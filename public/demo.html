@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travelgenix Pricing Widget — Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #FFFFFF;
+      color: #0F172A;
+      line-height: 1.6;
+    }
+
+    /* Demo site header */
+    .demo-header {
+      background: linear-gradient(135deg, #1B2B5B, #0F172A);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .demo-logo {
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .demo-logo span { color: #00B4D8; }
+    .demo-nav { display: flex; gap: 24px; }
+    .demo-nav a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .demo-nav a:hover { color: white; }
+
+    /* Demo hero */
+    .demo-hero {
+      text-align: center;
+      padding: 80px 24px 40px;
+      background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+    }
+    .demo-hero h1 {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #0F172A;
+      margin-bottom: 12px;
+    }
+    .demo-hero p {
+      font-size: 16px;
+      color: #64748B;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Demo info bar */
+    .demo-info {
+      background: #0F172A;
+      color: #94A3B8;
+      text-align: center;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .demo-info code {
+      background: rgba(255,255,255,0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #00B4D8;
+    }
+
+    /* Demo footer */
+    .demo-footer {
+      text-align: center;
+      padding: 40px 24px;
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+    }
+    .demo-footer p {
+      font-size: 13px;
+      color: #94A3B8;
+    }
+
+    /* Dark mode demo section */
+    .dark-section {
+      background: #0F172A;
+      padding: 40px 0 0;
+    }
+    .dark-section h2 {
+      text-align: center;
+      color: #F1F5F9;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .dark-section p {
+      text-align: center;
+      color: #64748B;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Simulated client website header -->
+  <div class="demo-header">
+    <div class="demo-logo">Sunshine<span>Holidays</span></div>
+    <nav class="demo-nav">
+      <a href="#">Destinations</a>
+      <a href="#">Deals</a>
+      <a href="#">About Us</a>
+      <a href="#">Contact</a>
+    </nav>
+  </div>
+
+  <div class="demo-info">
+    This is a demo page simulating the widget embedded on a client website. Widget loads from a single <code>&lt;script&gt;</code> tag.
+  </div>
+
+  <!-- Simulated page content -->
+  <div class="demo-hero">
+    <h1>Our Packages</h1>
+    <p>Choose the perfect package for your travel business. All plans include a 30-day free trial.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       THIS IS THE ONLY CODE A CLIENT NEEDS TO ADD
+       ═══════════════════════════════════════════════════════════════ -->
+  <div data-tg-widget="pricing" data-tg-config='{
+    "header": {
+      "title": "Find Your Perfect Package",
+      "subtitle": "Everything you need to sell holidays online. Start free, upgrade anytime."
+    },
+    "brandColor": "#0891B2",
+    "accentColor": "#6366F1",
+    "pageBg": "#FFFFFF",
+    "cardBg": "#FFFFFF",
+    "textColor": "#0F172A",
+    "subtextColor": "#64748B",
+    "borderRadius": 16,
+    "showToggle": true,
+    "showBadge": true,
+    "showIcons": true,
+    "showDescription": true,
+    "showHints": true,
+    "showTrustStrip": true,
+    "trustText": "30-day money-back guarantee · No contracts · Cancel anytime",
+    "savingsLabel": "Save {pct}%",
+    "theme": "light",
+    "plans": [
+      {
+        "name": "Spark",
+        "description": "Get online fast with a professional bookable website",
+        "monthlyPrice": 159,
+        "yearlyPrice": 1590,
+        "currency": "£",
+        "icon": "Zap",
+        "highlighted": false,
+        "badge": "",
+        "cta": "Get Started",
+        "ctaUrl": "#spark",
+        "features": [
+          {"text": "Bookable website", "included": true, "hint": "Fully responsive, mobile-optimised"},
+          {"text": "10 supplier feeds", "included": true, "hint": "Major tour operators included"},
+          {"text": "Basic search widget", "included": true, "hint": ""},
+          {"text": "Email support", "included": true, "hint": ""},
+          {"text": "Luna AI chatbot", "included": false, "hint": "AI-powered customer assistant"},
+          {"text": "Custom branding", "included": false, "hint": ""}
+        ]
+      },
+      {
+        "name": "Boost",
+        "description": "More power, more suppliers, more bookings",
+        "monthlyPrice": 229,
+        "yearlyPrice": 2290,
+        "currency": "£",
+        "icon": "Star",
+        "highlighted": true,
+        "badge": "Most Popular",
+        "cta": "Start Free Trial",
+        "ctaUrl": "#boost",
+        "features": [
+          {"text": "Bookable website", "included": true, "hint": ""},
+          {"text": "50 supplier feeds", "included": true, "hint": "Includes niche and specialist operators"},
+          {"text": "Advanced widget suite", "included": true, "hint": "Search, quotes, deals and more"},
+          {"text": "Priority support", "included": true, "hint": "Dedicated response within 4 hours"},
+          {"text": "Luna AI chatbot", "included": true, "hint": "AI-powered customer assistant"},
+          {"text": "Custom branding", "included": false, "hint": ""}
+        ]
+      },
+      {
+        "name": "Ignite",
+        "description": "Full platform power for ambitious agencies",
+        "monthlyPrice": 299,
+        "yearlyPrice": 2990,
+        "currency": "£",
+        "icon": "Crown",
+        "highlighted": false,
+        "badge": "",
+        "cta": "Contact Sales",
+        "ctaUrl": "#ignite",
+        "features": [
+          {"text": "Bookable website", "included": true, "hint": ""},
+          {"text": "Unlimited supplier feeds", "included": true, "hint": "Every connected operator"},
+          {"text": "Full widget suite + API", "included": true, "hint": "Everything we build, you get"},
+          {"text": "Dedicated account manager", "included": true, "hint": "Named contact who knows your business"},
+          {"text": "Luna AI chatbot", "included": true, "hint": ""},
+          {"text": "Full custom branding", "included": true, "hint": "White-label everything"}
+        ]
+      }
+    ]
+  }'></div>
+
+  <script src="widget.js"></script>
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- Dark mode demo -->
+  <div class="dark-section">
+    <h2>Works in Dark Mode Too</h2>
+    <p>Same widget, dark theme — one config change</p>
+
+    <div data-tg-widget="pricing" data-tg-config='{
+      "header": {
+        "title": "Simple, Transparent Pricing",
+        "subtitle": "No hidden fees. No surprises. Cancel anytime."
+      },
+      "brandColor": "#7C3AED",
+      "accentColor": "#EC4899",
+      "borderRadius": 20,
+      "showToggle": true,
+      "showBadge": true,
+      "showIcons": true,
+      "showDescription": true,
+      "showHints": false,
+      "showTrustStrip": true,
+      "trustText": "Enterprise-grade security · 99.9% uptime · GDPR compliant",
+      "savingsLabel": "Save {pct}%",
+      "theme": "dark",
+      "plans": [
+        {
+          "name": "Free",
+          "description": "For individuals getting started",
+          "monthlyPrice": 0,
+          "yearlyPrice": 0,
+          "currency": "$",
+          "icon": "Zap",
+          "highlighted": false,
+          "badge": "",
+          "cta": "Sign Up Free",
+          "ctaUrl": "#",
+          "features": [
+            {"text": "Up to 3 projects", "included": true},
+            {"text": "1GB storage", "included": true},
+            {"text": "Community support", "included": true},
+            {"text": "API access", "included": false},
+            {"text": "Custom domains", "included": false}
+          ]
+        },
+        {
+          "name": "Pro",
+          "description": "For growing teams",
+          "monthlyPrice": 29,
+          "yearlyPrice": 290,
+          "currency": "$",
+          "icon": "Star",
+          "highlighted": true,
+          "badge": "Best Value",
+          "cta": "Start Trial",
+          "ctaUrl": "#",
+          "features": [
+            {"text": "Unlimited projects", "included": true},
+            {"text": "50GB storage", "included": true},
+            {"text": "Priority support", "included": true},
+            {"text": "API access", "included": true},
+            {"text": "Custom domains", "included": false}
+          ]
+        },
+        {
+          "name": "Enterprise",
+          "description": "For large organisations",
+          "monthlyPrice": 99,
+          "yearlyPrice": 990,
+          "currency": "$",
+          "icon": "Crown",
+          "highlighted": false,
+          "badge": "",
+          "cta": "Contact Us",
+          "ctaUrl": "#",
+          "features": [
+            {"text": "Unlimited everything", "included": true},
+            {"text": "1TB storage", "included": true},
+            {"text": "Dedicated support", "included": true},
+            {"text": "Full API access", "included": true},
+            {"text": "Custom domains", "included": true}
+          ]
+        }
+      ]
+    }'></div>
+  </div>
+
+  <div class="demo-footer">
+    <p>Travelgenix Widget Suite v1.0.0 · Pricing Table Widget · Shadow DOM isolated · Zero dependencies</p>
+  </div>
+
+</body>
+</html>
+
+
