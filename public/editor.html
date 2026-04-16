@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Widget Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --ed-bg: #F4F5F7; --ed-surface: #FFFFFF; --ed-border: #E3E5E8;
+  --ed-text: #1A1D23; --ed-sub: #6B7280; --ed-muted: #9CA3AF;
+  --ed-brand: #0891B2; --ed-brand-light: #ECFEFF; --ed-brand-dark: #0E7490;
+  --ed-accent: #7C3AED; --ed-danger: #EF4444; --ed-success: #10B981;
+  --ed-radius: 10px; --ed-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --ed-font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--ed-font); background: var(--ed-bg); color: var(--ed-text); height: 100vh; overflow: hidden; }
+
+/* Layout */
+.app { display: flex; height: 100vh; }
+.editor { width: 340px; background: var(--ed-surface); border-right: 1px solid var(--ed-border); display: flex; flex-direction: column; flex-shrink: 0; }
+.preview-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Editor Header */
+.ed-header { padding: 12px 16px; border-bottom: 1px solid var(--ed-border); display: flex; align-items: center; justify-content: space-between; }
+.ed-logo { display: flex; align-items: center; gap: 10px; }
+.ed-logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--ed-brand), var(--ed-accent)); display: flex; align-items: center; justify-content: center; }
+.ed-logo-icon svg { width: 16px; height: 16px; stroke: white; fill: none; stroke-width: 2; }
+.ed-logo-text h1 { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.ed-logo-text span { font-size: 11px; color: var(--ed-muted); font-weight: 500; }
+.ed-actions { display: flex; gap: 4px; }
+.ed-actions button { width: 32px; height: 32px; border: none; background: transparent; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; color: var(--ed-sub); }
+.ed-actions button:hover { background: var(--ed-bg); color: var(--ed-text); }
+.ed-actions button.ai-btn { color: var(--ed-accent); }
+.ed-actions button.ai-btn:hover { background: #F5F3FF; }
+.ed-actions button.save-btn { color: var(--ed-success); }
+
+/* Tabs */
+.ed-tabs { display: flex; border-bottom: 1px solid var(--ed-border); }
+.ed-tab { flex: 1; padding: 10px 0; font-size: 12px; font-weight: 600; text-align: center; border: none; background: none; cursor: pointer; color: var(--ed-muted); position: relative; transition: color 0.2s; }
+.ed-tab.active { color: var(--ed-brand); }
+.ed-tab.active::after { content: ''; position: absolute; bottom: 0; left: 12px; right: 12px; height: 2px; background: var(--ed-brand); border-radius: 1px; }
+
+/* Editor Body */
+.ed-body { flex: 1; overflow-y: auto; }
+
+/* Section */
+.ed-section { border-bottom: 1px solid var(--ed-border); }
+.ed-section-header { padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.ed-section-header:hover { background: #FAFAFA; }
+.ed-section-title { font-size: 12px; font-weight: 700; color: var(--ed-text); display: flex; align-items: center; gap: 8px; }
+.ed-section-title svg { width: 14px; height: 14px; stroke: var(--ed-muted); fill: none; stroke-width: 2; }
+.ed-chevron { width: 12px; height: 12px; stroke: var(--ed-muted); fill: none; stroke-width: 2; transition: transform 0.2s; }
+.ed-section.open .ed-chevron { transform: rotate(180deg); }
+.ed-section-body { padding: 0 16px 14px; display: none; }
+.ed-section.open .ed-section-body { display: block; }
+
+/* Fields */
+.field { margin-bottom: 10px; }
+.field-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.field-label { font-size: 12px; font-weight: 500; color: var(--ed-sub); }
+.field-value { font-size: 11px; color: var(--ed-muted); font-family: 'SF Mono', monospace; }
+
+input[type="text"], input[type="number"], input[type="url"], select, textarea {
+  width: 100%; padding: 7px 10px; font-size: 12px; border: 1px solid var(--ed-border); border-radius: 8px;
+  background: #FAFBFC; font-family: var(--ed-font); color: var(--ed-text); outline: none; transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--ed-brand); box-shadow: 0 0 0 3px rgba(8,145,178,0.1); }
+textarea { resize: vertical; min-height: 56px; }
+
+.color-field { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.color-field label { font-size: 12px; font-weight: 500; color: var(--ed-sub); }
+.color-field-right { display: flex; align-items: center; gap: 8px; }
+.color-field-right span { font-size: 11px; color: var(--ed-muted); font-family: monospace; text-transform: uppercase; }
+.color-swatch { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--ed-border); overflow: hidden; position: relative; cursor: pointer; }
+.color-swatch input { position: absolute; inset: -4px; width: 140%; height: 140%; cursor: pointer; opacity: 0; }
+.color-swatch-bg { width: 100%; height: 100%; }
+
+.toggle-field { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+.toggle-field label { font-size: 12px; font-weight: 500; color: var(--ed-sub); }
+.toggle-track { width: 36px; height: 20px; border-radius: 10px; background: #D1D5DB; border: none; cursor: pointer; position: relative; transition: background 0.2s; padding: 0; }
+.toggle-track.on { background: var(--ed-brand); }
+.toggle-track .thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); transition: transform 0.2s; }
+.toggle-track.on .thumb { transform: translateX(16px); }
+
+.slider-field { margin-bottom: 10px; }
+.slider-field .field-row { margin-bottom: 4px; }
+.slider-field input[type="range"] { width: 100%; height: 6px; -webkit-appearance: none; background: var(--ed-border); border-radius: 3px; outline: none; }
+.slider-field input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--ed-brand); border-radius: 8px; cursor: pointer; }
+
+.presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+.preset { height: 32px; border-radius: 8px; border: 1px solid var(--ed-border); overflow: hidden; cursor: pointer; position: relative; transition: border-color 0.15s; }
+.preset:hover { border-color: var(--ed-brand); transform: scale(1.05); }
+
+/* Plan cards in editor */
+.plan-card { background: #FAFBFC; border: 1px solid var(--ed-border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+.plan-card-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; }
+.plan-card-header:hover { background: #F3F4F6; }
+.plan-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.plan-card-name { flex: 1; font-size: 12px; font-weight: 600; color: var(--ed-text); }
+.plan-card-price { font-size: 11px; color: var(--ed-muted); font-family: monospace; }
+.plan-card-body { padding: 10px; border-top: 1px solid var(--ed-border); display: none; }
+.plan-card.open .plan-card-body { display: block; }
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+
+.feature-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.feature-toggle { width: 20px; height: 20px; border-radius: 4px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.feature-toggle svg { width: 10px; height: 10px; stroke-width: 3; }
+.feature-row input { flex: 1; padding: 5px 8px; font-size: 11px; }
+.feature-hint { width: 80px; font-size: 10px !important; }
+.feature-del { width: 20px; height: 20px; border: none; background: transparent; cursor: pointer; color: var(--ed-muted); display: flex; align-items: center; justify-content: center; border-radius: 4px; opacity: 0; transition: opacity 0.15s; }
+.feature-row:hover .feature-del { opacity: 1; }
+.feature-del:hover { color: var(--ed-danger); background: #FEF2F2; }
+
+.add-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--ed-brand); background: none; border: none; cursor: pointer; padding: 4px 0; }
+.add-btn:hover { color: var(--ed-brand-dark); }
+
+.danger-btn { color: var(--ed-danger); }
+.danger-btn:hover { color: #DC2626 !important; }
+
+/* Upload zone */
+.upload-zone { border: 2px dashed var(--ed-border); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 10px; }
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--ed-brand); background: var(--ed-brand-light); }
+.upload-zone svg { width: 24px; height: 24px; stroke: var(--ed-muted); fill: none; stroke-width: 1.5; margin: 0 auto 6px; display: block; }
+.upload-zone p { font-size: 12px; color: var(--ed-sub); font-weight: 500; }
+.upload-zone span { font-size: 11px; color: var(--ed-muted); display: block; margin-top: 2px; }
+.upload-zone .dl-link { color: var(--ed-brand); text-decoration: underline; cursor: pointer; font-weight: 600; }
+
+/* Preview toolbar */
+.preview-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--ed-surface); border-bottom: 1px solid var(--ed-border); }
+.preview-devices { display: flex; align-items: center; gap: 4px; }
+.preview-devices span { font-size: 12px; font-weight: 500; color: var(--ed-muted); margin-right: 8px; }
+.device-btn { width: 30px; height: 30px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; color: var(--ed-muted); }
+.device-btn.active { background: var(--ed-bg); color: var(--ed-brand); }
+.device-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+.preview-right { display: flex; align-items: center; gap: 8px; }
+.theme-btn { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--ed-sub); font-family: var(--ed-font); }
+.theme-btn:hover { background: var(--ed-bg); }
+.theme-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* Preview frame */
+.preview-frame { flex: 1; overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 24px; background: #E8ECF0; }
+.preview-container { background: white; border-radius: 12px; border: 1px solid var(--ed-border); overflow: hidden; transition: width 0.3s ease; min-height: 500px; }
+
+/* Embed code */
+.embed-block { background: #1E293B; border-radius: 10px; padding: 14px; font-family: 'SF Mono', Consolas, monospace; font-size: 11px; color: #CBD5E1; line-height: 1.8; overflow-x: auto; margin-bottom: 8px; }
+.embed-block .tag { color: #67E8F9; } .embed-block .attr { color: #6EE7B7; } .embed-block .val { color: #FCD34D; }
+.copy-btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--ed-border); background: var(--ed-surface); cursor: pointer; font-size: 11px; font-weight: 600; color: var(--ed-brand); font-family: var(--ed-font); transition: all 0.15s; }
+.copy-btn:hover { background: var(--ed-brand-light); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal { background: white; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); transform: translateY(10px); transition: transform 0.2s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-body { padding: 24px; }
+.modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.modal p { font-size: 13px; color: var(--ed-sub); margin-bottom: 16px; }
+.modal textarea { width: 100%; height: 80px; margin-bottom: 10px; }
+
+.suggestion-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--ed-border); background: #FAFBFC; font-size: 11px; color: var(--ed-sub); cursor: pointer; font-family: var(--ed-font); transition: all 0.15s; }
+.chip:hover { border-color: var(--ed-brand); background: var(--ed-brand-light); color: var(--ed-brand); }
+
+.modal-actions { display: flex; gap: 8px; }
+.modal-actions button { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--ed-font); border: none; transition: all 0.15s; }
+.btn-cancel { background: var(--ed-bg); color: var(--ed-sub); }
+.btn-cancel:hover { background: #E5E7EB; }
+.btn-primary { background: linear-gradient(135deg, var(--ed-accent), var(--ed-brand)); color: white; }
+.btn-primary:hover { box-shadow: 0 4px 12px rgba(8,145,178,0.3); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.template-card { padding: 12px; border: 1px solid var(--ed-border); border-radius: 10px; cursor: pointer; margin-bottom: 8px; transition: all 0.15s; display: flex; align-items: center; gap: 12px; }
+.template-card:hover { border-color: var(--ed-brand); background: var(--ed-brand-light); }
+.template-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--ed-bg); display: flex; align-items: center; justify-content: center; }
+.template-icon svg { width: 16px; height: 16px; stroke: var(--ed-muted); fill: none; stroke-width: 2; }
+.template-info { flex: 1; }
+.template-info strong { font-size: 13px; display: block; }
+.template-info span { font-size: 11px; color: var(--ed-muted); }
+
+.ai-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.ai-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--ed-accent), var(--ed-brand)); display: flex; align-items: center; justify-content: center; }
+.ai-icon svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; }
+
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast { position: fixed; bottom: 20px; right: 20px; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; color: white; z-index: 2000; transform: translateY(60px); opacity: 0; transition: all 0.3s; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--ed-success); }
+.toast.error { background: var(--ed-danger); }
+
+.status-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: var(--ed-brand-light); color: var(--ed-brand); margin-left: 4px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ═══ EDITOR PANEL ═══ -->
+  <div class="editor">
+    <div class="ed-header">
+      <div class="ed-logo">
+        <div class="ed-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="ed-logo-text"><h1>Pricing Table</h1><span>Widget Editor</span></div>
+      </div>
+      <div class="ed-actions">
+        <button onclick="showTemplates()" title="Templates"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></button>
+        <button class="ai-btn" onclick="showAI()" title="AI Builder"><svg viewBox="0 0 24 24"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8l1.4 1.4M17.8 6.2l1.4-1.4M12.2 11.8l-1.4 1.4M12.2 6.2l-1.4-1.4M15 12a3 3 0 100-6 3 3 0 000 6z"/><path d="M6 15a6 6 0 0012 0"/></svg></button>
+        <button class="save-btn" onclick="saveWidget()" title="Save"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+      </div>
+    </div>
+
+    <div class="ed-tabs">
+      <button class="ed-tab active" onclick="switchTab('design',this)">Design</button>
+      <button class="ed-tab" onclick="switchTab('content',this)">Content</button>
+      <button class="ed-tab" onclick="switchTab('settings',this)">Settings</button>
+    </div>
+
+    <div class="ed-body" id="editorBody"></div>
+  </div>
+
+  <!-- ═══ PREVIEW ═══ -->
+  <div class="preview-area">
+    <div class="preview-toolbar">
+      <div class="preview-devices">
+        <span>Preview</span>
+        <button class="device-btn active" onclick="setDevice('desktop',this)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>
+        <button class="device-btn" onclick="setDevice('tablet',this)"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button class="device-btn" onclick="setDevice('mobile',this)"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="preview-right">
+        <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Light
+        </button>
+      </div>
+    </div>
+    <div class="preview-frame">
+      <div class="preview-container" id="previewContainer" style="width:100%">
+        <div id="widgetMount"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="aiModal">
+  <div class="modal">
+    <div class="modal-body">
+      <div class="ai-header">
+        <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8l1.4 1.4M17.8 6.2l1.4-1.4M12.2 11.8l-1.4 1.4M12.2 6.2l-1.4-1.4M15 12a3 3 0 100-6 3 3 0 000 6z"/><path d="M6 15a6 6 0 0012 0"/></svg></div>
+        <div><h2>AI Widget Builder</h2><p style="margin:0">Describe what you need in plain English</p></div>
+      </div>
+      <textarea id="aiPrompt" placeholder="e.g. 3-tier pricing for a UK travel agency selling package holidays with prices in GBP"></textarea>
+      <div class="suggestion-chips">
+        <button class="chip" onclick="setAIPrompt(this.textContent)">3-tier pricing for a UK travel agency</button>
+        <button class="chip" onclick="setAIPrompt(this.textContent)">SaaS pricing with free tier in USD</button>
+        <button class="chip" onclick="setAIPrompt(this.textContent)">Luxury tour packages in GBP</button>
+      </div>
+      <div id="aiError" style="color:var(--ed-danger);font-size:12px;margin-bottom:8px;display:none"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+        <button class="btn-primary" id="aiGenBtn" onclick="generateAI()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:white;fill:none;stroke-width:2;margin-right:4px"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8l1.4 1.4M12.2 6.2l-1.4-1.4M15 12a3 3 0 100-6 3 3 0 000 6z"/></svg> Generate with AI</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="templateModal">
+  <div class="modal">
+    <div class="modal-body">
+      <h2>Start Building</h2>
+      <p>Choose a template or let AI create one for you</p>
+      <div class="template-card" onclick="closeModals();showAI()">
+        <div class="ai-icon" style="width:36px;height:36px;border-radius:8px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M15 12a3 3 0 100-6 3 3 0 000 6z"/></svg></div>
+        <div class="template-info"><strong>Build with AI</strong><span>Describe what you need in plain English</span></div>
+      </div>
+      <div id="templateList"></div>
+      <button style="width:100%;margin-top:8px;padding:8px;border:none;background:none;font-size:12px;color:var(--ed-muted);cursor:pointer;font-family:var(--ed-font)" onclick="closeModals()">Start from scratch</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ━━━ STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+let config = {
+  header: { title: 'Choose Your Plan', subtitle: 'Start free, upgrade when you\'re ready. No hidden fees.' },
+  brandColor: '#0891B2', accentColor: '#6366F1', pageBg: '#F8FAFC', cardBg: '#FFFFFF',
+  textColor: '#0F172A', subtextColor: '#64748B', borderRadius: 16,
+  showToggle: true, showBadge: true, showIcons: true, showDescription: true,
+  showHints: true, showTrustStrip: true, trustText: '30-day money-back guarantee · No contracts · Cancel anytime',
+  savingsLabel: 'Save {pct}%', theme: 'light', plans: []
+};
+
+let widgetId = null;
+let darkPreview = false;
+let currentTab = 'design';
+let widgetInstance = null;
+
+const TEMPLATES = [
+  { name:'Travel Agency', desc:'Spark / Boost / Ignite', header:{title:'Find Your Perfect Package',subtitle:'Everything you need to sell holidays online.'}, plans:[
+    {name:'Spark',description:'Get online fast',monthlyPrice:159,yearlyPrice:1590,currency:'£',icon:'Zap',highlighted:false,badge:'',cta:'Get Started',ctaUrl:'#',features:[{text:'Bookable website',included:true,hint:'Fully responsive'},{text:'10 supplier feeds',included:true,hint:''},{text:'Basic search widget',included:true,hint:''},{text:'Email support',included:true,hint:''},{text:'Luna AI chatbot',included:false,hint:''},{text:'Custom branding',included:false,hint:''}]},
+    {name:'Boost',description:'More power, more bookings',monthlyPrice:229,yearlyPrice:2290,currency:'£',icon:'Star',highlighted:true,badge:'Most Popular',cta:'Start Free Trial',ctaUrl:'#',features:[{text:'Bookable website',included:true,hint:''},{text:'50 supplier feeds',included:true,hint:''},{text:'Advanced widget suite',included:true,hint:''},{text:'Priority support',included:true,hint:''},{text:'Luna AI chatbot',included:true,hint:''},{text:'Custom branding',included:false,hint:''}]},
+    {name:'Ignite',description:'Full platform power',monthlyPrice:299,yearlyPrice:2990,currency:'£',icon:'Crown',highlighted:false,badge:'',cta:'Contact Sales',ctaUrl:'#',features:[{text:'Bookable website',included:true,hint:''},{text:'Unlimited supplier feeds',included:true,hint:''},{text:'Full widget suite + API',included:true,hint:''},{text:'Dedicated account manager',included:true,hint:''},{text:'Luna AI chatbot',included:true,hint:''},{text:'Full custom branding',included:true,hint:''}]}
+  ]},
+  { name:'SaaS Product', desc:'Free / Pro / Enterprise', header:{title:'Simple, Transparent Pricing',subtitle:'No hidden fees. Cancel anytime.'}, plans:[
+    {name:'Free',description:'For individuals',monthlyPrice:0,yearlyPrice:0,currency:'$',icon:'Zap',highlighted:false,badge:'',cta:'Sign Up Free',ctaUrl:'#',features:[{text:'3 projects',included:true,hint:''},{text:'1GB storage',included:true,hint:''},{text:'Community support',included:true,hint:''},{text:'API access',included:false,hint:''}]},
+    {name:'Pro',description:'For growing teams',monthlyPrice:29,yearlyPrice:290,currency:'$',icon:'Star',highlighted:true,badge:'Best Value',cta:'Start Trial',ctaUrl:'#',features:[{text:'Unlimited projects',included:true,hint:''},{text:'50GB storage',included:true,hint:''},{text:'Priority support',included:true,hint:''},{text:'API access',included:true,hint:''}]},
+    {name:'Enterprise',description:'For organisations',monthlyPrice:99,yearlyPrice:990,currency:'$',icon:'Crown',highlighted:false,badge:'',cta:'Contact Us',ctaUrl:'#',features:[{text:'Unlimited everything',included:true,hint:''},{text:'1TB storage',included:true,hint:''},{text:'Dedicated support',included:true,hint:''},{text:'Full API access',included:true,hint:''}]}
+  ]}
+];
+
+/* ━━━ INIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  widgetId = params.get('id');
+  if (widgetId) {
+    loadWidget(widgetId);
+  } else {
+    config.plans = TEMPLATES[0].plans;
+    config.header = TEMPLATES[0].header;
+    renderEditor();
+    renderPreview();
+  }
+});
+
+async function loadWidget(id) {
+  try {
+    const r = await fetch('/api/widget-config?id=' + encodeURIComponent(id));
+    if (!r.ok) throw new Error('Not found');
+    const data = await r.json();
+    Object.assign(config, data);
+    renderEditor();
+    renderPreview();
+    toast('Widget loaded', 'success');
+  } catch(e) {
+    config.plans = TEMPLATES[0].plans;
+    renderEditor();
+    renderPreview();
+    toast('Could not load widget — using template', 'error');
+  }
+}
+
+/* ━━━ TABS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.ed-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderEditor();
+}
+
+/* ━━━ RENDER EDITOR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderEditor() {
+  const body = document.getElementById('editorBody');
+  if (currentTab === 'design') body.innerHTML = renderDesignTab();
+  else if (currentTab === 'content') body.innerHTML = renderContentTab();
+  else body.innerHTML = renderSettingsTab();
+  bindEditorEvents();
+}
+
+function renderDesignTab() {
+  return `
+    ${section('Header', '<path d="M4 7V4h16v3M9 20h6M12 4v16"/>', true, `
+      <div class="field"><label class="field-label">Title</label><input type="text" value="${esc(config.header.title)}" data-bind="header.title"></div>
+      <div class="field"><label class="field-label">Subtitle</label><input type="text" value="${esc(config.header.subtitle)}" data-bind="header.subtitle"></div>
+    `)}
+    ${section('Colors', '<circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0110 10"/>', true, `
+      ${colorField('Brand Color','brandColor',config.brandColor)}
+      ${colorField('Accent Color','accentColor',config.accentColor)}
+      ${colorField('Page Background','pageBg',config.pageBg)}
+      ${colorField('Card Background','cardBg',config.cardBg)}
+      ${colorField('Text Color','textColor',config.textColor)}
+      <div style="margin-top:8px"><span class="field-label">Quick Presets</span>
+      <div class="presets">
+        ${[{b:'#0891B2',a:'#6366F1'},{b:'#7C3AED',a:'#EC4899'},{b:'#059669',a:'#0D9488'},{b:'#DC2626',a:'#F97316'},{b:'#1E293B',a:'#3B82F6'}].map(p =>
+          `<div class="preset" onclick="applyPreset('${p.b}','${p.a}')" style="background:linear-gradient(135deg,${p.b},${p.a})"></div>`
+        ).join('')}
+      </div></div>
+    `)}
+    ${section('Shape', '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/>', false, `
+      <div class="slider-field"><div class="field-row"><span class="field-label">Border Radius</span><span class="field-value">${config.borderRadius}px</span></div>
+      <input type="range" min="0" max="28" value="${config.borderRadius}" data-bind="borderRadius"></div>
+    `)}
+  `;
+}
+
+function renderContentTab() {
+  const plansHtml = config.plans.map((p,i) => {
+    const featsHtml = p.features.map((f,fi) =>
+      `<div class="feature-row">
+        <button class="feature-toggle" style="background:${f.included?'#ECFEFF':'#F3F4F6'}" onclick="toggleFeature(${i},${fi})">
+          <svg viewBox="0 0 24 24" style="stroke:${f.included?'var(--ed-brand)':'#D1D5DB'};fill:none;stroke-linecap:round;stroke-linejoin:round">${f.included?'<path d="M20 6L9 17l-5-5"/>':'<path d="M18 6L6 18M6 6l12 12"/>'}</svg>
+        </button>
+        <input type="text" value="${esc(f.text)}" onchange="updateFeature(${i},${fi},'text',this.value)">
+        <input type="text" class="feature-hint" value="${esc(f.hint||'')}" placeholder="Hint" onchange="updateFeature(${i},${fi},'hint',this.value)">
+        <button class="feature-del" onclick="removeFeature(${i},${fi})"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>
+      </div>`
+    ).join('');
+
+    return `<div class="plan-card" id="plan-${i}">
+      <div class="plan-card-header" onclick="togglePlanCard(${i})">
+        <div class="plan-dot" style="background:${p.highlighted?config.brandColor:'#E5E7EB'}"></div>
+        <span class="plan-card-name">${esc(p.name)||'Untitled'}</span>
+        <span class="plan-card-price">${esc(p.currency||'£')}${p.monthlyPrice}</span>
+        <svg class="ed-chevron" viewBox="0 0 24 24" style="width:12px"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="plan-card-body">
+        <div class="plan-grid">
+          <div class="field"><label class="field-label">Name</label><input type="text" value="${esc(p.name)}" onchange="updatePlan(${i},'name',this.value)"></div>
+          <div class="field"><label class="field-label">Icon</label>
+            <select onchange="updatePlan(${i},'icon',this.value)">${['Zap','Star','Crown','Shield','Sparkles','Award'].map(ic=>`<option${p.icon===ic?' selected':''}>${ic}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="field"><label class="field-label">Description</label><input type="text" value="${esc(p.description)}" onchange="updatePlan(${i},'description',this.value)"></div>
+        <div class="plan-grid">
+          <div class="field"><label class="field-label">Monthly Price</label><input type="number" value="${p.monthlyPrice}" onchange="updatePlan(${i},'monthlyPrice',+this.value)"></div>
+          <div class="field"><label class="field-label">Yearly Price</label><input type="number" value="${p.yearlyPrice}" onchange="updatePlan(${i},'yearlyPrice',+this.value)"></div>
+        </div>
+        <div class="plan-grid">
+          <div class="field"><label class="field-label">Currency</label>
+            <select onchange="updatePlan(${i},'currency',this.value)">${['£','$','€','A$','C$'].map(c=>`<option${(p.currency||'£')===c?' selected':''}>${c}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label class="field-label">CTA Text</label><input type="text" value="${esc(p.cta)}" onchange="updatePlan(${i},'cta',this.value)"></div>
+        </div>
+        <div class="field"><label class="field-label">CTA URL</label><input type="url" value="${esc(p.ctaUrl||'')}" onchange="updatePlan(${i},'ctaUrl',this.value)" placeholder="https://"></div>
+        <div class="toggle-field"><label>Featured</label><button class="toggle-track${p.highlighted?' on':''}" onclick="updatePlan(${i},'highlighted',!config.plans[${i}].highlighted)"><span class="thumb"></span></button></div>
+        ${p.highlighted?`<div class="field"><label class="field-label">Badge Text</label><input type="text" value="${esc(p.badge)}" onchange="updatePlan(${i},'badge',this.value)"></div>`:''}
+        <div style="margin-top:8px"><label class="field-label">Features</label>
+          <div style="margin-top:6px">${featsHtml}</div>
+          <button class="add-btn" onclick="addFeature(${i})"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg> Add feature</button>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--ed-border)">
+          <button class="add-btn danger-btn" onclick="removePlan(${i})"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg> Remove plan</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div style="padding:12px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span class="field-label" style="font-weight:700;color:var(--ed-text)">Plans (${config.plans.length})</span>
+        <div style="display:flex;gap:8px">
+          <button class="add-btn" onclick="showAI()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M15 12a3 3 0 100-6 3 3 0 000 6z"/></svg> AI</button>
+          <button class="add-btn" onclick="addPlan()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg> Add</button>
+        </div>
+      </div>
+
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p>Upload spreadsheet to import plans</p>
+        <span>CSV or Excel — <span class="dl-link" onclick="event.stopPropagation();downloadTemplate()">Download template</span></span>
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleUpload(this)">
+      </div>
+
+      ${plansHtml}
+      ${config.plans.length===0?'<div style="text-align:center;padding:32px 0"><svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:var(--ed-muted);fill:none;stroke-width:1.5;margin:0 auto 8px;display:block"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg><p style="font-size:12px;color:var(--ed-muted)">No plans yet — add one or upload a spreadsheet</p></div>':''}
+    </div>
+  `;
+}
+
+function renderSettingsTab() {
+  return `
+    ${section('Display Options', '<circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/>', true, `
+      ${toggleField('Billing toggle','showToggle',config.showToggle)}
+      ${toggleField('Feature badges','showBadge',config.showBadge)}
+      ${toggleField('Plan icons','showIcons',config.showIcons)}
+      ${toggleField('Plan descriptions','showDescription',config.showDescription)}
+      ${toggleField('Feature tooltips','showHints',config.showHints)}
+      ${toggleField('Trust strip','showTrustStrip',config.showTrustStrip)}
+      ${config.showTrustStrip?`<div class="field" style="margin-top:6px"><label class="field-label">Trust text</label><input type="text" value="${esc(config.trustText)}" data-bind="trustText"></div>`:''}
+    `)}
+    ${section('Embed Code', '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>', false, `
+      <div class="embed-block"><span class="tag">&lt;div</span> <span class="attr">data-tg-widget</span>=<span class="val">"pricing"</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="attr">data-tg-id</span>=<span class="val">"${widgetId||'YOUR_WIDGET_ID'}"</span><span class="tag">&gt;&lt;/div&gt;</span><br><span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="val">"https://tg-widgets.vercel.app/widget.js"</span><span class="tag">&gt;&lt;/script&gt;</span></div>
+      <button class="copy-btn" onclick="copyEmbed()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy embed code</button>
+    `)}
+  `;
+}
+
+/* ━━━ HTML HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML.replace(/"/g,'&quot;'); }
+
+function section(title, iconPath, open, content) {
+  return `<div class="ed-section${open?' open':''}">
+    <div class="ed-section-header" onclick="this.parentElement.classList.toggle('open')">
+      <span class="ed-section-title"><svg viewBox="0 0 24 24" style="stroke-linecap:round;stroke-linejoin:round">${iconPath}</svg>${title}</span>
+      <svg class="ed-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="ed-section-body">${content}</div>
+  </div>`;
+}
+
+function colorField(label, key, value) {
+  return `<div class="color-field"><label>${label}</label><div class="color-field-right"><span>${value}</span><div class="color-swatch"><div class="color-swatch-bg" style="background:${value}"></div><input type="color" value="${value}" data-bind="${key}"></div></div></div>`;
+}
+
+function toggleField(label, key, checked) {
+  return `<div class="toggle-field"><label>${label}</label><button class="toggle-track${checked?' on':''}" data-toggle="${key}" onclick="toggleConfig('${key}')"><span class="thumb"></span></button></div>`;
+}
+
+/* ━━━ EDITOR EVENTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function bindEditorEvents() {
+  document.querySelectorAll('[data-bind]').forEach(el => {
+    const ev = el.type==='range'?'input':'change';
+    el.addEventListener(ev, () => {
+      const key = el.dataset.bind;
+      if (key.includes('.')) {
+        const [a,b] = key.split('.'); config[a][b] = el.value;
+      } else {
+        config[key] = el.type==='range' ? +el.value : el.value;
+      }
+      renderEditor(); renderPreview();
+    });
+  });
+
+  // Drag and drop
+  const zone = document.getElementById('uploadZone');
+  if (zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); if(e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]); });
+  }
+}
+
+/* ━━━ CONFIG ACTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function toggleConfig(key) { config[key] = !config[key]; renderEditor(); renderPreview(); }
+function applyPreset(b, a) { config.brandColor=b; config.accentColor=a; renderEditor(); renderPreview(); }
+function updatePlan(i, key, val) { config.plans[i][key]=val; renderEditor(); renderPreview(); }
+function removePlan(i) { config.plans.splice(i,1); renderEditor(); renderPreview(); }
+function addPlan() {
+  config.plans.push({name:'New Plan',description:'Describe this plan',monthlyPrice:49,yearlyPrice:490,currency:'£',icon:'Zap',highlighted:false,badge:'',cta:'Get Started',ctaUrl:'#',features:[{text:'Feature one',included:true,hint:''}]});
+  renderEditor(); renderPreview();
+}
+function togglePlanCard(i) { document.getElementById('plan-'+i).classList.toggle('open'); }
+function toggleFeature(pi,fi) { config.plans[pi].features[fi].included = !config.plans[pi].features[fi].included; renderEditor(); renderPreview(); }
+function updateFeature(pi,fi,key,val) { config.plans[pi].features[fi][key]=val; renderPreview(); }
+function removeFeature(pi,fi) { config.plans[pi].features.splice(fi,1); renderEditor(); renderPreview(); }
+function addFeature(pi) { config.plans[pi].features.push({text:'New feature',included:true,hint:''}); renderEditor(); renderPreview(); }
+
+/* ━━━ PREVIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderPreview() {
+  const mount = document.getElementById('widgetMount');
+  const previewConfig = { ...config, theme: darkPreview ? 'dark' : 'light' };
+  // Recreate widget
+  mount.innerHTML = '';
+  const el = document.createElement('div');
+  el.setAttribute('data-tg-widget', 'pricing');
+  mount.appendChild(el);
+  if (window.TGPricingWidget) {
+    new window.TGPricingWidget(el, previewConfig);
+  }
+}
+
+function setDevice(device, btn) {
+  document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const c = document.getElementById('previewContainer');
+  c.style.width = device==='mobile'?'375px':device==='tablet'?'768px':'100%';
+}
+
+function toggleTheme() {
+  darkPreview = !darkPreview;
+  const btn = document.getElementById('themeToggle');
+  btn.innerHTML = darkPreview
+    ? '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg> Dark'
+    : '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Light';
+  renderPreview();
+}
+
+/* ━━━ SPREADSHEET UPLOAD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function handleUpload(input) { if(input.files.length) processFile(input.files[0]); input.value=''; }
+
+function processFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'binary'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+      if (!rows.length) { toast('No data found in file', 'error'); return; }
+
+      const plans = rows.map(row => {
+        const featCols = Object.keys(row).filter(k => k.toLowerCase().startsWith('feature'));
+        const features = [];
+        
+        // Try "Feature 1", "Feature 2"... columns
+        if (featCols.length > 0) {
+          featCols.forEach(col => {
+            let val = String(row[col]||'').trim();
+            if (!val) return;
+            let included = true;
+            let hint = '';
+            if (val.startsWith('-') || val.startsWith('~')) { included = false; val = val.slice(1).trim(); }
+            else if (val.startsWith('+')) { val = val.slice(1).trim(); }
+            if (val.includes('|')) { const parts = val.split('|'); val = parts[0].trim(); hint = parts[1].trim(); }
+            features.push({ text: val, included, hint });
+          });
+        }
+        
+        // Also try "Features" single column (semicolon or newline separated)
+        if (row['Features'] && features.length === 0) {
+          String(row['Features']).split(/[;\n]/).forEach(line => {
+            let val = line.trim();
+            if (!val) return;
+            let included = true, hint = '';
+            if (val.startsWith('-') || val.startsWith('~')) { included = false; val = val.slice(1).trim(); }
+            else if (val.startsWith('+')) { val = val.slice(1).trim(); }
+            if (val.includes('|')) { const parts = val.split('|'); val = parts[0].trim(); hint = parts[1].trim(); }
+            features.push({ text: val, included, hint });
+          });
+        }
+
+        return {
+          name: row['Plan Name'] || row['Name'] || row['Plan'] || 'Untitled',
+          description: row['Description'] || '',
+          monthlyPrice: parseInt(row['Monthly Price'] || row['Monthly'] || 0),
+          yearlyPrice: parseInt(row['Yearly Price'] || row['Yearly'] || 0),
+          currency: row['Currency'] || '£',
+          icon: row['Icon'] || 'Zap',
+          highlighted: String(row['Featured']||'').toLowerCase() === 'yes',
+          badge: row['Badge'] || (String(row['Featured']||'').toLowerCase() === 'yes' ? 'Most Popular' : ''),
+          cta: row['CTA'] || row['CTA Text'] || row['Button'] || 'Get Started',
+          ctaUrl: row['CTA URL'] || row['URL'] || '#',
+          features: features.length ? features : [{text:'Feature one',included:true,hint:''}]
+        };
+      });
+
+      config.plans = plans;
+      renderEditor(); renderPreview();
+      toast(`Imported ${plans.length} plans from spreadsheet`, 'success');
+    } catch(e) {
+      console.error(e);
+      toast('Error reading file — check the format', 'error');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function downloadTemplate() {
+  const headers = ['Plan Name','Description','Monthly Price','Yearly Price','Currency','CTA','CTA URL','Featured','Badge','Icon','Feature 1','Feature 2','Feature 3','Feature 4','Feature 5','Feature 6'];
+  const example = [
+    ['Starter','Basic package for new businesses','29','290','£','Get Started','#','no','','Zap','Bookable website','5 suppliers','Email support','-AI chatbot','-Custom branding',''],
+    ['Professional','Everything you need to grow','59','590','£','Start Trial','#','yes','Most Popular','+Bookable website','+25 suppliers|Includes niche operators','+Priority support|4hr response','+AI chatbot|Powered by Luna AI','-Custom branding','Star'],
+    ['Enterprise','Full platform power','99','990','£','Contact Sales','#','no','','Crown','+Bookable website','+Unlimited suppliers','+Dedicated manager','+AI chatbot','+Custom branding|White-label everything','']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...example]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Plans');
+  XLSX.writeFile(wb, 'pricing-widget-template.xlsx');
+}
+
+/* ━━━ AI BUILDER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function showAI() { closeModals(); document.getElementById('aiModal').classList.add('open'); document.getElementById('aiPrompt').focus(); }
+function setAIPrompt(t) { document.getElementById('aiPrompt').value = t; }
+
+async function generateAI() {
+  const prompt = document.getElementById('aiPrompt').value.trim();
+  if (!prompt) return;
+  const btn = document.getElementById('aiGenBtn');
+  const errEl = document.getElementById('aiError');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating...';
+  errEl.style.display = 'none';
+
+  try {
+    const r = await fetch('/api/widget-ai', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt })
+    });
+    if (!r.ok) throw new Error('AI generation failed');
+    const data = await r.json();
+    if (data.plans) config.plans = data.plans;
+    if (data.header) config.header = data.header;
+    if (data.brandColor) config.brandColor = data.brandColor;
+    if (data.accentColor) config.accentColor = data.accentColor;
+    if (data.trustText) config.trustText = data.trustText;
+    closeModals(); renderEditor(); renderPreview();
+    toast('AI generated your pricing table', 'success');
+  } catch(e) {
+    errEl.textContent = 'Generation failed — try a more specific description';
+    errEl.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:white;fill:none;stroke-width:2;margin-right:4px"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M15 12a3 3 0 100-6 3 3 0 000 6z"/></svg> Generate with AI';
+}
+
+/* ━━━ TEMPLATES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function showTemplates() {
+  document.getElementById('templateList').innerHTML = TEMPLATES.map((t,i) =>
+    `<div class="template-card" onclick="applyTemplate(${i})">
+      <div class="template-icon"><svg viewBox="0 0 24 24" style="stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+      <div class="template-info"><strong>${t.name}</strong><span>${t.desc} · ${t.plans.length} plans</span></div>
+    </div>`
+  ).join('');
+  document.getElementById('templateModal').classList.add('open');
+}
+
+function applyTemplate(i) {
+  const t = TEMPLATES[i];
+  config.plans = JSON.parse(JSON.stringify(t.plans));
+  config.header = { ...t.header };
+  closeModals(); renderEditor(); renderPreview();
+  toast('Template applied', 'success');
+}
+
+/* ━━━ SAVE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function saveWidget() {
+  try {
+    const body = { config, name: config.header.title };
+    if (widgetId) body.widgetId = widgetId;
+    const r = await fetch('/api/widget-config', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    if (data.widgetId) {
+      widgetId = data.widgetId;
+      const url = new URL(window.location); url.searchParams.set('id', widgetId); window.history.replaceState(null, '', url);
+    }
+    toast('Widget saved!', 'success');
+    renderEditor(); // refresh embed code
+  } catch(e) {
+    toast('Save failed — check connection', 'error');
+  }
+}
+
+/* ━━━ UTILS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open')); }
+function copyEmbed() {
+  const code = `<div data-tg-widget="pricing" data-tg-id="${widgetId||'YOUR_WIDGET_ID'}"></div>\n<script src="https://tg-widgets.vercel.app/widget.js"><\/script>`;
+  navigator.clipboard.writeText(code).then(() => toast('Copied to clipboard','success'));
+}
+
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) closeModals(); });
+});
+</script>
+
+<!-- Load the actual widget engine -->
+<script src="/widget.js"></script>
+
+</body>
+</html>
