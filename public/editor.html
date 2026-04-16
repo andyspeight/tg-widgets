@@ -102,7 +102,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 .ov-label{position:absolute;top:-24px;left:4px;font-size:10px;font-weight:700;color:#fff;background:var(--br);padding:2px 8px;border-radius:4px;white-space:nowrap;opacity:0;transform:translateY(4px);transition:all .15s;pointer-events:none;font-family:var(--ft)}
 
 /* ═══ POPOVER ═══ */
-.pop{position:absolute;z-index:100;background:#fff;border:1px solid var(--bd);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);padding:14px;min-width:260px;max-width:320px;font-family:var(--ft);opacity:0;transform:translateY(6px);transition:all .15s}
+.pop{position:fixed;z-index:9999;background:#fff;border:1px solid var(--bd);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15),0 4px 12px rgba(0,0,0,.08);padding:14px;min-width:260px;max-width:320px;font-family:var(--ft);opacity:0;transform:translateY(6px);transition:all .15s;pointer-events:none}
+.pop.show{pointer-events:auto}
 .pop.show{opacity:1;transform:translateY(0)}
 .pop-title{font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 .pop-close{width:20px;height:20px;border:none;background:transparent;cursor:pointer;color:var(--mt);display:flex;align-items:center;justify-content:center;border-radius:4px}
@@ -203,11 +204,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
     <div class="pvx" id="pvx" style="width:100%">
       <div id="mt"></div>
       <div class="ov-wrap" id="ovWrap"></div>
-      <div class="pop" id="popover"></div>
     </div>
   </div>
 </div>
 </div>
+
+<div class="pop" id="popover"></div>
 
 <!-- Modals -->
 <div class="mbg" id="aiM"><div class="mdl"><div class="mbd">
@@ -288,8 +290,10 @@ function esc(s){const d=document.createElement('div');d.textContent=s||'';return
 
 /* ═══ RENDER EDITOR (sidebar) ═══ */
 function ren(){
+  saveSecState();
   const B=document.getElementById('edB');
   if(tab==='design')B.innerHTML=dTab();else if(tab==='content')B.innerHTML=cTab();else B.innerHTML=sTab();
+  restoreSecState();
   bind();
 }
 
@@ -352,8 +356,33 @@ function sTab(){
 }
 
 /* ═══ BIND ═══ */
+let openSecs={},openPlans={};
+function saveSecState(){document.querySelectorAll('.sec').forEach((s,i)=>{openSecs[tab+'_'+i]=s.classList.contains('open')});document.querySelectorAll('.pc').forEach((p,i)=>{openPlans[i]=p.classList.contains('open')})}
+function restoreSecState(){document.querySelectorAll('.sec').forEach((s,i)=>{if(openSecs[tab+'_'+i])s.classList.add('open')});document.querySelectorAll('.pc').forEach((p,i)=>{if(openPlans[i])p.classList.add('open')})}
 function bind(){
-  document.querySelectorAll('[data-bind]').forEach(el=>{el.addEventListener(el.type==='range'?'input':'change',()=>{snap();const k=el.dataset.bind;if(k.includes('.')){const[a,b]=k.split('.');C[a][b]=el.value}else{C[k]=el.type==='range'?+el.value:el.value}ren();renP()})});
+  document.querySelectorAll('[data-bind]').forEach(el=>{
+    const ev=el.type==='range'?'input':'change';
+    el.addEventListener(ev,()=>{
+      snap();
+      const k=el.dataset.bind;
+      if(k.includes('.')){const[a,b]=k.split('.');C[a][b]=el.value}else{C[k]=el.type==='range'?+el.value:el.value}
+      // For range sliders: update display without rebuilding sidebar
+      if(el.type==='range'){
+        const disp=el.closest('.sr')?.querySelector('.st span:last-child');
+        if(disp)disp.textContent=el.value+'px';
+        renP();
+      } else {
+        // For color pickers: update swatch without rebuilding
+        if(el.type==='color'){
+          const sw=el.closest('.sw');if(sw)sw.querySelector('div').style.background=el.value;
+          const sp=el.closest('.cr')?.querySelector('.crr span');if(sp)sp.textContent=el.value;
+          renP();
+        } else {
+          saveSecState();ren();renP();restoreSecState();
+        }
+      }
+    });
+  });
   const z=document.getElementById('upZ');
   if(z){z.ondragover=e=>{e.preventDefault();z.classList.add('dragover')};z.ondragleave=()=>z.classList.remove('dragover');z.ondrop=e=>{e.preventDefault();z.classList.remove('dragover');if(e.dataTransfer.files.length)procF(e.dataTransfer.files[0])}}
   filtF('');
@@ -478,11 +507,17 @@ function openPop(type,data,x,y){
   }
 
   pop.innerHTML=html;
-  // Position: keep within bounds
-  const pvx=document.getElementById('pvx').getBoundingClientRect();
-  const maxX=pvx.width-280;
-  pop.style.left=Math.min(Math.max(x,8),maxX)+'px';
-  pop.style.top=Math.min(y,pvx.height-200)+'px';
+  // Position fixed relative to viewport
+  const mountEl=document.getElementById('mt').firstElementChild;
+  if(!mountEl||!mountEl.shadowRoot){pop.classList.add('show');return}
+  // Find the clicked element's viewport position from the spot click coords
+  const pvxRect=document.getElementById('pvx').getBoundingClientRect();
+  const popX=pvxRect.left+x;
+  const popY=pvxRect.top+y;
+  // Keep within viewport
+  const vw=window.innerWidth,vh=window.innerHeight;
+  pop.style.left=Math.min(Math.max(popX,8),vw-330)+'px';
+  pop.style.top=Math.min(Math.max(popY,8),vh-300)+'px';
   pop.classList.add('show');
 }
 
@@ -491,7 +526,10 @@ function getPath(p){return p.split('.').reduce((o,k)=>o&&o[k],C)}
 function setPath(p,v){const keys=p.split('.');let o=C;for(let i=0;i<keys.length-1;i++)o=o[keys[i]];o[keys[keys.length-1]]=v}
 
 // Close popover on outside click
-document.getElementById('pvf').addEventListener('click',e=>{if(!e.target.closest('.pop')&&!e.target.closest('.ov-spot'))closePop()});
+document.addEventListener('click',e=>{
+  const pop=document.getElementById('popover');
+  if(pop.classList.contains('show')&&!e.target.closest('.pop')&&!e.target.closest('.ov-spot')){closePop()}
+});
 // Rebuild overlays on scroll/resize
 document.getElementById('pvf').addEventListener('scroll',()=>{if(dm)buildOv()});
 window.addEventListener('resize',()=>{if(dm)setTimeout(buildOv,100)});
