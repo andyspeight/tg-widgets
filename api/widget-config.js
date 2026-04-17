@@ -86,9 +86,13 @@ export default async function handler(req, res) {
         if (searchData.records && searchData.records.length > 0) {
           const record = searchData.records[0];
           
-          // Verify ownership — widget must belong to this user
-          const widgetEmail = record.fields.ClientEmail || '';
-          if (widgetEmail && widgetEmail.toLowerCase() !== user.email.toLowerCase()) {
+          // Verify ownership — widget must belong to this user.
+          // Fail closed if the email is missing, empty, or doesn't match.
+          // Prior version skipped the check entirely when widgetEmail was
+          // falsy, letting any signed-in user overwrite unattributed widgets.
+          const widgetEmail = (record.fields.ClientEmail || '').toLowerCase().trim();
+          const userEmail = (user.email || '').toLowerCase().trim();
+          if (!widgetEmail || !userEmail || widgetEmail !== userEmail) {
             return res.status(403).json({ error: 'You do not have permission to edit this widget' });
           }
 
