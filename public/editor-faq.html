@@ -2342,7 +2342,15 @@
         throw new Error(body.error || ('HTTP ' + res.status));
       }
       const data = await res.json();
-      setSession({ token: data.token, email: data.email || email, plan: data.plan, expiresAt: data.expiresAt });
+      // Match the dashboard's session shape so both surfaces stay in sync.
+      // Dashboard expects { user: {...}, token, timestamp } — and uses sess.timestamp
+      // for the 24hr expiry check; without it the dashboard silently logs out.
+      const user = data.user || {
+        email: data.email || email,
+        plan: data.plan,
+        clientName: data.clientName
+      };
+      setSession({ user: user, token: data.token, timestamp: Date.now() });
       return data;
     }
 
