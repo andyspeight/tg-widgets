@@ -16,16 +16,23 @@
  *
  * ─── Security layers ────────────────────────────────────────────────
  *   1. Auth — requires valid bearer token (via _auth.js)
- *   2. Plan gate — blocks Spark tier; enforces per-plan daily caps
- *   3. Rate limiting — persisted to Airtable Users table, survives cold starts
- *   4. Input validation — widgetType enum, length caps, options schema
- *   5. Prompt injection defence — XML-delimited user input + system-role
+ * ─── Security layers ────────────────────────────────────────────────
+ *   1. Auth — requires valid bearer token (via _auth.js)
+ *   2. User resolution — session token carries email only; we look up the
+ *      Airtable record by email on every call. Filters on Active status,
+ *      so suspended accounts are denied even with a still-valid token.
+ *   3. Plan gate — blocks Spark tier; enforces per-plan daily caps.
+ *      Plan is read fresh from Airtable on every call so upgrades/downgrades
+ *      take effect immediately (not at token expiry).
+ *   4. Rate limiting — persisted to Airtable Users table, survives cold starts
+ *   5. Input validation — widgetType enum, length caps, options schema
+ *   6. Prompt injection defence — XML-delimited user input + system-role
  *      instructions with explicit decline-hijack clause
- *   6. Output validation — strict allowlist per widget type (FAQ only)
- *   7. Fetch timeout — 30s abort to protect Vercel function compute
- *   8. Fail closed — Airtable unreachable, rate limit read failure,
+ *   7. Output validation — strict allowlist per widget type (FAQ only)
+ *   8. Fetch timeout — 30s abort to protect Vercel function compute
+ *   9. Fail closed — Airtable unreachable, rate limit read failure,
  *      Anthropic error, and unparseable output all deny
- *   9. Generic client errors — server-side logs have detail, clients don't
+ *  10. Generic client errors — server-side logs have detail, clients don't
  *
  * ─── Required env vars ──────────────────────────────────────────────
  *   ANTHROPIC_API_KEY      — server-only, sk-ant-...
@@ -33,10 +40,11 @@
  *   AIRTABLE_BASE_ID       — e.g. appAYzWZxvK6qlwXK
  *   AIRTABLE_USERS_TABLE   — the Users table ID, e.g. tblikekpaTKraMktZ
  *
- * ─── Required Airtable schema (add to Users table) ──────────────────
- *   Field "AI Daily Count" — Number (integer)
- *   Field "AI Daily Date"  — Single line text (YYYY-MM-DD format)
- *   If these fields are absent, rate limiting fails closed with a 503.
+ * ─── Airtable schema (Users table fields — already created) ────────
+ *   fldlyipF5vQLUUxoh  "AI Daily Count" — Number, precision 0
+ *   fldlJ8nMB41hqdRnS  "AI Daily Date"  — Single line text (YYYY-MM-DD)
+ *   Field IDs are used throughout (not names) so Airtable UI renames
+ *   do not break this endpoint. IDs are in the FIELD_IDS constants below.
  *
  * ─── TODO: global daily ceiling ─────────────────────────────────────
  *   Per-user caps prevent one account draining the budget. For a belt-and-
@@ -81,6 +89,11 @@ const FAQ_ALLOWED_ICONS = [
   'phone', 'mail', 'message', 'book', 'check',
 ];
 
+// Airtable field IDs on the Users table. Using IDs (not names) so that
+// renaming the fields in the Airtable UI doesn't break this endpoint.
+const FIELD_AI_DAILY_COUNT = 'fldlyipF5vQLUUxoh';
+const FIELD_AI_DAILY_DATE  = 'fldlJ8nMB41hqdRnS';
+
 // ═══════════════════════════════════════════════════════════════════
 // MAIN HANDLER
 // ═══════════════════════════════════════════════════════════════════
@@ -95,8 +108,8 @@ export default async function handler(req, res) {
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
 
   const user = extractUser(auth);
-  if (!user.recordId) {
-    console.error('[widget-ai] Auth returned no user record ID — check _auth.js shape');
+  if (!user.email) {
+    console.error('[widget-ai] Auth returned no email — check _auth.js token shape');
     return res.status(500).json({ error: 'Session error' });
   }
 
@@ -107,25 +120,45 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'AI service not configured' });
   }
 
-  // ── 3. Plan gate ────────────────────────────────────────────────
-  const planLimit = PLAN_DAILY_LIMITS[user.plan];
+  // ── 3. Resolve Airtable user record ─────────────────────────────
+  // The session token carries email/plan/clientName (from _auth.js), but not
+  // the Airtable record ID needed for rate-limit tracking. Look it up now.
+  // Also confirms the user still exists and is Active — catches suspended
+  // accounts whose tokens haven't expired yet.
+  let userRecord;
+  try {
+    userRecord = await lookupUserByEmail(user.email);
+  } catch (err) {
+    console.error('[widget-ai] User lookup failed:', err.message);
+    return res.status(503).json({ error: 'Service temporarily unavailable. Please try again.' });
+  }
+  if (!userRecord) {
+    console.error('[widget-ai] No active user record for', user.email);
+    return res.status(403).json({ error: 'Account not found or inactive. Please sign in again.' });
+  }
+
+  // ── 4. Plan gate ────────────────────────────────────────────────
+  // Use the plan from the Airtable record (freshest) rather than the token,
+  // so a plan upgrade/downgrade takes effect immediately.
+  const effectivePlan = userRecord.plan || user.plan;
+  const planLimit = PLAN_DAILY_LIMITS[effectivePlan];
   if (planLimit === undefined) {
-    console.error('[widget-ai] Unknown plan:', user.plan);
+    console.error('[widget-ai] Unknown plan:', effectivePlan);
     return res.status(403).json({ error: 'Your plan does not support AI generation. Contact support.' });
   }
   if (planLimit === 0) {
     return res.status(403).json({ error: 'AI generation requires a Boost plan or higher. Upgrade to unlock.' });
   }
 
-  // ── 4. Input validation ─────────────────────────────────────────
+  // ── 5. Input validation ─────────────────────────────────────────
   const parsed = parseBody(req.body);
   if (parsed.error) return res.status(400).json({ error: parsed.error });
   const { widgetType, prompt, options } = parsed;
 
-  // ── 5. Rate limit check (Airtable-backed, fail closed) ──────────
+  // ── 6. Rate limit check (Airtable-backed, fail closed) ──────────
   let limitState;
   try {
-    limitState = await checkAndIncrementLimit(user.recordId, planLimit);
+    limitState = await checkAndIncrementLimit(userRecord.recordId, planLimit);
   } catch (err) {
     console.error('[widget-ai] Rate-limit check failed:', err.message);
     return res.status(503).json({ error: 'Service temporarily unavailable. Please try again in a moment.' });
@@ -141,7 +174,7 @@ export default async function handler(req, res) {
   res.setHeader('X-RateLimit-Limit', planLimit);
   res.setHeader('X-RateLimit-Remaining', Math.max(0, planLimit - limitState.newCount));
 
-  // ── 6. Build prompt + call Anthropic ────────────────────────────
+  // ── 7. Build prompt + call Anthropic ────────────────────────────
   const { system, userMsg } = buildPrompt(widgetType, prompt, options);
 
   let aiResponse;
@@ -156,7 +189,7 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: 'AI service error. Please try again.' });
   }
 
-  // ── 7. Parse + validate output ──────────────────────────────────
+  // ── 8. Parse + validate output ──────────────────────────────────
   let cleaned;
   try {
     cleaned = parseAndValidate(widgetType, aiResponse, options);
@@ -165,7 +198,7 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: 'AI returned an invalid response. Please rephrase and try again.' });
   }
 
-  // ── 8. Return ───────────────────────────────────────────────────
+  // ── 9. Return ───────────────────────────────────────────────────
   return res.status(200).json(cleaned);
 }
 
@@ -174,12 +207,13 @@ export default async function handler(req, res) {
 // ═══════════════════════════════════════════════════════════════════
 
 function extractUser(auth) {
-  // Common auth shapes: auth.user.{field} OR auth.{field}
+  // _auth.js returns { user: {...tokenPayload} } where tokenPayload contains
+  // email, clientName, plan (per the widget-auth login endpoint).
   const u = auth.user || auth;
   return {
-    email:    u.email    || auth.email    || '',
-    plan:     u.plan     || auth.plan     || '',
-    recordId: u.recordId || u.id || auth.recordId || auth.userId || '',
+    email:      (u.email || '').toLowerCase().trim(),
+    plan:       u.plan || '',
+    clientName: u.clientName || '',
   };
 }
 
@@ -223,6 +257,53 @@ function clampInt(v, min, max, dflt) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// AIRTABLE USER LOOKUP — resolve session email to record ID + plan
+// ═══════════════════════════════════════════════════════════════════
+
+// Field IDs on the Users table. These are the three fields we read during
+// the AI endpoint flow. If any field is renamed in Airtable, the IDs stay
+// stable so this keeps working.
+const FIELD_EMAIL  = 'fldVRiIAlrTjxnNHP';
+const FIELD_PLAN   = 'fldBgDeQdtwMqTIS4';
+const FIELD_STATUS = 'fldgz6ScqvHQy2jdH';
+
+async function lookupUserByEmail(email) {
+  const AT_BASE  = process.env.AIRTABLE_BASE_ID;
+  const AT_TABLE = process.env.AIRTABLE_USERS_TABLE;
+
+  // Validate email format before building any formula. The regex is strict
+  // enough that anything passing it is safe to interpolate into a quoted
+  // Airtable string literal, but we still escape defensively.
+  if (!/^[^\s@"']+@[^\s@"']+\.[^\s@"']+$/.test(email) || email.length > 254) {
+    return null;
+  }
+  const safeEmail = email.toLowerCase().replace(/'/g, "\\'");
+
+  // EXACT() with LOWER() for case-insensitive exact match on the email field,
+  // filtered to Active status only. Suspended accounts cannot generate AI
+  // even with a still-valid bearer token.
+  const formula = `AND(LOWER({${FIELD_EMAIL}})='${safeEmail}',{${FIELD_STATUS}}='Active')`;
+  const url = `https://api.airtable.com/v0/${AT_BASE}/${encodeURIComponent(AT_TABLE)}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1&returnFieldsByFieldId=true`;
+
+  const res = await fetchWithTimeout(url, {
+    headers: { 'Authorization': `Bearer ${process.env.AIRTABLE_PAT}` },
+  }, 8000);
+
+  if (!res.ok) throw new Error(`Airtable GET ${res.status}`);
+
+  const data = await res.json();
+  const rec = (data.records || [])[0];
+  if (!rec) return null;
+
+  const fields = rec.fields || {};
+  const planRaw = fields[FIELD_PLAN];
+  // singleSelect returns as string in filterByFormula GET responses
+  const plan = typeof planRaw === 'string' ? planRaw : (planRaw?.name || '');
+
+  return { recordId: rec.id, plan };
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // RATE LIMITING — Airtable-backed, persists across cold starts
 // ═══════════════════════════════════════════════════════════════════
 
@@ -230,20 +311,23 @@ async function checkAndIncrementLimit(userRecordId, planLimit) {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
   const AT_BASE  = process.env.AIRTABLE_BASE_ID;
   const AT_TABLE = process.env.AIRTABLE_USERS_TABLE;
-  const url = `https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${encodeURIComponent(userRecordId)}`;
+  // returnFieldsByFieldId=true makes the GET response key fields by ID, not name.
+  // That keeps the code stable if the UI field names are ever renamed.
+  const getUrl = `https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${encodeURIComponent(userRecordId)}?returnFieldsByFieldId=true`;
+  const patchUrl = `https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${encodeURIComponent(userRecordId)}`;
   const headers = {
     'Authorization': `Bearer ${process.env.AIRTABLE_PAT}`,
     'Content-Type': 'application/json',
   };
 
   // GET current record
-  const getRes = await fetchWithTimeout(url, { headers }, 8000);
+  const getRes = await fetchWithTimeout(getUrl, { headers }, 8000);
   if (!getRes.ok) throw new Error(`Airtable GET ${getRes.status}`);
   const record = await getRes.json();
   const fields = record.fields || {};
 
-  const storedDate  = fields['AI Daily Date'] || '';
-  const storedCount = typeof fields['AI Daily Count'] === 'number' ? fields['AI Daily Count'] : 0;
+  const storedDate  = fields[FIELD_AI_DAILY_DATE] || '';
+  const storedCount = typeof fields[FIELD_AI_DAILY_COUNT] === 'number' ? fields[FIELD_AI_DAILY_COUNT] : 0;
 
   // Roll over at midnight UTC
   const currentCount = (storedDate === today) ? storedCount : 0;
@@ -252,15 +336,17 @@ async function checkAndIncrementLimit(userRecordId, planLimit) {
     return { exceeded: true, newCount: currentCount };
   }
 
-  // PATCH: increment + set today
+  // PATCH: increment + set today.
+  // The PATCH body accepts field IDs as keys when we send them — Airtable
+  // handles both ID-keyed and name-keyed input on writes.
   const newCount = currentCount + 1;
-  const patchRes = await fetchWithTimeout(url, {
+  const patchRes = await fetchWithTimeout(patchUrl, {
     method: 'PATCH',
     headers,
     body: JSON.stringify({
       fields: {
-        'AI Daily Count': newCount,
-        'AI Daily Date': today,
+        [FIELD_AI_DAILY_COUNT]: newCount,
+        [FIELD_AI_DAILY_DATE]: today,
       },
     }),
   }, 8000);
