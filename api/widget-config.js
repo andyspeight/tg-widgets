@@ -11,6 +11,37 @@ import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors } from './_aut
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
+// Per-plan widget count limits, keyed by widgetType.
+//   -1       = unlimited
+//    0       = widget type not available on this plan
+//   positive = max number of widgets of this type this plan can create
+// KEEP IN SYNC with the WIDGETS array in public/index.html. If these drift,
+// the dashboard will show one limit while the API enforces another.
+const PLAN_WIDGET_LIMITS = {
+  'Pricing Table':  { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
+  'FAQ':            { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Google Reviews': { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+};
+
+// Count existing widgets owned by this user, of a specific type.
+// Used by the CREATE path to enforce plan limits.
+async function countUserWidgetsOfType(email, widgetType, headers) {
+  const emailEsc = sanitiseForFormula(email.toLowerCase());
+  const typeEsc  = sanitiseForFormula(widgetType);
+  const formula = encodeURIComponent(
+    `AND(LOWER({ClientEmail})='${emailEsc}',{WidgetType}='${typeEsc}')`
+  );
+  // Only fetch WidgetID to keep the payload tiny — we just need a count.
+  // maxRecords capped at 100: all current plan limits are <=5, so this
+  // always captures enough to detect "over limit" without paginating.
+  const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`
+    + `?filterByFormula=${formula}&maxRecords=100&fields%5B%5D=WidgetID`;
+  const resp = await fetch(url, { headers });
+  if (!resp.ok) throw new Error('Count query failed');
+  const data = await resp.json();
+  return (data.records || []).length;
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -113,6 +144,41 @@ export default async function handler(req, res) {
           return res.status(200).json({ success: true, recordId: record.id, widgetId });
         }
       }
+
+      // ── Enforce per-plan widget count limits ──────────────────
+      // Must happen only on the CREATE path — updates don't change count.
+      const planLimits = PLAN_WIDGET_LIMITS[safeType];
+      if (!planLimits) {
+        // Widget type not in our limits table — fail closed so unknown
+        // types (typos, future additions not yet wired) can't bypass gating.
+        console.error('[widget-config] Unknown widgetType for limit check:', safeType);
+        return res.status(400).json({ error: 'Unsupported widget type' });
+      }
+      const planLimit = planLimits[user.plan];
+      if (planLimit === undefined) {
+        console.error('[widget-config] Unknown plan for limit check:', user.plan);
+        return res.status(403).json({ error: 'Your plan does not support widget creation. Contact support.' });
+      }
+      if (planLimit === 0) {
+        return res.status(403).json({
+          error: `The ${safeType} widget is not included in your plan. Please upgrade to use this widget.`
+        });
+      }
+      if (planLimit > 0) {
+        let existingCount;
+        try {
+          existingCount = await countUserWidgetsOfType(user.email, safeType, headers);
+        } catch (err) {
+          console.error('[widget-config] Count query failed:', err.message);
+          return res.status(503).json({ error: 'Service temporarily unavailable. Please try again.' });
+        }
+        if (existingCount >= planLimit) {
+          return res.status(403).json({
+            error: `You've reached your plan's limit of ${planLimit} ${safeType} widget${planLimit === 1 ? '' : 's'}. Upgrade to create more.`
+          });
+        }
+      }
+      // planLimit === -1 means unlimited — fall through to create.
 
       // Create new record (tagged to authenticated user)
       // Always generate the widgetId server-side for new records.
