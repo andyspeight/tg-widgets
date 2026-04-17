@@ -4,21 +4,13 @@
     { "source": "/demo", "destination": "/demo.html" },
     { "source": "/demo-reviews", "destination": "/demo-reviews.html" },
     { "source": "/demo-faq", "destination": "/demo-faq.html" },
+    { "source": "/demo-testimonials", "destination": "/demo-testimonials.html" },
     { "source": "/editor", "destination": "/editor.html" },
     { "source": "/editor-reviews", "destination": "/editor-reviews.html" },
-    { "source": "/editor-faq", "destination": "/editor-faq.html" }
+    { "source": "/editor-faq", "destination": "/editor-faq.html" },
+    { "source": "/editor-testimonials", "destination": "/editor-testimonials.html" }
   ],
   "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains; preload" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" }
-      ]
-    },
     {
       "source": "/widget.js",
       "headers": [
@@ -44,10 +36,18 @@
       ]
     },
     {
+      "source": "/widget-testimonials.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
       "source": "/api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, DELETE, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
       ]
     }
