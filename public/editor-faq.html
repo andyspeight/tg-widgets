@@ -57,6 +57,12 @@
     a:hover { text-decoration: underline; }
 
     /* ---- layout ---- */
+    /* Ensure the HTML `hidden` attribute always hides elements, even when
+       a class rule (like .login-overlay { display: flex } or .editor { display: grid })
+       would otherwise override the user-agent's default [hidden] { display: none }.
+       Without this, hideLogin() appears to succeed but the overlay stays visible. */
+    [hidden] { display: none !important; }
+
     .editor { display: grid; grid-template-columns: 380px 1fr; height: 100vh; }
     .sidebar {
       background: var(--panel);
