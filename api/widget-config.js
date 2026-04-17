@@ -115,7 +115,13 @@ export default async function handler(req, res) {
       }
 
       // Create new record (tagged to authenticated user)
-      const newWidgetId = widgetId || `tgw_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      // Always generate the widgetId server-side for new records.
+      // A client-provided widgetId is only honoured on the UPDATE path above
+      // (where ownership has been verified). Falling through to here means the
+      // search either found no match or no widgetId was supplied — in either
+      // case we mint a fresh ID to prevent squatting on predictable/reserved
+      // IDs and collisions with future auto-generated ones.
+      const newWidgetId = `tgw_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const createUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`;
       const createResp = await fetch(createUrl, {
         method: 'POST',
