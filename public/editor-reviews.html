@@ -9,6 +9,7 @@
 <style>
 :root{--bg:#F4F5F7;--sf:#FFF;--bd:#E3E5E8;--tx:#1A1D23;--sb:#6B7280;--mt:#9CA3AF;--br:#0891B2;--bl:#ECFEFF;--bk:#0E7490;--ac:#7C3AED;--dn:#EF4444;--ok:#10B981;--ft:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--ft);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden}
+[hidden]{display:none!important}
 .app{display:flex;height:100vh}
 .editor{width:360px;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
 .ed-top{padding:14px 16px;border-bottom:1px solid var(--bd)}.ed-top-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -136,6 +137,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 <div class="editor">
   <div class="ed-top">
     <div class="ed-top-row">
+      <a class="ab2" href="/" title="Back to dashboard" aria-label="Back to dashboard" style="text-decoration:none;padding:0 8px"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></a>
       <div class="ed-logo"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
       <div class="ed-info"><h1>Google Reviews</h1><span>Widget Editor</span></div>
       <div class="ea">
@@ -239,6 +241,7 @@ function redo(){if(hIdx<hist.length-1){hIdx++;C=JSON.parse(hist[hIdx]);ren();ren
 
 /* ═══ INIT ═══ */
 window.addEventListener('DOMContentLoaded',()=>{
+  if(!ensureAuth())return;
   const p=new URLSearchParams(location.search);wId=p.get('id');
   if(wId){loadW(wId)}else{C.reviews=JSON.parse(JSON.stringify(TPL[0].reviews));C.place={...TPL[0].place};snap();ren();renP()}
 });
@@ -444,6 +447,7 @@ function dlTpl(){
 /* ═══ AI ═══ */
 function getAuthToken(){try{return JSON.parse(sessionStorage.getItem('tgw_session'))?.token||''}catch{return''}}
 function authH(){const t=getAuthToken();const h={'Content-Type':'application/json'};if(t)h['Authorization']='Bearer '+t;return h}
+function ensureAuth(){try{const s=JSON.parse(sessionStorage.getItem('tgw_session')||'null');if(!s||!s.token||!s.user){location.href='/';return false}if(s.timestamp&&(Date.now()-s.timestamp)>86400000){sessionStorage.removeItem('tgw_session');location.href='/';return false}return true}catch(e){location.href='/';return false}}
 
 function showAI(){closeM();document.getElementById('aiM').classList.add('open');document.getElementById('aiP').focus()}
 async function genAI(){
@@ -463,7 +467,7 @@ function showTpl(){document.getElementById('tpL').innerHTML=TPL.map((t,i)=>`<div
 function apTpl(i){snap();C.reviews=JSON.parse(JSON.stringify(TPL[i].reviews));C.place={...TPL[i].place};closeM();ren();renP();toast('Template applied','ok')}
 
 /* ═══ SAVE ═══ */
-async function saveW(){try{const name=document.getElementById('wName').value||'Untitled';const body={config:C,name,widgetType:'Google Reviews'};if(wId)body.widgetId=wId;const r=await fetch('/api/widget-config',{method:'POST',headers:authH(),body:JSON.stringify(body)});const d=await r.json();if(!r.ok){toast(d.error||'Save failed','err');return}if(d.widgetId){wId=d.widgetId;const u=new URL(location);u.searchParams.set('id',wId);history.replaceState(null,'',u)}ren();toast('Saved!','ok')}catch(e){toast('Save failed','err')}}
+async function saveW(){try{const name=document.getElementById('wName').value||'Untitled';const body={config:C,name,widgetType:'Google Reviews'};if(wId)body.widgetId=wId;const r=await fetch('/api/widget-config',{method:'POST',headers:authH(),body:JSON.stringify(body)});if(r.status===401){sessionStorage.removeItem('tgw_session');toast('Session expired — redirecting to login','err');setTimeout(()=>location.href='/',1200);return}const d=await r.json();if(!r.ok){toast(d.error||'Save failed','err');return}if(d.widgetId){wId=d.widgetId;const u=new URL(location);u.searchParams.set('id',wId);history.replaceState(null,'',u)}ren();toast('Saved!','ok')}catch(e){toast('Save failed','err')}}
 
 /* ═══ UTILS ═══ */
 function closeM(){document.querySelectorAll('.mbg').forEach(m=>m.classList.remove('open'))}
