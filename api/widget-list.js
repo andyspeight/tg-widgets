@@ -1,8 +1,7 @@
 /**
  * Widget List API
- * GET /api/widget-list → returns array of saved widgets
- * 
- * Env vars: AIRTABLE_KEY, AIRTABLE_BASE_ID
+ * GET /api/widget-list?email=USER_EMAIL → returns array of saved widgets for that user
+ * GET /api/widget-list (no email) → returns all widgets (admin)
  */
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
@@ -16,7 +15,14 @@ export default async function handler(req, res) {
   if (!AIRTABLE_KEY || !AIRTABLE_BASE_ID) return res.status(500).json({ error: 'Config missing' });
 
   try {
-    const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?sort%5B0%5D%5Bfield%5D=UpdatedAt&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=50`;
+    const email = req.query.email;
+    let url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?sort%5B0%5D%5Bfield%5D=UpdatedAt&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=50`;
+    
+    if (email) {
+      const formula = encodeURIComponent(`{ClientEmail} = '${email.replace(/'/g, "\\'")}'`);
+      url += `&filterByFormula=${formula}`;
+    }
+
     const resp = await fetch(url, {
       headers: { 'Authorization': `Bearer ${AIRTABLE_KEY}` },
     });
@@ -33,7 +39,7 @@ export default async function handler(req, res) {
       client: r.fields.ClientName || '',
     }));
 
-    res.setHeader('Cache-Control', 'max-age=30');
+    res.setHeader('Cache-Control', 'max-age=10');
     return res.status(200).json(widgets);
   } catch (err) {
     console.error('[widget-list]', err);
