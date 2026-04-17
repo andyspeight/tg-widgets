@@ -159,11 +159,40 @@ a{text-decoration:none;color:inherit}
 .type-modal-item-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok)}
 .type-modal-item-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--bd);background:#fff;font-size:12px;font-weight:700;font-family:var(--ft);cursor:pointer;color:var(--sb);transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .type-modal-item-btn:hover{border-color:var(--br);color:var(--br)}
+.type-modal-item-delete{width:32px;height:32px;padding:0;border-radius:8px;border:1px solid var(--bd);background:#fff;cursor:pointer;color:var(--mt);display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.type-modal-item-delete svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.type-modal-item-delete:hover{border-color:var(--dn);color:var(--dn);background:#FEF2F2}
+.type-modal-item-delete:disabled{opacity:.5;cursor:not-allowed}
 .type-modal-foot{padding:16px 20px;border-top:1px solid var(--bd);background:var(--sf)}
 .type-modal-create{width:100%;padding:11px 16px;border-radius:10px;border:none;background:var(--br);color:#fff;font-size:13px;font-weight:700;font-family:var(--ft);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:all .15s}
 .type-modal-create:hover{background:var(--bk)}
 .type-modal-create svg{width:14px;height:14px}
 body.modal-open{overflow:hidden}
+
+/* Confirm delete dialog */
+.confirm-dialog{background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.2);padding:28px;display:flex;flex-direction:column;gap:14px}
+.confirm-dialog-head{display:flex;align-items:flex-start;gap:14px}
+.confirm-dialog-icon{width:44px;height:44px;border-radius:11px;background:#FEF2F2;color:var(--dn);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.confirm-dialog-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.confirm-dialog-title{font-size:16px;font-weight:800;margin:2px 0 4px;letter-spacing:-.01em}
+.confirm-dialog-body{font-size:13px;color:var(--sb);line-height:1.5;margin:0}
+.confirm-dialog-body strong{color:var(--ink)}
+.confirm-dialog-err{color:var(--dn);font-size:12px;font-weight:600;margin:0;padding:10px 12px;background:#FEF2F2;border-radius:8px;border:1px solid #FECACA;display:none}
+.confirm-dialog-err.show{display:block}
+.confirm-dialog-actions{display:flex;gap:8px;margin-top:6px}
+.confirm-dialog-btn{flex:1;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;font-family:var(--ft);cursor:pointer;border:none;transition:all .15s}
+.confirm-dialog-btn.cancel{background:var(--bg);color:var(--sb)}
+.confirm-dialog-btn.cancel:hover{background:#E5E7EB}
+.confirm-dialog-btn.delete{background:var(--dn);color:#fff}
+.confirm-dialog-btn.delete:hover{background:#B91C1C}
+.confirm-dialog-btn:disabled{opacity:.6;cursor:wait}
+
+/* Toast notifications — top-right, brief */
+.toast-stack{position:fixed;top:16px;right:16px;z-index:1100;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.18);opacity:0;transform:translateX(20px);transition:all .2s;pointer-events:auto;max-width:360px}
+.toast.show{opacity:1;transform:translateX(0)}
+.toast.ok{background:#059669}
+.toast.err{background:var(--dn)}
 
 /* Footer */
 .footer{text-align:center;padding:32px;border-top:1px solid var(--bd);background:var(--sf);margin-top:48px}
@@ -236,6 +265,14 @@ body.modal-open{overflow:hidden}
 <div class="modal-bg" id="typeModal" onclick="if(event.target===this)closeTypeModal()">
   <div class="type-modal" id="typeModalInner"></div>
 </div>
+
+<!-- Delete confirm dialog (populated dynamically by confirmDeleteWidget) -->
+<div class="modal-bg" id="confirmDialog" onclick="if(event.target===this)closeConfirmDialog()">
+  <div class="confirm-dialog" id="confirmDialogInner"></div>
+</div>
+
+<!-- Toast stack for transient notifications -->
+<div class="toast-stack" id="toastStack"></div>
 
 <script>
 /* ═══ WIDGET REGISTRY ═══ 
@@ -454,6 +491,10 @@ function openTypeModal(airtableType) {
       <a class="type-modal-item-btn" href="${reg.editorUrl}?id=${encodeURIComponent(w.widgetId)}">
         Edit
       </a>
+      <button class="type-modal-item-delete" title="Delete widget" aria-label="Delete widget"
+              onclick="confirmDeleteWidget('${esc(w.widgetId)}')">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
     </div>`).join('');
 
   document.getElementById('typeModalInner').innerHTML = `
@@ -492,6 +533,137 @@ document.addEventListener('keydown', (e) => {
     closeTypeModal();
   }
 });
+
+/* ═══ DELETE WIDGET FLOW ═══ */
+
+// Open the confirm dialog. Takes only widgetId — name and type are looked up
+// from myWidgetData, avoiding HTML-attribute-quoting problems with names
+// that contain apostrophes or double quotes.
+function confirmDeleteWidget(widgetId) {
+  const w = myWidgetData.find(x => x.widgetId === widgetId);
+  if (!w) {
+    console.warn('[confirmDelete] widget not found in local state:', widgetId);
+    return;
+  }
+  const widgetName = w.name || 'Untitled';
+  const airtableType = w.type;
+
+  const dialog = document.getElementById('confirmDialog');
+  const inner = document.getElementById('confirmDialogInner');
+  inner.innerHTML = `
+    <div class="confirm-dialog-head">
+      <div class="confirm-dialog-icon">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </div>
+      <div style="flex:1">
+        <h2 class="confirm-dialog-title">Delete widget?</h2>
+        <p class="confirm-dialog-body">
+          You're about to delete <strong>${esc(widgetName)}</strong>. This cannot be undone — any site embedding this widget will stop working immediately.
+        </p>
+      </div>
+    </div>
+    <p class="confirm-dialog-err" id="confirmDialogErr"></p>
+    <div class="confirm-dialog-actions">
+      <button class="confirm-dialog-btn cancel" onclick="closeConfirmDialog()">Cancel</button>
+      <button class="confirm-dialog-btn delete" id="confirmDialogDelete" onclick="performDeleteWidget()">Delete widget</button>
+    </div>`;
+  // Stash context on the element so the handler can read it back cleanly
+  dialog.dataset.widgetId = widgetId;
+  dialog.dataset.airtableType = airtableType;
+  dialog.classList.add('open');
+  document.body.classList.add('modal-open');
+}
+
+function closeConfirmDialog() {
+  const dialog = document.getElementById('confirmDialog');
+  dialog.classList.remove('open');
+  // Only release body scroll lock if no other modal still open
+  if (!document.getElementById('typeModal').classList.contains('open')) {
+    document.body.classList.remove('modal-open');
+  }
+  delete dialog.dataset.widgetId;
+  delete dialog.dataset.airtableType;
+}
+
+async function performDeleteWidget() {
+  const dialog = document.getElementById('confirmDialog');
+  const widgetId = dialog.dataset.widgetId;
+  const airtableType = dialog.dataset.airtableType;
+  if (!widgetId) return;
+
+  const deleteBtn = document.getElementById('confirmDialogDelete');
+  const errEl = document.getElementById('confirmDialogErr');
+  deleteBtn.disabled = true;
+  deleteBtn.textContent = 'Deleting…';
+  errEl.classList.remove('show');
+
+  try {
+    const r = await fetch('/api/widget-config?id=' + encodeURIComponent(widgetId), {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.status === 401) {
+      errEl.textContent = 'Session expired. Please sign in again.';
+      errEl.classList.add('show');
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = 'Delete widget';
+      return;
+    }
+    if (!r.ok) {
+      errEl.textContent = data.error || `Delete failed (HTTP ${r.status})`;
+      errEl.classList.add('show');
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = 'Delete widget';
+      return;
+    }
+
+    // Success — update local state, close dialog, refresh UI
+    myWidgetData = myWidgetData.filter(w => w.widgetId !== widgetId);
+    closeConfirmDialog();
+    showToast('Widget deleted', 'ok');
+
+    // Decide what to re-render:
+    //   - If the type still has widgets, re-open the modal for that type
+    //   - If not, close the type modal and re-render the grid
+    const remaining = myWidgetData.filter(w => w.type === airtableType);
+    if (remaining.length > 0) {
+      openTypeModal(airtableType);  // repaints the list, updates count in header
+    } else {
+      closeTypeModal();
+    }
+    // Always re-render the grid so counts update / empty state appears
+    renderMyWidgets();
+  } catch (err) {
+    console.error('[delete] failed:', err);
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.classList.add('show');
+    deleteBtn.disabled = false;
+    deleteBtn.textContent = 'Delete widget';
+  }
+}
+
+// ESC closes confirm dialog (without closing the type modal behind it)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('confirmDialog')?.classList.contains('open')) {
+    closeConfirmDialog();
+  }
+});
+
+/* ═══ TOAST ═══ */
+function showToast(message, kind) {
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind || '');
+  t.textContent = message;
+  stack.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 250);
+  }, 2400);
+}
 
 function renderFilters() {
   document.getElementById('catFilters').innerHTML = CATEGORIES.map(c =>
