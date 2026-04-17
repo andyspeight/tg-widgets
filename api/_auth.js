@@ -10,36 +10,83 @@ import { createHmac, timingSafeEqual } from 'crypto';
 const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // ── Rate Limiter (in-memory, per-instance) ──────────────────────
-// Vercel serverless functions share memory within a single instance
-// lifetime (~5-15 mins). Not bulletproof but catches basic brute force.
-const rateLimitStore = new Map();
-const RATE_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const MAX_AUTH_ATTEMPTS = 8;
+// KNOWN LIMITATION: Vercel serverless functions have per-instance memory.
+// An attacker hitting multiple cold starts can bypass this. In practice
+// this catches buggy clients, naive brute force, and opportunistic abuse —
+// good defence in depth on top of HMAC auth, ownership checks, and plan
+// gates. For stronger defence, migrate to Upstash Redis when the suite
+// faces targeted abuse.
 
-export function checkRateLimit(key) {
+const rateLimitStore = new Map();
+const MAX_STORE_SIZE = 10000; // bound memory — sweep stale entries when full
+
+// Presets for common endpoint types. Tune these by endpoint class, not
+// by individual endpoint, so limits stay consistent and easy to reason about.
+export const RATE_LIMITS = {
+  auth:        { max: 8,   windowMs: 15 * 60 * 1000 }, // login: strict — brute-force defence
+  widgetRead:  { max: 120, windowMs: 15 * 60 * 1000 }, // list/load: generous — dashboard refreshes
+  widgetWrite: { max: 60,  windowMs: 15 * 60 * 1000 }, // save: moderate — bounded human action
+};
+
+/**
+ * Check whether a request keyed by `key` is within the given rate limit.
+ * Returns { allowed, remaining, retryAfter? }.
+ * Most callers should use applyRateLimit() instead of this directly.
+ */
+export function checkRateLimit(key, limit = RATE_LIMITS.widgetRead) {
+  if (typeof key !== 'string' || !key) {
+    return { allowed: false, remaining: 0, retryAfter: 60 };
+  }
+  const { max, windowMs } = limit;
   const now = Date.now();
   const entry = rateLimitStore.get(key);
-  
-  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
+
+  // Lazy cleanup: expired entry → start fresh window
+  if (!entry || now - entry.windowStart > windowMs) {
     rateLimitStore.set(key, { windowStart: now, count: 1 });
-    return { allowed: true, remaining: MAX_AUTH_ATTEMPTS - 1 };
+    if (rateLimitStore.size > MAX_STORE_SIZE) sweepStale(now);
+    return { allowed: true, remaining: max - 1 };
   }
 
   entry.count++;
-  if (entry.count > MAX_AUTH_ATTEMPTS) {
-    return { allowed: false, remaining: 0, retryAfter: Math.ceil((entry.windowStart + RATE_WINDOW_MS - now) / 1000) };
+  if (entry.count > max) {
+    return {
+      allowed: false,
+      remaining: 0,
+      retryAfter: Math.ceil((entry.windowStart + windowMs - now) / 1000),
+    };
   }
-
-  return { allowed: true, remaining: MAX_AUTH_ATTEMPTS - entry.count };
+  return { allowed: true, remaining: max - entry.count };
 }
 
-// Clean up stale entries periodically
-setInterval(() => {
-  const now = Date.now();
+// Sweep entries older than 1 hour — conservative, covers all current window sizes.
+function sweepStale(now) {
+  const cutoff = 60 * 60 * 1000;
   for (const [key, entry] of rateLimitStore) {
-    if (now - entry.windowStart > RATE_WINDOW_MS) rateLimitStore.delete(key);
+    if (now - entry.windowStart > cutoff) rateLimitStore.delete(key);
   }
-}, 60000);
+}
+
+/**
+ * Apply rate limit and write response headers.
+ * Returns true if the request may proceed, false if a 429 has been sent.
+ *
+ * Usage:
+ *   if (!applyRateLimit(res, `list:${user.email}`, RATE_LIMITS.widgetRead)) return;
+ */
+export function applyRateLimit(res, key, limit = RATE_LIMITS.widgetRead) {
+  const result = checkRateLimit(key, limit);
+  res.setHeader('X-RateLimit-Limit', limit.max);
+  res.setHeader('X-RateLimit-Remaining', Math.max(0, result.remaining));
+  if (!result.allowed) {
+    res.setHeader('Retry-After', result.retryAfter);
+    res.status(429).json({
+      error: `Too many requests. Please try again in ${result.retryAfter} second${result.retryAfter === 1 ? '' : 's'}.`,
+    });
+    return false;
+  }
+  return true;
+}
 
 
 // ── Session Token (HMAC-SHA256) ─────────────────────────────────
