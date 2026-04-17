@@ -1,108 +1,117 @@
 /**
- * Widget Config API
- * GET  /api/widget-config?id=WIDGET_ID  → returns config JSON
- * POST /api/widget-config               → creates/updates config, returns record ID
+ * Widget Config API (Hardened)
+ * GET  /api/widget-config?id=WIDGET_ID  → public, returns config JSON (cached)
+ * POST /api/widget-config               → AUTHENTICATED, creates/updates config
  * 
- * Env vars required:
- *   AIRTABLE_KEY     — Airtable personal access token
- *   AIRTABLE_BASE_ID — Base ID for widget configs
+ * Security: GET is public (widgets must load without auth), POST requires valid session token.
+ * All inputs sanitised before Airtable queries.
  */
+import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors } from './_auth.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
 export default async function handler(req, res) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { AIRTABLE_KEY, AIRTABLE_BASE_ID } = process.env;
+  if (!AIRTABLE_KEY || !AIRTABLE_BASE_ID) return res.status(500).json({ error: 'Server configuration error' });
 
-  if (!AIRTABLE_KEY || !AIRTABLE_BASE_ID) {
-    return res.status(500).json({ error: 'Server configuration missing' });
-  }
-
-  const headers = {
-    'Authorization': `Bearer ${AIRTABLE_KEY}`,
-    'Content-Type': 'application/json',
-  };
+  const headers = { 'Authorization': `Bearer ${AIRTABLE_KEY}`, 'Content-Type': 'application/json' };
 
   try {
-    // ── GET: Fetch config by widget ID ──────────────────────────
+    // ── GET: Public — fetch config by widget ID ─────────────
     if (req.method === 'GET') {
       const widgetId = req.query.id;
-      if (!widgetId) return res.status(400).json({ error: 'Missing widget ID' });
+      if (!widgetId || typeof widgetId !== 'string' || widgetId.length > 100) {
+        return res.status(400).json({ error: 'Invalid widget ID' });
+      }
 
-      // Search by WidgetID field
-      const formula = encodeURIComponent(`{WidgetID} = '${widgetId}'`);
+      // Sanitise before using in formula
+      const safeId = sanitiseForFormula(widgetId);
+      const formula = encodeURIComponent(`{WidgetID} = '${safeId}'`);
       const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
 
       const resp = await fetch(url, { headers });
-      if (!resp.ok) throw new Error(`Airtable error: ${resp.status}`);
+      if (!resp.ok) throw new Error(`Upstream error`);
 
       const data = await resp.json();
       if (!data.records || data.records.length === 0) {
         return res.status(404).json({ error: 'Widget not found' });
       }
 
-      const record = data.records[0];
-      const configStr = record.fields.Config || '{}';
-
+      const configStr = data.records[0].fields.Config || '{}';
       try {
         const config = JSON.parse(configStr);
-        // Cache for 5 minutes at CDN, 1 minute at browser
         res.setHeader('Cache-Control', 's-maxage=300, max-age=60, stale-while-revalidate=600');
         return res.status(200).json(config);
-      } catch (e) {
-        return res.status(500).json({ error: 'Invalid config data' });
+      } catch {
+        return res.status(500).json({ error: 'Widget data corrupted' });
       }
     }
 
-    // ── POST: Create or update config ───────────────────────────
+    // ── POST: Authenticated — create or update config ───────
     if (req.method === 'POST') {
-      const { widgetId, name, config } = req.body || {};
+      // Require valid session
+      const auth = requireAuth(req);
+      if (auth.error) return res.status(auth.status).json({ error: auth.error });
+      const user = auth.user;
 
-      if (!config) return res.status(400).json({ error: 'Missing config' });
+      const { widgetId, name, config, widgetType } = req.body || {};
+      if (!config || typeof config !== 'object') {
+        return res.status(400).json({ error: 'Missing or invalid config' });
+      }
 
-      const configStr = JSON.stringify(config);
+      // Sanitise the config object
+      const cleanConfig = sanitiseConfig(config);
+      const configStr = JSON.stringify(cleanConfig);
 
-      // If widgetId provided, try to update existing
+      // Cap config size (prevent abuse)
+      if (configStr.length > 500000) {
+        return res.status(413).json({ error: 'Config too large (max 500KB)' });
+      }
+
+      const safeName = (typeof name === 'string' ? name : 'Untitled').slice(0, 200);
+      const safeType = (typeof widgetType === 'string' ? widgetType : 'Pricing Table').slice(0, 50);
+
+      // If widgetId provided, try to update existing (verify ownership)
       if (widgetId) {
-        const formula = encodeURIComponent(`{WidgetID} = '${widgetId}'`);
+        const safeWid = sanitiseForFormula(widgetId);
+        const formula = encodeURIComponent(`{WidgetID} = '${safeWid}'`);
         const searchUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
         const searchResp = await fetch(searchUrl, { headers });
         const searchData = await searchResp.json();
 
         if (searchData.records && searchData.records.length > 0) {
-          // Update existing record
-          const recordId = searchData.records[0].id;
-          const updateUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}/${recordId}`;
+          const record = searchData.records[0];
+          
+          // Verify ownership — widget must belong to this user
+          const widgetEmail = record.fields.ClientEmail || '';
+          if (widgetEmail && widgetEmail.toLowerCase() !== user.email.toLowerCase()) {
+            return res.status(403).json({ error: 'You do not have permission to edit this widget' });
+          }
+
+          const updateUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}/${record.id}`;
           const updateResp = await fetch(updateUrl, {
             method: 'PATCH',
             headers,
             body: JSON.stringify({
               fields: {
                 Config: configStr,
-                Name: name || searchData.records[0].fields.Name || 'Untitled',
+                Name: safeName,
                 UpdatedAt: new Date().toISOString(),
               },
             }),
           });
+          if (!updateResp.ok) throw new Error('Update failed');
 
-          if (!updateResp.ok) throw new Error(`Update failed: ${updateResp.status}`);
-          const updated = await updateResp.json();
-          return res.status(200).json({
-            success: true,
-            recordId: updated.id,
-            widgetId: widgetId,
-          });
+          return res.status(200).json({ success: true, recordId: record.id, widgetId });
         }
       }
 
-      // Create new record
-      const newWidgetId = widgetId || `tgp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      // Create new record (tagged to authenticated user)
+      const newWidgetId = widgetId || `tgw_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const createUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`;
       const createResp = await fetch(createUrl, {
         method: 'POST',
@@ -111,19 +120,21 @@ export default async function handler(req, res) {
           records: [{
             fields: {
               WidgetID: newWidgetId,
-              Name: name || 'Untitled Widget',
+              Name: safeName,
               Config: configStr,
               Status: 'Active',
-              WidgetType: 'Pricing Table',
+              WidgetType: safeType,
+              ClientName: user.clientName || '',
+              ClientEmail: user.email,
               CreatedAt: new Date().toISOString(),
               UpdatedAt: new Date().toISOString(),
             },
           }],
         }),
       });
-
-      if (!createResp.ok) throw new Error(`Create failed: ${createResp.status}`);
+      if (!createResp.ok) throw new Error('Create failed');
       const created = await createResp.json();
+
       return res.status(201).json({
         success: true,
         recordId: created.records[0].id,
@@ -133,7 +144,7 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
-    console.error('[widget-config]', err);
-    return res.status(500).json({ error: err.message });
+    console.error('[widget-config]', err.message);
+    return res.status(500).json({ error: 'Service temporarily unavailable' });
   }
 }
