@@ -3,8 +3,10 @@
   "rewrites": [
     { "source": "/demo", "destination": "/demo.html" },
     { "source": "/demo-reviews", "destination": "/demo-reviews.html" },
+    { "source": "/demo-faq", "destination": "/demo-faq.html" },
     { "source": "/editor", "destination": "/editor.html" },
-    { "source": "/editor-reviews", "destination": "/editor-reviews.html" }
+    { "source": "/editor-reviews", "destination": "/editor-reviews.html" },
+    { "source": "/editor-faq", "destination": "/editor-faq.html" }
   ],
   "headers": [
     {
@@ -17,6 +19,14 @@
     },
     {
       "source": "/widget-reviews.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-faq.js",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
