@@ -200,6 +200,7 @@ const WIDGETS = [
   {
     id: 'pricing',
     name: 'Pricing Table',
+    airtableType: 'Pricing Table',  // matches Airtable WidgetType singleSelect option
     description: 'Showcase your plans, pricing tiers and features with a beautiful, interactive pricing table. Monthly/yearly toggle, feature tooltips, trust strip.',
     category: 'E-commerce',
     status: 'live',
@@ -214,6 +215,7 @@ const WIDGETS = [
   {
     id: 'reviews',
     name: 'Google Reviews',
+    airtableType: 'Google Reviews',  // matches Airtable WidgetType singleSelect option
     description: 'Display Google reviews in 6 stunning layouts — cards, masonry, carousel, spotlight, trust badge and ticker. AI insights, smart tags, owner replies.',
     category: 'Social Proof',
     status: 'live',
@@ -228,6 +230,7 @@ const WIDGETS = [
   {
     id: 'faq',
     name: 'FAQ Accordion',
+    airtableType: 'FAQ',  // IMPORTANT: dashboard display name differs from Airtable type name
     description: 'Beautiful, searchable FAQs in four layouts — accordion, two-column, tabs, or searchable. Markdown answers, categories, SEO schema built-in.',
     category: 'Content',
     status: 'live',
@@ -353,7 +356,10 @@ async function renderMyWidgets() {
   }
 
   grid.innerHTML = myWidgetData.map(w => {
-    const reg = WIDGETS.find(rw => rw.name === w.type) || WIDGETS[0];
+    // Match on airtableType (exact singleSelect value) with fallback to name.
+    // This matters for widgets whose display name differs from the type stored
+    // in Airtable — e.g. FAQ is "FAQ Accordion" in the catalog but "FAQ" in the DB.
+    const reg = WIDGETS.find(rw => (rw.airtableType || rw.name) === w.type) || WIDGETS[0];
     return `<div class="my-card" onclick="location.href='${reg.editorUrl}?id=${w.widgetId}'">
       <div class="my-card-top">
         <div class="my-card-icon" style="background:${reg.color}12"><svg viewBox="${reg.icon.viewBox}" style="stroke:${reg.color}">${reg.icon.paths}</svg></div>
