@@ -215,9 +215,13 @@
 
     /* List container */
     .tgf-list { display: flex; flex-direction: column; gap: 10px; }
-    .tgf-list--two-col { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: start; }
+    /* Two-column layout: each column is an independent flex stack so opening
+       an item in one column does NOT push items in the other column down. */
+    .tgf-list--two-col { display: flex; flex-direction: column; gap: 10px; }
+    .tgf-list--two-col .tgf-col { display: flex; flex-direction: column; gap: 10px; }
     @media (min-width: 900px) {
-      .tgf-list--two-col { grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+      .tgf-list--two-col { flex-direction: row; gap: 16px; align-items: flex-start; }
+      .tgf-list--two-col .tgf-col { flex: 1 1 0; min-width: 0; }
     }
 
     /* Item */
@@ -770,6 +774,20 @@
           <div class="tgf-empty-icon">${icon('search', 28)}</div>
           <p class="tgf-empty-title">${esc(noResultsText)}</p>
           <p class="tgf-empty-text">Try a different search term or browse all questions.</p>
+        </div>`;
+      }
+
+      // Two-column: split into independent columns. First-half goes left, second-half right.
+      // This keeps each column's layout independent (opening an item in one column
+      // doesn't push items in the other down) and preserves reading order on mobile
+      // when columns stack vertically.
+      if (this.c.layout === 'two-column') {
+        const half = Math.ceil(qs.length / 2);
+        const left = qs.slice(0, half).map(q => this._renderItem(q)).join('');
+        const right = qs.slice(half).map(q => this._renderItem(q)).join('');
+        return `<div class="${listClass}">
+          <div class="tgf-col">${left}</div>
+          <div class="tgf-col">${right}</div>
         </div>`;
       }
 
