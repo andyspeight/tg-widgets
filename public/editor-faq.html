@@ -2400,10 +2400,16 @@
 
     /* ============================ INIT ============================ */
     async function init() {
-      // Check session first
+      // DIAGNOSTIC — always log what init sees
       const sess = getSession();
-      if (!sess || !sess.token) { showLogin(); return; }
+      console.log('[init] running. session found?', !!sess, '| has token?', !!sess?.token, '| url:', location.href);
+      if (!sess || !sess.token) {
+        console.log('[init] → showing login overlay (no valid session at this moment)');
+        showLogin();
+        return;
+      }
 
+      console.log('[init] → hiding login, loading editor');
       hideLogin();
 
       // Load widget if ?id= in URL
@@ -2497,6 +2503,7 @@
     }
 
     /* ============================ BOOT ============================ */
+    console.log('[boot] editor-faq.html script running | sessionStorage keys:', Object.keys(sessionStorage));
     bindLogin();
     init();
   })();
