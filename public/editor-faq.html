@@ -896,10 +896,27 @@
 
     /* =============================== AUTH =============================== */
     function getSession() {
-      try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || null; } catch(e) { return null; }
+      let raw;
+      try { raw = sessionStorage.getItem(STORAGE_KEY); }
+      catch (e) { console.warn('[getSession] sessionStorage read failed:', e); return null; }
+      if (!raw) { return null; }
+      try {
+        const s = JSON.parse(raw);
+        if (!s || typeof s !== 'object') { console.warn('[getSession] session is not an object:', raw); return null; }
+        if (!s.token) { console.warn('[getSession] session has no token — will force re-login'); return null; }
+        return s;
+      } catch (e) {
+        console.warn('[getSession] JSON parse failed:', e);
+        return null;
+      }
     }
-    function setSession(s) { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
-    function clearSession() { sessionStorage.removeItem(STORAGE_KEY); }
+    function setSession(s) {
+      try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+      catch (e) { console.error('[setSession] sessionStorage write failed:', e); throw e; }
+    }
+    function clearSession() {
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    }
     function authHeaders(extra) {
       const s = getSession();
       const h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
@@ -2342,6 +2359,16 @@
         throw new Error(body.error || ('HTTP ' + res.status));
       }
       const data = await res.json();
+
+      // Validate the response contains a usable token. Without this, a
+      // response like { success: true, user: {...} } (no token) would write
+      // a broken session and the editor would silently redirect back to
+      // login with the button stuck on "Signing in...".
+      if (!data || typeof data.token !== 'string' || data.token.length < 10) {
+        console.error('[tryLogin] auth response missing token', data);
+        throw new Error('Sign-in succeeded but no session token received — contact support');
+      }
+
       // Match the dashboard's session shape so both surfaces stay in sync.
       // Dashboard expects { user: {...}, token, timestamp } — and uses sess.timestamp
       // for the 24hr expiry check; without it the dashboard silently logs out.
@@ -2435,13 +2462,34 @@
         if (!email || !code) { err.textContent = 'Email and client code both required'; err.style.display = ''; return; }
         const btn = $('#login-btn');
         btn.disabled = true; btn.textContent = 'Signing in…';
+
+        // Watchdog: if anything below hangs for more than 20s, abort so the
+        // button doesn't stay stuck on "Signing in..." forever.
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Sign-in timed out — please check your connection and try again')), 20000)
+        );
+
         try {
-          await tryLogin(email, code);
-          await init();
+          await Promise.race([tryLogin(email, code), timeout]);
+          // At this point tryLogin has written a validated session.
+          // Verify by reading it back before running init(), to catch any
+          // environment where sessionStorage writes silently fail (private
+          // mode, storage quota, policy restrictions).
+          const sess = getSession();
+          if (!sess || !sess.token) {
+            throw new Error('Your browser blocked session storage — try a normal window or a different browser');
+          }
+          await Promise.race([init(), timeout]);
         } catch (e) {
+          console.error('[login] failed:', e);
           err.textContent = e.message || 'Sign-in failed';
           err.style.display = '';
-          btn.disabled = false; btn.textContent = 'Sign in';
+        } finally {
+          // Always reset the button, regardless of success/failure. On
+          // success, the login overlay is hidden anyway; on failure the
+          // user can try again without being stuck on "Signing in...".
+          btn.disabled = false;
+          btn.textContent = 'Sign in';
         }
       };
       $('#login-btn').addEventListener('click', go);
