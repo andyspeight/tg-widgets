@@ -228,11 +228,15 @@ const WIDGETS = [
   {
     id: 'faq',
     name: 'FAQ Accordion',
-    description: 'Clean, accessible FAQ sections with smooth expand/collapse animations, search filtering, and category grouping.',
+    description: 'Beautiful, searchable FAQs in four layouts — accordion, two-column, tabs, or searchable. Markdown answers, categories, SEO schema built-in.',
     category: 'Content',
-    status: 'coming-soon',
+    status: 'live',
     icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
     color: '#8B5CF6',
+    editorUrl: '/editor-faq',
+    demoUrl: '/demo-faq',
+    widgetTag: 'faq',
+    scriptFile: 'widget-faq.js',
     access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
@@ -497,6 +501,24 @@ function loadMiniPreview(w) {
       ]
     });
   }
+
+  if (w.id === 'faq' && window.TGFaqWidget) {
+    new window.TGFaqWidget(el, {
+      layout:'accordion',theme:'light',radius:12,
+      colors:{brand:w.color,accent:'#EC4899',bg:'#FFFFFF',card:'#FFFFFF',text:'#0F172A',sub:'#64748B',border:'#E2E8F0'},
+      heading:{show:true,title:'Frequently asked questions',subtitle:'Everything you need to know.'},
+      search:{enabled:false},
+      showIcons:true,showExpandAll:false,expandBehavior:'single',defaultOpen:0,showUpdated:false,
+      categories:[],
+      questions:[
+        {id:'q1',question:'How do I book a holiday?',answer:'You can book **online**, by phone, or in-branch at any of our stores.',category:'',popular:true},
+        {id:'q2',question:'What is your cancellation policy?',answer:'Flexible terms vary by date.',category:'',popular:false},
+        {id:'q3',question:'Are my holidays ATOL protected?',answer:'Yes — all flight-inclusive packages.',category:'',popular:false},
+      ],
+      cta:{enabled:false},
+      seo:{enableSchema:false}
+    });
+  }
 }
 
 /* ═══ AUTH ═══ */
@@ -555,5 +577,6 @@ render();
 <!-- Load widget engines for mini previews -->
 <script src="/widget.js"></script>
 <script src="/widget-reviews.js"></script>
+<script src="/widget-faq.js"></script>
 </body>
 </html>
