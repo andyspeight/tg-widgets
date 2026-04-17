@@ -106,6 +106,7 @@
       cursor: pointer;
       display: inline-flex; align-items: center; gap: 6px;
       transition: all .15s ease;
+      text-decoration: none;   /* anchor-flavoured icon-btns (e.g. Dashboard link) */
     }
     .icon-btn:hover { border-color: var(--border-strong); color: var(--ink); background: var(--hover); }
     .icon-btn svg { flex-shrink: 0; }
@@ -737,6 +738,10 @@
   <main class="editor" id="editor" hidden>
     <aside class="sidebar">
       <div class="topbar">
+        <a class="icon-btn" href="/" id="back-btn" title="Back to dashboard" aria-label="Back to dashboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Dashboard
+        </a>
         <span class="logo">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>
