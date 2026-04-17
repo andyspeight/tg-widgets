@@ -4,7 +4,7 @@
  * 
  * Security: requires valid session token, scopes results to authenticated user's email
  */
-import { requireAuth, sanitiseForFormula, setCors } from './_auth.js';
+import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
@@ -21,6 +21,11 @@ export default async function handler(req, res) {
   const auth = requireAuth(req);
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
   const user = auth.user;
+
+  // ── Rate limit (per-user, in-memory) ──────────────────────
+  // Catches buggy clients and opportunistic abuse. Not a strong control on
+  // its own — see _auth.js for the cold-start caveat.
+  if (!applyRateLimit(res, `list:${user.email}`, RATE_LIMITS.widgetRead)) return;
 
   try {
     // Always scope to the authenticated user's email — never trust query params
