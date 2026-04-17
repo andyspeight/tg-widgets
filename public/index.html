@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travelgenix Widget Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F8FA;--sf:#FFF;--bd:#E5E7EB;--tx:#111827;--sb:#6B7280;--mt:#9CA3AF;--br:#0891B2;--bl:#ECFEFF;--bk:#0E7490;--ac:#7C3AED;--ok:#10B981;--dn:#EF4444;--warn:#F59E0B;--ft:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--ft);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .5s ease-out both}
+
+/* Nav */
+.nav{background:var(--sf);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:50}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--br),var(--ac));display:flex;align-items:center;justify-content:center}
+.nav-logo-icon svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-logo span{font-size:15px;font-weight:800;letter-spacing:-.02em}.nav-logo small{font-size:11px;font-weight:500;color:var(--mt);margin-left:6px;background:var(--bg);padding:2px 8px;border-radius:6px}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-link{font-size:13px;font-weight:500;color:var(--sb);padding:6px 12px;border-radius:8px;transition:all .15s;cursor:pointer;border:none;background:none;font-family:var(--ft)}
+.nav-link:hover{color:var(--tx);background:var(--bg)}
+.nav-btn{font-size:13px;font-weight:600;color:#fff;padding:7px 16px;border-radius:8px;background:var(--br);border:none;cursor:pointer;font-family:var(--ft);transition:all .15s;display:flex;align-items:center;gap:6px}
+.nav-btn:hover{background:var(--bk);box-shadow:0 2px 8px rgba(8,145,178,.25)}
+.nav-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-user{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:20px;background:var(--bg);border:1px solid var(--bd);font-size:12px;font-weight:600;color:var(--tx);cursor:pointer}
+.nav-user-av{width:28px;height:28px;border-radius:14px;background:var(--br);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+/* Hero */
+.hero{text-align:center;padding:56px 24px 40px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(8,145,178,.06) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:12px;position:relative}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--br),var(--ac));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:15px;color:var(--sb);max-width:500px;margin:0 auto;line-height:1.6;position:relative}
+
+/* Stats bar (logged in) */
+.stats{max-width:1200px;margin:0 auto 24px;padding:0 24px;display:none}
+.stats.show{display:block}
+.stats-inner{display:flex;gap:12px}
+.stat-card{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.stat-num{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1}.stat-label{font-size:12px;color:var(--mt);font-weight:500}
+
+/* My Widgets (logged in) */
+.my-widgets{max-width:1200px;margin:0 auto 32px;padding:0 24px;display:none}
+.my-widgets.show{display:block}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:16px;font-weight:700}
+.my-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.my-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px;transition:all .2s;cursor:pointer;display:flex;flex-direction:column}
+.my-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.06);border-color:#D1D5DB;transform:translateY(-2px)}
+.my-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.my-card-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.my-card-icon svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.my-card-name{font-size:14px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.my-card-type{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.my-card-meta{font-size:11px;color:var(--mt);margin-top:auto;padding-top:8px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.my-card-status{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600}
+.dot{width:6px;height:6px;border-radius:3px}
+
+/* Catalogue */
+.catalogue{max-width:1200px;margin:0 auto;padding:0 24px 48px}
+.cat-filters{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.cat-filter{padding:7px 16px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);font-size:12px;font-weight:600;color:var(--sb);cursor:pointer;font-family:var(--ft);transition:all .15s}
+.cat-filter:hover{border-color:var(--br);color:var(--br)}
+.cat-filter.active{background:var(--bl);border-color:var(--br);color:var(--br)}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+
+/* Widget Card */
+.w-card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;overflow:hidden;transition:all .3s}
+.w-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);border-color:#D1D5DB;transform:translateY(-3px)}
+.w-card-preview{height:200px;background:var(--bg);border-bottom:1px solid var(--bd);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+.w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px}
+.w-card-body{padding:18px 20px}
+.w-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
+.w-card-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.w-card-logo svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.w-card-name{font-size:16px;font-weight:700;line-height:1.2}
+.w-card-cat{font-size:11px;font-weight:600;color:var(--mt);margin-top:2px}
+.w-card-desc{font-size:13px;color:var(--sb);line-height:1.5;margin-bottom:14px}
+.w-card-actions{display:flex;gap:8px}
+.w-card-btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--ft);cursor:pointer;transition:all .15s;border:none;display:flex;align-items:center;gap:5px}
+.w-card-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-create{background:var(--br);color:#fff}.btn-create:hover{background:var(--bk)}
+.btn-preview{background:var(--bg);color:var(--sb);border:1px solid var(--bd)}.btn-preview:hover{background:#E5E7EB}
+.btn-soon{background:var(--bg);color:var(--mt);border:1px solid var(--bd);cursor:default}
+
+/* Coming soon overlay */
+.w-card.soon{opacity:.75}.w-card.soon:hover{transform:none;box-shadow:none}
+.soon-badge{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(0,0,0,.6);color:#fff;letter-spacing:.5px;text-transform:uppercase;backdrop-filter:blur(4px)}
+.w-card.soon .w-card-preview{background:linear-gradient(135deg,#F8FAFC,#EFF6FF);display:flex;align-items:center;justify-content:center}
+.soon-placeholder{text-align:center;color:var(--mt)}
+.soon-placeholder svg{width:40px;height:40px;stroke:var(--bd);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:8px}
+.soon-placeholder p{font-size:12px;font-weight:600}
+
+/* Sign in modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:auto}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);padding:32px}
+.modal h2{font-size:20px;font-weight:800;margin-bottom:4px;text-align:center}
+.modal p{font-size:13px;color:var(--sb);margin-bottom:20px;text-align:center}
+.modal input{width:100%;padding:10px 14px;font-size:14px;border:1px solid var(--bd);border-radius:10px;font-family:var(--ft);outline:none;margin-bottom:10px}
+.modal input:focus{border-color:var(--br);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
+.modal .modal-btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:var(--ft);cursor:pointer;transition:all .15s}
+.modal .btn-p{background:var(--br);color:#fff;margin-bottom:8px}.modal .btn-p:hover{background:var(--bk)}
+.modal .btn-c{background:var(--bg);color:var(--sb)}.modal .btn-c:hover{background:#E5E7EB}
+.modal .err{color:var(--dn);font-size:12px;margin-bottom:8px;text-align:center}
+
+/* Footer */
+.footer{text-align:center;padding:32px;border-top:1px solid var(--bd);background:var(--sf);margin-top:48px}
+.footer p{font-size:12px;color:var(--mt)}
+.footer a{color:var(--br);font-weight:600}
+
+@media(max-width:768px){
+  .hero h1{font-size:28px}.cat-grid{grid-template-columns:1fr}.stats-inner{flex-direction:column}
+  .my-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav"><div class="nav-inner">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+    <span>Widget Suite</span><small>by Travelgenix</small>
+  </a>
+  <div class="nav-right" id="navRight"></div>
+</div></nav>
+
+<!-- Hero -->
+<div class="hero fade-up">
+  <h1>Beautiful widgets.<br><em>Zero code.</em></h1>
+  <p>Embeddable, customisable widgets for any website. Built for travel businesses, loved by everyone.</p>
+</div>
+
+<!-- Stats (logged in) -->
+<div class="stats" id="statsBar">
+  <div class="stats-inner" id="statsInner"></div>
+</div>
+
+<!-- My Widgets (logged in) -->
+<div class="my-widgets" id="myWidgets">
+  <div class="section-head">
+    <h2 class="section-title">My Widgets</h2>
+  </div>
+  <div class="my-grid" id="myGrid"></div>
+</div>
+
+<!-- Catalogue -->
+<div class="catalogue">
+  <div class="section-head">
+    <h2 class="section-title" id="catTitle">Widget Catalogue</h2>
+  </div>
+  <div class="cat-filters" id="catFilters"></div>
+  <div class="cat-grid" id="catGrid"></div>
+</div>
+
+<div class="footer">
+  <p>Travelgenix Widget Suite v1.0 · <a href="https://travelgenix.io" target="_blank">travelgenix.io</a></p>
+</div>
+
+<!-- Sign in modal -->
+<div class="modal-bg" id="signInModal">
+  <div class="modal">
+    <h2>Sign In</h2>
+    <p>Enter your email and client code to access your widgets</p>
+    <input type="email" id="signEmail" placeholder="Email address">
+    <input type="password" id="signCode" placeholder="Client code">
+    <div id="signErr" class="err" style="display:none"></div>
+    <button class="modal-btn btn-p" onclick="doSignIn()">Sign In</button>
+    <button class="modal-btn btn-c" onclick="closeSignIn()">Cancel</button>
+  </div>
+</div>
+
+<script>
+/* ═══ WIDGET REGISTRY ═══ 
+   Adding a widget = adding one object here. Everything else auto-builds. */
+const WIDGETS = [
+  {
+    id: 'pricing',
+    name: 'Pricing Table',
+    description: 'Showcase your plans, pricing tiers and features with a beautiful, interactive pricing table. Monthly/yearly toggle, feature tooltips, trust strip.',
+    category: 'E-commerce',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor',
+    demoUrl: '/demo',
+    widgetTag: 'pricing',
+    scriptFile: 'widget.js',
+  },
+  {
+    id: 'reviews',
+    name: 'Google Reviews',
+    description: 'Display Google reviews in 6 stunning layouts — cards, masonry, carousel, spotlight, trust badge and ticker. AI insights, smart tags, owner replies.',
+    category: 'Social Proof',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
+    color: '#F59E0B',
+    editorUrl: '/editor-reviews',
+    demoUrl: '/demo-reviews',
+    widgetTag: 'reviews',
+    scriptFile: 'widget-reviews.js',
+  },
+  {
+    id: 'faq',
+    name: 'FAQ Accordion',
+    description: 'Clean, accessible FAQ sections with smooth expand/collapse animations, search filtering, and category grouping.',
+    category: 'Content',
+    status: 'coming-soon',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+    color: '#8B5CF6',
+  },
+  {
+    id: 'testimonials',
+    name: 'Testimonials',
+    description: 'Rotating testimonial cards, quote sliders, and video testimonial embeds. Perfect for building trust on landing pages.',
+    category: 'Social Proof',
+    status: 'coming-soon',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>'},
+    color: '#EC4899',
+  },
+  {
+    id: 'countdown',
+    name: 'Countdown Timer',
+    description: 'Create urgency with animated countdown timers for sales, launches, and events. Multiple display styles.',
+    category: 'E-commerce',
+    status: 'coming-soon',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
+    color: '#EF4444',
+  },
+  {
+    id: 'logo-showcase',
+    name: 'Logo Showcase',
+    description: 'Display partner, client, or supplier logos in a scrolling carousel or grid. Grayscale-to-colour hover effect.',
+    category: 'Social Proof',
+    status: 'coming-soon',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'},
+    color: '#059669',
+  },
+  {
+    id: 'team',
+    name: 'Team Showcase',
+    description: 'Present your team with photos, roles, bios, and social links. Multiple layout options including grid, carousel, and cards.',
+    category: 'Content',
+    status: 'coming-soon',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>'},
+    color: '#3B82F6',
+  },
+  {
+    id: 'event-calendar',
+    name: 'Event Calendar',
+    description: 'Display upcoming events, schedules, and activities. Month/week/list views with filtering and colour coding.',
+    category: 'Content',
+    status: 'coming-soon',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'},
+    color: '#F97316',
+  },
+];
+
+const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
+let signedIn = sessionStorage.getItem('tgw_user') ? true : false;
+let userEmail = sessionStorage.getItem('tgw_user') || '';
+let activeFilter = 'All';
+let myWidgetData = [];
+
+/* ═══ RENDER ═══ */
+function render() {
+  renderNav();
+  renderStats();
+  renderMyWidgets();
+  renderFilters();
+  renderCatalogue();
+}
+
+function renderNav() {
+  const el = document.getElementById('navRight');
+  if (signedIn) {
+    const ini = userEmail.slice(0,2).toUpperCase();
+    el.innerHTML = `<button class="nav-link" onclick="location.href='#catalogue'">Widgets</button>
+      <div class="nav-user" onclick="signOut()"><div class="nav-user-av">${ini}</div>${userEmail.split('@')[0]}</div>`;
+  } else {
+    el.innerHTML = `<button class="nav-link" onclick="location.href='#catalogue'">Widgets</button>
+      <button class="nav-btn" onclick="openSignIn()"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>Sign In</button>`;
+  }
+}
+
+function renderStats() {
+  const bar = document.getElementById('statsBar');
+  if (!signedIn) { bar.classList.remove('show'); return; }
+  bar.classList.add('show');
+  const total = myWidgetData.length;
+  const views = myWidgetData.reduce((s, w) => s + (w.views || 0), 0);
+  document.getElementById('statsInner').innerHTML = `
+    <div class="stat-card"><div class="stat-icon" style="background:${WIDGETS[0].color}15"><svg style="stroke:${WIDGETS[0].color}" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div><div><div class="stat-num">${total}</div><div class="stat-label">My widgets</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#8B5CF615"><svg style="stroke:#8B5CF6" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="stat-num">${views.toLocaleString()}</div><div class="stat-label">Total views</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#10B98115"><svg style="stroke:#10B981" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>w.status==='live').length}</div><div class="stat-label">Widgets available</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#F59E0B15"><svg style="stroke:#F59E0B" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>w.status==='coming-soon').length}</div><div class="stat-label">Coming soon</div></div></div>`;
+}
+
+async function renderMyWidgets() {
+  const el = document.getElementById('myWidgets');
+  if (!signedIn) { el.classList.remove('show'); return; }
+  el.classList.add('show');
+
+  // Fetch from Airtable
+  try {
+    const r = await fetch('/api/widget-list');
+    if (r.ok) { myWidgetData = await r.json(); }
+  } catch(e) { myWidgetData = []; }
+
+  const grid = document.getElementById('myGrid');
+  if (!myWidgetData.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--mt);font-size:13px">No widgets yet. Create your first one from the catalogue below.</div>`;
+    return;
+  }
+
+  grid.innerHTML = myWidgetData.map(w => {
+    const reg = WIDGETS.find(rw => rw.name === w.type) || WIDGETS[0];
+    return `<div class="my-card" onclick="location.href='${reg.editorUrl}?id=${w.widgetId}'">
+      <div class="my-card-top">
+        <div class="my-card-icon" style="background:${reg.color}12"><svg viewBox="${reg.icon.viewBox}" style="stroke:${reg.color}">${reg.icon.paths}</svg></div>
+        <span class="my-card-name">${esc(w.name)}</span>
+        <span class="my-card-type" style="background:${reg.color}12;color:${reg.color}">${esc(w.type)}</span>
+      </div>
+      <div class="my-card-meta">
+        <span class="my-card-status"><span class="dot" style="background:${w.status==='Active'?'var(--ok)':'var(--warn)'}"></span>${w.status}</span>
+        <span>${w.updated || ''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFilters() {
+  document.getElementById('catFilters').innerHTML = CATEGORIES.map(c =>
+    `<button class="cat-filter${activeFilter===c?' active':''}" onclick="setFilter('${c}')">${c}</button>`
+  ).join('');
+}
+
+function renderCatalogue() {
+  const filtered = activeFilter === 'All' ? WIDGETS : WIDGETS.filter(w => w.category === activeFilter);
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = filtered.map((w, i) => {
+    const isLive = w.status === 'live';
+    const soonCls = isLive ? '' : ' soon';
+    let preview = '';
+    if (isLive) {
+      preview = `<div class="w-card-preview"><div class="w-card-preview-inner" id="prev_${w.id}"></div></div>`;
+    } else {
+      preview = `<div class="w-card-preview"><span class="soon-badge">Coming Soon</span><div class="soon-placeholder"><svg viewBox="${w.icon.viewBox}">${w.icon.paths}</svg><p>${w.name}</p></div></div>`;
+    }
+
+    const actions = isLive
+      ? `<button class="w-card-btn btn-create" onclick="event.stopPropagation();${signedIn?`location.href='${w.editorUrl}'`:`openSignIn()`}"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>${signedIn?'Create Widget':'Sign In to Create'}</button>
+        <button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`
+      : `<button class="w-card-btn btn-soon">Coming Soon</button>`;
+
+    return `<div class="w-card${soonCls} fade-up" style="animation-delay:${i*60}ms" ${isLive?`onclick="location.href='${w.demoUrl}'"`:''}>
+      ${preview}
+      <div class="w-card-body">
+        <div class="w-card-head">
+          <div class="w-card-logo" style="background:${w.color}12"><svg viewBox="${w.icon.viewBox}" style="stroke:${w.color}">${w.icon.paths}</svg></div>
+          <div><div class="w-card-name">${w.name}</div><div class="w-card-cat">${w.category}</div></div>
+        </div>
+        <p class="w-card-desc">${w.description}</p>
+        <div class="w-card-actions">${actions}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Load live mini-previews
+  setTimeout(() => {
+    filtered.filter(w => w.status === 'live').forEach(w => loadMiniPreview(w));
+  }, 200);
+}
+
+function setFilter(cat) {
+  activeFilter = cat;
+  renderFilters();
+  renderCatalogue();
+}
+
+/* ═══ MINI PREVIEWS ═══ */
+function loadMiniPreview(w) {
+  const container = document.getElementById('prev_' + w.id);
+  if (!container) return;
+  container.innerHTML = '';
+  const el = document.createElement('div');
+  el.setAttribute('data-tg-widget', w.widgetTag);
+  container.appendChild(el);
+
+  if (w.id === 'pricing' && window.TGPricingWidget) {
+    new window.TGPricingWidget(el, {
+      header:{title:'Choose Your Plan',subtitle:'Start free, upgrade anytime.'},
+      brandColor:w.color,accentColor:'#6366F1',pageBg:'#FFFFFF',cardBg:'#FFFFFF',textColor:'#0F172A',subtextColor:'#64748B',borderRadius:14,showToggle:true,showBadge:true,showIcons:true,showDescription:true,showHints:false,showTrustStrip:false,theme:'light',
+      plans:[
+        {name:'Starter',description:'Get started',monthlyPrice:29,yearlyPrice:290,currency:'£',icon:'Zap',highlighted:false,badge:'',cta:'Get Started',ctaUrl:'#',features:[{text:'5 projects',included:true},{text:'Basic support',included:true},{text:'API access',included:false}]},
+        {name:'Pro',description:'For teams',monthlyPrice:59,yearlyPrice:590,currency:'£',icon:'Star',highlighted:true,badge:'Popular',cta:'Try Free',ctaUrl:'#',features:[{text:'Unlimited projects',included:true},{text:'Priority support',included:true},{text:'API access',included:true}]},
+        {name:'Enterprise',description:'Full power',monthlyPrice:99,yearlyPrice:990,currency:'£',icon:'Crown',highlighted:false,badge:'',cta:'Contact',ctaUrl:'#',features:[{text:'Unlimited everything',included:true},{text:'Dedicated support',included:true},{text:'API access',included:true}]}
+      ]
+    });
+  }
+
+  if (w.id === 'reviews' && window.TGReviewsWidget) {
+    new window.TGReviewsWidget(el, {
+      place:{name:'Sunshine Holidays',rating:4.9,total:247},brandColor:w.color,pageBg:'#FFFFFF',cardBg:'#FFFFFF',textColor:'#0F172A',subtextColor:'#64748B',borderRadius:14,layout:'cards',theme:'light',showHeader:true,showAI:false,showTags:false,showPhotos:true,showReplies:false,showHelpful:false,showTrust:false,showCTA:false,
+      reviews:[
+        {id:'1',author:'Sarah M',rating:5,date:'2 weeks ago',text:'Incredible service from start to finish. Everything was seamless.',tags:['Family'],helpful:24,hasPhoto:false},
+        {id:'2',author:'James R',rating:5,date:'1 month ago',text:'Third year booking and they never disappoint. Great prices.',tags:['Value'],helpful:18},
+        {id:'3',author:'Emma T',rating:4,date:'3 weeks ago',text:'Really good experience. Booking was easy and straightforward.',tags:['Service'],helpful:12},
+      ]
+    });
+  }
+}
+
+/* ═══ AUTH ═══ */
+function openSignIn(){document.getElementById('signInModal').classList.add('open');document.getElementById('signEmail').focus()}
+function closeSignIn(){document.getElementById('signInModal').classList.remove('open');document.getElementById('signErr').style.display='none'}
+function doSignIn(){
+  const email=document.getElementById('signEmail').value.trim();
+  const code=document.getElementById('signCode').value.trim();
+  if(!email||!code){document.getElementById('signErr').textContent='Please enter email and client code';document.getElementById('signErr').style.display='block';return}
+  // For now, accept any non-empty credentials
+  sessionStorage.setItem('tgw_user',email);
+  signedIn=true;userEmail=email;
+  closeSignIn();render();
+}
+function signOut(){sessionStorage.removeItem('tgw_user');signedIn=false;userEmail='';myWidgetData=[];render()}
+
+/* ═══ UTILS ═══ */
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+document.getElementById('signInModal').addEventListener('click',e=>{if(e.target.id==='signInModal')closeSignIn()});
+
+/* ═══ INIT ═══ */
+render();
+</script>
+
+<!-- Load widget engines for mini previews -->
+<script src="/widget.js"></script>
+<script src="/widget-reviews.js"></script>
+</body>
+</html>
