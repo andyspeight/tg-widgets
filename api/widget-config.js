@@ -6,7 +6,7 @@
  * Security: GET is public (widgets must load without auth), POST requires valid session token.
  * All inputs sanitised before Airtable queries.
  */
-import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors } from './_auth.js';
+import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
@@ -97,6 +97,12 @@ export default async function handler(req, res) {
       const auth = requireAuth(req);
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
       const user = auth.user;
+
+      // ── Rate limit (per-user, in-memory) ──────────────────
+      // Catches buggy clients and opportunistic abuse. See _auth.js for
+      // the cold-start caveat. GET path is not rate-limited — the CDN
+      // cache (s-maxage=300) absorbs that class of abuse.
+      if (!applyRateLimit(res, `save:${user.email}`, RATE_LIMITS.widgetWrite)) return;
 
       const { widgetId, name, config, widgetType } = req.body || {};
       if (!config || typeof config !== 'object') {
