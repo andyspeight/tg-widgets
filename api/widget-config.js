@@ -11,6 +11,15 @@ import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors } from './_aut
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
+// Allowed widget type names. Canonical casing — must match the Airtable
+// singleSelect "WidgetType" option names exactly (the field is case-sensitive).
+// If you add a new widget type, update THREE places:
+//   1. This constant
+//   2. PLAN_WIDGET_LIMITS below
+//   3. The WidgetType singleSelect options in Airtable
+//   4. The WIDGETS array in public/index.html
+const ALLOWED_WIDGET_TYPES = ['Pricing Table', 'FAQ', 'Google Reviews'];
+
 // Per-plan widget count limits, keyed by widgetType.
 //   -1       = unlimited
 //    0       = widget type not available on this plan
@@ -104,7 +113,26 @@ export default async function handler(req, res) {
       }
 
       const safeName = (typeof name === 'string' ? name : 'Untitled').slice(0, 200);
-      const safeType = (typeof widgetType === 'string' ? widgetType : 'Pricing Table').slice(0, 50);
+
+      // Validate widgetType against the enum if provided. Case-insensitive
+      // match — we store the canonical form to match the Airtable singleSelect
+      // option names exactly. If not provided here, the CREATE path below
+      // will reject the request (required for new widgets).
+      let safeType = null;
+      if (widgetType !== undefined && widgetType !== null) {
+        if (typeof widgetType !== 'string' || widgetType.length === 0 || widgetType.length > 50) {
+          return res.status(400).json({ error: 'Invalid widgetType' });
+        }
+        const canonical = ALLOWED_WIDGET_TYPES.find(
+          t => t.toLowerCase() === widgetType.toLowerCase()
+        );
+        if (!canonical) {
+          return res.status(400).json({
+            error: `Unsupported widget type. Allowed: ${ALLOWED_WIDGET_TYPES.join(', ')}`
+          });
+        }
+        safeType = canonical;
+      }
 
       // If widgetId provided, try to update existing (verify ownership)
       if (widgetId) {
@@ -147,12 +175,22 @@ export default async function handler(req, res) {
 
       // ── Enforce per-plan widget count limits ──────────────────
       // Must happen only on the CREATE path — updates don't change count.
+
+      // widgetType is required for CREATE. The earlier validation accepted
+      // it as optional to support future UPDATE-only flows; here we require it.
+      if (!safeType) {
+        return res.status(400).json({
+          error: 'widgetType is required when creating a new widget'
+        });
+      }
+
       const planLimits = PLAN_WIDGET_LIMITS[safeType];
       if (!planLimits) {
-        // Widget type not in our limits table — fail closed so unknown
-        // types (typos, future additions not yet wired) can't bypass gating.
-        console.error('[widget-config] Unknown widgetType for limit check:', safeType);
-        return res.status(400).json({ error: 'Unsupported widget type' });
+        // Should be unreachable: safeType is already validated against
+        // ALLOWED_WIDGET_TYPES above. If we hit this, the two constants have
+        // drifted — a dev sync error, not user error.
+        console.error('[widget-config] Widget type missing from PLAN_WIDGET_LIMITS:', safeType);
+        return res.status(500).json({ error: 'Widget configuration error. Contact support.' });
       }
       const planLimit = planLimits[user.plan];
       if (planLimit === undefined) {
