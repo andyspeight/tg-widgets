@@ -336,9 +336,9 @@ async function renderMyWidgets() {
   if (!signedIn) { el.classList.remove('show'); return; }
   el.classList.add('show');
 
-  // Fetch from Airtable, scoped to this user
+  // Fetch from Airtable, scoped to this user via auth token
   try {
-    const r = await fetch('/api/widget-list?email=' + encodeURIComponent(userEmail));
+    const r = await fetch('/api/widget-list', { headers: authHeaders() });
     if (r.ok) { myWidgetData = await r.json(); }
   } catch(e) { myWidgetData = []; }
 
@@ -501,7 +501,16 @@ function loadMiniPreview(w) {
 
 /* ═══ AUTH ═══ */
 let userData = null;
-try { userData = JSON.parse(sessionStorage.getItem('tgw_session')); signedIn = !!userData; userEmail = userData?.email || ''; } catch(e) {}
+try {
+  const sess = JSON.parse(sessionStorage.getItem('tgw_session'));
+  // Check expiry (24 hours)
+  if (sess && sess.timestamp && (Date.now() - sess.timestamp) < 86400000) {
+    userData = sess.user; signedIn = true; userEmail = sess.user?.email || '';
+  } else { sessionStorage.removeItem('tgw_session'); }
+} catch(e) {}
+
+function getAuthToken() { try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; } }
+function authHeaders() { const t = getAuthToken(); return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }; }
 
 function openSignIn(){document.getElementById('signInModal').classList.add('open');document.getElementById('signEmail').focus()}
 function closeSignIn(){document.getElementById('signInModal').classList.remove('open');document.getElementById('signErr').style.display='none'}
@@ -512,7 +521,7 @@ async function doSignIn(){
   const errEl=document.getElementById('signErr');
   errEl.style.display='none';
   if(!email||!code){errEl.textContent='Please enter email and client code';errEl.style.display='block';return}
-  
+
   try {
     const r = await fetch('/api/widget-auth', {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -520,9 +529,9 @@ async function doSignIn(){
     });
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error || 'Sign in failed'; errEl.style.display='block'; return; }
-    
+
     userData = d.user;
-    sessionStorage.setItem('tgw_session', JSON.stringify(d.user));
+    sessionStorage.setItem('tgw_session', JSON.stringify({ user: d.user, token: d.token, timestamp: Date.now() }));
     signedIn = true;
     userEmail = d.user.email;
     closeSignIn();
