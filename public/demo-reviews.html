@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviews Widget Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:#fff;color:#0F172A;line-height:1.6}
+.demo-hd{background:linear-gradient(135deg,#1B2B5B,#0F172A);padding:14px 32px;display:flex;align-items:center;justify-content:space-between}
+.demo-logo{color:#fff;font-size:18px;font-weight:700;letter-spacing:-.02em}.demo-logo span{color:#00B4D8}
+.demo-nav{display:flex;gap:24px}.demo-nav a{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;font-weight:500}
+.demo-nav a:hover{color:#fff}
+.demo-bar{background:#0F172A;color:#94A3B8;text-align:center;padding:10px;font-size:12px;font-weight:500}
+.demo-bar code{background:rgba(255,255,255,.1);padding:2px 8px;border-radius:4px;font-size:11px;color:#00B4D8}
+.demo-hero{text-align:center;padding:60px 24px 32px;background:linear-gradient(180deg,#F8FAFC,#fff)}
+.demo-hero h1{font-size:36px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+.demo-hero p{font-size:15px;color:#64748B;max-width:460px;margin:0 auto}
+.section-label{text-align:center;padding:32px 24px 8px;font-size:12px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px}
+.demo-footer{text-align:center;padding:32px;background:#F8FAFC;border-top:1px solid #E2E8F0}
+.demo-footer p{font-size:12px;color:#94A3B8}
+.layout-switcher{display:flex;justify-content:center;gap:8px;padding:16px;flex-wrap:wrap}
+.layout-btn{padding:8px 16px;border-radius:8px;border:1px solid #E2E8F0;background:#fff;font-size:12px;font-weight:600;color:#64748B;cursor:pointer;font-family:inherit;transition:all .15s}
+.layout-btn:hover{border-color:#0891B2;color:#0891B2}
+.layout-btn.active{background:#ECFEFF;border-color:#0891B2;color:#0891B2}
+</style>
+</head>
+<body>
+
+<div class="demo-hd">
+  <div class="demo-logo">Sunshine<span>Holidays</span></div>
+  <nav class="demo-nav"><a href="#">Destinations</a><a href="#">Deals</a><a href="#">Reviews</a><a href="#">Contact</a></nav>
+</div>
+<div class="demo-bar">Demo page — Reviews widget embedded via a single <code>&lt;script&gt;</code> tag. Switch layouts below.</div>
+
+<div class="demo-hero">
+  <h1>What Our Customers Say</h1>
+  <p>Real reviews from real travellers. See why thousands of families trust us with their holidays.</p>
+</div>
+
+<div class="layout-switcher">
+  <button class="layout-btn active" onclick="switchLayout('cards',this)">Cards Grid</button>
+  <button class="layout-btn" onclick="switchLayout('masonry',this)">Masonry</button>
+  <button class="layout-btn" onclick="switchLayout('carousel',this)">Carousel</button>
+  <button class="layout-btn" onclick="switchLayout('spotlight',this)">Spotlight</button>
+  <button class="layout-btn" onclick="switchLayout('badge',this)">Trust Badge</button>
+  <button class="layout-btn" onclick="switchLayout('ticker',this)">Ticker</button>
+</div>
+
+<div id="widgetContainer"></div>
+
+<div class="demo-footer">
+  <p>Travelgenix Widget Suite v1.0.0 · Google Reviews Widget · Shadow DOM · Zero dependencies</p>
+</div>
+
+<script>
+const DEMO_CONFIG = {
+  place: { name: "Sunshine Holidays", rating: 4.9, total: 247 },
+  brandColor: "#0891B2",
+  accentColor: "#6366F1",
+  pageBg: "#FFFFFF",
+  cardBg: "#FFFFFF",
+  textColor: "#0F172A",
+  subtextColor: "#64748B",
+  borderRadius: 16,
+  layout: "cards",
+  theme: "light",
+  showHeader: true,
+  showAI: true,
+  showTags: true,
+  showPhotos: true,
+  showReplies: true,
+  showHelpful: true,
+  showTrust: true,
+  showCTA: true,
+  ctaText: "Write a Review",
+  ctaUrl: "#",
+  trustText: "Verified reviews powered by Google · Widget by Travelgenix",
+  aiHighlights: [
+    { label: "Most praised", value: "Personal service & attention to detail", color: "#EC4899", icon: "heart" },
+    { label: "98% recommend", value: "for families and couples", color: "#8B5CF6", icon: "users" },
+    { label: "Trending up", value: "Rating improved 0.3★ this year", color: "#10B981", icon: "trending" },
+    { label: "Top strength", value: "Finding better deals than online", color: "#F59E0B", icon: "award" }
+  ],
+  reviews: [
+    { id:"1", author:"Sarah Mitchell", rating:5, date:"2 weeks ago", text:"Absolutely incredible service from start to finish. The team helped us plan a last-minute family holiday to Crete and everything was seamless — flights, hotel, transfers, even restaurant recommendations. The kids loved it and we didn't have to lift a finger. Already planning our next trip with them!", tags:["Family","Service","Crete"], helpful:24, hasPhoto:true, photoUrl:"https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=300&fit=crop", reply:{author:"Sunshine Holidays",text:"Thank you Sarah! So glad the whole family had such a wonderful time in Crete. We'd love to help with your next adventure!"} },
+    { id:"2", author:"James Robertson", rating:5, date:"1 month ago", text:"Third year running we've booked through Sunshine Holidays and they never disappoint. This year was Tenerife — found us a stunning adults-only hotel at a price that beat everything we found online. The personal touch makes all the difference.", tags:["Couples","Value","Tenerife"], helpful:18 },
+    { id:"3", author:"Emma Thompson", rating:4, date:"3 weeks ago", text:"Really good experience overall. The booking process was straightforward and the website made it easy to compare options. Only small issue was a slight delay with our transfer but the team sorted it quickly. Would definitely recommend.", tags:["Service","Booking"], helpful:12, reply:{author:"Sunshine Holidays",text:"Thanks Emma! Sorry about the transfer hiccup — we've fed that back to our supplier. Glad we got it sorted quickly for you."} },
+    { id:"4", author:"David Chen", rating:5, date:"1 week ago", text:"Booked a honeymoon to the Maldives and it was absolutely perfect. Every single detail was thought of — the room upgrade, the sunset dinner, even a bottle of champagne waiting in the room. Felt like VIPs the entire trip. Cannot recommend highly enough.", tags:["Couples","Luxury","Maldives"], helpful:31, hasPhoto:true, photoUrl:"https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&h=300&fit=crop" },
+    { id:"5", author:"Lisa Patel", rating:5, date:"2 months ago", text:"First time using a travel agent instead of booking everything myself and I'm a convert! Saved us about £400 on our Turkey trip compared to what we'd found, plus got free airport lounge access thrown in. The personal service is just on another level.", tags:["Value","Turkey","First-timer"], helpful:22 },
+    { id:"6", author:"Mark Williams", rating:5, date:"3 days ago", text:"Just got back from an amazing week in Majorca. The hotel was perfect for the kids — splash park, kids club, the lot. And right on the beach. Agent really listened to what we needed and nailed it. Already looking at next summer!", tags:["Family","Beach","Majorca"], helpful:8, hasPhoto:true, photoUrl:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop" },
+    { id:"7", author:"Rachel Adams", rating:5, date:"1 month ago", text:"We needed a complex multi-centre holiday — Dubai for 4 nights then Mauritius for 10. Other agents couldn't get it right but Sunshine nailed it first time. Flights, hotels, internal transfers, visa advice — all sorted. Stress-free from start to finish.", tags:["Multi-centre","Luxury","Dubai","Mauritius"], helpful:27 },
+    { id:"8", author:"Tom Burke", rating:4, date:"6 weeks ago", text:"Good solid service. Booked a week in Lanzarote, good hotel at a fair price. Nothing flashy but exactly what we wanted — a relaxing week in the sun. Appreciated the honest advice about which areas to stay in.", tags:["Relaxation","Lanzarote","Honest advice"], helpful:9 }
+  ]
+};
+
+let currentWidget = null;
+
+function renderWidget(layout) {
+  const container = document.getElementById('widgetContainer');
+  container.innerHTML = '';
+  const el = document.createElement('div');
+  el.setAttribute('data-tg-widget', 'reviews');
+  container.appendChild(el);
+  const cfg = { ...DEMO_CONFIG, layout: layout };
+  if (window.TGReviewsWidget) {
+    currentWidget = new window.TGReviewsWidget(el, cfg);
+  }
+}
+
+function switchLayout(layout, btn) {
+  document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWidget(layout);
+}
+
+// Initial render after script loads
+document.addEventListener('DOMContentLoaded', () => {
+  // Small delay to ensure widget script is ready
+  setTimeout(() => renderWidget('cards'), 100);
+});
+</script>
+<script src="/widget-reviews.js"></script>
+</body>
+</html>
