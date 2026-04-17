@@ -2,9 +2,9 @@
  * Widget Auth API (Hardened)
  * POST /api/widget-auth  { email, code }  → returns session token + user info
  * 
- * Security: rate limited, input sanitised, returns signed HMAC token
+ * Security: rate limited (per-IP AND per-email), input sanitised, returns signed HMAC token
  */
-import { checkRateLimit, createToken, sanitiseForFormula, isValidEmail, setCors } from './_auth.js';
+import { checkRateLimit, RATE_LIMITS, createToken, sanitiseForFormula, isValidEmail, setCors } from './_auth.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Users';
@@ -27,14 +27,27 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid client code format' });
   }
 
-  // ── Rate limiting ─────────────────────────────────────────
+  // ── Rate limiting (two independent dimensions) ──────────
+  // Per-IP blocks one attacker hammering many accounts (brute-force spray).
+  // Per-email blocks anyone (across IPs) hammering one account (targeted attack).
+  // Either failing → 429. Both share the auth preset (8/15min).
+  // Uses checkRateLimit directly (not applyRateLimit) so we can show a login-specific
+  // error message in minutes rather than the generic "too many requests in N seconds".
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
-  const rateKey = `auth:${email.toLowerCase()}:${ip}`;
-  const rateCheck = checkRateLimit(rateKey);
-  if (!rateCheck.allowed) {
-    res.setHeader('Retry-After', rateCheck.retryAfter);
+  const emailLower = String(email).toLowerCase().trim();
+  const ipCheck = checkRateLimit(`authIp:${ip}`, RATE_LIMITS.auth);
+  const emailCheck = checkRateLimit(`authEmail:${emailLower}`, RATE_LIMITS.auth);
+
+  // Report whichever is tightest in headers (least remaining budget)
+  const tightest = ipCheck.remaining < emailCheck.remaining ? ipCheck : emailCheck;
+  res.setHeader('X-RateLimit-Limit', RATE_LIMITS.auth.max);
+  res.setHeader('X-RateLimit-Remaining', Math.max(0, tightest.remaining));
+
+  const failed = !ipCheck.allowed ? ipCheck : !emailCheck.allowed ? emailCheck : null;
+  if (failed) {
+    res.setHeader('Retry-After', failed.retryAfter);
     return res.status(429).json({
-      error: `Too many sign-in attempts. Please try again in ${Math.ceil(rateCheck.retryAfter / 60)} minutes.`
+      error: `Too many sign-in attempts. Please try again in ${Math.ceil(failed.retryAfter / 60)} minutes.`
     });
   }
 
