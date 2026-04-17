@@ -96,6 +96,23 @@ a{text-decoration:none;color:inherit}
 .soon-placeholder svg{width:40px;height:40px;stroke:var(--bd);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:8px}
 .soon-placeholder p{font-size:12px;font-weight:600}
 
+/* Locked overlay */
+.locked-overlay{position:absolute;inset:0;background:rgba(255,255,255,.85);backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;border-radius:16px 16px 0 0}
+.locked-icon{width:48px;height:48px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid var(--bd)}
+.locked-icon svg{width:22px;height:22px;stroke:var(--mt);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.locked-text{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.locked-sub{font-size:11px;color:var(--mt);margin-bottom:10px}
+.upgrade-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--ft);cursor:pointer;border:none;background:linear-gradient(135deg,var(--ac),var(--br));color:#fff;transition:all .15s;display:flex;align-items:center;gap:5px}
+.upgrade-btn:hover{box-shadow:0 4px 12px rgba(124,58,237,.3);transform:scale(1.03)}
+.upgrade-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Access badge on card */
+.access-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;margin-top:8px}
+.access-badge svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.access-included{background:#ECFDF5;color:#059669}
+.access-limit{background:#FEF3C7;color:#D97706}
+.access-locked{background:#FEF2F2;color:#DC2626}
+
 /* Sign in modal */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-bg.open{opacity:1;pointer-events:auto}
@@ -192,6 +209,7 @@ const WIDGETS = [
     demoUrl: '/demo',
     widgetTag: 'pricing',
     scriptFile: 'widget.js',
+    access: { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'reviews',
@@ -205,6 +223,7 @@ const WIDGETS = [
     demoUrl: '/demo-reviews',
     widgetTag: 'reviews',
     scriptFile: 'widget-reviews.js',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'faq',
@@ -214,6 +233,7 @@ const WIDGETS = [
     status: 'coming-soon',
     icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
     color: '#8B5CF6',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'testimonials',
@@ -223,6 +243,7 @@ const WIDGETS = [
     status: 'coming-soon',
     icon: {viewBox:'0 0 24 24', paths:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>'},
     color: '#EC4899',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'countdown',
@@ -232,6 +253,7 @@ const WIDGETS = [
     status: 'coming-soon',
     icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
     color: '#EF4444',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'logo-showcase',
@@ -241,6 +263,7 @@ const WIDGETS = [
     status: 'coming-soon',
     icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'},
     color: '#059669',
+    access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'team',
@@ -250,6 +273,7 @@ const WIDGETS = [
     status: 'coming-soon',
     icon: {viewBox:'0 0 24 24', paths:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>'},
     color: '#3B82F6',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'event-calendar',
@@ -259,12 +283,13 @@ const WIDGETS = [
     status: 'coming-soon',
     icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'},
     color: '#F97316',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
 ];
 
 const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
-let signedIn = sessionStorage.getItem('tgw_user') ? true : false;
-let userEmail = sessionStorage.getItem('tgw_user') || '';
+let signedIn = false;
+let userEmail = '';
 let activeFilter = 'All';
 let myWidgetData = [];
 
@@ -279,10 +304,14 @@ function render() {
 
 function renderNav() {
   const el = document.getElementById('navRight');
-  if (signedIn) {
-    const ini = userEmail.slice(0,2).toUpperCase();
-    el.innerHTML = `<button class="nav-link" onclick="location.href='#catalogue'">Widgets</button>
-      <div class="nav-user" onclick="signOut()"><div class="nav-user-av">${ini}</div>${userEmail.split('@')[0]}</div>`;
+  if (signedIn && userData) {
+    const ini = (userData.clientName || userData.email).slice(0,2).toUpperCase();
+    const display = userData.clientName || userData.email.split('@')[0];
+    const planColors = {Spark:'#0891B2',Boost:'#3B82F6',Ignite:'#7C3AED',Bespoke:'#F59E0B'};
+    const planCol = planColors[userData.plan] || '#6B7280';
+    el.innerHTML = `<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:${planCol}15;color:${planCol}">${userData.plan || 'Free'}</span>
+      <button class="nav-link" onclick="location.href='#catalogue'">Widgets</button>
+      <div class="nav-user" onclick="signOut()"><div class="nav-user-av">${ini}</div>${display}</div>`;
   } else {
     el.innerHTML = `<button class="nav-link" onclick="location.href='#catalogue'">Widgets</button>
       <button class="nav-btn" onclick="openSignIn()"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>Sign In</button>`;
@@ -307,9 +336,9 @@ async function renderMyWidgets() {
   if (!signedIn) { el.classList.remove('show'); return; }
   el.classList.add('show');
 
-  // Fetch from Airtable
+  // Fetch from Airtable, scoped to this user
   try {
-    const r = await fetch('/api/widget-list');
+    const r = await fetch('/api/widget-list?email=' + encodeURIComponent(userEmail));
     if (r.ok) { myWidgetData = await r.json(); }
   } catch(e) { myWidgetData = []; }
 
@@ -344,22 +373,51 @@ function renderFilters() {
 function renderCatalogue() {
   const filtered = activeFilter === 'All' ? WIDGETS : WIDGETS.filter(w => w.category === activeFilter);
   const grid = document.getElementById('catGrid');
+  const plan = getUserPlan();
+
   grid.innerHTML = filtered.map((w, i) => {
     const isLive = w.status === 'live';
-    const soonCls = isLive ? '' : ' soon';
+    const isSoon = w.status === 'coming-soon';
+    const access = signedIn ? getAccess(w) : null;
+    const isLocked = signedIn && access === 0;
+    const minTier = getMinTier(w);
+    const soonCls = isSoon ? ' soon' : '';
+
     let preview = '';
-    if (isLive) {
+    if (isLive && !isLocked) {
       preview = `<div class="w-card-preview"><div class="w-card-preview-inner" id="prev_${w.id}"></div></div>`;
+    } else if (isLive && isLocked) {
+      preview = `<div class="w-card-preview" style="position:relative">
+        <div class="w-card-preview-inner" id="prev_${w.id}" style="filter:blur(3px);opacity:.5"></div>
+        <div class="locked-overlay">
+          <div class="locked-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+          <div class="locked-text">Upgrade to unlock</div>
+          <div class="locked-sub">Available on ${minTier} and above</div>
+          <button class="upgrade-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>Upgrade to ${minTier}</button>
+        </div></div>`;
     } else {
       preview = `<div class="w-card-preview"><span class="soon-badge">Coming Soon</span><div class="soon-placeholder"><svg viewBox="${w.icon.viewBox}">${w.icon.paths}</svg><p>${w.name}</p></div></div>`;
     }
 
-    const actions = isLive
-      ? `<button class="w-card-btn btn-create" onclick="event.stopPropagation();${signedIn?`location.href='${w.editorUrl}'`:`openSignIn()`}"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>${signedIn?'Create Widget':'Sign In to Create'}</button>
-        <button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`
-      : `<button class="w-card-btn btn-soon">Coming Soon</button>`;
+    // Access badge (only when signed in)
+    let accessBadge = '';
+    if (signedIn && w.access) {
+      const al = accessLabel(access);
+      accessBadge = `<div class="access-badge ${al.cls}"><svg viewBox="0 0 24 24">${al.icon}</svg>${al.text}</div>`;
+    }
 
-    return `<div class="w-card${soonCls} fade-up" style="animation-delay:${i*60}ms" ${isLive?`onclick="location.href='${w.demoUrl}'"`:''}>
+    // Actions
+    let actions = '';
+    if (isLive && !isLocked) {
+      actions = `<button class="w-card-btn btn-create" onclick="event.stopPropagation();${signedIn?`location.href='${w.editorUrl}'`:`openSignIn()`}"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>${signedIn?'Create Widget':'Sign In to Create'}</button>
+        <button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`;
+    } else if (isLive && isLocked) {
+      actions = `<button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`;
+    } else {
+      actions = `<button class="w-card-btn btn-soon">Coming Soon</button>`;
+    }
+
+    return `<div class="w-card${soonCls} fade-up" style="animation-delay:${i*60}ms" ${isLive&&!isLocked?`onclick="location.href='${w.demoUrl}'"`:''}>
       ${preview}
       <div class="w-card-body">
         <div class="w-card-head">
@@ -367,7 +425,8 @@ function renderCatalogue() {
           <div><div class="w-card-name">${w.name}</div><div class="w-card-cat">${w.category}</div></div>
         </div>
         <p class="w-card-desc">${w.description}</p>
-        <div class="w-card-actions">${actions}</div>
+        ${accessBadge}
+        <div class="w-card-actions" style="margin-top:${accessBadge?'8':'0'}px">${actions}</div>
       </div>
     </div>`;
   }).join('');
@@ -382,6 +441,29 @@ function setFilter(cat) {
   activeFilter = cat;
   renderFilters();
   renderCatalogue();
+}
+
+/* ═══ ACCESS HELPERS ═══ */
+function getUserPlan() { return userData?.plan || null; }
+function getAccess(widget) {
+  // -1 = unlimited, 0 = locked, positive = max widgets allowed
+  const plan = getUserPlan();
+  if (!plan || !widget.access) return null; // not signed in
+  return widget.access[plan] !== undefined ? widget.access[plan] : 0;
+}
+function getMinTier(widget) {
+  // Returns the minimum tier name that unlocks this widget
+  if (!widget.access) return 'Boost';
+  const order = ['Spark','Boost','Ignite'];
+  for (const tier of order) {
+    if (widget.access[tier] && widget.access[tier] !== 0) return tier;
+  }
+  return 'Ignite';
+}
+function accessLabel(limit) {
+  if (limit === -1) return { text: 'Unlimited', cls: 'access-included', icon: '<polyline points="20 6 9 17 4 12"/>' };
+  if (limit > 0) return { text: `Up to ${limit} widget${limit>1?'s':''}`, cls: 'access-limit', icon: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' };
+  return { text: 'Not included', cls: 'access-locked', icon: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>' };
 }
 
 /* ═══ MINI PREVIEWS ═══ */
@@ -418,18 +500,40 @@ function loadMiniPreview(w) {
 }
 
 /* ═══ AUTH ═══ */
+let userData = null;
+try { userData = JSON.parse(sessionStorage.getItem('tgw_session')); signedIn = !!userData; userEmail = userData?.email || ''; } catch(e) {}
+
 function openSignIn(){document.getElementById('signInModal').classList.add('open');document.getElementById('signEmail').focus()}
 function closeSignIn(){document.getElementById('signInModal').classList.remove('open');document.getElementById('signErr').style.display='none'}
-function doSignIn(){
+
+async function doSignIn(){
   const email=document.getElementById('signEmail').value.trim();
   const code=document.getElementById('signCode').value.trim();
-  if(!email||!code){document.getElementById('signErr').textContent='Please enter email and client code';document.getElementById('signErr').style.display='block';return}
-  // For now, accept any non-empty credentials
-  sessionStorage.setItem('tgw_user',email);
-  signedIn=true;userEmail=email;
-  closeSignIn();render();
+  const errEl=document.getElementById('signErr');
+  errEl.style.display='none';
+  if(!email||!code){errEl.textContent='Please enter email and client code';errEl.style.display='block';return}
+  
+  try {
+    const r = await fetch('/api/widget-auth', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, code })
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error || 'Sign in failed'; errEl.style.display='block'; return; }
+    
+    userData = d.user;
+    sessionStorage.setItem('tgw_session', JSON.stringify(d.user));
+    signedIn = true;
+    userEmail = d.user.email;
+    closeSignIn();
+    render();
+  } catch(e) {
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.style.display='block';
+  }
 }
-function signOut(){sessionStorage.removeItem('tgw_user');signedIn=false;userEmail='';myWidgetData=[];render()}
+
+function signOut(){sessionStorage.removeItem('tgw_session');signedIn=false;userEmail='';userData=null;myWidgetData=[];render()}
 
 /* ═══ UTILS ═══ */
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
