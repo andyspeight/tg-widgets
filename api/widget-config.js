@@ -262,6 +262,53 @@ export default async function handler(req, res) {
       });
     }
 
+    // ── DELETE: Authenticated — remove a widget ─────────────
+    if (req.method === 'DELETE') {
+      // Require valid session
+      const auth = requireAuth(req);
+      if (auth.error) return res.status(auth.status).json({ error: auth.error });
+      const user = auth.user;
+
+      // Rate limit (per-user, same preset as POST writes)
+      if (!applyRateLimit(res, `delete:${user.email}`, RATE_LIMITS.widgetWrite)) return;
+
+      // Parse widgetId from query string (DELETE convention)
+      const widgetId = req.query.id;
+      if (!widgetId || typeof widgetId !== 'string' || widgetId.length > 100) {
+        return res.status(400).json({ error: 'Invalid or missing widget ID' });
+      }
+
+      // Look up the record
+      const safeWid = sanitiseForFormula(widgetId);
+      const formula = encodeURIComponent(`{WidgetID} = '${safeWid}'`);
+      const searchUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
+      const searchResp = await fetch(searchUrl, { headers });
+      if (!searchResp.ok) throw new Error('Lookup failed');
+      const searchData = await searchResp.json();
+
+      if (!searchData.records || searchData.records.length === 0) {
+        // Idempotent: treat "already gone" as success so retries are safe
+        return res.status(200).json({ success: true, alreadyGone: true });
+      }
+
+      const record = searchData.records[0];
+
+      // Verify ownership — fail closed if email is missing or doesn't match.
+      // Same pattern as the UPDATE path; prevents cross-account deletes.
+      const widgetEmail = (record.fields.ClientEmail || '').toLowerCase().trim();
+      const userEmail = (user.email || '').toLowerCase().trim();
+      if (!widgetEmail || !userEmail || widgetEmail !== userEmail) {
+        return res.status(403).json({ error: 'You do not have permission to delete this widget' });
+      }
+
+      // Delete from Airtable
+      const deleteUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}/${record.id}`;
+      const deleteResp = await fetch(deleteUrl, { method: 'DELETE', headers });
+      if (!deleteResp.ok) throw new Error('Delete failed');
+
+      return res.status(200).json({ success: true, widgetId, recordId: record.id });
+    }
+
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
     console.error('[widget-config]', err.message);
