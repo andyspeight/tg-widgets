@@ -1415,17 +1415,21 @@
         <div class="toggle-row">
           <div class="toggle-row-main">
             <div class="toggle-row-label">Show header</div>
-            <div class="toggle-row-hint">Title + subtitle above the list</div>
+            <div class="toggle-row-hint">Eyebrow, title, and subtitle above the testimonials</div>
           </div>
-          <button class="toggle" role="switch" data-toggle="heading.show" aria-pressed="${!!c.heading.show}"></button>
+          <button class="toggle" role="switch" data-toggle="header.show" aria-pressed="${!!c.header.show}"></button>
+        </div>
+        <div class="field">
+          <label class="field-label">Eyebrow <span class="field-hint">Small label above title</span></label>
+          <input class="input" data-set="header.eyebrow" value="${esc(c.header.eyebrow || '')}" placeholder="Testimonials">
         </div>
         <div class="field">
           <label class="field-label">Title</label>
-          <input class="input" data-set="heading.title" value="${esc(c.heading.title || '')}" placeholder="Frequently asked questions">
+          <input class="input" data-set="header.title" value="${esc(c.header.title || '')}" placeholder="Loved by travellers">
         </div>
         <div class="field">
           <label class="field-label">Subtitle</label>
-          <textarea class="textarea" data-set="heading.subtitle" placeholder="A short description...">${esc(c.heading.subtitle || '')}</textarea>
+          <textarea class="textarea" data-set="header.subtitle" placeholder="A short description...">${esc(c.header.subtitle || '')}</textarea>
         </div>
       `;
 
@@ -1442,79 +1446,26 @@
     function renderContentTab() {
       const c = state.config;
 
-      // Questions section
-      const qsBody = `
+      // Testimonials section
+      const tsBody = `
         <div class="row-wrap" style="margin-bottom:10px">
-          <button class="btn btn-sm btn-primary" data-add-question>${icn('plus', 14)}Add question</button>
+          <button class="btn btn-sm btn-primary" data-add-testimonial>${icn('plus', 14)}Add testimonial</button>
           <button class="btn btn-sm" data-open-ai>${icn('sparkle', 14)}AI generate</button>
           <button class="btn btn-sm" data-open-templates>${icn('build', 14)}Template</button>
         </div>
         <div class="field">
           <div class="row">
-            <input class="input" id="q-filter" placeholder="Filter questions…" style="flex:1">
-            <span class="text-sub mono" style="font-size:11px">${c.questions.length}</span>
+            <input class="input" id="t-filter" placeholder="Filter testimonials…" style="flex:1">
+            <span class="text-sub mono" style="font-size:11px">${c.testimonials.length}</span>
           </div>
         </div>
-        <div class="q-list" id="q-list">${renderQList(c.questions)}</div>
-        ${c.questions.length === 0 ? '<p class="text-muted" style="padding:16px 0;text-align:center;font-size:13px;">No questions yet — add one, generate with AI, or use a template.</p>' : ''}
-      `;
-
-      // Categories section
-      const catsBody = `
-        <p class="field-hint" style="margin-bottom:10px">Group questions into categories. Categories appear as tabs or chips depending on layout.</p>
-        <div class="cat-list">${c.categories.map(cat => `
-          <span class="cat-chip" data-cat-id="${esc(cat.id)}">
-            ${esc(cat.label)}
-            <button type="button" data-del-cat="${esc(cat.id)}" aria-label="Remove category">${icn('x', 12)}</button>
-          </span>
-        `).join('') || '<span class="text-muted" style="font-size:12px">No categories yet</span>'}</div>
-        <div class="row">
-          <input class="input" id="new-cat-label" placeholder="Category name (e.g. Booking)" style="flex:1">
-          <select class="select" id="new-cat-icon" style="width:130px">
-            ${['help','calendar','credit-card','plane','luggage','shield','heart','globe','info','clock','users','star','sparkles'].map(i => `<option value="${i}">${i}</option>`).join('')}
-          </select>
-          <button class="btn btn-sm btn-primary" data-add-cat>${icn('plus', 14)}Add</button>
-        </div>
-      `;
-
-      // CTA section
-      const ctaBody = `
-        <div class="toggle-row">
-          <div class="toggle-row-main">
-            <div class="toggle-row-label">Show CTA</div>
-            <div class="toggle-row-hint">"Still got a question?" block below the list</div>
-          </div>
-          <button class="toggle" role="switch" data-toggle="cta.enabled" aria-pressed="${!!c.cta.enabled}"></button>
-        </div>
-        <div class="field">
-          <label class="field-label">Style</label>
-          <div class="btn-group">
-            <button data-set-cta-style="card"     aria-pressed="${c.cta.style === 'card'}">Card</button>
-            <button data-set-cta-style="strip"    aria-pressed="${c.cta.style === 'strip'}">Strip</button>
-            <button data-set-cta-style="gradient" aria-pressed="${c.cta.style === 'gradient'}">Gradient</button>
-          </div>
-        </div>
-        <div class="field">
-          <label class="field-label">Heading</label>
-          <input class="input" data-set="cta.heading" value="${esc(c.cta.heading)}">
-        </div>
-        <div class="field">
-          <label class="field-label">Description</label>
-          <textarea class="textarea" data-set="cta.description">${esc(c.cta.description)}</textarea>
-        </div>
-        <div class="field">
-          <label class="field-label">Button text</label>
-          <input class="input" data-set="cta.buttonText" value="${esc(c.cta.buttonText)}">
-        </div>
-        <div class="field">
-          <label class="field-label">Button URL <span class="field-hint">email:, tel:, #anchor, or full URL</span></label>
-          <input class="input" data-set="cta.buttonUrl" value="${esc(c.cta.buttonUrl)}">
-        </div>
+        <div class="q-list" id="q-list">${renderTestimonialList(c.testimonials)}</div>
+        ${c.testimonials.length === 0 ? '<p class="text-muted" style="padding:16px 0;text-align:center;font-size:13px;">No testimonials yet — add one, generate with AI, or use a template.</p>' : ''}
       `;
 
       // Import/export
       const importBody = `
-        <p class="field-hint" style="margin-bottom:10px">CSV columns: Question, Answer, Category, Popular, Pinned, Order</p>
+        <p class="field-hint" style="margin-bottom:10px">CSV columns: Quote, Author, Role, Location, Avatar URL, Rating, Destination, Trip Type, Travel Date, Source, Verified, Video URL, Featured</p>
         <div class="row-wrap">
           <button class="btn btn-sm" data-download-template>${icn('download', 14)}Download template</button>
           <button class="btn btn-sm" data-download-csv>${icn('download', 14)}Export current</button>
@@ -1526,38 +1477,52 @@
       `;
 
       return `
-        ${section('qs',     `Questions <span class="section-desc">${c.questions.length}</span>`, qsBody)}
-        ${section('cats',   'Categories', catsBody)}
-        ${section('cta',    'Call to action', ctaBody)}
+        ${section('ts',     `Testimonials <span class="section-desc">${c.testimonials.length}</span>`, tsBody)}
         ${section('import', 'Import / export', importBody)}
       `;
     }
 
-    function renderQList(questions) {
-      return questions.map((q, i) => `
-        <div class="q-item" draggable="true" data-qid="${esc(q.id)}" data-idx="${i}">
+    function renderTestimonialList(testimonials) {
+      return testimonials.map((t, i) => {
+        // Build meta line: destination · trip type · date · source
+        const metaParts = [];
+        if (t.destination) metaParts.push(esc(t.destination));
+        if (t.tripType)    metaParts.push(esc(t.tripType));
+        if (t.travelDate)  metaParts.push(esc(t.travelDate));
+        if (t.source)      metaParts.push(esc(t.source));
+        const metaLine = metaParts.length
+          ? metaParts.join(' · ')
+          : '<span class="text-muted">No context set</span>';
+
+        // Badges: featured, verified, video, hidden
+        const badges = [];
+        if (t.featured) badges.push('<span class="q-badge pinned">Featured</span>');
+        if (t.verified) badges.push('<span class="q-badge popular">Verified</span>');
+        if (t.video)    badges.push('<span class="q-badge popular">Video</span>');
+        if (t.hidden)   badges.push('<span class="q-badge hidden">Hidden</span>');
+
+        const previewQuote = (t.quote || '').replace(/\s+/g, ' ').trim();
+        const quoteShort = previewQuote.length > 90 ? previewQuote.slice(0, 90) + '…' : previewQuote;
+
+        return `
+        <div class="q-item" draggable="true" data-qid="${esc(t.id)}" data-idx="${i}">
           <span class="q-drag" aria-hidden="true">${icn('drag', 12)}</span>
           <div class="q-text">
-            <div class="q-title">${esc(q.question || 'Untitled question')}</div>
-            <div class="q-meta">
-              ${q.category ? `<span>${esc(getCatLabel(q.category))}</span>` : '<span class="text-muted">No category</span>'}
-              ${q.pinned ? '<span class="q-badge pinned">Pinned</span>' : ''}
-              ${q.popular ? '<span class="q-badge popular">Popular</span>' : ''}
-              ${q.hidden ? '<span class="q-badge hidden">Hidden</span>' : ''}
+            <div class="q-title">${esc(t.author || 'Untitled testimonial')}</div>
+            <div class="q-meta" style="gap:6px;flex-wrap:wrap">
+              <span>${metaLine}</span>
+              ${badges.join('')}
             </div>
+            ${quoteShort ? `<div class="q-meta" style="margin-top:4px;font-style:italic;color:var(--sub)">"${esc(quoteShort)}"</div>` : ''}
           </div>
           <div class="q-actions">
-            <button class="btn btn-xs" data-edit-q="${esc(q.id)}" title="Edit">${icn('pencil', 12)}</button>
-            <button class="btn btn-xs" data-toggle-q="pinned" data-qid="${esc(q.id)}" title="${q.pinned ? 'Unpin' : 'Pin'}">${icn('pin', 12)}</button>
-            <button class="btn btn-xs" data-toggle-q="hidden" data-qid="${esc(q.id)}" title="${q.hidden ? 'Show' : 'Hide'}">${icn(q.hidden ? 'eyeOff' : 'eye', 12)}</button>
-            <button class="btn btn-xs btn-danger" data-del-q="${esc(q.id)}" title="Delete">${icn('trash', 12)}</button>
+            <button class="btn btn-xs" data-edit-q="${esc(t.id)}" title="Edit">${icn('pencil', 12)}</button>
+            <button class="btn btn-xs" data-toggle-q="featured" data-qid="${esc(t.id)}" title="${t.featured ? 'Unfeature' : 'Feature'}">${icn('pin', 12)}</button>
+            <button class="btn btn-xs" data-toggle-q="hidden" data-qid="${esc(t.id)}" title="${t.hidden ? 'Show' : 'Hide'}">${icn(t.hidden ? 'eyeOff' : 'eye', 12)}</button>
+            <button class="btn btn-xs btn-danger" data-del-q="${esc(t.id)}" title="Delete">${icn('trash', 12)}</button>
           </div>
-        </div>
-      `).join('');
-    }
-    function getCatLabel(id) {
-      const c = state.config.categories.find(x => x.id === id);
-      return c ? c.label : id;
+        </div>`;
+      }).join('');
     }
 
     /* =========================== SETTINGS TAB =========================== */
@@ -1567,77 +1532,123 @@
       const displayBody = `
         <div class="toggle-row">
           <div class="toggle-row-main">
-            <div class="toggle-row-label">Search bar</div>
-            <div class="toggle-row-hint">Shown in accordion / two-column layouts</div>
+            <div class="toggle-row-label">Star rating</div>
+            <div class="toggle-row-hint">Show star rating when provided</div>
           </div>
-          <button class="toggle" role="switch" data-toggle="search.enabled" aria-pressed="${!!c.search.enabled}"></button>
+          <button class="toggle" role="switch" data-toggle="showRating" aria-pressed="${c.showRating !== false}"></button>
         </div>
-        <div class="field">
-          <label class="field-label">Search placeholder</label>
-          <input class="input" data-set="search.placeholder" value="${esc(c.search.placeholder)}">
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Source badge</div>
+            <div class="toggle-row-hint">Google / Facebook / Trustpilot / TripAdvisor logo</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showSource" aria-pressed="${c.showSource !== false}"></button>
         </div>
-        <div class="field">
-          <label class="field-label">No-results text</label>
-          <input class="input" data-set="search.noResultsText" value="${esc(c.search.noResultsText)}">
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Destination badge</div>
+            <div class="toggle-row-hint">e.g. "Maldives"</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showDestination" aria-pressed="${c.showDestination !== false}"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Trip type badge</div>
+            <div class="toggle-row-hint">e.g. "Honeymoon", "Family"</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showTripType" aria-pressed="${c.showTripType !== false}"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Travel date badge</div>
+            <div class="toggle-row-hint">e.g. "March 2024"</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showTravelDate" aria-pressed="${c.showTravelDate !== false}"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Video testimonials</div>
+            <div class="toggle-row-hint">Show play overlay on testimonials with video URL</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showVideo" aria-pressed="${c.showVideo !== false}"></button>
         </div>
         <div class="divider"></div>
         <div class="toggle-row">
           <div class="toggle-row-main">
-            <div class="toggle-row-label">Icons on questions</div>
-            <div class="toggle-row-hint">Show category icon next to each question</div>
+            <div class="toggle-row-label">Filter by trip type</div>
+            <div class="toggle-row-hint">Chip filter above the list (Grid / Masonry only)</div>
           </div>
-          <button class="toggle" role="switch" data-toggle="showIcons" aria-pressed="${c.showIcons !== false}"></button>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-row-main">
-            <div class="toggle-row-label">Expand/collapse all button</div>
-            <div class="toggle-row-hint">Shown above the list</div>
-          </div>
-          <button class="toggle" role="switch" data-toggle="showExpandAll" aria-pressed="${!!c.showExpandAll}"></button>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-row-main">
-            <div class="toggle-row-label">Last-updated timestamps</div>
-            <div class="toggle-row-hint">Shown under each answer when set</div>
-          </div>
-          <button class="toggle" role="switch" data-toggle="showUpdated" aria-pressed="${!!c.showUpdated}"></button>
+          <button class="toggle" role="switch" data-toggle="showFilters" aria-pressed="${!!c.showFilters}"></button>
         </div>
       `;
 
-      const behaveBody = `
-        <div class="field">
-          <label class="field-label">Expand behaviour</label>
-          <div class="btn-group">
-            <button data-set-behaviour="single"   aria-pressed="${c.expandBehavior === 'single'}">One at a time</button>
-            <button data-set-behaviour="multiple" aria-pressed="${c.expandBehavior === 'multiple'}">Multiple open</button>
+      // Layout-specific settings
+      const layoutBody = `
+        ${c.layout === 'grid' ? `
+          <div class="field">
+            <label class="field-label">Columns</label>
+            <div class="btn-group">
+              <button data-set-grid-cols="2" aria-pressed="${c.gridCols === 2}">2 columns</button>
+              <button data-set-grid-cols="3" aria-pressed="${c.gridCols === 3}">3 columns</button>
+            </div>
+            <p class="field-hint" style="margin-top:6px">Reflows to 1 column on mobile automatically.</p>
           </div>
-          <p class="field-hint" style="margin-top:6px">"One at a time" closes the previous question when a new one opens.</p>
-        </div>
-        <div class="field">
-          <label class="field-label">Default open question</label>
-          <select class="select" data-set="defaultOpen">
-            <option value="-1" ${c.defaultOpen === -1 ? 'selected' : ''}>None (all closed)</option>
-            ${state.config.questions.map((q, i) => `<option value="${i}" ${c.defaultOpen === i ? 'selected' : ''}>${esc(q.question).slice(0, 60)}</option>`).join('')}
-          </select>
-        </div>
-      `;
-
-      const seoBody = `
-        <div class="toggle-row">
-          <div class="toggle-row-main">
-            <div class="toggle-row-label">FAQPage schema (JSON-LD)</div>
-            <div class="toggle-row-hint">Injects structured data so your FAQs are eligible for Google rich results</div>
+        ` : ''}
+        ${c.layout === 'carousel' ? `
+          <div class="toggle-row">
+            <div class="toggle-row-main">
+              <div class="toggle-row-label">Autoplay</div>
+              <div class="toggle-row-hint">Advances automatically (respects prefers-reduced-motion)</div>
+            </div>
+            <button class="toggle" role="switch" data-toggle="carousel.autoplay" aria-pressed="${!!c.carousel.autoplay}"></button>
           </div>
-          <button class="toggle" role="switch" data-toggle="seo.enableSchema" aria-pressed="${!!c.seo.enableSchema}"></button>
-        </div>
-        <div style="padding:10px;background:var(--panel-2);border-radius:8px;margin-top:8px">
-          <div style="font-size:12px;font-weight:600;margin-bottom:4px">${icn('sparkle', 12)} Why enable this?</div>
-          <p class="field-hint" style="margin:0">Google reads this markup to show your FAQs as expandable panels directly in search results. Boosts clicks, no downside unless you don't want the schema in your HTML.</p>
-        </div>
+          <div class="field">
+            <label class="field-label">Autoplay interval <span class="field-hint">${(c.carousel.interval / 1000).toFixed(1)}s</span></label>
+            <div class="slider-row">
+              <input type="range" class="slider-input" data-slider="carousel.interval" min="2000" max="12000" step="500" value="${c.carousel.interval}">
+              <span class="slider-val">${(c.carousel.interval / 1000).toFixed(1)}s</span>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-row-main">
+              <div class="toggle-row-label">Dots</div>
+              <div class="toggle-row-hint">Navigation dots below the slider</div>
+            </div>
+            <button class="toggle" role="switch" data-toggle="carousel.dots" aria-pressed="${c.carousel.dots !== false}"></button>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-row-main">
+              <div class="toggle-row-label">Arrows</div>
+              <div class="toggle-row-hint">Prev / next arrow buttons</div>
+            </div>
+            <button class="toggle" role="switch" data-toggle="carousel.arrows" aria-pressed="${c.carousel.arrows !== false}"></button>
+          </div>
+        ` : ''}
+        ${c.layout === 'marquee' ? `
+          <div class="field">
+            <label class="field-label">Scroll speed <span class="field-hint">${c.marquee.speed}px/s</span></label>
+            <div class="slider-row">
+              <input type="range" class="slider-input" data-slider="marquee.speed" min="15" max="100" step="5" value="${c.marquee.speed}">
+              <span class="slider-val">${c.marquee.speed}</span>
+            </div>
+            <p class="field-hint" style="margin-top:6px">Higher is faster. Visitors can pause by hovering.</p>
+          </div>
+          <div class="field">
+            <label class="field-label">Rows</label>
+            <div class="btn-group">
+              <button data-set-marquee-rows="1" aria-pressed="${c.marquee.rows === 1}">1 row</button>
+              <button data-set-marquee-rows="2" aria-pressed="${c.marquee.rows === 2}">2 rows</button>
+            </div>
+            <p class="field-hint" style="margin-top:6px">Two rows scroll in opposite directions — classic social-proof strip.</p>
+          </div>
+        ` : ''}
+        ${(c.layout !== 'grid' && c.layout !== 'carousel' && c.layout !== 'marquee') ? `
+          <p class="text-muted" style="font-size:13px;text-align:center;padding:16px 0">No layout-specific settings for "${esc(c.layout)}".</p>
+        ` : ''}
       `;
 
       const embedBody = `
-        <p class="field-hint" style="margin-bottom:10px">${state.widgetId ? 'Paste this into any HTML page to embed your FAQ.' : 'Save the widget first to get your embed code.'}</p>
+        <p class="field-hint" style="margin-bottom:10px">${state.widgetId ? 'Paste this into any HTML page to embed your testimonials.' : 'Save the widget first to get your embed code.'}</p>
         ${state.widgetId ? `
           <div class="code-block">&lt;div data-tg-widget="testimonials" data-tg-id="${esc(state.widgetId)}"&gt;&lt;/div&gt;
 &lt;script src="https://tg-widgets.vercel.app/widget-testimonials.js"&gt;&lt;/script&gt;</div>
@@ -1647,8 +1658,7 @@
 
       return `
         ${section('display',   'Display options',  displayBody)}
-        ${section('behaviour', 'Behaviour',        behaveBody)}
-        ${section('seo',       'SEO',              seoBody)}
+        ${section('layoutopt', 'Layout options',   layoutBody)}
         ${section('embed',     'Embed code',       embedBody)}
       `;
     }
@@ -1743,71 +1753,55 @@
         renderTabBody();
       }));
 
-      // CTA style
-      $$('[data-set-cta-style]', body).forEach(el => el.addEventListener('click', () => {
-        mutate(cfg => { cfg.cta.style = el.dataset.setCtaStyle; });
-        $$('[data-set-cta-style]', body).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.setCtaStyle === state.config.cta.style)));
+      // Grid column selector (Settings tab, Layout options)
+      $$('[data-set-grid-cols]', body).forEach(el => el.addEventListener('click', () => {
+        const n = parseInt(el.dataset.setGridCols, 10);
+        if (!(n === 2 || n === 3)) return;
+        mutate(cfg => { cfg.gridCols = n; });
+        $$('[data-set-grid-cols]', body).forEach(b => b.setAttribute('aria-pressed', String(parseInt(b.dataset.setGridCols, 10) === state.config.gridCols)));
       }));
 
-      // Behaviour
-      $$('[data-set-behaviour]', body).forEach(el => el.addEventListener('click', () => {
-        mutate(cfg => { cfg.expandBehavior = el.dataset.setBehaviour; });
-        $$('[data-set-behaviour]', body).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.setBehaviour === state.config.expandBehavior)));
+      // Marquee rows selector
+      $$('[data-set-marquee-rows]', body).forEach(el => el.addEventListener('click', () => {
+        const n = parseInt(el.dataset.setMarqueeRows, 10);
+        if (!(n === 1 || n === 2)) return;
+        mutate(cfg => { cfg.marquee.rows = n; });
+        $$('[data-set-marquee-rows]', body).forEach(b => b.setAttribute('aria-pressed', String(parseInt(b.dataset.setMarqueeRows, 10) === state.config.marquee.rows)));
       }));
 
-      // Question actions
-      $$('[data-add-question]', body).forEach(el => el.addEventListener('click', () => openQuestionEditor(null)));
-      $$('[data-edit-q]', body).forEach(el => el.addEventListener('click', () => openQuestionEditor(el.dataset.editQ)));
+      // Testimonial actions
+      $$('[data-add-testimonial]', body).forEach(el => el.addEventListener('click', () => openTestimonialEditor(null)));
+      $$('[data-edit-q]', body).forEach(el => el.addEventListener('click', () => openTestimonialEditor(el.dataset.editQ)));
       $$('[data-del-q]', body).forEach(el => el.addEventListener('click', () => {
-        if (!confirm('Delete this question?')) return;
-        mutate(cfg => { cfg.questions = cfg.questions.filter(q => q.id !== el.dataset.delQ); });
+        if (!confirm('Delete this testimonial?')) return;
+        mutate(cfg => { cfg.testimonials = cfg.testimonials.filter(t => t.id !== el.dataset.delQ); });
         renderTabBody();
       }));
       $$('[data-toggle-q]', body).forEach(el => el.addEventListener('click', () => {
-        const key = el.dataset.toggleQ, qid = el.dataset.qid;
+        const key = el.dataset.toggleQ, tid = el.dataset.qid;
         mutate(cfg => {
-          const q = cfg.questions.find(x => x.id === qid); if (!q) return;
-          q[key] = !q[key];
+          const t = cfg.testimonials.find(x => x.id === tid); if (!t) return;
+          t[key] = !t[key];
         });
         renderTabBody();
       }));
 
-      // Question filter
-      const qFilter = $('#q-filter');
-      if (qFilter) {
-        qFilter.addEventListener('input', debounce(() => {
-          const term = qFilter.value.trim().toLowerCase();
+      // Testimonial filter
+      const tFilter = $('#t-filter');
+      if (tFilter) {
+        tFilter.addEventListener('input', debounce(() => {
+          const term = tFilter.value.trim().toLowerCase();
           const list = $('#q-list'); if (!list) return;
           const filtered = term
-            ? state.config.questions.filter(q => (q.question + ' ' + (q.answer || '')).toLowerCase().includes(term))
-            : state.config.questions;
-          list.innerHTML = renderQList(filtered);
+            ? state.config.testimonials.filter(t => (t.quote + ' ' + (t.author || '') + ' ' + (t.destination || '') + ' ' + (t.tripType || '')).toLowerCase().includes(term))
+            : state.config.testimonials;
+          list.innerHTML = renderTestimonialList(filtered);
           bindTabHandlers();
         }, 120));
       }
 
       // Drag to reorder
       bindDragReorder(body);
-
-      // Categories
-      $$('[data-add-cat]', body).forEach(el => el.addEventListener('click', () => {
-        const label = ($('#new-cat-label')?.value || '').trim();
-        const iconSel = ($('#new-cat-icon')?.value || 'help');
-        if (!label) return;
-        const id = slugify(label) || ('cat-' + Date.now().toString(36));
-        if (state.config.categories.some(c => c.id === id)) { showToast('A category with that name already exists', 'error'); return; }
-        mutate(cfg => { cfg.categories.push({ id, label, icon: iconSel }); });
-        renderTabBody();
-      }));
-      $$('[data-del-cat]', body).forEach(el => el.addEventListener('click', () => {
-        const id = el.dataset.delCat;
-        if (!confirm(`Delete category "${getCatLabel(id)}"? Questions in this category will be un-categorised.`)) return;
-        mutate(cfg => {
-          cfg.categories = cfg.categories.filter(c => c.id !== id);
-          cfg.questions.forEach(q => { if (q.category === id) q.category = ''; });
-        });
-        renderTabBody();
-      }));
 
       // AI / Templates
       $$('[data-open-ai]', body).forEach(el => el.addEventListener('click', openAIModal));
@@ -1866,104 +1860,163 @@
         const targetId = over.dataset.qid;
         if (targetId === state.dragId) return;
         mutate(cfg => {
-          const from = cfg.questions.findIndex(q => q.id === state.dragId);
-          const to = cfg.questions.findIndex(q => q.id === targetId);
+          const from = cfg.testimonials.findIndex(t => t.id === state.dragId);
+          const to = cfg.testimonials.findIndex(t => t.id === targetId);
           if (from < 0 || to < 0) return;
-          const [moved] = cfg.questions.splice(from, 1);
-          cfg.questions.splice(to, 0, moved);
+          const [moved] = cfg.testimonials.splice(from, 1);
+          cfg.testimonials.splice(to, 0, moved);
         });
         renderTabBody();
       });
     }
 
-    /* ============================ QUESTION EDITOR ============================ */
-    function openQuestionEditor(qid) {
+    /* ============================ TESTIMONIAL EDITOR ============================ */
+    function openTestimonialEditor(tid) {
       const c = state.config;
-      const q = qid ? c.questions.find(x => x.id === qid) : null;
-      const isNew = !q;
-      const model = q ? deepClone(q) : { id: uid('q'), question: '', answer: '', category: '', popular: false, pinned: false, hidden: false, updatedAt: '' };
+      const t = tid ? c.testimonials.find(x => x.id === tid) : null;
+      const isNew = !t;
+      const model = t ? deepClone(t) : {
+        id: uid('t'), quote: '', author: '', role: '', location: '', avatar: '',
+        rating: 0, destination: '', tripType: '', travelDate: '',
+        source: '', verified: false, video: '', featured: false, hidden: false
+      };
+
+      const tripPresets = ['Honeymoon','Family','Solo','Couples','Anniversary','Luxury','Adventure','Cruise','Group','Business'];
+      const sourceOptions = ['', 'Google', 'Facebook', 'Trustpilot', 'TripAdvisor', 'Direct'];
 
       openModal({
-        title: isNew ? 'New question' : 'Edit question',
+        title: isNew ? 'New testimonial' : 'Edit testimonial',
         large: true,
         body: `
           <div class="field">
-            <label class="field-label">Question</label>
-            <input class="input" id="qe-question" value="${esc(model.question)}" placeholder="e.g. How do I book a holiday?" maxlength="300">
+            <label class="field-label">Quote <span class="field-hint">The star of the show — keep it specific and emotional</span></label>
+            <textarea class="textarea" id="te-quote" style="min-height:120px" placeholder="e.g. The most magical 10 days of our lives. Every detail was handled..." maxlength="800">${esc(model.quote)}</textarea>
           </div>
-          <div class="field">
-            <label class="field-label">Answer <span class="field-hint">Markdown supported: **bold**, *italic*, [links](url), - bullets</span></label>
-            <textarea class="textarea" id="qe-answer" style="min-height:160px" placeholder="Write a clear, helpful answer...">${esc(model.answer)}</textarea>
+          <div class="row-wrap">
+            <div class="field" style="flex:1;min-width:180px;margin-bottom:0">
+              <label class="field-label">Author <span class="field-hint">Required</span></label>
+              <input class="input" id="te-author" value="${esc(model.author)}" placeholder="e.g. Sarah Thompson" maxlength="100">
+            </div>
+            <div class="field" style="flex:1;min-width:140px;margin-bottom:0">
+              <label class="field-label">Rating</label>
+              <select class="select" id="te-rating">
+                <option value="0" ${model.rating === 0 ? 'selected' : ''}>— none —</option>
+                <option value="1" ${model.rating === 1 ? 'selected' : ''}>★</option>
+                <option value="2" ${model.rating === 2 ? 'selected' : ''}>★★</option>
+                <option value="3" ${model.rating === 3 ? 'selected' : ''}>★★★</option>
+                <option value="4" ${model.rating === 4 ? 'selected' : ''}>★★★★</option>
+                <option value="5" ${model.rating === 5 ? 'selected' : ''}>★★★★★</option>
+              </select>
+            </div>
           </div>
           <div class="row-wrap">
             <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
-              <label class="field-label">Category</label>
-              <select class="select" id="qe-cat">
-                <option value="">— none —</option>
-                ${c.categories.map(cat => `<option value="${esc(cat.id)}" ${cat.id === model.category ? 'selected' : ''}>${esc(cat.label)}</option>`).join('')}
-              </select>
+              <label class="field-label">Role <span class="field-hint">optional</span></label>
+              <input class="input" id="te-role" value="${esc(model.role)}" placeholder="e.g. Honeymoon couple" maxlength="80">
+            </div>
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Location <span class="field-hint">optional</span></label>
+              <input class="input" id="te-location" value="${esc(model.location)}" placeholder="e.g. Manchester, UK" maxlength="80">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Avatar URL <span class="field-hint">optional — initials shown if blank</span></label>
+            <input class="input" id="te-avatar" value="${esc(model.avatar)}" placeholder="https://..." maxlength="500">
+          </div>
+          <div class="divider"></div>
+          <div class="row-wrap">
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Destination</label>
+              <input class="input" id="te-destination" value="${esc(model.destination)}" placeholder="e.g. Maldives" maxlength="60">
+            </div>
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Trip type</label>
+              <input class="input" id="te-trip-type" list="tripTypeList" value="${esc(model.tripType)}" placeholder="e.g. Honeymoon" maxlength="40">
+              <datalist id="tripTypeList">
+                ${tripPresets.map(p => `<option value="${esc(p)}">`).join('')}
+              </datalist>
             </div>
             <div class="field" style="flex:1;min-width:140px;margin-bottom:0">
-              <label class="field-label">Last updated</label>
-              <input class="input" id="qe-updated" type="date" value="${esc(model.updatedAt)}">
+              <label class="field-label">Travel date</label>
+              <input class="input" id="te-travel-date" value="${esc(model.travelDate)}" placeholder="e.g. March 2024" maxlength="40">
+            </div>
+          </div>
+          <div class="row-wrap">
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Source</label>
+              <select class="select" id="te-source">
+                ${sourceOptions.map(s => `<option value="${esc(s)}" ${s === (model.source || '') ? 'selected' : ''}>${s || '— none —'}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Video URL <span class="field-hint">YouTube, Vimeo, or MP4</span></label>
+              <input class="input" id="te-video" value="${esc(model.video)}" placeholder="https://..." maxlength="500">
             </div>
           </div>
           <div class="divider"></div>
           <div class="stack">
             <div class="toggle-row">
               <div class="toggle-row-main">
-                <div class="toggle-row-label">Popular</div>
-                <div class="toggle-row-hint">Shows a "Popular" badge and floats up</div>
+                <div class="toggle-row-label">Verified</div>
+                <div class="toggle-row-hint">Shows a green tick next to the author name</div>
               </div>
-              <button class="toggle" role="switch" id="qe-popular" aria-pressed="${!!model.popular}"></button>
+              <button class="toggle" role="switch" id="te-verified" aria-pressed="${!!model.verified}"></button>
             </div>
             <div class="toggle-row">
               <div class="toggle-row-main">
-                <div class="toggle-row-label">Pinned</div>
-                <div class="toggle-row-hint">Always at the top, above popular items</div>
+                <div class="toggle-row-label">Featured</div>
+                <div class="toggle-row-hint">Floats to the top in Grid / Masonry layouts</div>
               </div>
-              <button class="toggle" role="switch" id="qe-pinned" aria-pressed="${!!model.pinned}"></button>
+              <button class="toggle" role="switch" id="te-featured" aria-pressed="${!!model.featured}"></button>
             </div>
             <div class="toggle-row">
               <div class="toggle-row-main">
                 <div class="toggle-row-label">Hidden</div>
                 <div class="toggle-row-hint">Saved but not shown to visitors</div>
               </div>
-              <button class="toggle" role="switch" id="qe-hidden" aria-pressed="${!!model.hidden}"></button>
+              <button class="toggle" role="switch" id="te-hidden" aria-pressed="${!!model.hidden}"></button>
             </div>
           </div>
         `,
         foot: `
-          ${!isNew ? '<button class="btn btn-danger" data-qe-delete>Delete</button><div style="flex:1"></div>' : '<div style="flex:1"></div>'}
+          ${!isNew ? '<button class="btn btn-danger" data-te-delete>Delete</button><div style="flex:1"></div>' : '<div style="flex:1"></div>'}
           <button class="btn" data-modal-close>Cancel</button>
-          <button class="btn btn-primary" data-qe-save>${isNew ? 'Add question' : 'Save changes'}</button>
+          <button class="btn btn-primary" data-te-save>${isNew ? 'Add testimonial' : 'Save changes'}</button>
         `,
         onMount(root) {
           $$('[aria-pressed]', root).forEach(t => t.addEventListener('click', () => t.setAttribute('aria-pressed', String(t.getAttribute('aria-pressed') !== 'true'))));
-          $('[data-qe-save]', root)?.addEventListener('click', () => {
-            const q2 = {
+          $('[data-te-save]', root)?.addEventListener('click', () => {
+            const t2 = {
               id: model.id,
-              question: $('#qe-question', root).value.trim(),
-              answer: $('#qe-answer', root).value,
-              category: $('#qe-cat', root).value,
-              updatedAt: $('#qe-updated', root).value,
-              popular: $('#qe-popular', root).getAttribute('aria-pressed') === 'true',
-              pinned: $('#qe-pinned', root).getAttribute('aria-pressed') === 'true',
-              hidden: $('#qe-hidden', root).getAttribute('aria-pressed') === 'true',
+              quote: $('#te-quote', root).value.trim(),
+              author: $('#te-author', root).value.trim(),
+              role: $('#te-role', root).value.trim(),
+              location: $('#te-location', root).value.trim(),
+              avatar: $('#te-avatar', root).value.trim(),
+              rating: parseInt($('#te-rating', root).value, 10) || 0,
+              destination: $('#te-destination', root).value.trim(),
+              tripType: $('#te-trip-type', root).value.trim(),
+              travelDate: $('#te-travel-date', root).value.trim(),
+              source: $('#te-source', root).value,
+              video: $('#te-video', root).value.trim(),
+              verified: $('#te-verified', root).getAttribute('aria-pressed') === 'true',
+              featured: $('#te-featured', root).getAttribute('aria-pressed') === 'true',
+              hidden: $('#te-hidden', root).getAttribute('aria-pressed') === 'true',
             };
-            if (!q2.question) { showToast('Question text is required', 'error'); return; }
+            if (!t2.quote) { showToast('Quote is required', 'error'); return; }
+            if (!t2.author) { showToast('Author is required', 'error'); return; }
             mutate(cfg => {
-              if (isNew) cfg.questions.push(q2);
+              if (isNew) cfg.testimonials.push(t2);
               else {
-                const idx = cfg.questions.findIndex(x => x.id === q2.id);
-                if (idx >= 0) cfg.questions[idx] = q2;
+                const idx = cfg.testimonials.findIndex(x => x.id === t2.id);
+                if (idx >= 0) cfg.testimonials[idx] = t2;
               }
             });
             closeModal(); renderTabBody();
           });
-          $('[data-qe-delete]', root)?.addEventListener('click', () => {
-            if (!confirm('Delete this question?')) return;
-            mutate(cfg => { cfg.questions = cfg.questions.filter(x => x.id !== model.id); });
+          $('[data-te-delete]', root)?.addEventListener('click', () => {
+            if (!confirm('Delete this testimonial?')) return;
+            mutate(cfg => { cfg.testimonials = cfg.testimonials.filter(x => x.id !== model.id); });
             closeModal(); renderTabBody();
           });
         }
@@ -2005,7 +2058,7 @@
       const t = TEMPLATES.find(x => x.id === id); if (!t) return;
       if (state.config.questions.length > 0 && !confirm(`This will replace your current ${state.config.questions.length} questions with the ${t.name} template. Continue?`)) return;
       mutate(cfg => {
-        cfg.heading = Object.assign({}, cfg.heading, t.config.heading);
+        cfg.header = Object.assign({}, cfg.header, t.config.header);
         cfg.categories = deepClone(t.config.categories);
         cfg.questions = t.config.questions.map(q => Object.assign({ id: uid('q'), pinned: false, popular: false, hidden: false, updatedAt: '' }, q));
         if (t.config.cta) cfg.cta = Object.assign({}, cfg.cta, t.config.cta);
@@ -2179,18 +2232,22 @@
     /* ============================ CSV ============================ */
     function downloadCSVTemplate() {
       const rows = [
-        ['Question', 'Answer', 'Category', 'Popular', 'Pinned', 'Order'],
-        ['How do I book?', 'Book online, by phone, or in-branch. **Online bookings** are confirmed instantly.', 'booking', 'true', 'false', '1'],
-        ['What is your cancellation policy?', 'Cancellation charges vary by notice:\n- 60+ days: deposit only\n- 0–28 days: 100% of cost', 'booking', 'false', 'false', '2'],
+        ['Quote', 'Author', 'Role', 'Location', 'Avatar URL', 'Rating', 'Destination', 'Trip Type', 'Travel Date', 'Source', 'Verified', 'Video URL', 'Featured'],
+        ['The most magical 10 days of our lives. Every detail was handled.', 'Sarah Thompson', 'Honeymoon couple', 'Manchester, UK', '', '5', 'Maldives', 'Honeymoon', 'March 2024', 'Google', 'true', '', 'true'],
+        ['The kids still talk about it. Guides knew every child by name by day two.', 'Raj Patel', 'Family of four', 'Birmingham, UK', '', '5', 'Costa Rica', 'Family', 'October 2024', 'Direct', 'false', '', 'false'],
       ];
-      downloadCSV('faq-template.csv', rows);
+      downloadCSV('testimonials-template.csv', rows);
     }
     function downloadCSVExport() {
-      const rows = [['Question', 'Answer', 'Category', 'Popular', 'Pinned', 'Order']];
-      state.config.questions.forEach((q, i) => {
-        rows.push([q.question, q.answer, q.category || '', String(!!q.popular), String(!!q.pinned), String(i + 1)]);
+      const rows = [['Quote', 'Author', 'Role', 'Location', 'Avatar URL', 'Rating', 'Destination', 'Trip Type', 'Travel Date', 'Source', 'Verified', 'Video URL', 'Featured']];
+      state.config.testimonials.forEach(t => {
+        rows.push([
+          t.quote || '', t.author || '', t.role || '', t.location || '', t.avatar || '',
+          String(t.rating || 0), t.destination || '', t.tripType || '', t.travelDate || '',
+          t.source || '', String(!!t.verified), t.video || '', String(!!t.featured)
+        ]);
       });
-      downloadCSV('faq-export.csv', rows);
+      downloadCSV('testimonials-export.csv', rows);
     }
     function downloadCSV(filename, rows) {
       const csv = rows.map(r => r.map(v => {
@@ -2215,38 +2272,57 @@
           const arr = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
           if (!arr.length) throw new Error('Empty file');
           const header = arr[0].map(h => String(h).toLowerCase().trim());
-          const idx = {
-            q: header.findIndex(h => h.includes('question')),
-            a: header.findIndex(h => h.includes('answer')),
-            c: header.findIndex(h => h.includes('category')),
-            p: header.findIndex(h => h.includes('popular')),
-            pin: header.findIndex(h => h.includes('pinned') || h === 'pin'),
-            o: header.findIndex(h => h.includes('order'))
+          // Tolerant header matching — each field checks a few common variants
+          const find = (tests) => {
+            for (const t of tests) {
+              const i = header.findIndex(h => h === t || h.includes(t));
+              if (i >= 0) return i;
+            }
+            return -1;
           };
-          if (idx.q < 0 || idx.a < 0) throw new Error('CSV must have "Question" and "Answer" columns');
-          const rows = arr.slice(1).filter(r => r[idx.q]).map((r, i) => ({
-            id: uid('q'),
-            question: String(r[idx.q] || '').trim(),
-            answer: String(r[idx.a] || '').trim(),
-            category: idx.c >= 0 ? slugify(String(r[idx.c] || '').trim()) : '',
-            popular: idx.p >= 0 ? /^(true|yes|1|y)$/i.test(String(r[idx.p] || '')) : false,
-            pinned: idx.pin >= 0 ? /^(true|yes|1|y)$/i.test(String(r[idx.pin] || '')) : false,
+          const idx = {
+            quote:       find(['quote', 'testimonial', 'review']),
+            author:      find(['author', 'name', 'customer']),
+            role:        find(['role']),
+            location:    find(['location', 'city']),
+            avatar:      find(['avatar', 'photo', 'image']),
+            rating:      find(['rating', 'stars', 'score']),
+            destination: find(['destination', 'trip destination', 'place']),
+            tripType:    find(['trip type', 'triptype', 'tripkind', 'type']),
+            travelDate:  find(['travel date', 'traveldate', 'trip date', 'when']),
+            source:      find(['source']),
+            verified:    find(['verified']),
+            video:       find(['video', 'video url']),
+            featured:    find(['featured']),
+          };
+          if (idx.quote < 0 || idx.author < 0) throw new Error('CSV must have "Quote" and "Author" columns');
+          const boolish = (v) => /^(true|yes|1|y)$/i.test(String(v || '').trim());
+          const allowedSources = ['Google', 'Facebook', 'Trustpilot', 'TripAdvisor', 'Direct'];
+          const canonSource = (v) => {
+            const lc = String(v || '').trim().toLowerCase();
+            return allowedSources.find(s => s.toLowerCase() === lc) || (lc ? 'Direct' : '');
+          };
+          const rows = arr.slice(1).filter(r => r[idx.quote] && r[idx.author]).map(r => ({
+            id: uid('t'),
+            quote:       String(r[idx.quote] || '').trim(),
+            author:      String(r[idx.author] || '').trim(),
+            role:        idx.role        >= 0 ? String(r[idx.role] || '').trim()        : '',
+            location:    idx.location    >= 0 ? String(r[idx.location] || '').trim()    : '',
+            avatar:      idx.avatar      >= 0 ? String(r[idx.avatar] || '').trim()      : '',
+            rating:      idx.rating      >= 0 ? Math.max(0, Math.min(5, parseInt(r[idx.rating], 10) || 0)) : 0,
+            destination: idx.destination >= 0 ? String(r[idx.destination] || '').trim() : '',
+            tripType:    idx.tripType    >= 0 ? String(r[idx.tripType] || '').trim()    : '',
+            travelDate:  idx.travelDate  >= 0 ? String(r[idx.travelDate] || '').trim()  : '',
+            source:      idx.source      >= 0 ? canonSource(r[idx.source])              : '',
+            verified:    idx.verified    >= 0 ? boolish(r[idx.verified])                : false,
+            video:       idx.video       >= 0 ? String(r[idx.video] || '').trim()       : '',
+            featured:    idx.featured    >= 0 ? boolish(r[idx.featured])                : false,
             hidden: false,
-            updatedAt: '',
-            _order: idx.o >= 0 ? parseInt(r[idx.o], 10) || i : i
-          })).sort((a, b) => a._order - b._order).map(q => { delete q._order; return q; });
-          if (!rows.length) throw new Error('No valid rows');
-          // Auto-create missing categories
-          mutate(cfg => {
-            rows.forEach(q => {
-              if (q.category && !cfg.categories.some(c => c.id === q.category)) {
-                cfg.categories.push({ id: q.category, label: q.category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '), icon: 'help' });
-              }
-            });
-            cfg.questions = rows;
-          });
+          }));
+          if (!rows.length) throw new Error('No valid rows — each row needs a quote and an author');
+          mutate(cfg => { cfg.testimonials = rows; });
           renderTabBody();
-          showToast(`Imported ${rows.length} questions`, 'success');
+          showToast(`Imported ${rows.length} testimonial${rows.length === 1 ? '' : 's'}`, 'success');
         } catch (err) {
           showToast('Import failed: ' + (err.message || 'invalid file'), 'error');
         }
@@ -2312,9 +2388,9 @@
       if (target === 'heading') {
         body = `
           <div class="dm-popover-title">Header <button class="dm-popover-close" aria-label="Close">${icn('x', 14)}</button></div>
-          <div class="toggle-row"><div class="toggle-row-main"><div class="toggle-row-label">Show header</div></div><button class="toggle" role="switch" data-dm-toggle="heading.show" aria-pressed="${!!c.heading.show}"></button></div>
-          <div class="field"><label class="field-label">Title</label><input class="input" data-dm-set="heading.title" value="${esc(c.heading.title || '')}"></div>
-          <div class="field"><label class="field-label">Subtitle</label><textarea class="textarea" data-dm-set="heading.subtitle">${esc(c.heading.subtitle || '')}</textarea></div>
+          <div class="toggle-row"><div class="toggle-row-main"><div class="toggle-row-label">Show header</div></div><button class="toggle" role="switch" data-dm-toggle="header.show" aria-pressed="${!!c.header.show}"></button></div>
+          <div class="field"><label class="field-label">Title</label><input class="input" data-dm-set="header.title" value="${esc(c.header.title || '')}"></div>
+          <div class="field"><label class="field-label">Subtitle</label><textarea class="textarea" data-dm-set="header.subtitle">${esc(c.header.subtitle || '')}</textarea></div>
         `;
       } else if (target === 'search') {
         body = `
@@ -2411,7 +2487,7 @@
         state.config = Object.assign(defaultConfig(), data.config || {});
         // ensure nested objects are preserved
         state.config.colors = Object.assign({}, defaultConfig().colors, (data.config && data.config.colors) || {});
-        state.config.heading = Object.assign({}, defaultConfig().heading, (data.config && data.config.heading) || {});
+        state.config.header = Object.assign({}, defaultConfig().header, (data.config && data.config.header) || {});
         state.config.search = Object.assign({}, defaultConfig().search, (data.config && data.config.search) || {});
         state.config.cta = Object.assign({}, defaultConfig().cta, (data.config && data.config.cta) || {});
         state.config.seo = Object.assign({}, defaultConfig().seo, (data.config && data.config.seo) || {});
