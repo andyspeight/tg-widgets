@@ -5,10 +5,12 @@
     { "source": "/demo-reviews", "destination": "/demo-reviews.html" },
     { "source": "/demo-faq", "destination": "/demo-faq.html" },
     { "source": "/demo-testimonials", "destination": "/demo-testimonials.html" },
+    { "source": "/demo-spotlight", "destination": "/demo-spotlight.html" },
     { "source": "/editor", "destination": "/editor.html" },
     { "source": "/editor-reviews", "destination": "/editor-reviews.html" },
     { "source": "/editor-faq", "destination": "/editor-faq.html" },
-    { "source": "/editor-testimonials", "destination": "/editor-testimonials.html" }
+    { "source": "/editor-testimonials", "destination": "/editor-testimonials.html" },
+    { "source": "/editor-spotlight", "destination": "/editor-spotlight.html" }
   ],
   "headers": [
     {
@@ -37,6 +39,14 @@
     },
     {
       "source": "/widget-testimonials.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-spotlight.js",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
