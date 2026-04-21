@@ -324,25 +324,29 @@ export default async function handler(req, res) {
     }
 
     // ── Step 3: fetch destination record ──
+    // We use the LIST endpoint with filterByFormula=RECORD_ID()='...' rather
+    // than the single-record GET endpoint, because only the list endpoint
+    // supports fields[] filtering and returnFieldsByFieldId=true. Hitting the
+    // single-record endpoint with those params returns 422 Unprocessable.
     const map = LEVEL_MAP[level];
     const fieldIds = Object.values(map.fields);
     const qs = new URLSearchParams();
+    qs.append('filterByFormula', `RECORD_ID()='${recordId}'`);
+    qs.append('maxRecords', '1');
     fieldIds.forEach(id => qs.append('fields[]', id));
-    // Use field IDs in the response (returnFieldsByFieldId) so refactors in
-    // Airtable (renaming fields) don't break us.
     qs.append('returnFieldsByFieldId', 'true');
 
-    const destUrl = `${AIRTABLE_API}/${DESTINATION_BASE_ID}/${map.tableId}/${recordId}?${qs.toString()}`;
+    const destUrl = `${AIRTABLE_API}/${DESTINATION_BASE_ID}/${map.tableId}?${qs.toString()}`;
     const destResp = await fetch(destUrl, {
       headers: { 'Authorization': `Bearer ${AIRTABLE_DESTINATION_CONTENT_PAT}` },
     });
 
-    if (destResp.status === 404) return res.status(404).json({ error: 'Destination not found' });
     if (!destResp.ok) {
       // Surface the specific upstream status to aid diagnosis of PAT/scope/base
       // access issues. The error message is generic to avoid leaking detail
       // but the status code hint lets us see 401 (PAT invalid) / 403 (scope or
-      // base access wrong) / 429 (rate-limited). Safe: no key material exposed.
+      // base access wrong) / 422 (query malformed) / 429 (rate-limited).
+      // Safe: no key material exposed.
       console.error('[destination-content] Airtable destination fetch failed', {
         status: destResp.status,
         level,
@@ -355,7 +359,12 @@ export default async function handler(req, res) {
     }
 
     const raw = await destResp.json();
-    const f = raw.fields || {};
+    // List-endpoint shape: { records: [ { id, fields } ] } — zero records
+    // means the destination record ID didn't match anything in that table.
+    if (!raw.records || raw.records.length === 0) {
+      return res.status(404).json({ error: 'Destination not found' });
+    }
+    const f = raw.records[0].fields || {};
 
     // ── Step 4: shape and sanitise ──
     const images = parseMultilineUrls(f[map.fields.images]);
