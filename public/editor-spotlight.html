@@ -781,6 +781,7 @@
     const API_CONFIG = '/api/widget-config';
     const API_AI = '/api/widget-ai';
     const API_SEARCH = '/api/destination-search';
+    const API_CONTENT = '/api/destination-content';
     const WIDGET_TYPE = 'Destination Spotlight';
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -1111,6 +1112,44 @@
       document.getElementById('destSearch').value = '';
       renderSelectedDestination();
       onConfigChange();
+      fetchDestinationData(r.level, r.recordId); // preload for preview
+    }
+
+    // Cached destination payloads so we don't re-fetch on every preview render.
+    // Keyed by `${level}:${recordId}`. Set when the agent picks a destination,
+    // cleared when they clear the selection.
+    let destCache = {};
+    let destInFlight = null;
+    async function fetchDestinationData(level, recordId) {
+      const key = level + ':' + recordId;
+      if (destCache[key]) {
+        schedulePreview();
+        return;
+      }
+      // Abort any in-flight fetch — the user may have picked a new destination
+      if (destInFlight) destInFlight.abort();
+      destInFlight = new AbortController();
+      try {
+        const res = await fetch(
+          API_CONTENT + '?level=' + encodeURIComponent(level) + '&recordId=' + encodeURIComponent(recordId),
+          { headers: authH(), signal: destInFlight.signal }
+        );
+        if (res.status === 401) {
+          toast('Session expired. Please sign in.', 'error');
+          showLogin();
+          return;
+        }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to load destination');
+        }
+        destCache[key] = await res.json();
+        schedulePreview();
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.error('[editor] destination fetch failed', err);
+        toast('Could not load destination data for preview', 'error');
+      }
     }
     function renderSelectedDestination() {
       const wrap = document.getElementById('selectedDest');
@@ -1128,6 +1167,7 @@
         </div>`;
       document.getElementById('clearDest').addEventListener('click', () => {
         state.config.destination = null;
+        destCache = {};
         renderSelectedDestination();
         onConfigChange();
       });
@@ -1413,16 +1453,17 @@ ${escHtml(code)}
         const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id));
         if (!res.ok) throw new Error('Could not load widget');
         const data = await res.json();
-        // Merge over defaults so missing fields from older saved configs fill in
         state.config = Object.assign(defaultConfig(), data);
         state.config.sections = Object.assign(defaultConfig().sections, data.sections || {});
         state.config.cta = Object.assign(defaultConfig().cta, data.cta || {});
         state.config.autoDetect = Object.assign(defaultConfig().autoDetect, data.autoDetect || {});
-        // Name and recordId come from widget-list endpoint ideally but we only have config here.
-        // So we show the WidgetID as the fallback name hint.
         state.widgetId = id;
         document.getElementById('topbarSub').textContent = id;
         hydrateUI();
+        // Preload destination for preview
+        if (state.config.destination && state.config.destination.recordId) {
+          fetchDestinationData(state.config.destination.level, state.config.destination.recordId);
+        }
       } catch (ex) {
         toast('Could not load the widget. Starting fresh.', 'error');
       }
@@ -1439,17 +1480,23 @@ ${escHtml(code)}
     function renderPreview() {
       const frame = document.getElementById('previewFrame');
       const cfg = JSON.parse(JSON.stringify(state.config));
-      // For preview, we need the widget to actually fetch data. If the agent
-      // has picked a destination but not yet saved, we still want to show it.
-      // The widget's loader path requires a widgetId + /api/destination-content
-      // lookup. Since we don't have a saved widgetId yet (or the saved config
-      // may differ from the live edits), we use a small preview shim: we
-      // pass both destination.recordId AND the config inline, and let the
-      // widget-side `destinationData` escape hatch skip the API call when we
-      // pre-fetch it in the editor.
-      // For simplicity in v1, preview fetches /api/destination-content using
-      // a temporary widget record or — if the user hasn't saved — the widget
-      // will show the "no destination" notice. That's honest.
+
+      // Inject the cached destination payload so the widget skips its own API
+      // call and renders immediately. This is why the widget exposes the
+      // `destinationData` escape hatch — editor preview is the intended user.
+      if (cfg.destination && cfg.destination.recordId) {
+        const key = cfg.destination.level + ':' + cfg.destination.recordId;
+        if (destCache[key]) {
+          cfg.destinationData = destCache[key];
+        }
+        // If not cached yet, kick off a fetch. The preview will re-render when
+        // the fetch lands. In the meantime the widget shows its loading/notice
+        // state which is fine.
+        else {
+          fetchDestinationData(cfg.destination.level, cfg.destination.recordId);
+        }
+      }
+
       const font = cfg.fontFamily ? encodeURIComponent(cfg.fontFamily) : '';
       const html = `<!doctype html>
 <html><head>
@@ -1461,7 +1508,7 @@ ${escHtml(code)}
 ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;500;600;700&display=swap" rel="stylesheet">` : ''}
 <style>body{margin:0;padding:32px 24px;background:${cfg.theme==='dark'?'#0F172A':'#FFFFFF'};font-family:'Inter',sans-serif;}</style>
 </head><body>
-<div data-tg-widget="spotlight" ${state.widgetId ? `data-tg-id="${escAttr(state.widgetId)}"` : ''} data-tg-config='${escAttr(JSON.stringify(cfg))}'></div>
+<div data-tg-widget="spotlight" data-tg-config='${escAttr(JSON.stringify(cfg))}'></div>
 <script>window.__TG_PREVIEW__=true;<` + `/script>
 <script src="https://tg-widgets.vercel.app/widget-spotlight.js"><` + `/script>
 </body></html>`;
@@ -1633,7 +1680,10 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
           if (res.ok) {
             const data = await res.json();
             const first = (data.results || [])[0];
-            if (first) state.config.destination = { level: first.level, recordId: first.recordId, name: first.name };
+            if (first) {
+              state.config.destination = { level: first.level, recordId: first.recordId, name: first.name };
+              fetchDestinationData(first.level, first.recordId);
+            }
           }
         } catch (err) { /* best-effort */ }
       }
