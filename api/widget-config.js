@@ -18,7 +18,13 @@ const TABLE_NAME = 'Widgets';
 //   2. PLAN_WIDGET_LIMITS below
 //   3. The WidgetType singleSelect options in Airtable
 //   4. The WIDGETS array in public/index.html
-const ALLOWED_WIDGET_TYPES = ['Pricing Table', 'FAQ', 'Google Reviews'];
+const ALLOWED_WIDGET_TYPES = [
+  'Pricing Table',
+  'FAQ',
+  'Google Reviews',
+  'Testimonials',
+  'Destination Spotlight',
+];
 
 // Per-plan widget count limits, keyed by widgetType.
 //   -1       = unlimited
@@ -27,9 +33,11 @@ const ALLOWED_WIDGET_TYPES = ['Pricing Table', 'FAQ', 'Google Reviews'];
 // KEEP IN SYNC with the WIDGETS array in public/index.html. If these drift,
 // the dashboard will show one limit while the API enforces another.
 const PLAN_WIDGET_LIMITS = {
-  'Pricing Table':  { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
-  'FAQ':            { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Google Reviews': { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Pricing Table':         { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
+  'FAQ':                   { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Google Reviews':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Testimonials':          { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Destination Spotlight': { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
 };
 
 // Count existing widgets owned by this user, of a specific type.
