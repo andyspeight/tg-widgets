@@ -1155,10 +1155,10 @@
       try {
         if (state.widget && typeof state.widget.update === 'function') {
           state.widget.update(deepClone(state.config));
-        } else if (window.TGTestimonialsWidget) {
+        } else if (window.TGTestimonials) {
           try { mount.innerHTML = ''; } catch(e){}
           mount.removeAttribute('data-tg-initialised');
-          state.widget = new window.TGTestimonialsWidget(mount, deepClone(state.config));
+          state.widget = new window.TGTestimonials.Widget(mount, deepClone(state.config));
           mount.setAttribute('data-tg-initialised', 'true');
         }
         // If Design mode active, refresh hotspots
