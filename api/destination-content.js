@@ -202,15 +202,10 @@ function parseHighlights(str) {
     if (!h || typeof h !== 'object') return null;
     const icon = typeof h.icon === 'string' ? h.icon.trim().toLowerCase() : '';
     const safeIcon = ICON_VOCAB.has(icon) ? icon : 'star';
-    // Optional per-highlight image. Validated against the same URL allowlist
-    // as the main hero images. If invalid / absent, the widget falls back to
-    // the icon-only card treatment — no silent failure.
-    const image = typeof h.image === 'string' && URL_RE.test(h.image.trim()) ? h.image.trim() : '';
     return {
       icon: safeIcon,
       title: txt(h.title, 60),
       description: txt(h.description, 280),
-      image,
     };
   }).filter(h => h && h.title);
 }
