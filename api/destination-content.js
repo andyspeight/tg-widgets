@@ -42,7 +42,7 @@
  *   }
  */
 
-import { setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
+import { setCors, applyRateLimit, RATE_LIMITS, requireAuth } from './_auth.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 
@@ -282,42 +282,69 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
-  const widgetId = req.query.id;
-  if (!widgetId || typeof widgetId !== 'string' || widgetId.length > 100 || !/^[\w-]+$/.test(widgetId)) {
-    return res.status(400).json({ error: 'Invalid widget ID' });
+  // Two lookup modes:
+  //   1. Public:  ?id=WIDGET_ID        — used by embedded widgets in the wild
+  //   2. Direct:  ?level=X&recordId=Y  — used by the editor preview before the
+  //               widget is saved. REQUIRES AUTH so we don't expose the
+  //               destination catalogue to anonymous enumeration (that's what
+  //               destination-search.js already guards).
+  const directLevel = typeof req.query.level === 'string' ? req.query.level : '';
+  const directRecord = typeof req.query.recordId === 'string' ? req.query.recordId : '';
+  const isDirect = Boolean(directLevel || directRecord);
+
+  let level, recordId;
+
+  if (isDirect) {
+    // Auth-gated: editor preview. Same pattern as destination-search.
+    const auth = requireAuth(req);
+    if (auth.error) return res.status(auth.status).json({ error: auth.error });
+
+    if (!LEVEL_MAP[directLevel] || !/^rec[A-Za-z0-9]{14}$/.test(directRecord)) {
+      return res.status(400).json({ error: 'Invalid level or recordId' });
+    }
+    level = directLevel;
+    recordId = directRecord;
+  } else {
+    const widgetId = req.query.id;
+    if (!widgetId || typeof widgetId !== 'string' || widgetId.length > 100 || !/^[\w-]+$/.test(widgetId)) {
+      return res.status(400).json({ error: 'Invalid widget ID' });
+    }
+
+    try {
+      // Public widget-id path — unchanged behaviour
+      const widgetsFormula = encodeURIComponent(`{WidgetID} = '${widgetId}'`);
+      const widgetsUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${WIDGETS_TABLE_NAME}`
+        + `?filterByFormula=${widgetsFormula}&maxRecords=1&fields%5B%5D=Config`;
+
+      const widgetsResp = await fetch(widgetsUrl, {
+        headers: { 'Authorization': `Bearer ${AIRTABLE_KEY}` },
+      });
+      if (!widgetsResp.ok) throw new Error('upstream-widgets');
+
+      const widgetsData = await widgetsResp.json();
+      if (!widgetsData.records || widgetsData.records.length === 0) {
+        return res.status(404).json({ error: 'Widget not found' });
+      }
+
+      let config;
+      try { config = JSON.parse(widgetsData.records[0].fields.Config || '{}'); }
+      catch { return res.status(500).json({ error: 'Widget data corrupted' }); }
+
+      const dest = config.destination || {};
+      level = dest.level;
+      recordId = dest.recordId;
+
+      if (!level || !LEVEL_MAP[level] || !recordId || typeof recordId !== 'string' || !/^rec[A-Za-z0-9]{14}$/.test(recordId)) {
+        return res.status(400).json({ error: 'Widget has no destination configured' });
+      }
+    } catch (err) {
+      console.error('[destination-content] error:', err?.message || err);
+      return res.status(502).json({ error: 'Upstream unavailable' });
+    }
   }
 
   try {
-    // ── Step 1: look up widget config to find the destination it points to ──
-    // Use the existing AIRTABLE_KEY for the Widgets base, filter by WidgetID
-    // (sanitisation via the regex test above — widgetId is alphanumeric + _ + -).
-    const widgetsFormula = encodeURIComponent(`{WidgetID} = '${widgetId}'`);
-    const widgetsUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${WIDGETS_TABLE_NAME}`
-      + `?filterByFormula=${widgetsFormula}&maxRecords=1&fields%5B%5D=Config`;
-
-    const widgetsResp = await fetch(widgetsUrl, {
-      headers: { 'Authorization': `Bearer ${AIRTABLE_KEY}` },
-    });
-    if (!widgetsResp.ok) throw new Error('upstream-widgets');
-
-    const widgetsData = await widgetsResp.json();
-    if (!widgetsData.records || widgetsData.records.length === 0) {
-      return res.status(404).json({ error: 'Widget not found' });
-    }
-
-    let config;
-    try { config = JSON.parse(widgetsData.records[0].fields.Config || '{}'); }
-    catch { return res.status(500).json({ error: 'Widget data corrupted' }); }
-
-    const dest = config.destination || {};
-    const level = dest.level;
-    const recordId = dest.recordId;
-
-    if (!level || !LEVEL_MAP[level] || !recordId || typeof recordId !== 'string' || !/^rec[A-Za-z0-9]{14}$/.test(recordId)) {
-      return res.status(400).json({ error: 'Widget has no destination configured' });
-    }
-
-    // ── Step 2: check in-memory cache ──
+    // ── Cache check ──
     const cacheKey = `${level}:${recordId}`;
     const cached = memGet(cacheKey);
     if (cached) {
