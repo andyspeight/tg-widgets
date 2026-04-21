@@ -484,59 +484,68 @@
       gap: 20px;
     }
     .tgs-highlight {
+      position: relative;
       background: var(--tgs-card);
       border: 1px solid var(--tgs-border);
       border-radius: var(--tgs-radius);
-      padding: 24px;
-      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-      overflow: hidden;
-      display: flex; flex-direction: column;
+      padding: 26px 24px;
+      cursor: default;
+      outline: none;
+      /* Single combined transition so lift + border + shadow move together. */
+      transition: transform 220ms cubic-bezier(.22,1,.36,1),
+                  border-color 220ms ease,
+                  box-shadow 220ms ease,
+                  background 220ms ease;
+      /* Isolate so the ::before glow doesn't bleed onto neighbours. */
+      isolation: isolate;
     }
-    .tgs-highlight--has-media {
-      padding: 0;
+    /* The soft coloured glow sits BEHIND the card. Hidden by default, fades in
+       on hover. Kept out of the normal layout via negative z-index. */
+    .tgs-highlight::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: calc(var(--tgs-radius) + 4px);
+      background: radial-gradient(ellipse at center, var(--tgs-brand-soft) 0%, transparent 70%);
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 260ms ease;
+      pointer-events: none;
     }
-    .tgs-highlight:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--tgs-shadow-md);
+    .tgs-highlight:hover,
+    .tgs-highlight:focus-visible {
+      transform: translateY(-4px);
       border-color: var(--tgs-brand);
+      box-shadow: 0 12px 28px -8px rgba(15,23,42,0.14),
+                  0 4px 10px -2px rgba(15,23,42,0.06);
     }
-    .tgs-highlight-media {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      overflow: hidden;
-      background: var(--tgs-border-soft);
+    .tgs-highlight:hover::before,
+    .tgs-highlight:focus-visible::before {
+      opacity: 1;
     }
-    .tgs-highlight-media img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 400ms cubic-bezier(.22,1,.36,1);
+    /* Dark mode tweak — shadows need more weight to register against a dark
+       card. Also dial up the glow slightly. */
+    .tgs-root[data-theme="dark"] .tgs-highlight:hover,
+    .tgs-root[data-theme="dark"] .tgs-highlight:focus-visible {
+      box-shadow: 0 16px 32px -8px rgba(0,0,0,0.5),
+                  0 6px 12px -2px rgba(0,0,0,0.3);
     }
-    .tgs-highlight--has-media:hover .tgs-highlight-media img {
-      transform: scale(1.03);
-    }
-    .tgs-highlight-body {
-      padding: 0;
-      display: flex; flex-direction: column;
-    }
-    .tgs-highlight--has-media .tgs-highlight-body {
-      padding: 20px 22px 22px;
-      flex: 1;
-    }
+
     .tgs-highlight-icon {
       width: 44px; height: 44px;
       border-radius: 12px;
       background: var(--tgs-brand-soft);
       color: var(--tgs-brand);
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
-      flex-shrink: 0;
+      margin-bottom: 16px;
+      /* Separate transition from the card so icon scales independently. */
+      transition: background 220ms ease, color 220ms ease, transform 260ms cubic-bezier(.22,1,.36,1);
     }
-    .tgs-highlight-icon--inline {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      margin-bottom: 10px;
+    .tgs-highlight:hover .tgs-highlight-icon,
+    .tgs-highlight:focus-visible .tgs-highlight-icon {
+      background: var(--tgs-brand);
+      color: #FFFFFF;
+      transform: scale(1.06);
     }
     .tgs-highlight-title {
       margin: 0 0 8px;
@@ -736,7 +745,10 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .tgs-highlight:hover { transform: none; }
+      .tgs-highlight:hover,
+      .tgs-highlight:focus-visible { transform: none; }
+      .tgs-highlight:hover .tgs-highlight-icon,
+      .tgs-highlight:focus-visible .tgs-highlight-icon { transform: none; }
     }
   `;
 
@@ -1081,25 +1093,13 @@
       const list = Array.isArray(d.highlights) ? d.highlights : [];
       if (list.length === 0) return '';
 
-      // Per-highlight image. When a highlight has its own image URL set in the
-      // database, render the media card variant (photo + inline icon + body).
-      // When it doesn't, fall back to the icon-only treatment. This way the
-      // image genuinely matches the title, rather than being a generic thumbnail
-      // derived from the destination's hero image set.
-      const cards = list.slice(0, 6).map((h) => {
+      const cards = list.slice(0, 6).map(h => {
         if (!h || !h.title) return '';
-        const thumbUrl = h.image ? safeUrl(h.image) : '';
-        const mediaBlock = thumbUrl
-          ? '<div class="tgs-highlight-media"><img src="' + esc(thumbUrl) + '" alt="" loading="lazy" /></div>'
-          : '<div class="tgs-highlight-icon">' + icon(h.icon || 'star', 22) + '</div>';
         return (
-          '<article class="tgs-highlight' + (thumbUrl ? ' tgs-highlight--has-media' : '') + '">' +
-            mediaBlock +
-            '<div class="tgs-highlight-body">' +
-              (thumbUrl ? '<div class="tgs-highlight-icon tgs-highlight-icon--inline">' + icon(h.icon || 'star', 18) + '</div>' : '') +
-              '<h3 class="tgs-highlight-title">' + esc(h.title) + '</h3>' +
-              (h.description ? '<p class="tgs-highlight-desc">' + esc(h.description) + '</p>' : '') +
-            '</div>' +
+          '<article class="tgs-highlight" tabindex="0">' +
+            '<div class="tgs-highlight-icon">' + icon(h.icon || 'star', 22) + '</div>' +
+            '<h3 class="tgs-highlight-title">' + esc(h.title) + '</h3>' +
+            (h.description ? '<p class="tgs-highlight-desc">' + esc(h.description) + '</p>' : '') +
           '</article>'
         );
       }).join('');
