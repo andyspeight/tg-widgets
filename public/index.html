@@ -822,8 +822,8 @@ function loadMiniPreview(w) {
     });
   }
 
-  if (w.id === 'testimonials' && window.TGTestimonialsWidget) {
-    new window.TGTestimonialsWidget(el, {
+  if (w.id === 'testimonials' && window.TGTestimonials) {
+    new window.TGTestimonials.Widget(el, {
       layout:'grid',theme:'light',radius:12,
       colors:{brand:w.color,accent:'#8B5CF6',bg:'#FFFFFF',card:'#FFFFFF',text:'#0F172A',sub:'#475569',border:'#E2E8F0'},
       header:{show:true,eyebrow:'Testimonials',title:'Loved by travellers',subtitle:''},
