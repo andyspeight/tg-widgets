@@ -1081,14 +1081,14 @@
       const list = Array.isArray(d.highlights) ? d.highlights : [];
       if (list.length === 0) return '';
 
-      // The first image in d.images is the hero — subsequent images (if any)
-      // are used as thumbnails on highlight cards 1, 2, 3... in order.
-      // If we run out of images, remaining cards fall back to icon-only.
-      const thumbs = Array.isArray(d.images) ? d.images.slice(1) : [];
-
-      const cards = list.slice(0, 6).map((h, i) => {
+      // Per-highlight image. When a highlight has its own image URL set in the
+      // database, render the media card variant (photo + inline icon + body).
+      // When it doesn't, fall back to the icon-only treatment. This way the
+      // image genuinely matches the title, rather than being a generic thumbnail
+      // derived from the destination's hero image set.
+      const cards = list.slice(0, 6).map((h) => {
         if (!h || !h.title) return '';
-        const thumbUrl = thumbs[i] ? safeUrl(thumbs[i]) : '';
+        const thumbUrl = h.image ? safeUrl(h.image) : '';
         const mediaBlock = thumbUrl
           ? '<div class="tgs-highlight-media"><img src="' + esc(thumbUrl) + '" alt="" loading="lazy" /></div>'
           : '<div class="tgs-highlight-icon">' + icon(h.icon || 'star', 22) + '</div>';
