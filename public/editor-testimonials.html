@@ -863,7 +863,7 @@
     const API_CONFIG = '/api/widget-config';
     const API_LIST   = '/api/widget-list';
     const API_AI     = '/api/widget-ai';
-    const WIDGET_TYPE = 'FAQ';
+    const WIDGET_TYPE = 'Testimonials';
     const STORAGE_KEY = 'tgw_session';
 
     /* ================================ ICON ================================ */
@@ -1012,148 +1012,80 @@
     /* ============================ TEMPLATES ============================ */
     const TEMPLATES = [
       {
-        id: 'tour-operator',
-        name: 'Tour Operator',
-        description: 'Group tours, escorted trips, deposits, cancellations, ATOL protection.',
-        icon: 'plane', colour: '#0891B2',
-        config: {
-          heading: { show: true, title: 'Tour operator FAQ', subtitle: 'Everything you need to know about our escorted tours.' },
-          categories: [
-            { id: 'booking', label: 'Booking', icon: 'calendar' },
-            { id: 'deposits', label: 'Deposits & balances', icon: 'credit-card' },
-            { id: 'inclusions', label: 'What\'s included', icon: 'check' },
-            { id: 'cancel', label: 'Cancellations', icon: 'info' },
-            { id: 'protect', label: 'Protection', icon: 'shield' }
-          ],
-          questions: [
-            { question: 'How do I book a tour?', answer: 'You can book online, by phone, or in-branch. Online bookings are confirmed instantly, with a reservation summary emailed within minutes.', category: 'booking', popular: true },
-            { question: 'Is there a minimum group size?', answer: 'Our small-group tours run with **4 travellers minimum** and **16 maximum**. If numbers are lower, we\'ll contact you 60 days before departure with options.', category: 'booking' },
-            { question: 'How much deposit do I pay?', answer: 'A deposit of **£150 per person** secures your place. The balance is due **10 weeks before departure** — we\'ll send you a reminder.', category: 'deposits', popular: true },
-            { question: 'What\'s included in the tour price?', answer: 'All tours include:\n\n- Accommodation in 3-star or better hotels\n- All transport in-country\n- Specified meals (see individual tour)\n- Expert tour leader\n- All entrance fees listed in the itinerary', category: 'inclusions', popular: true },
-            { question: 'What\'s NOT included?', answer: '- International flights (unless stated)\n- Travel insurance\n- Visas where required\n- Meals marked "at your own cost"\n- Personal spending and tips', category: 'inclusions' },
-            { question: 'Can I extend my trip?', answer: 'Yes — most tours can be extended with pre- or post-tour stays. Speak to our team about options.', category: 'booking' },
-            { question: 'What happens if I need to cancel?', answer: 'Cancellation charges depend on notice:\n\n- **90+ days**: deposit only\n- **60–89 days**: 50% of cost\n- **30–59 days**: 75% of cost\n- **Under 30 days**: 100% of cost', category: 'cancel', popular: true },
-            { question: 'Are your tours ATOL protected?', answer: 'Every flight-inclusive tour is fully **ATOL protected** under licence 12345. Land-only bookings are protected by our ABTA bond.', category: 'protect', pinned: true, popular: true },
-            { question: 'What travel documents do I need?', answer: 'A **UK passport valid for 6 months beyond return** is required. Visa requirements vary — we\'ll send you a destination-specific checklist with your booking confirmation.', category: 'booking' },
-            { question: 'Do I need vaccinations?', answer: 'Vaccination requirements depend on your destination. We recommend checking the **NHS Fit for Travel** website or speaking to your GP at least 8 weeks before departure.', category: 'protect' }
-          ],
-          cta: { heading: 'Speak to a tour specialist', description: 'Our team has travelled to every destination we sell. Talk to a human about your trip.', buttonText: 'Get in touch' }
-        }
-      },
-      {
-        id: 'travel-agent',
-        name: 'Travel Agent',
-        description: 'Package holidays, flight-only, beach stays, city breaks, family holidays.',
-        icon: 'plane', colour: '#059669',
-        config: {
-          heading: { show: true, title: 'Help Centre', subtitle: 'Popular questions from our customers.' },
-          categories: [
-            { id: 'booking', label: 'Booking', icon: 'calendar' },
-            { id: 'payment', label: 'Payment', icon: 'credit-card' },
-            { id: 'before', label: 'Before you go', icon: 'plane' },
-            { id: 'airport', label: 'At the airport', icon: 'luggage' },
-            { id: 'support', label: 'While you\'re away', icon: 'help' }
-          ],
-          questions: [
-            { question: 'How do I book a package holiday?', answer: 'You can book online, call us on 0800 123 4567, or pop into any of our 12 high-street stores.', category: 'booking', popular: true },
-            { question: 'Can I book flights only?', answer: 'Yes — we sell flights separately. Note that **flight-only** bookings are not ATOL protected unless paid for as part of a package.', category: 'booking' },
-            { question: 'Do you price-match?', answer: 'Yes. If you find the **same holiday cheaper elsewhere within 24 hours of booking**, we\'ll refund the difference. Email us proof and we\'ll sort it.', category: 'booking', popular: true },
-            { question: 'What payment methods do you accept?', answer: 'All major credit and debit cards — **Visa, Mastercard, Amex**. No surcharges. Bank transfers available for bookings over £5,000.', category: 'payment' },
-            { question: 'When is my balance due?', answer: 'Your balance is due **10 weeks (70 days) before departure**. We\'ll email a reminder 14 days before the due date.', category: 'payment', popular: true },
-            { question: 'What documents do I need to travel?', answer: 'A **UK passport valid for 6 months beyond return**. Some destinations require visas — we\'ll send you a destination checklist at booking.', category: 'before', popular: true },
-            { question: 'Do I need travel insurance?', answer: 'Not legally required but strongly recommended. A single medical emergency abroad can cost thousands.', category: 'before' },
-            { question: 'How much luggage can I take?', answer: 'Typical allowance is 1 × 20kg checked bag and 1 × 10kg hand luggage. Exact allowance is on your e-ticket.', category: 'airport' },
-            { question: 'When should I arrive at the airport?', answer: '**2 hours before** short-haul flights, **3 hours before** long-haul.', category: 'airport' },
-            { question: 'What if something goes wrong while I\'m abroad?', answer: 'Call our 24/7 support line on **0800 999 8888** — real humans, seven days a week including bank holidays.', category: 'support', popular: true }
-          ],
-          cta: { heading: 'Can\'t find your answer?', description: 'Call us on 0800 123 4567 or drop us a line.', buttonText: 'Contact us' }
-        }
-      },
-      {
-        id: 'hotel',
-        name: 'Hotel / Villa',
-        description: 'Check-in, check-out, amenities, pets, children, parking, breakfast.',
+        id: 'luxury-agent',
+        name: 'Luxury Travel Agent',
+        description: 'Honeymoons, luxury villas, 5-star resorts, bespoke itineraries.',
         icon: 'star', colour: '#F59E0B',
         config: {
-          heading: { show: true, title: 'Your questions answered', subtitle: 'Everything you need to know about your stay.' },
-          categories: [
-            { id: 'checkin', label: 'Check-in & out', icon: 'clock' },
-            { id: 'rooms', label: 'Rooms & amenities', icon: 'help' },
-            { id: 'dining', label: 'Dining', icon: 'heart' },
-            { id: 'family', label: 'Families', icon: 'users' },
-            { id: 'practical', label: 'Practical', icon: 'info' }
-          ],
-          questions: [
-            { question: 'What time can I check in?', answer: 'Check-in is from **3:00pm**. Early check-in is subject to availability — let us know in advance and we\'ll do our best.', category: 'checkin', popular: true },
-            { question: 'What time is check-out?', answer: 'Check-out is by **11:00am**. Late check-out until 1pm is available for £25, subject to availability.', category: 'checkin' },
-            { question: 'Is breakfast included?', answer: 'Breakfast is **included in all B&B and half-board rates**. Room-only guests can add breakfast for £15 per adult, £7.50 per child.', category: 'dining', popular: true },
-            { question: 'Do you have a restaurant?', answer: 'Yes — our restaurant is open for breakfast (7–10am), lunch (12–2:30pm), and dinner (6:30–9:30pm). Booking recommended for dinner.', category: 'dining' },
-            { question: 'Do you allow pets?', answer: '**Dogs are welcome** in our garden rooms — £20 per stay, max 2 dogs. We provide a bed, bowl, and a welcome treat.', category: 'rooms', popular: true },
-            { question: 'Is there free Wi-Fi?', answer: 'Yes — **free, uncapped Wi-Fi** throughout the property. Speeds are fibre-grade in all rooms.', category: 'rooms' },
-            { question: 'Is there parking?', answer: 'We have **free on-site parking** for all guests. EV charge points are available — 4 × 22kW Type 2.', category: 'practical' },
-            { question: 'Do you cater for children?', answer: 'Absolutely — we have cots (free), highchairs, a children\'s menu, and a small play area. Under-5s stay free in family rooms.', category: 'family', popular: true },
-            { question: 'Can I cancel my booking?', answer: 'Flexible rates cancel free up to **48 hours before arrival**. Non-refundable rates are as booked.', category: 'practical' },
-            { question: 'Do you have accessible rooms?', answer: 'Yes — **two fully wheelchair-accessible rooms** with roll-in showers, lower beds, and grab rails. Please book directly so we can prepare.', category: 'rooms' }
-          ],
-          cta: { heading: 'Something else?', description: 'Give us a call or send us an email — we reply quickly.', buttonText: 'Contact the hotel' }
+          header: { show: true, eyebrow: 'Client Stories', title: 'Unforgettable journeys', subtitle: 'What our clients say about their bespoke travel experiences.' },
+          testimonials: [
+            { id: uid('t'), quote: "The most magical 10 days of our lives. Every detail was handled — from the overwater villa to the private dinner on the beach. We didn't lift a finger.", author: 'Sarah & James Mitchell', role: 'Honeymoon', location: 'London, UK', rating: 5, destination: 'Maldives', tripType: 'Honeymoon', travelDate: 'March 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Third year using them and they continue to exceed expectations. This year was an African safari — spotting the Big Five from our private lodge was extraordinary.", author: 'David Chen', role: 'Returning client', location: 'Manchester, UK', rating: 5, destination: 'Kenya', tripType: 'Safari', travelDate: 'September 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "A once-in-a-lifetime trip to Japan during cherry blossom season. Every hotel, every train, every restaurant was perfect. They thought of things we never would.", author: 'Emma Thompson', role: 'Anniversary trip', location: 'Bath, UK', rating: 5, destination: 'Japan', tripType: 'Cultural', travelDate: 'April 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "We needed a complex multi-centre honeymoon — Dubai, Seychelles, and a stopover in Doha. Other agents couldn't get it right but they nailed it first time.", author: 'Rachel Adams', role: 'Honeymoon', location: 'Edinburgh, UK', rating: 5, destination: 'Dubai & Seychelles', tripType: 'Honeymoon', travelDate: 'June 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Celebrated our 25th anniversary at an incredible villa in Santorini. The sunset dinners they arranged were beyond anything we imagined. Truly five-star service.", author: 'Mark & Linda Williams', role: 'Anniversary', location: 'Birmingham, UK', rating: 5, destination: 'Santorini', tripType: 'Couples', travelDate: 'July 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+          ]
+        }
+      },
+      {
+        id: 'family-tour-op',
+        name: 'Family Tour Operator',
+        description: 'Family holidays, kids clubs, all-inclusive, beach resorts.',
+        icon: 'heart', colour: '#EC4899',
+        config: {
+          header: { show: true, eyebrow: 'Happy Families', title: 'Holidays they\'ll never forget', subtitle: 'Real reviews from families who trusted us with their getaway.' },
+          testimonials: [
+            { id: uid('t'), quote: "The kids are STILL talking about it. Splash parks, kids clubs, pizza making — and we got to relax by the pool. Best family holiday we've ever had.", author: 'Lisa Patel', role: 'Family of four', location: 'Leeds, UK', rating: 5, destination: 'Majorca', tripType: 'Family', travelDate: 'August 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "First time flying with a toddler and they made it so easy. Airport lounge, short transfer, hotel with a cot already set up. Thought of everything.", author: 'Tom Burke', role: 'Family', location: 'Bristol, UK', rating: 5, destination: 'Lanzarote', tripType: 'Family', travelDate: 'May 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Three generations under one roof in a gorgeous villa in Tuscany. They found a property with a pool, close to town, and even arranged a private chef for one evening.", author: 'Janet Morrison', role: 'Multi-generational', location: 'Glasgow, UK', rating: 5, destination: 'Tuscany', tripType: 'Family', travelDate: 'June 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "We needed a holiday that worked for teenagers AND a 4-year-old. They found us a resort with teen activities AND a crèche. Everyone was happy. Miracle workers.", author: 'Chris Taylor', role: 'Blended family', location: 'Cardiff, UK', rating: 4, destination: 'Tenerife', tripType: 'Family', travelDate: 'October 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Saved us over £600 compared to booking direct, AND we got free kid places. The personal service makes such a difference to booking online.", author: 'Amy Foster', role: 'Family of five', location: 'Norwich, UK', rating: 5, destination: 'Turkey', tripType: 'Family', travelDate: 'July 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+          ]
         }
       },
       {
         id: 'cruise',
-        name: 'Cruise',
-        description: 'Cabins, dining, shore excursions, dress code, on-board spend, gratuities.',
+        name: 'Cruise Specialist',
+        description: 'Ocean & river cruises, expedition voyages, all-inclusive.',
         icon: 'plane', colour: '#6366F1',
         config: {
-          heading: { show: true, title: 'Cruise FAQ', subtitle: 'From cabins to captains\' tables — your questions answered.' },
-          categories: [
-            { id: 'booking', label: 'Booking', icon: 'calendar' },
-            { id: 'cabins', label: 'Cabins', icon: 'help' },
-            { id: 'dining', label: 'Dining', icon: 'heart' },
-            { id: 'shore', label: 'Shore excursions', icon: 'globe' },
-            { id: 'onboard', label: 'On board', icon: 'star' }
-          ],
-          questions: [
-            { question: 'How far in advance should I book?', answer: 'Popular cruises fill up **12–18 months ahead**, especially for school holidays. Last-minute deals sometimes appear 6–8 weeks before departure.', category: 'booking', popular: true },
-            { question: 'What\'s included in the cruise fare?', answer: '- Accommodation in your chosen cabin\n- All meals at included restaurants\n- Entertainment, shows, and daytime activities\n- Port taxes and fees\n- Kids\' clubs (age-grouped)', category: 'booking', popular: true },
-            { question: 'What\'s NOT included?', answer: '- Drinks (unless you buy a package)\n- Shore excursions\n- Spa treatments\n- Gratuities (£12–15 per person, per day, typically)\n- Specialty restaurants', category: 'booking' },
-            { question: 'What cabin types are available?', answer: 'Four main types:\n\n- **Inside** — no window, cheapest\n- **Oceanview** — window, no balcony\n- **Balcony** — private balcony, best value for sea views\n- **Suite** — larger, often with butler service', category: 'cabins', popular: true },
-            { question: 'Can I choose my cabin?', answer: 'Yes — when you book, you\'ll see a deck plan and can pick your exact cabin. **Guaranteed** fares are cheaper but the specific cabin is assigned at embarkation.', category: 'cabins' },
-            { question: 'Is there a dress code?', answer: 'Daytime is casual. Evenings have **smart-casual as default**, with usually 1–2 **formal nights** per week (jacket for men, cocktail dress or equivalent).', category: 'onboard', popular: true },
-            { question: 'Can I bring my own drinks?', answer: 'Policies vary by cruise line. Most allow **one bottle of wine per adult at embarkation**; beyond that, drinks must be purchased on board.', category: 'onboard' },
-            { question: 'Do I need to book shore excursions in advance?', answer: 'Popular excursions sell out — we recommend booking **at least 60 days ahead**. You can book independently in port, but there\'s no guarantee the ship will wait if you\'re delayed.', category: 'shore', popular: true },
-            { question: 'Do I need travel insurance?', answer: 'Strongly recommended. Cruises have strict cancellation terms, and medical evacuation from a ship can cost £20,000+.', category: 'booking' },
-            { question: 'What about tipping?', answer: 'Daily gratuities (£12–15 pp per day) are added to your on-board account. You can pre-pay at booking or adjust at guest services if service wasn\'t good.', category: 'onboard' }
-          ],
-          cta: { heading: 'Ready to set sail?', description: 'Our cruise specialists have sailed with every major line.', buttonText: 'Talk to a cruise expert' }
+          header: { show: true, eyebrow: 'Cruise Reviews', title: 'Life-changing voyages', subtitle: 'From the Mediterranean to the Arctic — hear from our passengers.' },
+          testimonials: [
+            { id: uid('t'), quote: "14 nights around the Greek islands and every single port was a highlight. The balcony cabin was worth every penny — watching sunsets from our private space was incredible.", author: 'Robert & Diana Hall', role: 'Retired couple', location: 'Surrey, UK', rating: 5, destination: 'Greek Islands', tripType: 'Cruise', travelDate: 'September 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Our first cruise and we're completely converted. The food, the entertainment, waking up in a different place every morning. They found us the perfect ship for first-timers.", author: 'Sophie Grant', role: 'First-time cruiser', location: 'Liverpool, UK', rating: 5, destination: 'Western Mediterranean', tripType: 'Cruise', travelDate: 'June 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Expedition cruise to Norway to see the Northern Lights. Small ship, expert guides, zodiac landings. They matched us to the perfect expedition company.", author: 'James Robertson', role: 'Adventure traveller', location: 'Aberdeen, UK', rating: 5, destination: 'Norway', tripType: 'Cruise', travelDate: 'February 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "River cruise through the Danube was so relaxing. All drinks included, excursions at every stop, and the staff remembered our names by day two.", author: 'Margaret Stone', role: 'Solo traveller', location: 'Oxford, UK', rating: 5, destination: 'Danube', tripType: 'Cruise', travelDate: 'May 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+          ]
         }
       },
       {
-        id: 'activity',
-        name: 'Activity Provider',
-        description: 'Tours, excursions, experiences, tickets, group bookings, weather policy.',
-        icon: 'heart', colour: '#EC4899',
+        id: 'adventure',
+        name: 'Adventure & Activity',
+        description: 'Trekking, safaris, diving, ski holidays, active escapes.',
+        icon: 'plane', colour: '#059669',
         config: {
-          heading: { show: true, title: 'Before you book', subtitle: 'The answers we get asked most.' },
-          categories: [
-            { id: 'booking', label: 'Booking', icon: 'calendar' },
-            { id: 'group', label: 'Groups', icon: 'users' },
-            { id: 'weather', label: 'Weather & safety', icon: 'shield' },
-            { id: 'before', label: 'On the day', icon: 'clock' },
-            { id: 'cancel', label: 'Cancellations', icon: 'info' }
-          ],
-          questions: [
-            { question: 'How do I book?', answer: 'Book instantly online, or call us on 0800 123 4567. You\'ll get a confirmation email with a QR ticket within minutes.', category: 'booking', popular: true },
-            { question: 'Is there a minimum age?', answer: 'Activities vary — check the individual experience page for age limits. Most family experiences welcome **ages 5+**.', category: 'booking' },
-            { question: 'Do you offer group discounts?', answer: 'Yes — **10+ people get 10% off**, **20+ get 15% off**. For corporate or school groups, email us for a custom quote.', category: 'group', popular: true },
-            { question: 'Can you accommodate large groups?', answer: 'We regularly host groups of **up to 60 people**. For bigger groups, multiple sessions can be combined. Give us at least 14 days\' notice for groups over 20.', category: 'group' },
-            { question: 'What if it rains?', answer: 'Most of our activities go ahead in **light rain**. We only cancel for **dangerous conditions** (storms, high winds). If we cancel, you get a full refund or free rebooking.', category: 'weather', popular: true },
-            { question: 'Is it suitable for people with limited mobility?', answer: 'Several of our activities are fully accessible. Look for the **accessibility icon** on the booking page, or call us and we\'ll help you choose.', category: 'weather' },
-            { question: 'What should I bring?', answer: '- Comfortable clothing suitable for the weather\n- Sturdy shoes\n- Water bottle\n- Your booking confirmation (QR code)\n- A photo ID if over 18', category: 'before', popular: true },
-            { question: 'Where do we meet?', answer: 'Meeting point details are in your confirmation email. We send a **reminder with the map 24 hours before**.', category: 'before' },
-            { question: 'Can I cancel or reschedule?', answer: 'Yes — **free cancellation up to 24 hours before**. Within 24 hours, no refund, but you can reschedule to any date within 12 months.', category: 'cancel', popular: true },
-            { question: 'Do I get a refund if I don\'t turn up?', answer: 'Unfortunately no — no-shows are non-refundable. If something unexpected happens, call us **before your session starts** and we\'ll do our best.', category: 'cancel' }
-          ],
-          cta: { heading: 'Got a specific question?', description: 'Drop us a line — we reply within a couple of hours.', buttonText: 'Ask us' }
+          header: { show: true, eyebrow: 'Adventure Stories', title: 'Pushing boundaries', subtitle: 'Tales from travellers who chose the path less travelled.' },
+          testimonials: [
+            { id: uid('t'), quote: "Kilimanjaro summit at sunrise. No words can describe it. They prepared us perfectly — training guidance, kit list, acclimatisation schedule. We all made it to the top.", author: 'Peter Clarke', role: 'Group of six', location: 'Brighton, UK', rating: 5, destination: 'Tanzania', tripType: 'Adventure', travelDate: 'January 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Diving in the Red Sea was a lifelong dream. They set up everything — PADI course, liveaboard, equipment hire. Swam with dolphins on day three.", author: 'Natalie Brooks', role: 'Solo diver', location: 'London, UK', rating: 5, destination: 'Egypt', tripType: 'Adventure', travelDate: 'March 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Ski holiday in Verbier with the whole family. They sorted chalet, lift passes, ski school for the kids, and even restaurant recommendations. Effortless.", author: 'Daniel & Sophie King', role: 'Family ski', location: 'Cheltenham, UK', rating: 5, destination: 'Verbier', tripType: 'Ski', travelDate: 'February 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Two weeks trekking in Patagonia. Remote lodges, incredible guides, scenery that made us cry. They understood exactly the level of adventure we wanted.", author: 'Michael & Priya Sharma', role: 'Couple', location: 'Cambridge, UK', rating: 5, destination: 'Patagonia', tripType: 'Adventure', travelDate: 'November 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+          ]
+        }
+      },
+      {
+        id: 'hotel-villa',
+        name: 'Hotel & Villa',
+        description: 'Boutique hotels, holiday villas, self-catering, B&Bs.',
+        icon: 'star', colour: '#0891B2',
+        config: {
+          header: { show: true, eyebrow: 'Guest Reviews', title: 'Stay with confidence', subtitle: 'Hear from guests who experienced our handpicked properties.' },
+          testimonials: [
+            { id: uid('t'), quote: "The villa was even better than the photos. Private pool, stunning views, and they had a welcome hamper waiting when we arrived. Proper attention to detail.", author: 'Karen & Steve Ellis', role: 'Couple', location: 'Devon, UK', rating: 5, destination: 'Algarve', tripType: 'Villa', travelDate: 'August 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Boutique hotel in Marrakech — tiny but perfect. They recommended it over the big chains and they were absolutely right. Rooftop breakfasts we'll never forget.", author: 'Alex Cooper', role: 'City break', location: 'London, UK', rating: 5, destination: 'Marrakech', tripType: 'Cultural', travelDate: 'April 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Gorgeous farmhouse in Provence sleeping 12. Perfect for our annual friends' holiday. They even arranged a local wine tour and truffle hunting experience.", author: 'Helen Dawe', role: 'Friends group', location: 'York, UK', rating: 5, destination: 'Provence', tripType: 'Villa', travelDate: 'September 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Beachfront apartment in Crete for a month. Remote working with a sea view. They found us reliable Wi-Fi, a quiet area, and a great price for a long stay.", author: 'Dan Mitchell', role: 'Digital nomad', location: 'Bristol, UK', rating: 4, destination: 'Crete', tripType: 'Solo', travelDate: 'October 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+          ]
         }
       }
     ];
@@ -1223,10 +1155,10 @@
       try {
         if (state.widget && typeof state.widget.update === 'function') {
           state.widget.update(deepClone(state.config));
-        } else if (window.TGFaqWidget) {
+        } else if (window.TGTestimonialsWidget) {
           try { mount.innerHTML = ''; } catch(e){}
           mount.removeAttribute('data-tg-initialised');
-          state.widget = new window.TGFaqWidget(mount, deepClone(state.config));
+          state.widget = new window.TGTestimonialsWidget(mount, deepClone(state.config));
           mount.setAttribute('data-tg-initialised', 'true');
         }
         // If Design mode active, refresh hotspots
@@ -2029,7 +1961,7 @@
         title: 'Choose a template',
         large: true,
         body: `
-          <p class="field-hint" style="margin-bottom:14px">Pick an industry-specific FAQ set to start from. You can edit anything after applying.</p>
+          <p class="field-hint" style="margin-bottom:14px">Pick a travel industry template to start from. You can edit anything after applying.</p>
           <div class="tmpl-grid">
             ${TEMPLATES.map(t => `
               <button class="tmpl-card" data-apply-tmpl="${esc(t.id)}">
@@ -2039,9 +1971,7 @@
                 </div>
                 <div class="tmpl-card-desc">${esc(t.description)}</div>
                 <div class="tmpl-card-meta">
-                  <span>${t.config.questions.length} questions</span>
-                  <span>·</span>
-                  <span>${t.config.categories.length} categories</span>
+                  <span>${t.config.testimonials.length} testimonials</span>
                 </div>
               </button>
             `).join('')}
@@ -2056,12 +1986,10 @@
 
     function applyTemplate(id) {
       const t = TEMPLATES.find(x => x.id === id); if (!t) return;
-      if (state.config.questions.length > 0 && !confirm(`This will replace your current ${state.config.questions.length} questions with the ${t.name} template. Continue?`)) return;
+      if (state.config.testimonials.length > 0 && !confirm(`This will replace your current ${state.config.testimonials.length} testimonials with the ${t.name} template. Continue?`)) return;
       mutate(cfg => {
-        cfg.header = Object.assign({}, cfg.header, t.config.header);
-        cfg.categories = deepClone(t.config.categories);
-        cfg.questions = t.config.questions.map(q => Object.assign({ id: uid('q'), pinned: false, popular: false, hidden: false, updatedAt: '' }, q));
-        if (t.config.cta) cfg.cta = Object.assign({}, cfg.cta, t.config.cta);
+        if (t.config.header) cfg.header = Object.assign({}, cfg.header, t.config.header);
+        cfg.testimonials = t.config.testimonials.map(item => Object.assign({ id: uid('t'), hidden: false, featured: false, video: '', avatar: '' }, item));
       });
       closeModal();
       setTab('content');
@@ -2071,21 +1999,21 @@
     /* ============================ AI MODAL ============================ */
     function openAIModal() {
       openModal({
-        title: 'Generate FAQs with AI',
+        title: 'Generate Testimonials with AI',
         body: `
-          <p class="field-hint" style="margin-bottom:12px">Describe your business and what kind of FAQs you need. The more specific you are, the better the results.</p>
+          <p class="field-hint" style="margin-bottom:12px">Describe your business and what kind of testimonials you need. The more specific you are, the better the results.</p>
           <div class="field">
             <label class="field-label">Business description</label>
-            <textarea class="textarea" id="ai-prompt" style="min-height:120px" placeholder="e.g. Independent travel agent based in Manchester, specialising in Greek island holidays for families and couples. Need FAQs covering booking, deposits, ATOL protection, what's included, and child policies."></textarea>
+            <textarea class="textarea" id="ai-prompt" style="min-height:120px" placeholder="e.g. Luxury travel agent in London specialising in honeymoons and bespoke itineraries. Need testimonials from couples, families, and solo travellers covering destinations like Maldives, Japan, Santorini."></textarea>
           </div>
           <div class="row-wrap">
             <div class="field" style="flex:1;min-width:140px">
               <label class="field-label">Count</label>
               <select class="select" id="ai-count">
-                <option value="5">5 questions</option>
-                <option value="8" selected>8 questions</option>
-                <option value="12">12 questions</option>
-                <option value="15">15 questions</option>
+                <option value="4">4 testimonials</option>
+                <option value="6" selected>6 testimonials</option>
+                <option value="8">8 testimonials</option>
+                <option value="10">10 testimonials</option>
               </select>
             </div>
             <div class="field" style="flex:1;min-width:140px">
@@ -2134,36 +2062,33 @@
                   widgetType: WIDGET_TYPE,
                   action: 'generate',
                   prompt,
-                  options: { count, tone, existingCategories: state.config.categories.map(c => c.label) }
+                  options: { count, tone }
                 })
               });
               if (res.status === 401) { showToast('Session expired — please sign in again', 'error'); clearSession(); location.reload(); return; }
               if (!res.ok) throw new Error('HTTP ' + res.status);
               const data = await res.json();
-              const arr = data.questions || data.result?.questions || data.result || [];
-              if (!Array.isArray(arr) || arr.length === 0) throw new Error('No questions returned');
-              const cats = data.categories || data.result?.categories || [];
+              const arr = data.testimonials || data.result?.testimonials || data.result || [];
+              if (!Array.isArray(arr) || arr.length === 0) throw new Error('No testimonials returned');
               mutate(cfg => {
-                // Merge categories
-                if (Array.isArray(cats)) {
-                  cats.forEach(cat => {
-                    const id = cat.id || slugify(cat.label || cat);
-                    const label = cat.label || cat;
-                    if (!cfg.categories.some(x => x.id === id)) cfg.categories.push({ id, label, icon: cat.icon || 'help' });
-                  });
-                }
-                // Questions
-                const built = arr.map(q => ({
-                  id: uid('q'),
-                  question: q.question || q.q || '',
-                  answer: q.answer || q.a || '',
-                  category: q.category || '',
-                  popular: !!q.popular, pinned: false, hidden: false, updatedAt: ''
-                })).filter(q => q.question);
-                if (merge === 'replace') cfg.questions = built;
-                else cfg.questions = cfg.questions.concat(built);
+                const built = arr.map(t => ({
+                  id: uid('t'),
+                  quote: t.quote || t.text || '',
+                  author: t.author || t.name || '',
+                  role: t.role || '',
+                  location: t.location || '',
+                  avatar: '', rating: t.rating || 5,
+                  destination: t.destination || '',
+                  tripType: t.tripType || t.trip_type || '',
+                  travelDate: t.travelDate || t.travel_date || '',
+                  source: t.source || 'Google',
+                  verified: !!t.verified,
+                  video: '', featured: !!t.featured, hidden: false
+                })).filter(t => t.quote);
+                if (merge === 'replace') cfg.testimonials = built;
+                else cfg.testimonials = cfg.testimonials.concat(built);
               });
-              closeModal(); setTab('content'); showToast(`Generated ${arr.length} questions`, 'success');
+              closeModal(); setTab('content'); showToast(`Generated ${arr.length} testimonials`, 'success');
             } catch (err) {
               status.textContent = 'Error: ' + (err.message || 'Could not generate');
               status.style.color = 'var(--danger)';
@@ -2181,7 +2106,7 @@
       openModal({
         title: 'Embed code',
         body: `
-          <p class="field-hint" style="margin-bottom:12px">Paste this into any HTML page where you want your FAQ to appear.</p>
+          <p class="field-hint" style="margin-bottom:12px">Paste this into any HTML page where you want your testimonials to appear.</p>
           <div class="code-block" id="embed-code">${esc(snippet)}</div>
           <p class="field-hint" style="margin-top:12px">The widget loads only when the page loads — no setup, no dependencies, zero impact on your page speed.</p>
         `,
@@ -2358,14 +2283,13 @@
       const root = mount.shadowRoot;
       if (!root) return;
       const hotspots = [];
-      const header = root.querySelector('.tgf-header');
+      const header = root.querySelector('.tgt-header');
       if (header) hotspots.push({ node: header, label: 'Header', target: 'heading' });
-      const search = root.querySelector('.tgf-search');
-      if (search) hotspots.push({ node: search, label: 'Search bar', target: 'search' });
-      const tabs = root.querySelector('.tgf-tabs, .tgf-chips');
-      if (tabs) hotspots.push({ node: tabs, label: 'Categories', target: 'categories' });
-      const cta = root.querySelector('.tgf-cta');
-      if (cta) hotspots.push({ node: cta, label: 'Call to action', target: 'cta' });
+      // Find individual testimonial cards
+      const cards = root.querySelectorAll('.tgt-card, .tgt-featured, .tgt-item');
+      cards.forEach((card, i) => {
+        if (i < 6) hotspots.push({ node: card, label: `Testimonial ${i + 1}`, target: 'testimonial-' + i });
+      });
 
       hotspots.forEach(h => {
         const rect = h.node.getBoundingClientRect();
@@ -2389,29 +2313,23 @@
         body = `
           <div class="dm-popover-title">Header <button class="dm-popover-close" aria-label="Close">${icn('x', 14)}</button></div>
           <div class="toggle-row"><div class="toggle-row-main"><div class="toggle-row-label">Show header</div></div><button class="toggle" role="switch" data-dm-toggle="header.show" aria-pressed="${!!c.header.show}"></button></div>
+          <div class="field"><label class="field-label">Eyebrow</label><input class="input" data-dm-set="header.eyebrow" value="${esc(c.header.eyebrow || '')}"></div>
           <div class="field"><label class="field-label">Title</label><input class="input" data-dm-set="header.title" value="${esc(c.header.title || '')}"></div>
           <div class="field"><label class="field-label">Subtitle</label><textarea class="textarea" data-dm-set="header.subtitle">${esc(c.header.subtitle || '')}</textarea></div>
         `;
-      } else if (target === 'search') {
-        body = `
-          <div class="dm-popover-title">Search bar <button class="dm-popover-close" aria-label="Close">${icn('x', 14)}</button></div>
-          <div class="toggle-row"><div class="toggle-row-main"><div class="toggle-row-label">Enabled</div></div><button class="toggle" role="switch" data-dm-toggle="search.enabled" aria-pressed="${!!c.search.enabled}"></button></div>
-          <div class="field"><label class="field-label">Placeholder</label><input class="input" data-dm-set="search.placeholder" value="${esc(c.search.placeholder)}"></div>
-        `;
-      } else if (target === 'cta') {
-        body = `
-          <div class="dm-popover-title">CTA <button class="dm-popover-close" aria-label="Close">${icn('x', 14)}</button></div>
-          <div class="toggle-row"><div class="toggle-row-main"><div class="toggle-row-label">Show CTA</div></div><button class="toggle" role="switch" data-dm-toggle="cta.enabled" aria-pressed="${!!c.cta.enabled}"></button></div>
-          <div class="field"><label class="field-label">Heading</label><input class="input" data-dm-set="cta.heading" value="${esc(c.cta.heading)}"></div>
-          <div class="field"><label class="field-label">Button text</label><input class="input" data-dm-set="cta.buttonText" value="${esc(c.cta.buttonText)}"></div>
-          <div class="field"><label class="field-label">Button URL</label><input class="input" data-dm-set="cta.buttonUrl" value="${esc(c.cta.buttonUrl)}"></div>
-        `;
-      } else if (target === 'categories') {
-        body = `
-          <div class="dm-popover-title">Categories <button class="dm-popover-close" aria-label="Close">${icn('x', 14)}</button></div>
-          <p class="field-hint" style="margin-bottom:8px">${c.categories.length} categories — manage them in the Content tab.</p>
-          <button class="btn btn-sm btn-block" data-dm-goto="content">Edit categories →</button>
-        `;
+      } else if (target.startsWith('testimonial-')) {
+        const idx = parseInt(target.split('-')[1], 10);
+        const t = c.testimonials[idx];
+        if (t) {
+          body = `
+            <div class="dm-popover-title">Testimonial <button class="dm-popover-close" aria-label="Close">${icn('x', 14)}</button></div>
+            <div class="field"><label class="field-label">Quote</label><textarea class="textarea" data-dm-set="testimonials.${idx}.quote" style="min-height:60px">${esc(t.quote || '')}</textarea></div>
+            <div class="field"><label class="field-label">Author</label><input class="input" data-dm-set="testimonials.${idx}.author" value="${esc(t.author || '')}"></div>
+            <div class="field"><label class="field-label">Destination</label><input class="input" data-dm-set="testimonials.${idx}.destination" value="${esc(t.destination || '')}"></div>
+            <div class="field"><label class="field-label">Trip type</label><input class="input" data-dm-set="testimonials.${idx}.tripType" value="${esc(t.tripType || '')}"></div>
+            <button class="btn btn-sm btn-block" data-dm-goto="content">Full edit in Content tab →</button>
+          `;
+        }
       }
       pop.innerHTML = body;
       pop.hidden = false;
@@ -2439,7 +2357,7 @@
     /* ============================ SAVE / LOAD ============================ */
     async function save() {
       const btn = $('#save-btn');
-      if (!state.widgetName.trim()) state.widgetName = 'Untitled FAQ';
+      if (!state.widgetName.trim()) state.widgetName = 'Untitled Testimonials';
       btn.disabled = true;
       btn.innerHTML = `${icn('sparkle', 14).replace('>','  class="spin">')}Saving…`;
       try {
@@ -2483,7 +2401,7 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         state.widgetId = data.id || id;
-        state.widgetName = data.name || 'Untitled FAQ';
+        state.widgetName = data.name || 'Untitled Testimonials';
         state.config = Object.assign(defaultConfig(), data.config || {});
         // ensure nested objects are preserved
         state.config.colors = Object.assign({}, defaultConfig().colors, (data.config && data.config.colors) || {});
@@ -2657,7 +2575,7 @@
     }
 
     /* ============================ BOOT ============================ */
-    console.log('[boot] editor-faq.html script running | sessionStorage keys:', Object.keys(sessionStorage));
+    console.log('[boot] editor-testimonials.html script running | sessionStorage keys:', Object.keys(sessionStorage));
     bindLogin();
     init();
   })();
