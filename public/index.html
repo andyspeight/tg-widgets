@@ -1,879 +1,2584 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Travelgenix Widget Suite</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#F7F8FA;--sf:#FFF;--bd:#E5E7EB;--tx:#111827;--sb:#6B7280;--mt:#9CA3AF;--br:#0891B2;--bl:#ECFEFF;--bk:#0E7490;--ac:#7C3AED;--ok:#10B981;--dn:#EF4444;--warn:#F59E0B;--ft:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'JetBrains Mono',monospace}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--ft);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
-a{text-decoration:none;color:inherit}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp .5s ease-out both}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Testimonials Widget Editor · Travelgenix</title>
 
-/* Nav */
-.nav{background:var(--sf);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:50}
-.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
-.nav-logo{display:flex;align-items:center;gap:10px}
-.nav-logo-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--br),var(--ac));display:flex;align-items:center;justify-content:center}
-.nav-logo-icon svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.nav-logo span{font-size:15px;font-weight:800;letter-spacing:-.02em}.nav-logo small{font-size:11px;font-weight:500;color:var(--mt);margin-left:6px;background:var(--bg);padding:2px 8px;border-radius:6px}
-.nav-right{display:flex;align-items:center;gap:10px}
-.nav-link{font-size:13px;font-weight:500;color:var(--sb);padding:6px 12px;border-radius:8px;transition:all .15s;cursor:pointer;border:none;background:none;font-family:var(--ft)}
-.nav-link:hover{color:var(--tx);background:var(--bg)}
-.nav-btn{font-size:13px;font-weight:600;color:#fff;padding:7px 16px;border-radius:8px;background:var(--br);border:none;cursor:pointer;font-family:var(--ft);transition:all .15s;display:flex;align-items:center;gap:6px}
-.nav-btn:hover{background:var(--bk);box-shadow:0 2px 8px rgba(8,145,178,.25)}
-.nav-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.nav-user{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:20px;background:var(--bg);border:1px solid var(--bd);font-size:12px;font-weight:600;color:var(--tx);cursor:pointer}
-.nav-user-av{width:28px;height:28px;border-radius:14px;background:var(--br);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js" defer></script>
 
-/* Hero */
-.hero{text-align:center;padding:56px 24px 40px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(8,145,178,.06) 0%,transparent 70%);pointer-events:none}
-.hero h1{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:12px;position:relative}
-.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--br),var(--ac));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{font-size:15px;color:var(--sb);max-width:500px;margin:0 auto;line-height:1.6;position:relative}
+  <style>
+    /* ============================ Editor chrome ============================ */
+    :root {
+      --bg: #F8FAFC;
+      --panel: #FFFFFF;
+      --panel-2: #F8FAFC;
+      --ink: #0F172A;
+      --sub: #475569;
+      --muted: #94A3B8;
+      --border: #E2E8F0;
+      --border-strong: #CBD5E1;
+      --hover: #F1F5F9;
+      --brand: #EC4899;
+      --brand-soft: rgba(236,72,153,.1);
+      --accent: #8B5CF6;
+      --accent-soft: rgba(139,92,246,.1);
+      --success: #10B981;
+      --success-soft: rgba(16,185,129,.1);
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --radius-sm: 6px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
+      --shadow-sm: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+      --shadow-md: 0 4px 12px rgba(15,23,42,.08), 0 2px 4px rgba(15,23,42,.04);
+      --shadow-lg: 0 10px 24px rgba(15,23,42,.12), 0 4px 8px rgba(15,23,42,.06);
+      --shadow-xl: 0 24px 48px rgba(15,23,42,.14), 0 8px 16px rgba(15,23,42,.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--panel-2);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-/* Stats bar (logged in) */
-.stats{max-width:1200px;margin:0 auto 24px;padding:0 24px;display:none}
-.stats.show{display:block}
-.stats-inner{display:flex;gap:12px}
-.stat-card{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px}
-.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.stat-icon svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.stat-num{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1}.stat-label{font-size:12px;color:var(--mt);font-weight:500}
+    /* ---- layout ---- */
+    /* Ensure the HTML `hidden` attribute always hides elements, even when
+       a class rule (like .login-overlay { display: flex } or .editor { display: grid })
+       would otherwise override the user-agent's default [hidden] { display: none }.
+       Without this, hideLogin() appears to succeed but the overlay stays visible. */
+    [hidden] { display: none !important; }
 
-/* My Widgets (logged in) */
-.my-widgets{max-width:1200px;margin:0 auto 32px;padding:0 24px;display:none}
-.my-widgets.show{display:block}
-.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.section-title{font-size:16px;font-weight:700}
+    .editor { display: grid; grid-template-columns: 380px 1fr; height: 100vh; }
+    .sidebar {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .preview {
+      background: var(--panel-2);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+    }
 
-/* Type cards — one per widget type in My Widgets */
-.my-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-.type-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s;display:flex;flex-direction:column}
-.type-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);border-color:#D1D5DB;transform:translateY(-2px)}
-.type-card-visual{height:120px;display:flex;align-items:center;justify-content:center;position:relative}
-.type-card-visual svg{width:56px;height:56px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.95}
-.type-card-count{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;color:#111827}
-.type-card-body{padding:14px 16px;border-top:1px solid var(--bd);background:var(--sf)}
-.type-card-name{font-size:14px;font-weight:700;margin-bottom:2px}
-.type-card-sub{font-size:12px;color:var(--mt)}
+    /* ---- sidebar topbar ---- */
+    .topbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+    .topbar-title { font-weight: 700; font-size: 14px; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topbar-sub { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .topbar-ident { min-width: 0; flex-shrink: 1; }
+    .topbar-spacer { flex: 1; }
+    .icon-btn {
+      height: 32px; padding: 0 10px; border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--sub);
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s ease;
+      text-decoration: none;   /* anchor-flavoured icon-btns (e.g. Dashboard link) */
+      flex-shrink: 0;           /* don't shrink buttons — shrink the title instead */
+      white-space: nowrap;
+    }
+    .icon-btn:hover { border-color: var(--border-strong); color: var(--ink); background: var(--hover); }
+    .icon-btn svg { flex-shrink: 0; }
+    .icon-btn.icon-only { width: 32px; padding: 0; justify-content: center; }
 
-/* Legacy single-widget card (kept for empty-state hints) */
-.my-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px;transition:all .2s;cursor:pointer;display:flex;flex-direction:column}
-.my-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.06);border-color:#D1D5DB;transform:translateY(-2px)}
-.my-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.my-card-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.my-card-icon svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.my-card-name{font-size:14px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.my-card-type{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap}
-.my-card-meta{font-size:11px;color:var(--mt);margin-top:auto;padding-top:8px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
-.my-card-status{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600}
-.dot{width:6px;height:6px;border-radius:3px}
+    /* ---- name row ---- */
+    .name-row {
+      display: flex; gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel-2);
+    }
+    .name-input {
+      flex: 1;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--panel);
+      font-size: 13px; font-weight: 500;
+      outline: none;
+      transition: all .15s ease;
+    }
+    .name-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .save-btn {
+      height: 36px; padding: 0 14px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 600; font-size: 13px;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .save-btn:hover { background: color-mix(in srgb, var(--brand) 88%, #000); }
+    .save-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .save-btn.is-dirty { background: var(--warning); }
+    .save-btn.is-dirty:hover { background: color-mix(in srgb, var(--warning) 88%, #000); }
+    .save-btn.is-saved { background: var(--success); pointer-events: none; }
 
-/* Catalogue */
-.catalogue{max-width:1200px;margin:0 auto;padding:0 24px 48px}
-.cat-filters{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
-.cat-filter{padding:7px 16px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);font-size:12px;font-weight:600;color:var(--sb);cursor:pointer;font-family:var(--ft);transition:all .15s}
-.cat-filter:hover{border-color:var(--br);color:var(--br)}
-.cat-filter.active{background:var(--bl);border-color:var(--br);color:var(--br)}
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+    /* ---- tabs ---- */
+    .tabs {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .tab-btn {
+      height: 42px;
+      border: 0;
+      background: transparent;
+      color: var(--sub);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s ease;
+    }
+    .tab-btn:hover { color: var(--ink); background: var(--hover); }
+    .tab-btn[aria-selected="true"] {
+      color: var(--brand);
+      border-bottom-color: var(--brand);
+      background: var(--brand-soft);
+    }
 
-/* Widget Card */
-.w-card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;overflow:hidden;transition:all .3s}
-.w-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);border-color:#D1D5DB;transform:translateY(-3px)}
-.w-card-preview{height:200px;background:var(--bg);border-bottom:1px solid var(--bd);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
-.w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px}
-.w-card-body{padding:18px 20px}
-.w-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
-.w-card-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.w-card-logo svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.w-card-name{font-size:16px;font-weight:700;line-height:1.2}
-.w-card-cat{font-size:11px;font-weight:600;color:var(--mt);margin-top:2px}
-.w-card-desc{font-size:13px;color:var(--sb);line-height:1.5;margin-bottom:14px}
-.w-card-actions{display:flex;gap:8px}
-.w-card-btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--ft);cursor:pointer;transition:all .15s;border:none;display:flex;align-items:center;gap:5px}
-.w-card-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.btn-create{background:var(--br);color:#fff}.btn-create:hover{background:var(--bk)}
-.btn-preview{background:var(--bg);color:var(--sb);border:1px solid var(--bd)}.btn-preview:hover{background:#E5E7EB}
-.btn-soon{background:var(--bg);color:var(--mt);border:1px solid var(--bd);cursor:default}
+    /* ---- sidebar body (scrollable) ---- */
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .sidebar-body::-webkit-scrollbar { width: 10px; }
+    .sidebar-body::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; border: 2px solid var(--panel); }
+    .sidebar-body::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
 
-/* Coming soon overlay */
-.w-card.soon{opacity:.75}.w-card.soon:hover{transform:none;box-shadow:none}
-.soon-badge{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(0,0,0,.6);color:#fff;letter-spacing:.5px;text-transform:uppercase;backdrop-filter:blur(4px)}
-.w-card.soon .w-card-preview{background:linear-gradient(135deg,#F8FAFC,#EFF6FF);display:flex;align-items:center;justify-content:center}
-.soon-placeholder{text-align:center;color:var(--mt)}
-.soon-placeholder svg{width:40px;height:40px;stroke:var(--bd);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:8px}
-.soon-placeholder p{font-size:12px;font-weight:600}
+    /* ---- collapsible section ---- */
+    .section {
+      border-bottom: 1px solid var(--border);
+    }
+    .section-head {
+      width: 100%;
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 12px; font-weight: 700;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: left;
+    }
+    .section-head:hover { background: var(--hover); }
+    .section-head svg.chev { margin-left: auto; transition: transform .2s ease; color: var(--muted); }
+    .section[data-open="false"] .section-head svg.chev { transform: rotate(-90deg); }
+    .section[data-open="false"] .section-body { display: none; }
+    .section-body { padding: 4px 16px 16px; }
+    .section-desc {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 6px;
+    }
 
-/* Locked overlay */
-.locked-overlay{position:absolute;inset:0;background:rgba(255,255,255,.85);backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;border-radius:16px 16px 0 0}
-.locked-icon{width:48px;height:48px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid var(--bd)}
-.locked-icon svg{width:22px;height:22px;stroke:var(--mt);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.locked-text{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:2px}
-.locked-sub{font-size:11px;color:var(--mt);margin-bottom:10px}
-.upgrade-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--ft);cursor:pointer;border:none;background:linear-gradient(135deg,var(--ac),var(--br));color:#fff;transition:all .15s;display:flex;align-items:center;gap:5px}
-.upgrade-btn:hover{box-shadow:0 4px 12px rgba(124,58,237,.3);transform:scale(1.03)}
-.upgrade-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    /* ---- form controls ---- */
+    .field { margin-bottom: 12px; }
+    .field:last-child { margin-bottom: 0; }
+    .field-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: var(--sub);
+      margin-bottom: 6px;
+    }
+    .field-hint { font-size: 11px; color: var(--muted); font-weight: 400; }
+    .input, .textarea, .select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--panel);
+      font-size: 13px;
+      outline: none;
+      transition: all .15s ease;
+    }
+    .input { height: 34px; }
+    .select { height: 34px; cursor: pointer; appearance: none; padding-right: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+    }
+    .textarea { min-height: 72px; resize: vertical; font-family: inherit; }
+    .input:focus, .textarea:focus, .select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .input::placeholder, .textarea::placeholder { color: var(--muted); }
 
-/* Access badge on card */
-.access-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;margin-top:8px}
-.access-badge svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.access-included{background:#ECFDF5;color:#059669}
-.access-limit{background:#FEF3C7;color:#D97706}
-.access-locked{background:#FEF2F2;color:#DC2626}
+    /* Colour input with swatch */
+    .colour-row { display: flex; align-items: center; gap: 8px; }
+    .colour-swatch-wrap {
+      width: 34px; height: 34px; position: relative;
+      border-radius: 6px; overflow: hidden;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .colour-swatch-wrap input[type="color"] {
+      position: absolute; inset: -2px; width: calc(100% + 4px); height: calc(100% + 4px);
+      border: 0; padding: 0; background: transparent; cursor: pointer;
+    }
+    .colour-hex {
+      flex: 1; height: 34px; padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--panel);
+      font-size: 13px; font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      text-transform: uppercase;
+      outline: none;
+    }
+    .colour-hex:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 
-/* Sign in modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
-.modal-bg.open{opacity:1;pointer-events:auto}
-.modal{background:#fff;border-radius:16px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);padding:32px}
-.modal h2{font-size:20px;font-weight:800;margin-bottom:4px;text-align:center}
-.modal p{font-size:13px;color:var(--sb);margin-bottom:20px;text-align:center}
-.modal input{width:100%;padding:10px 14px;font-size:14px;border:1px solid var(--bd);border-radius:10px;font-family:var(--ft);outline:none;margin-bottom:10px}
-.modal input:focus{border-color:var(--br);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
-.modal .modal-btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:var(--ft);cursor:pointer;transition:all .15s}
-.modal .btn-p{background:var(--br);color:#fff;margin-bottom:8px}.modal .btn-p:hover{background:var(--bk)}
-.modal .btn-c{background:var(--bg);color:var(--sb)}.modal .btn-c:hover{background:#E5E7EB}
-.modal .err{color:var(--dn);font-size:12px;margin-bottom:8px;text-align:center}
+    /* Slider */
+    .slider-row { display: flex; align-items: center; gap: 10px; }
+    .slider-input {
+      flex: 1; height: 28px; -webkit-appearance: none; appearance: none;
+      background: transparent; cursor: pointer;
+    }
+    .slider-input::-webkit-slider-runnable-track {
+      height: 4px; background: var(--border); border-radius: 2px;
+    }
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--brand);
+      border: 2px solid var(--panel);
+      box-shadow: var(--shadow-sm);
+      margin-top: -6px;
+      cursor: pointer;
+    }
+    .slider-input::-moz-range-track { height: 4px; background: var(--border); border-radius: 2px; }
+    .slider-input::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--brand); border: 2px solid var(--panel); cursor: pointer; }
+    .slider-val { min-width: 44px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--sub); font-weight: 500; }
 
-/* Type detail modal — wider, with a scrollable list of widgets of a type */
-.type-modal{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:85vh;box-shadow:0 20px 60px rgba(0,0,0,.2);display:flex;flex-direction:column;overflow:hidden}
-.type-modal-head{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid var(--bd)}
-.type-modal-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.type-modal-ico svg{width:22px;height:22px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.type-modal-title{flex:1;min-width:0}
-.type-modal-title h2{font-size:17px;font-weight:800;margin:0;letter-spacing:-.01em}
-.type-modal-title p{font-size:12px;color:var(--mt);margin:2px 0 0}
-.type-modal-close{width:32px;height:32px;border-radius:8px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--sb);transition:all .15s}
-.type-modal-close:hover{background:var(--bg);color:var(--ink)}
-.type-modal-close svg{width:18px;height:18px}
-.type-modal-list{overflow-y:auto;padding:16px 20px;flex:1}
-.type-modal-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;margin-bottom:8px;background:var(--sf);transition:all .15s}
-.type-modal-item:hover{border-color:#D1D5DB}
-.type-modal-item-body{flex:1;min-width:0}
-.type-modal-item-name{font-size:14px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.type-modal-item-meta{font-size:11px;color:var(--mt);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.type-modal-item-id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;color:var(--mt);opacity:.85}
-.type-modal-item-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok)}
-.type-modal-item-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--bd);background:#fff;font-size:12px;font-weight:700;font-family:var(--ft);cursor:pointer;color:var(--sb);transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.type-modal-item-btn:hover{border-color:var(--br);color:var(--br)}
-.type-modal-item-delete{width:32px;height:32px;padding:0;border-radius:8px;border:1px solid var(--bd);background:#fff;cursor:pointer;color:var(--mt);display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.type-modal-item-delete svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.type-modal-item-delete:hover{border-color:var(--dn);color:var(--dn);background:#FEF2F2}
-.type-modal-item-delete:disabled{opacity:.5;cursor:not-allowed}
-.type-modal-foot{padding:16px 20px;border-top:1px solid var(--bd);background:var(--sf)}
-.type-modal-create{width:100%;padding:11px 16px;border-radius:10px;border:none;background:var(--br);color:#fff;font-size:13px;font-weight:700;font-family:var(--ft);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:all .15s}
-.type-modal-create:hover{background:var(--bk)}
-.type-modal-create svg{width:14px;height:14px}
-body.modal-open{overflow:hidden}
+    /* Toggle */
+    .toggle-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0;
+      min-height: 32px;
+    }
+    .toggle-row-label { flex: 1; font-size: 13px; color: var(--ink); }
+    .toggle-row-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .toggle-row-main { flex: 1; }
+    .toggle {
+      width: 36px; height: 20px; position: relative;
+      background: var(--border); border-radius: 999px;
+      border: 0; padding: 0;
+      cursor: pointer;
+      transition: background .15s ease;
+      flex-shrink: 0;
+    }
+    .toggle::before {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--panel); box-shadow: var(--shadow-xs);
+      transition: transform .2s ease;
+    }
+    .toggle[aria-pressed="true"] { background: var(--brand); }
+    .toggle[aria-pressed="true"]::before { transform: translateX(16px); }
 
-/* Confirm delete dialog */
-.confirm-dialog{background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.2);padding:28px;display:flex;flex-direction:column;gap:14px}
-.confirm-dialog-head{display:flex;align-items:flex-start;gap:14px}
-.confirm-dialog-icon{width:44px;height:44px;border-radius:11px;background:#FEF2F2;color:var(--dn);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.confirm-dialog-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.confirm-dialog-title{font-size:16px;font-weight:800;margin:2px 0 4px;letter-spacing:-.01em}
-.confirm-dialog-body{font-size:13px;color:var(--sb);line-height:1.5;margin:0}
-.confirm-dialog-body strong{color:var(--ink)}
-.confirm-dialog-err{color:var(--dn);font-size:12px;font-weight:600;margin:0;padding:10px 12px;background:#FEF2F2;border-radius:8px;border:1px solid #FECACA;display:none}
-.confirm-dialog-err.show{display:block}
-.confirm-dialog-actions{display:flex;gap:8px;margin-top:6px}
-.confirm-dialog-btn{flex:1;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;font-family:var(--ft);cursor:pointer;border:none;transition:all .15s}
-.confirm-dialog-btn.cancel{background:var(--bg);color:var(--sb)}
-.confirm-dialog-btn.cancel:hover{background:#E5E7EB}
-.confirm-dialog-btn.delete{background:var(--dn);color:#fff}
-.confirm-dialog-btn.delete:hover{background:#B91C1C}
-.confirm-dialog-btn:disabled{opacity:.6;cursor:wait}
+    /* Button groups (segment) */
+    .btn-group {
+      display: flex; gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 3px;
+      background: var(--panel-2);
+    }
+    .btn-group button {
+      flex: 1;
+      height: 28px; padding: 0 10px;
+      border: 0;
+      background: transparent;
+      color: var(--sub);
+      font-size: 12px; font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .btn-group button:hover { color: var(--ink); }
+    .btn-group button[aria-pressed="true"] {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: var(--shadow-xs);
+    }
 
-/* Toast notifications — top-right, brief */
-.toast-stack{position:fixed;top:16px;right:16px;z-index:1100;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.18);opacity:0;transform:translateX(20px);transition:all .2s;pointer-events:auto;max-width:360px}
-.toast.show{opacity:1;transform:translateX(0)}
-.toast.ok{background:#059669}
-.toast.err{background:var(--dn)}
+    /* Layout cards (2x2 grid) */
+    .layout-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .layout-card {
+      position: relative;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--panel);
+      cursor: pointer;
+      text-align: left;
+      transition: all .15s ease;
+      overflow: hidden;
+    }
+    .layout-card:hover { border-color: var(--border-strong); }
+    .layout-card[aria-pressed="true"] {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+    }
+    .layout-card-name {
+      font-size: 12px; font-weight: 700; color: var(--ink);
+      margin-top: 8px;
+    }
+    .layout-card-thumb {
+      height: 48px; border-radius: 4px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 3px;
+      padding: 4px;
+    }
+    .layout-card-thumb .tline {
+      height: 4px; border-radius: 2px;
+      background: var(--border-strong);
+    }
+    .layout-card[aria-pressed="true"] .layout-card-thumb .tline {
+      background: var(--brand);
+    }
 
-/* Footer */
-.footer{text-align:center;padding:32px;border-top:1px solid var(--bd);background:var(--sf);margin-top:48px}
-.footer p{font-size:12px;color:var(--mt)}
-.footer a{color:var(--br);font-weight:600}
+    /* Colour presets */
+    .preset-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .preset-chip {
+      width: 44px; height: 44px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      transition: all .15s ease;
+    }
+    .preset-chip:hover { transform: scale(1.05); border-color: var(--border-strong); }
+    .preset-chip[aria-pressed="true"] {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 3px var(--brand-soft);
+    }
+    .preset-chip::before, .preset-chip::after { content: ''; position: absolute; inset: 0; }
+    .preset-chip::before { background: var(--p1); }
+    .preset-chip::after { background: var(--p2); clip-path: polygon(100% 0,100% 100%,0 100%); }
 
-@media(max-width:768px){
-  .hero h1{font-size:28px}.cat-grid{grid-template-columns:1fr}.stats-inner{flex-direction:column}
-  .my-grid{grid-template-columns:1fr}
-}
-</style>
+    /* Primary/Secondary CTA buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      height: 36px; padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .btn:hover { border-color: var(--border-strong); background: var(--hover); }
+    .btn-primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .btn-primary:hover { background: color-mix(in srgb, var(--brand) 88%, #000); border-color: color-mix(in srgb, var(--brand) 88%, #000); }
+    .btn-ghost { border-color: transparent; background: transparent; }
+    .btn-ghost:hover { background: var(--hover); }
+    .btn-danger { color: var(--danger); }
+    .btn-danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); border-color: var(--danger); }
+    .btn-block { width: 100%; }
+    .btn-sm { height: 30px; padding: 0 10px; font-size: 12px; }
+    .btn-xs { height: 26px; padding: 0 8px; font-size: 11px; }
+    .btn .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Question list items */
+    .q-list { display: flex; flex-direction: column; gap: 6px; }
+    .q-item {
+      display: grid; grid-template-columns: 20px 1fr auto; gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--panel);
+      transition: all .15s ease;
+      cursor: grab;
+    }
+    .q-item:hover { border-color: var(--border-strong); box-shadow: var(--shadow-xs); }
+    .q-item.dragging { opacity: .5; cursor: grabbing; }
+    .q-item.drag-over { border-color: var(--brand); border-style: dashed; }
+    .q-drag { color: var(--muted); display: flex; align-items: center; cursor: grab; }
+    .q-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .q-title { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .q-meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+    .q-badge { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
+    .q-badge.pinned { background: var(--accent-soft); color: var(--accent); }
+    .q-badge.popular { background: color-mix(in srgb, var(--warning) 15%, transparent); color: #B45309; }
+    .q-badge.hidden { background: var(--hover); color: var(--muted); }
+    .q-actions { display: flex; gap: 2px; }
+    .q-actions .btn-xs { padding: 0 6px; height: 24px; }
+
+    /* Category chips in editor */
+    .cat-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .cat-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 8px 4px 10px;
+      background: var(--hover);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 500;
+      color: var(--ink);
+    }
+    .cat-chip button {
+      width: 18px; height: 18px; padding: 0;
+      border: 0; background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .cat-chip button:hover { background: var(--border); color: var(--danger); }
+
+    /* ============================ Preview panel ============================ */
+    .preview-toolbar {
+      display: flex; gap: 8px; align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .preview-title {
+      font-size: 12px; font-weight: 600; color: var(--sub);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .preview-canvas {
+      flex: 1;
+      overflow: auto;
+      padding: 32px 16px;
+      display: flex;
+      justify-content: center;
+      background: var(--panel-2);
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(0,0,0,.06) 1px, transparent 0);
+      background-size: 20px 20px;
+      position: relative;
+    }
+    .preview-frame {
+      background: transparent;
+      border-radius: 12px;
+      transition: max-width .3s ease;
+      width: 100%;
+    }
+    .preview-frame[data-viewport="desktop"] { max-width: 1000px; }
+    .preview-frame[data-viewport="tablet"] { max-width: 768px; }
+    .preview-frame[data-viewport="mobile"] { max-width: 390px; }
+
+    /* Design Mode overlay */
+    .dm-layer {
+      position: absolute;
+      pointer-events: none;
+    }
+    .dm-hotspot {
+      position: absolute;
+      border: 2px dashed var(--accent);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      border-radius: 4px;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all .15s ease;
+      display: flex; align-items: flex-start; justify-content: flex-end;
+      padding: 3px;
+    }
+    .dm-hotspot:hover {
+      background: color-mix(in srgb, var(--accent) 20%, transparent);
+      border-style: solid;
+    }
+    .dm-hotspot-label {
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: all .15s ease;
+    }
+    .dm-hotspot:hover .dm-hotspot-label { opacity: 1; transform: translateY(0); }
+
+    .dm-popover {
+      position: fixed;
+      z-index: 9999;
+      width: 320px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-xl);
+      padding: 16px;
+    }
+    .dm-popover-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .dm-popover-close {
+      width: 24px; height: 24px; border: 0; background: transparent;
+      color: var(--muted); cursor: pointer; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .dm-popover-close:hover { background: var(--hover); color: var(--ink); }
+
+    /* ============================ Modal ============================ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: color-mix(in srgb, #000 45%, transparent);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      animation: fade-in .15s ease-out;
+    }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    .modal-overlay[hidden] { display: none; }
+    .modal {
+      background: var(--panel);
+      border-radius: 14px;
+      box-shadow: var(--shadow-xl);
+      width: 100%;
+      max-width: 560px;
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modal-in .2s ease-out;
+    }
+    .modal.modal-lg { max-width: 720px; }
+    @keyframes modal-in { from { transform: translateY(8px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-head {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 15px; font-weight: 700; flex: 1; }
+    .modal-close {
+      width: 32px; height: 32px; border: 0; background: transparent;
+      color: var(--muted); cursor: pointer; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: var(--hover); color: var(--ink); }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .modal-foot {
+      display: flex; gap: 8px; justify-content: flex-end;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--panel-2);
+    }
+
+    /* Template cards */
+    .tmpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tmpl-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      background: var(--panel);
+      cursor: pointer;
+      text-align: left;
+      transition: all .15s ease;
+    }
+    .tmpl-card:hover { border-color: var(--brand); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+    .tmpl-card-head {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px;
+    }
+    .tmpl-card-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+    }
+    .tmpl-card-name { font-size: 13px; font-weight: 700; }
+    .tmpl-card-desc { font-size: 12px; color: var(--sub); line-height: 1.4; }
+    .tmpl-card-meta { font-size: 11px; color: var(--muted); margin-top: 8px; display: flex; gap: 8px; }
+
+    /* Embed code block */
+    .code-block {
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      font-size: 12px; line-height: 1.55;
+      background: #0F172A;
+      color: #E2E8F0;
+      padding: 14px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre;
+      border: 1px solid var(--border);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      padding: 10px 16px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      font-size: 13px; font-weight: 500;
+      z-index: 10000;
+      display: flex; align-items: center; gap: 8px;
+      opacity: 0;
+      transform: translateX(-50%) translateY(8px);
+      pointer-events: none;
+      transition: all .2s ease;
+    }
+    .toast[data-visible="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    /* Login overlay */
+    .login-overlay {
+      position: fixed; inset: 0;
+      background: var(--panel-2);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      background: var(--panel);
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg);
+      width: 100%; max-width: 400px;
+      padding: 32px;
+    }
+    .login-logo {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .login-title { font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin: 0 0 8px; }
+    .login-sub { color: var(--sub); font-size: 14px; margin: 0 0 20px; }
+
+    /* Loading shimmer */
+    .shimmer {
+      background: linear-gradient(90deg, var(--hover) 0%, var(--border) 50%, var(--hover) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s ease-in-out infinite;
+      border-radius: 4px;
+    }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    .preview-loading { width: 80%; height: 300px; border-radius: 12px; }
+
+    /* Responsive — collapse sidebar on mobile */
+    @media (max-width: 900px) {
+      .editor { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .sidebar { height: auto; max-height: 50vh; border-right: 0; border-bottom: 1px solid var(--border); }
+      .preview-frame[data-viewport="desktop"] { max-width: 100%; }
+    }
+
+    /* Kbd helpers */
+    kbd {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      background: var(--panel-2); border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      font-size: 10px; font-weight: 600;
+      color: var(--sub);
+    }
+
+    /* small utility */
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row-wrap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    .text-muted { color: var(--muted); }
+    .text-sub { color: var(--sub); }
+    .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+    .divider { height: 1px; background: var(--border); margin: 12px 0; }
+  </style>
 </head>
 <body>
 
-<!-- Nav -->
-<nav class="nav"><div class="nav-inner">
-  <a href="/" class="nav-logo">
-    <div class="nav-logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-    <span>Widget Suite</span><small>by Travelgenix</small>
-  </a>
-  <div class="nav-right" id="navRight"></div>
-</div></nav>
-
-<!-- Hero -->
-<div class="hero fade-up">
-  <h1>Beautiful widgets.<br><em>Zero code.</em></h1>
-  <p>Embeddable, customisable widgets for any website. Built for travel businesses, loved by everyone.</p>
-</div>
-
-<!-- Stats (logged in) -->
-<div class="stats" id="statsBar">
-  <div class="stats-inner" id="statsInner"></div>
-</div>
-
-<!-- My Widgets (logged in) -->
-<div class="my-widgets" id="myWidgets">
-  <div class="section-head">
-    <h2 class="section-title">My Widgets</h2>
-  </div>
-  <div class="my-grid" id="myGrid"></div>
-</div>
-
-<!-- Catalogue -->
-<div class="catalogue">
-  <div class="section-head">
-    <h2 class="section-title" id="catTitle">Widget Catalogue</h2>
-  </div>
-  <div class="cat-filters" id="catFilters"></div>
-  <div class="cat-grid" id="catGrid"></div>
-</div>
-
-<div class="footer">
-  <p>Travelgenix Widget Suite v1.0 · <a href="https://travelgenix.io" target="_blank">travelgenix.io</a></p>
-</div>
-
-<!-- Sign in modal -->
-<div class="modal-bg" id="signInModal">
-  <div class="modal">
-    <h2>Sign In</h2>
-    <p>Enter your email and client code to access your widgets</p>
-    <input type="email" id="signEmail" placeholder="Email address">
-    <input type="password" id="signCode" placeholder="Client code">
-    <div id="signErr" class="err" style="display:none"></div>
-    <button class="modal-btn btn-p" onclick="doSignIn()">Sign In</button>
-    <button class="modal-btn btn-c" onclick="closeSignIn()">Cancel</button>
-  </div>
-</div>
-
-<!-- Type detail modal (populated dynamically by openTypeModal) -->
-<div class="modal-bg" id="typeModal" onclick="if(event.target===this)closeTypeModal()">
-  <div class="type-modal" id="typeModalInner"></div>
-</div>
-
-<!-- Delete confirm dialog (populated dynamically by confirmDeleteWidget) -->
-<div class="modal-bg" id="confirmDialog" onclick="if(event.target===this)closeConfirmDialog()">
-  <div class="confirm-dialog" id="confirmDialogInner"></div>
-</div>
-
-<!-- Toast stack for transient notifications -->
-<div class="toast-stack" id="toastStack"></div>
-
-<script>
-/* ═══ WIDGET REGISTRY ═══ 
-   Adding a widget = adding one object here. Everything else auto-builds. */
-const WIDGETS = [
-  {
-    id: 'pricing',
-    name: 'Pricing Table',
-    airtableType: 'Pricing Table',  // matches Airtable WidgetType singleSelect option
-    description: 'Showcase your plans, pricing tiers and features with a beautiful, interactive pricing table. Monthly/yearly toggle, feature tooltips, trust strip.',
-    category: 'E-commerce',
-    status: 'live',
-    icon: {viewBox:'0 0 24 24', paths:'<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'},
-    color: '#0891B2',
-    editorUrl: '/editor',
-    demoUrl: '/demo',
-    widgetTag: 'pricing',
-    scriptFile: 'widget.js',
-    access: { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
-  },
-  {
-    id: 'reviews',
-    name: 'Google Reviews',
-    airtableType: 'Google Reviews',  // matches Airtable WidgetType singleSelect option
-    description: 'Display Google reviews in 6 stunning layouts — cards, masonry, carousel, spotlight, trust badge and ticker. AI insights, smart tags, owner replies.',
-    category: 'Social Proof',
-    status: 'live',
-    icon: {viewBox:'0 0 24 24', paths:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
-    color: '#F59E0B',
-    editorUrl: '/editor-reviews',
-    demoUrl: '/demo-reviews',
-    widgetTag: 'reviews',
-    scriptFile: 'widget-reviews.js',
-    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  },
-  {
-    id: 'faq',
-    name: 'FAQ Accordion',
-    airtableType: 'FAQ',  // IMPORTANT: dashboard display name differs from Airtable type name
-    description: 'Beautiful, searchable FAQs in four layouts — accordion, two-column, tabs, or searchable. Markdown answers, categories, SEO schema built-in.',
-    category: 'Content',
-    status: 'live',
-    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
-    color: '#8B5CF6',
-    editorUrl: '/editor-faq',
-    demoUrl: '/demo-faq',
-    widgetTag: 'faq',
-    scriptFile: 'widget-faq.js',
-    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  },
-  {
-    id: 'testimonials',
-    name: 'Testimonials',
-    description: 'Rotating testimonial cards, quote sliders, and video testimonial embeds. Perfect for building trust on landing pages.',
-    category: 'Social Proof',
-    status: 'coming-soon',
-    icon: {viewBox:'0 0 24 24', paths:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>'},
-    color: '#EC4899',
-    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  },
-  {
-    id: 'countdown',
-    name: 'Countdown Timer',
-    description: 'Create urgency with animated countdown timers for sales, launches, and events. Multiple display styles.',
-    category: 'E-commerce',
-    status: 'coming-soon',
-    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
-    color: '#EF4444',
-    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  },
-  {
-    id: 'logo-showcase',
-    name: 'Logo Showcase',
-    description: 'Display partner, client, or supplier logos in a scrolling carousel or grid. Grayscale-to-colour hover effect.',
-    category: 'Social Proof',
-    status: 'coming-soon',
-    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'},
-    color: '#059669',
-    access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
-  },
-  {
-    id: 'team',
-    name: 'Team Showcase',
-    description: 'Present your team with photos, roles, bios, and social links. Multiple layout options including grid, carousel, and cards.',
-    category: 'Content',
-    status: 'coming-soon',
-    icon: {viewBox:'0 0 24 24', paths:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>'},
-    color: '#3B82F6',
-    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  },
-  {
-    id: 'event-calendar',
-    name: 'Event Calendar',
-    description: 'Display upcoming events, schedules, and activities. Month/week/list views with filtering and colour coding.',
-    category: 'Content',
-    status: 'coming-soon',
-    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'},
-    color: '#F97316',
-    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  },
-];
-
-const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
-let signedIn = false;
-let userEmail = '';
-let activeFilter = 'All';
-let myWidgetData = [];
-
-/* ═══ RENDER ═══ */
-function render() {
-  renderNav();
-  renderStats();
-  renderMyWidgets();
-  renderFilters();
-  renderCatalogue();
-}
-
-function renderNav() {
-  const el = document.getElementById('navRight');
-  if (signedIn && userData) {
-    const ini = (userData.clientName || userData.email).slice(0,2).toUpperCase();
-    const display = userData.clientName || userData.email.split('@')[0];
-    const planColors = {Spark:'#0891B2',Boost:'#3B82F6',Ignite:'#7C3AED',Bespoke:'#F59E0B'};
-    const planCol = planColors[userData.plan] || '#6B7280';
-    el.innerHTML = `<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:${planCol}15;color:${planCol}">${userData.plan || 'Free'}</span>
-      <button class="nav-link" onclick="location.href='#catalogue'">Widgets</button>
-      <div class="nav-user" onclick="signOut()"><div class="nav-user-av">${ini}</div>${display}</div>`;
-  } else {
-    el.innerHTML = `<button class="nav-link" onclick="location.href='#catalogue'">Widgets</button>
-      <button class="nav-btn" onclick="openSignIn()"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>Sign In</button>`;
-  }
-}
-
-function renderStats() {
-  const bar = document.getElementById('statsBar');
-  if (!signedIn) { bar.classList.remove('show'); return; }
-  bar.classList.add('show');
-  const total = myWidgetData.length;
-  const views = myWidgetData.reduce((s, w) => s + (w.views || 0), 0);
-  document.getElementById('statsInner').innerHTML = `
-    <div class="stat-card"><div class="stat-icon" style="background:${WIDGETS[0].color}15"><svg style="stroke:${WIDGETS[0].color}" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div><div><div class="stat-num">${total}</div><div class="stat-label">My widgets</div></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#8B5CF615"><svg style="stroke:#8B5CF6" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="stat-num">${views.toLocaleString()}</div><div class="stat-label">Total views</div></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#10B98115"><svg style="stroke:#10B981" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>w.status==='live').length}</div><div class="stat-label">Widgets available</div></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#F59E0B15"><svg style="stroke:#F59E0B" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>w.status==='coming-soon').length}</div><div class="stat-label">Coming soon</div></div></div>`;
-}
-
-async function renderMyWidgets() {
-  const el = document.getElementById('myWidgets');
-  if (!signedIn) { el.classList.remove('show'); return; }
-  el.classList.add('show');
-
-  // Fetch from Airtable, scoped to this user via auth token
-  try {
-    const r = await fetch('/api/widget-list', { headers: authHeaders() });
-    if (r.ok) { myWidgetData = await r.json(); }
-  } catch(e) { myWidgetData = []; }
-
-  const grid = document.getElementById('myGrid');
-  if (!myWidgetData.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--mt);font-size:13px">No widgets yet. Create your first one from the catalogue below.</div>`;
-    return;
-  }
-
-  // Group widgets by their Airtable type string
-  const byType = new Map();
-  for (const w of myWidgetData) {
-    if (!byType.has(w.type)) byType.set(w.type, []);
-    byType.get(w.type).push(w);
-  }
-
-  // Render one card per type. Order: most-widgets first, then alphabetical.
-  const groups = Array.from(byType.entries())
-    .map(([type, widgets]) => {
-      const reg = WIDGETS.find(rw => (rw.airtableType || rw.name) === type) || WIDGETS[0];
-      return { type, widgets, reg };
-    })
-    .sort((a, b) => (b.widgets.length - a.widgets.length) || a.reg.name.localeCompare(b.reg.name));
-
-  grid.innerHTML = groups.map(({ type, widgets, reg }) => {
-    const n = widgets.length;
-    return `<div class="type-card" onclick="openTypeModal('${esc(type)}')">
-      <div class="type-card-visual" style="background:linear-gradient(135deg, ${reg.color}22 0%, ${reg.color}10 100%)">
-        <svg viewBox="${reg.icon.viewBox}" style="stroke:${reg.color}">${reg.icon.paths}</svg>
-        <span class="type-card-count">${n} widget${n===1?'':'s'}</span>
-      </div>
-      <div class="type-card-body">
-        <div class="type-card-name">${esc(reg.name)}</div>
-        <div class="type-card-sub">Click to view or edit</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ═══ TYPE DETAIL MODAL ═══ */
-function openTypeModal(airtableType) {
-  const widgets = myWidgetData.filter(w => w.type === airtableType);
-  const reg = WIDGETS.find(rw => (rw.airtableType || rw.name) === airtableType) || WIDGETS[0];
-  const n = widgets.length;
-
-  // Sort widgets: most-recently-updated first
-  const sorted = [...widgets].sort((a, b) => {
-    const au = a.updated || '', bu = b.updated || '';
-    return bu.localeCompare(au);
-  });
-
-  const items = sorted.map(w => `
-    <div class="type-modal-item">
-      <div class="type-modal-item-body">
-        <div class="type-modal-item-name">${esc(w.name || 'Untitled')}</div>
-        <div class="type-modal-item-meta">
-          <span class="type-modal-item-id">${esc(w.widgetId)}</span>
-          <span><span class="type-modal-item-dot" style="background:${w.status==='Active'?'var(--ok)':'var(--warn)'}"></span> ${esc(w.status || 'Draft')}</span>
-          ${w.updated ? `<span>Updated ${esc(w.updated)}</span>` : ''}
+  <!-- ======================== EDITOR LAYOUT ======================== -->
+  <main class="editor" id="editor" hidden>
+    <aside class="sidebar">
+      <div class="topbar">
+        <a class="icon-btn icon-only" href="/" id="back-btn" title="Back to dashboard" aria-label="Back to dashboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <span class="logo">
+          <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+            <path d="M10.72 24.32c-2.27 0-4.1-.78-5.5-2.34-1.4-1.56-2.1-3.76-2.1-6.58 0-2.83.77-5.38 2.3-7.66 1.54-2.28 3.92-4.3 7.14-6.06l1.4 2.1c-1.9 1.06-3.4 2.22-4.52 3.48-1.12 1.26-1.78 2.58-1.98 3.96 1.2-.4 2.28-.6 3.24-.6 1.97 0 3.58.6 4.82 1.82 1.24 1.2 1.86 2.78 1.86 4.72 0 2.08-.66 3.77-1.98 5.06-1.32 1.4-3.03 2.1-5.12 2.1zm14 0c-2.27 0-4.1-.78-5.5-2.34-1.4-1.56-2.1-3.76-2.1-6.58 0-2.83.77-5.38 2.3-7.66 1.54-2.28 3.92-4.3 7.14-6.06l1.4 2.1c-1.9 1.06-3.4 2.22-4.52 3.48-1.12 1.26-1.78 2.58-1.98 3.96 1.2-.4 2.28-.6 3.24-.6 1.97 0 3.58.6 4.82 1.82 1.24 1.2 1.86 2.78 1.86 4.72 0 2.08-.66 3.77-1.98 5.06-1.32 1.4-3.03 2.1-5.12 2.1z"/>
+          </svg>
+        </span>
+        <div class="topbar-ident">
+          <div class="topbar-title">Testimonials</div>
         </div>
+        <div class="topbar-spacer"></div>
+        <button class="icon-btn icon-only" id="btn-ai" title="AI builder (A)" aria-label="AI builder">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        </button>
+        <button class="icon-btn icon-only" id="btn-templates" title="Templates (T)" aria-label="Templates">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </button>
       </div>
-      <a class="type-modal-item-btn" href="${reg.editorUrl}?id=${encodeURIComponent(w.widgetId)}">
-        Edit
-      </a>
-      <button class="type-modal-item-delete" title="Delete widget" aria-label="Delete widget"
-              onclick="confirmDeleteWidget('${esc(w.widgetId)}')">
-        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-      </button>
-    </div>`).join('');
 
-  document.getElementById('typeModalInner').innerHTML = `
-    <div class="type-modal-head">
-      <div class="type-modal-ico" style="background:${reg.color}18">
-        <svg viewBox="${reg.icon.viewBox}" style="stroke:${reg.color}">${reg.icon.paths}</svg>
+      <div class="name-row">
+        <input class="name-input" id="name-input" placeholder="Untitled testimonials widget" maxlength="80">
+        <button class="save-btn" id="save-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save
+        </button>
       </div>
-      <div class="type-modal-title">
-        <h2>${esc(reg.name)}</h2>
-        <p>${n} widget${n===1?'':'s'} of this type</p>
+
+      <nav class="tabs" role="tablist">
+        <button class="tab-btn" role="tab" data-tab="design"   aria-selected="true">Design</button>
+        <button class="tab-btn" role="tab" data-tab="content"  aria-selected="false">Content</button>
+        <button class="tab-btn" role="tab" data-tab="settings" aria-selected="false">Settings</button>
+      </nav>
+
+      <div class="sidebar-body" id="sidebar-body"></div>
+    </aside>
+
+    <section class="preview">
+      <div class="preview-toolbar">
+        <span class="preview-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 4V2M12 22v-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          Live preview
+        </span>
+        <div style="flex:1"></div>
+        <div class="btn-group" role="group" aria-label="Viewport">
+          <button data-viewport="desktop" aria-pressed="true" title="Desktop">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+          </button>
+          <button data-viewport="tablet" aria-pressed="false" title="Tablet">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          </button>
+          <button data-viewport="mobile" aria-pressed="false" title="Mobile">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          </button>
+        </div>
+        <button class="icon-btn" id="btn-dm" title="Design mode (D)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          Design mode
+        </button>
+        <button class="icon-btn" id="btn-embed" title="Get embed code">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Embed
+        </button>
       </div>
-      <button class="type-modal-close" onclick="closeTypeModal()" aria-label="Close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="type-modal-list">${items}</div>
-    <div class="type-modal-foot">
-      <a class="type-modal-create" href="${reg.editorUrl}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Create new ${esc(reg.name)} widget
-      </a>
-    </div>`;
-
-  document.getElementById('typeModal').classList.add('open');
-  document.body.classList.add('modal-open');
-}
-
-function closeTypeModal() {
-  document.getElementById('typeModal').classList.remove('open');
-  document.body.classList.remove('modal-open');
-}
-
-// Close type modal on ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && document.getElementById('typeModal')?.classList.contains('open')) {
-    closeTypeModal();
-  }
-});
-
-/* ═══ DELETE WIDGET FLOW ═══ */
-
-// Open the confirm dialog. Takes only widgetId — name and type are looked up
-// from myWidgetData, avoiding HTML-attribute-quoting problems with names
-// that contain apostrophes or double quotes.
-function confirmDeleteWidget(widgetId) {
-  const w = myWidgetData.find(x => x.widgetId === widgetId);
-  if (!w) {
-    console.warn('[confirmDelete] widget not found in local state:', widgetId);
-    return;
-  }
-  const widgetName = w.name || 'Untitled';
-  const airtableType = w.type;
-
-  const dialog = document.getElementById('confirmDialog');
-  const inner = document.getElementById('confirmDialogInner');
-  inner.innerHTML = `
-    <div class="confirm-dialog-head">
-      <div class="confirm-dialog-icon">
-        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <div class="preview-canvas" id="preview-canvas">
+        <div class="preview-frame" id="preview-frame" data-viewport="desktop">
+          <div id="tgt-mount" data-tg-widget="testimonials"></div>
+        </div>
+        <div class="dm-layer" id="dm-layer"></div>
       </div>
-      <div style="flex:1">
-        <h2 class="confirm-dialog-title">Delete widget?</h2>
-        <p class="confirm-dialog-body">
-          You're about to delete <strong>${esc(widgetName)}</strong>. This cannot be undone — any site embedding this widget will stop working immediately.
-        </p>
+    </section>
+  </main>
+
+  <!-- ======================== LOGIN OVERLAY ======================== -->
+  <div class="login-overlay" id="login" hidden>
+    <div class="login-card">
+      <span class="login-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      </span>
+      <h1 class="login-title">Sign in to edit</h1>
+      <p class="login-sub">Use your Travelgenix credentials.</p>
+      <div class="stack">
+        <div class="field">
+          <label class="field-label" for="login-email">Email</label>
+          <input class="input" id="login-email" type="email" autocomplete="username" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label class="field-label" for="login-code">Client code</label>
+          <input class="input" id="login-code" type="password" autocomplete="current-password" placeholder="Your code">
+        </div>
+        <button class="btn btn-primary btn-block" id="login-btn">Sign in</button>
+        <p class="field-hint" id="login-err" style="color:var(--danger); display:none;"></p>
+        <p class="field-hint"><a href="/">Back to dashboard</a></p>
       </div>
     </div>
-    <p class="confirm-dialog-err" id="confirmDialogErr"></p>
-    <div class="confirm-dialog-actions">
-      <button class="confirm-dialog-btn cancel" onclick="closeConfirmDialog()">Cancel</button>
-      <button class="confirm-dialog-btn delete" id="confirmDialogDelete" onclick="performDeleteWidget()">Delete widget</button>
-    </div>`;
-  // Stash context on the element so the handler can read it back cleanly
-  dialog.dataset.widgetId = widgetId;
-  dialog.dataset.airtableType = airtableType;
-  dialog.classList.add('open');
-  document.body.classList.add('modal-open');
-}
+  </div>
 
-function closeConfirmDialog() {
-  const dialog = document.getElementById('confirmDialog');
-  dialog.classList.remove('open');
-  // Only release body scroll lock if no other modal still open
-  if (!document.getElementById('typeModal').classList.contains('open')) {
-    document.body.classList.remove('modal-open');
-  }
-  delete dialog.dataset.widgetId;
-  delete dialog.dataset.airtableType;
-}
+  <!-- ======================== DESIGN MODE POPOVER ======================== -->
+  <div class="dm-popover" id="dm-popover" hidden></div>
 
-async function performDeleteWidget() {
-  const dialog = document.getElementById('confirmDialog');
-  const widgetId = dialog.dataset.widgetId;
-  const airtableType = dialog.dataset.airtableType;
-  if (!widgetId) return;
+  <!-- ======================== MODALS ======================== -->
+  <div class="modal-overlay" id="modal-layer" hidden>
+    <div class="modal" id="modal-box"></div>
+  </div>
 
-  const deleteBtn = document.getElementById('confirmDialogDelete');
-  const errEl = document.getElementById('confirmDialogErr');
-  deleteBtn.disabled = true;
-  deleteBtn.textContent = 'Deleting…';
-  errEl.classList.remove('show');
+  <!-- ======================== TOAST ======================== -->
+  <div class="toast" id="toast"></div>
 
-  try {
-    const r = await fetch('/api/widget-config?id=' + encodeURIComponent(widgetId), {
-      method: 'DELETE',
-      headers: authHeaders(),
-    });
-    const data = await r.json().catch(() => ({}));
-    if (r.status === 401) {
-      errEl.textContent = 'Session expired. Please sign in again.';
-      errEl.classList.add('show');
-      deleteBtn.disabled = false;
-      deleteBtn.textContent = 'Delete widget';
-      return;
+  <!-- ======================== Include the widget script ======================== -->
+  <script src="/widget-testimonials.js"></script>
+
+  <!-- ======================== Editor logic ======================== -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ================================ CONSTS ================================ */
+    const API_AUTH   = '/api/widget-auth';
+    const API_CONFIG = '/api/widget-config';
+    const API_LIST   = '/api/widget-list';
+    const API_AI     = '/api/widget-ai';
+    const WIDGET_TYPE = 'Testimonials';
+    const STORAGE_KEY = 'tgw_session';
+
+    /* ================================ ICON ================================ */
+    // Lucide-style icon set used across the editor sidebar
+    const ICONS = {
+      chevron:  '<path d="M6 9l6 6 6-6"/>',
+      plus:     '<path d="M12 5v14M5 12h14"/>',
+      x:        '<path d="M18 6 6 18M6 6l12 12"/>',
+      pencil:   '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+      trash:    '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+      drag:     '<circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>',
+      copy:     '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+      search:   '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+      up:       '<path d="M18 15l-6-6-6 6"/>',
+      down:     '<path d="M6 9l6 6 6-6"/>',
+      star:     '<path d="M12 2l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>',
+      pin:      '<path d="M12 17v5M5 9h14l-1.5-4.5A2 2 0 0 0 15.6 3H8.4a2 2 0 0 0-1.9 1.5L5 9z"/><path d="M3 9h18v5a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5z"/>',
+      eye:      '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+      eyeOff:   '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>',
+      upload:   '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+      sparkle:  '<path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/>',
+      undo:     '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6.36 2.64L3 13"/>',
+      redo:     '<path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6.36 2.64L21 13"/>',
+      reset:    '<path d="M3 12a9 9 0 1 0 9-9M3 3v9h9"/>',
+      check:    '<path d="M20 6L9 17l-5-5"/>',
+      help:     '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/>',
+      plane:    '<path d="M17.8 19.2 16 11l3.5-3.5c.5-.5 1-2.5.5-3-1-.5-3 0-3.5.5L13 8.5 4.8 6.5c-.5-.1-.9.2-.9.7v.4c0 .3.2.6.5.8L8 10.5 6 14H3l-.5 1.5L5 17l1.5 2.5L8 19v-3l3.5-2 2.8 3.5c.2.3.5.5.8.5h.4c.5 0 .8-.4.7-.9z"/>',
+      build:    '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    };
+    function icn(n, s) { s = s || 14; return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n] || ''}</svg>`; }
+
+    /* ================================ UTIL ================================ */
+    const $ = (s, r) => (r || document).querySelector(s);
+    const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const slugify = (s) => String(s || '').toLowerCase().trim().replace(/[^\w\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
+    const uid = (p) => (p || 'q') + '_' + Math.random().toString(36).slice(2, 9);
+    const deepClone = (o) => JSON.parse(JSON.stringify(o));
+    const debounce = (fn, ms) => { let t; return function(){ clearTimeout(t); const a=arguments, c=this; t=setTimeout(()=>fn.apply(c,a), ms); }; };
+
+    /* =============================== AUTH =============================== */
+    function getSession() {
+      let raw;
+      try { raw = sessionStorage.getItem(STORAGE_KEY); }
+      catch (e) { console.warn('[getSession] sessionStorage read failed:', e); return null; }
+      if (!raw) { return null; }
+      try {
+        const s = JSON.parse(raw);
+        if (!s || typeof s !== 'object') { console.warn('[getSession] session is not an object:', raw); return null; }
+        if (!s.token) { console.warn('[getSession] session has no token — will force re-login'); return null; }
+        return s;
+      } catch (e) {
+        console.warn('[getSession] JSON parse failed:', e);
+        return null;
+      }
     }
-    if (!r.ok) {
-      errEl.textContent = data.error || `Delete failed (HTTP ${r.status})`;
-      errEl.classList.add('show');
-      deleteBtn.disabled = false;
-      deleteBtn.textContent = 'Delete widget';
-      return;
+    function setSession(s) {
+      try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+      catch (e) { console.error('[setSession] sessionStorage write failed:', e); throw e; }
     }
-
-    // Success — update local state, close dialog, refresh UI
-    myWidgetData = myWidgetData.filter(w => w.widgetId !== widgetId);
-    closeConfirmDialog();
-    showToast('Widget deleted', 'ok');
-
-    // Decide what to re-render:
-    //   - If the type still has widgets, re-open the modal for that type
-    //   - If not, close the type modal and re-render the grid
-    const remaining = myWidgetData.filter(w => w.type === airtableType);
-    if (remaining.length > 0) {
-      openTypeModal(airtableType);  // repaints the list, updates count in header
-    } else {
-      closeTypeModal();
+    function clearSession() {
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
     }
-    // Always re-render the grid so counts update / empty state appears
-    renderMyWidgets();
-  } catch (err) {
-    console.error('[delete] failed:', err);
-    errEl.textContent = 'Connection error. Please try again.';
-    errEl.classList.add('show');
-    deleteBtn.disabled = false;
-    deleteBtn.textContent = 'Delete widget';
-  }
-}
-
-// ESC closes confirm dialog (without closing the type modal behind it)
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && document.getElementById('confirmDialog')?.classList.contains('open')) {
-    closeConfirmDialog();
-  }
-});
-
-/* ═══ TOAST ═══ */
-function showToast(message, kind) {
-  const stack = document.getElementById('toastStack');
-  if (!stack) return;
-  const t = document.createElement('div');
-  t.className = 'toast ' + (kind || '');
-  t.textContent = message;
-  stack.appendChild(t);
-  requestAnimationFrame(() => t.classList.add('show'));
-  setTimeout(() => {
-    t.classList.remove('show');
-    setTimeout(() => t.remove(), 250);
-  }, 2400);
-}
-
-function renderFilters() {
-  document.getElementById('catFilters').innerHTML = CATEGORIES.map(c =>
-    `<button class="cat-filter${activeFilter===c?' active':''}" onclick="setFilter('${c}')">${c}</button>`
-  ).join('');
-}
-
-function renderCatalogue() {
-  const filtered = activeFilter === 'All' ? WIDGETS : WIDGETS.filter(w => w.category === activeFilter);
-  const grid = document.getElementById('catGrid');
-  const plan = getUserPlan();
-
-  grid.innerHTML = filtered.map((w, i) => {
-    const isLive = w.status === 'live';
-    const isSoon = w.status === 'coming-soon';
-    const access = signedIn ? getAccess(w) : null;
-    const isLocked = signedIn && access === 0;
-    const minTier = getMinTier(w);
-    const soonCls = isSoon ? ' soon' : '';
-
-    let preview = '';
-    if (isLive && !isLocked) {
-      preview = `<div class="w-card-preview"><div class="w-card-preview-inner" id="prev_${w.id}"></div></div>`;
-    } else if (isLive && isLocked) {
-      preview = `<div class="w-card-preview" style="position:relative">
-        <div class="w-card-preview-inner" id="prev_${w.id}" style="filter:blur(3px);opacity:.5"></div>
-        <div class="locked-overlay">
-          <div class="locked-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-          <div class="locked-text">Upgrade to unlock</div>
-          <div class="locked-sub">Available on ${minTier} and above</div>
-          <button class="upgrade-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>Upgrade to ${minTier}</button>
-        </div></div>`;
-    } else {
-      preview = `<div class="w-card-preview"><span class="soon-badge">Coming Soon</span><div class="soon-placeholder"><svg viewBox="${w.icon.viewBox}">${w.icon.paths}</svg><p>${w.name}</p></div></div>`;
+    function authHeaders(extra) {
+      const s = getSession();
+      const h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
+      if (s && s.token) h['Authorization'] = 'Bearer ' + s.token;
+      return h;
     }
 
-    // Access badge (only when signed in)
-    let accessBadge = '';
-    if (signedIn && w.access) {
-      const al = accessLabel(access);
-      accessBadge = `<div class="access-badge ${al.cls}"><svg viewBox="0 0 24 24">${al.icon}</svg>${al.text}</div>`;
+    /* ============================ DEFAULT CONFIG ============================ */
+    function defaultConfig() {
+      return {
+        layout: 'grid',                         // featured | grid | masonry | carousel | marquee | spotlight
+        theme: 'light',
+        radius: 16,
+        colors: {
+          brand:  '#EC4899',
+          accent: '#8B5CF6',
+          bg:     '#F8FAFC',
+          card:   '#FFFFFF',
+          text:   '#0F172A',
+          sub:    '#475569',
+          border: '#E2E8F0'
+        },
+        header: {
+          show: true,
+          eyebrow: 'Testimonials',
+          title: 'Loved by travellers',
+          subtitle: 'Real stories from customers who took the trip of a lifetime.'
+        },
+        // Display toggles
+        showRating: true,
+        showSource: true,
+        showDestination: true,
+        showTripType: true,
+        showTravelDate: true,
+        showVideo: true,
+        showFilters: false,           // trip-type chip filter — grid/masonry only
+        // Grid
+        gridCols: 3,                   // 2 or 3
+        // Carousel
+        carousel: { autoplay: false, interval: 6000, dots: true, arrows: true },
+        // Marquee
+        marquee: { speed: 50, rows: 2 },
+        // Data
+        testimonials: [
+          {
+            id: uid('t'),
+            quote: "The most magical 10 days of our lives. Every detail was handled — from the overwater villa to the private dinner on the beach. We didn't lift a finger. Already planning our next trip.",
+            author: 'Sarah Thompson', role: 'Honeymoon couple', location: 'Manchester, UK',
+            avatar: '', rating: 5,
+            destination: 'Maldives', tripType: 'Honeymoon', travelDate: 'March 2024',
+            source: 'Google', verified: true, video: '', featured: true, hidden: false
+          },
+          {
+            id: uid('t'),
+            quote: "We've done family trips before but nothing compares to this. The guide knew every kid in our group by name by day two. The kids still talk about it.",
+            author: 'Raj Patel', role: 'Family of four', location: 'Birmingham, UK',
+            avatar: '', rating: 5,
+            destination: 'Costa Rica', tripType: 'Family', travelDate: 'October 2024',
+            source: 'Direct', verified: false, video: '', featured: false, hidden: false
+          },
+          {
+            id: uid('t'),
+            quote: "Two weeks navigating Japan solo felt ambitious. They built an itinerary that was structured enough to feel safe and loose enough to wander. Flawless.",
+            author: 'Michael Chen', role: 'Solo traveller', location: 'London, UK',
+            avatar: '', rating: 5,
+            destination: 'Japan', tripType: 'Solo', travelDate: 'April 2024',
+            source: 'TripAdvisor', verified: true, video: '', featured: false, hidden: false
+          }
+        ]
+      };
     }
 
-    // Actions
-    let actions = '';
-    if (isLive && !isLocked) {
-      actions = `<button class="w-card-btn btn-create" onclick="event.stopPropagation();${signedIn?`location.href='${w.editorUrl}'`:`openSignIn()`}"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>${signedIn?'Create Widget':'Sign In to Create'}</button>
-        <button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`;
-    } else if (isLive && isLocked) {
-      actions = `<button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`;
-    } else {
-      actions = `<button class="w-card-btn btn-soon">Coming Soon</button>`;
+    /* ============================ COLOUR PRESETS ============================ */
+    const PRESETS = [
+      { id: 'teal',     name: 'Teal',     colors: { brand:'#0891B2', accent:'#6366F1', bg:'#F8FAFC', card:'#FFFFFF', text:'#0F172A', sub:'#64748B', border:'#E2E8F0' } },
+      { id: 'indigo',   name: 'Indigo',   colors: { brand:'#4F46E5', accent:'#EC4899', bg:'#F5F3FF', card:'#FFFFFF', text:'#1E1B4B', sub:'#6D28D9', border:'#E9D5FF' } },
+      { id: 'emerald',  name: 'Emerald',  colors: { brand:'#059669', accent:'#0891B2', bg:'#ECFDF5', card:'#FFFFFF', text:'#064E3B', sub:'#047857', border:'#A7F3D0' } },
+      { id: 'sunset',   name: 'Sunset',   colors: { brand:'#EA580C', accent:'#DB2777', bg:'#FFF7ED', card:'#FFFFFF', text:'#431407', sub:'#9A3412', border:'#FED7AA' } },
+      { id: 'mono',     name: 'Mono',     colors: { brand:'#0F172A', accent:'#6366F1', bg:'#F8FAFC', card:'#FFFFFF', text:'#0F172A', sub:'#475569', border:'#E2E8F0' } },
+    ];
+
+    /* ============================ TEMPLATES ============================ */
+    const TEMPLATES = [
+      {
+        id: 'luxury-agent',
+        name: 'Luxury Travel Agent',
+        description: 'Honeymoons, luxury villas, 5-star resorts, bespoke itineraries.',
+        icon: 'star', colour: '#F59E0B',
+        config: {
+          header: { show: true, eyebrow: 'Client Stories', title: 'Unforgettable journeys', subtitle: 'What our clients say about their bespoke travel experiences.' },
+          testimonials: [
+            { id: uid('t'), quote: "The most magical 10 days of our lives. Every detail was handled — from the overwater villa to the private dinner on the beach. We didn't lift a finger.", author: 'Sarah & James Mitchell', role: 'Honeymoon', location: 'London, UK', rating: 5, destination: 'Maldives', tripType: 'Honeymoon', travelDate: 'March 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Third year using them and they continue to exceed expectations. This year was an African safari — spotting the Big Five from our private lodge was extraordinary.", author: 'David Chen', role: 'Returning client', location: 'Manchester, UK', rating: 5, destination: 'Kenya', tripType: 'Safari', travelDate: 'September 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "A once-in-a-lifetime trip to Japan during cherry blossom season. Every hotel, every train, every restaurant was perfect. They thought of things we never would.", author: 'Emma Thompson', role: 'Anniversary trip', location: 'Bath, UK', rating: 5, destination: 'Japan', tripType: 'Cultural', travelDate: 'April 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "We needed a complex multi-centre honeymoon — Dubai, Seychelles, and a stopover in Doha. Other agents couldn't get it right but they nailed it first time.", author: 'Rachel Adams', role: 'Honeymoon', location: 'Edinburgh, UK', rating: 5, destination: 'Dubai & Seychelles', tripType: 'Honeymoon', travelDate: 'June 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Celebrated our 25th anniversary at an incredible villa in Santorini. The sunset dinners they arranged were beyond anything we imagined. Truly five-star service.", author: 'Mark & Linda Williams', role: 'Anniversary', location: 'Birmingham, UK', rating: 5, destination: 'Santorini', tripType: 'Couples', travelDate: 'July 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+          ]
+        }
+      },
+      {
+        id: 'family-tour-op',
+        name: 'Family Tour Operator',
+        description: 'Family holidays, kids clubs, all-inclusive, beach resorts.',
+        icon: 'heart', colour: '#EC4899',
+        config: {
+          header: { show: true, eyebrow: 'Happy Families', title: 'Holidays they\'ll never forget', subtitle: 'Real reviews from families who trusted us with their getaway.' },
+          testimonials: [
+            { id: uid('t'), quote: "The kids are STILL talking about it. Splash parks, kids clubs, pizza making — and we got to relax by the pool. Best family holiday we've ever had.", author: 'Lisa Patel', role: 'Family of four', location: 'Leeds, UK', rating: 5, destination: 'Majorca', tripType: 'Family', travelDate: 'August 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "First time flying with a toddler and they made it so easy. Airport lounge, short transfer, hotel with a cot already set up. Thought of everything.", author: 'Tom Burke', role: 'Family', location: 'Bristol, UK', rating: 5, destination: 'Lanzarote', tripType: 'Family', travelDate: 'May 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Three generations under one roof in a gorgeous villa in Tuscany. They found a property with a pool, close to town, and even arranged a private chef for one evening.", author: 'Janet Morrison', role: 'Multi-generational', location: 'Glasgow, UK', rating: 5, destination: 'Tuscany', tripType: 'Family', travelDate: 'June 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "We needed a holiday that worked for teenagers AND a 4-year-old. They found us a resort with teen activities AND a crèche. Everyone was happy. Miracle workers.", author: 'Chris Taylor', role: 'Blended family', location: 'Cardiff, UK', rating: 4, destination: 'Tenerife', tripType: 'Family', travelDate: 'October 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Saved us over £600 compared to booking direct, AND we got free kid places. The personal service makes such a difference to booking online.", author: 'Amy Foster', role: 'Family of five', location: 'Norwich, UK', rating: 5, destination: 'Turkey', tripType: 'Family', travelDate: 'July 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+          ]
+        }
+      },
+      {
+        id: 'cruise',
+        name: 'Cruise Specialist',
+        description: 'Ocean & river cruises, expedition voyages, all-inclusive.',
+        icon: 'plane', colour: '#6366F1',
+        config: {
+          header: { show: true, eyebrow: 'Cruise Reviews', title: 'Life-changing voyages', subtitle: 'From the Mediterranean to the Arctic — hear from our passengers.' },
+          testimonials: [
+            { id: uid('t'), quote: "14 nights around the Greek islands and every single port was a highlight. The balcony cabin was worth every penny — watching sunsets from our private space was incredible.", author: 'Robert & Diana Hall', role: 'Retired couple', location: 'Surrey, UK', rating: 5, destination: 'Greek Islands', tripType: 'Cruise', travelDate: 'September 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Our first cruise and we're completely converted. The food, the entertainment, waking up in a different place every morning. They found us the perfect ship for first-timers.", author: 'Sophie Grant', role: 'First-time cruiser', location: 'Liverpool, UK', rating: 5, destination: 'Western Mediterranean', tripType: 'Cruise', travelDate: 'June 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Expedition cruise to Norway to see the Northern Lights. Small ship, expert guides, zodiac landings. They matched us to the perfect expedition company.", author: 'James Robertson', role: 'Adventure traveller', location: 'Aberdeen, UK', rating: 5, destination: 'Norway', tripType: 'Cruise', travelDate: 'February 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "River cruise through the Danube was so relaxing. All drinks included, excursions at every stop, and the staff remembered our names by day two.", author: 'Margaret Stone', role: 'Solo traveller', location: 'Oxford, UK', rating: 5, destination: 'Danube', tripType: 'Cruise', travelDate: 'May 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+          ]
+        }
+      },
+      {
+        id: 'adventure',
+        name: 'Adventure & Activity',
+        description: 'Trekking, safaris, diving, ski holidays, active escapes.',
+        icon: 'plane', colour: '#059669',
+        config: {
+          header: { show: true, eyebrow: 'Adventure Stories', title: 'Pushing boundaries', subtitle: 'Tales from travellers who chose the path less travelled.' },
+          testimonials: [
+            { id: uid('t'), quote: "Kilimanjaro summit at sunrise. No words can describe it. They prepared us perfectly — training guidance, kit list, acclimatisation schedule. We all made it to the top.", author: 'Peter Clarke', role: 'Group of six', location: 'Brighton, UK', rating: 5, destination: 'Tanzania', tripType: 'Adventure', travelDate: 'January 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Diving in the Red Sea was a lifelong dream. They set up everything — PADI course, liveaboard, equipment hire. Swam with dolphins on day three.", author: 'Natalie Brooks', role: 'Solo diver', location: 'London, UK', rating: 5, destination: 'Egypt', tripType: 'Adventure', travelDate: 'March 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Ski holiday in Verbier with the whole family. They sorted chalet, lift passes, ski school for the kids, and even restaurant recommendations. Effortless.", author: 'Daniel & Sophie King', role: 'Family ski', location: 'Cheltenham, UK', rating: 5, destination: 'Verbier', tripType: 'Ski', travelDate: 'February 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Two weeks trekking in Patagonia. Remote lodges, incredible guides, scenery that made us cry. They understood exactly the level of adventure we wanted.", author: 'Michael & Priya Sharma', role: 'Couple', location: 'Cambridge, UK', rating: 5, destination: 'Patagonia', tripType: 'Adventure', travelDate: 'November 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+          ]
+        }
+      },
+      {
+        id: 'hotel-villa',
+        name: 'Hotel & Villa',
+        description: 'Boutique hotels, holiday villas, self-catering, B&Bs.',
+        icon: 'star', colour: '#0891B2',
+        config: {
+          header: { show: true, eyebrow: 'Guest Reviews', title: 'Stay with confidence', subtitle: 'Hear from guests who experienced our handpicked properties.' },
+          testimonials: [
+            { id: uid('t'), quote: "The villa was even better than the photos. Private pool, stunning views, and they had a welcome hamper waiting when we arrived. Proper attention to detail.", author: 'Karen & Steve Ellis', role: 'Couple', location: 'Devon, UK', rating: 5, destination: 'Algarve', tripType: 'Villa', travelDate: 'August 2024', source: 'Google', verified: true, featured: true, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Boutique hotel in Marrakech — tiny but perfect. They recommended it over the big chains and they were absolutely right. Rooftop breakfasts we'll never forget.", author: 'Alex Cooper', role: 'City break', location: 'London, UK', rating: 5, destination: 'Marrakech', tripType: 'Cultural', travelDate: 'April 2024', source: 'TripAdvisor', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Gorgeous farmhouse in Provence sleeping 12. Perfect for our annual friends' holiday. They even arranged a local wine tour and truffle hunting experience.", author: 'Helen Dawe', role: 'Friends group', location: 'York, UK', rating: 5, destination: 'Provence', tripType: 'Villa', travelDate: 'September 2024', source: 'Google', verified: true, featured: false, hidden: false, avatar: '', video: '' },
+            { id: uid('t'), quote: "Beachfront apartment in Crete for a month. Remote working with a sea view. They found us reliable Wi-Fi, a quiet area, and a great price for a long stay.", author: 'Dan Mitchell', role: 'Digital nomad', location: 'Bristol, UK', rating: 4, destination: 'Crete', tripType: 'Solo', travelDate: 'October 2024', source: 'Direct', verified: false, featured: false, hidden: false, avatar: '', video: '' },
+          ]
+        }
+      }
+    ];
+
+    /* ============================ STATE ============================ */
+    const state = {
+      widgetId: null,
+      widgetName: '',
+      config: defaultConfig(),
+      activeTab: 'design',
+      viewport: 'desktop',
+      dmEnabled: false,
+      dmTarget: null,
+      dirty: false,
+      history: [],
+      historyIdx: -1,
+      sections: { // default-open sections per tab
+        layout: true, theme: true, colours: true, shape: true, heading: true,  // design
+        qs: true, cats: true, cta: true, import: false, // content
+        display: true, behaviour: true, seo: true, embed: true // settings
+      },
+      dragId: null,
+      widget: null
+    };
+
+    function pushHistory() {
+      // Truncate future
+      if (state.historyIdx < state.history.length - 1) {
+        state.history = state.history.slice(0, state.historyIdx + 1);
+      }
+      state.history.push(deepClone(state.config));
+      if (state.history.length > 40) state.history.shift();
+      state.historyIdx = state.history.length - 1;
+    }
+    function undo() {
+      if (state.historyIdx <= 0) return;
+      state.historyIdx--;
+      state.config = deepClone(state.history[state.historyIdx]);
+      renderAll(); updatePreview();
+    }
+    function redoAction() {
+      if (state.historyIdx >= state.history.length - 1) return;
+      state.historyIdx++;
+      state.config = deepClone(state.history[state.historyIdx]);
+      renderAll(); updatePreview();
     }
 
-    return `<div class="w-card${soonCls} fade-up" style="animation-delay:${i*60}ms" ${isLive&&!isLocked?`onclick="location.href='${w.demoUrl}'"`:''}>
-      ${preview}
-      <div class="w-card-body">
-        <div class="w-card-head">
-          <div class="w-card-logo" style="background:${w.color}12"><svg viewBox="${w.icon.viewBox}" style="stroke:${w.color}">${w.icon.paths}</svg></div>
-          <div><div class="w-card-name">${w.name}</div><div class="w-card-cat">${w.category}</div></div>
+    function mutate(fn) {
+      fn(state.config);
+      pushHistory();
+      state.dirty = true;
+      syncSaveBtn();
+      updatePreview();
+    }
+    function mutateLight(fn) {
+      // Micro-change that shouldn't add a history entry per keystroke (handled by caller to push)
+      fn(state.config);
+      state.dirty = true;
+      syncSaveBtn();
+      updatePreview();
+    }
+
+    /* ============================ PREVIEW MOUNT ============================ */
+    function updatePreview() {
+      const mount = $('#tgt-mount');
+      if (!mount) return;
+      try {
+        if (state.widget && typeof state.widget.update === 'function') {
+          state.widget.update(deepClone(state.config));
+        } else if (window.TGTestimonialsWidget) {
+          try { mount.innerHTML = ''; } catch(e){}
+          mount.removeAttribute('data-tg-initialised');
+          state.widget = new window.TGTestimonialsWidget(mount, deepClone(state.config));
+          mount.setAttribute('data-tg-initialised', 'true');
+        }
+        // If Design mode active, refresh hotspots
+        if (state.dmEnabled) requestAnimationFrame(buildDMHotspots);
+      } catch (e) { console.warn('Preview update failed', e); }
+    }
+
+    function syncSaveBtn() {
+      const b = $('#save-btn');
+      if (!b) return;
+      b.classList.toggle('is-dirty', state.dirty);
+      b.classList.remove('is-saved');
+    }
+
+    /* ============================ TAB SWITCH ============================ */
+    function setTab(name) {
+      state.activeTab = name;
+      $$('.tab-btn').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name ? 'true' : 'false'));
+      renderTabBody();
+    }
+
+    function renderAll() {
+      $('#name-input').value = state.widgetName || '';
+      renderTabBody();
+    }
+
+    function renderTabBody() {
+      const host = $('#sidebar-body');
+      if (!host) return;
+      if (state.activeTab === 'design') host.innerHTML = renderDesignTab();
+      else if (state.activeTab === 'content') host.innerHTML = renderContentTab();
+      else host.innerHTML = renderSettingsTab();
+      bindTabHandlers();
+    }
+
+    /* ============================ SECTIONS ============================ */
+    function section(key, title, body, desc) {
+      const open = state.sections[key] !== false;
+      return `
+        <div class="section" data-open="${open}" data-section="${key}">
+          <button class="section-head" data-toggle-section="${key}">
+            ${title}${desc ? ` <span class="section-desc">${esc(desc)}</span>` : ''}
+            ${icn('chevron', 14).replace('>', ' class="chev">')}
+          </button>
+          <div class="section-body">${body}</div>
         </div>
-        <p class="w-card-desc">${w.description}</p>
-        ${accessBadge}
-        <div class="w-card-actions" style="margin-top:${accessBadge?'8':'0'}px">${actions}</div>
-      </div>
-    </div>`;
-  }).join('');
+      `;
+    }
 
-  // Load live mini-previews
-  setTimeout(() => {
-    filtered.filter(w => w.status === 'live').forEach(w => loadMiniPreview(w));
-  }, 200);
-}
+    /* =========================== DESIGN TAB =========================== */
+    function renderDesignTab() {
+      const c = state.config;
 
-function setFilter(cat) {
-  activeFilter = cat;
-  renderFilters();
-  renderCatalogue();
-}
+      const layoutBody = `
+        <div class="layout-grid">
+          ${[
+            { id: 'featured',  name: 'Featured',  kind: 'featured'  },
+            { id: 'grid',      name: 'Grid',      kind: 'grid'      },
+            { id: 'masonry',   name: 'Masonry',   kind: 'masonry'   },
+            { id: 'carousel',  name: 'Carousel',  kind: 'carousel'  },
+            { id: 'marquee',   name: 'Marquee',   kind: 'marquee'   },
+            { id: 'spotlight', name: 'Spotlight', kind: 'spotlight' }
+          ].map(l => {
+            let thumb = '';
+            if (l.kind === 'featured') {
+              thumb = `<div class="tline" style="width:80%;margin:6px auto 4px;background:var(--brand);height:10px;border-radius:2px"></div>
+                       <div class="tline" style="width:60%;margin:0 auto;height:5px"></div>
+                       <div class="tline" style="width:50%;margin:0 auto;height:5px"></div>
+                       <div style="display:flex;justify-content:center;gap:3px;margin-top:6px">
+                         <div style="width:4px;height:4px;border-radius:50%;background:var(--brand)"></div>
+                         <div style="width:4px;height:4px;border-radius:50%;background:var(--border-strong)"></div>
+                         <div style="width:4px;height:4px;border-radius:50%;background:var(--border-strong)"></div>
+                       </div>`;
+            } else if (l.kind === 'grid') {
+              thumb = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;">
+                         ${Array(6).fill('<div class="tline" style="height:14px"></div>').join('')}
+                       </div>`;
+            } else if (l.kind === 'masonry') {
+              thumb = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;grid-auto-rows:5px">
+                         <div class="tline" style="grid-row:span 3;height:auto"></div>
+                         <div class="tline" style="grid-row:span 2;height:auto"></div>
+                         <div class="tline" style="grid-row:span 4;height:auto"></div>
+                         <div class="tline" style="grid-row:span 2;height:auto"></div>
+                         <div class="tline" style="grid-row:span 3;height:auto"></div>
+                         <div class="tline" style="grid-row:span 2;height:auto"></div>
+                       </div>`;
+            } else if (l.kind === 'carousel') {
+              thumb = `<div style="display:flex;gap:2px;margin-bottom:4px">
+                         <div class="tline" style="flex:0 0 70%;height:22px;background:var(--brand);opacity:.3"></div>
+                         <div class="tline" style="flex:0 0 26%;height:22px"></div>
+                       </div>
+                       <div style="display:flex;justify-content:center;gap:3px;margin-top:4px">
+                         <div style="width:4px;height:4px;border-radius:50%;background:var(--brand)"></div>
+                         <div style="width:4px;height:4px;border-radius:50%;background:var(--border-strong)"></div>
+                         <div style="width:4px;height:4px;border-radius:50%;background:var(--border-strong)"></div>
+                       </div>`;
+            } else if (l.kind === 'marquee') {
+              thumb = `<div style="display:flex;gap:2px;overflow:hidden;margin-bottom:3px">
+                         <div class="tline" style="flex:0 0 30%;height:10px"></div>
+                         <div class="tline" style="flex:0 0 30%;height:10px"></div>
+                         <div class="tline" style="flex:0 0 30%;height:10px"></div>
+                         <div class="tline" style="flex:0 0 20%;height:10px"></div>
+                       </div>
+                       <div style="display:flex;gap:2px;overflow:hidden">
+                         <div class="tline" style="flex:0 0 20%;height:10px"></div>
+                         <div class="tline" style="flex:0 0 30%;height:10px"></div>
+                         <div class="tline" style="flex:0 0 30%;height:10px"></div>
+                         <div class="tline" style="flex:0 0 30%;height:10px"></div>
+                       </div>`;
+            } else if (l.kind === 'spotlight') {
+              thumb = `<div class="tline" style="height:20px;background:var(--brand);opacity:.3;margin-bottom:3px"></div>
+                       <div style="display:flex;gap:2px">
+                         <div class="tline" style="flex:1;height:6px"></div>
+                         <div class="tline" style="flex:1;height:6px"></div>
+                         <div class="tline" style="flex:1;height:6px"></div>
+                         <div class="tline" style="flex:1;height:6px"></div>
+                       </div>`;
+            }
+            return `
+            <button class="layout-card" data-set-layout="${l.id}" aria-pressed="${c.layout === l.id}">
+              <div class="layout-card-thumb">${thumb}</div>
+              <div class="layout-card-name">${l.name}</div>
+            </button>`;
+          }).join('')}
+        </div>
+      `;
 
-/* ═══ ACCESS HELPERS ═══ */
-function getUserPlan() { return userData?.plan || null; }
-function getAccess(widget) {
-  // -1 = unlimited, 0 = locked, positive = max widgets allowed
-  const plan = getUserPlan();
-  if (!plan || !widget.access) return null; // not signed in
-  return widget.access[plan] !== undefined ? widget.access[plan] : 0;
-}
-function getMinTier(widget) {
-  // Returns the minimum tier name that unlocks this widget
-  if (!widget.access) return 'Boost';
-  const order = ['Spark','Boost','Ignite'];
-  for (const tier of order) {
-    if (widget.access[tier] && widget.access[tier] !== 0) return tier;
-  }
-  return 'Ignite';
-}
-function accessLabel(limit) {
-  if (limit === -1) return { text: 'Unlimited', cls: 'access-included', icon: '<polyline points="20 6 9 17 4 12"/>' };
-  if (limit > 0) return { text: `Up to ${limit} widget${limit>1?'s':''}`, cls: 'access-limit', icon: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' };
-  return { text: 'Not included', cls: 'access-locked', icon: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>' };
-}
+      const themeBody = `
+        <div class="field">
+          <label class="field-label">Theme</label>
+          <div class="btn-group">
+            <button data-set-theme="light" aria-pressed="${c.theme === 'light'}">Light</button>
+            <button data-set-theme="dark"  aria-pressed="${c.theme === 'dark'}">Dark</button>
+            <button data-set-theme="auto"  aria-pressed="${c.theme === 'auto'}">Auto</button>
+          </div>
+          <p class="field-hint" style="margin-top:6px">Auto follows the visitor's system preference.</p>
+        </div>
+      `;
 
-/* ═══ MINI PREVIEWS ═══ */
-function loadMiniPreview(w) {
-  const container = document.getElementById('prev_' + w.id);
-  if (!container) return;
-  container.innerHTML = '';
-  const el = document.createElement('div');
-  el.setAttribute('data-tg-widget', w.widgetTag);
-  container.appendChild(el);
+      const presetRow = `
+        <div class="field">
+          <label class="field-label">Presets</label>
+          <div class="preset-row">
+            ${PRESETS.map(p => {
+              const match = p.colors.brand === c.colors.brand && p.colors.bg === c.colors.bg;
+              return `<button class="preset-chip" data-apply-preset="${p.id}" aria-pressed="${match}" title="${esc(p.name)}" style="--p1:${p.colors.brand};--p2:${p.colors.accent}"></button>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
 
-  if (w.id === 'pricing' && window.TGPricingWidget) {
-    new window.TGPricingWidget(el, {
-      header:{title:'Choose Your Plan',subtitle:'Start free, upgrade anytime.'},
-      brandColor:w.color,accentColor:'#6366F1',pageBg:'#FFFFFF',cardBg:'#FFFFFF',textColor:'#0F172A',subtextColor:'#64748B',borderRadius:14,showToggle:true,showBadge:true,showIcons:true,showDescription:true,showHints:false,showTrustStrip:false,theme:'light',
-      plans:[
-        {name:'Starter',description:'Get started',monthlyPrice:29,yearlyPrice:290,currency:'£',icon:'Zap',highlighted:false,badge:'',cta:'Get Started',ctaUrl:'#',features:[{text:'5 projects',included:true},{text:'Basic support',included:true},{text:'API access',included:false}]},
-        {name:'Pro',description:'For teams',monthlyPrice:59,yearlyPrice:590,currency:'£',icon:'Star',highlighted:true,badge:'Popular',cta:'Try Free',ctaUrl:'#',features:[{text:'Unlimited projects',included:true},{text:'Priority support',included:true},{text:'API access',included:true}]},
-        {name:'Enterprise',description:'Full power',monthlyPrice:99,yearlyPrice:990,currency:'£',icon:'Crown',highlighted:false,badge:'',cta:'Contact',ctaUrl:'#',features:[{text:'Unlimited everything',included:true},{text:'Dedicated support',included:true},{text:'API access',included:true}]}
-      ]
-    });
-  }
+      const colourField = (key, label) => `
+        <div class="field">
+          <label class="field-label">${label}</label>
+          <div class="colour-row">
+            <label class="colour-swatch-wrap" style="background:${esc(c.colors[key])}">
+              <input type="color" data-colour-key="${key}" value="${esc(c.colors[key])}">
+            </label>
+            <input type="text" class="colour-hex" data-colour-text="${key}" value="${esc(c.colors[key])}" maxlength="9" spellcheck="false">
+          </div>
+        </div>
+      `;
 
-  if (w.id === 'reviews' && window.TGReviewsWidget) {
-    new window.TGReviewsWidget(el, {
-      place:{name:'Sunshine Holidays',rating:4.9,total:247},brandColor:w.color,pageBg:'#FFFFFF',cardBg:'#FFFFFF',textColor:'#0F172A',subtextColor:'#64748B',borderRadius:14,layout:'cards',theme:'light',showHeader:true,showAI:false,showTags:false,showPhotos:true,showReplies:false,showHelpful:false,showTrust:false,showCTA:false,
-      reviews:[
-        {id:'1',author:'Sarah M',rating:5,date:'2 weeks ago',text:'Incredible service from start to finish. Everything was seamless.',tags:['Family'],helpful:24,hasPhoto:false},
-        {id:'2',author:'James R',rating:5,date:'1 month ago',text:'Third year booking and they never disappoint. Great prices.',tags:['Value'],helpful:18},
-        {id:'3',author:'Emma T',rating:4,date:'3 weeks ago',text:'Really good experience. Booking was easy and straightforward.',tags:['Service'],helpful:12},
-      ]
-    });
-  }
+      const coloursBody = `
+        ${presetRow}
+        ${colourField('brand',  'Brand')}
+        ${colourField('accent', 'Accent')}
+        ${colourField('bg',     'Background')}
+        ${colourField('card',   'Card surface')}
+        ${colourField('text',   'Text')}
+        ${colourField('sub',    'Secondary text')}
+        ${colourField('border', 'Border')}
+      `;
 
-  if (w.id === 'faq' && window.TGFaqWidget) {
-    new window.TGFaqWidget(el, {
-      layout:'accordion',theme:'light',radius:12,
-      colors:{brand:w.color,accent:'#EC4899',bg:'#FFFFFF',card:'#FFFFFF',text:'#0F172A',sub:'#64748B',border:'#E2E8F0'},
-      heading:{show:true,title:'Frequently asked questions',subtitle:'Everything you need to know.'},
-      search:{enabled:false},
-      showIcons:true,showExpandAll:false,expandBehavior:'single',defaultOpen:0,showUpdated:false,
-      categories:[],
-      questions:[
-        {id:'q1',question:'How do I book a holiday?',answer:'You can book **online**, by phone, or in-branch at any of our stores.',category:'',popular:true},
-        {id:'q2',question:'What is your cancellation policy?',answer:'Flexible terms vary by date.',category:'',popular:false},
-        {id:'q3',question:'Are my holidays ATOL protected?',answer:'Yes — all flight-inclusive packages.',category:'',popular:false},
-      ],
-      cta:{enabled:false},
-      seo:{enableSchema:false}
-    });
-  }
-}
+      const shapeBody = `
+        <div class="field">
+          <label class="field-label">Corner radius <span class="field-hint">${c.radius}px</span></label>
+          <div class="slider-row">
+            <input type="range" class="slider-input" data-slider="radius" min="0" max="28" step="1" value="${c.radius}">
+            <span class="slider-val">${c.radius}px</span>
+          </div>
+        </div>
+      `;
 
-/* ═══ AUTH ═══ */
-let userData = null;
-try {
-  const sess = JSON.parse(sessionStorage.getItem('tgw_session'));
-  // Check expiry (24 hours)
-  if (sess && sess.timestamp && (Date.now() - sess.timestamp) < 86400000) {
-    userData = sess.user; signedIn = true; userEmail = sess.user?.email || '';
-  } else { sessionStorage.removeItem('tgw_session'); }
-} catch(e) {}
+      const headingBody = `
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Show header</div>
+            <div class="toggle-row-hint">Eyebrow, title, and subtitle above the testimonials</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="header.show" aria-pressed="${!!c.header.show}"></button>
+        </div>
+        <div class="field">
+          <label class="field-label">Eyebrow <span class="field-hint">Small label above title</span></label>
+          <input class="input" data-set="header.eyebrow" value="${esc(c.header.eyebrow || '')}" placeholder="Testimonials">
+        </div>
+        <div class="field">
+          <label class="field-label">Title</label>
+          <input class="input" data-set="header.title" value="${esc(c.header.title || '')}" placeholder="Loved by travellers">
+        </div>
+        <div class="field">
+          <label class="field-label">Subtitle</label>
+          <textarea class="textarea" data-set="header.subtitle" placeholder="A short description...">${esc(c.header.subtitle || '')}</textarea>
+        </div>
+      `;
 
-function getAuthToken() { try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; } }
-function authHeaders() { const t = getAuthToken(); return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }; }
+      return `
+        ${section('layout',   'Layout',    layoutBody)}
+        ${section('theme',    'Theme',     themeBody)}
+        ${section('colours',  'Colours',   coloursBody)}
+        ${section('shape',    'Shape',     shapeBody)}
+        ${section('heading',  'Heading',   headingBody)}
+      `;
+    }
 
-function openSignIn(){document.getElementById('signInModal').classList.add('open');document.getElementById('signEmail').focus()}
-function closeSignIn(){document.getElementById('signInModal').classList.remove('open');document.getElementById('signErr').style.display='none'}
+    /* =========================== CONTENT TAB =========================== */
+    function renderContentTab() {
+      const c = state.config;
 
-async function doSignIn(){
-  const email=document.getElementById('signEmail').value.trim();
-  const code=document.getElementById('signCode').value.trim();
-  const errEl=document.getElementById('signErr');
-  errEl.style.display='none';
-  if(!email||!code){errEl.textContent='Please enter email and client code';errEl.style.display='block';return}
+      // Testimonials section
+      const tsBody = `
+        <div class="row-wrap" style="margin-bottom:10px">
+          <button class="btn btn-sm btn-primary" data-add-testimonial>${icn('plus', 14)}Add testimonial</button>
+          <button class="btn btn-sm" data-open-ai>${icn('sparkle', 14)}AI generate</button>
+          <button class="btn btn-sm" data-open-templates>${icn('build', 14)}Template</button>
+        </div>
+        <div class="field">
+          <div class="row">
+            <input class="input" id="t-filter" placeholder="Filter testimonials…" style="flex:1">
+            <span class="text-sub mono" style="font-size:11px">${c.testimonials.length}</span>
+          </div>
+        </div>
+        <div class="q-list" id="q-list">${renderTestimonialList(c.testimonials)}</div>
+        ${c.testimonials.length === 0 ? '<p class="text-muted" style="padding:16px 0;text-align:center;font-size:13px;">No testimonials yet — add one, generate with AI, or use a template.</p>' : ''}
+      `;
 
-  try {
-    const r = await fetch('/api/widget-auth', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, code })
-    });
-    const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.error || 'Sign in failed'; errEl.style.display='block'; return; }
+      // Import/export
+      const importBody = `
+        <p class="field-hint" style="margin-bottom:10px">CSV columns: Quote, Author, Role, Location, Avatar URL, Rating, Destination, Trip Type, Travel Date, Source, Verified, Video URL, Featured</p>
+        <div class="row-wrap">
+          <button class="btn btn-sm" data-download-template>${icn('download', 14)}Download template</button>
+          <button class="btn btn-sm" data-download-csv>${icn('download', 14)}Export current</button>
+          <label class="btn btn-sm btn-primary" style="cursor:pointer">
+            ${icn('upload', 14)}Import CSV
+            <input type="file" accept=".csv,.xlsx,.xls" id="csv-input" style="display:none">
+          </label>
+        </div>
+      `;
 
-    userData = d.user;
-    sessionStorage.setItem('tgw_session', JSON.stringify({ user: d.user, token: d.token, timestamp: Date.now() }));
-    signedIn = true;
-    userEmail = d.user.email;
-    closeSignIn();
-    render();
-  } catch(e) {
-    errEl.textContent = 'Connection error. Please try again.';
-    errEl.style.display='block';
-  }
-}
+      return `
+        ${section('ts',     `Testimonials <span class="section-desc">${c.testimonials.length}</span>`, tsBody)}
+        ${section('import', 'Import / export', importBody)}
+      `;
+    }
 
-function signOut(){sessionStorage.removeItem('tgw_session');signedIn=false;userEmail='';userData=null;myWidgetData=[];render()}
+    function renderTestimonialList(testimonials) {
+      return testimonials.map((t, i) => {
+        // Build meta line: destination · trip type · date · source
+        const metaParts = [];
+        if (t.destination) metaParts.push(esc(t.destination));
+        if (t.tripType)    metaParts.push(esc(t.tripType));
+        if (t.travelDate)  metaParts.push(esc(t.travelDate));
+        if (t.source)      metaParts.push(esc(t.source));
+        const metaLine = metaParts.length
+          ? metaParts.join(' · ')
+          : '<span class="text-muted">No context set</span>';
 
-/* ═══ UTILS ═══ */
-function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
-document.getElementById('signInModal').addEventListener('click',e=>{if(e.target.id==='signInModal')closeSignIn()});
+        // Badges: featured, verified, video, hidden
+        const badges = [];
+        if (t.featured) badges.push('<span class="q-badge pinned">Featured</span>');
+        if (t.verified) badges.push('<span class="q-badge popular">Verified</span>');
+        if (t.video)    badges.push('<span class="q-badge popular">Video</span>');
+        if (t.hidden)   badges.push('<span class="q-badge hidden">Hidden</span>');
 
-/* ═══ INIT ═══ */
-render();
-</script>
+        const previewQuote = (t.quote || '').replace(/\s+/g, ' ').trim();
+        const quoteShort = previewQuote.length > 90 ? previewQuote.slice(0, 90) + '…' : previewQuote;
 
-<!-- Load widget engines for mini previews -->
-<script src="/widget.js"></script>
-<script src="/widget-reviews.js"></script>
-<script src="/widget-faq.js"></script>
+        return `
+        <div class="q-item" draggable="true" data-qid="${esc(t.id)}" data-idx="${i}">
+          <span class="q-drag" aria-hidden="true">${icn('drag', 12)}</span>
+          <div class="q-text">
+            <div class="q-title">${esc(t.author || 'Untitled testimonial')}</div>
+            <div class="q-meta" style="gap:6px;flex-wrap:wrap">
+              <span>${metaLine}</span>
+              ${badges.join('')}
+            </div>
+            ${quoteShort ? `<div class="q-meta" style="margin-top:4px;font-style:italic;color:var(--sub)">"${esc(quoteShort)}"</div>` : ''}
+          </div>
+          <div class="q-actions">
+            <button class="btn btn-xs" data-edit-q="${esc(t.id)}" title="Edit">${icn('pencil', 12)}</button>
+            <button class="btn btn-xs" data-toggle-q="featured" data-qid="${esc(t.id)}" title="${t.featured ? 'Unfeature' : 'Feature'}">${icn('pin', 12)}</button>
+            <button class="btn btn-xs" data-toggle-q="hidden" data-qid="${esc(t.id)}" title="${t.hidden ? 'Show' : 'Hide'}">${icn(t.hidden ? 'eyeOff' : 'eye', 12)}</button>
+            <button class="btn btn-xs btn-danger" data-del-q="${esc(t.id)}" title="Delete">${icn('trash', 12)}</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    /* =========================== SETTINGS TAB =========================== */
+    function renderSettingsTab() {
+      const c = state.config;
+
+      const displayBody = `
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Star rating</div>
+            <div class="toggle-row-hint">Show star rating when provided</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showRating" aria-pressed="${c.showRating !== false}"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Source badge</div>
+            <div class="toggle-row-hint">Google / Facebook / Trustpilot / TripAdvisor logo</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showSource" aria-pressed="${c.showSource !== false}"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Destination badge</div>
+            <div class="toggle-row-hint">e.g. "Maldives"</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showDestination" aria-pressed="${c.showDestination !== false}"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Trip type badge</div>
+            <div class="toggle-row-hint">e.g. "Honeymoon", "Family"</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showTripType" aria-pressed="${c.showTripType !== false}"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Travel date badge</div>
+            <div class="toggle-row-hint">e.g. "March 2024"</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showTravelDate" aria-pressed="${c.showTravelDate !== false}"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Video testimonials</div>
+            <div class="toggle-row-hint">Show play overlay on testimonials with video URL</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showVideo" aria-pressed="${c.showVideo !== false}"></button>
+        </div>
+        <div class="divider"></div>
+        <div class="toggle-row">
+          <div class="toggle-row-main">
+            <div class="toggle-row-label">Filter by trip type</div>
+            <div class="toggle-row-hint">Chip filter above the list (Grid / Masonry only)</div>
+          </div>
+          <button class="toggle" role="switch" data-toggle="showFilters" aria-pressed="${!!c.showFilters}"></button>
+        </div>
+      `;
+
+      // Layout-specific settings
+      const layoutBody = `
+        ${c.layout === 'grid' ? `
+          <div class="field">
+            <label class="field-label">Columns</label>
+            <div class="btn-group">
+              <button data-set-grid-cols="2" aria-pressed="${c.gridCols === 2}">2 columns</button>
+              <button data-set-grid-cols="3" aria-pressed="${c.gridCols === 3}">3 columns</button>
+            </div>
+            <p class="field-hint" style="margin-top:6px">Reflows to 1 column on mobile automatically.</p>
+          </div>
+        ` : ''}
+        ${c.layout === 'carousel' ? `
+          <div class="toggle-row">
+            <div class="toggle-row-main">
+              <div class="toggle-row-label">Autoplay</div>
+              <div class="toggle-row-hint">Advances automatically (respects prefers-reduced-motion)</div>
+            </div>
+            <button class="toggle" role="switch" data-toggle="carousel.autoplay" aria-pressed="${!!c.carousel.autoplay}"></button>
+          </div>
+          <div class="field">
+            <label class="field-label">Autoplay interval <span class="field-hint">${(c.carousel.interval / 1000).toFixed(1)}s</span></label>
+            <div class="slider-row">
+              <input type="range" class="slider-input" data-slider="carousel.interval" min="2000" max="12000" step="500" value="${c.carousel.interval}">
+              <span class="slider-val">${(c.carousel.interval / 1000).toFixed(1)}s</span>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-row-main">
+              <div class="toggle-row-label">Dots</div>
+              <div class="toggle-row-hint">Navigation dots below the slider</div>
+            </div>
+            <button class="toggle" role="switch" data-toggle="carousel.dots" aria-pressed="${c.carousel.dots !== false}"></button>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-row-main">
+              <div class="toggle-row-label">Arrows</div>
+              <div class="toggle-row-hint">Prev / next arrow buttons</div>
+            </div>
+            <button class="toggle" role="switch" data-toggle="carousel.arrows" aria-pressed="${c.carousel.arrows !== false}"></button>
+          </div>
+        ` : ''}
+        ${c.layout === 'marquee' ? `
+          <div class="field">
+            <label class="field-label">Scroll speed <span class="field-hint">${c.marquee.speed}px/s</span></label>
+            <div class="slider-row">
+              <input type="range" class="slider-input" data-slider="marquee.speed" min="15" max="100" step="5" value="${c.marquee.speed}">
+              <span class="slider-val">${c.marquee.speed}</span>
+            </div>
+            <p class="field-hint" style="margin-top:6px">Higher is faster. Visitors can pause by hovering.</p>
+          </div>
+          <div class="field">
+            <label class="field-label">Rows</label>
+            <div class="btn-group">
+              <button data-set-marquee-rows="1" aria-pressed="${c.marquee.rows === 1}">1 row</button>
+              <button data-set-marquee-rows="2" aria-pressed="${c.marquee.rows === 2}">2 rows</button>
+            </div>
+            <p class="field-hint" style="margin-top:6px">Two rows scroll in opposite directions — classic social-proof strip.</p>
+          </div>
+        ` : ''}
+        ${(c.layout !== 'grid' && c.layout !== 'carousel' && c.layout !== 'marquee') ? `
+          <p class="text-muted" style="font-size:13px;text-align:center;padding:16px 0">No layout-specific settings for "${esc(c.layout)}".</p>
+        ` : ''}
+      `;
+
+      const embedBody = `
+        <p class="field-hint" style="margin-bottom:10px">${state.widgetId ? 'Paste this into any HTML page to embed your testimonials.' : 'Save the widget first to get your embed code.'}</p>
+        ${state.widgetId ? `
+          <div class="code-block">&lt;div data-tg-widget="testimonials" data-tg-id="${esc(state.widgetId)}"&gt;&lt;/div&gt;
+&lt;script src="https://tg-widgets.vercel.app/widget-testimonials.js"&gt;&lt;/script&gt;</div>
+          <div style="margin-top:8px"><button class="btn btn-sm btn-block" data-copy-embed>${icn('copy', 14)}Copy embed code</button></div>
+        ` : '<div class="code-block text-muted" style="color:var(--muted)">Save the widget first to generate an embed snippet.</div>'}
+      `;
+
+      return `
+        ${section('display',   'Display options',  displayBody)}
+        ${section('layoutopt', 'Layout options',   layoutBody)}
+        ${section('embed',     'Embed code',       embedBody)}
+      `;
+    }
+
+    /* ============================ EVENT BINDING ============================ */
+    function bindTabHandlers() {
+      const body = $('#sidebar-body');
+      if (!body) return;
+
+      // Section toggles
+      $$('[data-toggle-section]', body).forEach(el => el.addEventListener('click', () => {
+        const k = el.dataset.toggleSection;
+        state.sections[k] = !(state.sections[k] !== false);
+        const sec = el.closest('.section');
+        if (sec) sec.dataset.open = String(state.sections[k]);
+      }));
+
+      // Generic toggles (path-based)
+      $$('[data-toggle]', body).forEach(el => el.addEventListener('click', () => {
+        const path = el.dataset.toggle;
+        mutate(cfg => setAtPath(cfg, path, !getAtPath(cfg, path)));
+        el.setAttribute('aria-pressed', String(getAtPath(state.config, path)));
+      }));
+
+      // Generic set (text, select) — on input (light) + on blur (commit history)
+      $$('[data-set]', body).forEach(el => {
+        const path = el.dataset.set;
+        const isSelect = el.tagName === 'SELECT';
+        const event = isSelect ? 'change' : 'input';
+        el.addEventListener(event, debounce(() => {
+          const val = isSelect && /^[-\d]+$/.test(el.value) ? parseInt(el.value, 10) : el.value;
+          mutateLight(cfg => setAtPath(cfg, path, val));
+        }, 120));
+        el.addEventListener('blur', () => pushHistory());
+        if (isSelect) el.addEventListener('change', () => pushHistory());
+      });
+
+      // Colour pickers + hex inputs
+      $$('[data-colour-key]', body).forEach(el => {
+        el.addEventListener('input', debounce(() => {
+          const k = el.dataset.colourKey;
+          mutateLight(cfg => { cfg.colors[k] = el.value; });
+          const text = $(`[data-colour-text="${k}"]`, body);
+          if (text) text.value = el.value;
+          const sw = el.closest('.colour-swatch-wrap');
+          if (sw) sw.style.background = el.value;
+        }, 60));
+        el.addEventListener('change', () => pushHistory());
+      });
+      $$('[data-colour-text]', body).forEach(el => {
+        el.addEventListener('change', () => {
+          const k = el.dataset.colourText;
+          const v = el.value.trim();
+          if (!/^#?([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v)) { el.value = state.config.colors[k]; return; }
+          const hex = v.startsWith('#') ? v : '#' + v;
+          mutate(cfg => { cfg.colors[k] = hex; });
+          const col = $(`[data-colour-key="${k}"]`, body); if (col) col.value = hex;
+          const sw = el.closest('.colour-row').querySelector('.colour-swatch-wrap');
+          if (sw) sw.style.background = hex;
+        });
+      });
+
+      // Sliders
+      $$('[data-slider]', body).forEach(el => {
+        const k = el.dataset.slider;
+        const val = el.parentElement.querySelector('.slider-val');
+        el.addEventListener('input', () => {
+          mutateLight(cfg => { cfg[k] = parseInt(el.value, 10); });
+          if (val) val.textContent = el.value + 'px';
+          const hint = el.closest('.field').querySelector('.field-hint'); if (hint) hint.textContent = el.value + 'px';
+        });
+        el.addEventListener('change', () => pushHistory());
+      });
+
+      // Layout cards
+      $$('[data-set-layout]', body).forEach(el => el.addEventListener('click', () => {
+        mutate(cfg => { cfg.layout = el.dataset.setLayout; });
+        $$('[data-set-layout]', body).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.setLayout === state.config.layout)));
+      }));
+
+      // Theme
+      $$('[data-set-theme]', body).forEach(el => el.addEventListener('click', () => {
+        mutate(cfg => { cfg.theme = el.dataset.setTheme; });
+        $$('[data-set-theme]', body).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.setTheme === state.config.theme)));
+      }));
+
+      // Presets
+      $$('[data-apply-preset]', body).forEach(el => el.addEventListener('click', () => {
+        const p = PRESETS.find(x => x.id === el.dataset.applyPreset);
+        if (!p) return;
+        mutate(cfg => { cfg.colors = Object.assign({}, cfg.colors, p.colors); });
+        renderTabBody();
+      }));
+
+      // Grid column selector (Settings tab, Layout options)
+      $$('[data-set-grid-cols]', body).forEach(el => el.addEventListener('click', () => {
+        const n = parseInt(el.dataset.setGridCols, 10);
+        if (!(n === 2 || n === 3)) return;
+        mutate(cfg => { cfg.gridCols = n; });
+        $$('[data-set-grid-cols]', body).forEach(b => b.setAttribute('aria-pressed', String(parseInt(b.dataset.setGridCols, 10) === state.config.gridCols)));
+      }));
+
+      // Marquee rows selector
+      $$('[data-set-marquee-rows]', body).forEach(el => el.addEventListener('click', () => {
+        const n = parseInt(el.dataset.setMarqueeRows, 10);
+        if (!(n === 1 || n === 2)) return;
+        mutate(cfg => { cfg.marquee.rows = n; });
+        $$('[data-set-marquee-rows]', body).forEach(b => b.setAttribute('aria-pressed', String(parseInt(b.dataset.setMarqueeRows, 10) === state.config.marquee.rows)));
+      }));
+
+      // Testimonial actions
+      $$('[data-add-testimonial]', body).forEach(el => el.addEventListener('click', () => openTestimonialEditor(null)));
+      $$('[data-edit-q]', body).forEach(el => el.addEventListener('click', () => openTestimonialEditor(el.dataset.editQ)));
+      $$('[data-del-q]', body).forEach(el => el.addEventListener('click', () => {
+        if (!confirm('Delete this testimonial?')) return;
+        mutate(cfg => { cfg.testimonials = cfg.testimonials.filter(t => t.id !== el.dataset.delQ); });
+        renderTabBody();
+      }));
+      $$('[data-toggle-q]', body).forEach(el => el.addEventListener('click', () => {
+        const key = el.dataset.toggleQ, tid = el.dataset.qid;
+        mutate(cfg => {
+          const t = cfg.testimonials.find(x => x.id === tid); if (!t) return;
+          t[key] = !t[key];
+        });
+        renderTabBody();
+      }));
+
+      // Testimonial filter
+      const tFilter = $('#t-filter');
+      if (tFilter) {
+        tFilter.addEventListener('input', debounce(() => {
+          const term = tFilter.value.trim().toLowerCase();
+          const list = $('#q-list'); if (!list) return;
+          const filtered = term
+            ? state.config.testimonials.filter(t => (t.quote + ' ' + (t.author || '') + ' ' + (t.destination || '') + ' ' + (t.tripType || '')).toLowerCase().includes(term))
+            : state.config.testimonials;
+          list.innerHTML = renderTestimonialList(filtered);
+          bindTabHandlers();
+        }, 120));
+      }
+
+      // Drag to reorder
+      bindDragReorder(body);
+
+      // AI / Templates
+      $$('[data-open-ai]', body).forEach(el => el.addEventListener('click', openAIModal));
+      $$('[data-open-templates]', body).forEach(el => el.addEventListener('click', openTemplatesModal));
+
+      // CSV
+      const csvIn = $('#csv-input', body); if (csvIn) csvIn.addEventListener('change', (e) => handleCSVImport(e.target.files[0]));
+      $$('[data-download-template]', body).forEach(el => el.addEventListener('click', downloadCSVTemplate));
+      $$('[data-download-csv]', body).forEach(el => el.addEventListener('click', downloadCSVExport));
+
+      // Embed copy
+      $$('[data-copy-embed]', body).forEach(el => el.addEventListener('click', () => {
+        if (!state.widgetId) return;
+        const snippet = `<div data-tg-widget="testimonials" data-tg-id="${state.widgetId}"></div>\n<script src="https://tg-widgets.vercel.app/widget-testimonials.js"><\/script>`;
+        navigator.clipboard.writeText(snippet).then(() => showToast('Embed code copied', 'success'));
+      }));
+    }
+
+    /* ============================ DEEP SET/GET ============================ */
+    function getAtPath(obj, path) {
+      return path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+    }
+    function setAtPath(obj, path, val) {
+      const keys = path.split('.');
+      let cur = obj;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (cur[keys[i]] == null) cur[keys[i]] = {};
+        cur = cur[keys[i]];
+      }
+      cur[keys[keys.length - 1]] = val;
+    }
+
+    /* ============================ DRAG REORDER ============================ */
+    function bindDragReorder(body) {
+      const list = $('#q-list', body); if (!list) return;
+      list.addEventListener('dragstart', (e) => {
+        const item = e.target.closest('.q-item'); if (!item) return;
+        state.dragId = item.dataset.qid;
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      list.addEventListener('dragend', (e) => {
+        const item = e.target.closest('.q-item'); if (item) item.classList.remove('dragging');
+        $$('.q-item', list).forEach(i => i.classList.remove('drag-over'));
+        state.dragId = null;
+      });
+      list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const over = e.target.closest('.q-item'); if (!over || over.classList.contains('dragging')) return;
+        $$('.q-item', list).forEach(i => i.classList.remove('drag-over'));
+        over.classList.add('drag-over');
+      });
+      list.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const over = e.target.closest('.q-item'); if (!over || !state.dragId) return;
+        const targetId = over.dataset.qid;
+        if (targetId === state.dragId) return;
+        mutate(cfg => {
+          const from = cfg.testimonials.findIndex(t => t.id === state.dragId);
+          const to = cfg.testimonials.findIndex(t => t.id === targetId);
+          if (from < 0 || to < 0) return;
+          const [moved] = cfg.testimonials.splice(from, 1);
+          cfg.testimonials.splice(to, 0, moved);
+        });
+        renderTabBody();
+      });
+    }
+
+    /* ============================ TESTIMONIAL EDITOR ============================ */
+    function openTestimonialEditor(tid) {
+      const c = state.config;
+      const t = tid ? c.testimonials.find(x => x.id === tid) : null;
+      const isNew = !t;
+      const model = t ? deepClone(t) : {
+        id: uid('t'), quote: '', author: '', role: '', location: '', avatar: '',
+        rating: 0, destination: '', tripType: '', travelDate: '',
+        source: '', verified: false, video: '', featured: false, hidden: false
+      };
+
+      const tripPresets = ['Honeymoon','Family','Solo','Couples','Anniversary','Luxury','Adventure','Cruise','Group','Business'];
+      const sourceOptions = ['', 'Google', 'Facebook', 'Trustpilot', 'TripAdvisor', 'Direct'];
+
+      openModal({
+        title: isNew ? 'New testimonial' : 'Edit testimonial',
+        large: true,
+        body: `
+          <div class="field">
+            <label class="field-label">Quote <span class="field-hint">The star of the show — keep it specific and emotional</span></label>
+            <textarea class="textarea" id="te-quote" style="min-height:120px" placeholder="e.g. The most magical 10 days of our lives. Every detail was handled..." maxlength="800">${esc(model.quote)}</textarea>
+          </div>
+          <div class="row-wrap">
+            <div class="field" style="flex:1;min-width:180px;margin-bottom:0">
+              <label class="field-label">Author <span class="field-hint">Required</span></label>
+              <input class="input" id="te-author" value="${esc(model.author)}" placeholder="e.g. Sarah Thompson" maxlength="100">
+            </div>
+            <div class="field" style="flex:1;min-width:140px;margin-bottom:0">
+              <label class="field-label">Rating</label>
+              <select class="select" id="te-rating">
+                <option value="0" ${model.rating === 0 ? 'selected' : ''}>— none —</option>
+                <option value="1" ${model.rating === 1 ? 'selected' : ''}>★</option>
+                <option value="2" ${model.rating === 2 ? 'selected' : ''}>★★</option>
+                <option value="3" ${model.rating === 3 ? 'selected' : ''}>★★★</option>
+                <option value="4" ${model.rating === 4 ? 'selected' : ''}>★★★★</option>
+                <option value="5" ${model.rating === 5 ? 'selected' : ''}>★★★★★</option>
+              </select>
+            </div>
+          </div>
+          <div class="row-wrap">
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Role <span class="field-hint">optional</span></label>
+              <input class="input" id="te-role" value="${esc(model.role)}" placeholder="e.g. Honeymoon couple" maxlength="80">
+            </div>
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Location <span class="field-hint">optional</span></label>
+              <input class="input" id="te-location" value="${esc(model.location)}" placeholder="e.g. Manchester, UK" maxlength="80">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Avatar URL <span class="field-hint">optional — initials shown if blank</span></label>
+            <input class="input" id="te-avatar" value="${esc(model.avatar)}" placeholder="https://..." maxlength="500">
+          </div>
+          <div class="divider"></div>
+          <div class="row-wrap">
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Destination</label>
+              <input class="input" id="te-destination" value="${esc(model.destination)}" placeholder="e.g. Maldives" maxlength="60">
+            </div>
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Trip type</label>
+              <input class="input" id="te-trip-type" list="tripTypeList" value="${esc(model.tripType)}" placeholder="e.g. Honeymoon" maxlength="40">
+              <datalist id="tripTypeList">
+                ${tripPresets.map(p => `<option value="${esc(p)}">`).join('')}
+              </datalist>
+            </div>
+            <div class="field" style="flex:1;min-width:140px;margin-bottom:0">
+              <label class="field-label">Travel date</label>
+              <input class="input" id="te-travel-date" value="${esc(model.travelDate)}" placeholder="e.g. March 2024" maxlength="40">
+            </div>
+          </div>
+          <div class="row-wrap">
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Source</label>
+              <select class="select" id="te-source">
+                ${sourceOptions.map(s => `<option value="${esc(s)}" ${s === (model.source || '') ? 'selected' : ''}>${s || '— none —'}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field" style="flex:1;min-width:160px;margin-bottom:0">
+              <label class="field-label">Video URL <span class="field-hint">YouTube, Vimeo, or MP4</span></label>
+              <input class="input" id="te-video" value="${esc(model.video)}" placeholder="https://..." maxlength="500">
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="stack">
+            <div class="toggle-row">
+              <div class="toggle-row-main">
+                <div class="toggle-row-label">Verified</div>
+                <div class="toggle-row-hint">Shows a green tick next to the author name</div>
+              </div>
+              <button class="toggle" role="switch" id="te-verified" aria-pressed="${!!model.verified}"></button>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-row-main">
+                <div class="toggle-row-label">Featured</div>
+                <div class="toggle-row-hint">Floats to the top in Grid / Masonry layouts</div>
+              </div>
+              <button class="toggle" role="switch" id="te-featured" aria-pressed="${!!model.featured}"></button>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-row-main">
+                <div class="toggle-row-label">Hidden</div>
+                <div class="toggle-row-hint">Saved but not shown to visitors</div>
+              </div>
+              <button class="toggle" role="switch" id="te-hidden" aria-pressed="${!!model.hidden}"></button>
+            </div>
+          </div>
+        `,
+        foot: `
+          ${!isNew ? '<button class="btn btn-danger" data-te-delete>Delete</button><div style="flex:1"></div>' : '<div style="flex:1"></div>'}
+          <button class="btn" data-modal-close>Cancel</button>
+          <button class="btn btn-primary" data-te-save>${isNew ? 'Add testimonial' : 'Save changes'}</button>
+        `,
+        onMount(root) {
+          $$('[aria-pressed]', root).forEach(t => t.addEventListener('click', () => t.setAttribute('aria-pressed', String(t.getAttribute('aria-pressed') !== 'true'))));
+          $('[data-te-save]', root)?.addEventListener('click', () => {
+            const t2 = {
+              id: model.id,
+              quote: $('#te-quote', root).value.trim(),
+              author: $('#te-author', root).value.trim(),
+              role: $('#te-role', root).value.trim(),
+              location: $('#te-location', root).value.trim(),
+              avatar: $('#te-avatar', root).value.trim(),
+              rating: parseInt($('#te-rating', root).value, 10) || 0,
+              destination: $('#te-destination', root).value.trim(),
+              tripType: $('#te-trip-type', root).value.trim(),
+              travelDate: $('#te-travel-date', root).value.trim(),
+              source: $('#te-source', root).value,
+              video: $('#te-video', root).value.trim(),
+              verified: $('#te-verified', root).getAttribute('aria-pressed') === 'true',
+              featured: $('#te-featured', root).getAttribute('aria-pressed') === 'true',
+              hidden: $('#te-hidden', root).getAttribute('aria-pressed') === 'true',
+            };
+            if (!t2.quote) { showToast('Quote is required', 'error'); return; }
+            if (!t2.author) { showToast('Author is required', 'error'); return; }
+            mutate(cfg => {
+              if (isNew) cfg.testimonials.push(t2);
+              else {
+                const idx = cfg.testimonials.findIndex(x => x.id === t2.id);
+                if (idx >= 0) cfg.testimonials[idx] = t2;
+              }
+            });
+            closeModal(); renderTabBody();
+          });
+          $('[data-te-delete]', root)?.addEventListener('click', () => {
+            if (!confirm('Delete this testimonial?')) return;
+            mutate(cfg => { cfg.testimonials = cfg.testimonials.filter(x => x.id !== model.id); });
+            closeModal(); renderTabBody();
+          });
+        }
+      });
+    }
+
+    /* ============================ TEMPLATES MODAL ============================ */
+    function openTemplatesModal() {
+      openModal({
+        title: 'Choose a template',
+        large: true,
+        body: `
+          <p class="field-hint" style="margin-bottom:14px">Pick a travel industry template to start from. You can edit anything after applying.</p>
+          <div class="tmpl-grid">
+            ${TEMPLATES.map(t => `
+              <button class="tmpl-card" data-apply-tmpl="${esc(t.id)}">
+                <div class="tmpl-card-head">
+                  <span class="tmpl-card-icon" style="background:${esc(t.colour)}">${icn(t.icon, 16)}</span>
+                  <span class="tmpl-card-name">${esc(t.name)}</span>
+                </div>
+                <div class="tmpl-card-desc">${esc(t.description)}</div>
+                <div class="tmpl-card-meta">
+                  <span>${t.config.testimonials.length} testimonials</span>
+                </div>
+              </button>
+            `).join('')}
+          </div>
+        `,
+        foot: `<button class="btn" data-modal-close>Close</button>`,
+        onMount(root) {
+          $$('[data-apply-tmpl]', root).forEach(b => b.addEventListener('click', () => applyTemplate(b.dataset.applyTmpl)));
+        }
+      });
+    }
+
+    function applyTemplate(id) {
+      const t = TEMPLATES.find(x => x.id === id); if (!t) return;
+      if (state.config.testimonials.length > 0 && !confirm(`This will replace your current ${state.config.testimonials.length} testimonials with the ${t.name} template. Continue?`)) return;
+      mutate(cfg => {
+        if (t.config.header) cfg.header = Object.assign({}, cfg.header, t.config.header);
+        cfg.testimonials = t.config.testimonials.map(item => Object.assign({ id: uid('t'), hidden: false, featured: false, video: '', avatar: '' }, item));
+      });
+      closeModal();
+      setTab('content');
+      showToast(`Applied ${t.name} template`, 'success');
+    }
+
+    /* ============================ AI MODAL ============================ */
+    function openAIModal() {
+      openModal({
+        title: 'Generate Testimonials with AI',
+        body: `
+          <p class="field-hint" style="margin-bottom:12px">Describe your business and what kind of testimonials you need. The more specific you are, the better the results.</p>
+          <div class="field">
+            <label class="field-label">Business description</label>
+            <textarea class="textarea" id="ai-prompt" style="min-height:120px" placeholder="e.g. Luxury travel agent in London specialising in honeymoons and bespoke itineraries. Need testimonials from couples, families, and solo travellers covering destinations like Maldives, Japan, Santorini."></textarea>
+          </div>
+          <div class="row-wrap">
+            <div class="field" style="flex:1;min-width:140px">
+              <label class="field-label">Count</label>
+              <select class="select" id="ai-count">
+                <option value="4">4 testimonials</option>
+                <option value="6" selected>6 testimonials</option>
+                <option value="8">8 testimonials</option>
+                <option value="10">10 testimonials</option>
+              </select>
+            </div>
+            <div class="field" style="flex:1;min-width:140px">
+              <label class="field-label">Tone</label>
+              <select class="select" id="ai-tone">
+                <option value="warm">Warm & friendly</option>
+                <option value="professional" selected>Professional</option>
+                <option value="casual">Casual</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Merge behaviour</label>
+            <div class="btn-group">
+              <button id="ai-merge-replace" aria-pressed="true">Replace existing</button>
+              <button id="ai-merge-append" aria-pressed="false">Append</button>
+            </div>
+          </div>
+          <div id="ai-status" class="field-hint" style="display:none;margin-top:8px"></div>
+        `,
+        foot: `
+          <div style="flex:1"></div>
+          <button class="btn" data-modal-close>Cancel</button>
+          <button class="btn btn-primary" id="ai-go">${icn('sparkle', 14)}Generate</button>
+        `,
+        onMount(root) {
+          $$('#ai-merge-replace, #ai-merge-append', root).forEach(b => b.addEventListener('click', () => {
+            $$('#ai-merge-replace, #ai-merge-append', root).forEach(x => x.setAttribute('aria-pressed', 'false'));
+            b.setAttribute('aria-pressed', 'true');
+          }));
+          $('#ai-go', root).addEventListener('click', async () => {
+            const prompt = $('#ai-prompt', root).value.trim();
+            if (!prompt) { showToast('Describe your business first', 'error'); return; }
+            const count = parseInt($('#ai-count', root).value, 10);
+            const tone  = $('#ai-tone', root).value;
+            const merge = $('#ai-merge-append', root).getAttribute('aria-pressed') === 'true' ? 'append' : 'replace';
+            const status = $('#ai-status', root);
+            const btn = $('#ai-go', root);
+            status.style.display = ''; status.textContent = 'Generating — usually takes 10–20 seconds…';
+            btn.disabled = true; btn.innerHTML = `${icn('sparkle', 14).replace('>','  class="spin">')}Generating…`;
+            try {
+              const res = await fetch(API_AI, {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({
+                  widgetType: WIDGET_TYPE,
+                  action: 'generate',
+                  prompt,
+                  options: { count, tone }
+                })
+              });
+              if (res.status === 401) { showToast('Session expired — please sign in again', 'error'); clearSession(); location.reload(); return; }
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              const data = await res.json();
+              const arr = data.testimonials || data.result?.testimonials || data.result || [];
+              if (!Array.isArray(arr) || arr.length === 0) throw new Error('No testimonials returned');
+              mutate(cfg => {
+                const built = arr.map(t => ({
+                  id: uid('t'),
+                  quote: t.quote || t.text || '',
+                  author: t.author || t.name || '',
+                  role: t.role || '',
+                  location: t.location || '',
+                  avatar: '', rating: t.rating || 5,
+                  destination: t.destination || '',
+                  tripType: t.tripType || t.trip_type || '',
+                  travelDate: t.travelDate || t.travel_date || '',
+                  source: t.source || 'Google',
+                  verified: !!t.verified,
+                  video: '', featured: !!t.featured, hidden: false
+                })).filter(t => t.quote);
+                if (merge === 'replace') cfg.testimonials = built;
+                else cfg.testimonials = cfg.testimonials.concat(built);
+              });
+              closeModal(); setTab('content'); showToast(`Generated ${arr.length} testimonials`, 'success');
+            } catch (err) {
+              status.textContent = 'Error: ' + (err.message || 'Could not generate');
+              status.style.color = 'var(--danger)';
+              btn.disabled = false; btn.innerHTML = `${icn('sparkle', 14)}Try again`;
+            }
+          });
+        }
+      });
+    }
+
+    /* ============================ EMBED MODAL ============================ */
+    function openEmbedModal() {
+      if (!state.widgetId) { showToast('Save the widget first to get an embed code', 'error'); return; }
+      const snippet = `<div data-tg-widget="testimonials" data-tg-id="${state.widgetId}"></div>\n<script src="https://tg-widgets.vercel.app/widget-testimonials.js"><\/script>`;
+      openModal({
+        title: 'Embed code',
+        body: `
+          <p class="field-hint" style="margin-bottom:12px">Paste this into any HTML page where you want your testimonials to appear.</p>
+          <div class="code-block" id="embed-code">${esc(snippet)}</div>
+          <p class="field-hint" style="margin-top:12px">The widget loads only when the page loads — no setup, no dependencies, zero impact on your page speed.</p>
+        `,
+        foot: `
+          <div style="flex:1"></div>
+          <button class="btn" data-modal-close>Close</button>
+          <button class="btn btn-primary" id="copy-embed-modal">${icn('copy', 14)}Copy code</button>
+        `,
+        onMount(root) {
+          $('#copy-embed-modal', root).addEventListener('click', () => {
+            navigator.clipboard.writeText(snippet).then(() => showToast('Copied to clipboard', 'success'));
+          });
+        }
+      });
+    }
+
+    /* ============================ MODAL PRIMITIVE ============================ */
+    function openModal({ title, body, foot, large, onMount }) {
+      const layer = $('#modal-layer'); const box = $('#modal-box');
+      box.className = 'modal' + (large ? ' modal-lg' : '');
+      box.innerHTML = `
+        <div class="modal-head">
+          <div class="modal-title">${esc(title)}</div>
+          <button class="modal-close" data-modal-close aria-label="Close">${icn('x', 16)}</button>
+        </div>
+        <div class="modal-body">${body}</div>
+        <div class="modal-foot">${foot || '<button class="btn btn-primary" data-modal-close>Done</button>'}</div>
+      `;
+      layer.hidden = false;
+      $$('[data-modal-close]', box).forEach(b => b.addEventListener('click', closeModal));
+      if (onMount) onMount(box);
+    }
+    function closeModal() {
+      const layer = $('#modal-layer'); if (layer) layer.hidden = true;
+    }
+
+    /* ============================ TOAST ============================ */
+    let toastTimer;
+    function showToast(msg, type) {
+      const t = $('#toast'); if (!t) return;
+      t.className = 'toast' + (type ? ' ' + type : '');
+      t.innerHTML = `${type === 'success' ? icn('check', 14) : (type === 'error' ? icn('x', 14) : '')}<span>${esc(msg)}</span>`;
+      t.setAttribute('data-visible', 'true');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.setAttribute('data-visible', 'false'), 3200);
+    }
+
+    /* ============================ CSV ============================ */
+    function downloadCSVTemplate() {
+      const rows = [
+        ['Quote', 'Author', 'Role', 'Location', 'Avatar URL', 'Rating', 'Destination', 'Trip Type', 'Travel Date', 'Source', 'Verified', 'Video URL', 'Featured'],
+        ['The most magical 10 days of our lives. Every detail was handled.', 'Sarah Thompson', 'Honeymoon couple', 'Manchester, UK', '', '5', 'Maldives', 'Honeymoon', 'March 2024', 'Google', 'true', '', 'true'],
+        ['The kids still talk about it. Guides knew every child by name by day two.', 'Raj Patel', 'Family of four', 'Birmingham, UK', '', '5', 'Costa Rica', 'Family', 'October 2024', 'Direct', 'false', '', 'false'],
+      ];
+      downloadCSV('testimonials-template.csv', rows);
+    }
+    function downloadCSVExport() {
+      const rows = [['Quote', 'Author', 'Role', 'Location', 'Avatar URL', 'Rating', 'Destination', 'Trip Type', 'Travel Date', 'Source', 'Verified', 'Video URL', 'Featured']];
+      state.config.testimonials.forEach(t => {
+        rows.push([
+          t.quote || '', t.author || '', t.role || '', t.location || '', t.avatar || '',
+          String(t.rating || 0), t.destination || '', t.tripType || '', t.travelDate || '',
+          t.source || '', String(!!t.verified), t.video || '', String(!!t.featured)
+        ]);
+      });
+      downloadCSV('testimonials-export.csv', rows);
+    }
+    function downloadCSV(filename, rows) {
+      const csv = rows.map(r => r.map(v => {
+        const s = String(v == null ? '' : v);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }).join(',')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    }
+    function handleCSVImport(file) {
+      if (!file) return;
+      if (typeof XLSX === 'undefined') { showToast('Importer still loading — try again in a moment', 'error'); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const wb = XLSX.read(data, { type: 'array' });
+          const sheet = wb.Sheets[wb.SheetNames[0]];
+          const arr = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
+          if (!arr.length) throw new Error('Empty file');
+          const header = arr[0].map(h => String(h).toLowerCase().trim());
+          // Tolerant header matching — each field checks a few common variants
+          const find = (tests) => {
+            for (const t of tests) {
+              const i = header.findIndex(h => h === t || h.includes(t));
+              if (i >= 0) return i;
+            }
+            return -1;
+          };
+          const idx = {
+            quote:       find(['quote', 'testimonial', 'review']),
+            author:      find(['author', 'name', 'customer']),
+            role:        find(['role']),
+            location:    find(['location', 'city']),
+            avatar:      find(['avatar', 'photo', 'image']),
+            rating:      find(['rating', 'stars', 'score']),
+            destination: find(['destination', 'trip destination', 'place']),
+            tripType:    find(['trip type', 'triptype', 'tripkind', 'type']),
+            travelDate:  find(['travel date', 'traveldate', 'trip date', 'when']),
+            source:      find(['source']),
+            verified:    find(['verified']),
+            video:       find(['video', 'video url']),
+            featured:    find(['featured']),
+          };
+          if (idx.quote < 0 || idx.author < 0) throw new Error('CSV must have "Quote" and "Author" columns');
+          const boolish = (v) => /^(true|yes|1|y)$/i.test(String(v || '').trim());
+          const allowedSources = ['Google', 'Facebook', 'Trustpilot', 'TripAdvisor', 'Direct'];
+          const canonSource = (v) => {
+            const lc = String(v || '').trim().toLowerCase();
+            return allowedSources.find(s => s.toLowerCase() === lc) || (lc ? 'Direct' : '');
+          };
+          const rows = arr.slice(1).filter(r => r[idx.quote] && r[idx.author]).map(r => ({
+            id: uid('t'),
+            quote:       String(r[idx.quote] || '').trim(),
+            author:      String(r[idx.author] || '').trim(),
+            role:        idx.role        >= 0 ? String(r[idx.role] || '').trim()        : '',
+            location:    idx.location    >= 0 ? String(r[idx.location] || '').trim()    : '',
+            avatar:      idx.avatar      >= 0 ? String(r[idx.avatar] || '').trim()      : '',
+            rating:      idx.rating      >= 0 ? Math.max(0, Math.min(5, parseInt(r[idx.rating], 10) || 0)) : 0,
+            destination: idx.destination >= 0 ? String(r[idx.destination] || '').trim() : '',
+            tripType:    idx.tripType    >= 0 ? String(r[idx.tripType] || '').trim()    : '',
+            travelDate:  idx.travelDate  >= 0 ? String(r[idx.travelDate] || '').trim()  : '',
+            source:      idx.source      >= 0 ? canonSource(r[idx.source])              : '',
+            verified:    idx.verified    >= 0 ? boolish(r[idx.verified])                : false,
+            video:       idx.video       >= 0 ? String(r[idx.video] || '').trim()       : '',
+            featured:    idx.featured    >= 0 ? boolish(r[idx.featured])                : false,
+            hidden: false,
+          }));
+          if (!rows.length) throw new Error('No valid rows — each row needs a quote and an author');
+          mutate(cfg => { cfg.testimonials = rows; });
+          renderTabBody();
+          showToast(`Imported ${rows.length} testimonial${rows.length === 1 ? '' : 's'}`, 'success');
+        } catch (err) {
+          showToast('Import failed: ' + (err.message || 'invalid file'), 'error');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    /* ============================ DESIGN MODE ============================ */
+    function toggleDM() {
+      state.dmEnabled = !state.dmEnabled;
+      $('#btn-dm').classList.toggle('is-on', state.dmEnabled);
+      $('#btn-dm').style.background = state.dmEnabled ? 'var(--accent)' : '';
+      $('#btn-dm').style.color = state.dmEnabled ? '#fff' : '';
+      $('#btn-dm').style.borderColor = state.dmEnabled ? 'var(--accent)' : '';
+      const layer = $('#dm-layer');
+      layer.innerHTML = '';
+      if (state.dmEnabled) buildDMHotspots();
+      $('#dm-popover').hidden = true;
+    }
+
+    function buildDMHotspots() {
+      const layer = $('#dm-layer');
+      const canvas = $('#preview-canvas');
+      const mount = $('#tgt-mount');
+      if (!layer || !canvas || !mount) return;
+      layer.innerHTML = '';
+      // Position the layer to cover the preview canvas
+      const canvasRect = canvas.getBoundingClientRect();
+      layer.style.left = '0px'; layer.style.top = '0px';
+      layer.style.width = canvasRect.width + 'px';
+      layer.style.height = canvasRect.height + 'px';
+
+      const root = mount.shadowRoot;
+      if (!root) return;
+      const hotspots = [];
+      const header = root.querySelector('.tgt-header');
+      if (header) hotspots.push({ node: header, label: 'Header', target: 'heading' });
+      // Find individual testimonial cards
+      const cards = root.querySelectorAll('.tgt-card, .tgt-featured, .tgt-item');
+      cards.forEach((card, i) => {
+        if (i < 6) hotspots.push({ node: card, label: `Testimonial ${i + 1}`, target: 'testimonial-' + i });
+      });
+
+      hotspots.forEach(h => {
+        const rect = h.node.getBoundingClientRect();
+        const hs = document.createElement('button');
+        hs.className = 'dm-hotspot';
+        hs.innerHTML = `<span class="dm-hotspot-label">${h.label}</span>`;
+        hs.style.left = (rect.left - canvasRect.left + canvas.scrollLeft) + 'px';
+        hs.style.top = (rect.top - canvasRect.top + canvas.scrollTop) + 'px';
+        hs.style.width = rect.width + 'px';
+        hs.style.height = rect.height + 'px';
+        hs.addEventListener('click', (e) => openDMPopover(h.target, e.clientX, e.clientY));
+        layer.appendChild(hs);
+      });
+    }
+
+    function openDMPopover(target, x, y) {
+      const pop = $('#dm-popover');
+      let body = '';
+      const c = state.config;
+      if (target === 'heading') {
+        body = `
+          <div class="dm-popover-title">Header <button class="dm-popover-close" aria-label="Close">${icn('x', 14)}</button></div>
+          <div class="toggle-row"><div class="toggle-row-main"><div class="toggle-row-label">Show header</div></div><button class="toggle" role="switch" data-dm-toggle="header.show" aria-pressed="${!!c.header.show}"></button></div>
+          <div class="field"><label class="field-label">Eyebrow</label><input class="input" data-dm-set="header.eyebrow" value="${esc(c.header.eyebrow || '')}"></div>
+          <div class="field"><label class="field-label">Title</label><input class="input" data-dm-set="header.title" value="${esc(c.header.title || '')}"></div>
+          <div class="field"><label class="field-label">Subtitle</label><textarea class="textarea" data-dm-set="header.subtitle">${esc(c.header.subtitle || '')}</textarea></div>
+        `;
+      } else if (target.startsWith('testimonial-')) {
+        const idx = parseInt(target.split('-')[1], 10);
+        const t = c.testimonials[idx];
+        if (t) {
+          body = `
+            <div class="dm-popover-title">Testimonial <button class="dm-popover-close" aria-label="Close">${icn('x', 14)}</button></div>
+            <div class="field"><label class="field-label">Quote</label><textarea class="textarea" data-dm-set="testimonials.${idx}.quote" style="min-height:60px">${esc(t.quote || '')}</textarea></div>
+            <div class="field"><label class="field-label">Author</label><input class="input" data-dm-set="testimonials.${idx}.author" value="${esc(t.author || '')}"></div>
+            <div class="field"><label class="field-label">Destination</label><input class="input" data-dm-set="testimonials.${idx}.destination" value="${esc(t.destination || '')}"></div>
+            <div class="field"><label class="field-label">Trip type</label><input class="input" data-dm-set="testimonials.${idx}.tripType" value="${esc(t.tripType || '')}"></div>
+            <button class="btn btn-sm btn-block" data-dm-goto="content">Full edit in Content tab →</button>
+          `;
+        }
+      }
+      pop.innerHTML = body;
+      pop.hidden = false;
+      // Position near click, clamp to viewport
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const pw = 320, ph = 320;
+      pop.style.left = Math.min(x + 10, vw - pw - 16) + 'px';
+      pop.style.top = Math.min(y + 10, vh - ph - 16) + 'px';
+      // Bind
+      $$('[data-dm-toggle]', pop).forEach(t => t.addEventListener('click', () => {
+        const path = t.dataset.dmToggle;
+        mutate(cfg => setAtPath(cfg, path, !getAtPath(cfg, path)));
+        t.setAttribute('aria-pressed', String(getAtPath(state.config, path)));
+      }));
+      $$('[data-dm-set]', pop).forEach(el => {
+        el.addEventListener('input', debounce(() => {
+          mutateLight(cfg => setAtPath(cfg, el.dataset.dmSet, el.value));
+        }, 120));
+        el.addEventListener('blur', () => pushHistory());
+      });
+      $('.dm-popover-close', pop)?.addEventListener('click', () => pop.hidden = true);
+      $$('[data-dm-goto]', pop).forEach(el => el.addEventListener('click', () => { setTab(el.dataset.dmGoto); pop.hidden = true; toggleDM(); }));
+    }
+
+    /* ============================ SAVE / LOAD ============================ */
+    async function save() {
+      const btn = $('#save-btn');
+      if (!state.widgetName.trim()) state.widgetName = 'Untitled Testimonials';
+      btn.disabled = true;
+      btn.innerHTML = `${icn('sparkle', 14).replace('>','  class="spin">')}Saving…`;
+      try {
+        const res = await fetch(API_CONFIG, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            id: state.widgetId,
+            name: state.widgetName,
+            type: WIDGET_TYPE,
+            widgetType: WIDGET_TYPE,
+            config: state.config
+          })
+        });
+        if (res.status === 401) { showToast('Session expired — please sign in again', 'error'); clearSession(); location.reload(); return; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data && data.id && !state.widgetId) {
+          state.widgetId = data.id;
+          // update URL without reload
+          const u = new URL(window.location.href); u.searchParams.set('id', data.id); window.history.replaceState(null, '', u);
+        }
+        state.dirty = false;
+        btn.classList.add('is-saved'); btn.classList.remove('is-dirty');
+        btn.innerHTML = `${icn('check', 14)}Saved`;
+        showToast('Saved', 'success');
+        setTimeout(() => {
+          btn.disabled = false; btn.classList.remove('is-saved');
+          btn.innerHTML = `${icn('copy', 14)}Save`;
+        }, 1400);
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = `${icn('copy', 14)}Save`;
+        showToast('Save failed: ' + (err.message || 'unknown'), 'error');
+      }
+    }
+
+    async function load(id) {
+      try {
+        const res = await fetch(`${API_CONFIG}?id=${encodeURIComponent(id)}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        state.widgetId = data.id || id;
+        state.widgetName = data.name || 'Untitled Testimonials';
+        state.config = Object.assign(defaultConfig(), data.config || {});
+        // ensure nested objects are preserved
+        state.config.colors = Object.assign({}, defaultConfig().colors, (data.config && data.config.colors) || {});
+        state.config.header = Object.assign({}, defaultConfig().header, (data.config && data.config.header) || {});
+        state.config.search = Object.assign({}, defaultConfig().search, (data.config && data.config.search) || {});
+        state.config.cta = Object.assign({}, defaultConfig().cta, (data.config && data.config.cta) || {});
+        state.config.seo = Object.assign({}, defaultConfig().seo, (data.config && data.config.seo) || {});
+        pushHistory();
+      } catch (err) {
+        console.warn('Load failed', err);
+        showToast('Could not load that widget — showing a blank one', 'error');
+      }
+    }
+
+    /* ============================ LOGIN ============================ */
+    function showLogin() { $('#login').hidden = false; $('#editor').hidden = true; }
+    function hideLogin() { $('#login').hidden = true; $('#editor').hidden = false; }
+
+    async function tryLogin(email, code) {
+      const res = await fetch(API_AUTH, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || ('HTTP ' + res.status));
+      }
+      const data = await res.json();
+
+      // Validate the response contains a usable token. Without this, a
+      // response like { success: true, user: {...} } (no token) would write
+      // a broken session and the editor would silently redirect back to
+      // login with the button stuck on "Signing in...".
+      if (!data || typeof data.token !== 'string' || data.token.length < 10) {
+        console.error('[tryLogin] auth response missing token', data);
+        throw new Error('Sign-in succeeded but no session token received — contact support');
+      }
+
+      // Match the dashboard's session shape so both surfaces stay in sync.
+      // Dashboard expects { user: {...}, token, timestamp } — and uses sess.timestamp
+      // for the 24hr expiry check; without it the dashboard silently logs out.
+      const user = data.user || {
+        email: data.email || email,
+        plan: data.plan,
+        clientName: data.clientName
+      };
+      setSession({ user: user, token: data.token, timestamp: Date.now() });
+      return data;
+    }
+
+    /* ============================ KEYBOARD ============================ */
+    function bindKeyboard() {
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); save(); return; }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'z') { e.preventDefault(); undo(); return; }
+        if ((e.metaKey || e.ctrlKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redoAction(); return; }
+        if (e.target.matches && e.target.matches('input, textarea, select')) return;
+        if (e.key === 'Escape') { closeModal(); const pop = $('#dm-popover'); if (pop) pop.hidden = true; return; }
+        if (e.key === 'd' || e.key === 'D') toggleDM();
+        else if (e.key === 'a' || e.key === 'A') openAIModal();
+        else if (e.key === 't' || e.key === 'T') openTemplatesModal();
+        else if (e.key === '1') setTab('design');
+        else if (e.key === '2') setTab('content');
+        else if (e.key === '3') setTab('settings');
+      });
+    }
+
+    /* ============================ INIT ============================ */
+    async function init() {
+      // DIAGNOSTIC — always log what init sees
+      const sess = getSession();
+      console.log('[init] running. session found?', !!sess, '| has token?', !!sess?.token, '| url:', location.href);
+      if (!sess || !sess.token) {
+        console.log('[init] → showing login overlay (no valid session at this moment)');
+        showLogin();
+        return;
+      }
+
+      console.log('[init] → hiding login, loading editor');
+      hideLogin();
+
+      // Load widget if ?id= in URL
+      const urlId = new URLSearchParams(location.search).get('id');
+      if (urlId) {
+        state.widgetId = urlId;
+        await load(urlId);
+      } else {
+        pushHistory();
+      }
+
+      renderAll();
+      updatePreview();
+
+      // Tab buttons
+      $$('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+      // Name input
+      $('#name-input').addEventListener('input', debounce((e) => { state.widgetName = e.target.value; state.dirty = true; syncSaveBtn(); }, 150));
+
+      // Save button
+      $('#save-btn').addEventListener('click', save);
+
+      // AI / Templates / Embed / DM buttons
+      $('#btn-ai').addEventListener('click', openAIModal);
+      $('#btn-templates').addEventListener('click', openTemplatesModal);
+      $('#btn-embed').addEventListener('click', openEmbedModal);
+      $('#btn-dm').addEventListener('click', toggleDM);
+
+      // Viewport toggle
+      $$('[data-viewport]').forEach(b => b.addEventListener('click', () => {
+        state.viewport = b.dataset.viewport;
+        $$('[data-viewport]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.viewport === state.viewport)));
+        $('#preview-frame').setAttribute('data-viewport', state.viewport);
+        if (state.dmEnabled) requestAnimationFrame(buildDMHotspots);
+      }));
+
+      // Window resize → redraw DM hotspots if enabled
+      window.addEventListener('resize', debounce(() => { if (state.dmEnabled) buildDMHotspots(); }, 100));
+
+      // Warn before leaving with unsaved changes
+      window.addEventListener('beforeunload', (e) => {
+        if (state.dirty) { e.preventDefault(); e.returnValue = ''; }
+      });
+
+      bindKeyboard();
+    }
+
+    /* ============================ LOGIN FORM ============================ */
+    function bindLogin() {
+      const go = async () => {
+        const email = $('#login-email').value.trim();
+        const code  = $('#login-code').value;
+        const err = $('#login-err');
+        err.style.display = 'none';
+        if (!email || !code) { err.textContent = 'Email and client code both required'; err.style.display = ''; return; }
+        const btn = $('#login-btn');
+        btn.disabled = true; btn.textContent = 'Signing in…';
+
+        // Watchdog: if anything below hangs for more than 20s, abort so the
+        // button doesn't stay stuck on "Signing in..." forever.
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Sign-in timed out — please check your connection and try again')), 20000)
+        );
+
+        try {
+          await Promise.race([tryLogin(email, code), timeout]);
+          // At this point tryLogin has written a validated session.
+          // Verify by reading it back before running init(), to catch any
+          // environment where sessionStorage writes silently fail (private
+          // mode, storage quota, policy restrictions).
+          const sess = getSession();
+          if (!sess || !sess.token) {
+            throw new Error('Your browser blocked session storage — try a normal window or a different browser');
+          }
+          await Promise.race([init(), timeout]);
+        } catch (e) {
+          console.error('[login] failed:', e);
+          err.textContent = e.message || 'Sign-in failed';
+          err.style.display = '';
+        } finally {
+          // Always reset the button, regardless of success/failure. On
+          // success, the login overlay is hidden anyway; on failure the
+          // user can try again without being stuck on "Signing in...".
+          btn.disabled = false;
+          btn.textContent = 'Sign in';
+        }
+      };
+      $('#login-btn').addEventListener('click', go);
+      $$('#login-email, #login-code').forEach(i => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); }));
+    }
+
+    /* ============================ BOOT ============================ */
+    console.log('[boot] editor-testimonials.html script running | sessionStorage keys:', Object.keys(sessionStorage));
+    bindLogin();
+    init();
+  })();
+  </script>
 </body>
 </html>
