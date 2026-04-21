@@ -65,7 +65,7 @@ const FETCH_TIMEOUT_MS = 30_000;
 const PROMPT_MIN_LEN = 5;
 const PROMPT_MAX_LEN = 1000;
 
-const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'REVIEWS'];
+const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'REVIEWS', 'SPOTLIGHT'];
 const ALLOWED_TONES        = ['warm', 'professional', 'casual'];
 
 // Per-plan daily caps. Adjust here without touching logic.
@@ -227,7 +227,7 @@ function parseBody(body) {
   // widgetType — strict enum
   const widgetType = String(body.widgetType || '').toUpperCase();
   if (!ALLOWED_WIDGET_TYPES.includes(widgetType)) {
-    return { error: 'Invalid widgetType. Must be FAQ, PRICING, or REVIEWS.' };
+    return { error: 'Invalid widgetType. Must be FAQ, PRICING, REVIEWS, or SPOTLIGHT.' };
   }
 
   // prompt — trimmed, length-bounded string
@@ -367,9 +367,10 @@ function msUntilMidnightUTC() {
 // ═══════════════════════════════════════════════════════════════════
 
 function buildPrompt(widgetType, userPrompt, options) {
-  if (widgetType === 'FAQ')     return buildFAQPrompt(userPrompt, options);
-  if (widgetType === 'PRICING') return buildPricingPrompt(userPrompt);
-  if (widgetType === 'REVIEWS') return buildReviewsPrompt(userPrompt);
+  if (widgetType === 'FAQ')       return buildFAQPrompt(userPrompt, options);
+  if (widgetType === 'PRICING')   return buildPricingPrompt(userPrompt);
+  if (widgetType === 'REVIEWS')   return buildReviewsPrompt(userPrompt);
+  if (widgetType === 'SPOTLIGHT') return buildSpotlightPrompt(userPrompt);
   throw new Error('Unreachable'); // caught by input validation above
 }
 
@@ -460,6 +461,47 @@ Return a JSON config with: place {name, rating, total}, reviews array (6-8 reali
   return { system: SYSTEM_SAFETY, userMsg };
 }
 
+function buildSpotlightPrompt(userPrompt) {
+  // Spotlight content (name, tagline, climate, highlights, facts, events) always
+  // comes from the Destination Content database. The AI does NOT generate those.
+  // Its job is to pick a brand-appropriate colour palette, compose the CTA copy,
+  // and suggest the temperature-unit default — all editorial, no destination data.
+  const userMsg = `Widget type: SPOTLIGHT
+
+The Destination Spotlight widget is a single-destination editorial showcase that is populated automatically from the Travelgenix destination content database. You do NOT generate the destination content (name, tagline, climate data, highlights, facts, events, tags) — those come from the database. Your task is limited to:
+
+1. Pick a brand colour palette (brand + accent hex codes) that suits the travel business described below
+2. Suggest a suitable default temperature unit ("C" or "F") based on the business's likely audience
+3. Compose CTA copy that fits the brand: title (a confident one-line invitation), optional subtitle (a warm single sentence), button label (2-4 words, action-oriented, never generic like "Click here")
+
+<business_description>
+${userPrompt}
+</business_description>
+
+Return a single JSON object with this exact shape:
+{
+  "brandColor": "#RRGGBB",
+  "accentColor": "#RRGGBB",
+  "temperatureUnit": "C",
+  "cta": {
+    "title": "Speak to our [something] specialist",
+    "subtitle": "Short warm line, around 10-15 words, optional but recommended.",
+    "buttonLabel": "Start your enquiry"
+  }
+}
+
+Rules:
+- Colours must be valid 6-digit hex including the # prefix
+- brandColor is used for section headings and the CTA panel background — it should be deep enough to hold white text comfortably (minimum contrast ratio 4.5:1 against white)
+- accentColor is used for links, active states and the climate chart's "best season" bars — it should be vibrant enough to stand out but not clash
+- temperatureUnit: "C" for UK/European/Australian/Asian audiences, "F" for US audiences, default to "C" if unsure
+- CTA title should be specific to the described business, not generic. Examples: "Speak to our Greek Islands specialist", "Plan your Caribbean honeymoon", "Design your Kenyan safari"
+- British English throughout
+- No em-dashes, no Oxford commas, no AI filler phrases ("cutting-edge", "seamless", "curated", "bespoke" unless the business is genuinely luxury)`;
+
+  return { system: SYSTEM_SAFETY, userMsg };
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // ANTHROPIC CALL
 // ═══════════════════════════════════════════════════════════════════
@@ -521,9 +563,10 @@ function parseAndValidate(widgetType, rawText, options) {
     throw new Error('Model declined: ' + obj.error);
   }
 
-  if (widgetType === 'FAQ')     return validateFAQ(obj, options);
-  if (widgetType === 'PRICING') return validatePricingLoose(obj);
-  if (widgetType === 'REVIEWS') return validateReviewsLoose(obj);
+  if (widgetType === 'FAQ')       return validateFAQ(obj, options);
+  if (widgetType === 'PRICING')   return validatePricingLoose(obj);
+  if (widgetType === 'REVIEWS')   return validateReviewsLoose(obj);
+  if (widgetType === 'SPOTLIGHT') return validateSpotlightLoose(obj);
   throw new Error('Unknown widgetType in validator');
 }
 
@@ -583,4 +626,30 @@ function validatePricingLoose(obj) {
 function validateReviewsLoose(obj) {
   if (obj && typeof obj === 'object') return obj;
   throw new Error('Invalid reviews response');
+}
+
+function validateSpotlightLoose(obj) {
+  // Strict schema enforcement — Spotlight AI output is small, predictable,
+  // and directly controls styling. Don't leave any room for drift.
+  if (!obj || typeof obj !== 'object') throw new Error('Invalid spotlight response');
+
+  const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
+  const brandColor = typeof obj.brandColor === 'string' && HEX_RE.test(obj.brandColor.trim())
+    ? obj.brandColor.trim() : '#1B2B5B';
+  const accentColor = typeof obj.accentColor === 'string' && HEX_RE.test(obj.accentColor.trim())
+    ? obj.accentColor.trim() : '#00B4D8';
+
+  const tu = typeof obj.temperatureUnit === 'string' ? obj.temperatureUnit.toUpperCase() : 'C';
+  const temperatureUnit = (tu === 'F') ? 'F' : 'C';
+
+  const rawCta = (obj.cta && typeof obj.cta === 'object') ? obj.cta : {};
+  const cta = {
+    title:       String(rawCta.title || '').slice(0, 120).trim(),
+    subtitle:    String(rawCta.subtitle || '').slice(0, 200).trim(),
+    buttonLabel: String(rawCta.buttonLabel || '').slice(0, 40).trim(),
+  };
+  if (!cta.title) cta.title = 'Speak to our destination specialist';
+  if (!cta.buttonLabel) cta.buttonLabel = 'Start your enquiry';
+
+  return { brandColor, accentColor, temperatureUnit, cta };
 }
