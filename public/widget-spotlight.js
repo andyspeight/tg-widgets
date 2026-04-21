@@ -177,8 +177,8 @@
 
       --tgs-season-best: #00B4D8;
       --tgs-season-shoulder: #F59E0B;
-      --tgs-season-off: #CBD5E1;
-      --tgs-rain: rgba(15,23,42,0.18);
+      --tgs-season-off: #94A3B8;
+      --tgs-rain: rgba(59,130,246,0.32);
 
       --tgs-radius: 16px;
       --tgs-radius-sm: 10px;
@@ -209,7 +209,7 @@
       --tgs-brand-soft: rgba(0,180,216,0.12);
       --tgs-accent-soft: rgba(0,180,216,0.18);
       --tgs-season-off: #475569;
-      --tgs-rain: rgba(203,213,225,0.25);
+      --tgs-rain: rgba(96,165,250,0.4);
       --tgs-shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
       --tgs-shadow-md: 0 4px 16px rgba(0,0,0,0.35);
       --tgs-shadow-lg: 0 20px 40px rgba(0,0,0,0.45);
