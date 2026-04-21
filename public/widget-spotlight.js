@@ -282,7 +282,7 @@
     .tgs-section-hero { margin: 0 0 48px; }
 
     .tgs-section-head {
-      display: flex; align-items: baseline; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       gap: 16px; margin: 0 0 20px;
     }
     .tgs-section-title {
@@ -294,6 +294,35 @@
       font-size: 13px; color: var(--tgs-sub); margin: 4px 0 0;
     }
 
+    /* ─── UNIT TOGGLE (C/F in climate chart header) ──── */
+    .tgs-climate-units {
+      display: inline-flex; gap: 2px;
+      padding: 3px;
+      background: var(--tgs-border-soft);
+      border-radius: 999px;
+    }
+    .tgs-climate-unit {
+      border: 0; background: transparent;
+      font: inherit; font-size: 12px; font-weight: 600;
+      color: var(--tgs-sub);
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      min-width: 40px;
+      transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+      min-height: 28px;
+    }
+    .tgs-climate-unit:hover { color: var(--tgs-text); }
+    .tgs-climate-unit[aria-pressed="true"] {
+      background: var(--tgs-card);
+      color: var(--tgs-text);
+      box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+    }
+    .tgs-root[data-theme="dark"] .tgs-climate-unit[aria-pressed="true"] {
+      background: var(--tgs-bg);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
     /* ─── CLIMATE CHART ───────────────────────────────── */
     .tgs-climate {
       background: var(--tgs-card);
@@ -301,13 +330,24 @@
       border-radius: var(--tgs-radius);
       padding: 24px 28px;
     }
+    .tgs-climate-topline {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .tgs-climate-current-label {
+      font-size: 12px; color: var(--tgs-sub);
+    }
+    .tgs-climate-current-label strong {
+      color: var(--tgs-text);
+      font-weight: 600;
+    }
     .tgs-climate-callout {
       display: inline-flex; align-items: center; gap: 8px;
       background: var(--tgs-accent-soft);
       color: var(--tgs-accent);
       padding: 6px 12px; border-radius: 999px;
       font-size: 12px; font-weight: 600;
-      margin-bottom: 18px;
     }
     .tgs-climate-callout[data-theme-dark] { color: var(--tgs-accent); }
     .tgs-climate-chart {
@@ -322,6 +362,22 @@
       position: relative;
       display: flex; flex-direction: column; align-items: center;
       height: 100%;
+    }
+    /* Current month — the "you are here" cue. */
+    .tgs-climate-col[data-current="true"] .tgs-climate-bar {
+      box-shadow: 0 0 0 2px var(--tgs-bg), 0 0 0 4px var(--tgs-text);
+    }
+    .tgs-climate-col[data-current="true"] .tgs-climate-temp {
+      color: var(--tgs-text);
+      font-weight: 700;
+    }
+    .tgs-climate-rain-cell[data-current="true"] {
+      background: var(--tgs-text);
+      opacity: 0.6;
+    }
+    .tgs-climate-month[data-current="true"] {
+      color: var(--tgs-text);
+      font-weight: 700;
     }
     .tgs-climate-bar {
       width: 100%;
@@ -433,11 +489,40 @@
       border-radius: var(--tgs-radius);
       padding: 24px;
       transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .tgs-highlight--has-media {
+      padding: 0;
     }
     .tgs-highlight:hover {
       transform: translateY(-2px);
       box-shadow: var(--tgs-shadow-md);
       border-color: var(--tgs-brand);
+    }
+    .tgs-highlight-media {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      background: var(--tgs-border-soft);
+    }
+    .tgs-highlight-media img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 400ms cubic-bezier(.22,1,.36,1);
+    }
+    .tgs-highlight--has-media:hover .tgs-highlight-media img {
+      transform: scale(1.03);
+    }
+    .tgs-highlight-body {
+      padding: 0;
+      display: flex; flex-direction: column;
+    }
+    .tgs-highlight--has-media .tgs-highlight-body {
+      padding: 20px 22px 22px;
+      flex: 1;
     }
     .tgs-highlight-icon {
       width: 44px; height: 44px;
@@ -446,6 +531,12 @@
       color: var(--tgs-brand);
       display: flex; align-items: center; justify-content: center;
       margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+    .tgs-highlight-icon--inline {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      margin-bottom: 10px;
     }
     .tgs-highlight-title {
       margin: 0 0 8px;
@@ -614,10 +705,14 @@
       .tgs-hero-content { padding: 24px 20px; }
       .tgs-section { margin: 36px 0; }
       .tgs-section-hero { margin: 0 0 36px; }
+      .tgs-section-head { flex-wrap: wrap; }
       .tgs-section-title { font-size: 20px; }
       .tgs-climate { padding: 18px; }
+      .tgs-climate-topline { gap: 10px; }
+      .tgs-climate-current-label { order: 2; }
       .tgs-climate-chart { height: 140px; }
       .tgs-climate-temp { font-size: 9px; }
+      .tgs-climate-unit { padding: 5px 10px; min-width: 34px; font-size: 11px; }
       .tgs-highlights { grid-template-columns: 1fr; }
       .tgs-facts { grid-template-columns: repeat(2, 1fr); }
       .tgs-fact { padding: 16px; gap: 12px; }
@@ -722,6 +817,7 @@
         accentColor: '#00B4D8',
         radius: 16,
         fontFamily: '',          // optional override
+        temperatureUnit: 'C',    // 'C' | 'F' — default for climate chart; readers can flip
         sections: {
           hero: true, climate: true, facts: true, highlights: true,
           tags: true, events: true, cta: true,
@@ -815,15 +911,18 @@
       const s = this.c.sections;
       const html = [];
 
+      // Section order (v1.1): hero → tags → climate → facts → highlights → events → cta
+      // Tags moved up because they're the most scannable "at a glance" read for agents' visitors.
       if (s.hero) html.push(this._renderHero(d));
+      if (s.tags) html.push(this._renderTags(d));
       if (s.climate) html.push(this._renderClimate(d));
       if (s.facts) html.push(this._renderFacts(d));
       if (s.highlights) html.push(this._renderHighlights(d));
-      if (s.tags) html.push(this._renderTags(d));
       if (s.events) html.push(this._renderEvents(d));
       if (s.cta) html.push(this._renderCta());
 
       this.root.innerHTML = html.filter(Boolean).join('');
+      this._bind();
     }
 
     _renderHero(d) {
@@ -832,7 +931,10 @@
       const attribution = (this.c.showAttribution && d.attributions && d.attributions[0])
         ? esc(d.attributions[0]) : '';
       const tagline = d.tagline || d.heroIntro || '';
-      const level = d.level === 'country' ? 'Country' : d.level === 'city' ? 'City / Region' : 'Resort';
+      const levelLabel = d.level === 'country' ? 'Country' : d.level === 'city' ? 'City / Region' : 'Resort';
+      // Compose eyebrow: if a Region is set on the destination, show "Country · Region".
+      // The middle dot is the standard editorial separator used elsewhere in the brand.
+      const eyebrowText = d.region ? levelLabel + ' · ' + d.region : levelLabel;
       const altText = d.name + (d.tagline ? ' — ' + d.tagline : '');
 
       return (
@@ -843,7 +945,7 @@
               : '<div class="tgs-hero-img" style="background:linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent));"></div>') +
             '<div class="tgs-hero-scrim" aria-hidden="true"></div>' +
             '<div class="tgs-hero-content">' +
-              '<span class="tgs-hero-eyebrow">' + esc(level) + '</span>' +
+              '<span class="tgs-hero-eyebrow">' + esc(eyebrowText) + '</span>' +
               '<h1 class="tgs-hero-title" id="tgs-hero-title">' + esc(d.name) + '</h1>' +
               (tagline ? '<p class="tgs-hero-tagline">' + esc(tagline) + '</p>' : '') +
             '</div>' +
@@ -860,41 +962,74 @@
       if (!Array.isArray(temps) || temps.length !== 12) return '';
       if (!Array.isArray(season) || season.length !== 12) return '';
 
-      const maxTemp = Math.max.apply(null, temps.filter(n => typeof n === 'number'));
+      // Current month — used to highlight the "you are here" column.
+      const currentMonth = new Date().getMonth(); // 0-11
+
+      // Unit — defaults to what the widget config says, but readers can flip
+      // via the toggle. We store the chosen unit on the widget instance so
+      // subsequent re-renders preserve it.
+      if (!this._tempUnit) this._tempUnit = this.c.temperatureUnit === 'F' ? 'F' : 'C';
+      const unit = this._tempUnit;
+      const conv = (c) => unit === 'F' ? Math.round(c * 9 / 5 + 32) : c;
+
+      const displayTemps = temps.map(conv);
+      const maxDisplay = Math.max.apply(null, displayTemps.filter(n => typeof n === 'number'));
+      const minTempForScaling = unit === 'F' ? 32 : 0; // scale bars from a sensible baseline
+      const range = Math.max(maxDisplay - minTempForScaling, 1);
+
       const maxRain = Array.isArray(rain) ? Math.max.apply(null, rain.filter(n => typeof n === 'number')) || 1 : 1;
 
-      const bars = temps.map((t, i) => {
-        const h = Math.max(6, Math.round((t / Math.max(maxTemp, 1)) * 100));
+      const bars = displayTemps.map((t, i) => {
+        const h = Math.max(6, Math.round(((t - minTempForScaling) / range) * 100));
         const s = season[i] || 'off';
+        const isCurrent = i === currentMonth;
+        const currentAttr = isCurrent ? ' data-current="true"' : '';
         return (
-          '<div class="tgs-climate-col">' +
+          '<div class="tgs-climate-col"' + currentAttr + '>' +
             '<span class="tgs-climate-temp">' + t + '°</span>' +
             '<div class="tgs-climate-bar" data-season="' + esc(s) + '" style="height:' + h + '%;" aria-hidden="true"></div>' +
           '</div>'
         );
       }).join('');
 
-      const rainCells = Array.isArray(rain) && rain.length === 12 ? rain.map(r => {
+      const rainCells = Array.isArray(rain) && rain.length === 12 ? rain.map((r, i) => {
         const h = Math.max(2, Math.round((r / maxRain) * 100));
-        return '<div class="tgs-climate-rain-cell" style="height:' + h + '%;" aria-hidden="true"></div>';
+        const currentAttr = i === currentMonth ? ' data-current="true"' : '';
+        return '<div class="tgs-climate-rain-cell"' + currentAttr + ' style="height:' + h + '%;" aria-hidden="true"></div>';
       }).join('') : '';
 
-      const months = MONTH_LABELS.map(m => '<span class="tgs-climate-month">' + esc(m) + '</span>').join('');
+      const months = MONTH_LABELS.map((m, i) => {
+        const isCurrent = i === currentMonth;
+        return '<span class="tgs-climate-month"' + (isCurrent ? ' data-current="true"' : '') + '>' + esc(m) + '</span>';
+      }).join('');
 
       const bestPhrase = formatBestMonths(season);
       const callout = (this.c.showBestTimeCallout && bestPhrase)
         ? '<div class="tgs-climate-callout">' + icon('sun', 14) + '<span>Best time to visit: ' + esc(bestPhrase) + '</span></div>'
         : '';
 
+      // Unit toggle — renders two pill buttons. The bind step attaches listeners.
+      const unitToggle = (
+        '<div class="tgs-climate-units" role="group" aria-label="Temperature units">' +
+          '<button type="button" class="tgs-climate-unit" data-unit="C" aria-pressed="' + (unit === 'C' ? 'true' : 'false') + '">°C</button>' +
+          '<button type="button" class="tgs-climate-unit" data-unit="F" aria-pressed="' + (unit === 'F' ? 'true' : 'false') + '">°F</button>' +
+        '</div>'
+      );
+
       const srDesc = climateSrDescription(d.name || 'this destination', temps, season);
+      const currentLabel = MONTH_NAMES_FULL[currentMonth];
 
       return (
         '<section class="tgs-section" aria-labelledby="tgs-climate-heading">' +
           '<div class="tgs-section-head">' +
             '<h2 class="tgs-section-title" id="tgs-climate-heading">' + esc(this.c.climateHeading) + '</h2>' +
+            unitToggle +
           '</div>' +
           '<div class="tgs-climate">' +
-            callout +
+            '<div class="tgs-climate-topline">' +
+              callout +
+              '<span class="tgs-climate-current-label" aria-hidden="true">You are here: <strong>' + esc(currentLabel) + '</strong></span>' +
+            '</div>' +
             '<p class="tgs-climate-sr-only">' + esc(srDesc) + '</p>' +
             '<div class="tgs-climate-chart" role="img" aria-label="' + esc(srDesc) + '">' + bars + '</div>' +
             (rainCells ? '<div class="tgs-climate-rain" aria-hidden="true">' + rainCells + '</div>' : '') +
@@ -946,13 +1081,25 @@
       const list = Array.isArray(d.highlights) ? d.highlights : [];
       if (list.length === 0) return '';
 
-      const cards = list.slice(0, 6).map(h => {
+      // The first image in d.images is the hero — subsequent images (if any)
+      // are used as thumbnails on highlight cards 1, 2, 3... in order.
+      // If we run out of images, remaining cards fall back to icon-only.
+      const thumbs = Array.isArray(d.images) ? d.images.slice(1) : [];
+
+      const cards = list.slice(0, 6).map((h, i) => {
         if (!h || !h.title) return '';
+        const thumbUrl = thumbs[i] ? safeUrl(thumbs[i]) : '';
+        const mediaBlock = thumbUrl
+          ? '<div class="tgs-highlight-media"><img src="' + esc(thumbUrl) + '" alt="" loading="lazy" /></div>'
+          : '<div class="tgs-highlight-icon">' + icon(h.icon || 'star', 22) + '</div>';
         return (
-          '<article class="tgs-highlight">' +
-            '<div class="tgs-highlight-icon">' + icon(h.icon || 'star', 22) + '</div>' +
-            '<h3 class="tgs-highlight-title">' + esc(h.title) + '</h3>' +
-            (h.description ? '<p class="tgs-highlight-desc">' + esc(h.description) + '</p>' : '') +
+          '<article class="tgs-highlight' + (thumbUrl ? ' tgs-highlight--has-media' : '') + '">' +
+            mediaBlock +
+            '<div class="tgs-highlight-body">' +
+              (thumbUrl ? '<div class="tgs-highlight-icon tgs-highlight-icon--inline">' + icon(h.icon || 'star', 18) + '</div>' : '') +
+              '<h3 class="tgs-highlight-title">' + esc(h.title) + '</h3>' +
+              (h.description ? '<p class="tgs-highlight-desc">' + esc(h.description) + '</p>' : '') +
+            '</div>' +
           '</article>'
         );
       }).join('');
@@ -1057,6 +1204,24 @@
           '<h2 class="tgs-notice-title">Unable to load destination</h2>' +
           '<p class="tgs-notice-body">The destination content is temporarily unavailable. Please try again in a moment.</p>' +
         '</div>';
+    }
+
+    // Wire up interactive controls inside the Shadow DOM. Called after every
+    // _renderContent so listeners attach to the fresh markup.
+    _bind() {
+      const r = this.root;
+      if (!r) return;
+      // Temperature unit toggle in the climate chart header
+      const unitBtns = r.querySelectorAll('.tgs-climate-unit');
+      unitBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const unit = btn.getAttribute('data-unit');
+          if (!unit || unit === this._tempUnit) return;
+          this._tempUnit = unit;
+          // Only re-render content (not shell) so fonts/theme stay stable
+          this._renderContent();
+        });
+      });
     }
 
     // Public API
