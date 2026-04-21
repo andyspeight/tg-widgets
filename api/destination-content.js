@@ -338,7 +338,21 @@ export default async function handler(req, res) {
     });
 
     if (destResp.status === 404) return res.status(404).json({ error: 'Destination not found' });
-    if (!destResp.ok) throw new Error('upstream-destination');
+    if (!destResp.ok) {
+      // Surface the specific upstream status to aid diagnosis of PAT/scope/base
+      // access issues. The error message is generic to avoid leaking detail
+      // but the status code hint lets us see 401 (PAT invalid) / 403 (scope or
+      // base access wrong) / 429 (rate-limited). Safe: no key material exposed.
+      console.error('[destination-content] Airtable destination fetch failed', {
+        status: destResp.status,
+        level,
+        tableId: map.tableId,
+      });
+      return res.status(502).json({
+        error: 'Upstream unavailable',
+        hint: `destination-fetch-${destResp.status}`,
+      });
+    }
 
     const raw = await destResp.json();
     const f = raw.fields || {};
