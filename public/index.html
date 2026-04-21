@@ -339,6 +339,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'spotlight',
+    name: 'Destination Spotlight',
+    airtableType: 'Destination Spotlight',
+    description: 'Editorial single-destination showcase with climate chart, highlights, quick facts and branded CTA. Live from the Travelgenix destination content database — updates automatically as content is refreshed.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'},
+    color: '#00B4D8',
+    editorUrl: '/editor-spotlight',
+    demoUrl: '/demo-spotlight',
+    widgetTag: 'spotlight',
+    scriptFile: 'widget-spotlight.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'countdown',
     name: 'Countdown Timer',
     description: 'Create urgency with animated countdown timers for sales, launches, and events. Multiple display styles.',
@@ -836,6 +851,37 @@ function loadMiniPreview(w) {
       ]
     });
   }
+
+  if (w.id === 'spotlight' && window.TGSpotlightWidget) {
+    // Tile preview uses inline fake data via the widget's `destinationData`
+    // escape hatch. No API call; renders synchronously for a snappy catalogue.
+    // Sections trimmed to the ones that fit well at tile size.
+    new window.TGSpotlightWidget(el, {
+      theme:'light',
+      brandColor:w.color, accentColor:'#F59E0B',
+      radius:12,
+      temperatureUnit:'C',
+      sections:{hero:true,tags:false,climate:true,facts:false,highlights:false,events:false,cta:false},
+      showAttribution:false,
+      showBestTimeCallout:false,
+      destinationData:{
+        level:'country',
+        name:'Greece',
+        tagline:'Ancient ruins, island hopping and Aegean sunsets',
+        heroIntro:'',
+        region:'Mediterranean · Southern Europe',
+        images:['https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=1200&q=70'],
+        attributions:[],
+        climate:{
+          temps:[12,13,15,18,23,28,31,31,27,22,17,13],
+          rainfall:[62,53,45,23,13,6,5,8,18,68,80,82],
+          season:['off','off','shoulder','shoulder','best','best','best','best','best','shoulder','off','off'],
+        },
+        facts:{flightTime:'3h 45m',timeZone:'GMT+2',currency:'Euro (€)',language:'Greek',voltage:'230V / Type C & F'},
+        highlights:[],bestForTags:[],events:[],
+      },
+    });
+  }
 }
 
 /* ═══ AUTH ═══ */
@@ -896,5 +942,6 @@ render();
 <script src="/widget-reviews.js"></script>
 <script src="/widget-faq.js"></script>
 <script src="/widget-testimonials.js"></script>
+<script src="/widget-spotlight.js"></script>
 </body>
 </html>
