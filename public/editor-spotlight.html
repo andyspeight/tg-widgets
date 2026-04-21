@@ -1,0 +1,1696 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Destination Spotlight Editor · Travelgenix</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       Editor chrome — matches the other editors in the suite
+       ============================================================ */
+    :root {
+      --bg: #F8FAFC;
+      --panel: #FFFFFF;
+      --panel-2: #F8FAFC;
+      --ink: #0F172A;
+      --sub: #475569;
+      --muted: #94A3B8;
+      --border: #E2E8F0;
+      --border-strong: #CBD5E1;
+      --hover: #F1F5F9;
+      --brand: #1B2B5B;
+      --brand-soft: rgba(27,43,91,.10);
+      --accent: #00B4D8;
+      --accent-soft: rgba(0,180,216,.12);
+      --success: #10B981;
+      --success-soft: rgba(16,185,129,.1);
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --radius-sm: 6px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
+      --shadow-sm: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+      --shadow-md: 0 4px 12px rgba(15,23,42,.08), 0 2px 4px rgba(15,23,42,.04);
+      --shadow-lg: 0 10px 24px rgba(15,23,42,.12), 0 4px 8px rgba(15,23,42,.06);
+      --shadow-xl: 0 24px 48px rgba(15,23,42,.14), 0 8px 16px rgba(15,23,42,.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--panel-2);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    [hidden] { display: none !important; }
+
+    .editor { display: grid; grid-template-columns: 380px 1fr; height: 100vh; }
+    .sidebar { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; }
+    .preview { background: var(--panel-2); display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+
+    /* ---- topbar ---- */
+    .topbar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .logo {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #fff; box-shadow: var(--shadow-sm); flex-shrink: 0;
+    }
+    .topbar-ident { min-width: 0; flex-shrink: 1; }
+    .topbar-title { font-weight: 700; font-size: 14px; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topbar-sub { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .topbar-spacer { flex: 1; }
+    .icon-btn {
+      height: 32px; padding: 0 10px; border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--panel); color: var(--sub);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s ease; text-decoration: none;
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .icon-btn:hover { border-color: var(--border-strong); color: var(--ink); background: var(--hover); }
+    .icon-btn svg { flex-shrink: 0; }
+    .icon-btn.icon-only { width: 32px; padding: 0; justify-content: center; }
+
+    /* ---- name row ---- */
+    .name-row { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--panel-2); }
+    .name-input {
+      flex: 1; height: 36px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 7px;
+      background: var(--panel); font-size: 13px; font-weight: 500;
+      outline: none; transition: all .15s ease; min-width: 0;
+    }
+    .name-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .save-btn {
+      height: 36px; padding: 0 14px; border: 0; border-radius: 7px;
+      background: var(--brand); color: #fff;
+      font-weight: 600; font-size: 13px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s ease; white-space: nowrap;
+    }
+    .save-btn:hover { background: color-mix(in srgb, var(--brand) 88%, #000); }
+    .save-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .save-btn.is-dirty { background: var(--warning); }
+    .save-btn.is-dirty:hover { background: color-mix(in srgb, var(--warning) 88%, #000); }
+    .save-btn.is-saved { background: var(--success); pointer-events: none; }
+
+    /* ---- tabs ---- */
+    .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid var(--border); background: var(--panel); }
+    .tab-btn {
+      height: 42px; border: 0; background: transparent;
+      color: var(--sub); font-size: 13px; font-weight: 600; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all .15s ease;
+    }
+    .tab-btn:hover { color: var(--ink); background: var(--hover); }
+    .tab-btn[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); background: var(--brand-soft); }
+
+    /* ---- sidebar body ---- */
+    .sidebar-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
+    .sidebar-body::-webkit-scrollbar { width: 10px; }
+    .sidebar-body::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; border: 2px solid var(--panel); }
+    .sidebar-body::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+    /* ---- section ---- */
+    .section { border-bottom: 1px solid var(--border); }
+    .section-head {
+      width: 100%; display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px; border: 0; background: transparent;
+      color: var(--ink); font-size: 12px; font-weight: 700;
+      letter-spacing: .04em; text-transform: uppercase;
+      cursor: pointer; transition: all .15s ease;
+    }
+    .section-head:hover { background: var(--hover); }
+    .section-head-chev { margin-left: auto; transition: transform .2s ease; color: var(--muted); }
+    .section[data-open="true"] .section-head-chev { transform: rotate(180deg); }
+    .section-body { padding: 4px 16px 16px; display: none; }
+    .section[data-open="true"] .section-body { display: block; }
+
+    /* ---- form controls ---- */
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field-label { display: block; font-size: 11px; font-weight: 600; color: var(--sub); margin-bottom: 6px; letter-spacing: .02em; }
+    .field-help { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .input, .textarea, .select {
+      width: 100%; padding: 8px 10px; font-size: 13px;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--panel); color: var(--ink); outline: none;
+      transition: all .15s ease;
+    }
+    .input:focus, .textarea:focus, .select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .textarea { resize: vertical; min-height: 60px; font-family: inherit; line-height: 1.5; }
+
+    /* colour pickers */
+    .colour-row { display: flex; gap: 8px; align-items: center; }
+    .colour-swatch {
+      width: 34px; height: 34px; border-radius: 6px;
+      border: 1px solid var(--border); cursor: pointer; overflow: hidden;
+      position: relative; background: #fff;
+    }
+    .colour-swatch input[type="color"] {
+      position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
+      border: 0; padding: 0; cursor: pointer; opacity: 1;
+    }
+    .colour-hex {
+      flex: 1; padding: 0 10px; height: 34px;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--panel); font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+      outline: none;
+    }
+    .colour-hex:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+
+    /* presets */
+    .presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .preset {
+      height: 36px; border-radius: 6px; border: 2px solid transparent;
+      cursor: pointer; overflow: hidden; position: relative;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .preset:hover { transform: scale(1.04); border-color: var(--border-strong); }
+    .preset[aria-pressed="true"] { border-color: var(--ink); }
+    .preset-inner { width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+
+    /* slider */
+    .slider-row { display: flex; align-items: center; gap: 10px; }
+    .slider { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--brand); border: 2px solid var(--panel); box-shadow: var(--shadow-sm); cursor: pointer;
+    }
+    .slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brand); border: 2px solid var(--panel); box-shadow: var(--shadow-sm); cursor: pointer; border: 0; }
+    .slider-value { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--sub); font-weight: 600; min-width: 34px; text-align: right; }
+
+    /* segmented */
+    .segmented { display: inline-flex; padding: 3px; background: var(--hover); border-radius: 7px; gap: 2px; width: 100%; }
+    .segmented button {
+      flex: 1; border: 0; background: transparent; padding: 6px 10px;
+      font-size: 12px; font-weight: 600; color: var(--sub);
+      border-radius: 5px; cursor: pointer; transition: all .15s ease;
+    }
+    .segmented button:hover { color: var(--ink); }
+    .segmented button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow-xs); }
+
+    /* toggle */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+    .toggle-row + .toggle-row { border-top: 1px solid var(--border); }
+    .toggle-label { font-size: 13px; color: var(--ink); font-weight: 500; }
+    .toggle-help { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .toggle {
+      position: relative; width: 36px; height: 20px; flex-shrink: 0;
+      background: var(--border); border-radius: 999px; cursor: pointer;
+      transition: background .2s ease;
+    }
+    .toggle::after {
+      content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+      background: #fff; border-radius: 50%; box-shadow: var(--shadow-sm);
+      transition: transform .2s ease;
+    }
+    .toggle[aria-checked="true"] { background: var(--brand); }
+    .toggle[aria-checked="true"]::after { transform: translateX(16px); }
+
+    /* destination picker */
+    .picker-wrap { position: relative; }
+    .picker-results {
+      position: absolute; top: 100%; left: 0; right: 0;
+      margin-top: 4px; max-height: 280px; overflow-y: auto;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; box-shadow: var(--shadow-md);
+      z-index: 10;
+    }
+    .picker-result {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .picker-result:last-child { border-bottom: 0; }
+    .picker-result:hover { background: var(--hover); }
+    .picker-result-name { font-weight: 500; color: var(--ink); }
+    .picker-result-level {
+      font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--brand-soft); color: var(--brand);
+    }
+    .picker-result-level[data-level="city"] { background: rgba(6,182,212,.12); color: #0891B2; }
+    .picker-result-level[data-level="resort"] { background: rgba(99,102,241,.12); color: #4F46E5; }
+    .picker-status { padding: 12px; text-align: center; font-size: 12px; color: var(--muted); }
+
+    .selected-dest {
+      padding: 10px 12px;
+      background: var(--brand-soft); border: 1px solid var(--brand);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-top: 6px;
+    }
+    .selected-dest-name { font-weight: 600; font-size: 13px; color: var(--ink); }
+    .selected-dest-level { font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--brand); }
+    .selected-dest-clear {
+      background: transparent; border: 0; color: var(--sub);
+      cursor: pointer; padding: 4px; border-radius: 4px;
+      display: inline-flex; align-items: center;
+    }
+    .selected-dest-clear:hover { color: var(--danger); background: rgba(239,68,68,.1); }
+
+    /* embed code */
+    .embed {
+      background: #0F172A; color: #94A3B8;
+      padding: 10px 12px; border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-all;
+      position: relative;
+    }
+    .embed-copy {
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(255,255,255,.1); border: 0; color: #CBD5E1;
+      padding: 4px 8px; border-radius: 4px; font-size: 10px;
+      cursor: pointer; font-weight: 600;
+    }
+    .embed-copy:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+    /* ---- preview pane ---- */
+    .preview-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--panel);
+    }
+    .preview-toolbar-left { flex: 1; font-size: 12px; font-weight: 600; color: var(--sub); letter-spacing: .02em; text-transform: uppercase; }
+    .viewport-seg { display: inline-flex; padding: 3px; background: var(--hover); border-radius: 7px; gap: 2px; }
+    .viewport-seg button {
+      border: 0; background: transparent; padding: 6px 12px; font-size: 12px; font-weight: 600;
+      color: var(--sub); border-radius: 5px; cursor: pointer; transition: all .15s ease;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .viewport-seg button:hover { color: var(--ink); }
+    .viewport-seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow-xs); }
+
+    .preview-scroll { flex: 1; overflow: auto; display: flex; justify-content: center; padding: 32px; }
+    .preview-frame-wrap {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: var(--shadow-md); overflow: hidden;
+      transition: width .2s ease; max-width: 100%;
+    }
+    .preview-frame { width: 100%; min-height: 1400px; border: 0; display: block; }
+
+    /* ---- modal (AI, Templates) ---- */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 20px;
+    }
+    .modal {
+      background: var(--panel); border-radius: 12px; box-shadow: var(--shadow-xl);
+      max-width: 520px; width: 100%; max-height: 90vh; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+    .modal-close { background: transparent; border: 0; padding: 4px; color: var(--muted); cursor: pointer; border-radius: 4px; display: inline-flex; }
+    .modal-close:hover { color: var(--ink); background: var(--hover); }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-primary {
+      height: 36px; padding: 0 16px; border: 0; border-radius: 7px;
+      background: var(--brand); color: #fff; font-weight: 600; font-size: 13px;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { background: color-mix(in srgb, var(--brand) 88%, #000); }
+    .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-secondary {
+      height: 36px; padding: 0 14px; border: 1px solid var(--border); border-radius: 7px;
+      background: var(--panel); color: var(--ink); font-weight: 600; font-size: 13px; cursor: pointer;
+    }
+    .btn-secondary:hover { background: var(--hover); }
+
+    /* template cards */
+    .templates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .template-card {
+      padding: 12px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer;
+      transition: all .15s ease; background: var(--panel);
+      text-align: left;
+    }
+    .template-card:hover { border-color: var(--brand); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .template-swatches { display: flex; gap: 4px; margin-bottom: 10px; }
+    .template-swatch { flex: 1; height: 16px; border-radius: 3px; }
+    .template-name { font-weight: 600; font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+    .template-dest { font-size: 11px; color: var(--muted); }
+
+    /* login overlay (Flavour 2 — embedded) */
+    .login-overlay {
+      position: fixed; inset: 0; background: var(--panel-2);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--panel); border-radius: 14px; box-shadow: var(--shadow-xl);
+      padding: 36px 32px; max-width: 400px; width: 100%;
+    }
+    .login-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      margin: 0 auto 18px; display: flex; align-items: center; justify-content: center;
+      color: #fff; box-shadow: var(--shadow-md);
+    }
+    .login-title { text-align: center; font-size: 20px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 4px; }
+    .login-sub { text-align: center; font-size: 13px; color: var(--sub); margin: 0 0 24px; }
+    .login-field { margin-bottom: 12px; }
+    .login-input {
+      width: 100%; height: 40px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--panel); font-size: 14px; outline: none;
+      transition: all .15s ease;
+    }
+    .login-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .login-btn {
+      width: 100%; height: 42px; border: 0; border-radius: 8px;
+      background: var(--brand); color: #fff; font-weight: 600; font-size: 14px;
+      cursor: pointer; margin-top: 8px;
+    }
+    .login-btn:hover { background: color-mix(in srgb, var(--brand) 88%, #000); }
+    .login-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .login-err { font-size: 12px; color: var(--danger); margin-top: 8px; text-align: center; min-height: 16px; }
+    .login-footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 18px; }
+
+    /* toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      background: var(--ink); color: #fff; box-shadow: var(--shadow-lg); z-index: 300;
+      display: flex; align-items: center; gap: 8px;
+      animation: toast-in .2s ease;
+    }
+    .toast.is-success { background: var(--success); }
+    .toast.is-error { background: var(--danger); }
+    @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+    /* responsive fallback — editor is desktop-first */
+    @media (max-width: 900px) {
+      .editor { grid-template-columns: 1fr; }
+      .sidebar { height: 50vh; border-right: 0; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login overlay (Flavour 2) -->
+  <div class="login-overlay" id="loginOverlay" hidden>
+    <div class="login-card">
+      <div class="login-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+      </div>
+      <h1 class="login-title">Sign in</h1>
+      <p class="login-sub">Access your Travelgenix Widget Suite</p>
+      <form id="loginForm">
+        <div class="login-field"><input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" autocomplete="email" required></div>
+        <div class="login-field"><input class="login-input" id="loginCode" type="password" placeholder="Client code" autocomplete="current-password" required></div>
+        <button type="submit" class="login-btn" id="loginBtn">Sign in</button>
+        <div class="login-err" id="loginErr"></div>
+      </form>
+      <p class="login-footer">Need help? Contact your Travelgenix account manager.</p>
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <div class="editor" id="editor" hidden>
+
+    <aside class="sidebar">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="logo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="topbar-ident">
+          <div class="topbar-title">Spotlight Editor</div>
+          <div class="topbar-sub" id="topbarSub">New widget</div>
+        </div>
+        <div class="topbar-spacer"></div>
+        <button class="icon-btn icon-only" id="aiBtn" title="AI suggestions (A)" aria-label="AI suggestions">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2m0 14v2M5.5 5.5l1.4 1.4m10.2 10.2 1.4 1.4M3 12h2m14 0h2M5.5 18.5l1.4-1.4m10.2-10.2 1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>
+        </button>
+        <button class="icon-btn icon-only" id="templatesBtn" title="Templates (T)" aria-label="Templates">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </button>
+        <a class="icon-btn icon-only" href="/" title="Back to dashboard" aria-label="Back to dashboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 12-7 7-7-7"/><path d="M12 19V5"/><path d="M5 5h14"/></svg>
+        </a>
+      </div>
+
+      <!-- Name + Save -->
+      <div class="name-row">
+        <input class="name-input" id="nameInput" placeholder="Widget name" maxlength="100" />
+        <button class="save-btn" id="saveBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" role="tablist">
+        <button class="tab-btn" id="tabDesign" role="tab" aria-selected="true">Design</button>
+        <button class="tab-btn" id="tabContent" role="tab" aria-selected="false">Content</button>
+        <button class="tab-btn" id="tabSettings" role="tab" aria-selected="false">Settings</button>
+      </div>
+
+      <!-- Body -->
+      <div class="sidebar-body">
+
+        <!-- DESIGN TAB -->
+        <div id="panelDesign">
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Theme
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Mode</label>
+                <div class="segmented" role="group" aria-label="Theme mode">
+                  <button type="button" id="themeLight" aria-pressed="true">Light</button>
+                  <button type="button" id="themeDark" aria-pressed="false">Dark</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Colours
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Brand colour</label>
+                <div class="colour-row">
+                  <label class="colour-swatch" id="brandSwatch"><input type="color" id="brandColor" value="#1B2B5B" /></label>
+                  <input class="colour-hex" id="brandHex" maxlength="7" value="#1B2B5B" />
+                </div>
+                <div class="field-help">Used for section headings and the CTA panel background.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Accent colour</label>
+                <div class="colour-row">
+                  <label class="colour-swatch" id="accentSwatch"><input type="color" id="accentColor" value="#00B4D8" /></label>
+                  <input class="colour-hex" id="accentHex" maxlength="7" value="#00B4D8" />
+                </div>
+                <div class="field-help">Used for links, active states and the climate chart "best season" bars.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Presets</label>
+                <div class="presets" id="presets">
+                  <!-- injected by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Shape &amp; type
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Corner radius</label>
+                <div class="slider-row">
+                  <input class="slider" id="radius" type="range" min="0" max="24" value="16" />
+                  <span class="slider-value" id="radiusVal">16px</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Font family</label>
+                <select class="select" id="fontFamily">
+                  <option value="">Inter (default)</option>
+                  <!-- injected by JS -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Climate chart
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Temperature unit (default)</label>
+                <div class="segmented" role="group" aria-label="Temperature unit">
+                  <button type="button" id="unitC" aria-pressed="true">°C</button>
+                  <button type="button" id="unitF" aria-pressed="false">°F</button>
+                </div>
+                <div class="field-help">Readers can flip between °C and °F on the widget. This is just the default.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTENT TAB -->
+        <div id="panelContent" hidden>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Destination
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Fixed destination</label>
+                <div class="picker-wrap">
+                  <input class="input" id="destSearch" placeholder="Search countries, cities, resorts…" autocomplete="off" />
+                  <div class="picker-results" id="pickerResults" hidden></div>
+                </div>
+                <div id="selectedDest"></div>
+                <div class="field-help">Pick the destination this widget should show. This overrides auto-detect.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Auto-detect
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Slug source</label>
+                <select class="select" id="slugSource">
+                  <option value="last-path-segment">Last URL path segment (e.g. /destinations/greece → "greece")</option>
+                  <option value="query-param">URL query parameter</option>
+                  <option value="custom-selector">Custom CSS selector</option>
+                </select>
+              </div>
+              <div class="field" id="slugExtraWrap" hidden>
+                <label class="field-label" id="slugExtraLabel">Parameter name</label>
+                <input class="input" id="slugExtra" placeholder="e.g. dest" />
+              </div>
+              <div class="field">
+                <label class="field-label">Lookup order</label>
+                <div class="field-help">Searches each level in this order until a match is found. Most specific first matches best.</div>
+                <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
+                  <span style="font-size:12px;color:var(--sub);font-weight:600;">Resort</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  <span style="font-size:12px;color:var(--sub);font-weight:600;">City</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  <span style="font-size:12px;color:var(--sub);font-weight:600;">Country</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Call to action
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Title</label>
+                <input class="input" id="ctaTitle" maxlength="120" placeholder="Speak to our destination specialist" />
+              </div>
+              <div class="field">
+                <label class="field-label">Subtitle (optional)</label>
+                <textarea class="textarea" id="ctaSubtitle" maxlength="200" rows="2" placeholder="Warm one-line invitation"></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label">Button label</label>
+                <input class="input" id="ctaButton" maxlength="40" placeholder="Start your enquiry" />
+              </div>
+              <div class="field">
+                <label class="field-label">Button URL</label>
+                <input class="input" id="ctaUrl" placeholder="https://youragency.com/enquire" />
+                <div class="field-help">Must start with <code>http://</code>, <code>https://</code>, <code>mailto:</code> or <code>tel:</code>.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Section headings
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Climate</label>
+                <input class="input" id="hClimate" maxlength="40" placeholder="Climate" />
+              </div>
+              <div class="field">
+                <label class="field-label">Quick facts</label>
+                <input class="input" id="hFacts" maxlength="40" placeholder="At a glance" />
+              </div>
+              <div class="field">
+                <label class="field-label">Highlights</label>
+                <input class="input" id="hHighlights" maxlength="40" placeholder="Highlights" />
+              </div>
+              <div class="field">
+                <label class="field-label">Best For tags</label>
+                <input class="input" id="hTags" maxlength="40" placeholder="Best for" />
+              </div>
+              <div class="field">
+                <label class="field-label">Events</label>
+                <input class="input" id="hEvents" maxlength="40" placeholder="What's on" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="panelSettings" hidden>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Section visibility
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body" id="sectionTogglesWrap">
+              <!-- injected by JS -->
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Extras
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Show image attribution</div>
+                  <div class="toggle-help">Required by Unsplash licensing when showing their photos.</div>
+                </div>
+                <button type="button" class="toggle" id="togAttribution" role="switch" aria-checked="true"></button>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Show "best time to visit" callout</div>
+                  <div class="toggle-help">The pill above the climate chart.</div>
+                </div>
+                <button type="button" class="toggle" id="togBestTime" role="switch" aria-checked="true"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Embed code
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div id="embedWrap">
+                <div class="field-help" id="embedHelp">Save the widget first to get your embed code.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Preview pane -->
+    <section class="preview">
+      <div class="preview-toolbar">
+        <div class="preview-toolbar-left">Live preview</div>
+        <div class="viewport-seg" role="group" aria-label="Viewport">
+          <button type="button" id="vpDesktop" aria-pressed="true" title="Desktop">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            1280
+          </button>
+          <button type="button" id="vpTablet" aria-pressed="false" title="Tablet">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            768
+          </button>
+          <button type="button" id="vpMobile" aria-pressed="false" title="Mobile">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            375
+          </button>
+        </div>
+      </div>
+      <div class="preview-scroll">
+        <div class="preview-frame-wrap" id="previewWrap" style="width: 1280px;">
+          <iframe class="preview-frame" id="previewFrame" title="Widget preview"></iframe>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- AI Modal -->
+  <div class="modal-backdrop" id="aiModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">AI suggestions</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label class="field-label">Describe your travel business</label>
+          <textarea class="textarea" id="aiPrompt" rows="5" placeholder="e.g. Luxury Mediterranean villa specialists based in London, focused on couples and families. Warm, refined brand." maxlength="1000"></textarea>
+          <div class="field-help">AI will suggest a colour palette and CTA copy that fits. Destination content always comes from the database.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close>Cancel</button>
+        <button class="btn-primary" id="aiGenerate">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2m0 14v2M5.5 5.5l1.4 1.4m10.2 10.2 1.4 1.4M3 12h2m14 0h2M5.5 18.5l1.4-1.4m10.2-10.2 1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>
+          Generate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Templates Modal -->
+  <div class="modal-backdrop" id="templatesModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Templates</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="templates-grid" id="templatesGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       State + helpers
+       ============================================================ */
+    const API_AUTH = '/api/widget-auth';
+    const API_CONFIG = '/api/widget-config';
+    const API_AI = '/api/widget-ai';
+    const API_SEARCH = '/api/destination-search';
+    const WIDGET_TYPE = 'Destination Spotlight';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const widgetIdFromUrl = urlParams.get('id');
+
+    // Default config — matches widget-spotlight.js defaults
+    function defaultConfig() {
+      return {
+        theme: 'light',
+        brandColor: '#1B2B5B',
+        accentColor: '#00B4D8',
+        radius: 16,
+        fontFamily: '',
+        temperatureUnit: 'C',
+        sections: {
+          hero: true, climate: true, facts: true, highlights: true,
+          tags: true, events: true, cta: true,
+        },
+        showAttribution: true,
+        showBestTimeCallout: true,
+        eventsHeading: "What's on",
+        highlightsHeading: 'Highlights',
+        tagsHeading: 'Best for',
+        climateHeading: 'Climate',
+        factsHeading: 'At a glance',
+        cta: {
+          title: 'Speak to our destination specialist',
+          subtitle: '',
+          buttonLabel: 'Start your enquiry',
+          url: '',
+        },
+        destination: null,
+        autoDetect: {
+          enabled: false,
+          slugSource: 'last-path-segment',
+          slugExtra: '',
+          lookupOrder: ['resort', 'city', 'country'],
+        },
+      };
+    }
+
+    let state = {
+      widgetId: widgetIdFromUrl || null,
+      airtableRecordId: null,
+      name: '',
+      config: defaultConfig(),
+      dirty: false,
+    };
+
+    // Undo/redo — 40 states
+    let history = [];
+    let historyIdx = -1;
+    const HISTORY_MAX = 40;
+
+    function pushHistory() {
+      history = history.slice(0, historyIdx + 1);
+      history.push(JSON.stringify({ name: state.name, config: state.config }));
+      if (history.length > HISTORY_MAX) history.shift();
+      historyIdx = history.length - 1;
+    }
+    function undo() {
+      if (historyIdx <= 0) return;
+      historyIdx--;
+      applyHistory(history[historyIdx]);
+    }
+    function redo() {
+      if (historyIdx >= history.length - 1) return;
+      historyIdx++;
+      applyHistory(history[historyIdx]);
+    }
+    function applyHistory(snapshot) {
+      try {
+        const obj = JSON.parse(snapshot);
+        state.name = obj.name || '';
+        state.config = obj.config;
+        hydrateUI();
+        state.dirty = true;
+        refreshSaveBtn();
+        renderPreview();
+      } catch (err) { console.error('undo/redo apply failed', err); }
+    }
+
+    /* ---------- auth ---------- */
+    function getToken() {
+      try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.token || ''; }
+      catch { return ''; }
+    }
+    function authH() {
+      const t = getToken();
+      const h = { 'Content-Type': 'application/json' };
+      if (t) h['Authorization'] = 'Bearer ' + t;
+      return h;
+    }
+    function isLoggedIn() {
+      try {
+        const s = JSON.parse(sessionStorage.getItem('tgw_session'));
+        return !!(s && s.token && s.exp && Date.now() < s.exp);
+      } catch { return false; }
+    }
+
+    /* ---------- toast ---------- */
+    let toastTimer = null;
+    function toast(msg, kind) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      if (toastTimer) clearTimeout(toastTimer);
+      const el = document.createElement('div');
+      el.className = 'toast' + (kind ? ' is-' + kind : '');
+      el.textContent = msg;
+      document.body.appendChild(el);
+      toastTimer = setTimeout(() => el.remove(), 3200);
+    }
+
+    /* ============================================================
+       Login
+       ============================================================ */
+    function showLogin() {
+      document.getElementById('loginOverlay').hidden = false;
+      document.getElementById('editor').hidden = true;
+      setTimeout(() => document.getElementById('loginEmail').focus(), 50);
+    }
+    function hideLogin() {
+      document.getElementById('loginOverlay').hidden = true;
+      document.getElementById('editor').hidden = false;
+    }
+    async function doLogin(email, code) {
+      const res = await fetch(API_AUTH, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || ('Sign in failed (' + res.status + ')'));
+      sessionStorage.setItem('tgw_session', JSON.stringify({
+        token: data.token, email: data.email, plan: data.plan, clientName: data.clientName,
+        exp: Date.now() + (23 * 60 * 60 * 1000),
+      }));
+      return data;
+    }
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('loginErr');
+      const btn = document.getElementById('loginBtn');
+      err.textContent = '';
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      try {
+        await doLogin(
+          document.getElementById('loginEmail').value.trim(),
+          document.getElementById('loginCode').value
+        );
+        hideLogin();
+        await boot();
+      } catch (ex) {
+        err.textContent = ex.message || 'Something went wrong. Please try again.';
+      } finally {
+        btn.disabled = false; btn.textContent = 'Sign in';
+      }
+    });
+
+    /* ============================================================
+       Tabs
+       ============================================================ */
+    function setTab(which) {
+      const tabs = ['Design', 'Content', 'Settings'];
+      for (const t of tabs) {
+        const btn = document.getElementById('tab' + t);
+        const panel = document.getElementById('panel' + t);
+        const active = (t === which);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        panel.hidden = !active;
+      }
+    }
+    document.getElementById('tabDesign').onclick = () => setTab('Design');
+    document.getElementById('tabContent').onclick = () => setTab('Content');
+    document.getElementById('tabSettings').onclick = () => setTab('Settings');
+
+    /* ============================================================
+       Collapsible sections
+       ============================================================ */
+    document.querySelectorAll('[data-section]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sec = btn.closest('.section');
+        const isOpen = sec.getAttribute('data-open') === 'true';
+        sec.setAttribute('data-open', isOpen ? 'false' : 'true');
+      });
+    });
+
+    /* ============================================================
+       Colour presets
+       ============================================================ */
+    const PRESETS = [
+      { name: 'Mediterranean', brand: '#1B2B5B', accent: '#00B4D8' },
+      { name: 'Sunset',        brand: '#7C2D12', accent: '#F59E0B' },
+      { name: 'Forest',        brand: '#14532D', accent: '#22C55E' },
+      { name: 'Plum',          brand: '#581C87', accent: '#C084FC' },
+      { name: 'Coral',         brand: '#9F1239', accent: '#FB7185' },
+    ];
+    function renderPresets() {
+      const wrap = document.getElementById('presets');
+      wrap.innerHTML = '';
+      PRESETS.forEach((p, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'preset';
+        btn.title = p.name;
+        btn.setAttribute('aria-pressed', 'false');
+        btn.innerHTML = `<div class="preset-inner"><div style="background:${p.brand}"></div><div style="background:${p.accent}"></div></div>`;
+        btn.addEventListener('click', () => {
+          state.config.brandColor = p.brand;
+          state.config.accentColor = p.accent;
+          onConfigChange();
+          hydrateUI();
+        });
+        wrap.appendChild(btn);
+      });
+    }
+
+    /* ============================================================
+       Font picker — 30 Google Fonts
+       ============================================================ */
+    const FONTS = [
+      'Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Poppins', 'Raleway',
+      'Nunito', 'Source Sans Pro', 'Merriweather', 'Playfair Display', 'Lora',
+      'PT Serif', 'Libre Baskerville', 'Roboto Slab', 'Oswald', 'DM Sans',
+      'Plus Jakarta Sans', 'Space Grotesk', 'Manrope', 'Work Sans', 'Rubik',
+      'Mulish', 'Karla', 'Cabin', 'Quicksand', 'Fraunces', 'Outfit',
+      'Figtree', 'Albert Sans',
+    ];
+    function renderFontPicker() {
+      const sel = document.getElementById('fontFamily');
+      FONTS.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f; opt.textContent = f;
+        sel.appendChild(opt);
+      });
+    }
+
+    /* ============================================================
+       Section toggles (Settings tab)
+       ============================================================ */
+    const SECTION_TOGGLES = [
+      { key: 'hero',       label: 'Hero',            help: 'Full-bleed image with destination name and tagline.' },
+      { key: 'tags',       label: 'Best for tags',   help: 'Pill row showing who the destination suits.' },
+      { key: 'climate',    label: 'Climate chart',   help: '12-month temperature bars with season colour-coding.' },
+      { key: 'facts',      label: 'Quick facts',     help: 'Flight time, time zone, currency, language, voltage.' },
+      { key: 'highlights', label: 'Highlights grid', help: 'Cards describing the top things to see or do.' },
+      { key: 'events',     label: 'Events',          help: 'Festivals, religious holidays, seasonal experiences.' },
+      { key: 'cta',        label: 'Call to action',  help: 'Your brandable enquire button at the bottom.' },
+    ];
+    function renderSectionToggles() {
+      const wrap = document.getElementById('sectionTogglesWrap');
+      wrap.innerHTML = '';
+      SECTION_TOGGLES.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'toggle-row';
+        row.innerHTML = `
+          <div>
+            <div class="toggle-label">${s.label}</div>
+            <div class="toggle-help">${s.help}</div>
+          </div>
+          <button type="button" class="toggle" data-section-toggle="${s.key}" role="switch" aria-checked="true"></button>
+        `;
+        wrap.appendChild(row);
+      });
+      wrap.querySelectorAll('[data-section-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-section-toggle');
+          state.config.sections[key] = !state.config.sections[key];
+          btn.setAttribute('aria-checked', state.config.sections[key] ? 'true' : 'false');
+          onConfigChange();
+        });
+      });
+    }
+
+    /* ============================================================
+       Destination picker (debounced, authenticated search)
+       ============================================================ */
+    let searchAbort = null;
+    let searchTimer = null;
+    function searchDestinations(q) {
+      if (searchTimer) clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => runSearch(q), 200);
+    }
+    async function runSearch(q) {
+      const results = document.getElementById('pickerResults');
+      if (!q || q.length < 2) {
+        results.hidden = true;
+        results.innerHTML = '';
+        return;
+      }
+      if (searchAbort) searchAbort.abort();
+      searchAbort = new AbortController();
+      results.hidden = false;
+      results.innerHTML = '<div class="picker-status">Searching…</div>';
+      try {
+        const res = await fetch(API_SEARCH + '?q=' + encodeURIComponent(q), {
+          headers: authH(), signal: searchAbort.signal,
+        });
+        if (res.status === 401) {
+          results.innerHTML = '<div class="picker-status">Please sign in to search.</div>';
+          return;
+        }
+        const data = await res.json();
+        const list = data.results || [];
+        if (list.length === 0) {
+          results.innerHTML = '<div class="picker-status">No matches.</div>';
+          return;
+        }
+        results.innerHTML = '';
+        list.forEach(r => {
+          const row = document.createElement('div');
+          row.className = 'picker-result';
+          row.innerHTML = `
+            <span class="picker-result-name">${escHtml(r.name)}</span>
+            <span class="picker-result-level" data-level="${r.level}">${r.level}</span>
+          `;
+          row.addEventListener('click', () => pickDestination(r));
+          results.appendChild(row);
+        });
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        results.innerHTML = '<div class="picker-status">Search failed. Try again.</div>';
+      }
+    }
+    function pickDestination(r) {
+      state.config.destination = { level: r.level, recordId: r.recordId, name: r.name };
+      document.getElementById('pickerResults').hidden = true;
+      document.getElementById('destSearch').value = '';
+      renderSelectedDestination();
+      onConfigChange();
+    }
+    function renderSelectedDestination() {
+      const wrap = document.getElementById('selectedDest');
+      const d = state.config.destination;
+      if (!d) { wrap.innerHTML = ''; return; }
+      wrap.innerHTML = `
+        <div class="selected-dest">
+          <div>
+            <div class="selected-dest-name">${escHtml(d.name || '(unnamed)')}</div>
+            <div class="selected-dest-level">${d.level}</div>
+          </div>
+          <button type="button" class="selected-dest-clear" id="clearDest" title="Clear">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>`;
+      document.getElementById('clearDest').addEventListener('click', () => {
+        state.config.destination = null;
+        renderSelectedDestination();
+        onConfigChange();
+      });
+    }
+
+    function escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    /* ============================================================
+       Hydrate UI from state.config
+       ============================================================ */
+    function hydrateUI() {
+      const c = state.config;
+      // Name
+      document.getElementById('nameInput').value = state.name || '';
+      // Theme
+      document.getElementById('themeLight').setAttribute('aria-pressed', c.theme === 'light' ? 'true' : 'false');
+      document.getElementById('themeDark').setAttribute('aria-pressed',  c.theme === 'dark'  ? 'true' : 'false');
+      // Colours
+      document.getElementById('brandColor').value = c.brandColor;
+      document.getElementById('brandHex').value   = c.brandColor.toUpperCase();
+      document.getElementById('accentColor').value = c.accentColor;
+      document.getElementById('accentHex').value   = c.accentColor.toUpperCase();
+      // Preset highlight
+      document.querySelectorAll('.preset').forEach((btn, i) => {
+        const p = PRESETS[i];
+        const match = (p.brand.toLowerCase() === c.brandColor.toLowerCase()
+                    && p.accent.toLowerCase() === c.accentColor.toLowerCase());
+        btn.setAttribute('aria-pressed', match ? 'true' : 'false');
+      });
+      // Radius
+      document.getElementById('radius').value = c.radius;
+      document.getElementById('radiusVal').textContent = c.radius + 'px';
+      // Font
+      document.getElementById('fontFamily').value = c.fontFamily || '';
+      // Unit
+      document.getElementById('unitC').setAttribute('aria-pressed', c.temperatureUnit === 'F' ? 'false' : 'true');
+      document.getElementById('unitF').setAttribute('aria-pressed', c.temperatureUnit === 'F' ? 'true' : 'false');
+      // CTA
+      document.getElementById('ctaTitle').value = (c.cta && c.cta.title) || '';
+      document.getElementById('ctaSubtitle').value = (c.cta && c.cta.subtitle) || '';
+      document.getElementById('ctaButton').value = (c.cta && c.cta.buttonLabel) || '';
+      document.getElementById('ctaUrl').value = (c.cta && c.cta.url) || '';
+      // Headings
+      document.getElementById('hClimate').value = c.climateHeading || '';
+      document.getElementById('hFacts').value = c.factsHeading || '';
+      document.getElementById('hHighlights').value = c.highlightsHeading || '';
+      document.getElementById('hTags').value = c.tagsHeading || '';
+      document.getElementById('hEvents').value = c.eventsHeading || '';
+      // Auto-detect
+      const ad = c.autoDetect || {};
+      document.getElementById('slugSource').value = ad.slugSource || 'last-path-segment';
+      document.getElementById('slugExtra').value = ad.slugExtra || '';
+      updateSlugExtraVisibility();
+      // Section toggles
+      document.querySelectorAll('[data-section-toggle]').forEach(btn => {
+        const k = btn.getAttribute('data-section-toggle');
+        btn.setAttribute('aria-checked', c.sections[k] ? 'true' : 'false');
+      });
+      // Extras
+      document.getElementById('togAttribution').setAttribute('aria-checked', c.showAttribution ? 'true' : 'false');
+      document.getElementById('togBestTime').setAttribute('aria-checked', c.showBestTimeCallout ? 'true' : 'false');
+      // Destination
+      renderSelectedDestination();
+      // Embed
+      renderEmbed();
+    }
+
+    function updateSlugExtraVisibility() {
+      const src = document.getElementById('slugSource').value;
+      const wrap = document.getElementById('slugExtraWrap');
+      const label = document.getElementById('slugExtraLabel');
+      if (src === 'query-param') {
+        wrap.hidden = false; label.textContent = 'Parameter name'; document.getElementById('slugExtra').placeholder = 'e.g. dest';
+      } else if (src === 'custom-selector') {
+        wrap.hidden = false; label.textContent = 'CSS selector (data-attribute expected)'; document.getElementById('slugExtra').placeholder = 'e.g. [data-destination]';
+      } else {
+        wrap.hidden = true;
+      }
+    }
+
+    /* ============================================================
+       Input wiring — every input updates config + triggers preview
+       ============================================================ */
+    function onConfigChange() {
+      state.dirty = true;
+      refreshSaveBtn();
+      renderEmbed();
+      schedulePreview();
+      schedulePushHistory();
+    }
+    let historyTimer = null;
+    function schedulePushHistory() {
+      if (historyTimer) clearTimeout(historyTimer);
+      historyTimer = setTimeout(pushHistory, 500);
+    }
+
+    // Name
+    document.getElementById('nameInput').addEventListener('input', (e) => {
+      state.name = e.target.value;
+      state.dirty = true;
+      refreshSaveBtn();
+      schedulePushHistory();
+    });
+
+    // Theme
+    document.getElementById('themeLight').onclick = () => { state.config.theme = 'light'; hydrateUI(); onConfigChange(); };
+    document.getElementById('themeDark').onclick  = () => { state.config.theme = 'dark';  hydrateUI(); onConfigChange(); };
+
+    // Colour pickers
+    function bindColour(pickerId, hexId, key) {
+      const picker = document.getElementById(pickerId);
+      const hex = document.getElementById(hexId);
+      picker.addEventListener('input', () => {
+        state.config[key] = picker.value;
+        hex.value = picker.value.toUpperCase();
+        hydrateUI();
+        onConfigChange();
+      });
+      hex.addEventListener('change', () => {
+        let v = hex.value.trim();
+        if (!/^#[0-9a-f]{6}$/i.test(v)) { hex.value = state.config[key].toUpperCase(); return; }
+        state.config[key] = v.toLowerCase();
+        hydrateUI();
+        onConfigChange();
+      });
+    }
+    bindColour('brandColor', 'brandHex', 'brandColor');
+    bindColour('accentColor', 'accentHex', 'accentColor');
+
+    // Radius
+    document.getElementById('radius').addEventListener('input', (e) => {
+      state.config.radius = parseInt(e.target.value, 10) || 0;
+      document.getElementById('radiusVal').textContent = state.config.radius + 'px';
+      onConfigChange();
+    });
+
+    // Font
+    document.getElementById('fontFamily').addEventListener('change', (e) => {
+      state.config.fontFamily = e.target.value;
+      onConfigChange();
+    });
+
+    // Unit
+    document.getElementById('unitC').onclick = () => { state.config.temperatureUnit = 'C'; hydrateUI(); onConfigChange(); };
+    document.getElementById('unitF').onclick = () => { state.config.temperatureUnit = 'F'; hydrateUI(); onConfigChange(); };
+
+    // CTA
+    document.getElementById('ctaTitle').addEventListener('input', e => { state.config.cta.title = e.target.value; onConfigChange(); });
+    document.getElementById('ctaSubtitle').addEventListener('input', e => { state.config.cta.subtitle = e.target.value; onConfigChange(); });
+    document.getElementById('ctaButton').addEventListener('input', e => { state.config.cta.buttonLabel = e.target.value; onConfigChange(); });
+    document.getElementById('ctaUrl').addEventListener('input', e => { state.config.cta.url = e.target.value; onConfigChange(); });
+
+    // Headings
+    document.getElementById('hClimate').addEventListener('input', e => { state.config.climateHeading = e.target.value; onConfigChange(); });
+    document.getElementById('hFacts').addEventListener('input', e => { state.config.factsHeading = e.target.value; onConfigChange(); });
+    document.getElementById('hHighlights').addEventListener('input', e => { state.config.highlightsHeading = e.target.value; onConfigChange(); });
+    document.getElementById('hTags').addEventListener('input', e => { state.config.tagsHeading = e.target.value; onConfigChange(); });
+    document.getElementById('hEvents').addEventListener('input', e => { state.config.eventsHeading = e.target.value; onConfigChange(); });
+
+    // Auto-detect
+    document.getElementById('slugSource').addEventListener('change', e => {
+      state.config.autoDetect.slugSource = e.target.value;
+      updateSlugExtraVisibility();
+      onConfigChange();
+    });
+    document.getElementById('slugExtra').addEventListener('input', e => {
+      state.config.autoDetect.slugExtra = e.target.value;
+      onConfigChange();
+    });
+
+    // Extras toggles
+    document.getElementById('togAttribution').addEventListener('click', (e) => {
+      state.config.showAttribution = !state.config.showAttribution;
+      e.currentTarget.setAttribute('aria-checked', state.config.showAttribution ? 'true' : 'false');
+      onConfigChange();
+    });
+    document.getElementById('togBestTime').addEventListener('click', (e) => {
+      state.config.showBestTimeCallout = !state.config.showBestTimeCallout;
+      e.currentTarget.setAttribute('aria-checked', state.config.showBestTimeCallout ? 'true' : 'false');
+      onConfigChange();
+    });
+
+    // Destination picker input
+    document.getElementById('destSearch').addEventListener('input', (e) => searchDestinations(e.target.value.trim()));
+    document.getElementById('destSearch').addEventListener('focus', (e) => {
+      if (e.target.value.trim().length >= 2) document.getElementById('pickerResults').hidden = false;
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.picker-wrap')) document.getElementById('pickerResults').hidden = true;
+    });
+
+    /* ============================================================
+       Save + Embed code
+       ============================================================ */
+    function refreshSaveBtn() {
+      const btn = document.getElementById('saveBtn');
+      btn.classList.remove('is-saved');
+      if (state.dirty) btn.classList.add('is-dirty');
+      else btn.classList.remove('is-dirty');
+    }
+    function renderEmbed() {
+      const wrap = document.getElementById('embedWrap');
+      if (!state.widgetId) {
+        wrap.innerHTML = '<div class="field-help">Save the widget first to get your embed code.</div>';
+        return;
+      }
+      const code = `<div data-tg-widget="spotlight" data-tg-id="${state.widgetId}"></div>\n<script src="https://tg-widgets.vercel.app/widget-spotlight.js"></scr` + `ipt>`;
+      wrap.innerHTML = `
+        <div class="embed">
+          <button class="embed-copy" id="embedCopy">Copy</button>
+${escHtml(code)}
+        </div>
+        <div class="field-help" style="margin-top:6px;">Paste this snippet anywhere on your site where you want the widget to appear.</div>
+      `;
+      document.getElementById('embedCopy').addEventListener('click', () => {
+        navigator.clipboard.writeText(code).then(() => toast('Embed code copied', 'success'));
+      });
+    }
+
+    async function save() {
+      if (!state.name || !state.name.trim()) {
+        toast('Give the widget a name first', 'error');
+        document.getElementById('nameInput').focus();
+        return;
+      }
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving…';
+      try {
+        const body = {
+          widgetId: state.widgetId,
+          name: state.name.trim(),
+          widgetType: WIDGET_TYPE,
+          config: state.config,
+        };
+        const res = await fetch(API_CONFIG, {
+          method: 'POST',
+          headers: authH(),
+          body: JSON.stringify(body),
+        });
+        if (res.status === 401) {
+          toast('Your session expired. Please sign in again.', 'error');
+          sessionStorage.removeItem('tgw_session');
+          showLogin();
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || ('Save failed (' + res.status + ')'));
+        state.widgetId = data.widgetId || state.widgetId;
+        state.airtableRecordId = data.recordId || state.airtableRecordId;
+        state.dirty = false;
+        // Reflect in URL if we didn't have an ID
+        if (!widgetIdFromUrl && state.widgetId) {
+          const u = new URL(window.location.href);
+          u.searchParams.set('id', state.widgetId);
+          history.length = 0; historyIdx = -1; pushHistory();
+          window.history.replaceState({}, '', u.toString());
+        }
+        document.getElementById('topbarSub').textContent = state.widgetId || 'Saved';
+        btn.classList.remove('is-dirty');
+        btn.classList.add('is-saved');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved';
+        renderEmbed();
+        setTimeout(() => { btn.classList.remove('is-saved'); btn.innerHTML = originalText; btn.disabled = false; }, 1800);
+      } catch (ex) {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        toast(ex.message || 'Save failed', 'error');
+      }
+    }
+    document.getElementById('saveBtn').addEventListener('click', save);
+
+    /* ============================================================
+       Load existing widget (if ?id=...)
+       ============================================================ */
+    async function loadExisting(id) {
+      try {
+        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id));
+        if (!res.ok) throw new Error('Could not load widget');
+        const data = await res.json();
+        // Merge over defaults so missing fields from older saved configs fill in
+        state.config = Object.assign(defaultConfig(), data);
+        state.config.sections = Object.assign(defaultConfig().sections, data.sections || {});
+        state.config.cta = Object.assign(defaultConfig().cta, data.cta || {});
+        state.config.autoDetect = Object.assign(defaultConfig().autoDetect, data.autoDetect || {});
+        // Name and recordId come from widget-list endpoint ideally but we only have config here.
+        // So we show the WidgetID as the fallback name hint.
+        state.widgetId = id;
+        document.getElementById('topbarSub').textContent = id;
+        hydrateUI();
+      } catch (ex) {
+        toast('Could not load the widget. Starting fresh.', 'error');
+      }
+    }
+
+    /* ============================================================
+       Live preview — sandboxed iframe, inline config
+       ============================================================ */
+    let previewTimer = null;
+    function schedulePreview() {
+      if (previewTimer) clearTimeout(previewTimer);
+      previewTimer = setTimeout(renderPreview, 120);
+    }
+    function renderPreview() {
+      const frame = document.getElementById('previewFrame');
+      const cfg = JSON.parse(JSON.stringify(state.config));
+      // For preview, we need the widget to actually fetch data. If the agent
+      // has picked a destination but not yet saved, we still want to show it.
+      // The widget's loader path requires a widgetId + /api/destination-content
+      // lookup. Since we don't have a saved widgetId yet (or the saved config
+      // may differ from the live edits), we use a small preview shim: we
+      // pass both destination.recordId AND the config inline, and let the
+      // widget-side `destinationData` escape hatch skip the API call when we
+      // pre-fetch it in the editor.
+      // For simplicity in v1, preview fetches /api/destination-content using
+      // a temporary widget record or — if the user hasn't saved — the widget
+      // will show the "no destination" notice. That's honest.
+      const font = cfg.fontFamily ? encodeURIComponent(cfg.fontFamily) : '';
+      const html = `<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;500;600;700&display=swap" rel="stylesheet">` : ''}
+<style>body{margin:0;padding:32px 24px;background:${cfg.theme==='dark'?'#0F172A':'#FFFFFF'};font-family:'Inter',sans-serif;}</style>
+</head><body>
+<div data-tg-widget="spotlight" ${state.widgetId ? `data-tg-id="${escAttr(state.widgetId)}"` : ''} data-tg-config='${escAttr(JSON.stringify(cfg))}'></div>
+<script>window.__TG_PREVIEW__=true;<` + `/script>
+<script src="https://tg-widgets.vercel.app/widget-spotlight.js"><` + `/script>
+</body></html>`;
+      // Safer blob-based load than srcdoc for large docs
+      frame.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+    }
+    function escAttr(s) { return String(s || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;'); }
+
+    /* ============================================================
+       Viewport switcher
+       ============================================================ */
+    function setViewport(px, which) {
+      const wrap = document.getElementById('previewWrap');
+      wrap.style.width = px + 'px';
+      ['Desktop','Tablet','Mobile'].forEach(v => {
+        document.getElementById('vp' + v).setAttribute('aria-pressed', v === which ? 'true' : 'false');
+      });
+    }
+    document.getElementById('vpDesktop').onclick = () => setViewport(1280, 'Desktop');
+    document.getElementById('vpTablet').onclick = () => setViewport(768, 'Tablet');
+    document.getElementById('vpMobile').onclick = () => setViewport(375, 'Mobile');
+
+    /* ============================================================
+       AI Modal
+       ============================================================ */
+    function openModal(id) { document.getElementById(id).hidden = false; }
+    function closeModal(id) { document.getElementById(id).hidden = true; }
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const m = btn.closest('.modal-backdrop');
+        if (m) m.hidden = true;
+      });
+    });
+    document.getElementById('aiBtn').onclick = () => openModal('aiModal');
+    document.getElementById('templatesBtn').onclick = () => openModal('templatesModal');
+
+    document.getElementById('aiGenerate').addEventListener('click', async () => {
+      const prompt = document.getElementById('aiPrompt').value.trim();
+      if (prompt.length < 10) { toast('Please describe your business in a bit more detail', 'error'); return; }
+      const btn = document.getElementById('aiGenerate');
+      btn.disabled = true; btn.textContent = 'Generating…';
+      try {
+        const res = await fetch(API_AI, {
+          method: 'POST',
+          headers: authH(),
+          body: JSON.stringify({ widgetType: 'SPOTLIGHT', prompt }),
+        });
+        if (res.status === 401) { toast('Your session expired. Please sign in.', 'error'); showLogin(); return; }
+        if (res.status === 429) {
+          const data = await res.json().catch(() => ({}));
+          toast(data.error || 'AI limit reached. Try again later.', 'error');
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'AI generation failed');
+        // Apply the AI's suggestions
+        if (data.brandColor) state.config.brandColor = data.brandColor;
+        if (data.accentColor) state.config.accentColor = data.accentColor;
+        if (data.temperatureUnit) state.config.temperatureUnit = data.temperatureUnit;
+        if (data.cta) {
+          if (data.cta.title) state.config.cta.title = data.cta.title;
+          if (data.cta.subtitle) state.config.cta.subtitle = data.cta.subtitle;
+          if (data.cta.buttonLabel) state.config.cta.buttonLabel = data.cta.buttonLabel;
+        }
+        hydrateUI();
+        onConfigChange();
+        closeModal('aiModal');
+        toast('AI suggestions applied', 'success');
+      } catch (ex) {
+        toast(ex.message || 'AI generation failed', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2m0 14v2M5.5 5.5l1.4 1.4m10.2 10.2 1.4 1.4M3 12h2m14 0h2M5.5 18.5l1.4-1.4m10.2-10.2 1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg> Generate';
+      }
+    });
+
+    /* ============================================================
+       Templates — curated starting points
+       Each template sets colours + CTA copy + unit + suggests a matching
+       demo destination that the agent can accept or replace.
+       ============================================================ */
+    const TEMPLATES = [
+      {
+        name: 'Mediterranean',
+        destHint: 'Greece',
+        brandColor: '#1B2B5B', accentColor: '#00B4D8',
+        temperatureUnit: 'C',
+        cta: {
+          title: 'Speak to our Mediterranean specialist',
+          subtitle: 'Whitewashed villages, cobalt seas and sun-soaked mornings — handpicked stays across the Med.',
+          buttonLabel: 'Plan your escape',
+        },
+      },
+      {
+        name: 'Winter Sun',
+        destHint: 'Barbados',
+        brandColor: '#7C2D12', accentColor: '#F59E0B',
+        temperatureUnit: 'C',
+        cta: {
+          title: 'Escape the British winter',
+          subtitle: 'Warm sand, warm sea, warm welcome. Curated long-haul escapes when the UK turns grey.',
+          buttonLabel: 'Find your sunshine',
+        },
+      },
+      {
+        name: 'Adventure',
+        destHint: 'Kenya',
+        brandColor: '#14532D', accentColor: '#22C55E',
+        temperatureUnit: 'C',
+        cta: {
+          title: 'Design your next adventure',
+          subtitle: 'Safari, summit, surf or sand — travel that earns the photographs.',
+          buttonLabel: 'Start planning',
+        },
+      },
+      {
+        name: 'Luxury',
+        destHint: 'Maldives',
+        brandColor: '#581C87', accentColor: '#C084FC',
+        temperatureUnit: 'C',
+        cta: {
+          title: 'Designed for the quietly extraordinary',
+          subtitle: 'Private villas, chartered boats and the kind of stays that feel made for you.',
+          buttonLabel: 'Speak to a specialist',
+        },
+      },
+      {
+        name: 'City Break',
+        destHint: 'Italy',
+        brandColor: '#9F1239', accentColor: '#FB7185',
+        temperatureUnit: 'C',
+        cta: {
+          title: 'Weekends worth booking a Monday off for',
+          subtitle: 'Europe\'s best short breaks, the restaurants to book and the hotels worth the walk.',
+          buttonLabel: 'Find yours',
+        },
+      },
+    ];
+    function renderTemplates() {
+      const grid = document.getElementById('templatesGrid');
+      grid.innerHTML = '';
+      TEMPLATES.forEach((t, i) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'template-card';
+        card.innerHTML = `
+          <div class="template-swatches">
+            <div class="template-swatch" style="background:${t.brandColor}"></div>
+            <div class="template-swatch" style="background:${t.accentColor}"></div>
+          </div>
+          <div class="template-name">${t.name}</div>
+          <div class="template-dest">Example destination: ${t.destHint}</div>
+        `;
+        card.addEventListener('click', () => applyTemplate(t));
+        grid.appendChild(card);
+      });
+    }
+    async function applyTemplate(t) {
+      state.config.brandColor = t.brandColor;
+      state.config.accentColor = t.accentColor;
+      state.config.temperatureUnit = t.temperatureUnit;
+      state.config.cta.title = t.cta.title;
+      state.config.cta.subtitle = t.cta.subtitle;
+      state.config.cta.buttonLabel = t.cta.buttonLabel;
+      // Try to auto-select the hinted destination if the user hasn't set one
+      if (!state.config.destination && t.destHint) {
+        try {
+          const res = await fetch(API_SEARCH + '?q=' + encodeURIComponent(t.destHint), { headers: authH() });
+          if (res.ok) {
+            const data = await res.json();
+            const first = (data.results || [])[0];
+            if (first) state.config.destination = { level: first.level, recordId: first.recordId, name: first.name };
+          }
+        } catch (err) { /* best-effort */ }
+      }
+      hydrateUI();
+      onConfigChange();
+      closeModal('templatesModal');
+      toast(t.name + ' template applied', 'success');
+    }
+
+    /* ============================================================
+       Keyboard shortcuts
+       ============================================================ */
+    document.addEventListener('keydown', (e) => {
+      // Ignore when typing in inputs/textareas (except the shortcuts that should always work)
+      const inField = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT');
+      // ⌘S / Ctrl+S — save
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(); return; }
+      // ⌘Z / ⌘⇧Z — undo/redo
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
+      // Esc closes modals
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop:not([hidden])').forEach(m => m.hidden = true);
+        document.getElementById('pickerResults').hidden = true;
+        return;
+      }
+      if (inField) return;
+      // Letters
+      if (e.key === 'a' || e.key === 'A') { e.preventDefault(); openModal('aiModal'); return; }
+      if (e.key === 't' || e.key === 'T') { e.preventDefault(); openModal('templatesModal'); return; }
+      if (e.key === '1') { e.preventDefault(); setTab('Design'); return; }
+      if (e.key === '2') { e.preventDefault(); setTab('Content'); return; }
+      if (e.key === '3') { e.preventDefault(); setTab('Settings'); return; }
+    });
+
+    /* ============================================================
+       Boot
+       ============================================================ */
+    async function boot() {
+      renderPresets();
+      renderFontPicker();
+      renderSectionToggles();
+      renderTemplates();
+      if (widgetIdFromUrl) await loadExisting(widgetIdFromUrl);
+      hydrateUI();
+      pushHistory();
+      renderPreview();
+    }
+    (async () => {
+      if (!isLoggedIn()) {
+        showLogin();
+      } else {
+        hideLogin();
+        await boot();
+      }
+    })();
+  </script>
+
+</body>
+</html>
