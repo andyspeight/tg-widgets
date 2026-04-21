@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Destination Spotlight — Travelgenix Widget Demo</title>
+<meta name="description" content="Live demo of the Travelgenix Destination Spotlight widget — an editorial single-destination showcase for travel agent websites." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ─── Reset + base ─── */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #FFFFFF;
+    color: #0F172A;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+  body[data-page-theme="dark"] { background: #0A0F1E; color: #F8FAFC; }
+
+  /* ─── Fake travel-agent site chrome ─── */
+  .site-nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid #E2E8F0;
+  }
+  body[data-page-theme="dark"] .site-nav {
+    background: rgba(10,15,30,0.85);
+    border-bottom-color: #1E293B;
+  }
+  .site-nav-inner {
+    max-width: 1280px; margin: 0 auto;
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px;
+  }
+  .site-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 17px; letter-spacing: -0.01em;
+  }
+  .site-brand-mark {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, #1B2B5B 0%, #00B4D8 100%);
+  }
+  .site-nav-links { display: flex; gap: 28px; font-size: 14px; font-weight: 500; }
+  .site-nav-links a { color: inherit; text-decoration: none; opacity: 0.8; }
+  .site-nav-links a:hover { opacity: 1; }
+  @media (max-width: 720px) {
+    .site-nav-links { display: none; }
+  }
+
+  /* ─── Page intro ─── */
+  .page-intro {
+    max-width: 1280px; margin: 0 auto;
+    padding: 48px 24px 28px;
+  }
+  .page-intro-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    background: rgba(0,180,216,0.10); color: #0096B7;
+    padding: 5px 10px; border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  body[data-page-theme="dark"] .page-intro-eyebrow { background: rgba(0,180,216,0.18); color: #48CAE4; }
+  .page-intro h1 {
+    margin: 0 0 8px;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .page-intro p {
+    margin: 0; color: #475569; font-size: 16px; max-width: 700px;
+  }
+  body[data-page-theme="dark"] .page-intro p { color: #CBD5E1; }
+
+  /* ─── Controls bar ─── */
+  .controls {
+    max-width: 1280px; margin: 0 auto;
+    padding: 12px 24px 28px;
+    display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+  }
+  .controls-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: #64748B;
+    margin-right: 4px;
+  }
+  body[data-page-theme="dark"] .controls-label { color: #94A3B8; }
+  .pill-group {
+    display: inline-flex; gap: 4px;
+    padding: 4px;
+    background: #F1F5F9; border-radius: 999px;
+  }
+  body[data-page-theme="dark"] .pill-group { background: #1E293B; }
+  .pill-btn {
+    border: 0; background: transparent;
+    font: inherit; font-size: 13px; font-weight: 500;
+    color: inherit;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  .pill-btn:hover { background: rgba(255,255,255,0.5); }
+  body[data-page-theme="dark"] .pill-btn:hover { background: rgba(255,255,255,0.06); }
+  .pill-btn[aria-pressed="true"] {
+    background: #FFFFFF; color: #0F172A;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.1);
+  }
+  body[data-page-theme="dark"] .pill-btn[aria-pressed="true"] {
+    background: #334155; color: #F8FAFC;
+  }
+
+  /* ─── Widget frame ─── */
+  .widget-frame {
+    max-width: 1280px; margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ─── Footer ─── */
+  .site-footer {
+    border-top: 1px solid #E2E8F0;
+    background: #F8FAFC;
+    padding: 32px 24px;
+    font-size: 13px; color: #64748B;
+    text-align: center;
+  }
+  body[data-page-theme="dark"] .site-footer {
+    background: #0F172A; border-top-color: #1E293B; color: #94A3B8;
+  }
+
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 400px;
+    font-size: 14px; color: #64748B;
+  }
+</style>
+</head>
+
+<body data-page-theme="light">
+
+  <!-- Fake travel-agent site nav -->
+  <nav class="site-nav" aria-label="Primary">
+    <div class="site-nav-inner">
+      <div class="site-brand">
+        <div class="site-brand-mark" aria-hidden="true"></div>
+        <span>Aegean Holidays</span>
+      </div>
+      <div class="site-nav-links">
+        <a href="#">Destinations</a>
+        <a href="#">Offers</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page intro -->
+  <header class="page-intro">
+    <span class="page-intro-eyebrow">Widget Preview</span>
+    <h1>Destination Spotlight</h1>
+    <p>An editorial single-destination showcase for travel agent websites. Fully customisable, live-fetched from the Travelgenix destination database. This demo renders Greece at the country level.</p>
+  </header>
+
+  <!-- Demo controls -->
+  <div class="controls" role="toolbar" aria-label="Demo controls">
+    <span class="controls-label">Theme</span>
+    <div class="pill-group" role="group" aria-label="Theme">
+      <button class="pill-btn" type="button" data-theme="light" aria-pressed="true">Light</button>
+      <button class="pill-btn" type="button" data-theme="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+
+  <!-- The widget itself -->
+  <div class="widget-frame">
+    <div id="widget-host">
+      <div class="loading">Loading Destination Spotlight…</div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>Travelgenix Widget Suite — tg-widgets.vercel.app</p>
+  </footer>
+
+  <script>
+    // Page-level theme toggle — rebuilds the widget with the selected theme.
+    // The widget itself respects data-theme inside its Shadow DOM; the page
+    // chrome separately adapts via the body attribute.
+    const host = document.getElementById('widget-host');
+    const pillButtons = document.querySelectorAll('.pill-btn[data-theme]');
+    let currentTheme = 'light';
+
+    function buildWidget(theme) {
+      host.innerHTML = '<div class="loading">Loading Destination Spotlight…</div>';
+      // Small timeout so the UI change feels responsive
+      setTimeout(() => {
+        host.innerHTML = '';
+        const el = document.createElement('div');
+        el.setAttribute('data-tg-widget', 'spotlight');
+        el.setAttribute('data-tg-id', 'tgs_demo_greece');
+        // Override the theme via inline config by passing it as a wrapper.
+        // Since the saved widget config has theme:light, we instead read the
+        // config and merge the theme override by hand. Simpler: re-load the
+        // widget JS and let it pick up the saved config, then override via
+        // the widget's update() method once it's constructed.
+        host.appendChild(el);
+
+        // Kick off init, then wait for the widget to be mounted and push the
+        // theme override.
+        if (window.TGSpotlightWidget) {
+          // The auto-initialiser runs via MutationObserver; poll briefly.
+          const start = Date.now();
+          const poll = setInterval(() => {
+            if (el.__tgSpotlight) {
+              el.__tgSpotlight.update({ theme });
+              clearInterval(poll);
+            } else if (Date.now() - start > 3000) {
+              clearInterval(poll);
+            }
+          }, 50);
+        }
+      }, 80);
+    }
+
+    pillButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.getAttribute('data-theme');
+        if (theme === currentTheme) return;
+        currentTheme = theme;
+        document.body.setAttribute('data-page-theme', theme);
+        pillButtons.forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+        buildWidget(theme);
+      });
+    });
+
+    // Initial mount
+    window.addEventListener('DOMContentLoaded', () => {
+      buildWidget('light');
+    });
+  </script>
+
+  <!-- The Spotlight widget script -->
+  <script src="/widget-spotlight.js"></script>
+
+</body>
+</html>
