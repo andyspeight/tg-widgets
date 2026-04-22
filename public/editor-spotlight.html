@@ -878,7 +878,15 @@
     function isLoggedIn() {
       try {
         const s = JSON.parse(sessionStorage.getItem('tgw_session'));
-        return !!(s && s.token && s.exp && Date.now() < s.exp);
+        // Match FAQ/Testimonials/Weather editors: just check a token exists.
+        // The server re-validates tokens on every protected request (via
+        // _auth.js) so the client doesn't need to enforce expiry here — if a
+        // token has expired, the next save/AI/search call returns 401 and we
+        // showLogin() then. Previously this required s.exp && Date.now() < s.exp
+        // which failed because the dashboard login writes `timestamp` not `exp`,
+        // forcing a redundant re-login every time you opened the editor from
+        // the dashboard.
+        return !!(s && s.token);
       } catch { return false; }
     }
 
