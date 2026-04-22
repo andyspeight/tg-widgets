@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Weather Widget Demo · Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F8FAFC;
+      color: #0F172A;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    body[data-theme="dark"] { background: #0B1222; color: #F8FAFC; }
+
+    /* ─── Site header (simulates an agency site) ─── */
+    .site-header {
+      background: #fff; border-bottom: 1px solid #E2E8F0;
+      padding: 16px 32px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    body[data-theme="dark"] .site-header { background: #121A2F; border-bottom-color: #1E293B; }
+    .brand { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+    .brand-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #00B4D8; margin-right: 10px; vertical-align: 2px; }
+    .nav-links { display: flex; gap: 20px; font-size: 13px; color: #475569; }
+    body[data-theme="dark"] .nav-links { color: #CBD5E1; }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .header-spacer { flex: 1; }
+    .controls {
+      display: inline-flex; gap: 6px;
+      padding: 3px;
+      background: #F1F5F9;
+      border-radius: 999px;
+    }
+    body[data-theme="dark"] .controls { background: #1E293B; }
+    .controls button {
+      border: 0; background: transparent;
+      font: inherit; font-size: 12px; font-weight: 600;
+      color: #475569;
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 150ms ease, color 150ms ease;
+      min-height: 28px;
+    }
+    body[data-theme="dark"] .controls button { color: #CBD5E1; }
+    .controls button[aria-pressed="true"] {
+      background: #fff; color: #0F172A;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+    }
+    body[data-theme="dark"] .controls button[aria-pressed="true"] {
+      background: #0F172A; color: #F8FAFC;
+    }
+
+    /* ─── Hero strip (where a wide widget would sit) ─── */
+    .hero {
+      max-width: 1200px; margin: 0 auto; padding: 40px 32px 24px;
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 34px; font-weight: 700; letter-spacing: -0.02em;
+    }
+    .hero p {
+      margin: 0;
+      font-size: 16px; color: #475569; max-width: 640px;
+    }
+    body[data-theme="dark"] .hero p { color: #CBD5E1; }
+
+    /* ─── Main content + sidebar grid ─── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px 60px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 40px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    article h2 {
+      margin: 32px 0 12px;
+      font-size: 22px; font-weight: 700;
+    }
+    article p {
+      margin: 0 0 14px;
+      font-size: 15px; line-height: 1.65; color: #334155;
+    }
+    body[data-theme="dark"] article p { color: #CBD5E1; }
+
+    .callout-box {
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 14px;
+      padding: 20px; margin: 0 0 20px;
+    }
+    body[data-theme="dark"] .callout-box { background: #1E293B; border-color: #334155; }
+
+    aside {
+      display: flex; flex-direction: column; gap: 20px;
+      position: sticky; top: 20px;
+    }
+    aside h3 {
+      margin: 0 0 10px;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: #64748B;
+    }
+
+    /* ─── Section labels ─── */
+    .section-label {
+      margin: 20px 0 12px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #64748B;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      border-top: 1px solid #E2E8F0;
+      padding: 24px 32px; text-align: center;
+      font-size: 12px; color: #64748B;
+    }
+    body[data-theme="dark"] footer { border-top-color: #1E293B; }
+
+    /* Layout switcher container */
+    .layout-showcase {
+      max-width: 1200px; margin: 0 auto; padding: 20px 32px 40px;
+    }
+    .layout-showcase h2 {
+      margin: 0 0 4px;
+      font-size: 18px; font-weight: 600;
+    }
+    .layout-showcase p {
+      margin: 0 0 20px;
+      font-size: 13px; color: #64748B;
+    }
+    .layout-stage {
+      display: flex; justify-content: center;
+      padding: 40px 24px;
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      min-height: 380px;
+    }
+    body[data-theme="dark"] .layout-stage { background: #121A2F; border-color: #1E293B; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand"><span class="brand-dot"></span>Sunrise Holidays</div>
+    <nav class="nav-links">
+      <a href="#">Destinations</a>
+      <a href="#">Holidays</a>
+      <a href="#">Cruises</a>
+      <a href="#">About</a>
+    </nav>
+    <div class="header-spacer"></div>
+    <div class="controls" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+      <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Greece — when to go</h1>
+    <p>The weather widget you can drop on any destination page. Shows 12-month climate, highlights the best months, and keeps your agent's CTA front and centre.</p>
+  </section>
+
+  <!-- Layout switcher — shows all three layouts, one at a time -->
+  <section class="layout-showcase">
+    <h2>Layout preview</h2>
+    <p>All three layouts work from the same data. Switch to see how each feels.</p>
+    <div class="controls" role="group" aria-label="Layout" style="margin-bottom:20px">
+      <button type="button" data-layout-btn="standard" aria-pressed="true">Standard</button>
+      <button type="button" data-layout-btn="compact" aria-pressed="false">Compact</button>
+      <button type="button" data-layout-btn="wide" aria-pressed="false">Wide</button>
+    </div>
+    <div class="layout-stage">
+      <div id="demoWidget"></div>
+    </div>
+  </section>
+
+  <!-- Realistic placement examples -->
+  <main>
+    <article>
+      <div class="section-label">Mid-article placement (standard layout)</div>
+      <h2>Planning a trip to the Greek Islands</h2>
+      <p>Greece rewards flexibility. The high season runs from late May to early September, when the Aegean is warm, the ferries run on the hour, and the meltemi wind keeps the heat honest. Everything works — but everything is busy.</p>
+      <p>If you can travel outside school holidays, May and September are the sweet spot. You get beach weather without the crush; tavernas have time to chat; and you can usually walk into a hotel with no reservation.</p>
+
+      <div class="callout-box">
+        <div id="midArticleWidget"></div>
+      </div>
+
+      <p>Winter on the islands is a different story. Most of Santorini and Mykonos closes down from November to April. The exceptions are Crete and Rhodes, which stay open year round and are a revelation in February — empty archaeological sites, mild afternoons, and wild flowers on the coast roads.</p>
+      <p>For a first trip, Santorini plus Naxos makes a good pair: one iconic, one working. For a third or fourth trip, try the Dodecanese — Symi, Kastellorizo, Tilos — where you'll need a ferry timetable and a bit of Greek.</p>
+    </article>
+
+    <aside>
+      <h3>At a glance</h3>
+      <div id="sidebarWidget"></div>
+    </aside>
+  </main>
+
+  <footer>
+    Demo site — the Weather widget is embeddable via a single <code>&lt;script&gt;</code> tag. <a href="/">Back to dashboard</a>
+  </footer>
+
+  <script src="/widget-weather.js"></script>
+  <script>
+    // Demo destination data — matches the Destination Content API response shape.
+    // Real deployments fetch this from /api/destination-content via widget-id.
+    const GREECE = {
+      level: 'country',
+      name: 'Greece',
+      tagline: 'Ancient ruins, island hopping and Aegean sunsets',
+      heroIntro: '',
+      region: 'Mediterranean · Southern Europe',
+      images: [],
+      attributions: [],
+      climate: {
+        temps:    [12,13,15,18,23,28,31,31,27,22,17,13],
+        rainfall: [62,53,45,23,13,6,5,8,18,68,80,82],
+        season:   ['off','off','shoulder','shoulder','best','best','best','best','best','shoulder','off','off'],
+      },
+      facts: {},
+      highlights: [],
+      bestForTags: [],
+      events: [],
+    };
+
+    // ── Layout showcase widget ──
+    let demoWidget = null;
+    function renderDemoWidget(layout) {
+      const host = document.getElementById('demoWidget');
+      if (!host) return;
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'weather');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        theme: document.body.dataset.theme === 'dark' ? 'dark' : 'light',
+        layout: layout,
+        brandColor: '#1B2B5B',
+        accentColor: '#00B4D8',
+        radius: 16,
+        temperatureUnit: 'C',
+        showFlag: true,
+        sections: { header: true, callout: true, climate: true, bestMonths: true, cta: true },
+        cta: {
+          title: 'Plan your Greek Islands escape',
+          subtitle: 'Handpicked hotels, ferry-connected itineraries, and dates that match the weather.',
+          buttonLabel: 'Get in touch',
+          url: 'https://example.com',
+        },
+        destinationData: GREECE,
+      }));
+      host.appendChild(div);
+    }
+
+    // ── Mid-article widget (standard layout, no CTA) ──
+    function renderMidArticleWidget() {
+      const host = document.getElementById('midArticleWidget');
+      if (!host) return;
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'weather');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        theme: document.body.dataset.theme === 'dark' ? 'dark' : 'light',
+        layout: 'standard',
+        brandColor: '#1B2B5B',
+        accentColor: '#00B4D8',
+        radius: 12,
+        temperatureUnit: 'C',
+        showFlag: true,
+        sections: { header: true, callout: true, climate: true, bestMonths: false, cta: false },
+        destinationData: GREECE,
+      }));
+      host.appendChild(div);
+    }
+
+    // ── Sidebar widget (compact layout) ──
+    function renderSidebarWidget() {
+      const host = document.getElementById('sidebarWidget');
+      if (!host) return;
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'weather');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        theme: document.body.dataset.theme === 'dark' ? 'dark' : 'light',
+        layout: 'compact',
+        brandColor: '#1B2B5B',
+        accentColor: '#00B4D8',
+        radius: 12,
+        temperatureUnit: 'C',
+        showFlag: true,
+        sections: { header: true, callout: true, climate: true, bestMonths: false, cta: false },
+        destinationData: GREECE,
+      }));
+      host.appendChild(div);
+    }
+
+    function renderAll() {
+      const btn = document.querySelector('[data-layout-btn][aria-pressed="true"]');
+      const layout = btn ? btn.dataset.layoutBtn : 'standard';
+      renderDemoWidget(layout);
+      renderMidArticleWidget();
+      renderSidebarWidget();
+    }
+
+    // Layout switcher
+    document.querySelectorAll('[data-layout-btn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-layout-btn]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        renderDemoWidget(btn.dataset.layoutBtn);
+      });
+    });
+
+    // Theme switcher
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        document.body.dataset.theme = btn.dataset.themeBtn;
+        renderAll();
+      });
+    });
+
+    // Initial render
+    renderAll();
+  </script>
+</body>
+</html>
