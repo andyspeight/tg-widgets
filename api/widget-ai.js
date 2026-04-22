@@ -65,7 +65,7 @@ const FETCH_TIMEOUT_MS = 30_000;
 const PROMPT_MIN_LEN = 5;
 const PROMPT_MAX_LEN = 1000;
 
-const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'REVIEWS', 'SPOTLIGHT'];
+const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'REVIEWS', 'SPOTLIGHT', 'WEATHER'];
 const ALLOWED_TONES        = ['warm', 'professional', 'casual'];
 
 // Per-plan daily caps. Adjust here without touching logic.
@@ -227,7 +227,7 @@ function parseBody(body) {
   // widgetType — strict enum
   const widgetType = String(body.widgetType || '').toUpperCase();
   if (!ALLOWED_WIDGET_TYPES.includes(widgetType)) {
-    return { error: 'Invalid widgetType. Must be FAQ, PRICING, REVIEWS, or SPOTLIGHT.' };
+    return { error: 'Invalid widgetType. Must be FAQ, PRICING, REVIEWS, SPOTLIGHT or WEATHER.' };
   }
 
   // prompt — trimmed, length-bounded string
@@ -371,6 +371,7 @@ function buildPrompt(widgetType, userPrompt, options) {
   if (widgetType === 'PRICING')   return buildPricingPrompt(userPrompt);
   if (widgetType === 'REVIEWS')   return buildReviewsPrompt(userPrompt);
   if (widgetType === 'SPOTLIGHT') return buildSpotlightPrompt(userPrompt);
+  if (widgetType === 'WEATHER')   return buildWeatherPrompt(userPrompt);
   throw new Error('Unreachable'); // caught by input validation above
 }
 
@@ -502,6 +503,49 @@ Rules:
   return { system: SYSTEM_SAFETY, userMsg };
 }
 
+function buildWeatherPrompt(userPrompt) {
+  // Weather content (name, climate, season) always comes from the Destination
+  // Content database. The AI picks presentation: palette, layout, temperature
+  // unit default, and CTA copy. It never generates destination facts.
+  const userMsg = `Widget type: WEATHER
+
+The Weather widget is a compact destination weather widget pulled from the Travelgenix destination content database. You do NOT generate climate or destination data — that comes from the database. Your task is:
+
+1. Pick a brand colour palette (brand + accent hex codes) that suits the travel business described below
+2. Recommend a layout — "compact" (sidebar-friendly, ~380px wide), "standard" (mid-article card, ~440px wide), or "wide" (horizontal hero strip, ~820px wide). Use "wide" for content-publishing businesses, "compact" for niche specialists or small agencies, "standard" as the default.
+3. Suggest a temperature-unit default ("C" or "F") based on the likely audience
+4. Compose CTA copy that fits the brand: title (a short confident invitation), optional subtitle (a warm single sentence), button label (2-4 words, action-oriented, never generic like "Click here")
+
+<business_description>
+${userPrompt}
+</business_description>
+
+Return a single JSON object with this exact shape:
+{
+  "brandColor": "#RRGGBB",
+  "accentColor": "#RRGGBB",
+  "temperatureUnit": "C",
+  "layout": "standard",
+  "cta": {
+    "title": "Plan your [something]",
+    "subtitle": "Short warm line, around 10-15 words, optional but recommended.",
+    "buttonLabel": "Enquire now"
+  }
+}
+
+Rules:
+- Colours must be valid 6-digit hex including the # prefix
+- brandColor is used for the CTA panel background — it must hold white text (minimum 4.5:1 contrast against white)
+- accentColor is used for the climate chart "best season" bars, pills, and CTA button — vibrant but not clashing
+- layout must be exactly "compact", "standard", or "wide"
+- temperatureUnit: "C" for UK/European/Australian/Asian audiences, "F" for US audiences, default "C" if unsure
+- CTA title specific to the described business. Examples: "Plan your Greek Islands escape", "Find your winter sun", "Design your safari"
+- British English throughout
+- No em-dashes, no Oxford commas, no AI filler phrases ("cutting-edge", "seamless", "curated", "bespoke" unless the business is genuinely luxury)`;
+
+  return { system: SYSTEM_SAFETY, userMsg };
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // ANTHROPIC CALL
 // ═══════════════════════════════════════════════════════════════════
@@ -567,6 +611,7 @@ function parseAndValidate(widgetType, rawText, options) {
   if (widgetType === 'PRICING')   return validatePricingLoose(obj);
   if (widgetType === 'REVIEWS')   return validateReviewsLoose(obj);
   if (widgetType === 'SPOTLIGHT') return validateSpotlightLoose(obj);
+  if (widgetType === 'WEATHER')   return validateWeatherLoose(obj);
   throw new Error('Unknown widgetType in validator');
 }
 
@@ -652,4 +697,33 @@ function validateSpotlightLoose(obj) {
   if (!cta.buttonLabel) cta.buttonLabel = 'Start your enquiry';
 
   return { brandColor, accentColor, temperatureUnit, cta };
+}
+
+function validateWeatherLoose(obj) {
+  // Strict schema enforcement — Weather AI output is small and controls
+  // styling directly. Same pattern as validateSpotlightLoose.
+  if (!obj || typeof obj !== 'object') throw new Error('Invalid weather response');
+
+  const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
+  const brandColor = typeof obj.brandColor === 'string' && HEX_RE.test(obj.brandColor.trim())
+    ? obj.brandColor.trim() : '#1B2B5B';
+  const accentColor = typeof obj.accentColor === 'string' && HEX_RE.test(obj.accentColor.trim())
+    ? obj.accentColor.trim() : '#00B4D8';
+
+  const tu = typeof obj.temperatureUnit === 'string' ? obj.temperatureUnit.toUpperCase() : 'C';
+  const temperatureUnit = (tu === 'F') ? 'F' : 'C';
+
+  const rawLayout = typeof obj.layout === 'string' ? obj.layout.toLowerCase().trim() : 'standard';
+  const layout = ['compact', 'standard', 'wide'].includes(rawLayout) ? rawLayout : 'standard';
+
+  const rawCta = (obj.cta && typeof obj.cta === 'object') ? obj.cta : {};
+  const cta = {
+    title:       String(rawCta.title || '').slice(0, 120).trim(),
+    subtitle:    String(rawCta.subtitle || '').slice(0, 200).trim(),
+    buttonLabel: String(rawCta.buttonLabel || '').slice(0, 40).trim(),
+  };
+  if (!cta.title) cta.title = 'Plan your trip';
+  if (!cta.buttonLabel) cta.buttonLabel = 'Enquire now';
+
+  return { brandColor, accentColor, temperatureUnit, layout, cta };
 }
