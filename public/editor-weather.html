@@ -877,7 +877,11 @@
     function isLoggedIn() {
       try {
         const s = JSON.parse(sessionStorage.getItem('tgw_session'));
-        return !!(s && s.token && s.exp && Date.now() < s.exp);
+        // Match FAQ/Testimonials editors: just check a token exists. The server
+        // re-validates tokens on every request (via _auth.js) so the client
+        // doesn't need to enforce expiry here — if a token has expired, the
+        // next save/AI/search call returns 401 and we showLogin() then.
+        return !!(s && s.token);
       } catch { return false; }
     }
 
@@ -1497,6 +1501,12 @@ ${escHtml(code)}
       }
 
       const font = cfg.fontFamily ? encodeURIComponent(cfg.fontFamily) : '';
+      // Stage sizing — reflects how the widget would behave inside a real
+      // page column. The stage max-width matches the layout's natural width
+      // (with a little breathing room) so the widget renders at the right
+      // size instead of floating tiny in a wide preview pane.
+      const layout = cfg.layout || 'standard';
+      const stageMax = layout === 'wide' ? 880 : layout === 'standard' ? 500 : 420;
       const html = `<!doctype html>
 <html><head>
 <meta charset="utf-8">
@@ -1505,9 +1515,36 @@ ${escHtml(code)}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;500;600;700&display=swap" rel="stylesheet">` : ''}
-<style>body{margin:0;padding:32px 24px;background:${cfg.theme==='dark'?'#0F172A':'#FFFFFF'};font-family:'Inter',sans-serif;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;}</style>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: ${cfg.theme==='dark'?'#0F172A':'#F8FAFC'};
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .stage {
+    width: 100%;
+    max-width: ${stageMax}px;
+  }
+  .stage-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: ${cfg.theme==='dark'?'#64748B':'#94A3B8'};
+    margin: 0 0 12px;
+    text-align: center;
+  }
+</style>
 </head><body>
-<div data-tg-widget="weather" data-tg-config='${escAttr(JSON.stringify(cfg))}'></div>
+<div class="stage">
+  <p class="stage-label">${escHtml(layout)} layout preview</p>
+  <div data-tg-widget="weather" data-tg-config='${escAttr(JSON.stringify(cfg))}'></div>
+</div>
 <script>window.__TG_PREVIEW__=true;<` + `/script>
 <script src="https://tg-widgets.vercel.app/widget-weather.js"><` + `/script>
 </body></html>`;
