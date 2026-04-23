@@ -3791,8 +3791,11 @@
     }
 
     // ── Airtable (client's own base) inspector ──
-    // The encryption endpoint doesn't exist yet, so the PAT field is shown
-    // in a "Coming soon" state. Base ID, table ID and field map can be saved.
+    // The encryption endpoint handles the PAT round-trip. This inspector
+    // shows three states:
+    //  1. Not set — input field + "Save token" button
+    //  2. Set + verified — masked "●●●● ✓ Verified" + Replace/Remove
+    //  3. Set + error — masked blob + error message + Replace/Remove
     function renderAirtableInspector(body, cfg, save) {
       if (!cfg.enabled) {
         body.appendChild(sectionNote(
@@ -3820,23 +3823,8 @@
         })
       ]));
 
-      // Personal access token — encryption endpoint not built yet
-      const patSec = document.createElement('div');
-      patSec.className = 'insp-section';
-      const patTitle = document.createElement('h4');
-      patTitle.className = 'insp-section-title';
-      patTitle.textContent = 'Personal access token';
-      patSec.appendChild(patTitle);
-      const patPill = document.createElement('div');
-      patPill.className = 'coming-soon-pill';
-      patPill.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-        </svg>
-        Secure PAT entry arrives in the next build — email support@travelgenix.io to configure your PAT for now
-      `;
-      patSec.appendChild(patPill);
-      body.appendChild(patSec);
+      // Personal access token — full self-service flow
+      body.appendChild(renderAirtablePatSection(cfg, save));
 
       // Field map (advanced)
       body.appendChild(section('Field mapping', [
@@ -3850,6 +3838,265 @@
           onInput: (v) => { cfg.fieldMap = v; save(); }
         })
       ]));
+    }
+
+    // Build the Personal Access Token section. Renders one of three states
+    // depending on whether a PAT is already saved and whether it verified.
+    function renderAirtablePatSection(cfg, save) {
+      const sec = document.createElement('div');
+      sec.className = 'insp-section';
+
+      const title = document.createElement('h4');
+      title.className = 'insp-section-title';
+      title.textContent = 'Personal access token';
+      sec.appendChild(title);
+
+      const isSet = !!cfg.patSet;
+      const verified = !!cfg.patVerifiedAt;
+      const verifyError = cfg.patLastError || '';
+
+      if (!isSet) {
+        // State 1 — no token saved yet. Show input + Save button.
+        sec.appendChild(renderPatEntryForm(cfg, save));
+      } else {
+        // State 2 / 3 — token saved. Show masked state + actions.
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+
+        // Masked display
+        const maskRow = document.createElement('div');
+        maskRow.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;';
+
+        const icon = document.createElement('span');
+        icon.style.cssText = `width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;background:${verified ? 'var(--success)' : 'var(--warning)'};`;
+        icon.innerHTML = verified
+          ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+          : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+        maskRow.appendChild(icon);
+
+        const maskInfo = document.createElement('div');
+        maskInfo.style.cssText = 'flex:1;min-width:0;';
+        const maskValue = document.createElement('div');
+        maskValue.style.cssText = 'font-family:-apple-system,"SF Mono",Menlo,monospace;font-size:13px;color:var(--ink);font-weight:600;';
+        maskValue.textContent = '●●●●●●●●●●●●';
+        maskInfo.appendChild(maskValue);
+        const maskMeta = document.createElement('div');
+        maskMeta.style.cssText = 'font-size:11px;color:var(--muted);margin-top:2px;';
+        if (verified) {
+          const verifiedAt = cfg.patVerifiedAt ? new Date(cfg.patVerifiedAt) : null;
+          maskMeta.textContent = verifiedAt
+            ? 'Verified ' + formatRelativeTime(verifiedAt)
+            : 'Verified';
+        } else if (verifyError) {
+          maskMeta.textContent = 'Not verified: ' + verifyError;
+          maskMeta.style.color = 'var(--warning)';
+        } else {
+          maskMeta.textContent = 'Saved but not verified';
+        }
+        maskInfo.appendChild(maskMeta);
+        maskRow.appendChild(maskInfo);
+        wrap.appendChild(maskRow);
+
+        // Actions
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex;gap:8px;';
+
+        const replaceBtn = document.createElement('button');
+        replaceBtn.type = 'button';
+        replaceBtn.className = 'btn btn-ghost btn-sm';
+        replaceBtn.textContent = 'Replace token';
+        replaceBtn.addEventListener('click', () => {
+          // Swap the section to entry mode without reloading config
+          const form = renderPatEntryForm(cfg, save, true /* expanded */);
+          wrap.replaceWith(form);
+          sec.appendChild(form);
+        });
+        actions.appendChild(replaceBtn);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn btn-ghost btn-sm';
+        removeBtn.style.color = 'var(--danger)';
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', () => removeAirtablePat(cfg));
+        actions.appendChild(removeBtn);
+
+        wrap.appendChild(actions);
+        sec.appendChild(wrap);
+      }
+
+      return sec;
+    }
+
+    // Render the PAT input + Save button. Used when no token is set yet,
+    // AND when the agent clicks "Replace token" on an existing PAT.
+    function renderPatEntryForm(cfg, save, expanded) {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+
+      const input = document.createElement('input');
+      input.type = 'password';
+      input.className = 'insp-input';
+      input.placeholder = 'patXXXXXXXXXXXXXX.abc123...';
+      input.autocomplete = 'off';
+      input.spellcheck = false;
+      input.setAttribute('data-lpignore', 'true'); // LastPass — don't autofill
+      wrap.appendChild(input);
+
+      const hint = document.createElement('p');
+      hint.className = 'insp-hint';
+      hint.innerHTML = `Create a token at <a href="https://airtable.com/create/tokens" target="_blank" rel="noopener" style="color:var(--brand);text-decoration:underline">airtable.com/create/tokens</a>. Scope: <code>data.records:write</code>. Access: your chosen base only.`;
+      wrap.appendChild(hint);
+
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:8px;align-items:center;';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button';
+      saveBtn.className = 'btn btn-primary btn-sm';
+      saveBtn.textContent = 'Save token';
+      actions.appendChild(saveBtn);
+
+      const status = document.createElement('span');
+      status.style.cssText = 'font-size:12px;color:var(--muted);';
+      actions.appendChild(status);
+
+      saveBtn.addEventListener('click', async () => {
+        const pat = input.value.trim();
+        if (!pat) {
+          status.textContent = 'Please paste your token';
+          status.style.color = 'var(--warning)';
+          input.focus();
+          return;
+        }
+        await saveAirtablePat(pat, cfg, { saveBtn, status, input });
+      });
+
+      // Enter to submit
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveBtn.click();
+        }
+      });
+
+      if (expanded) setTimeout(() => input.focus(), 50);
+
+      return wrap;
+    }
+
+    // Save token API call. Updates local cfg on success.
+    async function saveAirtablePat(pat, cfg, ui) {
+      const widgetId = state.widgetId;
+      if (!widgetId) {
+        showToast('Save the form first before adding a token', 'warning');
+        return;
+      }
+      ui.saveBtn.disabled = true;
+      ui.saveBtn.textContent = 'Saving...';
+      ui.status.textContent = '';
+
+      try {
+        const session = (function(){
+          try { return JSON.parse(sessionStorage.getItem('tgw_session') || 'null'); }
+          catch(e){ return null; }
+        })();
+        const headers = { 'Content-Type': 'application/json' };
+        if (session && session.token) headers['Authorization'] = 'Bearer ' + session.token;
+
+        const response = await fetch('/api/enquiry/airtable-pat', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            widgetId,
+            pat,
+            baseId: cfg.baseId || undefined,
+          }),
+        });
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          ui.saveBtn.disabled = false;
+          ui.saveBtn.textContent = 'Save token';
+          ui.status.textContent = result.error || 'Save failed';
+          ui.status.style.color = 'var(--danger)';
+          return;
+        }
+
+        // Update local cfg state so the inspector re-renders correctly
+        cfg.patSet = true;
+        cfg.patVerifiedAt = result.verified ? new Date().toISOString() : null;
+        cfg.patLastError = result.verified ? '' : (result.verifyError || '');
+
+        // Clear input + zero out its memory
+        ui.input.value = '';
+
+        // Toast + re-render inspector
+        if (result.verified) {
+          showToast('Token saved and verified', 'success', 2400);
+        } else if (result.verifyError) {
+          showToast('Token saved but not verified: ' + result.verifyError, 'warning', 4000);
+        } else {
+          showToast('Token saved', 'success');
+        }
+        renderInspector();
+      } catch (err) {
+        console.error('[pat] save failed', err);
+        ui.saveBtn.disabled = false;
+        ui.saveBtn.textContent = 'Save token';
+        ui.status.textContent = 'Network error';
+        ui.status.style.color = 'var(--danger)';
+      }
+    }
+
+    // Remove token API call.
+    async function removeAirtablePat(cfg) {
+      const widgetId = state.widgetId;
+      if (!widgetId) return;
+      if (!confirm('Remove the stored Airtable token? Submissions will stop routing to your base.')) return;
+
+      try {
+        const session = (function(){
+          try { return JSON.parse(sessionStorage.getItem('tgw_session') || 'null'); }
+          catch(e){ return null; }
+        })();
+        const headers = {};
+        if (session && session.token) headers['Authorization'] = 'Bearer ' + session.token;
+
+        const response = await fetch('/api/enquiry/airtable-pat?widgetId=' + encodeURIComponent(widgetId), {
+          method: 'DELETE',
+          headers,
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          showToast(result.error || 'Could not remove token', 'error');
+          return;
+        }
+        cfg.patSet = false;
+        cfg.patVerifiedAt = null;
+        cfg.patLastError = '';
+        showToast('Token removed', 'success');
+        renderInspector();
+      } catch (err) {
+        console.error('[pat] remove failed', err);
+        showToast('Network error', 'error');
+      }
+    }
+
+    // Friendly relative time, e.g. "2 minutes ago", "3 hours ago", "yesterday"
+    function formatRelativeTime(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffSec = Math.floor(diffMs / 1000);
+      if (diffSec < 60) return 'just now';
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return diffMin + ' minute' + (diffMin === 1 ? '' : 's') + ' ago';
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return diffHr + ' hour' + (diffHr === 1 ? '' : 's') + ' ago';
+      const diffDay = Math.floor(diffHr / 24);
+      if (diffDay === 1) return 'yesterday';
+      if (diffDay < 7) return diffDay + ' days ago';
+      return date.toLocaleDateString();
     }
 
     // ── Webhook inspector ──
