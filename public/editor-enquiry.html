@@ -1280,52 +1280,66 @@
     }
 
     /* ==================== COLOUR SWATCH PICKER ========================= */
-    /* Native color input wrapped with a visible swatch + hex text + click
-       target over the entire row. */
+    /* Layout: [swatchWrap: visible square + invisible native picker underneath]
+       [hex text input]. The swatchWrap is a <label> wrapping the native input,
+       so clicking anywhere on it opens the system colour picker. The hex
+       input is a proper sibling that accepts keyboard input normally. */
     .swatch-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      background: var(--panel);
-      cursor: pointer;
-      transition: border-color .12s ease;
-      position: relative;
+      gap: 8px;
     }
-    .swatch-row:hover { border-color: var(--border-strong); }
-    .swatch-row:focus-within {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px var(--brand-soft);
+    .swatch-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      display: block;
     }
     .swatch-square {
-      width: 28px; height: 28px;
-      border-radius: 5px;
-      flex-shrink: 0;
+      width: 34px; height: 34px;
+      border-radius: 6px;
       border: 1px solid var(--border);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
+      display: block;
+      cursor: pointer;
+      transition: transform .1s ease, border-color .12s ease;
     }
-    .swatch-hex {
-      flex: 1;
-      font-family: -apple-system, 'SF Mono', Menlo, monospace;
-      font-size: 13px;
-      color: var(--ink);
-      text-transform: uppercase;
-      letter-spacing: .02em;
-      background: transparent;
-      border: 0;
-      outline: none;
-      min-width: 0;
+    .swatch-wrap:hover .swatch-square {
+      border-color: var(--brand);
+      transform: scale(1.04);
     }
-    .swatch-row input[type="color"] {
+    .swatch-native {
+      /* Invisible picker sitting exactly on top of the square. Clicks open
+         the OS picker. Width/height 100% + opacity 0 is the standard pattern. */
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       opacity: 0;
-      cursor: pointer;
       border: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+    .swatch-hex {
+      flex: 1;
+      height: 34px;
+      padding: 0 10px;
+      font-family: -apple-system, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      transition: border-color .12s ease, box-shadow .12s ease;
+    }
+    .swatch-hex:hover { border-color: var(--border-strong); }
+    .swatch-hex:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px var(--brand-soft);
     }
 
     /* ======================= EMBED CODE MODAL ========================== */
@@ -2035,18 +2049,34 @@
       const mount = $('#preview-mount');
       if (!mount) return;
 
-      // Build a config shape matching what widget._normalise() expects
+      // Build a config shape matching what widget._normalise() expects.
+      // The branding object includes every new knob so preview reflects
+      // fontFamily, corner radius, field size/style, extended colours, logo etc.
       const fields = parseFields(state.config.fieldsJSON);
+      const cfg = state.config;
       const previewConfig = {
         formId: 'preview',   // flag for widget to suppress actual POST
         widgetId: state.widgetId || 'preview',
-        name: state.config.name || 'Preview',
-        header: { title: state.config.headerTitle, subtitle: state.config.headerSubtitle },
-        submitText: state.config.submitButtonText,
-        thankYou: { mode: state.config.thankYouMode, message: state.config.thankYouMessage, redirectUrl: state.config.redirectUrl },
-        branding: { buttonColour: state.config.buttonColour, accentColour: state.config.accentColour, theme: state.config.theme },
+        name: cfg.name || 'Preview',
+        header: { title: cfg.headerTitle, subtitle: cfg.headerSubtitle },
+        submitText: cfg.submitButtonText,
+        thankYou: { mode: cfg.thankYouMode, message: cfg.thankYouMessage, redirectUrl: cfg.redirectUrl },
+        branding: {
+          buttonColour: cfg.buttonColour,
+          accentColour: cfg.accentColour,
+          textColour:   cfg.textColour,
+          bgColour:     cfg.bgColour,
+          borderColour: cfg.borderColour,
+          errorColour:  cfg.errorColour,
+          cornerRadius: cfg.cornerRadius,
+          fieldSize:    cfg.fieldSize,
+          fieldStyle:   cfg.fieldStyle,
+          fontFamily:   cfg.fontFamily,
+          theme:        cfg.theme,
+          logoUrl:      cfg.logoUrl
+        },
         fieldsJSON: fields,
-        security: { honeypot: state.config.security.honeypot, turnstile: state.config.security.turnstile }
+        security: { honeypot: cfg.security && cfg.security.honeypot, turnstile: cfg.security && cfg.security.turnstile }
       };
 
       try {
@@ -3668,22 +3698,41 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
     function renderBrandingInspector(body, save) {
       const cfg = state.config;
 
-      // Typography
+      // Typography — 25 curated Google Fonts across sans-serif, serif, display, mono
       body.appendChild(section('Typography', [
         labelledSelect({
           label: 'Font family',
           value: cfg.fontFamily || 'Inter',
           options: [
-            { value: 'system',             label: 'System default' },
-            { value: 'Inter',              label: 'Inter' },
-            { value: 'DM Sans',            label: 'DM Sans' },
-            { value: 'Manrope',            label: 'Manrope' },
-            { value: 'Figtree',            label: 'Figtree' },
-            { value: 'Plus Jakarta Sans',  label: 'Plus Jakarta Sans' },
-            { value: 'Work Sans',          label: 'Work Sans' },
-            { value: 'Nunito',             label: 'Nunito' },
-            { value: 'Poppins',            label: 'Poppins' },
-            { value: 'Source Sans 3',      label: 'Source Sans 3' }
+            { value: 'system', label: 'System default' },
+            // Sans-serif (modern, friendly — best for forms)
+            { value: 'Inter',               label: 'Inter' },
+            { value: 'DM Sans',             label: 'DM Sans' },
+            { value: 'Manrope',             label: 'Manrope' },
+            { value: 'Figtree',             label: 'Figtree' },
+            { value: 'Plus Jakarta Sans',   label: 'Plus Jakarta Sans' },
+            { value: 'Work Sans',           label: 'Work Sans' },
+            { value: 'Nunito',              label: 'Nunito' },
+            { value: 'Nunito Sans',         label: 'Nunito Sans' },
+            { value: 'Poppins',             label: 'Poppins' },
+            { value: 'Source Sans 3',       label: 'Source Sans 3' },
+            { value: 'Montserrat',          label: 'Montserrat' },
+            { value: 'Open Sans',           label: 'Open Sans' },
+            { value: 'Lato',                label: 'Lato' },
+            { value: 'Roboto',              label: 'Roboto' },
+            { value: 'Rubik',               label: 'Rubik' },
+            { value: 'IBM Plex Sans',       label: 'IBM Plex Sans' },
+            { value: 'Karla',               label: 'Karla' },
+            { value: 'Outfit',              label: 'Outfit' },
+            { value: 'Space Grotesk',       label: 'Space Grotesk' },
+            { value: 'Be Vietnam Pro',      label: 'Be Vietnam Pro' },
+            // Serif (editorial, trust-signalling)
+            { value: 'Playfair Display',    label: 'Playfair Display' },
+            { value: 'Lora',                label: 'Lora' },
+            { value: 'Merriweather',        label: 'Merriweather' },
+            { value: 'Source Serif 4',      label: 'Source Serif 4' },
+            // Display / distinctive
+            { value: 'DM Serif Display',    label: 'DM Serif Display' }
           ],
           hint: 'Google Fonts — loaded automatically when the form renders.',
           onChange: (v) => { cfg.fontFamily = v; save(); }
@@ -3973,6 +4022,10 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
     // ── Colour swatch row factory ──
     // Produces a clickable row with a colour square, hex text and a hidden
     // native colour picker that fires the onChange callback.
+    // Colour picker row — the swatch on the left opens the native colour
+    // picker, the hex text on the right can be typed directly. No invisible
+    // absolute-positioned overlay (that caused clicks on the hex input to
+    // be swallowed in the previous version).
     function colourRow({ label, value, hint, onChange }) {
       const wrap = document.createElement('div');
       wrap.className = 'insp-field';
@@ -3982,23 +4035,42 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       lbl.textContent = label;
       wrap.appendChild(lbl);
 
-      const row = document.createElement('label');
+      const row = document.createElement('div');
       row.className = 'swatch-row';
+
+      // Swatch square — wraps the native color input (visually hidden inside)
+      // so clicking the square opens the picker. The hex text input is a
+      // separate sibling that the user can focus and type into.
+      const swatchWrap = document.createElement('label');
+      swatchWrap.className = 'swatch-wrap';
 
       const square = document.createElement('span');
       square.className = 'swatch-square';
       square.style.background = value;
-      row.appendChild(square);
+      swatchWrap.appendChild(square);
 
+      const colourInput = document.createElement('input');
+      colourInput.type = 'color';
+      colourInput.value = value;
+      colourInput.className = 'swatch-native';
+      colourInput.addEventListener('input', () => {
+        const v = colourInput.value.toUpperCase();
+        hex.value = v;
+        square.style.background = v;
+        onChange(v);
+      });
+      swatchWrap.appendChild(colourInput);
+      row.appendChild(swatchWrap);
+
+      // Hex text input — normal, clickable, editable
       const hex = document.createElement('input');
       hex.type = 'text';
       hex.className = 'swatch-hex';
       hex.value = value.toUpperCase();
       hex.maxLength = 9;
-      hex.addEventListener('click', (e) => { e.stopPropagation(); });
+      hex.spellcheck = false;
       hex.addEventListener('input', () => {
         const v = hex.value.trim();
-        // Accept # prefix or bare hex
         const normalised = v.startsWith('#') ? v : '#' + v;
         if (/^#[0-9A-Fa-f]{6}$/.test(normalised)) {
           square.style.background = normalised;
@@ -4007,17 +4079,6 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
         }
       });
       row.appendChild(hex);
-
-      const colourInput = document.createElement('input');
-      colourInput.type = 'color';
-      colourInput.value = value;
-      colourInput.addEventListener('input', () => {
-        const v = colourInput.value.toUpperCase();
-        hex.value = v;
-        square.style.background = v;
-        onChange(v);
-      });
-      row.appendChild(colourInput);
 
       wrap.appendChild(row);
 
