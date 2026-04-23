@@ -794,30 +794,44 @@
       color: var(--danger);
     }
 
-    /* Drop zones between field cards */
+    /* Drop zones between field cards.
+       CRITICAL: drop zones must have real height at rest, otherwise the browser
+       never fires dragover on them and drop never happens. The "invisible when
+       inactive" trick using height: 0 was broken — HTML5 DnD needs a real hit
+       target to fire events. So zones now have a small ambient height that
+       expands and turns blue when a valid drag is hovering. */
     .drop-zone {
-      height: 0;
-      margin: -2px 0;
+      height: 10px;
+      margin: 2px 0;
       background: transparent;
       transition: all .12s ease;
       border-radius: 4px;
       position: relative;
     }
+    body.is-dragging .drop-zone {
+      /* While a drag is in progress, bump zone height + show a dashed hint
+         so users can see where drops are possible. */
+      height: 20px;
+      background: var(--hover);
+      border: 1px dashed var(--border-strong);
+    }
+    body.is-dragging .drop-zone.is-active,
     .drop-zone.is-active {
-      height: 4px;
-      margin: 4px 0;
-      background: var(--brand);
+      height: 24px;
+      background: var(--brand-soft);
+      border: 2px solid var(--brand);
       box-shadow: 0 0 12px var(--brand-soft);
     }
-    /* Bigger drop zone at top/bottom when canvas is empty or single-item */
+    /* Bigger drop zone at top/bottom edges */
     .drop-zone-edge {
       height: 12px;
-      margin: 0;
     }
+    body.is-dragging .drop-zone-edge {
+      height: 24px;
+    }
+    body.is-dragging .drop-zone-edge.is-active,
     .drop-zone-edge.is-active {
-      height: 12px;
-      background: var(--brand-soft);
-      border: 2px dashed var(--brand);
+      height: 28px;
     }
 
     /* Canvas in drag-over state */
@@ -1204,6 +1218,11 @@
     const WIDGET_TYPE     = 'Enquiry Form';
     const STORAGE_KEY     = 'tgw_session';               // shared with rest of suite
     const AUTOSAVE_DELAY  = 2000;                         // ms after last change
+
+    // Enable debug logging by default while the editor is under active
+    // development. Set window.__tgDebug = false in the console to silence it.
+    // Turn off entirely once drag-and-drop feels solid.
+    window.__tgDebug = true;
 
     /* ================================ UTIL ================================ */
     const $  = (s, r) => (r || document).querySelector(s);
@@ -1967,6 +1986,7 @@
     };
 
     function startNewFieldDrag(typeId, evt) {
+      if (window.__tgDebug) console.log('[dnd] startNewFieldDrag', typeId);
       dragState = {
         kind: 'new',
         sourceTypeId: typeId,
@@ -1982,6 +2002,7 @@
     }
 
     function startMoveFieldDrag(fieldId, evt) {
+      if (window.__tgDebug) console.log('[dnd] startMoveFieldDrag', fieldId);
       dragState = {
         kind: 'move',
         sourceTypeId: null,
@@ -1997,6 +2018,7 @@
     }
 
     function endDrag() {
+      if (window.__tgDebug) console.log('[dnd] endDrag');
       if (dragState.activeZone) dragState.activeZone.classList.remove('is-active');
       dragState = { kind: null, sourceTypeId: null, sourceFieldId: null, activeZone: null };
       document.body.classList.remove('is-dragging');
@@ -2031,8 +2053,10 @@
     function onZoneDrop(zone, evt) {
       if (!dragState.kind) return;
       evt.preventDefault();
+      evt.stopPropagation(); // prevent stage fallback from also firing
 
       const insertIdx = parseInt(zone.getAttribute('data-insert-index'), 10);
+      if (window.__tgDebug) console.log('[dnd] onZoneDrop', { kind: dragState.kind, insertIdx });
 
       if (dragState.kind === 'new' && dragState.sourceTypeId) {
         addFieldToCanvas(dragState.sourceTypeId, insertIdx);
@@ -2050,7 +2074,9 @@
     // Called at the end of renderCanvas to attach handlers to all .drop-zone
     // elements we just created.
     function bindCanvasDropZones() {
-      $$('.drop-zone').forEach(zone => {
+      const zones = $$('.drop-zone');
+      if (window.__tgDebug) console.log('[dnd] binding', zones.length, 'drop zones');
+      zones.forEach(zone => {
         zone.addEventListener('dragover', (e) => onZoneDragOver(zone, e));
         zone.addEventListener('drop', (e) => onZoneDrop(zone, e));
         zone.addEventListener('dragleave', () => {
@@ -2063,21 +2089,59 @@
         });
       });
 
-      // Also mark the stage itself as a drag target for visual hint
+      // SAFETY NET: make the whole canvas stage accept drops too.
+      // If the user drops anywhere on the canvas that isn't a specific zone
+      // (e.g. a gap between cards, the padding, beside a card), we append to
+      // the end of the field list rather than losing the drop.
+      // This is forgiving and matches user intent in every testing round I've
+      // seen. A missed-by-a-pixel drop should not punish the user.
       const stage = $('#canvas-stage');
-      stage.addEventListener('dragenter', (e) => {
-        if (!dragState.kind) return;
-        // Check that the drag contains one of our types
-        const types = Array.from(e.dataTransfer.types || []);
-        if (types.includes(DT_TYPE_NEW) || types.includes(DT_TYPE_MOVE) || dragState.kind) {
+      // Remove any previous stage handlers by cloning. We can't easily track
+      // them since addEventListener doesn't expose a list, but stage is a
+      // single element that's never re-created, so this will accumulate
+      // handlers over time — use a flag to only bind once.
+      if (!stage.__tgDropBound) {
+        stage.__tgDropBound = true;
+        stage.addEventListener('dragover', (e) => {
+          if (!dragState.kind) return;
+          // Don't claim it if a zone is already active — let the zone win
+          if (dragState.activeZone) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
+        });
+        stage.addEventListener('drop', (e) => {
+          if (!dragState.kind) return;
+          // If a zone handled it, its event stopped propagation — but just in
+          // case, check whether we landed on a zone element.
+          const onZone = e.target && e.target.closest && e.target.closest('.drop-zone');
+          if (onZone) return; // let the zone handler deal with it
+          e.preventDefault();
+          if (window.__tgDebug) console.log('[dnd] stage fallback drop fired', { kind: dragState.kind });
+
+          // Append-to-end fallback
+          const currentFields = parseFields(state.config.fieldsJSON);
+          const endIdx = currentFields.length;
+
+          if (dragState.kind === 'new' && dragState.sourceTypeId) {
+            addFieldToCanvas(dragState.sourceTypeId, endIdx);
+          } else if (dragState.kind === 'move' && dragState.sourceFieldId) {
+            const fromIdx = currentFields.findIndex(f => f.id === dragState.sourceFieldId);
+            if (fromIdx !== -1 && fromIdx !== endIdx - 1) {
+              reorderField(fromIdx, endIdx);
+            }
+          }
+          endDrag();
+        });
+        stage.addEventListener('dragenter', (e) => {
+          if (!dragState.kind) return;
           stage.classList.add('is-drag-target');
-        }
-      });
-      stage.addEventListener('dragleave', (e) => {
-        // Only if we're actually leaving the stage (not entering a child)
-        if (e.relatedTarget && stage.contains(e.relatedTarget)) return;
-        stage.classList.remove('is-drag-target');
-      });
+        });
+        stage.addEventListener('dragleave', (e) => {
+          // Only if we're actually leaving the stage (not entering a child)
+          if (e.relatedTarget && stage.contains(e.relatedTarget)) return;
+          stage.classList.remove('is-drag-target');
+        });
+      }
     }
 
     function addFieldToCanvas(typeId, insertIndex) {
@@ -2114,6 +2178,7 @@
       }
 
       const updated = fields.filter(f => f.id !== fieldId);
+      if (window.__tgDebug) console.log('[mutate] removeField', fieldId, 'before:', fields.length, 'after:', updated.length);
       mutate(cfg => { cfg.fieldsJSON = JSON.stringify(updated); });
 
       // Clear selection if we deleted the selected field
