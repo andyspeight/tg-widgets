@@ -159,14 +159,18 @@ a{text-decoration:none;color:inherit}
 .type-modal-item-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok)}
 .type-modal-item-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--bd);background:#fff;font-size:12px;font-weight:700;font-family:var(--ft);cursor:pointer;color:var(--sb);transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .type-modal-item-btn:hover{border-color:var(--br);color:var(--br)}
+.type-modal-item-btn-secondary{color:#EC4899;border-color:#FBCFE8;background:#FDF2F8}
+.type-modal-item-btn-secondary:hover{border-color:#EC4899;color:#BE185D;background:#FCE7F3}
 .type-modal-item-delete{width:32px;height:32px;padding:0;border-radius:8px;border:1px solid var(--bd);background:#fff;cursor:pointer;color:var(--mt);display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .type-modal-item-delete svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .type-modal-item-delete:hover{border-color:var(--dn);color:var(--dn);background:#FEF2F2}
 .type-modal-item-delete:disabled{opacity:.5;cursor:not-allowed}
-.type-modal-foot{padding:16px 20px;border-top:1px solid var(--bd);background:var(--sf)}
-.type-modal-create{width:100%;padding:11px 16px;border-radius:10px;border:none;background:var(--br);color:#fff;font-size:13px;font-weight:700;font-family:var(--ft);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:all .15s}
+.type-modal-foot{padding:16px 20px;border-top:1px solid var(--bd);background:var(--sf);display:flex;gap:10px;align-items:stretch}
+.type-modal-create{flex:1;padding:11px 16px;border-radius:10px;border:none;background:var(--br);color:#fff;font-size:13px;font-weight:700;font-family:var(--ft);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:all .15s}
 .type-modal-create:hover{background:var(--bk)}
 .type-modal-create svg{width:14px;height:14px}
+.type-modal-create-secondary{background:#fff;color:#EC4899;border:1px solid #FBCFE8}
+.type-modal-create-secondary:hover{background:#FDF2F8;border-color:#EC4899;color:#BE185D}
 body.modal-open{overflow:hidden}
 
 /* Confirm delete dialog */
@@ -528,6 +532,8 @@ function openTypeModal(airtableType) {
     return bu.localeCompare(au);
   });
 
+  const isEnquiryForm = reg.id === 'enquiry';
+
   const items = sorted.map(w => `
     <div class="type-modal-item">
       <div class="type-modal-item-body">
@@ -538,6 +544,10 @@ function openTypeModal(airtableType) {
           ${w.updated ? `<span>Updated ${esc(w.updated)}</span>` : ''}
         </div>
       </div>
+      ${isEnquiryForm ? `<a class="type-modal-item-btn type-modal-item-btn-secondary" href="/inbox-enquiry" title="View submissions in your inbox">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:middle"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Inbox
+      </a>` : ''}
       <a class="type-modal-item-btn" href="${reg.editorUrl}?id=${encodeURIComponent(w.widgetId)}">
         Edit
       </a>
@@ -562,6 +572,10 @@ function openTypeModal(airtableType) {
     </div>
     <div class="type-modal-list">${items}</div>
     <div class="type-modal-foot">
+      ${isEnquiryForm ? `<a class="type-modal-create type-modal-create-secondary" href="/inbox-enquiry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        View all submissions
+      </a>` : ''}
       <a class="type-modal-create" href="${reg.editorUrl}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Create new ${esc(reg.name)} widget
