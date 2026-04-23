@@ -378,9 +378,7 @@ const WIDGETS = [
     icon: {viewBox:'0 0 24 24', paths:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/>'},
     color: '#EC4899',
     editorUrl: '/editor-enquiry',
-    // demoUrl intentionally omitted — demo page not yet built. The dashboard
-    // will hide the Preview button and disable the card-click handler when
-    // demoUrl is falsy. Add the URL here once public/demo-enquiry.html exists.
+    demoUrl: '/demo-enquiry',
     widgetTag: 'enquiry',
     scriptFile: 'widget-enquiry.js',
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
@@ -951,6 +949,110 @@ function loadMiniPreview(w) {
         },
       },
     });
+  }
+
+  if (w.id === 'enquiry') {
+    // Static HTML mockup — unlike other widgets, we don't instantiate the real
+    // TGEnquiryWidget class for the catalogue tile. The real widget is 600+px
+    // tall even with minimal config, and wouldn't fit the 700×340 canvas
+    // elegantly. This mockup is a visual taste of what the widget looks like
+    // — matching colours, typography and layout — without the bulk.
+    container.innerHTML = `
+      <div style="
+        width: 100%; height: 100%;
+        padding: 28px 32px;
+        background: #FFFFFF;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(15,23,42,.06);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        display: flex; flex-direction: column; gap: 18px;
+        box-sizing: border-box;
+      ">
+        <div>
+          <div style="font-size: 22px; font-weight: 700; color: #0F172A; letter-spacing: -.01em; margin-bottom: 4px;">
+            Tell us about your dream holiday
+          </div>
+          <div style="font-size: 13px; color: #64748B; line-height: 1.5;">
+            Share a few details and our specialists will come back within 24 hours.
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .05em;">Destination</div>
+            <div style="height: 36px; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0 10px; display: flex; align-items: center; gap: 6px; background: #FFFFFF;">
+              <span style="display:inline-flex; align-items:center; gap:5px; padding:3px 8px; background:rgba(236,72,153,.1); color:${w.color}; font-size:11px; font-weight:600; border-radius:999px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0116 0zm-8 3a3 3 0 100-6 3 3 0 000 6z"/></svg>
+                Maldives
+              </span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .05em;">Airport</div>
+            <div style="height: 36px; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0 10px; display: flex; align-items: center; color: #0F172A; font-size: 12px; background: #FFFFFF;">
+              London Heathrow (LHR)
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em;">Travellers</div>
+          <div style="display: flex; gap: 8px;">
+            <div style="flex:1; display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border:1px solid #E2E8F0; border-radius:8px; background:#FFFFFF;">
+              <div>
+                <div style="font-size:11px; font-weight:600; color:#0F172A;">Adults</div>
+                <div style="font-size:10px; color:#94A3B8;">Age 16+</div>
+              </div>
+              <div style="display:inline-flex; align-items:center; gap:3px; background:#F1F5F9; padding:3px; border-radius:6px;">
+                <span style="width:22px; height:22px; background:#FFFFFF; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; color:#64748B; font-weight:600; font-size:12px; box-shadow:0 1px 2px rgba(0,0,0,.05);">−</span>
+                <span style="min-width:18px; text-align:center; font-weight:700; font-size:12px; color:#0F172A;">2</span>
+                <span style="width:22px; height:22px; background:#FFFFFF; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; color:#64748B; font-weight:600; font-size:12px; box-shadow:0 1px 2px rgba(0,0,0,.05);">+</span>
+              </div>
+            </div>
+            <div style="flex:1; display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border:1px solid #E2E8F0; border-radius:8px; background:#FFFFFF;">
+              <div>
+                <div style="font-size:11px; font-weight:600; color:#0F172A;">Children</div>
+                <div style="font-size:10px; color:#94A3B8;">Age 2–15</div>
+              </div>
+              <div style="display:inline-flex; align-items:center; gap:3px; background:#F1F5F9; padding:3px; border-radius:6px;">
+                <span style="width:22px; height:22px; background:#FFFFFF; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; color:#CBD5E1; font-weight:600; font-size:12px; box-shadow:0 1px 2px rgba(0,0,0,.05);">−</span>
+                <span style="min-width:18px; text-align:center; font-weight:700; font-size:12px; color:#0F172A;">0</span>
+                <span style="width:22px; height:22px; background:#FFFFFF; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; color:#64748B; font-weight:600; font-size:12px; box-shadow:0 1px 2px rgba(0,0,0,.05);">+</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 10px; font-size: 10px; color: #94A3B8;">
+            <span style="display:inline-flex; align-items:center; gap:3px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Secure
+            </span>
+            <span style="display:inline-flex; align-items:center; gap:3px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              GDPR
+            </span>
+            <span style="display:inline-flex; align-items:center; gap:3px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              24hr reply
+            </span>
+          </div>
+          <div style="
+            padding: 10px 18px;
+            background: ${w.color};
+            color: #FFFFFF;
+            font-size: 13px; font-weight: 600;
+            border-radius: 8px;
+            display: inline-flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 6px rgba(236,72,153,.25);
+          ">
+            Send my enquiry
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+    `;
   }
 }
 
