@@ -303,26 +303,97 @@
     var primary = (brand && brand.buttonColour) || '#1B2B5B';
     var isDark = (brand && brand.theme) === 'dark';
 
-    var c = isDark ? {
+    // Base theme colour map — used as fallback when the user hasn't overridden
+    // a specific colour in the branding inspector.
+    var baseDark = {
       bg: '#0F172A', bgAlt: '#1E293B', bgTile: '#334155',
       border: '#334155', borderLight: '#1E293B',
       text: '#F8FAFC', textSecondary: '#CBD5E1', textTertiary: '#64748B'
-    } : {
+    };
+    var baseLight = {
       bg: '#FFFFFF', bgAlt: '#F8FAFC', bgTile: '#F1F5F9',
       border: '#E2E8F0', borderLight: '#F1F5F9',
       text: '#0F172A', textSecondary: '#475569', textTertiary: '#94A3B8'
     };
+    var base = isDark ? baseDark : baseLight;
+
+    // Apply branding overrides — if the user set a specific text/bg/border
+    // colour in the editor, it wins over the theme default. Leaving a value
+    // blank falls back to the sensible theme-based default above.
+    var c = {
+      bg:             (brand && brand.bgColour)     || base.bg,
+      bgAlt:          base.bgAlt,
+      bgTile:         base.bgTile,
+      border:         (brand && brand.borderColour) || base.border,
+      borderLight:    base.borderLight,
+      text:           (brand && brand.textColour)   || base.text,
+      textSecondary:  base.textSecondary,
+      textTertiary:   base.textTertiary
+    };
+    var errorC = (brand && brand.errorColour) || '#DC2626';
+
+    // Corner radius — translates the editor's segmented value to actual px.
+    // Applied to card, inputs, pills, chips, buttons. Keeps proportions sensible
+    // (e.g. pills stay rounded even when "None" is picked so they still read
+    // as pills, not rectangles).
+    var radiusMap = { none: 0, small: 4, medium: 8, large: 14 };
+    var radiusCard = radiusMap[(brand && brand.cornerRadius) || 'medium'] * 2; // cards are rounder
+    var radiusInput = radiusMap[(brand && brand.cornerRadius) || 'medium'];
+    var radiusBtn = radiusInput;
+
+    // Field size — compact/comfortable/spacious affects input height, pill
+    // height, section padding. Numbers picked to be visually distinct without
+    // causing any layout breakage.
+    var sizeMap = {
+      compact:     { inputH: 38, pillH: 34, sectionY: 18, sectionX: 24 },
+      comfortable: { inputH: 44, pillH: 40, sectionY: 24, sectionX: 32 },
+      spacious:    { inputH: 52, pillH: 46, sectionY: 32, sectionX: 36 }
+    };
+    var sz = sizeMap[(brand && brand.fieldSize) || 'comfortable'];
+
+    // Field style — outlined (default), filled (light grey background, no
+    // border), underlined (no side borders, only bottom underline).
+    var fieldStyle = (brand && brand.fieldStyle) || 'outlined';
+    var inputBg, inputBorder, inputBorderBottom;
+    if (fieldStyle === 'filled') {
+      inputBg = c.bgTile;
+      inputBorder = '1px solid transparent';
+      inputBorderBottom = '';
+    } else if (fieldStyle === 'underlined') {
+      inputBg = 'transparent';
+      inputBorder = 'none';
+      inputBorderBottom = 'border-bottom: 1px solid ' + c.border + ';border-radius: 0;';
+    } else {
+      inputBg = c.bg;
+      inputBorder = '1px solid ' + c.border;
+      inputBorderBottom = '';
+    }
+
+    // Font family — if a Google Font is picked, we load it via an @import
+    // at the top of the stylesheet. "system" means don't load anything,
+    // just use the system font stack. Loading happens inside the shadow DOM
+    // so it doesn't conflict with the host page.
+    var ff = (brand && brand.fontFamily) || 'Inter';
+    var fontStack, fontImport = '';
+    if (ff === 'system') {
+      fontStack = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+    } else {
+      fontStack = '"' + ff + '",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
+      fontImport = '@import url("https://fonts.googleapis.com/css2?family=' + encodeURIComponent(ff).replace(/%20/g, '+') + ':wght@400;500;600;700&display=swap");';
+    }
 
     return [
-      ':host{all:initial;display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.6;color:' + c.text + ';}',
+      fontImport,
+      ':host{all:initial;display:block;font-family:' + fontStack + ';font-size:15px;line-height:1.6;color:' + c.text + ';}',
       '*,*::before,*::after{box-sizing:border-box}',
       'button{font-family:inherit;font-size:inherit;cursor:pointer}',
       'input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}',
-      '.tg-card{background:' + c.bg + ';border:1px solid ' + c.border + ';border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.06)}',
-      '.tg-hero{padding:28px 32px 24px;border-bottom:1px solid ' + c.borderLight + '}',
+      '.tg-card{background:' + c.bg + ';border:1px solid ' + c.border + ';border-radius:' + radiusCard + 'px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.06)}',
+      '.tg-hero{padding:' + (sz.sectionY + 4) + 'px ' + sz.sectionX + 'px ' + sz.sectionY + 'px;border-bottom:1px solid ' + c.borderLight + '}',
+      '.tg-hero-logo{display:block;max-height:40px;max-width:200px;margin-bottom:14px;object-fit:contain}',
       '.tg-hero h2{margin:0 0 6px;font-size:22px;font-weight:600;color:' + c.text + '}',
       '.tg-hero p{margin:0;color:' + c.textSecondary + ';font-size:14px}',
-      '.tg-section{padding:24px 32px;border-bottom:1px solid ' + c.borderLight + '}',
+      '.tg-section{padding:' + sz.sectionY + 'px ' + sz.sectionX + 'px;border-bottom:1px solid ' + c.borderLight + '}',
       '.tg-section:last-of-type{border-bottom:none}',
       '.tg-field{margin-bottom:18px}',
       '.tg-field:last-child{margin-bottom:0}',
@@ -331,21 +402,21 @@
       '.tg-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:' + c.text + '}',
       '.tg-label .tg-opt{color:' + c.textTertiary + ';font-weight:400;margin-left:4px}',
       '.tg-help{font-size:12px;color:' + c.textTertiary + ';margin-top:6px}',
-      '.tg-field-error{display:none;font-size:12px;color:#DC2626;margin-top:6px;align-items:center;gap:6px}',
+      '.tg-field-error{display:none;font-size:12px;color:' + errorC + ';margin-top:6px;align-items:center;gap:6px}',
       '.tg-field-error.is-shown{display:flex}',
       '.tg-field-error svg{flex-shrink:0;width:14px;height:14px}',
-      '.tg-field.has-error .tg-input,.tg-field.has-error .tg-textarea,.tg-field.has-error .tg-dest-box{border-color:#DC2626}',
-      '.tg-summary-error{display:none;margin:0 32px 0;padding:12px 14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;color:#991B1B;font-size:13px;align-items:flex-start;gap:10px}',
+      '.tg-field.has-error .tg-input,.tg-field.has-error .tg-textarea,.tg-field.has-error .tg-dest-box{border-color:' + errorC + '}',
+      '.tg-summary-error{display:none;margin:0 ' + sz.sectionX + 'px 0;padding:12px 14px;background:' + errorC + '14;border:1px solid ' + errorC + '40;border-radius:' + radiusInput + 'px;color:' + errorC + ';font-size:13px;align-items:flex-start;gap:10px}',
       '.tg-summary-error.is-shown{display:flex}',
-      '.tg-summary-error svg{flex-shrink:0;margin-top:2px;color:#DC2626}',
-      '.tg-input{width:100%;height:44px;padding:0 14px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.text + ';transition:border-color .15s,box-shadow .15s;outline:none}',
+      '.tg-summary-error svg{flex-shrink:0;margin-top:2px;color:' + errorC + '}',
+      '.tg-input{width:100%;height:' + sz.inputH + 'px;padding:0 14px;border:' + inputBorder + ';' + inputBorderBottom + 'border-radius:' + radiusInput + 'px;background:' + inputBg + ';color:' + c.text + ';transition:border-color .15s,box-shadow .15s;outline:none}',
       '.tg-input:focus{border-color:' + accent + ';box-shadow:0 0 0 3px ' + accent + '26}',
       '.tg-input::placeholder{color:' + c.textTertiary + '}',
-      '.tg-textarea{width:100%;min-height:96px;padding:12px 14px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.text + ';line-height:1.55;resize:vertical;outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;font-size:15px}',
+      '.tg-textarea{width:100%;min-height:96px;padding:12px 14px;border:' + inputBorder + ';' + inputBorderBottom + 'border-radius:' + radiusInput + 'px;background:' + inputBg + ';color:' + c.text + ';line-height:1.55;resize:vertical;outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;font-size:15px}',
       '.tg-textarea:focus{border-color:' + accent + ';box-shadow:0 0 0 3px ' + accent + '26}',
       '.tg-textarea::placeholder{color:' + c.textTertiary + '}',
       '.tg-dest{position:relative}',
-      '.tg-dest-box{min-height:44px;padding:6px 8px 6px 14px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;transition:border-color .15s,box-shadow .15s}',
+      '.tg-dest-box{min-height:' + sz.inputH + 'px;padding:6px 8px 6px 14px;border:' + inputBorder + ';' + inputBorderBottom + 'border-radius:' + radiusInput + 'px;background:' + inputBg + ';display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;transition:border-color .15s,box-shadow .15s}',
       '.tg-dest-box.is-focus{border-color:' + accent + ';box-shadow:0 0 0 3px ' + accent + '26}',
       '.tg-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 10px;border-radius:999px;background:' + accent + '1A;color:' + accent + ';font-size:13px;font-weight:500}',
       '.tg-chip svg{width:12px;height:12px}',
@@ -353,20 +424,20 @@
       '.tg-chip-close:hover,.tg-chip-close:focus{opacity:1;background:' + accent + '26;outline:none}',
       '.tg-chip-close svg{width:10px;height:10px}',
       '.tg-dest-input{flex:1;min-width:120px;border:none;outline:none;background:transparent;padding:6px 4px;height:auto}',
-      '.tg-dest-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:' + c.bg + ';border:1px solid ' + c.border + ';border-radius:8px;box-shadow:0 12px 28px rgba(15,23,42,.12);max-height:280px;overflow-y:auto;z-index:10;display:none}',
+      '.tg-dest-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:' + c.bg + ';border:1px solid ' + c.border + ';border-radius:' + radiusInput + 'px;box-shadow:0 12px 28px rgba(15,23,42,.12);max-height:280px;overflow-y:auto;z-index:10;display:none}',
       '.tg-dest-drop.is-open{display:block}',
       '.tg-dest-grouplabel{padding:10px 14px 4px;font-size:11px;font-weight:600;color:' + c.textTertiary + ';text-transform:uppercase;letter-spacing:.06em}',
       '.tg-dest-option{padding:10px 14px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:10px;color:' + c.text + ';border:none;background:none;width:100%;text-align:left}',
       '.tg-dest-option:hover,.tg-dest-option.is-active{background:' + c.bgTile + ';outline:none}',
       '.tg-dest-option-meta{color:' + c.textTertiary + ';font-size:12px;margin-left:auto}',
       '.tg-chips{display:flex;flex-wrap:wrap;gap:8px}',
-      '.tg-pill{height:40px;padding:0 16px;border-radius:999px;border:1px solid ' + c.border + ';background:' + c.bg + ';color:' + c.textSecondary + ';font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .15s;cursor:pointer}',
+      '.tg-pill{height:' + sz.pillH + 'px;padding:0 16px;border-radius:999px;border:1px solid ' + c.border + ';background:' + c.bg + ';color:' + c.textSecondary + ';font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .15s;cursor:pointer}',
       '.tg-pill:hover{border-color:' + accent + ';color:' + c.text + '}',
       '.tg-pill:focus-visible{outline:none;box-shadow:0 0 0 3px ' + accent + '33}',
       '.tg-pill.is-active{background:' + primary + ';border-color:' + primary + ';color:#fff}',
       '.tg-pill.is-active svg{color:#fff}',
       '.tg-pill svg{width:14px;height:14px}',
-      '.tg-trav-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';margin-bottom:8px}',
+      '.tg-trav-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid ' + c.border + ';border-radius:' + radiusInput + 'px;background:' + c.bg + ';margin-bottom:8px}',
       '.tg-trav-row:last-of-type{margin-bottom:0}',
       '.tg-trav-meta h4{font-size:14px;font-weight:600;margin:0;color:' + c.text + '}',
       '.tg-trav-meta p{font-size:12px;color:' + c.textTertiary + ';margin:2px 0 0}',
@@ -419,7 +490,7 @@
       '@media(max-width:540px){.tg-seg-btn{font-size:12px;padding:0 6px}}',
       '.tg-turnstile{margin:0 32px 16px;min-height:65px;display:flex;align-items:center;justify-content:center}',
       '.tg-footer{padding:20px 32px 24px;background:' + c.bgAlt + ';display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}',
-      '.tg-submit{height:48px;padding:0 22px;border:none;border-radius:8px;background:' + primary + ';color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s;box-shadow:0 1px 0 rgba(0,0,0,.08),0 1px 3px rgba(15,23,42,.06)}',
+      '.tg-submit{height:48px;padding:0 22px;border:none;border-radius:' + radiusBtn + 'px;background:' + primary + ';color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s;box-shadow:0 1px 0 rgba(0,0,0,.08),0 1px 3px rgba(15,23,42,.06)}',
       '.tg-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,23,42,.12)}',
       '.tg-submit:focus-visible{outline:none;box-shadow:0 0 0 3px ' + accent + '66}',
       '.tg-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}',
@@ -1131,10 +1202,18 @@
 
     // Build card
     var card = el('div', { class: 'tg-card' });
-    card.appendChild(el('div', { class: 'tg-hero' }, [
-      el('h2', { text: config.header.title || '' }),
-      el('p', { text: config.header.subtitle || '' })
-    ]));
+    var heroChildren = [];
+    if (config.branding && config.branding.logoUrl) {
+      heroChildren.push(el('img', {
+        class: 'tg-hero-logo',
+        src: config.branding.logoUrl,
+        alt: '',
+        loading: 'lazy'
+      }));
+    }
+    heroChildren.push(el('h2', { text: config.header.title || '' }));
+    heroChildren.push(el('p', { text: config.header.subtitle || '' }));
+    card.appendChild(el('div', { class: 'tg-hero' }, heroChildren));
 
     // Section for all fields — for now, all fields in one section. Post-MVP the
     // editor will support organising into multiple sections.
