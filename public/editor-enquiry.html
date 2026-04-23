@@ -1222,6 +1222,245 @@
     .code-block .key     { color: #7DD3FC; }
     .code-block .str     { color: #FCA5A5; }
 
+    /* ========================== SETTINGS PALETTE ========================== */
+    /* Settings tab shares the route-card styling — both are "category cards"
+       that open their config in the inspector. Kept as separate class names so
+       future styling divergence is easy. */
+    .setting-card {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all .12s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .setting-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-xs);
+    }
+    .setting-card.is-selected {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+      box-shadow: 0 0 0 3px var(--brand-soft);
+    }
+    .setting-card-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .setting-card-info {
+      flex: 1;
+      min-width: 0;
+      line-height: 1.3;
+    }
+    .setting-card-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .setting-card-desc {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 1px;
+      line-height: 1.4;
+    }
+    .setting-card-chevron {
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    /* ==================== COLOUR SWATCH PICKER ========================= */
+    /* Native color input wrapped with a visible swatch + hex text + click
+       target over the entire row. */
+    .swatch-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--panel);
+      cursor: pointer;
+      transition: border-color .12s ease;
+      position: relative;
+    }
+    .swatch-row:hover { border-color: var(--border-strong); }
+    .swatch-row:focus-within {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px var(--brand-soft);
+    }
+    .swatch-square {
+      width: 28px; height: 28px;
+      border-radius: 5px;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
+    }
+    .swatch-hex {
+      flex: 1;
+      font-family: -apple-system, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      background: transparent;
+      border: 0;
+      outline: none;
+      min-width: 0;
+    }
+    .swatch-row input[type="color"] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: 0;
+    }
+
+    /* ======================= EMBED CODE MODAL ========================== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 8000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+    .modal-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      width: 100%;
+      max-width: 640px;
+      background: var(--panel);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      transform: translateY(8px) scale(.98);
+      transition: transform .18s ease;
+    }
+    .modal-overlay.is-open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+    .modal-head {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .modal-head-icon {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .modal-head-text { flex: 1; min-width: 0; }
+    .modal-head-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .modal-head-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .modal-close {
+      width: 32px; height: 32px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .12s ease;
+      flex-shrink: 0;
+    }
+    .modal-close:hover {
+      background: var(--hover);
+      color: var(--ink);
+    }
+    .modal-body {
+      padding: 20px 24px;
+    }
+    .modal-foot {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--panel-2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .modal-code-wrap {
+      position: relative;
+    }
+    .modal-code {
+      padding: 16px 18px;
+      background: #0F172A;
+      color: #E2E8F0;
+      border-radius: var(--radius);
+      font-family: -apple-system, 'SF Mono', Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .modal-code .tag { color: #7DD3FC; }
+    .modal-code .attr { color: #FCD34D; }
+    .modal-code .str { color: #FCA5A5; }
+    .modal-copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      height: 30px;
+      padding: 0 12px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.08);
+      color: #E2E8F0;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .12s ease;
+    }
+    .modal-copy-btn:hover {
+      background: rgba(255,255,255,.15);
+      border-color: rgba(255,255,255,.3);
+    }
+    .modal-copy-btn.is-copied {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
     /* While loading initial form */
     .boot-loading {
       position: fixed; inset: 0;
@@ -1852,11 +2091,7 @@
       } else if (state.activePaletteTab === 'routing') {
         renderRoutingPalette(body);
       } else {
-        body.innerHTML = `
-          <div class="palette-empty">
-            <p><strong style="color:var(--sub)">Form settings</strong><br>
-            Branding, security, embed code and more land here in Part 3b.</p>
-          </div>`;
+        renderSettingsPalette(body);
       }
     }
 
@@ -2099,6 +2334,116 @@
           selectItem({ kind: 'routing', destination: dest.id });
         });
 
+        body.appendChild(card);
+      });
+    }
+
+    /* =========================== SETTINGS =========================== */
+    // Metadata for the 4 settings category cards. Each opens its own inspector
+    // panel — no config happens directly in the palette (matches routing UX).
+    const SETTINGS_CATEGORIES = [
+      {
+        id: 'status',
+        name: 'Status',
+        desc: 'Draft, Live or Archived.',
+        icon: '<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>',
+      },
+      {
+        id: 'branding',
+        name: 'Branding',
+        desc: 'Button colour, accent colour and theme.',
+        icon: '<circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 0010 10c-1 3-4 5-7 5-2 0-3-1-3-3s-1-3-3-3-3 1-3 3c0 4 4 6 8 6 5 0 9-4 9-10A10 10 0 0012 2z"/>',
+      },
+      {
+        id: 'security',
+        name: 'Security',
+        desc: 'Honeypot, rate limits, Turnstile and allowed origins.',
+        icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+      },
+      {
+        id: 'reference',
+        name: 'Reference format',
+        desc: 'Customise the prefix on submission references.',
+        icon: '<polyline points="8 3 21 3 21 16"/><polygon points="13 8 3 8 3 21 13 21 13 8"/>',
+      },
+    ];
+
+    // Settings palette — 4 category cards, each opens its config in the inspector.
+    function renderSettingsPalette(body) {
+      // Intro
+      const intro = document.createElement('div');
+      intro.className = 'route-intro';
+      intro.innerHTML = `
+        <strong>Form settings</strong>
+        Configure how your form behaves, looks and protects itself. Changes save automatically as you edit.`;
+      body.appendChild(intro);
+
+      // Embed code shortcut — handy access from the settings tab since it's
+      // where agents naturally look for "how do I use this form now?"
+      const embedBtn = document.createElement('div');
+      embedBtn.className = 'setting-card';
+      embedBtn.style.borderColor = 'var(--brand)';
+      embedBtn.style.background = 'var(--brand-soft)';
+      embedBtn.innerHTML = `
+        <span class="setting-card-icon" style="background:var(--brand); color:#fff;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </span>
+        <div class="setting-card-info">
+          <div class="setting-card-name">Get embed code</div>
+          <div class="setting-card-desc">Grab the script snippet to paste onto your website.</div>
+        </div>
+        <svg class="setting-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      `;
+      embedBtn.addEventListener('click', () => openEmbedModal());
+      body.appendChild(embedBtn);
+
+      // Settings categories
+      SETTINGS_CATEGORIES.forEach(cat => {
+        const isSelected = state.selectedItem
+          && state.selectedItem.kind === 'settings'
+          && state.selectedItem.category === cat.id;
+
+        const card = document.createElement('div');
+        card.className = 'setting-card' + (isSelected ? ' is-selected' : '');
+
+        const icon = document.createElement('span');
+        icon.className = 'setting-card-icon';
+        icon.appendChild(iconSvg(cat.icon, 15));
+        card.appendChild(icon);
+
+        const info = document.createElement('div');
+        info.className = 'setting-card-info';
+        const name = document.createElement('div');
+        name.className = 'setting-card-name';
+        name.textContent = cat.name;
+        info.appendChild(name);
+        const desc = document.createElement('div');
+        desc.className = 'setting-card-desc';
+        desc.textContent = cat.desc;
+        info.appendChild(desc);
+        card.appendChild(info);
+
+        // Chevron
+        const chev = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        chev.setAttribute('class', 'setting-card-chevron');
+        chev.setAttribute('width', '14');
+        chev.setAttribute('height', '14');
+        chev.setAttribute('viewBox', '0 0 24 24');
+        chev.setAttribute('fill', 'none');
+        chev.setAttribute('stroke', 'currentColor');
+        chev.setAttribute('stroke-width', '2');
+        chev.setAttribute('stroke-linecap', 'round');
+        chev.setAttribute('stroke-linejoin', 'round');
+        chev.innerHTML = '<polyline points="9 18 15 12 9 6"/>';
+        card.appendChild(chev);
+
+        card.addEventListener('click', () => {
+          selectItem({ kind: 'settings', category: cat.id });
+        });
         body.appendChild(card);
       });
     }
@@ -2709,6 +3054,7 @@
       if (sel.kind === 'thankyou') return renderThankYouInspector(body, headTitle, headSub);
       if (sel.kind === 'field')   return renderFieldInspector(body, headTitle, headSub, sel.id);
       if (sel.kind === 'routing') return renderRoutingInspector(body, headTitle, headSub, sel.destination);
+      if (sel.kind === 'settings') return renderSettingsInspector(body, headTitle, headSub, sel.category);
     }
 
     // ── Header inspector ──
@@ -3235,6 +3581,459 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       return sec;
     }
 
+    /* =========================== SETTINGS INSPECTOR =========================== */
+    // Dispatches to one of 4 category-specific inspector panels based on
+    // state.selectedItem.category. Each panel mutates state.config directly
+    // and calls markDirtyAndSync to trigger autosave.
+    function renderSettingsInspector(body, headTitle, headSub, categoryId) {
+      const cat = SETTINGS_CATEGORIES.find(c => c.id === categoryId);
+      if (!cat) {
+        state.selectedItem = null;
+        renderInspector();
+        return;
+      }
+
+      headTitle.textContent = cat.name;
+      headSub.textContent = cat.desc;
+
+      const save = () => { markDirtyAndSync(); renderPalette(); };
+
+      if (cat.id === 'status')     renderStatusInspector(body, save);
+      else if (cat.id === 'branding')  renderBrandingInspector(body, save);
+      else if (cat.id === 'security')  renderSecurityInspector(body, save);
+      else if (cat.id === 'reference') renderReferenceInspector(body, save);
+    }
+
+    // ── Status inspector ──
+    // Draft / Live / Archived. Draft forms don't accept submissions.
+    // Archived forms are hidden from the dashboard but retain old submissions.
+    function renderStatusInspector(body, save) {
+      const cfg = state.config;
+
+      body.appendChild(section('Form status', [
+        segmented({
+          label: 'Current status',
+          value: cfg.status || 'Draft',
+          options: [
+            { value: 'Draft', label: 'Draft' },
+            { value: 'Live', label: 'Live' },
+            { value: 'Archived', label: 'Archived' }
+          ],
+          onChange: (v) => { cfg.status = v; save(); renderTopbar(); renderInspector(); }
+        })
+      ]));
+
+      // Explanatory note, context-aware based on current status
+      const current = cfg.status || 'Draft';
+      const noteSec = document.createElement('div');
+      noteSec.className = 'insp-section';
+      let noteText = '';
+      let noteColour = 'var(--warning)';
+      if (current === 'Draft') {
+        noteText = 'While in Draft, the form does not accept submissions. Preview works as normal so you can test it, but any real POST is rejected. Flip to Live when you are ready.';
+        noteColour = 'var(--warning)';
+      } else if (current === 'Live') {
+        noteText = 'The form is accepting submissions. Every valid POST fires through your routing destinations and lands in the submissions inbox.';
+        noteColour = 'var(--success)';
+      } else {
+        noteText = 'The form is archived — hidden from dashboards and no longer accepting submissions. Existing submissions are preserved. Flip back to Draft or Live to reactivate.';
+        noteColour = 'var(--muted)';
+      }
+      const note = document.createElement('div');
+      note.style.cssText = `padding: 12px; background: var(--hover); border-left: 3px solid ${noteColour}; border-radius: 0 7px 7px 0; font-size: 12px; line-height: 1.6; color: var(--sub);`;
+      note.textContent = noteText;
+      noteSec.appendChild(note);
+      body.appendChild(noteSec);
+    }
+
+    // ── Branding inspector ──
+    // Button colour, accent colour, theme. Changes reflect in the live preview
+    // immediately via the markDirtyAndSync → widget rebuild pipeline.
+    function renderBrandingInspector(body, save) {
+      const cfg = state.config;
+
+      body.appendChild(section('Primary colours', [
+        colourRow({
+          label: 'Button colour',
+          value: cfg.buttonColour || '#0891B2',
+          hint: 'Used on the submit button, focus rings and inline accents.',
+          onChange: (v) => { cfg.buttonColour = v; save(); }
+        }),
+        colourRow({
+          label: 'Accent colour',
+          value: cfg.accentColour || '#EC4899',
+          hint: 'Used on selected pills, highlighted elements and small flourishes.',
+          onChange: (v) => { cfg.accentColour = v; save(); }
+        })
+      ]));
+
+      body.appendChild(section('Theme', [
+        segmented({
+          label: 'Appearance mode',
+          value: cfg.theme || 'light',
+          options: [
+            { value: 'light', label: 'Light' },
+            { value: 'dark',  label: 'Dark' },
+            { value: 'auto',  label: 'Auto' }
+          ],
+          onChange: (v) => { cfg.theme = v; save(); }
+        })
+      ]));
+
+      // Tiny reset-to-defaults link
+      const resetSec = document.createElement('div');
+      resetSec.className = 'insp-section';
+      const resetBtn = document.createElement('button');
+      resetBtn.type = 'button';
+      resetBtn.className = 'insp-link-btn';
+      resetBtn.style.cssText = 'font-size: 12px; color: var(--muted); background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 0;';
+      resetBtn.textContent = 'Reset branding to Travelgenix defaults';
+      resetBtn.addEventListener('click', () => {
+        cfg.buttonColour = '#0891B2';
+        cfg.accentColour = '#EC4899';
+        cfg.theme = 'light';
+        save();
+        renderInspector();
+      });
+      resetSec.appendChild(resetBtn);
+      body.appendChild(resetSec);
+    }
+
+    // ── Security inspector ──
+    // Bot defences: honeypot, Turnstile, rate-limit tier, and allowed origins.
+    function renderSecurityInspector(body, save) {
+      if (!state.config.security) state.config.security = {};
+      const sec = state.config.security;
+
+      // Defaults
+      if (sec.honeypot === undefined) sec.honeypot = true;
+      if (sec.rateLimitTier === undefined) sec.rateLimitTier = 'standard';
+      if (sec.turnstile === undefined) sec.turnstile = false;
+
+      // Honeypot
+      body.appendChild(section('Bot defences', [
+        toggleRow({
+          label: 'Honeypot field',
+          sub: 'Adds an invisible trap field. Bots fill it in, humans do not. Simple, fast, and free.',
+          checked: !!sec.honeypot,
+          onChange: (v) => { sec.honeypot = v; save(); }
+        }),
+        toggleRow({
+          label: 'Cloudflare Turnstile',
+          sub: 'Privacy-friendly CAPTCHA for when honeypot alone is not enough. Requires Turnstile site key in your account.',
+          checked: !!sec.turnstile,
+          onChange: (v) => { sec.turnstile = v; save(); }
+        })
+      ]));
+
+      // Rate limiting
+      body.appendChild(section('Rate limiting', [
+        segmented({
+          label: 'Submission rate limit',
+          value: sec.rateLimitTier,
+          options: [
+            { value: 'strict',   label: 'Strict' },
+            { value: 'standard', label: 'Standard' },
+            { value: 'lenient',  label: 'Lenient' }
+          ],
+          onChange: (v) => { sec.rateLimitTier = v; save(); renderInspector(); }
+        })
+      ]));
+
+      // Explain what each tier means
+      const rateExplain = document.createElement('div');
+      rateExplain.className = 'insp-section';
+      const rateExplainInner = document.createElement('div');
+      rateExplainInner.style.cssText = 'padding: 12px; background: var(--hover); border-radius: 7px; font-size: 12px; line-height: 1.6; color: var(--sub);';
+      const tierMeta = {
+        strict:   '<strong>Strict</strong> — 3 submissions per IP per 15 minutes. Best for high-value forms where abuse would hurt.',
+        standard: '<strong>Standard</strong> — 10 submissions per IP per 15 minutes. Sensible default for most travel forms.',
+        lenient:  '<strong>Lenient</strong> — 30 submissions per IP per 15 minutes. Use for heavily-trafficked forms where false positives outweigh abuse risk.'
+      };
+      rateExplainInner.innerHTML = tierMeta[sec.rateLimitTier] || tierMeta.standard;
+      rateExplain.appendChild(rateExplainInner);
+      body.appendChild(rateExplain);
+
+      // Allowed origins
+      body.appendChild(section('Allowed origins', [
+        labelledTextarea({
+          label: 'Domains that may embed this form',
+          value: sec.allowedOrigins || '',
+          placeholder: 'https://www.yourshop.co.uk\nhttps://yourshop.co.uk\nhttps://staging.yourshop.co.uk',
+          rows: 4,
+          maxlength: 2000,
+          hint: 'One origin per line. Leave blank to allow any origin (not recommended for production).',
+          onInput: (v) => { sec.allowedOrigins = v; save(); }
+        })
+      ]));
+    }
+
+    // ── Reference inspector ──
+    // Customise the prefix on submission references (e.g. TG-, SH-, HOL-).
+    function renderReferenceInspector(body, save) {
+      const cfg = state.config;
+      const prefix = cfg.referencePrefix || 'TG-';
+
+      body.appendChild(section('Reference prefix', [
+        labelledInput({
+          label: 'Prefix',
+          value: prefix,
+          placeholder: 'TG-',
+          maxlength: 8,
+          hint: 'Every submission gets a unique reference like TG-A7B-0042. Your prefix appears at the start.',
+          onInput: (v) => {
+            // Uppercase-ish, letters/digits/dashes only, up to 8 chars
+            const clean = (v || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 8);
+            cfg.referencePrefix = clean;
+            save();
+          }
+        })
+      ]));
+
+      // Example preview of the final format
+      const previewSec = document.createElement('div');
+      previewSec.className = 'insp-section';
+      const previewInner = document.createElement('div');
+      previewInner.style.cssText = 'padding: 14px 16px; background: var(--hover); border-radius: 7px; text-align: center;';
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px;';
+      lbl.textContent = 'Example reference';
+      previewInner.appendChild(lbl);
+      const val = document.createElement('div');
+      val.style.cssText = 'font-family: -apple-system, "SF Mono", Menlo, monospace; font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: .02em;';
+      val.textContent = (prefix || 'TG-') + 'A7B-0042';
+      previewInner.appendChild(val);
+      previewSec.appendChild(previewInner);
+      body.appendChild(previewSec);
+    }
+
+    // ── Colour swatch row factory ──
+    // Produces a clickable row with a colour square, hex text and a hidden
+    // native colour picker that fires the onChange callback.
+    function colourRow({ label, value, hint, onChange }) {
+      const wrap = document.createElement('div');
+      wrap.className = 'insp-field';
+
+      const lbl = document.createElement('label');
+      lbl.className = 'insp-label';
+      lbl.textContent = label;
+      wrap.appendChild(lbl);
+
+      const row = document.createElement('label');
+      row.className = 'swatch-row';
+
+      const square = document.createElement('span');
+      square.className = 'swatch-square';
+      square.style.background = value;
+      row.appendChild(square);
+
+      const hex = document.createElement('input');
+      hex.type = 'text';
+      hex.className = 'swatch-hex';
+      hex.value = value.toUpperCase();
+      hex.maxLength = 9;
+      hex.addEventListener('click', (e) => { e.stopPropagation(); });
+      hex.addEventListener('input', () => {
+        const v = hex.value.trim();
+        // Accept # prefix or bare hex
+        const normalised = v.startsWith('#') ? v : '#' + v;
+        if (/^#[0-9A-Fa-f]{6}$/.test(normalised)) {
+          square.style.background = normalised;
+          colourInput.value = normalised;
+          onChange(normalised.toUpperCase());
+        }
+      });
+      row.appendChild(hex);
+
+      const colourInput = document.createElement('input');
+      colourInput.type = 'color';
+      colourInput.value = value;
+      colourInput.addEventListener('input', () => {
+        const v = colourInput.value.toUpperCase();
+        hex.value = v;
+        square.style.background = v;
+        onChange(v);
+      });
+      row.appendChild(colourInput);
+
+      wrap.appendChild(row);
+
+      if (hint) {
+        const h = document.createElement('p');
+        h.className = 'insp-hint';
+        h.textContent = hint;
+        wrap.appendChild(h);
+      }
+
+      return wrap;
+    }
+
+    /* ======================= EMBED CODE MODAL ========================= */
+    // Proper modal replacing the window.prompt() stopgap. Shows the embed
+    // snippet with syntax highlighting and a copy-to-clipboard button.
+    function openEmbedModal() {
+      if (!state.widgetId) {
+        showToast('Save the form first to get an embed code', 'warning');
+        return;
+      }
+
+      // Remove any existing modal
+      const existing = document.querySelector('.modal-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+
+      const card = document.createElement('div');
+      card.className = 'modal-card';
+
+      // Head
+      const head = document.createElement('div');
+      head.className = 'modal-head';
+      head.innerHTML = `
+        <span class="modal-head-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </span>
+        <div class="modal-head-text">
+          <div class="modal-head-title">Embed this form on your website</div>
+          <div class="modal-head-sub">Paste the snippet below into your site HTML. Works on any platform.</div>
+        </div>
+      `;
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'modal-close';
+      closeBtn.setAttribute('aria-label', 'Close');
+      closeBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      `;
+      closeBtn.addEventListener('click', closeEmbedModal);
+      head.appendChild(closeBtn);
+      card.appendChild(head);
+
+      // Body — the code block
+      const body = document.createElement('div');
+      body.className = 'modal-body';
+
+      const origin = window.location.origin;
+      const snippet = `<div data-tg-widget="enquiry" data-tg-id="${state.widgetId}"></div>
+<script src="${origin}/widget-enquiry.js" defer><\/script>`;
+
+      const codeWrap = document.createElement('div');
+      codeWrap.className = 'modal-code-wrap';
+
+      const code = document.createElement('pre');
+      code.className = 'modal-code';
+      // Syntax-highlighted version
+      code.innerHTML =
+        '<span class="tag">&lt;div</span> ' +
+        '<span class="attr">data-tg-widget</span>=<span class="str">"enquiry"</span> ' +
+        '<span class="attr">data-tg-id</span>=<span class="str">"' + escapeHtml(state.widgetId) + '"</span>' +
+        '<span class="tag">&gt;&lt;/div&gt;</span>\n' +
+        '<span class="tag">&lt;script</span> ' +
+        '<span class="attr">src</span>=<span class="str">"' + escapeHtml(origin + '/widget-enquiry.js') + '"</span> ' +
+        '<span class="attr">defer</span>' +
+        '<span class="tag">&gt;&lt;/script&gt;</span>';
+      codeWrap.appendChild(code);
+
+      // Copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'modal-copy-btn';
+      copyBtn.type = 'button';
+      copyBtn.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span>Copy</span>
+      `;
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(snippet);
+          copyBtn.classList.add('is-copied');
+          copyBtn.innerHTML = `
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Copied</span>
+          `;
+          setTimeout(() => {
+            copyBtn.classList.remove('is-copied');
+            copyBtn.innerHTML = `
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+              <span>Copy</span>
+            `;
+          }, 2400);
+        } catch (e) {
+          showToast('Copy failed — please select and copy manually', 'error');
+        }
+      });
+      codeWrap.appendChild(copyBtn);
+      body.appendChild(codeWrap);
+
+      // Instructions under the code block
+      const howto = document.createElement('div');
+      howto.style.cssText = 'margin-top: 18px; padding: 14px 16px; background: var(--hover); border-radius: 8px; font-size: 12px; line-height: 1.7; color: var(--sub);';
+      howto.innerHTML = `
+        <strong style="color: var(--ink); display: block; margin-bottom: 4px; font-size: 12px;">How to embed</strong>
+        Paste both lines into any page where you want the form to appear. The form will render in-place, inheriting your branding.
+        <br><br>
+        <strong style="color: var(--ink);">Tip:</strong> If your site uses React, Vue or similar, mount the <code style="font-family: 'SF Mono', Menlo, monospace; background: var(--panel); padding: 1px 5px; border-radius: 3px;">&lt;div&gt;</code> inside your component and load the script once in your layout.
+      `;
+      body.appendChild(howto);
+
+      card.appendChild(body);
+
+      // Foot
+      const foot = document.createElement('div');
+      foot.className = 'modal-foot';
+      const footLeft = document.createElement('div');
+      footLeft.innerHTML = `Form ID: <strong style="color: var(--ink); font-family: 'SF Mono', Menlo, monospace;">${escapeHtml(state.widgetId)}</strong>`;
+      foot.appendChild(footLeft);
+      const footClose = document.createElement('button');
+      footClose.className = 'btn btn-ghost btn-sm';
+      footClose.textContent = 'Close';
+      footClose.addEventListener('click', closeEmbedModal);
+      foot.appendChild(footClose);
+      card.appendChild(foot);
+
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+
+      // Click outside to close
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeEmbedModal();
+      });
+
+      // Esc to close
+      const escHandler = (e) => {
+        if (e.key === 'Escape') { closeEmbedModal(); document.removeEventListener('keydown', escHandler); }
+      };
+      document.addEventListener('keydown', escHandler);
+
+      // Animate in
+      requestAnimationFrame(() => overlay.classList.add('is-open'));
+    }
+
+    function closeEmbedModal() {
+      const overlay = document.querySelector('.modal-overlay');
+      if (!overlay) return;
+      overlay.classList.remove('is-open');
+      setTimeout(() => overlay.remove(), 200);
+    }
+
+    // HTML escape helper — used for safe interpolation into the modal snippet
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
     // Type-specific inspector extras — returns a section element, or null
     // if the type has no extras beyond the common basics + behaviour.
     function renderFieldExtras(field, saveField) {
@@ -3453,26 +4252,7 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       renderInspector();
     }
 
-    /* =========================== EMBED MODAL =========================== */
-    function openEmbedModal() {
-      if (!state.widgetId) {
-        showToast('Save the form first to get an embed code', 'warning');
-        return;
-      }
-      const origin = window.location.origin;
-      const snippet = `<div data-tg-widget="enquiry" data-tg-id="${state.widgetId}"></div>\n<script src="${origin}/widget-enquiry.js"><\/script>`;
-
-      // Simple prompt-style modal for now — Part 3 will build a proper modal with copy button
-      const msg = `Paste this into any HTML page where you want your form to appear:\n\n${snippet}\n\nForm ID: ${state.formId || 'Pending save'}`;
-      // Fall back to a native prompt so this works end-to-end in Part 1.
-      if (window.prompt) {
-        window.prompt('Copy the embed code below (⌘C / Ctrl+C):', snippet);
-      } else {
-        alert(msg);
-      }
-    }
-
-    /* ============================ KEYBOARD ============================ */
+    /* =========================== KEYBOARD =========================== */
     function bindKeyboard() {
       window.addEventListener('keydown', (e) => {
         // ⌘S / Ctrl+S — save
