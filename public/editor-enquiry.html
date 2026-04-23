@@ -1490,6 +1490,175 @@
       color: #fff;
     }
 
+    /* ======================= TEMPLATES MODAL ========================== */
+    /* Shown on editor load for new forms. Blocks interaction with the editor
+       behind it — the agent must pick a starter before they can build. Styled
+       slightly more prominently than the embed modal (wider, bigger header)
+       because it's a setup step, not an on-demand dialog. */
+    .template-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(6px);
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      overflow-y: auto;
+    }
+    .template-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .template-card-wrap {
+      width: 100%;
+      max-width: 900px;
+      background: var(--panel);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      transform: translateY(12px) scale(.98);
+      transition: transform .22s ease;
+    }
+    .template-overlay.is-open .template-card-wrap {
+      transform: translateY(0) scale(1);
+    }
+    .template-head {
+      padding: 32px 36px 24px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .template-head-eyebrow {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 14px;
+    }
+    .template-head-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .template-head-sub {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.55;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      padding: 28px 36px;
+    }
+    @media (max-width: 880px) {
+      .template-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .template-grid { grid-template-columns: 1fr; padding: 20px; }
+    }
+    .template-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      cursor: pointer;
+      transition: all .15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+      position: relative;
+    }
+    .template-card:hover {
+      border-color: var(--brand);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, .08);
+      transform: translateY(-2px);
+    }
+    .template-card.is-recommended::after {
+      content: 'Recommended';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 3px 8px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-radius: 3px;
+    }
+    .template-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .template-card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .template-card-tagline {
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.5;
+      flex: 1;
+    }
+    .template-card-meta {
+      font-size: 11px;
+      color: var(--muted);
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .template-card-count {
+      font-weight: 600;
+      color: var(--sub);
+    }
+    .template-foot {
+      padding: 18px 36px 28px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      background: var(--panel-2);
+      font-size: 13px;
+      color: var(--sub);
+    }
+    .template-foot-link {
+      background: none;
+      border: 0;
+      color: var(--brand);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 13px;
+    }
+    .template-foot-link:hover {
+      color: var(--ink);
+    }
+
     /* While loading initial form */
     .boot-loading {
       position: fixed; inset: 0;
@@ -4092,6 +4261,276 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       return wrap;
     }
 
+    /* ======================= TEMPLATES MODAL ========================= */
+    // Six starter templates shown when creating a new form. Picking a
+    // template seeds state.config with that template's fields and copy.
+    // The modal blocks interaction with the editor behind it — agents must
+    // pick one before they can build.
+    const TEMPLATES = [
+      {
+        id: 'holiday',
+        name: 'Holiday Enquiry',
+        tagline: 'The classic — all 13 fields ready for any package holiday request.',
+        recommended: true,
+        icon: '<path d="M12 2l-2 4h4l-2-4zm-8 8h16v10H4V10zm4-4h8v4H8V6z"/><path d="M2 20h20"/><circle cx="7" cy="15" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="17" cy="15" r="1"/>',
+        apply: (cfg) => {
+          cfg.headerTitle = 'Tell us about your dream holiday';
+          cfg.headerSubtitle = "Share a few details and one of our travel specialists will come back within 24 hours.";
+          cfg.submitButtonText = 'Send my enquiry';
+          cfg.fieldsJSON = JSON.stringify([
+            { id: 'destination',       type: 'destination',  label: 'Where are you dreaming of?', required: true,  visible: true },
+            { id: 'departure_airport', type: 'airport',      label: 'Departure airport',          required: true,  visible: true },
+            { id: 'travel_dates',      type: 'daterange',    label: 'Travel dates',               required: true,  visible: true },
+            { id: 'duration',          type: 'duration',     label: 'Duration',                   required: false, visible: true },
+            { id: 'travellers',        type: 'travellers',   label: "Who's travelling?",          required: true,  visible: true },
+            { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true },
+            { id: 'stars',             type: 'stars',        label: 'Star rating preference',     required: false, visible: true },
+            { id: 'board',             type: 'board',        label: 'Board basis',                required: false, visible: true },
+            { id: 'interests',         type: 'interests',    label: 'Interests',                  required: false, visible: true },
+            { id: 'name',              type: 'name',         label: 'Your name',                  required: true,  visible: true },
+            { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true },
+            { id: 'notes',             type: 'notes',        label: 'Anything else?',             required: false, visible: true },
+            { id: 'consent',           type: 'consent',      label: 'Consent',                    required: true,  visible: true }
+          ]);
+        }
+      },
+      {
+        id: 'cruise',
+        name: 'Cruise Enquiry',
+        tagline: 'Focused on cruise-specific details — itinerary, cabin preference, duration.',
+        icon: '<path d="M2 20a2.4 2.4 0 002 1c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1a2.4 2.4 0 002-1"/><path d="M4 18l-2-4h20l-2 4"/><path d="M12 10V4l5 5"/><path d="M10 4v6"/><path d="M5 14l1-3h12l1 3"/>',
+        apply: (cfg) => {
+          cfg.headerTitle = 'Plan your next cruise';
+          cfg.headerSubtitle = "From Mediterranean sun to Norwegian fjords — tell us where you'd like to sail.";
+          cfg.submitButtonText = 'Request my cruise quote';
+          cfg.fieldsJSON = JSON.stringify([
+            { id: 'destination',       type: 'destination',  label: 'Cruise region',              required: true,  visible: true },
+            { id: 'departure_airport', type: 'airport',      label: 'Preferred departure airport', required: false, visible: true },
+            { id: 'travel_dates',      type: 'daterange',    label: 'When would you like to sail?', required: true,  visible: true },
+            { id: 'duration',          type: 'duration',     label: 'Cruise length',              required: true,  visible: true },
+            { id: 'travellers',        type: 'travellers',   label: "Who's cruising?",            required: true,  visible: true },
+            { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true },
+            { id: 'interests',         type: 'interests',    label: 'Cabin preference & interests', required: false, visible: true },
+            { id: 'name',              type: 'name',         label: 'Your name',                  required: true,  visible: true },
+            { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true },
+            { id: 'notes',             type: 'notes',        label: 'Cabin preferences, accessibility, special occasions...', required: false, visible: true },
+            { id: 'consent',           type: 'consent',      label: 'Consent',                    required: true,  visible: true }
+          ]);
+        }
+      },
+      {
+        id: 'tour',
+        name: 'Tour Enquiry',
+        tagline: 'For escorted tours, small groups and multi-country itineraries.',
+        icon: '<circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 018 8c0 5-8 12-8 12S4 15 4 10a8 8 0 018-8z"/><circle cx="12" cy="10" r="1"/>',
+        apply: (cfg) => {
+          cfg.headerTitle = 'Find your perfect tour';
+          cfg.headerSubtitle = "Hand-crafted tours across the globe. Tell us where you'd like to explore.";
+          cfg.submitButtonText = 'Get my tour options';
+          cfg.fieldsJSON = JSON.stringify([
+            { id: 'destination',       type: 'destination',  label: 'Where would you like to go?', required: true,  visible: true },
+            { id: 'travel_dates',      type: 'daterange',    label: 'Travel dates',               required: true,  visible: true },
+            { id: 'duration',          type: 'duration',     label: 'Tour length',                required: false, visible: true },
+            { id: 'travellers',        type: 'travellers',   label: "Who's travelling?",          required: true,  visible: true },
+            { id: 'budget_pp',         type: 'budget',       label: 'Budget per person',          required: false, visible: true },
+            { id: 'interests',         type: 'interests',    label: 'Tour style & interests',     required: false, visible: true },
+            { id: 'name',              type: 'name',         label: 'Your name',                  required: true,  visible: true },
+            { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true },
+            { id: 'notes',             type: 'notes',        label: 'Pace preference, must-see sights, accessibility...', required: false, visible: true },
+            { id: 'consent',           type: 'consent',      label: 'Consent',                    required: true,  visible: true }
+          ]);
+        }
+      },
+      {
+        id: 'tailormade',
+        name: 'Tailor-Made',
+        tagline: 'Light-touch — just the essentials so clients can enquire in 30 seconds.',
+        icon: '<path d="M12 2L15 8l7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>',
+        apply: (cfg) => {
+          cfg.headerTitle = 'Let us craft something special';
+          cfg.headerSubtitle = "Tell us what you're dreaming of and we'll build it around you.";
+          cfg.submitButtonText = 'Start the conversation';
+          cfg.fieldsJSON = JSON.stringify([
+            { id: 'destination',       type: 'destination',  label: 'Where would you like to go?', required: true,  visible: true },
+            { id: 'travel_dates',      type: 'daterange',    label: 'When?',                      required: false, visible: true },
+            { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true },
+            { id: 'name',              type: 'name',         label: 'Your name',                  required: true,  visible: true },
+            { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true },
+            { id: 'notes',             type: 'notes',        label: 'Tell us what matters most',  required: false, visible: true },
+            { id: 'consent',           type: 'consent',      label: 'Consent',                    required: true,  visible: true }
+          ]);
+        }
+      },
+      {
+        id: 'group',
+        name: 'Group Travel',
+        tagline: 'Weddings, family reunions, corporate trips — anything 8+ people.',
+        icon: '<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="17" cy="9" r="3"/><path d="M15 15h2a4 4 0 014 4v2"/>',
+        apply: (cfg) => {
+          cfg.headerTitle = 'Planning a group holiday?';
+          cfg.headerSubtitle = "Weddings, family reunions, milestone birthdays — groups are our specialty.";
+          cfg.submitButtonText = 'Enquire about my group';
+          cfg.fieldsJSON = JSON.stringify([
+            { id: 'destination',       type: 'destination',  label: 'Where are you going?',       required: true,  visible: true },
+            { id: 'departure_airport', type: 'airport',      label: 'Departure airport',          required: false, visible: true },
+            { id: 'travel_dates',      type: 'daterange',    label: 'Travel dates',               required: true,  visible: true },
+            { id: 'duration',          type: 'duration',     label: 'How many nights?',           required: false, visible: true },
+            { id: 'travellers',        type: 'travellers',   label: 'Group size',                 required: true,  visible: true },
+            { id: 'budget_pp',         type: 'budget',       label: 'Budget per person',          required: false, visible: true },
+            { id: 'stars',             type: 'stars',        label: 'Accommodation level',        required: false, visible: true },
+            { id: 'board',             type: 'board',        label: 'Board basis',                required: false, visible: true },
+            { id: 'interests',         type: 'interests',    label: 'Group type & interests',     required: false, visible: true },
+            { id: 'name',              type: 'name',         label: 'Group organiser name',       required: true,  visible: true },
+            { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true },
+            { id: 'notes',             type: 'notes',        label: 'Occasion, dietary needs, accessibility...', required: false, visible: true },
+            { id: 'consent',           type: 'consent',      label: 'Consent',                    required: true,  visible: true }
+          ]);
+        }
+      },
+      {
+        id: 'blank',
+        name: 'Blank form',
+        tagline: 'Start from scratch — just the header and submit button.',
+        icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/>',
+        apply: (cfg) => {
+          cfg.headerTitle = 'Get in touch';
+          cfg.headerSubtitle = "We'd love to hear from you.";
+          cfg.submitButtonText = 'Send';
+          cfg.fieldsJSON = JSON.stringify([]);
+        }
+      }
+    ];
+
+    // Returns the count of visible fields in a template, for the card meta row
+    function templateFieldCount(template) {
+      try {
+        const cfg = {};
+        template.apply(cfg);
+        const fields = JSON.parse(cfg.fieldsJSON);
+        return Array.isArray(fields) ? fields.length : 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    // Show the modal. Called from the editor boot path when creating a new form.
+    function openTemplatesModal() {
+      // Clear any existing
+      const existing = document.querySelector('.template-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'template-overlay';
+
+      const wrap = document.createElement('div');
+      wrap.className = 'template-card-wrap';
+
+      // Head
+      const head = document.createElement('div');
+      head.className = 'template-head';
+      head.innerHTML = `
+        <span class="template-head-eyebrow">Let's get started</span>
+        <h2 class="template-head-title">Pick a starting point</h2>
+        <p class="template-head-sub">Each template is a working form you can customise from there. Switch templates any time before your first save.</p>
+      `;
+      wrap.appendChild(head);
+
+      // Grid
+      const grid = document.createElement('div');
+      grid.className = 'template-grid';
+
+      TEMPLATES.forEach(t => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'template-card' + (t.recommended ? ' is-recommended' : '');
+
+        const icon = document.createElement('span');
+        icon.className = 'template-card-icon';
+        icon.appendChild(iconSvg(t.icon, 20));
+        card.appendChild(icon);
+
+        const name = document.createElement('div');
+        name.className = 'template-card-name';
+        name.textContent = t.name;
+        card.appendChild(name);
+
+        const tagline = document.createElement('div');
+        tagline.className = 'template-card-tagline';
+        tagline.textContent = t.tagline;
+        card.appendChild(tagline);
+
+        const meta = document.createElement('div');
+        meta.className = 'template-card-meta';
+        const count = document.createElement('span');
+        count.className = 'template-card-count';
+        const n = templateFieldCount(t);
+        count.textContent = n === 0 ? 'No fields' : (n + ' field' + (n === 1 ? '' : 's'));
+        meta.appendChild(count);
+        const picker = document.createElement('span');
+        picker.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+        picker.style.color = 'var(--brand)';
+        meta.appendChild(picker);
+        card.appendChild(meta);
+
+        card.addEventListener('click', () => applyTemplate(t));
+        grid.appendChild(card);
+      });
+
+      wrap.appendChild(grid);
+
+      // Footer reinforces the point
+      const foot = document.createElement('div');
+      foot.className = 'template-foot';
+      foot.innerHTML = 'Not sure? <button type="button" class="template-foot-link" id="tpl-default-btn">Start with Holiday Enquiry</button> — you can change everything later.';
+      wrap.appendChild(foot);
+
+      overlay.appendChild(wrap);
+      document.body.appendChild(overlay);
+
+      // Wire the "Start with Holiday Enquiry" shortcut
+      document.getElementById('tpl-default-btn').addEventListener('click', () => {
+        applyTemplate(TEMPLATES.find(t => t.id === 'holiday'));
+      });
+
+      // Animate in
+      requestAnimationFrame(() => overlay.classList.add('is-open'));
+    }
+
+    function closeTemplatesModal() {
+      const overlay = document.querySelector('.template-overlay');
+      if (!overlay) return;
+      overlay.classList.remove('is-open');
+      setTimeout(() => overlay.remove(), 220);
+    }
+
+    // Apply a chosen template to state.config, dismiss modal, re-render.
+    // Marks dirty so the template seed persists on next autosave.
+    function applyTemplate(template) {
+      if (!template) return;
+      try {
+        // Apply template mutations directly to state.config
+        template.apply(state.config);
+        // Track which template was used — useful for analytics later
+        state.config.template = template.name;
+        // Re-render all the things
+        renderPalette();
+        renderCanvas();
+        renderInspector();
+        updatePreview();
+        // Mark dirty + trigger autosave so template choice persists
+        state.dirty = true;
+        syncSaveBtn();
+        autosave();
+        // Dismiss the modal
+        closeTemplatesModal();
+        // Friendly confirmation
+        showToast(`Started with ${template.name}`, 'success', 2200);
+      } catch (e) {
+        console.warn('[templates] apply failed', e);
+        showToast('Failed to apply template — please try again', 'error');
+      }
+    }
+
     /* ======================= EMBED CODE MODAL ========================= */
     // Proper modal replacing the window.prompt() stopgap. Shows the embed
     // snippet with syntax highlighting and a copy-to-clipboard button.
@@ -4596,6 +5035,14 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       renderInspector();
       syncSaveBtn();
       bindKeyboard();
+
+      // Show the templates modal for NEW forms (no ?id= in URL).
+      // If the agent is loading an existing form they already have fields and
+      // don't need the starter picker. Deferred one tick so first paint lands
+      // first — gives a nicer impression of the editor behind the overlay.
+      if (!loadId) {
+        setTimeout(() => openTemplatesModal(), 50);
+      }
 
       // Warn before unload if dirty
       window.addEventListener('beforeunload', (e) => {
