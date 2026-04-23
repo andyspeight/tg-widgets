@@ -4473,12 +4473,25 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
 
       const wrap = document.createElement('div');
       wrap.className = 'segmented';
+
+      // Keep references to all buttons so clicking one can update the
+      // active class on all siblings locally — no full inspector re-render
+      // needed. This is what fixes the "button click doesn't show selected"
+      // bug. The factory is now self-managing visually.
+      const buttons = [];
       (options || []).forEach(opt => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'seg-btn' + (opt.value === current ? ' is-active' : '');
         btn.textContent = opt.label;
-        btn.addEventListener('click', () => onChange && onChange(opt.value));
+        btn.addEventListener('click', () => {
+          // Update local visual state immediately — flip is-active to this button
+          buttons.forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+          // Then fire the change callback
+          if (onChange) onChange(opt.value);
+        });
+        buttons.push(btn);
         wrap.appendChild(btn);
       });
       field.appendChild(wrap);
