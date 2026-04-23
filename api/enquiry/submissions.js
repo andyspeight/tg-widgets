@@ -22,7 +22,7 @@
  * by filtering on Owner Email. Bypass attempts via query params are ignored.
  */
 
-const auth = require('../_auth.js');
+import { requireAuth, setCors, applyRateLimit, RATE_LIMITS, sanitiseForFormula } from '../_auth.js';
 
 const BASE_ID = process.env.TG_ENQUIRIES_AIRTABLE_BASE_ID || 'appQJYiPZVU5jMAml';
 const PAT = process.env.TG_ENQUIRIES_AIRTABLE_PAT;
@@ -82,23 +82,27 @@ const VALID_STATUSES = ['New', 'Read', 'Archived', 'Converted'];
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
 
-module.exports = async (req, res) => {
-  // CORS — same-origin for now but permissive in case the inbox gets embedded
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, PATCH, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+export default async function handler(req, res) {
+  // CORS via shared helper — consistent with the rest of the API
+  setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (!PAT) {
-    return res.status(500).json({ error: 'Server misconfigured: missing Airtable PAT' });
+    return res.status(500).json({ error: 'Server misconfigured: missing TG_ENQUIRIES_AIRTABLE_PAT' });
   }
 
-  const session = await auth.verify(req);
-  if (!session || !session.email) {
-    return res.status(401).json({ error: 'Not signed in' });
+  // Auth — requireAuth returns { user } on success or { error, status } on failure
+  const authResult = requireAuth(req);
+  if (authResult.error) {
+    return res.status(authResult.status).json({ error: authResult.error });
   }
-  const agentEmail = String(session.email).toLowerCase().trim();
+  const agentEmail = String(authResult.user.email || '').toLowerCase().trim();
+  if (!agentEmail) {
+    return res.status(401).json({ error: 'Session missing email' });
+  }
+
+  // Rate limit — per-agent, generous since this is dashboard-style read traffic
+  if (!applyRateLimit(res, `inbox:${agentEmail}`, RATE_LIMITS.widgetRead)) return;
 
   try {
     if (req.method === 'GET') {
@@ -116,7 +120,7 @@ module.exports = async (req, res) => {
     console.error('[submissions] fatal', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
-};
+}
 
 /* ============================== LIST ============================== */
 async function handleList(req, res, agentEmail) {
@@ -131,7 +135,7 @@ async function handleList(req, res, agentEmail) {
 
   // Filter formula — ALWAYS scoped to agent's ownership. No way to override.
   const filters = [
-    `LOWER({${F.ownerEmail}}) = '${escapeFormulaValue(agentEmail)}'`
+    `LOWER({${F.ownerEmail}}) = '${sanitiseForFormula(agentEmail)}'`
   ];
 
   const statusList = status.split(',').map(s => s.trim()).filter(s => VALID_STATUSES.includes(s));
@@ -141,7 +145,7 @@ async function handleList(req, res, agentEmail) {
   }
 
   if (formId && /^[A-Za-z0-9-]+$/.test(formId)) {
-    filters.push(`{${F.formId}} = '${escapeFormulaValue(formId)}'`);
+    filters.push(`{${F.formId}} = '${sanitiseForFormula(formId)}'`);
   }
 
   if (from && /^\d{4}-\d{2}-\d{2}/.test(from)) {
@@ -152,7 +156,7 @@ async function handleList(req, res, agentEmail) {
   }
 
   if (search && search.trim()) {
-    const safe = escapeFormulaValue(search.trim().toLowerCase());
+    const safe = sanitiseForFormula(search.trim().toLowerCase());
     filters.push(
       `OR(` +
         `FIND('${safe}', LOWER({${F.reference}})),` +
@@ -411,10 +415,4 @@ function parseJsonField(raw) {
   if (typeof raw === 'object') return raw;
   try { return JSON.parse(raw); }
   catch (e) { return raw; }
-}
-
-// Airtable formula strings use single quotes as string delimiters. Escape
-// user-supplied input to prevent formula injection.
-function escapeFormulaValue(str) {
-  return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
