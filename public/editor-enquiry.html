@@ -1419,25 +1419,40 @@
     .modal-code-wrap {
       position: relative;
     }
+    .modal-code-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #1E293B;
+      border-radius: var(--radius) var(--radius) 0 0;
+      border-bottom: 1px solid #334155;
+    }
+    .modal-code-toolbar-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
     .modal-code {
       padding: 16px 18px;
       background: #0F172A;
       color: #E2E8F0;
-      border-radius: var(--radius);
+      border-radius: 0 0 var(--radius) var(--radius);
       font-family: -apple-system, 'SF Mono', Menlo, monospace;
       font-size: 12px;
       line-height: 1.7;
       overflow-x: auto;
-      white-space: pre;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
     }
     .modal-code .tag { color: #7DD3FC; }
     .modal-code .attr { color: #FCD34D; }
     .modal-code .str { color: #FCA5A5; }
     .modal-copy-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      height: 30px;
+      height: 28px;
       padding: 0 12px;
       border: 1px solid rgba(255,255,255,.15);
       background: rgba(255,255,255,.08);
@@ -3619,7 +3634,7 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
             { value: 'Live', label: 'Live' },
             { value: 'Archived', label: 'Archived' }
           ],
-          onChange: (v) => { cfg.status = v; save(); renderTopbar(); renderInspector(); }
+          onChange: (v) => { cfg.status = v; save(); renderStatusBadge(); renderInspector(); }
         })
       ]));
 
@@ -3647,26 +3662,102 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
     }
 
     // ── Branding inspector ──
-    // Button colour, accent colour, theme. Changes reflect in the live preview
-    // immediately via the markDirtyAndSync → widget rebuild pipeline.
+    // Everything visual about the form — fonts, colours, shape, and size.
+    // Organised from most-impactful (Typography, Colours) to fine-tuning
+    // (Shape & Size, Borders, Logo). Sensible defaults if values are blank.
     function renderBrandingInspector(body, save) {
       const cfg = state.config;
 
+      // Typography
+      body.appendChild(section('Typography', [
+        labelledSelect({
+          label: 'Font family',
+          value: cfg.fontFamily || 'Inter',
+          options: [
+            { value: 'system',             label: 'System default' },
+            { value: 'Inter',              label: 'Inter' },
+            { value: 'DM Sans',            label: 'DM Sans' },
+            { value: 'Manrope',            label: 'Manrope' },
+            { value: 'Figtree',            label: 'Figtree' },
+            { value: 'Plus Jakarta Sans',  label: 'Plus Jakarta Sans' },
+            { value: 'Work Sans',          label: 'Work Sans' },
+            { value: 'Nunito',             label: 'Nunito' },
+            { value: 'Poppins',            label: 'Poppins' },
+            { value: 'Source Sans 3',      label: 'Source Sans 3' }
+          ],
+          hint: 'Google Fonts — loaded automatically when the form renders.',
+          onChange: (v) => { cfg.fontFamily = v; save(); }
+        })
+      ]));
+
+      // Colours — primary
       body.appendChild(section('Primary colours', [
         colourRow({
           label: 'Button colour',
           value: cfg.buttonColour || '#0891B2',
-          hint: 'Used on the submit button, focus rings and inline accents.',
+          hint: 'Submit button, focus rings, inline accents.',
           onChange: (v) => { cfg.buttonColour = v; save(); }
         }),
         colourRow({
           label: 'Accent colour',
           value: cfg.accentColour || '#EC4899',
-          hint: 'Used on selected pills, highlighted elements and small flourishes.',
+          hint: 'Selected pills, highlighted elements, small flourishes.',
           onChange: (v) => { cfg.accentColour = v; save(); }
         })
       ]));
 
+      // Colours — surfaces
+      body.appendChild(section('Text & background', [
+        colourRow({
+          label: 'Text colour',
+          value: cfg.textColour || '#0F172A',
+          hint: 'Primary text colour on the form.',
+          onChange: (v) => { cfg.textColour = v; save(); }
+        }),
+        colourRow({
+          label: 'Background colour',
+          value: cfg.bgColour || '#FFFFFF',
+          hint: 'Form panel background. Important for dark sites.',
+          onChange: (v) => { cfg.bgColour = v; save(); }
+        })
+      ]));
+
+      // Shape
+      body.appendChild(section('Shape', [
+        segmented({
+          label: 'Corner radius',
+          value: cfg.cornerRadius || 'medium',
+          options: [
+            { value: 'none',   label: 'None' },
+            { value: 'small',  label: 'Small' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'large',  label: 'Large' }
+          ],
+          onChange: (v) => { cfg.cornerRadius = v; save(); }
+        }),
+        segmented({
+          label: 'Field size',
+          value: cfg.fieldSize || 'comfortable',
+          options: [
+            { value: 'compact',      label: 'Compact' },
+            { value: 'comfortable',  label: 'Comfortable' },
+            { value: 'spacious',     label: 'Spacious' }
+          ],
+          onChange: (v) => { cfg.fieldSize = v; save(); }
+        }),
+        segmented({
+          label: 'Field style',
+          value: cfg.fieldStyle || 'outlined',
+          options: [
+            { value: 'outlined',   label: 'Outlined' },
+            { value: 'filled',     label: 'Filled' },
+            { value: 'underlined', label: 'Underlined' }
+          ],
+          onChange: (v) => { cfg.fieldStyle = v; save(); }
+        })
+      ]));
+
+      // Theme
       body.appendChild(section('Theme', [
         segmented({
           label: 'Appearance mode',
@@ -3680,23 +3771,95 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
         })
       ]));
 
-      // Tiny reset-to-defaults link
+      // Advanced colours
+      body.appendChild(section('Advanced colours', [
+        colourRow({
+          label: 'Border colour',
+          value: cfg.borderColour || '#E2E8F0',
+          hint: 'Input borders, dividers and separator lines.',
+          onChange: (v) => { cfg.borderColour = v; save(); }
+        }),
+        colourRow({
+          label: 'Error colour',
+          value: cfg.errorColour || '#EF4444',
+          hint: 'Validation error text and border highlighting.',
+          onChange: (v) => { cfg.errorColour = v; save(); }
+        })
+      ]));
+
+      // Logo
+      body.appendChild(section('Logo', [
+        labelledInput({
+          label: 'Logo image URL (optional)',
+          value: cfg.logoUrl || '',
+          placeholder: 'https://yourshop.co.uk/images/logo.svg',
+          type: 'url',
+          maxlength: 500,
+          hint: 'Appears above the form header. PNG, SVG or JPG. Leave blank to hide.',
+          onInput: (v) => { cfg.logoUrl = v; save(); }
+        })
+      ]));
+
+      // Reset
       const resetSec = document.createElement('div');
       resetSec.className = 'insp-section';
       const resetBtn = document.createElement('button');
       resetBtn.type = 'button';
-      resetBtn.className = 'insp-link-btn';
       resetBtn.style.cssText = 'font-size: 12px; color: var(--muted); background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 0;';
       resetBtn.textContent = 'Reset branding to Travelgenix defaults';
       resetBtn.addEventListener('click', () => {
-        cfg.buttonColour = '#0891B2';
-        cfg.accentColour = '#EC4899';
-        cfg.theme = 'light';
+        cfg.fontFamily    = 'Inter';
+        cfg.buttonColour  = '#0891B2';
+        cfg.accentColour  = '#EC4899';
+        cfg.textColour    = '#0F172A';
+        cfg.bgColour      = '#FFFFFF';
+        cfg.borderColour  = '#E2E8F0';
+        cfg.errorColour   = '#EF4444';
+        cfg.cornerRadius  = 'medium';
+        cfg.fieldSize     = 'comfortable';
+        cfg.fieldStyle    = 'outlined';
+        cfg.theme         = 'light';
+        cfg.logoUrl       = '';
         save();
         renderInspector();
       });
       resetSec.appendChild(resetBtn);
       body.appendChild(resetSec);
+    }
+
+    // ── labelledSelect factory ──
+    // A styled native <select> with optional hint below. Used for font family
+    // and other enumerated choices that have too many options for segmented.
+    function labelledSelect({ label, value, options, hint, onChange }) {
+      const wrap = document.createElement('div');
+      wrap.className = 'insp-field';
+
+      const lbl = document.createElement('label');
+      lbl.className = 'insp-label';
+      lbl.textContent = label;
+      wrap.appendChild(lbl);
+
+      const sel = document.createElement('select');
+      sel.className = 'insp-input';
+      sel.style.cssText = 'appearance: auto; cursor: pointer;';
+      options.forEach(opt => {
+        const o = document.createElement('option');
+        o.value = opt.value;
+        o.textContent = opt.label;
+        if (opt.value === value) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.addEventListener('change', () => onChange(sel.value));
+      wrap.appendChild(sel);
+
+      if (hint) {
+        const h = document.createElement('p');
+        h.className = 'insp-hint';
+        h.textContent = hint;
+        wrap.appendChild(h);
+      }
+
+      return wrap;
     }
 
     // ── Security inspector ──
@@ -3924,21 +4087,15 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       const codeWrap = document.createElement('div');
       codeWrap.className = 'modal-code-wrap';
 
-      const code = document.createElement('pre');
-      code.className = 'modal-code';
-      // Syntax-highlighted version
-      code.innerHTML =
-        '<span class="tag">&lt;div</span> ' +
-        '<span class="attr">data-tg-widget</span>=<span class="str">"enquiry"</span> ' +
-        '<span class="attr">data-tg-id</span>=<span class="str">"' + escapeHtml(state.widgetId) + '"</span>' +
-        '<span class="tag">&gt;&lt;/div&gt;</span>\n' +
-        '<span class="tag">&lt;script</span> ' +
-        '<span class="attr">src</span>=<span class="str">"' + escapeHtml(origin + '/widget-enquiry.js') + '"</span> ' +
-        '<span class="attr">defer</span>' +
-        '<span class="tag">&gt;&lt;/script&gt;</span>';
-      codeWrap.appendChild(code);
+      // Toolbar above the code block
+      const toolbar = document.createElement('div');
+      toolbar.className = 'modal-code-toolbar';
+      const toolbarLabel = document.createElement('span');
+      toolbarLabel.className = 'modal-code-toolbar-label';
+      toolbarLabel.textContent = 'HTML snippet';
+      toolbar.appendChild(toolbarLabel);
 
-      // Copy button
+      // Copy button — sits in the toolbar
       const copyBtn = document.createElement('button');
       copyBtn.className = 'modal-copy-btn';
       copyBtn.type = 'button';
@@ -3973,7 +4130,22 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
           showToast('Copy failed — please select and copy manually', 'error');
         }
       });
-      codeWrap.appendChild(copyBtn);
+      toolbar.appendChild(copyBtn);
+      codeWrap.appendChild(toolbar);
+
+      const code = document.createElement('pre');
+      code.className = 'modal-code';
+      // Syntax-highlighted version
+      code.innerHTML =
+        '<span class="tag">&lt;div</span> ' +
+        '<span class="attr">data-tg-widget</span>=<span class="str">"enquiry"</span> ' +
+        '<span class="attr">data-tg-id</span>=<span class="str">"' + escapeHtml(state.widgetId) + '"</span>' +
+        '<span class="tag">&gt;&lt;/div&gt;</span>\n' +
+        '<span class="tag">&lt;script</span> ' +
+        '<span class="attr">src</span>=<span class="str">"' + escapeHtml(origin + '/widget-enquiry.js') + '"</span> ' +
+        '<span class="attr">defer</span>' +
+        '<span class="tag">&gt;&lt;/script&gt;</span>';
+      codeWrap.appendChild(code);
       body.appendChild(codeWrap);
 
       // Instructions under the code block
@@ -4212,18 +4384,44 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       return row;
     }
 
-    function segmented(current, options, onChange) {
+    function segmented(currentOrOpts, optionsArg, onChangeArg) {
+      // Accept both call styles:
+      //   segmented(currentValue, optionsArray, onChange)         — positional
+      //   segmented({ label?, value, options, onChange })         — object
+      let current, options, onChange, label;
+      if (currentOrOpts && typeof currentOrOpts === 'object' && !Array.isArray(currentOrOpts) && 'options' in currentOrOpts) {
+        current  = currentOrOpts.value;
+        options  = currentOrOpts.options;
+        onChange = currentOrOpts.onChange;
+        label    = currentOrOpts.label;
+      } else {
+        current  = currentOrOpts;
+        options  = optionsArg;
+        onChange = onChangeArg;
+      }
+
+      // Wrap in a field block so we can show an optional label above the segmented control
+      const field = document.createElement('div');
+      field.className = 'insp-field';
+      if (label) {
+        const lbl = document.createElement('label');
+        lbl.className = 'insp-label';
+        lbl.textContent = label;
+        field.appendChild(lbl);
+      }
+
       const wrap = document.createElement('div');
       wrap.className = 'segmented';
-      options.forEach(opt => {
+      (options || []).forEach(opt => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'seg-btn' + (opt.value === current ? ' is-active' : '');
         btn.textContent = opt.label;
-        btn.addEventListener('click', () => onChange(opt.value));
+        btn.addEventListener('click', () => onChange && onChange(opt.value));
         wrap.appendChild(btn);
       });
-      return wrap;
+      field.appendChild(wrap);
+      return label ? field : wrap;
     }
 
     // Mark the state as dirty and sync UI — but DO NOT re-render the inspector.
@@ -4242,12 +4440,14 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
     /* =========================== SELECTION =========================== */
     function selectItem(target) {
       state.selectedItem = target;
+      renderPalette();  // update palette card selection state (for routing/settings tabs)
       renderCanvas();
       renderInspector();
     }
 
     function clearSelection() {
       state.selectedItem = null;
+      renderPalette();
       renderCanvas();
       renderInspector();
     }
