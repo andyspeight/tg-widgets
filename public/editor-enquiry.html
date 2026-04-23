@@ -1049,6 +1049,179 @@
       margin-top: 4px;
     }
 
+    /* ========================== ROUTING PALETTE =========================== */
+    /* Each routing destination (email, sheets, webhook, etc.) is a card in
+       the palette with an icon, name, description, and an inline toggle.
+       Clicking the card body opens that destination's config in the inspector.
+       The toggle itself is a direct state action — no inspector required. */
+    .route-card {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all .12s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .route-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-xs);
+    }
+    .route-card.is-selected {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+      box-shadow: 0 0 0 3px var(--brand-soft);
+    }
+    .route-card.is-enabled .route-card-icon {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+    .route-card.is-disabled {
+      opacity: .7;
+    }
+    .route-card.is-disabled .route-card-icon {
+      background: var(--hover);
+      color: var(--muted);
+    }
+    .route-card-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .route-card-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: var(--hover);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all .15s ease;
+    }
+    .route-card-info {
+      flex: 1;
+      min-width: 0;
+      line-height: 1.3;
+    }
+    .route-card-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .route-card-desc {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 1px;
+    }
+    .route-card-toggle {
+      flex-shrink: 0;
+    }
+    .route-card-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .route-card-badge.required {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+    .route-card-badge.coming-soon {
+      background: var(--warning);
+      color: #fff;
+      opacity: .85;
+    }
+    .route-card-badge.beta {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    /* Hint text at top of Routing palette */
+    .route-intro {
+      padding: 12px;
+      background: var(--hover);
+      border-radius: var(--radius);
+      font-size: 11px;
+      color: var(--sub);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .route-intro strong {
+      color: var(--ink);
+      display: block;
+      margin-bottom: 3px;
+      font-size: 12px;
+    }
+
+    /* Read-only value block — used in inspectors to show server-generated
+       values like webhook secrets, API keys etc. */
+    .readonly-box {
+      padding: 10px 12px;
+      background: var(--hover);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-family: -apple-system, 'SF Mono', Menlo, monospace;
+      font-size: 11px;
+      color: var(--sub);
+      word-break: break-all;
+      line-height: 1.5;
+      user-select: all;
+    }
+    .readonly-box.is-empty {
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    /* "Coming soon" pill for features not yet built */
+    .coming-soon-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--hover);
+      border: 1px dashed var(--border-strong);
+      border-radius: 7px;
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 6px;
+    }
+    .coming-soon-pill svg {
+      flex-shrink: 0;
+      color: var(--warning);
+    }
+
+    /* Code block for curl / snippet examples in inspector */
+    .code-block {
+      padding: 10px 12px;
+      background: #0F172A;
+      color: #E2E8F0;
+      border-radius: 7px;
+      font-family: -apple-system, 'SF Mono', Menlo, monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .code-block .comment { color: #64748B; }
+    .code-block .key     { color: #7DD3FC; }
+    .code-block .str     { color: #FCA5A5; }
+
     /* While loading initial form */
     .boot-loading {
       position: fixed; inset: 0;
@@ -1677,16 +1850,12 @@
       if (state.activePaletteTab === 'fields') {
         renderFieldPalette(body);
       } else if (state.activePaletteTab === 'routing') {
-        body.innerHTML = `
-          <div class="palette-empty">
-            <p><strong style="color:var(--sub)">Routing destinations</strong><br>
-            Email, Google Sheets, webhooks and more land here in Part 3.</p>
-          </div>`;
+        renderRoutingPalette(body);
       } else {
         body.innerHTML = `
           <div class="palette-empty">
             <p><strong style="color:var(--sub)">Form settings</strong><br>
-            Branding, security, embed code and more land here in Part 3.</p>
+            Branding, security, embed code and more land here in Part 3b.</p>
           </div>`;
       }
     }
@@ -1754,6 +1923,183 @@
 
           body.appendChild(card);
         });
+      });
+    }
+
+    /* =========================== ROUTING ============================ */
+    // Single source of truth for the 7 routing destinations. Each entry
+    // defines how the palette card appears and which inspector panel to show.
+    // The `configKey` maps to the routing namespace in state.config.routing.
+    const ROUTING_DESTINATIONS = [
+      {
+        id: 'email',
+        name: 'Email',
+        desc: 'Instant notification when a visitor submits the form.',
+        badge: 'required',
+        icon: ICONS.mail,
+        configKey: 'email',
+        defaultEnabled: true,
+        toggleable: false,  // email is always on — it's the minimum viable
+      },
+      {
+        id: 'googleSheets',
+        name: 'Google Sheets',
+        desc: 'Append each submission as a new row in a spreadsheet.',
+        icon: '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="8" y1="9" x2="10" y2="9"/>',
+        configKey: 'googleSheets',
+        defaultEnabled: false,
+        toggleable: true,
+      },
+      {
+        id: 'airtable',
+        name: 'Your Airtable',
+        desc: 'Push submissions into your own Airtable base.',
+        badge: 'beta',
+        icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+        configKey: 'airtable',
+        defaultEnabled: false,
+        toggleable: true,
+      },
+      {
+        id: 'webhook',
+        name: 'Webhook',
+        desc: 'POST each submission to any URL with an HMAC signature.',
+        icon: '<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 01-14 0"/><path d="M5 5l4 4M15 9l4-4"/>',
+        configKey: 'webhook',
+        defaultEnabled: false,
+        toggleable: true,
+      },
+      {
+        id: 'lunaChat',
+        name: 'Luna Chat',
+        desc: 'Pass submission context to Luna Chat if the visitor continues.',
+        icon: '<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
+        configKey: 'lunaChat',
+        defaultEnabled: false,
+        toggleable: true,
+      },
+      {
+        id: 'lunaMarketing',
+        name: 'Luna Marketing',
+        desc: 'Auto-enrol consenting visitors in drip campaigns.',
+        icon: '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+        configKey: 'lunaMarketing',
+        defaultEnabled: false,
+        toggleable: true,
+      },
+      {
+        id: 'lunaWork',
+        name: 'Luna Work',
+        desc: 'Create a lead in the CRM. Launching when Luna Work goes live.',
+        badge: 'coming-soon',
+        icon: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>',
+        configKey: 'lunaWork',
+        defaultEnabled: false,
+        toggleable: true,
+      },
+    ];
+
+    const ROUTING_MAP = ROUTING_DESTINATIONS.reduce((m, d) => { m[d.id] = d; return m; }, {});
+
+    // Routing tab — renders the 7 destinations as cards with inline toggles.
+    // Clicking the card opens config in the inspector. The toggle flips the
+    // enabled flag without opening anything.
+    function renderRoutingPalette(body) {
+      // Intro blurb
+      const intro = document.createElement('div');
+      intro.className = 'route-intro';
+      intro.innerHTML = `
+        <strong>Where submissions go</strong>
+        Every submission fires through the destinations you enable below. Email is always on — agents never miss an enquiry. Add more as you need them.`;
+      body.appendChild(intro);
+
+      ROUTING_DESTINATIONS.forEach(dest => {
+        const routingConfig = (state.config.routing && state.config.routing[dest.configKey]) || {};
+        const enabled = dest.toggleable
+          ? !!routingConfig.enabled
+          : (routingConfig.enabled !== false);  // email defaults on unless explicitly off
+        const isSelected = state.selectedItem
+          && state.selectedItem.kind === 'routing'
+          && state.selectedItem.destination === dest.id;
+
+        const card = document.createElement('div');
+        card.className = 'route-card'
+          + (isSelected ? ' is-selected' : '')
+          + (enabled ? ' is-enabled' : ' is-disabled');
+
+        const row = document.createElement('div');
+        row.className = 'route-card-row';
+
+        const icon = document.createElement('span');
+        icon.className = 'route-card-icon';
+        icon.appendChild(iconSvg(dest.icon, 15));
+        row.appendChild(icon);
+
+        const info = document.createElement('div');
+        info.className = 'route-card-info';
+
+        const nameWrap = document.createElement('div');
+        nameWrap.className = 'route-card-name';
+        nameWrap.appendChild(document.createTextNode(dest.name));
+        if (dest.badge) {
+          const badge = document.createElement('span');
+          badge.className = 'route-card-badge ' + dest.badge;
+          badge.textContent = dest.badge === 'coming-soon' ? 'Soon' : dest.badge;
+          nameWrap.appendChild(badge);
+        }
+        info.appendChild(nameWrap);
+
+        const desc = document.createElement('div');
+        desc.className = 'route-card-desc';
+        desc.textContent = dest.desc;
+        info.appendChild(desc);
+
+        row.appendChild(info);
+
+        // Inline toggle switch (unless this destination is not toggleable, e.g. email)
+        if (dest.toggleable) {
+          const toggleLabel = document.createElement('label');
+          toggleLabel.className = 'switch route-card-toggle';
+          toggleLabel.setAttribute('onclick', 'event.stopPropagation()');
+          const toggleInput = document.createElement('input');
+          toggleInput.type = 'checkbox';
+          toggleInput.checked = enabled;
+          toggleInput.addEventListener('change', (e) => {
+            e.stopPropagation();
+            mutate(cfg => {
+              if (!cfg.routing) cfg.routing = {};
+              if (!cfg.routing[dest.configKey]) cfg.routing[dest.configKey] = {};
+              cfg.routing[dest.configKey].enabled = toggleInput.checked;
+            });
+            renderPalette();
+            // If this destination is selected in the inspector, re-render it
+            // so any "enabled-dependent" fields reflect the new state
+            if (state.selectedItem && state.selectedItem.kind === 'routing' && state.selectedItem.destination === dest.id) {
+              renderInspector();
+            }
+          });
+          const track = document.createElement('span');
+          track.className = 'switch-track';
+          toggleLabel.appendChild(toggleInput);
+          toggleLabel.appendChild(track);
+          row.appendChild(toggleLabel);
+        } else {
+          // Non-toggleable (email) — show an always-on badge
+          const onBadge = document.createElement('span');
+          onBadge.style.cssText = 'font-size:10px; font-weight:600; color:var(--success); flex-shrink:0;';
+          onBadge.textContent = 'ON';
+          row.appendChild(onBadge);
+        }
+
+        card.appendChild(row);
+
+        // Click the card body (not the toggle) → open in inspector
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.route-card-toggle')) return;
+          selectItem({ kind: 'routing', destination: dest.id });
+        });
+
+        body.appendChild(card);
       });
     }
 
@@ -2362,6 +2708,7 @@
       if (sel.kind === 'header')  return renderHeaderInspector(body, headTitle, headSub);
       if (sel.kind === 'thankyou') return renderThankYouInspector(body, headTitle, headSub);
       if (sel.kind === 'field')   return renderFieldInspector(body, headTitle, headSub, sel.id);
+      if (sel.kind === 'routing') return renderRoutingInspector(body, headTitle, headSub, sel.destination);
     }
 
     // ── Header inspector ──
@@ -2540,6 +2887,352 @@
       dangerRow.appendChild(dangerBtn);
       dangerSec.appendChild(dangerRow);
       body.appendChild(dangerSec);
+    }
+
+    // ── Routing inspector ──
+    // One entry point that dispatches to a destination-specific builder.
+    // Every destination's config lives in state.config.routing[destKey].
+    function renderRoutingInspector(body, headTitle, headSub, destId) {
+      const dest = ROUTING_MAP[destId];
+      if (!dest) {
+        state.selectedItem = null;
+        renderInspector();
+        return;
+      }
+      if (!state.config.routing) state.config.routing = {};
+      if (!state.config.routing[dest.configKey]) state.config.routing[dest.configKey] = {};
+      const routingConfig = state.config.routing[dest.configKey];
+
+      headTitle.textContent = dest.name;
+      headSub.textContent = dest.desc;
+
+      const saveRouting = () => {
+        // Persist mutation — triggers dirty, autosave, canvas/palette repaint
+        markDirtyAndSync();
+        renderPalette(); // update card state (enabled/disabled visual)
+      };
+
+      // Enable/disable section (except for email — always on)
+      if (dest.toggleable) {
+        const currentEnabled = !!routingConfig.enabled;
+        body.appendChild(section('Status', [
+          toggleRow({
+            label: currentEnabled ? 'Enabled' : 'Disabled',
+            sub: currentEnabled
+              ? 'Submissions are being routed to this destination.'
+              : 'Flip on to start routing submissions here.',
+            checked: currentEnabled,
+            onChange: (v) => {
+              routingConfig.enabled = v;
+              saveRouting();
+              renderInspector(); // update Status label + conditional fields
+            }
+          })
+        ]));
+      }
+
+      // Destination-specific config
+      if (dest.id === 'email')         renderEmailInspector(body, routingConfig, saveRouting);
+      else if (dest.id === 'googleSheets')  renderGoogleSheetsInspector(body, routingConfig, saveRouting);
+      else if (dest.id === 'airtable')      renderAirtableInspector(body, routingConfig, saveRouting);
+      else if (dest.id === 'webhook')       renderWebhookInspector(body, routingConfig, saveRouting);
+      else if (dest.id === 'lunaChat')      renderLunaChatInspector(body, routingConfig, saveRouting);
+      else if (dest.id === 'lunaMarketing') renderLunaMarketingInspector(body, routingConfig, saveRouting);
+      else if (dest.id === 'lunaWork')      renderLunaWorkInspector(body, routingConfig, saveRouting);
+    }
+
+    // ── Email inspector ──
+    // Agent notification every time a submission lands, plus optional
+    // auto-reply to the customer.
+    function renderEmailInspector(body, cfg, save) {
+      // Recipients
+      body.appendChild(section('Recipients', [
+        labelledTextarea({
+          label: 'Send notifications to',
+          value: cfg.to || '',
+          placeholder: 'sales@yourshop.co.uk\nmanager@yourshop.co.uk',
+          rows: 3,
+          maxlength: 2000,
+          hint: 'One address per line. Every address here gets a notification email with the submission details.',
+          onInput: (v) => { cfg.to = v; save(); }
+        })
+      ]));
+
+      // Auto-reply to customer
+      body.appendChild(section('Customer auto-reply', [
+        toggleRow({
+          label: 'Send customer a confirmation',
+          sub: 'Branded email acknowledging the enquiry was received — usually a smart move for conversion.',
+          checked: !!cfg.autoReply,
+          onChange: (v) => { cfg.autoReply = v; save(); renderInspector(); }
+        })
+      ]));
+
+      // Optional custom HTML templates (advanced)
+      const templatesSec = section('Custom templates', [
+        labelledTextarea({
+          label: 'Agent notification HTML (optional)',
+          value: cfg.templateHTML || '',
+          placeholder: 'Leave blank to use the default Travelgenix template.',
+          rows: 4,
+          maxlength: 100000,
+          hint: 'Advanced — override the default agent email template with your own HTML. Use {{fieldName}} placeholders.',
+          onInput: (v) => { cfg.templateHTML = v; save(); }
+        })
+      ]);
+      body.appendChild(templatesSec);
+
+      if (cfg.autoReply) {
+        body.appendChild(section('Customer email', [
+          labelledTextarea({
+            label: 'Auto-reply HTML (optional)',
+            value: cfg.autoReplyHTML || '',
+            placeholder: 'Leave blank to use the default auto-reply template.',
+            rows: 4,
+            maxlength: 100000,
+            hint: 'Override the customer auto-reply template. Same {{fieldName}} placeholders as the agent template.',
+            onInput: (v) => { cfg.autoReplyHTML = v; save(); }
+          })
+        ]));
+      }
+    }
+
+    // ── Google Sheets inspector ──
+    function renderGoogleSheetsInspector(body, cfg, save) {
+      if (!cfg.enabled) {
+        body.appendChild(sectionNote(
+          'Flip the switch above to configure Google Sheets routing.'
+        ));
+        return;
+      }
+
+      body.appendChild(section('Sheet details', [
+        labelledInput({
+          label: 'Spreadsheet ID',
+          value: cfg.sheetId || '',
+          placeholder: '1a2b3c4d5e6f7g8h...',
+          maxlength: 100,
+          hintHtml: "The ID in your sheet's URL: <code>docs.google.com/spreadsheets/d/<strong>THIS_PART</strong>/edit</code>",
+          onInput: (v) => { cfg.sheetId = v; save(); }
+        }),
+        labelledInput({
+          label: 'Tab name',
+          value: cfg.tab || '',
+          placeholder: 'Enquiries',
+          maxlength: 100,
+          hint: 'The name of the tab within the spreadsheet (case-sensitive). Defaults to "Enquiries" if blank.',
+          onInput: (v) => { cfg.tab = v; save(); }
+        })
+      ]));
+
+      // One-time setup note
+      const setup = document.createElement('div');
+      setup.className = 'insp-section';
+      setup.innerHTML = `
+        <h4 class="insp-section-title">One-time setup</h4>
+        <div style="padding: 12px; background: var(--hover); border-radius: var(--radius); font-size: 12px; line-height: 1.5; color: var(--sub);">
+          Share your spreadsheet with our service account so Travelgenix can write to it:
+          <div class="readonly-box" style="margin-top: 8px;">travelgenix-forms@travelgenix-io.iam.gserviceaccount.com</div>
+          <div style="margin-top: 8px; font-size: 11px; color: var(--muted);">
+            Give it <strong>Editor</strong> access. Submissions will append as new rows starting from the next empty row.
+          </div>
+        </div>
+      `;
+      body.appendChild(setup);
+    }
+
+    // ── Airtable (client's own base) inspector ──
+    // The encryption endpoint doesn't exist yet, so the PAT field is shown
+    // in a "Coming soon" state. Base ID, table ID and field map can be saved.
+    function renderAirtableInspector(body, cfg, save) {
+      if (!cfg.enabled) {
+        body.appendChild(sectionNote(
+          'Flip the switch above to configure Airtable routing.'
+        ));
+        return;
+      }
+
+      body.appendChild(section('Your Airtable base', [
+        labelledInput({
+          label: 'Base ID',
+          value: cfg.baseId || '',
+          placeholder: 'appXXXXXXXXXXXXXX',
+          maxlength: 50,
+          hintHtml: "Starts with <code>app</code>. Find it in your Airtable URL or API docs.",
+          onInput: (v) => { cfg.baseId = v; save(); }
+        }),
+        labelledInput({
+          label: 'Table ID',
+          value: cfg.tableId || '',
+          placeholder: 'tblXXXXXXXXXXXXXX',
+          maxlength: 50,
+          hintHtml: "Starts with <code>tbl</code>. Found in the Airtable API reference for your base.",
+          onInput: (v) => { cfg.tableId = v; save(); }
+        })
+      ]));
+
+      // Personal access token — encryption endpoint not built yet
+      const patSec = document.createElement('div');
+      patSec.className = 'insp-section';
+      const patTitle = document.createElement('h4');
+      patTitle.className = 'insp-section-title';
+      patTitle.textContent = 'Personal access token';
+      patSec.appendChild(patTitle);
+      const patPill = document.createElement('div');
+      patPill.className = 'coming-soon-pill';
+      patPill.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Secure PAT entry arrives in the next build — email support@travelgenix.io to configure your PAT for now
+      `;
+      patSec.appendChild(patPill);
+      body.appendChild(patSec);
+
+      // Field map (advanced)
+      body.appendChild(section('Field mapping', [
+        labelledTextarea({
+          label: 'Field map JSON (optional)',
+          value: cfg.fieldMap || '',
+          placeholder: '{\n  "destinations": "fldXXXXX",\n  "travellers": "fldYYYYY"\n}',
+          rows: 5,
+          maxlength: 10000,
+          hintHtml: 'Map submission fields to your Airtable field IDs. Blank = auto-map by field name.',
+          onInput: (v) => { cfg.fieldMap = v; save(); }
+        })
+      ]));
+    }
+
+    // ── Webhook inspector ──
+    function renderWebhookInspector(body, cfg, save) {
+      if (!cfg.enabled) {
+        body.appendChild(sectionNote(
+          'Flip the switch above to configure webhook routing.'
+        ));
+        return;
+      }
+
+      body.appendChild(section('Endpoint', [
+        labelledInput({
+          label: 'Webhook URL',
+          value: cfg.url || '',
+          placeholder: 'https://your-crm.example.com/hooks/enquiry',
+          type: 'url',
+          maxlength: 500,
+          hint: 'Each submission gets POSTed here as JSON. Must be HTTPS.',
+          onInput: (v) => { cfg.url = v; save(); }
+        })
+      ]));
+
+      // HMAC signing secret — generated server-side, displayed read-only
+      const secretSec = document.createElement('div');
+      secretSec.className = 'insp-section';
+      const secretTitle = document.createElement('h4');
+      secretTitle.className = 'insp-section-title';
+      secretTitle.textContent = 'Signing secret';
+      secretSec.appendChild(secretTitle);
+
+      const secretBox = document.createElement('div');
+      if (cfg.hasSecret) {
+        secretBox.className = 'readonly-box';
+        secretBox.textContent = '●●●●●●●● · auto-generated on first save · only shown during create';
+      } else {
+        secretBox.className = 'readonly-box is-empty';
+        secretBox.textContent = 'A secret will be generated automatically when you enable webhook routing and save.';
+      }
+      secretSec.appendChild(secretBox);
+      const note = document.createElement('p');
+      note.className = 'insp-note';
+      note.innerHTML = 'Travelgenix signs every webhook POST with this secret. Verify it on your end by computing HMAC-SHA256 of the raw request body and comparing to the <code>X-Travelgenix-Signature</code> header.';
+      secretSec.appendChild(note);
+      body.appendChild(secretSec);
+
+      // Example payload
+      const exampleSec = document.createElement('div');
+      exampleSec.className = 'insp-section';
+      const exampleTitle = document.createElement('h4');
+      exampleTitle.className = 'insp-section-title';
+      exampleTitle.textContent = 'Example request';
+      exampleSec.appendChild(exampleTitle);
+
+      const code = document.createElement('div');
+      code.className = 'code-block';
+      code.innerHTML = `<span class="comment"># POST sent to your webhook URL</span>
+POST /hooks/enquiry HTTP/1.1
+Host: your-crm.example.com
+Content-Type: application/json
+X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
+
+{
+  <span class="key">"reference"</span>: <span class="str">"TG-HE-0042"</span>,
+  <span class="key">"formId"</span>: <span class="str">"EF-0001"</span>,
+  <span class="key">"submittedAt"</span>: <span class="str">"2026-04-23T14:30:00Z"</span>,
+  <span class="key">"fields"</span>: { ... }
+}`;
+      exampleSec.appendChild(code);
+      body.appendChild(exampleSec);
+    }
+
+    // ── Luna Chat inspector ──
+    function renderLunaChatInspector(body, cfg, save) {
+      const note = document.createElement('div');
+      note.className = 'insp-section';
+      note.innerHTML = `
+        <p style="font-size: 13px; color: var(--sub); line-height: 1.6; margin: 0;">
+          When enabled, each submission passes its context into Luna Chat so if the visitor continues chatting after submitting, Luna already knows what they asked for.
+        </p>
+        <p class="insp-note" style="margin-top: 12px;">
+          Requires Luna Chat to be configured for your client account. No extra setup here — just flip the switch above.
+        </p>
+      `;
+      body.appendChild(note);
+    }
+
+    // ── Luna Marketing inspector ──
+    function renderLunaMarketingInspector(body, cfg, save) {
+      const note = document.createElement('div');
+      note.className = 'insp-section';
+      note.innerHTML = `
+        <p style="font-size: 13px; color: var(--sub); line-height: 1.6; margin: 0;">
+          Visitors who tick the marketing consent box on the form get auto-enrolled in your Luna Marketing drip campaign. No consent, no enrolment — GDPR-friendly by default.
+        </p>
+        <p class="insp-note" style="margin-top: 12px;">
+          <strong>Depends on the Consent field</strong> being present on your form and marketing consent being ticked by the visitor.
+        </p>
+      `;
+      body.appendChild(note);
+    }
+
+    // ── Luna Work inspector ──
+    function renderLunaWorkInspector(body, cfg, save) {
+      const note = document.createElement('div');
+      note.className = 'insp-section';
+      note.innerHTML = `
+        <div class="coming-soon-pill" style="margin-bottom: 16px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Luna Work CRM launches in a future release
+        </div>
+        <p style="font-size: 13px; color: var(--sub); line-height: 1.6; margin: 0;">
+          When Luna Work goes live, every submission here will create a new lead in your CRM with a trip draft, contact record, and pre-filled preferences.
+        </p>
+        <p class="insp-note" style="margin-top: 12px;">
+          You can enable this now to flag your intent — the flag will be respected automatically when Luna Work launches.
+        </p>
+      `;
+      body.appendChild(note);
+    }
+
+    // Tiny helper for "flip the toggle first" empty states in routing inspectors
+    function sectionNote(text) {
+      const sec = document.createElement('div');
+      sec.className = 'insp-section';
+      const p = document.createElement('p');
+      p.style.cssText = 'font-size: 13px; color: var(--muted); margin: 0; padding: 20px 16px; text-align: center; background: var(--hover); border-radius: var(--radius); line-height: 1.5;';
+      p.textContent = text;
+      sec.appendChild(p);
+      return sec;
     }
 
     // Type-specific inspector extras — returns a section element, or null
