@@ -856,6 +856,147 @@
       min-height: 400px;
     }
 
+    /* ======================== INSPECTOR CONTROLS ========================== */
+    .insp-section {
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .insp-section:last-child {
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border-bottom: 0;
+    }
+    .insp-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+
+    /* Toggle rows — a row with a switch on the right */
+    .toggle-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      cursor: pointer;
+      transition: border-color .12s ease;
+      margin-bottom: 8px;
+    }
+    .toggle-row:last-child { margin-bottom: 0; }
+    .toggle-row:hover { border-color: var(--border-strong); }
+    .toggle-row-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .toggle-row-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+    .toggle-row-text { flex: 1; min-width: 0; }
+
+    /* Segmented control — for thank-you mode etc */
+    .segmented {
+      display: flex;
+      background: var(--hover);
+      padding: 3px;
+      border-radius: var(--radius);
+      gap: 2px;
+    }
+    .seg-btn {
+      flex: 1;
+      height: 30px;
+      padding: 0 10px;
+      border: 0;
+      background: transparent;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--sub);
+      cursor: pointer;
+      transition: all .12s ease;
+    }
+    .seg-btn:hover { color: var(--ink); }
+    .seg-btn.is-active {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: var(--shadow-xs);
+    }
+
+    /* Danger action — for delete buttons in the inspector */
+    .insp-danger-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      background: var(--danger-soft);
+      border-radius: var(--radius);
+    }
+    .insp-danger-text {
+      font-size: 12px;
+      color: var(--danger);
+      line-height: 1.4;
+    }
+    .insp-danger-btn {
+      height: 30px;
+      padding: 0 12px;
+      border: 1px solid var(--danger);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--danger);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .12s ease;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .insp-danger-btn:hover { background: var(--danger); color: #fff; }
+
+    /* Helper text between form controls */
+    .insp-note {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 6px 0 0;
+    }
+    .insp-note code {
+      background: var(--hover);
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: -apple-system, 'SF Mono', Menlo, monospace;
+      font-size: 11px;
+      color: var(--sub);
+    }
+
+    /* When a url-style input is hidden (e.g. redirect URL when mode isn't redirect) */
+    .insp-conditional {
+      display: none;
+    }
+    .insp-conditional.is-visible {
+      display: block;
+    }
+
+    /* Make the character-count indicator subtle */
+    .insp-charcount {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      margin-top: 4px;
+    }
+
     /* While loading initial form */
     .boot-loading {
       position: fixed; inset: 0;
@@ -1537,20 +1678,15 @@
           text.appendChild(descEl);
           card.appendChild(text);
 
-          // Drag source events — payload wiring lives in Part 2b.
-          // For now we just set a data transfer so the browser shows the
-          // drag ghost correctly when Part 2b wires up the canvas drops.
+          // Drag source events
           card.addEventListener('dragstart', (e) => {
             if (already) { e.preventDefault(); return; }
             card.classList.add('is-dragging');
-            try {
-              e.dataTransfer.effectAllowed = 'copy';
-              e.dataTransfer.setData('application/x-tg-field-type', type.id);
-              e.dataTransfer.setData('text/plain', type.id);
-            } catch (err) { /* Safari sometimes throws on setData */ }
+            startNewFieldDrag(type.id, e);
           });
           card.addEventListener('dragend', () => {
             card.classList.remove('is-dragging');
+            endDrag();
           });
           // Click-to-add as an accessible fallback for when drag-and-drop
           // isn't available (touch, keyboard, reduced-motion preferences).
@@ -1613,6 +1749,9 @@
 
       // ── Thank-you card (always shown, pinned at bottom) ──
       stage.insertBefore(renderThankYouCard(), previewWrapper);
+
+      // Wire up HTML5 DnD on every newly-created .drop-zone
+      bindCanvasDropZones();
     }
 
     function renderHeaderCard() {
@@ -1705,11 +1844,20 @@
         + (field.visible === false ? ' is-hidden' : '');
       card.setAttribute('data-canvas-item', 'field');
       card.setAttribute('data-field-id', field.id);
-      card.setAttribute('draggable', 'true'); // reorder wired up in Part 2b
+      card.setAttribute('draggable', 'true');
       card.addEventListener('click', (e) => {
         // Ignore clicks on the delete button (handled separately)
         if (e.target.closest('.field-card-delete')) return;
         selectItem({ kind: 'field', id: field.id });
+      });
+      // Drag source — reorder existing field
+      card.addEventListener('dragstart', (e) => {
+        card.classList.add('is-dragging');
+        startMoveFieldDrag(field.id, e);
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('is-dragging');
+        endDrag();
       });
 
       // Drag handle (visual + cursor affordance)
@@ -1797,7 +1945,141 @@
       return wrap;
     }
 
-    /* =========================== FIELD MUTATIONS =========================== */
+    /* =========================== DRAG AND DROP =========================== */
+    // Two kinds of drag:
+    //   1. Palette card → canvas (new field)     — payload: application/x-tg-field-type
+    //   2. Canvas field card → another position  — payload: application/x-tg-field-id
+    //
+    // We identify which kind by inspecting dataTransfer.types during dragover.
+    // Drop zones on the canvas light up blue when a valid payload is hovering.
+    // Dropping on a zone inserts / moves the field to that index.
+    //
+    // HTML5 native DnD, no libraries — matches the suite's zero-dependency rule.
+
+    const DT_TYPE_NEW  = 'application/x-tg-field-type';
+    const DT_TYPE_MOVE = 'application/x-tg-field-id';
+
+    let dragState = {
+      kind: null,          // 'new' | 'move' | null
+      sourceTypeId: null,  // for 'new'
+      sourceFieldId: null, // for 'move'
+      activeZone: null     // currently highlighted drop zone element
+    };
+
+    function startNewFieldDrag(typeId, evt) {
+      dragState = {
+        kind: 'new',
+        sourceTypeId: typeId,
+        sourceFieldId: null,
+        activeZone: null
+      };
+      try {
+        evt.dataTransfer.effectAllowed = 'copy';
+        evt.dataTransfer.setData(DT_TYPE_NEW, typeId);
+        evt.dataTransfer.setData('text/plain', typeId);
+      } catch (e) { /* Safari quirk */ }
+      document.body.classList.add('is-dragging');
+    }
+
+    function startMoveFieldDrag(fieldId, evt) {
+      dragState = {
+        kind: 'move',
+        sourceTypeId: null,
+        sourceFieldId: fieldId,
+        activeZone: null
+      };
+      try {
+        evt.dataTransfer.effectAllowed = 'move';
+        evt.dataTransfer.setData(DT_TYPE_MOVE, fieldId);
+        evt.dataTransfer.setData('text/plain', fieldId);
+      } catch (e) { /* ignore */ }
+      document.body.classList.add('is-dragging');
+    }
+
+    function endDrag() {
+      if (dragState.activeZone) dragState.activeZone.classList.remove('is-active');
+      dragState = { kind: null, sourceTypeId: null, sourceFieldId: null, activeZone: null };
+      document.body.classList.remove('is-dragging');
+      $$('.drop-zone').forEach(z => z.classList.remove('is-active'));
+      $('#canvas-stage').classList.remove('is-drag-target');
+    }
+
+    // Called on every dragover on a drop zone. preventDefault() is what allows
+    // the drop event to fire at all — if you forget this, nothing works.
+    function onZoneDragOver(zone, evt) {
+      if (!dragState.kind) return; // not our drag
+      evt.preventDefault();
+      evt.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
+
+      // Don't activate a zone adjacent to the card being moved (no-op drop)
+      if (dragState.kind === 'move') {
+        const targetIdx = parseInt(zone.getAttribute('data-insert-index'), 10);
+        const fields = parseFields(state.config.fieldsJSON);
+        const fromIdx = fields.findIndex(f => f.id === dragState.sourceFieldId);
+        if (fromIdx === -1) return;
+        // A drop at fromIdx or fromIdx+1 is a no-op (same position)
+        if (targetIdx === fromIdx || targetIdx === fromIdx + 1) return;
+      }
+
+      if (dragState.activeZone && dragState.activeZone !== zone) {
+        dragState.activeZone.classList.remove('is-active');
+      }
+      zone.classList.add('is-active');
+      dragState.activeZone = zone;
+    }
+
+    function onZoneDrop(zone, evt) {
+      if (!dragState.kind) return;
+      evt.preventDefault();
+
+      const insertIdx = parseInt(zone.getAttribute('data-insert-index'), 10);
+
+      if (dragState.kind === 'new' && dragState.sourceTypeId) {
+        addFieldToCanvas(dragState.sourceTypeId, insertIdx);
+      } else if (dragState.kind === 'move' && dragState.sourceFieldId) {
+        const fields = parseFields(state.config.fieldsJSON);
+        const fromIdx = fields.findIndex(f => f.id === dragState.sourceFieldId);
+        if (fromIdx !== -1) {
+          reorderField(fromIdx, insertIdx);
+        }
+      }
+      endDrag();
+    }
+
+    // Wire up drop zones after renderCanvas runs.
+    // Called at the end of renderCanvas to attach handlers to all .drop-zone
+    // elements we just created.
+    function bindCanvasDropZones() {
+      $$('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', (e) => onZoneDragOver(zone, e));
+        zone.addEventListener('drop', (e) => onZoneDrop(zone, e));
+        zone.addEventListener('dragleave', () => {
+          // Only deactivate if the pointer actually left this zone (not a child)
+          // Drop zones have no children so this is safe.
+          if (dragState.activeZone === zone) {
+            zone.classList.remove('is-active');
+            dragState.activeZone = null;
+          }
+        });
+      });
+
+      // Also mark the stage itself as a drag target for visual hint
+      const stage = $('#canvas-stage');
+      stage.addEventListener('dragenter', (e) => {
+        if (!dragState.kind) return;
+        // Check that the drag contains one of our types
+        const types = Array.from(e.dataTransfer.types || []);
+        if (types.includes(DT_TYPE_NEW) || types.includes(DT_TYPE_MOVE) || dragState.kind) {
+          stage.classList.add('is-drag-target');
+        }
+      });
+      stage.addEventListener('dragleave', (e) => {
+        // Only if we're actually leaving the stage (not entering a child)
+        if (e.relatedTarget && stage.contains(e.relatedTarget)) return;
+        stage.classList.remove('is-drag-target');
+      });
+    }
+
     function addFieldToCanvas(typeId, insertIndex) {
       const fields = parseFields(state.config.fieldsJSON);
       // Guard: one of each type per form
@@ -1857,86 +2139,420 @@
     }
 
     /* =========================== INSPECTOR =========================== */
-    // For Part 2a, the inspector just shows what's selected — a labelled
-    // summary of the header / field / thank-you card. Part 2b wires up the
-    // actual config controls (label input, required toggle etc).
+    // The inspector is re-rendered ONLY when selection changes — NOT on every
+    // keystroke. Each input updates state.config directly via mutateFromInput()
+    // which marks dirty + triggers autosave + re-renders only the canvas
+    // (so field card label updates live) without rebuilding the inspector
+    // itself (so inputs keep focus).
     function renderInspector() {
       const headTitle = $('#inspector-title');
       const headSub = $('#inspector-sub');
       const body = $('#inspector-body');
 
+      body.innerHTML = '';
+
       if (!state.selectedItem) {
         headTitle.textContent = 'Inspector';
         headSub.textContent = 'Select something to edit';
-        body.innerHTML = `
-          <div class="inspector-empty">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 21H5a2 2 0 01-2-2v-4m6 6h10a2 2 0 002-2v-4"/>
-            </svg>
-            <h4>Nothing selected</h4>
-            <p>Click a field, the header, or the thank-you card to edit its settings here.</p>
-          </div>`;
+        const empty = document.createElement('div');
+        empty.className = 'inspector-empty';
+        empty.innerHTML = `
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 21H5a2 2 0 01-2-2v-4m6 6h10a2 2 0 002-2v-4"/>
+          </svg>
+          <h4>Nothing selected</h4>
+          <p>Click a field, the header, or the thank-you card to edit its settings here.</p>`;
+        body.appendChild(empty);
         return;
       }
 
       const sel = state.selectedItem;
-      if (sel.kind === 'header') {
-        headTitle.textContent = 'Form header';
-        headSub.textContent = 'Visible at the top of your form';
-        body.innerHTML = `
-          <div class="inspector-empty">
-            <p style="font-size: 13px; color: var(--sub); margin: 0 0 12px;">
-              Editing the header title, subtitle, and style arrives in the next build.
-            </p>
-            <p style="font-size: 12px; color: var(--muted); margin: 0;">
-              Current title: <strong style="color: var(--ink)">${esc(state.config.headerTitle || '(empty)')}</strong>
-            </p>
-          </div>`;
-        return;
+      if (sel.kind === 'header')  return renderHeaderInspector(body, headTitle, headSub);
+      if (sel.kind === 'thankyou') return renderThankYouInspector(body, headTitle, headSub);
+      if (sel.kind === 'field')   return renderFieldInspector(body, headTitle, headSub, sel.id);
+    }
+
+    // ── Header inspector ──
+    function renderHeaderInspector(body, headTitle, headSub) {
+      headTitle.textContent = 'Form header';
+      headSub.textContent = 'Visible at the top of your form';
+
+      body.appendChild(section('Content', [
+        labelledInput({
+          label: 'Title',
+          value: state.config.headerTitle,
+          placeholder: 'Tell us about your dream holiday',
+          maxlength: 200,
+          onInput: (v) => { state.config.headerTitle = v; markDirtyAndSync(); }
+        }),
+        labelledTextarea({
+          label: 'Subtitle',
+          value: state.config.headerSubtitle,
+          placeholder: 'A short line to set expectations',
+          rows: 3,
+          maxlength: 500,
+          hint: 'Shown below the title. Optional.',
+          onInput: (v) => { state.config.headerSubtitle = v; markDirtyAndSync(); }
+        })
+      ]));
+    }
+
+    // ── Thank-you inspector ──
+    function renderThankYouInspector(body, headTitle, headSub) {
+      headTitle.textContent = 'Thank-you message';
+      headSub.textContent = 'Shown after successful submission';
+
+      // Mode segmented control
+      const modes = [
+        { value: 'inline',   label: 'Inline' },
+        { value: 'replace',  label: 'Replace form' },
+        { value: 'redirect', label: 'Redirect' }
+      ];
+      const current = state.config.thankYouMode || 'inline';
+      const segEl = segmented(current, modes, (v) => {
+        state.config.thankYouMode = v;
+        markDirtyAndSync();
+        // Re-render the inspector so the conditional Redirect URL field shows/hides
+        renderInspector();
+      });
+      const segWrap = document.createElement('div');
+      segWrap.className = 'field';
+      const segLabel = document.createElement('div');
+      segLabel.className = 'field-label';
+      segLabel.textContent = 'Mode';
+      segWrap.appendChild(segLabel);
+      segWrap.appendChild(segEl);
+      const segHint = document.createElement('p');
+      segHint.className = 'insp-note';
+      segHint.innerHTML = {
+        'inline':   'The thank-you appears below the form, form stays visible.',
+        'replace':  'The form is replaced with the thank-you message.',
+        'redirect': 'The visitor is sent to another URL after submitting.'
+      }[current];
+      segWrap.appendChild(segHint);
+      body.appendChild(section('Behaviour', [segWrap]));
+
+      // Message textarea (shown for inline + replace, hidden for redirect)
+      if (current !== 'redirect') {
+        body.appendChild(section('Message', [
+          labelledTextarea({
+            label: 'Thank-you text',
+            value: state.config.thankYouMessage,
+            placeholder: "Thanks {firstName} — we're on it",
+            rows: 3,
+            maxlength: 500,
+            hintHtml: 'Use <code>{firstName}</code> to insert the visitor\'s first name.',
+            onInput: (v) => { state.config.thankYouMessage = v; markDirtyAndSync(); }
+          })
+        ]));
       }
 
-      if (sel.kind === 'thankyou') {
-        headTitle.textContent = 'Thank-you message';
-        headSub.textContent = 'Shown after successful submission';
-        body.innerHTML = `
-          <div class="inspector-empty">
-            <p style="font-size: 13px; color: var(--sub); margin: 0 0 12px;">
-              Editing the thank-you message, mode, and redirect URL arrives in the next build.
-            </p>
-            <p style="font-size: 12px; color: var(--muted); margin: 0;">
-              Mode: <strong style="color: var(--ink)">${esc(state.config.thankYouMode || 'inline')}</strong>
-            </p>
-          </div>`;
+      // Redirect URL (only when mode=redirect)
+      if (current === 'redirect') {
+        body.appendChild(section('Destination', [
+          labelledInput({
+            label: 'Redirect URL',
+            value: state.config.redirectUrl,
+            placeholder: 'https://example.com/thanks',
+            type: 'url',
+            maxlength: 500,
+            hint: 'Visitors are sent here after the form submits successfully.',
+            onInput: (v) => { state.config.redirectUrl = v; markDirtyAndSync(); }
+          })
+        ]));
+      }
+    }
+
+    // ── Field inspector ──
+    function renderFieldInspector(body, headTitle, headSub, fieldId) {
+      const fields = parseFields(state.config.fieldsJSON);
+      const fieldIdx = fields.findIndex(f => f.id === fieldId);
+      const field = fields[fieldIdx];
+      if (!field) {
+        // Field was removed out from under us
+        state.selectedItem = null;
+        renderInspector();
         return;
+      }
+      const def = FIELD_TYPE_MAP[field.type];
+      headTitle.textContent = def ? def.name : field.type;
+      headSub.textContent = 'Field · ' + (def ? def.desc : field.type);
+
+      // Helper to persist a field mutation back to state.config.fieldsJSON.
+      // Using a closure on the current `fields` array lets inputs modify
+      // the field object directly and we just re-serialise.
+      const saveField = () => {
+        state.config.fieldsJSON = JSON.stringify(fields);
+        markDirtyAndSync();
+      };
+
+      // ── Basics section (all field types) ──
+      body.appendChild(section('Basics', [
+        labelledInput({
+          label: 'Label',
+          value: field.label,
+          placeholder: def ? def.defaultLabel : '',
+          maxlength: 200,
+          onInput: (v) => { field.label = v; saveField(); }
+        }),
+        labelledTextarea({
+          label: 'Help text',
+          value: field.help || '',
+          placeholder: 'Optional hint shown below the field',
+          rows: 2,
+          maxlength: 300,
+          hint: 'Appears in small grey text under the field on the form.',
+          onInput: (v) => { field.help = v; saveField(); }
+        })
+      ]));
+
+      // ── Behaviour section ──
+      body.appendChild(section('Behaviour', [
+        toggleRow({
+          label: 'Required',
+          sub: 'Visitors must fill this in before submitting.',
+          checked: !!field.required,
+          onChange: (v) => { field.required = v; saveField(); }
+        }),
+        toggleRow({
+          label: 'Visible',
+          sub: 'Uncheck to hide this field without deleting it.',
+          checked: field.visible !== false,
+          onChange: (v) => { field.visible = v; saveField(); }
+        })
+      ]));
+
+      // ── Type-specific extras ──
+      const extras = renderFieldExtras(field, saveField);
+      if (extras) body.appendChild(extras);
+
+      // ── Danger zone ──
+      const dangerSec = document.createElement('div');
+      dangerSec.className = 'insp-section';
+      const dangerTitle = document.createElement('h4');
+      dangerTitle.className = 'insp-section-title';
+      dangerTitle.textContent = 'Remove';
+      dangerSec.appendChild(dangerTitle);
+
+      const dangerRow = document.createElement('div');
+      dangerRow.className = 'insp-danger-row';
+      const dangerText = document.createElement('span');
+      dangerText.className = 'insp-danger-text';
+      dangerText.textContent = 'Delete this field from the form';
+      const dangerBtn = document.createElement('button');
+      dangerBtn.type = 'button';
+      dangerBtn.className = 'insp-danger-btn';
+      dangerBtn.textContent = 'Delete';
+      dangerBtn.addEventListener('click', () => removeField(field.id));
+      dangerRow.appendChild(dangerText);
+      dangerRow.appendChild(dangerBtn);
+      dangerSec.appendChild(dangerRow);
+      body.appendChild(dangerSec);
+    }
+
+    // Type-specific inspector extras — returns a section element, or null
+    // if the type has no extras beyond the common basics + behaviour.
+    function renderFieldExtras(field, saveField) {
+      // Ensure field.options exists — older saved fields may not have it
+      if (!field.options || typeof field.options !== 'object') field.options = {};
+
+      if (field.type === 'notes') {
+        return section('Placeholder', [
+          labelledTextarea({
+            label: 'Placeholder text',
+            value: field.options.placeholder || '',
+            placeholder: 'Dietary requirements, accessibility needs, specific resorts...',
+            rows: 2,
+            maxlength: 300,
+            hint: 'Shown inside the textarea when empty.',
+            onInput: (v) => { field.options.placeholder = v; saveField(); }
+          })
+        ]);
       }
 
-      if (sel.kind === 'field') {
-        const fields = parseFields(state.config.fieldsJSON);
-        const field = fields.find(f => f.id === sel.id);
-        if (!field) {
-          // Field was removed — fall back to empty inspector
-          state.selectedItem = null;
-          renderInspector();
-          return;
-        }
-        const def = FIELD_TYPE_MAP[field.type];
-        headTitle.textContent = def ? def.name : field.type;
-        headSub.textContent = 'Field · ' + (field.required ? 'Required' : 'Optional');
-        body.innerHTML = `
-          <div class="inspector-empty" style="text-align: left; padding: 8px 0;">
-            <p style="font-size: 13px; color: var(--sub); margin: 0 0 16px;">
-              Field config controls — label, help text, required toggle, type-specific options — arrive in the next build.
-            </p>
-            <div style="background: var(--hover); border-radius: var(--radius); padding: 12px; font-size: 12px; line-height: 1.6;">
-              <div><strong>Type</strong> · ${esc(def ? def.name : field.type)}</div>
-              <div><strong>Label</strong> · ${esc(field.label)}</div>
-              <div><strong>Required</strong> · ${field.required ? 'Yes' : 'No'}</div>
-              <div><strong>Visible</strong> · ${field.visible === false ? 'No' : 'Yes'}</div>
-              <div><strong>ID</strong> · <code style="font-size: 11px; color: var(--muted)">${esc(field.id)}</code></div>
-            </div>
-          </div>`;
-        return;
+      if (field.type === 'consent') {
+        return section('Checkbox text', [
+          labelledInput({
+            label: 'Contact consent — bold text',
+            value: field.options.contactLabel || '',
+            placeholder: 'I agree to be contacted about this enquiry.',
+            maxlength: 200,
+            onInput: (v) => { field.options.contactLabel = v; saveField(); }
+          }),
+          labelledTextarea({
+            label: 'Contact consent — supporting text',
+            value: field.options.contactSub || '',
+            placeholder: "We'll only use your details to respond to your enquiry.",
+            rows: 2,
+            maxlength: 300,
+            onInput: (v) => { field.options.contactSub = v; saveField(); }
+          }),
+          labelledInput({
+            label: 'Marketing consent label',
+            value: field.options.marketingLabel || '',
+            placeholder: 'Send me occasional holiday inspiration and exclusive offers.',
+            maxlength: 200,
+            hint: 'The marketing opt-in is always optional. Leave blank for default text.',
+            onInput: (v) => { field.options.marketingLabel = v; saveField(); }
+          })
+        ]);
       }
+
+      // All other field types have no extras — the common sections cover them
+      return null;
+    }
+
+    /* =========================== INSPECTOR HELPERS =========================== */
+    // Small factory functions for building consistent inspector controls.
+    // Everything returns a DOM element ready to append.
+
+    function section(title, children) {
+      const sec = document.createElement('div');
+      sec.className = 'insp-section';
+      if (title) {
+        const h = document.createElement('h4');
+        h.className = 'insp-section-title';
+        h.textContent = title;
+        sec.appendChild(h);
+      }
+      children.forEach(c => c && sec.appendChild(c));
+      return sec;
+    }
+
+    function labelledInput(opts) {
+      const wrap = document.createElement('div');
+      wrap.className = 'field';
+      const label = document.createElement('label');
+      label.className = 'field-label';
+      label.textContent = opts.label;
+      wrap.appendChild(label);
+
+      const input = document.createElement('input');
+      input.className = 'input';
+      input.type = opts.type || 'text';
+      input.value = opts.value || '';
+      if (opts.placeholder) input.placeholder = opts.placeholder;
+      if (opts.maxlength) input.maxLength = opts.maxlength;
+      const id = uid('in');
+      input.id = id;
+      label.setAttribute('for', id);
+
+      // Debounce 100ms so typing stays responsive but we don't save-spam
+      // (autosave is already debounced 2s further downstream).
+      input.addEventListener('input', debounce((e) => {
+        opts.onInput(e.target.value);
+      }, 100));
+      wrap.appendChild(input);
+
+      if (opts.hintHtml) {
+        const hint = document.createElement('p');
+        hint.className = 'insp-note';
+        hint.innerHTML = opts.hintHtml;
+        wrap.appendChild(hint);
+      } else if (opts.hint) {
+        const hint = document.createElement('p');
+        hint.className = 'insp-note';
+        hint.textContent = opts.hint;
+        wrap.appendChild(hint);
+      }
+      return wrap;
+    }
+
+    function labelledTextarea(opts) {
+      const wrap = document.createElement('div');
+      wrap.className = 'field';
+      const label = document.createElement('label');
+      label.className = 'field-label';
+      label.textContent = opts.label;
+      wrap.appendChild(label);
+
+      const ta = document.createElement('textarea');
+      ta.className = 'textarea';
+      ta.value = opts.value || '';
+      ta.rows = opts.rows || 3;
+      if (opts.placeholder) ta.placeholder = opts.placeholder;
+      if (opts.maxlength) ta.maxLength = opts.maxlength;
+      const id = uid('ta');
+      ta.id = id;
+      label.setAttribute('for', id);
+
+      ta.addEventListener('input', debounce((e) => {
+        opts.onInput(e.target.value);
+      }, 100));
+      wrap.appendChild(ta);
+
+      if (opts.hintHtml) {
+        const hint = document.createElement('p');
+        hint.className = 'insp-note';
+        hint.innerHTML = opts.hintHtml;
+        wrap.appendChild(hint);
+      } else if (opts.hint) {
+        const hint = document.createElement('p');
+        hint.className = 'insp-note';
+        hint.textContent = opts.hint;
+        wrap.appendChild(hint);
+      }
+      return wrap;
+    }
+
+    function toggleRow(opts) {
+      const row = document.createElement('label');
+      row.className = 'toggle-row';
+
+      const text = document.createElement('div');
+      text.className = 'toggle-row-text';
+      const lbl = document.createElement('div');
+      lbl.className = 'toggle-row-label';
+      lbl.textContent = opts.label;
+      text.appendChild(lbl);
+      if (opts.sub) {
+        const sub = document.createElement('div');
+        sub.className = 'toggle-row-sub';
+        sub.textContent = opts.sub;
+        text.appendChild(sub);
+      }
+      row.appendChild(text);
+
+      const sw = document.createElement('span');
+      sw.className = 'switch';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = !!opts.checked;
+      const track = document.createElement('span');
+      track.className = 'switch-track';
+      sw.appendChild(input);
+      sw.appendChild(track);
+      row.appendChild(sw);
+
+      input.addEventListener('change', () => opts.onChange(input.checked));
+      return row;
+    }
+
+    function segmented(current, options, onChange) {
+      const wrap = document.createElement('div');
+      wrap.className = 'segmented';
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'seg-btn' + (opt.value === current ? ' is-active' : '');
+        btn.textContent = opt.label;
+        btn.addEventListener('click', () => onChange(opt.value));
+        wrap.appendChild(btn);
+      });
+      return wrap;
+    }
+
+    // Mark the state as dirty and sync UI — but DO NOT re-render the inspector.
+    // That's the critical bit: if we re-rendered the inspector here, every
+    // keystroke in an input would lose focus. Instead, the canvas re-renders
+    // (which is fine, it has no focused inputs) and the preview updates.
+    function markDirtyAndSync() {
+      state.dirty = true;
+      syncSaveBtn();
+      renderStatusBadge();
+      renderCanvas();
+      updatePreview();
+      autosave();
     }
 
     /* =========================== SELECTION =========================== */
