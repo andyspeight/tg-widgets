@@ -794,97 +794,96 @@
       color: var(--danger);
     }
 
-    /* Field cards double as drop targets. When a drag hovers, we highlight
-       half the card (top or bottom) to show where the field will land.
-       This is much more forgiving and visible than a thin line on the edge. */
-    .field-card {
-      position: relative;
-    }
-    .field-card::before,
-    .field-card::after {
-      content: '';
-      position: absolute;
-      left: -2px;
-      right: -2px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity .1s ease;
-      background: var(--brand-soft);
-      border: 2px solid var(--brand);
-      border-radius: var(--radius);
-      z-index: 1;
-    }
-    /* Top half highlight — "insert BEFORE this card" */
-    .field-card::before {
-      top: -2px;
-      height: 50%;
-      border-bottom: 3px solid var(--brand);
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-    /* Bottom half highlight — "insert AFTER this card" */
-    .field-card::after {
-      bottom: -2px;
-      height: 50%;
-      border-top: 3px solid var(--brand);
-      border-top-left-radius: 0;
-      border-top-right-radius: 0;
-    }
-    .field-card.drop-before::before { opacity: 1; }
-    .field-card.drop-after::after   { opacity: 1; }
-
-    /* Same treatment on the header and thank-you cards, so drops above the
-       first field or below the last field still land somewhere sensible. */
+    /* Drop indicator — cards open a slot.
+       When a drag hovers a card, the card (or its neighbour) slides out of
+       the way to open a visible gap. The gap shows a dashed blue placeholder
+       so the drop target is literally impossible to miss. Inspired by how
+       Notion, Linear and Trello handle list reordering. */
+    .field-card,
     .canvas-card {
       position: relative;
+      transition: margin-top .18s cubic-bezier(.2,0,.2,1),
+                  margin-bottom .18s cubic-bezier(.2,0,.2,1);
     }
+    /* The dashed placeholder sits in the gap created by the margin push */
+    .field-card::before,
+    .field-card::after,
     .canvas-card::before,
     .canvas-card::after {
       content: '';
       position: absolute;
-      left: -2px;
-      right: -2px;
+      left: 0;
+      right: 0;
       pointer-events: none;
       opacity: 0;
-      transition: opacity .1s ease;
+      transition: opacity .12s ease;
       background: var(--brand-soft);
-      border: 2px solid var(--brand);
-      border-radius: var(--radius-lg);
-      z-index: 1;
+      border: 2px dashed var(--brand);
+      border-radius: var(--radius);
+      z-index: 2;
     }
+    /* Slot above the card — "insert BEFORE" */
+    .field-card::before,
     .canvas-card::before {
-      top: -2px;
-      height: 50%;
-      border-bottom: 3px solid var(--brand);
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
+      top: -68px;    /* matches the margin-top push below */
+      height: 60px;
     }
+    /* Slot below the card — "insert AFTER" */
+    .field-card::after,
     .canvas-card::after {
-      bottom: -2px;
-      height: 50%;
-      border-top: 3px solid var(--brand);
-      border-top-left-radius: 0;
-      border-top-right-radius: 0;
+      bottom: -68px; /* matches the margin-bottom push below */
+      height: 60px;
     }
-    .canvas-card.drop-before::before { opacity: 1; }
-    .canvas-card.drop-after::after   { opacity: 1; }
+    /* When a card is the drop target (top half → before), push it down and
+       show the placeholder in the gap. */
+    .field-card.drop-before,
+    .canvas-card.drop-before {
+      margin-top: 72px;
+    }
+    .field-card.drop-before::before,
+    .canvas-card.drop-before::before {
+      opacity: 1;
+    }
+    /* Bottom half → after: push the NEXT card down instead. We apply
+       margin-bottom to this card to open the gap below it. */
+    .field-card.drop-after,
+    .canvas-card.drop-after {
+      margin-bottom: 72px;
+    }
+    .field-card.drop-after::after,
+    .canvas-card.drop-after::after {
+      opacity: 1;
+    }
 
-    /* While any drag is in progress, nudge cards apart slightly so the
-       drop highlight has somewhere breathable to sit. */
+    /* Label inside the slot so it's obvious what it's for */
+    .field-card.drop-before::before,
+    .field-card.drop-after::after,
+    .canvas-card.drop-before::before,
+    .canvas-card.drop-after::after {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    /* Use the content property on ::before/::after for the label. We need
+       separate selectors because ::before and ::after content are distinct. */
+    .field-card.drop-before::before,
+    .canvas-card.drop-before::before {
+      content: 'Drop here';
+    }
+    .field-card.drop-after::after,
+    .canvas-card.drop-after::after {
+      content: 'Drop here';
+    }
+
+    /* Extra bottom padding on the stage while dragging so the last card can
+       open a slot without being cut off. */
     body.is-dragging .canvas-stage {
-      padding-bottom: 40px;
-    }
-    body.is-dragging .field-card,
-    body.is-dragging .canvas-card {
-      transition: transform .15s ease, margin .15s ease;
-    }
-    /* While a drag is happening AND this card has a drop target active,
-       add some breathing room so the highlight is visually clear. */
-    body.is-dragging .field-card.drop-before {
-      margin-top: 20px;
-    }
-    body.is-dragging .field-card.drop-after {
-      margin-bottom: 20px;
+      padding-bottom: 120px;
     }
 
     /* Canvas in drag-over state */
@@ -2152,7 +2151,7 @@
           e.stopPropagation();
           e.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
 
-          // Don't show indicators for no-op moves (dropping on or adjacent to self)
+          // Don't show indicators on the card being dragged
           if (dragState.kind === 'move') {
             const isSelf = card.getAttribute('data-field-id') === dragState.sourceFieldId;
             if (isSelf) { clearDropIndicators(); return; }
@@ -2163,11 +2162,15 @@
 
         card.addEventListener('drop', (e) => onCardDrop(card, e));
 
-        card.addEventListener('dragleave', (e) => {
-          // Only clear if leaving the card entirely (not moving to a child)
-          if (e.relatedTarget && card.contains(e.relatedTarget)) return;
-          card.classList.remove('drop-before', 'drop-after');
-        });
+        // IMPORTANT: we intentionally do NOT clear the indicator on dragleave.
+        // Here's why: when the pointer enters a card and the card opens a slot
+        // (margin pushes it down), the pointer is now hovering the empty slot
+        // region (which has pointer-events: none). The browser fires dragleave
+        // on the card. If we cleared the indicator here, the slot would close,
+        // the card would snap back, dragenter would fire again, and we'd
+        // oscillate forever. Instead, the indicator only clears when a DIFFERENT
+        // card gets a dragover (updateCardDropIndicator handles the clearing).
+        // The stage's dragleave handles the "left the canvas entirely" case.
       });
 
       // SAFETY NET: canvas stage catches drops that land on empty space
@@ -2206,8 +2209,11 @@
           stage.classList.add('is-drag-target');
         });
         stage.addEventListener('dragleave', (e) => {
+          // Only clear when actually leaving the stage (not moving to a child)
           if (e.relatedTarget && stage.contains(e.relatedTarget)) return;
           stage.classList.remove('is-drag-target');
+          // If we left the canvas entirely, clear indicators so cards snap back
+          clearDropIndicators();
         });
       }
     }
