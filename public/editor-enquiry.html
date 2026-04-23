@@ -1659,6 +1659,159 @@
       color: var(--ink);
     }
 
+    /* Tiny preview mockup inside each template card — shows a scaled-down
+       representation of what the form looks like without instantiating
+       the widget (which would be expensive x6 and janky). */
+    .template-card-preview {
+      margin: 4px 0 8px;
+      padding: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+    .tpl-preview-title {
+      height: 7px;
+      background: var(--ink);
+      border-radius: 2px;
+      width: 85%;
+      opacity: .85;
+    }
+    .tpl-preview-sub {
+      height: 5px;
+      background: var(--muted);
+      border-radius: 2px;
+      width: 60%;
+      opacity: .6;
+      margin-bottom: 3px;
+    }
+    .tpl-preview-field {
+      height: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+    }
+    .tpl-preview-field.half { width: 48%; display: inline-block; }
+    .tpl-preview-row {
+      display: flex;
+      gap: 4px;
+    }
+    .tpl-preview-row .tpl-preview-field { flex: 1; }
+    .tpl-preview-btn {
+      height: 16px;
+      border-radius: 3px;
+      width: 70px;
+      align-self: flex-end;
+      margin-top: 2px;
+    }
+    .tpl-preview-empty {
+      padding: 14px 8px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ==================== TEMPLATE CHANGE CONFIRMATION =================== */
+    /* Warning modal shown when the agent clicks "Change template" on an
+       existing form. Confirms they're happy to lose their current form
+       content. Reuses modal-overlay styling from Part 3b. */
+    .confirm-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--panel);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      transform: translateY(8px) scale(.98);
+      transition: transform .18s ease;
+    }
+    .modal-overlay.is-open .confirm-card {
+      transform: translateY(0) scale(1);
+    }
+    .confirm-head {
+      padding: 28px 28px 12px;
+      text-align: center;
+    }
+    .confirm-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--warning) 15%, transparent);
+      color: var(--warning);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .confirm-sub {
+      font-size: 13px;
+      color: var(--sub);
+      line-height: 1.55;
+    }
+    .confirm-body {
+      padding: 0 28px 20px;
+    }
+    .confirm-list {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: var(--panel-2);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--sub);
+    }
+    .confirm-list-item {
+      display: flex;
+      gap: 8px;
+      line-height: 1.55;
+      padding: 3px 0;
+    }
+    .confirm-list-item svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .confirm-list-item.lost svg  { color: var(--warning); }
+    .confirm-list-item.kept svg  { color: var(--success); }
+    .confirm-foot {
+      padding: 14px 20px 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .confirm-btn {
+      height: 36px;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .12s ease;
+    }
+    .confirm-btn:hover {
+      background: var(--hover);
+      border-color: var(--border-strong);
+    }
+    .confirm-btn.is-danger {
+      background: var(--warning);
+      border-color: var(--warning);
+      color: #fff;
+    }
+    .confirm-btn.is-danger:hover {
+      background: color-mix(in srgb, var(--warning) 85%, black);
+    }
+
     /* While loading initial form */
     .boot-loading {
       position: fixed; inset: 0;
@@ -2591,6 +2744,33 @@
         <strong>Form settings</strong>
         Configure how your form behaves, looks and protects itself. Changes save automatically as you edit.`;
       body.appendChild(intro);
+
+      // Change template — shown only on saved forms where the template has
+      // been committed and we need a deliberate path to switch. On brand-new
+      // unsaved forms, the template picker already appeared on load so this
+      // button would be redundant. Styled slightly less prominently than
+      // the embed shortcut since it's a destructive action.
+      const changeBtn = document.createElement('div');
+      changeBtn.className = 'setting-card';
+      changeBtn.innerHTML = `
+        <span class="setting-card-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16"/>
+            <path d="M8 16H3v5"/>
+          </svg>
+        </span>
+        <div class="setting-card-info">
+          <div class="setting-card-name">Change template</div>
+          <div class="setting-card-desc">Switch to a different starter. Current fields will be replaced.</div>
+        </div>
+        <svg class="setting-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      `;
+      changeBtn.addEventListener('click', () => openChangeTemplateConfirm());
+      body.appendChild(changeBtn);
 
       // Embed code shortcut — handy access from the settings tab since it's
       // where agents naturally look for "how do I use this form now?"
@@ -4414,7 +4594,12 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
     }
 
     // Show the modal. Called from the editor boot path when creating a new form.
-    function openTemplatesModal() {
+    // Pass { mode: 'change' } to render the cancel-path variant shown when an
+    // agent is switching templates on an existing form.
+    function openTemplatesModal(opts) {
+      opts = opts || {};
+      const isChangeMode = opts.mode === 'change';
+
       // Clear any existing
       const existing = document.querySelector('.template-overlay');
       if (existing) existing.remove();
@@ -4425,14 +4610,22 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       const wrap = document.createElement('div');
       wrap.className = 'template-card-wrap';
 
-      // Head
+      // Head — different copy for change mode vs first-time setup
       const head = document.createElement('div');
       head.className = 'template-head';
-      head.innerHTML = `
-        <span class="template-head-eyebrow">Let's get started</span>
-        <h2 class="template-head-title">Pick a starting point</h2>
-        <p class="template-head-sub">Each template is a working form you can customise from there. Switch templates any time before your first save.</p>
-      `;
+      if (isChangeMode) {
+        head.innerHTML = `
+          <span class="template-head-eyebrow">Switch template</span>
+          <h2 class="template-head-title">Pick a different starting point</h2>
+          <p class="template-head-sub">Choosing any template below will replace your current fields and header copy. Your branding, routing and settings stay the same.</p>
+        `;
+      } else {
+        head.innerHTML = `
+          <span class="template-head-eyebrow">Let's get started</span>
+          <h2 class="template-head-title">Pick a starting point</h2>
+          <p class="template-head-sub">Each template is a working form you can customise from there. Switch templates any time before your first save.</p>
+        `;
+      }
       wrap.appendChild(head);
 
       // Grid
@@ -4453,6 +4646,12 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
         name.className = 'template-card-name';
         name.textContent = t.name;
         card.appendChild(name);
+
+        // Mini-mockup preview — shows what the form looks like without
+        // instantiating the real widget (which would be expensive at x6
+        // and cause layout thrash).
+        const preview = buildTemplatePreview(t);
+        card.appendChild(preview);
 
         const tagline = document.createElement('div');
         tagline.className = 'template-card-tagline';
@@ -4478,22 +4677,207 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
 
       wrap.appendChild(grid);
 
-      // Footer reinforces the point
+      // Footer — different for change mode (cancel option) vs setup
       const foot = document.createElement('div');
       foot.className = 'template-foot';
-      foot.innerHTML = 'Not sure? <button type="button" class="template-foot-link" id="tpl-default-btn">Start with Holiday Enquiry</button> — you can change everything later.';
+      if (isChangeMode) {
+        foot.innerHTML = '<button type="button" class="template-foot-link" id="tpl-cancel-btn">Cancel — keep my current form</button>';
+      } else {
+        foot.innerHTML = 'Not sure? <button type="button" class="template-foot-link" id="tpl-default-btn">Start with Holiday Enquiry</button> — you can change everything later.';
+      }
       wrap.appendChild(foot);
 
       overlay.appendChild(wrap);
       document.body.appendChild(overlay);
 
-      // Wire the "Start with Holiday Enquiry" shortcut
-      document.getElementById('tpl-default-btn').addEventListener('click', () => {
-        applyTemplate(TEMPLATES.find(t => t.id === 'holiday'));
-      });
+      // Wire the footer button
+      if (isChangeMode) {
+        document.getElementById('tpl-cancel-btn').addEventListener('click', () => {
+          closeTemplatesModal();
+        });
+        // In change mode, also allow Esc to dismiss (it's optional, not required)
+        const escHandler = (e) => {
+          if (e.key === 'Escape') { closeTemplatesModal(); document.removeEventListener('keydown', escHandler); }
+        };
+        document.addEventListener('keydown', escHandler);
+        // And clicking outside
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeTemplatesModal();
+        });
+      } else {
+        document.getElementById('tpl-default-btn').addEventListener('click', () => {
+          applyTemplate(TEMPLATES.find(t => t.id === 'holiday'));
+        });
+      }
 
       // Animate in
       requestAnimationFrame(() => overlay.classList.add('is-open'));
+    }
+
+    // Build a small visual representation of what a template looks like.
+    // Renders a header line, a handful of field placeholders, and a submit
+    // button using the current brand colour. Purely visual — the real widget
+    // is never instantiated for the preview.
+    function buildTemplatePreview(template) {
+      const wrap = document.createElement('div');
+      wrap.className = 'template-card-preview';
+
+      // Build a temp config to discover what fields the template seeds
+      let fields = [];
+      try {
+        const cfg = {};
+        template.apply(cfg);
+        fields = JSON.parse(cfg.fieldsJSON) || [];
+      } catch (e) {
+        fields = [];
+      }
+
+      // Header bars (title + subtitle lines)
+      const title = document.createElement('div');
+      title.className = 'tpl-preview-title';
+      wrap.appendChild(title);
+
+      const sub = document.createElement('div');
+      sub.className = 'tpl-preview-sub';
+      wrap.appendChild(sub);
+
+      if (fields.length === 0) {
+        // Blank template — show "no fields" state rather than empty placeholders
+        const empty = document.createElement('div');
+        empty.className = 'tpl-preview-empty';
+        empty.textContent = 'Start blank';
+        wrap.appendChild(empty);
+      } else {
+        // Show up to 3 field placeholders, with some variety (one row of two
+        // for destination/airport or similar pairs, one full-width field for
+        // longer types like travellers, one for contact/name)
+        const sample = fields.slice(0, 3);
+
+        // First row: either single field or paired half-width fields
+        if (sample.length >= 2) {
+          const row = document.createElement('div');
+          row.className = 'tpl-preview-row';
+          row.appendChild(makeFieldPlaceholder());
+          row.appendChild(makeFieldPlaceholder());
+          wrap.appendChild(row);
+        } else if (sample.length === 1) {
+          wrap.appendChild(makeFieldPlaceholder());
+        }
+
+        // Third slot: a full-width field
+        if (sample.length >= 3) {
+          wrap.appendChild(makeFieldPlaceholder());
+        }
+      }
+
+      // Submit button in brand colour (always shown, even for blank template)
+      const btn = document.createElement('div');
+      btn.className = 'tpl-preview-btn';
+      const brandColour = (state.config && state.config.buttonColour) || '#0891B2';
+      btn.style.background = brandColour;
+      wrap.appendChild(btn);
+
+      return wrap;
+    }
+
+    function makeFieldPlaceholder() {
+      const f = document.createElement('div');
+      f.className = 'tpl-preview-field';
+      return f;
+    }
+
+    // Confirmation dialog shown when an agent on an existing form clicks
+    // "Change template" in the Settings tab. Warns them clearly about what
+    // gets replaced (fields + header copy) and what gets preserved (branding,
+    // routing, settings, form name). Cancel keeps the current form; confirm
+    // opens the templates modal in change mode.
+    function openChangeTemplateConfirm() {
+      const existing = document.querySelector('.modal-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+
+      const card = document.createElement('div');
+      card.className = 'confirm-card';
+
+      // Head
+      const head = document.createElement('div');
+      head.className = 'confirm-head';
+      head.innerHTML = `
+        <div class="confirm-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="confirm-title">Switch template?</div>
+        <div class="confirm-sub">Switching templates rebuilds the form from scratch.</div>
+      `;
+      card.appendChild(head);
+
+      // Body — itemised what's lost vs kept
+      const body = document.createElement('div');
+      body.className = 'confirm-body';
+      body.innerHTML = `
+        <div class="confirm-list">
+          <div class="confirm-list-item lost">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span><strong>Replaced:</strong> all fields, header title, subtitle, and submit button text</span>
+          </div>
+          <div class="confirm-list-item kept">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span><strong>Kept:</strong> branding colours, fonts, routing, security settings, form name</span>
+          </div>
+        </div>
+      `;
+      card.appendChild(body);
+
+      // Foot — Cancel + Confirm
+      const foot = document.createElement('div');
+      foot.className = 'confirm-foot';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button';
+      cancelBtn.className = 'confirm-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.addEventListener('click', () => closeConfirmModal());
+      foot.appendChild(cancelBtn);
+
+      const confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      confirmBtn.className = 'confirm-btn is-danger';
+      confirmBtn.textContent = 'Choose new template';
+      confirmBtn.addEventListener('click', () => {
+        closeConfirmModal();
+        // Briefly wait for exit animation, then open templates modal in change mode
+        setTimeout(() => openTemplatesModal({ mode: 'change' }), 220);
+      });
+      foot.appendChild(confirmBtn);
+
+      card.appendChild(foot);
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+
+      // Escape + click outside to cancel
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeConfirmModal();
+      });
+      const escHandler = (e) => {
+        if (e.key === 'Escape') { closeConfirmModal(); document.removeEventListener('keydown', escHandler); }
+      };
+      document.addEventListener('keydown', escHandler);
+
+      // Animate in
+      requestAnimationFrame(() => overlay.classList.add('is-open'));
+    }
+
+    function closeConfirmModal() {
+      const overlay = document.querySelector('.modal-overlay');
+      if (!overlay) return;
+      overlay.classList.remove('is-open');
+      setTimeout(() => overlay.remove(), 200);
     }
 
     function closeTemplatesModal() {
