@@ -794,10 +794,9 @@
       color: var(--danger);
     }
 
-    /* Field cards double as drop targets. A thin blue line appears on the
-       top or bottom edge of the card to show where the drop will land.
-       This pattern is more forgiving than sliver-thin "drop zones between cards"
-       because every pixel of every card is a valid target. */
+    /* Field cards double as drop targets. When a drag hovers, we highlight
+       half the card (top or bottom) to show where the field will land.
+       This is much more forgiving and visible than a thin line on the edge. */
     .field-card {
       position: relative;
     }
@@ -805,18 +804,32 @@
     .field-card::after {
       content: '';
       position: absolute;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--brand);
-      border-radius: 2px;
+      left: -2px;
+      right: -2px;
       pointer-events: none;
       opacity: 0;
       transition: opacity .1s ease;
-      box-shadow: 0 0 8px var(--brand-soft);
+      background: var(--brand-soft);
+      border: 2px solid var(--brand);
+      border-radius: var(--radius);
+      z-index: 1;
     }
-    .field-card::before { top: -2px; }
-    .field-card::after  { bottom: -2px; }
+    /* Top half highlight — "insert BEFORE this card" */
+    .field-card::before {
+      top: -2px;
+      height: 50%;
+      border-bottom: 3px solid var(--brand);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    /* Bottom half highlight — "insert AFTER this card" */
+    .field-card::after {
+      bottom: -2px;
+      height: 50%;
+      border-top: 3px solid var(--brand);
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
     .field-card.drop-before::before { opacity: 1; }
     .field-card.drop-after::after   { opacity: 1; }
 
@@ -829,29 +842,49 @@
     .canvas-card::after {
       content: '';
       position: absolute;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--brand);
-      border-radius: 2px;
+      left: -2px;
+      right: -2px;
       pointer-events: none;
       opacity: 0;
       transition: opacity .1s ease;
-      box-shadow: 0 0 8px var(--brand-soft);
+      background: var(--brand-soft);
+      border: 2px solid var(--brand);
+      border-radius: var(--radius-lg);
+      z-index: 1;
     }
-    .canvas-card::before { top: -2px; }
-    .canvas-card::after  { bottom: -2px; }
+    .canvas-card::before {
+      top: -2px;
+      height: 50%;
+      border-bottom: 3px solid var(--brand);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    .canvas-card::after {
+      bottom: -2px;
+      height: 50%;
+      border-top: 3px solid var(--brand);
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
     .canvas-card.drop-before::before { opacity: 1; }
     .canvas-card.drop-after::after   { opacity: 1; }
 
-    /* While any drag is in progress, add subtle hint padding so drop targets
-       feel discoverable. */
+    /* While any drag is in progress, nudge cards apart slightly so the
+       drop highlight has somewhere breathable to sit. */
     body.is-dragging .canvas-stage {
       padding-bottom: 40px;
     }
     body.is-dragging .field-card,
     body.is-dragging .canvas-card {
-      transition: margin .12s ease;
+      transition: transform .15s ease, margin .15s ease;
+    }
+    /* While a drag is happening AND this card has a drop target active,
+       add some breathing room so the highlight is visually clear. */
+    body.is-dragging .field-card.drop-before {
+      margin-top: 20px;
+    }
+    body.is-dragging .field-card.drop-after {
+      margin-bottom: 20px;
     }
 
     /* Canvas in drag-over state */
@@ -2151,18 +2184,19 @@
           // If a card handled it, its handler called stopPropagation and we
           // won't get here. If we did get here, we're on empty space.
           e.preventDefault();
-          if (window.__tgDebug) console.log('[dnd] stage fallback drop (empty space) — appending to end');
-
-          const currentFields = parseFields(state.config.fieldsJSON);
-          const endIdx = currentFields.length;
 
           if (dragState.kind === 'new' && dragState.sourceTypeId) {
-            addFieldToCanvas(dragState.sourceTypeId, endIdx);
+            // Dropping a NEW palette field in empty space → append to end.
+            // This is forgiving — you meant to add something, so we add it.
+            if (window.__tgDebug) console.log('[dnd] stage fallback — new field, append to end');
+            const currentFields = parseFields(state.config.fieldsJSON);
+            addFieldToCanvas(dragState.sourceTypeId, currentFields.length);
           } else if (dragState.kind === 'move' && dragState.sourceFieldId) {
-            const fromIdx = currentFields.findIndex(f => f.id === dragState.sourceFieldId);
-            if (fromIdx !== -1 && fromIdx !== endIdx - 1) {
-              reorderField(fromIdx, endIdx);
-            }
+            // Dropping an EXISTING field in empty space → do nothing.
+            // Silently teleporting a reorder to the bottom is worse than
+            // cancelling. The user can try again, aiming at a card.
+            if (window.__tgDebug) console.log('[dnd] stage fallback — reorder missed a card, cancelling drop');
+            showToast('Drop on a field to reorder', 'warning', 1800);
           }
           clearDropIndicators();
           endDrag();
