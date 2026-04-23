@@ -369,6 +369,23 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'enquiry',
+    name: 'Enquiry Form',
+    airtableType: 'Enquiry Form',
+    description: 'Custom enquiry forms your clients actually fill in — 13 travel-native fields (destinations, airports, travellers with ages, board basis, star rating, budget slider), drag-and-drop builder, branded thank-you, and routing to email, Google Sheets, webhooks and your CRM.',
+    category: 'Lead Gen',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/>'},
+    color: '#EC4899',
+    editorUrl: '/editor-enquiry',
+    // demoUrl intentionally omitted — demo page not yet built. The dashboard
+    // will hide the Preview button and disable the card-click handler when
+    // demoUrl is falsy. Add the URL here once public/demo-enquiry.html exists.
+    widgetTag: 'enquiry',
+    scriptFile: 'widget-enquiry.js',
+    access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'countdown',
     name: 'Countdown Timer',
     description: 'Create urgency with animated countdown timers for sales, launches, and events. Multiple display styles.',
@@ -744,16 +761,30 @@ function renderCatalogue() {
 
     // Actions
     let actions = '';
+    // Hide the Preview button for widgets that don't have a demo page yet
+    // (e.g. Enquiry Form until demo-enquiry.html is built). Without this guard
+    // the button would navigate to `undefined` and 404.
+    const previewBtn = w.demoUrl
+      ? `<button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`
+      : '';
     if (isLive && !isLocked) {
       actions = `<button class="w-card-btn btn-create" onclick="event.stopPropagation();${signedIn?`location.href='${w.editorUrl}'`:`openSignIn()`}"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>${signedIn?'Create Widget':'Sign In to Create'}</button>
-        <button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`;
+        ${previewBtn}`;
     } else if (isLive && isLocked) {
-      actions = `<button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`;
+      // If a demo exists, show just the Preview button. If not, render nothing
+      // (the badge + description already communicate that this widget is
+      // locked behind a higher tier).
+      actions = previewBtn;
     } else {
       actions = `<button class="w-card-btn btn-soon">Coming Soon</button>`;
     }
 
-    return `<div class="w-card${soonCls} fade-up" style="animation-delay:${i*60}ms" ${isLive&&!isLocked?`onclick="location.href='${w.demoUrl}'"`:''}>
+    // Only make the card click-through when a demo URL exists. Otherwise the
+    // whole card would try to navigate to `undefined` and 404.
+    const cardOnClick = (isLive && !isLocked && w.demoUrl)
+      ? `onclick="location.href='${w.demoUrl}'"`
+      : '';
+    return `<div class="w-card${soonCls} fade-up" style="animation-delay:${i*60}ms" ${cardOnClick}>
       ${preview}
       <div class="w-card-body">
         <div class="w-card-head">
