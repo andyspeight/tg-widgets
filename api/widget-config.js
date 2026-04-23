@@ -25,6 +25,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Testimonials',
   'Destination Spotlight',
   'Weather',
+  'Enquiry Form',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -40,6 +41,7 @@ const PLAN_WIDGET_LIMITS = {
   'Testimonials':          { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Destination Spotlight': { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Weather':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Enquiry Form':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
 };
 
 // Count existing widgets owned by this user, of a specific type.
