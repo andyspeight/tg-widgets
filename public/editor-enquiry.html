@@ -794,72 +794,19 @@
       color: var(--danger);
     }
 
-    /* Drop indicator — cards open a slot.
-       When a drag hovers a card, the card (or its neighbour) slides out of
-       the way to open a visible gap. The gap shows a dashed blue placeholder
-       so the drop target is literally impossible to miss. Inspired by how
-       Notion, Linear and Trello handle list reordering. */
-    .field-card,
-    .canvas-card {
-      position: relative;
-      transition: margin-top .18s cubic-bezier(.2,0,.2,1),
-                  margin-bottom .18s cubic-bezier(.2,0,.2,1);
-    }
-    /* The dashed placeholder sits in the gap created by the margin push */
-    .field-card::before,
-    .field-card::after,
-    .canvas-card::before,
-    .canvas-card::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity .12s ease;
+    /* Drop indicator — a real DOM element that appears between cards.
+       Unlike the pseudo-element approach, this element has real pointer events
+       so drops fire properly on it. Inserted into the DOM by JS when a drag
+       is active, removed when the drag ends. */
+    .drop-slot {
+      height: 0;
+      margin: 0;
+      overflow: hidden;
+      transition: height .18s cubic-bezier(.2,0,.2,1),
+                  margin .18s cubic-bezier(.2,0,.2,1);
       background: var(--brand-soft);
       border: 2px dashed var(--brand);
       border-radius: var(--radius);
-      z-index: 2;
-    }
-    /* Slot above the card — "insert BEFORE" */
-    .field-card::before,
-    .canvas-card::before {
-      top: -68px;    /* matches the margin-top push below */
-      height: 60px;
-    }
-    /* Slot below the card — "insert AFTER" */
-    .field-card::after,
-    .canvas-card::after {
-      bottom: -68px; /* matches the margin-bottom push below */
-      height: 60px;
-    }
-    /* When a card is the drop target (top half → before), push it down and
-       show the placeholder in the gap. */
-    .field-card.drop-before,
-    .canvas-card.drop-before {
-      margin-top: 72px;
-    }
-    .field-card.drop-before::before,
-    .canvas-card.drop-before::before {
-      opacity: 1;
-    }
-    /* Bottom half → after: push the NEXT card down instead. We apply
-       margin-bottom to this card to open the gap below it. */
-    .field-card.drop-after,
-    .canvas-card.drop-after {
-      margin-bottom: 72px;
-    }
-    .field-card.drop-after::after,
-    .canvas-card.drop-after::after {
-      opacity: 1;
-    }
-
-    /* Label inside the slot so it's obvious what it's for */
-    .field-card.drop-before::before,
-    .field-card.drop-after::after,
-    .canvas-card.drop-before::before,
-    .canvas-card.drop-after::after {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -868,22 +815,27 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: .08em;
+      box-sizing: border-box;
+      opacity: 0;
+      pointer-events: none;
     }
-    /* Use the content property on ::before/::after for the label. We need
-       separate selectors because ::before and ::after content are distinct. */
-    .field-card.drop-before::before,
-    .canvas-card.drop-before::before {
-      content: 'Drop here';
+    .drop-slot.is-active {
+      height: 60px;
+      margin: 8px 0;
+      opacity: 1;
+      pointer-events: auto;
     }
-    .field-card.drop-after::after,
-    .canvas-card.drop-after::after {
-      content: 'Drop here';
+    /* A small always-present hit area between cards during a drag. Invisible
+       but catches dragover so we can activate the slot when the pointer is in
+       the gap between two cards. */
+    body.is-dragging .drop-slot {
+      height: 16px;
+      opacity: 0;
+      pointer-events: auto;
     }
-
-    /* Extra bottom padding on the stage while dragging so the last card can
-       open a slot without being cut off. */
-    body.is-dragging .canvas-stage {
-      padding-bottom: 120px;
+    body.is-dragging .drop-slot.is-active {
+      height: 60px;
+      opacity: 1;
     }
 
     /* Canvas in drag-over state */
@@ -1799,6 +1751,8 @@
 
       // ── Header card (always shown, pinned at top) ──
       stage.insertBefore(renderHeaderCard(), previewWrapper);
+      // Drop slot between header and first field (insertIdx 0)
+      stage.insertBefore(renderDropSlot(0), previewWrapper);
 
       // ── Field cards or empty state ──
       if (currentFields.length === 0) {
@@ -1806,14 +1760,29 @@
       } else {
         currentFields.forEach((field, index) => {
           stage.insertBefore(renderFieldCard(field, index), previewWrapper);
+          // Drop slot after this field (insertIdx = index + 1)
+          stage.insertBefore(renderDropSlot(index + 1), previewWrapper);
         });
       }
 
       // ── Thank-you card (always shown, pinned at bottom) ──
       stage.insertBefore(renderThankYouCard(), previewWrapper);
 
-      // Wire card-as-drop-target handlers onto all cards we just created
+      // Wire drop handlers onto cards AND slots
       bindCanvasDropTargets();
+    }
+
+    // Renders a real drop-slot element for a specific insertion index.
+    // The element is hidden (height: 0) until a drag is in progress, at which
+    // point it becomes a live drop target. When hovered, it expands to 60px
+    // with the "Drop here" label visible.
+    function renderDropSlot(insertIndex) {
+      const slot = document.createElement('div');
+      slot.className = 'drop-slot';
+      slot.setAttribute('data-drop-slot', '1');
+      slot.setAttribute('data-insert-index', String(insertIndex));
+      slot.textContent = 'Drop here';
+      return slot;
     }
 
     function renderHeaderCard() {
@@ -2053,84 +2022,58 @@
       if (window.__tgDebug) console.log('[dnd] endDrag');
       dragState = { kind: null, sourceTypeId: null, sourceFieldId: null, activeZone: null };
       document.body.classList.remove('is-dragging');
-      // Clear any remaining drop indicators on cards
-      $$('.field-card, .canvas-card').forEach(c => {
-        c.classList.remove('drop-before', 'drop-after');
-      });
+      clearDropIndicators();
       const stage = $('#canvas-stage');
       if (stage) stage.classList.remove('is-drag-target');
     }
 
-    // Called on every dragover on a drop target. preventDefault() is what
-    // allows the drop event to fire at all — if you forget this, nothing works.
-    // (This was originally for drop-zones, kept as a reference/stub.)
-    function onZoneDragOver(zone, evt) {
-      // Deprecated — see card dragover handlers in bindCanvasDropTargets instead.
-    }
-
-    function onZoneDrop(zone, evt) {
-      // Deprecated — kept for compatibility but no longer called.
-      // See onCardDrop instead.
-    }
-
-    // Clear any drop-before / drop-after indicators on all cards
+    // Clear any active drop slot
     function clearDropIndicators() {
-      $$('.field-card, .canvas-card').forEach(c => {
-        c.classList.remove('drop-before', 'drop-after');
-      });
+      $$('.drop-slot.is-active').forEach(s => s.classList.remove('is-active'));
     }
 
-    // Determine where on a card the pointer is (top half or bottom half)
-    // and update the visual indicator. Returns { position: 'before' | 'after' }.
-    function updateCardDropIndicator(card, evt) {
+    // Given a card and the pointer event, figure out which drop-slot
+    // (the one immediately before the card, or the one immediately after)
+    // should be activated.
+    function slotForCard(card, evt) {
       const rect = card.getBoundingClientRect();
       const midpoint = rect.top + rect.height / 2;
       const isAbove = evt.clientY < midpoint;
-      clearDropIndicators();
-      card.classList.add(isAbove ? 'drop-before' : 'drop-after');
-      return { position: isAbove ? 'before' : 'after' };
+      // Walk siblings to find the adjacent slot
+      const target = isAbove ? card.previousElementSibling : card.nextElementSibling;
+      if (target && target.classList.contains('drop-slot')) return target;
+      return null;
     }
 
-    // Compute the insertion index for a drop on a specific card
-    function computeInsertIdx(card, position) {
-      const item = card.getAttribute('data-canvas-item');
-      const currentFields = parseFields(state.config.fieldsJSON);
-
-      if (item === 'header') {
-        // Drop above header → index 0 (beginning)
-        // Drop below header → index 0 (still beginning, before first field)
-        return 0;
-      }
-      if (item === 'thankyou') {
-        // Drop above thankyou → at the end
-        // Drop below thankyou → at the end (can't go past)
-        return currentFields.length;
-      }
-      if (item === 'field') {
-        const fieldId = card.getAttribute('data-field-id');
-        const idx = currentFields.findIndex(f => f.id === fieldId);
-        if (idx === -1) return currentFields.length;
-        return position === 'before' ? idx : idx + 1;
-      }
-      return currentFields.length;
+    // Compute the insertion index for a drop on a specific slot
+    function slotInsertIdx(slot) {
+      return parseInt(slot.getAttribute('data-insert-index'), 10);
     }
 
-    // Called when a drop happens on a card
-    function onCardDrop(card, evt) {
+    // Activate a specific slot, deactivating all others. If slot is null,
+    // just clears everything.
+    function activateSlot(slot) {
+      $$('.drop-slot.is-active').forEach(s => {
+        if (s !== slot) s.classList.remove('is-active');
+      });
+      if (slot) slot.classList.add('is-active');
+    }
+
+    // Called when a drop happens on a slot
+    function onSlotDrop(slot, evt) {
       if (!dragState.kind) return;
       evt.preventDefault();
-      evt.stopPropagation(); // don't let stage fallback also fire
+      evt.stopPropagation();
 
-      const { position } = updateCardDropIndicator(card, evt);
-      const insertIdx = computeInsertIdx(card, position);
-
-      if (window.__tgDebug) console.log('[dnd] onCardDrop', { kind: dragState.kind, card: card.getAttribute('data-canvas-item'), position, insertIdx });
+      const insertIdx = slotInsertIdx(slot);
+      if (window.__tgDebug) console.log('[dnd] onSlotDrop', { kind: dragState.kind, insertIdx });
 
       if (dragState.kind === 'new' && dragState.sourceTypeId) {
         addFieldToCanvas(dragState.sourceTypeId, insertIdx);
       } else if (dragState.kind === 'move' && dragState.sourceFieldId) {
         const fields = parseFields(state.config.fieldsJSON);
         const fromIdx = fields.findIndex(f => f.id === dragState.sourceFieldId);
+        // Skip no-op moves (drop at current position or immediately after)
         if (fromIdx !== -1 && fromIdx !== insertIdx && fromIdx + 1 !== insertIdx) {
           reorderField(fromIdx, insertIdx);
         }
@@ -2139,11 +2082,36 @@
       endDrag();
     }
 
-    // Wire drop targets onto every card. Called after each renderCanvas.
+    // Wire drop targets onto slots + cards. Called after each renderCanvas.
     function bindCanvasDropTargets() {
+      const slots = $$('.drop-slot');
       const cards = $$('.field-card, .canvas-card');
-      if (window.__tgDebug) console.log('[dnd] binding', cards.length, 'drop targets');
 
+      if (window.__tgDebug) console.log('[dnd] binding', slots.length, 'slots and', cards.length, 'cards');
+
+      // SLOTS: the actual drop targets. They have real pointer events and
+      // live in the DOM between cards.
+      slots.forEach(slot => {
+        slot.addEventListener('dragover', (e) => {
+          if (!dragState.kind) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
+
+          // Hide slots adjacent to the card being moved (no-op drops)
+          if (dragState.kind === 'move' && isSlotNoOp(slot)) {
+            clearDropIndicators();
+            return;
+          }
+          activateSlot(slot);
+        });
+
+        slot.addEventListener('drop', (e) => onSlotDrop(slot, e));
+      });
+
+      // CARDS: act as proxies. Hovering a card activates the adjacent slot
+      // (the one immediately above if pointer is in top half, below if bottom).
+      // Dropping on a card is forwarded to the active slot.
       cards.forEach(card => {
         card.addEventListener('dragover', (e) => {
           if (!dragState.kind) return;
@@ -2151,29 +2119,36 @@
           e.stopPropagation();
           e.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
 
-          // Don't show indicators on the card being dragged
+          // Don't activate for the card being moved
           if (dragState.kind === 'move') {
             const isSelf = card.getAttribute('data-field-id') === dragState.sourceFieldId;
             if (isSelf) { clearDropIndicators(); return; }
           }
 
-          updateCardDropIndicator(card, e);
+          const slot = slotForCard(card, e);
+          if (!slot) { clearDropIndicators(); return; }
+
+          // Check for no-op (dragging onto a slot adjacent to self)
+          if (dragState.kind === 'move' && isSlotNoOp(slot)) {
+            clearDropIndicators();
+            return;
+          }
+          activateSlot(slot);
         });
 
-        card.addEventListener('drop', (e) => onCardDrop(card, e));
-
-        // IMPORTANT: we intentionally do NOT clear the indicator on dragleave.
-        // Here's why: when the pointer enters a card and the card opens a slot
-        // (margin pushes it down), the pointer is now hovering the empty slot
-        // region (which has pointer-events: none). The browser fires dragleave
-        // on the card. If we cleared the indicator here, the slot would close,
-        // the card would snap back, dragenter would fire again, and we'd
-        // oscillate forever. Instead, the indicator only clears when a DIFFERENT
-        // card gets a dragover (updateCardDropIndicator handles the clearing).
-        // The stage's dragleave handles the "left the canvas entirely" case.
+        // Dropping on a card → forward to the currently active slot
+        card.addEventListener('drop', (e) => {
+          if (!dragState.kind) return;
+          const activeSlot = $('.drop-slot.is-active');
+          if (activeSlot) {
+            e.preventDefault();
+            e.stopPropagation();
+            onSlotDrop(activeSlot, e);
+          }
+        });
       });
 
-      // SAFETY NET: canvas stage catches drops that land on empty space
+      // STAGE: fallback for drops landing on pure empty space
       const stage = $('#canvas-stage');
       if (!stage.__tgDropBound) {
         stage.__tgDropBound = true;
@@ -2184,22 +2159,29 @@
         });
         stage.addEventListener('drop', (e) => {
           if (!dragState.kind) return;
-          // If a card handled it, its handler called stopPropagation and we
-          // won't get here. If we did get here, we're on empty space.
           e.preventDefault();
+          // If a slot or card handled it, we won't reach here (they stopPropagation).
+          // If we did reach here, we're on genuinely empty space.
+
+          // But also: if there's an active slot (last known target), use it.
+          // This makes drops forgiving if the release happens just outside
+          // a slot that was still highlighted.
+          const activeSlot = $('.drop-slot.is-active');
+          if (activeSlot) {
+            if (window.__tgDebug) console.log('[dnd] stage caught drop but active slot exists → using it');
+            onSlotDrop(activeSlot, e);
+            return;
+          }
 
           if (dragState.kind === 'new' && dragState.sourceTypeId) {
-            // Dropping a NEW palette field in empty space → append to end.
-            // This is forgiving — you meant to add something, so we add it.
+            // New palette field dropped in empty space → append to end
             if (window.__tgDebug) console.log('[dnd] stage fallback — new field, append to end');
             const currentFields = parseFields(state.config.fieldsJSON);
             addFieldToCanvas(dragState.sourceTypeId, currentFields.length);
           } else if (dragState.kind === 'move' && dragState.sourceFieldId) {
-            // Dropping an EXISTING field in empty space → do nothing.
-            // Silently teleporting a reorder to the bottom is worse than
-            // cancelling. The user can try again, aiming at a card.
-            if (window.__tgDebug) console.log('[dnd] stage fallback — reorder missed a card, cancelling drop');
-            showToast('Drop on a field to reorder', 'warning', 1800);
+            // Existing field missed the drop → cancel (don't teleport)
+            if (window.__tgDebug) console.log('[dnd] stage fallback — reorder missed, cancelling');
+            showToast('Drop on a highlighted slot to reorder', 'warning', 1800);
           }
           clearDropIndicators();
           endDrag();
@@ -2209,13 +2191,23 @@
           stage.classList.add('is-drag-target');
         });
         stage.addEventListener('dragleave', (e) => {
-          // Only clear when actually leaving the stage (not moving to a child)
           if (e.relatedTarget && stage.contains(e.relatedTarget)) return;
           stage.classList.remove('is-drag-target');
-          // If we left the canvas entirely, clear indicators so cards snap back
           clearDropIndicators();
         });
       }
+    }
+
+    // True if this slot would be a no-op drop for the currently-moving field
+    // (i.e. dropping at its current position).
+    function isSlotNoOp(slot) {
+      if (dragState.kind !== 'move' || !dragState.sourceFieldId) return false;
+      const fields = parseFields(state.config.fieldsJSON);
+      const fromIdx = fields.findIndex(f => f.id === dragState.sourceFieldId);
+      if (fromIdx === -1) return false;
+      const targetIdx = slotInsertIdx(slot);
+      // Dropping at fromIdx or fromIdx+1 keeps the field in the same place
+      return targetIdx === fromIdx || targetIdx === fromIdx + 1;
     }
 
     // Back-compat alias so any old references don't break
