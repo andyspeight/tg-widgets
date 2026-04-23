@@ -546,6 +546,471 @@
     cursor: not-allowed;
   }
 
+  /* =========================== DETAIL DRAWER =========================== */
+  /* Slides in from the right when a row is clicked. Covers the list but
+     doesn't fully block the page — the sidebar stays visible. Designed to
+     support rapid triage: open, scan, close, open next. */
+  .drawer-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .drawer-scrim.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 560px;
+    max-width: 100vw;
+    background: var(--panel);
+    box-shadow: var(--shadow-xl);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .22s cubic-bezier(.2, 0, .2, 1);
+    overflow: hidden;
+  }
+  .drawer.is-open {
+    transform: translateX(0);
+  }
+
+  /* Drawer header — sticky at top with close button, reference, status */
+  .drawer-head {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .drawer-head-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .drawer-head-ref {
+    font-family: -apple-system, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .drawer-head-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .drawer-head-meta {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .drawer-head-meta-sep {
+    color: var(--border-strong);
+  }
+  .drawer-close {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    border-radius: 7px;
+    color: var(--muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all .12s ease;
+  }
+  .drawer-close:hover {
+    background: var(--hover);
+    color: var(--ink);
+  }
+
+  /* Drawer body — scrolls independently */
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px 40px;
+  }
+
+  /* Status segmented control — sits at the top of the drawer body */
+  .status-seg {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 4px;
+    background: var(--panel-2);
+    border-radius: 9px;
+    margin-bottom: 20px;
+  }
+  .status-seg-btn {
+    padding: 8px 6px;
+    border: 0;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sub);
+    cursor: pointer;
+    transition: all .12s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .status-seg-btn:hover:not(.is-active) {
+    background: var(--hover);
+    color: var(--ink);
+  }
+  .status-seg-btn.is-active {
+    background: var(--panel);
+    color: var(--ink);
+    box-shadow: var(--shadow-xs);
+  }
+  .status-seg-btn.is-active[data-status="New"] { color: var(--brand-ink); }
+  .status-seg-btn.is-active[data-status="Converted"] { color: var(--success); }
+
+  /* Primary action row — Reply / Call / Copy */
+  .drawer-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .drawer-action {
+    flex: 1;
+    padding: 9px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: all .12s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .drawer-action:hover {
+    background: var(--hover);
+    border-color: var(--border-strong);
+  }
+  .drawer-action.is-primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+  }
+  .drawer-action.is-primary:hover {
+    background: #DB2777;
+    border-color: #DB2777;
+  }
+  .drawer-action.is-disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Drawer sections — grouped data blocks */
+  .drawer-section {
+    margin-bottom: 22px;
+  }
+  .drawer-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  .drawer-card {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  /* Data rows within drawer cards */
+  .data-row {
+    display: flex;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .data-row:first-child { padding-top: 0; }
+  .data-row:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  .data-row-label {
+    width: 110px;
+    flex-shrink: 0;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .data-row-value {
+    flex: 1;
+    color: var(--ink);
+    word-break: break-word;
+  }
+  .data-row-value.is-empty {
+    color: var(--muted);
+    font-style: italic;
+  }
+  .data-row-value a {
+    color: var(--brand-ink);
+    text-decoration: none;
+  }
+  .data-row-value a:hover {
+    text-decoration: underline;
+  }
+
+  /* Destination chips inside a data row */
+  .dest-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .dest-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .interest-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .interest-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    background: var(--hover);
+    color: var(--sub);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* Consent indicators — a clear visual yes/no pair */
+  .consent-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .consent-item {
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .consent-item-label {
+    flex: 1;
+    color: var(--sub);
+    font-weight: 500;
+  }
+  .consent-item-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .consent-item.is-yes .consent-item-icon { background: var(--success); }
+  .consent-item.is-no  .consent-item-icon { background: var(--border-strong); color: var(--muted); }
+
+  /* Internal note editor */
+  .note-editor {
+    background: #FFFBEB;
+    border: 1px solid #FEF3C7;
+    border-radius: 10px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .note-editor-textarea {
+    width: 100%;
+    min-height: 84px;
+    padding: 12px 14px;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink);
+    outline: none;
+    resize: vertical;
+    display: block;
+  }
+  .note-editor-textarea::placeholder {
+    color: #D97706;
+    opacity: .7;
+  }
+  .note-editor-footer {
+    padding: 6px 14px 10px;
+    font-size: 11px;
+    color: #92400E;
+    opacity: .75;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .note-editor-footer.is-saving { color: #92400E; }
+  .note-editor-footer.is-saved  { color: var(--success); opacity: 1; }
+  .note-editor-footer svg { flex-shrink: 0; }
+
+  /* Routing history */
+  .routing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .routing-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .routing-row-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .routing-row-dot.ok       { background: var(--success); }
+  .routing-row-dot.failed   { background: var(--danger); }
+  .routing-row-dot.pending  { background: var(--warning); }
+  .routing-row-dot.skipped  { background: var(--border-strong); }
+  .routing-row-name {
+    font-weight: 600;
+    color: var(--ink);
+    flex: 1;
+  }
+  .routing-row-status {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: capitalize;
+  }
+
+  /* Collapsible — used for technical context and raw JSON */
+  .collapsible {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--panel-2);
+  }
+  .collapsible-head {
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sub);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .12s ease;
+  }
+  .collapsible-head:hover {
+    background: var(--hover);
+  }
+  .collapsible-chevron {
+    transition: transform .15s ease;
+  }
+  .collapsible.is-open .collapsible-chevron {
+    transform: rotate(90deg);
+  }
+  .collapsible-body {
+    display: none;
+    padding: 0 16px 14px;
+  }
+  .collapsible.is-open .collapsible-body {
+    display: block;
+  }
+
+  /* Raw JSON display */
+  .json-block {
+    background: #0F172A;
+    color: #E2E8F0;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-family: -apple-system, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  /* Loading state for the drawer body */
+  .drawer-loading {
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* Drawer error state */
+  .drawer-error {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--danger);
+    font-size: 13px;
+  }
+
+  @media (max-width: 640px) {
+    .drawer { width: 100%; }
+    .data-row { flex-direction: column; gap: 4px; }
+    .data-row-label { width: auto; }
+    .consent-grid { grid-template-columns: 1fr; }
+    .drawer-actions { flex-wrap: wrap; }
+    .drawer-action { flex: 1 1 calc(50% - 4px); }
+  }
+
   /* =========================== LOGIN OVERLAY =========================== */
   .login-overlay {
     position: fixed;
@@ -758,6 +1223,12 @@
 
   </div>
 </div>
+
+<!-- Drawer — slides in from right when a row is clicked -->
+<div id="drawer-scrim" class="drawer-scrim"></div>
+<aside id="drawer" class="drawer" role="dialog" aria-label="Submission details">
+  <!-- Populated dynamically by renderDrawer() -->
+</aside>
 
 <div class="toast-wrap" id="toast-wrap"></div>
 
@@ -1049,13 +1520,695 @@ function updateFormFilterFromItems() {
 }
 
 /* ============================ DRAWER ============================ */
-// Stub — detail drawer is built in Part B. For now, just toast.
-function openSubmission(id) {
-  // Mark visually as selected so agents get feedback
+// Drawer state — the open submission and anything in flight
+const drawerState = {
+  open: false,
+  loading: false,
+  id: null,
+  submission: null,
+  noteDebounce: null,
+  noteSaving: false,
+  noteLastSavedAt: null,
+};
+
+// Open a submission's detail drawer. Fetches the full record, auto-marks
+// as read server-side, updates the list row's unread/status visual state
+// once the server responds.
+async function openSubmission(id) {
+  // Visually mark this row as selected so the agent sees which one is open
   $$('.row').forEach(r => r.classList.remove('is-selected'));
   const row = document.querySelector(`.row[data-id="${id}"]`);
   if (row) row.classList.add('is-selected');
-  showToast('Detail view arrives in the next build', 'info', 2400);
+
+  drawerState.open = true;
+  drawerState.loading = true;
+  drawerState.id = id;
+  drawerState.submission = null;
+
+  $('#drawer-scrim').classList.add('is-open');
+  $('#drawer').classList.add('is-open');
+  renderDrawer();
+
+  try {
+    const res = await authedFetch('/api/enquiry/submissions?id=' + encodeURIComponent(id));
+    if (res.status === 401) {
+      $('#login-overlay').classList.add('is-visible');
+      $('#app').style.display = 'none';
+      return;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to load submission');
+    }
+    const data = await res.json();
+    drawerState.submission = data.submission;
+    drawerState.loading = false;
+    renderDrawer();
+
+    // Update the list row to reflect the auto-mark-as-read the server performed.
+    // The server flips New→Read and stamps agentReadAt, so the list should
+    // now show no unread dot and the "Read" badge instead of "New".
+    const item = state.items.find(s => s.id === id);
+    if (item) {
+      item.status = data.submission.status;
+      item.agentReadAt = data.submission.agentReadAt;
+      item.unread = false;
+      renderList();
+      // Re-apply selection since renderList rebuilt the DOM
+      const selRow = document.querySelector(`.row[data-id="${id}"]`);
+      if (selRow) selRow.classList.add('is-selected');
+    }
+  } catch (err) {
+    console.error('[drawer] load failed', err);
+    drawerState.loading = false;
+    drawerState.submission = null;
+    showToast('Failed to load submission: ' + err.message, 'error');
+    renderDrawer();
+  }
+}
+
+function closeDrawer() {
+  drawerState.open = false;
+  drawerState.submission = null;
+  drawerState.id = null;
+  // Cancel any pending note save — the autosave endpoint fires on blur
+  // too so we don't lose in-flight edits, but cancel the timer to be safe
+  if (drawerState.noteDebounce) {
+    clearTimeout(drawerState.noteDebounce);
+    drawerState.noteDebounce = null;
+  }
+  $('#drawer-scrim').classList.remove('is-open');
+  $('#drawer').classList.remove('is-open');
+  $$('.row').forEach(r => r.classList.remove('is-selected'));
+}
+
+// Main renderer. Called on open, on status change, on load finish.
+function renderDrawer() {
+  const drawer = $('#drawer');
+
+  if (drawerState.loading) {
+    drawer.innerHTML = `
+      <div class="drawer-head">
+        <div class="drawer-head-info">
+          <div class="drawer-head-name" style="color: var(--muted);">Loading…</div>
+        </div>
+        <button class="drawer-close" type="button" id="drawer-close-btn" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-loading">
+        <div class="spinner"></div>
+        <div>Fetching submission…</div>
+      </div>
+    `;
+    wireDrawerClose();
+    return;
+  }
+
+  const sub = drawerState.submission;
+  if (!sub) {
+    drawer.innerHTML = `
+      <div class="drawer-head">
+        <div class="drawer-head-info">
+          <div class="drawer-head-name">Could not load submission</div>
+        </div>
+        <button class="drawer-close" type="button" id="drawer-close-btn" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-error">
+        The submission could not be loaded. It may have been deleted or you may not have access.
+      </div>
+    `;
+    wireDrawerClose();
+    return;
+  }
+
+  // Format key strings
+  const fullName = sub.contact.fullName || '(no name provided)';
+  const when = sub.submittedAt
+    ? new Date(sub.submittedAt).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : '';
+
+  drawer.innerHTML = `
+    <div class="drawer-head">
+      <div class="drawer-head-info">
+        <div class="drawer-head-ref">${escapeHtml(sub.reference || '—')}</div>
+        <div class="drawer-head-name">${escapeHtml(fullName)}</div>
+        <div class="drawer-head-meta">
+          <span>${escapeHtml(sub.form.name || sub.form.id || 'Unknown form')}</span>
+          <span class="drawer-head-meta-sep">·</span>
+          <span>${escapeHtml(when)}</span>
+        </div>
+      </div>
+      <button class="drawer-close" type="button" id="drawer-close-btn" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+
+      ${renderStatusSegmented(sub)}
+
+      ${renderActionRow(sub)}
+
+      ${renderTripSection(sub)}
+
+      ${renderContactSection(sub)}
+
+      ${renderConsentSection(sub)}
+
+      ${renderNoteSection(sub)}
+
+      ${renderRoutingSection(sub)}
+
+      ${renderTechnicalSection(sub)}
+
+      ${renderRawSection(sub)}
+
+    </div>
+  `;
+
+  wireDrawerClose();
+  wireStatusSegmented();
+  wireNoteEditor();
+  wireCollapsibles();
+  wireCopyButtons();
+}
+
+function wireDrawerClose() {
+  const btn = document.getElementById('drawer-close-btn');
+  if (btn) btn.addEventListener('click', closeDrawer);
+}
+
+function renderStatusSegmented(sub) {
+  const opts = [
+    { value: 'New',       label: 'New',       icon: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' },
+    { value: 'Read',      label: 'Read',      icon: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>' },
+    { value: 'Converted', label: 'Converted', icon: '<polyline points="20 6 9 17 4 12"/>' },
+    { value: 'Archived',  label: 'Archive',   icon: '<polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/>' },
+  ];
+  const buttons = opts.map(o => {
+    const active = o.value === sub.status ? ' is-active' : '';
+    return `
+      <button type="button" class="status-seg-btn${active}" data-status="${o.value}" aria-pressed="${o.value === sub.status}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          ${o.icon}
+        </svg>
+        ${o.label}
+      </button>
+    `;
+  }).join('');
+  return `<div class="status-seg">${buttons}</div>`;
+}
+
+function renderActionRow(sub) {
+  const email = sub.contact.email;
+  const phone = sub.contact.phone;
+
+  // Pre-fill the mailto with a contextual subject including the reference
+  const subject = `Re: your enquiry (${sub.reference || 'enquiry'})`;
+  const emailHref = email
+    ? `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}`
+    : '#';
+  const phoneHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : '#';
+
+  return `
+    <div class="drawer-actions">
+      <a class="drawer-action is-primary${email ? '' : ' is-disabled'}" href="${emailHref}"${email ? '' : ' aria-disabled="true"'}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Reply by email
+      </a>
+      <a class="drawer-action${phone ? '' : ' is-disabled'}" href="${phoneHref}"${phone ? '' : ' aria-disabled="true"'}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+        </svg>
+        Call
+      </a>
+      <button type="button" class="drawer-action" data-copy="${escapeHtml(email || '')}" ${email ? '' : 'disabled'}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        Copy email
+      </button>
+    </div>
+  `;
+}
+
+function renderTripSection(sub) {
+  const trip = sub.trip;
+
+  const destText = renderDestinationChips(trip.destinations);
+  const datesText = renderDatesText(trip);
+  const durationText = renderDurationText(trip);
+  const travellersText = renderTravellersDetail(trip);
+  const budgetText = trip.budgetPP
+    ? '£' + Number(trip.budgetPP).toLocaleString()
+    : '';
+  const starsText = trip.stars ? (trip.stars + '★') : '';
+  const interestsHtml = renderInterestChips(trip.interests);
+
+  const rows = [
+    rowHtml('Destinations', destText, destText ? '' : 'is-empty'),
+    rowHtml('From', trip.departureAirport || '—', trip.departureAirport ? '' : 'is-empty'),
+    rowHtml('Travel dates', datesText || '—', datesText ? '' : 'is-empty'),
+    rowHtml('Duration', durationText || '—', durationText ? '' : 'is-empty'),
+    rowHtml('Travellers', travellersText || '—', ''),
+    rowHtml('Budget', budgetText ? ('Up to ' + budgetText + ' per person') : '—', budgetText ? '' : 'is-empty'),
+    rowHtml('Hotel stars', starsText || '—', starsText ? '' : 'is-empty'),
+    rowHtml('Board', trip.boardBasis || '—', trip.boardBasis ? '' : 'is-empty'),
+    rowHtml('Interests', interestsHtml || '—', interestsHtml ? '' : 'is-empty'),
+  ];
+
+  const notesBlock = trip.notes
+    ? `<div class="drawer-section">
+        <div class="drawer-section-title">Visitor notes</div>
+        <div class="drawer-card">
+          <div style="white-space: pre-wrap; color: var(--ink); font-size: 13px; line-height: 1.6;">${escapeHtml(trip.notes)}</div>
+        </div>
+      </div>`
+    : '';
+
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Trip details</div>
+      <div class="drawer-card">${rows.join('')}</div>
+    </div>
+    ${notesBlock}
+  `;
+}
+
+function renderContactSection(sub) {
+  const c = sub.contact;
+  const rows = [
+    rowHtml('Name', c.fullName || '—', c.fullName ? '' : 'is-empty'),
+    rowHtml('Email',
+      c.email ? `<a href="mailto:${encodeHtmlAttr(c.email)}">${escapeHtml(c.email)}</a>` : '—',
+      c.email ? '' : 'is-empty'),
+    rowHtml('Phone',
+      c.phone ? `<a href="tel:${encodeHtmlAttr(c.phone.replace(/[^\d+]/g, ''))}">${escapeHtml(c.phone)}</a>` : '—',
+      c.phone ? '' : 'is-empty'),
+  ];
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Contact</div>
+      <div class="drawer-card">${rows.join('')}</div>
+    </div>
+  `;
+}
+
+function renderConsentSection(sub) {
+  const contactConsent = sub.consent.contact;
+  const marketingConsent = sub.consent.marketing;
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Consent</div>
+      <div class="consent-grid">
+        <div class="consent-item ${contactConsent ? 'is-yes' : 'is-no'}">
+          <span class="consent-item-icon">
+            ${contactConsent
+              ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+              : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}
+          </span>
+          <span class="consent-item-label">Contact consent</span>
+        </div>
+        <div class="consent-item ${marketingConsent ? 'is-yes' : 'is-no'}">
+          <span class="consent-item-icon">
+            ${marketingConsent
+              ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+              : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}
+          </span>
+          <span class="consent-item-label">Marketing consent</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderNoteSection(sub) {
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Internal note (private)</div>
+      <div class="note-editor">
+        <textarea class="note-editor-textarea" id="note-textarea" placeholder="Add a private note — only you will see this.">${escapeHtml(sub.internalNote || '')}</textarea>
+        <div class="note-editor-footer" id="note-footer">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span id="note-status-text">Only visible to you — not sent to the visitor.</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRoutingSection(sub) {
+  const rs = sub.routingStatus;
+  if (!rs || typeof rs !== 'object') {
+    return `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Routing history</div>
+        <div class="drawer-card" style="color: var(--muted); font-size: 13px; font-style: italic;">No routing history recorded for this submission.</div>
+      </div>
+    `;
+  }
+
+  const labels = {
+    email: 'Email notification',
+    googleSheets: 'Google Sheets',
+    airtable: 'Airtable',
+    webhook: 'Webhook',
+    lunaChat: 'Luna Chat',
+    lunaMarketing: 'Luna Marketing',
+    lunaWork: 'Luna Work',
+    autoReply: 'Customer auto-reply',
+  };
+
+  const rows = Object.entries(rs).map(([key, value]) => {
+    const statusClass = value === 'ok' ? 'ok'
+      : value === 'failed' ? 'failed'
+      : value === 'pending' ? 'pending'
+      : 'skipped';
+    const statusText = value === 'ok' ? 'Delivered'
+      : value === 'failed' ? 'Failed'
+      : value === 'pending' ? 'Pending'
+      : (value === 'skipped' || value === 'disabled') ? 'Not sent'
+      : value;
+    return `
+      <div class="routing-row">
+        <span class="routing-row-dot ${statusClass}"></span>
+        <span class="routing-row-name">${escapeHtml(labels[key] || key)}</span>
+        <span class="routing-row-status">${escapeHtml(statusText)}</span>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Routing history</div>
+      <div class="routing-list">${rows}</div>
+    </div>
+  `;
+}
+
+function renderTechnicalSection(sub) {
+  const c = sub.context;
+  const hasAny = c.sourceUrl || c.ipAddress || c.userAgent || c.locale;
+  if (!hasAny) return '';
+
+  const rows = [
+    rowHtml('Source page', c.sourceUrl
+      ? `<a href="${encodeHtmlAttr(c.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(c.sourceUrl)}</a>`
+      : '—', c.sourceUrl ? '' : 'is-empty'),
+    rowHtml('IP address', c.ipAddress || '—', c.ipAddress ? '' : 'is-empty'),
+    rowHtml('Locale', c.locale || '—', c.locale ? '' : 'is-empty'),
+    rowHtml('User agent', c.userAgent ? `<span style="font-family: -apple-system, 'SF Mono', Menlo, monospace; font-size: 11px;">${escapeHtml(c.userAgent)}</span>` : '—', c.userAgent ? '' : 'is-empty'),
+  ];
+
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Technical context</div>
+      <div class="collapsible">
+        <button type="button" class="collapsible-head" data-collapse>
+          <svg class="collapsible-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+          <span>Show visitor context</span>
+        </button>
+        <div class="collapsible-body">
+          ${rows.join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRawSection(sub) {
+  if (!sub.rawPayload) return '';
+  const jsonStr = JSON.stringify(sub.rawPayload, null, 2);
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Raw submission data</div>
+      <div class="collapsible">
+        <button type="button" class="collapsible-head" data-collapse>
+          <svg class="collapsible-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+          <span>Show raw JSON (${jsonStr.length} chars)</span>
+        </button>
+        <div class="collapsible-body">
+          <div class="json-block">${escapeHtml(jsonStr)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---- Rendering helpers used inside the drawer ---- */
+function rowHtml(label, value, extraClass) {
+  return `
+    <div class="data-row">
+      <div class="data-row-label">${escapeHtml(label)}</div>
+      <div class="data-row-value ${extraClass || ''}">${value}</div>
+    </div>
+  `;
+}
+
+function renderDestinationChips(dests) {
+  if (!dests || !Array.isArray(dests) || dests.length === 0) return '';
+  return '<div class="dest-chips">' +
+    dests.map(d => {
+      const name = typeof d === 'string' ? d : (d.name || d.id || '');
+      if (!name) return '';
+      const region = (typeof d === 'object' && d.region) ? ` · ${escapeHtml(d.region)}` : '';
+      return `<span class="dest-chip">${escapeHtml(name)}${region}</span>`;
+    }).filter(Boolean).join('') +
+    '</div>';
+}
+
+function renderInterestChips(interests) {
+  if (!interests || !Array.isArray(interests) || interests.length === 0) return '';
+  return '<div class="interest-chips">' +
+    interests.map(i => `<span class="interest-chip">${escapeHtml(i)}</span>`).join('') +
+    '</div>';
+}
+
+function renderDatesText(trip) {
+  if (!trip.departDate && !trip.returnDate) {
+    return trip.flexibleDates ? 'Flexible' : '';
+  }
+  const depart = trip.departDate ? new Date(trip.departDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  const ret = trip.returnDate ? new Date(trip.returnDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  let text = depart;
+  if (ret) text += (depart ? ' → ' : '') + ret;
+  if (trip.flexibleDates) text += ' (flexible)';
+  return text;
+}
+
+function renderDurationText(trip) {
+  if (trip.durationNights) {
+    return trip.durationNights + ' night' + (trip.durationNights === 1 ? '' : 's');
+  }
+  if (trip.customDuration) return trip.customDuration;
+  return '';
+}
+
+function renderTravellersDetail(trip) {
+  const parts = [];
+  if (trip.adults > 0) parts.push(trip.adults + ' adult' + (trip.adults === 1 ? '' : 's'));
+  if (trip.children > 0) {
+    let c = trip.children + ' child' + (trip.children === 1 ? '' : 'ren');
+    if (trip.childAges && Array.isArray(trip.childAges) && trip.childAges.length) {
+      c += ' (ages ' + trip.childAges.join(', ') + ')';
+    }
+    parts.push(c);
+  }
+  if (trip.infants > 0) parts.push(trip.infants + ' infant' + (trip.infants === 1 ? '' : 's'));
+  return parts.join(', ');
+}
+
+function encodeHtmlAttr(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+/* ---- Drawer wiring ---- */
+function wireStatusSegmented() {
+  $$('.status-seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newStatus = btn.getAttribute('data-status');
+      if (newStatus === drawerState.submission.status) return;
+      updateStatus(newStatus);
+    });
+  });
+}
+
+async function updateStatus(newStatus) {
+  if (!drawerState.submission) return;
+  const id = drawerState.submission.id;
+  const previousStatus = drawerState.submission.status;
+
+  // Optimistic UI — flip visual state immediately
+  drawerState.submission.status = newStatus;
+  $$('.status-seg-btn').forEach(b => {
+    b.classList.toggle('is-active', b.getAttribute('data-status') === newStatus);
+    b.setAttribute('aria-pressed', b.getAttribute('data-status') === newStatus ? 'true' : 'false');
+  });
+
+  // Update the list row's badge + unread state
+  const item = state.items.find(s => s.id === id);
+  if (item) {
+    item.status = newStatus;
+    item.unread = false;
+    renderList();
+    const selRow = document.querySelector(`.row[data-id="${id}"]`);
+    if (selRow) selRow.classList.add('is-selected');
+  }
+
+  try {
+    const res = await authedFetch('/api/enquiry/submissions?id=' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Update failed');
+    }
+    showToast(`Marked as ${newStatus}`, 'success', 1800);
+  } catch (err) {
+    console.error('[drawer] status update failed', err);
+    // Revert optimistic change
+    drawerState.submission.status = previousStatus;
+    if (item) { item.status = previousStatus; renderList(); }
+    $$('.status-seg-btn').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-status') === previousStatus);
+    });
+    showToast('Failed to update status: ' + err.message, 'error');
+  }
+}
+
+function wireNoteEditor() {
+  const ta = document.getElementById('note-textarea');
+  if (!ta) return;
+  ta.addEventListener('input', () => scheduleNoteSave());
+  ta.addEventListener('blur', () => saveNoteNow());
+}
+
+function scheduleNoteSave() {
+  const footer = document.getElementById('note-footer');
+  const statusText = document.getElementById('note-status-text');
+  if (footer) footer.classList.remove('is-saved', 'is-saving');
+  if (statusText) statusText.textContent = 'Unsaved changes…';
+
+  if (drawerState.noteDebounce) clearTimeout(drawerState.noteDebounce);
+  drawerState.noteDebounce = setTimeout(() => saveNoteNow(), 1500);
+}
+
+async function saveNoteNow() {
+  if (drawerState.noteDebounce) {
+    clearTimeout(drawerState.noteDebounce);
+    drawerState.noteDebounce = null;
+  }
+  if (!drawerState.submission) return;
+  const ta = document.getElementById('note-textarea');
+  if (!ta) return;
+  const note = ta.value;
+  if (note === (drawerState.submission.internalNote || '')) {
+    // No actual change, don't hit the API
+    const statusText = document.getElementById('note-status-text');
+    if (statusText) statusText.textContent = 'Only visible to you — not sent to the visitor.';
+    return;
+  }
+
+  const footer = document.getElementById('note-footer');
+  const statusText = document.getElementById('note-status-text');
+  if (footer) footer.classList.add('is-saving');
+  if (statusText) statusText.textContent = 'Saving…';
+
+  try {
+    const res = await authedFetch('/api/enquiry/submissions?id=' + encodeURIComponent(drawerState.submission.id), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ internalNote: note })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Save failed');
+    }
+    drawerState.submission.internalNote = note;
+    drawerState.noteLastSavedAt = new Date();
+    if (footer) { footer.classList.remove('is-saving'); footer.classList.add('is-saved'); }
+    if (statusText) statusText.textContent = 'Saved. Only visible to you.';
+    // Revert status text to default after a moment
+    setTimeout(() => {
+      if (statusText && drawerState.submission && drawerState.submission.internalNote === note) {
+        if (footer) footer.classList.remove('is-saved');
+        statusText.textContent = 'Only visible to you — not sent to the visitor.';
+      }
+    }, 3000);
+  } catch (err) {
+    console.error('[drawer] note save failed', err);
+    if (footer) footer.classList.remove('is-saving');
+    if (statusText) statusText.textContent = 'Save failed — try again';
+    showToast('Failed to save note: ' + err.message, 'error');
+  }
+}
+
+function wireCollapsibles() {
+  $$('[data-collapse]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wrap = btn.closest('.collapsible');
+      if (wrap) wrap.classList.toggle('is-open');
+    });
+  });
+}
+
+function wireCopyButtons() {
+  $$('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const value = btn.getAttribute('data-copy');
+      if (!value) return;
+      try {
+        await navigator.clipboard.writeText(value);
+        const labelSpan = btn.querySelector('svg')?.nextSibling;
+        const originalText = btn.textContent.trim();
+        btn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Copied
+        `;
+        setTimeout(() => {
+          btn.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+            ${originalText}
+          `;
+        }, 1800);
+      } catch (e) {
+        showToast('Copy failed', 'error');
+      }
+    });
+  });
+}
+
+// Close drawer on Esc + click scrim
+function bindDrawerDismiss() {
+  $('#drawer-scrim').addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawerState.open) closeDrawer();
+  });
 }
 
 /* ============================ BINDINGS ============================ */
@@ -1143,6 +2296,7 @@ function bindRefresh() {
   bindSidebar();
   bindSearch();
   bindRefresh();
+  bindDrawerDismiss();
   fetchSubmissions(false);
 })();
 </script>
