@@ -802,8 +802,9 @@
       height: 0;
       margin: 0;
       overflow: hidden;
-      transition: height .18s cubic-bezier(.2,0,.2,1),
-                  margin .18s cubic-bezier(.2,0,.2,1);
+      transition: height .2s cubic-bezier(.2,0,.2,1),
+                  margin .2s cubic-bezier(.2,0,.2,1),
+                  opacity .15s ease;
       background: var(--brand-soft);
       border: 2px dashed var(--brand);
       border-radius: var(--radius);
@@ -811,31 +812,64 @@
       align-items: center;
       justify-content: center;
       color: var(--brand);
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .08em;
+      letter-spacing: .12em;
       box-sizing: border-box;
       opacity: 0;
       pointer-events: none;
     }
+    .drop-slot::before {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230891B2' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12l7 7 7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+    }
     .drop-slot.is-active {
-      height: 60px;
-      margin: 8px 0;
+      height: 56px;
+      margin: 10px 0;
       opacity: 1;
       pointer-events: auto;
+      animation: dropSlotPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes dropSlotPulse {
+      0%, 100% { background: var(--brand-soft); }
+      50% { background: rgba(8,145,178,.18); }
     }
     /* A small always-present hit area between cards during a drag. Invisible
        but catches dragover so we can activate the slot when the pointer is in
        the gap between two cards. */
     body.is-dragging .drop-slot {
-      height: 16px;
+      height: 12px;
       opacity: 0;
       pointer-events: auto;
     }
     body.is-dragging .drop-slot.is-active {
-      height: 60px;
+      height: 56px;
       opacity: 1;
+    }
+
+    /* When a slot is active, gently push the adjacent cards apart so the
+       list visually opens up — the Notion/Linear pattern. The slot itself
+       provides the main gap; these margins add breathing room so it doesn't
+       look glued to either card. */
+    .field-card,
+    .canvas-card {
+      transition: margin-top .2s cubic-bezier(.2,0,.2,1),
+                  margin-bottom .2s cubic-bezier(.2,0,.2,1);
+    }
+    .field-card.slot-above-active,
+    .canvas-card.slot-above-active {
+      margin-top: 6px;
+    }
+    .field-card.slot-below-active,
+    .canvas-card.slot-below-active {
+      margin-bottom: 6px;
     }
 
     /* Canvas in drag-over state */
@@ -1774,14 +1808,17 @@
 
     // Renders a real drop-slot element for a specific insertion index.
     // The element is hidden (height: 0) until a drag is in progress, at which
-    // point it becomes a live drop target. When hovered, it expands to 60px
-    // with the "Drop here" label visible.
+    // point it becomes a live drop target. When hovered, it expands to its
+    // full height with the "Drop here" label visible.
     function renderDropSlot(insertIndex) {
       const slot = document.createElement('div');
       slot.className = 'drop-slot';
       slot.setAttribute('data-drop-slot', '1');
       slot.setAttribute('data-insert-index', String(insertIndex));
-      slot.textContent = 'Drop here';
+      // Span wrapper so the ::before arrow icon can sit inline alongside
+      const label = document.createElement('span');
+      label.textContent = 'Drop here';
+      slot.appendChild(label);
       return slot;
     }
 
@@ -2027,9 +2064,12 @@
       if (stage) stage.classList.remove('is-drag-target');
     }
 
-    // Clear any active drop slot
+    // Clear any active drop slot and remove card push classes
     function clearDropIndicators() {
       $$('.drop-slot.is-active').forEach(s => s.classList.remove('is-active'));
+      $$('.slot-above-active, .slot-below-active').forEach(c => {
+        c.classList.remove('slot-above-active', 'slot-below-active');
+      });
     }
 
     // Given a card and the pointer event, figure out which drop-slot
@@ -2051,12 +2091,30 @@
     }
 
     // Activate a specific slot, deactivating all others. If slot is null,
-    // just clears everything.
+    // just clears everything. Also adds push classes to the cards immediately
+    // above and below the active slot so the list visually opens up.
     function activateSlot(slot) {
+      // First clear any existing state
       $$('.drop-slot.is-active').forEach(s => {
         if (s !== slot) s.classList.remove('is-active');
       });
-      if (slot) slot.classList.add('is-active');
+      $$('.slot-above-active, .slot-below-active').forEach(c => {
+        c.classList.remove('slot-above-active', 'slot-below-active');
+      });
+
+      if (!slot) return;
+      slot.classList.add('is-active');
+
+      // Push the card immediately before the slot (if any) downwards
+      // and the card immediately after the slot (if any) upwards.
+      const prev = slot.previousElementSibling;
+      const next = slot.nextElementSibling;
+      if (prev && (prev.classList.contains('field-card') || prev.classList.contains('canvas-card'))) {
+        prev.classList.add('slot-below-active');
+      }
+      if (next && (next.classList.contains('field-card') || next.classList.contains('canvas-card'))) {
+        next.classList.add('slot-above-active');
+      }
     }
 
     // Called when a drop happens on a slot
