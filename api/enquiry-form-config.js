@@ -59,6 +59,8 @@ const EF = {
   airtableBaseId:      'fldMJzweCfekIBAoF',
   airtableTableId:     'flddiEIebjjtGJMWY',
   airtablePAT:         'fldA6v05RBuCovsh6',
+  airtablePATVerifiedAt:'fldU9OeeLqwRVfPYN',
+  airtablePATLastError:'fldEvB2ncXRAVZQIG',
   airtableFieldMap:    'fldMF5oFaWCyqsNhL',
   routingEmail:        'fldkwZwxheNZJ8CrH',
   routingEmailTo:      'fldlu1HcErBfp2wh2',
@@ -252,7 +254,10 @@ function readEnquiryFormRecord(record) {
         enabled: !!f[EF.routingAirtable],
         baseId: f[EF.airtableBaseId] || '',
         tableId: f[EF.airtableTableId] || '',
-        hasPAT: !!f[EF.airtablePAT], // never expose the encrypted PAT itself
+        hasPAT: !!f[EF.airtablePAT], // legacy — kept for backwards compat
+        patSet: !!f[EF.airtablePAT],
+        patVerifiedAt: f[EF.airtablePATVerifiedAt] || null,
+        patLastError: f[EF.airtablePATLastError] || '',
         fieldMap: f[EF.airtableFieldMap] || '{}',
       },
       email: {
