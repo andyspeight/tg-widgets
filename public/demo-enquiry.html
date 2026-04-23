@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Enquiry Form Demo · Travelgenix</title>
+  <meta name="robots" content="noindex,nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ────────────────────── Reset + tokens ────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #F7F8FA;
+      color: #111827;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ─────────────────────── Demo chrome ─────────────────────── */
+    .demo-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: #0F172A;
+      color: #F8FAFC;
+      padding: 10px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; font-weight: 500;
+      gap: 16px;
+    }
+    .demo-bar-left { display: flex; align-items: center; gap: 12px; }
+    .demo-bar-dot { width: 8px; height: 8px; border-radius: 50%; background: #EC4899; box-shadow: 0 0 0 4px rgba(236,72,153,.2); }
+    .demo-bar-title { font-weight: 600; }
+    .demo-bar-sub { color: #94A3B8; font-weight: 400; }
+    .demo-bar-btn {
+      padding: 7px 14px;
+      background: #EC4899;
+      color: #FFFFFF;
+      border-radius: 7px;
+      font-weight: 600; font-size: 12px;
+      display: inline-flex; align-items: center; gap: 5px;
+      transition: background .15s;
+    }
+    .demo-bar-btn:hover { background: #DB2777; }
+    .demo-bar-btn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ───────────────────── Simulated site ───────────────────── */
+    .fake-nav {
+      background: #FFFFFF;
+      border-bottom: 1px solid #E5E7EB;
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .fake-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 800; font-size: 16px;
+      letter-spacing: -.02em;
+    }
+    .fake-logo-mark {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg,#0891B2,#7C3AED);
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #FFFFFF;
+    }
+    .fake-logo-mark svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .fake-nav-right { display: flex; gap: 22px; font-size: 14px; font-weight: 500; color: #4B5563; }
+    .fake-nav-right a:hover { color: #111827; }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      min-height: 380px;
+      background-image: linear-gradient(180deg, rgba(15,23,42,.1) 0%, rgba(15,23,42,.55) 100%),
+                        url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=2000&q=80');
+      background-size: cover;
+      background-position: center;
+      color: #FFFFFF;
+      padding: 80px 24px 60px;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .hero-inner { max-width: 780px; }
+    .hero-eyebrow {
+      display: inline-block;
+      padding: 5px 12px;
+      background: rgba(255,255,255,.15);
+      backdrop-filter: blur(6px);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: .04em;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: 44px; font-weight: 800;
+      line-height: 1.1; letter-spacing: -.03em;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 20px rgba(0,0,0,.25);
+    }
+    .hero p {
+      font-size: 17px; font-weight: 400;
+      max-width: 560px; margin: 0 auto;
+      opacity: .92;
+      line-height: 1.55;
+    }
+    @media (max-width: 640px) {
+      .hero { padding: 56px 20px 44px; }
+      .hero h1 { font-size: 30px; }
+      .hero p { font-size: 15px; }
+    }
+
+    /* Content area */
+    .content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 520px;
+      gap: 48px;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .content { grid-template-columns: 1fr; gap: 32px; padding-top: 40px; }
+    }
+
+    /* Left column — supporting copy */
+    .sell h2 {
+      font-size: 28px; font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 14px;
+      color: #0F172A;
+    }
+    .sell p {
+      font-size: 15px;
+      color: #475569;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .pointlist { margin-top: 28px; display: flex; flex-direction: column; gap: 16px; }
+    .point {
+      display: flex; gap: 12px;
+      align-items: flex-start;
+    }
+    .point-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: rgba(236,72,153,.1);
+      color: #EC4899;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .point-icon svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .point-text h3 {
+      font-size: 14px; font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 2px;
+    }
+    .point-text p {
+      font-size: 13px;
+      color: #64748B;
+      margin: 0;
+    }
+
+    /* Right column — widget mount */
+    .widget-column {
+      position: sticky; top: 80px;
+    }
+    .widget-label {
+      font-size: 11px; font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .widget-label::before {
+      content: ''; width: 6px; height: 6px;
+      background: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(16,185,129,.2);
+    }
+
+    /* Footer */
+    .fake-footer {
+      background: #FFFFFF;
+      border-top: 1px solid #E5E7EB;
+      padding: 32px 24px;
+      text-align: center;
+      color: #6B7280;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Demo chrome — a banner at the top making it clear this is a preview -->
+  <div class="demo-bar" role="banner">
+    <div class="demo-bar-left">
+      <span class="demo-bar-dot" aria-hidden="true"></span>
+      <span>
+        <span class="demo-bar-title">Enquiry Form demo</span>
+        <span class="demo-bar-sub"> · live preview on a simulated travel agency page</span>
+      </span>
+    </div>
+    <a href="/" class="demo-bar-btn">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to dashboard
+    </a>
+  </div>
+
+  <!-- Simulated travel agency nav -->
+  <div class="fake-nav">
+    <div class="fake-logo">
+      <span class="fake-logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5c.5-.5 1-2.5.5-3-1-.5-3 0-3.5.5L13 8.5 4.8 6.5c-.5-.1-.9.2-.9.7v.4c0 .3.2.6.5.8L8 10.5 6 14H3l-.5 1.5L5 17l1.5 2.5L8 19v-3l3.5-2 2.8 3.5c.2.3.5.5.8.5h.4c.5 0 .8-.4.7-.9z"/></svg>
+      </span>
+      <span>Sunshine Holidays</span>
+    </div>
+    <nav class="fake-nav-right" aria-label="Simulated navigation">
+      <a href="#">Destinations</a>
+      <a href="#">Offers</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="hero-eyebrow">Tailor-made holidays</span>
+      <h1>Your dream trip, quietly sorted.</h1>
+      <p>Tell us what you're looking for. One of our travel specialists will come back with a hand-picked itinerary within 24 hours — with flights, hotels, and the little touches that make the difference.</p>
+    </div>
+  </section>
+
+  <!-- Main content with widget mounted on the right -->
+  <div class="content">
+
+    <div class="sell">
+      <h2>We listen, then plan properly.</h2>
+      <p>This isn't a booking engine. It's the start of a conversation with a real person who's visited the places you're thinking about. Fill in a few details, and we'll come back with something that actually fits.</p>
+      <p>No pressure, no auto-generated spreadsheets — just a considered quote, a phone call if you want one, and zero booking fees.</p>
+
+      <div class="pointlist">
+        <div class="point">
+          <span class="point-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <div class="point-text">
+            <h3>ATOL-protected</h3>
+            <p>Every flight-inclusive package is fully protected. Peace of mind, baked in.</p>
+          </div>
+        </div>
+        <div class="point">
+          <span class="point-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+          <div class="point-text">
+            <h3>Response within 24 hours</h3>
+            <p>We'll come back by email or phone, whichever you prefer, usually much sooner.</p>
+          </div>
+        </div>
+        <div class="point">
+          <span class="point-icon">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </span>
+          <div class="point-text">
+            <h3>No booking fees</h3>
+            <p>Our quotes are all-in. No surprise charges at the checkout.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="widget-column">
+      <div class="widget-label">Plan your trip</div>
+
+      <!-- The Enquiry Form widget mount point.
+           data-tg-config provides inline config so the widget renders without
+           hitting the API. formId: 'preview' tells the widget to suppress real
+           submissions — clicking Send shows a success flash instead of POSTing. -->
+      <div id="enquiry-widget"></div>
+    </div>
+
+  </div>
+
+  <div class="fake-footer">
+    Simulated Sunshine Holidays landing page · The enquiry form above is a live Travelgenix widget.
+  </div>
+
+  <!-- Load the widget script. Since we're on tg-widgets.vercel.app itself,
+       the script is served from the same origin. -->
+  <script src="/widget-enquiry.js"></script>
+
+  <script>
+    // Mount the widget programmatically with inline preview config.
+    // This avoids the API call path — the widget just renders with what we
+    // pass in, and the preview formId tells it to flash "Looks good!" on
+    // submit instead of POSTing to /api/enquiry/submit.
+    (function () {
+      if (!window.TGEnquiryWidget) {
+        console.error('[demo-enquiry] Widget script did not load');
+        return;
+      }
+
+      const mount = document.getElementById('enquiry-widget');
+      if (!mount) return;
+
+      const previewConfig = {
+        formId: 'preview',
+        widgetId: 'demo',
+        name: 'Sunshine Holidays enquiry',
+        header: {
+          title: 'Tell us about your dream holiday',
+          subtitle: "Share a few details and one of our specialists will come back within 24 hours."
+        },
+        submitText: 'Send my enquiry',
+        thankYou: {
+          mode: 'inline',
+          message: "Thanks {firstName} — we're on it"
+        },
+        branding: {
+          buttonColour: '#0891B2',
+          accentColour: '#EC4899',
+          theme: 'light'
+        },
+        security: {
+          honeypot: true,
+          turnstile: false
+        },
+        fieldsJSON: [
+          { id: 'destination',       type: 'destination', label: 'Where are you dreaming of?', required: true,  visible: true },
+          { id: 'departure_airport', type: 'airport',     label: 'Departure airport',          required: true,  visible: true },
+          { id: 'travel_dates',      type: 'daterange',   label: 'Travel dates',               required: true,  visible: true },
+          { id: 'duration',          type: 'duration',    label: 'Duration',                   required: false, visible: true },
+          { id: 'travellers',        type: 'travellers',  label: "Who's travelling?",          required: true,  visible: true },
+          { id: 'budget_pp',         type: 'budget',      label: 'Approximate total budget',   required: false, visible: true },
+          { id: 'stars',             type: 'stars',       label: 'Star rating preference',     required: false, visible: true },
+          { id: 'board',             type: 'board',       label: 'Board basis',                required: false, visible: true },
+          { id: 'interests',         type: 'interests',   label: 'Interests',                  required: false, visible: true },
+          { id: 'name',              type: 'name',        label: 'Your name',                  required: true,  visible: true },
+          { id: 'contact',           type: 'contact',     label: 'How to reach you',           required: true,  visible: true },
+          { id: 'notes',             type: 'notes',       label: 'Anything else?',             required: false, visible: true },
+          { id: 'consent',           type: 'consent',     label: 'Consent',                    required: true,  visible: true }
+        ]
+      };
+
+      new window.TGEnquiryWidget(mount, previewConfig);
+    })();
+  </script>
+</body>
+</html>
