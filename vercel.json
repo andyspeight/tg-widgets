@@ -7,12 +7,14 @@
     { "source": "/demo-testimonials", "destination": "/demo-testimonials.html" },
     { "source": "/demo-spotlight", "destination": "/demo-spotlight.html" },
     { "source": "/demo-weather", "destination": "/demo-weather.html" },
+    { "source": "/demo-enquiry", "destination": "/demo-enquiry.html" },
     { "source": "/editor", "destination": "/editor.html" },
     { "source": "/editor-reviews", "destination": "/editor-reviews.html" },
     { "source": "/editor-faq", "destination": "/editor-faq.html" },
     { "source": "/editor-testimonials", "destination": "/editor-testimonials.html" },
     { "source": "/editor-spotlight", "destination": "/editor-spotlight.html" },
-    { "source": "/editor-weather", "destination": "/editor-weather.html" }
+    { "source": "/editor-weather", "destination": "/editor-weather.html" },
+    { "source": "/editor-enquiry", "destination": "/editor-enquiry.html" }
   ],
   "headers": [
     {
@@ -57,6 +59,14 @@
     },
     {
       "source": "/widget-weather.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-enquiry.js",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
