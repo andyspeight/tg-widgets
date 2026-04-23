@@ -794,44 +794,64 @@
       color: var(--danger);
     }
 
-    /* Drop zones between field cards.
-       CRITICAL: drop zones must have real height at rest, otherwise the browser
-       never fires dragover on them and drop never happens. The "invisible when
-       inactive" trick using height: 0 was broken — HTML5 DnD needs a real hit
-       target to fire events. So zones now have a small ambient height that
-       expands and turns blue when a valid drag is hovering. */
-    .drop-zone {
-      height: 10px;
-      margin: 2px 0;
-      background: transparent;
-      transition: all .12s ease;
-      border-radius: 4px;
+    /* Field cards double as drop targets. A thin blue line appears on the
+       top or bottom edge of the card to show where the drop will land.
+       This pattern is more forgiving than sliver-thin "drop zones between cards"
+       because every pixel of every card is a valid target. */
+    .field-card {
       position: relative;
     }
-    body.is-dragging .drop-zone {
-      /* While a drag is in progress, bump zone height + show a dashed hint
-         so users can see where drops are possible. */
-      height: 20px;
-      background: var(--hover);
-      border: 1px dashed var(--border-strong);
+    .field-card::before,
+    .field-card::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--brand);
+      border-radius: 2px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .1s ease;
+      box-shadow: 0 0 8px var(--brand-soft);
     }
-    body.is-dragging .drop-zone.is-active,
-    .drop-zone.is-active {
-      height: 24px;
-      background: var(--brand-soft);
-      border: 2px solid var(--brand);
-      box-shadow: 0 0 12px var(--brand-soft);
+    .field-card::before { top: -2px; }
+    .field-card::after  { bottom: -2px; }
+    .field-card.drop-before::before { opacity: 1; }
+    .field-card.drop-after::after   { opacity: 1; }
+
+    /* Same treatment on the header and thank-you cards, so drops above the
+       first field or below the last field still land somewhere sensible. */
+    .canvas-card {
+      position: relative;
     }
-    /* Bigger drop zone at top/bottom edges */
-    .drop-zone-edge {
-      height: 12px;
+    .canvas-card::before,
+    .canvas-card::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--brand);
+      border-radius: 2px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .1s ease;
+      box-shadow: 0 0 8px var(--brand-soft);
     }
-    body.is-dragging .drop-zone-edge {
-      height: 24px;
+    .canvas-card::before { top: -2px; }
+    .canvas-card::after  { bottom: -2px; }
+    .canvas-card.drop-before::before { opacity: 1; }
+    .canvas-card.drop-after::after   { opacity: 1; }
+
+    /* While any drag is in progress, add subtle hint padding so drop targets
+       feel discoverable. */
+    body.is-dragging .canvas-stage {
+      padding-bottom: 40px;
     }
-    body.is-dragging .drop-zone-edge.is-active,
-    .drop-zone-edge.is-active {
-      height: 28px;
+    body.is-dragging .field-card,
+    body.is-dragging .canvas-card {
+      transition: margin .12s ease;
     }
 
     /* Canvas in drag-over state */
@@ -1748,29 +1768,20 @@
       // ── Header card (always shown, pinned at top) ──
       stage.insertBefore(renderHeaderCard(), previewWrapper);
 
-      // ── Top edge drop zone ──
-      stage.insertBefore(renderDropZone('edge-top', 0, 'edge'), previewWrapper);
-
       // ── Field cards or empty state ──
       if (currentFields.length === 0) {
         stage.insertBefore(renderFieldsEmpty(), previewWrapper);
       } else {
         currentFields.forEach((field, index) => {
           stage.insertBefore(renderFieldCard(field, index), previewWrapper);
-          // Drop zone below each field (except last gets an edge-style one)
-          const isLast = index === currentFields.length - 1;
-          stage.insertBefore(
-            renderDropZone('after-' + field.id, index + 1, isLast ? 'edge' : 'between'),
-            previewWrapper
-          );
         });
       }
 
       // ── Thank-you card (always shown, pinned at bottom) ──
       stage.insertBefore(renderThankYouCard(), previewWrapper);
 
-      // Wire up HTML5 DnD on every newly-created .drop-zone
-      bindCanvasDropZones();
+      // Wire card-as-drop-target handlers onto all cards we just created
+      bindCanvasDropTargets();
     }
 
     function renderHeaderCard() {
@@ -1940,17 +1951,6 @@
       return card;
     }
 
-    // Drop zones live between field cards — Part 2b wires up the dragover/
-    // drop behaviour. For Part 2a they're just empty placeholders that take
-    // up no space.
-    function renderDropZone(id, insertIndex, style) {
-      const dz = document.createElement('div');
-      dz.className = 'drop-zone' + (style === 'edge' ? ' drop-zone-edge' : '');
-      dz.setAttribute('data-drop-zone', id);
-      dz.setAttribute('data-insert-index', String(insertIndex));
-      return dz;
-    }
-
     function renderFieldsEmpty() {
       const wrap = document.createElement('div');
       wrap.className = 'canvas-fields-empty';
@@ -2019,106 +2019,140 @@
 
     function endDrag() {
       if (window.__tgDebug) console.log('[dnd] endDrag');
-      if (dragState.activeZone) dragState.activeZone.classList.remove('is-active');
       dragState = { kind: null, sourceTypeId: null, sourceFieldId: null, activeZone: null };
       document.body.classList.remove('is-dragging');
-      $$('.drop-zone').forEach(z => z.classList.remove('is-active'));
-      $('#canvas-stage').classList.remove('is-drag-target');
+      // Clear any remaining drop indicators on cards
+      $$('.field-card, .canvas-card').forEach(c => {
+        c.classList.remove('drop-before', 'drop-after');
+      });
+      const stage = $('#canvas-stage');
+      if (stage) stage.classList.remove('is-drag-target');
     }
 
-    // Called on every dragover on a drop zone. preventDefault() is what allows
-    // the drop event to fire at all — if you forget this, nothing works.
+    // Called on every dragover on a drop target. preventDefault() is what
+    // allows the drop event to fire at all — if you forget this, nothing works.
+    // (This was originally for drop-zones, kept as a reference/stub.)
     function onZoneDragOver(zone, evt) {
-      if (!dragState.kind) return; // not our drag
-      evt.preventDefault();
-      evt.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
-
-      // Don't activate a zone adjacent to the card being moved (no-op drop)
-      if (dragState.kind === 'move') {
-        const targetIdx = parseInt(zone.getAttribute('data-insert-index'), 10);
-        const fields = parseFields(state.config.fieldsJSON);
-        const fromIdx = fields.findIndex(f => f.id === dragState.sourceFieldId);
-        if (fromIdx === -1) return;
-        // A drop at fromIdx or fromIdx+1 is a no-op (same position)
-        if (targetIdx === fromIdx || targetIdx === fromIdx + 1) return;
-      }
-
-      if (dragState.activeZone && dragState.activeZone !== zone) {
-        dragState.activeZone.classList.remove('is-active');
-      }
-      zone.classList.add('is-active');
-      dragState.activeZone = zone;
+      // Deprecated — see card dragover handlers in bindCanvasDropTargets instead.
     }
 
     function onZoneDrop(zone, evt) {
+      // Deprecated — kept for compatibility but no longer called.
+      // See onCardDrop instead.
+    }
+
+    // Clear any drop-before / drop-after indicators on all cards
+    function clearDropIndicators() {
+      $$('.field-card, .canvas-card').forEach(c => {
+        c.classList.remove('drop-before', 'drop-after');
+      });
+    }
+
+    // Determine where on a card the pointer is (top half or bottom half)
+    // and update the visual indicator. Returns { position: 'before' | 'after' }.
+    function updateCardDropIndicator(card, evt) {
+      const rect = card.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      const isAbove = evt.clientY < midpoint;
+      clearDropIndicators();
+      card.classList.add(isAbove ? 'drop-before' : 'drop-after');
+      return { position: isAbove ? 'before' : 'after' };
+    }
+
+    // Compute the insertion index for a drop on a specific card
+    function computeInsertIdx(card, position) {
+      const item = card.getAttribute('data-canvas-item');
+      const currentFields = parseFields(state.config.fieldsJSON);
+
+      if (item === 'header') {
+        // Drop above header → index 0 (beginning)
+        // Drop below header → index 0 (still beginning, before first field)
+        return 0;
+      }
+      if (item === 'thankyou') {
+        // Drop above thankyou → at the end
+        // Drop below thankyou → at the end (can't go past)
+        return currentFields.length;
+      }
+      if (item === 'field') {
+        const fieldId = card.getAttribute('data-field-id');
+        const idx = currentFields.findIndex(f => f.id === fieldId);
+        if (idx === -1) return currentFields.length;
+        return position === 'before' ? idx : idx + 1;
+      }
+      return currentFields.length;
+    }
+
+    // Called when a drop happens on a card
+    function onCardDrop(card, evt) {
       if (!dragState.kind) return;
       evt.preventDefault();
-      evt.stopPropagation(); // prevent stage fallback from also firing
+      evt.stopPropagation(); // don't let stage fallback also fire
 
-      const insertIdx = parseInt(zone.getAttribute('data-insert-index'), 10);
-      if (window.__tgDebug) console.log('[dnd] onZoneDrop', { kind: dragState.kind, insertIdx });
+      const { position } = updateCardDropIndicator(card, evt);
+      const insertIdx = computeInsertIdx(card, position);
+
+      if (window.__tgDebug) console.log('[dnd] onCardDrop', { kind: dragState.kind, card: card.getAttribute('data-canvas-item'), position, insertIdx });
 
       if (dragState.kind === 'new' && dragState.sourceTypeId) {
         addFieldToCanvas(dragState.sourceTypeId, insertIdx);
       } else if (dragState.kind === 'move' && dragState.sourceFieldId) {
         const fields = parseFields(state.config.fieldsJSON);
         const fromIdx = fields.findIndex(f => f.id === dragState.sourceFieldId);
-        if (fromIdx !== -1) {
+        if (fromIdx !== -1 && fromIdx !== insertIdx && fromIdx + 1 !== insertIdx) {
           reorderField(fromIdx, insertIdx);
         }
       }
+      clearDropIndicators();
       endDrag();
     }
 
-    // Wire up drop zones after renderCanvas runs.
-    // Called at the end of renderCanvas to attach handlers to all .drop-zone
-    // elements we just created.
-    function bindCanvasDropZones() {
-      const zones = $$('.drop-zone');
-      if (window.__tgDebug) console.log('[dnd] binding', zones.length, 'drop zones');
-      zones.forEach(zone => {
-        zone.addEventListener('dragover', (e) => onZoneDragOver(zone, e));
-        zone.addEventListener('drop', (e) => onZoneDrop(zone, e));
-        zone.addEventListener('dragleave', () => {
-          // Only deactivate if the pointer actually left this zone (not a child)
-          // Drop zones have no children so this is safe.
-          if (dragState.activeZone === zone) {
-            zone.classList.remove('is-active');
-            dragState.activeZone = null;
+    // Wire drop targets onto every card. Called after each renderCanvas.
+    function bindCanvasDropTargets() {
+      const cards = $$('.field-card, .canvas-card');
+      if (window.__tgDebug) console.log('[dnd] binding', cards.length, 'drop targets');
+
+      cards.forEach(card => {
+        card.addEventListener('dragover', (e) => {
+          if (!dragState.kind) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
+
+          // Don't show indicators for no-op moves (dropping on or adjacent to self)
+          if (dragState.kind === 'move') {
+            const isSelf = card.getAttribute('data-field-id') === dragState.sourceFieldId;
+            if (isSelf) { clearDropIndicators(); return; }
           }
+
+          updateCardDropIndicator(card, e);
+        });
+
+        card.addEventListener('drop', (e) => onCardDrop(card, e));
+
+        card.addEventListener('dragleave', (e) => {
+          // Only clear if leaving the card entirely (not moving to a child)
+          if (e.relatedTarget && card.contains(e.relatedTarget)) return;
+          card.classList.remove('drop-before', 'drop-after');
         });
       });
 
-      // SAFETY NET: make the whole canvas stage accept drops too.
-      // If the user drops anywhere on the canvas that isn't a specific zone
-      // (e.g. a gap between cards, the padding, beside a card), we append to
-      // the end of the field list rather than losing the drop.
-      // This is forgiving and matches user intent in every testing round I've
-      // seen. A missed-by-a-pixel drop should not punish the user.
+      // SAFETY NET: canvas stage catches drops that land on empty space
       const stage = $('#canvas-stage');
-      // Remove any previous stage handlers by cloning. We can't easily track
-      // them since addEventListener doesn't expose a list, but stage is a
-      // single element that's never re-created, so this will accumulate
-      // handlers over time — use a flag to only bind once.
       if (!stage.__tgDropBound) {
         stage.__tgDropBound = true;
         stage.addEventListener('dragover', (e) => {
           if (!dragState.kind) return;
-          // Don't claim it if a zone is already active — let the zone win
-          if (dragState.activeZone) return;
           e.preventDefault();
           e.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
         });
         stage.addEventListener('drop', (e) => {
           if (!dragState.kind) return;
-          // If a zone handled it, its event stopped propagation — but just in
-          // case, check whether we landed on a zone element.
-          const onZone = e.target && e.target.closest && e.target.closest('.drop-zone');
-          if (onZone) return; // let the zone handler deal with it
+          // If a card handled it, its handler called stopPropagation and we
+          // won't get here. If we did get here, we're on empty space.
           e.preventDefault();
-          if (window.__tgDebug) console.log('[dnd] stage fallback drop fired', { kind: dragState.kind });
+          if (window.__tgDebug) console.log('[dnd] stage fallback drop (empty space) — appending to end');
 
-          // Append-to-end fallback
           const currentFields = parseFields(state.config.fieldsJSON);
           const endIdx = currentFields.length;
 
@@ -2130,6 +2164,7 @@
               reorderField(fromIdx, endIdx);
             }
           }
+          clearDropIndicators();
           endDrag();
         });
         stage.addEventListener('dragenter', (e) => {
@@ -2137,12 +2172,14 @@
           stage.classList.add('is-drag-target');
         });
         stage.addEventListener('dragleave', (e) => {
-          // Only if we're actually leaving the stage (not entering a child)
           if (e.relatedTarget && stage.contains(e.relatedTarget)) return;
           stage.classList.remove('is-drag-target');
         });
       }
     }
+
+    // Back-compat alias so any old references don't break
+    const bindCanvasDropZones = bindCanvasDropTargets;
 
     function addFieldToCanvas(typeId, insertIndex) {
       const fields = parseFields(state.config.fieldsJSON);
