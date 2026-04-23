@@ -1,6 +1,6 @@
 /*!
  * Travelgenix Enquiry Form Widget
- * Version: 0.1.0 (session 1 — core skeleton + 4 field types)
+ * Version: 0.2.0 (session 2 — full field set + notes + improved payload collection)
  * Licence: Proprietary — Travelgenix / Agendas Group
  *
  * Embed on any website:
@@ -16,10 +16,14 @@
  *     window.TGEnquiryForm.mount('#my-form', { formId: 'EF-0001' });
  *   </script>
  *
- * Session 1 scope: destination autocomplete, airport picker, duration chips,
- * traveller group, name/email/phone, consent, submit handler, thank-you.
- * Remaining: date range, budget slider, stars, board basis, interests, notes,
- * marketing consent, full validation UI, full accessibility pass.
+ * Session 2 scope: destination, airport, date range + flexibility toggle,
+ * duration chips, travellers, budget slider, star rating cards, board basis,
+ * interest chips, name/email/phone, notes, consent. Submit handler with
+ * explicit payload key mapping (no more shape sniffing).
+ *
+ * Remaining for session 3: full a11y pass (aria-invalid, aria-describedby),
+ * Turnstile integration, conditional logic support, child age inputs when
+ * children > 0.
  */
 (function () {
   'use strict';
@@ -29,7 +33,6 @@
   // ============================================================================
 
   var API_BASE = (function () {
-    // Deduce API base from script src if possible; fallback to tg-widgets.vercel.app
     try {
       var scripts = document.getElementsByTagName('script');
       for (var i = 0; i < scripts.length; i++) {
@@ -45,7 +48,7 @@
   })();
 
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
-  var WIDGET_VERSION = '0.1.0';
+  var WIDGET_VERSION = '0.2.0';
 
   // ============================================================================
   //  Utilities
@@ -59,7 +62,7 @@
         var v = attrs[k];
         if (v === null || v === undefined || v === false) continue;
         if (k === 'class') el.className = v;
-        else if (k === 'text') el.textContent = v;  // safe text path
+        else if (k === 'text') el.textContent = v;
         else if (k === 'html') { /* deliberately not supported */ }
         else if (k.indexOf('on') === 0 && typeof v === 'function') {
           el.addEventListener(k.slice(2), v);
@@ -110,11 +113,24 @@
     return el;
   }
 
-  // Icon paths — minimal set for session 1, all Lucide-style
+  // Solid-fill SVG for star icons (filled shape, not a stroke)
+  function starIcon(size) {
+    var svgNs = 'http://www.w3.org/2000/svg';
+    var el = document.createElementNS(svgNs, 'svg');
+    el.setAttribute('viewBox', '0 0 24 24');
+    el.setAttribute('fill', 'currentColor');
+    el.setAttribute('width', size || 14);
+    el.setAttribute('height', size || 14);
+    el.setAttribute('aria-hidden', 'true');
+    var p = document.createElementNS(svgNs, 'polygon');
+    p.setAttribute('points', '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2');
+    el.appendChild(p);
+    return el;
+  }
+
+  // Icon paths — Lucide style
   var ICONS = {
     pin:      'M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0116 0zm-8 3a3 3 0 100-6 3 3 0 000 6z',
-    plane:    'M17.8 19.2 16 11l3.5-3.5c1.2-1.2 1.2-3.1 0-4.3s-3.1-1.2-4.3 0L11.7 6.7 3.5 5l-2.2 2.2 6.5 3.7-2.1 2.1L3.3 13 2 14.2l2.9.5.5 2.9 1.2-1.2.1-2.4 2.2-2.1 3.7 6.5 2.2-2.2z',
-    users:    'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m23 0v-2a4 4 0 00-3-3.87m-4-12a4 4 0 110 7.75M9 3a4 4 0 110 8 4 4 0 010-8z',
     clock:    'M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v6l4 2',
     check:    'M20 6L9 17l-5-5',
     x:        'M18 6L6 18M6 6l12 12',
@@ -123,7 +139,14 @@
     chevron:  'M6 9l6 6 6-6',
     spinner:  'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83',
     arrow:    'M5 12h14M12 5l7 7-7 7',
-    heart:    'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z'
+    heart:    'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z',
+    wave:     'M2 12c2 0 2-4 4-4s2 4 4 4 2-4 4-4 2 4 4 4 2-4 4-4',
+    building: 'M6 22V4a2 2 0 012-2h8a2 2 0 012 2v18M6 12h12M6 7h12',
+    museum:   'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z',
+    utensils: 'M6 2v7m0 0c0 3 2 4 6 4s6-1 6-4V2M12 13v9',
+    compass:  'M8 3v3M16 3v3M3 9l2 12h14l2-12H3z',
+    users:    'M9 7a4 4 0 110 8 4 4 0 010-8zm8 14v-2a4 4 0 00-3-3.87M17 3.13a4 4 0 010 7.75',
+    sparkles: 'M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z'
   };
 
   // ============================================================================
@@ -143,14 +166,13 @@
       try { localStorage.setItem(VISITOR_ID_KEY, id); } catch (e) {}
       return id;
     } catch (e) {
-      // localStorage blocked — generate ephemeral ID per page load
       return 'v_' + Math.random().toString(16).slice(2) + Date.now().toString(16);
     }
   }
 
   // ============================================================================
-  //  Destination data — static seed list for session 1.
-  //  Session 2+ will fetch from Luna Brain / Destination Content base.
+  //  Destination data — static seed list for session 2.
+  //  Session 3+ will fetch from Luna Brain / Destination Content base.
   // ============================================================================
 
   var DESTINATIONS = [
@@ -207,6 +229,31 @@
     ]}
   ];
 
+  var INTERESTS = [
+    { value: 'beach',     label: 'Beach',       icon: 'wave' },
+    { value: 'city',      label: 'City',        icon: 'building' },
+    { value: 'culture',   label: 'Culture',     icon: 'museum' },
+    { value: 'food',      label: 'Food & wine', icon: 'utensils' },
+    { value: 'adventure', label: 'Adventure',   icon: 'compass' },
+    { value: 'family',    label: 'Family',      icon: 'users' },
+    { value: 'wellness',  label: 'Wellness',    icon: 'pin' },
+    { value: 'honeymoon', label: 'Honeymoon',   icon: 'heart' }
+  ];
+
+  var BOARD_OPTIONS = [
+    { value: 'RO', label: 'Room only' },
+    { value: 'BB', label: 'B&B' },
+    { value: 'HB', label: 'Half board' },
+    { value: 'FB', label: 'Full board' },
+    { value: 'AI', label: 'All inclusive' }
+  ];
+
+  var STAR_OPTIONS = [
+    { stars: 3, label: 'Comfortable', desc: '3-star. Great value.' },
+    { stars: 4, label: 'Superior',    desc: '4-star. The sweet spot.', preselect: true },
+    { stars: 5, label: 'Luxury',      desc: '5-star. The full treatment.', luxury: true }
+  ];
+
   // ============================================================================
   //  Styles — scoped to shadow DOM
   // ============================================================================
@@ -257,8 +304,9 @@
       '.tg-input{width:100%;height:44px;padding:0 14px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.text + ';transition:border-color .15s,box-shadow .15s;outline:none}',
       '.tg-input:focus{border-color:' + accent + ';box-shadow:0 0 0 3px ' + accent + '26}',
       '.tg-input::placeholder{color:' + c.textTertiary + '}',
-      '.tg-textarea{width:100%;min-height:88px;padding:12px 14px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.text + ';line-height:1.5;resize:vertical;outline:none;transition:border-color .15s,box-shadow .15s}',
+      '.tg-textarea{width:100%;min-height:96px;padding:12px 14px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.text + ';line-height:1.55;resize:vertical;outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;font-size:15px}',
       '.tg-textarea:focus{border-color:' + accent + ';box-shadow:0 0 0 3px ' + accent + '26}',
+      '.tg-textarea::placeholder{color:' + c.textTertiary + '}',
 
       /* Destination autocomplete */
       '.tg-dest{position:relative}',
@@ -277,12 +325,13 @@
       '.tg-dest-option:hover,.tg-dest-option:focus{background:' + c.bgTile + ';outline:none}',
       '.tg-dest-option-meta{color:' + c.textTertiary + ';font-size:12px;margin-left:auto}',
 
-      /* Chips (duration) */
+      /* Chips (duration + interest) */
       '.tg-chips{display:flex;flex-wrap:wrap;gap:8px}',
       '.tg-pill{height:40px;padding:0 16px;border-radius:999px;border:1px solid ' + c.border + ';background:' + c.bg + ';color:' + c.textSecondary + ';font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .15s;cursor:pointer}',
       '.tg-pill:hover{border-color:' + accent + ';color:' + c.text + '}',
       '.tg-pill.is-active{background:' + primary + ';border-color:' + primary + ';color:#fff}',
       '.tg-pill.is-active svg{color:#fff}',
+      '.tg-pill svg{width:14px;height:14px}',
 
       /* Traveller group */
       '.tg-trav-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';margin-bottom:8px}',
@@ -295,6 +344,45 @@
       '.tg-step-btn:disabled{opacity:.35;cursor:not-allowed}',
       '.tg-step-val{min-width:26px;text-align:center;font-variant-numeric:tabular-nums;font-weight:600;font-size:14px;color:' + c.text + '}',
 
+      /* Date range + flex toggle */
+      '.tg-flex-toggle{display:inline-flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:' + c.textSecondary + ';cursor:pointer;user-select:none}',
+      '.tg-flex-toggle input{position:absolute;opacity:0;pointer-events:none}',
+      '.tg-flex-track{width:34px;height:20px;background:' + c.bgTile + ';border-radius:999px;position:relative;transition:background-color .2s;flex-shrink:0}',
+      '.tg-flex-track::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(15,23,42,.15);transition:transform .2s}',
+      '.tg-flex-toggle input:checked ~ .tg-flex-track{background:' + accent + '}',
+      '.tg-flex-toggle input:checked ~ .tg-flex-track::after{transform:translateX(14px)}',
+
+      /* Budget slider */
+      '.tg-budget-display{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}',
+      '.tg-budget-amount{font-size:24px;font-weight:700;color:' + accent + ';font-variant-numeric:tabular-nums}',
+      '.tg-budget-pp{font-size:13px;color:' + c.textSecondary + '}',
+      '.tg-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:' + c.bgTile + ';border-radius:999px;outline:none;margin:0}',
+      '.tg-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;background:' + accent + ';border-radius:50%;cursor:pointer;border:3px solid ' + c.bg + ';box-shadow:0 2px 6px rgba(15,23,42,.15);transition:transform .15s}',
+      '.tg-range::-webkit-slider-thumb:hover{transform:scale(1.1)}',
+      '.tg-range::-moz-range-thumb{width:22px;height:22px;background:' + accent + ';border-radius:50%;cursor:pointer;border:3px solid ' + c.bg + ';box-shadow:0 2px 6px rgba(15,23,42,.15)}',
+      '.tg-range:focus{outline:none}',
+      '.tg-range:focus::-webkit-slider-thumb{box-shadow:0 0 0 4px ' + accent + '33,0 2px 6px rgba(15,23,42,.15)}',
+      '.tg-budget-markers{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:' + c.textTertiary + ';font-variant-numeric:tabular-nums}',
+
+      /* Star rating cards */
+      '.tg-star-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}',
+      '@media(max-width:700px){.tg-star-grid{grid-template-columns:repeat(2,1fr)}}',
+      '@media(max-width:420px){.tg-star-grid{grid-template-columns:1fr}}',
+      '.tg-star-card{padding:14px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';cursor:pointer;text-align:left;transition:all .15s;font-family:inherit;color:inherit}',
+      '.tg-star-card:hover{border-color:' + accent + '}',
+      '.tg-star-card.is-active{border-color:' + accent + ';background:' + accent + '0D;box-shadow:0 0 0 3px ' + accent + '1A}',
+      '.tg-star-icons{display:flex;gap:2px;margin-bottom:8px;color:#F59E0B}',
+      '.tg-star-card.luxury .tg-star-icons{color:' + accent + '}',
+      '.tg-star-card h4{font-size:14px;font-weight:600;margin:0 0 2px;color:' + c.text + '}',
+      '.tg-star-card p{font-size:12px;color:' + c.textTertiary + ';margin:0}',
+
+      /* Board basis segmented */
+      '.tg-seg{display:flex;padding:4px;background:' + c.bgTile + ';border-radius:8px;width:100%;gap:2px}',
+      '.tg-seg-btn{flex:1;height:36px;padding:0 10px;border:none;background:transparent;border-radius:6px;font-weight:500;font-size:13px;color:' + c.textSecondary + ';cursor:pointer;transition:all .15s;white-space:nowrap}',
+      '.tg-seg-btn:hover{color:' + c.text + '}',
+      '.tg-seg-btn.is-active{background:' + c.bg + ';color:' + c.text + ';box-shadow:0 1px 3px rgba(15,23,42,.08)}',
+      '@media(max-width:540px){.tg-seg-btn{font-size:12px;padding:0 6px}}',
+
       /* Submit */
       '.tg-footer{padding:20px 32px 24px;background:' + c.bgAlt + ';display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}',
       '.tg-submit{height:48px;padding:0 22px;border:none;border-radius:8px;background:' + primary + ';color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s;box-shadow:0 1px 0 rgba(0,0,0,.08),0 1px 3px rgba(15,23,42,.06)}',
@@ -305,7 +393,7 @@
       '.tg-trust{display:flex;gap:12px;font-size:11px;color:' + c.textTertiary + '}',
       '.tg-trust span{display:inline-flex;align-items:center;gap:4px}',
 
-      /* Honeypot — visually hidden but available to bots */
+      /* Honeypot */
       '.tg-honeypot{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}',
 
       /* Consent */
@@ -315,11 +403,11 @@
       '.tg-check-text{font-size:13px;color:' + c.textSecondary + ';line-height:1.5}',
       '.tg-check-text strong{color:' + c.text + ';font-weight:500}',
 
-      /* Loading state */
+      /* Loading */
       '.tg-loading{padding:48px;text-align:center;color:' + c.textTertiary + '}',
       '.tg-loading svg{animation:tg-spin 1s linear infinite;margin-bottom:8px}',
 
-      /* Error state */
+      /* Error */
       '.tg-oops{padding:48px 32px;text-align:center}',
       '.tg-oops h3{font-size:18px;font-weight:600;margin:0 0 8px;color:' + c.text + '}',
       '.tg-oops p{color:' + c.textSecondary + ';margin:0 0 16px;font-size:14px}',
@@ -338,41 +426,47 @@
       '.tg-brand a{color:' + c.textTertiary + ';text-decoration:none}',
       '.tg-brand a:hover{color:' + c.textSecondary + '}',
 
-      /* Prefers reduced motion */
       '@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}'
     ].join('\n');
   }
 
   // ============================================================================
-  //  Field renderers (session 1: 4 travel-native + name/email/phone/consent)
+  //  Payload contract — every renderer declares where its value lives
+  // ============================================================================
+  //
+  //  Each renderer returns:
+  //    {
+  //      node:     DOM node to mount in the form
+  //      writeTo:  function(fieldsObj) { /* write value(s) into fieldsObj */ }
+  //      validate: function() { return errorString | null }
+  //    }
+  //
+  //  This replaces session 1's shape-sniffing with an explicit contract.
+  //  Each renderer knows exactly where in the payload its data belongs.
+  //
   // ============================================================================
 
-  // --- Destination autocomplete (multi-select) -------------------------------
-  function renderDestination(state) {
-    state.destinations = [];
+  // --- Destination autocomplete -----------------------------------------------
+  function renderDestination() {
+    var destinations = [];
 
     var input = $('input', {
-      class: 'tg-dest-input',
-      type: 'text',
+      class: 'tg-dest-input', type: 'text',
       placeholder: 'Search countries, cities, resorts...',
-      autocomplete: 'off',
-      'aria-label': 'Search destinations'
+      autocomplete: 'off', 'aria-label': 'Search destinations'
     });
-
     var box = $('div', { class: 'tg-dest-box' }, [input]);
     var drop = $('div', { class: 'tg-dest-drop' });
 
     function renderChips() {
-      // Remove any existing chips
       Array.prototype.slice.call(box.querySelectorAll('.tg-chip')).forEach(function (c) { c.remove(); });
-      state.destinations.forEach(function (d) {
+      destinations.forEach(function (d) {
         var closeBtn = $('button', {
-          class: 'tg-chip-close',
-          type: 'button',
+          class: 'tg-chip-close', type: 'button',
           'aria-label': 'Remove ' + d.name,
           onclick: function (e) {
             e.stopPropagation();
-            state.destinations = state.destinations.filter(function (x) { return x.id !== d.id; });
+            destinations = destinations.filter(function (x) { return x.id !== d.id; });
             renderChips();
           }
         }, [svg(ICONS.x)]);
@@ -387,7 +481,7 @@
       var any = false;
       DESTINATIONS.forEach(function (group) {
         var matching = group.items.filter(function (item) {
-          if (state.destinations.find(function (d) { return d.id === item.id; })) return false;
+          if (destinations.find(function (d) { return d.id === item.id; })) return false;
           if (!q) return true;
           return item.name.toLowerCase().indexOf(q) !== -1 ||
                  (item.meta || '').toLowerCase().indexOf(q) !== -1;
@@ -397,18 +491,17 @@
         drop.appendChild($('div', { class: 'tg-dest-grouplabel', text: group.group }));
         matching.forEach(function (item) {
           var opt = $('button', {
-            class: 'tg-dest-option',
-            type: 'button',
-            onmousedown: function (e) { e.preventDefault(); }, // don't blur input
+            class: 'tg-dest-option', type: 'button',
+            onmousedown: function (e) { e.preventDefault(); },
             onclick: function () {
-              state.destinations.push({ id: item.id, name: item.name, region: item.meta });
+              destinations.push({ id: item.id, name: item.name, region: item.meta });
               input.value = '';
               renderChips();
               renderDrop('');
               input.focus();
             }
           }, [
-            $('span', { class: 'tg-dest-option-name', text: item.name }),
+            $('span', { text: item.name }),
             $('span', { class: 'tg-dest-option-meta', text: item.meta })
           ]);
           drop.appendChild(opt);
@@ -416,7 +509,7 @@
       });
       if (!any) {
         drop.appendChild($('div', {
-          style: { padding: '14px', color: 'var(--tg-text-tertiary)', fontSize: '13px' },
+          style: { padding: '14px', fontSize: '13px' },
           text: 'No matches'
         }));
       }
@@ -442,21 +535,17 @@
         $('div', { class: 'tg-dest' }, [box, drop]),
         $('div', { class: 'tg-help', text: 'Add one, or multiple for a twin-centre trip.' })
       ]),
-      value: function () { return state.destinations; },
+      writeTo: function (fields) { fields.destinations = destinations.slice(); },
       validate: function () {
-        return state.destinations.length > 0 ? null : 'Please add at least one destination.';
+        return destinations.length > 0 ? null : 'Please add at least one destination.';
       }
     };
   }
 
   // --- Airport picker --------------------------------------------------------
-  function renderAirport(state) {
-    state.airport = '';
-
+  function renderAirport() {
     var select = $('select', {
-      class: 'tg-input',
-      'aria-label': 'Departure airport',
-      onchange: function () { state.airport = select.value; }
+      class: 'tg-input', 'aria-label': 'Departure airport'
     }, [$('option', { value: '', text: 'Select your preferred airport' })]);
 
     AIRPORTS.forEach(function (region) {
@@ -484,35 +573,83 @@
         $('label', { class: 'tg-label', text: 'Departure airport' }),
         select
       ]),
-      value: function () { return select.value; },
+      writeTo: function (fields) { fields.departure_airport = select.value; },
       validate: function () {
         return select.value ? null : 'Please select a departure airport.';
       }
     };
   }
 
+  // --- Date range + flexibility toggle ---------------------------------------
+  function renderDateRange() {
+    var today = new Date();
+    var minDate = today.toISOString().slice(0, 10);
+
+    var depart = $('input', {
+      class: 'tg-input', type: 'date', min: minDate,
+      'aria-label': 'Depart on'
+    });
+    var ret = $('input', {
+      class: 'tg-input', type: 'date', min: minDate,
+      'aria-label': 'Return on'
+    });
+    var flexInput = $('input', { type: 'checkbox', 'aria-label': 'Flexible dates' });
+    var flexTrack = $('span', { class: 'tg-flex-track', 'aria-hidden': 'true' });
+
+    // Keep return min date in sync with depart
+    depart.addEventListener('change', function () {
+      if (depart.value) {
+        ret.min = depart.value;
+        if (ret.value && ret.value < depart.value) ret.value = '';
+      }
+    });
+
+    return {
+      node: $('div', { class: 'tg-field' }, [
+        $('div', { class: 'tg-row' }, [
+          $('div', {}, [$('label', { class: 'tg-label', text: 'Depart on' }), depart]),
+          $('div', {}, [$('label', { class: 'tg-label', text: 'Return on' }), ret])
+        ]),
+        $('label', { class: 'tg-flex-toggle' }, [
+          flexInput, flexTrack,
+          $('span', { text: "I'm flexible by a week either side" })
+        ])
+      ]),
+      writeTo: function (fields) {
+        fields.travel_dates = {
+          depart: depart.value || null,
+          'return': ret.value || null,
+          flexible: !!flexInput.checked
+        };
+      },
+      validate: function () {
+        if (!depart.value) return 'Please choose a departure date.';
+        if (ret.value && ret.value < depart.value) return 'Return date must be after departure.';
+        return null;
+      }
+    };
+  }
+
   // --- Duration chips --------------------------------------------------------
-  function renderDuration(state) {
-    state.duration = { nights: 7 };
+  function renderDuration() {
+    var selected = 7;
     var options = [3, 5, 7, 10, 14];
     var buttons = [];
 
-    function setActive(idx) {
-      buttons.forEach(function (b, i) {
-        if (i === idx) b.classList.add('is-active');
+    function setActive(n) {
+      selected = n;
+      buttons.forEach(function (b) {
+        if (parseInt(b.getAttribute('data-n'), 10) === n) b.classList.add('is-active');
         else b.classList.remove('is-active');
       });
     }
 
-    options.forEach(function (n, idx) {
+    options.forEach(function (n) {
       var btn = $('button', {
         class: 'tg-pill' + (n === 7 ? ' is-active' : ''),
-        type: 'button',
+        type: 'button', 'data-n': String(n),
         text: n + ' nights',
-        onclick: function () {
-          state.duration = { nights: n };
-          setActive(idx);
-        }
+        onclick: function () { setActive(n); }
       });
       buttons.push(btn);
     });
@@ -522,48 +659,35 @@
         $('label', { class: 'tg-label', text: 'Duration' }),
         $('div', { class: 'tg-chips' }, buttons)
       ]),
-      value: function () { return state.duration; },
+      writeTo: function (fields) { fields.duration = { nights: selected }; },
       validate: function () { return null; }
     };
   }
 
   // --- Traveller group -------------------------------------------------------
-  function renderTravellers(state) {
-    state.travellers = { adults: 2, children: 0, infants: 0, childAges: [] };
+  function renderTravellers() {
+    var values = { adults: 2, children: 0, infants: 0 };
 
-    function row(label, sub, key, min, max) {
-      var valEl = $('span', { class: 'tg-step-val', text: String(state.travellers[key]) });
+    function stepperRow(label, sub, key, min, max) {
+      var valEl = $('span', { class: 'tg-step-val', text: String(values[key]) });
       function update() {
-        valEl.textContent = String(state.travellers[key]);
-        minusBtn.disabled = state.travellers[key] <= min;
-        plusBtn.disabled = state.travellers[key] >= max;
+        valEl.textContent = String(values[key]);
+        minusBtn.disabled = values[key] <= min;
+        plusBtn.disabled = values[key] >= max;
       }
       var minusBtn = $('button', {
         class: 'tg-step-btn', type: 'button',
         'aria-label': 'Decrease ' + label,
-        onclick: function () {
-          if (state.travellers[key] > min) {
-            state.travellers[key]--;
-            update();
-          }
-        }
+        onclick: function () { if (values[key] > min) { values[key]--; update(); } }
       }, [svg(ICONS.minus, { size: 14 })]);
       var plusBtn = $('button', {
         class: 'tg-step-btn', type: 'button',
         'aria-label': 'Increase ' + label,
-        onclick: function () {
-          if (state.travellers[key] < max) {
-            state.travellers[key]++;
-            update();
-          }
-        }
+        onclick: function () { if (values[key] < max) { values[key]++; update(); } }
       }, [svg(ICONS.plus, { size: 14 })]);
       update();
       return $('div', { class: 'tg-trav-row' }, [
-        $('div', { class: 'tg-trav-meta' }, [
-          $('h4', { text: label }),
-          $('p', { text: sub })
-        ]),
+        $('div', { class: 'tg-trav-meta' }, [$('h4', { text: label }), $('p', { text: sub })]),
         $('div', { class: 'tg-stepper' }, [minusBtn, valEl, plusBtn])
       ]);
     }
@@ -571,30 +695,204 @@
     return {
       node: $('div', { class: 'tg-field' }, [
         $('label', { class: 'tg-label', text: "Who's travelling?" }),
-        row('Adults', 'Age 16+', 'adults', 1, 9),
-        row('Children', 'Age 2–15', 'children', 0, 6),
-        row('Infants', 'Under 2', 'infants', 0, 3)
+        stepperRow('Adults', 'Age 16+', 'adults', 1, 9),
+        stepperRow('Children', 'Age 2–15', 'children', 0, 6),
+        stepperRow('Infants', 'Under 2', 'infants', 0, 3)
       ]),
-      value: function () { return state.travellers; },
+      writeTo: function (fields) {
+        fields.travellers = {
+          adults: values.adults,
+          children: values.children,
+          infants: values.infants,
+          childAges: [] // session 3: child age chips when children > 0
+        };
+      },
       validate: function () {
-        return state.travellers.adults > 0 ? null : 'At least one adult required.';
+        return values.adults > 0 ? null : 'At least one adult required.';
       }
     };
   }
 
-  // --- Name (first + last) ---------------------------------------------------
-  function renderName(state) {
-    state.first_name = '';
-    state.last_name = '';
+  // --- Budget slider ---------------------------------------------------------
+  function renderBudget() {
+    // Non-linear curve: 0-25 → £250-£1500, 25-50 → £1500-£3000,
+    // 50-75 → £3000-£5000, 75-100 → £5000-£10000
+    function sliderToBudget(v) {
+      if (v < 25) return 250 + (v / 25) * (1500 - 250);
+      if (v < 50) return 1500 + ((v - 25) / 25) * (3000 - 1500);
+      if (v < 75) return 3000 + ((v - 50) / 25) * (5000 - 3000);
+      return 5000 + ((v - 75) / 25) * (10000 - 5000);
+    }
+
+    var amountEl = $('span', { class: 'tg-budget-amount', text: '£3,000' });
+    var range = $('input', {
+      class: 'tg-range', type: 'range', min: '0', max: '100', value: '45',
+      'aria-label': 'Budget per person'
+    });
+    var currentBudget = 3000;
+
+    function update() {
+      var v = parseInt(range.value, 10);
+      currentBudget = Math.round(sliderToBudget(v) / 50) * 50;
+      if (v >= 97) {
+        amountEl.textContent = '£10,000+';
+      } else {
+        amountEl.textContent = '£' + currentBudget.toLocaleString('en-GB');
+      }
+    }
+    range.addEventListener('input', update);
+
+    return {
+      node: $('div', { class: 'tg-field' }, [
+        $('label', { class: 'tg-label', text: 'Approximate total budget' }),
+        $('div', { class: 'tg-budget-display' }, [
+          amountEl,
+          $('span', { class: 'tg-budget-pp', text: 'per person' })
+        ]),
+        range,
+        $('div', { class: 'tg-budget-markers' }, [
+          $('span', { text: '£250' }),
+          $('span', { text: '£1.5k' }),
+          $('span', { text: '£3k' }),
+          $('span', { text: '£5k+' })
+        ])
+      ]),
+      writeTo: function (fields) { fields.budget_pp = currentBudget; },
+      validate: function () { return null; }
+    };
+  }
+
+  // --- Star rating cards -----------------------------------------------------
+  function renderStars() {
+    var selected = 4;
+    var cards = [];
+
+    function setActive(stars) {
+      selected = stars;
+      cards.forEach(function (card) {
+        if (parseInt(card.getAttribute('data-stars'), 10) === stars) {
+          card.classList.add('is-active');
+        } else {
+          card.classList.remove('is-active');
+        }
+      });
+    }
+
+    STAR_OPTIONS.forEach(function (opt) {
+      var icons = $('div', { class: 'tg-star-icons' });
+      for (var i = 0; i < opt.stars; i++) icons.appendChild(starIcon(14));
+
+      var card = $('button', {
+        class: 'tg-star-card' + (opt.luxury ? ' luxury' : '') + (opt.preselect ? ' is-active' : ''),
+        type: 'button',
+        'data-stars': String(opt.stars),
+        'aria-label': opt.stars + '-star, ' + opt.label,
+        onclick: function () { setActive(opt.stars); }
+      }, [
+        icons,
+        $('h4', { text: opt.label }),
+        $('p', { text: opt.desc })
+      ]);
+      cards.push(card);
+    });
+
+    return {
+      node: $('div', { class: 'tg-field' }, [
+        $('label', { class: 'tg-label', text: 'Star rating preference' }),
+        $('div', { class: 'tg-star-grid' }, cards)
+      ]),
+      writeTo: function (fields) { fields.stars = selected; },
+      validate: function () { return null; }
+    };
+  }
+
+  // --- Board basis segmented control -----------------------------------------
+  function renderBoard() {
+    var selected = 'RO';
+    var buttons = [];
+
+    function setActive(value) {
+      selected = value;
+      buttons.forEach(function (btn) {
+        if (btn.getAttribute('data-value') === value) btn.classList.add('is-active');
+        else btn.classList.remove('is-active');
+      });
+    }
+
+    BOARD_OPTIONS.forEach(function (opt) {
+      var btn = $('button', {
+        class: 'tg-seg-btn' + (opt.value === 'RO' ? ' is-active' : ''),
+        type: 'button',
+        'data-value': opt.value,
+        'aria-label': opt.label,
+        text: opt.label,
+        onclick: function () { setActive(opt.value); }
+      });
+      buttons.push(btn);
+    });
+
+    return {
+      node: $('div', { class: 'tg-field' }, [
+        $('label', { class: 'tg-label', text: 'Board basis' }),
+        $('div', { class: 'tg-seg' }, buttons)
+      ]),
+      writeTo: function (fields) { fields.board = selected; },
+      validate: function () { return null; }
+    };
+  }
+
+  // --- Interest chips --------------------------------------------------------
+  function renderInterests() {
+    var selected = [];
+    var buttons = [];
+
+    INTERESTS.forEach(function (opt) {
+      var btn = $('button', {
+        class: 'tg-pill',
+        type: 'button',
+        'data-value': opt.value,
+        'aria-pressed': 'false',
+        onclick: function () {
+          var idx = selected.indexOf(opt.value);
+          if (idx >= 0) {
+            selected.splice(idx, 1);
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-pressed', 'false');
+          } else {
+            selected.push(opt.value);
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+          }
+        }
+      }, [
+        svg(ICONS[opt.icon] || ICONS.pin, { size: 14 }),
+        opt.label
+      ]);
+      buttons.push(btn);
+    });
+
+    return {
+      node: $('div', { class: 'tg-field' }, [
+        $('label', { class: 'tg-label' }, [
+          'Interests ',
+          $('span', { class: 'tg-opt', text: '(pick as many as apply)' })
+        ]),
+        $('div', { class: 'tg-chips' }, buttons)
+      ]),
+      writeTo: function (fields) { fields.interests = selected.slice(); },
+      validate: function () { return null; }
+    };
+  }
+
+  // --- Name ------------------------------------------------------------------
+  function renderName() {
     var first = $('input', {
       class: 'tg-input', type: 'text', placeholder: 'Jane',
-      'aria-label': 'First name', autocomplete: 'given-name',
-      oninput: function () { state.first_name = first.value; }
+      'aria-label': 'First name', autocomplete: 'given-name'
     });
     var last = $('input', {
       class: 'tg-input', type: 'text', placeholder: 'Smith',
-      'aria-label': 'Last name', autocomplete: 'family-name',
-      oninput: function () { state.last_name = last.value; }
+      'aria-label': 'Last name', autocomplete: 'family-name'
     });
     return {
       node: $('div', { class: 'tg-field' }, [
@@ -603,33 +901,32 @@
           $('div', {}, [$('label', { class: 'tg-label', text: 'Last name' }), last])
         ])
       ]),
-      value: function () { return { first_name: state.first_name, last_name: state.last_name }; },
+      writeTo: function (fields) {
+        fields.first_name = first.value.trim();
+        fields.last_name = last.value.trim();
+      },
       validate: function () {
-        if (!state.first_name.trim()) return 'First name required.';
-        if (!state.last_name.trim()) return 'Last name required.';
+        if (!first.value.trim()) return 'First name required.';
+        if (!last.value.trim()) return 'Last name required.';
         return null;
       }
     };
   }
 
   // --- Email + phone ---------------------------------------------------------
-  function renderContact(state) {
-    state.email = '';
-    state.phone = '';
+  function renderContact() {
     var email = $('input', {
       class: 'tg-input', type: 'email', placeholder: 'jane@example.com',
-      'aria-label': 'Email address', autocomplete: 'email', required: true,
-      oninput: function () { state.email = email.value; }
+      'aria-label': 'Email address', autocomplete: 'email', required: true
     });
     var phone = $('input', {
       class: 'tg-input', type: 'tel', placeholder: '07700 900000',
-      'aria-label': 'Phone number', autocomplete: 'tel',
-      oninput: function () { state.phone = phone.value; }
+      'aria-label': 'Phone number', autocomplete: 'tel'
     });
     return {
       node: $('div', { class: 'tg-field' }, [
         $('div', { class: 'tg-row' }, [
-          $('div', {}, [$('label', { class: 'tg-label' }, ['Email address']), email]),
+          $('div', {}, [$('label', { class: 'tg-label', text: 'Email address' }), email]),
           $('div', {}, [
             $('label', { class: 'tg-label' }, [
               'Phone ',
@@ -639,9 +936,12 @@
           ])
         ])
       ]),
-      value: function () { return { email: state.email, phone: state.phone }; },
+      writeTo: function (fields) {
+        fields.email = email.value.trim();
+        fields.phone = phone.value.trim();
+      },
       validate: function () {
-        var e = state.email.trim();
+        var e = email.value.trim();
         if (!e) return 'Email required.';
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return 'Please enter a valid email address.';
         return null;
@@ -649,22 +949,38 @@
     };
   }
 
-  // --- Consent checkboxes ----------------------------------------------------
-  function renderConsent(state) {
-    state.contact_consent = false;
-    state.marketing_consent = false;
+  // --- Notes (free-text) -----------------------------------------------------
+  function renderNotes() {
+    var textarea = $('textarea', {
+      class: 'tg-textarea',
+      'aria-label': 'Notes',
+      placeholder: 'Dietary requirements, accessibility needs, special occasions, specific resorts or hotels you have had your eye on...',
+      maxlength: '2000'
+    });
+    return {
+      node: $('div', { class: 'tg-field' }, [
+        $('label', { class: 'tg-label' }, [
+          'Anything else we should know? ',
+          $('span', { class: 'tg-opt', text: '(optional)' })
+        ]),
+        textarea
+      ]),
+      writeTo: function (fields) {
+        var v = textarea.value.trim();
+        if (v) fields.notes = v;
+      },
+      validate: function () { return null; }
+    };
+  }
 
+  // --- Consent ---------------------------------------------------------------
+  function renderConsent() {
     var contactInput = $('input', {
-      type: 'checkbox',
-      'aria-label': 'Agree to be contacted',
-      onchange: function () { state.contact_consent = contactInput.checked; }
+      type: 'checkbox', 'aria-label': 'Agree to be contacted'
     });
     var marketingInput = $('input', {
-      type: 'checkbox',
-      'aria-label': 'Receive marketing updates',
-      onchange: function () { state.marketing_consent = marketingInput.checked; }
+      type: 'checkbox', 'aria-label': 'Receive marketing updates'
     });
-
     return {
       node: $('div', { class: 'tg-field' }, [
         $('label', { class: 'tg-check' }, [
@@ -682,14 +998,12 @@
           ])
         ])
       ]),
-      value: function () {
-        return {
-          contact_consent: state.contact_consent,
-          marketing_consent: state.marketing_consent
-        };
+      writeTo: function (fields) {
+        fields.contact_consent = !!contactInput.checked;
+        fields.marketing_consent = !!marketingInput.checked;
       },
       validate: function () {
-        return state.contact_consent ? null : 'Please tick the consent box to continue.';
+        return contactInput.checked ? null : 'Please tick the consent box to continue.';
       }
     };
   }
@@ -699,26 +1013,22 @@
   // ============================================================================
 
   function buildForm(root, config) {
-    var state = {};
     var fields = [];
 
-    // Header
     var hero = $('div', { class: 'tg-hero' }, [
       $('h2', { text: (config.header && config.header.title) || 'Tell us about your dream holiday' }),
       $('p', { text: (config.header && config.header.subtitle) || 'Share a few details and one of our travel specialists will come back within 24 hours.' })
     ]);
 
-    // Honeypot (hidden)
     var honeypot = $('input', {
       class: 'tg-honeypot', type: 'text', name: 'website_url',
       tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true'
     });
 
-    // Sections
     function section(num, title, sub, renderers) {
       var body = $('div', {});
       renderers.forEach(function (r) {
-        var inst = r(state);
+        var inst = r();
         fields.push(inst);
         body.appendChild(inst.node);
       });
@@ -755,10 +1065,16 @@
 
     var card = $('div', { class: 'tg-card' }, [
       hero,
-      section(1, 'Where are you dreaming of?', 'Pick one, or add multiple.', [renderDestination, renderAirport]),
-      section(2, 'When and how long?', 'We can help with exact or flexible dates.', [renderDuration]),
-      section(3, "Who's travelling?", "We'll tailor suggestions to suit your group.", [renderTravellers]),
-      section(4, 'About you', 'So we know who to get in touch with.', [renderName, renderContact, renderConsent]),
+      section(1, 'Where are you dreaming of?', 'Pick one, or add multiple.',
+              [renderDestination, renderAirport]),
+      section(2, 'When would you like to travel?', 'Exact dates or flexible — we work around you.',
+              [renderDateRange, renderDuration]),
+      section(3, "Who's travelling?", "We'll tailor suggestions to suit your group.",
+              [renderTravellers]),
+      section(4, "What's your style?", 'Helps us narrow down the perfect property.',
+              [renderBudget, renderStars, renderBoard, renderInterests]),
+      section(5, 'About you', 'So we know who to get in touch with.',
+              [renderName, renderContact, renderNotes, renderConsent]),
       errorBar,
       footer,
       honeypot
@@ -766,11 +1082,14 @@
 
     root.appendChild(card);
     root.appendChild($('div', { class: 'tg-brand' }, [
-      'Powered by ', $('strong', {}, [$('a', { href: 'https://travelgenix.io', target: '_blank', rel: 'noopener', text: 'Travelgenix' })])
+      'Powered by ',
+      $('strong', {}, [$('a', {
+        href: 'https://travelgenix.io', target: '_blank', rel: 'noopener',
+        text: 'Travelgenix'
+      })])
     ]));
 
     function handleSubmit() {
-      // Validate all fields
       var firstError = null;
       fields.forEach(function (f) {
         var err = f.validate();
@@ -784,23 +1103,12 @@
       }
       errorBar.style.display = 'none';
 
-      // Collect payload
+      // Collect payload using each field's writeTo contract
       var fieldValues = {};
-      fields.forEach(function (f) {
-        var v = f.value();
-        if (v && typeof v === 'object' && !Array.isArray(v) && !v.hasOwnProperty('nights') && !v.hasOwnProperty('adults') && !v.hasOwnProperty('id')) {
-          // Spread plain key-value objects (name, contact, consent)
-          for (var k in v) fieldValues[k] = v[k];
-        } else if (Array.isArray(v)) {
-          fieldValues.destinations = v;
-        } else if (v && v.nights !== undefined) {
-          fieldValues.duration = v;
-        } else if (v && v.adults !== undefined) {
-          fieldValues.travellers = v;
-        } else if (typeof v === 'string') {
-          fieldValues.departure_airport = v;
-        }
-      });
+      fields.forEach(function (f) { f.writeTo(fieldValues); });
+
+      // Stash first_name locally so thank-you state can personalise
+      var firstNameForTy = fieldValues.first_name || '';
 
       var payload = {
         formId: config.formId,
@@ -812,7 +1120,6 @@
         fields: fieldValues
       };
 
-      // UI → submitting state
       submitBtn.disabled = true;
       submitBtn.innerHTML = '';
       submitBtn.appendChild(svg(ICONS.spinner, { size: 16, class: 'tg-spin' }));
@@ -826,11 +1133,11 @@
         return r.json().then(function (body) { return { ok: r.ok, body: body }; });
       }).then(function (result) {
         if (result.ok && result.body.ok) {
-          renderThankYou(root, config, result.body, state);
+          renderThankYou(root, config, result.body, firstNameForTy);
         } else {
           showError(result.body);
         }
-      }).catch(function (err) {
+      }).catch(function () {
         showError({ message: 'Something went wrong. Please try again.' });
       });
 
@@ -849,11 +1156,9 @@
   //  Thank-you view
   // ============================================================================
 
-  function renderThankYou(root, config, response, state) {
-    // Clear root
+  function renderThankYou(root, config, response, firstName) {
     while (root.firstChild) root.removeChild(root.firstChild);
 
-    var firstName = state.first_name || '';
     var message = (response.thankYou && response.thankYou.message) ||
                   ('Thanks' + (firstName ? ', ' + firstName : '') + " — we're on it");
 
@@ -866,7 +1171,11 @@
       ])
     ]));
     root.appendChild($('div', { class: 'tg-brand' }, [
-      'Powered by ', $('strong', {}, [$('a', { href: 'https://travelgenix.io', target: '_blank', rel: 'noopener', text: 'Travelgenix' })])
+      'Powered by ',
+      $('strong', {}, [$('a', {
+        href: 'https://travelgenix.io', target: '_blank', rel: 'noopener',
+        text: 'Travelgenix'
+      })])
     ]));
   }
 
@@ -885,30 +1194,30 @@
       return null;
     }
 
-    // Shadow DOM for style isolation
     var shadow = host.attachShadow ? host.attachShadow({ mode: 'open' }) : host;
 
-    // Loading state
     var loading = $('div', { class: 'tg-loading' }, [
       svg(ICONS.spinner, { size: 24 }),
       $('div', { text: 'Loading form...' })
     ]);
-    var tempStyle = $('style', { text: '.tg-loading{padding:48px;text-align:center;color:#94A3B8;font-family:-apple-system,sans-serif;font-size:14px}.tg-loading svg{animation:tg-spin 1s linear infinite;margin-bottom:8px}@keyframes tg-spin{to{transform:rotate(360deg)}}' });
+    var tempStyle = $('style', {
+      text: '.tg-loading{padding:48px;text-align:center;color:#94A3B8;font-family:-apple-system,sans-serif;font-size:14px}.tg-loading svg{animation:tg-spin 1s linear infinite;margin-bottom:8px}@keyframes tg-spin{to{transform:rotate(360deg)}}'
+    });
     shadow.appendChild(tempStyle);
     shadow.appendChild(loading);
 
-    // Fetch config
     fetch(API_BASE + '/api/enquiry/config?formId=' + encodeURIComponent(options.formId), {
       credentials: 'omit'
     }).then(function (r) {
       return r.json().then(function (body) { return { ok: r.ok, body: body }; });
     }).then(function (result) {
-      // Clear shadow
       while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
 
       if (!result.ok || !result.body.ok) {
         var msg = (result.body && result.body.message) || 'Unable to load this form.';
-        shadow.appendChild($('style', { text: '.tg-oops{padding:48px 32px;text-align:center;font-family:-apple-system,sans-serif}.tg-oops h3{font-size:18px;margin:0 0 8px}.tg-oops p{color:#475569;font-size:14px}' }));
+        shadow.appendChild($('style', {
+          text: '.tg-oops{padding:48px 32px;text-align:center;font-family:-apple-system,sans-serif}.tg-oops h3{font-size:18px;margin:0 0 8px}.tg-oops p{color:#475569;font-size:14px}'
+        }));
         shadow.appendChild($('div', { class: 'tg-oops' }, [
           $('h3', { text: 'Form unavailable' }),
           $('p', { text: msg })
@@ -919,7 +1228,6 @@
       var form = result.body.form;
       form.formId = options.formId;
 
-      // Style injection
       var brand = form.branding || {};
       shadow.appendChild($('style', { text: buildStyles({
         primary: brand.buttonColour,
@@ -927,27 +1235,22 @@
         theme: brand.theme
       })}));
 
-      // Mount the form
       var container = $('div', {});
       shadow.appendChild(container);
       buildForm(container, form);
-    }).catch(function (err) {
+    }).catch(function () {
       while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
-      shadow.appendChild($('style', { text: '.tg-oops{padding:48px 32px;text-align:center;font-family:-apple-system,sans-serif}.tg-oops h3{font-size:18px;margin:0 0 8px}.tg-oops p{color:#475569;font-size:14px}' }));
+      shadow.appendChild($('style', {
+        text: '.tg-oops{padding:48px 32px;text-align:center;font-family:-apple-system,sans-serif}.tg-oops h3{font-size:18px;margin:0 0 8px}.tg-oops p{color:#475569;font-size:14px}'
+      }));
       shadow.appendChild($('div', { class: 'tg-oops' }, [
         $('h3', { text: 'Form unavailable' }),
         $('p', { text: 'Unable to reach the Travelgenix widget service. Please try again later.' })
       ]));
     });
 
-    return { destroy: function () {
-      // Shadow DOM cleanup would go here if needed
-    }};
+    return { destroy: function () {} };
   }
-
-  // ============================================================================
-  //  Auto-mount via data attribute
-  // ============================================================================
 
   function autoMount() {
     var nodes = document.querySelectorAll('[data-tg-enquiry-form]');
@@ -957,27 +1260,18 @@
       node.__tgMounted = true;
       var formId = node.getAttribute('data-form-id');
       if (!formId) {
-        // Check if formId is on the script tag
         var scripts = document.querySelectorAll('script[data-form-id]');
         if (scripts.length > 0) formId = scripts[scripts.length - 1].getAttribute('data-form-id');
       }
-      if (formId) {
-        mount(node, { formId: formId });
-      }
+      if (formId) mount(node, { formId: formId });
     }
   }
 
-  // Public API
-  window.TGEnquiryForm = {
-    mount: mount,
-    version: WIDGET_VERSION
-  };
+  window.TGEnquiryForm = { mount: mount, version: WIDGET_VERSION };
 
-  // Auto-mount on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', autoMount);
   } else {
     autoMount();
   }
-
 })();
