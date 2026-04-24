@@ -695,8 +695,8 @@ export default async function handler(req, res) {
 //    LUNA_CHAT_JWT_SECRET=<32-byte hex for HMAC signing>
 //
 //  Next routing modules to implement (stubs expected by the orchestrator):
-//    _lib/routing/email.js          — Resend, agent notification
-//    _lib/routing/auto-reply.js     — Resend, customer auto-reply
+//    _lib/routing/email.js          — SendGrid, agent notification
+//    _lib/routing/auto-reply.js     — SendGrid, customer auto-reply (agent-branded)
 //    _lib/routing/google-sheets.js  — Google Sheets API, append row
 //    _lib/routing/airtable.js       — client's Airtable, encrypted PAT
 //    _lib/routing/webhook.js        — HMAC-signed POST
