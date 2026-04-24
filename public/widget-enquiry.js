@@ -40,7 +40,12 @@
 
   var WIDGET_VERSION = '1.0.0';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
-  var TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+  // Turnstile challenges are loaded via an iframe pointing at our own domain
+  // (/turnstile-frame.html) rather than directly on the host page. Cloudflare
+  // sitekeys are bound to hostnames, so we can't whitelist every client's site.
+  // The iframe runs on OUR whitelisted domain and postMessages the solved
+  // token back to the widget. See: public/turnstile-frame.html
+  var TURNSTILE_FRAME_PATH = '/turnstile-frame.html';
 
   // Deduce API base from this script's src, fallback to the production host.
   // Same pattern as every other widget in the suite.
@@ -176,29 +181,100 @@
   }
 
   // ============================================================================
-  //  Turnstile loader (shared across instances on the same page)
+  //  Turnstile iframe helper
+  //
+  //  The challenge runs inside an iframe pointing at /turnstile-frame.html on
+  //  our domain (tg-widgets.vercel.app or widgets.travelify.io). Cloudflare
+  //  Turnstile sitekeys are bound to hostnames, so we can't render directly on
+  //  client sites — instead the iframe on our whitelisted domain handles the
+  //  challenge and postMessages the token back to the widget.
+  //
+  //  The helpers below build the iframe, wire up the message listener, and
+  //  expose reset() so the widget can re-challenge after a failed submit.
   // ============================================================================
 
-  var turnstileReady = null;
-  function loadTurnstile() {
-    if (turnstileReady) return turnstileReady;
-    turnstileReady = new Promise(function (resolve, reject) {
-      if (window.turnstile) return resolve(window.turnstile);
-      var existing = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]');
-      if (existing) {
-        existing.addEventListener('load', function () { resolve(window.turnstile); });
-        existing.addEventListener('error', function () { reject(new Error('Turnstile script failed to load')); });
-        return;
+  // Build the iframe src URL, passing sitekey + theme as query params.
+  // API_BASE resolves to whichever origin the widget script was served from,
+  // which is the domain whitelisted in Cloudflare.
+  function buildTurnstileFrameUrl(sitekey, theme) {
+    var qs = new URLSearchParams();
+    qs.set('sitekey', sitekey);
+    qs.set('theme', theme === 'dark' ? 'dark' : 'light');
+    return API_BASE + TURNSTILE_FRAME_PATH + '?' + qs.toString();
+  }
+
+  // Create a Turnstile iframe controller. Returns { iframe, reset, destroy,
+  // getToken } so the widget's submit handler can check token state without
+  // caring about the underlying postMessage plumbing.
+  function createTurnstileFrame(sitekey, theme, onTokenChange) {
+    var frame = document.createElement('iframe');
+    frame.src = buildTurnstileFrameUrl(sitekey, theme);
+    // Constrain the iframe — no scrollbars, transparent background, sized to
+    // fit Turnstile's standard 300x65 widget. The host page around it handles
+    // layout (padding etc.) in the surrounding .tg-turnstile wrapper.
+    frame.setAttribute('title', 'Security check');
+    frame.setAttribute('aria-label', 'Security check');
+    frame.setAttribute('scrolling', 'no');
+    frame.setAttribute('frameborder', '0');
+    frame.style.cssText = 'border:0;width:300px;height:65px;background:transparent;color-scheme:normal;';
+    // Narrow sandbox: allow the scripts Turnstile needs, but nothing else.
+    // - allow-scripts: required for Turnstile itself
+    // - allow-same-origin: required for Turnstile to set its internal cookies
+    //   and read its own challenge response. Combined with sandbox, this is
+    //   safe because the iframe origin is our domain, which we trust.
+    // We deliberately DO NOT allow: forms, popups, top-navigation, downloads.
+    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+    var token = null;
+    var frameOrigin = (function () {
+      try {
+        var a = document.createElement('a');
+        a.href = API_BASE;
+        return a.protocol + '//' + a.host;
+      } catch (e) { return null; }
+    })();
+
+    function onMessage(event) {
+      // Strict origin check — only accept messages from the iframe's origin.
+      if (!frameOrigin || event.origin !== frameOrigin) return;
+      var data = event.data;
+      if (!data || data.source !== 'tg-turnstile') return;
+
+      if (data.type === 'token' && typeof data.token === 'string') {
+        token = data.token;
+        if (onTokenChange) onTokenChange(token);
+      } else if (data.type === 'expired' || data.type === 'timeout' || data.type === 'error') {
+        token = null;
+        if (onTokenChange) onTokenChange(null);
       }
-      var script = document.createElement('script');
-      script.src = TURNSTILE_SCRIPT_URL;
-      script.async = true;
-      script.defer = true;
-      script.addEventListener('load', function () { resolve(window.turnstile); });
-      script.addEventListener('error', function () { reject(new Error('Turnstile script failed to load')); });
-      document.head.appendChild(script);
-    });
-    return turnstileReady;
+      // 'ready' is informational — iframe has rendered the challenge. We could
+      // surface a loading-to-ready transition here if needed, but not worth it.
+    }
+
+    window.addEventListener('message', onMessage);
+
+    return {
+      iframe: frame,
+      getToken: function () { return token; },
+      reset: function () {
+        // Ask the iframe to reset its challenge (used after a failed submit
+        // so the user can try again with a fresh token).
+        if (!frame.contentWindow || !frameOrigin) return;
+        try {
+          frame.contentWindow.postMessage(
+            { source: 'tg-enquiry-widget', type: 'reset' },
+            frameOrigin
+          );
+          token = null;
+          if (onTokenChange) onTokenChange(null);
+        } catch (e) { /* ignore */ }
+      },
+      destroy: function () {
+        window.removeEventListener('message', onMessage);
+        if (frame.parentNode) frame.parentNode.removeChild(frame);
+        token = null;
+      }
+    };
   }
 
   // ============================================================================
@@ -1245,10 +1321,11 @@
     ]);
     card.appendChild(summaryError);
 
-    // Turnstile container — rendered only if security.turnstile === true
+    // Turnstile container — rendered only if security.turnstile === true.
+    // Holds the iframe that runs the challenge on our domain.
     var turnstileContainer = null;
     var turnstileToken = null;
-    var turnstileWidgetId = null;
+    var turnstileFrame = null;
     if (config.security && config.security.turnstile) {
       turnstileContainer = el('div', { class: 'tg-turnstile' });
       card.appendChild(turnstileContainer);
@@ -1281,20 +1358,35 @@
     this._honeypot = honeypot;
     this._turnstileToken = function () { return turnstileToken; };
 
-    // Render Turnstile after DOM is in place
+    // Destroy any previous Turnstile frame before creating a new one (update()
+    // path re-renders the whole widget, so we need to clean up listeners).
+    if (this._turnstileFrame) {
+      try { this._turnstileFrame.destroy(); } catch (e) { /* ignore */ }
+      this._turnstileFrame = null;
+    }
+
+    // Mount the Turnstile iframe. The iframe runs /turnstile-frame.html on
+    // our domain, solves the challenge, and postMessages the token back.
+    // If the sitekey is missing (Turnstile enabled but env var not set
+    // server-side), the submit handler will fail closed with a helpful error.
     if (turnstileContainer && config.security.turnstileSiteKey) {
-      loadTurnstile().then(function (turnstile) {
-        turnstileWidgetId = turnstile.render(turnstileContainer, {
-          sitekey: config.security.turnstileSiteKey,
-          theme: config.branding.theme === 'dark' ? 'dark' : 'light',
-          callback: function (token) { turnstileToken = token; },
-          'expired-callback': function () { turnstileToken = null; },
-          'error-callback': function () { turnstileToken = null; }
-        });
-        self._turnstileWidgetId = turnstileWidgetId;
-      }).catch(function (err) {
-        console.error('[TGEnquiryWidget] Turnstile failed to load:', err);
-      });
+      turnstileFrame = createTurnstileFrame(
+        config.security.turnstileSiteKey,
+        config.branding.theme,
+        function (newToken) { turnstileToken = newToken; }
+      );
+      turnstileContainer.appendChild(turnstileFrame.iframe);
+      this._turnstileFrame = turnstileFrame;
+    } else if (turnstileContainer) {
+      // Turnstile is enabled on the form but the sitekey didn't arrive —
+      // most likely TURNSTILE_SITE_KEY isn't set in the server environment.
+      // Show a visible placeholder so the agent notices something is wrong
+      // rather than silently letting bots through.
+      turnstileContainer.appendChild(el('div', {
+        style: { padding: '12px', fontSize: '12px', color: '#DC2626', textAlign: 'center' },
+        text: 'Security check misconfigured — please contact support.'
+      }));
+      console.error('[TGEnquiryWidget] security.turnstile is true but turnstileSiteKey is missing');
     }
   };
 
@@ -1396,8 +1488,10 @@
     submitBtn.appendChild(svg(ICONS.arrow, { size: 16 }));
     summaryError.classList.add('is-shown');
     summaryError.querySelector('.tg-summary-error-text').textContent = (body && body.message) || 'Something went wrong. Please try again.';
-    if (this.config.security && this.config.security.turnstile && window.turnstile && this._turnstileWidgetId) {
-      window.turnstile.reset(this._turnstileWidgetId);
+    // Reset the Turnstile challenge so the user can generate a fresh token —
+    // the one they just used was consumed by the failed submit attempt.
+    if (this.config.security && this.config.security.turnstile && this._turnstileFrame) {
+      try { this._turnstileFrame.reset(); } catch (e) { /* ignore */ }
     }
   };
 
@@ -1442,6 +1536,11 @@
 
   // PUBLIC: destroy the widget (cleanup for editor unmount etc.)
   TGEnquiryWidget.prototype.destroy = function () {
+    // Clean up the Turnstile message listener before tearing down the DOM
+    if (this._turnstileFrame) {
+      try { this._turnstileFrame.destroy(); } catch (e) { /* ignore */ }
+      this._turnstileFrame = null;
+    }
     if (this.shadow) {
       while (this.shadow.firstChild) this.shadow.removeChild(this.shadow.firstChild);
     }
