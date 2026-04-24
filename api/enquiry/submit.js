@@ -242,7 +242,11 @@ function validatePayload(raw) {
     fail('fields.marketing_consent', 'Invalid consent flag.');
   }
 
-  // Destinations
+  // Destinations — accepts two shapes:
+  //   (legacy) { id, name, region }
+  //   (new)    { id, name, type, parentCity?, parentCountry? }
+  // Both coexist; widget always sends one of them. Server stores as-is in
+  // the destinationsJSON field on the Submissions table.
   if (f.destinations !== undefined) {
     if (!Array.isArray(f.destinations) || f.destinations.length > 10) {
       fail('fields.destinations', 'Invalid destinations.');
@@ -252,16 +256,47 @@ function validatePayload(raw) {
         else {
           if (typeof d.id !== 'string' || d.id.length > 128) fail(`fields.destinations[${i}].id`, 'Invalid id.');
           if (typeof d.name !== 'string' || d.name.length > 128) fail(`fields.destinations[${i}].name`, 'Invalid name.');
+          // Legacy field
           if (d.region !== undefined && (typeof d.region !== 'string' || d.region.length > 128)) {
             fail(`fields.destinations[${i}].region`, 'Invalid region.');
+          }
+          // New fields — validate types + lengths defensively
+          if (d.type !== undefined) {
+            const VALID_TYPES = ['country', 'city', 'resort', 'free-text'];
+            if (typeof d.type !== 'string' || VALID_TYPES.indexOf(d.type) === -1) {
+              fail(`fields.destinations[${i}].type`, 'Invalid destination type.');
+            }
+          }
+          if (d.parentCity !== undefined && d.parentCity !== null && (typeof d.parentCity !== 'string' || d.parentCity.length > 128)) {
+            fail(`fields.destinations[${i}].parentCity`, 'Invalid parent city.');
+          }
+          if (d.parentCountry !== undefined && d.parentCountry !== null && (typeof d.parentCountry !== 'string' || d.parentCountry.length > 128)) {
+            fail(`fields.destinations[${i}].parentCountry`, 'Invalid parent country.');
           }
         }
       });
     }
   }
 
-  if (f.departure_airport !== undefined && (typeof f.departure_airport !== 'string' || f.departure_airport.length > 128)) {
-    fail('fields.departure_airport', 'Invalid airport.');
+  // Departure airport — accepts two shapes:
+  //   (legacy) string, e.g. "London Heathrow (LHR)"
+  //   (new)    array of strings, max 5
+  // Widget sends an array now, legacy submissions/integrations may still send
+  // a string. Both accepted server-side.
+  if (f.departure_airport !== undefined) {
+    if (Array.isArray(f.departure_airport)) {
+      if (f.departure_airport.length > 5) {
+        fail('fields.departure_airport', 'Too many airports (max 5).');
+      } else {
+        f.departure_airport.forEach((a, i) => {
+          if (typeof a !== 'string' || a.length > 128) {
+            fail(`fields.departure_airport[${i}]`, 'Invalid airport.');
+          }
+        });
+      }
+    } else if (typeof f.departure_airport !== 'string' || f.departure_airport.length > 128) {
+      fail('fields.departure_airport', 'Invalid airport.');
+    }
   }
 
   // Travel dates
@@ -496,7 +531,17 @@ async function writeMasterRecord({ form, payload, meta, sequential, reference })
       [SUB_FIELDS.email]:            normaliseEmail(p.email),
       [SUB_FIELDS.phone]:            normalisePhone(p.phone),
       [SUB_FIELDS.destinationsJSON]: JSON.stringify(p.destinations || []),
-      [SUB_FIELDS.departureAirport]: cleanString(p.departure_airport, 128),
+      // departure_airport: array from the new multi-select widget, or string
+      // from legacy integrations. Store as comma-separated string in Airtable
+      // so it displays cleanly in the inbox and emails ("LHR, LGW, MAN").
+      // The rawPayloadJSON preserves the structured array for any downstream
+      // consumer that needs it.
+      [SUB_FIELDS.departureAirport]: cleanString(
+        Array.isArray(p.departure_airport)
+          ? p.departure_airport.join(', ')
+          : p.departure_airport,
+        500
+      ),
       [SUB_FIELDS.flexibleDates]:    !!dates.flexible,
       [SUB_FIELDS.adults]:           travellers.adults ?? 0,
       [SUB_FIELDS.children]:         travellers.children ?? 0,
