@@ -368,6 +368,26 @@ export default async function handler(req, res) {
       }
 
       const pub = readEnquiryFormRecord(record);
+
+      // Build the security block for the public response. We only expose the
+      // Turnstile sitekey when Turnstile is enabled on this form — saves a
+      // DNS lookup + script load on forms that don't use it. The sitekey is
+      // public by design (Cloudflare publishes it client-side on every site
+      // using Turnstile), but keeping it conditional reduces attack surface
+      // and stops bots scraping keys from forms that wouldn't validate them.
+      //
+      // If the form has turnstile enabled but the env var is missing, we leave
+      // the sitekey null. The widget falls back to no challenge and submit.js
+      // fails closed (fail-if-secret-missing) so the bad deploy gets caught
+      // server-side rather than letting submissions through unchecked.
+      const publicSecurity = {
+        honeypot: pub.security.honeypot,
+        turnstile: pub.security.turnstile,
+      };
+      if (pub.security.turnstile) {
+        publicSecurity.turnstileSiteKey = process.env.TURNSTILE_SITE_KEY || null;
+      }
+
       // Drop sensitive routing config from the public payload — only surface
       // what the widget actually needs to render and submit. The submit endpoint
       // re-reads the full record on submission so routing stays server-side.
@@ -388,12 +408,7 @@ export default async function handler(req, res) {
           theme: pub.theme,
         },
         fieldsJSON: pub.fieldsJSON,
-        security: {
-          honeypot: pub.security.honeypot,
-          turnstile: pub.security.turnstile,
-          // Turnstile site key lives in env, not per-form — the widget reads it
-          // from a public config endpoint separately when turnstile === true.
-        },
+        security: publicSecurity,
       };
       res.setHeader('Cache-Control', 's-maxage=60, max-age=30, stale-while-revalidate=300');
       return res.status(200).json(publicConfig);
