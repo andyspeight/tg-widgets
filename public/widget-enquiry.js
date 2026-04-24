@@ -153,6 +153,7 @@
     minus:    'M5 12h14',
     spinner:  'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83',
     arrow:    'M5 12h14M12 5l7 7-7 7',
+    arrowLeft:'M19 12H5M12 19l-7-7 7-7',
     heart:    'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z',
     wave:     'M2 12c2 0 2-4 4-4s2 4 4 4 2-4 4-4 2 4 4 4 2-4 4-4',
     building: 'M6 22V4a2 2 0 012-2h8a2 2 0 012 2v18M6 12h12M6 7h12',
@@ -571,6 +572,39 @@
       '.tg-submit:focus-visible{outline:none;box-shadow:0 0 0 3px ' + accent + '66}',
       '.tg-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}',
       '.tg-submit .tg-spin{animation:tg-spin 1s linear infinite}',
+
+      // ── Multi-step navigation ────────────────────────────────────────
+      // Progress indicator sits below the hero; explicit numbered steps with
+      // labels so the user always knows where they are. Completed steps get
+      // a check icon styling, current gets the primary colour, future stay
+      // muted.
+      '.tg-progress{display:flex;align-items:center;justify-content:space-between;padding:20px 32px 4px;gap:8px;overflow-x:auto}',
+      '.tg-progress-step{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:' + c.textTertiary + ';flex-shrink:0;position:relative}',
+      '.tg-progress-step:not(:last-child)::after{content:"";width:24px;height:1px;background:' + c.border + ';margin-left:8px;flex-shrink:0}',
+      '.tg-progress-num{width:24px;height:24px;border-radius:50%;background:' + c.bgAlt + ';color:' + c.textTertiary + ';display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;border:1px solid ' + c.border + ';transition:all .2s}',
+      '.tg-progress-step.is-current .tg-progress-num{background:' + primary + ';color:#fff;border-color:' + primary + '}',
+      '.tg-progress-step.is-current{color:' + c.text + ';font-weight:600}',
+      '.tg-progress-step.is-complete .tg-progress-num{background:' + accent + ';color:#fff;border-color:' + accent + '}',
+      '.tg-progress-step.is-complete{color:' + c.textSecondary + '}',
+      // On narrow screens the labels get truncated/hidden so the progress
+      // row does not overflow. Numbers always visible.
+      '@media (max-width: 520px){.tg-progress{padding:16px 16px 2px;gap:4px}.tg-progress-label{display:none}.tg-progress-step:not(:last-child)::after{width:12px;margin-left:4px}}',
+
+      // Nav button group — Back | Next/Submit. Submit already exists; we
+      // layer Back + Next/Continue buttons in the same group.
+      '.tg-nav-buttons{display:flex;gap:10px;align-items:center;margin-left:auto}',
+      '.tg-nav-back,.tg-nav-next{height:48px;padding:0 18px;border-radius:' + radiusBtn + 'px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}',
+      '.tg-nav-back{background:transparent;color:' + c.textSecondary + ';border:1px solid ' + c.border + '}',
+      '.tg-nav-back:hover{background:' + c.bgAlt + ';color:' + c.text + '}',
+      '.tg-nav-back:focus-visible{outline:none;box-shadow:0 0 0 3px ' + accent + '33}',
+      '.tg-nav-next{background:' + primary + ';color:#fff;border:none;box-shadow:0 1px 0 rgba(0,0,0,.08),0 1px 3px rgba(15,23,42,.06)}',
+      '.tg-nav-next:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,23,42,.12)}',
+      '.tg-nav-next:focus-visible{outline:none;box-shadow:0 0 0 3px ' + accent + '66}',
+      // Step sections — each step fields live in a section, only one
+      // visible at a time (display toggled by the nav controller)
+      '.tg-step-section{animation:tg-step-in .25s ease}',
+      '@keyframes tg-step-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}',
+
       '@keyframes tg-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}',
       '.tg-trust{display:flex;gap:12px;font-size:11px;color:' + c.textTertiary + '}',
       '.tg-trust span{display:inline-flex;align-items:center;gap:4px}',
@@ -1250,7 +1284,14 @@
       submitText: config.submitText || 'Send my enquiry',
       thankYou:   config.thankYou || { mode: 'inline', message: "Thanks {firstName} — we're on it" },
       branding:   config.branding || { buttonColour: '#1B2B5B', accentColour: '#00B4D8', theme: 'light' },
-      security:   config.security || { honeypot: true, turnstile: false }
+      security:   config.security || { honeypot: true, turnstile: false },
+      // Multi-step layout. Values: 'single-page' (default) | 'multi-step'.
+      // When 'multi-step', fields are grouped by their `step` property and
+      // rendered one step at a time with Back/Next navigation.
+      layoutMode: (config.layoutMode === 'multi-step') ? 'multi-step' : 'single-page',
+      // Steps array — [{ id: 1, label: 'Your trip' }, ...]. If absent,
+      // normaliseSteps() below will synthesise one from the field list.
+      steps:      Array.isArray(config.steps) ? config.steps : null,
     };
     // fieldsJSON might arrive as a JSON string or a plain array
     var fields = config.fieldsJSON;
@@ -1259,9 +1300,50 @@
       catch (e) { console.warn('[TGEnquiryWidget] fieldsJSON parse failed, falling back to defaults'); fields = null; }
     }
     if (!Array.isArray(fields) || fields.length === 0) fields = defaultFieldSet();
+    // Ensure every field has an integer `step` property. Legacy forms (pre
+    // multi-step) won't have it — default to step 1 so they render in a
+    // single step and behave identically to single-page mode.
+    fields.forEach(function (f) {
+      var s = parseInt(f.step, 10);
+      f.step = (Number.isFinite(s) && s >= 1) ? s : 1;
+    });
     normalised.fields = fields;
+    normalised.steps = normaliseSteps(normalised.steps, fields);
     return normalised;
   };
+
+  // Derive the final steps array from config + fields. If the config has an
+  // explicit steps array, use it (filtered to only include steps that actually
+  // have fields). Otherwise synthesise one step per unique step-ID found in
+  // the fields. Always returns at least one step.
+  function normaliseSteps(configSteps, fields) {
+    // Collect the set of step IDs actually used by visible fields
+    var used = {};
+    fields.forEach(function (f) {
+      if (f.visible === false) return;
+      used[f.step || 1] = true;
+    });
+    var usedIds = Object.keys(used).map(function (k) { return parseInt(k, 10); });
+    usedIds.sort(function (a, b) { return a - b; });
+    if (usedIds.length === 0) usedIds = [1]; // no visible fields yet
+
+    if (Array.isArray(configSteps) && configSteps.length > 0) {
+      // Filter provided steps to only those whose ID is actually used by a
+      // visible field. Preserve labels. Fall through to synthesis if nothing
+      // survives filtering (e.g. stale config).
+      var filtered = configSteps
+        .filter(function (s) { return s && typeof s === 'object' && usedIds.indexOf(s.id) !== -1; })
+        .map(function (s, i) {
+          return { id: s.id, label: s.label || ('Step ' + (i + 1)) };
+        });
+      if (filtered.length > 0) return filtered;
+    }
+
+    // Synthesise: one entry per used ID with a generic label
+    return usedIds.map(function (id, i) {
+      return { id: id, label: 'Step ' + (i + 1) };
+    });
+  }
 
   // Clear shadow DOM and rebuild from config. Used by update() + initial render.
   TGEnquiryWidget.prototype._render = function () {
@@ -1291,9 +1373,21 @@
     heroChildren.push(el('p', { text: config.header.subtitle || '' }));
     card.appendChild(el('div', { class: 'tg-hero' }, heroChildren));
 
-    // Section for all fields — for now, all fields in one section. Post-MVP the
-    // editor will support organising into multiple sections.
-    var section = el('div', { class: 'tg-section' });
+    // ── Multi-step vs single-page branching ─────────────────────────────
+    // Single-page: all fields in one section, one submit button, same as
+    //              widget has always done.
+    // Multi-step:  fields grouped by step.id, one section visible at a time
+    //              with a progress indicator at top and Back/Next buttons.
+    //
+    // Both paths share the same: honeypot, summary error banner, Turnstile,
+    // post-submit handler. The difference is purely about what the user sees
+    // at any given moment.
+    var isMultiStep = (config.layoutMode === 'multi-step') && config.steps && config.steps.length > 1;
+
+    // Instantiate all field renderers up-front regardless of mode. The multi-
+    // step path still needs every field instance so _handleSubmit can gather
+    // values from all steps on final submit.
+    var fieldNodesByStep = {}; // step id → [DOM nodes]
     config.fields.forEach(function (fieldSpec) {
       if (fieldSpec.visible === false) return;
       var renderer = RENDERERS[fieldSpec.type];
@@ -1302,19 +1396,67 @@
         return;
       }
       var inst = renderer(instance, fieldSpec);
+      inst.__step = fieldSpec.step || 1; // stash for validation scoping
       fields.push(inst);
-      section.appendChild(inst.node);
+      var stepId = fieldSpec.step || 1;
+      if (!fieldNodesByStep[stepId]) fieldNodesByStep[stepId] = [];
+      fieldNodesByStep[stepId].push(inst.node);
     });
-    card.appendChild(section);
 
-    // Honeypot — always present, visually hidden
+    // Progress indicator (multi-step only). Rendered BEFORE the first section
+    // so it sits visually between the hero and the form fields.
+    var progressEl = null;
+    if (isMultiStep) {
+      progressEl = el('div', { class: 'tg-progress', role: 'progressbar', 'aria-valuemin': '1', 'aria-valuemax': String(config.steps.length), 'aria-valuenow': '1' });
+      config.steps.forEach(function (step, idx) {
+        var item = el('div', { class: 'tg-progress-step', 'data-step-idx': String(idx) }, [
+          el('span', { class: 'tg-progress-num', text: String(idx + 1) }),
+          el('span', { class: 'tg-progress-label', text: step.label || ('Step ' + (idx + 1)) })
+        ]);
+        progressEl.appendChild(item);
+      });
+      card.appendChild(progressEl);
+    }
+
+    // Build the sections. In single-page mode there's one section containing
+    // every field. In multi-step mode there's one section per step, and we
+    // toggle visibility as the user navigates.
+    var sectionsByStep = {};
+    if (isMultiStep) {
+      config.steps.forEach(function (step) {
+        var section = el('div', { class: 'tg-section tg-step-section', 'data-step-id': String(step.id) });
+        var nodes = fieldNodesByStep[step.id] || [];
+        if (nodes.length === 0) {
+          // Edge case: step exists in config but no fields are on it. Show a
+          // tiny placeholder so the step isn't jarringly empty — shouldn't
+          // normally happen because normaliseSteps filters these out.
+          section.appendChild(el('div', {
+            style: { padding: '24px 0', color: '#94A3B8', fontSize: '13px', textAlign: 'center' },
+            text: 'No fields on this step.'
+          }));
+        } else {
+          nodes.forEach(function (n) { section.appendChild(n); });
+        }
+        sectionsByStep[step.id] = section;
+        card.appendChild(section);
+      });
+    } else {
+      // Single-page — one section, all fields in original order.
+      var section = el('div', { class: 'tg-section' });
+      fields.forEach(function (inst) { section.appendChild(inst.node); });
+      card.appendChild(section);
+    }
+
+    // Honeypot — always present, visually hidden. Lives outside of step
+    // sections so it's part of every submit regardless of which step is active.
     var honeypot = el('input', {
       class: 'tg-honeypot', type: 'text', name: 'website_url',
       tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true'
     });
     card.appendChild(honeypot);
 
-    // Summary error banner (multiple errors)
+    // Summary error banner (multiple errors). Shared across steps — resets
+    // each time we show a new step.
     var summaryError = el('div', { class: 'tg-summary-error', role: 'alert', 'aria-live': 'assertive' }, [
       svg(ICONS.alert, { size: 16 }),
       el('span', { class: 'tg-summary-error-text' })
@@ -1322,28 +1464,63 @@
     card.appendChild(summaryError);
 
     // Turnstile container — rendered only if security.turnstile === true.
-    // Holds the iframe that runs the challenge on our domain.
+    // In multi-step mode it ONLY appears on the final step: Turnstile tokens
+    // expire after ~5 minutes, and showing the challenge on step 1 of a
+    // lengthy form would often result in expired tokens by submit time. The
+    // container is always in the DOM; we hide it until the final step.
     var turnstileContainer = null;
     var turnstileToken = null;
     var turnstileFrame = null;
     if (config.security && config.security.turnstile) {
       turnstileContainer = el('div', { class: 'tg-turnstile' });
+      if (isMultiStep) {
+        // Hide initially; shown when user navigates to final step
+        turnstileContainer.style.display = 'none';
+      }
       card.appendChild(turnstileContainer);
     }
 
-    // Submit button
-    var submitBtn = el('button', { class: 'tg-submit', type: 'button', onclick: function () { self._handleSubmit(fields, honeypot, summaryError, submitBtn, function () { return turnstileToken; }); } }, [
+    // ── Navigation row ──────────────────────────────────────────────────
+    // Single-page: one submit button (existing behaviour).
+    // Multi-step:  Back | Next on intermediate steps, Back | Submit on final.
+    var submitBtn = el('button', { class: 'tg-submit', type: 'button' }, [
       el('span', { text: config.submitText }),
       svg(ICONS.arrow, { size: 16 })
     ]);
-    card.appendChild(el('div', { class: 'tg-footer' }, [
-      el('div', { class: 'tg-trust' }, [
-        el('span', {}, [svg(ICONS.check, { size: 12 }), 'Secure']),
-        el('span', {}, [svg(ICONS.check, { size: 12 }), 'GDPR']),
-        el('span', {}, [svg(ICONS.clock, { size: 12 }), '24hr reply'])
-      ]),
-      submitBtn
-    ]));
+    var backBtn = null;
+    var nextBtn = null;
+    if (isMultiStep) {
+      backBtn = el('button', { class: 'tg-nav-back', type: 'button' }, [
+        svg(ICONS.arrowLeft || ICONS.arrow, { size: 16 }),
+        el('span', { text: 'Back' })
+      ]);
+      nextBtn = el('button', { class: 'tg-nav-next', type: 'button' }, [
+        el('span', { text: 'Continue' }),
+        svg(ICONS.arrow, { size: 16 })
+      ]);
+    }
+
+    var navChildren;
+    if (isMultiStep) {
+      navChildren = [
+        el('div', { class: 'tg-trust' }, [
+          el('span', {}, [svg(ICONS.check, { size: 12 }), 'Secure']),
+          el('span', {}, [svg(ICONS.check, { size: 12 }), 'GDPR']),
+          el('span', {}, [svg(ICONS.clock, { size: 12 }), '24hr reply'])
+        ]),
+        el('div', { class: 'tg-nav-buttons' }, [backBtn, nextBtn, submitBtn])
+      ];
+    } else {
+      navChildren = [
+        el('div', { class: 'tg-trust' }, [
+          el('span', {}, [svg(ICONS.check, { size: 12 }), 'Secure']),
+          el('span', {}, [svg(ICONS.check, { size: 12 }), 'GDPR']),
+          el('span', {}, [svg(ICONS.clock, { size: 12 }), '24hr reply'])
+        ]),
+        submitBtn
+      ];
+    }
+    card.appendChild(el('div', { class: 'tg-footer' }, navChildren));
 
     shadow.appendChild(card);
     shadow.appendChild(el('div', { class: 'tg-brand' }, [
@@ -1351,7 +1528,15 @@
       el('strong', {}, [el('a', { href: 'https://travelgenix.io', target: '_blank', rel: 'noopener', text: 'Travelgenix' })])
     ]));
 
-    // Stash refs for submit handler
+    // ── Submit wiring ────────────────────────────────────────────────────
+    // Submit button is wired identically in both modes — it always submits
+    // everything. In multi-step it's only visible on the final step, which
+    // is enforced by the nav state machine below.
+    submitBtn.addEventListener('click', function () {
+      self._handleSubmit(fields, honeypot, summaryError, submitBtn, function () { return turnstileToken; });
+    });
+
+    // Stash refs for submit handler + external callers
     this._fields = fields;
     this._submitBtn = submitBtn;
     this._summaryError = summaryError;
@@ -1388,6 +1573,142 @@
       }));
       console.error('[TGEnquiryWidget] security.turnstile is true but turnstileSiteKey is missing');
     }
+
+    // ── Multi-step navigation state machine ──────────────────────────────
+    // Tracks the currently-visible step and handles Back/Next + validation
+    // boundaries. Set up LAST because it references DOM elements created
+    // above (progressEl, sectionsByStep, backBtn, nextBtn, submitBtn,
+    // turnstileContainer).
+    if (isMultiStep) {
+      this._stepState = this._buildStepNav({
+        steps:              config.steps,
+        sectionsByStep:     sectionsByStep,
+        progressEl:         progressEl,
+        backBtn:            backBtn,
+        nextBtn:            nextBtn,
+        submitBtn:          submitBtn,
+        turnstileContainer: turnstileContainer,
+        summaryError:       summaryError,
+        fields:             fields,
+      });
+      // Show step 1 initially
+      this._stepState.goToStep(0);
+    }
+  };
+
+  // Build the multi-step navigation state machine. Returns a controller with
+  // goToStep(idx), next(), back() methods. Kept as a separate method so
+  // _render stays readable and the state machine logic is inspectable.
+  TGEnquiryWidget.prototype._buildStepNav = function (ctx) {
+    var self = this;
+    var currentIdx = 0;
+    var totalSteps = ctx.steps.length;
+
+    // Clear summary error — called when arriving at a new step so users
+    // don't see errors from a previous step they've moved past.
+    function clearSummaryError() {
+      ctx.summaryError.classList.remove('is-shown');
+      var t = ctx.summaryError.querySelector('.tg-summary-error-text');
+      if (t) t.textContent = '';
+    }
+
+    // Validate only the fields belonging to a given step. Returns true if all
+    // required fields in that step have valid values. Uses each field's own
+    // validate() method — same as _handleSubmit but scoped to one step.
+    function validateStep(stepIdx) {
+      var stepId = ctx.steps[stepIdx].id;
+      var firstInvalid = null;
+      var errorCount = 0;
+      ctx.fields.forEach(function (f) {
+        if (f.__step !== stepId) return;
+        if (!f.validate) return;
+        var result = f.validate();
+        if (result && result.error) {
+          errorCount++;
+          if (!firstInvalid) firstInvalid = f;
+        }
+      });
+      if (errorCount > 0) {
+        var text = errorCount === 1
+          ? 'Please fix the highlighted field above before continuing.'
+          : 'Please fix the ' + errorCount + ' highlighted fields above before continuing.';
+        ctx.summaryError.classList.add('is-shown');
+        var span = ctx.summaryError.querySelector('.tg-summary-error-text');
+        if (span) span.textContent = text;
+        if (firstInvalid && firstInvalid.node && firstInvalid.node.scrollIntoView) {
+          try { firstInvalid.node.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* ignore */ }
+        }
+        return false;
+      }
+      clearSummaryError();
+      return true;
+    }
+
+    // Transition to a given step index. Does NOT validate — callers that
+    // need validation (next button, submit) check first.
+    function goToStep(idx) {
+      if (idx < 0 || idx >= totalSteps) return;
+      currentIdx = idx;
+
+      // Toggle section visibility
+      ctx.steps.forEach(function (step) {
+        var section = ctx.sectionsByStep[step.id];
+        if (!section) return;
+        section.style.display = (step.id === ctx.steps[idx].id) ? '' : 'none';
+      });
+
+      // Update progress indicator
+      if (ctx.progressEl) {
+        ctx.progressEl.setAttribute('aria-valuenow', String(idx + 1));
+        var children = ctx.progressEl.children;
+        for (var i = 0; i < children.length; i++) {
+          children[i].classList.remove('is-current', 'is-complete');
+          if (i < idx) children[i].classList.add('is-complete');
+          else if (i === idx) children[i].classList.add('is-current');
+        }
+      }
+
+      // Nav button visibility + labels
+      var isFirst = idx === 0;
+      var isLast  = idx === totalSteps - 1;
+      if (ctx.backBtn) ctx.backBtn.style.visibility = isFirst ? 'hidden' : '';
+      if (ctx.nextBtn) ctx.nextBtn.style.display    = isLast ? 'none' : '';
+      if (ctx.submitBtn) ctx.submitBtn.style.display = isLast ? '' : 'none';
+
+      // Turnstile only on final step (tokens expire ~5 min)
+      if (ctx.turnstileContainer) {
+        ctx.turnstileContainer.style.display = isLast ? '' : 'none';
+      }
+
+      // Clear any step-validation error from the previous step
+      clearSummaryError();
+
+      // Scroll to top of card on step change (otherwise users can land
+      // mid-form after a long previous step)
+      try {
+        self.shadow.host.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (e) { /* ignore */ }
+    }
+
+    // Wire nav buttons
+    if (ctx.nextBtn) {
+      ctx.nextBtn.addEventListener('click', function () {
+        if (validateStep(currentIdx)) goToStep(currentIdx + 1);
+      });
+    }
+    if (ctx.backBtn) {
+      ctx.backBtn.addEventListener('click', function () {
+        goToStep(currentIdx - 1);
+      });
+    }
+
+    return {
+      goToStep: goToStep,
+      next: function () { if (validateStep(currentIdx)) goToStep(currentIdx + 1); },
+      back: function () { goToStep(currentIdx - 1); },
+      getCurrentIdx: function () { return currentIdx; },
+      getTotalSteps: function () { return totalSteps; },
+    };
   };
 
   TGEnquiryWidget.prototype._handleSubmit = function (fields, honeypot, summaryError, submitBtn, getToken) {
