@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Security check</title>
+
+  <!--
+    Turnstile iframe host.
+
+    This page exists to render the Cloudflare Turnstile challenge on a domain
+    that's whitelisted in Cloudflare (tg-widgets.vercel.app / widgets.travelify.io),
+    rather than directly on each client's site. Cloudflare sitekeys are bound
+    to hostnames — we can't whitelist every client domain individually, so the
+    widget embeds this page as an iframe on any client site, Turnstile runs
+    here on our domain, and the solved token is passed back to the parent
+    frame via postMessage.
+
+    Flow:
+      1. Widget injects <iframe src="/turnstile-frame.html?sitekey=...&theme=...">
+      2. This page loads, reads query params, renders Turnstile
+      3. When user solves: postMessage token to parent
+      4. When expired / errored: postMessage status to parent
+      5. Parent widget includes the token in the submission payload
+
+    Security notes:
+    - The sitekey is public by design (Cloudflare requires it client-side)
+    - We never accept/expose the secret key here — that lives server-side only
+    - postMessage uses an explicit targetOrigin (document.referrer's origin)
+      so a malicious third-party iframe can't intercept the token
+    - The Turnstile response is one-time-use; the backend's siteverify call
+      invalidates it, so replay attacks don't work even if a token leaked
+    - The parent origin is captured once on load and pinned — if the parent
+      tries to change origins mid-session, we stop responding
+  -->
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 65px;
+    }
+    #turnstile-mount {
+      display: inline-block;
+    }
+    .fallback {
+      font-size: 12px;
+      color: #94A3B8;
+      padding: 12px;
+      text-align: center;
+    }
+    .fallback.is-error { color: #DC2626; }
+    /* Screen-reader only live region for status announcements */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileReady" async defer></script>
+</head>
+<body>
+
+  <div id="turnstile-mount" role="group" aria-label="Security check"></div>
+  <div class="fallback" id="fallback" style="display:none;"></div>
+  <div class="sr-only" role="status" aria-live="polite" id="status"></div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ─── Parse config from URL ───────────────────────────────────────────
+    // Sitekey is passed from the widget (which got it from the form config
+    // endpoint). Theme is passed so the challenge matches the form's light/dark
+    // appearance. Neither is sensitive.
+    var params = new URLSearchParams(window.location.search);
+    var SITEKEY = params.get('sitekey') || '';
+    var THEME   = params.get('theme') === 'dark' ? 'dark' : 'light';
+
+    var mount    = document.getElementById('turnstile-mount');
+    var fallback = document.getElementById('fallback');
+    var statusEl = document.getElementById('status');
+
+    // ─── Parent origin pinning ───────────────────────────────────────────
+    // We only talk to the origin that loaded us. Captured once from
+    // document.referrer on page load and never updated. If referrer is
+    // missing (rare — some privacy extensions strip it) we fall back to
+    // window.parent's best-guess origin, but refuse to postMessage at all
+    // if neither is available.
+    var PARENT_ORIGIN = (function () {
+      try {
+        if (document.referrer) {
+          var a = document.createElement('a');
+          a.href = document.referrer;
+          return a.protocol + '//' + a.host;
+        }
+      } catch (e) { /* fallthrough */ }
+      return null;
+    })();
+
+    function postToParent(message) {
+      if (!window.parent || window.parent === window) return;
+      if (!PARENT_ORIGIN) {
+        console.warn('[turnstile-frame] no parent origin — dropping message');
+        return;
+      }
+      try {
+        window.parent.postMessage(
+          Object.assign({ source: 'tg-turnstile' }, message),
+          PARENT_ORIGIN
+        );
+      } catch (e) {
+        console.warn('[turnstile-frame] postMessage failed:', e);
+      }
+    }
+
+    function announce(text) {
+      statusEl.textContent = text;
+    }
+
+    function showFallback(text, isError) {
+      fallback.style.display = 'block';
+      fallback.className = 'fallback' + (isError ? ' is-error' : '');
+      fallback.textContent = text;
+      mount.style.display = 'none';
+    }
+
+    // ─── Config sanity checks ────────────────────────────────────────────
+    if (!SITEKEY) {
+      showFallback('Security check unavailable (missing sitekey).', true);
+      postToParent({ type: 'error', reason: 'missing-sitekey' });
+      return;
+    }
+
+    // Basic format check — real Turnstile sitekeys start with 0x followed
+    // by alphanumerics. Catches obviously malformed values early.
+    if (!/^0x[A-Za-z0-9_-]{10,}$/.test(SITEKEY)) {
+      showFallback('Security check unavailable (invalid sitekey).', true);
+      postToParent({ type: 'error', reason: 'invalid-sitekey' });
+      return;
+    }
+
+    // ─── Turnstile render callback ───────────────────────────────────────
+    // Cloudflare's api.js calls window.onTurnstileReady once loaded.
+    // At that point we render the challenge and wire callbacks.
+    var widgetId = null;
+
+    window.onTurnstileReady = function () {
+      if (!window.turnstile) {
+        showFallback('Security check failed to load.', true);
+        postToParent({ type: 'error', reason: 'turnstile-not-loaded' });
+        return;
+      }
+
+      try {
+        widgetId = window.turnstile.render(mount, {
+          sitekey: SITEKEY,
+          theme: THEME,
+          // Size: normal (300x65). Compact is tempting but less accessible
+          // and the solve rate is lower. Stick with normal.
+          size: 'normal',
+          callback: function (token) {
+            announce('Security check passed.');
+            postToParent({ type: 'token', token: token });
+          },
+          'expired-callback': function () {
+            announce('Security check expired — please try again.');
+            postToParent({ type: 'expired' });
+          },
+          'error-callback': function (err) {
+            announce('Security check failed.');
+            postToParent({ type: 'error', reason: String(err || 'unknown') });
+          },
+          'timeout-callback': function () {
+            announce('Security check timed out — please try again.');
+            postToParent({ type: 'timeout' });
+          }
+        });
+        postToParent({ type: 'ready' });
+      } catch (e) {
+        console.error('[turnstile-frame] render failed:', e);
+        showFallback('Security check failed to initialise.', true);
+        postToParent({ type: 'error', reason: 'render-failed' });
+      }
+    };
+
+    // ─── Parent → iframe messages ────────────────────────────────────────
+    // The parent can ask us to reset the challenge (e.g. after a failed
+    // submit attempt where the token was consumed). We only accept messages
+    // from the pinned parent origin.
+    window.addEventListener('message', function (event) {
+      if (!PARENT_ORIGIN || event.origin !== PARENT_ORIGIN) return;
+      var data = event.data;
+      if (!data || data.source !== 'tg-enquiry-widget') return;
+
+      if (data.type === 'reset' && widgetId !== null && window.turnstile) {
+        try {
+          window.turnstile.reset(widgetId);
+          announce('Security check reset.');
+        } catch (e) {
+          console.warn('[turnstile-frame] reset failed:', e);
+        }
+      }
+    });
+
+    // ─── Load guard ──────────────────────────────────────────────────────
+    // If Turnstile's script fails to load within 10 seconds, show a fallback
+    // message. Cloudflare is normally <2s but sketchy networks (corporate
+    // proxies, some VPNs) occasionally block it.
+    setTimeout(function () {
+      if (!window.turnstile) {
+        showFallback('Security check is taking too long to load. Please refresh the page.', true);
+        postToParent({ type: 'error', reason: 'load-timeout' });
+      }
+    }, 10000);
+  })();
+  </script>
+
+</body>
+</html>
