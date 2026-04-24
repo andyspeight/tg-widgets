@@ -854,6 +854,64 @@
       opacity: 1;
     }
 
+    /* Step separator — appears on the canvas only when in multi-step mode.
+       Sits between field groups as a visual divider; clicking it opens the
+       Layout inspector so agents can rename the step or manage the step list.
+       When a field is dragged over it the adjacent drop slot is activated
+       (handled by the standard drop-slot logic below it in the DOM). */
+    .step-separator {
+      display: flex;
+      align-items: center;
+      margin: 16px 0 8px;
+      padding: 0 4px;
+      user-select: none;
+      transition: opacity .12s ease;
+    }
+    .step-separator:hover {
+      opacity: .9;
+    }
+    .step-separator-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      padding: 8px 14px;
+      background: linear-gradient(to right, var(--brand-soft), transparent);
+      border-left: 3px solid var(--brand);
+      border-radius: 0 8px 8px 0;
+    }
+    .step-separator-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--brand);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-separator-num.is-warn {
+      background: var(--warning);
+    }
+    .step-separator-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .step-separator-hint {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .step-separator.is-orphan .step-separator-inner {
+      background: linear-gradient(to right, rgba(245,158,11,0.1), transparent);
+      border-left-color: var(--warning);
+    }
+
     /* When a slot is active, gently push the adjacent cards apart so the
        list visually opens up — the Notion/Linear pattern. The slot itself
        provides the main gap; these margins add breathing room so it doesn't
@@ -2117,6 +2175,12 @@
         help: def.defaultOptions.help || '',
         required: !!def.defaultRequired,
         visible: true,
+        // Step assignment for multi-step mode. Defaults to 1 so the field
+        // lands on step 1 in single-page mode (where it's ignored anyway)
+        // or on the first step in multi-step mode. addFieldToCanvas() below
+        // overrides this when inserting at a specific canvas position so
+        // the field inherits the step it was dropped into.
+        step: 1,
         options: Object.assign({}, def.defaultOptions)
       };
     }
@@ -2148,6 +2212,11 @@
         template: 'Holiday Enquiry',
         layoutMode: 'single-page',
         fieldsJSON: JSON.stringify(defaultFields()),
+        // stepsJSON — multi-step step metadata [{ id, label }]. Empty until
+        // agent switches layoutMode to 'multi-step' and defines steps.
+        // When empty, the widget falls back to single-step mode regardless
+        // of layoutMode setting.
+        stepsJSON: '[]',
         headerTitle: 'Tell us about your dream holiday',
         headerSubtitle: "Share a few details and one of our travel specialists will come back within 24 hours.",
         submitButtonText: 'Send my enquiry',
@@ -2177,20 +2246,23 @@
     }
 
     function defaultFields() {
+      // Every field carries a `step` property — defaults to 1 so single-page
+      // forms work identically to before (step is ignored), and if an agent
+      // later switches to multi-step mode, all existing fields land on step 1.
       return [
-        { id: 'destination',       type: 'destination',  label: 'Where are you dreaming of?', required: true,  visible: true },
-        { id: 'departure_airport', type: 'airport',      label: 'Departure airport',          required: true,  visible: true },
-        { id: 'travel_dates',      type: 'daterange',    label: 'Travel dates',               required: true,  visible: true },
-        { id: 'duration',          type: 'duration',     label: 'Duration',                   required: false, visible: true },
-        { id: 'travellers',        type: 'travellers',   label: "Who's travelling?",          required: true,  visible: true },
-        { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true },
-        { id: 'stars',             type: 'stars',        label: 'Star rating preference',     required: false, visible: true },
-        { id: 'board',             type: 'board',        label: 'Board basis',                required: false, visible: true },
-        { id: 'interests',         type: 'interests',    label: 'Interests',                  required: false, visible: true },
-        { id: 'name',              type: 'name',         label: 'Your name',                  required: true,  visible: true },
-        { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true },
-        { id: 'notes',             type: 'notes',        label: 'Anything else?',             required: false, visible: true },
-        { id: 'consent',           type: 'consent',      label: 'Consent',                    required: true,  visible: true }
+        { id: 'destination',       type: 'destination',  label: 'Where are you dreaming of?', required: true,  visible: true, step: 1 },
+        { id: 'departure_airport', type: 'airport',      label: 'Departure airport',          required: true,  visible: true, step: 1 },
+        { id: 'travel_dates',      type: 'daterange',    label: 'Travel dates',               required: true,  visible: true, step: 1 },
+        { id: 'duration',          type: 'duration',     label: 'Duration',                   required: false, visible: true, step: 1 },
+        { id: 'travellers',        type: 'travellers',   label: "Who's travelling?",          required: true,  visible: true, step: 1 },
+        { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true, step: 1 },
+        { id: 'stars',             type: 'stars',        label: 'Star rating preference',     required: false, visible: true, step: 1 },
+        { id: 'board',             type: 'board',        label: 'Board basis',                required: false, visible: true, step: 1 },
+        { id: 'interests',         type: 'interests',    label: 'Interests',                  required: false, visible: true, step: 1 },
+        { id: 'name',              type: 'name',         label: 'Your name',                  required: true,  visible: true, step: 1 },
+        { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true, step: 1 },
+        { id: 'notes',             type: 'notes',        label: 'Anything else?',             required: false, visible: true, step: 1 },
+        { id: 'consent',           type: 'consent',      label: 'Consent',                    required: true,  visible: true, step: 1 }
       ];
     }
 
@@ -2319,6 +2391,10 @@
           fieldsJSON: typeof data.fieldsJSON === 'string'
             ? data.fieldsJSON
             : JSON.stringify(data.fieldsJSON || defaultFields()),
+          // Ensure stepsJSON is a string — legacy forms won't have it
+          stepsJSON: typeof data.stepsJSON === 'string'
+            ? data.stepsJSON
+            : JSON.stringify(data.stepsJSON || []),
           routing: Object.assign(defaultConfig().routing, data.routing || {}),
           security: Object.assign(defaultConfig().security, data.security || {})
         });
@@ -2398,6 +2474,13 @@
           logoUrl:      cfg.logoUrl
         },
         fieldsJSON: fields,
+        // Multi-step support — pass through so the preview widget switches
+        // to the multi-step render path whenever the agent toggles it.
+        layoutMode: cfg.layoutMode || 'single-page',
+        steps: (function () {
+          try { const parsed = JSON.parse(cfg.stepsJSON || '[]'); return Array.isArray(parsed) ? parsed : []; }
+          catch (e) { return []; }
+        })(),
         security: { honeypot: cfg.security && cfg.security.honeypot, turnstile: cfg.security && cfg.security.turnstile }
       };
 
@@ -2419,19 +2502,30 @@
     function parseFields(raw) {
       // An array (already parsed) → pass through unchanged, even if empty.
       // Empty is a deliberate choice (Blank template).
-      if (Array.isArray(raw)) return raw;
-      // Non-string, non-array → something went wrong, use defaults
-      if (typeof raw !== 'string') return defaultFields();
-      try {
-        const parsed = JSON.parse(raw);
-        // Valid JSON array → pass through, even if empty
-        if (Array.isArray(parsed)) return parsed;
-        // JSON parsed but isn't an array → treat as corrupt, use defaults
-        return defaultFields();
-      } catch (e) {
-        // Genuine parse error → fall back to defaults
-        return defaultFields();
+      let result;
+      if (Array.isArray(raw)) {
+        result = raw;
+      } else if (typeof raw !== 'string') {
+        // Non-string, non-array → something went wrong, use defaults
+        result = defaultFields();
+      } else {
+        try {
+          const parsed = JSON.parse(raw);
+          // Valid JSON array → pass through, even if empty
+          result = Array.isArray(parsed) ? parsed : defaultFields();
+        } catch (e) {
+          // Genuine parse error → fall back to defaults
+          result = defaultFields();
+        }
       }
+      // Backfill: every field needs a `step` property for multi-step to work.
+      // Legacy forms + hardcoded template arrays won't have one — default to
+      // step 1 so they all land together on the first step. Non-destructive:
+      // only adds the property if missing.
+      result.forEach(f => {
+        if (f && typeof f === 'object' && !f.step) f.step = 1;
+      });
+      return result;
     }
 
     function togglePreview() {
@@ -2725,6 +2819,12 @@
         icon: '<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>',
       },
       {
+        id: 'layout',
+        name: 'Layout',
+        desc: 'Single-page or multi-step form, and manage step labels.',
+        icon: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+      },
+      {
         id: 'branding',
         name: 'Branding',
         desc: 'Button colour, accent colour and theme.',
@@ -2876,6 +2976,8 @@
       // Already removed above.
 
       const currentFields = parseFields(state.config.fieldsJSON);
+      const isMultiStep = state.config.layoutMode === 'multi-step';
+      const steps = isMultiStep ? parseSteps(state.config.stepsJSON) : [];
 
       // ── Header card (always shown, pinned at top) ──
       stage.insertBefore(renderHeaderCard(), previewWrapper);
@@ -2885,7 +2987,41 @@
       // ── Field cards or empty state ──
       if (currentFields.length === 0) {
         stage.insertBefore(renderFieldsEmpty(), previewWrapper);
+      } else if (isMultiStep && steps.length > 0) {
+        // Multi-step layout: group fields by step and render a step separator
+        // before each group. Fields are still rendered in their original array
+        // order within each step so drag-drop insertIdx math stays correct.
+        //
+        // We iterate over `steps` (in order) and for each step, render all
+        // fields whose step property matches, preserving original array order.
+        // Any fields whose step isn't in the steps array are shown under an
+        // "Unassigned" separator at the bottom — shouldn't happen normally
+        // but protects against stale step IDs.
+        const seen = new Set();
+        steps.forEach((step, stepIdx) => {
+          stage.insertBefore(renderStepSeparator(step, stepIdx, steps.length), previewWrapper);
+          // Render fields belonging to this step, in their original index order
+          currentFields.forEach((field, index) => {
+            if ((field.step || 1) !== step.id) return;
+            stage.insertBefore(renderFieldCard(field, index), previewWrapper);
+            stage.insertBefore(renderDropSlot(index + 1), previewWrapper);
+            seen.add(index);
+          });
+        });
+        // Any orphaned fields (step id not in steps array) — put them under
+        // a rescue separator so they're not invisible. Normally zero of these.
+        const orphans = currentFields
+          .map((f, i) => ({ f: f, i: i }))
+          .filter(x => !seen.has(x.i));
+        if (orphans.length > 0) {
+          stage.insertBefore(renderStepSeparator({ id: -1, label: 'Unassigned — drag into a step above' }, -1, 0, true), previewWrapper);
+          orphans.forEach(({ f, i }) => {
+            stage.insertBefore(renderFieldCard(f, i), previewWrapper);
+            stage.insertBefore(renderDropSlot(i + 1), previewWrapper);
+          });
+        }
       } else {
+        // Single-page layout — original flat list
         currentFields.forEach((field, index) => {
           stage.insertBefore(renderFieldCard(field, index), previewWrapper);
           // Drop slot after this field (insertIdx = index + 1)
@@ -2914,6 +3050,56 @@
       label.textContent = 'Drop here';
       slot.appendChild(label);
       return slot;
+    }
+
+    // Visual divider between steps on the canvas when in multi-step mode.
+    // Clicking it opens the Layout settings inspector so agents can rename
+    // the step or manage the step list. The separator is also a drop target:
+    // dragging a field onto it re-assigns that field to this step.
+    function renderStepSeparator(step, stepIdx, totalSteps, isOrphan) {
+      const sep = document.createElement('div');
+      sep.className = 'step-separator' + (isOrphan ? ' is-orphan' : '');
+      sep.setAttribute('data-step-separator', '1');
+      sep.setAttribute('data-step-id', String(step.id));
+
+      const inner = document.createElement('div');
+      inner.className = 'step-separator-inner';
+
+      // Step number pill
+      if (!isOrphan) {
+        const num = document.createElement('span');
+        num.className = 'step-separator-num';
+        num.textContent = String(stepIdx + 1);
+        inner.appendChild(num);
+      } else {
+        const warn = document.createElement('span');
+        warn.className = 'step-separator-num is-warn';
+        warn.innerHTML = '!';
+        inner.appendChild(warn);
+      }
+
+      const label = document.createElement('span');
+      label.className = 'step-separator-label';
+      label.textContent = step.label || ('Step ' + (stepIdx + 1));
+      inner.appendChild(label);
+
+      if (!isOrphan) {
+        const hint = document.createElement('span');
+        hint.className = 'step-separator-hint';
+        hint.textContent = 'Step ' + (stepIdx + 1) + ' of ' + totalSteps;
+        inner.appendChild(hint);
+
+        // Click opens the Layout settings inspector for quick editing
+        sep.addEventListener('click', () => {
+          state.selectedItem = { kind: 'settings', id: 'layout' };
+          renderInspector();
+          renderCanvas();
+        });
+        sep.style.cursor = 'pointer';
+      }
+
+      sep.appendChild(inner);
+      return sep;
     }
 
     function renderHeaderCard() {
@@ -3373,6 +3559,13 @@
         return;
       }
       const newField = makeField(typeId);
+      // In multi-step mode, the new field needs a step assignment. We derive
+      // it from the drop position's neighbouring fields on the canvas — the
+      // field before or after the insertion point tells us which step the
+      // drop slot belongs to.
+      if (state.config.layoutMode === 'multi-step') {
+        newField.step = inferStepFromInsertIndex(insertIndex, fields);
+      }
       if (typeof insertIndex === 'number' && insertIndex >= 0 && insertIndex <= fields.length) {
         fields.splice(insertIndex, 0, newField);
       } else {
@@ -3382,6 +3575,25 @@
       selectItem({ kind: 'field', id: newField.id });
       renderPalette(); // to update the "already added" dim state
       renderCanvas();
+    }
+
+    // Work out which step a newly-inserted field should belong to, based on
+    // its neighbouring fields in the original array. This is used when a field
+    // is dragged from the palette or reordered — the target step is whichever
+    // step the drop slot visually sits within on the canvas.
+    //
+    // Strategy: look at the field immediately before the insert position. If
+    // there's one, the new field inherits its step. Otherwise use the field
+    // immediately after. Otherwise fall back to step 1 (which also covers
+    // the "no fields yet" case).
+    function inferStepFromInsertIndex(insertIndex, fields) {
+      if (insertIndex > 0 && fields[insertIndex - 1]) {
+        return fields[insertIndex - 1].step || 1;
+      }
+      if (fields[insertIndex]) {
+        return fields[insertIndex].step || 1;
+      }
+      return 1;
     }
 
     function removeField(fieldId) {
@@ -3419,9 +3631,21 @@
       if (fromIndex < 0 || fromIndex >= fields.length) return;
       if (toIndex < 0 || toIndex > fields.length) return;
       const [moved] = fields.splice(fromIndex, 1);
-      fields.splice(toIndex > fromIndex ? toIndex - 1 : toIndex, 0, moved);
+      const actualToIndex = toIndex > fromIndex ? toIndex - 1 : toIndex;
+      // In multi-step mode, a reorder across step boundaries re-assigns the
+      // field to the step of its new neighbours. We infer this BEFORE
+      // inserting (so neighbours don't include the moved field itself).
+      if (state.config.layoutMode === 'multi-step') {
+        moved.step = inferStepFromInsertIndex(actualToIndex, fields);
+      }
+      fields.splice(actualToIndex, 0, moved);
       mutate(cfg => { cfg.fieldsJSON = JSON.stringify(fields); });
       renderCanvas();
+      // Refresh inspector too in case the step inspector is open — the
+      // field counts per step will have changed.
+      if (state.selectedItem && state.selectedItem.kind === 'settings' && state.selectedItem.id === 'layout') {
+        renderInspector();
+      }
     }
 
     /* =========================== INSPECTOR =========================== */
@@ -4249,6 +4473,7 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       const save = () => { markDirtyAndSync(); renderPalette(); };
 
       if (cat.id === 'status')     renderStatusInspector(body, save);
+      else if (cat.id === 'layout')    renderLayoutInspector(body, save);
       else if (cat.id === 'branding')  renderBrandingInspector(body, save);
       else if (cat.id === 'security')  renderSecurityInspector(body, save);
       else if (cat.id === 'reference') renderReferenceInspector(body, save);
@@ -4294,6 +4519,246 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       note.textContent = noteText;
       noteSec.appendChild(note);
       body.appendChild(noteSec);
+    }
+
+    // ── Layout inspector ──
+    // Single-page or multi-step layout, plus step label editing when multi-step.
+    // Multi-step breaks the form into focused screens with a progress indicator
+    // and Back/Next navigation. Each field carries a `step` property pointing
+    // at one of the steps defined here; drag fields between step separators
+    // on the canvas to re-assign them.
+    function renderLayoutInspector(body, save) {
+      const cfg = state.config;
+      const mode = cfg.layoutMode === 'multi-step' ? 'multi-step' : 'single-page';
+
+      // Layout mode selector
+      body.appendChild(section('Layout mode', [
+        segmented({
+          label: 'How should the form be structured?',
+          value: mode,
+          options: [
+            { value: 'single-page', label: 'Single page' },
+            { value: 'multi-step',  label: 'Multi-step' }
+          ],
+          onChange: (v) => {
+            cfg.layoutMode = v;
+            // When switching TO multi-step for the first time, seed with one
+            // step containing all existing fields. Agents then split them up
+            // by adding more steps and dragging fields between them.
+            if (v === 'multi-step') {
+              const existingSteps = parseSteps(cfg.stepsJSON);
+              if (existingSteps.length === 0) {
+                cfg.stepsJSON = JSON.stringify([
+                  { id: 1, label: 'Your trip' },
+                  { id: 2, label: 'Your details' }
+                ]);
+                // Ensure all fields default to step 1 — pre-multi-step forms
+                // may not have a step property.
+                const fields = parseFields(cfg.fieldsJSON);
+                fields.forEach(f => { if (!f.step) f.step = 1; });
+                cfg.fieldsJSON = JSON.stringify(fields);
+              }
+            }
+            save();
+            renderInspector();
+            renderCanvas();
+            updatePreview();
+          }
+        })
+      ]));
+
+      // Explanatory note for the chosen mode
+      if (mode === 'single-page') {
+        const note = document.createElement('div');
+        note.style.cssText = 'padding: 12px; background: var(--hover); border-left: 3px solid var(--muted); border-radius: 0 7px 7px 0; font-size: 12px; line-height: 1.6; color: var(--sub);';
+        note.textContent = 'Every field is shown on a single scrolling page. Works well for short forms (fewer than 8 fields) or when you want visitors to see the whole picture at once.';
+        const noteSec = document.createElement('div');
+        noteSec.className = 'insp-section';
+        noteSec.appendChild(note);
+        body.appendChild(noteSec);
+        return;
+      }
+
+      // ── Multi-step: step management ──
+      const steps = parseSteps(cfg.stepsJSON);
+
+      // Helpful intro
+      const intro = document.createElement('div');
+      intro.style.cssText = 'padding: 12px; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 0 7px 7px 0; font-size: 12px; line-height: 1.6; color: var(--sub);';
+      intro.innerHTML = 'Break the form into focused screens. Visitors see one step at a time with a progress indicator, so long forms feel shorter and completion rates go up. Drag fields between step separators on the canvas to assign them.';
+      const introSec = document.createElement('div');
+      introSec.className = 'insp-section';
+      introSec.appendChild(intro);
+      body.appendChild(introSec);
+
+      // Step list — each row is { number, label input, delete button }
+      const stepsSection = document.createElement('div');
+      stepsSection.className = 'insp-section';
+
+      const stepsHeader = document.createElement('h4');
+      stepsHeader.className = 'insp-section-title';
+      stepsHeader.textContent = 'Steps';
+      stepsSection.appendChild(stepsHeader);
+
+      const stepList = document.createElement('div');
+      stepList.style.cssText = 'display: flex; flex-direction: column; gap: 8px;';
+
+      // Count fields per step so we can show a helpful "3 fields" hint on each row
+      const fields = parseFields(cfg.fieldsJSON);
+      const fieldCountByStep = {};
+      fields.forEach(f => {
+        const s = f.step || 1;
+        fieldCountByStep[s] = (fieldCountByStep[s] || 0) + 1;
+      });
+
+      steps.forEach((step, idx) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;';
+
+        // Step number pill
+        const num = document.createElement('div');
+        num.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; background: var(--brand); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0;';
+        num.textContent = String(idx + 1);
+        row.appendChild(num);
+
+        // Label input + field count
+        const labelWrap = document.createElement('div');
+        labelWrap.style.cssText = 'flex: 1; min-width: 0;';
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.className = 'input';
+        labelInput.value = step.label || '';
+        labelInput.placeholder = 'Step label (e.g. Your trip)';
+        labelInput.maxLength = 40;
+        labelInput.style.cssText = 'width: 100%; font-size: 13px;';
+        labelInput.addEventListener('input', (e) => {
+          // Update label on type — no debounce, just a small edit
+          const currentSteps = parseSteps(cfg.stepsJSON);
+          const match = currentSteps.find(s => s.id === step.id);
+          if (match) {
+            match.label = e.target.value.slice(0, 40);
+            cfg.stepsJSON = JSON.stringify(currentSteps);
+            save();
+            updatePreview();
+          }
+        });
+        labelWrap.appendChild(labelInput);
+
+        const count = fieldCountByStep[step.id] || 0;
+        const hint = document.createElement('div');
+        hint.style.cssText = 'font-size: 11px; color: var(--muted); margin-top: 4px;';
+        hint.textContent = count === 0
+          ? 'No fields on this step yet — drag some in on the canvas'
+          : (count === 1 ? '1 field' : count + ' fields');
+        if (count === 0) hint.style.color = 'var(--warning)';
+        labelWrap.appendChild(hint);
+        row.appendChild(labelWrap);
+
+        // Delete button (disabled on last remaining step)
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'icon-btn';
+        del.title = steps.length > 1 ? 'Remove this step' : 'Must have at least one step';
+        del.setAttribute('aria-label', 'Remove step');
+        del.style.cssText = 'background: transparent; border: 0; color: var(--muted); cursor: pointer; padding: 6px; border-radius: 5px; flex-shrink: 0;';
+        del.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+        if (steps.length <= 1) {
+          del.disabled = true;
+          del.style.opacity = '0.35';
+          del.style.cursor = 'not-allowed';
+        }
+        del.addEventListener('click', () => {
+          if (steps.length <= 1) return;
+          const count = fieldCountByStep[step.id] || 0;
+          let confirmMsg;
+          if (count > 0) {
+            confirmMsg = `Step "${step.label}" has ${count} field${count === 1 ? '' : 's'}. They'll be moved to the previous step. Remove this step?`;
+          } else {
+            confirmMsg = `Remove step "${step.label}"?`;
+          }
+          if (!confirm(confirmMsg)) return;
+          // Remove step and move its fields to the previous step
+          const currentSteps = parseSteps(cfg.stepsJSON);
+          const removeIdx = currentSteps.findIndex(s => s.id === step.id);
+          if (removeIdx === -1) return;
+          const fallbackStepId = removeIdx > 0 ? currentSteps[removeIdx - 1].id : (currentSteps[1] && currentSteps[1].id) || 1;
+          const currentFields = parseFields(cfg.fieldsJSON);
+          currentFields.forEach(f => { if (f.step === step.id) f.step = fallbackStepId; });
+          currentSteps.splice(removeIdx, 1);
+          cfg.stepsJSON = JSON.stringify(currentSteps);
+          cfg.fieldsJSON = JSON.stringify(currentFields);
+          save();
+          renderInspector();
+          renderCanvas();
+          updatePreview();
+        });
+        row.appendChild(del);
+
+        stepList.appendChild(row);
+      });
+
+      stepsSection.appendChild(stepList);
+
+      // Add step button
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'add-step-btn';
+      addBtn.style.cssText = 'margin-top: 10px; width: 100%; padding: 10px; background: transparent; border: 1px dashed var(--border-strong); border-radius: 8px; color: var(--sub); cursor: pointer; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all .12s ease;';
+      addBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add step</span>';
+      addBtn.addEventListener('mouseenter', () => {
+        addBtn.style.background = 'var(--hover)';
+        addBtn.style.borderColor = 'var(--brand)';
+        addBtn.style.color = 'var(--ink)';
+      });
+      addBtn.addEventListener('mouseleave', () => {
+        addBtn.style.background = 'transparent';
+        addBtn.style.borderColor = 'var(--border-strong)';
+        addBtn.style.color = 'var(--sub)';
+      });
+      addBtn.addEventListener('click', () => {
+        const currentSteps = parseSteps(cfg.stepsJSON);
+        // Allocate next free step id (monotonically increasing so historic
+        // fields keep pointing at their correct step even as others come and go)
+        const maxId = currentSteps.reduce((m, s) => Math.max(m, s.id), 0);
+        const newId = maxId + 1;
+        currentSteps.push({ id: newId, label: 'Step ' + (currentSteps.length + 1) });
+        cfg.stepsJSON = JSON.stringify(currentSteps);
+        save();
+        renderInspector();
+        renderCanvas();
+        updatePreview();
+      });
+      stepsSection.appendChild(addBtn);
+
+      body.appendChild(stepsSection);
+
+      // Validation warning — all fields still on one step
+      const allOnOne = Object.keys(fieldCountByStep).length === 1 && steps.length > 1;
+      if (allOnOne) {
+        const warn = document.createElement('div');
+        warn.style.cssText = 'padding: 12px; background: rgba(245,158,11,0.08); border-left: 3px solid var(--warning); border-radius: 0 7px 7px 0; font-size: 12px; line-height: 1.6; color: var(--sub);';
+        warn.textContent = "All your fields are on one step. On the canvas, drag fields under a different step separator to split them up.";
+        const warnSec = document.createElement('div');
+        warnSec.className = 'insp-section';
+        warnSec.appendChild(warn);
+        body.appendChild(warnSec);
+      }
+    }
+
+    // Parse stepsJSON to an array, defensively handling bad input.
+    // Used throughout the editor (inspector, canvas, mutators).
+    function parseSteps(raw) {
+      if (!raw) return [];
+      try {
+        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (!Array.isArray(parsed)) return [];
+        // Defensively coerce to the expected shape
+        return parsed
+          .filter(s => s && typeof s === 'object' && typeof s.id === 'number')
+          .map(s => ({ id: s.id, label: String(s.label || '').slice(0, 80) }));
+      } catch (e) {
+        return [];
+      }
     }
 
     // ── Branding inspector ──
