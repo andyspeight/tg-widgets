@@ -47,9 +47,15 @@ export function buildFromField(displayName) {
  * @param {string} params.html       - rendered HTML body
  * @param {string} [params.replyTo]  - optional Reply-To address
  * @param {object} [params.headers]  - optional custom headers (e.g. X-TG-Reference)
+ * @param {object} [params.customArgs] - optional custom_args — key/value pairs
+ *                                        that SendGrid surfaces in Event Webhook
+ *                                        payloads. Use for submissionId, reference,
+ *                                        etc. so the webhook can match events
+ *                                        back to our records. Unlike custom headers,
+ *                                        custom_args ARE visible to webhooks.
  * @param {string} [params.categoryTag] - SendGrid category for analytics
  */
-export async function sendViaSendGrid({ from, to, subject, html, replyTo, headers, categoryTag }) {
+export async function sendViaSendGrid({ from, to, subject, html, replyTo, headers, customArgs, categoryTag }) {
   if (!SENDGRID_API_KEY) {
     return { status: 'failed', error: 'SENDGRID_API_KEY not configured' };
   }
@@ -97,6 +103,29 @@ export async function sendViaSendGrid({ from, to, subject, html, replyTo, header
 
   if (categoryTag && typeof categoryTag === 'string') {
     body.categories = [categoryTag.slice(0, 255)];
+  }
+
+  // custom_args are the SendGrid mechanism for passing metadata from mail-send
+  // through to Event Webhook payloads. Unlike arbitrary X- headers, custom_args
+  // ARE surfaced back on every event (delivered, opened, bounced, etc.) — which
+  // is exactly what our sendgrid-webhook.js endpoint needs to match events
+  // back to submission records.
+  //
+  // SendGrid limits:
+  //   - Keys must be strings (no nested objects)
+  //   - Total serialised size must not exceed 10KB
+  //   - Certain reserved names are replaced with SendGrid values
+  // We cap values defensively and only stringify primitives.
+  if (customArgs && typeof customArgs === 'object') {
+    const safeArgs = {};
+    for (const [k, v] of Object.entries(customArgs)) {
+      if (typeof k !== 'string' || k.length === 0 || k.length > 100) continue;
+      if (v === null || v === undefined) continue;
+      // Coerce to string, cap length to keep the total payload well under 10KB
+      const strVal = String(v).slice(0, 500);
+      if (strVal) safeArgs[k] = strVal;
+    }
+    if (Object.keys(safeArgs).length > 0) body.custom_args = safeArgs;
   }
 
   try {
