@@ -54,9 +54,13 @@ const ENQUIRIES_PAT          = process.env.TG_ENQUIRIES_AIRTABLE_PAT;     // wri
 // closed (better to block than to silently skip anti-spam).
 const TURNSTILE_SECRET       = process.env.TURNSTILE_SECRET_KEY;
 
-// Demo origins permitted alongside any form-configured allowedOrigins
+// Demo origins permitted alongside any form-configured allowedOrigins.
+// These are the Travelgenix-hosted domains where we serve test pages and
+// the widget itself. Submissions from client sites must be whitelisted via
+// each form's Allowed Origins setting instead of being added here.
 const DEMO_ORIGINS = [
   'https://tg-widgets.vercel.app',
+  'https://widgets.travelify.io',
 ];
 
 const MAX_PAYLOAD_BYTES = 64 * 1024; // 64KB
@@ -451,6 +455,12 @@ async function verifyTurnstile(token, ip) {
       body: body.toString(),
     });
     const json = await r.json();
+    if (!json.success) {
+      // Cloudflare returns specific error-codes like invalid-input-secret,
+      // timeout-or-duplicate, etc. Log them server-side so we can diagnose
+      // verification failures without exposing details to the client.
+      console.warn('[submit] Turnstile verification failed:', json['error-codes'] || 'unknown');
+    }
     return !!json.success;
   } catch (err) {
     console.error('[submit] Turnstile error:', err);
