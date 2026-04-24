@@ -143,6 +143,15 @@ export default async function sendAgentEmail(ctx) {
       'X-TG-Reference': reference,
       'X-TG-Submission-Id': submissionId,
     },
+    // custom_args are what SendGrid surfaces back on Event Webhook payloads,
+    // so the webhook can match delivery/open/bounce events to this submission.
+    // The X- headers above are for the recipient mail client; custom_args are
+    // internal metadata for our own webhook.
+    customArgs: {
+      submissionId,
+      reference,
+      emailKind: 'agent-notification',
+    },
     categoryTag: 'enquiry-agent-notification',
   });
 }
