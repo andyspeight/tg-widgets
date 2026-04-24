@@ -41,6 +41,11 @@ const EF = {
   template:            'fldaM2kxvZDutozGT',
   layoutMode:          'fldCEfu1NVD9Ewp4O',
   fieldsJSON:          'fldYdK8X3BgN7hPCx',
+  // stepsJSON — multi-step form step metadata (array of { id, label }).
+  // Only meaningful when layoutMode === 'multi-step'. Stored as a JSON
+  // string alongside fieldsJSON; individual field objects within fieldsJSON
+  // carry a `step` property pointing at one of these step IDs.
+  stepsJSON:           'flddIHep7nOXNugJK',
   headerTitle:         'fldCflEWJo9YxxA8Y',
   headerSubtitle:      'fldRBu8uajKutfX60',
   submitButtonText:    'fldjrfgcfK7580bft',
@@ -155,6 +160,33 @@ function buildEnquiryFormFields(payload, userEmail, isCreate) {
       throw new Error('Invalid fieldsJSON: ' + e.message);
     }
   }
+  if (payload.stepsJSON !== undefined) {
+    // stepsJSON — multi-step step metadata as JSON string.
+    // Expected shape: [{ id: 1, label: 'Your trip' }, ...]. Unused when
+    // layoutMode === 'single-page' but always safe to persist — the widget
+    // only consults it when in multi-step mode.
+    try {
+      const raw = typeof payload.stepsJSON === 'string'
+        ? payload.stepsJSON
+        : JSON.stringify(payload.stepsJSON);
+      if (raw.length > 10000) throw new Error('stepsJSON too large');
+      // Validate structure — must be an array of { id: number, label: string }
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) throw new Error('stepsJSON must be an array');
+      parsed.forEach((s, i) => {
+        if (!s || typeof s !== 'object') throw new Error(`stepsJSON[${i}] must be an object`);
+        if (typeof s.id !== 'number' || !Number.isInteger(s.id) || s.id < 1) {
+          throw new Error(`stepsJSON[${i}].id must be a positive integer`);
+        }
+        if (typeof s.label !== 'string') throw new Error(`stepsJSON[${i}].label must be a string`);
+      });
+      // Re-stringify after parsing to canonicalise whitespace + truncate labels
+      const clean = parsed.map(s => ({ id: s.id, label: String(s.label).slice(0, 80) }));
+      fields[EF.stepsJSON] = JSON.stringify(clean);
+    } catch (e) {
+      throw new Error('Invalid stepsJSON: ' + e.message);
+    }
+  }
   if (payload.headerTitle !== undefined)       fields[EF.headerTitle] = safeStr(payload.headerTitle, 200);
   if (payload.headerSubtitle !== undefined)    fields[EF.headerSubtitle] = safeStr(payload.headerSubtitle, 500);
   if (payload.submitButtonText !== undefined)  fields[EF.submitButtonText] = safeStr(payload.submitButtonText, 60);
@@ -238,6 +270,10 @@ function readEnquiryFormRecord(record) {
     template: f[EF.template] || 'Blank',
     layoutMode: f[EF.layoutMode] || 'single-page',
     fieldsJSON: f[EF.fieldsJSON] || '[]',
+    // stepsJSON — multi-step metadata. Default to empty array string; the
+    // widget's normaliser will synthesise one step per unique step ID it
+    // finds in fieldsJSON when this is empty.
+    stepsJSON: f[EF.stepsJSON] || '[]',
     headerTitle: f[EF.headerTitle] || '',
     headerSubtitle: f[EF.headerSubtitle] || '',
     submitButtonText: f[EF.submitButtonText] || 'Send my enquiry',
@@ -408,6 +444,17 @@ export default async function handler(req, res) {
           theme: pub.theme,
         },
         fieldsJSON: pub.fieldsJSON,
+        // Multi-step config — only meaningful when layoutMode === 'multi-step',
+        // but we always expose both so the widget's normaliser has everything
+        // it needs. Widget falls back to single-page if either is missing.
+        layoutMode: pub.layoutMode || 'single-page',
+        // Parse stepsJSON here so the widget receives an actual array. If
+        // parsing fails, surface an empty array and let the widget synthesise
+        // steps from the fields' step properties.
+        steps: (function () {
+          try { const parsed = JSON.parse(pub.stepsJSON || '[]'); return Array.isArray(parsed) ? parsed : []; }
+          catch (e) { return []; }
+        })(),
         security: publicSecurity,
       };
       res.setHeader('Cache-Control', 's-maxage=60, max-age=30, stale-while-revalidate=300');
