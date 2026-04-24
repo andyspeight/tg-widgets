@@ -34,6 +34,15 @@
     --shadow-sm: 0 1px 3px rgba(15, 23, 42, .08);
     --shadow-lg: 0 10px 30px rgba(15, 23, 42, .12);
     --shadow-xl: 0 24px 60px rgba(15, 23, 42, .18);
+
+    /* Email delivery state palette — muted on purpose so the UI doesn't
+       shout about delivery state; it's secondary info to the main triage flow */
+    --email-delivered: #16A34A;  /* green */
+    --email-opened:    #0EA5E9;  /* sky blue */
+    --email-clicked:   #8B5CF6;  /* violet */
+    --email-pending:   #F59E0B;  /* amber */
+    --email-failed:    #DC2626;  /* red */
+    --email-unknown:   #94A3B8;  /* muted grey */
   }
 
   * { box-sizing: border-box; }
@@ -193,6 +202,14 @@
     color: var(--brand-ink);
   }
   .sidebar-icon {
+    flex-shrink: 0;
+  }
+
+  /* Email status filter dot inside sidebar item */
+  .sidebar-item-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     flex-shrink: 0;
   }
 
@@ -409,12 +426,41 @@
     margin-bottom: 2px;
   }
   .row-email {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 12px;
     color: var(--muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .row-email-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  /* Small delivery dot next to the email address. Tooltip on hover tells
+     the agent what it means — no screen clutter with permanent labels */
+  .email-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--email-unknown);
+    cursor: help;
+    position: relative;
+  }
+  .email-dot[data-state="Delivered"]    { background: var(--email-delivered); }
+  .email-dot[data-state="Opened"]       { background: var(--email-opened); }
+  .email-dot[data-state="Clicked"]      { background: var(--email-clicked); }
+  .email-dot[data-state="Processed"],
+  .email-dot[data-state="Deferred"]     { background: var(--email-pending); }
+  .email-dot[data-state="Bounced"],
+  .email-dot[data-state="Dropped"],
+  .email-dot[data-state="Spam Reported"]{ background: var(--email-failed); }
   .row-destinations {
     font-size: 13px;
     color: var(--sub);
@@ -928,6 +974,127 @@
     text-transform: capitalize;
   }
 
+  /* Email delivery timeline — drawer section showing SendGrid event history */
+  .email-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .email-summary-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--email-unknown);
+  }
+  .email-summary-dot[data-state="Delivered"]    { background: var(--email-delivered); }
+  .email-summary-dot[data-state="Opened"]       { background: var(--email-opened); }
+  .email-summary-dot[data-state="Clicked"]      { background: var(--email-clicked); }
+  .email-summary-dot[data-state="Processed"],
+  .email-summary-dot[data-state="Deferred"]     { background: var(--email-pending); }
+  .email-summary-dot[data-state="Bounced"],
+  .email-summary-dot[data-state="Dropped"],
+  .email-summary-dot[data-state="Spam Reported"]{ background: var(--email-failed); }
+  .email-summary-label {
+    flex: 1;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .email-summary-hint {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .email-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 4px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .email-timeline-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    position: relative;
+    font-size: 12px;
+  }
+  .email-timeline-row:not(:last-child)::after {
+    /* Vertical connector line between timeline dots */
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 18px;
+    bottom: -2px;
+    width: 1px;
+    background: var(--border);
+  }
+  .email-timeline-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+    background: var(--email-unknown);
+    box-shadow: 0 0 0 2px var(--panel-2);
+    z-index: 1;
+    position: relative;
+  }
+  .email-timeline-dot[data-event="delivered"]  { background: var(--email-delivered); }
+  .email-timeline-dot[data-event="open"]       { background: var(--email-opened); }
+  .email-timeline-dot[data-event="click"]      { background: var(--email-clicked); }
+  .email-timeline-dot[data-event="processed"],
+  .email-timeline-dot[data-event="deferred"]   { background: var(--email-pending); }
+  .email-timeline-dot[data-event="bounce"],
+  .email-timeline-dot[data-event="dropped"],
+  .email-timeline-dot[data-event="spamreport"] { background: var(--email-failed); }
+  .email-timeline-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .email-timeline-title {
+    font-weight: 600;
+    color: var(--ink);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .email-timeline-kind {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--hover);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .email-timeline-kind.is-customer {
+    background: rgba(236,72,153,.12);
+    color: var(--brand-ink);
+  }
+  .email-timeline-meta {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .email-timeline-reason {
+    color: var(--email-failed);
+    font-size: 11px;
+    margin-top: 3px;
+    font-style: italic;
+  }
+
   /* Collapsible — used for technical context and raw JSON */
   .collapsible {
     border: 1px solid var(--border);
@@ -1172,6 +1339,29 @@
         </button>
       </div>
 
+      <!-- Email delivery filter — filters submissions by the SendGrid Event
+           Webhook status on the agent notification email. Useful for triage:
+           "show me all the bounced ones" or "show me opens this week". -->
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Email delivery</h3>
+        <button class="sidebar-item is-active" data-email-status="">
+          <span class="sidebar-item-dot" style="background: var(--email-unknown);"></span>
+          <span>Any</span>
+        </button>
+        <button class="sidebar-item" data-email-status="Delivered,Opened,Clicked">
+          <span class="sidebar-item-dot" style="background: var(--email-delivered);"></span>
+          <span>Delivered &amp; engaged</span>
+        </button>
+        <button class="sidebar-item" data-email-status="Bounced,Dropped,Spam Reported">
+          <span class="sidebar-item-dot" style="background: var(--email-failed);"></span>
+          <span>Failed or rejected</span>
+        </button>
+        <button class="sidebar-item" data-email-status="Processed,Deferred">
+          <span class="sidebar-item-dot" style="background: var(--email-pending);"></span>
+          <span>Still processing</span>
+        </button>
+      </div>
+
       <div class="sidebar-section">
         <h3 class="sidebar-title">Form</h3>
         <select class="sidebar-select" id="form-filter">
@@ -1265,6 +1455,16 @@ function formatRelativeDate(iso) {
   return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 }
 
+// Format a unix timestamp (seconds) from SendGrid events
+function formatEventTime(unixSec) {
+  if (!unixSec) return '';
+  const date = new Date(unixSec * 1000);
+  if (isNaN(date)) return '';
+  return date.toLocaleString(undefined, {
+    day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit'
+  });
+}
+
 function formatDepartDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -1304,10 +1504,37 @@ function travellersText(adults, children) {
   return parts.join(', ');
 }
 
+// Friendly, user-facing descriptions of email states. Keep these short —
+// they appear in tooltips and compact labels.
+const EMAIL_STATE_DESCRIPTIONS = {
+  'Processed':     'Email sent to SendGrid, awaiting delivery',
+  'Deferred':      'Delivery temporarily deferred by recipient server',
+  'Delivered':     'Email delivered to recipient inbox',
+  'Opened':        'Recipient opened the email',
+  'Clicked':       'Recipient clicked a link in the email',
+  'Bounced':       'Email bounced — address invalid or rejected',
+  'Dropped':       'SendGrid did not attempt delivery (spammy, suppressed)',
+  'Spam Reported': 'Recipient marked the email as spam',
+};
+
+// Map SendGrid raw event names to human-friendly titles for the timeline
+const EVENT_TITLES = {
+  processed:   'Accepted by SendGrid',
+  deferred:    'Delivery deferred',
+  delivered:   'Delivered to inbox',
+  open:        'Opened',
+  click:       'Link clicked',
+  bounce:      'Bounced',
+  dropped:     'Dropped',
+  spamreport:  'Marked as spam',
+  unsubscribe: 'Unsubscribed',
+};
+
 /* =========================== STATE =========================== */
 const state = {
   session: null,
   status: 'New,Read',
+  emailStatus: '',   // comma-separated list, empty = any
   formId: '',
   q: '',
   from: '',
@@ -1361,6 +1588,7 @@ async function fetchSubmissions(append = false) {
   if (state.q) params.set('q', state.q);
   if (state.from) params.set('from', state.from);
   if (state.to) params.set('to', state.to);
+  if (state.emailStatus) params.set('emailStatus', state.emailStatus);
   if (append && state.cursor) params.set('cursor', state.cursor);
 
   try {
@@ -1416,7 +1644,7 @@ function renderList() {
   }
 
   if (state.items.length === 0) {
-    const hasFilter = state.q || state.formId || state.from || state.to;
+    const hasFilter = state.q || state.formId || state.from || state.to || state.emailStatus;
     scroll.innerHTML = `
       <div class="empty">
         <span class="empty-icon">
@@ -1464,13 +1692,23 @@ function renderRow(sub) {
   const badgeClass = 'badge-' + sub.status.toLowerCase();
   const unread = sub.unread ? ' is-unread' : '';
 
+  // Email delivery dot — subtle indicator next to the email address so agents
+  // can spot bounces / unopened emails at a glance. Null status = no dot
+  // (most likely means the email hasn't moved through SendGrid yet).
+  const emailDot = sub.emailStatus
+    ? `<span class="email-dot" data-state="${escapeHtml(sub.emailStatus)}" title="${escapeHtml(EMAIL_STATE_DESCRIPTIONS[sub.emailStatus] || sub.emailStatus)}" aria-label="Email ${escapeHtml(sub.emailStatus)}"></span>`
+    : '';
+
   return `
     <div class="row${unread}" data-id="${escapeHtml(sub.id)}" role="button" tabindex="0">
       <span class="row-unread-dot" aria-hidden="true"></span>
       <div class="row-ref">${escapeHtml(sub.reference || '—')}</div>
       <div class="row-main">
         <div class="row-name">${escapeHtml(fullName)}</div>
-        <div class="row-email">${escapeHtml(sub.email || '—')}</div>
+        <div class="row-email">
+          ${emailDot}
+          <span class="row-email-text">${escapeHtml(sub.email || '—')}</span>
+        </div>
       </div>
       <div class="row-destinations">${escapeHtml(destText) || '—'}</div>
       <div class="row-form">${escapeHtml(sub.formName || sub.formId || '—')}</div>
@@ -1686,6 +1924,8 @@ function renderDrawer() {
 
       ${renderNoteSection(sub)}
 
+      ${renderEmailDeliverySection(sub)}
+
       ${renderRoutingSection(sub)}
 
       ${renderTechnicalSection(sub)}
@@ -1866,6 +2106,74 @@ function renderNoteSection(sub) {
           <span id="note-status-text">Only visible to you — not sent to the visitor.</span>
         </div>
       </div>
+    </div>
+  `;
+}
+
+// Email delivery section — summarises the SendGrid event log for this
+// submission so agents can tell whether the customer actually received and
+// opened the auto-reply, or whether the agent-notification email bounced.
+function renderEmailDeliverySection(sub) {
+  const email = sub.email || { status: null, events: [] };
+  // If we've never received any webhook events, don't render the section at
+  // all — keeps the drawer clean for older submissions that predate this
+  // feature, and for brand-new submissions where events haven't arrived yet.
+  if (!email.status && (!email.events || email.events.length === 0)) {
+    return '';
+  }
+
+  const summary = email.status
+    ? `<div class="email-summary">
+        <span class="email-summary-dot" data-state="${escapeHtml(email.status)}"></span>
+        <span class="email-summary-label">${escapeHtml(email.status)}</span>
+        <span class="email-summary-hint">${escapeHtml(EMAIL_STATE_DESCRIPTIONS[email.status] || '')}</span>
+      </div>`
+    : '';
+
+  // Sort events oldest → newest for timeline display. Fall back gracefully
+  // if events are malformed.
+  const events = Array.isArray(email.events) ? email.events.slice() : [];
+  events.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+  const timelineRows = events.map(ev => {
+    const title = EVENT_TITLES[ev.event] || ev.event;
+    const when = formatEventTime(ev.timestamp);
+    const kind = ev.emailKind === 'customer-auto-reply'
+      ? '<span class="email-timeline-kind is-customer">Customer</span>'
+      : (ev.emailKind === 'agent-notification'
+        ? '<span class="email-timeline-kind">Agent</span>'
+        : '');
+    // Bounces + drops often include a human-readable reason — show it
+    const reason = ev.reason
+      ? `<div class="email-timeline-reason">${escapeHtml(ev.reason)}</div>`
+      : '';
+    // Recipient — useful when multiple recipients are on the same submission
+    // (e.g. agent notifications cc'd to multiple team members)
+    const meta = [when, ev.email].filter(Boolean).map(escapeHtml).join(' · ');
+    return `
+      <div class="email-timeline-row">
+        <span class="email-timeline-dot" data-event="${escapeHtml(ev.event || '')}"></span>
+        <div class="email-timeline-main">
+          <div class="email-timeline-title">
+            <span>${escapeHtml(title)}</span>
+            ${kind}
+          </div>
+          <div class="email-timeline-meta">${meta}</div>
+          ${reason}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const timeline = events.length
+    ? `<div class="email-timeline">${timelineRows}</div>`
+    : '';
+
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Email delivery</div>
+      ${summary}
+      ${timeline}
     </div>
   `;
 }
@@ -2224,6 +2532,17 @@ function bindSidebar() {
     });
   });
 
+  // Email status buttons — exclusive, like the main status group
+  $$('.sidebar-item[data-email-status]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.sidebar-item[data-email-status]').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      state.emailStatus = btn.getAttribute('data-email-status') || '';
+      state.cursor = '';
+      fetchSubmissions(false);
+    });
+  });
+
   // Form filter
   $('#form-filter').addEventListener('change', e => {
     state.formId = e.target.value;
@@ -2249,12 +2568,17 @@ function bindSidebar() {
     state.from = '';
     state.to = '';
     state.q = '';
+    state.emailStatus = '';
     state.cursor = '';
     $('#form-filter').value = '';
     $('#date-from').value = '';
     $('#date-to').value = '';
     $('#search-input').value = '';
     $('#search-clear').classList.remove('is-visible');
+    // Reset email status buttons to "Any"
+    $$('.sidebar-item[data-email-status]').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-email-status') === '');
+    });
     fetchSubmissions(false);
   });
 }
