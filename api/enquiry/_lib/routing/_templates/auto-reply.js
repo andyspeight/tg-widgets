@@ -5,20 +5,25 @@
 //  Sends a branded confirmation email to the visitor who just submitted
 //  the form. Only runs if the form has Routing Email Auto Reply enabled.
 //
+//  Delivered via SendGrid from noreply@travelify.io (our authenticated domain).
+//  The display name is the TRAVEL AGENT's business (e.g. "Travelaire",
+//  "EveryHoliday") — pulled from the form's Client Name field. The customer's
+//  inbox reads their travel agent's brand, even though the underlying
+//  delivery infrastructure is ours. This is the standard pattern for
+//  SaaS transactional email — you cannot forge from addresses on domains
+//  you don't control, but you can set any display name you like.
+//
+//  Reply-to is the agent's first notification address so when the customer
+//  hits Reply, it goes straight to the agent's inbox.
+//
 //  Branded with the CLIENT's colours (buttonColour / accentColour from the
 //  form config), not Travelgenix's. Travelgenix appears as a small footer
-//  credit. This is the visitor's communication with the travel agency.
-//
-//  Reply-to is set to the agent's notification email (first recipient)
-//  so if the visitor replies, it reaches the agent directly.
+//  credit.
 //
 // =============================================================================
 
 import { renderDefaultAutoReplyEmail } from './_templates/auto-reply-email.js';
-
-const RESEND_API_KEY  = process.env.RESEND_API_KEY;
-const RESEND_FROM     = process.env.RESEND_FROM || 'Travelgenix Enquiries <enquiries@enquiries.tg-widgets.io>';
-const RESEND_ENDPOINT = 'https://api.resend.com/emails';
+import { sendViaSendGrid, buildFromField } from './_sendgrid.js';
 
 const BOARD_BASIS_LABEL = {
   RO: 'Room only', BB: 'B&B', HB: 'Half board', FB: 'Full board', AI: 'All inclusive',
@@ -38,7 +43,6 @@ const F = {
 
 /**
  * Build the token map available inside auto-reply HTML templates.
- * Shares most tokens with the agent email, adds client-branding specifics.
  */
 function buildTokens({ form, payload, reference, submissionId }) {
   const f = payload.fields;
@@ -46,7 +50,7 @@ function buildTokens({ form, payload, reference, submissionId }) {
   const travellers = f.travellers || { adults: 0 };
   const duration = f.duration || {};
 
-  const destNames = (f.destinations || []).map(d => d.name).join(' + ') || 'your destination';
+  const destNames = (f.destinations || []).map(d => d.name).join(' + ') || '';
 
   const travellerParts = [];
   if (travellers.adults)   travellerParts.push(`${travellers.adults} ${travellers.adults === 1 ? 'adult' : 'adults'}`);
@@ -111,7 +115,7 @@ function renderTemplate(html, tokens) {
 
 /**
  * Get the first valid agent email from the Routing Email To field.
- * Used as reply-to so the visitor can reply directly to the agent.
+ * Used as Reply-To so the visitor can reply directly to the agent.
  */
 function getAgentReplyTo(raw) {
   if (!raw || typeof raw !== 'string') return null;
@@ -126,10 +130,6 @@ function getAgentReplyTo(raw) {
 
 export default async function sendAutoReply(ctx) {
   const { form, payload, reference, submissionId } = ctx;
-
-  if (!RESEND_API_KEY) {
-    return { status: 'failed', error: 'RESEND_API_KEY not configured' };
-  }
 
   // Visitor's email is the recipient
   const to = payload.fields.email;
@@ -146,43 +146,27 @@ export default async function sendAutoReply(ctx) {
     : renderDefaultAutoReplyEmail(tokens);
 
   const subject = `Your enquiry ${reference} — we've got it`;
+
+  // Build the from display name. Use the travel agent's business name
+  // (their Client Name in the form config) so the customer's inbox shows
+  // "From: Travelaire" rather than "From: Travelgenix". Falls back to the
+  // Travelgenix default inside buildFromField() if Client Name is blank.
+  const agentBrandName = form.fields[F.clientName] || '';
+
+  // Reply-To goes to the agent's first notification address so the
+  // customer's reply lands with them, not at our no-reply address.
   const replyTo = getAgentReplyTo(form.fields[F.routingEmailTo]);
 
-  const body = {
-    from: RESEND_FROM,
+  return await sendViaSendGrid({
+    from: buildFromField(agentBrandName),
     to: [to],
-    subject: subject.slice(0, 200),
+    subject,
     html,
+    replyTo: replyTo || undefined,
     headers: {
       'X-TG-Reference': reference,
       'X-TG-Submission-Id': submissionId,
     },
-  };
-  if (replyTo) body.reply_to = replyTo;
-
-  try {
-    const response = await fetch(RESEND_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('[routing/auto-reply] Resend failed:', response.status, errText.slice(0, 300));
-      return {
-        status: 'failed',
-        statusCode: response.status,
-        error: `Resend returned ${response.status}`,
-      };
-    }
-
-    return { status: 'ok', statusCode: response.status };
-  } catch (err) {
-    console.error('[routing/auto-reply] Fetch error:', err);
-    return { status: 'failed', error: err.message };
-  }
+    categoryTag: 'enquiry-customer-auto-reply',
+  });
 }
