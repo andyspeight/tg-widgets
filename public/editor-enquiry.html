@@ -854,6 +854,40 @@
       opacity: 1;
     }
 
+    /* Empty-step drop slot — the step has no fields assigned. Unlike regular
+       drop slots (which hide at 0 height until a drag begins), this one stays
+       permanently visible with a gentle dashed outline so the agent has a
+       clear visual target for "drop something here". It grows taller and
+       pulses on active drag, same as any other slot. */
+    .drop-slot.is-empty-step {
+      height: 64px;
+      margin: 6px 0 14px;
+      opacity: 1;
+      pointer-events: auto;
+      background: var(--panel-2);
+      border: 2px dashed var(--border-strong);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .drop-slot.is-empty-step::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='5' x2='12' y2='19'/%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3C/svg%3E");
+    }
+    body.is-dragging .drop-slot.is-empty-step {
+      height: 64px;
+      opacity: 1;
+    }
+    body.is-dragging .drop-slot.is-empty-step.is-active {
+      height: 72px;
+      background: var(--brand-soft);
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+    body.is-dragging .drop-slot.is-empty-step.is-active::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230891B2' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12l7 7 7-7'/%3E%3C/svg%3E");
+    }
     /* Step separator — appears on the canvas only when in multi-step mode.
        Sits between field groups as a visual divider; clicking it opens the
        Layout inspector so agents can rename the step or manage the step list.
@@ -2988,25 +3022,80 @@
       if (currentFields.length === 0) {
         stage.insertBefore(renderFieldsEmpty(), previewWrapper);
       } else if (isMultiStep && steps.length > 0) {
-        // Multi-step layout: group fields by step and render a step separator
-        // before each group. Fields are still rendered in their original array
-        // order within each step so drag-drop insertIdx math stays correct.
+        // Multi-step layout: group fields by step. Each step gets its own
+        // separator followed by a chain of (field, slot, field, slot...). Every
+        // drop slot is tagged with the step it belongs to so fields dropped
+        // inside a step section inherit that step regardless of their
+        // neighbours' steps. The first slot before the first field (already
+        // emitted above with insertIdx 0) belongs to the first step implicitly.
         //
-        // We iterate over `steps` (in order) and for each step, render all
-        // fields whose step property matches, preserving original array order.
-        // Any fields whose step isn't in the steps array are shown under an
-        // "Unassigned" separator at the bottom — shouldn't happen normally
-        // but protects against stale step IDs.
+        // The insertIdx math: fields keep their original array position in
+        // fieldsJSON, so insertIdx values are always raw array indices. On
+        // drop, if the slot has a stepId tag, the dropped field's step is
+        // set to that value.
+        //
+        // Key invariant: EVERY step gets at least one drop slot, even if it's
+        // empty, so agents can always drag new fields into any step.
+        const fieldStepLookup = {}; // step id → [{ field, index }] in original order
+        currentFields.forEach((field, index) => {
+          const stepId = field.step || 1;
+          if (!fieldStepLookup[stepId]) fieldStepLookup[stepId] = [];
+          fieldStepLookup[stepId].push({ field: field, index: index });
+        });
+
+        // Clear the initial drop slot we emitted before the step loop and
+        // instead emit step-scoped slots. The first-step's leading slot is
+        // tagged with step 1's id. (Simpler than conditional emission.)
+        const leadingSlot = stage.querySelector('.drop-slot[data-insert-index="0"]:not([data-step-id])');
+        if (leadingSlot) {
+          leadingSlot.setAttribute('data-step-id', String(steps[0].id));
+        }
+
         const seen = new Set();
         steps.forEach((step, stepIdx) => {
           stage.insertBefore(renderStepSeparator(step, stepIdx, steps.length), previewWrapper);
-          // Render fields belonging to this step, in their original index order
-          currentFields.forEach((field, index) => {
-            if ((field.step || 1) !== step.id) return;
-            stage.insertBefore(renderFieldCard(field, index), previewWrapper);
-            stage.insertBefore(renderDropSlot(index + 1), previewWrapper);
-            seen.add(index);
-          });
+
+          const fieldsInStep = fieldStepLookup[step.id] || [];
+          if (fieldsInStep.length === 0) {
+            // Empty step — emit a single drop slot with the lowest plausible
+            // insertIdx for this position. We pick: one past the last field
+            // of the previous step's block (or the end of the array if this
+            // is the last step with nothing after it). This keeps the raw
+            // array ordering sensible when a new field lands here.
+            //
+            // Walk back through earlier steps to find the last field index;
+            // if none, insertIdx is 0.
+            let insertIdx = 0;
+            for (let p = stepIdx - 1; p >= 0; p--) {
+              const prevFields = fieldStepLookup[steps[p].id] || [];
+              if (prevFields.length > 0) {
+                insertIdx = prevFields[prevFields.length - 1].index + 1;
+                break;
+              }
+            }
+            // If no earlier step has fields, we might still have fields
+            // belonging to LATER steps (out-of-canvas-order due to array
+            // position). Cap insertIdx so it sits before those so the
+            // stepwise canvas order stays coherent.
+            for (let n = stepIdx + 1; n < steps.length; n++) {
+              const nextFields = fieldStepLookup[steps[n].id] || [];
+              if (nextFields.length > 0) {
+                insertIdx = Math.min(insertIdx, nextFields[0].index);
+                break;
+              }
+            }
+            stage.insertBefore(renderDropSlot(insertIdx, step.id, true), previewWrapper);
+          } else {
+            // Step has fields — emit a slot BEFORE the first field (so you
+            // can drop at the top of a step) then interleave cards + slots.
+            // The "before" slot uses the first field's index as insertIdx.
+            stage.insertBefore(renderDropSlot(fieldsInStep[0].index, step.id), previewWrapper);
+            fieldsInStep.forEach(({ field, index }) => {
+              stage.insertBefore(renderFieldCard(field, index), previewWrapper);
+              stage.insertBefore(renderDropSlot(index + 1, step.id), previewWrapper);
+              seen.add(index);
+            });
+          }
         });
         // Any orphaned fields (step id not in steps array) — put them under
         // a rescue separator so they're not invisible. Normally zero of these.
@@ -3040,14 +3129,22 @@
     // The element is hidden (height: 0) until a drag is in progress, at which
     // point it becomes a live drop target. When hovered, it expands to its
     // full height with the "Drop here" label visible.
-    function renderDropSlot(insertIndex) {
+    function renderDropSlot(insertIndex, stepId, isEmptyStep) {
       const slot = document.createElement('div');
-      slot.className = 'drop-slot';
+      slot.className = 'drop-slot'
+        + (isEmptyStep ? ' is-empty-step' : '');
       slot.setAttribute('data-drop-slot', '1');
       slot.setAttribute('data-insert-index', String(insertIndex));
+      // Tag with step id so onSlotDrop knows which step to assign the field to.
+      // Unset in single-page mode and for the final orphan slots.
+      if (typeof stepId === 'number' || typeof stepId === 'string') {
+        slot.setAttribute('data-step-id', String(stepId));
+      }
       // Span wrapper so the ::before arrow icon can sit inline alongside
       const label = document.createElement('span');
-      label.textContent = 'Drop here';
+      label.textContent = isEmptyStep
+        ? 'Drop fields here to add them to this step'
+        : 'Drop here';
       slot.appendChild(label);
       return slot;
     }
@@ -3404,16 +3501,27 @@
       evt.stopPropagation();
 
       const insertIdx = slotInsertIdx(slot);
-      if (window.__tgDebug) console.log('[dnd] onSlotDrop', { kind: dragState.kind, insertIdx });
+      // Read step ID off the slot (set by renderDropSlot in multi-step mode).
+      // null in single-page mode — addFieldToCanvas / reorderField will fall
+      // back to inferring step from neighbouring fields, which behaves
+      // identically since all fields are step 1.
+      const slotStepAttr = slot.getAttribute('data-step-id');
+      const slotStepId = slotStepAttr !== null ? parseInt(slotStepAttr, 10) : null;
+      if (window.__tgDebug) console.log('[dnd] onSlotDrop', { kind: dragState.kind, insertIdx, slotStepId });
 
       if (dragState.kind === 'new' && dragState.sourceTypeId) {
-        addFieldToCanvas(dragState.sourceTypeId, insertIdx);
+        addFieldToCanvas(dragState.sourceTypeId, insertIdx, slotStepId);
       } else if (dragState.kind === 'move' && dragState.sourceFieldId) {
         const fields = parseFields(state.config.fieldsJSON);
         const fromIdx = fields.findIndex(f => f.id === dragState.sourceFieldId);
-        // Skip no-op moves (drop at current position or immediately after)
-        if (fromIdx !== -1 && fromIdx !== insertIdx && fromIdx + 1 !== insertIdx) {
-          reorderField(fromIdx, insertIdx);
+        // Skip no-op moves (drop at current position or immediately after) —
+        // but only in single-page mode. In multi-step mode, a drop onto a
+        // slot for a DIFFERENT step is meaningful even if the array position
+        // doesn't change, because it re-assigns the step.
+        const isNoOpPosition = fromIdx !== -1 && (fromIdx === insertIdx || fromIdx + 1 === insertIdx);
+        const stepChange = slotStepId !== null && fields[fromIdx] && (fields[fromIdx].step || 1) !== slotStepId;
+        if (fromIdx !== -1 && (!isNoOpPosition || stepChange)) {
+          reorderField(fromIdx, insertIdx, slotStepId);
         }
       }
       clearDropIndicators();
@@ -3486,6 +3594,48 @@
         });
       });
 
+      // STEP SEPARATORS (multi-step mode only): act as drag-over proxies for
+      // the drop slot that immediately follows them. When a field is dragged
+      // over a separator, the slot below it activates so the user can drop
+      // into an empty step. Without this the 12px "dragging baseline" slot
+      // sits just below the separator and doesn't activate on its own.
+      const separators = $$('.step-separator:not(.is-orphan)');
+      separators.forEach(sep => {
+        sep.addEventListener('dragover', (e) => {
+          if (!dragState.kind) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = dragState.kind === 'new' ? 'copy' : 'move';
+
+          // Find the drop slot that follows this separator in the DOM
+          let next = sep.nextElementSibling;
+          while (next && !next.classList.contains('drop-slot')) {
+            next = next.nextElementSibling;
+          }
+          if (next) {
+            // Don't activate if the very next slot is a no-op for the
+            // currently-dragging field (e.g. dragging a field and hovering
+            // the separator of the step it already starts with).
+            if (dragState.kind === 'move' && isSlotNoOp(next)) {
+              clearDropIndicators();
+              return;
+            }
+            activateSlot(next);
+          }
+        });
+
+        // Dropping on the separator forwards to the active slot
+        sep.addEventListener('drop', (e) => {
+          if (!dragState.kind) return;
+          const activeSlot = $('.drop-slot.is-active');
+          if (activeSlot) {
+            e.preventDefault();
+            e.stopPropagation();
+            onSlotDrop(activeSlot, e);
+          }
+        });
+      });
+
       // STAGE: fallback for drops landing on pure empty space
       const stage = $('#canvas-stage');
       if (!stage.__tgDropBound) {
@@ -3544,6 +3694,14 @@
       const fromIdx = fields.findIndex(f => f.id === dragState.sourceFieldId);
       if (fromIdx === -1) return false;
       const targetIdx = slotInsertIdx(slot);
+      // In multi-step mode, a drop into a different step is meaningful even
+      // if the array position would be a no-op — it reassigns the step.
+      const slotStepAttr = slot.getAttribute('data-step-id');
+      const slotStepId = slotStepAttr !== null ? parseInt(slotStepAttr, 10) : null;
+      if (slotStepId !== null) {
+        const currentStep = fields[fromIdx].step || 1;
+        if (slotStepId !== currentStep) return false; // real step change
+      }
       // Dropping at fromIdx or fromIdx+1 keeps the field in the same place
       return targetIdx === fromIdx || targetIdx === fromIdx + 1;
     }
@@ -3551,7 +3709,7 @@
     // Back-compat alias so any old references don't break
     const bindCanvasDropZones = bindCanvasDropTargets;
 
-    function addFieldToCanvas(typeId, insertIndex) {
+    function addFieldToCanvas(typeId, insertIndex, explicitStepId) {
       const fields = parseFields(state.config.fieldsJSON);
       // Guard: one of each type per form
       if (fields.find(f => f.type === typeId)) {
@@ -3559,12 +3717,17 @@
         return;
       }
       const newField = makeField(typeId);
-      // In multi-step mode, the new field needs a step assignment. We derive
-      // it from the drop position's neighbouring fields on the canvas — the
-      // field before or after the insertion point tells us which step the
-      // drop slot belongs to.
+      // Step assignment (multi-step only). Priority order:
+      //  1. Slot's data-step-id (set in renderDropSlot) — the authoritative
+      //     hint when a slot is emitted inside a specific step section.
+      //  2. Neighbouring field's step — falls back to what's around it.
+      //  3. Step 1 — baseline default.
       if (state.config.layoutMode === 'multi-step') {
-        newField.step = inferStepFromInsertIndex(insertIndex, fields);
+        if (typeof explicitStepId === 'number' && explicitStepId > 0) {
+          newField.step = explicitStepId;
+        } else {
+          newField.step = inferStepFromInsertIndex(insertIndex, fields);
+        }
       }
       if (typeof insertIndex === 'number' && insertIndex >= 0 && insertIndex <= fields.length) {
         fields.splice(insertIndex, 0, newField);
@@ -3624,19 +3787,22 @@
       showToast('Field removed', 'success', 1800);
     }
 
-    function reorderField(fromIndex, toIndex) {
+    function reorderField(fromIndex, toIndex, explicitStepId) {
       // Wired up properly in Part 2b. Stubbed here so the contract is set.
       const fields = parseFields(state.config.fieldsJSON);
-      if (fromIndex === toIndex) return;
       if (fromIndex < 0 || fromIndex >= fields.length) return;
       if (toIndex < 0 || toIndex > fields.length) return;
       const [moved] = fields.splice(fromIndex, 1);
       const actualToIndex = toIndex > fromIndex ? toIndex - 1 : toIndex;
-      // In multi-step mode, a reorder across step boundaries re-assigns the
-      // field to the step of its new neighbours. We infer this BEFORE
-      // inserting (so neighbours don't include the moved field itself).
+      // In multi-step mode, set the field's step based on priority:
+      //  1. Explicit step ID from the drop slot (authoritative)
+      //  2. Neighbour-inferred step (for slots without a step tag)
       if (state.config.layoutMode === 'multi-step') {
-        moved.step = inferStepFromInsertIndex(actualToIndex, fields);
+        if (typeof explicitStepId === 'number' && explicitStepId > 0) {
+          moved.step = explicitStepId;
+        } else {
+          moved.step = inferStepFromInsertIndex(actualToIndex, fields);
+        }
       }
       fields.splice(actualToIndex, 0, moved);
       mutate(cfg => { cfg.fieldsJSON = JSON.stringify(fields); });
