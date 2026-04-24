@@ -678,6 +678,11 @@
   // Only the outer shell (class wrapper, mount, update) has been refactored.
 
   function renderDestination(instance, fieldSpec) {
+    // Each entry in `destinations` is a structured object matching the public
+    // API shape: { id, name, type, parentCity?, parentCountry? }. Backwards
+    // compatible with legacy single-shape { id, name, region } — submit.js
+    // accepts either. Free-text entries (user typed something we couldn't
+    // match) get type 'free-text' and a synthesised id.
     var destinations = [];
     var shell = createFieldShell(instance, fieldSpec.label || 'Where are you dreaming of?');
     var input = el('input', {
@@ -693,6 +698,11 @@
     var drop = el('div', { class: 'tg-dest-drop', role: 'listbox' });
     var activeIndex = -1;
     var visibleOptions = [];
+
+    // Debounced live search state
+    var searchTimer = null;
+    var inflightController = null;    // AbortController for in-flight request
+    var lastRenderedQuery = null;     // so we know when to re-render
 
     function renderChips() {
       Array.prototype.slice.call(box.querySelectorAll('.tg-chip')).forEach(function (c) { c.remove(); });
@@ -712,49 +722,436 @@
       });
     }
 
+    // Build a human-readable label for a destination result used in the
+    // dropdown (e.g. "Hersonissos — Resort, Greece"). Richer than the chip
+    // label so visitors can disambiguate similarly-named places.
+    function describeResult(item) {
+      var parts = [];
+      if (item.type === 'country') {
+        parts.push('Country');
+      } else if (item.type === 'city') {
+        parts.push(item.parentCountry ? ('City · ' + item.parentCountry) : 'City');
+      } else if (item.type === 'resort') {
+        var tail = [item.parentCity, item.parentCountry].filter(Boolean).join(', ');
+        parts.push(tail ? ('Resort · ' + tail) : 'Resort');
+      }
+      return parts.join(' · ');
+    }
+
+    // Append options for a single group (country/city/resort) to the dropdown.
+    function appendGroup(group) {
+      if (!group || !group.results || group.results.length === 0) return;
+      drop.appendChild(el('div', {
+        class: 'tg-dest-grouplabel', 'aria-hidden': 'true',
+        text: group.label
+      }));
+      group.results.forEach(function (item) {
+        // Skip items already selected
+        if (destinations.find(function (d) { return d.id === item.id; })) return;
+        var opt = el('button', {
+          class: 'tg-dest-option', type: 'button',
+          role: 'option',
+          'aria-selected': 'false',
+          onmousedown: function (e) { e.preventDefault(); },
+          onclick: function () { selectDestination(item); }
+        }, [
+          el('span', { text: item.name }),
+          el('span', { class: 'tg-dest-option-meta', text: describeResult(item) })
+        ]);
+        drop.appendChild(opt);
+        visibleOptions.push({ node: opt, item: item });
+      });
+    }
+
+    // Append a "use this text as typed" option at the bottom. Triggered whenever
+    // there's a non-empty query — lets visitors submit obscure destinations
+    // we haven't indexed.
+    function appendFreeTextOption(query) {
+      if (!query) return;
+      var trimmed = query.trim();
+      if (!trimmed) return;
+      // Skip if we already have this as free text selected
+      if (destinations.find(function (d) { return d.type === 'free-text' && d.name.toLowerCase() === trimmed.toLowerCase(); })) return;
+      drop.appendChild(el('div', {
+        class: 'tg-dest-grouplabel', 'aria-hidden': 'true',
+        text: "Can't find it?"
+      }));
+      var freeItem = {
+        // Stable-ish synthesised id — lets removal work and avoids collisions
+        // with real record ids (which start with 'rec').
+        id: 'freetext:' + trimmed.toLowerCase().replace(/\s+/g, '-').slice(0, 80),
+        name: trimmed,
+        type: 'free-text'
+      };
+      var opt = el('button', {
+        class: 'tg-dest-option', type: 'button',
+        role: 'option',
+        'aria-selected': 'false',
+        onmousedown: function (e) { e.preventDefault(); },
+        onclick: function () { selectDestination(freeItem); }
+      }, [
+        el('span', { text: 'Use "' + trimmed + '"' }),
+        el('span', { class: 'tg-dest-option-meta', text: 'Submit as typed' })
+      ]);
+      drop.appendChild(opt);
+      visibleOptions.push({ node: opt, item: freeItem });
+    }
+
+    // Render dropdown based on the current query. Short queries (<2 chars)
+    // show a "keep typing" hint; longer queries trigger a debounced API call.
     function renderDrop(query) {
       drop.innerHTML = '';
       visibleOptions = [];
       activeIndex = -1;
-      var q = (query || '').toLowerCase().trim();
-      var any = false;
-      DESTINATIONS.forEach(function (group) {
-        var matching = group.items.filter(function (item) {
-          if (destinations.find(function (d) { return d.id === item.id; })) return false;
-          if (!q) return true;
-          return item.name.toLowerCase().indexOf(q) !== -1 ||
-                 (item.meta || '').toLowerCase().indexOf(q) !== -1;
-        });
-        if (!matching.length) return;
-        any = true;
-        drop.appendChild(el('div', { class: 'tg-dest-grouplabel', 'aria-hidden': 'true', text: group.group }));
-        matching.forEach(function (item) {
-          var opt = el('button', {
-            class: 'tg-dest-option', type: 'button',
-            role: 'option',
-            'aria-selected': 'false',
-            onmousedown: function (e) { e.preventDefault(); },
-            onclick: function () { selectDestination(item); }
-          }, [
-            el('span', { text: item.name }),
-            el('span', { class: 'tg-dest-option-meta', text: item.meta })
-          ]);
-          drop.appendChild(opt);
-          visibleOptions.push({ node: opt, item: item });
-        });
-      });
-      if (!any) {
-        drop.appendChild(el('div', { style: { padding: '14px', fontSize: '13px' }, text: 'No matches' }));
+      var q = (query || '').trim();
+
+      if (q.length === 0) {
+        drop.appendChild(el('div', {
+          style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
+          text: 'Start typing a country, city, or resort…'
+        }));
+        return;
       }
+
+      if (q.length < 2) {
+        drop.appendChild(el('div', {
+          style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
+          text: 'Keep typing…'
+        }));
+        return;
+      }
+
+      // Show a loading state while we're debouncing + fetching
+      drop.appendChild(el('div', {
+        class: 'tg-dest-loading',
+        style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
+        text: 'Searching…'
+      }));
+      lastRenderedQuery = q;
+    }
+
+    // Fetch results for `query` and render them — but only if the query hasn't
+    // changed in the meantime (race guard). Uses AbortController so in-flight
+    // requests are cancelled when the user keeps typing.
+    function fetchAndRender(query) {
+      if (inflightController) {
+        try { inflightController.abort(); } catch (e) { /* ignore */ }
+      }
+      inflightController = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var thisQuery = query;
+
+      var url = API_BASE + '/api/destinations/search?q=' + encodeURIComponent(query);
+      fetch(url, {
+        method: 'GET',
+        signal: inflightController ? inflightController.signal : undefined,
+        headers: { 'Accept': 'application/json' }
+      }).then(function (res) {
+        if (!res.ok) throw new Error('search_failed');
+        return res.json();
+      }).then(function (data) {
+        // Race guard — if the user has typed more, ignore this response
+        if (input.value.trim() !== thisQuery) return;
+        if (lastRenderedQuery !== thisQuery) return;
+
+        drop.innerHTML = '';
+        visibleOptions = [];
+        activeIndex = -1;
+
+        var groups = Array.isArray(data.groups) ? data.groups : [];
+        groups.forEach(appendGroup);
+
+        // Always offer the "use as typed" fallback at the bottom
+        appendFreeTextOption(thisQuery);
+
+        if (visibleOptions.length === 0) {
+          // No groups AND no free-text (can happen if user selected the free
+          // text already) — show nothing-to-show message
+          drop.appendChild(el('div', {
+            style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
+            text: 'No matches — try a different term'
+          }));
+        }
+      }).catch(function (err) {
+        if (err && err.name === 'AbortError') return; // silenced by newer query
+        console.warn('[TGEnquiryWidget] destination search failed:', err && err.message);
+        // Network / server error — still let the visitor submit free text
+        if (input.value.trim() !== thisQuery) return;
+        drop.innerHTML = '';
+        visibleOptions = [];
+        activeIndex = -1;
+        drop.appendChild(el('div', {
+          style: { padding: '14px', fontSize: '13px', color: '#DC2626' },
+          text: 'Search is temporarily unavailable.'
+        }));
+        appendFreeTextOption(thisQuery);
+      });
+    }
+
+    function scheduleSearch(query) {
+      if (searchTimer) clearTimeout(searchTimer);
+      var q = (query || '').trim();
+      if (q.length < 2) return;
+      // 250ms debounce — feels instant but prevents hammering on fast typers
+      searchTimer = setTimeout(function () { fetchAndRender(q); }, 250);
     }
 
     function selectDestination(item) {
-      destinations.push({ id: item.id, name: item.name, region: item.meta });
+      // Dedupe: same id already selected → no-op
+      if (destinations.find(function (d) { return d.id === item.id; })) return;
+      destinations.push({
+        id:            item.id,
+        name:          item.name,
+        type:          item.type,
+        parentCity:    item.parentCity || undefined,
+        parentCountry: item.parentCountry || undefined
+      });
       input.value = '';
       renderChips();
       renderDrop('');
       shell.clear();
       input.focus();
+    }
+
+    function setActiveOption(idx) {
+      visibleOptions.forEach(function (o, i) {
+        o.node.classList.toggle('is-active', i === idx);
+        o.node.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+      });
+      if (idx >= 0 && visibleOptions[idx]) {
+        var elt = visibleOptions[idx].node;
+        var elRect = elt.getBoundingClientRect();
+        var dropRect = drop.getBoundingClientRect();
+        if (elRect.bottom > dropRect.bottom) elt.scrollIntoView({ block: 'end' });
+        else if (elRect.top < dropRect.top) elt.scrollIntoView({ block: 'start' });
+      }
+      activeIndex = idx;
+    }
+
+    box.addEventListener('click', function () { input.focus(); });
+    input.addEventListener('focus', function () {
+      box.classList.add('is-focus');
+      drop.classList.add('is-open');
+      input.setAttribute('aria-expanded', 'true');
+      renderDrop(input.value);
+      if (input.value.trim().length >= 2) scheduleSearch(input.value);
+    });
+    input.addEventListener('blur', function () {
+      setTimeout(function () {
+        box.classList.remove('is-focus');
+        drop.classList.remove('is-open');
+        input.setAttribute('aria-expanded', 'false');
+        setActiveOption(-1);
+      }, 150);
+    });
+    input.addEventListener('input', function () {
+      renderDrop(input.value);
+      scheduleSearch(input.value);
+    });
+    input.addEventListener('keydown', function (e) {
+      if (!visibleOptions.length) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActiveOption(Math.min(activeIndex + 1, visibleOptions.length - 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveOption(Math.max(activeIndex - 1, 0)); }
+      else if (e.key === 'Enter' && activeIndex >= 0) { e.preventDefault(); selectDestination(visibleOptions[activeIndex].item); }
+      else if (e.key === 'Escape') { input.blur(); }
+    });
+
+    shell.fieldNode.appendChild(el('div', { class: 'tg-dest' }, [box, drop]));
+    if (fieldSpec.help !== false) {
+      shell.fieldNode.appendChild(el('div', { class: 'tg-help', text: fieldSpec.help || 'Add one, or multiple for a twin-centre trip.' }));
+    }
+    shell.fieldNode.appendChild(shell.errorNode);
+    input.setAttribute('aria-describedby', shell.errorId);
+
+    return {
+      type: 'destination',
+      node: shell.fieldNode,
+      writeTo: function (fields) { fields.destinations = destinations.slice(); },
+      validate: function () {
+        if (fieldSpec.required === false) return null;
+        return destinations.length > 0 ? null : 'Please add at least one destination.';
+      },
+      showError: function (msg) { shell.show(msg); input.setAttribute('aria-invalid', 'true'); },
+      clearError: function () { shell.clear(); input.removeAttribute('aria-invalid'); },
+      focus: function () { input.focus(); }
+    };
+  }
+
+  function renderAirport(instance, fieldSpec) {
+    // Multi-select airport picker. Combines a typeahead input with a chip
+    // display for selected airports, similar to the destinations field but
+    // against a fixed local list (AIRPORTS) — no API call needed.
+    //
+    // Cap: 5 airports per submission. Travellers typically specify at most
+    // "London area" (LHR, LGW, STN) plus one regional — rarely more than
+    // that. The cap also keeps the chip bar readable on mobile.
+    var MAX_SELECTIONS = 5;
+    var shell = createFieldShell(instance, fieldSpec.label || 'Departure airport', [
+      ' ',
+      el('span', { class: 'tg-opt', text: '(pick up to ' + MAX_SELECTIONS + ')' })
+    ]);
+
+    // Flatten AIRPORTS into a searchable list of { name, code, region, value }.
+    // value is the submission string — kept identical to the old single-select
+    // so downstream consumers (Airtable, email templates) don't need changes
+    // for airport entries beyond "now an array".
+    var airportOptions = [];
+    AIRPORTS.forEach(function (region) {
+      region.codes.forEach(function (a) {
+        airportOptions.push({
+          code:   a.code,
+          name:   a.name,
+          region: region.region,
+          value:  a.name + ' (' + a.code + ')'
+        });
+      });
+    });
+    // "I'm flexible on airport" as a special sentinel — picking it clears
+    // all other choices, and selecting others clears it. Matches the old
+    // single-select semantics where it was the only other option.
+    var FLEXIBLE_VALUE = 'Flexible on airport';
+
+    var selected = [];  // array of { code, name, region, value } or { value: FLEXIBLE_VALUE, flexible: true }
+
+    var input = el('input', {
+      class: 'tg-dest-input', type: 'text',
+      placeholder: 'Search airports (e.g. Heathrow, LHR, Manchester)...',
+      autocomplete: 'off',
+      'aria-label': 'Search airports',
+      'aria-expanded': 'false',
+      'aria-autocomplete': 'list',
+      role: 'combobox'
+    });
+    var box = el('div', { class: 'tg-dest-box' }, [input]);
+    var drop = el('div', { class: 'tg-dest-drop', role: 'listbox' });
+    var activeIndex = -1;
+    var visibleOptions = [];
+
+    function renderChips() {
+      // Remove existing chips before rebuilding — simpler than diffing
+      Array.prototype.slice.call(box.querySelectorAll('.tg-chip')).forEach(function (c) { c.remove(); });
+      selected.forEach(function (s) {
+        var closeBtn = el('button', {
+          class: 'tg-chip-close', type: 'button',
+          'aria-label': 'Remove ' + s.value,
+          onclick: function (e) {
+            e.stopPropagation();
+            selected = selected.filter(function (x) { return x.value !== s.value; });
+            renderChips();
+            shell.clear();
+          }
+        }, [svg(ICONS.x)]);
+        // Label uses airport code for brevity — chip bar gets busy with full names
+        var label = s.flexible ? 'Flexible' : (s.code || s.value);
+        var chip = el('span', { class: 'tg-chip', role: 'listitem' }, [
+          svg(ICONS.pin), label, closeBtn
+        ]);
+        box.insertBefore(chip, input);
+      });
+    }
+
+    function isSelected(value) {
+      return selected.some(function (s) { return s.value === value; });
+    }
+
+    function addSelection(item) {
+      // "Flexible" is exclusive — picking it clears everything else
+      if (item.flexible) {
+        selected = [{ value: FLEXIBLE_VALUE, flexible: true }];
+        input.value = '';
+        renderChips();
+        renderDrop('');
+        shell.clear();
+        input.focus();
+        return;
+      }
+      // If "flexible" was selected, picking a specific airport clears it
+      selected = selected.filter(function (s) { return !s.flexible; });
+      if (selected.length >= MAX_SELECTIONS) {
+        shell.show('You can pick up to ' + MAX_SELECTIONS + ' airports.');
+        return;
+      }
+      if (isSelected(item.value)) return;
+      selected.push(item);
+      input.value = '';
+      renderChips();
+      renderDrop('');
+      shell.clear();
+      input.focus();
+    }
+
+    function renderDrop(query) {
+      drop.innerHTML = '';
+      visibleOptions = [];
+      activeIndex = -1;
+      var q = (query || '').toLowerCase().trim();
+
+      // Group matches by region — keeps UK geography scannable
+      var matchesByRegion = {};
+      airportOptions.forEach(function (item) {
+        if (isSelected(item.value)) return;
+        if (q) {
+          var haystack = (item.name + ' ' + item.code + ' ' + item.region).toLowerCase();
+          if (haystack.indexOf(q) === -1) return;
+        }
+        if (!matchesByRegion[item.region]) matchesByRegion[item.region] = [];
+        matchesByRegion[item.region].push(item);
+      });
+
+      var any = false;
+      // Preserve original region ordering
+      AIRPORTS.forEach(function (region) {
+        var matches = matchesByRegion[region.region];
+        if (!matches || matches.length === 0) return;
+        any = true;
+        drop.appendChild(el('div', {
+          class: 'tg-dest-grouplabel', 'aria-hidden': 'true',
+          text: region.region
+        }));
+        matches.forEach(function (item) {
+          var opt = el('button', {
+            class: 'tg-dest-option', type: 'button',
+            role: 'option',
+            'aria-selected': 'false',
+            onmousedown: function (e) { e.preventDefault(); },
+            onclick: function () { addSelection(item); }
+          }, [
+            el('span', { text: item.name }),
+            el('span', { class: 'tg-dest-option-meta', text: item.code })
+          ]);
+          drop.appendChild(opt);
+          visibleOptions.push({ node: opt, item: item });
+        });
+      });
+
+      // Flexible option — always available unless a specific airport is selected
+      var hasSpecific = selected.some(function (s) { return !s.flexible; });
+      if (!hasSpecific) {
+        drop.appendChild(el('div', {
+          class: 'tg-dest-grouplabel', 'aria-hidden': 'true',
+          text: 'Flexible'
+        }));
+        var flexItem = { value: FLEXIBLE_VALUE, flexible: true };
+        var flexOpt = el('button', {
+          class: 'tg-dest-option', type: 'button',
+          role: 'option',
+          'aria-selected': 'false',
+          onmousedown: function (e) { e.preventDefault(); },
+          onclick: function () { addSelection(flexItem); }
+        }, [
+          el('span', { text: "I'm flexible on airport" }),
+          el('span', { class: 'tg-dest-option-meta', text: 'Any' })
+        ]);
+        drop.appendChild(flexOpt);
+        visibleOptions.push({ node: flexOpt, item: flexItem });
+        any = true;
+      }
+
+      if (!any) {
+        drop.appendChild(el('div', {
+          style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
+          text: q ? 'No matches — try a different term' : 'No more airports to pick'
+        }));
+      }
     }
 
     function setActiveOption(idx) {
@@ -792,65 +1189,42 @@
       if (!visibleOptions.length) return;
       if (e.key === 'ArrowDown') { e.preventDefault(); setActiveOption(Math.min(activeIndex + 1, visibleOptions.length - 1)); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveOption(Math.max(activeIndex - 1, 0)); }
-      else if (e.key === 'Enter' && activeIndex >= 0) { e.preventDefault(); selectDestination(visibleOptions[activeIndex].item); }
+      else if (e.key === 'Enter' && activeIndex >= 0) { e.preventDefault(); addSelection(visibleOptions[activeIndex].item); }
       else if (e.key === 'Escape') { input.blur(); }
+      else if (e.key === 'Backspace' && !input.value && selected.length) {
+        // Quick removal: backspace in an empty input pops the last chip
+        selected.pop();
+        renderChips();
+        renderDrop('');
+      }
     });
 
     shell.fieldNode.appendChild(el('div', { class: 'tg-dest' }, [box, drop]));
     if (fieldSpec.help !== false) {
-      shell.fieldNode.appendChild(el('div', { class: 'tg-help', text: fieldSpec.help || 'Add one, or multiple for a twin-centre trip.' }));
+      shell.fieldNode.appendChild(el('div', {
+        class: 'tg-help',
+        text: fieldSpec.help || 'Add one or more airports — or pick "flexible" if you don\u2019t mind.'
+      }));
     }
     shell.fieldNode.appendChild(shell.errorNode);
     input.setAttribute('aria-describedby', shell.errorId);
 
     return {
-      type: 'destination',
+      type: 'airport',
       node: shell.fieldNode,
-      writeTo: function (fields) { fields.destinations = destinations.slice(); },
+      // Submission payload: array of value strings for straightforward rendering.
+      // Kept as an array even if only one is picked — downstream code can
+      // .join(', ') or iterate however it likes.
+      writeTo: function (fields) {
+        fields.departure_airport = selected.map(function (s) { return s.value; });
+      },
       validate: function () {
         if (fieldSpec.required === false) return null;
-        return destinations.length > 0 ? null : 'Please add at least one destination.';
+        return selected.length > 0 ? null : 'Please pick at least one departure airport.';
       },
       showError: function (msg) { shell.show(msg); input.setAttribute('aria-invalid', 'true'); },
       clearError: function () { shell.clear(); input.removeAttribute('aria-invalid'); },
       focus: function () { input.focus(); }
-    };
-  }
-
-  function renderAirport(instance, fieldSpec) {
-    var shell = createFieldShell(instance, fieldSpec.label || 'Departure airport');
-    var select = el('select', {
-      class: 'tg-input',
-      'aria-label': 'Departure airport',
-      'aria-describedby': shell.errorId,
-      onchange: function () { shell.clear(); select.removeAttribute('aria-invalid'); }
-    }, [el('option', { value: '', text: 'Select your preferred airport' })]);
-    AIRPORTS.forEach(function (region) {
-      var group = document.createElement('optgroup');
-      group.label = region.region;
-      region.codes.forEach(function (a) {
-        group.appendChild(el('option', { value: a.name + ' (' + a.code + ')', text: a.name + ' (' + a.code + ')' }));
-      });
-      select.appendChild(group);
-    });
-    var flexGroup = document.createElement('optgroup');
-    flexGroup.label = 'Flexible';
-    flexGroup.appendChild(el('option', { value: 'Flexible on airport', text: "I'm flexible on airport" }));
-    select.appendChild(flexGroup);
-
-    shell.fieldNode.appendChild(select);
-    shell.fieldNode.appendChild(shell.errorNode);
-    return {
-      type: 'airport',
-      node: shell.fieldNode,
-      writeTo: function (fields) { fields.departure_airport = select.value; },
-      validate: function () {
-        if (fieldSpec.required === false) return null;
-        return select.value ? null : 'Please select a departure airport.';
-      },
-      showError: function (msg) { shell.show(msg); select.setAttribute('aria-invalid', 'true'); },
-      clearError: function () { shell.clear(); select.removeAttribute('aria-invalid'); },
-      focus: function () { select.focus(); }
     };
   }
 
