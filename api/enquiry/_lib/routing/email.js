@@ -19,7 +19,7 @@
 // =============================================================================
 
 import { renderDefaultAgentEmail } from './_templates/agent-email.js';
-import { sendViaSendGrid, buildFromField } from './_sendgrid.js';
+import { sendViaSendGrid, buildFromField } from './sendgrid.js';
 
 const BOARD_BASIS_LABEL = {
   RO: 'Room only', BB: 'B&B', HB: 'Half board', FB: 'Full board', AI: 'All inclusive',
