@@ -167,6 +167,14 @@ export default async function sendAutoReply(ctx) {
       'X-TG-Reference': reference,
       'X-TG-Submission-Id': submissionId,
     },
+    // See matching comment in email.js — custom_args are what SendGrid
+    // surfaces on Event Webhook payloads so we can thread delivery/open/
+    // bounce events back to this submission record in Airtable.
+    customArgs: {
+      submissionId,
+      reference,
+      emailKind: 'customer-auto-reply',
+    },
     categoryTag: 'enquiry-customer-auto-reply',
   });
 }
