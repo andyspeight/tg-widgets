@@ -76,9 +76,20 @@ const F = {
   lunaWorkLead:    'fldrH7JulBo0O4hWZ',
   gdprRequested:   'fldSoTM5ogUOn4dTL',
   gdprDeletedAt:   'fldXdzFytvkzsFPgi',
+  // Email delivery tracking (populated by sendgrid-webhook.js from SendGrid
+  // Event Webhook events). Status is the single "best" state (Delivered,
+  // Opened, Clicked, Bounced, etc.) and Events is the JSON audit log.
+  emailStatus:     'fld5vnl2pMMTkaJXZ',
+  emailEvents:     'fldY8o2tEXYDf2Eed',
 };
 
 const VALID_STATUSES = ['New', 'Read', 'Archived', 'Converted'];
+// Email status values the inbox can filter by. Matches the single-select
+// options in Airtable exactly — any mismatch would silently filter to 0.
+const VALID_EMAIL_STATUSES = [
+  'Processed', 'Deferred', 'Delivered', 'Opened',
+  'Clicked', 'Bounced', 'Dropped', 'Spam Reported',
+];
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
 
@@ -132,6 +143,9 @@ async function handleList(req, res, agentEmail) {
   const to = q.to || '';
   const cursor = q.cursor || '';
   const limit = Math.min(Math.max(parseInt(q.limit, 10) || DEFAULT_LIMIT, 1), MAX_LIMIT);
+  // Email status filter — optional. Comma-separated list of valid values.
+  // e.g. ?emailStatus=Bounced  or  ?emailStatus=Bounced,Dropped,Spam%20Reported
+  const emailStatus = q.emailStatus || '';
 
   // Filter formula — ALWAYS scoped to agent's ownership. No way to override.
   const filters = [
@@ -142,6 +156,15 @@ async function handleList(req, res, agentEmail) {
   if (statusList.length) {
     const orClauses = statusList.map(s => `{${F.status}} = '${s}'`);
     filters.push(`OR(${orClauses.join(',')})`);
+  }
+
+  // Email status filter — whitelisted to avoid injection via formula
+  if (emailStatus) {
+    const emailList = emailStatus.split(',').map(s => s.trim()).filter(s => VALID_EMAIL_STATUSES.includes(s));
+    if (emailList.length) {
+      const orClauses = emailList.map(s => `{${F.emailStatus}} = '${s}'`);
+      filters.push(`OR(${orClauses.join(',')})`);
+    }
   }
 
   if (formId && /^[A-Za-z0-9-]+$/.test(formId)) {
@@ -180,10 +203,13 @@ async function handleList(req, res, agentEmail) {
   });
   // Minimal fields for list view — keeps the payload small and avoids
   // leaking IP / user agent / raw payload until the drawer is opened.
+  // Includes emailStatus so the list row can show a small delivery dot
+  // without a second round-trip.
   const listFields = [
     F.reference, F.formId, F.formName, F.firstName, F.lastName,
     F.email, F.destinations, F.departDate, F.adults, F.children,
     F.budgetPP, F.status, F.submittedAt, F.agentReadAt,
+    F.emailStatus,
   ];
   listFields.forEach(f => params.append('fields[]', f));
 
@@ -339,6 +365,9 @@ function mapListRecord(rec) {
     submittedAt: f[F.submittedAt] || null,
     agentReadAt: f[F.agentReadAt] || null,
     unread: !f[F.agentReadAt] && (f[F.status] || 'New') === 'New',
+    // Email delivery state for the row dot. Null if the email has not yet
+    // moved through SendGrid (still in processing) — UI shows a neutral dot.
+    emailStatus: f[F.emailStatus] || null,
   };
 }
 
@@ -411,6 +440,13 @@ function mapDetailRecord(rec) {
     gdpr: {
       deletionRequested: !!f[F.gdprRequested],
       deletedAt: f[F.gdprDeletedAt] || null,
+    },
+
+    // Email delivery tracking — status is the single best state, events is
+    // the full audit log used by the drawer to render the delivery timeline.
+    email: {
+      status: f[F.emailStatus] || null,
+      events: parseJsonField(f[F.emailEvents]) || [],
     },
   };
 }
