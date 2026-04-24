@@ -2,26 +2,32 @@
 //  /api/enquiry/_lib/routing/email.js
 // =============================================================================
 //
-//  Sends the agent notification email when a new submission lands.
+//  Sends the AGENT notification email when a new submission lands.
 //  ALWAYS enabled — this is the required routing destination.
 //
-//  Delivered via Resend (https://resend.com) — chosen for deliverability,
-//  branded-domain sending, and simple API.
+//  Delivered via SendGrid (https://sendgrid.com) — chosen because the client
+//  already had a verified SendGrid account for other Agendas Group products.
 //
 //  Uses the form's custom HTML template if set, otherwise the built-in
 //  default below. {token} placeholders in the HTML are replaced at send time.
 //
+//  The agent email is branded as "Travelgenix Enquiries" — agents receive
+//  these as system notifications from their widget platform, not as customer
+//  replies. Reply-To is set to the visitor's email so hitting Reply in the
+//  mail client goes straight to the customer.
+//
 // =============================================================================
 
 import { renderDefaultAgentEmail } from './_templates/agent-email.js';
-
-const RESEND_API_KEY   = process.env.RESEND_API_KEY;
-const RESEND_FROM      = process.env.RESEND_FROM || 'Travelgenix Enquiries <enquiries@enquiries.tg-widgets.io>';
-const RESEND_ENDPOINT  = 'https://api.resend.com/emails';
+import { sendViaSendGrid, buildFromField } from './_sendgrid.js';
 
 const BOARD_BASIS_LABEL = {
   RO: 'Room only', BB: 'B&B', HB: 'Half board', FB: 'Full board', AI: 'All inclusive',
 };
+
+// The display name for agent-facing emails. Always Travelgenix — this is an
+// internal system notification, not a customer-facing message.
+const AGENT_EMAIL_FROM_NAME = 'Travelgenix Enquiries';
 
 /**
  * Build the replaceable token map used inside HTML templates.
@@ -79,7 +85,7 @@ function buildTokens({ form, payload, reference, submissionId, meta }) {
 
 /**
  * Simple {token} replacement. HTML-escapes values to prevent injection when
- * agent's custom template mixes visitor data with HTML.
+ * an agent's custom template mixes visitor data with HTML.
  */
 function renderTemplate(html, tokens) {
   return html.replace(/\{(\w+)\}/g, (_, key) => {
@@ -96,7 +102,7 @@ function renderTemplate(html, tokens) {
 
 /**
  * Parse recipient list from the form's Routing Email To field.
- * Accepts comma or newline separated values.
+ * Accepts comma, semicolon or newline separated values.
  */
 function parseRecipients(raw) {
   if (!raw || typeof raw !== 'string') return [];
@@ -111,10 +117,6 @@ function parseRecipients(raw) {
 
 export default async function sendAgentEmail(ctx) {
   const { form, payload, reference, submissionId, meta } = ctx;
-
-  if (!RESEND_API_KEY) {
-    return { status: 'failed', error: 'RESEND_API_KEY not configured' };
-  }
 
   const recipients = parseRecipients(form.fields.fldlu1HcErBfp2wh2); // Routing Email To
   if (recipients.length === 0) {
@@ -131,41 +133,16 @@ export default async function sendAgentEmail(ctx) {
 
   const subject = `New enquiry ${reference} — ${tokens.fullName} · ${tokens.destinations}`;
 
-  const body = {
-    from: RESEND_FROM,
+  return await sendViaSendGrid({
+    from: buildFromField(AGENT_EMAIL_FROM_NAME),
     to: recipients,
-    subject: subject.slice(0, 200),
+    subject,
     html,
-    reply_to: tokens.email || undefined,
+    replyTo: tokens.email || undefined,
     headers: {
       'X-TG-Reference': reference,
       'X-TG-Submission-Id': submissionId,
     },
-  };
-
-  try {
-    const response = await fetch(RESEND_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('[routing/email] Resend failed:', response.status, errText.slice(0, 300));
-      return {
-        status: 'failed',
-        statusCode: response.status,
-        error: `Resend returned ${response.status}`,
-      };
-    }
-
-    return { status: 'ok', statusCode: response.status };
-  } catch (err) {
-    console.error('[routing/email] Fetch error:', err);
-    return { status: 'failed', error: err.message };
-  }
+    categoryTag: 'enquiry-agent-notification',
+  });
 }
