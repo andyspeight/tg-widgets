@@ -26,6 +26,15 @@
 import { createHmac } from 'node:crypto';
 import { applyRateLimit, RATE_LIMITS } from '../_auth.js';
 
+// Static imports for routing handlers that exist today. Static imports are
+// reliably traced by the Vercel bundler — dynamic imports with string paths
+// are not, which caused "mod.default is not a function" errors alternating
+// between email.js and auto-reply.js per deploy. When future routing modules
+// are built (google-sheets, webhook, luna-*), import them here the same way
+// and swap their entry in the `enabled` array below from `loader` to `handler`.
+import sendAgentEmail from './_lib/routing/email.js';
+import sendAutoReply  from './_lib/routing/auto-reply.js';
+
 // ---------- Config -----------------------------------------------------------
 
 // The widget-suite base holds form config. Re-uses the same env vars that the
@@ -558,18 +567,20 @@ async function fanOutRouting({ form, payload, submissionId, reference, meta }) {
   const f = form.fields;
   const ctx = { form, payload, submissionId, reference, meta };
 
-  // Each entry describes a routing destination. `loader` lazy-imports the
-  // module so we only pay the import cost for destinations that are actually
-  // enabled.
+  // Each entry describes a routing destination. Entries with `handler` use
+  // a statically imported function (reliable on Vercel). Entries with
+  // `loader` still use dynamic import — keep these ONLY for modules that
+  // don't exist yet. When you build them, add a static import at the top
+  // of this file and swap the entry over to `handler`.
   const enabled = [
-    { key: 'email',           always: true,  on: f[FORM_FIELDS.routingEmail],          loader: () => import('./_lib/routing/email.js') },
-    { key: 'auto-reply',      always: false, on: f[FORM_FIELDS.routingEmailAutoReply], loader: () => import('./_lib/routing/auto-reply.js') },
-    { key: 'google-sheets',   always: false, on: f[FORM_FIELDS.routingGoogleSheets],   loader: () => import('./_lib/routing/google-sheets.js') },
-    { key: 'airtable',        always: false, on: f[FORM_FIELDS.routingAirtable],       loader: () => import('./_lib/routing/airtable.js') },
-    { key: 'webhook',         always: false, on: f[FORM_FIELDS.routingWebhook],        loader: () => import('./_lib/routing/webhook.js') },
-    { key: 'luna-chat',       always: false, on: f[FORM_FIELDS.routingLunaChat],       loader: () => import('./_lib/routing/luna-chat.js') },
-    { key: 'luna-marketing',  always: false, on: f[FORM_FIELDS.routingLunaMarketing],  loader: () => import('./_lib/routing/luna-marketing.js') },
-    { key: 'luna-work',       always: false, on: f[FORM_FIELDS.routingLunaWork],       loader: () => import('./_lib/routing/luna-work.js') },
+    { key: 'email',          always: true,  on: f[FORM_FIELDS.routingEmail],          handler: sendAgentEmail },
+    { key: 'auto-reply',     always: false, on: f[FORM_FIELDS.routingEmailAutoReply], handler: sendAutoReply },
+    { key: 'google-sheets',  always: false, on: f[FORM_FIELDS.routingGoogleSheets],   loader:  () => import('./_lib/routing/google-sheets.js') },
+    { key: 'airtable',       always: false, on: f[FORM_FIELDS.routingAirtable],       loader:  () => import('./_lib/routing/airtable.js') },
+    { key: 'webhook',        always: false, on: f[FORM_FIELDS.routingWebhook],        loader:  () => import('./_lib/routing/webhook.js') },
+    { key: 'luna-chat',      always: false, on: f[FORM_FIELDS.routingLunaChat],       loader:  () => import('./_lib/routing/luna-chat.js') },
+    { key: 'luna-marketing', always: false, on: f[FORM_FIELDS.routingLunaMarketing],  loader:  () => import('./_lib/routing/luna-marketing.js') },
+    { key: 'luna-work',      always: false, on: f[FORM_FIELDS.routingLunaWork],       loader:  () => import('./_lib/routing/luna-work.js') },
   ].filter(r => r.always || r.on);
 
   // Luna Marketing only fires if the visitor gave marketing consent
@@ -581,8 +592,17 @@ async function fanOutRouting({ form, payload, submissionId, reference, meta }) {
   const results = await Promise.allSettled(filtered.map(async (r) => {
     const start = Date.now();
     try {
-      const mod = await r.loader();
-      const result = await mod.default(ctx);
+      // Static handler or dynamic loader — run whichever the entry provides.
+      let result;
+      if (r.handler) {
+        result = await r.handler(ctx);
+      } else {
+        const mod = await r.loader();
+        if (typeof mod.default !== 'function') {
+          throw new Error(`Routing module ${r.key} has no default export`);
+        }
+        result = await mod.default(ctx);
+      }
       const durationMs = Date.now() - start;
       await logRouting({
         submissionId,
