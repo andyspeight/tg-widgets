@@ -189,6 +189,11 @@ async function handleList(req, res, agentEmail) {
 
   if (cursor) params.append('offset', cursor);
 
+  // CRITICAL: returnFieldsByFieldId=true is what makes record.fields keyed
+  // by field ID (fldXXX) rather than field name. All downstream code reads
+  // records via the F.* field-ID map, so this must be set.
+  params.append('returnFieldsByFieldId', 'true');
+
   const atUrl = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_SUBMISSIONS}?${params.toString()}`;
   const atResponse = await fetch(atUrl, {
     headers: { Authorization: `Bearer ${PAT}` }
@@ -216,7 +221,8 @@ async function handleGetOne(req, res, agentEmail, id) {
     return res.status(400).json({ error: 'Invalid submission id' });
   }
 
-  const atUrl = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_SUBMISSIONS}/${id}`;
+  // See list handler — same reason: need field IDs not names
+  const atUrl = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_SUBMISSIONS}/${id}?returnFieldsByFieldId=true`;
   const atResponse = await fetch(atUrl, { headers: { Authorization: `Bearer ${PAT}` } });
   if (atResponse.status === 404) return res.status(404).json({ error: 'Submission not found' });
   if (!atResponse.ok) {
@@ -270,7 +276,7 @@ async function handlePatch(req, res, agentEmail, id) {
 
   // Re-check ownership before mutating. Small extra roundtrip but prevents
   // cross-agent writes if any request-state is stale.
-  const getUrl = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_SUBMISSIONS}/${id}?fields[]=${F.ownerEmail}`;
+  const getUrl = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_SUBMISSIONS}/${id}?fields[]=${F.ownerEmail}&returnFieldsByFieldId=true`;
   const getRes = await fetch(getUrl, { headers: { Authorization: `Bearer ${PAT}` } });
   if (getRes.status === 404) return res.status(404).json({ error: 'Submission not found' });
   if (!getRes.ok) return res.status(502).json({ error: 'Airtable read failed' });
