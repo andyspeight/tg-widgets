@@ -39,7 +39,22 @@ function buildTokens({ form, payload, reference, submissionId, meta }) {
   const travellers = f.travellers || { adults: 0 };
   const duration = f.duration || {};
 
-  const destNames = (f.destinations || []).map(d => d.name).join(' + ') || '—';
+  // Destinations — render rich labels when available ("Hersonissos, Crete,
+  // Greece") falling back to just the name for legacy / free-text entries.
+  const destParts = (f.destinations || []).map(d => {
+    if (!d || !d.name) return '';
+    const extras = [];
+    if (d.parentCity && d.parentCity !== d.name) extras.push(d.parentCity);
+    if (d.parentCountry) extras.push(d.parentCountry);
+    return extras.length > 0 ? `${d.name} (${extras.join(', ')})` : d.name;
+  }).filter(Boolean);
+  const destNames = destParts.join(' + ') || '—';
+
+  // Airport — array from multi-select or scalar from legacy
+  const airportStr = Array.isArray(f.departure_airport)
+    ? (f.departure_airport.length > 0 ? f.departure_airport.join(', ') : '—')
+    : (f.departure_airport || '—');
+
   const travellerParts = [];
   if (travellers.adults)   travellerParts.push(`${travellers.adults} ${travellers.adults === 1 ? 'adult' : 'adults'}`);
   if (travellers.children) travellerParts.push(`${travellers.children} ${travellers.children === 1 ? 'child' : 'children'}`);
@@ -68,7 +83,7 @@ function buildTokens({ form, payload, reference, submissionId, meta }) {
     email: f.email || '',
     phone: f.phone || '—',
     destinations: destNames,
-    departureAirport: f.departure_airport || '—',
+    departureAirport: airportStr,
     dates: datesStr,
     duration: durationStr,
     travellers: travellerParts.join(', ') || '—',
