@@ -807,9 +807,21 @@ export default async function handler(req, res) {
   // 13. Build thank-you response before firing routing (so we can return fast)
   const thankYou = buildThankYouContext({ form, payload, submissionId, reference });
 
-  // 14. Fan out routing — fire and forget. We want to return fast.
-  fanOutRouting({ form, payload, submissionId, reference, meta })
-    .catch(err => console.error('[submit] Routing orchestrator failed:', err));
+  // 14. Fan out routing. We await this (rather than fire-and-forget) because
+  //     Vercel serverless functions are terminated once the response is sent,
+  //     which kills any in-flight background promises. Awaiting adds 1-3s to
+  //     the response but guarantees routing actually completes. If we ever
+  //     migrate to Vercel's Edge runtime we can switch to waitUntil for the
+  //     background pattern.
+  let routingSummary;
+  try {
+    routingSummary = await fanOutRouting({ form, payload, submissionId, reference, meta });
+  } catch (err) {
+    // Routing failures are non-fatal — submission is already saved. Log and
+    // continue so the visitor still gets their confirmation.
+    console.error('[submit] Routing orchestrator failed:', err);
+    routingSummary = { error: err.message };
+  }
 
   // 15. Return success
   return res.status(200).json({
