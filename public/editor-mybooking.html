@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Booking — Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1B2B5B;
+    --primary-light: #2A3F7A;
+    --accent: #00B4D8;
+    --accent-dark: #0096B7;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --bg: #FFFFFF;
+    --bg-2: #F8FAFC;
+    --bg-3: #F1F5F9;
+    --border: #E2E8F0;
+    --border-light: #F1F5F9;
+    --text: #0F172A;
+    --text-2: #475569;
+    --text-3: #94A3B8;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.04);
+    --shadow-xl: 0 20px 25px rgba(0,0,0,.08), 0 10px 10px rgba(0,0,0,.04);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg-2); color: var(--text); -webkit-font-smoothing: antialiased; height: 100vh; overflow: hidden; }
+  button, input, select, textarea { font-family: inherit; }
+
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ===== LAYOUT ===== */
+  .editor { display: flex; height: 100vh; }
+  .sidebar { width: 360px; flex-shrink: 0; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .preview-pane { flex: 1; display: flex; flex-direction: column; background: var(--bg-2); overflow: hidden; }
+
+  /* ===== SIDEBAR TOPBAR ===== */
+  .sb-top { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .sb-top .logo { width: 32px; height: 32px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary), var(--primary-light)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sb-top .logo svg { width: 16px; height: 16px; color: #fff; }
+  .sb-top .name { flex: 1; min-width: 0; font-weight: 700; font-size: 15px; letter-spacing: -.01em; }
+  .sb-top .topbtn { width: 32px; height: 32px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-2); transition: all .15s; }
+  .sb-top .topbtn:hover { border-color: var(--accent); color: var(--text); }
+  .sb-top .topbtn svg { width: 16px; height: 16px; }
+  .sb-top a.back { font-size: 12px; color: var(--text-3); text-decoration: none; }
+
+  /* ===== NAME INPUT + SAVE ===== */
+  .sb-save { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; }
+  .sb-save input { flex: 1; min-width: 0; height: 38px; padding: 0 12px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); outline: none; transition: border-color .15s; }
+  .sb-save input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
+  .sb-save .save-btn { height: 38px; padding: 0 16px; background: var(--primary); color: #fff; font-weight: 600; font-size: 13px; border: none; border-radius: var(--radius-md); cursor: pointer; transition: background .15s; min-width: 64px; }
+  .sb-save .save-btn:hover { background: var(--primary-light); }
+  .sb-save .save-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .sb-save .save-btn.saved { background: var(--success); }
+
+  /* ===== TABS ===== */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); }
+  .tabs button { flex: 1; height: 44px; background: transparent; border: none; font-size: 13px; font-weight: 500; color: var(--text-2); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+  .tabs button:hover { color: var(--text); }
+  .tabs button.active { color: var(--primary); border-bottom-color: var(--accent); font-weight: 600; }
+
+  /* ===== SIDEBAR BODY ===== */
+  .sb-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Section */
+  .section { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; }
+  .section-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background .15s; }
+  .section-header:hover { background: var(--bg-2); }
+  .section-header h3 { font-size: 13px; font-weight: 600; margin: 0; letter-spacing: -.01em; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .section-header h3 svg { width: 14px; height: 14px; color: var(--accent); }
+  .section-header .chev { width: 16px; height: 16px; color: var(--text-3); transition: transform .25s; }
+  .section.open .chev { transform: rotate(180deg); }
+  .section-body { max-height: 0; overflow: hidden; transition: max-height .3s ease-out; }
+  .section.open .section-body { max-height: 2000px; transition: max-height .5s ease-in; }
+  .section-body-inner { padding: 0 16px 16px; }
+
+  /* Form fields */
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 4px; }
+  .field input[type="text"], .field input[type="email"], .field input[type="tel"], .field input[type="password"], .field textarea, .field select {
+    width: 100%; min-height: 36px; padding: 8px 10px; font-size: 13px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    outline: none; transition: border-color .15s; font-family: inherit;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,180,216,.12); }
+  .field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+  .field-help { font-size: 11px; color: var(--text-3); margin-top: 4px; line-height: 1.4; }
+
+  /* Color row */
+  .color-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+  .color-row label { flex: 1; font-size: 12px; font-weight: 500; color: var(--text-2); margin: 0; }
+  .color-row input[type="color"] { width: 32px; height: 32px; padding: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; background: transparent; }
+  .color-row .hex { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-3); width: 70px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Layout switcher */
+  .layout-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+  .layout-tile { padding: 10px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 11px; font-weight: 500; color: var(--text-2); text-align: center; transition: all .15s; }
+  .layout-tile:hover { border-color: var(--accent); }
+  .layout-tile.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .layout-tile-icon { display: block; margin: 0 auto 6px; width: 32px; height: 18px; border: 1.5px solid currentColor; border-radius: 3px; opacity: .7; }
+  .layout-tile.vertical .layout-tile-icon { width: 20px; height: 24px; }
+  .layout-tile.compact .layout-tile-icon { width: 16px; height: 22px; }
+
+  /* Toggle row */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; gap: 12px; }
+  .toggle-row > span { flex: 1; font-size: 13px; color: var(--text); }
+  .toggle-row > span small { display: block; font-size: 11px; color: var(--text-3); margin-top: 2px; line-height: 1.3; }
+  .switch { position: relative; width: 36px; height: 20px; background: var(--border); border-radius: 9999px; cursor: pointer; transition: background .2s; border: none; padding: 0; flex-shrink: 0; }
+  .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: var(--shadow-sm); }
+  .switch.on { background: var(--accent); }
+  .switch.on::after { transform: translateX(16px); }
+
+  /* Embed code */
+  .embed-block { background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text); line-height: 1.5; word-break: break-all; max-height: 160px; overflow: auto; }
+  .embed-actions { margin-top: 8px; display: flex; gap: 6px; }
+  .embed-actions button { flex: 1; height: 32px; font-size: 12px; font-weight: 500; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all .15s; }
+  .embed-actions button:hover { border-color: var(--accent); }
+  .embed-actions button.copied { background: var(--success); color: #fff; border-color: var(--success); }
+
+  /* Travelify credentials block */
+  .creds-status { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--radius-md); font-size: 12px; margin-bottom: 12px; }
+  .creds-status.ok { background: rgba(16,185,129,.08); color: #065F46; border: 1px solid rgba(16,185,129,.25); }
+  .creds-status.missing { background: rgba(245,158,11,.08); color: #78350F; border: 1px solid rgba(245,158,11,.25); }
+  .creds-status svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .creds-meta { font-size: 11px; color: var(--text-3); margin-top: 6px; line-height: 1.5; font-family: 'JetBrains Mono', monospace; }
+  .creds-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .creds-actions button { flex: 1; height: 36px; font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: all .15s; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+  .creds-actions button:hover { border-color: var(--accent); }
+  .creds-actions button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .creds-actions button.primary:hover { background: var(--primary-light); }
+  .creds-actions button.danger { color: var(--error); }
+  .creds-actions button.danger:hover { border-color: var(--error); background: rgba(239,68,68,.05); }
+
+  /* ===== PREVIEW PANE ===== */
+  .preview-bar { padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .preview-bar .label { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: .04em; text-transform: uppercase; margin-right: 8px; }
+  .preview-bar .vp-btn { height: 32px; padding: 0 12px; font-size: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); transition: all .15s; }
+  .preview-bar .vp-btn:hover { color: var(--text); border-color: var(--accent); }
+  .preview-bar .vp-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .preview-bar .right { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
+
+  .preview-stage { flex: 1; overflow: auto; padding: 32px; display: flex; align-items: flex-start; justify-content: center; background: var(--bg-2); }
+  .preview-stage[data-theme="dark"] { background: #0F172A; }
+  .preview-frame { width: 100%; max-width: 880px; transition: max-width .3s; }
+  .preview-frame[data-vp="mobile"] { max-width: 380px; }
+  .preview-frame[data-vp="tablet"] { max-width: 768px; }
+  .preview-frame[data-vp="desktop"] { max-width: 1280px; }
+
+  /* ===== TOAST ===== */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 12px 16px; background: var(--text); color: #fff; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-xl); opacity: 0; pointer-events: none; transition: all .25s ease-out; z-index: 100; display: flex; align-items: center; gap: 10px; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast-icon { width: 20px; height: 20px; border-radius: 50%; background: var(--success); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .toast-icon svg { width: 12px; height: 12px; color: #fff; stroke-width: 3; }
+  .toast.error .toast-icon { background: var(--error); }
+
+  /* ===== LOGIN OVERLAY ===== */
+  .login-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.9); backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .login-card { width: 100%; max-width: 400px; background: #fff; border-radius: 16px; padding: 32px; box-shadow: var(--shadow-xl); }
+  .login-card h2 { font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: -.02em; color: var(--text); }
+  .login-card p { font-size: 14px; color: var(--text-2); margin: 0 0 24px; line-height: 1.5; }
+  .login-card .field { margin-bottom: 16px; }
+  .login-card .field input { width: 100%; height: 44px; padding: 0 14px; font-size: 15px; font-family: inherit; color: var(--text); background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); outline: none; transition: border-color .15s; }
+  .login-card .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
+  .login-card .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
+  .login-btn { width: 100%; height: 44px; background: var(--primary); color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius-md); cursor: pointer; transition: background .15s; }
+  .login-btn:hover { background: var(--primary-light); }
+  .login-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .login-error { padding: 10px 12px; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2); border-radius: var(--radius-md); color: var(--error); font-size: 13px; margin-bottom: 16px; }
+
+  /* Modal */
+  .modal { position: fixed; inset: 0; background: rgba(15,23,42,.6); backdrop-filter: blur(4px); z-index: 150; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal-card { width: 100%; max-width: 480px; background: #fff; border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow-xl); }
+  .modal-card h2 { font-size: 18px; font-weight: 600; margin: 0 0 8px; letter-spacing: -.01em; }
+  .modal-card p { font-size: 14px; color: var(--text-2); margin: 0 0 16px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-actions button { flex: 1; height: 40px; font-family: inherit; font-size: 14px; font-weight: 500; border-radius: var(--radius-md); cursor: pointer; }
+  .modal-actions .cancel { background: #fff; border: 1px solid var(--border); color: var(--text); }
+  .modal-actions .ok { background: var(--primary); border: 1px solid var(--primary); color: #fff; }
+  .modal-actions .ok:hover { background: var(--primary-light); }
+  .modal-actions .ok.danger { background: var(--error); border-color: var(--error); }
+</style>
+</head>
+<body>
+
+<div class="editor">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sb-top">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8"/><rect x="3" y="5" width="18" height="14" rx="2" ry="2"/></svg>
+      </div>
+      <div class="name">My Booking</div>
+      <a href="/" class="topbtn" title="Back to dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+    </div>
+
+    <div class="sb-save">
+      <input type="text" id="widget-name" placeholder="Untitled My Booking widget" value="My Booking">
+      <button class="save-btn" id="save-btn">Save</button>
+    </div>
+
+    <div class="tabs">
+      <button class="active" data-tab="design">Design</button>
+      <button data-tab="content">Content</button>
+      <button data-tab="settings">Settings</button>
+    </div>
+
+    <div class="sb-body">
+
+      <!-- DESIGN TAB -->
+      <div class="tab-content active" data-tab="design">
+
+        <div class="section open" data-section="layout">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg> Layout</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="layout-grid">
+              <button class="layout-tile vertical active" data-layout="vertical" type="button">
+                <span class="layout-tile-icon"></span>
+                Vertical
+              </button>
+              <button class="layout-tile" data-layout="horizontal" type="button">
+                <span class="layout-tile-icon"></span>
+                Horizontal
+              </button>
+              <button class="layout-tile compact" data-layout="compact" type="button">
+                <span class="layout-tile-icon"></span>
+                Compact
+              </button>
+            </div>
+            <div class="field-help">Vertical: full card with hero band. Horizontal: page-top strip. Compact: narrow sidebar widget.</div>
+          </div></div>
+        </div>
+
+        <div class="section" data-section="theme">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14 14 0 0 0 0 20"/></svg> Theme</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="toggle-row">
+              <span>Dark mode<small>Default theme for the widget</small></span>
+              <button class="switch" id="toggle-theme" type="button" aria-label="Toggle theme"></button>
+            </div>
+          </div></div>
+        </div>
+
+      </div>
+
+      <!-- CONTENT TAB -->
+      <div class="tab-content" data-tab="content">
+
+        <div class="section open" data-section="creds">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Travelify API</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div id="creds-status-area">
+              <div class="creds-status missing">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Not configured. Add your Travelify credentials below.</span>
+              </div>
+            </div>
+
+            <div id="creds-form">
+              <div class="field">
+                <label>Application ID</label>
+                <input type="text" id="travelify-appid" placeholder="e.g. 250" autocomplete="off">
+                <div class="field-help">Your Travelify Application ID, supplied when your account was set up.</div>
+              </div>
+              <div class="field">
+                <label>API Key</label>
+                <input type="password" id="travelify-apikey" placeholder="••••••••••••••••" autocomplete="off">
+                <div class="field-help">Your secret API key. Encrypted at rest using AES-256-GCM. Never displayed again once saved.</div>
+              </div>
+              <button class="login-btn" id="save-creds-btn" type="button" style="height:38px; font-size:13px;">Save credentials</button>
+            </div>
+
+            <div id="creds-replace" hidden>
+              <div class="creds-actions">
+                <button id="rotate-creds-btn" type="button">Rotate key</button>
+                <button id="revoke-creds-btn" type="button" class="danger">Revoke</button>
+              </div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="section" data-section="copy">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Copy</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="field">
+              <label>Title</label>
+              <input type="text" id="copy-title" value="My Booking">
+            </div>
+            <div class="field">
+              <label>Subtitle (vertical)</label>
+              <textarea id="copy-subtitle">Welcome back. Enter your details to view everything about your upcoming trip.</textarea>
+            </div>
+            <div class="field">
+              <label>Subtitle (horizontal)</label>
+              <input type="text" id="copy-subtitle-short" value="Look up your trip in seconds">
+            </div>
+            <div class="field">
+              <label>Eyebrow text</label>
+              <input type="text" id="copy-eyebrow" value="Secure booking lookup">
+            </div>
+          </div></div>
+        </div>
+
+        <div class="section" data-section="support">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7a2 2 0 0 1 1.72 2z"/></svg> Support contact</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="field">
+              <label>Support email</label>
+              <input type="email" id="support-email" placeholder="support@yourcompany.com">
+            </div>
+            <div class="field">
+              <label>Support phone</label>
+              <input type="tel" id="support-phone" placeholder="+44 1234 567890">
+            </div>
+            <div class="field-help">Shown on the help card and the not-found state. Leave blank to hide.</div>
+          </div></div>
+        </div>
+
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div class="tab-content" data-tab="settings">
+
+        <div class="section open" data-section="display">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg> Display</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="toggle-row"><span>Email + PDF action buttons</span><button class="switch on" data-display="showActions" type="button"></button></div>
+            <div class="toggle-row"><span>Documents section</span><button class="switch on" data-display="showDocuments" type="button"></button></div>
+            <div class="toggle-row"><span>Hotel facilities</span><button class="switch on" data-display="showFacilities" type="button"></button></div>
+            <div class="toggle-row"><span>Hotel description</span><button class="switch on" data-display="showHotelDescription" type="button"></button></div>
+            <div class="toggle-row"><span>Cancellation policy</span><button class="switch on" data-display="showCancellation" type="button"></button></div>
+            <div class="toggle-row"><span>Local fees</span><button class="switch on" data-display="showLocalFees" type="button"></button></div>
+          </div></div>
+        </div>
+
+        <div class="section" data-section="embed">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Embed code</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="embed-block" id="embed-code">&lt;!-- Save the widget first to get embed code --&gt;</div>
+            <div class="embed-actions">
+              <button id="copy-embed" type="button">Copy code</button>
+            </div>
+            <div class="field-help" style="margin-top:8px;">Paste this into any HTML page. Works in Duda, WordPress, Wix, Squarespace and any custom site.</div>
+          </div></div>
+        </div>
+
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ PREVIEW PANE ============ -->
+  <main class="preview-pane">
+    <div class="preview-bar">
+      <span class="label">Preview</span>
+      <button class="vp-btn active" data-vp="auto">Auto</button>
+      <button class="vp-btn" data-vp="mobile">Mobile</button>
+      <button class="vp-btn" data-vp="tablet">Tablet</button>
+      <button class="vp-btn" data-vp="desktop">Desktop</button>
+      <div class="right">
+        <span>Preview theme</span>
+        <button class="switch" id="preview-theme-switch" type="button" aria-label="Preview theme"></button>
+      </div>
+    </div>
+    <div class="preview-stage" id="preview-stage">
+      <div class="preview-frame" id="preview-frame" data-vp="auto">
+        <div id="widget-host"></div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <span id="toast-text">Saved</span>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="login-overlay" hidden>
+  <div class="login-card">
+    <h2>Sign in to edit</h2>
+    <p>Enter your Travelgenix credentials to continue.</p>
+    <div id="login-error" class="login-error" hidden></div>
+    <div class="field">
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="login-pw">Password</label>
+      <input type="password" id="login-pw" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="login-btn" type="button">Sign in</button>
+  </div>
+</div>
+
+<!-- CONFIRM REVOKE MODAL -->
+<div class="modal" id="confirm-modal" hidden>
+  <div class="modal-card">
+    <h2 id="confirm-title">Revoke credentials?</h2>
+    <p id="confirm-body">Your widget will stop working until you add new credentials. Existing customer lookups will fail with a not-found message.</p>
+    <div class="modal-actions">
+      <button class="cancel" id="confirm-cancel" type="button">Cancel</button>
+      <button class="ok danger" id="confirm-ok" type="button">Revoke</button>
+    </div>
+  </div>
+</div>
+
+<script src="/widget-mybooking.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // ===== State =====
+  const state = {
+    widgetId: null,
+    name: 'My Booking',
+    config: {
+      layout: 'vertical',
+      theme: 'light',
+      title: 'My Booking',
+      subtitle: 'Welcome back. Enter your details to view everything about your upcoming trip.',
+      subtitleShort: 'Look up your trip in seconds',
+      eyebrow: 'Secure booking lookup',
+      labels: {},
+      support: { email: '', phone: '' },
+      display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showLocalFees: true },
+    },
+    integration: null,
+    previewTheme: 'light',
+    rerenderTimer: null,
+  };
+
+  // ===== Auth =====
+  function getAuthToken() {
+    try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; }
+  }
+  function getAuthEmail() {
+    try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.user?.email || ''; } catch { return ''; }
+  }
+  function authH() {
+    const t = getAuthToken();
+    const h = { 'Content-Type': 'application/json' };
+    if (t) h['Authorization'] = 'Bearer ' + t;
+    return h;
+  }
+  function isLoggedIn() {
+    try {
+      const s = JSON.parse(sessionStorage.getItem('tgw_session'));
+      return !!(s && s.token);
+    } catch { return false; }
+  }
+  function showLogin() {
+    document.getElementById('login-overlay').hidden = false;
+    setTimeout(() => document.getElementById('login-email').focus(), 100);
+  }
+  function hideLogin() { document.getElementById('login-overlay').hidden = true; }
+
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pw = document.getElementById('login-pw').value;
+    const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('login-btn');
+    errEl.hidden = true;
+    if (!email || !pw) {
+      errEl.textContent = 'Please enter both email and password.';
+      errEl.hidden = false;
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    try {
+      const res = await fetch('/api/widget-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pw }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.token) {
+        errEl.textContent = data.error || 'Invalid credentials.';
+        errEl.hidden = false;
+        return;
+      }
+      sessionStorage.setItem('tgw_session', JSON.stringify({
+        user: data.user || { email },
+        token: data.token,
+        timestamp: Date.now(),
+      }));
+      hideLogin();
+      bootstrap();
+    } catch (e) {
+      errEl.textContent = 'Network error. Please try again.';
+      errEl.hidden = false;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  }
+  document.getElementById('login-btn').addEventListener('click', doLogin);
+  ['login-email', 'login-pw'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+
+  function ensureAuth() {
+    if (!isLoggedIn()) {
+      showLogin();
+      return false;
+    }
+    return true;
+  }
+
+  // ===== Toast =====
+  function toast(msg, type) {
+    const el = document.getElementById('toast');
+    document.getElementById('toast-text').textContent = msg;
+    el.classList.toggle('error', type === 'error');
+    el.classList.add('show');
+    clearTimeout(window._toastT);
+    window._toastT = setTimeout(() => el.classList.remove('show'), 3200);
+  }
+
+  // ===== Tabs =====
+  document.querySelectorAll('.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.dataset.tab === tab));
+    });
+  });
+
+  // ===== Sections =====
+  document.querySelectorAll('.section-header').forEach(h => {
+    h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
+  });
+
+  // ===== Layout switcher =====
+  document.querySelectorAll('.layout-tile').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.layout-tile').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      state.config.layout = t.dataset.layout;
+      schedulePreview();
+    });
+  });
+
+  // ===== Theme toggle =====
+  document.getElementById('toggle-theme').addEventListener('click', e => {
+    e.currentTarget.classList.toggle('on');
+    state.config.theme = e.currentTarget.classList.contains('on') ? 'dark' : 'light';
+    schedulePreview();
+  });
+
+  // ===== Preview theme =====
+  document.getElementById('preview-theme-switch').addEventListener('click', e => {
+    e.currentTarget.classList.toggle('on');
+    state.previewTheme = e.currentTarget.classList.contains('on') ? 'dark' : 'light';
+    document.getElementById('preview-stage').dataset.theme = state.previewTheme;
+  });
+
+  // ===== Viewport buttons =====
+  document.querySelectorAll('.vp-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.vp-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      document.getElementById('preview-frame').dataset.vp = b.dataset.vp;
+    });
+  });
+
+  // ===== Display toggles =====
+  document.querySelectorAll('[data-display]').forEach(sw => {
+    sw.addEventListener('click', () => {
+      sw.classList.toggle('on');
+      state.config.display[sw.dataset.display] = sw.classList.contains('on');
+      schedulePreview();
+    });
+  });
+
+  // ===== Copy fields =====
+  ['copy-title', 'copy-subtitle', 'copy-subtitle-short', 'copy-eyebrow', 'support-email', 'support-phone'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      if (id === 'copy-title') state.config.title = el.value;
+      else if (id === 'copy-subtitle') state.config.subtitle = el.value;
+      else if (id === 'copy-subtitle-short') state.config.subtitleShort = el.value;
+      else if (id === 'copy-eyebrow') state.config.eyebrow = el.value;
+      else if (id === 'support-email') state.config.support.email = el.value;
+      else if (id === 'support-phone') state.config.support.phone = el.value;
+      schedulePreview();
+    });
+  });
+
+  document.getElementById('widget-name').addEventListener('input', e => {
+    state.name = e.target.value;
+  });
+
+  // ===== Preview rendering =====
+  function schedulePreview() {
+    clearTimeout(state.rerenderTimer);
+    state.rerenderTimer = setTimeout(renderPreview, 150);
+  }
+  function renderPreview() {
+    const host = document.getElementById('widget-host');
+    host.innerHTML = '';
+    const div = document.createElement('div');
+    div.setAttribute('data-tg-widget', 'mybooking');
+    const cfg = JSON.parse(JSON.stringify(state.config));
+    cfg.widgetId = state.widgetId || 'PREVIEW_ID';
+    div.__tgmInitialised = true;
+    host.appendChild(div);
+    try {
+      new window.TGMyBookingWidget(div, cfg);
+    } catch (e) {
+      host.innerHTML = '<p style="color:var(--error);padding:24px;">Preview error: ' + e.message + '</p>';
+    }
+    updateEmbedCode();
+  }
+
+  function updateEmbedCode() {
+    const host = window.location.origin;
+    const id = state.widgetId || '{WIDGET_ID}';
+    const code = `<div data-tg-widget="mybooking" data-tg-id="${id}"></div>\n<script src="${host}/widget-mybooking.js"><\/script>`;
+    document.getElementById('embed-code').textContent = code;
+  }
+
+  document.getElementById('copy-embed').addEventListener('click', e => {
+    if (!state.widgetId) {
+      toast('Save the widget first to get the embed code', 'error');
+      return;
+    }
+    const code = document.getElementById('embed-code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      e.currentTarget.textContent = 'Copied!';
+      e.currentTarget.classList.add('copied');
+      setTimeout(() => {
+        e.currentTarget.textContent = 'Copy code';
+        e.currentTarget.classList.remove('copied');
+      }, 1500);
+    });
+  });
+
+  // ===== Save widget =====
+  document.getElementById('save-btn').addEventListener('click', saveWidget);
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      saveWidget();
+    }
+  });
+
+  async function saveWidget() {
+    if (!ensureAuth()) return;
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const body = {
+        widgetType: 'My Booking',
+        name: state.name || 'Untitled My Booking widget',
+        config: state.config,
+      };
+      if (state.widgetId) body.id = state.widgetId;
+
+      const res = await fetch('/api/widget-config', {
+        method: 'POST',
+        headers: authH(),
+        body: JSON.stringify(body),
+      });
+      if (res.status === 401) {
+        showLogin();
+        btn.disabled = false;
+        btn.textContent = 'Save';
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+
+      const newId = data.id || data.widgetId;
+      if (newId && !state.widgetId) {
+        state.widgetId = newId;
+        // Update URL so refresh keeps the same widget
+        const url = new URL(window.location.href);
+        url.searchParams.set('id', newId);
+        window.history.replaceState({}, '', url.toString());
+      }
+
+      btn.textContent = 'Saved';
+      btn.classList.add('saved');
+      setTimeout(() => {
+        btn.textContent = 'Save';
+        btn.classList.remove('saved');
+      }, 1500);
+      toast('Saved');
+      updateEmbedCode();
+    } catch (e) {
+      btn.textContent = 'Save';
+      toast('Save failed: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ===== Travelify credentials =====
+  async function loadIntegration() {
+    if (!ensureAuth()) return;
+    try {
+      const res = await fetch('/api/client-integrations?service=Travelify', {
+        headers: authH(),
+      });
+      if (res.status === 401) {
+        showLogin();
+        return;
+      }
+      const data = await res.json();
+      state.integration = data.integration || null;
+      renderCredsStatus();
+    } catch (e) {
+      console.error('Load integration failed:', e);
+    }
+  }
+
+  function renderCredsStatus() {
+    const area = document.getElementById('creds-status-area');
+    const formEl = document.getElementById('creds-form');
+    const replaceEl = document.getElementById('creds-replace');
+
+    if (state.integration && state.integration.status === 'Active') {
+      area.innerHTML = `
+        <div class="creds-status ok">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Travelify credentials are active.</span>
+        </div>
+        <div class="creds-meta">App ID: ${state.integration.appId || '—'}<br>Last used: ${state.integration.lastUsedAt ? new Date(state.integration.lastUsedAt).toLocaleString('en-GB') : 'never'}</div>
+      `;
+      formEl.hidden = true;
+      replaceEl.hidden = false;
+    } else {
+      area.innerHTML = `
+        <div class="creds-status missing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Not configured. Add your Travelify credentials below.</span>
+        </div>
+      `;
+      formEl.hidden = false;
+      replaceEl.hidden = true;
+    }
+  }
+
+  document.getElementById('save-creds-btn').addEventListener('click', saveCredentials);
+
+  async function saveCredentials() {
+    if (!ensureAuth()) return;
+    const appId = document.getElementById('travelify-appid').value.trim();
+    const apiKey = document.getElementById('travelify-apikey').value.trim();
+    if (!appId) { toast('Please enter the Application ID', 'error'); return; }
+    if (!apiKey) { toast('Please enter the API Key', 'error'); return; }
+
+    const btn = document.getElementById('save-creds-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const res = await fetch('/api/client-integrations', {
+        method: 'POST',
+        headers: authH(),
+        body: JSON.stringify({ service: 'Travelify', appId, apiKey }),
+      });
+      if (res.status === 401) {
+        showLogin();
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      state.integration = data.integration;
+      // Clear the input fields
+      document.getElementById('travelify-appid').value = '';
+      document.getElementById('travelify-apikey').value = '';
+      renderCredsStatus();
+      toast('Travelify credentials saved');
+    } catch (e) {
+      toast('Save failed: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save credentials';
+    }
+  }
+
+  document.getElementById('rotate-creds-btn').addEventListener('click', () => {
+    state.integration = null;
+    renderCredsStatus();
+    toast('Enter the new credentials below');
+  });
+
+  document.getElementById('revoke-creds-btn').addEventListener('click', () => {
+    showConfirm('Revoke credentials?', 'Your widget will stop working until you add new credentials. Existing customer lookups will fail with a not-found message.', async () => {
+      try {
+        const res = await fetch('/api/client-integrations?service=Travelify', {
+          method: 'DELETE',
+          headers: authH(),
+        });
+        if (res.status === 401) { showLogin(); return; }
+        if (!res.ok) throw new Error('Revoke failed');
+        state.integration = null;
+        renderCredsStatus();
+        toast('Credentials revoked');
+      } catch (e) {
+        toast('Revoke failed: ' + e.message, 'error');
+      }
+    });
+  });
+
+  // ===== Confirm modal =====
+  function showConfirm(title, body, onOk) {
+    const m = document.getElementById('confirm-modal');
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-body').textContent = body;
+    m.hidden = false;
+    const okBtn = document.getElementById('confirm-ok');
+    const cancelBtn = document.getElementById('confirm-cancel');
+    function close() { m.hidden = true; okBtn.removeEventListener('click', okHandler); cancelBtn.removeEventListener('click', close); }
+    function okHandler() { close(); onOk(); }
+    okBtn.addEventListener('click', okHandler);
+    cancelBtn.addEventListener('click', close);
+  }
+
+  // ===== Load existing widget =====
+  async function loadWidget(id) {
+    try {
+      const res = await fetch('/api/widget-config?id=' + encodeURIComponent(id));
+      if (!res.ok) throw new Error('Load failed');
+      const data = await res.json();
+      state.widgetId = id;
+      state.name = data.name || 'My Booking';
+      if (data.config) {
+        state.config = Object.assign(state.config, data.config);
+      }
+      // Populate UI
+      document.getElementById('widget-name').value = state.name;
+      document.getElementById('copy-title').value = state.config.title || '';
+      document.getElementById('copy-subtitle').value = state.config.subtitle || '';
+      document.getElementById('copy-subtitle-short').value = state.config.subtitleShort || '';
+      document.getElementById('copy-eyebrow').value = state.config.eyebrow || '';
+      document.getElementById('support-email').value = state.config.support?.email || '';
+      document.getElementById('support-phone').value = state.config.support?.phone || '';
+      // Layout tile
+      document.querySelectorAll('.layout-tile').forEach(t => t.classList.toggle('active', t.dataset.layout === state.config.layout));
+      // Theme switch
+      const themeOn = state.config.theme === 'dark';
+      document.getElementById('toggle-theme').classList.toggle('on', themeOn);
+      // Display switches
+      document.querySelectorAll('[data-display]').forEach(sw => {
+        const k = sw.dataset.display;
+        sw.classList.toggle('on', state.config.display?.[k] !== false);
+      });
+    } catch (e) {
+      toast('Could not load widget: ' + e.message, 'error');
+    }
+  }
+
+  // ===== Bootstrap =====
+  async function bootstrap() {
+    if (!ensureAuth()) return;
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id) {
+      await loadWidget(id);
+    }
+    await loadIntegration();
+    renderPreview();
+    updateEmbedCode();
+  }
+
+  bootstrap();
+})();
+</script>
+
+</body>
+</html>
