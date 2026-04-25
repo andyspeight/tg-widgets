@@ -388,6 +388,21 @@ const WIDGETS = [
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'mybooking',
+    name: 'My Booking',
+    airtableType: 'My Booking',
+    description: 'Premium booking lookup widget — your customers retrieve their confirmed booking with three details. Live from Travelify, with payment schedule, hotel info, documents and instalments. AES-256 encrypted credentials.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8"/><rect x="3" y="5" width="18" height="14" rx="2" ry="2"/>'},
+    color: '#1B2B5B',
+    editorUrl: '/editor-mybooking',
+    demoUrl: '/demo-mybooking',
+    widgetTag: 'mybooking',
+    scriptFile: 'widget-mybooking.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'countdown',
     name: 'Countdown Timer',
     description: 'Create urgency with animated countdown timers for sales, launches, and events. Multiple display styles.',
@@ -1068,6 +1083,109 @@ function loadMiniPreview(w) {
       </div>
     `;
   }
+
+  if (w.id === 'mybooking') {
+    // Static HTML mockup — same approach as Enquiry. The real My Booking widget
+    // is 800+px tall once a booking is loaded, and the form-only state would
+    // waste the canvas. This mockup is a visual taste of the "found" state at
+    // tile size — hero strip with destination, confirmed pill, key stay facts.
+    container.innerHTML = `
+      <div style="
+        width: 100%; height: 100%;
+        background: #FFFFFF;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(15,23,42,.06);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+        box-sizing: border-box;
+      ">
+        <div style="
+          position: relative;
+          height: 140px;
+          background-image: linear-gradient(180deg, rgba(15,23,42,.05) 0%, rgba(15,23,42,.75) 100%), url('https://photos.hotelbeds.com/giata/bigger/11/115398/115398a_hb_a_014.jpg');
+          background-size: cover;
+          background-position: center;
+          padding: 14px 18px;
+          display: flex; flex-direction: column; justify-content: space-between;
+        ">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+            <span style="
+              display: inline-flex; align-items: center; gap: 6px;
+              padding: 4px 10px;
+              background: rgba(16,185,129,.95);
+              border-radius: 999px;
+              font-size: 10px; font-weight: 700;
+              letter-spacing: .04em; text-transform: uppercase;
+              color: #FFFFFF;
+            ">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Confirmed
+            </span>
+            <span style="
+              padding: 4px 10px;
+              background: rgba(255,255,255,.15);
+              border: 1px solid rgba(255,255,255,.2);
+              border-radius: 6px;
+              font-size: 10px; font-weight: 500;
+              color: rgba(255,255,255,.92);
+              letter-spacing: .04em;
+              backdrop-filter: blur(8px);
+            ">
+              Ref <strong style="color:#FFFFFF; font-weight:700; font-variant-numeric: tabular-nums;">DEMO81376</strong>
+            </span>
+          </div>
+          <div>
+            <div style="display: inline-flex; gap: 1px; margin-bottom: 4px; color: #FFD166;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 9 12 2"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 9 12 2"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 9 12 2"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 9 12 2"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 9 12 2"/></svg>
+            </div>
+            <div style="font-size: 22px; font-weight: 700; color: #FFFFFF; letter-spacing: -.02em; line-height: 1.05; margin-bottom: 2px; text-shadow: 0 2px 8px rgba(0,0,0,.3);">
+              Address Downtown
+            </div>
+            <div style="font-size: 11px; color: rgba(255,255,255,.85); display: inline-flex; align-items: center; gap: 5px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Dubai, UAE
+            </div>
+          </div>
+        </div>
+
+        <div style="
+          flex: 1;
+          padding: 16px 18px;
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr 1fr;
+          gap: 14px;
+          align-items: center;
+          background: #FFFFFF;
+        ">
+          <div>
+            <div style="font-size: 9px; font-weight: 600; color: #94A3B8; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px;">Check-in</div>
+            <div style="font-size: 14px; font-weight: 600; color: #0F172A; letter-spacing: -.01em; font-variant-numeric: tabular-nums;">23 Sep</div>
+            <div style="font-size: 10px; color: #475569; margin-top: 1px;">Wed · 2026</div>
+          </div>
+          <div style="border-left: 1px solid #F1F5F9; padding-left: 14px;">
+            <div style="font-size: 9px; font-weight: 600; color: #94A3B8; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px;">Nights</div>
+            <div style="font-size: 14px; font-weight: 600; color: #0F172A; letter-spacing: -.01em; font-variant-numeric: tabular-nums;">7</div>
+            <div style="font-size: 10px; color: #475569; margin-top: 1px;">1 week</div>
+          </div>
+          <div style="border-left: 1px solid #F1F5F9; padding-left: 14px;">
+            <div style="font-size: 9px; font-weight: 600; color: #94A3B8; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px;">Total</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; letter-spacing: -.01em; font-variant-numeric: tabular-nums;">£1,762</div>
+            <div style="font-size: 10px; color: ${w.color}; font-weight: 500; margin-top: 1px;">Paid</div>
+          </div>
+          <div style="border-left: 1px solid #F1F5F9; padding-left: 14px;">
+            <div style="font-size: 9px; font-weight: 600; color: #94A3B8; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px;">Until trip</div>
+            <div style="font-size: 14px; font-weight: 600; color: ${w.color}; letter-spacing: -.01em; font-variant-numeric: tabular-nums;">152 days</div>
+            <div style="font-size: 10px; color: #475569; margin-top: 1px;">Ready to fly</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 }
 
 /* ═══ AUTH ═══ */
@@ -1130,5 +1248,6 @@ render();
 <script src="/widget-testimonials.js"></script>
 <script src="/widget-spotlight.js"></script>
 <script src="/widget-weather.js"></script>
+<script src="/widget-mybooking.js"></script>
 </body>
 </html>
