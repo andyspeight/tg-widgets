@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Booking Widget — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1B2B5B;
+    --accent: #00B4D8;
+    --bg: #F8FAFC;
+    --bg-2: #F1F5F9;
+    --border: #E2E8F0;
+    --text: #0F172A;
+    --text-2: #475569;
+    --text-3: #94A3B8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+  .topbar { padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+  .topbar .brand { font-weight: 700; font-size: 16px; color: var(--primary); letter-spacing: -.01em; }
+  .topbar a.back { font-size: 13px; color: var(--text-2); text-decoration: none; }
+  .topbar a.back:hover { color: var(--accent); }
+  .topbar .switcher { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+  .topbar .switcher button { font-family: inherit; font-size: 13px; font-weight: 500; padding: 8px 12px; border-radius: 9999px; border: 1px solid var(--border); background: #fff; color: var(--text-2); cursor: pointer; transition: all .15s; min-height: 36px; }
+  .topbar .switcher button:hover { border-color: var(--accent); color: var(--text); }
+  .topbar .switcher button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .topbar .theme { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+  .topbar .switch { position: relative; width: 40px; height: 22px; background: var(--border); border-radius: 9999px; cursor: pointer; transition: background .2s; border: none; padding: 0; }
+  .topbar .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  body[data-demo-theme="dark"] .topbar .switch { background: var(--accent); }
+  body[data-demo-theme="dark"] .topbar .switch::after { transform: translateX(18px); }
+
+  .stage { padding: 48px 24px 96px; max-width: 880px; margin: 0 auto; }
+  .stage h1 { font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin: 0 0 8px; }
+  .stage h1 + p { font-size: 16px; color: var(--text-2); margin: 0 0 32px; }
+  .demo-info { padding: 12px 16px; background: rgba(0,180,216,.08); border: 1px solid rgba(0,180,216,.2); border-radius: 12px; font-size: 13px; color: #075985; margin-bottom: 24px; line-height: 1.5; }
+  .demo-info strong { color: var(--text); }
+  .demo-info code { padding: 1px 6px; background: rgba(0,180,216,.12); border-radius: 4px; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+
+  .widget-stage { padding: 24px 0; }
+
+  body[data-demo-theme="dark"] { background: #0F172A; color: #F8FAFC; }
+  body[data-demo-theme="dark"] .topbar { background: #1E293B; border-color: #334155; }
+  body[data-demo-theme="dark"] .topbar .brand { color: #F8FAFC; }
+  body[data-demo-theme="dark"] .topbar .switcher button { background: #1E293B; border-color: #334155; color: #CBD5E1; }
+  body[data-demo-theme="dark"] .topbar .switcher button.active { background: var(--accent); color: #0F172A; border-color: var(--accent); }
+  body[data-demo-theme="dark"] .demo-info { background: rgba(0,180,216,.12); border-color: rgba(0,180,216,.3); color: #67E8F9; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="/" class="back">← Dashboard</a>
+  <span class="brand">My Booking — Demo</span>
+  <div class="switcher" id="layout-switcher">
+    <button class="active" data-layout="vertical">Vertical</button>
+    <button data-layout="horizontal">Horizontal</button>
+    <button data-layout="compact">Compact</button>
+  </div>
+  <div class="theme">
+    <span>Light</span>
+    <button class="switch" id="theme-switch" aria-label="Toggle dark mode"></button>
+    <span>Dark</span>
+  </div>
+</header>
+
+<main class="stage">
+  <h1>My Booking</h1>
+  <p>A premium booking lookup widget that lets your customers retrieve their confirmed booking with just three details.</p>
+
+  <div class="demo-info">
+    <strong>Demo mode:</strong> this page uses inline config. The Travelify demo credentials (<code>App ID 250</code>) are wired through the production retrieve endpoint. Try the test booking: <code>info@travelgenix.io</code> · <code>2026-09-23</code> · <code>DEMO81376</code>.
+  </div>
+
+  <div class="widget-stage" id="widget-stage">
+    <!-- Widget renders here -->
+  </div>
+</main>
+
+<script src="/widget-mybooking.js"></script>
+<script>
+  const stage = document.getElementById('widget-stage');
+  let currentLayout = 'vertical';
+  let currentTheme = 'light';
+
+  function rebuild() {
+    stage.innerHTML = '';
+    const div = document.createElement('div');
+    div.setAttribute('data-tg-widget', 'mybooking');
+    div.setAttribute('data-tg-config', JSON.stringify({
+      layout: currentLayout,
+      theme: currentTheme,
+      // For demo only — in production this would be a real widgetId
+      widgetId: 'DEMO_WIDGET_ID',
+      title: 'My Booking',
+      subtitle: 'Welcome back. Enter your details to view everything about your upcoming trip.',
+      support: {
+        email: 'support@travelgenix.io',
+        phone: '+44 1202 123456',
+      },
+    }));
+    stage.appendChild(div);
+    // Re-trigger init for new node
+    if (typeof window.TGMyBookingWidget === 'function') {
+      // The auto-init scans on DOMContentLoaded; for dynamic injection we instantiate manually
+      div.__tgmInitialised = true;
+      try {
+        new window.TGMyBookingWidget(div, {
+          layout: currentLayout,
+          theme: currentTheme,
+          widgetId: 'DEMO_WIDGET_ID',
+          title: 'My Booking',
+          subtitle: 'Welcome back. Enter your details to view everything about your upcoming trip.',
+          support: { email: 'support@travelgenix.io', phone: '+44 1202 123456' },
+        });
+      } catch (e) {
+        console.error('Widget init error:', e);
+      }
+    }
+  }
+
+  document.querySelectorAll('#layout-switcher button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#layout-switcher button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentLayout = btn.dataset.layout;
+      rebuild();
+    });
+  });
+
+  document.getElementById('theme-switch').addEventListener('click', () => {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-demo-theme', currentTheme);
+    rebuild();
+  });
+
+  // Listen for events
+  stage.addEventListener('tg-mybooking:booking-loaded', e => {
+    console.log('[Demo] booking loaded:', e.detail);
+  });
+  stage.addEventListener('tg-mybooking:email-requested', e => {
+    alert('Email requested — Phase 2 will send the confirmation email.');
+  });
+  stage.addEventListener('tg-mybooking:pdf-requested', e => {
+    alert('PDF requested — Phase 2 will generate and download the PDF.');
+  });
+
+  // Initial build
+  setTimeout(rebuild, 50);
+</script>
+
+</body>
+</html>
