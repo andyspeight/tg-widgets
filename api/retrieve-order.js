@@ -50,18 +50,21 @@ const IF = {
 const TRAVELIFY_API = 'https://api.travelify.io/account/order';
 
 // ----- Demo bypass -----
-// When widgetId === DEMO_WIDGET_SENTINEL, skip the Airtable widget + integration
-// lookups and use the demo Travelify credentials from env vars. This is for the
-// public /demo-mybooking.html standalone test page.
+// When widgetId === DEMO_WIDGET_SENTINEL, skip the Airtable widget lookup and
+// instead pull the demo Travelify integration directly from Airtable by record
+// ID. The encrypted key is decrypted with the same TG_ENCRYPTION_KEY used by
+// real client lookups. This is for the public /demo-mybooking.html standalone
+// test page.
 //
 // SAFETY:
 //   - Only triggers on the literal string 'DEMO_WIDGET_ID'. Real widgets use
 //     the tgw_{ts}_{rand} format so there is no collision risk.
-//   - The demo creds MUST point at the Travelify demo App (currently 250) with
-//     synthetic bookings only. Never point them at a real client's App.
+//   - The pinned record MUST be the Travelify demo App (currently 250) with
+//     synthetic bookings only. Never repoint this at a real client's record.
 //   - Validation, rate limiting, and response sanitisation still run.
-//   - If either env var is missing the demo path fails closed (notFound).
+//   - If the record is missing or decryption fails, the path fails closed (notFound).
 const DEMO_WIDGET_SENTINEL = 'DEMO_WIDGET_ID';
+const DEMO_INTEGRATION_RECORD_ID = 'rec6TnQI0Pz8PyrGs';
 
 // ----- Rate limiting (in-memory, same pattern as _auth.js) -----
 
@@ -170,6 +173,17 @@ async function findActiveTravelifyIntegration(clientEmail) {
   if (!res.ok) throw new Error(`Integration lookup failed: ${res.status}`);
   const data = await res.json();
   return data.records?.[0] || null;
+}
+
+// Direct fetch by record ID — used only by the demo bypass.
+async function getIntegrationById(recordId) {
+  const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${INTEGRATIONS_TABLE}/${recordId}`);
+  url.searchParams.set('returnFieldsByFieldId', 'true');
+
+  const res = await fetch(url.toString(), { headers: airtableHeaders() });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Integration get-by-id failed: ${res.status}`);
+  return await res.json();
 }
 
 async function touchLastUsed(recordId) {
@@ -413,12 +427,30 @@ export default async function handler(req, res) {
 
     if (widgetId === DEMO_WIDGET_SENTINEL) {
       // ----- Demo path -----
-      appId = process.env.TRAVELIFY_DEMO_APPID;
-      apiKey = process.env.TRAVELIFY_DEMO_KEY;
-      if (!appId || !apiKey) {
-        console.warn('Demo lookup attempted but TRAVELIFY_DEMO_APPID / TRAVELIFY_DEMO_KEY not configured');
+      // Pull the pinned demo Travelify integration record directly. Encrypted
+      // key is decrypted with the same TG_ENCRYPTION_KEY used for real clients.
+      const integration = await getIntegrationById(DEMO_INTEGRATION_RECORD_ID);
+      if (!integration) {
+        console.warn('Demo integration record not found:', DEMO_INTEGRATION_RECORD_ID);
         return notFound(res);
       }
+
+      const demoAppId = integration.fields?.[IF.AppId];
+      const demoApiKeyEncrypted = integration.fields?.[IF.ApiKeyEncrypted];
+      if (!demoAppId || !demoApiKeyEncrypted) {
+        console.warn('Demo integration record missing AppId or encrypted key');
+        return notFound(res);
+      }
+
+      try {
+        apiKey = decrypt(demoApiKeyEncrypted);
+      } catch (e) {
+        console.error('Demo key decryption failed:', e.message);
+        return notFound(res);
+      }
+      appId = demoAppId;
+      // Don't set integrationId — we don't want to update LastUsedAt for the
+      // demo record on every public test.
     } else {
       // ----- Real client path -----
       // 1. Find widget → owning client
