@@ -159,7 +159,10 @@ export function renderPdfHtml(order, opts = {}) {
     text:    '#0F172A',
   };
   const colors = Object.assign({}, COLOR_DEFAULTS, opts.colors || {});
-  const radius = Math.max(0, Math.min(28, parseInt(opts.radius, 10) || 12));
+  // Note: don't use `|| 12` — that would treat 0 (Sharp) as falsy and
+  // substitute 12. Default only when the value is missing or NaN.
+  const parsedRadius = parseInt(opts.radius, 10);
+  const radius = Math.max(0, Math.min(28, Number.isFinite(parsedRadius) ? parsedRadius : 12));
   // Derive a darker primary for the gradient ramp
   const primaryDark = shiftHex(colors.primary, -18);
 
