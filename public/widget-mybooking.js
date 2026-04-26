@@ -17,9 +17,51 @@
 (function () {
   'use strict';
 
-  const API_CONFIG = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
-  const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || '/api/retrieve-order';
-  const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || '/api/booking-pdf';
+  // Derive the API base from this script's own src. When the widget is
+  // loaded directly on widgets.travelify.io a relative "/api/..." works
+  // fine, but when embedded cross-origin (e.g. inside Luna chat on a
+  // client website) the relative path resolves against the host page
+  // and 403s. Computing the base from document.currentScript ensures
+  // we always hit the origin the widget was actually served from.
+  //
+  // Resolution order:
+  //   1. window.__TG_WIDGET_API_BASE__ (explicit override, full origin)
+  //   2. document.currentScript.src origin
+  //   3. <script src*="widget-mybooking"> match in DOM
+  //   4. Empty string (relative paths, original behaviour)
+  function deriveApiBase() {
+    if (typeof window === 'undefined') return '';
+    if (typeof window.__TG_WIDGET_API_BASE__ === 'string' && window.__TG_WIDGET_API_BASE__) {
+      return window.__TG_WIDGET_API_BASE__.replace(/\/$/, '');
+    }
+    try {
+      var s = document.currentScript;
+      if (!s) {
+        // currentScript is null inside async callbacks; find by src match
+        var scripts = document.getElementsByTagName('script');
+        for (var i = 0; i < scripts.length; i++) {
+          if (scripts[i].src && scripts[i].src.indexOf('widget-mybooking') !== -1) {
+            s = scripts[i];
+            break;
+          }
+        }
+      }
+      if (s && s.src) {
+        var u = new URL(s.src, window.location.href);
+        return u.origin;
+      }
+    } catch (_) {}
+    return '';
+  }
+
+  var API_BASE = deriveApiBase();
+
+  // Per-endpoint overrides still win — handy for local dev or when the
+  // host wants to proxy via their own domain. Default behaviour is to
+  // join the auto-detected origin with the standard path.
+  const API_CONFIG = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || (API_BASE + '/api/widget-config');
+  const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || (API_BASE + '/api/retrieve-order');
+  const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || (API_BASE + '/api/booking-pdf');
   const VERSION = '1.1.0';
 
   // ----- Inline SVG icons (no external deps) -----
