@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "functions": {
+    "api/booking-pdf.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     { "source": "/demo",              "destination": "/demo.html" },
     { "source": "/demo-reviews",      "destination": "/demo-reviews.html" },
@@ -9,7 +15,6 @@
     { "source": "/demo-weather",      "destination": "/demo-weather.html" },
     { "source": "/demo-enquiry",      "destination": "/demo-enquiry.html" },
     { "source": "/demo-mybooking",    "destination": "/demo-mybooking.html" },
-
     { "source": "/editor",              "destination": "/editor.html" },
     { "source": "/editor-reviews",      "destination": "/editor-reviews.html" },
     { "source": "/editor-faq",          "destination": "/editor-faq.html" },
@@ -18,7 +23,6 @@
     { "source": "/editor-weather",      "destination": "/editor-weather.html" },
     { "source": "/editor-enquiry",      "destination": "/editor-enquiry.html" },
     { "source": "/editor-mybooking",    "destination": "/editor-mybooking.html" },
-
     { "source": "/inbox-enquiry", "destination": "/inbox-enquiry.html" }
   ],
   "headers": [
