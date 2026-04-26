@@ -17,19 +17,17 @@
  *     the install snippet on every page that runs Luna.
  *   - Rate limited per IP to prevent enumeration scans.
  *
- * No auth required. No third-party npm dependencies — uses native fetch
- * against the Airtable REST API.
+ * Implementation: no third-party dependencies, no Airtable formula. We list
+ * all widget records and filter in JS. Any widget with a parseable
+ * lunaIntegration block in its Settings JSON wins regardless of its Type
+ * field — that's the only signal we trust anyway, since the editor only
+ * writes lunaIntegration when the user explicitly connects.
  *
  * Module type: ESM (matches the rest of tg-widgets).
  */
 
 const BASE_ID = 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
-
-// Field IDs — match the rest of the codebase
-const F_NAME = 'fldNVCcOLs0vLAYOk';
-const F_TYPE = 'fldZH88nElhBLNo7N';
-const F_SETTINGS = 'fldGRGAUjxfAPAHLz';
 
 // Simple in-memory rate limit. 60 lookups per IP per minute is more than
 // enough for legitimate use (Luna caches the result per session anyway).
@@ -73,6 +71,67 @@ function getAirtableKey() {
       || '';
 }
 
+// Walk a Settings field and return parsed JSON, or null. Settings can be
+// stored as a JSON string or, in newer rows, as already-parsed objects.
+function parseSettings(raw) {
+  if (!raw) return null;
+  if (typeof raw === 'object') return raw;
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+  return null;
+}
+
+// Find the Settings field on a record, by trying common field names in order.
+// Avoids hard-coding a field ID that might not match this base.
+const SETTINGS_FIELD_CANDIDATES = ['Settings', 'settings', 'Config', 'config'];
+
+function getSettingsRaw(fields) {
+  for (const name of SETTINGS_FIELD_CANDIDATES) {
+    if (fields[name] !== undefined) return fields[name];
+  }
+  // Last resort: hunt for any field whose value parses as JSON containing
+  // a lunaIntegration key. This is defensive and only matters if someone
+  // renames the field upstream.
+  for (const key of Object.keys(fields)) {
+    const parsed = parseSettings(fields[key]);
+    if (parsed && parsed.lunaIntegration) return fields[key];
+  }
+  return null;
+}
+
+// Fetch all widget records via Airtable's pagination. Limited to 5 pages
+// (500 records) as a safety net — a single tg-widgets base shouldn't have
+// more than that, and if it does we'll log and proceed with what we have.
+async function fetchAllWidgets(apiKey) {
+  const baseUrl = 'https://api.airtable.com/v0/' + BASE_ID + '/' + WIDGETS_TABLE;
+  let offset = '';
+  let pages = 0;
+  const all = [];
+
+  while (pages < 5) {
+    const url = baseUrl + '?pageSize=100' + (offset ? '&offset=' + encodeURIComponent(offset) : '');
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' }
+    });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error('Airtable ' + res.status + ': ' + body.slice(0, 300));
+    }
+
+    const data = await res.json();
+    if (Array.isArray(data.records)) all.push(...data.records);
+
+    if (!data.offset) break;
+    offset = data.offset;
+    pages += 1;
+  }
+
+  return all;
+}
+
 export default async function handler(req, res) {
   setCors(res);
 
@@ -106,66 +165,32 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'server_misconfigured' });
   }
 
+  let records;
   try {
-    // Filter to active My Booking widgets, then walk results in JS to inspect
-    // the Settings JSON. Airtable formula language can't parse JSON, so we
-    // pre-filter by widget type at the API level. A client typically has
-    // <100 widgets, well within one page.
-    const formula = `{${F_TYPE}} = 'My Booking'`;
-    const url = 'https://api.airtable.com/v0/' + BASE_ID + '/' + WIDGETS_TABLE
-      + '?filterByFormula=' + encodeURIComponent(formula)
-      + '&pageSize=100'
-      + '&fields%5B%5D=' + encodeURIComponent(F_NAME)
-      + '&fields%5B%5D=' + encodeURIComponent(F_TYPE)
-      + '&fields%5B%5D=' + encodeURIComponent(F_SETTINGS);
-
-    const atRes = await fetch(url, {
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' }
-    });
-
-    if (!atRes.ok) {
-      const errBody = await atRes.text().catch(() => '');
-      console.error('[find-booking-widget] Airtable error', atRes.status, errBody.slice(0, 300));
-      return res.status(500).json({ error: 'lookup_failed' });
-    }
-
-    const data = await atRes.json();
-    const records = Array.isArray(data.records) ? data.records : [];
-    const target = lunaClientName.toLowerCase();
-
-    for (const rec of records) {
-      const fields = rec.fields || {};
-      const rawSettings = fields[F_SETTINGS];
-      if (!rawSettings) continue;
-
-      let settings;
-      if (typeof rawSettings === 'object') {
-        settings = rawSettings;
-      } else if (typeof rawSettings === 'string') {
-        try { settings = JSON.parse(rawSettings); } catch (_) { continue; }
-      } else {
-        continue;
-      }
-
-      const luna = settings && settings.lunaIntegration;
-      if (!luna || !luna.connected) continue;
-      if (typeof luna.clientName !== 'string') continue;
-
-      // Case-insensitive comparison — Luna client names aren't case-sensitive
-      // when the install snippet is parsed, so we match the same way here.
-      if (luna.clientName.trim().toLowerCase() === target) {
-        return res.status(200).json({
-          widgetId: rec.id,
-          connected: true,
-          clientName: luna.clientName
-        });
-      }
-    }
-
-    return res.status(404).json({ error: 'not_found' });
+    records = await fetchAllWidgets(apiKey);
   } catch (err) {
-    console.error('[find-booking-widget] Lookup error:', err && err.message ? err.message : err);
+    console.error('[find-booking-widget] Airtable fetch failed:', err && err.message ? err.message : err);
     return res.status(500).json({ error: 'lookup_failed' });
   }
+
+  const target = lunaClientName.toLowerCase();
+  for (const rec of records) {
+    const fields = rec.fields || {};
+    const settings = parseSettings(getSettingsRaw(fields));
+    if (!settings) continue;
+
+    const luna = settings.lunaIntegration;
+    if (!luna || !luna.connected) continue;
+    if (typeof luna.clientName !== 'string') continue;
+
+    if (luna.clientName.trim().toLowerCase() === target) {
+      return res.status(200).json({
+        widgetId: rec.id,
+        connected: true,
+        clientName: luna.clientName
+      });
+    }
+  }
+
+  return res.status(404).json({ error: 'not_found' });
 }
