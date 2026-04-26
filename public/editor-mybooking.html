@@ -428,6 +428,38 @@
           </div></div>
         </div>
 
+        <div class="section" data-section="luna">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Luna Chat Integration</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+
+            <div id="luna-status-area">
+              <div class="creds-status missing">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Not connected. Paste your Luna install code below.</span>
+              </div>
+            </div>
+
+            <div id="luna-form">
+              <div class="field">
+                <label>Luna install code</label>
+                <textarea id="luna-snippet" placeholder='&lt;script src="https://luna-chat-endpoint.vercel.app/widget-core.js" data-clientName="YourCompany" async&gt;&lt;/script&gt;' style="font-family: 'JetBrains Mono', monospace; font-size: 11px; min-height: 90px;"></textarea>
+                <div class="field-help">When customers ask about their booking in chat, Luna will use this widget to look it up. Find your install code in your Luna dashboard. Make sure to use the same code you've already added to your website.</div>
+              </div>
+              <button class="save-creds-btn" id="luna-connect-btn" type="button">Connect Luna</button>
+            </div>
+
+            <div id="luna-connected" hidden>
+              <div class="creds-actions">
+                <button id="luna-disconnect-btn" type="button" class="danger">Disconnect</button>
+              </div>
+            </div>
+
+          </div></div>
+        </div>
+
       </div>
 
       <!-- SETTINGS TAB -->
@@ -565,6 +597,7 @@ import { renderEmailHtml } from '/_email-template.js';
       radius: 12,
       support: { email: '', phone: '' },
       display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showLocalFees: true },
+      lunaIntegration: { connected: false, clientName: '' },
     },
     integration: null,
     previewTheme: 'light',
@@ -1072,6 +1105,73 @@ import { renderEmailHtml } from '/_email-template.js';
     toast('Enter the new credentials below');
   });
 
+  // ===== Luna Chat Integration =====
+  // Extracts the data-clientName attribute from a Luna install snippet.
+  // Returns null if the snippet looks invalid.
+  function parseLunaSnippet(snippet) {
+    if (typeof snippet !== 'string' || !snippet.trim()) return null;
+    const cleaned = snippet.trim();
+    // Must be a Luna script tag — sanity check
+    if (!/luna-chat-endpoint|widget-core\.js/i.test(cleaned)) return null;
+    // Pull data-clientName="X" or data-clientname="X" (HTML attrs are case-insensitive)
+    const match = cleaned.match(/data-client[Nn]ame\s*=\s*["']([^"']+)["']/);
+    if (!match || !match[1]) return null;
+    return match[1].trim();
+  }
+
+  function renderLunaStatus() {
+    const area = document.getElementById('luna-status-area');
+    const formEl = document.getElementById('luna-form');
+    const connectedEl = document.getElementById('luna-connected');
+    const isConnected = !!(state.config.lunaIntegration && state.config.lunaIntegration.connected);
+
+    if (isConnected) {
+      const clientName = state.config.lunaIntegration.clientName || 'Luna chat';
+      area.innerHTML = `
+        <div class="creds-status ok">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Connected to <strong>${escapeHtmlForAttr(clientName)}</strong>. Booking lookup is live in your chat.</span>
+        </div>
+      `;
+      formEl.hidden = true;
+      connectedEl.hidden = false;
+    } else {
+      area.innerHTML = `
+        <div class="creds-status missing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Not connected. Paste your Luna install code below.</span>
+        </div>
+      `;
+      formEl.hidden = false;
+      connectedEl.hidden = true;
+    }
+  }
+
+  function escapeHtmlForAttr(s) {
+    return String(s || '').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+
+  document.getElementById('luna-connect-btn').addEventListener('click', () => {
+    const snippet = document.getElementById('luna-snippet').value;
+    const clientName = parseLunaSnippet(snippet);
+    if (!clientName) {
+      toast('That doesn\'t look like a valid Luna install code. Make sure you\'re pasting the full <script> tag from your Luna dashboard.', 'error');
+      return;
+    }
+    state.config.lunaIntegration = { connected: true, clientName };
+    renderLunaStatus();
+    toast('Luna chat connected. Save the widget to make it live.');
+  });
+
+  document.getElementById('luna-disconnect-btn').addEventListener('click', () => {
+    showConfirm('Disconnect Luna chat?', 'Booking lookup will stop working in your Luna chat widget until you reconnect. Customers will need to contact you another way.', () => {
+      state.config.lunaIntegration = { connected: false, clientName: '' };
+      document.getElementById('luna-snippet').value = '';
+      renderLunaStatus();
+      toast('Luna disconnected. Save the widget to apply.');
+    });
+  });
+
   document.getElementById('revoke-creds-btn').addEventListener('click', () => {
     showConfirm('Revoke credentials?', 'Your widget will stop working until you add new credentials. Existing customer lookups will fail with a not-found message.', async () => {
       try {
@@ -1151,6 +1251,9 @@ import { renderEmailHtml } from '/_email-template.js';
         const k = sw.dataset.display;
         sw.classList.toggle('on', state.config.display?.[k] !== false);
       });
+      // Luna integration
+      if (!state.config.lunaIntegration) state.config.lunaIntegration = { connected: false, clientName: '' };
+      renderLunaStatus();
     } catch (e) {
       toast('Could not load widget: ' + e.message, 'error');
     }
@@ -1165,6 +1268,7 @@ import { renderEmailHtml } from '/_email-template.js';
       await loadWidget(id);
     }
     await loadIntegration();
+    renderLunaStatus();
     renderPreview();
     updateEmbedCode();
   }
