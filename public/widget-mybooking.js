@@ -857,7 +857,10 @@
       const lighten = (hex, amt) => this._shiftHex(hex, amt);
       const primary = c.primary || '#1B2B5B';
       const accent = c.accent || '#00B4D8';
-      const radius = Math.max(0, Math.min(28, parseInt(this.c.radius, 10) || 12));
+      // Note: don't use `|| 12` — that would treat 0 (Sharp) as falsy and
+      // substitute 12. Default only when the value is missing or NaN.
+      const parsed = parseInt(this.c.radius, 10);
+      const radius = Math.max(0, Math.min(28, Number.isFinite(parsed) ? parsed : 12));
       const overrides = {
         '--tgm-primary': primary,
         '--tgm-primary-light': lighten(primary, 18),
