@@ -49,6 +49,20 @@ const IF = {
 
 const TRAVELIFY_API = 'https://api.travelify.io/account/order';
 
+// ----- Demo bypass -----
+// When widgetId === DEMO_WIDGET_SENTINEL, skip the Airtable widget + integration
+// lookups and use the demo Travelify credentials from env vars. This is for the
+// public /demo-mybooking.html standalone test page.
+//
+// SAFETY:
+//   - Only triggers on the literal string 'DEMO_WIDGET_ID'. Real widgets use
+//     the tgw_{ts}_{rand} format so there is no collision risk.
+//   - The demo creds MUST point at the Travelify demo App (currently 250) with
+//     synthetic bookings only. Never point them at a real client's App.
+//   - Validation, rate limiting, and response sanitisation still run.
+//   - If either env var is missing the demo path fails closed (notFound).
+const DEMO_WIDGET_SENTINEL = 'DEMO_WIDGET_ID';
+
 // ----- Rate limiting (in-memory, same pattern as _auth.js) -----
 
 const rateLimitStore = new Map(); // key -> { count, resetAt }
@@ -393,39 +407,55 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Find widget → owning client
-    const widget = await findWidgetById(widgetId);
-    if (!widget) return notFound(res);
-
-    const widgetType = widget.fields?.WidgetType;
-    if (widgetType !== 'My Booking') return notFound(res);
-
-    const widgetStatus = widget.fields?.Status;
-    if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') {
-      return notFound(res);
-    }
-
-    const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
-    if (!clientEmail) return notFound(res);
-
-    // 2. Find active Travelify integration for this client
-    const integration = await findActiveTravelifyIntegration(clientEmail);
-    if (!integration) {
-      console.warn(`No active Travelify integration for client (widgetId=${widgetId})`);
-      return notFound(res);
-    }
-
-    const appId = integration.fields?.[IF.AppId];
-    const apiKeyEncrypted = integration.fields?.[IF.ApiKeyEncrypted];
-    if (!appId || !apiKeyEncrypted) return notFound(res);
-
-    // 3. Decrypt
+    let appId;
     let apiKey;
-    try {
-      apiKey = decrypt(apiKeyEncrypted);
-    } catch (e) {
-      console.error('Decryption failed for integration', integration.id, ':', e.message);
-      return notFound(res);
+    let integrationId = null; // for LastUsedAt update; null on demo path
+
+    if (widgetId === DEMO_WIDGET_SENTINEL) {
+      // ----- Demo path -----
+      appId = process.env.TRAVELIFY_DEMO_APPID;
+      apiKey = process.env.TRAVELIFY_DEMO_KEY;
+      if (!appId || !apiKey) {
+        console.warn('Demo lookup attempted but TRAVELIFY_DEMO_APPID / TRAVELIFY_DEMO_KEY not configured');
+        return notFound(res);
+      }
+    } else {
+      // ----- Real client path -----
+      // 1. Find widget → owning client
+      const widget = await findWidgetById(widgetId);
+      if (!widget) return notFound(res);
+
+      const widgetType = widget.fields?.WidgetType;
+      if (widgetType !== 'My Booking') return notFound(res);
+
+      const widgetStatus = widget.fields?.Status;
+      if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') {
+        return notFound(res);
+      }
+
+      const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
+      if (!clientEmail) return notFound(res);
+
+      // 2. Find active Travelify integration for this client
+      const integration = await findActiveTravelifyIntegration(clientEmail);
+      if (!integration) {
+        console.warn(`No active Travelify integration for client (widgetId=${widgetId})`);
+        return notFound(res);
+      }
+
+      const integrationAppId = integration.fields?.[IF.AppId];
+      const apiKeyEncrypted = integration.fields?.[IF.ApiKeyEncrypted];
+      if (!integrationAppId || !apiKeyEncrypted) return notFound(res);
+
+      // 3. Decrypt
+      try {
+        apiKey = decrypt(apiKeyEncrypted);
+      } catch (e) {
+        console.error('Decryption failed for integration', integration.id, ':', e.message);
+        return notFound(res);
+      }
+      appId = integrationAppId;
+      integrationId = integration.id;
     }
 
     // 4. Call Travelify
@@ -468,8 +498,8 @@ export default async function handler(req, res) {
     const order = trimOrder(raw);
     if (!order || !order.id) return notFound(res);
 
-    // 6. Async update LastUsedAt
-    touchLastUsed(integration.id);
+    // 6. Async update LastUsedAt (skipped on demo path — no integration record)
+    if (integrationId) touchLastUsed(integrationId);
 
     return res.status(200).json({ order });
   } catch (err) {
