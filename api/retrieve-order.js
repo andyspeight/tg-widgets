@@ -451,6 +451,16 @@ export default async function handler(req, res) {
       appId = demoAppId;
       // Don't set integrationId — we don't want to update LastUsedAt for the
       // demo record on every public test.
+
+      // TEMP DEBUG: log what we're about to send to Travelify
+      console.log('[DEMO DEBUG] About to call Travelify with:', {
+        appId: String(appId),
+        keyLength: typeof apiKey === 'string' ? apiKey.length : 0,
+        keyPreview: typeof apiKey === 'string' ? `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}` : 'invalid',
+        emailAddress,
+        departDate,
+        orderRef,
+      });
     } else {
       // ----- Real client path -----
       // 1. Find widget → owning client
@@ -506,6 +516,20 @@ export default async function handler(req, res) {
       signal: AbortSignal.timeout(12000),
     });
 
+    // Capture body as text first so we can log it on the demo path even on
+    // non-200 responses.
+    const rawText = await travelifyRes.text();
+    const isDemo = widgetId === DEMO_WIDGET_SENTINEL;
+
+    if (isDemo) {
+      console.log('[DEMO DEBUG] Travelify response:', {
+        status: travelifyRes.status,
+        statusText: travelifyRes.statusText,
+        contentType: travelifyRes.headers.get('content-type'),
+        bodyPreview: rawText.slice(0, 1500),
+      });
+    }
+
     if (travelifyRes.status === 404) {
       return notFound(res);
     }
@@ -516,7 +540,7 @@ export default async function handler(req, res) {
 
     let raw;
     try {
-      raw = await travelifyRes.json();
+      raw = JSON.parse(rawText);
     } catch {
       return notFound(res);
     }
