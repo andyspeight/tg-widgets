@@ -113,17 +113,55 @@ const pickHotelDescription = (descriptions) => {
   return main?.text || null;
 };
 
+// Lighten (positive) or darken (negative) a hex colour by a percentage.
+// Used to derive primary-dark from primary in the gradient ramp.
+function shiftHex(hex, percent) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 0xff;
+  const g = (n >> 8) & 0xff;
+  const b = n & 0xff;
+  const target = percent >= 0 ? 255 : 0;
+  const ratio = Math.abs(percent) / 100;
+  const adj = (c) => Math.round(c + (target - c) * ratio);
+  const out = (adj(r) << 16) | (adj(g) << 8) | adj(b);
+  return '#' + out.toString(16).padStart(6, '0');
+}
+
 // ----- Main render -----
 
 /**
  * @param {object} order — trimmed order from retrieve-order
- * @param {object} opts — { issuedAt?: ISO string, brandName?: string, supportEmail?: string, supportPhone?: string }
+ * @param {object} opts — {
+ *   issuedAt?: ISO string,
+ *   brandName?: string,            // displayed in header/footer when set; omitted when blank
+ *   supportEmail?: string,
+ *   supportPhone?: string,
+ *   colors?: { primary, accent, success, warning, text },
+ *   radius?: number                // base radius in px
+ * }
  */
 export function renderPdfHtml(order, opts = {}) {
   const issuedAt = opts.issuedAt || new Date().toISOString();
-  const brandName = opts.brandName || 'Travelgenix';
+  const brandName = (opts.brandName || '').trim();         // empty = no brand row
+  const hasBrand = brandName.length > 0;
   const supportEmail = opts.supportEmail || null;
   const supportPhone = opts.supportPhone || null;
+
+  // Colour overrides — defaults match the Travelgenix design language but
+  // are fully overridable per widget.
+  const COLOR_DEFAULTS = {
+    primary: '#1B2B5B',
+    accent:  '#00B4D8',
+    success: '#10B981',
+    warning: '#F59E0B',
+    text:    '#0F172A',
+  };
+  const colors = Object.assign({}, COLOR_DEFAULTS, opts.colors || {});
+  const radius = Math.max(0, Math.min(28, parseInt(opts.radius, 10) || 12));
+  // Derive a darker primary for the gradient ramp
+  const primaryDark = shiftHex(colors.primary, -18);
 
   // First accommodation item is the v1 case
   const accomItem = (order.items || []).find((it) => it?.product === 'Accommodation') || (order.items || [])[0] || null;
@@ -197,23 +235,27 @@ export function renderPdfHtml(order, opts = {}) {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Booking ${escapeHtml(orderRef)} — ${escapeHtml(brandName)}</title>
+<title>Booking ${escapeHtml(orderRef)}${hasBrand ? ' — ' + escapeHtml(brandName) : ''}</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #1B2B5B;
-    --primary-dark: #111D3E;
-    --accent: #00B4D8;
-    --accent-dark: #0096B7;
-    --success: #10B981;
-    --warning: #F59E0B;
-    --text: #0F172A;
+    --primary: ${colors.primary};
+    --primary-dark: ${primaryDark};
+    --accent: ${colors.accent};
+    --accent-dark: ${shiftHex(colors.accent, -16)};
+    --success: ${colors.success};
+    --warning: ${colors.warning};
+    --text: ${colors.text};
     --text-2: #475569;
     --text-3: #94A3B8;
     --bg: #F8FAFC;
     --bg-2: #F1F5F9;
     --border: #E2E8F0;
     --border-light: #F1F5F9;
+    --radius: ${radius}px;
+    --radius-sm: ${Math.round(radius * 0.5)}px;
+    --radius-md: ${Math.round(radius * 0.66)}px;
+    --radius-lg: ${radius}px;
     --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     --font-display: 'Fraunces', Georgia, serif;
   }
@@ -551,7 +593,7 @@ export function renderPdfHtml(order, opts = {}) {
 <div class="page">
 
   <div class="pdf-header">
-    <div class="pdf-header-brand">${escapeHtml(brandName)}</div>
+    <div class="pdf-header-brand">${hasBrand ? escapeHtml(brandName) : '&nbsp;'}</div>
     <div class="pdf-header-meta">
       Booking Confirmation<br>
       <span class="num">Issued ${escapeHtml(formatDateShort(issuedAt))}</span>
@@ -679,7 +721,7 @@ export function renderPdfHtml(order, opts = {}) {
   </div>
 
   <div class="pdf-footer">
-    <span class="pdf-footer-brand">${escapeHtml(brandName)}</span>
+    <span class="pdf-footer-brand">${hasBrand ? escapeHtml(brandName) : ''}</span>
     <span class="num">Booking ${escapeHtml(orderRef)}${hasHotelDetail ? ' · Page 1 of 2' : ''}</span>
     <span>${escapeHtml(supportEmail || '')}</span>
   </div>
@@ -691,7 +733,7 @@ ${hasHotelDetail ? `
 <div class="page">
 
   <div class="pdf-page-header">
-    <span class="brand">${escapeHtml(brandName)}</span>
+    <span class="brand">${hasBrand ? escapeHtml(brandName) : '&nbsp;'}</span>
     <span class="num">Booking ${escapeHtml(orderRef)} · ${escapeHtml(propertyName)}${startDate ? ` · ${escapeHtml(formatDateShort(startDate))}` : ''}</span>
   </div>
 
@@ -741,13 +783,15 @@ ${hasHotelDetail ? `
     </div>` : ''}
 
     <p style="margin-top:36px; font-size:11px; color:var(--text-3); line-height:1.6;">
-      This confirmation is issued under ${escapeHtml(brandName)}'s standard booking terms. Please retain this document for your records.
+      ${hasBrand
+        ? `This confirmation is issued under ${escapeHtml(brandName)}'s standard booking terms. Please retain this document for your records.`
+        : `Please retain this document for your records.`}
     </p>
 
   </div>
 
   <div class="pdf-footer">
-    <span class="pdf-footer-brand">${escapeHtml(brandName)}</span>
+    <span class="pdf-footer-brand">${hasBrand ? escapeHtml(brandName) : ''}</span>
     <span class="num">Booking ${escapeHtml(orderRef)} · Page 2 of 2</span>
     <span>${escapeHtml(supportEmail || '')}</span>
   </div>
