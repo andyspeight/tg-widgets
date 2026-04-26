@@ -197,30 +197,48 @@
     .tgm-error-msg svg { width: 14px; height: 14px; flex-shrink: 0; }
 
     /* ===== HORIZONTAL FORM ===== */
-    .tgm-hform { position: relative; padding: 24px; background: linear-gradient(135deg, var(--tgm-primary) 0%, var(--tgm-primary-dark) 100%); border-radius: var(--tgm-radius-2xl); overflow: hidden; box-shadow: 0 10px 15px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.04); }
-    .tgm-hform::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 10% 20%, rgba(0,180,216,.15), transparent 50%), radial-gradient(circle at 90% 80%, rgba(72,202,228,.08), transparent 50%); pointer-events: none; }
+    /* HORIZONTAL form — light by default, dark variant via [data-theme="dark"] below. */
+    .tgm-hform { position: relative; padding: 24px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-2xl); overflow: hidden; box-shadow: 0 10px 15px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.04); }
+    .tgm-hform::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 10% 20%, rgba(0,180,216,.06), transparent 50%); pointer-events: none; }
     .tgm-hform-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
     .tgm-hform-heading { display: flex; align-items: center; gap: 12px; }
-    .tgm-hform-icon { width: 40px; height: 40px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); border-radius: var(--tgm-radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .tgm-hform-icon svg { width: 20px; height: 20px; color: var(--tgm-accent-light); }
-    .tgm-hform-title { font-size: 18px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 2px; color: #fff; line-height: 1.2; }
-    .tgm-hform-sub { font-size: 13px; color: rgba(248,250,252,.7); margin: 0; }
-    .tgm-hform-trust { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; color: rgba(248,250,252,.7); padding: 8px 12px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 9999px; }
+    .tgm-hform-icon { width: 40px; height: 40px; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tgm-hform-icon svg { width: 20px; height: 20px; color: var(--tgm-accent); }
+    .tgm-hform-title { font-size: 18px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 2px; color: var(--tgm-text); line-height: 1.2; }
+    .tgm-hform-sub { font-size: 13px; color: var(--tgm-text-2); margin: 0; }
+    .tgm-hform-trust { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; color: var(--tgm-text-2); padding: 8px 12px; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border); border-radius: 9999px; }
     .tgm-hform-trust svg { width: 12px; height: 12px; }
     .tgm-hform-row { position: relative; display: grid; grid-template-columns: 1.2fr 1fr 1fr auto; gap: 12px; align-items: end; }
     .tgm-hform-field { display: flex; flex-direction: column; }
-    .tgm-hform-field label { font-size: 11px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: rgba(248,250,252,.7); margin-bottom: 4px; }
+    .tgm-hform-field label { font-size: 11px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--tgm-text-2); margin-bottom: 4px; }
     .tgm-hform-iw { position: relative; display: flex; align-items: center; }
-    .tgm-hform-iw svg { position: absolute; left: 12px; width: 16px; height: 16px; color: rgba(255,255,255,.5); pointer-events: none; }
-    .tgm-hform-input { width: 100%; height: 44px; padding: 0 12px 0 36px; font-family: inherit; font-size: 15px; color: #fff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: var(--tgm-radius-md); outline: none; transition: all .15s; }
-    .tgm-hform-input::placeholder { color: rgba(255,255,255,.4); }
-    .tgm-hform-input:focus { background: rgba(255,255,255,.12); border-color: var(--tgm-accent); box-shadow: 0 0 0 3px rgba(0,180,216,.25); }
-    .tgm-hform-input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.6); cursor: pointer; }
-    .tgm-hform-cta { height: 44px; padding: 0 20px; font-family: inherit; font-size: 15px; font-weight: 600; color: var(--tgm-primary); background: var(--tgm-accent); border: none; border-radius: var(--tgm-radius-md); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, transform .1s; box-shadow: 0 4px 12px rgba(0,180,216,.25); white-space: nowrap; }
-    .tgm-hform-cta:hover { background: var(--tgm-accent-light); }
+    .tgm-hform-iw svg { position: absolute; left: 12px; width: 16px; height: 16px; color: var(--tgm-text-3); pointer-events: none; }
+    .tgm-hform-input { width: 100%; height: 44px; padding: 0 12px 0 36px; font-family: inherit; font-size: 15px; color: var(--tgm-text); background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); outline: none; transition: all .15s; }
+    .tgm-hform-input::placeholder { color: var(--tgm-text-3); }
+    .tgm-hform-input:focus { border-color: var(--tgm-accent); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
+    .tgm-hform-cta { height: 44px; padding: 0 20px; font-family: inherit; font-size: 15px; font-weight: 600; color: #fff; background: var(--tgm-primary); border: none; border-radius: var(--tgm-radius-md); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, transform .1s; box-shadow: 0 4px 12px rgba(15,23,42,.15); white-space: nowrap; }
+    .tgm-hform-cta:hover { background: var(--tgm-primary-light); }
     .tgm-hform-cta:active { transform: scale(.97); }
     .tgm-hform-cta:disabled { opacity: .6; cursor: not-allowed; }
     .tgm-hform-cta svg { width: 16px; height: 16px; }
+
+    /* HORIZONTAL form — dark theme override */
+    .tgm-root[data-theme="dark"] .tgm-hform { background: linear-gradient(135deg, var(--tgm-primary) 0%, var(--tgm-primary-dark) 100%); border-color: transparent; }
+    .tgm-root[data-theme="dark"] .tgm-hform::before { background: radial-gradient(circle at 10% 20%, rgba(0,180,216,.15), transparent 50%), radial-gradient(circle at 90% 80%, rgba(72,202,228,.08), transparent 50%); }
+    .tgm-root[data-theme="dark"] .tgm-hform-icon { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+    .tgm-root[data-theme="dark"] .tgm-hform-icon svg { color: var(--tgm-accent-light); }
+    .tgm-root[data-theme="dark"] .tgm-hform-title { color: #fff; }
+    .tgm-root[data-theme="dark"] .tgm-hform-sub { color: rgba(248,250,252,.7); }
+    .tgm-root[data-theme="dark"] .tgm-hform-trust { color: rgba(248,250,252,.7); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); }
+    .tgm-root[data-theme="dark"] .tgm-hform-field label { color: rgba(248,250,252,.7); }
+    .tgm-root[data-theme="dark"] .tgm-hform-iw svg { color: rgba(255,255,255,.5); }
+    .tgm-root[data-theme="dark"] .tgm-hform-input { color: #fff; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.15); }
+    .tgm-root[data-theme="dark"] .tgm-hform-input::placeholder { color: rgba(255,255,255,.4); }
+    .tgm-root[data-theme="dark"] .tgm-hform-input:focus { background: rgba(255,255,255,.12); border-color: var(--tgm-accent); box-shadow: 0 0 0 3px rgba(0,180,216,.25); }
+    .tgm-root[data-theme="dark"] .tgm-hform-input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.6); }
+    .tgm-root[data-theme="dark"] .tgm-hform-cta { color: var(--tgm-primary); background: var(--tgm-accent); box-shadow: 0 4px 12px rgba(0,180,216,.25); }
+    .tgm-root[data-theme="dark"] .tgm-hform-cta:hover { background: var(--tgm-accent-light); }
+
     @media (max-width: 860px) {
       .tgm-hform-row { grid-template-columns: 1fr 1fr; }
       .tgm-hform-cta { grid-column: 1 / -1; width: 100%; }
@@ -806,7 +824,7 @@
     }
 
     _defaults(c) {
-      return Object.assign({
+      const merged = Object.assign({
         layout: 'vertical', // vertical | horizontal | compact
         theme: 'light',
         title: 'My Booking',
@@ -814,21 +832,81 @@
         subtitleShort: 'Look up your trip in seconds',
         eyebrow: 'Secure booking lookup',
         labels: {},
+        brand: { name: '' },
+        colors: {},
+        radius: 12,
         support: {},
         display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showLocalFees: true },
         widgetId: c?.widgetId || null,
       }, c || {});
+      // Make sure colors object is always complete
+      merged.colors = Object.assign({
+        primary: '#1B2B5B',
+        accent:  '#00B4D8',
+        success: '#10B981',
+        warning: '#F59E0B',
+        text:    '#0F172A',
+      }, merged.colors || {});
+      if (typeof merged.radius !== 'number') merged.radius = 12;
+      return merged;
+    }
+
+    _buildOverrides() {
+      const c = this.c.colors || {};
+      // Derive light/dark variants of primary for hover and gradient
+      const lighten = (hex, amt) => this._shiftHex(hex, amt);
+      const primary = c.primary || '#1B2B5B';
+      const accent = c.accent || '#00B4D8';
+      const radius = Math.max(0, Math.min(28, parseInt(this.c.radius, 10) || 12));
+      const overrides = {
+        '--tgm-primary': primary,
+        '--tgm-primary-light': lighten(primary, 18),
+        '--tgm-primary-dark': lighten(primary, -18),
+        '--tgm-accent': accent,
+        '--tgm-accent-light': lighten(accent, 16),
+        '--tgm-accent-dark': lighten(accent, -16),
+        '--tgm-success': c.success || '#10B981',
+        '--tgm-warning': c.warning || '#F59E0B',
+        '--tgm-text': c.text || '#0F172A',
+        // Radius scale derived from a single base value
+        '--tgm-radius-sm': Math.round(radius * 0.5) + 'px',
+        '--tgm-radius-md': Math.round(radius * 0.66) + 'px',
+        '--tgm-radius-lg': radius + 'px',
+        '--tgm-radius-xl': Math.round(radius * 1.33) + 'px',
+        '--tgm-radius-2xl': Math.round(radius * 1.66) + 'px',
+      };
+      return Object.entries(overrides)
+        .map(([k, v]) => k + ':' + v + ';')
+        .join('');
+    }
+
+    _shiftHex(hex, percent) {
+      // Lighten if percent > 0, darken if < 0. Clamps to [0, 255].
+      const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+      if (!m) return hex;
+      const n = parseInt(m[1], 16);
+      const r = (n >> 16) & 0xff;
+      const g = (n >> 8) & 0xff;
+      const b = n & 0xff;
+      const adjust = (c) => {
+        const target = percent >= 0 ? 255 : 0;
+        const ratio = Math.abs(percent) / 100;
+        return Math.round(c + (target - c) * ratio);
+      };
+      const out = (adjust(r) << 16) | (adjust(g) << 8) | adjust(b);
+      return '#' + out.toString(16).padStart(6, '0');
     }
 
     _render() {
       const themeAttr = this.c.theme === 'dark' ? ' data-theme="dark"' : '';
+      const overrides = this._buildOverrides();
       let inner;
       if (this.state.stage === 'loading') inner = renderLoading(this.c);
       else if (this.state.stage === 'found') inner = renderFound(this.state.order, this.c);
       else if (this.state.stage === 'notfound') inner = renderNotFound(this.c);
       else inner = renderForm(this.c, this.state);
 
-      this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root"' + themeAttr + '>' + inner + '</div>';
+      this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root"' + themeAttr + ' style="' + overrides + '">' + inner + '</div>';
       this._bind();
     }
 
