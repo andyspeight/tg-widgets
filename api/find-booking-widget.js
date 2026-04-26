@@ -19,6 +19,8 @@
  *
  * No auth required. No third-party npm dependencies — uses native fetch
  * against the Airtable REST API.
+ *
+ * Module type: ESM (matches the rest of tg-widgets).
  */
 
 const BASE_ID = 'appAYzWZxvK6qlwXK';
@@ -71,7 +73,7 @@ function getAirtableKey() {
       || '';
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   setCors(res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -166,4 +168,4 @@ module.exports = async function handler(req, res) {
     console.error('[find-booking-widget] Lookup error:', err && err.message ? err.message : err);
     return res.status(500).json({ error: 'lookup_failed' });
   }
-};
+}
