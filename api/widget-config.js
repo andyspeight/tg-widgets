@@ -26,6 +26,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Destination Spotlight',
   'Weather',
   'Enquiry Form',
+  'My Booking',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -42,11 +43,16 @@ const PLAN_WIDGET_LIMITS = {
   'Destination Spotlight': { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Weather':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Enquiry Form':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'My Booking':            { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
 };
 
 // Count existing widgets owned by this user, of a specific type.
 // Used by the CREATE path to enforce plan limits.
-async function countUserWidgetsOfType(email, widgetType, headers) {
+//
+// Takes baseId as a parameter rather than reading from process.env directly,
+// because the destructured AIRTABLE_BASE_ID lives inside handler() scope and
+// the previous version of this helper referenced an undefined identifier.
+async function countUserWidgetsOfType(email, widgetType, headers, baseId) {
   const emailEsc = sanitiseForFormula(email.toLowerCase());
   const typeEsc  = sanitiseForFormula(widgetType);
   const formula = encodeURIComponent(
@@ -55,7 +61,7 @@ async function countUserWidgetsOfType(email, widgetType, headers) {
   // Only fetch WidgetID to keep the payload tiny — we just need a count.
   // maxRecords capped at 100: all current plan limits are <=5, so this
   // always captures enough to detect "over limit" without paginating.
-  const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`
+  const url = `${AIRTABLE_API}/${baseId}/${TABLE_NAME}`
     + `?filterByFormula=${formula}&maxRecords=100&fields%5B%5D=WidgetID`;
   const resp = await fetch(url, { headers });
   if (!resp.ok) throw new Error('Count query failed');
@@ -223,7 +229,7 @@ export default async function handler(req, res) {
       if (planLimit > 0) {
         let existingCount;
         try {
-          existingCount = await countUserWidgetsOfType(user.email, safeType, headers);
+          existingCount = await countUserWidgetsOfType(user.email, safeType, headers, AIRTABLE_BASE_ID);
         } catch (err) {
           console.error('[widget-config] Count query failed:', err.message);
           return res.status(503).json({ error: 'Service temporarily unavailable. Please try again.' });
