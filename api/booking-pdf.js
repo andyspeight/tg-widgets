@@ -388,7 +388,7 @@ export default async function handler(req, res) {
     const order = trimOrder(raw);
     if (!order || !order.id) return notFound(res);
 
-    // Pull brand / contact details from the widget config (optional)
+    // Pull brand / contact / styling from the widget config (all optional)
     // These come from the widget's settings JSON if the editor has saved them.
     const widgetSettings = (() => {
       const raw = widget.fields?.Settings;
@@ -397,15 +397,21 @@ export default async function handler(req, res) {
       try { return JSON.parse(raw); } catch { return {}; }
     })();
 
-    const brandName = widgetSettings?.brand?.name || 'Travelgenix';
+    // Brand name is optional. When blank, the PDF omits the brand row entirely
+    // rather than falling back to "Travelgenix" — this is a client-facing widget.
+    const brandName = widgetSettings?.brand?.name || '';
     const supportEmail = widgetSettings?.support?.email || null;
     const supportPhone = widgetSettings?.support?.phone || null;
+    const colors = widgetSettings?.colors || {};
+    const radius = typeof widgetSettings?.radius === 'number' ? widgetSettings.radius : 12;
 
     // Render HTML
     const html = renderPdfHtml(order, {
       brandName,
       supportEmail,
       supportPhone,
+      colors,
+      radius,
       issuedAt: new Date().toISOString(),
     });
 
