@@ -1,7 +1,14 @@
 /**
- * Travelgenix My Booking Widget v1.0.0
+ * Travelgenix My Booking Widget v1.1.0
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.1.0 changes:
+ *   - PDF download wired to /api/booking-pdf (Puppeteer-rendered A4 pack)
+ *   - Email action hidden (Phase 2)
+ *   - Single full-width PDF action button replaces 2-column action grid
+ *   - Lookup credentials cached on widget instance for PDF re-lookup
+ *   - Spinner-on-button + toast notifications during PDF generation
  *
  * Usage:
  *   <div data-tg-widget="mybooking" data-tg-id="YOUR_WIDGET_ID"></div>
@@ -12,7 +19,8 @@
 
   const API_CONFIG = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
   const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || '/api/retrieve-order';
-  const VERSION = '1.0.0';
+  const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || '/api/booking-pdf';
+  const VERSION = '1.1.0';
 
   // ----- Inline SVG icons (no external deps) -----
   const IC = {
@@ -38,6 +46,7 @@
     booking: 'M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M3 5h18v14H3z',
     ref:     'M3 3h18v18H3zM9 9h6M9 13h6M9 17h4',
     refresh: 'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-7.07 3M3 4v5h5',
+    alert:   'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01',
   };
   function svg(p, sw) {
     sw = sw || 2;
@@ -135,6 +144,7 @@
       font-size: 15px;
       color: var(--tgm-text);
       line-height: 1.6;
+      position: relative;
     }
     .tgm-root[data-theme="dark"] {
       --tgm-bg: #0F172A;
@@ -264,17 +274,38 @@
     .tgm-countdown svg { width: 14px; height: 14px; }
     .tgm-countdown strong { color: var(--tgm-accent-dark); font-weight: 700; font-variant-numeric: tabular-nums; }
 
-    .tgm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-    .tgm-action { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); cursor: pointer; text-align: left; font-family: inherit; transition: all .25s cubic-bezier(.2,.7,.2,1); width: 100%; }
-    .tgm-action:hover { border-color: var(--tgm-accent); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04); }
-    .tgm-action-icon { width: 40px; height: 40px; border-radius: var(--tgm-radius-md); background: linear-gradient(135deg, var(--tgm-accent) 0%, var(--tgm-accent-dark) 100%); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
-    .tgm-action-icon svg { width: 18px; height: 18px; }
+    /* Single full-width PDF action button */
+    .tgm-action-row { margin-bottom: 16px; }
+    .tgm-action { display: flex; align-items: center; gap: 16px; padding: 18px 24px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); cursor: pointer; text-align: left; font-family: inherit; transition: all .25s cubic-bezier(.2,.7,.2,1); width: 100%; position: relative; }
+    .tgm-action:hover:not(:disabled) { border-color: var(--tgm-accent); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04); }
+    .tgm-action:disabled { cursor: wait; opacity: .85; }
+    .tgm-action-icon { width: 44px; height: 44px; border-radius: var(--tgm-radius-md); background: linear-gradient(135deg, var(--tgm-accent) 0%, var(--tgm-accent-dark) 100%); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+    .tgm-action-icon svg { width: 20px; height: 20px; }
     .tgm-action-text { flex: 1; min-width: 0; }
-    .tgm-action-title { font-size: 15px; font-weight: 600; color: var(--tgm-text); margin-bottom: 2px; }
+    .tgm-action-title { font-size: 16px; font-weight: 600; color: var(--tgm-text); margin-bottom: 2px; letter-spacing: -.01em; }
     .tgm-action-sub { font-size: 13px; color: var(--tgm-text-2); }
-    .tgm-action-arrow { width: 18px; height: 18px; color: var(--tgm-text-3); transition: transform .15s, color .15s; flex-shrink: 0; }
-    .tgm-action:hover .tgm-action-arrow { transform: translateX(2px); color: var(--tgm-accent); }
-    @media (max-width: 600px) { .tgm-actions { grid-template-columns: 1fr; } }
+    .tgm-action-arrow { width: 20px; height: 20px; color: var(--tgm-text-3); transition: transform .15s, color .15s; flex-shrink: 0; }
+    .tgm-action:hover:not(:disabled) .tgm-action-arrow { transform: translateX(2px); color: var(--tgm-accent); }
+    .tgm-action.is-loading .tgm-action-arrow { display: none; }
+    .tgm-action-loader { width: 20px; height: 20px; border: 2px solid var(--tgm-bg-3); border-top-color: var(--tgm-accent); border-radius: 50%; animation: tgm-spin .7s linear infinite; flex-shrink: 0; display: none; }
+    .tgm-action.is-loading .tgm-action-loader { display: block; }
+
+    /* Toast notifications */
+    .tgm-toast-stack { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; z-index: 999999; max-width: 380px; }
+    .tgm-toast { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); box-shadow: 0 10px 25px rgba(0,0,0,.12), 0 4px 10px rgba(0,0,0,.06); font-size: 14px; color: var(--tgm-text); pointer-events: auto; animation: tgm-toast-in .35s cubic-bezier(.2,.7,.2,1); min-width: 280px; }
+    .tgm-toast.is-leaving { animation: tgm-toast-out .25s cubic-bezier(.4,0,1,1) forwards; }
+    @keyframes tgm-toast-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+    @keyframes tgm-toast-out { to { opacity: 0; transform: translateX(20px); } }
+    .tgm-toast-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
+    .tgm-toast-icon svg { width: 16px; height: 16px; stroke-width: 2.5; }
+    .tgm-toast.is-loading .tgm-toast-icon { background: var(--tgm-accent); }
+    .tgm-toast.is-success .tgm-toast-icon { background: var(--tgm-success); }
+    .tgm-toast.is-error .tgm-toast-icon { background: var(--tgm-error); }
+    .tgm-toast.is-loading .tgm-toast-icon::before { content: ''; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: tgm-spin .7s linear infinite; }
+    .tgm-toast.is-loading .tgm-toast-icon svg { display: none; }
+    .tgm-toast-content { flex: 1; min-width: 0; }
+    .tgm-toast-title { font-weight: 600; font-size: 14px; color: var(--tgm-text); }
+    .tgm-toast-sub { font-size: 12px; color: var(--tgm-text-2); margin-top: 1px; }
 
     .tgm-stay { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); padding: 20px; margin-bottom: 16px; }
     .tgm-stay-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
@@ -379,6 +410,8 @@
       .tgm-form-hero { padding: 32px 20px 24px; }
       .tgm-form-body { padding: 20px; }
       .tgm-section, .tgm-stay { padding: 16px; }
+      .tgm-toast-stack { left: 16px; right: 16px; max-width: none; }
+      .tgm-toast { min-width: 0; }
     }
   `;
 
@@ -581,21 +614,14 @@
         </div>
 
         ${(c.display?.showActions !== false) ? `
-        <div class="tgm-actions">
-          <button type="button" class="tgm-action" data-tgm-email-action>
-            <div class="tgm-action-icon">${svg(IC.mail)}</div>
-            <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionEmail || 'Email me a copy')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionEmailSub || 'Coming soon')}</div>
-            </div>
-            ${svg(IC.arrow)}
-          </button>
+        <div class="tgm-action-row">
           <button type="button" class="tgm-action" data-tgm-pdf-action>
             <div class="tgm-action-icon">${svg(IC.dl)}</div>
             <div class="tgm-action-text">
               <div class="tgm-action-title">${esc(c.labels?.actionPdf || 'Download as PDF')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionPdfSub || 'Coming soon')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionPdfSub || 'A4 confirmation pack with all your booking details')}</div>
             </div>
+            <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
           </button>
         </div>
@@ -760,6 +786,8 @@
             ${c.support?.phone ? `<a class="tgm-help-btn" href="tel:${esc(c.support.phone.replace(/[^+0-9]/g, ''))}">${svg(IC.phone)}${esc(c.labels?.callUs || 'Call us')}</a>` : ''}
           </div>
         </div>` : ''}
+
+        <div class="tgm-toast-stack" data-tgm-toast-stack></div>
       </div>
     `;
   }
@@ -772,6 +800,8 @@
       this.c = this._defaults(config);
       this.shadow = container.attachShadow({ mode: 'open' });
       this.state = { stage: 'form', order: null, error: null };
+      this.lookup = null; // cached { email, date, ref } for PDF re-lookup
+      this._toastTimers = new Map();
       this._render();
     }
 
@@ -841,15 +871,9 @@
         });
       });
 
-      // Email + PDF buttons (Phase 2 hooks)
-      const emailBtn = root.querySelector('[data-tgm-email-action]');
-      if (emailBtn) emailBtn.addEventListener('click', () => {
-        this._fireEvent('email-requested', { order: this.state.order });
-      });
+      // PDF download button
       const pdfBtn = root.querySelector('[data-tgm-pdf-action]');
-      if (pdfBtn) pdfBtn.addEventListener('click', () => {
-        this._fireEvent('pdf-requested', { order: this.state.order });
-      });
+      if (pdfBtn) pdfBtn.addEventListener('click', () => this._downloadPdf(pdfBtn));
     }
 
     async _submit(form) {
@@ -908,6 +932,9 @@
           return;
         }
 
+        // Cache lookup credentials so we can call /booking-pdf later
+        this.lookup = { email, date, ref };
+
         this.state = { stage: 'found', order: data.order, error: null };
         this._render();
         this._fireEvent('booking-loaded', { order: data.order });
@@ -915,6 +942,118 @@
         this.state = { stage: 'form', order: null, error: 'Something went wrong. Please try again in a moment.' };
         this._render();
       }
+    }
+
+    async _downloadPdf(btn) {
+      if (!this.lookup || !this.c.widgetId) {
+        this._showToast('error', 'Cannot generate PDF', 'Please look up your booking again.');
+        return;
+      }
+      if (btn.disabled) return;
+
+      // Spinner on button
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+
+      // Loading toast
+      const loadingToastId = this._showToast('loading', 'Generating your PDF', 'This usually takes a few seconds.');
+
+      try {
+        const res = await fetch(API_PDF, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widgetId: this.c.widgetId,
+            emailAddress: this.lookup.email,
+            departDate: this.lookup.date,
+            orderRef: this.lookup.ref,
+          }),
+        });
+
+        if (!res.ok) {
+          this._dismissToast(loadingToastId);
+          if (res.status === 429) {
+            this._showToast('error', 'Too many requests', 'Please wait a few minutes and try again.', 6000);
+          } else if (res.status === 404) {
+            this._showToast('error', "We couldn't generate that PDF", 'Please look up your booking again.', 6000);
+          } else {
+            this._showToast('error', 'Something went wrong', 'Please try again in a moment.', 6000);
+          }
+          return;
+        }
+
+        const blob = await res.blob();
+
+        // Trigger download
+        const item = this.state.order?.items?.[0];
+        const refValue = item?.bookingReference || ('TG' + (this.state.order?.id || ''));
+        const filename = 'booking-' + String(refValue).replace(/[^A-Z0-9_\-]/gi, '') + '.pdf';
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Revoke after a tick so the browser has time to start the download
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        this._dismissToast(loadingToastId);
+        this._showToast('success', 'PDF downloaded', filename, 4000);
+        this._fireEvent('pdf-downloaded', { filename });
+      } catch (err) {
+        this._dismissToast(loadingToastId);
+        this._showToast('error', 'Download failed', 'Please check your connection and try again.', 6000);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+      }
+    }
+
+    // ----- Toast helpers -----
+
+    _showToast(type, title, sub, autoDismissMs) {
+      const stack = this.shadow.querySelector('[data-tgm-toast-stack]');
+      if (!stack) return null;
+
+      const id = 'toast-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+      const iconPath = type === 'success' ? IC.check : (type === 'error' ? IC.alert : '');
+      const node = document.createElement('div');
+      node.className = 'tgm-toast is-' + type;
+      node.setAttribute('data-toast-id', id);
+      node.setAttribute('role', type === 'error' ? 'alert' : 'status');
+      node.innerHTML = `
+        <div class="tgm-toast-icon">${iconPath ? svg(iconPath, 2.5) : ''}</div>
+        <div class="tgm-toast-content">
+          <div class="tgm-toast-title">${esc(title)}</div>
+          ${sub ? `<div class="tgm-toast-sub">${esc(sub)}</div>` : ''}
+        </div>
+      `;
+      stack.appendChild(node);
+
+      if (autoDismissMs && autoDismissMs > 0) {
+        const timer = setTimeout(() => this._dismissToast(id), autoDismissMs);
+        this._toastTimers.set(id, timer);
+      }
+
+      return id;
+    }
+
+    _dismissToast(id) {
+      if (!id) return;
+      const timer = this._toastTimers.get(id);
+      if (timer) {
+        clearTimeout(timer);
+        this._toastTimers.delete(id);
+      }
+      const stack = this.shadow.querySelector('[data-tgm-toast-stack]');
+      if (!stack) return;
+      const node = stack.querySelector('[data-toast-id="' + id + '"]');
+      if (!node) return;
+      node.classList.add('is-leaving');
+      setTimeout(() => { try { node.remove(); } catch {} }, 250);
     }
 
     _fireEvent(name, detail) {
@@ -929,7 +1068,11 @@
     }
 
     destroy() {
-      try { this.shadow.innerHTML = ''; } catch {}
+      try {
+        for (const t of this._toastTimers.values()) clearTimeout(t);
+        this._toastTimers.clear();
+        this.shadow.innerHTML = '';
+      } catch {}
     }
   }
 
