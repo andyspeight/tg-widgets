@@ -157,7 +157,15 @@
   .save-creds-btn:disabled { opacity: .6; cursor: not-allowed; }
 
   /* ===== PREVIEW PANE ===== */
+  .preview-tabs { display: flex; align-items: center; gap: 4px; padding: 8px 16px; background: var(--bg); border-bottom: 1px solid var(--border-light); }
+  .preview-tab { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; font-size: 12px; font-weight: 500; background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); transition: all .15s; }
+  .preview-tab svg { width: 14px; height: 14px; }
+  .preview-tab:hover { color: var(--text); background: var(--bg-2); }
+  .preview-tab.active { background: var(--bg-2); color: var(--primary); border-color: var(--border); font-weight: 600; }
+  .preview-mock-note { margin-left: auto; font-size: 11px; color: var(--text-3); font-style: italic; }
+
   .preview-bar { padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .preview-bar[hidden] { display: none; }
   .preview-bar .label { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: .04em; text-transform: uppercase; margin-right: 8px; }
   .preview-bar .vp-btn { height: 32px; padding: 0 12px; font-size: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); transition: all .15s; }
   .preview-bar .vp-btn:hover { color: var(--text); border-color: var(--accent); }
@@ -167,9 +175,17 @@
   .preview-stage { flex: 1; overflow: auto; padding: 32px; display: flex; align-items: flex-start; justify-content: center; background: var(--bg-2); }
   .preview-stage[data-theme="dark"] { background: #0F172A; }
   .preview-frame { width: 100%; max-width: 880px; transition: max-width .3s; }
+  .preview-frame[hidden] { display: none; }
   .preview-frame[data-vp="mobile"] { max-width: 380px; }
   .preview-frame[data-vp="tablet"] { max-width: 768px; }
   .preview-frame[data-vp="desktop"] { max-width: 1280px; }
+
+  /* Document-style preview frames (PDF + email) */
+  .preview-frame-doc { max-width: 880px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.06); }
+  .preview-frame-doc iframe { display: block; width: 100%; height: 1200px; border: 0; background: #fff; }
+  .preview-frame-doc[data-preview-target="pdf"] { max-width: 794px; }
+  .preview-frame-doc[data-preview-target="email"] { max-width: 660px; }
+  .preview-frame-doc[data-preview-target="email"] iframe { height: 1600px; background: #F8FAFC; }
 
   /* ===== TOAST ===== */
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 12px 16px; background: var(--text); color: #fff; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-xl); opacity: 0; pointer-events: none; transition: all .25s ease-out; z-index: 100; display: flex; align-items: center; gap: 10px; }
@@ -452,7 +468,22 @@
 
   <!-- ============ PREVIEW PANE ============ -->
   <main class="preview-pane">
-    <div class="preview-bar">
+    <div class="preview-tabs">
+      <button class="preview-tab active" data-preview="widget" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+        Widget
+      </button>
+      <button class="preview-tab" data-preview="pdf" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        PDF
+      </button>
+      <button class="preview-tab" data-preview="email" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email
+      </button>
+      <span class="preview-mock-note" id="preview-mock-note" hidden>Showing sample booking data</span>
+    </div>
+    <div class="preview-bar" id="preview-bar-widget">
       <span class="label">Preview</span>
       <button class="vp-btn active" data-vp="auto">Auto</button>
       <button class="vp-btn" data-vp="mobile">Mobile</button>
@@ -464,8 +495,17 @@
       </div>
     </div>
     <div class="preview-stage" id="preview-stage">
-      <div class="preview-frame" id="preview-frame" data-vp="auto">
+      <!-- Widget preview (live re-render) -->
+      <div class="preview-frame" id="preview-frame" data-vp="auto" data-preview-target="widget">
         <div id="widget-host"></div>
+      </div>
+      <!-- PDF preview (iframe with rendered HTML) -->
+      <div class="preview-frame preview-frame-doc" data-preview-target="pdf" hidden>
+        <iframe id="pdf-iframe" title="PDF preview" sandbox="allow-same-origin"></iframe>
+      </div>
+      <!-- Email preview (iframe with rendered HTML) -->
+      <div class="preview-frame preview-frame-doc" data-preview-target="email" hidden>
+        <iframe id="email-iframe" title="Email preview" sandbox="allow-same-origin"></iframe>
       </div>
     </div>
   </main>
@@ -493,7 +533,10 @@
 </div>
 
 <script src="/widget-mybooking.js"></script>
-<script>
+<script type="module">
+import { renderPdfHtml } from '/_pdf-template.js';
+import { renderEmailHtml } from '/_email-template.js';
+
 (function() {
   'use strict';
 
@@ -525,7 +568,73 @@
     },
     integration: null,
     previewTheme: 'light',
+    previewTab: 'widget',  // widget | pdf | email
     rerenderTimer: null,
+  };
+
+  // ===== Mock booking data for PDF / email previews =====
+  // Static sample so the client can see how their brand looks against a
+  // realistic booking. Same shape as a real trimmed Travelify response.
+  const MOCK_ORDER = {
+    id: 81376,
+    status: 'Confirmed',
+    customerTitle: 'Mr',
+    customerFirstname: 'Luke',
+    customerSurname: 'Livsey',
+    customerEmail: 'sample@example.com',
+    specialRequests: 'High floor if possible',
+    currency: 'GBP',
+    created: new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10),
+    items: [{
+      id: 1,
+      product: 'Accommodation',
+      bookingReference: 'DEMO81376',
+      price: 1762,
+      currency: 'GBP',
+      startDate: new Date(Date.now() + 152 * 86400000).toISOString().slice(0, 10),
+      duration: 7,
+      accommodation: {
+        name: 'Address Downtown',
+        propertyType: 'Hotel',
+        rating: 5,
+        location: { address1: 'Sheik Mohammed Bin Rashid Boulevard', city: 'Dubai', country: 'AE' },
+        pricing: {
+          currency: 'GBP',
+          price: 1762,
+          inResortFees: null,
+          isRefundable: true,
+          refundability: 'Refundable',
+          depositOptions: [{
+            id: 1, name: 'Deposit', amount: 352.40,
+            dueDate: new Date(Date.now() + 138 * 86400000).toISOString().slice(0, 10),
+            breakdown: [
+              { num: 1, amount: 352.40, dueDate: new Date(Date.now() + 21 * 86400000).toISOString().slice(0, 10) },
+              { num: 2, amount: 352.40, dueDate: new Date(Date.now() + 51 * 86400000).toISOString().slice(0, 10) },
+              { num: 3, amount: 352.40, dueDate: new Date(Date.now() + 81 * 86400000).toISOString().slice(0, 10) },
+              { num: 4, amount: 352.40, dueDate: new Date(Date.now() + 111 * 86400000).toISOString().slice(0, 10) },
+            ],
+          }],
+        },
+        descriptions: [{
+          type: 'general',
+          title: 'About',
+          text: 'Towering at 302 metres across 63 levels, Address Downtown is a landmark of luxury in the heart of Downtown Dubai. The hotel directly overlooks Burj Khalifa, offers uninterrupted views of the daily Dubai fountain show and is connected to The Dubai Mall by a pathway-bridge.',
+        }],
+        amenities: ['Wi-Fi', '24-hour reception', 'Gym', 'Spa', 'Outdoor pool', 'Room service', 'Airport shuttle', 'Concierge'],
+        media: [{
+          type: 'EXTERIOR',
+          url: 'https://photos.hotelbeds.com/giata/bigger/11/115398/115398a_hb_a_014.jpg',
+        }],
+        units: [{
+          name: 'Deluxe Room',
+          roomType: 'Deluxe',
+          checkin: new Date(Date.now() + 152 * 86400000).toISOString().slice(0, 10),
+          nights: 7,
+          rates: [{ name: 'Room only', board: 'Room only' }],
+        }],
+        guests: [{ type: 'Lead', title: 'Mr', firstname: 'Luke', surname: 'Livsey' }],
+      },
+    }],
   };
 
   // ===== Auth =====
@@ -693,6 +802,11 @@
     state.rerenderTimer = setTimeout(renderPreview, 150);
   }
   function renderPreview() {
+    if (state.previewTab === 'widget') return renderWidgetPreview();
+    if (state.previewTab === 'pdf') return renderPdfPreview();
+    if (state.previewTab === 'email') return renderEmailPreview();
+  }
+  function renderWidgetPreview() {
     const host = document.getElementById('widget-host');
     host.innerHTML = '';
     const div = document.createElement('div');
@@ -708,6 +822,61 @@
     }
     updateEmbedCode();
   }
+  function renderPdfPreview() {
+    try {
+      const html = renderPdfHtml(MOCK_ORDER, _previewOpts());
+      _writeIframe('pdf-iframe', html);
+    } catch (e) {
+      console.error('PDF preview error:', e);
+    }
+  }
+  function renderEmailPreview() {
+    try {
+      const html = renderEmailHtml(MOCK_ORDER, _previewOpts());
+      _writeIframe('email-iframe', html);
+    } catch (e) {
+      console.error('Email preview error:', e);
+    }
+  }
+  function _previewOpts() {
+    return {
+      brandName: state.config.brand?.name || '',
+      supportEmail: state.config.support?.email || null,
+      supportPhone: state.config.support?.phone || null,
+      colors: state.config.colors,
+      radius: state.config.radius,
+      issuedAt: new Date().toISOString(),
+    };
+  }
+  function _writeIframe(id, html) {
+    const iframe = document.getElementById(id);
+    if (!iframe) return;
+    // Use srcdoc so the iframe is fully self-contained — no parent CSS bleed,
+    // no security warnings, and srcdoc updates trigger an instant reload.
+    iframe.srcdoc = html;
+  }
+
+  // ===== Preview tab switching =====
+  document.querySelectorAll('.preview-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.preview;
+      state.previewTab = target;
+      // Update tab button states
+      document.querySelectorAll('.preview-tab').forEach(b => b.classList.toggle('active', b === btn));
+      // Show/hide the right preview frame
+      document.querySelectorAll('[data-preview-target]').forEach(frame => {
+        frame.hidden = frame.dataset.previewTarget !== target;
+      });
+      // Hide the viewport bar for non-widget previews (it doesn't apply)
+      const bar = document.getElementById('preview-bar-widget');
+      if (bar) bar.hidden = target !== 'widget';
+      // Show/hide the "showing sample data" note
+      const note = document.getElementById('preview-mock-note');
+      if (note) note.hidden = target === 'widget';
+      // Render fresh content for the newly-shown preview
+      renderPreview();
+    });
+  });
 
   function updateEmbedCode() {
     const host = window.location.origin;
