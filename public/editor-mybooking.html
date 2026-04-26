@@ -672,6 +672,10 @@
   }
 
   // ===== Travelify credentials =====
+  // Note: this endpoint may return 401 even when the user is otherwise
+  // authenticated (it has its own auth requirements). We treat 401 here
+  // as "credentials feature unavailable" rather than "logged out" — the
+  // rest of the editor still works fine.
   async function loadIntegration() {
     if (!ensureAuth()) return;
     try {
@@ -679,7 +683,10 @@
         headers: authH(),
       });
       if (res.status === 401) {
-        redirectToDashboard();
+        // Credentials endpoint isn't available for this session.
+        // Don't redirect — let the user keep using the rest of the editor.
+        state.integration = null;
+        renderCredsUnavailable();
         return;
       }
       const data = await res.json();
@@ -687,7 +694,22 @@
       renderCredsStatus();
     } catch (e) {
       console.error('Load integration failed:', e);
+      renderCredsUnavailable();
     }
+  }
+
+  function renderCredsUnavailable() {
+    const area = document.getElementById('creds-status-area');
+    const formEl = document.getElementById('creds-form');
+    const replaceEl = document.getElementById('creds-replace');
+    area.innerHTML = `
+      <div class="creds-status missing">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Credential management isn't available from this account. Please contact Travelgenix support to set up Travelify credentials.</span>
+      </div>
+    `;
+    formEl.hidden = true;
+    replaceEl.hidden = true;
   }
 
   function renderCredsStatus() {
@@ -736,7 +758,7 @@
         body: JSON.stringify({ service: 'Travelify', appId, apiKey }),
       });
       if (res.status === 401) {
-        redirectToDashboard();
+        toast('Credential management is not available from this account', 'error');
         return;
       }
       const data = await res.json();
@@ -768,7 +790,7 @@
           method: 'DELETE',
           headers: authH(),
         });
-        if (res.status === 401) { redirectToDashboard(); return; }
+        if (res.status === 401) { toast('Credential management is not available from this account', 'error'); return; }
         if (!res.ok) throw new Error('Revoke failed');
         state.integration = null;
         renderCredsStatus();
