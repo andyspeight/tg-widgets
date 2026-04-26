@@ -145,6 +145,10 @@
   .creds-actions button.danger { color: var(--error); }
   .creds-actions button.danger:hover { border-color: var(--error); background: rgba(239,68,68,.05); }
 
+  .save-creds-btn { width: 100%; height: 38px; background: var(--primary); color: #fff; font-family: inherit; font-size: 13px; font-weight: 600; border: none; border-radius: var(--radius-md); cursor: pointer; transition: background .15s; }
+  .save-creds-btn:hover { background: var(--primary-light); }
+  .save-creds-btn:disabled { opacity: .6; cursor: not-allowed; }
+
   /* ===== PREVIEW PANE ===== */
   .preview-bar { padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .preview-bar .label { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: .04em; text-transform: uppercase; margin-right: 8px; }
@@ -166,20 +170,6 @@
   .toast-icon { width: 20px; height: 20px; border-radius: 50%; background: var(--success); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .toast-icon svg { width: 12px; height: 12px; color: #fff; stroke-width: 3; }
   .toast.error .toast-icon { background: var(--error); }
-
-  /* ===== LOGIN OVERLAY ===== */
-  .login-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.9); backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
-  .login-card { width: 100%; max-width: 400px; background: #fff; border-radius: 16px; padding: 32px; box-shadow: var(--shadow-xl); }
-  .login-card h2 { font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: -.02em; color: var(--text); }
-  .login-card p { font-size: 14px; color: var(--text-2); margin: 0 0 24px; line-height: 1.5; }
-  .login-card .field { margin-bottom: 16px; }
-  .login-card .field input { width: 100%; height: 44px; padding: 0 14px; font-size: 15px; font-family: inherit; color: var(--text); background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); outline: none; transition: border-color .15s; }
-  .login-card .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
-  .login-card .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
-  .login-btn { width: 100%; height: 44px; background: var(--primary); color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius-md); cursor: pointer; transition: background .15s; }
-  .login-btn:hover { background: var(--primary-light); }
-  .login-btn:disabled { opacity: .6; cursor: not-allowed; }
-  .login-error { padding: 10px 12px; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2); border-radius: var(--radius-md); color: var(--error); font-size: 13px; margin-bottom: 16px; }
 
   /* Modal */
   .modal { position: fixed; inset: 0; background: rgba(15,23,42,.6); backdrop-filter: blur(4px); z-index: 150; display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -292,7 +282,7 @@
                 <input type="password" id="travelify-apikey" placeholder="••••••••••••••••" autocomplete="off">
                 <div class="field-help">Your secret API key. Encrypted at rest using AES-256-GCM. Never displayed again once saved.</div>
               </div>
-              <button class="login-btn" id="save-creds-btn" type="button" style="height:38px; font-size:13px;">Save credentials</button>
+              <button class="save-creds-btn" id="save-creds-btn" type="button">Save credentials</button>
             </div>
 
             <div id="creds-replace" hidden>
@@ -358,7 +348,7 @@
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="section-body"><div class="section-body-inner">
-            <div class="toggle-row"><span>Email + PDF action buttons</span><button class="switch on" data-display="showActions" type="button"></button></div>
+            <div class="toggle-row"><span>PDF download button</span><button class="switch on" data-display="showActions" type="button"></button></div>
             <div class="toggle-row"><span>Documents section</span><button class="switch on" data-display="showDocuments" type="button"></button></div>
             <div class="toggle-row"><span>Hotel facilities</span><button class="switch on" data-display="showFacilities" type="button"></button></div>
             <div class="toggle-row"><span>Hotel description</span><button class="switch on" data-display="showHotelDescription" type="button"></button></div>
@@ -415,24 +405,6 @@
   <span id="toast-text">Saved</span>
 </div>
 
-<!-- LOGIN OVERLAY -->
-<div class="login-overlay" id="login-overlay" hidden>
-  <div class="login-card">
-    <h2>Sign in to edit</h2>
-    <p>Enter your Travelgenix credentials to continue.</p>
-    <div id="login-error" class="login-error" hidden></div>
-    <div class="field">
-      <label for="login-email">Email</label>
-      <input type="email" id="login-email" autocomplete="email">
-    </div>
-    <div class="field">
-      <label for="login-pw">Password</label>
-      <input type="password" id="login-pw" autocomplete="current-password">
-    </div>
-    <button class="login-btn" id="login-btn" type="button">Sign in</button>
-  </div>
-</div>
-
 <!-- CONFIRM REVOKE MODAL -->
 <div class="modal" id="confirm-modal" hidden>
   <div class="modal-card">
@@ -471,11 +443,10 @@
   };
 
   // ===== Auth =====
+  // Matches the dashboard auth pattern. If session is missing or expired,
+  // bounce back to the dashboard at "/" — the dashboard owns sign-in.
   function getAuthToken() {
     try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; }
-  }
-  function getAuthEmail() {
-    try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.user?.email || ''; } catch { return ''; }
   }
   function authH() {
     const t = getAuthToken();
@@ -486,65 +457,26 @@
   function isLoggedIn() {
     try {
       const s = JSON.parse(sessionStorage.getItem('tgw_session'));
-      return !!(s && s.token);
+      // Honour the same 24-hour expiry the dashboard uses
+      if (!s || !s.token) return false;
+      if (s.timestamp && (Date.now() - s.timestamp) > 86400000) {
+        sessionStorage.removeItem('tgw_session');
+        return false;
+      }
+      return true;
     } catch { return false; }
   }
-  function showLogin() {
-    document.getElementById('login-overlay').hidden = false;
-    setTimeout(() => document.getElementById('login-email').focus(), 100);
-  }
-  function hideLogin() { document.getElementById('login-overlay').hidden = true; }
-
-  async function doLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const pw = document.getElementById('login-pw').value;
-    const errEl = document.getElementById('login-error');
-    const btn = document.getElementById('login-btn');
-    errEl.hidden = true;
-    if (!email || !pw) {
-      errEl.textContent = 'Please enter both email and password.';
-      errEl.hidden = false;
-      return;
-    }
-    btn.disabled = true;
-    btn.textContent = 'Signing in…';
+  function redirectToDashboard() {
+    // Preserve where the user was trying to go so the dashboard can bring
+    // them back after sign-in (dashboard can read this if it wants to).
     try {
-      const res = await fetch('/api/widget-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pw }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.token) {
-        errEl.textContent = data.error || 'Invalid credentials.';
-        errEl.hidden = false;
-        return;
-      }
-      sessionStorage.setItem('tgw_session', JSON.stringify({
-        user: data.user || { email },
-        token: data.token,
-        timestamp: Date.now(),
-      }));
-      hideLogin();
-      bootstrap();
-    } catch (e) {
-      errEl.textContent = 'Network error. Please try again.';
-      errEl.hidden = false;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Sign in';
-    }
+      sessionStorage.setItem('tgw_post_login_redirect', window.location.pathname + window.location.search);
+    } catch {}
+    window.location.href = '/';
   }
-  document.getElementById('login-btn').addEventListener('click', doLogin);
-  ['login-email', 'login-pw'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-  });
-
   function ensureAuth() {
     if (!isLoggedIn()) {
-      showLogin();
+      redirectToDashboard();
       return false;
     }
     return true;
@@ -708,9 +640,7 @@
         body: JSON.stringify(body),
       });
       if (res.status === 401) {
-        showLogin();
-        btn.disabled = false;
-        btn.textContent = 'Save';
+        redirectToDashboard();
         return;
       }
       const data = await res.json();
@@ -749,7 +679,7 @@
         headers: authH(),
       });
       if (res.status === 401) {
-        showLogin();
+        redirectToDashboard();
         return;
       }
       const data = await res.json();
@@ -806,7 +736,7 @@
         body: JSON.stringify({ service: 'Travelify', appId, apiKey }),
       });
       if (res.status === 401) {
-        showLogin();
+        redirectToDashboard();
         return;
       }
       const data = await res.json();
@@ -838,7 +768,7 @@
           method: 'DELETE',
           headers: authH(),
         });
-        if (res.status === 401) { showLogin(); return; }
+        if (res.status === 401) { redirectToDashboard(); return; }
         if (!res.ok) throw new Error('Revoke failed');
         state.integration = null;
         renderCredsStatus();
