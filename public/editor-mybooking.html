@@ -115,6 +115,13 @@
   .layout-tile.vertical .layout-tile-icon { width: 20px; height: 24px; }
   .layout-tile.compact .layout-tile-icon { width: 16px; height: 22px; }
 
+  /* Radius switcher */
+  .radius-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+  .radius-tile { padding: 10px 6px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 11px; font-weight: 500; color: var(--text-2); text-align: center; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .radius-tile:hover { border-color: var(--accent); }
+  .radius-tile.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .radius-icon { display: inline-block; width: 24px; height: 24px; border: 1.5px solid currentColor; opacity: .7; }
+
   /* Toggle row */
   .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; gap: 12px; }
   .toggle-row > span { flex: 1; font-size: 13px; color: var(--text); }
@@ -249,6 +256,74 @@
             <div class="toggle-row">
               <span>Dark mode<small>Default theme for the widget</small></span>
               <button class="switch" id="toggle-theme" type="button" aria-label="Toggle theme"></button>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="section" data-section="brand">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Brand</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="field">
+              <label>Brand name</label>
+              <input type="text" id="brand-name" placeholder="Your company name">
+              <div class="field-help">Shown on the PDF header and footer. Leave blank to omit.</div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="section" data-section="colours">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><path d="M12 22a10 10 0 1 1 6.6-17.5L12 12v10z"/></svg> Colours</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="color-row">
+              <label>Primary</label>
+              <input type="color" data-colour="primary">
+              <span class="hex" data-hex="primary">#1B2B5B</span>
+            </div>
+            <div class="color-row">
+              <label>Accent</label>
+              <input type="color" data-colour="accent">
+              <span class="hex" data-hex="accent">#00B4D8</span>
+            </div>
+            <div class="color-row">
+              <label>Paid (success)</label>
+              <input type="color" data-colour="success">
+              <span class="hex" data-hex="success">#10B981</span>
+            </div>
+            <div class="color-row">
+              <label>Due (warning)</label>
+              <input type="color" data-colour="warning">
+              <span class="hex" data-hex="warning">#F59E0B</span>
+            </div>
+            <div class="color-row">
+              <label>Text</label>
+              <input type="color" data-colour="text">
+              <span class="hex" data-hex="text">#0F172A</span>
+            </div>
+            <div class="field-help" style="margin-top: 8px;">Primary drives the hero band, CTAs and PDF header. Accent is used for focus rings, links and the live indicator. Success/Warning are used for paid/balance amounts.</div>
+          </div></div>
+        </div>
+
+        <div class="section" data-section="style">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="6"/></svg> Style</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="field">
+              <label>Border radius</label>
+              <div class="radius-grid">
+                <button type="button" class="radius-tile" data-radius="0"><span class="radius-icon" style="border-radius: 0;"></span><span>Sharp</span></button>
+                <button type="button" class="radius-tile" data-radius="6"><span class="radius-icon" style="border-radius: 2px;"></span><span>Subtle</span></button>
+                <button type="button" class="radius-tile active" data-radius="12"><span class="radius-icon" style="border-radius: 4px;"></span><span>Rounded</span></button>
+                <button type="button" class="radius-tile" data-radius="20"><span class="radius-icon" style="border-radius: 8px;"></span><span>Soft</span></button>
+              </div>
+              <div class="field-help">Applies to cards, inputs and buttons.</div>
             </div>
           </div></div>
         </div>
@@ -423,6 +498,14 @@
   'use strict';
 
   // ===== State =====
+  const DEFAULT_COLOURS = {
+    primary: '#1B2B5B',
+    accent:  '#00B4D8',
+    success: '#10B981',
+    warning: '#F59E0B',
+    text:    '#0F172A',
+  };
+
   const state = {
     widgetId: null,
     name: 'My Booking',
@@ -434,6 +517,9 @@
       subtitleShort: 'Look up your trip in seconds',
       eyebrow: 'Secure booking lookup',
       labels: {},
+      brand: { name: '' },
+      colors: Object.assign({}, DEFAULT_COLOURS),
+      radius: 12,
       support: { email: '', phone: '' },
       display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showLocalFees: true },
     },
@@ -559,6 +645,40 @@
       else if (id === 'copy-eyebrow') state.config.eyebrow = el.value;
       else if (id === 'support-email') state.config.support.email = el.value;
       else if (id === 'support-phone') state.config.support.phone = el.value;
+      schedulePreview();
+    });
+  });
+
+  // ===== Brand =====
+  document.getElementById('brand-name').addEventListener('input', e => {
+    state.config.brand.name = e.target.value;
+    schedulePreview();
+  });
+
+  // ===== Colour pickers =====
+  function setColourFromInput(input) {
+    const key = input.dataset.colour;
+    const value = input.value;
+    state.config.colors[key] = value;
+    const hex = document.querySelector('[data-hex="' + key + '"]');
+    if (hex) hex.textContent = value.toUpperCase();
+    schedulePreview();
+  }
+  document.querySelectorAll('[data-colour]').forEach(input => {
+    // Initialise the picker from current state
+    const key = input.dataset.colour;
+    input.value = state.config.colors[key] || DEFAULT_COLOURS[key];
+    const hex = document.querySelector('[data-hex="' + key + '"]');
+    if (hex) hex.textContent = (input.value || '').toUpperCase();
+    input.addEventListener('input', () => setColourFromInput(input));
+  });
+
+  // ===== Radius tiles =====
+  document.querySelectorAll('.radius-tile').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.radius-tile').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      state.config.radius = parseInt(t.dataset.radius, 10) || 0;
       schedulePreview();
     });
   });
@@ -824,7 +944,12 @@
       state.widgetId = id;
       state.name = data.name || 'My Booking';
       if (data.config) {
+        // Merge loaded config over defaults so missing fields fall back gracefully
         state.config = Object.assign(state.config, data.config);
+        // Make sure colours object is complete (older saves may not have all keys)
+        state.config.colors = Object.assign({}, DEFAULT_COLOURS, state.config.colors || {});
+        state.config.brand = state.config.brand || { name: '' };
+        if (typeof state.config.radius !== 'number') state.config.radius = 12;
       }
       // Populate UI
       document.getElementById('widget-name').value = state.name;
@@ -834,11 +959,24 @@
       document.getElementById('copy-eyebrow').value = state.config.eyebrow || '';
       document.getElementById('support-email').value = state.config.support?.email || '';
       document.getElementById('support-phone').value = state.config.support?.phone || '';
+      document.getElementById('brand-name').value = state.config.brand?.name || '';
       // Layout tile
       document.querySelectorAll('.layout-tile').forEach(t => t.classList.toggle('active', t.dataset.layout === state.config.layout));
       // Theme switch
       const themeOn = state.config.theme === 'dark';
       document.getElementById('toggle-theme').classList.toggle('on', themeOn);
+      // Colour pickers
+      document.querySelectorAll('[data-colour]').forEach(input => {
+        const key = input.dataset.colour;
+        const value = state.config.colors[key] || DEFAULT_COLOURS[key];
+        input.value = value;
+        const hex = document.querySelector('[data-hex="' + key + '"]');
+        if (hex) hex.textContent = (value || '').toUpperCase();
+      });
+      // Radius tile
+      document.querySelectorAll('.radius-tile').forEach(t => {
+        t.classList.toggle('active', parseInt(t.dataset.radius, 10) === state.config.radius);
+      });
       // Display switches
       document.querySelectorAll('[data-display]').forEach(sw => {
         const k = sw.dataset.display;
