@@ -31,7 +31,9 @@
 
 import { setCors, sanitiseForFormula } from './_auth.js';
 import { decrypt } from './_crypto.js';
-import { renderPdfHtml } from './_pdf-template.js';
+// Template lives in /public so it can be loaded both server-side (here) and
+// browser-side (the editor preview). Same file, single source of truth.
+import { renderPdfHtml } from '../public/_pdf-template.js';
 
 // Chromium / Puppeteer — only loaded inside the handler so cold start
 // doesn't pay the cost on health checks etc.
