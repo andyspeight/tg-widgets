@@ -1,38 +1,14 @@
 /**
  * GET /api/find-booking-widget?lunaClientName=X
  *
- * Public lookup. Returns the My Booking widget ID linked to a given Luna
- * chat client name. Called by luna-chat-endpoint at runtime to discover
- * whether the visitor's site has booking lookup enabled.
- *
- * Returns:
- *   200 { widgetId: "rec...", connected: true, clientName: "..." }   when found
- *   404 { error: "not_found" }                                        when no widget links to that client
- *
- * Why this is safe to expose publicly:
- *   - The widget ID alone does NOT grant any data access. Customer data
- *     retrieval still requires a valid email + booking ref + departure date,
- *     which an attacker would not have.
- *   - The Luna client name is itself essentially public — it's embedded in
- *     the install snippet on every page that runs Luna.
- *   - Rate limited per IP to prevent enumeration scans.
- *
- * Implementation: no third-party dependencies, no Airtable formula. We list
- * all widget records and filter in JS. Any widget with a parseable
- * lunaIntegration block in its Settings JSON wins regardless of its Type
- * field — that's the only signal we trust anyway, since the editor only
- * writes lunaIntegration when the user explicitly connects.
- *
- * Module type: ESM (matches the rest of tg-widgets).
+ * DIAGNOSTIC BUILD: surfaces underlying Airtable errors in the JSON response
+ * so we can debug without round-tripping to Vercel logs. Once working, swap
+ * back to the production version that hides internals.
  */
 
 const BASE_ID = 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
 
-// Simple in-memory rate limit. 60 lookups per IP per minute is more than
-// enough for legitimate use (Luna caches the result per session anyway).
-// Resets when the function cold-starts, which is fine — abuse would still
-// surface in Vercel logs.
 const RATE_WINDOW_MS = 60 * 1000;
 const RATE_MAX = 60;
 const rateBuckets = new Map();
@@ -62,7 +38,6 @@ function setCors(res) {
   res.setHeader('Cache-Control', 'no-store');
 }
 
-// First env var that exists wins. tg-widgets may use any of these names.
 function getAirtableKey() {
   return process.env.AIRTABLE_API_KEY
       || process.env.AIRTABLE_KEY
@@ -71,8 +46,6 @@ function getAirtableKey() {
       || '';
 }
 
-// Walk a Settings field and return parsed JSON, or null. Settings can be
-// stored as a JSON string or, in newer rows, as already-parsed objects.
 function parseSettings(raw) {
   if (!raw) return null;
   if (typeof raw === 'object') return raw;
@@ -82,54 +55,17 @@ function parseSettings(raw) {
   return null;
 }
 
-// Find the Settings field on a record, by trying common field names in order.
-// Avoids hard-coding a field ID that might not match this base.
 const SETTINGS_FIELD_CANDIDATES = ['Settings', 'settings', 'Config', 'config'];
 
 function getSettingsRaw(fields) {
   for (const name of SETTINGS_FIELD_CANDIDATES) {
     if (fields[name] !== undefined) return fields[name];
   }
-  // Last resort: hunt for any field whose value parses as JSON containing
-  // a lunaIntegration key. This is defensive and only matters if someone
-  // renames the field upstream.
   for (const key of Object.keys(fields)) {
     const parsed = parseSettings(fields[key]);
     if (parsed && parsed.lunaIntegration) return fields[key];
   }
   return null;
-}
-
-// Fetch all widget records via Airtable's pagination. Limited to 5 pages
-// (500 records) as a safety net — a single tg-widgets base shouldn't have
-// more than that, and if it does we'll log and proceed with what we have.
-async function fetchAllWidgets(apiKey) {
-  const baseUrl = 'https://api.airtable.com/v0/' + BASE_ID + '/' + WIDGETS_TABLE;
-  let offset = '';
-  let pages = 0;
-  const all = [];
-
-  while (pages < 5) {
-    const url = baseUrl + '?pageSize=100' + (offset ? '&offset=' + encodeURIComponent(offset) : '');
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' }
-    });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new Error('Airtable ' + res.status + ': ' + body.slice(0, 300));
-    }
-
-    const data = await res.json();
-    if (Array.isArray(data.records)) all.push(...data.records);
-
-    if (!data.offset) break;
-    offset = data.offset;
-    pages += 1;
-  }
-
-  return all;
 }
 
 export default async function handler(req, res) {
@@ -142,8 +78,6 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'rate_limited' });
   }
 
-  // Parse the lunaClientName from query string. Vercel populates req.query
-  // for serverless functions, but fall back to URL parsing just in case.
   let lunaClientName = '';
   if (req.query && req.query.lunaClientName) {
     lunaClientName = String(req.query.lunaClientName);
@@ -161,26 +95,92 @@ export default async function handler(req, res) {
 
   const apiKey = getAirtableKey();
   if (!apiKey) {
-    console.error('[find-booking-widget] No Airtable key in env (tried AIRTABLE_API_KEY, AIRTABLE_KEY, AIRTABLE_TOKEN, AIRTABLE_PAT)');
-    return res.status(500).json({ error: 'server_misconfigured' });
+    return res.status(500).json({
+      error: 'server_misconfigured',
+      detail: 'No Airtable key in env (tried AIRTABLE_API_KEY, AIRTABLE_KEY, AIRTABLE_TOKEN, AIRTABLE_PAT)'
+    });
   }
 
-  let records;
+  // Try to fetch one page of widgets and surface any Airtable error verbatim
+  const baseUrl = 'https://api.airtable.com/v0/' + BASE_ID + '/' + WIDGETS_TABLE;
+  const firstUrl = baseUrl + '?pageSize=100';
+
+  let firstRes;
   try {
-    records = await fetchAllWidgets(apiKey);
+    firstRes = await fetch(firstUrl, {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' }
+    });
   } catch (err) {
-    console.error('[find-booking-widget] Airtable fetch failed:', err && err.message ? err.message : err);
-    return res.status(500).json({ error: 'lookup_failed' });
+    return res.status(500).json({
+      error: 'fetch_threw',
+      detail: err && err.message ? err.message : String(err)
+    });
+  }
+
+  if (!firstRes.ok) {
+    const body = await firstRes.text().catch(() => '');
+    return res.status(500).json({
+      error: 'airtable_http_' + firstRes.status,
+      detail: body.slice(0, 800),
+      requestUrl: firstUrl,
+      keyPrefix: apiKey.slice(0, 6) + '…'
+    });
+  }
+
+  let firstData;
+  try {
+    firstData = await firstRes.json();
+  } catch (err) {
+    return res.status(500).json({
+      error: 'airtable_invalid_json',
+      detail: err && err.message ? err.message : String(err)
+    });
+  }
+
+  const allRecords = Array.isArray(firstData.records) ? firstData.records.slice() : [];
+
+  // Paginate up to 5 pages total (500 records). Errors here are non-fatal —
+  // we proceed with what we have and note the issue in diagnostics.
+  let offset = firstData.offset;
+  let pages = 1;
+  const pageErrors = [];
+  while (offset && pages < 5) {
+    const url = baseUrl + '?pageSize=100&offset=' + encodeURIComponent(offset);
+    try {
+      const r = await fetch(url, {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' }
+      });
+      if (!r.ok) {
+        const body = await r.text().catch(() => '');
+        pageErrors.push('page ' + (pages + 1) + ': ' + r.status + ' ' + body.slice(0, 200));
+        break;
+      }
+      const d = await r.json();
+      if (Array.isArray(d.records)) allRecords.push(...d.records);
+      offset = d.offset;
+      pages += 1;
+    } catch (err) {
+      pageErrors.push('page ' + (pages + 1) + ' threw: ' + (err && err.message ? err.message : String(err)));
+      break;
+    }
   }
 
   const target = lunaClientName.toLowerCase();
-  for (const rec of records) {
+  let scanned = 0;
+  let withSettings = 0;
+  let withLuna = 0;
+  for (const rec of allRecords) {
+    scanned += 1;
     const fields = rec.fields || {};
     const settings = parseSettings(getSettingsRaw(fields));
     if (!settings) continue;
+    withSettings += 1;
 
     const luna = settings.lunaIntegration;
     if (!luna || !luna.connected) continue;
+    withLuna += 1;
     if (typeof luna.clientName !== 'string') continue;
 
     if (luna.clientName.trim().toLowerCase() === target) {
@@ -192,5 +192,15 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(404).json({ error: 'not_found' });
+  // Not found — but include diagnostics so we can see what was scanned.
+  return res.status(404).json({
+    error: 'not_found',
+    diagnostics: {
+      scannedRecords: scanned,
+      recordsWithSettings: withSettings,
+      recordsWithLunaConnected: withLuna,
+      requestedClientName: lunaClientName,
+      pageErrors: pageErrors.length ? pageErrors : undefined
+    }
+  });
 }
