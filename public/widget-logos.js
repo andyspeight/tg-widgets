@@ -31,6 +31,17 @@
     return s;
   }
 
+  // Image URLs are allowed to be data: URIs (for inline SVG/PNG placeholders),
+  // but javascript: and vbscript: are still blocked to prevent XSS.
+  // Only data:image/... is permitted — not data:text/html or other types.
+  function safeImageUrl(u) {
+    if (!u) return '';
+    const s = String(u).trim();
+    if (/^javascript:/i.test(s) || /^vbscript:/i.test(s)) return '';
+    if (/^data:/i.test(s) && !/^data:image\//i.test(s)) return '';
+    return s;
+  }
+
   // ---------- Styles ----------
   const STYLES = `
     :host { all: initial; display: block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -502,7 +513,7 @@
       return `
         <${tag} class="tgl-cell${linkClass}" ${linkAttrs} aria-label="${esc(name || 'Logo')}">
           <div class="tgl-img-wrap">
-            <img class="tgl-img" src="${esc(safeUrl(logo.image))}" alt="${esc(altText)}" loading="lazy" decoding="async" />
+            <img class="tgl-img" src="${esc(safeImageUrl(logo.image))}" alt="${esc(altText)}" loading="lazy" decoding="async" />
           </div>
           ${caption}
         </${tag}>
@@ -539,7 +550,7 @@
           <div class="tgl-spotlight-featured">
             <span class="tgl-spotlight-badge">Featured Partner</span>
             <div class="tgl-spotlight-img-wrap">
-              <img class="tgl-spotlight-img" src="${esc(safeUrl(featured.image))}" alt="${esc(featured.alt || featured.name || 'Featured logo')}" loading="lazy" decoding="async" />
+              <img class="tgl-spotlight-img" src="${esc(safeImageUrl(featured.image))}" alt="${esc(featured.alt || featured.name || 'Featured logo')}" loading="lazy" decoding="async" />
             </div>
             ${featured.name ? `<h3 class="tgl-spotlight-name">${esc(featured.name)}</h3>` : ''}
             ${this.c.spotlightTagline ? `<p class="tgl-spotlight-tagline">${esc(this.c.spotlightTagline)}</p>` : ''}
