@@ -14,7 +14,7 @@
   'use strict';
 
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -46,6 +46,17 @@
 
   function pad2(n) {
     return n < 10 ? '0' + n : '' + n;
+  }
+
+  // Convert "#1B2B5B" → "27, 43, 91" for use in rgba() CSS vars.
+  // Returns empty string for invalid input — caller falls back to defaults in CSS.
+  function hexToRgb(hex) {
+    if (!hex || typeof hex !== 'string') return '';
+    let h = hex.trim().replace('#', '');
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    if (!/^[0-9a-f]{6}$/i.test(h)) return '';
+    const n = parseInt(h, 16);
+    return ((n >> 16) & 255) + ', ' + ((n >> 8) & 255) + ', ' + (n & 255);
   }
 
   // Parse ISO target date safely. Returns ms-since-epoch, or null if invalid.
@@ -97,7 +108,9 @@
     .tgcd-root {
       /* Theme tokens (overridable via config) */
       --tgcd-brand: #1B2B5B;
+      --tgcd-brand-rgb: 27, 43, 91;
       --tgcd-accent: #00B4D8;
+      --tgcd-accent-rgb: 0, 180, 216;
       --tgcd-bg: transparent;
       --tgcd-card: #FFFFFF;
       --tgcd-text: #0F172A;
@@ -139,23 +152,82 @@
       flex-direction: column;
       align-items: center;
       gap: 6px;
+      position: relative;
     }
+
+    /* Digit cell — gradient surface with subtle inner highlight */
     .tgcd-digits {
+      position: relative;
       font-feature-settings: 'tnum' 1, 'lnum' 1;
       font-variant-numeric: tabular-nums lining-nums;
       font-weight: 800;
       letter-spacing: -0.02em;
       line-height: 1;
       color: var(--tgcd-digit-text);
-      background: var(--tgcd-digit-bg);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.55) 0%, transparent 35%),
+        linear-gradient(180deg, var(--tgcd-digit-bg) 0%, color-mix(in srgb, var(--tgcd-digit-bg) 88%, var(--tgcd-brand) 12%) 100%);
       border: 1px solid var(--tgcd-border);
       border-radius: var(--tgcd-radius-sm);
       padding: 14px 16px;
       min-width: 76px;
       text-align: center;
       font-size: 36px;
-      transition: color .25s ease, background-color .25s ease, border-color .25s ease;
+      transition: color .25s ease, border-color .25s ease, box-shadow .35s ease, transform .15s ease;
+      overflow: hidden;
+      isolation: isolate;
     }
+    /* Soft brand glow (gated behind .tgcd-glow on root) */
+    .tgcd-root.tgcd-glow .tgcd-digits {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.5) inset,
+        0 -1px 0 rgba(0,0,0,.04) inset,
+        0 6px 18px -8px rgba(var(--tgcd-brand-rgb), .35),
+        0 2px 4px rgba(15,23,42,.04);
+    }
+    .tgcd-root[data-theme="dark"] .tgcd-digits {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 50%),
+        linear-gradient(180deg, var(--tgcd-digit-bg) 0%, color-mix(in srgb, var(--tgcd-digit-bg) 80%, var(--tgcd-brand) 20%) 100%);
+    }
+    .tgcd-root[data-theme="dark"].tgcd-glow .tgcd-digits {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.06) inset,
+        0 -1px 0 rgba(0,0,0,.3) inset,
+        0 8px 22px -10px rgba(var(--tgcd-accent-rgb), .35),
+        0 2px 6px rgba(0,0,0,.3);
+    }
+
+    /* Sliding digit reels */
+    .tgcd-reel {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      height: 1em;
+      line-height: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .tgcd-reel-cur, .tgcd-reel-nxt {
+      display: block;
+      height: 1em;
+      line-height: 1;
+    }
+    /* Default: no transition (set on first paint) */
+    .tgcd-reel.is-animating .tgcd-reel-cur,
+    .tgcd-reel.is-animating .tgcd-reel-nxt {
+      transition: transform .45s cubic-bezier(.2,.7,.2,1), opacity .45s ease;
+    }
+    .tgcd-reel.is-animating .tgcd-reel-cur { transform: translateY(-100%); opacity: 0; }
+    .tgcd-reel.is-animating .tgcd-reel-nxt { transform: translateY(-100%); opacity: 1; }
+    /* Reduced motion fallback — instant swap */
+    @media (prefers-reduced-motion: reduce) {
+      .tgcd-reel.is-animating .tgcd-reel-cur,
+      .tgcd-reel.is-animating .tgcd-reel-nxt {
+        transition: none !important;
+      }
+    }
+
     .tgcd-label {
       font-size: 11px;
       letter-spacing: 0.08em;
@@ -173,30 +245,52 @@
       user-select: none;
     }
 
-    /* Tick animation — only applied when not reduced-motion */
-    @media (prefers-reduced-motion: no-preference) {
-      .tgcd-digits.tgcd-tick {
-        animation: tgcd-tick-anim .35s ease;
-      }
-      @keyframes tgcd-tick-anim {
-        0%   { transform: translateY(0);    opacity: 1; }
-        45%  { transform: translateY(-3px); opacity: 0.55; }
-        100% { transform: translateY(0);    opacity: 1; }
-      }
+    /* Final-minute progress ring around the seconds cell */
+    .tgcd-ring {
+      position: absolute;
+      inset: -6px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s ease;
     }
+    .tgcd-root.tgcd-final-min .tgcd-ring {
+      opacity: 1;
+    }
+    .tgcd-ring circle {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: center;
+    }
+    .tgcd-ring .tgcd-ring-track { stroke: var(--tgcd-border); }
+    .tgcd-ring .tgcd-ring-fill  { stroke: var(--tgcd-accent); transition: stroke-dashoffset .95s linear; }
 
     /* Urgency styling */
     .tgcd-root.tgcd-urgent .tgcd-digits {
       color: var(--tgcd-accent);
-      border-color: var(--tgcd-accent);
+      border-color: color-mix(in srgb, var(--tgcd-accent) 60%, var(--tgcd-border));
+    }
+    .tgcd-root.tgcd-urgent.tgcd-glow .tgcd-digits {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.5) inset,
+        0 -1px 0 rgba(0,0,0,.04) inset,
+        0 8px 24px -6px rgba(var(--tgcd-accent-rgb), .55),
+        0 2px 4px rgba(15,23,42,.06);
     }
     @media (prefers-reduced-motion: no-preference) {
       .tgcd-root.tgcd-urgent .tgcd-unit-seconds .tgcd-digits {
-        animation: tgcd-pulse 1s ease-in-out infinite;
+        animation: tgcd-pulse 1.4s ease-in-out infinite;
       }
       @keyframes tgcd-pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(0,180,216,0); }
-        50%      { box-shadow: 0 0 0 4px rgba(0,180,216,.18); }
+        0%, 100% { box-shadow:
+          0 1px 0 rgba(255,255,255,.5) inset,
+          0 -1px 0 rgba(0,0,0,.04) inset,
+          0 0 0 0 rgba(var(--tgcd-accent-rgb), 0); }
+        50%      { box-shadow:
+          0 1px 0 rgba(255,255,255,.5) inset,
+          0 -1px 0 rgba(0,0,0,.04) inset,
+          0 0 0 6px rgba(var(--tgcd-accent-rgb), .15); }
       }
     }
 
@@ -253,10 +347,15 @@
       box-shadow: var(--tgcd-shadow);
       flex-wrap: wrap;
       justify-content: center;
+      position: relative;
+      overflow: hidden;
     }
     .tgcd-banner .tgcd-banner-text {
       flex: 1;
       min-width: 200px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     .tgcd-banner .tgcd-heading { font-size: 17px; }
     .tgcd-banner .tgcd-sub { font-size: 13px; margin-top: 2px; }
@@ -265,6 +364,22 @@
     .tgcd-banner .tgcd-label { font-size: 10px; }
     .tgcd-banner .tgcd-sep { font-size: 22px; transform: translateY(-7px); }
     .tgcd-banner .tgcd-cta { padding: 10px 18px; font-size: 14px; min-height: 40px; }
+    /* Banner ticker dot — pulses next to the heading */
+    .tgcd-banner-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--tgcd-accent);
+      flex-shrink: 0;
+      box-shadow: 0 0 0 0 rgba(var(--tgcd-accent-rgb), .5);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .tgcd-banner-dot {
+        animation: tgcd-dot-pulse 2.2s ease-in-out infinite;
+      }
+      @keyframes tgcd-dot-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(var(--tgcd-accent-rgb), .5); }
+        50%      { box-shadow: 0 0 0 6px rgba(var(--tgcd-accent-rgb), 0); }
+      }
+    }
 
     /* ---------- CARD LAYOUT ---------- */
     .tgcd-card {
@@ -278,6 +393,8 @@
       border-radius: var(--tgcd-radius);
       box-shadow: var(--tgcd-shadow);
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
     .tgcd-card .tgcd-heading { font-size: 20px; }
     .tgcd-card .tgcd-sub { font-size: 14px; max-width: 480px; }
@@ -310,6 +427,8 @@
       font-size: 16px;
       font-weight: 700;
       color: var(--tgcd-text);
+      box-shadow: none !important;
+      overflow: visible;
     }
     .tgcd-inline .tgcd-label {
       font-size: 13px;
@@ -325,19 +444,59 @@
       min-height: 28px;
       margin-left: 4px;
     }
+    .tgcd-inline .tgcd-ring { display: none; }
 
     /* ---------- HERO LAYOUT ---------- */
     .tgcd-hero {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 24px;
-      padding: 48px 32px;
+      padding: 56px 32px;
       background: var(--tgcd-card);
       border: 1px solid var(--tgcd-border);
       border-radius: var(--tgcd-radius);
       box-shadow: var(--tgcd-shadow);
       text-align: center;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    /* Aurora — gated behind .tgcd-aurora on the hero element */
+    .tgcd-hero.tgcd-aurora::before {
+      content: '';
+      position: absolute;
+      inset: -20%;
+      z-index: -1;
+      background:
+        radial-gradient(40% 50% at 20% 30%, rgba(var(--tgcd-brand-rgb), .35) 0%, transparent 60%),
+        radial-gradient(45% 55% at 80% 25%, rgba(var(--tgcd-accent-rgb), .35) 0%, transparent 65%),
+        radial-gradient(50% 60% at 70% 80%, rgba(var(--tgcd-brand-rgb), .25) 0%, transparent 60%),
+        radial-gradient(35% 45% at 25% 75%, rgba(var(--tgcd-accent-rgb), .25) 0%, transparent 60%);
+      filter: blur(40px);
+      opacity: .9;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .tgcd-hero.tgcd-aurora::before {
+        animation: tgcd-aurora 18s ease-in-out infinite alternate;
+      }
+      @keyframes tgcd-aurora {
+        0%   { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+        50%  { transform: translate(-3%, 2%) rotate(8deg) scale(1.05); }
+        100% { transform: translate(2%, -2%) rotate(-6deg) scale(1.02); }
+      }
+    }
+    .tgcd-hero.tgcd-aurora::after {
+      /* Soft inner vignette so aurora doesn't overwhelm the centre content */
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(60% 50% at 50% 50%, transparent 0%, rgba(255,255,255,.5) 100%);
+      pointer-events: none;
+    }
+    .tgcd-root[data-theme="dark"] .tgcd-hero.tgcd-aurora::after {
+      background: radial-gradient(60% 50% at 50% 50%, transparent 0%, rgba(15,23,42,.5) 100%);
     }
     .tgcd-hero .tgcd-heading {
       font-size: 36px;
@@ -385,10 +544,10 @@
     /* ---------- Responsive ---------- */
     @media (max-width: 600px) {
       .tgcd-banner { flex-direction: column; text-align: center; padding: 16px; }
-      .tgcd-banner .tgcd-banner-text { text-align: center; }
+      .tgcd-banner .tgcd-banner-text { justify-content: center; text-align: center; }
       .tgcd-banner .tgcd-units { justify-content: center; }
       .tgcd-card { padding: 24px 16px; }
-      .tgcd-hero { padding: 32px 20px; }
+      .tgcd-hero { padding: 40px 20px; }
       .tgcd-hero .tgcd-heading { font-size: 26px; }
       .tgcd-hero .tgcd-digits { font-size: 40px; padding: 16px 14px; min-width: 80px; }
       .tgcd-hero .tgcd-sep { font-size: 36px; transform: translateY(-10px); }
@@ -417,6 +576,14 @@
       repeating: { enabled: false, frequency: 'weekly', dayOfWeek: 5, time: '17:00' },
       urgency: { enabled: true, thresholdHours: 24 },
       animation: { tick: true },
+      wow: {
+        slidingDigits: true,    // digits slide up reel-style on change
+        gradientCells: true,    // brand-tinted gradient on digit cells (vs flat colour)
+        glow: true,             // soft brand-coloured glow under digit cells
+        finalMinuteRing: true,  // SVG progress ring around seconds in final 60s
+        heroAurora: true,       // animated aurora background behind the Hero layout
+        bannerDot: true         // pulsing dot next to the heading on Banner layout
+      },
       colours: {
         brand: '#1B2B5B',
         accent: '#00B4D8',
@@ -502,10 +669,18 @@
       if (cs.digitBg) root.style.setProperty('--tgcd-digit-bg', cs.digitBg);
       root.style.setProperty('--tgcd-cta-bg', cs.ctaBg || cs.brand || '#1B2B5B');
       if (cs.ctaText) root.style.setProperty('--tgcd-cta-text', cs.ctaText);
+      // RGB tokens for rgba() in CSS — used by glow + aurora
+      const brandRgb = hexToRgb(cs.brand || '#1B2B5B');
+      const accentRgb = hexToRgb(cs.accent || '#00B4D8');
+      if (brandRgb)  root.style.setProperty('--tgcd-brand-rgb',  brandRgb);
+      if (accentRgb) root.style.setProperty('--tgcd-accent-rgb', accentRgb);
       if (typeof c.radius === 'number') {
         root.style.setProperty('--tgcd-radius', c.radius + 'px');
         root.style.setProperty('--tgcd-radius-sm', Math.max(4, c.radius - 6) + 'px');
       }
+      // Wow flags — opt-in CSS classes on the root
+      const wow = c.wow || {};
+      if (wow.glow) root.classList.add('tgcd-glow');
 
       // Style block
       const style = document.createElement('style');
@@ -581,6 +756,12 @@
 
       const text = document.createElement('div');
       text.className = 'tgcd-banner-text';
+      if (c.wow && c.wow.bannerDot && c.heading) {
+        const dot = document.createElement('span');
+        dot.className = 'tgcd-banner-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        text.appendChild(dot);
+      }
       if (c.heading) {
         const h = document.createElement('p');
         h.className = 'tgcd-heading';
@@ -646,6 +827,7 @@
       const c = this.c;
       const wrap = document.createElement('div');
       wrap.className = 'tgcd-hero';
+      if (c.wow && c.wow.heroAurora) wrap.classList.add('tgcd-aurora');
 
       if (c.heading) {
         const h = document.createElement('h2');
@@ -667,6 +849,9 @@
 
     _buildUnits(remaining) {
       const c = this.c;
+      const useReels = !!(c.wow && c.wow.slidingDigits);
+      const useRing  = !!(c.wow && c.wow.finalMinuteRing);
+
       const units = document.createElement('div');
       units.className = 'tgcd-units';
       units.setAttribute('role', 'timer');
@@ -687,9 +872,56 @@
         const dig = document.createElement('div');
         dig.className = 'tgcd-digits';
         dig.setAttribute('data-unit', key);
-        // Days can exceed 99 — let it grow naturally
-        dig.textContent = key === 'days' ? String(val) : pad2(val);
+
+        const formatted = key === 'days' ? String(val) : pad2(val);
+
+        if (useReels && c.layout !== 'inline') {
+          // Reel: a clip-masked container with two stacked digit spans.
+          // .tgcd-reel-cur shows the current value; .tgcd-reel-nxt is hidden below.
+          // On tick we set the next value into .tgcd-reel-nxt, then trigger the slide.
+          const reel = document.createElement('span');
+          reel.className = 'tgcd-reel';
+          reel.setAttribute('data-reel', key);
+
+          const cur = document.createElement('span');
+          cur.className = 'tgcd-reel-cur';
+          cur.textContent = formatted;
+
+          const nxt = document.createElement('span');
+          nxt.className = 'tgcd-reel-nxt';
+          nxt.setAttribute('aria-hidden', 'true');
+          nxt.textContent = formatted;
+
+          reel.appendChild(cur);
+          reel.appendChild(nxt);
+          dig.appendChild(reel);
+        } else {
+          // Plain text — used by inline layout, or when sliding digits is off
+          dig.textContent = formatted;
+        }
+
         unit.appendChild(dig);
+
+        // Final-minute progress ring on the seconds cell
+        if (useRing && key === 'seconds' && c.layout !== 'inline') {
+          const svgNs = 'http://www.w3.org/2000/svg';
+          const ring = document.createElementNS(svgNs, 'svg');
+          ring.setAttribute('class', 'tgcd-ring');
+          ring.setAttribute('viewBox', '0 0 100 100');
+          ring.setAttribute('aria-hidden', 'true');
+          const track = document.createElementNS(svgNs, 'circle');
+          track.setAttribute('class', 'tgcd-ring-track');
+          track.setAttribute('cx', '50'); track.setAttribute('cy', '50'); track.setAttribute('r', '46');
+          const fill  = document.createElementNS(svgNs, 'circle');
+          fill.setAttribute('class', 'tgcd-ring-fill');
+          fill.setAttribute('cx', '50'); fill.setAttribute('cy', '50'); fill.setAttribute('r', '46');
+          // Circumference for r=46 is ~289 — used as dasharray; offset will animate
+          fill.setAttribute('stroke-dasharray', '289');
+          fill.setAttribute('stroke-dashoffset', '289'); // start empty; _tick fills it in
+          ring.appendChild(track);
+          ring.appendChild(fill);
+          unit.appendChild(ring);
+        }
 
         const lab = document.createElement('div');
         lab.className = 'tgcd-label';
@@ -731,24 +963,57 @@
       if (!targetMs) return;
       const r = computeRemaining(targetMs);
 
-      // Update each digit cell + apply tick animation only when value changed
       const c = this.c;
       const root = this._root;
       if (!root) return;
 
+      const useReels = !!(c.wow && c.wow.slidingDigits) && c.layout !== 'inline';
       const map = { days: r.days, hours: r.hours, minutes: r.minutes, seconds: r.seconds };
+
       Object.keys(map).forEach((key) => {
         const cell = root.querySelector('.tgcd-digits[data-unit="' + key + '"]');
         if (!cell) return;
         const newText = key === 'days' ? String(map[key]) : pad2(map[key]);
-        if (cell.textContent !== newText) {
-          cell.textContent = newText;
-          if (!initial && c.animation && c.animation.tick) {
-            cell.classList.remove('tgcd-tick');
-            // Force reflow so the animation restarts
-            void cell.offsetWidth;
-            cell.classList.add('tgcd-tick');
+
+        if (useReels) {
+          const reel = cell.querySelector('.tgcd-reel');
+          const cur = reel && reel.querySelector('.tgcd-reel-cur');
+          const nxt = reel && reel.querySelector('.tgcd-reel-nxt');
+          if (!reel || !cur || !nxt) return;
+
+          if (cur.textContent === newText) return; // no change
+          if (initial) {
+            cur.textContent = newText;
+            nxt.textContent = newText;
+            return;
           }
+          // Set up the slide: nxt has the new value, cur still has the old one.
+          nxt.textContent = newText;
+          // Reset to baseline (no transition) before triggering the slide
+          reel.classList.remove('is-animating');
+          // Force reflow so removing the class actually takes effect before re-adding
+          void reel.offsetWidth;
+          reel.classList.add('is-animating');
+          // After the animation completes, snap to the new value with no transition
+          // and clear the animating class so the next tick can replay cleanly.
+          const onEnd = () => {
+            reel.classList.remove('is-animating');
+            cur.textContent = newText;
+            nxt.textContent = newText;
+            cur.removeEventListener('transitionend', onEnd);
+          };
+          cur.addEventListener('transitionend', onEnd, { once: true });
+          // Safety net — if transitionend doesn't fire (e.g. reduced-motion), still resolve
+          setTimeout(() => {
+            if (cur.textContent !== newText) {
+              reel.classList.remove('is-animating');
+              cur.textContent = newText;
+              nxt.textContent = newText;
+            }
+          }, 700);
+        } else {
+          // Plain mode: just swap the text
+          if (cell.textContent !== newText) cell.textContent = newText;
         }
       });
 
@@ -759,6 +1024,23 @@
           root.classList.add('tgcd-urgent');
         } else {
           root.classList.remove('tgcd-urgent');
+        }
+      }
+
+      // Final-minute progress ring
+      if (c.wow && c.wow.finalMinuteRing) {
+        const inFinalMinute = r.total > 0 && r.total <= 60 * 1000;
+        if (inFinalMinute) {
+          root.classList.add('tgcd-final-min');
+          const fill = root.querySelector('.tgcd-ring-fill');
+          if (fill) {
+            // Drain anticlockwise: at 60s remaining, offset = 0 (full ring); at 0s, offset = 289 (empty)
+            const elapsed = 60 - r.seconds; // 0..59
+            const offset = (elapsed / 60) * 289;
+            fill.setAttribute('stroke-dashoffset', String(offset.toFixed(1)));
+          }
+        } else {
+          root.classList.remove('tgcd-final-min');
         }
       }
 
