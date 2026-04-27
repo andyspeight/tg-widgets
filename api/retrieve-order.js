@@ -501,11 +501,17 @@ export default async function handler(req, res) {
     }
 
     // 4. Call Travelify
+    // The Travelify API requires an Origin header. From a browser, this is set
+    // automatically; from a server-to-server call (Node fetch from Vercel) it
+    // is not, and the API silently returns 401 "Missing or invalid application
+    // credentials" — making it look like the auth is wrong when it's actually
+    // the missing Origin. Sending our own product origin satisfies the gate.
     const travelifyRes = await fetch(TRAVELIFY_API, {
       method: 'POST',
       headers: {
         'Authorization': `Token ${appId}:${apiKey}`,
         'Content-Type': 'application/json',
+        'Origin': 'https://www.travelgenix.io',
       },
       body: JSON.stringify({
         emailAddress,
