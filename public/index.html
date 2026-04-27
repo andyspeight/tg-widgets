@@ -1195,6 +1195,10 @@ function loadMiniPreview(w) {
   if (w.id === 'logos' && window.TGLogosWidget) {
     container.innerHTML = '<div data-tg-widget="logos"></div>';
     const inner = container.querySelector('[data-tg-widget="logos"]');
+    // Inline SVG placeholder logos — never break, no network calls
+    const mkLogo = (label, bg, fg) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60"><rect width="160" height="60" rx="6" fill="${bg}"/><text x="80" y="38" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="${fg}" letter-spacing="1">${label}</text></svg>`
+    );
     new window.TGLogosWidget(inner, {
       layout: 'grid',
       columns: 3,
@@ -1202,12 +1206,12 @@ function loadMiniPreview(w) {
       showHeading: false,
       showCaptions: false,
       logos: [
-        { name: 'ABTA',   image: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/ABTA_Logo.svg/200px-ABTA_Logo.svg.png' },
-        { name: 'ATOL',   image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ATOL_Logo.svg/200px-ATOL_Logo.svg.png' },
-        { name: 'IATA',   image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IATA_logo.svg/200px-IATA_logo.svg.png' },
-        { name: 'TUI',    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/TUI_Logo_neu.svg/200px-TUI_Logo_neu.svg.png' },
-        { name: 'Jet2',   image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Jet2.com_logo.svg/200px-Jet2.com_logo.svg.png' },
-        { name: 'BA',     image: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/42/British_Airways_Logo.svg/200px-British_Airways_Logo.svg.png' },
+        { name: 'ABTA',   image: mkLogo('ABTA', '#003B7A', '#FFFFFF') },
+        { name: 'ATOL',   image: mkLogo('ATOL', '#FFD200', '#003B7A') },
+        { name: 'IATA',   image: mkLogo('IATA', '#0033A0', '#FFFFFF') },
+        { name: 'TUI',    image: mkLogo('TUI',  '#E60019', '#FFFFFF') },
+        { name: 'Jet2',   image: mkLogo('Jet2', '#E60012', '#FFFFFF') },
+        { name: 'BA',     image: mkLogo('BA',   '#075AAA', '#FFFFFF') },
       ],
       theme: { mode: 'light', brand: w.color || '#0891B2', radius: 12 }
     });
