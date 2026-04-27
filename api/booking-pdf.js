@@ -370,6 +370,12 @@ export default async function handler(req, res) {
       headers: {
         'Authorization': `Token ${appId}:${apiKey}`,
         'Content-Type': 'application/json',
+        // Travelify requires a non-empty Origin header. Without it the API
+        // returns 401 "Missing or invalid application credentials" no matter
+        // how valid the key is — the error message is misleading. We use a
+        // fixed value because this is server-side and the widget can be
+        // embedded on any client domain.
+        'Origin': 'https://www.travelgenix.io',
       },
       body: JSON.stringify({ emailAddress, departDate, orderRef }),
       signal: AbortSignal.timeout(12000),
