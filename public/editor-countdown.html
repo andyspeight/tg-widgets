@@ -1340,7 +1340,6 @@
        ========================================================= */
     function rebuild() {
       const stage = document.getElementById('pvStage');
-      const host = document.getElementById('pvHost');
       const label = document.getElementById('pvStageLabel');
       const layoutPill = document.getElementById('pvLayoutPill');
       const themePill = document.getElementById('pvThemePill');
@@ -1354,16 +1353,24 @@
       themePill.style.color = cfg.theme === 'dark' ? '#CBD5E1' : '#92400E';
       themePill.style.borderColor = cfg.theme === 'dark' ? '#334155' : '#FDE68A';
 
-      // Inline layout sits inside body copy
+      // CRITICAL: tear down the previous instance and REPLACE the host element
+      // entirely. Calling attachShadow() twice on the same element throws
+      // NotSupportedError silently and leaves the preview blank — that's why
+      // only the first layout (Card) rendered before this fix. A brand-new
+      // host element gets a brand-new shadow root.
+      if (widgetInst) { try { widgetInst.destroy(); } catch {} }
+      const oldHost = document.getElementById('pvHost');
+      const freshHost = document.createElement('div');
+      freshHost.id = 'pvHost';
+      oldHost.replaceWith(freshHost);
+
+      // Inline layout sits inside body copy; nest the widget host inside the copy.
       if (cfg.layout === 'inline') {
-        host.innerHTML = '<span style="display:inline-block">Don\'t miss out — </span><span id="cdHost" style="display:inline-block;vertical-align:middle"></span><span style="display:inline-block"> before the season closes.</span>';
+        freshHost.innerHTML = '<span style="display:inline-block">Don\'t miss out — </span><span id="cdHost" style="display:inline-block;vertical-align:middle"></span><span style="display:inline-block"> before the season closes.</span>';
         const inner = document.getElementById('cdHost');
-        if (widgetInst) { try { widgetInst.destroy(); } catch {} }
         widgetInst = new window.TGCountdownWidget(inner, cfg);
       } else {
-        host.innerHTML = '';
-        if (widgetInst) { try { widgetInst.destroy(); } catch {} }
-        widgetInst = new window.TGCountdownWidget(host, cfg);
+        widgetInst = new window.TGCountdownWidget(freshHost, cfg);
       }
 
       // If design mode is on, rebuild overlay
