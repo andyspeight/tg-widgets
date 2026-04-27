@@ -89,13 +89,24 @@
     ref:     'M3 3h18v18H3zM9 9h6M9 13h6M9 17h4',
     refresh: 'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-7.07 3M3 4v5h5',
     alert:   'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01',
+    plane:   'M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z',
+    bag:     'M16 3h-1V1h-2v2H7V1H5v2H4a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM4 8h12v12H4V8z',
+    lounge:  'M19 7v3.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 10.5V7M3 21V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10M3 17h18',
+    arrowR:  'M5 12h14M13 5l7 7-7 7',
+    leaf:    'M11 20A7 7 0 0 1 4 13c0-2 1-4 3-6 1-1 2-3 4-5l1 4c2-1 4 1 5 3 1 3 0 5-1 6-2 2-4 5-5 5z',
   };
-  function svg(p, sw) {
+  function svg(p, sw, size) {
+    // Bulletproof sizing: write width/height directly on the SVG element so
+    // sizing never depends on host-page CSS or stylesheet load order. CSS can
+    // still override (e.g. `.tgm-action-icon svg { width: 20px }`) but the
+    // attribute is the safety net. Default 20px matches the dominant size in
+    // this widget — outliers pass an explicit size.
     sw = sw || 2;
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p.split(/(?=M)/).map(d => '<path d="' + d + '"/>').join('') + '</svg>';
+    const s = size || 20;
+    return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="currentColor" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p.split(/(?=M)/).map(d => '<path d="' + d + '"/>').join('') + '</svg>';
   }
   function star() {
-    return '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15 9 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 9 12 2"/></svg>';
+    return '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><polygon points="12 2 15 9 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 9 12 2"/></svg>';
   }
 
   // ----- Helpers -----
@@ -138,6 +149,26 @@
     if (Number.isNaN(d.getTime())) return null;
     const ms = d.getTime() - Date.now();
     return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+  }
+  // Render an ISO timestamp as HH:MM in the booking's local clock. We use UTC
+  // because Travelify stores depart/arrive times as the LOCAL airport time
+  // dressed as UTC (e.g. "2026-10-02T14:45:00Z" really means 14:45 LHR local).
+  // Converting to local browser time would shift the printed clock incorrectly.
+  function fmtTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '';
+    const hh = String(d.getUTCHours()).padStart(2, '0');
+    const mm = String(d.getUTCMinutes()).padStart(2, '0');
+    return hh + ':' + mm;
+  }
+  function fmtDuration(mins) {
+    if (typeof mins !== 'number' || !Number.isFinite(mins) || mins <= 0) return '';
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
+    if (h && m) return h + 'h ' + m + 'm';
+    if (h) return h + 'h';
+    return m + 'm';
   }
   function initials(first, last) {
     const a = (first || '').trim();
@@ -438,6 +469,68 @@
     .tgm-fac { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border-light); border-radius: 9999px; font-size: 13px; color: var(--tgm-text-2); }
     .tgm-fac svg { width: 13px; height: 13px; color: var(--tgm-success); }
 
+    /* ===== Flight card =====
+       Each flight item produces a card. Inside are 1-2 "leg" blocks
+       (Outbound / Inbound). A leg shows the route at a glance — depart
+       airport, arrow, destination airport, total duration. The full
+       segment-by-segment detail is a collapsible below. */
+    .tgm-flight-card { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); padding: 20px; margin-bottom: 16px; }
+    .tgm-flight-card h3 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; margin: 0 0 16px; color: var(--tgm-text); letter-spacing: -.01em; }
+    .tgm-flight-card h3 svg { color: var(--tgm-accent); }
+    .tgm-flight-card h3 .tgm-flight-meta { margin-left: auto; font-size: 13px; font-weight: 400; color: var(--tgm-text-3); }
+    .tgm-leg { padding: 16px 0; border-top: 1px solid var(--tgm-border-light); }
+    .tgm-leg:first-of-type { border-top: none; padding-top: 0; }
+    .tgm-leg-dir { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; background: var(--tgm-bg-2); border-radius: 9999px; font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--tgm-text-2); margin-bottom: 12px; }
+    .tgm-leg-route { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+    .tgm-leg-end { min-width: 0; }
+    .tgm-leg-end.dest { text-align: right; }
+    .tgm-leg-time { font-size: 22px; font-weight: 700; color: var(--tgm-text); letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .tgm-leg-iata { font-size: 13px; font-weight: 600; color: var(--tgm-text-2); margin-top: 2px; letter-spacing: .04em; }
+    .tgm-leg-airport { font-size: 13px; color: var(--tgm-text-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tgm-leg-line { display: flex; flex-direction: column; align-items: center; min-width: 100px; }
+    .tgm-leg-line-dur { font-size: 11px; color: var(--tgm-text-3); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+    .tgm-leg-line-bar { width: 100%; height: 2px; background: var(--tgm-border); position: relative; display: flex; align-items: center; justify-content: center; }
+    .tgm-leg-line-bar::before, .tgm-leg-line-bar::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--tgm-accent); position: absolute; top: 50%; transform: translateY(-50%); }
+    .tgm-leg-line-bar::before { left: 0; }
+    .tgm-leg-line-bar::after { right: 0; }
+    .tgm-leg-line-icon { background: var(--tgm-bg); padding: 0 6px; color: var(--tgm-accent); position: relative; z-index: 1; }
+    .tgm-leg-stops { font-size: 11px; color: var(--tgm-text-3); margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .tgm-leg-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--tgm-border-light); font-size: 13px; color: var(--tgm-text-2); }
+    .tgm-leg-meta-item { display: inline-flex; align-items: center; gap: 6px; }
+    .tgm-leg-meta-item svg { color: var(--tgm-text-3); }
+    .tgm-leg-meta-item strong { color: var(--tgm-text); font-weight: 600; }
+
+    /* Collapsible segment detail inside the flight card */
+    .tgm-segs { padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--tgm-border-light); }
+    .tgm-seg { display: grid; grid-template-columns: 60px 1fr 60px; gap: 12px; padding: 10px 0; align-items: center; font-size: 13px; }
+    .tgm-seg + .tgm-seg { border-top: 1px dashed var(--tgm-border-light); }
+    .tgm-seg-time { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--tgm-text); }
+    .tgm-seg-iata { font-size: 11px; color: var(--tgm-text-3); }
+    .tgm-seg-route { color: var(--tgm-text-2); }
+    .tgm-seg-route strong { color: var(--tgm-text); font-weight: 600; }
+    .tgm-seg-flight { font-size: 11px; color: var(--tgm-text-3); margin-top: 2px; }
+    .tgm-stop-marker { padding: 8px 0 8px 12px; font-size: 12px; color: var(--tgm-text-3); border-left: 2px solid var(--tgm-border); margin-left: 26px; font-style: italic; }
+
+    @media (max-width: 480px) {
+      .tgm-leg-route { grid-template-columns: 1fr; gap: 12px; }
+      .tgm-leg-end.dest { text-align: left; }
+      .tgm-leg-line { transform: rotate(90deg); height: 24px; min-width: 0; width: 24px; align-self: center; }
+    }
+
+    /* ===== Airport extras card =====
+       Lounges, transfers, parking, fast-track. Each extra is its own card.
+       Compact by default; descriptions collapse. */
+    .tgm-extra-card { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); padding: 20px; margin-bottom: 16px; }
+    .tgm-extra-head { display: flex; align-items: flex-start; gap: 16px; }
+    .tgm-extra-icon { width: 44px; height: 44px; border-radius: var(--tgm-radius-md); background: var(--tgm-bg-2); display: flex; align-items: center; justify-content: center; color: var(--tgm-primary); flex-shrink: 0; }
+    .tgm-extra-info { flex: 1; min-width: 0; }
+    .tgm-extra-kind { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--tgm-text-3); }
+    .tgm-extra-name { font-size: 18px; font-weight: 600; color: var(--tgm-text); margin: 2px 0 4px; letter-spacing: -.01em; }
+    .tgm-extra-sub { font-size: 13px; color: var(--tgm-text-2); }
+    .tgm-extra-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--tgm-border-light); font-size: 13px; color: var(--tgm-text-2); }
+    .tgm-extra-meta-item { display: inline-flex; align-items: center; gap: 6px; }
+    .tgm-extra-meta-item strong { color: var(--tgm-text); font-weight: 600; }
+
     .tgm-help { background: linear-gradient(135deg, var(--tgm-primary) 0%, var(--tgm-primary-dark) 100%); color: #fff; padding: 20px; border-radius: var(--tgm-radius-lg); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
     .tgm-help h3 { font-size: 16px; font-weight: 600; margin: 0 0 4px; letter-spacing: -.01em; color: #fff; }
     .tgm-help p { font-size: 13px; color: rgba(248,250,252,.78); margin: 0; }
@@ -592,32 +685,212 @@
     `;
   }
 
+  // ----- Flight card -----
+  // A flight item has 1+ "routes" (legs): typically Outbound and Inbound.
+  // Each leg has 1+ "segments" (the actual hops, e.g. LHR-AUH-MLE has 2).
+  // The card shows a route-level summary at a glance, with a collapsible
+  // for the full segment-by-segment detail. Baggage and cabin class are
+  // surfaced in the leg-meta strip because they're decision-relevant info
+  // travellers genuinely want at a glance.
+  function renderFlightCard(item, c) {
+    const f = item.flights;
+    if (!f || !Array.isArray(f.routes) || f.routes.length === 0) return '';
+
+    const carrierNames = new Set();
+    for (const r of f.routes) {
+      for (const s of r.segments || []) {
+        if (s.marketingCarrier?.name) carrierNames.add(s.marketingCarrier.name);
+      }
+    }
+    const carrierSummary = Array.from(carrierNames).slice(0, 3).join(', ');
+
+    return `
+      <div class="tgm-flight-card">
+        <h3>${svg(IC.plane)}${esc(c.labels?.flights || 'Flights')}${
+          carrierSummary
+            ? `<span class="tgm-flight-meta">${esc(carrierSummary)}</span>`
+            : ''
+        }</h3>
+        ${f.routes.map(route => renderFlightLeg(route)).join('')}
+      </div>
+    `;
+  }
+
+  function renderFlightLeg(route) {
+    const segs = route.segments || [];
+    if (segs.length === 0) return '';
+
+    const first = segs[0];
+    const last = segs[segs.length - 1];
+    const stops = segs.length - 1;
+
+    // Pull baggage + cabin from the first segment — Travelify uses the same
+    // values across all segments of a leg in practice.
+    const baggage = first.baggage?.allowance || first.baggage?.weight || '';
+    const cabin = first.cabinClass || '';
+    const fareName = first.fareName || '';
+
+    // Total flight time = sum of in-air segment durations only. The route's
+    // own `duration` field includes layovers, so for a one-stop with a long
+    // overnight layover (e.g. AUH 23-hour wait) the route duration looks
+    // alarming. Showing in-air time is what travellers actually want.
+    const flightMins = segs.reduce((acc, s) => acc + (typeof s.duration === 'number' ? s.duration : 0), 0);
+
+    return `
+      <div class="tgm-leg">
+        <div class="tgm-leg-dir">${esc(route.direction || 'Flight')}</div>
+        <div class="tgm-leg-route">
+          <div class="tgm-leg-end">
+            <div class="tgm-leg-time">${esc(fmtTime(first.depart))}</div>
+            <div class="tgm-leg-iata">${esc(first.origin?.iataCode || '')}${first.origin?.terminal ? ` · T${esc(first.origin.terminal)}` : ''}</div>
+            <div class="tgm-leg-airport" title="${esc(first.origin?.name || '')}">${esc(first.origin?.name || '')}</div>
+          </div>
+          <div class="tgm-leg-line">
+            <div class="tgm-leg-line-dur">${esc(fmtDuration(flightMins))}</div>
+            <div class="tgm-leg-line-bar"><span class="tgm-leg-line-icon">${svg(IC.plane, 2, 14)}</span></div>
+            <div class="tgm-leg-stops">${stops === 0 ? 'Direct' : `${stops} ${stops === 1 ? 'stop' : 'stops'}`}</div>
+          </div>
+          <div class="tgm-leg-end dest">
+            <div class="tgm-leg-time">${esc(fmtTime(last.arrive))}</div>
+            <div class="tgm-leg-iata">${esc(last.destination?.iataCode || '')}${last.destination?.terminal ? ` · T${esc(last.destination.terminal)}` : ''}</div>
+            <div class="tgm-leg-airport" title="${esc(last.destination?.name || '')}">${esc(last.destination?.name || '')}</div>
+          </div>
+        </div>
+        <div class="tgm-leg-meta">
+          ${cabin ? `<span class="tgm-leg-meta-item">${svg(IC.user, 2, 14)}<span><strong>${esc(cabin)}</strong>${fareName ? ` · ${esc(fareName)}` : ''}</span></span>` : ''}
+          ${baggage ? `<span class="tgm-leg-meta-item">${svg(IC.bag, 2, 14)}<span>${esc(baggage)}</span></span>` : ''}
+        </div>
+        ${stops > 0 ? renderSegmentDetail(segs) : ''}
+      </div>
+    `;
+  }
+
+  function renderSegmentDetail(segs) {
+    // Show each leg-segment as a compact row with stop markers between them.
+    let html = '<div class="tgm-segs">';
+    for (let i = 0; i < segs.length; i++) {
+      const s = segs[i];
+      html += `
+        <div class="tgm-seg">
+          <div>
+            <div class="tgm-seg-time">${esc(fmtTime(s.depart))}</div>
+            <div class="tgm-seg-iata">${esc(s.origin?.iataCode || '')}</div>
+          </div>
+          <div class="tgm-seg-route">
+            <strong>${esc(s.marketingCarrier?.code || '')}${esc(s.flightNo || '')}</strong>
+            ${s.marketingCarrier?.name ? ` · ${esc(s.marketingCarrier.name)}` : ''}
+            <div class="tgm-seg-flight">${esc(fmtDuration(s.duration))}${s.aircraft ? ` · Aircraft ${esc(s.aircraft)}` : ''}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="tgm-seg-time">${esc(fmtTime(s.arrive))}</div>
+            <div class="tgm-seg-iata">${esc(s.destination?.iataCode || '')}</div>
+          </div>
+        </div>
+      `;
+      if (i < segs.length - 1) {
+        // Stopover gap = next.depart - this.arrive
+        const nextDep = Date.parse(segs[i + 1].depart || '');
+        const thisArr = Date.parse(s.arrive || '');
+        const gapMin = (Number.isFinite(nextDep) && Number.isFinite(thisArr))
+          ? Math.round((nextDep - thisArr) / 60000)
+          : 0;
+        html += `
+          <div class="tgm-stop-marker">
+            ${gapMin > 0 ? `${esc(fmtDuration(gapMin))} stopover in ${esc(s.destination?.iataCode || '')}` : `Stopover in ${esc(s.destination?.iataCode || '')}`}
+          </div>
+        `;
+      }
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ----- Airport extras card -----
+  // Lounges, transfers, parking, fast-track. We render each extra as its
+  // own card. The "type" field tells us which icon and label fits best.
+  function renderExtraCard(item, c) {
+    const e = item.airportExtras;
+    if (!e) return '';
+
+    const kindLabel = e.type === 'Lounge' ? 'Airport lounge'
+      : e.type === 'Transfer' ? 'Airport transfer'
+      : e.type === 'Parking' ? 'Airport parking'
+      : (e.type || 'Airport extra');
+
+    const icon = e.type === 'Lounge' ? IC.lounge
+      : e.type === 'Transfer' ? IC.plane
+      : IC.bag;
+
+    const airport = e.location?.iataCode || '';
+    const terminal = e.location?.terminal ? `T${e.location.terminal}` : '';
+    const startTime = fmtTime(e.startDateTime);
+    const endTime = fmtTime(e.endDateTime);
+    const dateLabel = e.startDateTime ? fmtDate(e.startDateTime, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+    return `
+      <div class="tgm-extra-card">
+        <div class="tgm-extra-head">
+          <div class="tgm-extra-icon">${svg(icon, 2, 22)}</div>
+          <div class="tgm-extra-info">
+            <div class="tgm-extra-kind">${esc(kindLabel)}</div>
+            <div class="tgm-extra-name">${esc(e.name || 'Airport extra')}</div>
+            ${e.subTitle ? `<div class="tgm-extra-sub">${esc(e.subTitle)}</div>` : ''}
+          </div>
+        </div>
+        <div class="tgm-extra-meta">
+          ${airport ? `<span class="tgm-extra-meta-item">${svg(IC.pin, 2, 14)}<span><strong>${esc(airport)}</strong>${terminal ? ` · ${esc(terminal)}` : ''}</span></span>` : ''}
+          ${dateLabel ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span>${esc(dateLabel)}</span></span>` : ''}
+          ${startTime ? `<span class="tgm-extra-meta-item">${svg(IC.clock, 2, 14)}<span>${esc(startTime)}${endTime ? ` – ${esc(endTime)}` : ''}</span></span>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
   function renderFound(order, c) {
-    const item = order.items?.[0];
-    const acc = item?.accommodation;
-    const checkin = item?.startDate;
-    const nights = item?.duration || 0;
+    const items = order.items || [];
+    const summary = order.summary || {};
+
+    // Find the items we render with full detail. The widget can handle
+    // multiple of each, but the lead-card values (hero, dates, etc) come
+    // from the FIRST of each type. Multiple hotels/flights are rendered
+    // as additional cards below.
+    const accItem = items.find(i => i.product === 'Accommodation') || null;
+    const flightItems = items.filter(i => i.product === 'Flights');
+    const extraItems = items.filter(i => i.product === 'AirportExtras');
+
+    const acc = accItem?.accommodation;
+    const checkin = accItem?.startDate;
+    const nights = accItem?.duration || 0;
     const checkoutMs = checkin ? new Date(checkin).getTime() + nights * 86400000 : null;
     const checkout = checkoutMs ? new Date(checkoutMs).toISOString() : null;
-    const days = daysUntil(checkin);
 
-    // Hero image
-    const heroUrl = acc?.media?.[0]?.url || '';
+    // Days-until uses the EARLIEST item date. For trip+flight bookings the
+    // outbound flight is usually the trigger date, not hotel check-in.
+    const tripStart = summary.earliestStart || checkin;
+    const days = daysUntil(tripStart);
+
+    // Hero image — prefer accommodation media, fall back to first lounge
+    // image, then to nothing (the widget handles a missing hero gracefully).
+    const heroUrl = acc?.media?.[0]?.url || extraItems[0]?.airportExtras?.media?.[0]?.url || '';
     const thumbs = (acc?.media || []).slice(0, 4);
 
     // Confirm pill + ref
-    const refValue = item?.bookingReference || ('TG' + order.id);
+    const refValue = accItem?.bookingReference || flightItems[0]?.bookingReference || ('TG' + order.id);
 
     // Stars
     const starHtml = acc?.rating ? Array.from({ length: Math.round(acc.rating) }, () => star()).join('') : '';
 
-    // Guests
-    const guests = acc?.guests || [];
+    // Travellers list across the whole order, not just the hotel guest list.
+    const travellers = (summary.travellers && summary.travellers.length)
+      ? summary.travellers
+      : (acc?.guests || []);
 
-    // Pricing
+    // Pricing — total is summed across ALL items, not just the hotel.
     const pricing = acc?.pricing;
-    const totalPrice = pricing?.memberPrice ?? pricing?.price ?? item?.price ?? 0;
     const currency = pricing?.currency || order.currency || 'GBP';
+    const totalPrice = (typeof summary.totalPrice === 'number' && summary.totalPrice > 0)
+      ? summary.totalPrice
+      : (pricing?.memberPrice ?? pricing?.price ?? accItem?.price ?? 0);
     const inResort = pricing?.inResortFees;
 
     // Deposit options - pick first one with installments, else first one
@@ -687,6 +960,7 @@
         </div>
         ` : ''}
 
+        ${(checkin || checkout || nights || acc?.units?.[0]) ? `
         <div class="tgm-stay">
           <div class="tgm-stay-grid">
             ${checkin ? `
@@ -715,6 +989,11 @@
             </div>` : ''}
           </div>
         </div>
+        ` : ''}
+
+        ${flightItems.map(fItem => renderFlightCard(fItem, c)).join('')}
+
+        ${extraItems.map(eItem => renderExtraCard(eItem, c)).join('')}
 
         <div class="tgm-two">
           <div class="tgm-section">
@@ -754,7 +1033,7 @@
 
           <div class="tgm-section">
             <h3>${svg(IC.users)}${esc(c.labels?.travelling || "Who's travelling")}</h3>
-            ${guests.length === 0 ? `
+            ${travellers.length === 0 ? `
               <div class="tgm-guest">
                 <div class="tgm-guest-av">${esc(initials(order.customerFirstname, order.customerSurname))}</div>
                 <div class="tgm-guest-info">
@@ -762,12 +1041,12 @@
                   <div class="tgm-guest-meta">${esc(c.labels?.leadGuest || 'Lead guest')}</div>
                 </div>
               </div>
-            ` : guests.map((g, i) => `
+            ` : travellers.map((g, i) => `
               <div class="tgm-guest">
                 <div class="tgm-guest-av">${esc(initials(g.firstname, g.surname))}</div>
                 <div class="tgm-guest-info">
                   <div class="tgm-guest-name">${esc((g.title ? g.title + ' ' : '') + (g.firstname || '') + ' ' + (g.surname || ''))}</div>
-                  <div class="tgm-guest-meta">${esc(i === 0 ? (c.labels?.leadGuest || 'Lead guest') : (g.type || 'Adult'))}${g.type ? ` · ${esc(g.type)}` : ''}</div>
+                  <div class="tgm-guest-meta">${esc(i === 0 ? (c.labels?.leadGuest || 'Lead guest') : (g.type || 'Adult'))}${i > 0 && g.type ? ` · ${esc(g.type)}` : ''}</div>
                 </div>
               </div>
             `).join('')}
