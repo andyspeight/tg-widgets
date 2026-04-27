@@ -382,13 +382,15 @@
     .tgm-action.is-loading .tgm-action-loader { display: block; }
 
     /* When the action row is at 3 columns, the action title can get tight.
-       Drop sub copy gracefully on narrow desktop sizes between 760-960px. */
+       Drop sub copy gracefully on narrow desktop sizes between 760-960px so
+       titles stay on a single line. */
     @media (min-width: 761px) and (max-width: 960px) {
-      .tgm-action { padding: 14px 16px; gap: 12px; }
+      .tgm-action { padding: 14px 14px; gap: 10px; }
       .tgm-action-icon { width: 36px; height: 36px; }
       .tgm-action-icon svg { width: 16px; height: 16px; }
-      .tgm-action-title { font-size: 14px; }
+      .tgm-action-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .tgm-action-sub { display: none; }
+      .tgm-action-arrow { display: none; }
     }
 
     /* Inline PDF viewer panel */
@@ -1129,8 +1131,8 @@
           <button type="button" class="tgm-action" data-tgm-pdf-preview>
             <div class="tgm-action-icon">${svg(IC.eye)}</div>
             <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionPreview || 'Preview booking pack')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionPreviewSub || 'View your full A4 confirmation inline')}</div>
+              <div class="tgm-action-title">${esc(c.labels?.actionPreview || 'Preview')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionPreviewSub || 'View the A4 booking pack inline')}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
@@ -1138,8 +1140,8 @@
           <button type="button" class="tgm-action" data-tgm-pdf-email>
             <div class="tgm-action-icon">${svg(IC.mail)}</div>
             <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionEmail || 'Email booking pack')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionEmailSub || 'Send the confirmation to your inbox')}</div>
+              <div class="tgm-action-title">${esc(c.labels?.actionEmail || 'Email')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionEmailSub || 'Send a confirmation to your inbox')}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
@@ -1147,7 +1149,7 @@
           <button type="button" class="tgm-action" data-tgm-pdf-download>
             <div class="tgm-action-icon">${svg(IC.dl)}</div>
             <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionDownload || 'Download as PDF')}</div>
+              <div class="tgm-action-title">${esc(c.labels?.actionDownload || 'Download')}</div>
               <div class="tgm-action-sub">${esc(c.labels?.actionDownloadSub || 'Save the booking pack to your device')}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
