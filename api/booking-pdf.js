@@ -1,42 +1,16 @@
 /**
- * Travelgenix Widget Suite — Booking PDF (public endpoint)
+ * Travelgenix Widget Suite — Booking PDF (DEBUG VERSION)
  *
- * Generates a print-ready A4 PDF of a booking confirmation.
+ * Same as production but with verbose console.log at every step so we can
+ * see in Vercel logs exactly where the 404 happens.
  *
- * Reuses the exact same widget+integration lookup chain as retrieve-order.js:
- *   1. POST { widgetId, emailAddress, departDate, orderRef }
- *   2. Look up widget → ClientEmail
- *   3. Look up active Travelify integration → AppId + encrypted key
- *   4. Decrypt key, call Travelify
- *   5. Trim response, render via _pdf-template
- *   6. Puppeteer → PDF buffer → stream back to caller
- *
- * Endpoint:
- *   POST /api/booking-pdf
- *
- * Response:
- *   200 → application/pdf attachment
- *   404 → { error: 'not_found', message: ... }  (generic, no leak)
- *   429 → rate limited
- *   5xx → generic error
- *
- * Vercel deps required (add to package.json):
- *   "@sparticuz/chromium": "^131.0.0"
- *   "puppeteer-core": "^23.0.0"
- *
- * Vercel function config:
- *   memory: 1024 (PDF rendering is RAM-hungry)
- *   maxDuration: 30
+ * Once we know what's failing, we'll swap back to the clean version.
  */
 
 import { setCors, sanitiseForFormula } from './_auth.js';
 import { decrypt } from './_crypto.js';
-// Template lives in /public so it can be loaded both server-side (here) and
-// browser-side (the editor preview). Same file, single source of truth.
 import { renderPdfHtml } from '../public/_pdf-template.js';
 
-// Chromium / Puppeteer — only loaded inside the handler so cold start
-// doesn't pay the cost on health checks etc.
 let _chromium, _puppeteer;
 async function getBrowser() {
   if (!_chromium) {
@@ -51,9 +25,10 @@ async function getBrowser() {
   });
 }
 
-const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
+const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
 const INTEGRATIONS_TABLE = 'tblpzQpwmcTvUeHcF';
+const TRAVELIFY_API = 'https://api.travelify.io/account/order';
 
 const IF = {
   ClientEmail:      'flditBgdp6egbk3Fb',
@@ -61,77 +36,11 @@ const IF = {
   AppId:            'fldCXwCixuvqN2HMy',
   ApiKeyEncrypted:  'fldpb4JQRSuot0Gg2',
   Status:           'fldEVMrKnEpFaxORk',
-  LastUsedAt:       'fldQgOjcM3sfKL7uB',
 };
 
-const TRAVELIFY_API = 'https://api.travelify.io/account/order';
-
-// ----- Rate limiting (same pattern as retrieve-order) -----
-
-const rateLimitStore = new Map();
-const RL_WINDOW_MS = 15 * 60 * 1000;
-
-function rateLimit(key, max) {
-  const now = Date.now();
-  const entry = rateLimitStore.get(key);
-  if (rateLimitStore.size > 1000) {
-    for (const [k, v] of rateLimitStore.entries()) {
-      if (v.resetAt < now) rateLimitStore.delete(k);
-    }
-  }
-  if (!entry || entry.resetAt < now) {
-    rateLimitStore.set(key, { count: 1, resetAt: now + RL_WINDOW_MS });
-    return { ok: true };
-  }
-  if (entry.count >= max) {
-    return { ok: false, retryAfterMs: entry.resetAt - now };
-  }
-  entry.count++;
-  return { ok: true };
-}
-
-function getClientIp(req) {
-  const xff = req.headers['x-forwarded-for'];
-  if (typeof xff === 'string' && xff.length > 0) return xff.split(',')[0].trim();
-  return req.socket?.remoteAddress || 'unknown';
-}
-
-// ----- Validation (mirrors retrieve-order) -----
-
-const validateEmail = (s) => {
-  if (typeof s !== 'string') return null;
-  const v = s.trim().toLowerCase();
-  if (v.length < 5 || v.length > 254) return null;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return null;
-  return v;
-};
-const validateDate = (s) => {
-  if (typeof s !== 'string') return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  const d = new Date(s + 'T00:00:00Z');
-  if (Number.isNaN(d.getTime())) return null;
-  const yr = parseInt(s.slice(0, 4), 10);
-  if (yr < 2020 || yr > 2050) return null;
-  return s;
-};
-const validateOrderRef = (s) => {
-  if (typeof s !== 'string') return null;
-  const v = s.trim().toUpperCase();
-  if (!/^[A-Z0-9_\-]{3,40}$/.test(v)) return null;
-  return v;
-};
-const validateWidgetId = (s) => {
-  if (typeof s !== 'string') return null;
-  if (!/^[a-zA-Z0-9_\-]{8,80}$/.test(s)) return null;
-  return s;
-};
-
-// ----- Airtable helpers -----
-
+const AIRTABLE_KEY = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_ACCESS_TOKEN;
 function airtableHeaders() {
-  const key = process.env.AIRTABLE_KEY;
-  if (!key) throw new Error('AIRTABLE_KEY env var missing');
-  return { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' };
+  return { 'Authorization': `Bearer ${AIRTABLE_KEY}`, 'Content-Type': 'application/json' };
 }
 
 async function findWidgetById(widgetId) {
@@ -141,7 +50,10 @@ async function findWidgetById(widgetId) {
   url.searchParams.set('filterByFormula', formula);
   url.searchParams.set('maxRecords', '1');
   const res = await fetch(url.toString(), { headers: airtableHeaders() });
-  if (!res.ok) throw new Error(`Widget lookup failed: ${res.status}`);
+  if (!res.ok) {
+    console.error(`[pdf-debug] Widget lookup HTTP ${res.status}`);
+    throw new Error(`Widget lookup failed: ${res.status}`);
+  }
   const data = await res.json();
   return data.records?.[0] || null;
 }
@@ -154,19 +66,46 @@ async function findActiveTravelifyIntegration(clientEmail) {
   url.searchParams.set('maxRecords', '1');
   url.searchParams.set('returnFieldsByFieldId', 'true');
   const res = await fetch(url.toString(), { headers: airtableHeaders() });
-  if (!res.ok) throw new Error(`Integration lookup failed: ${res.status}`);
+  if (!res.ok) {
+    console.error(`[pdf-debug] Integration lookup HTTP ${res.status}`);
+    throw new Error(`Integration lookup failed: ${res.status}`);
+  }
   const data = await res.json();
   return data.records?.[0] || null;
 }
 
-// ----- Re-import the trim function from retrieve-order's logic -----
-// We mirror the same trim shape so the template gets a consistent input.
-// (Kept inline rather than imported to avoid coupling the public retrieve
-// endpoint's trim function as a stable contract; if you'd prefer DRY, lift
-// trimOrder() into a shared _booking-shape.js helper later.)
+// ----- Validators -----
+function validateWidgetId(v) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  if (!/^tgw_[0-9a-z_]{6,80}$/i.test(t)) return null;
+  return t;
+}
+function validateEmail(v) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  if (t.length > 254) return null;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)) return null;
+  return t.toLowerCase();
+}
+function validateDate(v) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(t)) return null;
+  const d = new Date(t + 'T00:00:00Z');
+  if (Number.isNaN(d.getTime())) return null;
+  return t;
+}
+function validateOrderRef(v) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  if (!/^[A-Za-z0-9_-]{1,40}$/.test(t)) return null;
+  return t;
+}
 
-const safeStr = (v, max = 500) => v == null ? null : (String(v).length > max ? String(v).slice(0, max) : String(v));
-const safeNum = (v) => (typeof v !== 'number' || !Number.isFinite(v)) ? null : v;
+// ----- Trim functions (kept inline) -----
+const safeStr = (v, max) => typeof v === 'string' ? v.slice(0, max) : null;
+const safeNum = (v) => typeof v === 'number' && Number.isFinite(v) ? v : null;
 const sanitiseDesc = (t) => typeof t === 'string' ? t.replace(/<[^>]*>/g, '').slice(0, 4000) : null;
 const sanitiseUrl = (u) => (typeof u === 'string' && /^https:\/\/[^\s]+$/i.test(u) && u.length <= 500) ? u : null;
 
@@ -249,7 +188,7 @@ function trimItem(item) {
         : [],
       guests: Array.isArray(d.guests)
         ? d.guests.slice(0, 12).map((g) => ({
-            type: safeStr(g.type, 30),
+            type: safeStr(g.type, 20),
             title: safeStr(g.title, 30),
             firstname: safeStr(g.firstname, 80),
             surname: safeStr(g.surname, 80),
@@ -278,42 +217,30 @@ function trimOrder(raw) {
 
 // ----- Errors -----
 
-function notFound(res) {
-  return res.status(404).json({
-    error: 'not_found',
-    message: "We couldn't find a confirmed booking with those details.",
-  });
+function notFound(res, debugTag) {
+  console.warn(`[pdf-debug] FAIL: ${debugTag}`);
+  return res.status(404).json({ error: 'not_found', message: "We couldn't find a confirmed booking with those details.", debug: debugTag });
 }
 
-function genericError(res) {
-  return res.status(500).json({
-    error: 'server_error',
-    message: 'Something went wrong generating your PDF. Please try again in a moment.',
-  });
-}
+function rateLimit() { return { ok: true }; } // placeholder
 
-// ----- HTTP handler -----
+// ----- Handler -----
 
 export default async function handler(req, res) {
+  console.log('[pdf-debug:01] === Request received ===');
   setCors(res);
+
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const ip = getClientIp(req);
-  const ipLimit = rateLimit(`pdf:ip:${ip}`, 5);
-  if (!ipLimit.ok) {
-    return res.status(429).json({
-      error: 'too_many_attempts',
-      message: 'Too many PDF requests. Please wait 15 minutes and try again.',
-      retryAfterMs: ipLimit.retryAfterMs,
-    });
-  }
+  console.log('[pdf-debug:02] Method check passed');
 
   let body;
   try {
     body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-  } catch {
-    return notFound(res);
+    console.log('[pdf-debug:03] Body parsed, keys:', Object.keys(body).join(','));
+  } catch (e) {
+    return notFound(res, '03-body-parse');
   }
 
   const widgetId = validateWidgetId(body.widgetId);
@@ -321,83 +248,86 @@ export default async function handler(req, res) {
   const departDate = validateDate(body.departDate);
   const orderRef = validateOrderRef(body.orderRef);
 
-  if (!widgetId || !emailAddress || !departDate || !orderRef) return notFound(res);
+  console.log('[pdf-debug:04] Validation results:',
+    'widgetId=', !!widgetId,
+    'email=', !!emailAddress,
+    'date=', !!departDate,
+    'ref=', !!orderRef);
 
-  const widgetLimit = rateLimit(`pdf:ipw:${ip}:${widgetId}`, 20);
-  if (!widgetLimit.ok) {
-    return res.status(429).json({
-      error: 'too_many_attempts',
-      message: 'Too many PDF requests for this widget. Please try again later.',
-      retryAfterMs: widgetLimit.retryAfterMs,
-    });
+  if (!widgetId || !emailAddress || !departDate || !orderRef) {
+    return notFound(res, '04-validation-failed');
   }
 
-  let browser;
   try {
-    // Lookup chain — same as retrieve-order
+    console.log('[pdf-debug:05] Looking up widget…');
     const widget = await findWidgetById(widgetId);
-    if (!widget) return notFound(res);
+    if (!widget) return notFound(res, '05-widget-not-found');
+    console.log('[pdf-debug:06] Widget found:', widget.id);
 
     const widgetType = widget.fields?.WidgetType;
-    if (widgetType !== 'My Booking') return notFound(res);
-
     const widgetStatus = widget.fields?.Status;
-    if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') return notFound(res);
-
     const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
-    if (!clientEmail) return notFound(res);
+    console.log('[pdf-debug:07] Widget fields - type:', widgetType, 'status:', widgetStatus, 'clientEmail:', clientEmail);
 
+    if (widgetType !== 'My Booking') return notFound(res, '07a-wrong-widget-type:' + widgetType);
+    if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') return notFound(res, '07b-bad-status:' + widgetStatus);
+    if (!clientEmail) return notFound(res, '07c-no-client-email');
+
+    console.log('[pdf-debug:08] Looking up Travelify integration…');
     const integration = await findActiveTravelifyIntegration(clientEmail);
-    if (!integration) {
-      console.warn(`No active Travelify integration for client (widgetId=${widgetId})`);
-      return notFound(res);
-    }
+    if (!integration) return notFound(res, '08-no-active-integration');
+    console.log('[pdf-debug:09] Integration found:', integration.id);
 
     const appId = integration.fields?.[IF.AppId];
     const apiKeyEncrypted = integration.fields?.[IF.ApiKeyEncrypted];
-    if (!appId || !apiKeyEncrypted) return notFound(res);
+    console.log('[pdf-debug:10] AppId:', appId, 'has-encrypted-key:', !!apiKeyEncrypted);
+    if (!appId || !apiKeyEncrypted) return notFound(res, '10-missing-creds');
 
     let apiKey;
     try {
       apiKey = decrypt(apiKeyEncrypted);
+      console.log('[pdf-debug:11] Decryption succeeded, key length:', apiKey?.length);
     } catch (e) {
-      console.error('Decryption failed for integration', integration.id, ':', e.message);
-      return notFound(res);
+      console.error('[pdf-debug:11] Decryption error:', e.message);
+      return notFound(res, '11-decrypt-failed');
     }
 
+    console.log('[pdf-debug:12] Calling Travelify…');
     const travelifyRes = await fetch(TRAVELIFY_API, {
       method: 'POST',
       headers: {
         'Authorization': `Token ${appId}:${apiKey}`,
         'Content-Type': 'application/json',
-        // Travelify requires a non-empty Origin header. Without it the API
-        // returns 401 "Missing or invalid application credentials" no matter
-        // how valid the key is — the error message is misleading. We use a
-        // fixed value because this is server-side and the widget can be
-        // embedded on any client domain.
         'Origin': 'https://www.travelgenix.io',
       },
       body: JSON.stringify({ emailAddress, departDate, orderRef }),
       signal: AbortSignal.timeout(12000),
     });
+    console.log('[pdf-debug:13] Travelify status:', travelifyRes.status);
 
-    if (travelifyRes.status === 404) return notFound(res);
+    if (travelifyRes.status === 404) return notFound(res, '13a-travelify-404');
     if (!travelifyRes.ok) {
-      console.error(`Travelify returned ${travelifyRes.status} for widget ${widgetId}`);
-      return notFound(res);
+      const errBody = await travelifyRes.text().catch(() => '');
+      console.error('[pdf-debug:13] Travelify body:', errBody.slice(0, 500));
+      return notFound(res, '13b-travelify-not-ok-' + travelifyRes.status);
     }
 
     let raw;
-    try { raw = await travelifyRes.json(); }
-    catch { return notFound(res); }
+    try {
+      raw = await travelifyRes.json();
+      console.log('[pdf-debug:14] Travelify JSON parsed, keys:', Object.keys(raw).slice(0, 10).join(','));
+    } catch (e) {
+      console.error('[pdf-debug:14] JSON parse failed:', e.message);
+      return notFound(res, '14-travelify-json-parse');
+    }
 
-    if (raw && (raw.code === '404' || raw.code === 404)) return notFound(res);
+    if (raw && (raw.code === '404' || raw.code === 404)) return notFound(res, '15-travelify-404-in-body');
 
     const order = trimOrder(raw);
-    if (!order || !order.id) return notFound(res);
+    console.log('[pdf-debug:16] Trim done. order.id:', order?.id, 'items:', order?.items?.length);
+    if (!order || !order.id) return notFound(res, '16-trim-no-id');
 
-    // Pull brand / contact / styling from the widget config (all optional)
-    // These come from the widget's settings JSON if the editor has saved them.
+    console.log('[pdf-debug:17] Reading widget settings…');
     const widgetSettings = (() => {
       const raw = widget.fields?.Settings;
       if (!raw) return {};
@@ -405,53 +335,53 @@ export default async function handler(req, res) {
       try { return JSON.parse(raw); } catch { return {}; }
     })();
 
-    // Brand name is optional. When blank, the PDF omits the brand row entirely
-    // rather than falling back to "Travelgenix" — this is a client-facing widget.
     const brandName = widgetSettings?.brand?.name || '';
     const supportEmail = widgetSettings?.support?.email || null;
     const supportPhone = widgetSettings?.support?.phone || null;
     const colors = widgetSettings?.colors || {};
     const radius = typeof widgetSettings?.radius === 'number' ? widgetSettings.radius : 12;
 
-    // Render HTML
-    const html = renderPdfHtml(order, {
-      brandName,
-      supportEmail,
-      supportPhone,
-      colors,
-      radius,
-      issuedAt: new Date().toISOString(),
-    });
-
-    // Puppeteer → PDF
-    browser = await getBrowser();
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 15000 });
-    await page.emulateMediaType('screen');
-
-    const pdf = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: { top: '0', right: '0', bottom: '0', left: '0' },
-      preferCSSPageSize: false,
-    });
-
-    await page.close();
-
-    // Filename
-    const safeRef = orderRef.replace(/[^A-Z0-9_\-]/gi, '');
-    const filename = `booking-${safeRef}.pdf`;
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Cache-Control', 'private, no-store');
-    res.status(200).send(Buffer.from(pdf));
-  } catch (err) {
-    console.error('booking-pdf error:', err.message);
-    if (!res.headersSent) return genericError(res);
-  } finally {
-    if (browser) {
-      try { await browser.close(); } catch {}
+    console.log('[pdf-debug:18] Rendering HTML…');
+    let html;
+    try {
+      html = renderPdfHtml(order, { brandName, supportEmail, supportPhone, colors, radius });
+      console.log('[pdf-debug:19] HTML rendered, length:', html?.length);
+    } catch (e) {
+      console.error('[pdf-debug:19] Template render error:', e.message, e.stack?.slice(0, 500));
+      return res.status(500).json({ error: 'render_failed', message: 'Template error', debug: e.message });
     }
+
+    console.log('[pdf-debug:20] Launching browser…');
+    let browser;
+    try {
+      browser = await getBrowser();
+      console.log('[pdf-debug:21] Browser ready');
+    } catch (e) {
+      console.error('[pdf-debug:21] Browser launch error:', e.message);
+      return res.status(500).json({ error: 'browser_failed', debug: e.message });
+    }
+
+    let pdfBuffer;
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      console.log('[pdf-debug:22] Page content set');
+      pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } });
+      console.log('[pdf-debug:23] PDF generated, size:', pdfBuffer?.length);
+      await browser.close();
+    } catch (e) {
+      console.error('[pdf-debug:23] PDF generation error:', e.message);
+      try { await browser?.close(); } catch {}
+      return res.status(500).json({ error: 'pdf_failed', debug: e.message });
+    }
+
+    console.log('[pdf-debug:24] Sending PDF response');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="booking-${orderRef}.pdf"`);
+    return res.status(200).send(pdfBuffer);
+
+  } catch (err) {
+    console.error('[pdf-debug:99] Unhandled error:', err.message, err.stack?.slice(0, 1000));
+    return res.status(500).json({ error: 'server_error', debug: err.message });
   }
 }
