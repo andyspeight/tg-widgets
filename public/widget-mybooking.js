@@ -1,7 +1,15 @@
 /**
- * Travelgenix My Booking Widget v1.2.0
+ * Travelgenix My Booking Widget v1.3.0
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.3.0 changes:
+ *   - Email action: customer can email their booking pack from the page
+ *   - Three-button action row (Preview / Email / Download) on desktop, stacked on mobile
+ *   - Email composer modal: pre-filled to the customer's address, supports up to 3 cc,
+ *     optional message, sends via /api/booking-email with PDF attached server-side
+ *   - Customer's email is enforced as a recipient (anti-abuse — see endpoint docs)
+ *   - Per-widget agency branding (FromName, LogoUrl, EmailFooter) drives email layout
  *
  * v1.2.0 changes:
  *   - Two-button PDF action: 'Preview' opens an inline viewer; 'Download' saves the file
@@ -57,7 +65,8 @@
   const API_CONFIG = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || (API_BASE + '/api/widget-config');
   const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || (API_BASE + '/api/retrieve-order');
   const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || (API_BASE + '/api/booking-pdf');
-  const VERSION = '1.2.0';
+  const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
+  const VERSION = '1.3.0';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -354,9 +363,9 @@
     .tgm-countdown svg { width: 14px; height: 14px; }
     .tgm-countdown strong { color: var(--tgm-accent-dark); font-weight: 700; font-variant-numeric: tabular-nums; }
 
-    /* ===== PDF action row — two buttons (Preview + Download) ===== */
-    .tgm-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-    @media (max-width: 560px) { .tgm-action-row { grid-template-columns: 1fr; } }
+    /* ===== PDF action row — three buttons (Preview + Email + Download) ===== */
+    .tgm-action-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 760px) { .tgm-action-row { grid-template-columns: 1fr; } }
     .tgm-action { display: flex; align-items: center; gap: 16px; padding: 18px 24px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); cursor: pointer; text-align: left; font-family: inherit; transition: all .25s cubic-bezier(.2,.7,.2,1); width: 100%; position: relative; }
     .tgm-action:hover:not(:disabled) { border-color: var(--tgm-accent); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04); }
     .tgm-action:disabled { cursor: wait; opacity: .85; }
@@ -371,6 +380,16 @@
     .tgm-action.is-loading .tgm-action-arrow { display: none; }
     .tgm-action-loader { width: 20px; height: 20px; border: 2px solid var(--tgm-bg-3); border-top-color: var(--tgm-accent); border-radius: 50%; animation: tgm-spin .7s linear infinite; flex-shrink: 0; display: none; }
     .tgm-action.is-loading .tgm-action-loader { display: block; }
+
+    /* When the action row is at 3 columns, the action title can get tight.
+       Drop sub copy gracefully on narrow desktop sizes between 760-960px. */
+    @media (min-width: 761px) and (max-width: 960px) {
+      .tgm-action { padding: 14px 16px; gap: 12px; }
+      .tgm-action-icon { width: 36px; height: 36px; }
+      .tgm-action-icon svg { width: 16px; height: 16px; }
+      .tgm-action-title { font-size: 14px; }
+      .tgm-action-sub { display: none; }
+    }
 
     /* Inline PDF viewer panel */
     .tgm-pdf-viewer { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); overflow: hidden; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.02); animation: tgm-fadeup .3s cubic-bezier(.2,.7,.2,1); }
@@ -387,6 +406,50 @@
        We swap to a download-only state with a clear call to action. */
     .tgm-pdf-viewer-fallback { padding: 32px 24px; text-align: center; }
     .tgm-pdf-viewer-fallback p { font-size: 14px; color: var(--tgm-text-2); margin: 0 0 16px; line-height: 1.5; }
+
+    /* ===== Email modal ===== */
+    /* Modal lives inside the widget shadow root so it inherits all our tokens
+       and doesn't conflict with the host page. We use position: fixed so it
+       overlays the host viewport, not the widget container. */
+    .tgm-modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, .55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 999998; display: flex; align-items: center; justify-content: center; padding: 16px; animation: tgm-fade .2s ease; }
+    @keyframes tgm-fade { from { opacity: 0; } to { opacity: 1; } }
+    .tgm-modal { background: var(--tgm-bg); border-radius: var(--tgm-radius-2xl); width: 100%; max-width: 520px; max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 25px 50px rgba(0,0,0,.25), 0 12px 24px rgba(0,0,0,.15); animation: tgm-modal-in .3s cubic-bezier(.2,.7,.2,1); position: relative; }
+    @keyframes tgm-modal-in { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+    .tgm-modal-head { padding: 24px 24px 16px; border-bottom: 1px solid var(--tgm-border-light); display: flex; align-items: flex-start; gap: 16px; }
+    .tgm-modal-head-icon { width: 40px; height: 40px; border-radius: var(--tgm-radius-md); background: linear-gradient(135deg, var(--tgm-accent), var(--tgm-accent-dark)); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tgm-modal-head-icon svg { width: 20px; height: 20px; }
+    .tgm-modal-head-text { flex: 1; min-width: 0; }
+    .tgm-modal-head-title { font-size: 18px; font-weight: 700; color: var(--tgm-text); margin: 0 0 2px; letter-spacing: -.01em; line-height: 1.3; }
+    .tgm-modal-head-sub { font-size: 13px; color: var(--tgm-text-2); margin: 0; line-height: 1.5; }
+    .tgm-modal-close { width: 32px; height: 32px; border-radius: var(--tgm-radius-sm); border: 1px solid var(--tgm-border); background: var(--tgm-bg); color: var(--tgm-text-3); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; padding: 0; }
+    .tgm-modal-close:hover { border-color: var(--tgm-accent); color: var(--tgm-text); }
+    .tgm-modal-close svg { width: 14px; height: 14px; }
+    .tgm-modal-body { padding: 20px 24px; }
+    .tgm-modal-field { margin-bottom: 16px; }
+    .tgm-modal-field:last-child { margin-bottom: 0; }
+    .tgm-modal-field label { display: block; font-size: 12px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--tgm-text-2); margin-bottom: 6px; }
+    .tgm-modal-input, .tgm-modal-textarea { width: 100%; font-family: inherit; font-size: 15px; color: var(--tgm-text); background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); outline: none; transition: border-color .15s, box-shadow .15s; padding: 10px 12px; }
+    .tgm-modal-input { height: 44px; }
+    .tgm-modal-textarea { min-height: 84px; resize: vertical; line-height: 1.5; font-family: inherit; }
+    .tgm-modal-input:focus, .tgm-modal-textarea:focus { border-color: var(--tgm-accent); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
+    .tgm-modal-input::placeholder, .tgm-modal-textarea::placeholder { color: var(--tgm-text-3); }
+    .tgm-modal-help { font-size: 12px; color: var(--tgm-text-3); margin-top: 6px; line-height: 1.5; }
+    .tgm-modal-attach { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); margin-top: 4px; }
+    .tgm-modal-attach-icon { width: 32px; height: 32px; border-radius: var(--tgm-radius-sm); background: var(--tgm-bg); border: 1px solid var(--tgm-border); display: flex; align-items: center; justify-content: center; color: var(--tgm-accent); flex-shrink: 0; }
+    .tgm-modal-attach-icon svg { width: 16px; height: 16px; }
+    .tgm-modal-attach-text { flex: 1; min-width: 0; font-size: 13px; }
+    .tgm-modal-attach-name { font-weight: 600; color: var(--tgm-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tgm-modal-attach-meta { color: var(--tgm-text-2); margin-top: 1px; }
+    .tgm-modal-foot { padding: 16px 24px 20px; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .tgm-modal-foot .tgm-btn-1, .tgm-modal-foot .tgm-btn-2 { min-width: 110px; }
+    .tgm-modal-error { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); border-radius: var(--tgm-radius-md); padding: 10px 12px; font-size: 13px; color: var(--tgm-error); display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .tgm-modal-error svg { width: 14px; height: 14px; flex-shrink: 0; }
+    @media (max-width: 480px) {
+      .tgm-modal { max-width: 100%; max-height: 100vh; border-radius: 0; }
+      .tgm-modal-head, .tgm-modal-body, .tgm-modal-foot { padding-left: 16px; padding-right: 16px; }
+      .tgm-modal-foot { flex-direction: column-reverse; }
+      .tgm-modal-foot .tgm-btn-1, .tgm-modal-foot .tgm-btn-2 { width: 100%; }
+    }
 
     /* Toast notifications */
     .tgm-toast-stack { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; z-index: 999999; max-width: 380px; }
@@ -1072,6 +1135,15 @@
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
           </button>
+          <button type="button" class="tgm-action" data-tgm-pdf-email>
+            <div class="tgm-action-icon">${svg(IC.mail)}</div>
+            <div class="tgm-action-text">
+              <div class="tgm-action-title">${esc(c.labels?.actionEmail || 'Email booking pack')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionEmailSub || 'Send the confirmation to your inbox')}</div>
+            </div>
+            <div class="tgm-action-loader" aria-hidden="true"></div>
+            ${svg(IC.arrow)}
+          </button>
           <button type="button" class="tgm-action" data-tgm-pdf-download>
             <div class="tgm-action-icon">${svg(IC.dl)}</div>
             <div class="tgm-action-text">
@@ -1083,6 +1155,7 @@
           </button>
         </div>
         <div data-tgm-pdf-viewer-mount></div>
+        <div data-tgm-modal-mount></div>
         ` : ''}
 
         ${(checkin || checkout || nights || acc?.units?.[0]) ? `
@@ -1359,6 +1432,8 @@
       this._pdfBlob = null;          // cached blob, shared by preview & download
       this._pdfPreviewUrl = null;    // object URL for the inline iframe
       this._pdfViewerOpen = false;
+      this._emailModalOpen = false;  // tracks email composer modal visibility
+      this._emailEscHandler = null;  // document-level Esc listener for modal
       this._render();
     }
 
@@ -1444,7 +1519,20 @@
 
       // When we re-render the found view, the previously injected iframe
       // is gone. Reset the open flag so the next Preview click rebuilds it.
-      if (this.state.stage !== 'found') this._pdfViewerOpen = false;
+      // Same for the email modal — if we navigate away, the modal DOM is
+      // torn down with the rest of the shadow root.
+      if (this.state.stage !== 'found') {
+        this._pdfViewerOpen = false;
+        if (this._emailModalOpen) {
+          // Re-render replaces the shadow tree, so the modal DOM is already
+          // gone. We just need to detach the document-level Esc listener.
+          if (this._emailEscHandler) {
+            document.removeEventListener('keydown', this._emailEscHandler);
+            this._emailEscHandler = null;
+          }
+          this._emailModalOpen = false;
+        }
+      }
 
       this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root"' + themeAttr + ' style="' + overrides + '">' + inner + '</div>';
       this._bind();
@@ -1492,6 +1580,8 @@
       if (previewBtn) previewBtn.addEventListener('click', () => this._handlePdfPreview(previewBtn));
       const downloadBtn = root.querySelector('[data-tgm-pdf-download]');
       if (downloadBtn) downloadBtn.addEventListener('click', () => this._handlePdfDownload(downloadBtn));
+      const emailBtn = root.querySelector('[data-tgm-pdf-email]');
+      if (emailBtn) emailBtn.addEventListener('click', () => this._handleEmailOpen(emailBtn));
     }
 
     async _submit(form) {
@@ -1749,6 +1839,300 @@
       }
     }
 
+    // ===== Email modal =====
+    //
+    // Three-stage flow:
+    //   1. _handleEmailOpen → renders modal, focuses To field, listens for keys
+    //   2. _sendEmail → validates inputs, POSTs to /api/booking-email
+    //   3. _closeEmailModal → tears down DOM + key listener
+    //
+    // The modal is mounted inside the widget shadow root so it inherits theme
+    // tokens. We use position: fixed on the backdrop so it overlays the host
+    // page viewport, not just the widget's box.
+
+    _handleEmailOpen(btn) {
+      // The Email button doesn't trigger any fetch itself — the PDF is
+      // generated server-side as part of the email send. So we open the
+      // modal immediately and don't show the button spinner unless something
+      // long-running starts.
+      const root = this.shadow.querySelector('.tgm-root');
+      const mount = root?.querySelector('[data-tgm-modal-mount]');
+      if (!mount) return;
+
+      // If a modal is already open (defensive — shouldn't happen) close it
+      // before opening another.
+      if (this._emailModalOpen) this._closeEmailModal();
+
+      const order = this.state.order;
+      const customerEmail = (order?.customerEmail || this.lookup?.email || '').trim();
+      const customerFirstName = (order?.customerFirstname || '').trim();
+
+      // The customer's email is the canonical "to" — pre-fill it. They can
+      // edit it but the server will reject the send if their booking email
+      // isn't somewhere in the recipient list (anti-abuse).
+      mount.innerHTML = this._renderEmailModal({
+        customerEmail,
+        customerFirstName,
+        filename: this._pdfFilename(),
+      });
+
+      const backdrop = mount.querySelector('[data-tgm-modal-backdrop]');
+      const modal = mount.querySelector('.tgm-modal');
+      const closeBtn = mount.querySelector('[data-tgm-modal-close]');
+      const cancelBtn = mount.querySelector('[data-tgm-modal-cancel]');
+      const sendBtn = mount.querySelector('[data-tgm-modal-send]');
+      const toInput = mount.querySelector('[data-tgm-modal-to]');
+
+      // Click outside to close, but not when click started inside the modal
+      // and ended on the backdrop (avoids closing during text selection drags).
+      let downOnBackdrop = false;
+      backdrop.addEventListener('mousedown', (e) => {
+        downOnBackdrop = e.target === backdrop;
+      });
+      backdrop.addEventListener('mouseup', (e) => {
+        if (downOnBackdrop && e.target === backdrop) this._closeEmailModal();
+        downOnBackdrop = false;
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', () => this._closeEmailModal());
+      if (cancelBtn) cancelBtn.addEventListener('click', () => this._closeEmailModal());
+      if (sendBtn) sendBtn.addEventListener('click', () => this._sendEmail(sendBtn, mount));
+
+      // Esc to close — bound at document level since focus may be inside
+      // an input. Stored on instance so we can remove on close.
+      this._emailEscHandler = (e) => {
+        if (e.key === 'Escape') this._closeEmailModal();
+      };
+      document.addEventListener('keydown', this._emailEscHandler);
+
+      // Auto-focus the To input. Defer to next frame so the modal animation
+      // doesn't fight focus assignment.
+      requestAnimationFrame(() => {
+        if (toInput) toInput.focus();
+      });
+
+      this._emailModalOpen = true;
+      this._fireEvent('email-modal-opened');
+    }
+
+    _renderEmailModal({ customerEmail, customerFirstName, filename }) {
+      const c = this.c;
+      const greeting = customerFirstName
+        ? `Send ${esc(customerFirstName)} a copy of this booking pack`
+        : 'Send a copy of this booking pack';
+
+      return `
+        <div class="tgm-modal-backdrop" data-tgm-modal-backdrop role="dialog" aria-modal="true" aria-labelledby="tgm-modal-title">
+          <div class="tgm-modal" role="document">
+            <div class="tgm-modal-head">
+              <div class="tgm-modal-head-icon">${svg(IC.mail)}</div>
+              <div class="tgm-modal-head-text">
+                <h2 class="tgm-modal-head-title" id="tgm-modal-title">${esc(c.labels?.emailModalTitle || 'Email booking pack')}</h2>
+                <p class="tgm-modal-head-sub">${esc(c.labels?.emailModalSub || greeting)}</p>
+              </div>
+              <button type="button" class="tgm-modal-close" data-tgm-modal-close aria-label="Close">${svg(IC.x)}</button>
+            </div>
+            <div class="tgm-modal-body">
+              <div class="tgm-modal-field">
+                <label for="tgm-modal-to-input">${esc(c.labels?.emailTo || 'Send to')}</label>
+                <input
+                  id="tgm-modal-to-input"
+                  type="email"
+                  class="tgm-modal-input"
+                  data-tgm-modal-to
+                  value="${esc(customerEmail)}"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                  spellcheck="false"
+                />
+                <div class="tgm-modal-help">${esc(c.labels?.emailToHelp || 'Defaults to the email on your booking. Edit to send to a different address.')}</div>
+              </div>
+              <div class="tgm-modal-field">
+                <label for="tgm-modal-cc-input">${esc(c.labels?.emailCc || 'Also send to (optional)')}</label>
+                <input
+                  id="tgm-modal-cc-input"
+                  type="text"
+                  class="tgm-modal-input"
+                  data-tgm-modal-cc
+                  placeholder="someone@example.com, another@example.com"
+                  spellcheck="false"
+                />
+                <div class="tgm-modal-help">${esc(c.labels?.emailCcHelp || 'Separate multiple addresses with commas. Up to 3.')}</div>
+              </div>
+              <div class="tgm-modal-field">
+                <label for="tgm-modal-message-input">${esc(c.labels?.emailMessage || 'Add a message (optional)')}</label>
+                <textarea
+                  id="tgm-modal-message-input"
+                  class="tgm-modal-textarea"
+                  data-tgm-modal-message
+                  rows="3"
+                  maxlength="1000"
+                  placeholder="${esc(c.labels?.emailMessagePlaceholder || 'A short note that will appear above the booking summary.')}"
+                ></textarea>
+              </div>
+              <div class="tgm-modal-field">
+                <label>${esc(c.labels?.emailAttachment || 'Attachment')}</label>
+                <div class="tgm-modal-attach">
+                  <div class="tgm-modal-attach-icon">${svg(IC.file)}</div>
+                  <div class="tgm-modal-attach-text">
+                    <div class="tgm-modal-attach-name">${esc(filename)}</div>
+                    <div class="tgm-modal-attach-meta">${esc(c.labels?.emailAttachmentMeta || 'A4 booking confirmation pack')}</div>
+                  </div>
+                </div>
+              </div>
+              <div data-tgm-modal-error-mount></div>
+            </div>
+            <div class="tgm-modal-foot">
+              <button type="button" class="tgm-btn-2" data-tgm-modal-cancel>${esc(c.labels?.emailCancel || 'Cancel')}</button>
+              <button type="button" class="tgm-btn-1" data-tgm-modal-send>
+                ${svg(IC.mail)}
+                <span data-tgm-modal-send-label>${esc(c.labels?.emailSend || 'Send email')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async _sendEmail(sendBtn, mount) {
+      if (sendBtn.disabled) return;
+
+      const toInput = mount.querySelector('[data-tgm-modal-to]');
+      const ccInput = mount.querySelector('[data-tgm-modal-cc]');
+      const messageInput = mount.querySelector('[data-tgm-modal-message]');
+      const errorMount = mount.querySelector('[data-tgm-modal-error-mount]');
+      const sendLabel = mount.querySelector('[data-tgm-modal-send-label]');
+
+      const showError = (msg) => {
+        if (errorMount) {
+          errorMount.innerHTML = `<div class="tgm-modal-error">${svg(IC.alert)}<span>${esc(msg)}</span></div>`;
+        }
+      };
+      const clearError = () => { if (errorMount) errorMount.innerHTML = ''; };
+
+      clearError();
+
+      const toEmail = (toInput?.value || '').trim().toLowerCase();
+      const ccRaw = (ccInput?.value || '').trim();
+      const message = (messageInput?.value || '').trim();
+
+      // Same regex as server-side validator. Done client-side too so the user
+      // gets instant feedback rather than waiting for a round-trip.
+      const emailRe = /^[^\s@<>(),;:"\[\]\\]+@[^\s@<>(),;:"\[\]\\]+\.[^\s@<>(),;:"\[\]\\]+$/;
+
+      if (!toEmail || !emailRe.test(toEmail)) {
+        showError('Please enter a valid email address in the To field.');
+        toInput?.focus();
+        return;
+      }
+
+      // CC parsing: comma/semicolon separated, max 3, no duplicates.
+      const ccCandidates = ccRaw
+        ? ccRaw.split(/[,;]/).map(s => s.trim().toLowerCase()).filter(Boolean)
+        : [];
+      const ccEmails = [];
+      const seen = new Set([toEmail]);
+      for (const c of ccCandidates) {
+        if (!emailRe.test(c)) {
+          showError(`"${c}" doesn't look like a valid email address.`);
+          ccInput?.focus();
+          return;
+        }
+        if (seen.has(c)) continue;
+        seen.add(c);
+        ccEmails.push(c);
+        if (ccEmails.length >= 3) break;
+      }
+      if (ccCandidates.length > 3) {
+        showError('You can include up to 3 additional addresses. Remove some and try again.');
+        return;
+      }
+
+      // Server enforces this too — but giving the user the message client-side
+      // means we don't fire a request we know will fail.
+      const customerEmail = (this.state.order?.customerEmail || this.lookup?.email || '').trim().toLowerCase();
+      if (customerEmail) {
+        const allRecipients = new Set([toEmail, ...ccEmails]);
+        if (!allRecipients.has(customerEmail)) {
+          showError(`The booking holder's email (${customerEmail}) must be included as a recipient.`);
+          return;
+        }
+      }
+
+      // Loading state on the send button. Modal stays open so we can show
+      // errors without losing the user's input.
+      sendBtn.disabled = true;
+      const previousLabel = sendLabel?.textContent || 'Send email';
+      if (sendLabel) sendLabel.textContent = 'Sending…';
+
+      const loadingToastId = this._showToast('loading', 'Sending your booking pack', 'Generating PDF and emailing it now.');
+
+      try {
+        const res = await fetch(API_EMAIL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widgetId: this.c.widgetId,
+            emailAddress: this.lookup.email,
+            departDate: this.lookup.date,
+            orderRef: this.lookup.ref,
+            toEmail,
+            ccEmails,
+            message,
+          }),
+        });
+
+        this._dismissToast(loadingToastId);
+
+        if (!res.ok) {
+          let serverErr = '';
+          try { const j = await res.json(); serverErr = j?.error || ''; } catch {}
+          if (res.status === 429) {
+            showError('Too many email requests. Please wait a few minutes and try again.');
+          } else if (res.status === 400 && serverErr === 'recipient_mismatch') {
+            showError(`The booking holder's email must be included as a recipient.`);
+          } else if (res.status === 400 && serverErr === 'invalid_recipients') {
+            showError('One of the email addresses looks invalid. Please check and try again.');
+          } else if (res.status === 400 && serverErr === 'invalid_message') {
+            showError('Your message is too long. Please shorten it to under 1000 characters.');
+          } else if (res.status === 502 || serverErr === 'send_failed') {
+            showError("We couldn't send the email just now. Please try again in a moment.");
+          } else if (res.status === 404) {
+            showError("We couldn't find that booking. Please look it up again.");
+          } else {
+            showError('Something went wrong. Please try again in a moment.');
+          }
+          return;
+        }
+
+        // Success — close modal and show toast.
+        const data = await res.json().catch(() => ({}));
+        const sentTo = data?.sentTo || toEmail;
+        this._closeEmailModal();
+        this._showToast('success', 'Email sent', `Booking pack on its way to ${sentTo}.`, 5000);
+        this._fireEvent('email-sent', { sentTo, ccCount: ccEmails.length });
+
+      } catch (err) {
+        this._dismissToast(loadingToastId);
+        showError('Network error. Please check your connection and try again.');
+      } finally {
+        sendBtn.disabled = false;
+        if (sendLabel) sendLabel.textContent = previousLabel;
+      }
+    }
+
+    _closeEmailModal() {
+      const root = this.shadow.querySelector('.tgm-root');
+      const mount = root?.querySelector('[data-tgm-modal-mount]');
+      if (mount) mount.innerHTML = '';
+      if (this._emailEscHandler) {
+        document.removeEventListener('keydown', this._emailEscHandler);
+        this._emailEscHandler = null;
+      }
+      this._emailModalOpen = false;
+      this._fireEvent('email-modal-closed');
+    }
+
     _showToast(type, title, sub, autoDismissMs) {
       const stack = this.shadow.querySelector('[data-tgm-toast-stack]');
       if (!stack) return null;
@@ -1807,6 +2191,11 @@
         for (const t of this._toastTimers.values()) clearTimeout(t);
         this._toastTimers.clear();
         this._discardPdfCache();
+        if (this._emailEscHandler) {
+          document.removeEventListener('keydown', this._emailEscHandler);
+          this._emailEscHandler = null;
+        }
+        this._emailModalOpen = false;
         this.shadow.innerHTML = '';
       } catch {}
     }
