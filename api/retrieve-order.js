@@ -240,6 +240,7 @@ function trimAccommodation(d) {
       address1: safeStr(d.location.address1, 300),
       city: safeStr(d.location.city, 100),
       state: safeStr(d.location.state, 100),
+      postalCode: safeStr(d.location.postalCode, 30),
       country: safeStr(d.location.country, 10),
       latitude: safeNum(d.location.latitude),
       longitude: safeNum(d.location.longitude),
@@ -256,6 +257,28 @@ function trimAccommodation(d) {
       inResortFees: safeNum(d.pricing.inResortFees),
       isRefundable: !!d.pricing.isRefundable,
       refundability: safeStr(d.pricing.refundability, 30),
+      // What the headline price is composed of (e.g. "Rate for Room £2073").
+      // Surfaced to customers in the payment breakdown.
+      breakdown: Array.isArray(d.pricing.breakdown)
+        ? d.pricing.breakdown.slice(0, 10).map(b => ({
+            type: safeStr(b.type, 30),
+            name: safeStr(b.name, 100),
+            description: safeStr(b.description, 200),
+            unitPrice: safeNum(b.unitPrice),
+            qty: safeNum(b.qty),
+          }))
+        : [],
+      // Charges payable at the property (e.g. tourist tax, ecologic fee).
+      // Customers MUST see these — they're additional cost, not bundled.
+      payAtLocation: Array.isArray(d.pricing.payAtLocation)
+        ? d.pricing.payAtLocation.slice(0, 10).map(b => ({
+            type: safeStr(b.type, 30),
+            name: safeStr(b.name, 100),
+            description: safeStr(b.description, 200),
+            unitPrice: safeNum(b.unitPrice),
+            qty: safeNum(b.qty),
+          }))
+        : [],
       depositOptions: Array.isArray(d.pricing.depositOptions)
         ? d.pricing.depositOptions.slice(0, 5).map(opt => ({
             id: safeNum(opt.id),
@@ -275,7 +298,7 @@ function trimAccommodation(d) {
         : [],
     } : null,
     descriptions: Array.isArray(d.descriptions)
-      ? d.descriptions.slice(0, 10).map(desc => ({
+      ? d.descriptions.slice(0, 30).map(desc => ({
           type: safeStr(desc.type, 40),
           title: safeStr(desc.title, 100),
           text: sanitiseHotelDescription(desc.text),
