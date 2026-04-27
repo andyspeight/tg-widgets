@@ -21,6 +21,7 @@
     { "source": "/demo-enquiry",      "destination": "/demo-enquiry.html" },
     { "source": "/demo-mybooking",    "destination": "/demo-mybooking.html" },
     { "source": "/demo-countdown",    "destination": "/demo-countdown.html" },
+    { "source": "/wow-showcase",      "destination": "/wow-showcase.html" },
     { "source": "/demo-logos",        "destination": "/demo-logos.html" },
     { "source": "/editor",              "destination": "/editor.html" },
     { "source": "/editor-reviews",      "destination": "/editor-reviews.html" },
