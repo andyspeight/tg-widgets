@@ -366,30 +366,28 @@
     /* ===== PDF action row — three buttons (Preview + Email + Download) ===== */
     .tgm-action-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
     @media (max-width: 760px) { .tgm-action-row { grid-template-columns: 1fr; } }
-    .tgm-action { display: flex; align-items: center; gap: 16px; padding: 18px 24px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); cursor: pointer; text-align: left; font-family: inherit; transition: all .25s cubic-bezier(.2,.7,.2,1); width: 100%; position: relative; }
+    .tgm-action { display: flex; align-items: center; gap: 12px; padding: 16px 18px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); cursor: pointer; text-align: left; font-family: inherit; transition: all .25s cubic-bezier(.2,.7,.2,1); width: 100%; position: relative; }
     .tgm-action:hover:not(:disabled) { border-color: var(--tgm-accent); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04); }
     .tgm-action:disabled { cursor: wait; opacity: .85; }
     .tgm-action.is-active { border-color: var(--tgm-accent); background: var(--tgm-bg-2); }
-    .tgm-action-icon { width: 44px; height: 44px; border-radius: var(--tgm-radius-md); background: linear-gradient(135deg, var(--tgm-accent) 0%, var(--tgm-accent-dark) 100%); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
-    .tgm-action-icon svg { width: 20px; height: 20px; }
+    .tgm-action-icon { width: 40px; height: 40px; border-radius: var(--tgm-radius-md); background: linear-gradient(135deg, var(--tgm-accent) 0%, var(--tgm-accent-dark) 100%); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+    .tgm-action-icon svg { width: 18px; height: 18px; }
     .tgm-action-text { flex: 1; min-width: 0; }
-    .tgm-action-title { font-size: 16px; font-weight: 600; color: var(--tgm-text); margin-bottom: 2px; letter-spacing: -.01em; }
-    .tgm-action-sub { font-size: 13px; color: var(--tgm-text-2); }
-    .tgm-action-arrow { width: 20px; height: 20px; color: var(--tgm-text-3); transition: transform .15s, color .15s; flex-shrink: 0; }
+    .tgm-action-title { font-size: 15px; font-weight: 600; color: var(--tgm-text); margin-bottom: 2px; letter-spacing: -.01em; line-height: 1.3; }
+    .tgm-action-sub { font-size: 12px; color: var(--tgm-text-2); line-height: 1.4; }
+    .tgm-action-arrow { width: 18px; height: 18px; color: var(--tgm-text-3); transition: transform .15s, color .15s; flex-shrink: 0; }
     .tgm-action:hover:not(:disabled) .tgm-action-arrow { transform: translateX(2px); color: var(--tgm-accent); }
     .tgm-action.is-loading .tgm-action-arrow { display: none; }
-    .tgm-action-loader { width: 20px; height: 20px; border: 2px solid var(--tgm-bg-3); border-top-color: var(--tgm-accent); border-radius: 50%; animation: tgm-spin .7s linear infinite; flex-shrink: 0; display: none; }
+    .tgm-action-loader { width: 18px; height: 18px; border: 2px solid var(--tgm-bg-3); border-top-color: var(--tgm-accent); border-radius: 50%; animation: tgm-spin .7s linear infinite; flex-shrink: 0; display: none; }
     .tgm-action.is-loading .tgm-action-loader { display: block; }
 
     /* When the action row is at 3 columns, the action title can get tight.
-       Drop sub copy gracefully on narrow desktop sizes between 760-960px so
-       titles stay on a single line. */
-    @media (min-width: 761px) and (max-width: 960px) {
+       Hide the arrow on narrow desktop sizes between 760-1100px so titles
+       and sub-copy have room to breathe. */
+    @media (min-width: 761px) and (max-width: 1100px) {
       .tgm-action { padding: 14px 14px; gap: 10px; }
       .tgm-action-icon { width: 36px; height: 36px; }
       .tgm-action-icon svg { width: 16px; height: 16px; }
-      .tgm-action-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .tgm-action-sub { display: none; }
       .tgm-action-arrow { display: none; }
     }
 
@@ -1132,7 +1130,7 @@
             <div class="tgm-action-icon">${svg(IC.eye)}</div>
             <div class="tgm-action-text">
               <div class="tgm-action-title">${esc(c.labels?.actionPreview || 'Preview')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionPreviewSub || 'View the A4 booking pack inline')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionPreviewSub || 'View the booking pack inline')}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
@@ -1141,7 +1139,7 @@
             <div class="tgm-action-icon">${svg(IC.mail)}</div>
             <div class="tgm-action-text">
               <div class="tgm-action-title">${esc(c.labels?.actionEmail || 'Email')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionEmailSub || 'Send a confirmation to your inbox')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionEmailSub || 'Send to your inbox')}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
@@ -1150,7 +1148,7 @@
             <div class="tgm-action-icon">${svg(IC.dl)}</div>
             <div class="tgm-action-text">
               <div class="tgm-action-title">${esc(c.labels?.actionDownload || 'Download')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionDownloadSub || 'Save the booking pack to your device')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionDownloadSub || 'Save the PDF to your device')}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
