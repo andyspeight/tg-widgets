@@ -1,12 +1,17 @@
 /**
- * Travelgenix My Booking Widget v1.1.0
+ * Travelgenix My Booking Widget v1.2.0
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.2.0 changes:
+ *   - Two-button PDF action: 'Preview' opens an inline viewer; 'Download' saves the file
+ *   - Inline PDF viewer rendered in an iframe below the action row (~840px tall)
+ *   - Single fetch shared between preview and download (blob cached on instance)
+ *   - Preview button toggles the viewer open/closed
  *
  * v1.1.0 changes:
  *   - PDF download wired to /api/booking-pdf (Puppeteer-rendered A4 pack)
  *   - Email action hidden (Phase 2)
- *   - Single full-width PDF action button replaces 2-column action grid
  *   - Lookup credentials cached on widget instance for PDF re-lookup
  *   - Spinner-on-button + toast notifications during PDF generation
  *
@@ -23,12 +28,6 @@
   // client website) the relative path resolves against the host page
   // and 403s. Computing the base from document.currentScript ensures
   // we always hit the origin the widget was actually served from.
-  //
-  // Resolution order:
-  //   1. window.__TG_WIDGET_API_BASE__ (explicit override, full origin)
-  //   2. document.currentScript.src origin
-  //   3. <script src*="widget-mybooking"> match in DOM
-  //   4. Empty string (relative paths, original behaviour)
   function deriveApiBase() {
     if (typeof window === 'undefined') return '';
     if (typeof window.__TG_WIDGET_API_BASE__ === 'string' && window.__TG_WIDGET_API_BASE__) {
@@ -37,7 +36,6 @@
     try {
       var s = document.currentScript;
       if (!s) {
-        // currentScript is null inside async callbacks; find by src match
         var scripts = document.getElementsByTagName('script');
         for (var i = 0; i < scripts.length; i++) {
           if (scripts[i].src && scripts[i].src.indexOf('widget-mybooking') !== -1) {
@@ -56,15 +54,12 @@
 
   var API_BASE = deriveApiBase();
 
-  // Per-endpoint overrides still win — handy for local dev or when the
-  // host wants to proxy via their own domain. Default behaviour is to
-  // join the auto-detected origin with the standard path.
   const API_CONFIG = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || (API_BASE + '/api/widget-config');
   const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || (API_BASE + '/api/retrieve-order');
   const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || (API_BASE + '/api/booking-pdf');
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
 
-  // ----- Inline SVG icons (no external deps) -----
+  // ----- Inline SVG icons -----
   const IC = {
     mail:    'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6L12 13 2 6',
     cal:     'M3 4h18v18H3zM3 10h18M16 2v6M8 2v6',
@@ -91,22 +86,14 @@
     alert:   'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01',
     plane:   'M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z',
     bag:     'M16 3h-1V1h-2v2H7V1H5v2H4a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM4 8h12v12H4V8z',
-    /* Lucide bed-double (v0.383) — the canonical accommodation/hotel icon
-       in the Lucide family. Used here for the Accommodation card header so
-       it visually parallels Plane (Flights) and Lounge (Airport extras).
-       Same 24x24 viewBox + stroke-width 2 as every other icon in this set.
-       Path data verified against unpkg.com/lucide-static@0.383.0. */
     bed:     'M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M12 4v6M2 18h20',
     lounge:  'M19 7v3.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 10.5V7M3 21V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10M3 17h18',
     arrowR:  'M5 12h14M13 5l7 7-7 7',
     leaf:    'M11 20A7 7 0 0 1 4 13c0-2 1-4 3-6 1-1 2-3 4-5l1 4c2-1 4 1 5 3 1 3 0 5-1 6-2 2-4 5-5 5z',
+    eye:     'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+    x:       'M18 6L6 18M6 6l12 12',
   };
   function svg(p, sw, size) {
-    // Bulletproof sizing: write width/height directly on the SVG element so
-    // sizing never depends on host-page CSS or stylesheet load order. CSS can
-    // still override (e.g. `.tgm-action-icon svg { width: 20px }`) but the
-    // attribute is the safety net. Default 20px matches the dominant size in
-    // this widget — outliers pass an explicit size.
     sw = sw || 2;
     const s = size || 20;
     return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="currentColor" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p.split(/(?=M)/).map(d => '<path d="' + d + '"/>').join('') + '</svg>';
@@ -156,10 +143,6 @@
     const ms = d.getTime() - Date.now();
     return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
   }
-  // Render an ISO timestamp as HH:MM in the booking's local clock. We use UTC
-  // because Travelify stores depart/arrive times as the LOCAL airport time
-  // dressed as UTC (e.g. "2026-10-02T14:45:00Z" really means 14:45 LHR local).
-  // Converting to local browser time would shift the printed clock incorrectly.
   function fmtTime(iso) {
     if (!iso) return '';
     const d = new Date(iso);
@@ -191,7 +174,7 @@
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
-  // ----- Styles (injected into Shadow DOM) -----
+  // ----- Styles -----
   const STYLES = `
     :host { all: initial; display: block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
     *, *::before, *::after { box-sizing: border-box; }
@@ -276,7 +259,6 @@
     .tgm-error-msg svg { width: 14px; height: 14px; flex-shrink: 0; }
 
     /* ===== HORIZONTAL FORM ===== */
-    /* HORIZONTAL form — light by default, dark variant via [data-theme="dark"] below. */
     .tgm-hform { position: relative; padding: 24px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-2xl); overflow: hidden; box-shadow: 0 10px 15px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.04); }
     .tgm-hform::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 10% 20%, rgba(0,180,216,.06), transparent 50%); pointer-events: none; }
     .tgm-hform-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -301,7 +283,6 @@
     .tgm-hform-cta:disabled { opacity: .6; cursor: not-allowed; }
     .tgm-hform-cta svg { width: 16px; height: 16px; }
 
-    /* HORIZONTAL form — dark theme override */
     .tgm-root[data-theme="dark"] .tgm-hform { background: linear-gradient(135deg, var(--tgm-primary) 0%, var(--tgm-primary-dark) 100%); border-color: transparent; }
     .tgm-root[data-theme="dark"] .tgm-hform::before { background: radial-gradient(circle at 10% 20%, rgba(0,180,216,.15), transparent 50%), radial-gradient(circle at 90% 80%, rgba(72,202,228,.08), transparent 50%); }
     .tgm-root[data-theme="dark"] .tgm-hform-icon { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
@@ -356,8 +337,6 @@
     .tgm-ref strong { color: #fff; margin-left: 8px; font-weight: 700; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
     .tgm-hero-rating { display: inline-flex; gap: 2px; align-items: center; margin-bottom: 12px; }
     .tgm-hero-rating svg { width: 14px; height: 14px; fill: #FFD166; color: #FFD166; }
-    /* Review chip — sits inline with the star rating to surface third-party
-       social proof (TripAdvisor, etc) directly on the confirmation card. */
     .tgm-review-chip { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 3px 10px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25); border-radius: 9999px; font-size: 12px; font-weight: 500; color: #fff; backdrop-filter: blur(4px); }
     .tgm-review-chip strong { font-weight: 700; font-variant-numeric: tabular-nums; }
     .tgm-hero-name { font-size: 32px; font-weight: 700; letter-spacing: -.02em; line-height: 1.05; margin: 0 0 4px; text-shadow: 0 2px 12px rgba(0,0,0,.3); }
@@ -375,11 +354,13 @@
     .tgm-countdown svg { width: 14px; height: 14px; }
     .tgm-countdown strong { color: var(--tgm-accent-dark); font-weight: 700; font-variant-numeric: tabular-nums; }
 
-    /* Single full-width PDF action button */
-    .tgm-action-row { margin-bottom: 16px; }
+    /* ===== PDF action row — two buttons (Preview + Download) ===== */
+    .tgm-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 560px) { .tgm-action-row { grid-template-columns: 1fr; } }
     .tgm-action { display: flex; align-items: center; gap: 16px; padding: 18px 24px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); cursor: pointer; text-align: left; font-family: inherit; transition: all .25s cubic-bezier(.2,.7,.2,1); width: 100%; position: relative; }
     .tgm-action:hover:not(:disabled) { border-color: var(--tgm-accent); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04); }
     .tgm-action:disabled { cursor: wait; opacity: .85; }
+    .tgm-action.is-active { border-color: var(--tgm-accent); background: var(--tgm-bg-2); }
     .tgm-action-icon { width: 44px; height: 44px; border-radius: var(--tgm-radius-md); background: linear-gradient(135deg, var(--tgm-accent) 0%, var(--tgm-accent-dark) 100%); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
     .tgm-action-icon svg { width: 20px; height: 20px; }
     .tgm-action-text { flex: 1; min-width: 0; }
@@ -390,6 +371,22 @@
     .tgm-action.is-loading .tgm-action-arrow { display: none; }
     .tgm-action-loader { width: 20px; height: 20px; border: 2px solid var(--tgm-bg-3); border-top-color: var(--tgm-accent); border-radius: 50%; animation: tgm-spin .7s linear infinite; flex-shrink: 0; display: none; }
     .tgm-action.is-loading .tgm-action-loader { display: block; }
+
+    /* Inline PDF viewer panel */
+    .tgm-pdf-viewer { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); overflow: hidden; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.02); animation: tgm-fadeup .3s cubic-bezier(.2,.7,.2,1); }
+    .tgm-pdf-viewer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--tgm-bg-2); border-bottom: 1px solid var(--tgm-border); }
+    .tgm-pdf-viewer-title { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--tgm-text); letter-spacing: -.01em; }
+    .tgm-pdf-viewer-title svg { width: 16px; height: 16px; color: var(--tgm-accent); }
+    .tgm-pdf-viewer-actions { display: flex; gap: 8px; align-items: center; }
+    .tgm-pdf-viewer-btn { height: 32px; padding: 0 12px; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--tgm-text-2); background: transparent; border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
+    .tgm-pdf-viewer-btn:hover { border-color: var(--tgm-accent); color: var(--tgm-text); }
+    .tgm-pdf-viewer-btn svg { width: 14px; height: 14px; }
+    .tgm-pdf-viewer-frame { width: 100%; height: 840px; border: none; display: block; background: var(--tgm-bg-3); }
+    @media (max-width: 480px) { .tgm-pdf-viewer-frame { height: 600px; } }
+    /* Mobile fallback — iOS Safari can't render <iframe src="blob:..."> for PDFs.
+       We swap to a download-only state with a clear call to action. */
+    .tgm-pdf-viewer-fallback { padding: 32px 24px; text-align: center; }
+    .tgm-pdf-viewer-fallback p { font-size: 14px; color: var(--tgm-text-2); margin: 0 0 16px; line-height: 1.5; }
 
     /* Toast notifications */
     .tgm-toast-stack { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; z-index: 999999; max-width: 380px; }
@@ -409,9 +406,6 @@
     .tgm-toast-sub { font-size: 12px; color: var(--tgm-text-2); margin-top: 1px; }
 
     .tgm-stay { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); padding: 20px; margin-bottom: 16px; }
-    /* Header for the accommodation card — matches the visual pattern of
-       .tgm-flight-card h3 and .tgm-extra-card head: icon + label + optional
-       right-aligned meta. Keeps the three product cards visually consistent. */
     .tgm-stay h3 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; margin: 0 0 16px; color: var(--tgm-text); letter-spacing: -.01em; }
     .tgm-stay h3 svg { color: var(--tgm-accent); }
     .tgm-stay h3 .tgm-stay-meta { margin-left: auto; font-size: 13px; font-weight: 400; color: var(--tgm-text-3); }
@@ -485,11 +479,6 @@
     .tgm-fac { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border-light); border-radius: 9999px; font-size: 13px; color: var(--tgm-text-2); }
     .tgm-fac svg { width: 13px; height: 13px; color: var(--tgm-success); }
 
-    /* ===== Structured detail blocks =====
-       Used inside the collapsibles to organise rich content (key/value rows
-       for property metadata, line-item rows for fees and price breakdowns,
-       sub-headings inside long collapse bodies). All values from the type
-       scale; no arbitrary sizes. */
     .tgm-subhead { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--tgm-text-3); margin: 16px 0 8px; }
     .tgm-subhead:first-child { margin-top: 0; }
     .tgm-kv { display: grid; grid-template-columns: minmax(120px, 30%) 1fr; gap: 8px 16px; font-size: 14px; }
@@ -507,11 +496,6 @@
     .tgm-pay-breakdown .tgm-fee-line:first-child { padding-top: 0; }
     .tgm-pay-breakdown .tgm-fee-line:first-child + .tgm-fee-line { border-top: 1px dashed var(--tgm-border-light); }
 
-    /* ===== Flight card =====
-       Each flight item produces a card. Inside are 1-2 "leg" blocks
-       (Outbound / Inbound). A leg shows the route at a glance — depart
-       airport, arrow, destination airport, total duration. The full
-       segment-by-segment detail is a collapsible below. */
     .tgm-flight-card { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); padding: 20px; margin-bottom: 16px; }
     .tgm-flight-card h3 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; margin: 0 0 16px; color: var(--tgm-text); letter-spacing: -.01em; }
     .tgm-flight-card h3 svg { color: var(--tgm-accent); }
@@ -538,7 +522,6 @@
     .tgm-leg-meta-item svg { color: var(--tgm-text-3); }
     .tgm-leg-meta-item strong { color: var(--tgm-text); font-weight: 600; }
 
-    /* Collapsible segment detail inside the flight card */
     .tgm-segs { padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--tgm-border-light); }
     .tgm-seg { display: grid; grid-template-columns: 60px 1fr 60px; gap: 12px; padding: 10px 0; align-items: center; font-size: 13px; }
     .tgm-seg + .tgm-seg { border-top: 1px dashed var(--tgm-border-light); }
@@ -555,9 +538,6 @@
       .tgm-leg-line { transform: rotate(90deg); height: 24px; min-width: 0; width: 24px; align-self: center; }
     }
 
-    /* ===== Airport extras card =====
-       Lounges, transfers, parking, fast-track. Each extra is its own card.
-       Compact by default; descriptions collapse. */
     .tgm-extra-card { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); padding: 20px; margin-bottom: 16px; }
     .tgm-extra-head { display: flex; align-items: flex-start; gap: 16px; }
     .tgm-extra-icon { width: 44px; height: 44px; border-radius: var(--tgm-radius-md); background: var(--tgm-bg-2); display: flex; align-items: center; justify-content: center; color: var(--tgm-primary); flex-shrink: 0; }
@@ -723,13 +703,6 @@
     `;
   }
 
-  // ----- Flight card -----
-  // A flight item has 1+ "routes" (legs): typically Outbound and Inbound.
-  // Each leg has 1+ "segments" (the actual hops, e.g. LHR-AUH-MLE has 2).
-  // The card shows a route-level summary at a glance, with a collapsible
-  // for the full segment-by-segment detail. Baggage and cabin class are
-  // surfaced in the leg-meta strip because they're decision-relevant info
-  // travellers genuinely want at a glance.
   function renderFlightCard(item, c) {
     const f = item.flights;
     if (!f || !Array.isArray(f.routes) || f.routes.length === 0) return '';
@@ -742,18 +715,7 @@
     }
     const carrierSummary = Array.from(carrierNames).slice(0, 3).join(', ');
 
-    // Fare information block — Travelify ships endorsements, ticketing
-    // deadline, fare calculation, tour code as separate `fareInformation`
-    // entries. These are MEANINGFUL to customers (refund rules!) so we
-    // surface them in a "Fare conditions" collapsible at the bottom of the
-    // flight card.
     const fareInfo = Array.isArray(f.fareInformation) ? f.fareInformation : [];
-    // Filter out noise — fare basis codes (e.g. "ELN0IV2P") are operational,
-    // not customer-facing. We hide:
-    //   • entries with type 'FareBasis'
-    //   • entries whose title contains 'fare basis'
-    //   • entries whose text is a compact alphanumeric token (no spaces,
-    //     all caps + digits, ≤10 chars) — these are codes regardless of title
     const meaningfulFareInfo = fareInfo.filter(fi => {
       if (!fi.title || !fi.text) return false;
       if ((fi.type || '').toLowerCase() === 'farebasis') return false;
@@ -797,16 +759,10 @@
     const last = segs[segs.length - 1];
     const stops = segs.length - 1;
 
-    // Pull baggage + cabin from the first segment — Travelify uses the same
-    // values across all segments of a leg in practice.
     const baggage = first.baggage?.allowance || first.baggage?.weight || '';
     const cabin = first.cabinClass || '';
     const fareName = first.fareName || '';
 
-    // Total flight time = sum of in-air segment durations only. The route's
-    // own `duration` field includes layovers, so for a one-stop with a long
-    // overnight layover (e.g. AUH 23-hour wait) the route duration looks
-    // alarming. Showing in-air time is what travellers actually want.
     const flightMins = segs.reduce((acc, s) => acc + (typeof s.duration === 'number' ? s.duration : 0), 0);
 
     return `
@@ -839,7 +795,6 @@
   }
 
   function renderSegmentDetail(segs) {
-    // Show each leg-segment as a compact row with stop markers between them.
     let html = '<div class="tgm-segs">';
     for (let i = 0; i < segs.length; i++) {
       const s = segs[i];
@@ -861,7 +816,6 @@
         </div>
       `;
       if (i < segs.length - 1) {
-        // Stopover gap = next.depart - this.arrive
         const nextDep = Date.parse(segs[i + 1].depart || '');
         const thisArr = Date.parse(s.arrive || '');
         const gapMin = (Number.isFinite(nextDep) && Number.isFinite(thisArr))
@@ -878,9 +832,6 @@
     return html;
   }
 
-  // ----- Airport extras card -----
-  // Lounges, transfers, parking, fast-track. We render each extra as its
-  // own card. The "type" field tells us which icon and label fits best.
   function renderExtraCard(item, c) {
     const e = item.airportExtras;
     if (!e) return '';
@@ -900,10 +851,6 @@
     const endTime = fmtTime(e.endDateTime);
     const dateLabel = e.startDateTime ? fmtDate(e.startDateTime, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
-    // Pull structured detail out of the descriptions array. Travelify
-    // (Holiday Extras upstream for lounges) ships these as separate
-    // entries with stable types: 'Generic' for description, 'OpeningTimes',
-    // 'DressCode', 'Inclusions' (which has multiple title sub-types).
     const descByType = (type) => (e.descriptions || []).find(d => d.type === type);
     const descByTitle = (title) => (e.descriptions || []).find(d => d.title === title);
     const fullDesc = descByType('Generic')?.text || descByTitle('Description')?.text || '';
@@ -913,7 +860,6 @@
     const food = (e.descriptions || []).find(d => /food|dining|cuisine/i.test(d.title || ''))?.text || '';
     const announcements = (e.descriptions || []).find(d => /announcement/i.test(d.title || ''))?.text || '';
 
-    // Map machine-readable feature flags to human-friendly chip labels.
     const featureLabels = {
       FreeDrinks: 'Drinks included',
       FreeFood: 'Food included',
@@ -987,10 +933,6 @@
     const items = order.items || [];
     const summary = order.summary || {};
 
-    // Find the items we render with full detail. The widget can handle
-    // multiple of each, but the lead-card values (hero, dates, etc) come
-    // from the FIRST of each type. Multiple hotels/flights are rendered
-    // as additional cards below.
     const accItem = items.find(i => i.product === 'Accommodation') || null;
     const flightItems = items.filter(i => i.product === 'Flights');
     const extraItems = items.filter(i => i.product === 'AirportExtras');
@@ -1001,28 +943,20 @@
     const checkoutMs = checkin ? new Date(checkin).getTime() + nights * 86400000 : null;
     const checkout = checkoutMs ? new Date(checkoutMs).toISOString() : null;
 
-    // Days-until uses the EARLIEST item date. For trip+flight bookings the
-    // outbound flight is usually the trigger date, not hotel check-in.
     const tripStart = summary.earliestStart || checkin;
     const days = daysUntil(tripStart);
 
-    // Hero image — prefer accommodation media, fall back to first lounge
-    // image, then to nothing (the widget handles a missing hero gracefully).
     const heroUrl = acc?.media?.[0]?.url || extraItems[0]?.airportExtras?.media?.[0]?.url || '';
     const thumbs = (acc?.media || []).slice(0, 4);
 
-    // Confirm pill + ref
     const refValue = accItem?.bookingReference || flightItems[0]?.bookingReference || ('TG' + order.id);
 
-    // Stars
     const starHtml = acc?.rating ? Array.from({ length: Math.round(acc.rating) }, () => star()).join('') : '';
 
-    // Travellers list across the whole order, not just the hotel guest list.
     const travellers = (summary.travellers && summary.travellers.length)
       ? summary.travellers
       : (acc?.guests || []);
 
-    // Pricing — total is summed across ALL items, not just the hotel.
     const pricing = acc?.pricing;
     const currency = pricing?.currency || order.currency || 'GBP';
     const totalPrice = (typeof summary.totalPrice === 'number' && summary.totalPrice > 0)
@@ -1030,26 +964,18 @@
       : (pricing?.memberPrice ?? pricing?.price ?? accItem?.price ?? 0);
     const inResort = pricing?.inResortFees;
 
-    // Deposit options - pick first one with installments, else first one
     const depositOpts = pricing?.depositOptions || [];
     const installPlan = depositOpts.find(d => d.installments && d.installmentsAmount) || null;
     const standardDep = depositOpts.find(d => !d.installments) || depositOpts[0] || null;
 
-    // Cancellation policy from rate descriptions
     const rate = acc?.units?.[0]?.rates?.[0];
     const cancelDescs = (rate?.descriptions || []).filter(d => d.type === 'CancelAndAmendments');
 
-    // Hotel description
     const hotelDesc = (acc?.descriptions || []).find(d => d.title === 'Description' || d.type === 'Generic');
 
-    // Facilities
     const facilitiesList = (acc?.descriptions || []).find(d => d.title === 'Facilities');
     const facilities = facilitiesList?.text ? facilitiesList.text.split(/[,•]/).map(s => s.trim()).filter(Boolean).slice(0, 12) : [];
 
-    // ----- Property metadata pulled from the descriptions array.
-    // Travelify (Hotelbeds upstream) ships these as separate description
-    // entries with stable titles. We pluck them by title so the order we
-    // render is independent of the order they arrive in.
     const descByTitle = (title) => (acc?.descriptions || []).find(d => d.title === title);
 
     const paymentMethodsDesc = descByTitle('Methods of payment');
@@ -1060,7 +986,6 @@
     const yearBuiltText = descByTitle('Year of construction')?.text
       || descByTitle('Year built')?.text
       || '';
-    // Extract just the year number — Hotelbeds sometimes wraps it in a sentence.
     const yearBuiltMatch = yearBuiltText.match(/\b(19|20)\d{2}\b/);
     const yearBuilt = yearBuiltMatch ? yearBuiltMatch[0] : '';
 
@@ -1081,11 +1006,6 @@
       })
       .filter(Boolean);
 
-    // Check-in / check-out time windows. Travelify ships these inside
-    // ImportantInfo description entries — we want them in the stay strip,
-    // not buried in the Important Info wall of text. We parse them out and
-    // remove them from the importantInfoBullets list below so they're not
-    // duplicated.
     const allImportantInfo = (acc?.descriptions || []).filter(d => d.type === 'ImportantInfo');
     let checkinTime = '';
     let checkoutTime = '';
@@ -1096,25 +1016,17 @@
       const coMatch = t.match(/Check[\s-]?out\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
       if (ciMatch && !checkinTime) checkinTime = ciMatch[1];
       if (coMatch && !checkoutTime) checkoutTime = coMatch[1];
-      // Keep the bullet only if it's not purely a check-in/out time line —
-      // those go on the stay strip separately.
       const isJustTimes = /^check[\s-]?(in|out)/i.test(t.trim()) && t.length < 80;
       if (!isJustTimes) importantInfoBullets.push(info);
     }
-    // Backwards-compat alias used further down — keep the existing variable
-    // name to minimise diff in the render template.
     const importantInfo = importantInfoBullets;
 
-    // Pricing breakdown (item-level, e.g. Rate for Room) and pay-at-location
-    // (e.g. City Tax, Ecologic Fee). Both come from the API trim.
     const priceBreakdown = pricing?.breakdown || [];
     const payAtLocation = pricing?.payAtLocation || [];
 
-    // Documents
     const docs = order.documents || [];
     const showDocs = c.display?.showDocuments !== false && docs.length > 0;
 
-    // Greeting
     const firstName = order.customerFirstname || 'there';
     const destCity = acc?.location?.city || '';
 
@@ -1151,16 +1063,26 @@
 
         ${(c.display?.showActions !== false) ? `
         <div class="tgm-action-row">
-          <button type="button" class="tgm-action" data-tgm-pdf-action>
+          <button type="button" class="tgm-action" data-tgm-pdf-preview>
+            <div class="tgm-action-icon">${svg(IC.eye)}</div>
+            <div class="tgm-action-text">
+              <div class="tgm-action-title">${esc(c.labels?.actionPreview || 'Preview booking pack')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionPreviewSub || 'View your full A4 confirmation inline')}</div>
+            </div>
+            <div class="tgm-action-loader" aria-hidden="true"></div>
+            ${svg(IC.arrow)}
+          </button>
+          <button type="button" class="tgm-action" data-tgm-pdf-download>
             <div class="tgm-action-icon">${svg(IC.dl)}</div>
             <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionPdf || 'Download as PDF')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionPdfSub || 'A4 confirmation pack with all your booking details')}</div>
+              <div class="tgm-action-title">${esc(c.labels?.actionDownload || 'Download as PDF')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionDownloadSub || 'Save the booking pack to your device')}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
           </button>
         </div>
+        <div data-tgm-pdf-viewer-mount></div>
         ` : ''}
 
         ${(checkin || checkout || nights || acc?.units?.[0]) ? `
@@ -1209,9 +1131,6 @@
               <span class="tgm-pay-total-amt">${esc(fmtMoney(totalPrice, currency))}</span>
             </div>
             ${(() => {
-              // Per-product breakdown — only useful when there's more than
-              // one product. For a hotel-only booking the total IS the hotel
-              // price, no breakdown adds info.
               const productCount = (summary.hasAccommodation ? 1 : 0) + (summary.hasFlights ? 1 : 0) + (summary.hasAirportExtras ? 1 : 0);
               if (productCount < 2) return '';
               const lines = [];
@@ -1435,14 +1354,17 @@
       this.c = this._defaults(config);
       this.shadow = container.attachShadow({ mode: 'open' });
       this.state = { stage: 'form', order: null, error: null };
-      this.lookup = null; // cached { email, date, ref } for PDF re-lookup
+      this.lookup = null;
       this._toastTimers = new Map();
+      this._pdfBlob = null;          // cached blob, shared by preview & download
+      this._pdfPreviewUrl = null;    // object URL for the inline iframe
+      this._pdfViewerOpen = false;
       this._render();
     }
 
     _defaults(c) {
       const merged = Object.assign({
-        layout: 'vertical', // vertical | horizontal | compact
+        layout: 'vertical',
         theme: 'light',
         title: 'My Booking',
         subtitle: 'Welcome back. Enter your details to view everything about your upcoming trip.',
@@ -1456,7 +1378,6 @@
         display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showLocalFees: true },
         widgetId: c?.widgetId || null,
       }, c || {});
-      // Make sure colors object is always complete
       merged.colors = Object.assign({
         primary: '#1B2B5B',
         accent:  '#00B4D8',
@@ -1470,12 +1391,9 @@
 
     _buildOverrides() {
       const c = this.c.colors || {};
-      // Derive light/dark variants of primary for hover and gradient
       const lighten = (hex, amt) => this._shiftHex(hex, amt);
       const primary = c.primary || '#1B2B5B';
       const accent = c.accent || '#00B4D8';
-      // Note: don't use `|| 12` — that would treat 0 (Sharp) as falsy and
-      // substitute 12. Default only when the value is missing or NaN.
       const parsed = parseInt(this.c.radius, 10);
       const radius = Math.max(0, Math.min(28, Number.isFinite(parsed) ? parsed : 12));
       const overrides = {
@@ -1488,7 +1406,6 @@
         '--tgm-success': c.success || '#10B981',
         '--tgm-warning': c.warning || '#F59E0B',
         '--tgm-text': c.text || '#0F172A',
-        // Radius scale derived from a single base value
         '--tgm-radius-sm': Math.round(radius * 0.5) + 'px',
         '--tgm-radius-md': Math.round(radius * 0.66) + 'px',
         '--tgm-radius-lg': radius + 'px',
@@ -1501,7 +1418,6 @@
     }
 
     _shiftHex(hex, percent) {
-      // Lighten if percent > 0, darken if < 0. Clamps to [0, 255].
       const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
       if (!m) return hex;
       const n = parseInt(m[1], 16);
@@ -1526,6 +1442,10 @@
       else if (this.state.stage === 'notfound') inner = renderNotFound(this.c);
       else inner = renderForm(this.c, this.state);
 
+      // When we re-render the found view, the previously injected iframe
+      // is gone. Reset the open flag so the next Preview click rebuilds it.
+      if (this.state.stage !== 'found') this._pdfViewerOpen = false;
+
       this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root"' + themeAttr + ' style="' + overrides + '">' + inner + '</div>';
       this._bind();
     }
@@ -1534,7 +1454,6 @@
       const root = this.shadow.querySelector('.tgm-root');
       if (!root) return;
 
-      // Form submit
       const form = root.querySelector('[data-tgm-form]');
       if (form) {
         form.addEventListener('submit', (e) => {
@@ -1543,14 +1462,12 @@
         });
       }
 
-      // Try-again button
       const tryAgain = root.querySelector('[data-tgm-tryagain]');
       if (tryAgain) tryAgain.addEventListener('click', () => {
         this.state = { stage: 'form', order: null, error: null };
         this._render();
       });
 
-      // Hero thumbs
       const heroImg = root.querySelector('[data-tgm-hero-img]');
       root.querySelectorAll('[data-tgm-thumb]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1560,7 +1477,6 @@
         });
       });
 
-      // Collapsibles
       root.querySelectorAll('.tgm-collapse-trig').forEach(t => {
         t.addEventListener('click', () => {
           const wrap = t.parentElement;
@@ -1569,9 +1485,13 @@
         });
       });
 
-      // PDF download button
-      const pdfBtn = root.querySelector('[data-tgm-pdf-action]');
-      if (pdfBtn) pdfBtn.addEventListener('click', () => this._downloadPdf(pdfBtn));
+      // PDF buttons: Preview opens inline viewer, Download triggers a file save.
+      // Both share a single fetch — the blob is cached on the instance after
+      // the first call so the second action reuses it.
+      const previewBtn = root.querySelector('[data-tgm-pdf-preview]');
+      if (previewBtn) previewBtn.addEventListener('click', () => this._handlePdfPreview(previewBtn));
+      const downloadBtn = root.querySelector('[data-tgm-pdf-download]');
+      if (downloadBtn) downloadBtn.addEventListener('click', () => this._handlePdfDownload(downloadBtn));
     }
 
     async _submit(form) {
@@ -1580,7 +1500,6 @@
       const date = (data.get('date') || '').toString().trim();
       const ref = (data.get('ref') || '').toString().trim();
 
-      // Client-side validation
       if (!email || !date || !ref) {
         this.state.error = 'Please fill in all three fields.';
         this._render();
@@ -1630,8 +1549,10 @@
           return;
         }
 
-        // Cache lookup credentials so we can call /booking-pdf later
         this.lookup = { email, date, ref };
+
+        // New booking → previously cached PDF is now stale. Discard.
+        this._discardPdfCache();
 
         this.state = { stage: 'found', order: data.order, error: null };
         this._render();
@@ -1642,18 +1563,23 @@
       }
     }
 
-    async _downloadPdf(btn) {
+    // Filename derived from the booking ref, shared between preview + download.
+    _pdfFilename() {
+      const item = this.state.order?.items?.[0];
+      const refValue = item?.bookingReference || ('TG' + (this.state.order?.id || ''));
+      return 'booking-' + String(refValue).replace(/[^A-Z0-9_\-]/gi, '') + '.pdf';
+    }
+
+    // Single source of truth for the PDF blob. Returns the cached blob if one
+    // exists, otherwise fetches once. All errors surface as toasts.
+    async _ensurePdfBlob() {
+      if (this._pdfBlob) return this._pdfBlob;
+
       if (!this.lookup || !this.c.widgetId) {
         this._showToast('error', 'Cannot generate PDF', 'Please look up your booking again.');
-        return;
+        return null;
       }
-      if (btn.disabled) return;
 
-      // Spinner on button
-      btn.disabled = true;
-      btn.classList.add('is-loading');
-
-      // Loading toast
       const loadingToastId = this._showToast('loading', 'Generating your PDF', 'This usually takes a few seconds.');
 
       try {
@@ -1677,16 +1603,134 @@
           } else {
             this._showToast('error', 'Something went wrong', 'Please try again in a moment.', 6000);
           }
-          return;
+          return null;
         }
 
         const blob = await res.blob();
+        this._pdfBlob = blob;
+        this._dismissToast(loadingToastId);
+        return blob;
+      } catch (err) {
+        this._dismissToast(loadingToastId);
+        this._showToast('error', 'Generation failed', 'Please check your connection and try again.', 6000);
+        return null;
+      }
+    }
 
-        // Trigger download
-        const item = this.state.order?.items?.[0];
-        const refValue = item?.bookingReference || ('TG' + (this.state.order?.id || ''));
-        const filename = 'booking-' + String(refValue).replace(/[^A-Z0-9_\-]/gi, '') + '.pdf';
+    _discardPdfCache() {
+      if (this._pdfPreviewUrl) {
+        try { URL.revokeObjectURL(this._pdfPreviewUrl); } catch {}
+        this._pdfPreviewUrl = null;
+      }
+      this._pdfBlob = null;
+      this._pdfViewerOpen = false;
+    }
 
+    // Preview button — toggles the inline viewer. If already open, closes it.
+    async _handlePdfPreview(btn) {
+      if (btn.disabled) return;
+
+      const root = this.shadow.querySelector('.tgm-root');
+      const mount = root?.querySelector('[data-tgm-pdf-viewer-mount]');
+      if (!mount) return;
+
+      if (this._pdfViewerOpen) {
+        this._closePdfViewer();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+
+      try {
+        const blob = await this._ensurePdfBlob();
+        if (!blob) return;
+
+        if (!this._pdfPreviewUrl) {
+          this._pdfPreviewUrl = URL.createObjectURL(blob);
+        }
+
+        // iOS Safari can't render <iframe src="blob:..."> for PDFs. Detect
+        // and offer a download-only fallback so users aren't left with an
+        // empty grey box and no recourse.
+        const ua = navigator.userAgent || '';
+        const isIosSafari = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+
+        const filename = this._pdfFilename();
+        if (isIosSafari) {
+          mount.innerHTML = `
+            <div class="tgm-pdf-viewer">
+              <div class="tgm-pdf-viewer-head">
+                <span class="tgm-pdf-viewer-title">${svg(IC.file)}${esc(filename)}</span>
+                <div class="tgm-pdf-viewer-actions">
+                  <button type="button" class="tgm-pdf-viewer-btn" data-tgm-pdf-viewer-close>${svg(IC.x)}Close</button>
+                </div>
+              </div>
+              <div class="tgm-pdf-viewer-fallback">
+                <p>Inline preview isn't supported on this browser. Tap below to open the PDF in a new tab, or use the Download button to save it.</p>
+                <a class="tgm-btn-1" href="${this._pdfPreviewUrl}" target="_blank" rel="noopener">${svg(IC.arrow)}Open PDF</a>
+              </div>
+            </div>
+          `;
+        } else {
+          // The #toolbar=0 hash is a hint to most desktop PDF viewers to hide
+          // their built-in toolbar — keeps the chrome consistent.
+          mount.innerHTML = `
+            <div class="tgm-pdf-viewer">
+              <div class="tgm-pdf-viewer-head">
+                <span class="tgm-pdf-viewer-title">${svg(IC.file)}${esc(filename)}</span>
+                <div class="tgm-pdf-viewer-actions">
+                  <button type="button" class="tgm-pdf-viewer-btn" data-tgm-pdf-viewer-close>${svg(IC.x)}Close</button>
+                </div>
+              </div>
+              <iframe class="tgm-pdf-viewer-frame" src="${this._pdfPreviewUrl}#toolbar=0" title="Booking confirmation PDF preview"></iframe>
+            </div>
+          `;
+        }
+
+        const closeBtn = mount.querySelector('[data-tgm-pdf-viewer-close]');
+        if (closeBtn) closeBtn.addEventListener('click', () => this._closePdfViewer());
+
+        this._pdfViewerOpen = true;
+        btn.classList.add('is-active');
+        this._fireEvent('pdf-previewed', { filename });
+
+        // Smooth-scroll the viewer into view so the user sees what just happened.
+        const viewer = mount.querySelector('.tgm-pdf-viewer');
+        if (viewer && typeof viewer.scrollIntoView === 'function') {
+          requestAnimationFrame(() => {
+            viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+        }
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+      }
+    }
+
+    _closePdfViewer() {
+      const root = this.shadow.querySelector('.tgm-root');
+      const mount = root?.querySelector('[data-tgm-pdf-viewer-mount]');
+      if (mount) mount.innerHTML = '';
+      const previewBtn = root?.querySelector('[data-tgm-pdf-preview]');
+      if (previewBtn) previewBtn.classList.remove('is-active');
+      this._pdfViewerOpen = false;
+    }
+
+    // Download button — uses the same fetch/blob as preview. If user clicks
+    // Download first (without previewing), this fetches; if they previewed
+    // first, this reuses the cached blob.
+    async _handlePdfDownload(btn) {
+      if (btn.disabled) return;
+
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+
+      try {
+        const blob = await this._ensurePdfBlob();
+        if (!blob) return;
+
+        const filename = this._pdfFilename();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -1695,22 +1739,15 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        // Revoke after a tick so the browser has time to start the download
         setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-        this._dismissToast(loadingToastId);
         this._showToast('success', 'PDF downloaded', filename, 4000);
         this._fireEvent('pdf-downloaded', { filename });
-      } catch (err) {
-        this._dismissToast(loadingToastId);
-        this._showToast('error', 'Download failed', 'Please check your connection and try again.', 6000);
       } finally {
         btn.disabled = false;
         btn.classList.remove('is-loading');
       }
     }
-
-    // ----- Toast helpers -----
 
     _showToast(type, title, sub, autoDismissMs) {
       const stack = this.shadow.querySelector('[data-tgm-toast-stack]');
@@ -1769,6 +1806,7 @@
       try {
         for (const t of this._toastTimers.values()) clearTimeout(t);
         this._toastTimers.clear();
+        this._discardPdfCache();
         this.shadow.innerHTML = '';
       } catch {}
     }
