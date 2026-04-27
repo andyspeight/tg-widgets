@@ -91,6 +91,12 @@
     alert:   'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01',
     plane:   'M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z',
     bag:     'M16 3h-1V1h-2v2H7V1H5v2H4a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM4 8h12v12H4V8z',
+    /* Lucide bed-double (v0.383) — the canonical accommodation/hotel icon
+       in the Lucide family. Used here for the Accommodation card header so
+       it visually parallels Plane (Flights) and Lounge (Airport extras).
+       Same 24x24 viewBox + stroke-width 2 as every other icon in this set.
+       Path data verified against unpkg.com/lucide-static@0.383.0. */
+    bed:     'M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M12 4v6M2 18h20',
     lounge:  'M19 7v3.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 10.5V7M3 21V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10M3 17h18',
     arrowR:  'M5 12h14M13 5l7 7-7 7',
     leaf:    'M11 20A7 7 0 0 1 4 13c0-2 1-4 3-6 1-1 2-3 4-5l1 4c2-1 4 1 5 3 1 3 0 5-1 6-2 2-4 5-5 5z',
@@ -403,6 +409,12 @@
     .tgm-toast-sub { font-size: 12px; color: var(--tgm-text-2); margin-top: 1px; }
 
     .tgm-stay { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); padding: 20px; margin-bottom: 16px; }
+    /* Header for the accommodation card — matches the visual pattern of
+       .tgm-flight-card h3 and .tgm-extra-card head: icon + label + optional
+       right-aligned meta. Keeps the three product cards visually consistent. */
+    .tgm-stay h3 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; margin: 0 0 16px; color: var(--tgm-text); letter-spacing: -.01em; }
+    .tgm-stay h3 svg { color: var(--tgm-accent); }
+    .tgm-stay h3 .tgm-stay-meta { margin-left: auto; font-size: 13px; font-weight: 400; color: var(--tgm-text-3); }
     .tgm-stay-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
     .tgm-stay-cell { padding: 0 16px; border-right: 1px solid var(--tgm-border-light); }
     .tgm-stay-cell:first-child { padding-left: 0; }
@@ -1153,6 +1165,9 @@
 
         ${(checkin || checkout || nights || acc?.units?.[0]) ? `
         <div class="tgm-stay">
+          <h3>${svg(IC.bed)}${esc(c.labels?.accommodation || 'Accommodation')}${
+            acc?.name ? `<span class="tgm-stay-meta">${esc(acc.name)}</span>` : ''
+          }</h3>
           <div class="tgm-stay-grid">
             ${checkin ? `
             <div class="tgm-stay-cell">
@@ -1299,7 +1314,7 @@
         ${(hotelDesc?.text || acc?.location?.address1 || paymentMethods.length || yearBuilt || totalRooms || roomMix.length || facilities.length) ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-            <div class="tgm-collapse-left">${svg(IC.home)}${esc(c.labels?.aboutHotel || 'About the hotel')}</div>
+            <div class="tgm-collapse-left">${svg(IC.bed)}${esc(c.labels?.aboutHotel || 'About the hotel')}</div>
             ${svg(IC.chev)}
           </button>
           <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
