@@ -1,7 +1,16 @@
 /**
- * Travelgenix My Booking Widget v1.3.0
+ * Travelgenix My Booking Widget v1.3.1
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.3.1 changes:
+ *   - Container-driven narrow layout: when the widget's container is < 440px wide
+ *     (e.g. embedded in the Luna chat bubble), a `tgm-narrow` class is applied to
+ *     the widget root and parallel CSS rules stack the previously side-by-side
+ *     sections (action row, accommodation grid, payment + travellers, flight legs).
+ *   - Existing viewport @media rules left untouched, so behaviour at standalone
+ *     widget sizes is unchanged. ResizeObserver is feature-detected and falls
+ *     back to a one-shot width check on browsers without it.
  *
  * v1.3.0 changes:
  *   - Email action: customer can email their booking pack from the page
@@ -66,7 +75,7 @@
   const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || (API_BASE + '/api/retrieve-order');
   const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || (API_BASE + '/api/booking-pdf');
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
-  const VERSION = '1.3.0';
+  const VERSION = '1.3.1';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -647,6 +656,54 @@
       .tgm-toast-stack { left: 16px; right: 16px; max-width: none; }
       .tgm-toast { min-width: 0; }
     }
+
+    /* ─── Narrow-container layout (Luna chat embed, < 440px container width) ───
+       Container-driven, not viewport-driven. Applied via JS when ResizeObserver
+       detects the widget's container dropping below the threshold. Mirrors the
+       existing @media (max-width: 480/760/780px) rules so a narrow embed on a
+       wide viewport gets the same stacked treatment a mobile viewport does. */
+    .tgm-root.tgm-narrow .tgm-hero { height: 220px; border-radius: var(--tgm-radius-xl); margin-bottom: 12px; }
+    .tgm-root.tgm-narrow .tgm-hero-content { padding: 16px; }
+    .tgm-root.tgm-narrow .tgm-hero-name { font-size: 22px; line-height: 1.1; }
+    .tgm-root.tgm-narrow .tgm-hero-loc { font-size: 13px; }
+    .tgm-root.tgm-narrow .tgm-hero-thumbs { display: none; }
+    .tgm-root.tgm-narrow .tgm-hero-rating { gap: 6px; }
+    .tgm-root.tgm-narrow .tgm-review-chip { font-size: 11px; padding: 3px 8px; }
+
+    .tgm-root.tgm-narrow .tgm-greeting { flex-direction: column; align-items: flex-start; padding: 14px 16px; gap: 8px; }
+    .tgm-root.tgm-narrow .tgm-greeting-text { font-size: 14px; line-height: 1.4; }
+
+    .tgm-root.tgm-narrow .tgm-action-row { grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
+    .tgm-root.tgm-narrow .tgm-action { padding: 12px 14px; gap: 12px; }
+    .tgm-root.tgm-narrow .tgm-action-icon { width: 36px; height: 36px; }
+    .tgm-root.tgm-narrow .tgm-action-icon svg { width: 16px; height: 16px; }
+    .tgm-root.tgm-narrow .tgm-action-arrow { display: none; }
+    .tgm-root.tgm-narrow .tgm-action-title { font-size: 14px; }
+    .tgm-root.tgm-narrow .tgm-action-sub { font-size: 11px; }
+
+    .tgm-root.tgm-narrow .tgm-stay { padding: 16px; }
+    .tgm-root.tgm-narrow .tgm-stay h3 { font-size: 15px; flex-wrap: wrap; }
+    .tgm-root.tgm-narrow .tgm-stay h3 .tgm-stay-meta { margin-left: 0; flex-basis: 100%; margin-top: 2px; font-size: 12px; }
+    .tgm-root.tgm-narrow .tgm-stay-grid { grid-template-columns: 1fr 1fr; gap: 14px 12px; }
+    .tgm-root.tgm-narrow .tgm-stay-cell { padding: 0; border-right: none; }
+    .tgm-root.tgm-narrow .tgm-stay-cell:nth-child(odd) { border-right: 1px solid var(--tgm-border-light); padding-right: 12px; }
+    .tgm-root.tgm-narrow .tgm-stay-value { font-size: 16px; }
+    .tgm-root.tgm-narrow .tgm-stay-sub { font-size: 12px; }
+
+    .tgm-root.tgm-narrow .tgm-two { grid-template-columns: 1fr; gap: 12px; }
+    .tgm-root.tgm-narrow .tgm-section { padding: 16px; }
+    .tgm-root.tgm-narrow .tgm-section h3 { font-size: 15px; }
+    .tgm-root.tgm-narrow .tgm-pay-total-amt { font-size: 22px; }
+
+    .tgm-root.tgm-narrow .tgm-leg-route { grid-template-columns: 1fr; gap: 10px; text-align: center; }
+    .tgm-root.tgm-narrow .tgm-seg { grid-template-columns: 48px 1fr 48px; gap: 8px; font-size: 12px; }
+    .tgm-root.tgm-narrow .tgm-kv { grid-template-columns: 1fr; gap: 4px 0; font-size: 13px; }
+    .tgm-root.tgm-narrow .tgm-kv > div + div { margin-top: 8px; }
+
+    .tgm-root.tgm-narrow .tgm-pdf-viewer-frame { height: 600px; }
+
+    .tgm-root.tgm-narrow .tgm-modal { padding: 0; align-items: flex-end; }
+    .tgm-root.tgm-narrow .tgm-modal-card { max-width: 100%; width: 100%; border-radius: var(--tgm-radius-xl) var(--tgm-radius-xl) 0 0; max-height: 92vh; }
   `;
 
   // ----- Templates -----
@@ -1419,6 +1476,16 @@
     `;
   }
 
+  // Width below which the booking summary stacks instead of side-by-side.
+  // 440px chosen because:
+  //   - The Luna chat bubble is ~340px on desktop and ~300px on mobile — both well under.
+  //   - Standalone My Booking demo at default sizing is ~700px+ — well over.
+  //   - Mobile devices already hit the existing @media (max-width: 480px) rule first,
+  //     and most of those rules already match what tgm-narrow does, so layout stays consistent.
+  const NARROW_THRESHOLD_PX = 440;
+  // Hysteresis to stop flicker when the container width sits right on the threshold.
+  const NARROW_HYSTERESIS_PX = 16;
+
   // ----- Widget class -----
 
   class TGMyBookingWidget {
@@ -1434,7 +1501,49 @@
       this._pdfViewerOpen = false;
       this._emailModalOpen = false;  // tracks email composer modal visibility
       this._emailEscHandler = null;  // document-level Esc listener for modal
+      this._narrow = false;          // container-width-driven narrow layout flag
+      this._resizeObserver = null;
+      this._initNarrowObserver();    // sets _narrow before first render so no flash
       this._render();
+    }
+
+    _initNarrowObserver() {
+      // Compute the initial value synchronously so _render gets it right
+      // first time. ResizeObserver only delivers the first callback async,
+      // which would otherwise cause a one-frame flash of the wide layout.
+      try {
+        const w = this.el.getBoundingClientRect().width;
+        if (w > 0) this._narrow = w < NARROW_THRESHOLD_PX;
+      } catch (_) { /* element not yet in DOM — observer will catch it */ }
+
+      if (typeof ResizeObserver === 'undefined') return;
+      try {
+        this._resizeObserver = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const w = entry.contentRect ? entry.contentRect.width : 0;
+            if (w <= 0) continue;
+            // Hysteresis: switching to narrow is at < threshold,
+            // switching back to wide requires width >= threshold + hysteresis.
+            const nextNarrow = this._narrow
+              ? w < (NARROW_THRESHOLD_PX + NARROW_HYSTERESIS_PX)
+              : w < NARROW_THRESHOLD_PX;
+            if (nextNarrow !== this._narrow) {
+              this._narrow = nextNarrow;
+              this._applyNarrow();
+            }
+          }
+        });
+        this._resizeObserver.observe(this.el);
+      } catch (_) { /* obscure browser failure — fall back to initial-only sizing */ }
+    }
+
+    _applyNarrow() {
+      // Toggle the class on the already-rendered .tgm-root without doing a
+      // full re-render — the inner HTML doesn't change, only its layout does.
+      const root = this.shadow && this.shadow.querySelector('.tgm-root');
+      if (!root) return;
+      if (this._narrow) root.classList.add('tgm-narrow');
+      else root.classList.remove('tgm-narrow');
     }
 
     _defaults(c) {
@@ -1534,7 +1643,8 @@
         }
       }
 
-      this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root"' + themeAttr + ' style="' + overrides + '">' + inner + '</div>';
+      const narrowAttr = this._narrow ? ' tgm-narrow' : '';
+      this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root' + narrowAttr + '"' + themeAttr + ' style="' + overrides + '">' + inner + '</div>';
       this._bind();
     }
 
@@ -2196,6 +2306,10 @@
           this._emailEscHandler = null;
         }
         this._emailModalOpen = false;
+        if (this._resizeObserver) {
+          try { this._resizeObserver.disconnect(); } catch (_) {}
+          this._resizeObserver = null;
+        }
         this.shadow.innerHTML = '';
       } catch {}
     }
