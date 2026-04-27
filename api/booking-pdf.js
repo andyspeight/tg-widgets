@@ -371,8 +371,21 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const ip = getClientIp(req);
-  const ipLimit = rateLimit(`pdf:ip:${ip}`, 5);
+  // Internal-call detection. /api/booking-email calls this endpoint server-to-
+  // server to get the PDF for an outgoing email. Those calls come from the
+  // Vercel function's egress IP — if we rate-limited by that IP, every email
+  // user across the platform would share a tiny bucket. Instead, when the
+  // shared secret header matches, we trust the X-TG-Real-IP header for rate
+  // limiting and apply a higher per-IP cap (the email endpoint already
+  // rate-limits the user, so this is just a backstop).
+  const isInternalCall = !!process.env.TG_INTERNAL_KEY
+    && req.headers['x-tg-internal-key'] === process.env.TG_INTERNAL_KEY;
+
+  const realIp = isInternalCall && typeof req.headers['x-tg-real-ip'] === 'string'
+    ? req.headers['x-tg-real-ip']
+    : getClientIp(req);
+
+  const ipLimit = rateLimit(`pdf:ip:${realIp}`, isInternalCall ? 30 : 5);
   if (!ipLimit.ok) {
     return res.status(429).json({ error: 'too_many_attempts', retryAfterMs: ipLimit.retryAfterMs });
   }
@@ -391,7 +404,7 @@ export default async function handler(req, res) {
 
   if (!widgetId || !emailAddress || !departDate || !orderRef) return notFound(res);
 
-  const widgetLimit = rateLimit(`pdf:ipw:${ip}:${widgetId}`, 30);
+  const widgetLimit = rateLimit(`pdf:ipw:${realIp}:${widgetId}`, 30);
   if (!widgetLimit.ok) {
     return res.status(429).json({ error: 'too_many_attempts', retryAfterMs: widgetLimit.retryAfterMs });
   }
