@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Logo Showcase — Travelgenix Widget Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC;
+    color: #0F172A;
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Demo header */
+  .demo-bar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.85);
+  }
+  .demo-bar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .demo-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #0F172A;
+  }
+  .demo-brand-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #0891B2 0%, #6366F1 100%);
+  }
+  .demo-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .demo-pill {
+    appearance: none; border: 1px solid #E2E8F0; background: #fff;
+    color: #475569; font: inherit; font-size: 13px; font-weight: 500;
+    padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .demo-pill:hover { background: #F1F5F9; color: #0F172A; }
+  .demo-pill[aria-pressed="true"] {
+    background: #0F172A; color: #fff; border-color: #0F172A;
+  }
+  .demo-divider { width: 1px; height: 20px; background: #E2E8F0; margin: 0 4px; }
+
+  /* Mock client site */
+  .mock-site { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+  .mock-hero {
+    text-align: center; padding: 48px 24px 64px;
+  }
+  .mock-hero h1 {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    color: #0F172A;
+  }
+  .mock-hero p {
+    font-size: 17px;
+    color: #64748B;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Widget container */
+  .widget-stage {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  }
+  body.is-dark { background: #020617; color: #F1F5F9; }
+  body.is-dark .demo-bar { background: rgba(15, 23, 42, 0.85); border-color: #1E293B; }
+  body.is-dark .demo-brand { color: #F1F5F9; }
+  body.is-dark .demo-pill { background: #1E293B; border-color: #334155; color: #94A3B8; }
+  body.is-dark .demo-pill:hover { background: #334155; color: #F1F5F9; }
+  body.is-dark .demo-pill[aria-pressed="true"] { background: #F1F5F9; color: #0F172A; border-color: #F1F5F9; }
+  body.is-dark .demo-divider { background: #334155; }
+  body.is-dark .mock-hero h1 { color: #F1F5F9; }
+  body.is-dark .mock-hero p { color: #94A3B8; }
+  body.is-dark .widget-stage { background: #0F172A; border-color: #1E293B; }
+
+  .demo-footer {
+    text-align: center; margin-top: 48px;
+    font-size: 13px; color: #94A3B8;
+  }
+  .demo-footer a { color: #0891B2; text-decoration: none; font-weight: 500; }
+  .demo-footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header class="demo-bar">
+  <div class="demo-bar-inner">
+    <div class="demo-brand">
+      <div class="demo-brand-mark"></div>
+      <span>Logo Showcase Demo</span>
+    </div>
+    <div class="demo-controls" role="toolbar" aria-label="Demo controls">
+      <button class="demo-pill" data-layout="grid" aria-pressed="true">Grid</button>
+      <button class="demo-pill" data-layout="strip" aria-pressed="false">Strip</button>
+      <button class="demo-pill" data-layout="marquee" aria-pressed="false">Marquee</button>
+      <button class="demo-pill" data-layout="spotlight" aria-pressed="false">Spotlight</button>
+      <span class="demo-divider"></span>
+      <button class="demo-pill" id="grayscale-toggle" aria-pressed="true">Grayscale</button>
+      <button class="demo-pill" id="theme-toggle" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main class="mock-site">
+  <section class="mock-hero">
+    <h1>Sunshine Holidays</h1>
+    <p>Tailor-made holidays from Bournemouth's friendliest travel team. ATOL-protected, ABTA-bonded, and trusted by thousands.</p>
+  </section>
+
+  <section class="widget-stage">
+    <div id="logos-mount"></div>
+  </section>
+
+  <p class="demo-footer">
+    A <a href="/">Travelgenix Widget Suite</a> demonstration · <a href="/editor-logos">Open in Editor</a>
+  </p>
+</main>
+
+<script>
+  // Sample logos — using high-quality SVG/PNG sources for demo only
+  const SAMPLE_LOGOS = [
+    {
+      name: 'ABTA',
+      image: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/ABTA_Logo.svg/320px-ABTA_Logo.svg.png',
+      url: 'https://www.abta.com',
+      group: 'Accreditations',
+      featured: true,
+      alt: 'ABTA — The Travel Association'
+    },
+    {
+      name: 'ATOL Protected',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ATOL_Logo.svg/320px-ATOL_Logo.svg.png',
+      url: 'https://www.caa.co.uk/atol-protection/',
+      group: 'Accreditations',
+      alt: 'ATOL Protected'
+    },
+    {
+      name: 'IATA',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IATA_logo.svg/320px-IATA_logo.svg.png',
+      url: 'https://www.iata.org',
+      group: 'Accreditations',
+      alt: 'IATA'
+    },
+    {
+      name: 'TUI',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/TUI_Logo_neu.svg/320px-TUI_Logo_neu.svg.png',
+      url: 'https://www.tui.co.uk',
+      group: 'Suppliers',
+      alt: 'TUI Holidays'
+    },
+    {
+      name: 'Jet2 Holidays',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Jet2.com_logo.svg/320px-Jet2.com_logo.svg.png',
+      url: 'https://www.jet2holidays.com',
+      group: 'Suppliers',
+      alt: 'Jet2 Holidays'
+    },
+    {
+      name: 'British Airways',
+      image: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/42/British_Airways_Logo.svg/320px-British_Airways_Logo.svg.png',
+      url: 'https://www.britishairways.com',
+      group: 'Suppliers',
+      alt: 'British Airways'
+    },
+    {
+      name: 'Emirates',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Emirates_logo.svg/320px-Emirates_logo.svg.png',
+      url: 'https://www.emirates.com',
+      group: 'Suppliers',
+      alt: 'Emirates'
+    },
+    {
+      name: 'Trustpilot',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Trustpilot_logo_%282022%29.svg/320px-Trustpilot_logo_%282022%29.svg.png',
+      url: 'https://www.trustpilot.com',
+      group: 'Reviews',
+      alt: 'Trustpilot'
+    },
+  ];
+
+  function buildConfig(layout) {
+    const base = {
+      layout: layout,
+      columns: 4,
+      marqueeSpeed: 35,
+      grayscale: document.getElementById('grayscale-toggle').getAttribute('aria-pressed') === 'true',
+      showHeading: true,
+      eyebrow: 'Trusted by the best',
+      title: 'Our partners and accreditations',
+      subtitle: 'We work with the UK\u2019s most trusted travel suppliers and hold every accreditation that matters.',
+      showCaptions: layout === 'grid',
+      showFilters: false,
+      logos: SAMPLE_LOGOS,
+      theme: {
+        mode: document.body.classList.contains('is-dark') ? 'dark' : 'light',
+        brand: '#0891B2',
+        accent: '#6366F1',
+        radius: 16
+      }
+    };
+    if (layout === 'spotlight') {
+      base.spotlightTagline = 'Member of ABTA \u2014 the UK\u2019s leading travel association, giving you peace of mind on every booking.';
+      base.spotlightCta = 'Verify our membership';
+    }
+    return base;
+  }
+
+  let widget = null;
+  let currentLayout = 'grid';
+
+  function mount() {
+    const host = document.getElementById('logos-mount');
+    host.innerHTML = '<div data-tg-widget="logos"></div>';
+    const inner = host.querySelector('[data-tg-widget="logos"]');
+    inner.setAttribute('data-tg-config', JSON.stringify(buildConfig(currentLayout)));
+    if (window.TGLogosWidget) {
+      widget = new window.TGLogosWidget(inner, buildConfig(currentLayout));
+    }
+  }
+
+  document.querySelectorAll('.demo-pill[data-layout]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.demo-pill[data-layout]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      btn.setAttribute('aria-pressed', 'true');
+      currentLayout = btn.getAttribute('data-layout');
+      mount();
+    });
+  });
+
+  document.getElementById('grayscale-toggle').addEventListener('click', e => {
+    const pressed = e.currentTarget.getAttribute('aria-pressed') === 'true';
+    e.currentTarget.setAttribute('aria-pressed', String(!pressed));
+    mount();
+  });
+
+  document.getElementById('theme-toggle').addEventListener('click', e => {
+    const pressed = e.currentTarget.getAttribute('aria-pressed') === 'true';
+    e.currentTarget.setAttribute('aria-pressed', String(!pressed));
+    document.body.classList.toggle('is-dark');
+    mount();
+  });
+
+  // Mount once the widget script is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.TGLogosWidget) mount();
+    else {
+      const check = setInterval(() => {
+        if (window.TGLogosWidget) { clearInterval(check); mount(); }
+      }, 50);
+    }
+  });
+</script>
+<script src="/widget-logos.js"></script>
+
+</body>
+</html>
