@@ -811,6 +811,47 @@
               </div>
             </div>
           </div>
+
+          <div class="sec is-open">
+            <button class="sec-head" type="button"><span class="sec-title">Wow effects</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Sliding digits</div>
+                  <div class="toggle-sub">Numbers slide up reel-style on change. Reduced-motion users get an instant swap.</div>
+                </div>
+                <button class="toggle is-on" data-toggle="wowSliding" type="button" aria-label="Toggle sliding digits"></button>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Brand glow</div>
+                  <div class="toggle-sub">Soft brand-coloured shadow under each digit cell. Lifts on urgency.</div>
+                </div>
+                <button class="toggle is-on" data-toggle="wowGlow" type="button" aria-label="Toggle brand glow"></button>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Final-minute ring</div>
+                  <div class="toggle-sub">SVG progress ring around the seconds cell during the final 60 seconds.</div>
+                </div>
+                <button class="toggle is-on" data-toggle="wowRing" type="button" aria-label="Toggle final-minute ring"></button>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Hero aurora</div>
+                  <div class="toggle-sub">Animated brand-tinted aurora background on the Hero layout only.</div>
+                </div>
+                <button class="toggle is-on" data-toggle="wowAurora" type="button" aria-label="Toggle hero aurora"></button>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Banner pulse dot</div>
+                  <div class="toggle-sub">Pulsing dot beside the heading on the Banner layout only.</div>
+                </div>
+                <button class="toggle is-on" data-toggle="wowDot" type="button" aria-label="Toggle banner pulse dot"></button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- CONTENT TAB -->
@@ -1116,6 +1157,14 @@
         repeating: { enabled: false, frequency: 'weekly', dayOfWeek: 5, time: '17:00' },
         urgency: { enabled: true, thresholdHours: 24 },
         animation: { tick: true },
+        wow: {
+          slidingDigits: true,
+          gradientCells: true,
+          glow: true,
+          finalMinuteRing: true,
+          heroAurora: true,
+          bannerDot: true
+        },
         colours: {
           brand: '#1B2B5B',
           accent: '#00B4D8',
@@ -1266,6 +1315,13 @@
       setToggle('showHours', cfg.display.showHours);
       setToggle('showMinutes', cfg.display.showMinutes);
       setToggle('showSeconds', cfg.display.showSeconds);
+      // Wow effects
+      const w = cfg.wow || {};
+      setToggle('wowSliding', w.slidingDigits);
+      setToggle('wowGlow',    w.glow);
+      setToggle('wowRing',    w.finalMinuteRing);
+      setToggle('wowAurora',  w.heroAurora);
+      setToggle('wowDot',     w.bannerDot);
     }
 
     function setToggle(name, on) {
@@ -1396,6 +1452,12 @@
           if (k === 'showHours')   cfg.display.showHours = on;
           if (k === 'showMinutes') cfg.display.showMinutes = on;
           if (k === 'showSeconds') cfg.display.showSeconds = on;
+          // Wow effects — guard cfg.wow for older saved configs
+          if (k === 'wowSliding') { (cfg.wow = cfg.wow || {}).slidingDigits   = on; }
+          if (k === 'wowGlow')    { (cfg.wow = cfg.wow || {}).glow            = on; }
+          if (k === 'wowRing')    { (cfg.wow = cfg.wow || {}).finalMinuteRing = on; }
+          if (k === 'wowAurora')  { (cfg.wow = cfg.wow || {}).heroAurora      = on; }
+          if (k === 'wowDot')     { (cfg.wow = cfg.wow || {}).bannerDot       = on; }
           rebuild(); snapshot();
         });
       });
@@ -1699,7 +1761,7 @@
         if (data && data.config) {
           cfg = Object.assign(defaultsCfg(), data.config);
           // Deep merge nested keys
-          ['cta','expiry','display','repeating','urgency','animation','colours'].forEach(k => {
+          ['cta','expiry','display','repeating','urgency','animation','wow','colours'].forEach(k => {
             cfg[k] = Object.assign(defaultsCfg()[k], data.config[k] || {});
           });
           widgetId = data.id || id;
