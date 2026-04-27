@@ -74,7 +74,11 @@ async function listActiveIntegrations(clientEmail, service) {
 }
 
 async function createIntegration(fields) {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${TABLE_ID}`;
+  // returnFieldsByFieldId=true keeps the response shape consistent with the
+  // list/read path so publicShape() can index by field ID. Without this the
+  // response is keyed by field NAME, and the editor sees status:null and
+  // re-renders the empty form even though the record was created.
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${TABLE_ID}?returnFieldsByFieldId=true`;
   const res = await fetch(url, {
     method: 'POST',
     headers: airtableHeaders(),
@@ -92,7 +96,9 @@ async function createIntegration(fields) {
 }
 
 async function updateIntegration(recordId, fields) {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${TABLE_ID}`;
+  // See createIntegration: returnFieldsByFieldId=true keeps the response
+  // shape consistent with the list path.
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${TABLE_ID}?returnFieldsByFieldId=true`;
   const res = await fetch(url, {
     method: 'PATCH',
     headers: airtableHeaders(),
