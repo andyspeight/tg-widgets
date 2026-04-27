@@ -7,9 +7,8 @@
       "includeFiles": "node_modules/@sparticuz/chromium/**"
     },
     "api/booking-email.js": {
-      "memory": 1024,
-      "maxDuration": 30,
-      "includeFiles": "node_modules/@sparticuz/chromium/**"
+      "memory": 512,
+      "maxDuration": 30
     }
   },
   "rewrites": [
