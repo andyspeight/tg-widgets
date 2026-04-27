@@ -20,7 +20,7 @@
  *   Table: tblpzQpwmcTvUeHcF (ClientIntegrations)
  */
 
-import { requireAuth, sanitiseForFormula, setCors } from './_auth.js';
+import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { encrypt } from './_crypto.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
@@ -167,14 +167,20 @@ export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  let auth;
-  try {
-    auth = await requireAuth(req);
-  } catch {
-    return res.status(401).json({ error: 'Unauthorised' });
-  }
-  const clientEmail = (auth.email || '').toLowerCase().trim();
-  if (!clientEmail) return res.status(401).json({ error: 'Unauthorised' });
+  // Auth — same pattern as widget-list.js, widget-config.js, widget-ai.js
+  const auth = requireAuth(req);
+  if (auth.error) return res.status(auth.status).json({ error: auth.error });
+  const user = auth.user;
+
+  const clientEmail = (user.email || '').toLowerCase().trim();
+  if (!clientEmail) return res.status(401).json({ error: 'Authentication required' });
+
+  // Rate limit per user. Reads are generous (dashboard refreshes), writes moderate.
+  const rlKey = req.method === 'GET'
+    ? `integrations-read:${clientEmail}`
+    : `integrations-write:${clientEmail}`;
+  const rlLimit = req.method === 'GET' ? RATE_LIMITS.widgetRead : RATE_LIMITS.widgetWrite;
+  if (!applyRateLimit(res, rlKey, rlLimit)) return;
 
   try {
     if (req.method === 'GET') {
