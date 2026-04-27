@@ -695,7 +695,9 @@
     .tgm-root.tgm-narrow .tgm-section h3 { font-size: 15px; }
     .tgm-root.tgm-narrow .tgm-pay-total-amt { font-size: 22px; }
 
-    .tgm-root.tgm-narrow .tgm-leg-route { grid-template-columns: 1fr; gap: 10px; text-align: center; }
+    .tgm-root.tgm-narrow .tgm-leg-route { grid-template-columns: 1fr; gap: 12px; }
+    .tgm-root.tgm-narrow .tgm-leg-end.dest { text-align: left; }
+    .tgm-root.tgm-narrow .tgm-leg-line { transform: rotate(90deg); height: 24px; min-width: 0; width: 24px; align-self: center; }
     .tgm-root.tgm-narrow .tgm-seg { grid-template-columns: 48px 1fr 48px; gap: 8px; font-size: 12px; }
     .tgm-root.tgm-narrow .tgm-kv { grid-template-columns: 1fr; gap: 4px 0; font-size: 13px; }
     .tgm-root.tgm-narrow .tgm-kv > div + div { margin-top: 8px; }
