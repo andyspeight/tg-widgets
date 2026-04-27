@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Countdown · Wow Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F7F8FA;
+      --panel: #FFFFFF;
+      --text: #0F172A;
+      --sub: #475569;
+      --muted: #94A3B8;
+      --border: #E2E8F0;
+      --brand: #1B2B5B;
+      --accent: #00B4D8;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+    a { color: var(--accent); }
+
+    /* Top bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 30;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: saturate(180%) blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 1320px; margin: 0 auto;
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .brand-mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 15px; color: var(--text);
+      text-decoration: none;
+    }
+    .pill {
+      font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 999px;
+      background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+      color: #fff;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .topbar-spacer { flex: 1; }
+    .topbar-link {
+      font-size: 13px; font-weight: 500; color: var(--sub);
+      text-decoration: none;
+      padding: 6px 10px; border-radius: 8px;
+    }
+    .topbar-link:hover { color: var(--text); background: var(--bg); }
+
+    /* Page intro */
+    .wrap { max-width: 1320px; margin: 0 auto; padding: 32px 24px 80px; }
+    h1 {
+      font-size: 32px; font-weight: 700; letter-spacing: -.02em;
+      margin: 0 0 8px;
+    }
+    .lede {
+      font-size: 16px; color: var(--sub);
+      margin: 0 0 28px; max-width: 720px;
+    }
+
+    /* Master controls */
+    .controls {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+    }
+    .ctrl-block { min-width: 0; }
+    .ctrl-label {
+      display: block;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .toggles { display: grid; gap: 8px; }
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; cursor: pointer; user-select: none;
+    }
+    .toggle-name { font-size: 13px; color: var(--text); }
+    .toggle {
+      position: relative;
+      width: 32px; height: 18px;
+      background: var(--border);
+      border-radius: 999px;
+      transition: background .2s ease;
+      flex-shrink: 0;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,.15);
+    }
+    .toggle.is-on { background: #10B981; }
+    .toggle.is-on::after { transform: translateX(14px); }
+
+    .ctrl-btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ctrl-btn {
+      appearance: none; border: 1px solid var(--border);
+      background: var(--panel); color: var(--text);
+      padding: 7px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 500;
+      cursor: pointer; font-family: inherit;
+    }
+    .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ctrl-btn.is-active {
+      background: var(--brand); border-color: var(--brand); color: #fff;
+    }
+    .target-display {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      font-size: 12px; color: var(--sub);
+      padding: 8px 10px; background: var(--bg); border-radius: 8px;
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    /* Showcase grid */
+    .showcase {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 1100px) { .showcase { grid-template-columns: 1fr; } }
+    .show-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+      position: relative;
+      min-height: 200px;
+    }
+    .show-card.full { grid-column: 1 / -1; }
+    .show-label {
+      position: absolute;
+      top: -10px; left: 16px;
+      background: var(--panel);
+      padding: 0 8px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .show-card.dark {
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+      border-color: #334155;
+    }
+    .show-card.dark .show-label {
+      background: #1E293B;
+      color: #94A3B8;
+    }
+    .show-inline {
+      font-size: 16px; line-height: 1.7; color: var(--sub);
+      padding: 8px 0;
+    }
+
+    /* Notes grid */
+    .notes {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+    }
+    .notes h3 {
+      font-size: 14px; font-weight: 700; margin: 0 0 14px;
+      letter-spacing: -.01em;
+    }
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .note {
+      padding: 12px 14px;
+      background: var(--bg);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .note-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .note-body { font-size: 12px; color: var(--sub); line-height: 1.5; }
+
+    .foot {
+      max-width: 1320px; margin: 0 auto; padding: 20px 24px 24px;
+      text-align: center; font-size: 13px; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark"></span>
+        <span>Travelgenix</span>
+      </a>
+      <span class="pill">Countdown · Wow Showcase</span>
+      <div class="topbar-spacer"></div>
+      <a class="topbar-link" href="/demo-countdown">Demo →</a>
+      <a class="topbar-link" href="/editor-countdown">Editor →</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>Countdown — wow effects, all on one page</h1>
+    <p class="lede">
+      Every wow effect, every layout, side-by-side. Toggle effects on and off in real time. The "force final minute" and "force urgency" buttons skip ahead so you don't have to wait — you can see the progress ring drain and the urgency pulse without sitting through a real timer.
+    </p>
+
+    <div class="controls" role="region" aria-label="Showcase controls">
+      <div class="ctrl-block">
+        <span class="ctrl-label">Wow effects</span>
+        <div class="toggles" id="wowToggles">
+          <label class="toggle-row" data-wow="slidingDigits"><span class="toggle-name">Sliding digits</span><span class="toggle is-on"></span></label>
+          <label class="toggle-row" data-wow="gradientCells"><span class="toggle-name">Gradient cells</span><span class="toggle is-on"></span></label>
+          <label class="toggle-row" data-wow="glow"><span class="toggle-name">Brand glow</span><span class="toggle is-on"></span></label>
+          <label class="toggle-row" data-wow="finalMinuteRing"><span class="toggle-name">Final-minute ring</span><span class="toggle is-on"></span></label>
+          <label class="toggle-row" data-wow="heroAurora"><span class="toggle-name">Hero aurora</span><span class="toggle is-on"></span></label>
+          <label class="toggle-row" data-wow="bannerDot"><span class="toggle-name">Banner dot</span><span class="toggle is-on"></span></label>
+        </div>
+      </div>
+
+      <div class="ctrl-block">
+        <span class="ctrl-label">Force scenarios</span>
+        <div class="ctrl-btn-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <button class="ctrl-btn" id="setT3w">Default (T+3 weeks)</button>
+          <button class="ctrl-btn" id="setT12h">Urgency mode (T+12h)</button>
+          <button class="ctrl-btn" id="setT45s">Final minute (T+45s)</button>
+        </div>
+        <div class="target-display" id="targetDisplay">--</div>
+      </div>
+
+      <div class="ctrl-block">
+        <span class="ctrl-label">Theme</span>
+        <div class="ctrl-btn-row">
+          <button class="ctrl-btn is-active" data-theme="light">Light</button>
+          <button class="ctrl-btn" data-theme="dark">Dark</button>
+        </div>
+      </div>
+
+      <div class="ctrl-block">
+        <span class="ctrl-label">Brand colour</span>
+        <div class="ctrl-btn-row" id="paletteRow">
+          <button class="ctrl-btn is-active" data-palette="travelgenix" style="background:linear-gradient(135deg,#1B2B5B,#00B4D8);color:#fff;border-color:transparent">Travelgenix</button>
+          <button class="ctrl-btn" data-palette="sunset" style="background:linear-gradient(135deg,#9A3412,#F97316);color:#fff;border-color:transparent">Sunset</button>
+          <button class="ctrl-btn" data-palette="forest" style="background:linear-gradient(135deg,#14532D,#10B981);color:#fff;border-color:transparent">Forest</button>
+          <button class="ctrl-btn" data-palette="coral" style="background:linear-gradient(135deg,#9F1239,#F43F5E);color:#fff;border-color:transparent">Coral</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero showcase, full width -->
+    <div class="showcase">
+      <div class="show-card full" id="show-hero">
+        <span class="show-label">Hero · The showpiece</span>
+        <div id="host-hero"></div>
+      </div>
+    </div>
+
+    <!-- Card + Banner -->
+    <div class="showcase">
+      <div class="show-card" id="show-card">
+        <span class="show-label">Card · Default</span>
+        <div id="host-card"></div>
+      </div>
+      <div class="show-card" id="show-banner">
+        <span class="show-label">Banner · Ticker style</span>
+        <div id="host-banner"></div>
+      </div>
+    </div>
+
+    <!-- Inline -->
+    <div class="showcase">
+      <div class="show-card full" id="show-inline">
+        <span class="show-label">Inline · Invisible chrome</span>
+        <p class="show-inline">
+          Don't miss out — <span id="host-inline"></span> before the season closes. New offers drop every week, and our team can hold a quote for you while you decide.
+        </p>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h3>What you're looking at</h3>
+      <div class="notes-grid">
+        <div class="note">
+          <div class="note-title">Sliding digits</div>
+          <div class="note-body">When a digit changes, the old number slides up and out, the new one slides up into place. Departure-board energy, no flip-card cliché.</div>
+        </div>
+        <div class="note">
+          <div class="note-title">Gradient cells</div>
+          <div class="note-body">Each digit cell uses a brand-tinted vertical gradient instead of a flat colour. Subtle on its own, premium-feeling in aggregate.</div>
+        </div>
+        <div class="note">
+          <div class="note-title">Brand glow</div>
+          <div class="note-body">A soft, brand-coloured shadow under each cell. Adds depth without becoming neon.</div>
+        </div>
+        <div class="note">
+          <div class="note-title">Final-minute ring</div>
+          <div class="note-body">When ≤60 seconds remain, an SVG progress ring traces around the seconds cell, draining as time runs out. Click "Final minute" above to see it.</div>
+        </div>
+        <div class="note">
+          <div class="note-title">Hero aurora</div>
+          <div class="note-body">A slow-moving brand-coloured radial gradient behind the Hero layout only. ~18s cycle, low opacity, fully respects reduced-motion preference.</div>
+        </div>
+        <div class="note">
+          <div class="note-title">Banner dot</div>
+          <div class="note-body">A pulsing dot next to the Banner heading — the universal "live, in progress" signal. Live tickers everywhere use it.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    Travelgenix Widget Suite · <a href="/" style="color:inherit">All widgets</a>
+  </footer>
+
+  <script src="/widget-countdown.js"></script>
+  <script>
+    (function () {
+      // State
+      const wow = {
+        slidingDigits: true,
+        gradientCells: true,   // (purely informational — gradients are part of the digit cell baseline; toggling this flips a class for visual A/B)
+        glow: true,
+        finalMinuteRing: true,
+        heroAurora: true,
+        bannerDot: true
+      };
+
+      const PALETTES = {
+        travelgenix: { brand: '#1B2B5B', accent: '#00B4D8', card: '#FFFFFF', text: '#0F172A', digitBg: '#F8FAFC' },
+        sunset:      { brand: '#9A3412', accent: '#F97316', card: '#FFFBEB', text: '#1F2937', digitBg: '#FEF3C7' },
+        forest:      { brand: '#14532D', accent: '#10B981', card: '#FFFFFF', text: '#0F172A', digitBg: '#ECFDF5' },
+        coral:       { brand: '#9F1239', accent: '#F43F5E', card: '#FFFFFF', text: '#0F172A', digitBg: '#FFF1F2' }
+      };
+      const DARK_PALETTE = { card: '#1E293B', text: '#F1F5F9', digitBg: '#0F172A' };
+
+      let theme = 'light';
+      let palette = 'travelgenix';
+      let targetDate = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString();
+
+      // Instances
+      const instances = {};
+
+      function colours() {
+        const base = PALETTES[palette];
+        if (theme === 'dark') {
+          return { ...base, ...DARK_PALETTE, ctaBg: base.accent, ctaText: '#0F172A' };
+        }
+        return { ...base, ctaBg: '', ctaText: '#FFFFFF' };
+      }
+
+      function buildOne(host, layout, headingText, subhText, ctaText) {
+        if (!host) return;
+        // Wipe previous instance
+        if (instances[layout]) { try { instances[layout].destroy(); } catch {} }
+        // Replace host element each time so a new shadow root is created cleanly
+        const fresh = document.createElement(layout === 'inline' ? 'span' : 'div');
+        fresh.id = host.id;
+        host.replaceWith(fresh);
+        const cfg = {
+          layout: layout,
+          theme: theme,
+          targetDate: targetDate,
+          heading: headingText,
+          subheading: subhText,
+          cta: ctaText ? { text: ctaText, url: '#', openInNewTab: false } : { text: '', url: '' },
+          display: { showDays: true, showHours: true, showMinutes: true, showSeconds: true },
+          urgency: { enabled: true, thresholdHours: 24 },
+          animation: { tick: true },
+          wow: { ...wow },
+          colours: colours(),
+          radius: 14
+        };
+        instances[layout] = new window.TGCountdownWidget(fresh, cfg);
+      }
+
+      function rebuildAll() {
+        // Update background of cards based on theme
+        document.querySelectorAll('.show-card').forEach((c) => {
+          if (theme === 'dark') c.classList.add('dark'); else c.classList.remove('dark');
+        });
+
+        buildOne(
+          document.getElementById('host-hero'), 'hero',
+          'Summer sale ends in',
+          'Save up to 40% on package holidays. Limited departures, limited time.',
+          'Browse offers'
+        );
+        buildOne(
+          document.getElementById('host-card'), 'card',
+          'Sale ends in',
+          'Save up to 40% across our top-selling Mediterranean destinations.',
+          'View deals'
+        );
+        buildOne(
+          document.getElementById('host-banner'), 'banner',
+          'Black Friday flash sale',
+          '',
+          'Shop deals'
+        );
+        buildOne(
+          document.getElementById('host-inline'), 'inline',
+          '', '', ''
+        );
+
+        // Update target display
+        const t = new Date(targetDate);
+        const ms = t.getTime() - Date.now();
+        let label;
+        if (ms <= 0) label = 'EXPIRED';
+        else if (ms < 60_000) label = 'T-' + Math.floor(ms/1000) + 's';
+        else if (ms < 60 * 60 * 1000) label = 'T-' + Math.floor(ms/60000) + 'm';
+        else if (ms < 24 * 60 * 60 * 1000) label = 'T-' + Math.floor(ms/3600000) + 'h ' + Math.floor((ms % 3600000)/60000) + 'm';
+        else label = 'T-' + Math.floor(ms/(86400000)) + 'd';
+        document.getElementById('targetDisplay').textContent = 'Target: ' + label;
+      }
+
+      // Wow toggles
+      document.querySelectorAll('#wowToggles .toggle-row').forEach((row) => {
+        row.addEventListener('click', () => {
+          const key = row.dataset.wow;
+          wow[key] = !wow[key];
+          row.querySelector('.toggle').classList.toggle('is-on', wow[key]);
+          rebuildAll();
+        });
+      });
+
+      // Theme
+      document.querySelectorAll('[data-theme]').forEach((b) => {
+        b.addEventListener('click', () => {
+          document.querySelectorAll('[data-theme]').forEach(x => x.classList.remove('is-active'));
+          b.classList.add('is-active');
+          theme = b.dataset.theme;
+          rebuildAll();
+        });
+      });
+
+      // Palette
+      document.querySelectorAll('#paletteRow [data-palette]').forEach((b) => {
+        b.addEventListener('click', () => {
+          document.querySelectorAll('#paletteRow [data-palette]').forEach(x => x.classList.remove('is-active'));
+          b.classList.add('is-active');
+          palette = b.dataset.palette;
+          rebuildAll();
+        });
+      });
+
+      // Force buttons
+      function setTarget(ms) {
+        targetDate = new Date(Date.now() + ms).toISOString();
+        rebuildAll();
+      }
+      document.getElementById('setT3w').addEventListener('click', () => setTarget(21 * 24 * 60 * 60 * 1000));
+      document.getElementById('setT12h').addEventListener('click', () => setTarget(12 * 60 * 60 * 1000));
+      document.getElementById('setT45s').addEventListener('click', () => setTarget(45 * 1000));
+
+      // Update target-display every second so the user can see the countdown advancing
+      setInterval(() => {
+        const t = new Date(targetDate);
+        const ms = t.getTime() - Date.now();
+        let label;
+        if (ms <= 0) label = 'EXPIRED';
+        else if (ms < 60_000) label = 'T-' + Math.floor(ms/1000) + 's';
+        else if (ms < 60 * 60 * 1000) label = 'T-' + Math.floor(ms/60000) + 'm';
+        else if (ms < 24 * 60 * 60 * 1000) label = 'T-' + Math.floor(ms/3600000) + 'h ' + Math.floor((ms % 3600000)/60000) + 'm';
+        else label = 'T-' + Math.floor(ms/(86400000)) + 'd';
+        document.getElementById('targetDisplay').textContent = 'Target: ' + label;
+      }, 1000);
+
+      // Boot
+      if (typeof window.TGCountdownWidget !== 'function') {
+        document.body.insertAdjacentHTML('afterbegin',
+          '<div style="padding:14px 24px;background:#FEF2F2;border-bottom:1px solid #FECACA;color:#B91C1C;font-family:monospace;font-size:13px">' +
+          '<strong>widget-countdown.js failed to load.</strong> The showcase needs the widget JS. Check Network tab for 404s.' +
+          '</div>'
+        );
+        return;
+      }
+      rebuildAll();
+    })();
+  </script>
+</body>
+</html>
