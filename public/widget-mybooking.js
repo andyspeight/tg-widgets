@@ -1,7 +1,15 @@
 /**
- * Travelgenix My Booking Widget v1.3.1
+ * Travelgenix My Booking Widget v1.4.0
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.4.0 changes:
+ *   - New public method getSafeContextSummary() returns a privacy-redacted
+ *     trip summary (destination, dates, hotel name, airports, airline, party
+ *     shape — no names, no prices, no refs, no emails, no special requests)
+ *     suitable for passing to AI chat as conversational context. Returns
+ *     null until state.stage === 'found'. Used by Luna chat so follow-up
+ *     questions get answered without re-asking facts visible on screen.
  *
  * v1.3.1 changes:
  *   - Container-driven narrow layout: when the widget's container is < 440px wide
@@ -75,7 +83,7 @@
   const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || (API_BASE + '/api/retrieve-order');
   const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || (API_BASE + '/api/booking-pdf');
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
-  const VERSION = '1.3.1';
+  const VERSION = '1.4.0';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -2291,6 +2299,113 @@
       try {
         this.el.dispatchEvent(new CustomEvent('tg-mybooking:' + name, { detail, bubbles: true }));
       } catch {}
+    }
+
+    /**
+     * Returns a redacted, privacy-safe summary of the loaded booking suitable
+     * for passing to AI as conversational context (e.g. so Luna chat can
+     * answer follow-up questions without re-asking the visitor for facts
+     * already on screen). Returns null until the booking is fully loaded.
+     *
+     * Deliberately strips:
+     *   - All names (first, last, traveller titles)
+     *   - Email addresses
+     *   - Booking reference / order ID
+     *   - Total price, deposit, balance, payment details
+     *   - Special requests (free text — could contain anything)
+     *   - Hotel review platform data
+     *
+     * Keeps only what's needed to give relevant trip-context advice:
+     * destination, dates, hotel name, airports, airline, party shape.
+     */
+    getSafeContextSummary() {
+      try {
+        if (this.state?.stage !== 'found') return null;
+        const order = this.state.order;
+        if (!order) return null;
+
+        const items = Array.isArray(order.items) ? order.items : [];
+        const accItem = items.find(i => i.product === 'Accommodation') || null;
+        const flightItems = items.filter(i => i.product === 'Flights');
+        const acc = accItem?.accommodation;
+
+        const startDate = accItem?.startDate || order.summary?.earliestStart || null;
+        const nights = accItem?.duration || 0;
+        const endDateMs = startDate ? new Date(startDate).getTime() + nights * 86400000 : null;
+        const endDate = endDateMs ? new Date(endDateMs).toISOString().slice(0, 10) : null;
+
+        // Aggregate flight info — outbound and inbound separately
+        const outboundRoute = flightItems[0]?.flights?.routes?.find(r => /outbound/i.test(r.direction || '')) || flightItems[0]?.flights?.routes?.[0] || null;
+        const inboundRoute = flightItems[0]?.flights?.routes?.find(r => /inbound|return/i.test(r.direction || '')) || flightItems[0]?.flights?.routes?.[1] || null;
+
+        function legSummary(route) {
+          if (!route || !Array.isArray(route.segments) || route.segments.length === 0) return null;
+          const segs = route.segments;
+          const first = segs[0];
+          const last = segs[segs.length - 1];
+          const carriers = new Set();
+          for (const s of segs) {
+            if (s.marketingCarrier?.name) carriers.add(s.marketingCarrier.name);
+          }
+          const stops = segs.length - 1;
+          const stopAirports = stops > 0 ? segs.slice(0, -1).map(s => s.destination?.iataCode).filter(Boolean) : [];
+          return {
+            from: first.origin?.iataCode || null,
+            to: last.destination?.iataCode || null,
+            airline: Array.from(carriers).slice(0, 2).join(', ') || null,
+            stops,
+            stopAirports: stopAirports.length ? stopAirports : null,
+            cabin: first.cabinClass || null,
+          };
+        }
+
+        // Party shape — count types only, never names
+        const travellersRaw = (order.summary?.travellers && order.summary.travellers.length)
+          ? order.summary.travellers
+          : (acc?.guests || []);
+        let adults = 0, children = 0, infants = 0;
+        for (const t of travellersRaw) {
+          const type = String(t?.type || 'Adult').toLowerCase();
+          if (type.includes('infant')) infants++;
+          else if (type.includes('child')) children++;
+          else adults++;
+        }
+        // Fallback if traveller list was empty but we have accommodation info
+        if (adults + children + infants === 0) {
+          adults = acc?.units?.[0]?.sleepsAdults || 0;
+        }
+
+        const summary = {
+          destinationCity: acc?.location?.city || null,
+          destinationCountry: acc?.location?.country || null,
+          hotelName: acc?.name || null,
+          startDate,            // ISO yyyy-mm-dd
+          endDate,              // ISO yyyy-mm-dd
+          nights: nights || null,
+          daysUntilDeparture: daysUntil(startDate),
+          boardBasis: acc?.units?.[0]?.rates?.[0]?.board || null,
+          outboundFlight: legSummary(outboundRoute),
+          inboundFlight: legSummary(inboundRoute),
+          adults,
+          children,
+          infants,
+        };
+
+        // Strip null/empty values so the prompt context is compact
+        const cleaned = {};
+        for (const k of Object.keys(summary)) {
+          const v = summary[k];
+          if (v == null) continue;
+          if (typeof v === 'number' && v === 0 && (k === 'children' || k === 'infants')) continue;
+          if (typeof v === 'object' && v !== null && Object.keys(v).every(kk => v[kk] == null)) continue;
+          cleaned[k] = v;
+        }
+
+        return cleaned;
+      } catch (e) {
+        // Defensive: never break the widget over context extraction
+        return null;
+      }
     }
 
     update(newConfig) {
