@@ -20,6 +20,7 @@
     { "source": "/demo-weather",      "destination": "/demo-weather.html" },
     { "source": "/demo-enquiry",      "destination": "/demo-enquiry.html" },
     { "source": "/demo-mybooking",    "destination": "/demo-mybooking.html" },
+    { "source": "/demo-countdown",    "destination": "/demo-countdown.html" },
     { "source": "/demo-logos",        "destination": "/demo-logos.html" },
     { "source": "/editor",              "destination": "/editor.html" },
     { "source": "/editor-reviews",      "destination": "/editor-reviews.html" },
@@ -29,6 +30,7 @@
     { "source": "/editor-weather",      "destination": "/editor-weather.html" },
     { "source": "/editor-enquiry",      "destination": "/editor-enquiry.html" },
     { "source": "/editor-mybooking",    "destination": "/editor-mybooking.html" },
+    { "source": "/editor-countdown",    "destination": "/editor-countdown.html" },
     { "source": "/editor-logos",        "destination": "/editor-logos.html" },
     { "source": "/inbox-enquiry", "destination": "/inbox-enquiry.html" }
   ],
@@ -91,6 +93,14 @@
     },
     {
       "source": "/widget-mybooking.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-countdown.js",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
