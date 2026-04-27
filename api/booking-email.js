@@ -518,13 +518,6 @@ export default async function handler(req, res) {
     // any deployment (production, preview branches, local dev) without
     // needing an env var. The booking-pdf endpoint handles all the same
     // lookup logic — calling it here means we don't re-do the work.
-    //
-    // We pass two headers the PDF endpoint understands:
-    //   - X-TG-Internal-Key: shared secret. Bypasses default rate limit.
-    //     If unset (env var missing), the call still works but rate limits
-    //     against the Vercel egress IP — fine for low traffic, bad at scale.
-    //   - X-TG-Real-IP: the actual user's IP, so the PDF endpoint can rate
-    //     limit per-user instead of per-Vercel-egress-IP.
     const proto = (req.headers['x-forwarded-proto'] || 'https').toString().split(',')[0];
     const host = (req.headers['x-forwarded-host'] || req.headers.host || '').toString().split(',')[0];
     if (!host) {
@@ -533,17 +526,11 @@ export default async function handler(req, res) {
     }
     const pdfUrl = `${proto}://${host}/api/booking-pdf`;
 
-    const pdfHeaders = { 'Content-Type': 'application/json' };
-    if (process.env.TG_INTERNAL_KEY) {
-      pdfHeaders['X-TG-Internal-Key'] = process.env.TG_INTERNAL_KEY;
-      pdfHeaders['X-TG-Real-IP'] = ip;
-    }
-
     const pdfRes = await fetch(pdfUrl, {
       method: 'POST',
-      headers: pdfHeaders,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ widgetId, emailAddress, departDate, orderRef }),
-      signal: AbortSignal.timeout(28000),
+      signal: AbortSignal.timeout(25000),
     });
 
     if (!pdfRes.ok) {
@@ -562,17 +549,11 @@ export default async function handler(req, res) {
     const pdfFilename = `booking-${orderRef.replace(/[^A-Z0-9_-]/gi, '')}.pdf`;
 
     // ----- Build email body -----
-    const accItem = order.items.find(i => i.product === 'Accommodation');
-    const flightItem = order.items.find(i => i.product === 'Flights');
-    const startDate = order.summary?.earliestStart || accItem?.startDate;
-    const destinationCity = accItem?.accommodation?.location?.city || '';
-
+    // The template extracts what it needs directly from the order — single
+    // source of truth, no risk of fields drifting between extraction here
+    // and rendering there.
     const { subject, html, text } = renderBookingEmail({
-      customerFirstName: order.customerFirstname || '',
-      bookingReference: accItem?.bookingReference || flightItem?.bookingReference || `TG${order.id}`,
-      destinationCity,
-      departureDate: startDate,
-      hotelName: accItem?.accommodation?.name || '',
+      order,
       message,
       brand: brandConfig,
       colors: widgetSettings?.colors || {},
