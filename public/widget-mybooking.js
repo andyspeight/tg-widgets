@@ -350,6 +350,10 @@
     .tgm-ref strong { color: #fff; margin-left: 8px; font-weight: 700; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
     .tgm-hero-rating { display: inline-flex; gap: 2px; align-items: center; margin-bottom: 12px; }
     .tgm-hero-rating svg { width: 14px; height: 14px; fill: #FFD166; color: #FFD166; }
+    /* Review chip — sits inline with the star rating to surface third-party
+       social proof (TripAdvisor, etc) directly on the confirmation card. */
+    .tgm-review-chip { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 3px 10px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25); border-radius: 9999px; font-size: 12px; font-weight: 500; color: #fff; backdrop-filter: blur(4px); }
+    .tgm-review-chip strong { font-weight: 700; font-variant-numeric: tabular-nums; }
     .tgm-hero-name { font-size: 32px; font-weight: 700; letter-spacing: -.02em; line-height: 1.05; margin: 0 0 4px; text-shadow: 0 2px 12px rgba(0,0,0,.3); }
     .tgm-hero-loc { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: rgba(255,255,255,.88); margin: 0; }
     .tgm-hero-loc svg { width: 14px; height: 14px; }
@@ -468,6 +472,28 @@
     .tgm-facilities { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
     .tgm-fac { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border-light); border-radius: 9999px; font-size: 13px; color: var(--tgm-text-2); }
     .tgm-fac svg { width: 13px; height: 13px; color: var(--tgm-success); }
+
+    /* ===== Structured detail blocks =====
+       Used inside the collapsibles to organise rich content (key/value rows
+       for property metadata, line-item rows for fees and price breakdowns,
+       sub-headings inside long collapse bodies). All values from the type
+       scale; no arbitrary sizes. */
+    .tgm-subhead { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--tgm-text-3); margin: 16px 0 8px; }
+    .tgm-subhead:first-child { margin-top: 0; }
+    .tgm-kv { display: grid; grid-template-columns: minmax(120px, 30%) 1fr; gap: 8px 16px; font-size: 14px; }
+    .tgm-kv dt { color: var(--tgm-text-3); font-weight: 500; }
+    .tgm-kv dd { color: var(--tgm-text); margin: 0; font-variant-numeric: tabular-nums; }
+    .tgm-fee-line { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 14px; }
+    .tgm-fee-line + .tgm-fee-line { border-top: 1px dashed var(--tgm-border-light); }
+    .tgm-fee-line .name { color: var(--tgm-text-2); }
+    .tgm-fee-line .name small { color: var(--tgm-text-3); display: block; font-size: 12px; margin-top: 2px; }
+    .tgm-fee-line .val { font-weight: 600; color: var(--tgm-text); font-variant-numeric: tabular-nums; }
+    .tgm-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .tgm-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border-light); border-radius: 9999px; font-size: 13px; color: var(--tgm-text-2); }
+    .tgm-chip svg { width: 13px; height: 13px; color: var(--tgm-text-3); }
+    .tgm-pay-breakdown { padding: 12px 0; border-top: 1px dashed var(--tgm-border-light); margin-top: 8px; }
+    .tgm-pay-breakdown .tgm-fee-line:first-child { padding-top: 0; }
+    .tgm-pay-breakdown .tgm-fee-line:first-child + .tgm-fee-line { border-top: 1px dashed var(--tgm-border-light); }
 
     /* ===== Flight card =====
        Each flight item produces a card. Inside are 1-2 "leg" blocks
@@ -704,6 +730,25 @@
     }
     const carrierSummary = Array.from(carrierNames).slice(0, 3).join(', ');
 
+    // Fare information block — Travelify ships endorsements, ticketing
+    // deadline, fare calculation, tour code as separate `fareInformation`
+    // entries. These are MEANINGFUL to customers (refund rules!) so we
+    // surface them in a "Fare conditions" collapsible at the bottom of the
+    // flight card.
+    const fareInfo = Array.isArray(f.fareInformation) ? f.fareInformation : [];
+    // Filter out noise — fare basis codes (e.g. "ELN0IV2P") are operational,
+    // not customer-facing. We hide:
+    //   • entries with type 'FareBasis'
+    //   • entries whose title contains 'fare basis'
+    //   • entries whose text is a compact alphanumeric token (no spaces,
+    //     all caps + digits, ≤10 chars) — these are codes regardless of title
+    const meaningfulFareInfo = fareInfo.filter(fi => {
+      if (!fi.title || !fi.text) return false;
+      if ((fi.type || '').toLowerCase() === 'farebasis') return false;
+      if (/fare\s*basis/i.test(fi.title)) return false;
+      return true;
+    });
+
     return `
       <div class="tgm-flight-card">
         <h3>${svg(IC.plane)}${esc(c.labels?.flights || 'Flights')}${
@@ -712,6 +757,22 @@
             : ''
         }</h3>
         ${f.routes.map(route => renderFlightLeg(route)).join('')}
+        ${meaningfulFareInfo.length ? `
+          <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
+            <button class="tgm-collapse-trig" type="button" aria-expanded="false">
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.fareConditions || 'Fare conditions')}</div>
+              ${svg(IC.chev)}
+            </button>
+            <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
+              <dl class="tgm-kv">
+                ${meaningfulFareInfo.map(fi => `
+                  <dt>${esc(fi.title)}</dt>
+                  <dd>${esc(fi.text)}</dd>
+                `).join('')}
+              </dl>
+            </div></div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -827,6 +888,35 @@
     const endTime = fmtTime(e.endDateTime);
     const dateLabel = e.startDateTime ? fmtDate(e.startDateTime, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
+    // Pull structured detail out of the descriptions array. Travelify
+    // (Holiday Extras upstream for lounges) ships these as separate
+    // entries with stable types: 'Generic' for description, 'OpeningTimes',
+    // 'DressCode', 'Inclusions' (which has multiple title sub-types).
+    const descByType = (type) => (e.descriptions || []).find(d => d.type === type);
+    const descByTitle = (title) => (e.descriptions || []).find(d => d.title === title);
+    const fullDesc = descByType('Generic')?.text || descByTitle('Description')?.text || '';
+    const openingTimes = descByType('OpeningTimes')?.text || descByTitle('Opening times')?.text || '';
+    const dressCode = descByType('DressCode')?.text || descByTitle('Dress code')?.text || '';
+    const drinks = (e.descriptions || []).find(d => /drinks?/i.test(d.title || ''))?.text || '';
+    const food = (e.descriptions || []).find(d => /food|dining|cuisine/i.test(d.title || ''))?.text || '';
+    const announcements = (e.descriptions || []).find(d => /announcement/i.test(d.title || ''))?.text || '';
+
+    // Map machine-readable feature flags to human-friendly chip labels.
+    const featureLabels = {
+      FreeDrinks: 'Drinks included',
+      FreeFood: 'Food included',
+      WiFi: 'Wi-fi',
+      TV: 'TV',
+      ChildrenAllowed: 'Children welcome',
+      Newspapers: 'Newspapers',
+      Showers: 'Showers',
+      QuietZone: 'Quiet zone',
+      Workspace: 'Workspace',
+    };
+    const features = (e.features || []).map(f => featureLabels[f] || f);
+
+    const hasDetails = fullDesc || openingTimes || dressCode || drinks || food || announcements || features.length;
+
     return `
       <div class="tgm-extra-card">
         <div class="tgm-extra-head">
@@ -842,6 +932,41 @@
           ${dateLabel ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span>${esc(dateLabel)}</span></span>` : ''}
           ${startTime ? `<span class="tgm-extra-meta-item">${svg(IC.clock, 2, 14)}<span>${esc(startTime)}${endTime ? ` – ${esc(endTime)}` : ''}</span></span>` : ''}
         </div>
+        ${hasDetails ? `
+          <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
+            <button class="tgm-collapse-trig" type="button" aria-expanded="false">
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.whatToExpect || 'What to expect')}</div>
+              ${svg(IC.chev)}
+            </button>
+            <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
+              ${fullDesc ? `<p>${esc(fullDesc.slice(0, 800))}${fullDesc.length > 800 ? '…' : ''}</p>` : ''}
+
+              ${(openingTimes || dressCode) ? `
+                <div class="tgm-subhead">${esc(c.labels?.atAGlance || 'At a glance')}</div>
+                <dl class="tgm-kv">
+                  ${openingTimes ? `<dt>${esc(c.labels?.openingTimes || 'Opening times')}</dt><dd>${esc(openingTimes)}</dd>` : ''}
+                  ${dressCode ? `<dt>${esc(c.labels?.dressCode || 'Dress code')}</dt><dd>${esc(dressCode)}</dd>` : ''}
+                </dl>
+              ` : ''}
+
+              ${(drinks || food) ? `
+                <div class="tgm-subhead">${esc(c.labels?.included || 'Included')}</div>
+                ${drinks ? `<p><strong>${esc(c.labels?.drinks || 'Drinks')}:</strong> ${esc(drinks)}</p>` : ''}
+                ${food ? `<p><strong>${esc(c.labels?.food || 'Food')}:</strong> ${esc(food)}</p>` : ''}
+              ` : ''}
+
+              ${announcements ? `
+                <div class="tgm-subhead">${esc(c.labels?.flightAnnouncements || 'Flight announcements')}</div>
+                <p>${esc(announcements)}</p>
+              ` : ''}
+
+              ${features.length ? `
+                <div class="tgm-subhead">${esc(c.labels?.features || 'Features')}</div>
+                <div class="tgm-chips">${features.map(f => `<span class="tgm-chip">${svg(IC.check)}${esc(f)}</span>`).join('')}</div>
+              ` : ''}
+            </div></div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -909,6 +1034,70 @@
     const facilitiesList = (acc?.descriptions || []).find(d => d.title === 'Facilities');
     const facilities = facilitiesList?.text ? facilitiesList.text.split(/[,•]/).map(s => s.trim()).filter(Boolean).slice(0, 12) : [];
 
+    // ----- Property metadata pulled from the descriptions array.
+    // Travelify (Hotelbeds upstream) ships these as separate description
+    // entries with stable titles. We pluck them by title so the order we
+    // render is independent of the order they arrive in.
+    const descByTitle = (title) => (acc?.descriptions || []).find(d => d.title === title);
+
+    const paymentMethodsDesc = descByTitle('Methods of payment');
+    const paymentMethods = paymentMethodsDesc?.text
+      ? paymentMethodsDesc.text.split(/[,•]/).map(s => s.trim()).filter(Boolean).slice(0, 8)
+      : [];
+
+    const yearBuiltText = descByTitle('Year of construction')?.text
+      || descByTitle('Year built')?.text
+      || '';
+    // Extract just the year number — Hotelbeds sometimes wraps it in a sentence.
+    const yearBuiltMatch = yearBuiltText.match(/\b(19|20)\d{2}\b/);
+    const yearBuilt = yearBuiltMatch ? yearBuiltMatch[0] : '';
+
+    const totalRoomsText = descByTitle('Total number of rooms')?.text || '';
+    const totalRoomsMatch = totalRoomsText.match(/\d+/);
+    const totalRooms = totalRoomsMatch ? totalRoomsMatch[0] : '';
+
+    const roomMix = [
+      ['Twin', descByTitle('Twin rooms')?.text],
+      ['Double', descByTitle('Double rooms')?.text],
+      ['Superior', descByTitle('Superior rooms')?.text],
+      ['Family', descByTitle('Family rooms')?.text],
+      ['Suite', descByTitle('Suites')?.text],
+    ]
+      .map(([label, text]) => {
+        const m = (text || '').match(/\d+/);
+        return m ? { label, count: m[0] } : null;
+      })
+      .filter(Boolean);
+
+    // Check-in / check-out time windows. Travelify ships these inside
+    // ImportantInfo description entries — we want them in the stay strip,
+    // not buried in the Important Info wall of text. We parse them out and
+    // remove them from the importantInfoBullets list below so they're not
+    // duplicated.
+    const allImportantInfo = (acc?.descriptions || []).filter(d => d.type === 'ImportantInfo');
+    let checkinTime = '';
+    let checkoutTime = '';
+    const importantInfoBullets = [];
+    for (const info of allImportantInfo) {
+      const t = info.text || '';
+      const ciMatch = t.match(/Check[\s-]?in\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
+      const coMatch = t.match(/Check[\s-]?out\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
+      if (ciMatch && !checkinTime) checkinTime = ciMatch[1];
+      if (coMatch && !checkoutTime) checkoutTime = coMatch[1];
+      // Keep the bullet only if it's not purely a check-in/out time line —
+      // those go on the stay strip separately.
+      const isJustTimes = /^check[\s-]?(in|out)/i.test(t.trim()) && t.length < 80;
+      if (!isJustTimes) importantInfoBullets.push(info);
+    }
+    // Backwards-compat alias used further down — keep the existing variable
+    // name to minimise diff in the render template.
+    const importantInfo = importantInfoBullets;
+
+    // Pricing breakdown (item-level, e.g. Rate for Room) and pay-at-location
+    // (e.g. City Tax, Ecologic Fee). Both come from the API trim.
+    const priceBreakdown = pricing?.breakdown || [];
+    const payAtLocation = pricing?.payAtLocation || [];
+
     // Documents
     const docs = order.documents || [];
     const showDocs = c.display?.showDocuments !== false && docs.length > 0;
@@ -916,9 +1105,6 @@
     // Greeting
     const firstName = order.customerFirstname || 'there';
     const destCity = acc?.location?.city || '';
-
-    // City tax / local fees
-    const importantInfo = (acc?.descriptions || []).filter(d => d.type === 'ImportantInfo');
 
     return `
       <div class="tgm-found">
@@ -932,7 +1118,12 @@
               <span class="tgm-ref">${esc(c.labels?.ref || 'Ref')}<strong>${esc(refValue)}</strong></span>
             </div>
             <div>
-              ${starHtml ? `<div class="tgm-hero-rating">${starHtml}</div>` : ''}
+              ${(starHtml || acc?.review?.rating) ? `
+                <div class="tgm-hero-rating">
+                  ${starHtml}
+                  ${acc?.review?.rating ? `<span class="tgm-review-chip"><strong>${acc.review.rating}</strong>/5${acc.review.reviews ? ` · ${esc(acc.review.reviews.toLocaleString('en-GB'))} reviews` : ''}${acc.review.platform ? ` · ${esc(acc.review.platform)}` : ''}</span>` : ''}
+                </div>
+              ` : ''}
               <h1 class="tgm-hero-name">${esc(acc?.name || 'Your booking')}</h1>
               ${acc?.location?.city ? `<p class="tgm-hero-loc">${svg(IC.pin)}${esc(acc.location.city)}${acc.location.country ? ', ' + esc(acc.location.country) : ''}</p>` : ''}
             </div>
@@ -1002,6 +1193,32 @@
               <span class="tgm-pay-label">${esc(c.labels?.totalCost || 'Total holiday cost')}</span>
               <span class="tgm-pay-total-amt">${esc(fmtMoney(totalPrice, currency))}</span>
             </div>
+            ${(() => {
+              // Per-product breakdown — only useful when there's more than
+              // one product. For a hotel-only booking the total IS the hotel
+              // price, no breakdown adds info.
+              const productCount = (summary.hasAccommodation ? 1 : 0) + (summary.hasFlights ? 1 : 0) + (summary.hasAirportExtras ? 1 : 0);
+              if (productCount < 2) return '';
+              const lines = [];
+              if (accItem && typeof accItem.price === 'number') {
+                lines.push({ label: c.labels?.hotelLine || 'Hotel', val: accItem.price });
+              }
+              const flightTotal = flightItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
+              if (flightTotal > 0) lines.push({ label: c.labels?.flightsLine || 'Flights', val: flightTotal });
+              const extrasTotal = extraItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
+              if (extrasTotal > 0) lines.push({ label: c.labels?.extrasLine || 'Airport extras', val: extrasTotal });
+              if (lines.length < 2) return '';
+              return `
+                <div class="tgm-pay-breakdown">
+                  ${lines.map(l => `
+                    <div class="tgm-fee-line">
+                      <span class="name">${esc(l.label)}</span>
+                      <span class="val">${esc(fmtMoney(l.val, currency))}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              `;
+            })()}
             ${standardDep ? `
               <div class="tgm-pay-row">
                 <span class="tgm-pay-label">${esc(c.labels?.depositPaid || 'Deposit paid')}</span>
@@ -1046,7 +1263,7 @@
                 <div class="tgm-guest-av">${esc(initials(g.firstname, g.surname))}</div>
                 <div class="tgm-guest-info">
                   <div class="tgm-guest-name">${esc((g.title ? g.title + ' ' : '') + (g.firstname || '') + ' ' + (g.surname || ''))}</div>
-                  <div class="tgm-guest-meta">${esc(i === 0 ? (c.labels?.leadGuest || 'Lead guest') : (g.type || 'Adult'))}${i > 0 && g.type ? ` · ${esc(g.type)}` : ''}</div>
+                  <div class="tgm-guest-meta">${esc(i === 0 ? (c.labels?.leadGuest || 'Lead guest') : (g.type || 'Adult'))}</div>
                 </div>
               </div>
             `).join('')}
@@ -1079,15 +1296,49 @@
 
         <h3 class="tgm-h-eyebrow">${esc(c.labels?.thingsToKnow || 'Things to know')}</h3>
 
-        ${hotelDesc?.text ? `
+        ${(hotelDesc?.text || acc?.location?.address1 || paymentMethods.length || yearBuilt || totalRooms || roomMix.length || facilities.length) ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
             <div class="tgm-collapse-left">${svg(IC.home)}${esc(c.labels?.aboutHotel || 'About the hotel')}</div>
             ${svg(IC.chev)}
           </button>
           <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
-            <p>${esc(hotelDesc.text.slice(0, 800))}${hotelDesc.text.length > 800 ? '…' : ''}</p>
-            ${facilities.length ? `<div class="tgm-facilities">${facilities.map(f => `<span class="tgm-fac">${svg(IC.check)}${esc(f)}</span>`).join('')}</div>` : ''}
+            ${hotelDesc?.text ? `<p>${esc(hotelDesc.text.slice(0, 800))}${hotelDesc.text.length > 800 ? '…' : ''}</p>` : ''}
+
+            ${(acc?.location?.address1 || acc?.location?.city || acc?.location?.postalCode) ? `
+              <div class="tgm-subhead">${esc(c.labels?.address || 'Address')}</div>
+              <p>
+                ${[
+                  acc?.location?.address1,
+                  acc?.location?.city,
+                  acc?.location?.state,
+                  acc?.location?.postalCode,
+                  acc?.location?.country,
+                ].filter(Boolean).map(s => esc(s)).join(', ')}
+                ${(acc?.location?.latitude && acc?.location?.longitude)
+                  ? ` · <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(acc.location.latitude + ',' + acc.location.longitude)}" target="_blank" rel="noopener">${esc(c.labels?.viewMap || 'View on map')}</a>`
+                  : ''}
+              </p>
+            ` : ''}
+
+            ${(yearBuilt || totalRooms || roomMix.length) ? `
+              <div class="tgm-subhead">${esc(c.labels?.propertyDetails || 'Property details')}</div>
+              <dl class="tgm-kv">
+                ${yearBuilt ? `<dt>${esc(c.labels?.yearBuilt || 'Year built')}</dt><dd>${esc(yearBuilt)}</dd>` : ''}
+                ${totalRooms ? `<dt>${esc(c.labels?.totalRooms || 'Total rooms')}</dt><dd>${esc(totalRooms)}</dd>` : ''}
+                ${roomMix.length ? `<dt>${esc(c.labels?.roomMix || 'Room mix')}</dt><dd>${roomMix.map(r => `${esc(r.count)} ${esc(r.label.toLowerCase())}`).join(', ')}</dd>` : ''}
+              </dl>
+            ` : ''}
+
+            ${facilities.length ? `
+              <div class="tgm-subhead">${esc(c.labels?.facilities || 'Facilities')}</div>
+              <div class="tgm-facilities">${facilities.map(f => `<span class="tgm-fac">${svg(IC.check)}${esc(f)}</span>`).join('')}</div>
+            ` : ''}
+
+            ${paymentMethods.length ? `
+              <div class="tgm-subhead">${esc(c.labels?.paymentMethods || 'Accepted at the hotel')}</div>
+              <div class="tgm-chips">${paymentMethods.map(p => `<span class="tgm-chip">${svg(IC.card)}${esc(p)}</span>`).join('')}</div>
+            ` : ''}
           </div></div>
         </div>` : ''}
 
@@ -1102,15 +1353,45 @@
           </div></div>
         </div>` : ''}
 
-        ${importantInfo.length || inResort ? `
+        ${(importantInfo.length || inResort || payAtLocation.length || checkinTime || checkoutTime) ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-            <div class="tgm-collapse-left">${svg(IC.coin)}${esc(c.labels?.localFees || 'Local fees')}</div>
+            <div class="tgm-collapse-left">${svg(IC.coin)}${esc(c.labels?.localFees || 'At the hotel')}</div>
             ${svg(IC.chev)}
           </button>
           <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
-            ${inResort ? `<p>A <strong>resort fee of ${esc(fmtMoney(inResort, currency))}</strong> is payable at the hotel on arrival.</p>` : ''}
-            ${importantInfo.map(d => `<p>${esc(d.text)}</p>`).join('')}
+            ${(checkinTime || checkoutTime) ? `
+              <div class="tgm-subhead">${esc(c.labels?.checkInOutTimes || 'Check-in & check-out')}</div>
+              <dl class="tgm-kv">
+                ${checkinTime ? `<dt>${esc(c.labels?.checkin || 'Check-in')}</dt><dd>${esc(checkinTime)}</dd>` : ''}
+                ${checkoutTime ? `<dt>${esc(c.labels?.checkout || 'Check-out')}</dt><dd>${esc(checkoutTime)}</dd>` : ''}
+              </dl>
+            ` : ''}
+
+            ${(payAtLocation.length || inResort) ? `
+              <div class="tgm-subhead">${esc(c.labels?.payAtHotel || 'Payable at the hotel')}</div>
+              ${payAtLocation.map(line => `
+                <div class="tgm-fee-line">
+                  <span class="name">
+                    ${esc(line.name || 'Local fee')}
+                    ${line.description && line.description !== line.name ? `<small>${esc(line.description)}</small>` : ''}
+                    ${(typeof line.qty === 'number' && line.qty > 1) ? `<small>× ${esc(String(line.qty))}</small>` : ''}
+                  </span>
+                  <span class="val">${typeof line.unitPrice === 'number' ? esc(fmtMoney((line.unitPrice || 0) * (line.qty || 1), currency)) : '—'}</span>
+                </div>
+              `).join('')}
+              ${(inResort && !payAtLocation.length) ? `
+                <div class="tgm-fee-line">
+                  <span class="name">${esc(c.labels?.resortFee || 'Resort fee')}</span>
+                  <span class="val">${esc(fmtMoney(inResort, currency))}</span>
+                </div>
+              ` : ''}
+            ` : ''}
+
+            ${importantInfo.length ? `
+              <div class="tgm-subhead">${esc(c.labels?.goodToKnow || 'Good to know')}</div>
+              ${importantInfo.map(d => `<p>${esc(d.text)}</p>`).join('')}
+            ` : ''}
           </div></div>
         </div>` : ''}
 
