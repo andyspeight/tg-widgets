@@ -1,1963 +1,1110 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Countdown Editor · Travelgenix Widget Suite</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #F8FAFC;
-      --card: #FFFFFF;
-      --text: #0F172A;
-      --sub: #475569;
-      --muted: #94A3B8;
-      --border: #E2E8F0;
-      --border-light: #F1F5F9;
-      --brand: #1B2B5B;
-      --brand-light: #2A3F7A;
-      --accent: #00B4D8;
-      --success: #10B981;
-      --warning: #F59E0B;
-      --error: #EF4444;
-      --radius-sm: 8px;
-      --radius: 12px;
-      --radius-lg: 16px;
-      --shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.06);
-      --shadow-lg: 0 8px 24px rgba(15,23,42,.12);
-    }
-    * { box-sizing: border-box; }
-    [hidden] { display: none !important; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      font-size: 14px;
-      line-height: 1.5;
-      overflow: hidden;
-    }
-    button { font-family: inherit; }
-    a { color: var(--accent); }
+/**
+ * Travelgenix Countdown Timer Widget v1.1.0
+ * Self-contained, embeddable widget
+ * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.1.0 adds the "wow" effects: sliding digit reels, gradient digit cells,
+ * brand glow, final-minute progress ring, hero aurora, banner pulse dot.
+ * All effects respect prefers-reduced-motion.
+ *
+ * Usage:
+ *   <div data-tg-widget="countdown" data-tg-id="YOUR_WIDGET_ID"></div>
+ *   <script src="https://tg-widgets.vercel.app/widget-countdown.js"></script>
+ *
+ * Or with inline config:
+ *   <div data-tg-widget="countdown" data-tg-config='{"targetDate":"2026-12-31T23:59:59Z", ...}'></div>
+ */
+(function () {
+  'use strict';
 
-    /* App shell */
-    .app {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      height: 100vh;
+  const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
+  const VERSION = '1.1.0';
+
+  // ---------- Helpers ----------
+  function esc(s) {
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Strict URL validation: allow https://, http:// (with warning), relative paths, anchors. Block anything else.
+  function safeUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('/') || trimmed.startsWith('#')) return trimmed;
+    try {
+      const u = new URL(trimmed);
+      if (u.protocol === 'https:' || u.protocol === 'http:' || u.protocol === 'mailto:' || u.protocol === 'tel:') {
+        return u.href;
+      }
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
+  function pad2(n) {
+    return n < 10 ? '0' + n : '' + n;
+  }
+
+  // Convert "#1B2B5B" → "27, 43, 91" for use in rgba() CSS vars.
+  // Returns empty string for invalid input — caller falls back to defaults in CSS.
+  function hexToRgb(hex) {
+    if (!hex || typeof hex !== 'string') return '';
+    let h = hex.trim().replace('#', '');
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    if (!/^[0-9a-f]{6}$/i.test(h)) return '';
+    const n = parseInt(h, 16);
+    return ((n >> 16) & 255) + ', ' + ((n >> 8) & 255) + ', ' + (n & 255);
+  }
+
+  // Parse ISO target date safely. Returns ms-since-epoch, or null if invalid.
+  function parseTarget(iso) {
+    if (!iso) return null;
+    const t = Date.parse(iso);
+    return Number.isFinite(t) ? t : null;
+  }
+
+  // Compute remaining time. Returns { total, days, hours, minutes, seconds, expired }.
+  function computeRemaining(targetMs) {
+    const now = Date.now();
+    const diff = Math.max(0, targetMs - now);
+    const expired = diff === 0;
+    const totalSec = Math.floor(diff / 1000);
+    const days = Math.floor(totalSec / 86400);
+    const hours = Math.floor((totalSec % 86400) / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+    return { total: diff, days, hours, minutes, seconds, expired };
+  }
+
+  // Compute next occurrence for repeating mode. Returns ms-since-epoch.
+  function nextRepeatingTarget(currentTargetMs, freq, dayOfWeek, timeStr) {
+    const now = Date.now();
+    if (currentTargetMs > now) return currentTargetMs;
+
+    const [hh, mm] = (timeStr || '17:00').split(':').map(Number);
+    const next = new Date();
+    next.setHours(hh || 0, mm || 0, 0, 0);
+
+    if (freq === 'daily') {
+      if (next.getTime() <= now) next.setDate(next.getDate() + 1);
+      return next.getTime();
+    }
+    // weekly
+    const target = ((dayOfWeek == null ? 5 : dayOfWeek) % 7); // 0=Sun..6=Sat, default Fri
+    const diff = (target - next.getDay() + 7) % 7;
+    next.setDate(next.getDate() + diff);
+    if (next.getTime() <= now) next.setDate(next.getDate() + 7);
+    return next.getTime();
+  }
+
+  // ---------- Styles ----------
+  const STYLES = `
+    :host { all: initial; display: block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .tgcd-root {
+      /* Theme tokens (overridable via config) */
+      --tgcd-brand: #1B2B5B;
+      --tgcd-brand-rgb: 27, 43, 91;
+      --tgcd-accent: #00B4D8;
+      --tgcd-accent-rgb: 0, 180, 216;
+      --tgcd-bg: transparent;
+      --tgcd-card: #FFFFFF;
+      --tgcd-text: #0F172A;
+      --tgcd-sub: #475569;
+      --tgcd-muted: #94A3B8;
+      --tgcd-border: #E2E8F0;
+      --tgcd-radius: 16px;
+      --tgcd-radius-sm: 10px;
+      --tgcd-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.06);
+      --tgcd-digit-bg: #F8FAFC;
+      --tgcd-digit-text: var(--tgcd-text);
+      --tgcd-cta-bg: var(--tgcd-brand);
+      --tgcd-cta-text: #FFFFFF;
+      color: var(--tgcd-text);
+      background: var(--tgcd-bg);
+      width: 100%;
+    }
+    .tgcd-root[data-theme="dark"] {
+      --tgcd-card: #1E293B;
+      --tgcd-text: #F1F5F9;
+      --tgcd-sub: #CBD5E1;
+      --tgcd-muted: #64748B;
+      --tgcd-border: #334155;
+      --tgcd-digit-bg: #0F172A;
+      --tgcd-digit-text: #F1F5F9;
+      --tgcd-shadow: 0 1px 2px rgba(0,0,0,.2), 0 4px 12px rgba(0,0,0,.3);
     }
 
-    /* Sidebar */
-    .sidebar {
-      background: var(--card);
-      border-right: 1px solid var(--border);
+    /* ---------- Shared digits ---------- */
+    .tgcd-units {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .tgcd-unit {
       display: flex;
       flex-direction: column;
-      min-width: 0;
+      align-items: center;
+      gap: 6px;
+      position: relative;
     }
-    .sb-top {
-      display: flex; align-items: center; gap: 10px;
+
+    /* Digit cell — gradient surface with subtle inner highlight */
+    .tgcd-digits {
+      position: relative;
+      font-feature-settings: 'tnum' 1, 'lnum' 1;
+      font-variant-numeric: tabular-nums lining-nums;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--tgcd-digit-text);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.55) 0%, transparent 35%),
+        linear-gradient(180deg, var(--tgcd-digit-bg) 0%, color-mix(in srgb, var(--tgcd-digit-bg) 88%, var(--tgcd-brand) 12%) 100%);
+      border: 1px solid var(--tgcd-border);
+      border-radius: var(--tgcd-radius-sm);
       padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
+      min-width: 76px;
+      text-align: center;
+      font-size: 36px;
+      transition: color .25s ease, border-color .25s ease, box-shadow .35s ease, transform .15s ease;
+      overflow: hidden;
+      isolation: isolate;
     }
-    .sb-back {
-      width: 32px; height: 32px;
-      display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 8px;
-      color: var(--sub);
+    /* Soft brand glow (gated behind .tgcd-glow on root) */
+    .tgcd-root.tgcd-glow .tgcd-digits {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.5) inset,
+        0 -1px 0 rgba(0,0,0,.04) inset,
+        0 6px 18px -8px rgba(var(--tgcd-brand-rgb), .35),
+        0 2px 4px rgba(15,23,42,.04);
+    }
+    .tgcd-root[data-theme="dark"] .tgcd-digits {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 50%),
+        linear-gradient(180deg, var(--tgcd-digit-bg) 0%, color-mix(in srgb, var(--tgcd-digit-bg) 80%, var(--tgcd-brand) 20%) 100%);
+    }
+    .tgcd-root[data-theme="dark"].tgcd-glow .tgcd-digits {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.06) inset,
+        0 -1px 0 rgba(0,0,0,.3) inset,
+        0 8px 22px -10px rgba(var(--tgcd-accent-rgb), .35),
+        0 2px 6px rgba(0,0,0,.3);
+    }
+
+    /* Sliding digit reels */
+    .tgcd-reel {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      height: 1em;
+      line-height: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .tgcd-reel-cur, .tgcd-reel-nxt {
+      display: block;
+      height: 1em;
+      line-height: 1;
+    }
+    /* Default: no transition (set on first paint) */
+    .tgcd-reel.is-animating .tgcd-reel-cur,
+    .tgcd-reel.is-animating .tgcd-reel-nxt {
+      transition: transform .45s cubic-bezier(.2,.7,.2,1), opacity .45s ease;
+    }
+    .tgcd-reel.is-animating .tgcd-reel-cur { transform: translateY(-100%); opacity: 0; }
+    .tgcd-reel.is-animating .tgcd-reel-nxt { transform: translateY(-100%); opacity: 1; }
+    /* Reduced motion fallback — instant swap */
+    @media (prefers-reduced-motion: reduce) {
+      .tgcd-reel.is-animating .tgcd-reel-cur,
+      .tgcd-reel.is-animating .tgcd-reel-nxt {
+        transition: none !important;
+      }
+    }
+
+    .tgcd-label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--tgcd-sub);
+    }
+    .tgcd-sep {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--tgcd-muted);
+      padding: 0 2px;
+      align-self: center;
+      transform: translateY(-9px);
+      user-select: none;
+    }
+
+    /* Final-minute progress ring around the seconds cell */
+    .tgcd-ring {
+      position: absolute;
+      inset: -6px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .tgcd-root.tgcd-final-min .tgcd-ring {
+      opacity: 1;
+    }
+    .tgcd-ring circle {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: center;
+    }
+    .tgcd-ring .tgcd-ring-track { stroke: var(--tgcd-border); }
+    .tgcd-ring .tgcd-ring-fill  { stroke: var(--tgcd-accent); transition: stroke-dashoffset .95s linear; }
+
+    /* Urgency styling */
+    .tgcd-root.tgcd-urgent .tgcd-digits {
+      color: var(--tgcd-accent);
+      border-color: color-mix(in srgb, var(--tgcd-accent) 60%, var(--tgcd-border));
+    }
+    .tgcd-root.tgcd-urgent.tgcd-glow .tgcd-digits {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.5) inset,
+        0 -1px 0 rgba(0,0,0,.04) inset,
+        0 8px 24px -6px rgba(var(--tgcd-accent-rgb), .55),
+        0 2px 4px rgba(15,23,42,.06);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .tgcd-root.tgcd-urgent .tgcd-unit-seconds .tgcd-digits {
+        animation: tgcd-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes tgcd-pulse {
+        0%, 100% { box-shadow:
+          0 1px 0 rgba(255,255,255,.5) inset,
+          0 -1px 0 rgba(0,0,0,.04) inset,
+          0 0 0 0 rgba(var(--tgcd-accent-rgb), 0); }
+        50%      { box-shadow:
+          0 1px 0 rgba(255,255,255,.5) inset,
+          0 -1px 0 rgba(0,0,0,.04) inset,
+          0 0 0 6px rgba(var(--tgcd-accent-rgb), .15); }
+      }
+    }
+
+    /* ---------- Heading + sub ---------- */
+    .tgcd-heading {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--tgcd-text);
+      margin: 0;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+    .tgcd-sub {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--tgcd-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ---------- CTA ---------- */
+    .tgcd-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--tgcd-cta-text);
+      background: var(--tgcd-cta-bg);
+      border: 1px solid transparent;
+      border-radius: var(--tgcd-radius-sm);
       text-decoration: none;
-      transition: background .15s ease, color .15s ease;
-    }
-    .sb-back:hover { background: var(--bg); color: var(--text); }
-    .sb-mark {
-      width: 28px; height: 28px; border-radius: 8px;
-      background: linear-gradient(135deg, #1B2B5B, #00B4D8);
-      flex-shrink: 0;
-    }
-    .sb-title {
-      font-weight: 700; font-size: 14px;
-      flex: 1; min-width: 0;
-      white-space: nowrap; text-overflow: ellipsis; overflow: hidden;
-    }
-    .sb-action {
-      width: 32px; height: 32px;
-      display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 8px; cursor: pointer;
-      background: transparent; border: 1px solid var(--border);
-      color: var(--sub);
-      transition: all .15s ease;
-    }
-    .sb-action:hover { color: var(--text); border-color: var(--accent); }
-    .sb-action svg { width: 16px; height: 16px; }
-
-    .sb-name {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-light);
-      display: flex; gap: 8px; align-items: center;
-    }
-    .sb-name input {
-      flex: 1;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 13px; font-family: inherit;
-      background: var(--bg);
-      color: var(--text);
-      min-width: 0;
-    }
-    .sb-name input:focus {
-      outline: none; border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0,180,216,.15);
-    }
-    .sb-save {
-      padding: 8px 14px;
-      border-radius: 8px;
-      background: var(--brand); color: #fff;
-      border: none; cursor: pointer;
-      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+      min-height: 44px;
       white-space: nowrap;
-      transition: filter .15s ease;
     }
-    .sb-save:hover { filter: brightness(1.1); }
-    .sb-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tgcd-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .tgcd-cta:active { transform: translateY(0); filter: brightness(0.96); }
+    .tgcd-cta:focus-visible { outline: 2px solid var(--tgcd-accent); outline-offset: 2px; }
 
-    /* Tabs */
-    .tabs {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      border-bottom: 1px solid var(--border);
+    /* ---------- BANNER LAYOUT ---------- */
+    .tgcd-banner {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 16px 24px;
+      background: var(--tgcd-card);
+      border: 1px solid var(--tgcd-border);
+      border-radius: var(--tgcd-radius);
+      box-shadow: var(--tgcd-shadow);
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
     }
-    .tab {
-      padding: 12px;
+    .tgcd-banner .tgcd-banner-text {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tgcd-banner .tgcd-heading { font-size: 17px; }
+    .tgcd-banner .tgcd-sub { font-size: 13px; margin-top: 2px; }
+    .tgcd-banner .tgcd-units { gap: 8px; justify-content: flex-start; }
+    .tgcd-banner .tgcd-digits { font-size: 24px; padding: 8px 12px; min-width: 56px; }
+    .tgcd-banner .tgcd-label { font-size: 10px; }
+    .tgcd-banner .tgcd-sep { font-size: 22px; transform: translateY(-7px); }
+    .tgcd-banner .tgcd-cta { padding: 10px 18px; font-size: 14px; min-height: 40px; }
+    /* Banner ticker dot — pulses next to the heading */
+    .tgcd-banner-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--tgcd-accent);
+      flex-shrink: 0;
+      box-shadow: 0 0 0 0 rgba(var(--tgcd-accent-rgb), .5);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .tgcd-banner-dot {
+        animation: tgcd-dot-pulse 2.2s ease-in-out infinite;
+      }
+      @keyframes tgcd-dot-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(var(--tgcd-accent-rgb), .5); }
+        50%      { box-shadow: 0 0 0 6px rgba(var(--tgcd-accent-rgb), 0); }
+      }
+    }
+
+    /* ---------- CARD LAYOUT ---------- */
+    .tgcd-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 28px 24px;
+      background: var(--tgcd-card);
+      border: 1px solid var(--tgcd-border);
+      border-radius: var(--tgcd-radius);
+      box-shadow: var(--tgcd-shadow);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .tgcd-card .tgcd-heading { font-size: 20px; }
+    .tgcd-card .tgcd-sub { font-size: 14px; max-width: 480px; }
+    .tgcd-card .tgcd-units { margin-top: 4px; }
+
+    /* ---------- INLINE LAYOUT ---------- */
+    .tgcd-inline {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 6px 12px;
+      background: transparent;
+      font-size: 15px;
+      color: var(--tgcd-text);
+    }
+    .tgcd-inline .tgcd-heading {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--tgcd-sub);
+      margin-right: 4px;
+    }
+    .tgcd-inline .tgcd-units { gap: 6px; align-items: baseline; }
+    .tgcd-inline .tgcd-unit { flex-direction: row; align-items: baseline; gap: 2px; }
+    .tgcd-inline .tgcd-digits {
       background: transparent;
       border: none;
-      font-size: 13px; font-weight: 500;
-      color: var(--sub);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all .15s ease;
-    }
-    .tab:hover { color: var(--text); }
-    .tab.is-active {
-      color: var(--text); font-weight: 600;
-      border-bottom-color: var(--brand);
-    }
-
-    /* Body — scrollable */
-    .sb-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 0 24px;
-    }
-    .sb-body::-webkit-scrollbar { width: 8px; }
-    .sb-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-    /* Section */
-    .sec {
-      border-bottom: 1px solid var(--border-light);
-    }
-    .sec-head {
-      width: 100%;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px;
-      background: transparent; border: none; cursor: pointer;
-      font-family: inherit;
-      text-align: left;
-      transition: background .15s ease;
-    }
-    .sec-head:hover { background: var(--bg); }
-    .sec-title { font-size: 13px; font-weight: 600; color: var(--text); }
-    .sec-chev {
-      width: 16px; height: 16px;
-      transition: transform .2s ease;
-      color: var(--muted);
-    }
-    .sec.is-open .sec-chev { transform: rotate(180deg); }
-    .sec-body {
-      padding: 4px 16px 16px;
-      display: none;
-    }
-    .sec.is-open .sec-body { display: block; }
-
-    /* Form bits */
-    .field { margin-bottom: 12px; }
-    .field-label {
-      display: block;
-      font-size: 12px; font-weight: 600;
-      color: var(--sub);
-      margin-bottom: 6px;
-    }
-    .field-help {
-      font-size: 11px; color: var(--muted); margin-top: 4px;
-      line-height: 1.4;
-    }
-    .input, .select, .textarea {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 13px; font-family: inherit;
-      background: var(--card);
-      color: var(--text);
-    }
-    .input:focus, .select:focus, .textarea:focus {
-      outline: none; border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0,180,216,.15);
-    }
-    .textarea { resize: vertical; min-height: 64px; }
-
-    .colour-row {
-      display: grid;
-      grid-template-columns: 36px 1fr;
-      gap: 8px;
-      align-items: center;
-    }
-    .colour-row input[type="color"] {
-      appearance: none; -webkit-appearance: none;
-      width: 36px; height: 32px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
       padding: 0;
-      cursor: pointer; background: none;
+      min-width: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--tgcd-text);
+      box-shadow: none !important;
+      overflow: visible;
     }
-    .colour-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-    .colour-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
-    .colour-row input[type="text"] {
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-      font-size: 12px;
-      text-transform: uppercase;
+    .tgcd-inline .tgcd-label {
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: lowercase;
+      letter-spacing: 0;
+      color: var(--tgcd-sub);
     }
+    .tgcd-inline .tgcd-sep { display: none; }
+    .tgcd-inline .tgcd-cta {
+      padding: 4px 10px;
+      font-size: 13px;
+      min-height: 28px;
+      margin-left: 4px;
+    }
+    .tgcd-inline .tgcd-ring { display: none; }
 
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-
-    /* Toggle */
-    .toggle-row {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px;
-      padding: 6px 0;
-    }
-    .toggle-label { font-size: 13px; color: var(--text); flex: 1; }
-    .toggle-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .toggle {
+    /* ---------- HERO LAYOUT ---------- */
+    .tgcd-hero {
       position: relative;
-      width: 36px; height: 20px;
-      background: var(--border);
-      border-radius: 999px;
-      cursor: pointer;
-      transition: background .2s ease;
-      flex-shrink: 0;
-    }
-    .toggle::after {
-      content: '';
-      position: absolute;
-      top: 2px; left: 2px;
-      width: 16px; height: 16px;
-      background: #fff;
-      border-radius: 50%;
-      transition: transform .2s ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,.15);
-    }
-    .toggle.is-on { background: var(--success); }
-    .toggle.is-on::after { transform: translateX(16px); }
-
-    /* Layout picker */
-    .layout-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    }
-    .layout-card {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      cursor: pointer;
-      background: var(--card);
-      text-align: left;
-      font-family: inherit;
-      transition: all .15s ease;
-    }
-    .layout-card:hover { border-color: var(--accent); }
-    .layout-card.is-active {
-      border-color: var(--brand);
-      background: #F1F5F9;
-      box-shadow: 0 0 0 2px var(--brand) inset;
-    }
-    .layout-name {
-      font-size: 12px; font-weight: 600; color: var(--text);
-    }
-    .layout-desc {
-      font-size: 11px; color: var(--muted); margin-top: 2px;
-    }
-    .layout-thumb {
-      height: 38px;
-      background: var(--border-light);
-      border-radius: 6px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 4px;
-    }
-    .layout-thumb .b {
-      background: var(--muted);
-      border-radius: 2px;
-      opacity: .7;
-    }
-
-    /* Presets */
-    .presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-    .preset-btn {
-      height: 32px; border-radius: 6px;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: transform .15s ease, box-shadow .15s ease;
-    }
-    .preset-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,.08); }
-
-    /* Slider */
-    .slider-wrap { display: flex; align-items: center; gap: 10px; }
-    .slider {
-      flex: 1;
-      -webkit-appearance: none; appearance: none;
-      height: 4px;
-      background: var(--border);
-      border-radius: 999px;
-    }
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: var(--brand);
-      cursor: pointer;
-    }
-    .slider-val {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 11px; color: var(--muted);
-      width: 36px; text-align: right;
-    }
-
-    /* Embed code */
-    .code {
-      background: #0F172A;
-      color: #E2E8F0;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 11px;
-      padding: 12px;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      line-height: 1.5;
-    }
-    .copy-btn {
-      width: 100%;
-      padding: 8px;
-      border-radius: 8px;
-      background: var(--brand); color: #fff;
-      border: none; cursor: pointer;
-      font-size: 12px; font-weight: 600;
-      margin-top: 8px;
-      transition: filter .15s ease;
-    }
-    .copy-btn:hover { filter: brightness(1.1); }
-    .copy-btn.is-copied { background: var(--success); }
-
-    /* Preview area */
-    .preview {
       display: flex;
       flex-direction: column;
-      min-width: 0;
-      background: var(--bg);
-    }
-    .pv-bar {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--border);
-      background: var(--card);
-    }
-    .pv-bar-spacer { flex: 1; }
-    .pv-bar-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 10px;
-      border-radius: 8px;
-      background: var(--card); border: 1px solid var(--border);
-      color: var(--sub); font-size: 12px; font-weight: 500;
-      cursor: pointer; transition: all .15s ease;
-    }
-    .pv-bar-btn:hover { border-color: var(--accent); color: var(--text); }
-    .pv-bar-btn.is-on { background: var(--brand); color: #fff; border-color: var(--brand); }
-    .pv-bar-btn svg { width: 14px; height: 14px; }
-    .pv-bar-pill {
-      font-size: 11px; padding: 3px 8px;
-      background: #ECFEFF; color: #0E7490;
-      border-radius: 999px; font-weight: 600;
-      border: 1px solid #A5F3FC;
-    }
-    .pv-frame {
-      flex: 1;
-      overflow: auto;
-      padding: 32px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-    }
-    .pv-stage {
-      width: 100%;
-      max-width: 880px;
-      padding: 32px;
-      background: var(--card);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      position: relative;
-      min-height: 240px;
-      display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 24px;
+      padding: 56px 32px;
+      background: var(--tgcd-card);
+      border: 1px solid var(--tgcd-border);
+      border-radius: var(--tgcd-radius);
+      box-shadow: var(--tgcd-shadow);
+      text-align: center;
+      overflow: hidden;
+      isolation: isolate;
     }
-    .pv-stage[data-layout="hero"] {
-      max-width: 960px;
-      padding: 0;
-      background: transparent;
-      box-shadow: none;
-    }
-    .pv-stage[data-layout="banner"] {
-      max-width: 1100px;
-      padding: 16px;
-    }
-    .pv-stage[data-layout="inline"] {
-      align-items: flex-start;
-      padding: 24px;
-      font-size: 16px; line-height: 1.7;
-      color: var(--sub);
-    }
-    .pv-stage.dark {
-      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-    }
-    .pv-stage-label {
+    /* Aurora — gated behind .tgcd-aurora on the hero element */
+    .tgcd-hero.tgcd-aurora::before {
+      content: '';
       position: absolute;
-      top: -10px; left: 16px;
-      background: var(--card);
-      padding: 0 8px;
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--muted);
+      inset: -20%;
+      z-index: -1;
+      background:
+        radial-gradient(40% 50% at 20% 30%, rgba(var(--tgcd-brand-rgb), .35) 0%, transparent 60%),
+        radial-gradient(45% 55% at 80% 25%, rgba(var(--tgcd-accent-rgb), .35) 0%, transparent 65%),
+        radial-gradient(50% 60% at 70% 80%, rgba(var(--tgcd-brand-rgb), .25) 0%, transparent 60%),
+        radial-gradient(35% 45% at 25% 75%, rgba(var(--tgcd-accent-rgb), .25) 0%, transparent 60%);
+      filter: blur(40px);
+      opacity: .9;
     }
-
-    /* Design mode overlay */
-    .dm-overlay {
+    @media (prefers-reduced-motion: no-preference) {
+      .tgcd-hero.tgcd-aurora::before {
+        animation: tgcd-aurora 18s ease-in-out infinite alternate;
+      }
+      @keyframes tgcd-aurora {
+        0%   { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+        50%  { transform: translate(-3%, 2%) rotate(8deg) scale(1.05); }
+        100% { transform: translate(2%, -2%) rotate(-6deg) scale(1.02); }
+      }
+    }
+    .tgcd-hero.tgcd-aurora::after {
+      /* Soft inner vignette so aurora doesn't overwhelm the centre content */
+      content: '';
       position: absolute;
       inset: 0;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .dm-hot {
-      position: absolute;
-      border: 2px dashed rgba(0,180,216,.6);
-      background: rgba(0,180,216,.08);
-      border-radius: 6px;
-      pointer-events: auto;
-      cursor: pointer;
-      transition: background .15s ease, border-color .15s ease;
-    }
-    .dm-hot:hover {
-      background: rgba(0,180,216,.18);
-      border-color: var(--accent);
-    }
-    .dm-hot-label {
-      position: absolute;
-      top: -22px; left: 0;
-      background: var(--accent);
-      color: #fff;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 10px; font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      z-index: -1;
+      background: radial-gradient(60% 50% at 50% 50%, transparent 0%, rgba(255,255,255,.5) 100%);
       pointer-events: none;
     }
-    .dm-pop {
-      position: absolute;
-      z-index: 100;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      box-shadow: var(--shadow-lg);
-      width: 280px;
+    .tgcd-root[data-theme="dark"] .tgcd-hero.tgcd-aurora::after {
+      background: radial-gradient(60% 50% at 50% 50%, transparent 0%, rgba(15,23,42,.5) 100%);
     }
-    .dm-pop-title {
-      font-size: 12px; font-weight: 600;
-      color: var(--text);
-      margin: 0 0 10px;
+    .tgcd-hero .tgcd-heading {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      max-width: 720px;
     }
-
-    /* Modals (AI / Templates) */
-    .modal-bg {
-      position: fixed; inset: 0;
-      background: rgba(15,23,42,.55);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px;
+    .tgcd-hero .tgcd-sub {
+      font-size: 17px;
+      max-width: 600px;
+      line-height: 1.6;
     }
-    .modal {
-      background: var(--card);
-      border-radius: 16px;
-      width: 100%; max-width: 520px;
-      max-height: calc(100vh - 48px);
-      overflow: hidden;
-      display: flex; flex-direction: column;
-      box-shadow: var(--shadow-lg);
+    .tgcd-hero .tgcd-units { gap: 16px; margin: 12px 0; }
+    .tgcd-hero .tgcd-digits {
+      font-size: 64px;
+      padding: 24px 22px;
+      min-width: 120px;
+      border-radius: 14px;
     }
-    .modal-head {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-title { font-size: 15px; font-weight: 700; }
-    .modal-close {
-      background: transparent; border: none;
-      width: 28px; height: 28px;
-      display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 6px; cursor: pointer; color: var(--muted);
-    }
-    .modal-close:hover { background: var(--bg); color: var(--text); }
-    .modal-body { padding: 20px; overflow-y: auto; }
-    .modal-foot {
-      padding: 12px 20px;
-      border-top: 1px solid var(--border);
-      display: flex; gap: 8px; justify-content: flex-end;
-    }
-    .btn-primary {
-      padding: 8px 16px; border-radius: 8px;
-      background: var(--brand); color: #fff;
-      border: none; cursor: pointer;
-      font-size: 13px; font-weight: 600;
-      transition: filter .15s ease;
-    }
-    .btn-primary:hover { filter: brightness(1.1); }
-    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-secondary {
-      padding: 8px 16px; border-radius: 8px;
-      background: var(--card); color: var(--text);
-      border: 1px solid var(--border); cursor: pointer;
-      font-size: 13px; font-weight: 500;
-    }
-    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* Templates list */
-    .tpl-list { display: grid; gap: 8px; }
-    .tpl-card {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      cursor: pointer;
-      background: var(--card);
-      text-align: left;
-      font-family: inherit;
-      transition: all .15s ease;
-    }
-    .tpl-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-    .tpl-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-    .tpl-desc { font-size: 12px; color: var(--sub); }
-
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%);
-      background: var(--text); color: #fff;
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-size: 13px; font-weight: 500;
-      z-index: 300;
-      opacity: 0; pointer-events: none;
-      transition: opacity .2s ease, transform .2s ease;
-    }
-    .toast.is-show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(-4px);
-    }
-    .toast.is-error { background: var(--error); }
-    .toast.is-success { background: var(--success); }
-
-    /* Login overlay */
-    .login {
-      position: fixed; inset: 0;
-      background: rgba(248,250,252,.96);
-      backdrop-filter: blur(8px);
-      z-index: 400;
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px;
-    }
-    .login-box {
-      background: var(--card);
-      border-radius: 16px;
-      box-shadow: var(--shadow-lg);
-      padding: 28px;
-      width: 100%; max-width: 380px;
-    }
-    .login h2 {
-      margin: 0 0 4px;
-      font-size: 20px; font-weight: 700;
-    }
-    .login p {
-      margin: 0 0 20px;
-      color: var(--sub); font-size: 13px;
-    }
-    .login .field { margin-bottom: 12px; }
-    .login-err {
-      color: var(--error);
-      font-size: 12px;
-      margin-top: 8px;
-      min-height: 16px;
-    }
-    .login-submit {
-      width: 100%;
-      padding: 10px;
-      background: var(--brand); color: #fff;
-      border: none; border-radius: 8px;
-      font-size: 14px; font-weight: 600;
-      cursor: pointer; margin-top: 4px;
-      transition: filter .15s ease;
-    }
-    .login-submit:hover { filter: brightness(1.1); }
-
-    /* AI textarea */
-    .ai-prompt {
-      width: 100%;
-      min-height: 120px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 13px; font-family: inherit;
-      resize: vertical;
-    }
-    .ai-prompt:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,180,216,.15); }
-    .ai-hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-
-    /* Responsive: collapse sidebar on small screens */
-    @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-      .sidebar { border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Login overlay -->
-  <div class="login" id="loginBox" hidden>
-    <div class="login-box">
-      <h2>Sign in to continue</h2>
-      <p>Use your Travelgenix Widget Suite credentials.</p>
-      <form id="loginForm" autocomplete="on">
-        <div class="field">
-          <label class="field-label" for="loginEmail">Email</label>
-          <input class="input" id="loginEmail" type="email" autocomplete="username" required />
-        </div>
-        <div class="field">
-          <label class="field-label" for="loginPwd">Client code</label>
-          <input class="input" id="loginPwd" type="password" autocomplete="current-password" required />
-        </div>
-        <div class="login-err" id="loginErr"></div>
-        <button class="login-submit" type="submit" id="loginBtn">Sign in</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- App -->
-  <div class="app" id="app" hidden>
-    <aside class="sidebar">
-      <!-- Top -->
-      <div class="sb-top">
-        <a class="sb-back" href="/" title="Back to dashboard" aria-label="Back to dashboard">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        </a>
-        <span class="sb-mark"></span>
-        <span class="sb-title">Countdown Timer</span>
-        <button class="sb-action" id="btnAi" title="AI builder (A)" aria-label="AI builder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2zM18 14l.7 2.3L21 17l-2.3.7L18 20l-.7-2.3L15 17l2.3-.7L18 14z"/></svg>
-        </button>
-        <button class="sb-action" id="btnTpl" title="Templates (T)" aria-label="Templates">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        </button>
-        <button class="sb-action" id="btnUndo" title="Undo (⌘Z)" aria-label="Undo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15.5-6L3 13"/></svg>
-        </button>
-        <button class="sb-action" id="btnRedo" title="Redo (⌘Y)" aria-label="Redo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15.5-6L21 13"/></svg>
-        </button>
-      </div>
-
-      <div class="sb-name">
-        <input id="widgetName" placeholder="Widget name…" />
-        <button class="sb-save" id="btnSave">Save</button>
-      </div>
-
-      <div class="tabs" role="tablist">
-        <button class="tab is-active" data-tab="design" role="tab">Design</button>
-        <button class="tab" data-tab="content" role="tab">Content</button>
-        <button class="tab" data-tab="settings" role="tab">Settings</button>
-      </div>
-
-      <div class="sb-body">
-
-        <!-- DESIGN TAB -->
-        <div class="tab-panel" data-panel="design">
-          <div class="sec is-open">
-            <button class="sec-head" type="button"><span class="sec-title">Layout</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="layout-grid" id="layoutGrid">
-                <button class="layout-card is-active" data-layout="card" type="button">
-                  <div class="layout-thumb"><div class="b" style="width:60%;height:8px"></div></div>
-                  <div class="layout-name">Card</div>
-                  <div class="layout-desc">Boxed, mid-page</div>
-                </button>
-                <button class="layout-card" data-layout="banner" type="button">
-                  <div class="layout-thumb"><div class="b" style="width:90%;height:14px"></div></div>
-                  <div class="layout-name">Banner</div>
-                  <div class="layout-desc">Wide horizontal strip</div>
-                </button>
-                <button class="layout-card" data-layout="inline" type="button">
-                  <div class="layout-thumb" style="justify-content:flex-start;padding-left:8px"><div class="b" style="width:30%;height:6px"></div></div>
-                  <div class="layout-name">Inline</div>
-                  <div class="layout-desc">Just the digits</div>
-                </button>
-                <button class="layout-card" data-layout="hero" type="button">
-                  <div class="layout-thumb"><div class="b" style="width:50%;height:24px"></div></div>
-                  <div class="layout-name">Hero</div>
-                  <div class="layout-desc">Large, centred</div>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec is-open">
-            <button class="sec-head" type="button"><span class="sec-title">Theme & colours</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="field">
-                <span class="field-label">Theme</span>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-                  <button class="btn-secondary" data-theme-btn="light" id="themeLight" style="padding:8px;font-size:12px">Light</button>
-                  <button class="btn-secondary" data-theme-btn="dark" id="themeDark" style="padding:8px;font-size:12px">Dark</button>
-                </div>
-              </div>
-
-              <div class="field">
-                <span class="field-label">Presets</span>
-                <div class="presets" id="presetsRow"></div>
-              </div>
-
-              <div class="field"><span class="field-label">Brand colour</span>
-                <div class="colour-row">
-                  <input type="color" id="colBrand" />
-                  <input type="text" class="input" id="colBrandHex" maxlength="7" />
-                </div>
-              </div>
-              <div class="field"><span class="field-label">Accent colour</span>
-                <div class="colour-row">
-                  <input type="color" id="colAccent" />
-                  <input type="text" class="input" id="colAccentHex" maxlength="7" />
-                </div>
-              </div>
-              <div class="field"><span class="field-label">Card background</span>
-                <div class="colour-row">
-                  <input type="color" id="colCard" />
-                  <input type="text" class="input" id="colCardHex" maxlength="7" />
-                </div>
-              </div>
-              <div class="field"><span class="field-label">Text</span>
-                <div class="colour-row">
-                  <input type="color" id="colText" />
-                  <input type="text" class="input" id="colTextHex" maxlength="7" />
-                </div>
-              </div>
-              <div class="field"><span class="field-label">Digit cell background</span>
-                <div class="colour-row">
-                  <input type="color" id="colDigitBg" />
-                  <input type="text" class="input" id="colDigitBgHex" maxlength="7" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec is-open">
-            <button class="sec-head" type="button"><span class="sec-title">Shape & motion</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="field">
-                <span class="field-label">Border radius</span>
-                <div class="slider-wrap">
-                  <input type="range" min="0" max="28" step="1" id="radiusSlider" class="slider" />
-                  <span class="slider-val" id="radiusVal">16</span>
-                </div>
-              </div>
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Tick animation</div>
-                  <div class="toggle-sub">Subtle fade as digits change. Disabled automatically for reduced-motion users.</div>
-                </div>
-                <button class="toggle is-on" data-toggle="anim" type="button" aria-label="Toggle tick animation"></button>
-              </div>
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Urgency mode</div>
-                  <div class="toggle-sub">Switch digits to accent colour when below threshold.</div>
-                </div>
-                <button class="toggle is-on" data-toggle="urgency" type="button" aria-label="Toggle urgency mode"></button>
-              </div>
-              <div class="field">
-                <span class="field-label">Urgency threshold (hours)</span>
-                <input class="input" type="number" min="1" max="168" id="urgencyHours" />
-              </div>
-            </div>
-          </div>
-
-          <div class="sec is-open">
-            <button class="sec-head" type="button"><span class="sec-title">Wow effects</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Sliding digits</div>
-                  <div class="toggle-sub">Numbers slide up reel-style on change. Reduced-motion users get an instant swap.</div>
-                </div>
-                <button class="toggle is-on" data-toggle="wowSliding" type="button" aria-label="Toggle sliding digits"></button>
-              </div>
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Brand glow</div>
-                  <div class="toggle-sub">Soft brand-coloured shadow under each digit cell. Lifts on urgency.</div>
-                </div>
-                <button class="toggle is-on" data-toggle="wowGlow" type="button" aria-label="Toggle brand glow"></button>
-              </div>
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Final-minute ring</div>
-                  <div class="toggle-sub">SVG progress ring around the seconds cell during the final 60 seconds.</div>
-                </div>
-                <button class="toggle is-on" data-toggle="wowRing" type="button" aria-label="Toggle final-minute ring"></button>
-              </div>
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Hero aurora</div>
-                  <div class="toggle-sub">Animated brand-tinted aurora background on the Hero layout only.</div>
-                </div>
-                <button class="toggle is-on" data-toggle="wowAurora" type="button" aria-label="Toggle hero aurora"></button>
-              </div>
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Banner pulse dot</div>
-                  <div class="toggle-sub">Pulsing dot beside the heading on the Banner layout only.</div>
-                </div>
-                <button class="toggle is-on" data-toggle="wowDot" type="button" aria-label="Toggle banner pulse dot"></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CONTENT TAB -->
-        <div class="tab-panel" data-panel="content" hidden>
-
-          <div class="sec is-open">
-            <button class="sec-head" type="button"><span class="sec-title">Target</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="field">
-                <span class="field-label">Target date & time</span>
-                <input class="input" type="datetime-local" id="targetDate" />
-                <div class="field-help">Stored as UTC. The widget computes time-until in milliseconds, so it works correctly regardless of viewer timezone.</div>
-              </div>
-              <div class="field">
-                <span class="field-label">Reference timezone</span>
-                <select class="select" id="timezone">
-                  <option value="Europe/London">Europe/London</option>
-                  <option value="Europe/Dublin">Europe/Dublin</option>
-                  <option value="Europe/Paris">Europe/Paris</option>
-                  <option value="UTC">UTC</option>
-                  <option value="America/New_York">America/New_York</option>
-                  <option value="America/Los_Angeles">America/Los_Angeles</option>
-                  <option value="Asia/Dubai">Asia/Dubai</option>
-                  <option value="Asia/Singapore">Asia/Singapore</option>
-                  <option value="Australia/Sydney">Australia/Sydney</option>
-                </select>
-                <div class="field-help">Used to interpret the date you typed above. The display label inside the widget always reflects the viewer's local time.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec is-open">
-            <button class="sec-head" type="button"><span class="sec-title">Copy</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="field">
-                <span class="field-label">Heading</span>
-                <input class="input" id="heading" maxlength="120" />
-              </div>
-              <div class="field">
-                <span class="field-label">Subheading (optional)</span>
-                <textarea class="textarea" id="subheading" maxlength="240"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec">
-            <button class="sec-head" type="button"><span class="sec-title">Call to action</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="field">
-                <span class="field-label">Button text</span>
-                <input class="input" id="ctaText" maxlength="40" placeholder="Browse offers" />
-              </div>
-              <div class="field">
-                <span class="field-label">Button URL</span>
-                <input class="input" id="ctaUrl" maxlength="500" placeholder="https://…" />
-                <div class="field-help">Must start with https://, http://, /, or # — anything else is rejected.</div>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Open in new tab</div>
-                <button class="toggle is-on" data-toggle="ctaNewTab" type="button" aria-label="Open in new tab"></button>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec">
-            <button class="sec-head" type="button"><span class="sec-title">When it hits zero</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="field">
-                <span class="field-label">Behaviour</span>
-                <select class="select" id="expiryBehaviour">
-                  <option value="message">Show expired message</option>
-                  <option value="cta-only">Show CTA only</option>
-                  <option value="hide">Hide widget</option>
-                </select>
-              </div>
-              <div class="field" id="expiryMessageWrap">
-                <span class="field-label">Expired message</span>
-                <input class="input" id="expiryMessage" maxlength="160" />
-              </div>
-            </div>
-          </div>
-
-          <div class="sec">
-            <button class="sec-head" type="button"><span class="sec-title">Repeating mode</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Repeat the countdown</div>
-                  <div class="toggle-sub">When the timer hits zero, roll over to the next occurrence. Overrides "When it hits zero" above.</div>
-                </div>
-                <button class="toggle" data-toggle="repeat" type="button" aria-label="Toggle repeating mode"></button>
-              </div>
-              <div id="repeatFields" hidden>
-                <div class="field">
-                  <span class="field-label">Frequency</span>
-                  <select class="select" id="repeatFreq">
-                    <option value="weekly">Weekly</option>
-                    <option value="daily">Daily</option>
-                  </select>
-                </div>
-                <div class="field" id="repeatDayWrap">
-                  <span class="field-label">Day of week</span>
-                  <select class="select" id="repeatDay">
-                    <option value="0">Sunday</option>
-                    <option value="1">Monday</option>
-                    <option value="2">Tuesday</option>
-                    <option value="3">Wednesday</option>
-                    <option value="4">Thursday</option>
-                    <option value="5">Friday</option>
-                    <option value="6">Saturday</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <span class="field-label">Time</span>
-                  <input class="input" type="time" id="repeatTime" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- SETTINGS TAB -->
-        <div class="tab-panel" data-panel="settings" hidden>
-
-          <div class="sec is-open">
-            <button class="sec-head" type="button"><span class="sec-title">Show units</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="toggle-row">
-                <div class="toggle-label">Days</div>
-                <button class="toggle is-on" data-toggle="showDays" type="button" aria-label="Show days"></button>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Hours</div>
-                <button class="toggle is-on" data-toggle="showHours" type="button" aria-label="Show hours"></button>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Minutes</div>
-                <button class="toggle is-on" data-toggle="showMinutes" type="button" aria-label="Show minutes"></button>
-              </div>
-              <div class="toggle-row">
-                <div class="toggle-label">Seconds</div>
-                <button class="toggle is-on" data-toggle="showSeconds" type="button" aria-label="Show seconds"></button>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec is-open">
-            <button class="sec-head" type="button"><span class="sec-title">Embed code</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <pre class="code" id="embedCode">Save first to get your embed code.</pre>
-              <button class="copy-btn" id="copyBtn">Copy embed code</button>
-            </div>
-          </div>
-
-          <div class="sec">
-            <button class="sec-head" type="button"><span class="sec-title">Advanced</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="sec-body">
-              <div class="field-help" style="font-size:12px;line-height:1.5">
-                <strong style="color:var(--text)">Client time:</strong> The widget uses the viewer's device clock to compute the remaining time. The configured target is stored as a fixed UTC instant, so the moment is unambiguous worldwide. If a viewer's clock is set incorrectly their countdown will be off — this is acceptable for marketing campaigns. For legally binding deadlines, use a server-rendered timestamp instead.
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </aside>
-
-    <!-- Preview -->
-    <main class="preview">
-      <div class="pv-bar">
-        <span class="pv-bar-pill" id="pvLayoutPill">CARD</span>
-        <span class="pv-bar-pill" id="pvThemePill" style="background:#FEF3C7;color:#92400E;border-color:#FDE68A">LIGHT</span>
-        <div class="pv-bar-spacer"></div>
-        <button class="pv-bar-btn" id="btnDesignMode" title="Design mode (D)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          Design mode
-        </button>
-      </div>
-      <div class="pv-frame">
-        <div class="pv-stage" id="pvStage" data-layout="card">
-          <span class="pv-stage-label" id="pvStageLabel">CARD LAYOUT</span>
-          <div id="pvHost"></div>
-          <div class="dm-overlay" id="dmOverlay" hidden></div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
-
-  <!-- Modals -->
-  <div class="modal-bg" id="aiModal" hidden>
-    <div class="modal">
-      <div class="modal-head">
-        <span class="modal-title">AI builder</span>
-        <button class="modal-close" data-close="aiModal" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="field-label">Tell me about your campaign</div>
-        <textarea class="ai-prompt" id="aiPrompt" placeholder="e.g. A Black Friday sale on Caribbean cruises, ending Friday 28 November at midnight. The CTA goes to our packages page."></textarea>
-        <div class="ai-hint">I'll suggest a heading, subheading, CTA text, and target date. You can review and tweak before applying.</div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn-secondary" data-close="aiModal">Cancel</button>
-        <button class="btn-primary" id="aiGenerateBtn">Generate</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-bg" id="tplModal" hidden>
-    <div class="modal">
-      <div class="modal-head">
-        <span class="modal-title">Templates</span>
-        <button class="modal-close" data-close="tplModal" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="tpl-list" id="tplList"></div>
-      </div>
-    </div>
-  </div>
-
-  <script src="/widget-countdown.js"></script>
-  <script>
-    /* =========================================================
-       Auth helpers — FAQ pattern (no exp check, server validates)
-       ========================================================= */
-    const SESSION_KEY = 'tgw_session';
-    function getSession() {
-      try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch { return null; }
-    }
-    function isLoggedIn() {
-      const s = getSession();
-      return !!(s && s.token);
-    }
-    function getAuthToken() {
-      try { return JSON.parse(sessionStorage.getItem(SESSION_KEY))?.token || ''; } catch { return ''; }
-    }
-    function authH() {
-      const t = getAuthToken();
-      const h = { 'Content-Type': 'application/json' };
-      if (t) h['Authorization'] = 'Bearer ' + t;
-      return h;
-    }
-    function showLogin() {
-      document.getElementById('app').setAttribute('hidden', '');
-      document.getElementById('loginBox').removeAttribute('hidden');
-    }
-    function showApp() {
-      document.getElementById('loginBox').setAttribute('hidden', '');
-      document.getElementById('app').removeAttribute('hidden');
+    .tgcd-hero .tgcd-label { font-size: 12px; }
+    .tgcd-hero .tgcd-sep { font-size: 56px; transform: translateY(-16px); }
+    .tgcd-hero .tgcd-cta {
+      padding: 16px 32px;
+      font-size: 16px;
+      min-height: 52px;
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const pwd = document.getElementById('loginPwd').value;
-      const err = document.getElementById('loginErr');
-      const btn = document.getElementById('loginBtn');
-      err.textContent = '';
-      btn.textContent = 'Signing in…';
-      btn.disabled = true;
-      try {
-        const res = await fetch('/api/widget-auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, code: pwd })
-        });
-        if (!res.ok) {
-          err.textContent = res.status === 429 ? 'Too many attempts. Try again later.' : 'Invalid credentials.';
-          return;
-        }
-        const data = await res.json();
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
-          user: data.user, token: data.token, timestamp: Date.now()
-        }));
-        showApp();
-        boot();
-      } catch (ex) {
-        err.textContent = 'Network error. Please try again.';
-      } finally {
-        btn.textContent = 'Sign in';
-        btn.disabled = false;
+    /* ---------- Expired ---------- */
+    .tgcd-expired {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 32px 24px;
+      background: var(--tgcd-card);
+      border: 1px solid var(--tgcd-border);
+      border-radius: var(--tgcd-radius);
+      box-shadow: var(--tgcd-shadow);
+      text-align: center;
+    }
+    .tgcd-expired .tgcd-heading { font-size: 18px; }
+    .tgcd-expired .tgcd-sub { font-size: 14px; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 600px) {
+      .tgcd-banner { flex-direction: column; text-align: center; padding: 16px; }
+      .tgcd-banner .tgcd-banner-text { justify-content: center; text-align: center; }
+      .tgcd-banner .tgcd-units { justify-content: center; }
+      .tgcd-card { padding: 24px 16px; }
+      .tgcd-hero { padding: 40px 20px; }
+      .tgcd-hero .tgcd-heading { font-size: 26px; }
+      .tgcd-hero .tgcd-digits { font-size: 40px; padding: 16px 14px; min-width: 80px; }
+      .tgcd-hero .tgcd-sep { font-size: 36px; transform: translateY(-10px); }
+      .tgcd-digits { font-size: 28px; padding: 10px 12px; min-width: 60px; }
+      .tgcd-sep { font-size: 24px; transform: translateY(-7px); }
+    }
+    @media (max-width: 360px) {
+      .tgcd-units { gap: 6px; }
+      .tgcd-digits { font-size: 24px; padding: 8px 10px; min-width: 52px; }
+      .tgcd-hero .tgcd-digits { font-size: 32px; min-width: 64px; }
+    }
+  `;
+
+  // ---------- Defaults ----------
+  function defaults() {
+    return {
+      layout: 'card', // banner | card | inline | hero
+      theme: 'light', // light | dark
+      targetDate: null, // ISO string
+      timezone: 'Europe/London', // display label only; the ISO above is the source of truth
+      heading: 'Sale ends in',
+      subheading: '',
+      cta: { text: '', url: '', openInNewTab: true },
+      expiry: { behaviour: 'message', message: 'This offer has now ended.' }, // hide | message | cta-only
+      display: { showDays: true, showHours: true, showMinutes: true, showSeconds: true },
+      repeating: { enabled: false, frequency: 'weekly', dayOfWeek: 5, time: '17:00' },
+      urgency: { enabled: true, thresholdHours: 24 },
+      animation: { tick: true },
+      wow: {
+        slidingDigits: true,    // digits slide up reel-style on change
+        gradientCells: true,    // brand-tinted gradient on digit cells (vs flat colour)
+        glow: true,             // soft brand-coloured glow under digit cells
+        finalMinuteRing: true,  // SVG progress ring around seconds in final 60s
+        heroAurora: true,       // animated aurora background behind the Hero layout
+        bannerDot: true         // pulsing dot next to the heading on Banner layout
+      },
+      colours: {
+        brand: '#1B2B5B',
+        accent: '#00B4D8',
+        bg: 'transparent',
+        card: '#FFFFFF',
+        text: '#0F172A',
+        digitBg: '#F8FAFC',
+        ctaBg: '',     // empty = use brand
+        ctaText: '#FFFFFF'
+      },
+      radius: 16
+    };
+  }
+
+  function mergeConfig(d, c) {
+    if (!c) return d;
+    const out = JSON.parse(JSON.stringify(d));
+    for (const k of Object.keys(c)) {
+      if (c[k] && typeof c[k] === 'object' && !Array.isArray(c[k]) && out[k] && typeof out[k] === 'object') {
+        out[k] = Object.assign({}, out[k], c[k]);
+      } else if (c[k] !== undefined) {
+        out[k] = c[k];
       }
-    });
+    }
+    return out;
+  }
 
-    /* =========================================================
-       App state
-       ========================================================= */
-    function defaultsCfg() {
-      return {
-        layout: 'card',
-        theme: 'light',
-        targetDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(),
-        timezone: 'Europe/London',
-        heading: 'Sale ends in',
-        subheading: '',
-        cta: { text: 'Browse offers', url: 'https://example.com', openInNewTab: true },
-        expiry: { behaviour: 'message', message: 'This offer has now ended.' },
-        display: { showDays: true, showHours: true, showMinutes: true, showSeconds: true },
-        repeating: { enabled: false, frequency: 'weekly', dayOfWeek: 5, time: '17:00' },
-        urgency: { enabled: true, thresholdHours: 24 },
-        animation: { tick: true },
-        wow: {
-          slidingDigits: true,
-          gradientCells: true,
-          glow: true,
-          finalMinuteRing: true,
-          heroAurora: true,
-          bannerDot: true
-        },
-        colours: {
-          brand: '#1B2B5B',
-          accent: '#00B4D8',
-          bg: 'transparent',
-          card: '#FFFFFF',
-          text: '#0F172A',
-          digitBg: '#F8FAFC',
-          ctaBg: '',
-          ctaText: '#FFFFFF'
-        },
-        radius: 16
-      };
+  // ---------- Widget class ----------
+  class TGCountdownWidget {
+    constructor(container, config) {
+      this.el = container;
+      this.c = mergeConfig(defaults(), config);
+      this.shadow = container.attachShadow({ mode: 'open' });
+      this._lastValues = {};
+      this._timerId = null;
+      this._render();
     }
 
-    let cfg = defaultsCfg();
-    let widgetId = null;
-    let widgetName = '';
-    let widgetInst = null;
-
-    // Undo stack
-    const UNDO_LIMIT = 40;
-    let undoStack = [];
-    let redoStack = [];
-    let undoLock = false;
-    function snapshot() {
-      if (undoLock) return;
-      const snap = JSON.stringify({ cfg: cfg, name: widgetName });
-      if (undoStack[undoStack.length - 1] === snap) return;
-      undoStack.push(snap);
-      if (undoStack.length > UNDO_LIMIT) undoStack.shift();
-      redoStack = [];
-    }
-    function applySnap(str) {
-      try {
-        const o = JSON.parse(str);
-        cfg = o.cfg;
-        widgetName = o.name || '';
-        document.getElementById('widgetName').value = widgetName;
-        undoLock = true;
-        hydrateUI();
-        rebuild();
-        undoLock = false;
-      } catch {}
-    }
-    function undo() {
-      if (undoStack.length < 2) return;
-      const cur = undoStack.pop();
-      redoStack.push(cur);
-      const prev = undoStack[undoStack.length - 1];
-      applySnap(prev);
-    }
-    function redo() {
-      if (!redoStack.length) return;
-      const next = redoStack.pop();
-      undoStack.push(next);
-      applySnap(next);
+    update(newConfig) {
+      this.c = mergeConfig(defaults(), newConfig);
+      this._lastValues = {};
+      this._stop();
+      this._render();
     }
 
-    /* =========================================================
-       UI hydration & wiring
-       ========================================================= */
-    const PRESETS = [
-      { name: 'Travelgenix', brand: '#1B2B5B', accent: '#00B4D8', card: '#FFFFFF', text: '#0F172A', digitBg: '#F8FAFC' },
-      { name: 'Sunset',      brand: '#9A3412', accent: '#F97316', card: '#FFFBEB', text: '#1F2937', digitBg: '#FEF3C7' },
-      { name: 'Forest',      brand: '#14532D', accent: '#10B981', card: '#FFFFFF', text: '#0F172A', digitBg: '#ECFDF5' },
-      { name: 'Coral',       brand: '#9F1239', accent: '#F43F5E', card: '#FFFFFF', text: '#0F172A', digitBg: '#FFF1F2' },
-      { name: 'Midnight',    brand: '#312E81', accent: '#A78BFA', card: '#0F172A', text: '#F1F5F9', digitBg: '#1E1B4B' }
-    ];
-
-    function buildPresets() {
-      const row = document.getElementById('presetsRow');
-      row.innerHTML = '';
-      PRESETS.forEach((p, i) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'preset-btn';
-        btn.title = p.name;
-        btn.style.background = 'linear-gradient(135deg, ' + p.brand + ' 0%, ' + p.accent + ' 100%)';
-        btn.addEventListener('click', () => {
-          cfg.colours.brand = p.brand;
-          cfg.colours.accent = p.accent;
-          cfg.colours.card = p.card;
-          cfg.colours.text = p.text;
-          cfg.colours.digitBg = p.digitBg;
-          // Auto-set theme based on card colour darkness
-          const isDark = parseInt(p.card.replace('#',''), 16) < 0x808080;
-          cfg.theme = isDark ? 'dark' : 'light';
-          hydrateUI();
-          rebuild();
-          snapshot();
-        });
-        row.appendChild(btn);
-      });
+    destroy() {
+      this._stop();
+      try { this.shadow.innerHTML = ''; } catch {}
     }
 
-    function hydrateUI() {
-      // Layout
-      document.querySelectorAll('#layoutGrid .layout-card').forEach(b => {
-        b.classList.toggle('is-active', b.dataset.layout === cfg.layout);
-      });
-      // Theme
-      document.getElementById('themeLight').classList.toggle('is-active', cfg.theme === 'light');
-      document.getElementById('themeDark').classList.toggle('is-active', cfg.theme === 'dark');
-      document.getElementById('themeLight').style.background = cfg.theme === 'light' ? 'var(--brand)' : '';
-      document.getElementById('themeLight').style.color = cfg.theme === 'light' ? '#fff' : '';
-      document.getElementById('themeLight').style.borderColor = cfg.theme === 'light' ? 'var(--brand)' : '';
-      document.getElementById('themeDark').style.background = cfg.theme === 'dark' ? 'var(--brand)' : '';
-      document.getElementById('themeDark').style.color = cfg.theme === 'dark' ? '#fff' : '';
-      document.getElementById('themeDark').style.borderColor = cfg.theme === 'dark' ? 'var(--brand)' : '';
-      // Colours
-      const setCol = (idC, idH, val) => {
-        document.getElementById(idC).value = val.startsWith('#') ? val : '#1B2B5B';
-        document.getElementById(idH).value = val.toUpperCase();
-      };
-      setCol('colBrand', 'colBrandHex', cfg.colours.brand);
-      setCol('colAccent', 'colAccentHex', cfg.colours.accent);
-      setCol('colCard', 'colCardHex', cfg.colours.card);
-      setCol('colText', 'colTextHex', cfg.colours.text);
-      setCol('colDigitBg', 'colDigitBgHex', cfg.colours.digitBg);
-      // Shape
-      document.getElementById('radiusSlider').value = cfg.radius;
-      document.getElementById('radiusVal').textContent = cfg.radius;
-      // Toggles
-      setToggle('anim', cfg.animation.tick);
-      setToggle('urgency', cfg.urgency.enabled);
-      document.getElementById('urgencyHours').value = cfg.urgency.thresholdHours;
-      // Content
-      const dt = cfg.targetDate ? toLocalDateTimeInput(cfg.targetDate) : '';
-      document.getElementById('targetDate').value = dt;
-      document.getElementById('timezone').value = cfg.timezone || 'Europe/London';
-      document.getElementById('heading').value = cfg.heading || '';
-      document.getElementById('subheading').value = cfg.subheading || '';
-      document.getElementById('ctaText').value = cfg.cta.text || '';
-      document.getElementById('ctaUrl').value = cfg.cta.url || '';
-      setToggle('ctaNewTab', !!cfg.cta.openInNewTab);
-      document.getElementById('expiryBehaviour').value = cfg.expiry.behaviour;
-      document.getElementById('expiryMessage').value = cfg.expiry.message || '';
-      document.getElementById('expiryMessageWrap').style.display = cfg.expiry.behaviour === 'message' ? '' : 'none';
-      // Repeating
-      setToggle('repeat', cfg.repeating.enabled);
-      document.getElementById('repeatFields').toggleAttribute('hidden', !cfg.repeating.enabled);
-      document.getElementById('repeatFreq').value = cfg.repeating.frequency;
-      document.getElementById('repeatDay').value = String(cfg.repeating.dayOfWeek);
-      document.getElementById('repeatTime').value = cfg.repeating.time;
-      document.getElementById('repeatDayWrap').style.display = cfg.repeating.frequency === 'weekly' ? '' : 'none';
-      // Settings — units
-      setToggle('showDays', cfg.display.showDays);
-      setToggle('showHours', cfg.display.showHours);
-      setToggle('showMinutes', cfg.display.showMinutes);
-      setToggle('showSeconds', cfg.display.showSeconds);
-      // Wow effects
-      const w = cfg.wow || {};
-      setToggle('wowSliding', w.slidingDigits);
-      setToggle('wowGlow',    w.glow);
-      setToggle('wowRing',    w.finalMinuteRing);
-      setToggle('wowAurora',  w.heroAurora);
-      setToggle('wowDot',     w.bannerDot);
+    _stop() {
+      if (this._timerId) { clearInterval(this._timerId); this._timerId = null; }
     }
 
-    function setToggle(name, on) {
-      const el = document.querySelector('[data-toggle="' + name + '"]');
-      if (el) el.classList.toggle('is-on', !!on);
+    _resolveTarget() {
+      let t = parseTarget(this.c.targetDate);
+      if (this.c.repeating && this.c.repeating.enabled) {
+        // If repeating, always use the next occurrence (rolls over silently when expired)
+        const base = t || Date.now();
+        if (Date.now() >= base) {
+          t = nextRepeatingTarget(base, this.c.repeating.frequency, this.c.repeating.dayOfWeek, this.c.repeating.time);
+        }
+      }
+      return t;
     }
 
-    function toLocalDateTimeInput(iso) {
-      const d = new Date(iso);
-      const pad = (n) => (n < 10 ? '0' + n : '' + n);
-      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-    }
+    _render() {
+      const c = this.c;
+      const targetMs = this._resolveTarget();
 
-    /* =========================================================
-       Rebuild preview
-       ========================================================= */
-    function rebuild() {
-      const stage = document.getElementById('pvStage');
-      const host = document.getElementById('pvHost');
-      const label = document.getElementById('pvStageLabel');
-      const layoutPill = document.getElementById('pvLayoutPill');
-      const themePill = document.getElementById('pvThemePill');
+      // Build root
+      const root = document.createElement('div');
+      root.className = 'tgcd-root';
+      root.setAttribute('data-theme', c.theme === 'dark' ? 'dark' : 'light');
 
-      stage.setAttribute('data-layout', cfg.layout);
-      stage.classList.toggle('dark', cfg.theme === 'dark');
-      label.textContent = cfg.layout.toUpperCase() + ' LAYOUT';
-      layoutPill.textContent = cfg.layout.toUpperCase();
-      themePill.textContent = cfg.theme.toUpperCase();
-      themePill.style.background = cfg.theme === 'dark' ? '#1E293B' : '#FEF3C7';
-      themePill.style.color = cfg.theme === 'dark' ? '#CBD5E1' : '#92400E';
-      themePill.style.borderColor = cfg.theme === 'dark' ? '#334155' : '#FDE68A';
+      // Apply config-driven CSS vars
+      const cs = c.colours || {};
+      if (cs.brand)   root.style.setProperty('--tgcd-brand',   cs.brand);
+      if (cs.accent)  root.style.setProperty('--tgcd-accent',  cs.accent);
+      if (cs.bg !== undefined) root.style.setProperty('--tgcd-bg', cs.bg);
+      if (cs.card)    root.style.setProperty('--tgcd-card',    cs.card);
+      if (cs.text)    root.style.setProperty('--tgcd-text',    cs.text);
+      if (cs.digitBg) root.style.setProperty('--tgcd-digit-bg', cs.digitBg);
+      root.style.setProperty('--tgcd-cta-bg', cs.ctaBg || cs.brand || '#1B2B5B');
+      if (cs.ctaText) root.style.setProperty('--tgcd-cta-text', cs.ctaText);
+      // RGB tokens for rgba() in CSS — used by glow + aurora
+      const brandRgb = hexToRgb(cs.brand || '#1B2B5B');
+      const accentRgb = hexToRgb(cs.accent || '#00B4D8');
+      if (brandRgb)  root.style.setProperty('--tgcd-brand-rgb',  brandRgb);
+      if (accentRgb) root.style.setProperty('--tgcd-accent-rgb', accentRgb);
+      if (typeof c.radius === 'number') {
+        root.style.setProperty('--tgcd-radius', c.radius + 'px');
+        root.style.setProperty('--tgcd-radius-sm', Math.max(4, c.radius - 6) + 'px');
+      }
+      // Wow flags — opt-in CSS classes on the root
+      const wow = c.wow || {};
+      if (wow.glow) root.classList.add('tgcd-glow');
 
-      // Inline layout sits inside body copy
-      if (cfg.layout === 'inline') {
-        host.innerHTML = '<span style="display:inline-block">Don\'t miss out — </span><span id="cdHost" style="display:inline-block;vertical-align:middle"></span><span style="display:inline-block"> before the season closes.</span>';
-        const inner = document.getElementById('cdHost');
-        if (widgetInst) { try { widgetInst.destroy(); } catch {} }
-        widgetInst = new window.TGCountdownWidget(inner, cfg);
+      // Style block
+      const style = document.createElement('style');
+      style.textContent = STYLES;
+
+      // Decide what to render
+      const remaining = targetMs ? computeRemaining(targetMs) : null;
+      const isExpired = !targetMs || (remaining && remaining.expired);
+
+      if (isExpired && !(c.repeating && c.repeating.enabled)) {
+        const node = this._buildExpired();
+        root.appendChild(node);
       } else {
-        host.innerHTML = '';
-        if (widgetInst) { try { widgetInst.destroy(); } catch {} }
-        widgetInst = new window.TGCountdownWidget(host, cfg);
+        const node = this._buildLayout(remaining || { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 });
+        root.appendChild(node);
       }
 
-      // If design mode is on, rebuild overlay
-      if (designModeOn) buildDesignOverlay();
-      // Update embed code
-      updateEmbed();
-    }
+      // Mount
+      this.shadow.innerHTML = '';
+      this.shadow.appendChild(style);
+      this.shadow.appendChild(root);
+      this._root = root;
 
-    /* =========================================================
-       Wiring
-       ========================================================= */
-    function wire() {
-      // Sections collapse
-      document.querySelectorAll('.sec-head').forEach(h => {
-        h.addEventListener('click', () => h.parentElement.classList.toggle('is-open'));
-      });
-      // Tabs
-      document.querySelectorAll('.tab').forEach(t => {
-        t.addEventListener('click', () => {
-          document.querySelectorAll('.tab').forEach(x => x.classList.remove('is-active'));
-          t.classList.add('is-active');
-          document.querySelectorAll('.tab-panel').forEach(p => p.setAttribute('hidden', ''));
-          document.querySelector('[data-panel="' + t.dataset.tab + '"]').removeAttribute('hidden');
-        });
-      });
-
-      // Layout
-      document.querySelectorAll('#layoutGrid .layout-card').forEach(b => {
-        b.addEventListener('click', () => {
-          cfg.layout = b.dataset.layout;
-          document.querySelectorAll('#layoutGrid .layout-card').forEach(x => x.classList.toggle('is-active', x === b));
-          rebuild(); snapshot();
-        });
-      });
-      // Theme
-      document.getElementById('themeLight').addEventListener('click', () => { cfg.theme = 'light'; hydrateUI(); rebuild(); snapshot(); });
-      document.getElementById('themeDark').addEventListener('click', () => { cfg.theme = 'dark'; hydrateUI(); rebuild(); snapshot(); });
-
-      // Colour pickers
-      function bindColour(idC, idH, key) {
-        const c = document.getElementById(idC), h = document.getElementById(idH);
-        c.addEventListener('input', () => {
-          cfg.colours[key] = c.value;
-          h.value = c.value.toUpperCase();
-          rebuild();
-        });
-        c.addEventListener('change', () => snapshot());
-        h.addEventListener('change', () => {
-          const v = h.value.trim();
-          if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
-            cfg.colours[key] = v;
-            c.value = v;
-            rebuild(); snapshot();
-          }
-        });
+      // Start ticking only if there's a live countdown
+      if (!isExpired || (c.repeating && c.repeating.enabled)) {
+        this._tick(true);
+        this._timerId = setInterval(() => this._tick(false), 1000);
       }
-      bindColour('colBrand', 'colBrandHex', 'brand');
-      bindColour('colAccent', 'colAccentHex', 'accent');
-      bindColour('colCard', 'colCardHex', 'card');
-      bindColour('colText', 'colTextHex', 'text');
-      bindColour('colDigitBg', 'colDigitBgHex', 'digitBg');
-
-      // Slider
-      const radiusSlider = document.getElementById('radiusSlider');
-      radiusSlider.addEventListener('input', () => {
-        cfg.radius = parseInt(radiusSlider.value, 10);
-        document.getElementById('radiusVal').textContent = cfg.radius;
-        rebuild();
-      });
-      radiusSlider.addEventListener('change', () => snapshot());
-
-      // Toggles (delegated)
-      document.querySelectorAll('[data-toggle]').forEach(t => {
-        t.addEventListener('click', () => {
-          const k = t.dataset.toggle;
-          t.classList.toggle('is-on');
-          const on = t.classList.contains('is-on');
-          if (k === 'anim')      cfg.animation.tick = on;
-          if (k === 'urgency')   cfg.urgency.enabled = on;
-          if (k === 'ctaNewTab') cfg.cta.openInNewTab = on;
-          if (k === 'repeat')    {
-            cfg.repeating.enabled = on;
-            document.getElementById('repeatFields').toggleAttribute('hidden', !on);
-          }
-          if (k === 'showDays')    cfg.display.showDays = on;
-          if (k === 'showHours')   cfg.display.showHours = on;
-          if (k === 'showMinutes') cfg.display.showMinutes = on;
-          if (k === 'showSeconds') cfg.display.showSeconds = on;
-          // Wow effects — guard cfg.wow for older saved configs
-          if (k === 'wowSliding') { (cfg.wow = cfg.wow || {}).slidingDigits   = on; }
-          if (k === 'wowGlow')    { (cfg.wow = cfg.wow || {}).glow            = on; }
-          if (k === 'wowRing')    { (cfg.wow = cfg.wow || {}).finalMinuteRing = on; }
-          if (k === 'wowAurora')  { (cfg.wow = cfg.wow || {}).heroAurora      = on; }
-          if (k === 'wowDot')     { (cfg.wow = cfg.wow || {}).bannerDot       = on; }
-          rebuild(); snapshot();
-        });
-      });
-
-      // Urgency hours
-      document.getElementById('urgencyHours').addEventListener('change', (e) => {
-        const v = parseInt(e.target.value, 10);
-        if (v > 0 && v <= 168) { cfg.urgency.thresholdHours = v; rebuild(); snapshot(); }
-      });
-
-      // Content
-      document.getElementById('targetDate').addEventListener('change', (e) => {
-        const v = e.target.value;
-        if (v) {
-          const local = new Date(v);
-          if (!isNaN(local.getTime())) { cfg.targetDate = local.toISOString(); rebuild(); snapshot(); }
-        }
-      });
-      document.getElementById('timezone').addEventListener('change', (e) => { cfg.timezone = e.target.value; snapshot(); });
-      document.getElementById('heading').addEventListener('input', (e) => { cfg.heading = e.target.value; rebuild(); });
-      document.getElementById('heading').addEventListener('change', () => snapshot());
-      document.getElementById('subheading').addEventListener('input', (e) => { cfg.subheading = e.target.value; rebuild(); });
-      document.getElementById('subheading').addEventListener('change', () => snapshot());
-      document.getElementById('ctaText').addEventListener('input', (e) => { cfg.cta.text = e.target.value; rebuild(); });
-      document.getElementById('ctaText').addEventListener('change', () => snapshot());
-      document.getElementById('ctaUrl').addEventListener('input', (e) => { cfg.cta.url = e.target.value; rebuild(); });
-      document.getElementById('ctaUrl').addEventListener('change', () => snapshot());
-      document.getElementById('expiryBehaviour').addEventListener('change', (e) => {
-        cfg.expiry.behaviour = e.target.value;
-        document.getElementById('expiryMessageWrap').style.display = e.target.value === 'message' ? '' : 'none';
-        rebuild(); snapshot();
-      });
-      document.getElementById('expiryMessage').addEventListener('input', (e) => { cfg.expiry.message = e.target.value; rebuild(); });
-      document.getElementById('expiryMessage').addEventListener('change', () => snapshot());
-      document.getElementById('repeatFreq').addEventListener('change', (e) => {
-        cfg.repeating.frequency = e.target.value;
-        document.getElementById('repeatDayWrap').style.display = e.target.value === 'weekly' ? '' : 'none';
-        rebuild(); snapshot();
-      });
-      document.getElementById('repeatDay').addEventListener('change', (e) => { cfg.repeating.dayOfWeek = parseInt(e.target.value, 10); rebuild(); snapshot(); });
-      document.getElementById('repeatTime').addEventListener('change', (e) => { cfg.repeating.time = e.target.value; rebuild(); snapshot(); });
-
-      // Name
-      document.getElementById('widgetName').addEventListener('input', (e) => { widgetName = e.target.value; });
-
-      // Save
-      document.getElementById('btnSave').addEventListener('click', save);
-
-      // Top icons
-      document.getElementById('btnAi').addEventListener('click', () => openModal('aiModal'));
-      document.getElementById('btnTpl').addEventListener('click', () => openModal('tplModal'));
-      document.getElementById('btnUndo').addEventListener('click', undo);
-      document.getElementById('btnRedo').addEventListener('click', redo);
-
-      // Modal close
-      document.querySelectorAll('[data-close]').forEach(b => {
-        b.addEventListener('click', () => closeModal(b.dataset.close));
-      });
-
-      // AI generate
-      document.getElementById('aiGenerateBtn').addEventListener('click', aiGenerate);
-
-      // Templates
-      buildTemplates();
-
-      // Design mode
-      document.getElementById('btnDesignMode').addEventListener('click', toggleDesignMode);
-
-      // Copy embed
-      document.getElementById('copyBtn').addEventListener('click', copyEmbed);
-
-      // Keyboard
-      document.addEventListener('keydown', (e) => {
-        const tag = (e.target.tagName || '').toLowerCase();
-        const inField = ['input', 'textarea', 'select'].includes(tag);
-        // Always-on shortcuts
-        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(); return; }
-        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
-        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
-        if (e.key === 'Escape') {
-          closeModal('aiModal'); closeModal('tplModal'); closeDesignPopover();
-          return;
-        }
-        if (inField) return;
-        if (e.key === 'd' || e.key === 'D') { e.preventDefault(); toggleDesignMode(); }
-        if (e.key === 'a' || e.key === 'A') { e.preventDefault(); openModal('aiModal'); }
-        if (e.key === 't' || e.key === 'T') { e.preventDefault(); openModal('tplModal'); }
-        if (e.key === '1') { document.querySelector('.tab[data-tab="design"]').click(); }
-        if (e.key === '2') { document.querySelector('.tab[data-tab="content"]').click(); }
-        if (e.key === '3') { document.querySelector('.tab[data-tab="settings"]').click(); }
-      });
     }
 
-    /* =========================================================
-       Modals
-       ========================================================= */
-    function openModal(id)  { document.getElementById(id).removeAttribute('hidden'); }
-    function closeModal(id) { document.getElementById(id).setAttribute('hidden', ''); }
+    _buildExpired() {
+      const c = this.c;
+      const wrap = document.createElement('div');
+      wrap.className = 'tgcd-expired';
 
-    /* =========================================================
-       Templates
-       ========================================================= */
-    function isoDaysFromNow(days, hh, mm) {
-      const d = new Date(); d.setDate(d.getDate() + days);
-      d.setHours(hh, mm, 0, 0); return d.toISOString();
-    }
-    function isoNextBlackFriday() {
-      const now = new Date();
-      let year = now.getFullYear();
-      // Black Friday = day after the 4th Thursday of November
-      function bf(y) {
-        const nov1 = new Date(y, 10, 1);
-        const firstThu = (4 - nov1.getDay() + 7) % 7;
-        const fourthThu = new Date(y, 10, 1 + firstThu + 21);
-        const friday = new Date(fourthThu); friday.setDate(friday.getDate() + 1);
-        friday.setHours(23, 59, 0, 0);
-        return friday;
+      if (c.expiry.behaviour === 'hide') {
+        wrap.style.display = 'none';
+        return wrap;
       }
-      let target = bf(year);
-      if (target.getTime() < now.getTime()) target = bf(year + 1);
-      return target.toISOString();
-    }
 
-    const TEMPLATES = [
-      {
-        name: 'Summer Sale',
-        desc: '3-week countdown to summer holiday savings',
-        cfg: () => ({
-          layout: 'card', heading: 'Summer sale ends in',
-          subheading: 'Up to 40% off package holidays. Limited departures.',
-          cta: { text: 'Browse offers', url: 'https://example.com/summer-sale', openInNewTab: true },
-          targetDate: isoDaysFromNow(21, 23, 59),
-          colours: { brand: '#9A3412', accent: '#F97316', card: '#FFFBEB', text: '#1F2937', digitBg: '#FEF3C7', ctaBg: '', ctaText: '#FFFFFF' }
-        })
-      },
-      {
-        name: 'Black Friday',
-        desc: 'Counts down to the next Black Friday at 23:59',
-        cfg: () => ({
-          layout: 'banner', heading: 'Black Friday flash sale ends in',
-          subheading: '',
-          cta: { text: 'Shop deals', url: 'https://example.com/black-friday', openInNewTab: true },
-          targetDate: isoNextBlackFriday(),
-          colours: { brand: '#0F172A', accent: '#F59E0B', card: '#FFFFFF', text: '#0F172A', digitBg: '#F8FAFC', ctaBg: '#0F172A', ctaText: '#FFFFFF' }
-        })
-      },
-      {
-        name: 'Early Booking Deadline',
-        desc: '6-week countdown to early-booking offer deadline',
-        cfg: () => ({
-          layout: 'card', heading: 'Early booking ends in',
-          subheading: 'Lock in next year\'s prices and free child places before the deadline.',
-          cta: { text: 'View offers', url: 'https://example.com/early-booking', openInNewTab: true },
-          targetDate: isoDaysFromNow(42, 17, 0),
-          display: { showDays: true, showHours: true, showMinutes: true, showSeconds: false },
-          colours: { brand: '#1B2B5B', accent: '#00B4D8', card: '#FFFFFF', text: '#0F172A', digitBg: '#F8FAFC', ctaBg: '', ctaText: '#FFFFFF' }
-        })
-      },
-      {
-        name: 'Last-minute Departure',
-        desc: 'Countdown to a featured departure date',
-        cfg: () => ({
-          layout: 'hero', heading: 'Departing in',
-          subheading: 'Mykonos · 7 nights · all inclusive · 2 adults from £1,289pp',
-          cta: { text: 'Book this trip', url: 'https://example.com/mykonos', openInNewTab: true },
-          targetDate: isoDaysFromNow(9, 6, 0),
-          colours: { brand: '#0E7490', accent: '#06B6D4', card: '#0F172A', text: '#F1F5F9', digitBg: '#1E293B', ctaBg: '#06B6D4', ctaText: '#0F172A' },
-          theme: 'dark'
-        })
-      },
-      {
-        name: 'Generic Campaign',
-        desc: 'A clean 7-day starting point',
-        cfg: () => ({
-          layout: 'card', heading: 'Offer ends in',
-          subheading: '',
-          cta: { text: 'Find out more', url: 'https://example.com', openInNewTab: true },
-          targetDate: isoDaysFromNow(7, 23, 59),
-          colours: { brand: '#1B2B5B', accent: '#00B4D8', card: '#FFFFFF', text: '#0F172A', digitBg: '#F8FAFC', ctaBg: '', ctaText: '#FFFFFF' }
-        })
+      if (c.expiry.behaviour === 'cta-only' && c.cta && c.cta.text && safeUrl(c.cta.url)) {
+        const cta = this._buildCta();
+        if (cta) wrap.appendChild(cta);
+        return wrap;
       }
-    ];
 
-    function buildTemplates() {
-      const list = document.getElementById('tplList');
-      list.innerHTML = '';
-      TEMPLATES.forEach(t => {
-        const b = document.createElement('button');
-        b.className = 'tpl-card';
-        b.type = 'button';
-        b.innerHTML = '<div class="tpl-name">' + t.name + '</div><div class="tpl-desc">' + t.desc + '</div>';
-        b.addEventListener('click', () => {
-          const merged = Object.assign(defaultsCfg(), t.cfg());
-          if (t.cfg().colours) merged.colours = Object.assign(defaultsCfg().colours, t.cfg().colours);
-          if (t.cfg().display) merged.display = Object.assign(defaultsCfg().display, t.cfg().display);
-          cfg = merged;
-          if (!widgetName) {
-            widgetName = t.name + ' countdown';
-            document.getElementById('widgetName').value = widgetName;
-          }
-          hydrateUI();
-          rebuild();
-          snapshot();
-          closeModal('tplModal');
-          toast('Template applied', 'success');
-        });
-        list.appendChild(b);
-      });
+      // message
+      const h = document.createElement('p');
+      h.className = 'tgcd-heading';
+      h.textContent = c.expiry.message || 'This offer has now ended.';
+      wrap.appendChild(h);
+      if (c.cta && c.cta.text && safeUrl(c.cta.url)) {
+        const cta = this._buildCta();
+        if (cta) wrap.appendChild(cta);
+      }
+      return wrap;
     }
 
-    /* =========================================================
-       AI builder
-       ========================================================= */
-    async function aiGenerate() {
-      const prompt = document.getElementById('aiPrompt').value.trim();
-      if (!prompt) { toast('Tell me about your campaign first', 'error'); return; }
-      const btn = document.getElementById('aiGenerateBtn');
-      btn.disabled = true; btn.textContent = 'Generating…';
-      try {
-        const res = await fetch('/api/widget-ai', {
-          method: 'POST',
-          headers: authH(),
-          body: JSON.stringify({
-            widgetType: 'Countdown Timer',
-            mode: 'countdown-default',
-            prompt: prompt
-          })
-        });
-        if (res.status === 401) { showLogin(); return; }
-        if (!res.ok) throw new Error('AI request failed (' + res.status + ')');
-        const data = await res.json();
-        // Expect { heading, subheading, ctaText, suggestedTargetDateISO } — apply what we got
-        if (data && (data.heading || data.subheading || data.ctaText || data.suggestedTargetDateISO || data.config)) {
-          // Allow either flat fields or a nested config
-          const c = data.config || data;
-          if (c.heading) cfg.heading = String(c.heading).slice(0, 120);
-          if (c.subheading) cfg.subheading = String(c.subheading).slice(0, 240);
-          if (c.ctaText) cfg.cta.text = String(c.ctaText).slice(0, 40);
-          if (c.suggestedTargetDateISO) {
-            const t = Date.parse(c.suggestedTargetDateISO);
-            if (!isNaN(t) && t > Date.now()) cfg.targetDate = new Date(t).toISOString();
-          }
-          // Default layout to card per our brief
-          cfg.layout = cfg.layout || 'card';
-          hydrateUI(); rebuild(); snapshot();
-          closeModal('aiModal');
-          toast('AI suggestions applied', 'success');
+    _buildLayout(remaining) {
+      switch (this.c.layout) {
+        case 'banner': return this._buildBanner(remaining);
+        case 'inline': return this._buildInline(remaining);
+        case 'hero':   return this._buildHero(remaining);
+        case 'card':
+        default:       return this._buildCard(remaining);
+      }
+    }
+
+    _buildBanner(remaining) {
+      const c = this.c;
+      const wrap = document.createElement('div');
+      wrap.className = 'tgcd-banner';
+
+      const text = document.createElement('div');
+      text.className = 'tgcd-banner-text';
+      if (c.wow && c.wow.bannerDot && c.heading) {
+        const dot = document.createElement('span');
+        dot.className = 'tgcd-banner-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        text.appendChild(dot);
+      }
+      if (c.heading) {
+        const h = document.createElement('p');
+        h.className = 'tgcd-heading';
+        h.textContent = c.heading;
+        text.appendChild(h);
+      }
+      if (c.subheading) {
+        const s = document.createElement('p');
+        s.className = 'tgcd-sub';
+        s.textContent = c.subheading;
+        text.appendChild(s);
+      }
+      wrap.appendChild(text);
+      wrap.appendChild(this._buildUnits(remaining));
+
+      const cta = this._buildCta();
+      if (cta) wrap.appendChild(cta);
+
+      return wrap;
+    }
+
+    _buildCard(remaining) {
+      const c = this.c;
+      const wrap = document.createElement('div');
+      wrap.className = 'tgcd-card';
+
+      if (c.heading) {
+        const h = document.createElement('p');
+        h.className = 'tgcd-heading';
+        h.textContent = c.heading;
+        wrap.appendChild(h);
+      }
+      wrap.appendChild(this._buildUnits(remaining));
+      if (c.subheading) {
+        const s = document.createElement('p');
+        s.className = 'tgcd-sub';
+        s.textContent = c.subheading;
+        wrap.appendChild(s);
+      }
+      const cta = this._buildCta();
+      if (cta) wrap.appendChild(cta);
+      return wrap;
+    }
+
+    _buildInline(remaining) {
+      const c = this.c;
+      const wrap = document.createElement('span');
+      wrap.className = 'tgcd-inline';
+
+      if (c.heading) {
+        const h = document.createElement('span');
+        h.className = 'tgcd-heading';
+        h.textContent = c.heading;
+        wrap.appendChild(h);
+      }
+      wrap.appendChild(this._buildUnits(remaining));
+      const cta = this._buildCta();
+      if (cta) wrap.appendChild(cta);
+      return wrap;
+    }
+
+    _buildHero(remaining) {
+      const c = this.c;
+      const wrap = document.createElement('div');
+      wrap.className = 'tgcd-hero';
+      if (c.wow && c.wow.heroAurora) wrap.classList.add('tgcd-aurora');
+
+      if (c.heading) {
+        const h = document.createElement('h2');
+        h.className = 'tgcd-heading';
+        h.textContent = c.heading;
+        wrap.appendChild(h);
+      }
+      if (c.subheading) {
+        const s = document.createElement('p');
+        s.className = 'tgcd-sub';
+        s.textContent = c.subheading;
+        wrap.appendChild(s);
+      }
+      wrap.appendChild(this._buildUnits(remaining));
+      const cta = this._buildCta();
+      if (cta) wrap.appendChild(cta);
+      return wrap;
+    }
+
+    _buildUnits(remaining) {
+      const c = this.c;
+      const useReels = !!(c.wow && c.wow.slidingDigits);
+      const useRing  = !!(c.wow && c.wow.finalMinuteRing);
+
+      const units = document.createElement('div');
+      units.className = 'tgcd-units';
+      units.setAttribute('role', 'timer');
+      units.setAttribute('aria-live', 'off'); // reduces SR noise on tick
+      units.setAttribute('aria-atomic', 'true');
+
+      const list = [];
+      if (c.display.showDays)    list.push(['days',    'Days',    remaining.days]);
+      if (c.display.showHours)   list.push(['hours',   'Hours',   remaining.hours]);
+      if (c.display.showMinutes) list.push(['minutes', 'Minutes', remaining.minutes]);
+      if (c.display.showSeconds) list.push(['seconds', 'Seconds', remaining.seconds]);
+
+      list.forEach((item, idx) => {
+        const [key, label, val] = item;
+        const unit = document.createElement('div');
+        unit.className = 'tgcd-unit tgcd-unit-' + key;
+
+        const dig = document.createElement('div');
+        dig.className = 'tgcd-digits';
+        dig.setAttribute('data-unit', key);
+
+        const formatted = key === 'days' ? String(val) : pad2(val);
+
+        if (useReels && c.layout !== 'inline') {
+          // Reel: a clip-masked container with two stacked digit spans.
+          // .tgcd-reel-cur shows the current value; .tgcd-reel-nxt is hidden below.
+          // On tick we set the next value into .tgcd-reel-nxt, then trigger the slide.
+          const reel = document.createElement('span');
+          reel.className = 'tgcd-reel';
+          reel.setAttribute('data-reel', key);
+
+          const cur = document.createElement('span');
+          cur.className = 'tgcd-reel-cur';
+          cur.textContent = formatted;
+
+          const nxt = document.createElement('span');
+          nxt.className = 'tgcd-reel-nxt';
+          nxt.setAttribute('aria-hidden', 'true');
+          nxt.textContent = formatted;
+
+          reel.appendChild(cur);
+          reel.appendChild(nxt);
+          dig.appendChild(reel);
         } else {
-          toast('AI returned an empty response', 'error');
+          // Plain text — used by inline layout, or when sliding digits is off
+          dig.textContent = formatted;
         }
-      } catch (e) {
-        toast(e.message || 'AI failed', 'error');
-      } finally {
-        btn.disabled = false; btn.textContent = 'Generate';
-      }
-    }
 
-    /* =========================================================
-       Save / Load
-       ========================================================= */
-    async function save() {
-      const btn = document.getElementById('btnSave');
-      btn.disabled = true; btn.textContent = 'Saving…';
-      try {
-        const body = {
-          widgetType: 'Countdown Timer',
-          name: widgetName || 'Untitled countdown',
-          config: cfg
-        };
-        if (widgetId) body.id = widgetId;
-        const res = await fetch('/api/widget-config', {
-          method: 'POST',
-          headers: authH(),
-          body: JSON.stringify(body)
-        });
-        if (res.status === 401) { showLogin(); return; }
-        if (!res.ok) throw new Error('Save failed (' + res.status + ')');
-        const data = await res.json();
-        if (data && data.id) {
-          widgetId = data.id;
-          // Update URL so refresh keeps the record
-          const url = new URL(window.location.href);
-          url.searchParams.set('id', widgetId);
-          window.history.replaceState({}, '', url.toString());
+        unit.appendChild(dig);
+
+        // Final-minute progress ring on the seconds cell
+        if (useRing && key === 'seconds' && c.layout !== 'inline') {
+          const svgNs = 'http://www.w3.org/2000/svg';
+          const ring = document.createElementNS(svgNs, 'svg');
+          ring.setAttribute('class', 'tgcd-ring');
+          ring.setAttribute('viewBox', '0 0 100 100');
+          ring.setAttribute('aria-hidden', 'true');
+          const track = document.createElementNS(svgNs, 'circle');
+          track.setAttribute('class', 'tgcd-ring-track');
+          track.setAttribute('cx', '50'); track.setAttribute('cy', '50'); track.setAttribute('r', '46');
+          const fill  = document.createElementNS(svgNs, 'circle');
+          fill.setAttribute('class', 'tgcd-ring-fill');
+          fill.setAttribute('cx', '50'); fill.setAttribute('cy', '50'); fill.setAttribute('r', '46');
+          // Circumference for r=46 is ~289 — used as dasharray; offset will animate
+          fill.setAttribute('stroke-dasharray', '289');
+          fill.setAttribute('stroke-dashoffset', '289'); // start empty; _tick fills it in
+          ring.appendChild(track);
+          ring.appendChild(fill);
+          unit.appendChild(ring);
         }
-        updateEmbed();
-        toast('Saved', 'success');
-      } catch (e) {
-        toast(e.message || 'Save failed', 'error');
-      } finally {
-        btn.disabled = false; btn.textContent = 'Save';
-      }
-    }
 
-    async function loadExisting(id) {
-      try {
-        const res = await fetch('/api/widget-config?id=' + encodeURIComponent(id), { headers: authH() });
-        if (res.status === 401) { showLogin(); return false; }
-        if (!res.ok) return false;
-        const data = await res.json();
-        if (data && data.config) {
-          cfg = Object.assign(defaultsCfg(), data.config);
-          // Deep merge nested keys
-          ['cta','expiry','display','repeating','urgency','animation','wow','colours'].forEach(k => {
-            cfg[k] = Object.assign(defaultsCfg()[k], data.config[k] || {});
-          });
-          widgetId = data.id || id;
-          widgetName = data.name || '';
-          document.getElementById('widgetName').value = widgetName;
-          return true;
+        const lab = document.createElement('div');
+        lab.className = 'tgcd-label';
+        lab.textContent = label;
+        unit.appendChild(lab);
+
+        units.appendChild(unit);
+
+        if (idx < list.length - 1 && c.layout !== 'inline') {
+          const sep = document.createElement('div');
+          sep.className = 'tgcd-sep';
+          sep.setAttribute('aria-hidden', 'true');
+          sep.textContent = ':';
+          units.appendChild(sep);
         }
-      } catch {}
-      return false;
-    }
-
-    function updateEmbed() {
-      const code = document.getElementById('embedCode');
-      if (!widgetId) {
-        code.textContent = 'Save first to get your embed code.';
-        return;
-      }
-      code.textContent =
-        '<div data-tg-widget="countdown" data-tg-id="' + widgetId + '"></div>\n' +
-        '<script src="https://tg-widgets.vercel.app/widget-countdown.js"><\/script>';
-    }
-
-    function copyEmbed() {
-      const code = document.getElementById('embedCode').textContent;
-      if (code.indexOf('Save first') !== -1) { toast('Save first', 'error'); return; }
-      navigator.clipboard.writeText(code).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.textContent = 'Copied!';
-        btn.classList.add('is-copied');
-        setTimeout(() => { btn.textContent = 'Copy embed code'; btn.classList.remove('is-copied'); }, 1500);
       });
+
+      return units;
     }
 
-    /* =========================================================
-       Design Mode overlay
-       ========================================================= */
-    let designModeOn = false;
-    function toggleDesignMode() {
-      designModeOn = !designModeOn;
-      const btn = document.getElementById('btnDesignMode');
-      btn.classList.toggle('is-on', designModeOn);
-      const overlay = document.getElementById('dmOverlay');
-      if (designModeOn) {
-        overlay.removeAttribute('hidden');
-        buildDesignOverlay();
-      } else {
-        overlay.setAttribute('hidden', '');
-        overlay.innerHTML = '';
-        closeDesignPopover();
+    _buildCta() {
+      const c = this.c;
+      if (!c.cta || !c.cta.text) return null;
+      const url = safeUrl(c.cta.url);
+      if (!url) return null;
+      const a = document.createElement('a');
+      a.className = 'tgcd-cta';
+      a.textContent = c.cta.text;
+      a.setAttribute('href', url);
+      if (c.cta.openInNewTab) {
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
       }
+      return a;
     }
-    function buildDesignOverlay() {
-      const overlay = document.getElementById('dmOverlay');
-      overlay.innerHTML = '';
 
-      // Hotspots are positioned over the rendered widget; we approximate via getBoundingClientRect from inside Shadow DOM
-      const stage = document.getElementById('pvStage');
-      const stageRect = stage.getBoundingClientRect();
-      const host = document.getElementById('pvHost');
-      const widgetEl = (cfg.layout === 'inline') ? document.getElementById('cdHost') : host;
-      if (!widgetEl) return;
-      // Reach into shadow DOM
-      const shadowRoot = widgetEl.shadowRoot;
-      if (!shadowRoot) return;
-      const root = shadowRoot.querySelector('.tgcd-root');
+    _tick(initial) {
+      const targetMs = this._resolveTarget();
+      if (!targetMs) return;
+      const r = computeRemaining(targetMs);
+
+      const c = this.c;
+      const root = this._root;
       if (!root) return;
 
-      function addHot(el, label, fields) {
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        const hot = document.createElement('div');
-        hot.className = 'dm-hot';
-        hot.style.left   = (r.left - stageRect.left) + 'px';
-        hot.style.top    = (r.top  - stageRect.top)  + 'px';
-        hot.style.width  = r.width  + 'px';
-        hot.style.height = r.height + 'px';
-        const lab = document.createElement('span');
-        lab.className = 'dm-hot-label';
-        lab.textContent = label;
-        hot.appendChild(lab);
-        hot.addEventListener('click', (e) => {
-          e.stopPropagation();
-          openDesignPopover(label, fields, r);
-        });
-        overlay.appendChild(hot);
-      }
+      const useReels = !!(c.wow && c.wow.slidingDigits) && c.layout !== 'inline';
+      const map = { days: r.days, hours: r.hours, minutes: r.minutes, seconds: r.seconds };
 
-      addHot(root.querySelector('.tgcd-heading'), 'Heading', [
-        { type: 'text', label: 'Heading text', value: cfg.heading, set: (v) => cfg.heading = v }
-      ]);
-      addHot(root.querySelector('.tgcd-sub'), 'Subheading', [
-        { type: 'text', label: 'Subheading', value: cfg.subheading, set: (v) => cfg.subheading = v }
-      ]);
-      addHot(root.querySelector('.tgcd-units'), 'Digits', [
-        { type: 'colour', label: 'Digit cell background', value: cfg.colours.digitBg, set: (v) => cfg.colours.digitBg = v },
-        { type: 'colour', label: 'Accent (urgency)',      value: cfg.colours.accent,  set: (v) => cfg.colours.accent  = v }
-      ]);
-      addHot(root.querySelector('.tgcd-cta'), 'CTA', [
-        { type: 'text',   label: 'Button text', value: cfg.cta.text, set: (v) => cfg.cta.text = v },
-        { type: 'colour', label: 'Button background', value: cfg.colours.ctaBg || cfg.colours.brand, set: (v) => { cfg.colours.ctaBg = v; } }
-      ]);
-    }
-    function closeDesignPopover() {
-      const p = document.querySelector('.dm-pop');
-      if (p) p.remove();
-    }
-    function openDesignPopover(title, fields, anchorRect) {
-      closeDesignPopover();
-      const stage = document.getElementById('pvStage');
-      const stageRect = stage.getBoundingClientRect();
-      const pop = document.createElement('div');
-      pop.className = 'dm-pop';
-      pop.style.left = Math.min((anchorRect.left - stageRect.left), stageRect.width - 300) + 'px';
-      pop.style.top = (anchorRect.bottom - stageRect.top + 10) + 'px';
-      const h = document.createElement('p');
-      h.className = 'dm-pop-title';
-      h.textContent = title;
-      pop.appendChild(h);
-      fields.forEach(f => {
-        const wrap = document.createElement('div');
-        wrap.className = 'field';
-        const lab = document.createElement('span');
-        lab.className = 'field-label'; lab.textContent = f.label;
-        wrap.appendChild(lab);
-        if (f.type === 'text') {
-          const inp = document.createElement('input');
-          inp.className = 'input'; inp.type = 'text'; inp.value = f.value || '';
-          inp.addEventListener('input', () => { f.set(inp.value); rebuild(); });
-          inp.addEventListener('change', () => snapshot());
-          wrap.appendChild(inp);
-        } else if (f.type === 'colour') {
-          const row = document.createElement('div'); row.className = 'colour-row';
-          const c = document.createElement('input'); c.type = 'color'; c.value = (f.value || '#1B2B5B');
-          const t = document.createElement('input'); t.type = 'text'; t.className = 'input';
-          t.value = (f.value || '#1B2B5B').toUpperCase();
-          c.addEventListener('input', () => { f.set(c.value); t.value = c.value.toUpperCase(); hydrateUI(); rebuild(); });
-          c.addEventListener('change', () => snapshot());
-          t.addEventListener('change', () => {
-            if (/^#[0-9A-Fa-f]{6}$/.test(t.value.trim())) {
-              f.set(t.value.trim()); c.value = t.value.trim(); hydrateUI(); rebuild(); snapshot();
+      Object.keys(map).forEach((key) => {
+        const cell = root.querySelector('.tgcd-digits[data-unit="' + key + '"]');
+        if (!cell) return;
+        const newText = key === 'days' ? String(map[key]) : pad2(map[key]);
+
+        if (useReels) {
+          const reel = cell.querySelector('.tgcd-reel');
+          const cur = reel && reel.querySelector('.tgcd-reel-cur');
+          const nxt = reel && reel.querySelector('.tgcd-reel-nxt');
+          if (!reel || !cur || !nxt) return;
+
+          if (cur.textContent === newText) return; // no change
+          if (initial) {
+            cur.textContent = newText;
+            nxt.textContent = newText;
+            return;
+          }
+          // Set up the slide: nxt has the new value, cur still has the old one.
+          nxt.textContent = newText;
+          // Reset to baseline (no transition) before triggering the slide
+          reel.classList.remove('is-animating');
+          // Force reflow so removing the class actually takes effect before re-adding
+          void reel.offsetWidth;
+          reel.classList.add('is-animating');
+          // After the animation completes, snap to the new value with no transition
+          // and clear the animating class so the next tick can replay cleanly.
+          const onEnd = () => {
+            reel.classList.remove('is-animating');
+            cur.textContent = newText;
+            nxt.textContent = newText;
+            cur.removeEventListener('transitionend', onEnd);
+          };
+          cur.addEventListener('transitionend', onEnd, { once: true });
+          // Safety net — if transitionend doesn't fire (e.g. reduced-motion), still resolve
+          setTimeout(() => {
+            if (cur.textContent !== newText) {
+              reel.classList.remove('is-animating');
+              cur.textContent = newText;
+              nxt.textContent = newText;
             }
-          });
-          row.appendChild(c); row.appendChild(t);
-          wrap.appendChild(row);
+          }, 700);
+        } else {
+          // Plain mode: just swap the text
+          if (cell.textContent !== newText) cell.textContent = newText;
         }
-        pop.appendChild(wrap);
       });
-      stage.appendChild(pop);
-      document.addEventListener('click', closePopOnOutside, { once: true, capture: true });
-    }
-    function closePopOnOutside(e) {
-      if (!e.target.closest('.dm-pop') && !e.target.closest('.dm-hot')) {
-        closeDesignPopover();
-      } else {
-        document.addEventListener('click', closePopOnOutside, { once: true, capture: true });
+
+      // Urgency mode
+      if (c.urgency && c.urgency.enabled) {
+        const thresholdMs = (c.urgency.thresholdHours || 24) * 3600 * 1000;
+        if (r.total > 0 && r.total <= thresholdMs) {
+          root.classList.add('tgcd-urgent');
+        } else {
+          root.classList.remove('tgcd-urgent');
+        }
+      }
+
+      // Final-minute progress ring
+      if (c.wow && c.wow.finalMinuteRing) {
+        const inFinalMinute = r.total > 0 && r.total <= 60 * 1000;
+        if (inFinalMinute) {
+          root.classList.add('tgcd-final-min');
+          const fill = root.querySelector('.tgcd-ring-fill');
+          if (fill) {
+            // Drain anticlockwise: at 60s remaining, offset = 0 (full ring); at 0s, offset = 289 (empty)
+            const elapsed = 60 - r.seconds; // 0..59
+            const offset = (elapsed / 60) * 289;
+            fill.setAttribute('stroke-dashoffset', String(offset.toFixed(1)));
+          }
+        } else {
+          root.classList.remove('tgcd-final-min');
+        }
+      }
+
+      // Expired
+      if (r.expired) {
+        if (c.repeating && c.repeating.enabled) {
+          // Roll over to next occurrence — re-render
+          this._stop();
+          this._render();
+        } else {
+          this._stop();
+          this._render(); // re-render into expired state
+        }
       }
     }
+  }
 
-    /* =========================================================
-       Toast
-       ========================================================= */
-    let toastTimer = null;
-    function toast(msg, kind) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.remove('is-error', 'is-success');
-      if (kind === 'error') t.classList.add('is-error');
-      if (kind === 'success') t.classList.add('is-success');
-      t.classList.add('is-show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('is-show'), 2200);
+  // ---------- Auto-init ----------
+  async function fetchConfig(id) {
+    try {
+      const res = await fetch(API_BASE + '?id=' + encodeURIComponent(id), { method: 'GET' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data && data.config ? data.config : null;
+    } catch {
+      return null;
     }
+  }
 
-    /* =========================================================
-       Boot
-       ========================================================= */
-    async function boot() {
-      buildPresets();
-      wire();
-      const url = new URL(window.location.href);
-      const id = url.searchParams.get('id');
-      if (id) {
-        const ok = await loadExisting(id);
-        if (!ok) toast('Could not load that widget', 'error');
-      }
-      hydrateUI();
-      rebuild();
-      snapshot();
-    }
-
-    if (isLoggedIn()) {
-      showApp();
-      boot();
+  async function initOne(el) {
+    if (el.__tgcdInit) return;
+    el.__tgcdInit = true;
+    let cfg = null;
+    const inline = el.getAttribute('data-tg-config');
+    if (inline) {
+      try { cfg = JSON.parse(inline); } catch { cfg = null; }
     } else {
-      showLogin();
+      const id = el.getAttribute('data-tg-id');
+      if (id) cfg = await fetchConfig(id);
     }
-  </script>
-</body>
-</html>
+    try {
+      const w = new TGCountdownWidget(el, cfg || {});
+      el.__tgcd = w;
+    } catch (e) {
+      // Fail safe — empty widget if anything goes wrong
+      try { console.warn('[TGCountdown] init failed', e); } catch {}
+    }
+  }
+
+  function init() {
+    const els = document.querySelectorAll('[data-tg-widget="countdown"]');
+    els.forEach(initOne);
+  }
+
+  window.TGCountdownWidget = TGCountdownWidget;
+  window.__TG_COUNTDOWN_VERSION__ = VERSION;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
