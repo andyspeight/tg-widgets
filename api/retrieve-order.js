@@ -19,6 +19,14 @@
  *
  * Endpoint:
  *   POST /api/retrieve-order
+ *
+ * Internal-call bypass (added Apr 2026):
+ *   When called from /api/booking-email (server-to-server), the caller sends
+ *   X-TG-Internal-Key (matching env var TG_INTERNAL_KEY) plus X-TG-Real-IP
+ *   carrying the original user's IP. This lets us rate-limit against the real
+ *   user instead of the shared Vercel egress IP, with a higher cap (30/min)
+ *   to avoid platform-wide throttling when many users send emails. Public
+ *   calls (widget → endpoint directly) keep the original 5/min cap.
  */
 
 import { setCors, sanitiseForFormula } from './_auth.js';
@@ -631,9 +639,19 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Rate limiting
-  const ip = getClientIp(req);
-  const ipLimit = rateLimit(`ro:ip:${ip}`, 5);
+  // Internal-call detection. /api/booking-email calls this endpoint server-
+  // to-server. Without bypass logic, every email send across the platform
+  // would hit this rate limit against the Vercel egress IP — capping the
+  // entire feature at 5 emails per 15 minutes. Internal calls get a higher
+  // cap (30) and rate limit against the forwarded user IP.
+  const isInternalCall = !!process.env.TG_INTERNAL_KEY
+    && req.headers['x-tg-internal-key'] === process.env.TG_INTERNAL_KEY;
+
+  const ip = isInternalCall && typeof req.headers['x-tg-real-ip'] === 'string'
+    ? req.headers['x-tg-real-ip']
+    : getClientIp(req);
+
+  const ipLimit = rateLimit(`ro:ip:${ip}`, isInternalCall ? 30 : 5);
   if (!ipLimit.ok) {
     return res.status(429).json({
       error: 'too_many_attempts',
