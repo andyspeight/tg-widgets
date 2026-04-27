@@ -500,9 +500,15 @@ export default async function handler(req, res) {
     const order = trimOrder(raw);
     if (!order || !order.id) return notFound(res);
 
-    // Pull brand/contact/styling from widget Settings JSON (skip on demo path
-    // since there's no widget record — use defaults).
+    // Pull brand/contact/styling from the widget record. Two sources:
+    //   - Settings JSON (existing — colours, radius, support contact, brand name)
+    //   - Top-level fields (FromName, LogoUrl, EmailFooter — added Apr 2026
+    //     for the email-send feature; used here too so the PDF logo matches
+    //     the email logo).
+    // Skip on demo path since there's no widget record — use defaults.
     let widgetSettings = {};
+    let pdfBrandName = '';
+    let pdfLogoUrl = '';
     if (widgetId !== DEMO_WIDGET_SENTINEL) {
       const widget = await findWidgetById(widgetId);
       const s = widget?.fields?.Settings;
@@ -510,10 +516,20 @@ export default async function handler(req, res) {
         if (typeof s === 'object') widgetSettings = s;
         else { try { widgetSettings = JSON.parse(s); } catch { widgetSettings = {}; } }
       }
+      const fields = widget?.fields || {};
+      pdfBrandName = (fields.FromName || '').toString().trim()
+        || widgetSettings?.brand?.name
+        || (fields.ClientName || '').toString().trim()
+        || '';
+      const logoUrl = (fields.LogoUrl || '').toString().trim();
+      // Only accept HTTPS — Puppeteer will refuse mixed content and a typo'd
+      // URL renders as a broken-image placeholder in the PDF.
+      pdfLogoUrl = (logoUrl && /^https:\/\//i.test(logoUrl)) ? logoUrl : '';
     }
 
     const html = renderPdfHtml(order, {
-      brandName: widgetSettings?.brand?.name || '',
+      brandName: pdfBrandName,
+      logoUrl: pdfLogoUrl,
       supportEmail: widgetSettings?.support?.email || null,
       supportPhone: widgetSettings?.support?.phone || null,
       colors: widgetSettings?.colors || {},
