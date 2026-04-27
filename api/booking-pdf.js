@@ -523,15 +523,24 @@ export default async function handler(req, res) {
     browser = await getBrowser();
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
-    const pdfBuffer = await page.pdf({
+    const pdfRaw = await page.pdf({
       format: 'A4', printBackground: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
     });
     await browser.close();
+    browser = null;
+
+    // Coerce to a Node Buffer. Puppeteer's page.pdf() may return a Uint8Array
+    // depending on version, and res.send() can re-encode anything non-Buffer
+    // as UTF-8 text — which silently corrupts PDF binary data and produces a
+    // file that opens to "may be damaged".
+    const pdfBuffer = Buffer.isBuffer(pdfRaw) ? pdfRaw : Buffer.from(pdfRaw);
 
     res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length);
     res.setHeader('Content-Disposition', `inline; filename="booking-${orderRef}.pdf"`);
-    return res.status(200).send(pdfBuffer);
+    res.status(200);
+    return res.end(pdfBuffer);
 
   } catch (err) {
     console.error('booking-pdf error:', err.message, err.stack?.slice(0, 500));
