@@ -321,6 +321,14 @@
         host.setAttribute('data-tg-config', JSON.stringify(cfg));
         // Manually instantiate (skip auto-init since we control the lifecycle here)
         if (widget) { try { widget.destroy(); } catch {} }
+        if (typeof window.TGCountdownWidget !== 'function') {
+          host.innerHTML = '<div style="padding:24px;border:1px dashed #EF4444;border-radius:12px;font-family:monospace;font-size:13px;color:#B91C1C;background:#FEF2F2">' +
+            '<strong>widget-countdown.js failed to load.</strong><br>' +
+            'Open DevTools → Network and look for a 404 on <code>/widget-countdown.js</code>. ' +
+            'If you see one, the file is missing from the deploy — check it has been pushed to <code>public/widget-countdown.js</code> in the tg-widgets repo.' +
+            '</div>';
+          return;
+        }
         widget = new window.TGCountdownWidget(host, cfg);
         stage.setAttribute('data-layout', cfg.layout);
         stageLabel.textContent = cfg.layout.toUpperCase() + ' LAYOUT PREVIEW';
