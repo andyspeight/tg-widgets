@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Logo Showcase Editor — Travelgenix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --tg-primary: #1B2B5B;
+    --tg-accent: #0891B2;
+    --tg-accent-2: #6366F1;
+    --tg-bg: #FFFFFF;
+    --tg-bg-2: #F8FAFC;
+    --tg-bg-3: #F1F5F9;
+    --tg-border: #E2E8F0;
+    --tg-text: #0F172A;
+    --tg-text-2: #475569;
+    --tg-text-3: #94A3B8;
+    --tg-success: #10B981;
+    --tg-warning: #F59E0B;
+    --tg-error: #EF4444;
+    --tg-radius: 12px;
+    --tg-radius-sm: 8px;
+  }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--tg-bg-2);
+    color: var(--tg-text);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  [hidden] { display: none !important; }
+
+  /* ---------- Layout ---------- */
+  .app { display: grid; grid-template-columns: 360px 1fr; height: 100vh; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: var(--tg-bg);
+    border-right: 1px solid var(--tg-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .topbar {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--tg-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--tg-accent) 0%, var(--tg-accent-2) 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 14px;
+  }
+  .topbar-title {
+    font-size: 14px; font-weight: 600; flex: 1;
+  }
+  .topbar-title small {
+    display: block; font-weight: 400; font-size: 11px; color: var(--tg-text-3); margin-top: 1px;
+  }
+  .icon-btn {
+    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg);
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--tg-text-2); transition: all 0.15s ease;
+  }
+  .icon-btn:hover { background: var(--tg-bg-2); color: var(--tg-text); border-color: var(--tg-text-3); }
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  .name-row {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--tg-border);
+    display: grid; grid-template-columns: 1fr auto; gap: 8px;
+  }
+  .name-input {
+    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg);
+    border-radius: var(--tg-radius-sm); padding: 0 10px; height: 36px;
+    font: inherit; font-size: 13px; color: var(--tg-text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .name-input:focus {
+    outline: none; border-color: var(--tg-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tg-accent) 18%, transparent);
+  }
+  .save-btn {
+    appearance: none; border: 0; background: var(--tg-text);
+    color: #fff; font: inherit; font-size: 13px; font-weight: 600;
+    padding: 0 14px; height: 36px; border-radius: var(--tg-radius-sm); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background 0.15s ease, opacity 0.15s ease;
+  }
+  .save-btn:hover { background: #000; }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .save-btn.is-saved { background: var(--tg-success); }
+
+  .tabs {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--tg-border);
+  }
+  .tab {
+    appearance: none; border: 0; background: transparent;
+    font: inherit; font-size: 13px; font-weight: 500;
+    padding: 12px 8px; cursor: pointer;
+    color: var(--tg-text-3); border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .tab[aria-selected="true"] { color: var(--tg-text); border-bottom-color: var(--tg-accent); }
+  .tab:hover { color: var(--tg-text); }
+
+  .panel-body {
+    flex: 1; overflow-y: auto; padding: 8px 0;
+  }
+  .panel { display: none; }
+  .panel.is-active { display: block; }
+
+  .section {
+    border-bottom: 1px solid var(--tg-border);
+  }
+  .section-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; cursor: pointer; user-select: none;
+  }
+  .section-head:hover { background: var(--tg-bg-2); }
+  .section-head h3 {
+    flex: 1; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--tg-text-2);
+  }
+  .section-head .chev {
+    width: 14px; height: 14px; color: var(--tg-text-3); transition: transform 0.2s ease;
+  }
+  .section.is-open .section-head .chev { transform: rotate(90deg); }
+  .section-body { padding: 4px 16px 16px; display: none; }
+  .section.is-open .section-body { display: block; }
+
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block; font-size: 12px; font-weight: 500; color: var(--tg-text-2); margin-bottom: 4px;
+  }
+  .field-input, .field-textarea, .field-select {
+    width: 100%; appearance: none; border: 1px solid var(--tg-border);
+    background: var(--tg-bg); border-radius: var(--tg-radius-sm);
+    padding: 8px 10px; font: inherit; font-size: 13px; color: var(--tg-text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field-textarea { min-height: 60px; resize: vertical; line-height: 1.45; }
+  .field-input:focus, .field-textarea:focus, .field-select:focus {
+    outline: none; border-color: var(--tg-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tg-accent) 18%, transparent);
+  }
+  .field-help {
+    font-size: 11px; color: var(--tg-text-3); margin-top: 4px; line-height: 1.4;
+  }
+
+  /* Color row */
+  .color-row {
+    display: grid; grid-template-columns: 32px 1fr auto; gap: 8px; align-items: center;
+  }
+  .color-swatch {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--tg-border);
+    cursor: pointer; appearance: none; padding: 0; overflow: hidden;
+  }
+  .color-swatch::-webkit-color-swatch-wrapper { padding: 0; }
+  .color-swatch::-webkit-color-swatch { border: 0; border-radius: 7px; }
+  .color-hex {
+    font-size: 11px; color: var(--tg-text-3); font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  /* Toggle */
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+  }
+  .toggle-row label {
+    font-size: 13px; font-weight: 500; color: var(--tg-text); margin: 0; cursor: pointer;
+  }
+  .toggle {
+    appearance: none; width: 36px; height: 20px; background: var(--tg-bg-3);
+    border-radius: 999px; position: relative; cursor: pointer;
+    transition: background 0.18s ease;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px; border-radius: 50%; background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    transition: transform 0.18s ease;
+  }
+  .toggle:checked { background: var(--tg-accent); }
+  .toggle:checked::after { transform: translateX(16px); }
+
+  /* Layout buttons */
+  .layout-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .layout-card {
+    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg);
+    border-radius: var(--tg-radius-sm); padding: 10px 8px; cursor: pointer;
+    font: inherit; font-size: 12px; font-weight: 500; color: var(--tg-text-2);
+    text-align: center; transition: all 0.15s ease;
+  }
+  .layout-card:hover { border-color: var(--tg-text-3); color: var(--tg-text); }
+  .layout-card[aria-pressed="true"] {
+    border-color: var(--tg-accent); background: color-mix(in srgb, var(--tg-accent) 8%, transparent);
+    color: var(--tg-accent);
+  }
+  .layout-card-svg { display: block; margin: 0 auto 6px; width: 100%; height: 28px; color: currentColor; }
+
+  /* Slider */
+  .slider-row { display: grid; grid-template-columns: 1fr 40px; gap: 12px; align-items: center; }
+  .slider {
+    appearance: none; width: 100%; height: 4px; border-radius: 999px;
+    background: var(--tg-border); cursor: pointer;
+  }
+  .slider::-webkit-slider-thumb {
+    appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--tg-accent); cursor: pointer; border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .slider-val { font-size: 12px; color: var(--tg-text-2); text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Logo list */
+  .logo-list { display: flex; flex-direction: column; gap: 8px; }
+  .logo-item {
+    background: var(--tg-bg-2); border: 1px solid var(--tg-border);
+    border-radius: var(--tg-radius-sm); padding: 10px;
+  }
+  .logo-item-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  }
+  .logo-item-thumb {
+    width: 36px; height: 36px; border-radius: 6px; background: #fff;
+    border: 1px solid var(--tg-border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; overflow: hidden;
+  }
+  .logo-item-thumb img { max-width: 80%; max-height: 80%; object-fit: contain; }
+  .logo-item-thumb-fallback { font-size: 10px; color: var(--tg-text-3); }
+  .logo-item-name {
+    flex: 1; font-size: 12px; font-weight: 600; color: var(--tg-text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .logo-item-actions { display: flex; gap: 4px; }
+  .mini-btn {
+    appearance: none; width: 24px; height: 24px; border-radius: 6px;
+    border: 1px solid var(--tg-border); background: var(--tg-bg);
+    color: var(--tg-text-3); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .mini-btn:hover { color: var(--tg-text); background: var(--tg-bg-3); }
+  .mini-btn.is-danger:hover { color: var(--tg-error); border-color: var(--tg-error); }
+  .mini-btn svg { width: 12px; height: 12px; }
+
+  .logo-item-fields { display: none; gap: 6px; }
+  .logo-item.is-open .logo-item-fields { display: grid; }
+  .logo-item-fields .field-input { font-size: 12px; padding: 6px 8px; }
+  .logo-item-fields label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--tg-text-3); }
+
+  .add-row-btn {
+    appearance: none; border: 1px dashed var(--tg-border); background: transparent;
+    color: var(--tg-text-2); font: inherit; font-size: 13px; font-weight: 500;
+    padding: 12px; border-radius: var(--tg-radius-sm); cursor: pointer; width: 100%;
+    transition: all 0.15s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .add-row-btn:hover { border-color: var(--tg-accent); color: var(--tg-accent); background: color-mix(in srgb, var(--tg-accent) 4%, transparent); }
+  .add-row-btn svg { width: 14px; height: 14px; }
+
+  /* Embed code */
+  .embed-box {
+    background: var(--tg-text); color: #fff; border-radius: var(--tg-radius-sm);
+    padding: 12px; font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 11px; line-height: 1.5; word-break: break-all;
+    position: relative;
+  }
+  .embed-copy {
+    position: absolute; top: 8px; right: 8px;
+    appearance: none; border: 0; background: rgba(255,255,255,0.1);
+    color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 6px;
+    cursor: pointer; font-family: inherit;
+  }
+  .embed-copy:hover { background: rgba(255,255,255,0.2); }
+  .embed-copy.is-copied { background: var(--tg-success); }
+
+  /* CSV upload + AI buttons */
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .action-btn {
+    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg);
+    color: var(--tg-text); font: inherit; font-size: 12px; font-weight: 500;
+    padding: 8px; border-radius: var(--tg-radius-sm); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+    transition: all 0.15s ease;
+  }
+  .action-btn:hover { border-color: var(--tg-accent); color: var(--tg-accent); }
+  .action-btn svg { width: 12px; height: 12px; }
+
+  /* ---------- Preview area ---------- */
+  .preview {
+    display: flex; flex-direction: column; overflow: hidden;
+    background: var(--tg-bg-2);
+  }
+  .preview-toolbar {
+    background: var(--tg-bg);
+    border-bottom: 1px solid var(--tg-border);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .preview-title {
+    flex: 1; font-size: 13px; font-weight: 500; color: var(--tg-text-2);
+  }
+  .preview-pill {
+    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg);
+    color: var(--tg-text-2); font: inherit; font-size: 12px; font-weight: 500;
+    padding: 6px 10px; border-radius: 999px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s ease;
+  }
+  .preview-pill:hover { background: var(--tg-bg-2); color: var(--tg-text); }
+  .preview-pill[aria-pressed="true"] { background: var(--tg-text); color: #fff; border-color: var(--tg-text); }
+  .preview-pill svg { width: 12px; height: 12px; }
+
+  .preview-stage {
+    flex: 1; overflow: auto;
+    padding: 32px;
+    background:
+      linear-gradient(45deg, var(--tg-bg-3) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--tg-bg-3) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--tg-bg-3) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--tg-bg-3) 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+  .preview-stage[data-bg="dark"] {
+    background: #020617;
+  }
+  .preview-frame {
+    max-width: 1100px; margin: 0 auto;
+    background: var(--tg-bg);
+    border-radius: 16px; padding: 8px;
+    box-shadow: 0 4px 6px rgba(15, 23, 42, 0.04), 0 10px 15px rgba(15, 23, 42, 0.06);
+  }
+  .preview-stage[data-bg="dark"] .preview-frame { background: #0F172A; }
+
+  /* ---------- Login overlay ---------- */
+  .login-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .login-card {
+    background: var(--tg-bg); border-radius: 16px; padding: 32px;
+    max-width: 400px; width: 100%;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  }
+  .login-card h2 {
+    font-size: 20px; font-weight: 700; margin-bottom: 4px;
+  }
+  .login-card p {
+    font-size: 13px; color: var(--tg-text-2); margin-bottom: 20px;
+  }
+  .login-card .field { margin-bottom: 12px; }
+  .login-card .field-input { height: 40px; }
+  .login-error {
+    background: color-mix(in srgb, var(--tg-error) 10%, transparent);
+    color: var(--tg-error); border-radius: var(--tg-radius-sm);
+    padding: 8px 10px; font-size: 12px; font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .login-submit {
+    appearance: none; border: 0; background: var(--tg-text);
+    color: #fff; font: inherit; font-size: 14px; font-weight: 600;
+    padding: 0 16px; height: 42px; border-radius: var(--tg-radius-sm);
+    cursor: pointer; width: 100%; margin-top: 4px;
+    transition: background 0.15s ease;
+  }
+  .login-submit:hover { background: #000; }
+
+  /* ---------- AI / Templates modal ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 900; padding: 20px;
+  }
+  .modal-card {
+    background: var(--tg-bg); border-radius: 16px;
+    max-width: 520px; width: 100%; max-height: 80vh; overflow: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  }
+  .modal-head {
+    padding: 16px 20px; border-bottom: 1px solid var(--tg-border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-head h2 { font-size: 16px; font-weight: 600; }
+  .modal-body { padding: 20px; }
+  .modal-foot {
+    padding: 12px 20px; border-top: 1px solid var(--tg-border);
+    display: flex; justify-content: flex-end; gap: 8px;
+  }
+  .modal-btn {
+    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg);
+    color: var(--tg-text); font: inherit; font-size: 13px; font-weight: 500;
+    padding: 8px 14px; border-radius: var(--tg-radius-sm); cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .modal-btn:hover { background: var(--tg-bg-2); }
+  .modal-btn.is-primary { background: var(--tg-text); color: #fff; border-color: var(--tg-text); }
+  .modal-btn.is-primary:hover { background: #000; }
+  .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .ai-mode-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;
+  }
+  .ai-mode-card {
+    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg-2);
+    padding: 12px; border-radius: var(--tg-radius-sm); cursor: pointer;
+    text-align: left; transition: all 0.15s ease;
+    font: inherit;
+  }
+  .ai-mode-card:hover { border-color: var(--tg-text-3); }
+  .ai-mode-card[aria-pressed="true"] {
+    border-color: var(--tg-accent);
+    background: color-mix(in srgb, var(--tg-accent) 6%, transparent);
+  }
+  .ai-mode-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; color: var(--tg-text); }
+  .ai-mode-desc { font-size: 11px; color: var(--tg-text-2); line-height: 1.4; }
+
+  .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .template-card {
+    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg);
+    padding: 12px; border-radius: var(--tg-radius-sm); cursor: pointer;
+    text-align: left; transition: all 0.15s ease;
+    font: inherit;
+  }
+  .template-card:hover { border-color: var(--tg-accent); transform: translateY(-1px); }
+  .template-name { font-size: 13px; font-weight: 600; color: var(--tg-text); margin-bottom: 2px; }
+  .template-desc { font-size: 11px; color: var(--tg-text-2); line-height: 1.35; }
+
+  /* Spinner */
+  .spinner {
+    width: 14px; height: 14px; border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
+    border-top-color: currentColor; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--tg-text); color: #fff;
+    padding: 10px 16px; border-radius: var(--tg-radius-sm);
+    font-size: 13px; font-weight: 500; opacity: 0;
+    transition: all 0.25s ease; pointer-events: none;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1500;
+  }
+  .toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.is-error { background: var(--tg-error); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .sidebar { max-height: 50vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="sidebar">
+    <div class="topbar">
+      <a href="/" class="topbar-logo" title="Back to dashboard" aria-label="Back to dashboard">L</a>
+      <div class="topbar-title">
+        Logo Showcase
+        <small>Travelgenix Widget Suite</small>
+      </div>
+      <button class="icon-btn" id="ai-btn" title="AI builder (A)" aria-label="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/></svg>
+      </button>
+      <button class="icon-btn" id="template-btn" title="Templates (T)" aria-label="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </button>
+    </div>
+
+    <div class="name-row">
+      <input class="name-input" id="widget-name" placeholder="Widget name" />
+      <button class="save-btn" id="save-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save
+      </button>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-panel="design">Design</button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="content">Content</button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="settings">Settings</button>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- ============ DESIGN PANEL ============ -->
+      <div class="panel is-active" data-panel="design">
+
+        <div class="section is-open">
+          <div class="section-head">
+            <h3>Layout</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="layout-grid">
+              <button class="layout-card" data-layout="grid" aria-pressed="true">
+                <svg class="layout-card-svg" viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="10" height="10" rx="1.5"/><rect x="15" y="2" width="10" height="10" rx="1.5"/><rect x="28" y="2" width="10" height="10" rx="1.5"/><rect x="2" y="15" width="10" height="10" rx="1.5"/><rect x="15" y="15" width="10" height="10" rx="1.5"/><rect x="28" y="15" width="10" height="10" rx="1.5"/></svg>
+                Grid
+              </button>
+              <button class="layout-card" data-layout="strip" aria-pressed="false">
+                <svg class="layout-card-svg" viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/><rect x="20" y="11" width="6" height="6" rx="1"/><rect x="29" y="11" width="6" height="6" rx="1"/></svg>
+                Strip
+              </button>
+              <button class="layout-card" data-layout="marquee" aria-pressed="false">
+                <svg class="layout-card-svg" viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="-2" y="11" width="6" height="6" rx="1"/><rect x="7" y="11" width="6" height="6" rx="1"/><rect x="16" y="11" width="6" height="6" rx="1"/><rect x="25" y="11" width="6" height="6" rx="1"/><rect x="34" y="11" width="6" height="6" rx="1"/><path d="M2 24 L4 26 M2 26 L6 22" stroke-width="1"/></svg>
+                Marquee
+              </button>
+              <button class="layout-card" data-layout="spotlight" aria-pressed="false">
+                <svg class="layout-card-svg" viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="20" rx="2"/><rect x="25" y="4" width="6" height="6" rx="1"/><rect x="33" y="4" width="6" height="6" rx="1"/><rect x="25" y="12" width="6" height="6" rx="1"/><rect x="33" y="12" width="6" height="6" rx="1"/></svg>
+                Spotlight
+              </button>
+            </div>
+
+            <div class="field" id="grid-cols-field" style="margin-top:12px">
+              <label>Columns</label>
+              <div class="slider-row">
+                <input type="range" min="2" max="6" step="1" value="4" class="slider" id="grid-cols" />
+                <div class="slider-val" id="grid-cols-val">4</div>
+              </div>
+            </div>
+
+            <div class="field" id="marquee-speed-field" hidden>
+              <label>Marquee speed (slower → faster)</label>
+              <div class="slider-row">
+                <input type="range" min="20" max="80" step="5" value="40" class="slider" id="marquee-speed" />
+                <div class="slider-val" id="marquee-speed-val">40s</div>
+              </div>
+              <div class="field-help">Lower = faster scroll. Marquee pauses on hover and stops entirely if the visitor has reduced-motion enabled.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <h3>Colours</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label>Brand colour</label>
+              <div class="color-row">
+                <input type="color" class="color-swatch" id="color-brand" value="#0891B2" />
+                <span class="color-hex" id="color-brand-hex">#0891B2</span>
+                <span></span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Page background</label>
+              <div class="color-row">
+                <input type="color" class="color-swatch" id="color-bg" value="#FFFFFF" />
+                <span class="color-hex" id="color-bg-hex">#FFFFFF</span>
+                <span></span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Card background</label>
+              <div class="color-row">
+                <input type="color" class="color-swatch" id="color-card" value="#F8FAFC" />
+                <span class="color-hex" id="color-card-hex">#F8FAFC</span>
+                <span></span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Text colour</label>
+              <div class="color-row">
+                <input type="color" class="color-swatch" id="color-text" value="#0F172A" />
+                <span class="color-hex" id="color-text-hex">#0F172A</span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <h3>Shape & treatment</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label>Border radius</label>
+              <div class="slider-row">
+                <input type="range" min="0" max="28" step="2" value="16" class="slider" id="radius-slider" />
+                <div class="slider-val" id="radius-val">16</div>
+              </div>
+            </div>
+            <div class="toggle-row">
+              <label for="grayscale-toggle">Grayscale (colour on hover)</label>
+              <input type="checkbox" class="toggle" id="grayscale-toggle" />
+            </div>
+            <div class="field-help">A classic "trust bar" pattern — logos appear muted until hovered, drawing the eye smoothly across the row.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ CONTENT PANEL ============ -->
+      <div class="panel" data-panel="content">
+
+        <div class="section is-open">
+          <div class="section-head">
+            <h3>Heading</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="toggle-row">
+              <label for="show-heading">Show heading</label>
+              <input type="checkbox" class="toggle" id="show-heading" checked />
+            </div>
+            <div class="field">
+              <label>Eyebrow (small label above title)</label>
+              <input type="text" class="field-input" id="eyebrow" placeholder="e.g. Trusted by the best" />
+            </div>
+            <div class="field">
+              <label>Title</label>
+              <input type="text" class="field-input" id="title" placeholder="e.g. Our partners and accreditations" />
+            </div>
+            <div class="field">
+              <label>Subtitle</label>
+              <textarea class="field-textarea" id="subtitle" placeholder="Optional supporting line"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="section is-open">
+          <div class="section-head">
+            <h3>Logos</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="logo-list" id="logo-list"></div>
+            <button class="add-row-btn" id="add-logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add logo
+            </button>
+            <div class="action-grid">
+              <button class="action-btn" id="csv-upload">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                CSV / XLSX
+              </button>
+              <button class="action-btn" id="csv-template">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Template
+              </button>
+            </div>
+            <input type="file" id="csv-input" accept=".csv,.xlsx,.xls" hidden />
+          </div>
+        </div>
+
+        <div class="section" id="spotlight-section" hidden>
+          <div class="section-head">
+            <h3>Spotlight content</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label>Featured tagline</label>
+              <textarea class="field-textarea" id="spotlight-tagline" placeholder="e.g. Member of ABTA — the UK's leading travel association"></textarea>
+            </div>
+            <div class="field">
+              <label>Featured CTA text</label>
+              <input type="text" class="field-input" id="spotlight-cta" placeholder="e.g. Verify our membership" />
+            </div>
+            <div class="field-help">In Spotlight layout, the first logo marked "featured" gets the large treatment. Tick the star on a logo to feature it.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SETTINGS PANEL ============ -->
+      <div class="panel" data-panel="settings">
+
+        <div class="section is-open">
+          <div class="section-head">
+            <h3>Display options</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="toggle-row">
+              <label for="show-captions">Show logo names below logos</label>
+              <input type="checkbox" class="toggle" id="show-captions" />
+            </div>
+            <div class="toggle-row">
+              <label for="show-filters">Group filter tabs</label>
+              <input type="checkbox" class="toggle" id="show-filters" />
+            </div>
+            <div class="field-help">Filter tabs let visitors switch between "Suppliers", "Accreditations", etc. Only useful if you've grouped your logos.</div>
+          </div>
+        </div>
+
+        <div class="section is-open">
+          <div class="section-head">
+            <h3>Embed code</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="embed-box" id="embed-box">
+              <button class="embed-copy" id="embed-copy">Copy</button>
+              <span id="embed-code">Save your widget to generate the embed code</span>
+            </div>
+            <div class="field-help" style="margin-top:8px">Paste this snippet into any HTML widget on Duda, WordPress, Wix, or Squarespace.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============== PREVIEW ============== -->
+  <main class="preview">
+    <div class="preview-toolbar">
+      <div class="preview-title">Live preview</div>
+      <button class="preview-pill" id="undo-btn" title="Undo (⌘Z)" aria-label="Undo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 7 8 7 8 12"/><path d="M20 17a8 8 0 0 0-8-8H4"/></svg>
+        Undo
+      </button>
+      <button class="preview-pill" id="redo-btn" title="Redo (⌘Y)" aria-label="Redo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 7 16 7 16 12"/><path d="M4 17a8 8 0 0 1 8-8h8"/></svg>
+        Redo
+      </button>
+      <button class="preview-pill" id="bg-toggle" title="Preview on dark background">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Dark canvas
+      </button>
+    </div>
+    <div class="preview-stage" id="preview-stage">
+      <div class="preview-frame">
+        <div id="preview-mount"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============== LOGIN OVERLAY ============== -->
+<div class="login-overlay" id="login-overlay" hidden>
+  <div class="login-card">
+    <h2>Sign in</h2>
+    <p>Sign in to save your widget to your Travelgenix dashboard.</p>
+    <div class="login-error" id="login-error" hidden></div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" class="field-input" id="login-email" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label>Client code</label>
+      <input type="password" class="field-input" id="login-code" autocomplete="current-password" />
+    </div>
+    <button class="login-submit" id="login-submit">Sign in</button>
+  </div>
+</div>
+
+<!-- ============== AI MODAL ============== -->
+<div class="modal-overlay" id="ai-modal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>AI logo builder</h2>
+      <button class="icon-btn" data-close-modal="ai-modal" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="ai-mode-row">
+        <button class="ai-mode-card" data-ai-mode="suggest" aria-pressed="true">
+          <div class="ai-mode-title">Suggest names</div>
+          <div class="ai-mode-desc">AI suggests partner names and groups. You upload the logo images.</div>
+        </button>
+        <button class="ai-mode-card" data-ai-mode="find" aria-pressed="false">
+          <div class="ai-mode-title">Find logos for me</div>
+          <div class="ai-mode-desc">AI suggests names and tries to find official logo URLs. Always double-check before publishing.</div>
+        </button>
+      </div>
+      <div class="field">
+        <label>Tell us about your business</label>
+        <textarea class="field-textarea" id="ai-prompt" placeholder="e.g. We're a Bournemouth travel agent specialising in package holidays to Spain and Greece. ABTA-bonded, ATOL protected, sell mainly TUI and Jet2." style="min-height:90px"></textarea>
+      </div>
+      <div class="field-help">The more specific you are about what you sell and your accreditations, the better the suggestions.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="modal-btn" data-close-modal="ai-modal">Cancel</button>
+      <button class="modal-btn is-primary" id="ai-generate">Generate logos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== TEMPLATES MODAL ============== -->
+<div class="modal-overlay" id="template-modal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>Templates</h2>
+      <button class="icon-btn" data-close-modal="template-modal" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="template-grid" id="template-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== TOAST ============== -->
+<div class="toast" id="toast"></div>
+
+<script src="/widget-logos.js"></script>
+<script>
+/* =================================================================
+   STATE
+   ================================================================= */
+const DEFAULT_CONFIG = {
+  layout: 'grid',
+  columns: 4,
+  marqueeSpeed: 40,
+  grayscale: false,
+  showHeading: true,
+  eyebrow: 'Trusted by the best',
+  title: 'Our partners and accreditations',
+  subtitle: 'We work with the UK\u2019s most trusted travel suppliers.',
+  showCaptions: false,
+  showFilters: false,
+  spotlightTagline: '',
+  spotlightCta: 'Visit website',
+  logos: [
+    { name: 'ABTA', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/ABTA_Logo.svg/320px-ABTA_Logo.svg.png', url: 'https://www.abta.com', group: 'Accreditations', featured: true },
+    { name: 'ATOL Protected', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ATOL_Logo.svg/320px-ATOL_Logo.svg.png', url: '', group: 'Accreditations', featured: false },
+    { name: 'IATA', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IATA_logo.svg/320px-IATA_logo.svg.png', url: '', group: 'Accreditations', featured: false },
+    { name: 'TUI', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/TUI_Logo_neu.svg/320px-TUI_Logo_neu.svg.png', url: '', group: 'Suppliers', featured: false },
+  ],
+  theme: { mode: 'light', brand: '#0891B2', accent: '#6366F1', bg: '', card: '', text: '', radius: 16 }
+};
+
+const TEMPLATES = [
+  {
+    name: 'UK Travel Agent',
+    desc: 'ABTA, ATOL, IATA, Trustpilot, Feefo — every accreditation that matters.',
+    config: {
+      ...DEFAULT_CONFIG,
+      title: 'Booked with confidence',
+      eyebrow: 'Fully protected',
+      logos: [
+        { name: 'ABTA', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/ABTA_Logo.svg/320px-ABTA_Logo.svg.png', url: 'https://www.abta.com', group: 'Accreditations', featured: true },
+        { name: 'ATOL Protected', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ATOL_Logo.svg/320px-ATOL_Logo.svg.png', url: '', group: 'Accreditations', featured: false },
+        { name: 'IATA', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IATA_logo.svg/320px-IATA_logo.svg.png', url: '', group: 'Accreditations', featured: false },
+        { name: 'Trustpilot', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Trustpilot_logo_%282022%29.svg/320px-Trustpilot_logo_%282022%29.svg.png', url: '', group: 'Reviews', featured: false },
+      ]
+    }
+  },
+  {
+    name: 'Premium Suppliers',
+    desc: 'TUI, Jet2, BA Holidays, Emirates, Etihad, Qatar.',
+    config: {
+      ...DEFAULT_CONFIG,
+      layout: 'marquee',
+      title: 'Working with the world\u2019s best',
+      logos: [
+        { name: 'TUI', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/TUI_Logo_neu.svg/320px-TUI_Logo_neu.svg.png', url: '', group: 'Suppliers', featured: false },
+        { name: 'Jet2 Holidays', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Jet2.com_logo.svg/320px-Jet2.com_logo.svg.png', url: '', group: 'Suppliers', featured: false },
+        { name: 'British Airways', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/42/British_Airways_Logo.svg/320px-British_Airways_Logo.svg.png', url: '', group: 'Suppliers', featured: false },
+        { name: 'Emirates', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Emirates_logo.svg/320px-Emirates_logo.svg.png', url: '', group: 'Suppliers', featured: false },
+      ]
+    }
+  },
+  {
+    name: 'Cruise Specialist',
+    desc: 'Royal Caribbean, P&O, Cunard, Celebrity, NCL, MSC.',
+    config: {
+      ...DEFAULT_CONFIG,
+      layout: 'grid',
+      columns: 3,
+      title: 'Sail with our trusted cruise lines',
+      eyebrow: 'Cruise specialist',
+      logos: [
+        { name: 'Royal Caribbean', image: '', url: '', group: 'Cruise lines', featured: false },
+        { name: 'P&O Cruises', image: '', url: '', group: 'Cruise lines', featured: false },
+        { name: 'Cunard', image: '', url: '', group: 'Cruise lines', featured: false },
+        { name: 'Celebrity Cruises', image: '', url: '', group: 'Cruise lines', featured: false },
+        { name: 'Norwegian Cruise Line', image: '', url: '', group: 'Cruise lines', featured: false },
+        { name: 'MSC Cruises', image: '', url: '', group: 'Cruise lines', featured: false },
+      ]
+    }
+  },
+  {
+    name: 'Generic Trust Bar',
+    desc: 'Empty placeholder cards — swap in your own logos.',
+    config: {
+      ...DEFAULT_CONFIG,
+      layout: 'strip',
+      showHeading: false,
+      logos: [
+        { name: 'Logo 1', image: '', url: '', group: '', featured: false },
+        { name: 'Logo 2', image: '', url: '', group: '', featured: false },
+        { name: 'Logo 3', image: '', url: '', group: '', featured: false },
+        { name: 'Logo 4', image: '', url: '', group: '', featured: false },
+        { name: 'Logo 5', image: '', url: '', group: '', featured: false },
+      ]
+    }
+  },
+];
+
+let state = {
+  config: deepClone(DEFAULT_CONFIG),
+  widgetId: null,
+  widgetName: 'My Logo Showcase',
+  history: [],
+  historyIdx: -1,
+  isDirty: false,
+  aiMode: 'suggest',
+  openLogoIdx: -1,
+};
+
+const $ = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+
+function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+function uid() { return 'tgw_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
+
+/* =================================================================
+   AUTH
+   ================================================================= */
+const SESSION_KEY = 'tgw_session';
+
+function getSession() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch { return null; }
+}
+
+function isLoggedIn() {
+  const s = getSession();
+  return !!(s && s.token);
+}
+
+function getAuthToken() {
+  const s = getSession();
+  return s && s.token ? s.token : '';
+}
+
+function authH() {
+  const t = getAuthToken();
+  const h = { 'Content-Type': 'application/json' };
+  if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+
+function showLogin() {
+  $('#login-overlay').hidden = false;
+  setTimeout(() => $('#login-email').focus(), 50);
+}
+function hideLogin() {
+  $('#login-overlay').hidden = true;
+  $('#login-error').hidden = true;
+}
+
+async function doLogin() {
+  const email = $('#login-email').value.trim();
+  const code = $('#login-code').value;
+  if (!email || !code) {
+    $('#login-error').textContent = 'Email and client code required';
+    $('#login-error').hidden = false;
+    return;
+  }
+  try {
+    const res = await fetch('/api/widget-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.token) {
+      $('#login-error').textContent = data.error || 'Sign-in failed';
+      $('#login-error').hidden = false;
+      return;
+    }
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      user: data.user || { email },
+      token: data.token,
+      timestamp: Date.now()
+    }));
+    hideLogin();
+    toast('Signed in');
+  } catch (e) {
+    $('#login-error').textContent = 'Network error — try again';
+    $('#login-error').hidden = false;
+  }
+}
+
+function ensureAuth() {
+  if (!isLoggedIn()) showLogin();
+}
+
+/* =================================================================
+   PREVIEW
+   ================================================================= */
+let previewWidget = null;
+
+function renderPreview() {
+  const mount = $('#preview-mount');
+  mount.innerHTML = '<div data-tg-widget="logos"></div>';
+  const inner = mount.querySelector('[data-tg-widget="logos"]');
+  if (window.TGLogosWidget) {
+    if (previewWidget && previewWidget.destroy) previewWidget.destroy();
+    previewWidget = new window.TGLogosWidget(inner, deepClone(state.config));
+  }
+}
+
+/* =================================================================
+   STATE → UI sync
+   ================================================================= */
+function syncUIFromState() {
+  const c = state.config;
+
+  // Layout buttons
+  $$('.layout-card').forEach(b => {
+    b.setAttribute('aria-pressed', b.getAttribute('data-layout') === c.layout ? 'true' : 'false');
+  });
+  $('#grid-cols-field').hidden = c.layout !== 'grid';
+  $('#marquee-speed-field').hidden = c.layout !== 'marquee';
+  $('#spotlight-section').hidden = c.layout !== 'spotlight';
+
+  // Sliders
+  $('#grid-cols').value = c.columns;
+  $('#grid-cols-val').textContent = c.columns;
+  $('#marquee-speed').value = c.marqueeSpeed;
+  $('#marquee-speed-val').textContent = c.marqueeSpeed + 's';
+  $('#radius-slider').value = c.theme.radius;
+  $('#radius-val').textContent = c.theme.radius;
+
+  // Colours
+  ['brand', 'bg', 'card', 'text'].forEach(k => {
+    const v = c.theme[k] || (k === 'brand' ? '#0891B2' : k === 'bg' ? '#FFFFFF' : k === 'card' ? '#F8FAFC' : '#0F172A');
+    $(`#color-${k}`).value = v;
+    $(`#color-${k}-hex`).textContent = v.toUpperCase();
+  });
+
+  // Toggles
+  $('#grayscale-toggle').checked = c.grayscale;
+  $('#show-heading').checked = c.showHeading;
+  $('#show-captions').checked = c.showCaptions;
+  $('#show-filters').checked = c.showFilters;
+
+  // Heading text
+  $('#eyebrow').value = c.eyebrow || '';
+  $('#title').value = c.title || '';
+  $('#subtitle').value = c.subtitle || '';
+  $('#spotlight-tagline').value = c.spotlightTagline || '';
+  $('#spotlight-cta').value = c.spotlightCta || '';
+
+  // Name
+  $('#widget-name').value = state.widgetName;
+
+  renderLogoList();
+  renderEmbedCode();
+  renderPreview();
+}
+
+function renderLogoList() {
+  const list = $('#logo-list');
+  const logos = state.config.logos || [];
+  if (logos.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--tg-text-3);font-size:12px">No logos yet — add one below</div>';
+    return;
+  }
+  list.innerHTML = logos.map((l, i) => {
+    const open = state.openLogoIdx === i;
+    const thumb = l.image
+      ? `<img src="${escAttr(l.image)}" alt="" />`
+      : `<span class="logo-item-thumb-fallback">No image</span>`;
+    return `
+      <div class="logo-item ${open ? 'is-open' : ''}" data-idx="${i}">
+        <div class="logo-item-head">
+          <div class="logo-item-thumb">${thumb}</div>
+          <div class="logo-item-name">${escHtml(l.name || 'Untitled logo')}</div>
+          <div class="logo-item-actions">
+            <button class="mini-btn" data-action="featured" data-idx="${i}" title="${l.featured ? 'Unfeature' : 'Feature'}" aria-label="Toggle featured">
+              <svg viewBox="0 0 24 24" fill="${l.featured ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+            <button class="mini-btn" data-action="up" data-idx="${i}" title="Move up" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <button class="mini-btn" data-action="down" data-idx="${i}" title="Move down" aria-label="Move down" ${i === logos.length - 1 ? 'disabled' : ''}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <button class="mini-btn" data-action="toggle" data-idx="${i}" title="Edit" aria-label="Edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="mini-btn is-danger" data-action="delete" data-idx="${i}" title="Delete" aria-label="Delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="logo-item-fields">
+          <label>Name</label>
+          <input class="field-input" data-field="name" data-idx="${i}" value="${escAttr(l.name || '')}" />
+          <label>Logo image URL</label>
+          <input class="field-input" data-field="image" data-idx="${i}" value="${escAttr(l.image || '')}" placeholder="https://..." />
+          <label>Link URL (optional)</label>
+          <input class="field-input" data-field="url" data-idx="${i}" value="${escAttr(l.url || '')}" placeholder="https://..." />
+          <label>Group (optional)</label>
+          <input class="field-input" data-field="group" data-idx="${i}" value="${escAttr(l.group || '')}" placeholder="e.g. Suppliers, Accreditations" />
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+function escAttr(s) { return escHtml(s); }
+
+function renderEmbedCode() {
+  const el = $('#embed-code');
+  if (!state.widgetId) {
+    el.textContent = 'Save your widget to generate the embed code';
+    return;
+  }
+  const origin = window.location.origin;
+  el.innerHTML = escHtml(`<div data-tg-widget="logos" data-tg-id="${state.widgetId}"></div>\n<script src="${origin}/widget-logos.js"><\/script>`);
+}
+
+/* =================================================================
+   STATE MUTATION + HISTORY
+   ================================================================= */
+function pushHistory() {
+  state.history = state.history.slice(0, state.historyIdx + 1);
+  state.history.push(deepClone(state.config));
+  if (state.history.length > 40) state.history.shift();
+  state.historyIdx = state.history.length - 1;
+  state.isDirty = true;
+  updateSaveButton();
+}
+
+function updateSaveButton() {
+  const b = $('#save-btn');
+  if (state.isDirty) {
+    b.classList.remove('is-saved');
+    b.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save`;
+  } else {
+    b.classList.add('is-saved');
+    b.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Saved`;
+  }
+}
+
+function undo() {
+  if (state.historyIdx <= 0) return;
+  state.historyIdx--;
+  state.config = deepClone(state.history[state.historyIdx]);
+  state.isDirty = true;
+  syncUIFromState();
+}
+function redo() {
+  if (state.historyIdx >= state.history.length - 1) return;
+  state.historyIdx++;
+  state.config = deepClone(state.history[state.historyIdx]);
+  state.isDirty = true;
+  syncUIFromState();
+}
+
+function setConfig(patch) {
+  Object.assign(state.config, patch);
+  pushHistory();
+  syncUIFromState();
+}
+
+function setTheme(patch) {
+  Object.assign(state.config.theme, patch);
+  pushHistory();
+  syncUIFromState();
+}
+
+/* =================================================================
+   SAVE
+   ================================================================= */
+async function saveWidget() {
+  if (!isLoggedIn()) { showLogin(); return; }
+  const btn = $('#save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+  try {
+    const sess = getSession();
+    const body = {
+      widgetType: 'Logo Showcase',
+      name: state.widgetName || 'Logo Showcase',
+      config: state.config,
+      clientEmail: sess && sess.user ? sess.user.email : '',
+    };
+    if (state.widgetId) body.widgetId = state.widgetId;
+
+    const res = await fetch('/api/widget-config', {
+      method: 'POST',
+      headers: authH(),
+      body: JSON.stringify(body)
+    });
+    if (res.status === 401) {
+      showLogin();
+      btn.disabled = false;
+      updateSaveButton();
+      return;
+    }
+    const data = await res.json();
+    if (!res.ok) {
+      toast(data.error || 'Save failed', true);
+      btn.disabled = false;
+      updateSaveButton();
+      return;
+    }
+    state.widgetId = data.widgetId || data.id || state.widgetId;
+    state.isDirty = false;
+    btn.disabled = false;
+    updateSaveButton();
+    renderEmbedCode();
+    // Update URL with widget id
+    if (state.widgetId) {
+      const u = new URL(window.location.href);
+      u.searchParams.set('id', state.widgetId);
+      window.history.replaceState({}, '', u.toString());
+    }
+    toast('Saved');
+  } catch (e) {
+    toast('Network error', true);
+    btn.disabled = false;
+    updateSaveButton();
+  }
+}
+
+async function loadWidget(id) {
+  try {
+    const res = await fetch(`/api/widget-config?id=${encodeURIComponent(id)}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    state.widgetId = data.widgetId || data.id || id;
+    state.widgetName = data.name || 'Logo Showcase';
+    state.config = Object.assign({}, deepClone(DEFAULT_CONFIG), data.config || {});
+    state.history = [deepClone(state.config)];
+    state.historyIdx = 0;
+    state.isDirty = false;
+    syncUIFromState();
+    updateSaveButton();
+  } catch (e) {
+    console.warn('Load failed', e);
+  }
+}
+
+/* =================================================================
+   AI BUILDER
+   ================================================================= */
+async function generateAI() {
+  if (!isLoggedIn()) { showLogin(); return; }
+  const prompt = $('#ai-prompt').value.trim();
+  if (!prompt) { toast('Please describe your business', true); return; }
+  const btn = $('#ai-generate');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating...';
+  try {
+    const fullPrompt = state.aiMode === 'find'
+      ? `You are helping a UK travel agent populate a "logos" widget for their website. Based on this description, suggest 6-10 partner/supplier/accreditation logos. For each, return: name, group ("Suppliers", "Accreditations", or "Reviews"), and a likely official logo image URL (use Wikipedia commons or the company's known logo CDN where possible). If unsure of the URL, leave it empty. Description: ${prompt}`
+      : `You are helping a UK travel agent populate a "logos" widget for their website. Based on this description, suggest 6-10 partner/supplier/accreditation names. For each, return: name (the brand name), group ("Suppliers", "Accreditations", or "Reviews"). Do not provide image URLs. Description: ${prompt}`;
+
+    const res = await fetch('/api/widget-ai', {
+      method: 'POST',
+      headers: authH(),
+      body: JSON.stringify({
+        widgetType: 'Logo Showcase',
+        prompt: fullPrompt,
+        responseFormat: 'json',
+        schema: {
+          logos: 'array of { name: string, group: string, image: string }'
+        }
+      })
+    });
+    if (res.status === 401) { showLogin(); btn.disabled = false; btn.textContent = 'Generate logos'; return; }
+    const data = await res.json();
+    if (!res.ok) {
+      toast(data.error || 'AI failed', true);
+      btn.disabled = false; btn.textContent = 'Generate logos';
+      return;
+    }
+    let suggestions = [];
+    try {
+      const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+      suggestions = parsed.logos || parsed || [];
+    } catch (e) {
+      console.warn('AI parse failed', e);
+    }
+    if (!Array.isArray(suggestions) || suggestions.length === 0) {
+      toast('No suggestions returned', true);
+      btn.disabled = false; btn.textContent = 'Generate logos';
+      return;
+    }
+    state.config.logos = suggestions.map(s => ({
+      name: s.name || '',
+      image: s.image || '',
+      url: '',
+      group: s.group || '',
+      featured: false,
+    }));
+    pushHistory();
+    syncUIFromState();
+    closeModal('ai-modal');
+    toast(`Added ${suggestions.length} logos`);
+  } catch (e) {
+    toast('Network error', true);
+  }
+  btn.disabled = false;
+  btn.textContent = 'Generate logos';
+}
+
+/* =================================================================
+   CSV / XLSX
+   ================================================================= */
+function downloadTemplate() {
+  const rows = [
+    ['Name', 'Logo URL', 'Link URL', 'Group', 'Featured'],
+    ['ABTA', 'https://example.com/abta.png', 'https://www.abta.com', 'Accreditations', 'TRUE'],
+    ['TUI', 'https://example.com/tui.png', 'https://www.tui.co.uk', 'Suppliers', 'FALSE'],
+  ];
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'logos-template.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function handleCsvUpload(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      if (rows.length < 2) { toast('No data rows found', true); return; }
+      const header = rows[0].map(h => String(h).toLowerCase().trim());
+      const idx = (k) => header.findIndex(h => h.includes(k));
+      const iName = idx('name');
+      const iImg = idx('logo') >= 0 ? idx('logo') : idx('image');
+      const iUrl = idx('link') >= 0 ? idx('link') : idx('url');
+      const iGroup = idx('group') >= 0 ? idx('group') : idx('category');
+      const iFeat = idx('featur');
+      const logos = [];
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row || row.every(c => c === '' || c == null)) continue;
+        const name = iName >= 0 ? String(row[iName] || '').trim() : '';
+        if (!name) continue;
+        logos.push({
+          name,
+          image: iImg >= 0 ? String(row[iImg] || '').trim() : '',
+          url: iUrl >= 0 ? String(row[iUrl] || '').trim() : '',
+          group: iGroup >= 0 ? String(row[iGroup] || '').trim() : '',
+          featured: iFeat >= 0 ? /^(true|yes|1|y)$/i.test(String(row[iFeat] || '').trim()) : false,
+        });
+      }
+      if (logos.length === 0) { toast('No valid logos found', true); return; }
+      state.config.logos = logos;
+      pushHistory();
+      syncUIFromState();
+      toast(`Imported ${logos.length} logos`);
+    } catch (err) {
+      console.warn(err);
+      toast('Import failed — check the file format', true);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* =================================================================
+   MODALS / TOAST
+   ================================================================= */
+function openModal(id) { $(`#${id}`).hidden = false; }
+function closeModal(id) { $(`#${id}`).hidden = true; }
+
+let toastTimer = null;
+function toast(msg, isError) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.toggle('is-error', !!isError);
+  t.classList.add('is-visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('is-visible'), 2400);
+}
+
+/* =================================================================
+   EVENT BINDING
+   ================================================================= */
+function bindEvents() {
+  // Tabs
+  $$('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      const target = t.getAttribute('data-panel');
+      $$('.tab').forEach(b => b.setAttribute('aria-selected', b === t ? 'true' : 'false'));
+      $$('.panel').forEach(p => p.classList.toggle('is-active', p.getAttribute('data-panel') === target));
+    });
+  });
+
+  // Section toggles
+  $$('.section-head').forEach(h => {
+    h.addEventListener('click', () => h.parentElement.classList.toggle('is-open'));
+  });
+
+  // Layout cards
+  $$('.layout-card').forEach(b => {
+    b.addEventListener('click', () => setConfig({ layout: b.getAttribute('data-layout') }));
+  });
+
+  // Sliders
+  $('#grid-cols').addEventListener('input', e => {
+    state.config.columns = parseInt(e.target.value, 10);
+    $('#grid-cols-val').textContent = state.config.columns;
+    renderPreview();
+  });
+  $('#grid-cols').addEventListener('change', () => pushHistory());
+  $('#marquee-speed').addEventListener('input', e => {
+    state.config.marqueeSpeed = parseInt(e.target.value, 10);
+    $('#marquee-speed-val').textContent = state.config.marqueeSpeed + 's';
+    renderPreview();
+  });
+  $('#marquee-speed').addEventListener('change', () => pushHistory());
+  $('#radius-slider').addEventListener('input', e => {
+    state.config.theme.radius = parseInt(e.target.value, 10);
+    $('#radius-val').textContent = state.config.theme.radius;
+    renderPreview();
+  });
+  $('#radius-slider').addEventListener('change', () => pushHistory());
+
+  // Colours
+  ['brand', 'bg', 'card', 'text'].forEach(k => {
+    const inp = $(`#color-${k}`);
+    inp.addEventListener('input', e => {
+      state.config.theme[k] = e.target.value;
+      $(`#color-${k}-hex`).textContent = e.target.value.toUpperCase();
+      renderPreview();
+    });
+    inp.addEventListener('change', () => pushHistory());
+  });
+
+  // Toggles
+  $('#grayscale-toggle').addEventListener('change', e => setConfig({ grayscale: e.target.checked }));
+  $('#show-heading').addEventListener('change', e => setConfig({ showHeading: e.target.checked }));
+  $('#show-captions').addEventListener('change', e => setConfig({ showCaptions: e.target.checked }));
+  $('#show-filters').addEventListener('change', e => setConfig({ showFilters: e.target.checked }));
+
+  // Heading text
+  ['eyebrow', 'title', 'subtitle', 'spotlight-tagline', 'spotlight-cta'].forEach(id => {
+    const el = $(`#${id}`);
+    el.addEventListener('input', () => {
+      const key = id === 'spotlight-tagline' ? 'spotlightTagline' : id === 'spotlight-cta' ? 'spotlightCta' : id;
+      state.config[key] = el.value;
+      renderPreview();
+    });
+    el.addEventListener('change', () => pushHistory());
+  });
+
+  // Widget name
+  $('#widget-name').addEventListener('input', e => {
+    state.widgetName = e.target.value;
+    state.isDirty = true;
+    updateSaveButton();
+  });
+
+  // Logo list events (delegate)
+  $('#logo-list').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const idx = parseInt(btn.getAttribute('data-idx'), 10);
+    const action = btn.getAttribute('data-action');
+    const logos = state.config.logos;
+    if (action === 'delete') {
+      logos.splice(idx, 1);
+      if (state.openLogoIdx === idx) state.openLogoIdx = -1;
+    } else if (action === 'up' && idx > 0) {
+      [logos[idx - 1], logos[idx]] = [logos[idx], logos[idx - 1]];
+    } else if (action === 'down' && idx < logos.length - 1) {
+      [logos[idx], logos[idx + 1]] = [logos[idx + 1], logos[idx]];
+    } else if (action === 'featured') {
+      logos[idx].featured = !logos[idx].featured;
+      // Only one featured at a time for spotlight clarity
+      if (logos[idx].featured) logos.forEach((l, i) => { if (i !== idx) l.featured = false; });
+    } else if (action === 'toggle') {
+      state.openLogoIdx = state.openLogoIdx === idx ? -1 : idx;
+      renderLogoList();
+      return;
+    }
+    pushHistory();
+    syncUIFromState();
+  });
+
+  $('#logo-list').addEventListener('input', e => {
+    const inp = e.target.closest('[data-field]');
+    if (!inp) return;
+    const idx = parseInt(inp.getAttribute('data-idx'), 10);
+    const field = inp.getAttribute('data-field');
+    if (state.config.logos[idx]) {
+      state.config.logos[idx][field] = inp.value;
+      state.isDirty = true;
+      updateSaveButton();
+      renderPreview();
+    }
+  });
+
+  $('#logo-list').addEventListener('change', e => {
+    if (e.target.closest('[data-field]')) pushHistory();
+  });
+
+  $('#add-logo').addEventListener('click', () => {
+    state.config.logos.push({ name: 'New logo', image: '', url: '', group: '', featured: false });
+    state.openLogoIdx = state.config.logos.length - 1;
+    pushHistory();
+    syncUIFromState();
+  });
+
+  // CSV
+  $('#csv-template').addEventListener('click', downloadTemplate);
+  $('#csv-upload').addEventListener('click', () => $('#csv-input').click());
+  $('#csv-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) handleCsvUpload(file);
+    e.target.value = '';
+  });
+
+  // Save
+  $('#save-btn').addEventListener('click', saveWidget);
+
+  // Undo / redo
+  $('#undo-btn').addEventListener('click', undo);
+  $('#redo-btn').addEventListener('click', redo);
+
+  // Background toggle
+  $('#bg-toggle').addEventListener('click', e => {
+    const stage = $('#preview-stage');
+    const isDark = stage.getAttribute('data-bg') === 'dark';
+    stage.setAttribute('data-bg', isDark ? 'light' : 'dark');
+    e.currentTarget.setAttribute('aria-pressed', String(!isDark));
+  });
+
+  // AI / Templates buttons
+  $('#ai-btn').addEventListener('click', () => { ensureAuth(); openModal('ai-modal'); });
+  $('#template-btn').addEventListener('click', () => { renderTemplates(); openModal('template-modal'); });
+  $$('[data-close-modal]').forEach(b => {
+    b.addEventListener('click', () => closeModal(b.getAttribute('data-close-modal')));
+  });
+
+  // AI mode
+  $$('[data-ai-mode]').forEach(b => {
+    b.addEventListener('click', () => {
+      $$('[data-ai-mode]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true');
+      state.aiMode = b.getAttribute('data-ai-mode');
+    });
+  });
+  $('#ai-generate').addEventListener('click', generateAI);
+
+  // Login
+  $('#login-submit').addEventListener('click', doLogin);
+  $('#login-overlay').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  // Embed copy
+  $('#embed-copy').addEventListener('click', () => {
+    if (!state.widgetId) return;
+    const text = $('#embed-code').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      $('#embed-copy').textContent = 'Copied!';
+      $('#embed-copy').classList.add('is-copied');
+      setTimeout(() => {
+        $('#embed-copy').textContent = 'Copy';
+        $('#embed-copy').classList.remove('is-copied');
+      }, 1500);
+    });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    const isInput = ['INPUT', 'TEXTAREA'].includes(e.target.tagName);
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveWidget(); return; }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+    if ((e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); redo(); return; }
+    if (isInput) return;
+    if (e.key.toLowerCase() === 'a') { ensureAuth(); openModal('ai-modal'); }
+    if (e.key.toLowerCase() === 't') { renderTemplates(); openModal('template-modal'); }
+    if (e.key === '1') $$('.tab')[0].click();
+    if (e.key === '2') $$('.tab')[1].click();
+    if (e.key === '3') $$('.tab')[2].click();
+    if (e.key === 'Escape') {
+      ['ai-modal', 'template-modal'].forEach(closeModal);
+    }
+  });
+}
+
+function renderTemplates() {
+  $('#template-grid').innerHTML = TEMPLATES.map((t, i) => `
+    <button class="template-card" data-template-idx="${i}">
+      <div class="template-name">${escHtml(t.name)}</div>
+      <div class="template-desc">${escHtml(t.desc)}</div>
+    </button>
+  `).join('');
+  $$('[data-template-idx]').forEach(b => {
+    b.addEventListener('click', () => {
+      const t = TEMPLATES[parseInt(b.getAttribute('data-template-idx'), 10)];
+      state.config = deepClone(t.config);
+      pushHistory();
+      syncUIFromState();
+      closeModal('template-modal');
+      toast('Template applied');
+    });
+  });
+}
+
+/* =================================================================
+   INIT
+   ================================================================= */
+function init() {
+  bindEvents();
+  state.history = [deepClone(state.config)];
+  state.historyIdx = 0;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (id) {
+    state.widgetId = id;
+    if (isLoggedIn()) loadWidget(id);
+    else showLogin();
+  } else {
+    if (!isLoggedIn()) showLogin();
+  }
+  syncUIFromState();
+  updateSaveButton();
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+</script>
+
+</body>
+</html>
