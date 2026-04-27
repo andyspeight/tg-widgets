@@ -25,7 +25,11 @@ const IF = {
   Status: 'fldEVMrKnEpFaxORk',
 };
 
-const AIRTABLE_KEY = process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_ACCESS_TOKEN;
+const AIRTABLE_KEY =
+  process.env.AIRTABLE_KEY ||
+  process.env.AIRTABLE_API_KEY ||
+  process.env.AIRTABLE_ACCESS_TOKEN ||
+  process.env.AIRTABLE_PAT;
 function airtableHeaders() {
   return { 'Authorization': `Bearer ${AIRTABLE_KEY}`, 'Content-Type': 'application/json' };
 }
