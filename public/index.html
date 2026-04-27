@@ -405,12 +405,17 @@ const WIDGETS = [
   {
     id: 'countdown',
     name: 'Countdown Timer',
-    description: 'Create urgency with animated countdown timers for sales, launches, and events. Multiple display styles.',
-    category: 'E-commerce',
-    status: 'coming-soon',
-    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
-    color: '#EF4444',
-    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+    airtableType: 'Countdown Timer',
+    description: 'Drive urgency around sales, peaks campaigns, departure dates and early-booking deadlines. Four layouts — banner, card, inline and hero — with light/dark themes, urgency mode and repeating timers.',
+    category: 'Marketing',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M9 2h6"/><path d="M12 5V2"/>'},
+    color: '#1B2B5B',
+    editorUrl: '/editor-countdown',
+    demoUrl: '/demo-countdown',
+    widgetTag: 'countdown',
+    scriptFile: 'widget-countdown.js',
+    access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'logos',
@@ -1192,6 +1197,35 @@ function loadMiniPreview(w) {
     `;
   }
 
+  if (w.id === 'countdown' && window.TGCountdownWidget) {
+    // Tile preview — card layout, two-week countdown, no seconds, animation off.
+    // Each render creates a new timer instance; the previous one's DOM is
+    // disposed by container.innerHTML='' at the top of loadMiniPreview, and
+    // its setInterval becomes a no-op once it has nothing to update.
+    new window.TGCountdownWidget(el, {
+      layout: 'card',
+      theme: 'light',
+      targetDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(),
+      heading: 'Summer sale ends in',
+      subheading: 'Save up to 40% on package holidays.',
+      cta: { text: 'Browse offers', url: '#', openInNewTab: false },
+      display: { showDays: true, showHours: true, showMinutes: true, showSeconds: false },
+      animation: { tick: false },
+      urgency: { enabled: false, thresholdHours: 24 },
+      radius: 12,
+      colours: {
+        brand: w.color,
+        accent: '#00B4D8',
+        bg: 'transparent',
+        card: '#FFFFFF',
+        text: '#0F172A',
+        digitBg: '#F8FAFC',
+        ctaBg: w.color,
+        ctaText: '#FFFFFF'
+      }
+    });
+  }
+
   if (w.id === 'logos' && window.TGLogosWidget) {
     container.innerHTML = '<div data-tg-widget="logos"></div>';
     const inner = container.querySelector('[data-tg-widget="logos"]');
@@ -1280,5 +1314,6 @@ render();
 <script src="/widget-weather.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
+<script src="/widget-countdown.js"></script>
 </body>
 </html>
