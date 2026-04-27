@@ -994,10 +994,6 @@ import { renderEmailHtml } from '/_email-template.js';
   }
 
   // ===== Travelify credentials =====
-  // Note: this endpoint may return 401 even when the user is otherwise
-  // authenticated (it has its own auth requirements). We treat 401 here
-  // as "credentials feature unavailable" rather than "logged out" — the
-  // rest of the editor still works fine.
   async function loadIntegration() {
     if (!ensureAuth()) return;
     try {
@@ -1005,10 +1001,15 @@ import { renderEmailHtml } from '/_email-template.js';
         headers: authH(),
       });
       if (res.status === 401) {
-        // Credentials endpoint isn't available for this session.
-        // Don't redirect — let the user keep using the rest of the editor.
+        // Session expired — same flow as the main save button.
+        redirectToDashboard();
+        return;
+      }
+      if (!res.ok) {
+        // Server error or rate-limit — surface a non-fatal message but keep
+        // the rest of the editor working. The user can retry.
         state.integration = null;
-        renderCredsUnavailable();
+        renderCredsLoadError();
         return;
       }
       const data = await res.json();
@@ -1016,18 +1017,18 @@ import { renderEmailHtml } from '/_email-template.js';
       renderCredsStatus();
     } catch (e) {
       console.error('Load integration failed:', e);
-      renderCredsUnavailable();
+      renderCredsLoadError();
     }
   }
 
-  function renderCredsUnavailable() {
+  function renderCredsLoadError() {
     const area = document.getElementById('creds-status-area');
     const formEl = document.getElementById('creds-form');
     const replaceEl = document.getElementById('creds-replace');
     area.innerHTML = `
       <div class="creds-status missing">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>Credential management isn't available from this account. Please contact Travelgenix support to set up Travelify credentials.</span>
+        <span>Couldn't load credential status. Refresh the page to try again, or contact support if it keeps happening.</span>
       </div>
     `;
     formEl.hidden = true;
@@ -1080,7 +1081,7 @@ import { renderEmailHtml } from '/_email-template.js';
         body: JSON.stringify({ service: 'Travelify', appId, apiKey }),
       });
       if (res.status === 401) {
-        toast('Credential management is not available from this account', 'error');
+        redirectToDashboard();
         return;
       }
       const data = await res.json();
@@ -1179,7 +1180,7 @@ import { renderEmailHtml } from '/_email-template.js';
           method: 'DELETE',
           headers: authH(),
         });
-        if (res.status === 401) { toast('Credential management is not available from this account', 'error'); return; }
+        if (res.status === 401) { redirectToDashboard(); return; }
         if (!res.ok) throw new Error('Revoke failed');
         state.integration = null;
         renderCredsStatus();
