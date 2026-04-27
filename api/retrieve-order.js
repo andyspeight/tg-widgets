@@ -222,6 +222,238 @@ function sanitiseImageUrl(u) {
   return u;
 }
 
+// ----- Per-product trim helpers -----
+//
+// Travelify orders contain heterogeneous items: Accommodation, Flights,
+// AirportExtras (lounges, transfers, parking), plus future product types.
+// Each branch below extracts only what the widget needs to render — never
+// the raw supplier data, never internal IDs that aren't safe to expose.
+// New product types fall through and are returned with just the common
+// envelope (id/status/product/price/etc) so they don't break the widget.
+
+function trimAccommodation(d) {
+  return {
+    name: safeStr(d.name, 200),
+    propertyType: safeStr(d.propertyType, 60),
+    rating: safeNum(d.rating),
+    location: d.location ? {
+      address1: safeStr(d.location.address1, 300),
+      city: safeStr(d.location.city, 100),
+      state: safeStr(d.location.state, 100),
+      country: safeStr(d.location.country, 10),
+      latitude: safeNum(d.location.latitude),
+      longitude: safeNum(d.location.longitude),
+    } : null,
+    review: d.review ? {
+      rating: safeNum(d.review.rating),
+      reviews: safeNum(d.review.reviews),
+      platform: safeStr(d.review.platform, 30),
+    } : null,
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10),
+      price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice),
+      inResortFees: safeNum(d.pricing.inResortFees),
+      isRefundable: !!d.pricing.isRefundable,
+      refundability: safeStr(d.pricing.refundability, 30),
+      depositOptions: Array.isArray(d.pricing.depositOptions)
+        ? d.pricing.depositOptions.slice(0, 5).map(opt => ({
+            id: safeNum(opt.id),
+            name: safeStr(opt.name, 60),
+            amount: safeNum(opt.amount),
+            dueDate: safeStr(opt.dueDate, 30),
+            installments: safeNum(opt.installments),
+            installmentsAmount: safeNum(opt.installmentsAmount),
+            breakdown: Array.isArray(opt.breakdown)
+              ? opt.breakdown.slice(0, 12).map(b => ({
+                  num: safeNum(b.num),
+                  amount: safeNum(b.amount),
+                  dueDate: safeStr(b.dueDate, 30),
+                }))
+              : [],
+          }))
+        : [],
+    } : null,
+    descriptions: Array.isArray(d.descriptions)
+      ? d.descriptions.slice(0, 10).map(desc => ({
+          type: safeStr(desc.type, 40),
+          title: safeStr(desc.title, 100),
+          text: sanitiseHotelDescription(desc.text),
+        })).filter(x => x.text)
+      : [],
+    amenities: Array.isArray(d.amenities)
+      ? d.amenities.slice(0, 30).map(a => safeStr(a, 60)).filter(Boolean)
+      : [],
+    goodFor: Array.isArray(d.goodFor)
+      ? d.goodFor.slice(0, 10).map(g => safeStr(g, 60)).filter(Boolean)
+      : [],
+    media: Array.isArray(d.media)
+      ? d.media.slice(0, 12).map(m => ({
+          type: safeStr(m.type, 40),
+          url: sanitiseImageUrl(m.url),
+          caption: safeStr(m.caption, 200),
+        })).filter(m => m.url)
+      : [],
+    units: Array.isArray(d.units)
+      ? d.units.slice(0, 5).map(u => ({
+          name: safeStr(u.name, 200),
+          roomType: safeStr(u.roomType, 60),
+          checkin: safeStr(u.checkin, 30),
+          nights: safeNum(u.nights),
+          sleeps: safeStr(u.sleeps, 100),
+          sleepsAdults: safeNum(u.sleepsAdults),
+          sleepsChildren: safeNum(u.sleepsChildren),
+          rates: Array.isArray(u.rates)
+            ? u.rates.slice(0, 3).map(r => ({
+                name: safeStr(r.name, 100),
+                board: safeStr(r.board, 40),
+                descriptions: Array.isArray(r.descriptions)
+                  ? r.descriptions.slice(0, 6).map(rd => ({
+                      type: safeStr(rd.type, 40),
+                      title: safeStr(rd.title, 100),
+                      text: sanitiseHotelDescription(rd.text),
+                    })).filter(x => x.text)
+                  : [],
+              }))
+            : [],
+        }))
+      : [],
+    guests: Array.isArray(d.guests)
+      ? d.guests.slice(0, 12).map(g => ({
+          type: safeStr(g.type, 30),
+          title: safeStr(g.title, 30),
+          firstname: safeStr(g.firstname, 80),
+          surname: safeStr(g.surname, 80),
+        }))
+      : [],
+  };
+}
+
+function trimFlightSegment(s) {
+  if (!s || typeof s !== 'object') return null;
+  return {
+    origin: s.origin ? {
+      iataCode: safeStr(s.origin.iataCode, 10),
+      terminal: safeStr(s.origin.terminal, 20),
+      name: safeStr(s.origin.name, 200),
+      description: safeStr(s.origin.description, 300),
+      country: safeStr(s.origin.country, 10),
+    } : null,
+    destination: s.destination ? {
+      iataCode: safeStr(s.destination.iataCode, 10),
+      terminal: safeStr(s.destination.terminal, 20),
+      name: safeStr(s.destination.name, 200),
+      description: safeStr(s.destination.description, 300),
+      country: safeStr(s.destination.country, 10),
+    } : null,
+    depart: safeStr(s.depart, 30),
+    arrive: safeStr(s.arrive, 30),
+    duration: safeNum(s.duration),
+    cabinClass: safeStr(s.cabinClass, 40),
+    fareName: safeStr(s.fareName, 80),
+    baggage: s.baggage ? {
+      allowance: safeStr(s.baggage.allowance, 200),
+      weight: safeStr(s.baggage.weight, 40),
+    } : null,
+    operatingCarrier: s.operatingCarrier ? {
+      code: safeStr(s.operatingCarrier.code, 10),
+      name: safeStr(s.operatingCarrier.name, 100),
+    } : null,
+    marketingCarrier: s.marketingCarrier ? {
+      code: safeStr(s.marketingCarrier.code, 10),
+      name: safeStr(s.marketingCarrier.name, 100),
+    } : null,
+    flightNo: safeStr(s.flightNo, 20),
+    aircraft: safeStr(s.aircraft, 20),
+    touchdowns: safeNum(s.touchdowns),
+  };
+}
+
+function trimFlights(d) {
+  return {
+    fareType: safeStr(d.fareType, 40),
+    openJaw: !!d.openJaw,
+    seatsAvailable: safeNum(d.seatsAvailable),
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10),
+      price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice),
+      refundability: safeStr(d.pricing.refundability, 30),
+    } : null,
+    routes: Array.isArray(d.routes)
+      ? d.routes.slice(0, 4).map(r => ({
+          legID: safeNum(r.legID),
+          direction: safeStr(r.direction, 30),
+          duration: safeNum(r.duration),
+          segments: Array.isArray(r.segments)
+            ? r.segments.slice(0, 6).map(trimFlightSegment).filter(Boolean)
+            : [],
+        }))
+      : [],
+    fareInformation: Array.isArray(d.fareInformation)
+      ? d.fareInformation.slice(0, 10).map(f => ({
+          type: safeStr(f.type, 40),
+          title: safeStr(f.title, 100),
+          text: safeStr(f.text, 1000),
+        })).filter(f => f.text)
+      : [],
+    travellers: Array.isArray(d.travellers)
+      ? d.travellers.slice(0, 12).map(t => ({
+          type: safeStr(t.type, 30),
+          title: safeStr(t.title, 30),
+          firstname: safeStr(t.firstname, 80),
+          surname: safeStr(t.surname, 80),
+        }))
+      : [],
+  };
+}
+
+function trimAirportExtras(d) {
+  return {
+    type: safeStr(d.type, 40),
+    name: safeStr(d.name, 200),
+    subTitle: safeStr(d.subTitle, 200),
+    startDateTime: safeStr(d.startDateTime, 30),
+    endDateTime: safeStr(d.endDateTime, 30),
+    location: d.location ? {
+      iataCode: safeStr(d.location.iataCode, 10),
+      terminal: safeStr(d.location.terminal, 20),
+      onAirport: !!d.location.onAirport,
+      country: safeStr(d.location.country, 10),
+    } : null,
+    descriptions: Array.isArray(d.descriptions)
+      ? d.descriptions.slice(0, 12).map(desc => ({
+          type: safeStr(desc.type, 40),
+          title: safeStr(desc.title, 100),
+          text: sanitiseHotelDescription(desc.text),
+        })).filter(x => x.text)
+      : [],
+    features: Array.isArray(d.features)
+      ? d.features.slice(0, 20).map(f => safeStr(f, 60)).filter(Boolean)
+      : [],
+    media: Array.isArray(d.media)
+      ? d.media.slice(0, 8).map(m => ({
+          type: safeStr(m.type, 40),
+          url: sanitiseImageUrl(m.url),
+        })).filter(m => m.url)
+      : [],
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10),
+      price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice),
+      refundability: safeStr(d.pricing.refundability, 30),
+    } : null,
+    travellers: Array.isArray(d.travellers)
+      ? d.travellers.slice(0, 12).map(t => ({
+          type: safeStr(t.type, 30),
+          title: safeStr(t.title, 30),
+          firstname: safeStr(t.firstname, 80),
+          surname: safeStr(t.surname, 80),
+        }))
+      : [],
+  };
+}
+
 function trimItem(item) {
   if (!item || typeof item !== 'object') return null;
   const out = {
@@ -235,111 +467,33 @@ function trimItem(item) {
     duration: safeNum(item.duration),
   };
 
-  // Accommodation-specific data (most common)
+  // Per-product extraction. Each branch is isolated so a malformed item
+  // of one product doesn't break the others.
   if (item.product === 'Accommodation' && item.dataObject) {
-    const d = item.dataObject;
-    out.accommodation = {
-      name: safeStr(d.name, 200),
-      propertyType: safeStr(d.propertyType, 60),
-      rating: safeNum(d.rating),
-      location: d.location ? {
-        address1: safeStr(d.location.address1, 300),
-        city: safeStr(d.location.city, 100),
-        state: safeStr(d.location.state, 100),
-        country: safeStr(d.location.country, 10),
-        latitude: safeNum(d.location.latitude),
-        longitude: safeNum(d.location.longitude),
-      } : null,
-      review: d.review ? {
-        rating: safeNum(d.review.rating),
-        reviews: safeNum(d.review.reviews),
-        platform: safeStr(d.review.platform, 30),
-      } : null,
-      pricing: d.pricing ? {
-        currency: safeStr(d.pricing.currency, 10),
-        price: safeNum(d.pricing.price),
-        memberPrice: safeNum(d.pricing.memberPrice),
-        inResortFees: safeNum(d.pricing.inResortFees),
-        isRefundable: !!d.pricing.isRefundable,
-        refundability: safeStr(d.pricing.refundability, 30),
-        depositOptions: Array.isArray(d.pricing.depositOptions)
-          ? d.pricing.depositOptions.slice(0, 5).map(opt => ({
-              id: safeNum(opt.id),
-              name: safeStr(opt.name, 60),
-              amount: safeNum(opt.amount),
-              dueDate: safeStr(opt.dueDate, 30),
-              installments: safeNum(opt.installments),
-              installmentsAmount: safeNum(opt.installmentsAmount),
-              breakdown: Array.isArray(opt.breakdown)
-                ? opt.breakdown.slice(0, 12).map(b => ({
-                    num: safeNum(b.num),
-                    amount: safeNum(b.amount),
-                    dueDate: safeStr(b.dueDate, 30),
-                  }))
-                : [],
-            }))
-          : [],
-      } : null,
-      descriptions: Array.isArray(d.descriptions)
-        ? d.descriptions.slice(0, 10).map(desc => ({
-            type: safeStr(desc.type, 40),
-            title: safeStr(desc.title, 100),
-            text: sanitiseHotelDescription(desc.text),
-          })).filter(x => x.text)
-        : [],
-      amenities: Array.isArray(d.amenities)
-        ? d.amenities.slice(0, 30).map(a => safeStr(a, 60)).filter(Boolean)
-        : [],
-      goodFor: Array.isArray(d.goodFor)
-        ? d.goodFor.slice(0, 10).map(g => safeStr(g, 60)).filter(Boolean)
-        : [],
-      media: Array.isArray(d.media)
-        ? d.media.slice(0, 12).map(m => ({
-            type: safeStr(m.type, 40),
-            url: sanitiseImageUrl(m.url),
-            caption: safeStr(m.caption, 200),
-          })).filter(m => m.url)
-        : [],
-      units: Array.isArray(d.units)
-        ? d.units.slice(0, 5).map(u => ({
-            name: safeStr(u.name, 200),
-            roomType: safeStr(u.roomType, 60),
-            checkin: safeStr(u.checkin, 30),
-            nights: safeNum(u.nights),
-            sleeps: safeStr(u.sleeps, 100),
-            sleepsAdults: safeNum(u.sleepsAdults),
-            sleepsChildren: safeNum(u.sleepsChildren),
-            rates: Array.isArray(u.rates)
-              ? u.rates.slice(0, 3).map(r => ({
-                  name: safeStr(r.name, 100),
-                  board: safeStr(r.board, 40),
-                  descriptions: Array.isArray(r.descriptions)
-                    ? r.descriptions.slice(0, 6).map(rd => ({
-                        type: safeStr(rd.type, 40),
-                        title: safeStr(rd.title, 100),
-                        text: sanitiseHotelDescription(rd.text),
-                      })).filter(x => x.text)
-                    : [],
-                }))
-              : [],
-          }))
-        : [],
-      guests: Array.isArray(d.guests)
-        ? d.guests.slice(0, 12).map(g => ({
-            type: safeStr(g.type, 30),
-            title: safeStr(g.title, 30),
-            firstname: safeStr(g.firstname, 80),
-            surname: safeStr(g.surname, 80),
-          }))
-        : [],
-    };
+    out.accommodation = trimAccommodation(item.dataObject);
+  } else if (item.product === 'Flights' && item.dataObject) {
+    out.flights = trimFlights(item.dataObject);
+  } else if (item.product === 'AirportExtras' && item.dataObject) {
+    out.airportExtras = trimAirportExtras(item.dataObject);
   }
+  // Other product types (Insurance, CarRental, etc) fall through with the
+  // common envelope only — widget will skip rendering them gracefully.
 
   return out;
 }
 
+
 function trimOrder(raw) {
   if (!raw || typeof raw !== 'object') return null;
+
+  const items = Array.isArray(raw.items)
+    ? raw.items.slice(0, 8).map(trimItem).filter(Boolean)
+    : [];
+
+  // Compute a summary derived from the items. The widget uses these to
+  // render the trip header, the countdown, and the totals row without
+  // having to re-walk the items array on the front end.
+  const summary = computeSummary(items);
 
   return {
     id: safeNum(raw.id),
@@ -351,7 +505,8 @@ function trimOrder(raw) {
     specialRequests: safeStr(raw.specialRequests, 1000),
     currency: safeStr(raw.currency, 10),
     created: safeStr(raw.created, 30),
-    items: Array.isArray(raw.items) ? raw.items.slice(0, 8).map(trimItem).filter(Boolean) : [],
+    items,
+    summary,
     documents: Array.isArray(raw.documents)
       ? raw.documents.slice(0, 20).map(doc => ({
           name: safeStr(doc.name, 200),
@@ -362,6 +517,79 @@ function trimOrder(raw) {
         })).filter(d => d.url)
       : [],
   };
+}
+
+// Aggregate per-item info into a single object the widget can read directly.
+// All fields are nullable so the widget can render gracefully when an order
+// has only some of the product types.
+function computeSummary(items) {
+  const summary = {
+    totalPrice: 0,
+    hasAccommodation: false,
+    hasFlights: false,
+    hasAirportExtras: false,
+    accommodationItems: 0,
+    flightItems: 0,
+    airportExtrasItems: 0,
+    earliestStart: null,
+    latestEnd: null,
+    travellers: [],
+  };
+
+  // Aggregate prices and product mix.
+  for (const item of items) {
+    if (typeof item.price === 'number') summary.totalPrice += item.price;
+
+    if (item.product === 'Accommodation') {
+      summary.hasAccommodation = true;
+      summary.accommodationItems++;
+    } else if (item.product === 'Flights') {
+      summary.hasFlights = true;
+      summary.flightItems++;
+    } else if (item.product === 'AirportExtras') {
+      summary.hasAirportExtras = true;
+      summary.airportExtrasItems++;
+    }
+
+    // Track earliest start across ALL items. For trips with flights, the
+    // outbound flight is typically earlier than hotel check-in (think a
+    // night-flight + next-morning check-in scenario), so this is the date
+    // the customer actually starts travelling.
+    if (item.startDate) {
+      const ts = Date.parse(item.startDate);
+      if (Number.isFinite(ts)) {
+        if (!summary.earliestStart || ts < Date.parse(summary.earliestStart)) {
+          summary.earliestStart = item.startDate;
+        }
+      }
+    }
+  }
+
+  // Round to 2dp to avoid floating-point noise in JSON.
+  summary.totalPrice = Math.round(summary.totalPrice * 100) / 100;
+  if (summary.totalPrice === 0) summary.totalPrice = null;
+
+  // Aggregate unique travellers across all items. People appear in the
+  // accommodation 'guests' array AND the flights 'travellers' AND the
+  // extras 'travellers' — usually overlapping but not always (e.g. only
+  // the lead guest is on a single-guest lounge booking).
+  const seen = new Set();
+  for (const item of items) {
+    const list =
+      item.accommodation?.guests ||
+      item.flights?.travellers ||
+      item.airportExtras?.travellers ||
+      [];
+    for (const t of list) {
+      const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
+      if (!seen.has(key) && (t.firstname || t.surname)) {
+        seen.add(key);
+        summary.travellers.push(t);
+      }
+    }
+  }
+
+  return summary;
 }
 
 // ----- Generic error response (no info leak) -----
