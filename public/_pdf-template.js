@@ -102,6 +102,187 @@ const pickHeroImage = (media) => {
   return (exterior?.url) || media[0]?.url || null;
 };
 
+// Render an ISO timestamp as HH:MM in airport-local clock. Travelify dresses
+// local times as UTC so we read UTC components — same convention used by
+// the widget. Mismatching this would shift printed clock times by hours.
+const fmtTimeUtc = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const mm = String(d.getUTCMinutes()).padStart(2, '0');
+  return hh + ':' + mm;
+};
+
+const fmtDuration = (mins) => {
+  if (typeof mins !== 'number' || !Number.isFinite(mins) || mins <= 0) return '';
+  const h = Math.floor(mins / 60);
+  const m = Math.round(mins % 60);
+  if (h && m) return h + 'h ' + m + 'm';
+  if (h) return h + 'h';
+  return m + 'm';
+};
+
+// Render a single Flights item as a print-safe table block. Each leg
+// (Outbound / Inbound) becomes a row group: depart info | route arrow |
+// arrive info, then a meta strip with cabin + baggage, then segment
+// detail rows for multi-stop legs. No collapsibles — print is always-on.
+const renderPdfFlightItem = (item) => {
+  const f = item?.flights;
+  if (!f || !Array.isArray(f.routes) || f.routes.length === 0) return '';
+
+  const carrierNames = new Set();
+  for (const r of f.routes) {
+    for (const s of (r.segments || [])) {
+      if (s.marketingCarrier?.name) carrierNames.add(s.marketingCarrier.name);
+    }
+  }
+  const carrier = Array.from(carrierNames).slice(0, 3).join(', ');
+
+  const renderLeg = (route) => {
+    const segs = route.segments || [];
+    if (segs.length === 0) return '';
+    const first = segs[0];
+    const last = segs[segs.length - 1];
+    const stops = segs.length - 1;
+    const flightMins = segs.reduce((a, s) => a + (typeof s.duration === 'number' ? s.duration : 0), 0);
+    const baggage = first.baggage?.allowance || first.baggage?.weight || '';
+    const cabin = first.cabinClass || '';
+    const fareName = first.fareName || '';
+
+    const segRows = stops > 0 ? segs.map((s, i) => {
+      const next = segs[i + 1];
+      let stopHtml = '';
+      if (next) {
+        const arr = Date.parse(s.arrive || '');
+        const dep = Date.parse(next.depart || '');
+        const gap = (Number.isFinite(arr) && Number.isFinite(dep)) ? Math.round((dep - arr) / 60000) : 0;
+        stopHtml = `
+          <tr><td colspan="3" style="padding:6px 0 6px 18px; font-size:11px; color:#64748B; font-style:italic; border-left:2px solid #E2E8F0; margin-left:18px;">
+            ${gap > 0 ? `${escapeHtml(fmtDuration(gap))} stopover in ${escapeHtml(s.destination?.iataCode || '')}` : `Stopover in ${escapeHtml(s.destination?.iataCode || '')}`}
+          </td></tr>`;
+      }
+      return `
+        <tr>
+          <td style="padding:6px 0; font-size:12px; color:#0F172A; vertical-align:top; width:60px;">
+            <strong class="num">${escapeHtml(fmtTimeUtc(s.depart))}</strong><br>
+            <span style="font-size:10px; color:#94A3B8;">${escapeHtml(s.origin?.iataCode || '')}</span>
+          </td>
+          <td style="padding:6px 12px; font-size:12px; color:#475569; vertical-align:top;">
+            <strong>${escapeHtml((s.marketingCarrier?.code || '') + (s.flightNo || ''))}</strong>${s.marketingCarrier?.name ? ` · ${escapeHtml(s.marketingCarrier.name)}` : ''}
+            <div style="font-size:10px; color:#94A3B8;">${escapeHtml(fmtDuration(s.duration))}${s.aircraft ? ` · Aircraft ${escapeHtml(s.aircraft)}` : ''}</div>
+          </td>
+          <td style="padding:6px 0; font-size:12px; color:#0F172A; vertical-align:top; width:60px; text-align:right;">
+            <strong class="num">${escapeHtml(fmtTimeUtc(s.arrive))}</strong><br>
+            <span style="font-size:10px; color:#94A3B8;">${escapeHtml(s.destination?.iataCode || '')}</span>
+          </td>
+        </tr>${stopHtml}`;
+    }).join('') : '';
+
+    return `
+      <div style="padding:14px 0; border-top:1px solid #E2E8F0;">
+        <div style="display:inline-block; padding:2px 10px; background:#F1F5F9; border-radius:9999px; font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#475569; margin-bottom:10px;">
+          ${escapeHtml(route.direction || 'Flight')}
+        </div>
+        <table style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="vertical-align:top; width:35%;">
+              <div style="font-size:18px; font-weight:700; color:#0F172A; line-height:1.1;" class="num">${escapeHtml(fmtTimeUtc(first.depart))}</div>
+              <div style="font-size:11px; font-weight:600; color:#475569; margin-top:2px; letter-spacing:.04em;">${escapeHtml(first.origin?.iataCode || '')}${first.origin?.terminal ? ` · T${escapeHtml(first.origin.terminal)}` : ''}</div>
+              <div style="font-size:11px; color:#94A3B8; margin-top:2px;">${escapeHtml(first.origin?.name || '')}</div>
+            </td>
+            <td style="vertical-align:middle; text-align:center; width:30%;">
+              <div style="font-size:10px; color:#94A3B8;" class="num">${escapeHtml(fmtDuration(flightMins))}</div>
+              <div style="height:1px; background:#CBD5E1; margin:6px 12px; position:relative;">
+                <span style="display:inline-block; position:absolute; left:0; top:-3px; width:7px; height:7px; border-radius:50%; background:#00B4D8;"></span>
+                <span style="display:inline-block; position:absolute; right:0; top:-3px; width:7px; height:7px; border-radius:50%; background:#00B4D8;"></span>
+              </div>
+              <div style="font-size:10px; color:#94A3B8;">${stops === 0 ? 'Direct' : (stops + ' stop' + (stops === 1 ? '' : 's'))}</div>
+            </td>
+            <td style="vertical-align:top; width:35%; text-align:right;">
+              <div style="font-size:18px; font-weight:700; color:#0F172A; line-height:1.1;" class="num">${escapeHtml(fmtTimeUtc(last.arrive))}</div>
+              <div style="font-size:11px; font-weight:600; color:#475569; margin-top:2px; letter-spacing:.04em;">${escapeHtml(last.destination?.iataCode || '')}${last.destination?.terminal ? ` · T${escapeHtml(last.destination.terminal)}` : ''}</div>
+              <div style="font-size:11px; color:#94A3B8; margin-top:2px;">${escapeHtml(last.destination?.name || '')}</div>
+            </td>
+          </tr>
+        </table>
+        ${(cabin || baggage) ? `
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0; font-size:11px; color:#475569;">
+          ${cabin ? `<strong style="color:#0F172A;">${escapeHtml(cabin)}</strong>${fareName ? ` · ${escapeHtml(fareName)}` : ''}` : ''}
+          ${cabin && baggage ? ' &nbsp;·&nbsp; ' : ''}
+          ${baggage ? `${escapeHtml(baggage)}` : ''}
+        </div>` : ''}
+        ${segRows ? `
+        <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+          ${segRows}
+        </table>` : ''}
+      </div>`;
+  };
+
+  const fareInfo = (Array.isArray(f.fareInformation) ? f.fareInformation : []).filter((fi) => {
+    if (!fi.title || !fi.text) return false;
+    if ((fi.type || '').toLowerCase() === 'farebasis') return false;
+    if (/fare\s*basis/i.test(fi.title)) return false;
+    return true;
+  });
+
+  return `
+    <div style="margin-bottom:16px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;">
+        <div style="font-size:14px; font-weight:600; color:#0F172A;">✈ Flights</div>
+        ${carrier ? `<div style="font-size:11px; color:#94A3B8;">${escapeHtml(carrier)}</div>` : ''}
+      </div>
+      ${f.routes.map(renderLeg).join('')}
+      ${fareInfo.length > 0 ? `
+        <div style="margin-top:12px; padding:12px 14px; background:#F8FAFC; border-radius:8px;">
+          <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:8px;">Fare conditions</div>
+          ${fareInfo.map((fi) => `<div style="font-size:11px; color:#475569; margin-bottom:4px;"><strong style="color:#0F172A;">${escapeHtml(fi.title)}:</strong> ${escapeHtml(fi.text)}</div>`).join('')}
+        </div>` : ''}
+    </div>`;
+};
+
+// Render an AirportExtras item (Lounge / Transfer / Parking) for the PDF.
+const renderPdfExtraItem = (item) => {
+  const e = item?.airportExtras;
+  if (!e) return '';
+
+  const kindLabel = e.type === 'Lounge' ? 'Airport lounge'
+    : e.type === 'Transfer' ? 'Airport transfer'
+    : e.type === 'Parking' ? 'Airport parking'
+    : (e.type || 'Airport extra');
+
+  const airport = e.location?.iataCode || '';
+  const terminal = e.location?.terminal ? `T${e.location.terminal}` : '';
+  const startTime = fmtTimeUtc(e.startDateTime);
+  const endTime = fmtTimeUtc(e.endDateTime);
+  const dateLabel = e.startDateTime ? formatDateShort(e.startDateTime) : '';
+
+  const descByType = (type) => (e.descriptions || []).find((d) => d.type === type);
+  const fullDesc = descByType('Generic')?.text || '';
+  const openingTimes = descByType('OpeningTimes')?.text || '';
+  const dressCode = descByType('DressCode')?.text || '';
+
+  return `
+    <div style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
+      <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">${escapeHtml(kindLabel)}</div>
+      <div style="font-size:14px; font-weight:600; color:#0F172A; margin-bottom:4px;">${escapeHtml(e.name || 'Airport extra')}</div>
+      ${e.subTitle ? `<div style="font-size:11px; color:#475569; margin-bottom:8px;">${escapeHtml(e.subTitle)}</div>` : ''}
+      <div style="font-size:11px; color:#475569; padding-top:8px; border-top:1px solid #E2E8F0;">
+        ${airport ? `<strong style="color:#0F172A;">${escapeHtml(airport)}</strong>${terminal ? ` · ${escapeHtml(terminal)}` : ''}` : ''}
+        ${(airport && dateLabel) ? '  ·  ' : ''}
+        ${dateLabel ? escapeHtml(dateLabel) : ''}
+        ${(dateLabel && startTime) ? '  ·  ' : ''}
+        ${startTime ? `<span class="num">${escapeHtml(startTime)}${endTime ? ` – ${escapeHtml(endTime)}` : ''}</span>` : ''}
+      </div>
+      ${(fullDesc || openingTimes || dressCode) ? `
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0; font-size:11px; color:#475569; line-height:1.55;">
+          ${fullDesc ? `<p style="margin:0 0 6px;">${escapeHtml(fullDesc.slice(0, 400))}${fullDesc.length > 400 ? '…' : ''}</p>` : ''}
+          ${openingTimes ? `<div><strong style="color:#0F172A;">Opening times:</strong> ${escapeHtml(openingTimes)}</div>` : ''}
+          ${dressCode ? `<div><strong style="color:#0F172A;">Dress code:</strong> ${escapeHtml(dressCode)}</div>` : ''}
+        </div>` : ''}
+    </div>`;
+};
+
 // Pick a description for the page-2 hotel block
 const pickHotelDescription = (descriptions) => {
   if (!Array.isArray(descriptions) || descriptions.length === 0) return null;
@@ -170,7 +351,13 @@ export function renderPdfHtml(order, opts = {}) {
   const accomItem = (order.items || []).find((it) => it?.product === 'Accommodation') || (order.items || [])[0] || null;
   const accom = accomItem?.accommodation || null;
 
-  const orderRef = accomItem?.bookingReference || order.id || '';
+  // Multi-product items. The PDF mirrors the widget: hotel on top, flights
+  // and extras as their own sections below the trip overview.
+  const flightItems = (order.items || []).filter((it) => it?.product === 'Flights');
+  const extraItems = (order.items || []).filter((it) => it?.product === 'AirportExtras');
+  const summary = order.summary || {};
+
+  const orderRef = accomItem?.bookingReference || flightItems[0]?.bookingReference || order.id || '';
   const heroImg = accom ? pickHeroImage(accom.media) : null;
   const stars = accom ? renderStars(accom.rating) : '';
   const propertyName = accom?.name || '—';
@@ -185,8 +372,12 @@ export function renderPdfHtml(order, opts = {}) {
   const unit = accom?.units?.[0] || null;
   const rate = unit?.rates?.[0] || null;
 
-  const totalCost = accom?.pricing?.price ?? accomItem?.price ?? null;
-  const currency = accom?.pricing?.currency || accomItem?.currency || order.currency || 'GBP';
+  // Total cost prefers the multi-product summary. For hotel-only orders the
+  // summary is missing or single-product, so we fall back to the hotel price.
+  const totalCost = (typeof summary.totalPrice === 'number' && summary.totalPrice > 0)
+    ? summary.totalPrice
+    : (accom?.pricing?.price ?? accomItem?.price ?? null);
+  const currency = accom?.pricing?.currency || accomItem?.currency || flightItems[0]?.currency || extraItems[0]?.currency || order.currency || 'GBP';
 
   // Pick a deposit option that has a breakdown (the instalment plan)
   const depositOption =
@@ -205,7 +396,9 @@ export function renderPdfHtml(order, opts = {}) {
   const customerName = titleCaseName([order.customerTitle, order.customerFirstname, order.customerSurname]);
   const customerSurnameOnly = order.customerSurname || '';
 
-  const guests = accom?.guests || [];
+  const guests = (Array.isArray(summary.travellers) && summary.travellers.length > 0)
+    ? summary.travellers
+    : (accom?.guests || []);
   const leadGuest = guests.find((g) => g?.type === 'Lead') || guests[0] || {
     title: order.customerTitle,
     firstname: order.customerFirstname,
@@ -646,11 +839,22 @@ export function renderPdfHtml(order, opts = {}) {
         <dt>Check-out</dt>
         <dd class="num">${escapeHtml(checkoutFmt)} &nbsp;·&nbsp; by 12:00</dd>
         ${nights ? `<dt>Duration</dt><dd class="num">${nights} night${nights === 1 ? '' : 's'}</dd>` : ''}
-        ${unit ? `<dt>Room type</dt><dd>${escapeHtml([unit.roomType || unit.name, rate?.board].filter(Boolean).join(', '))}</dd>` : ''}
+        ${unit ? `<dt>Room type</dt><dd>${escapeHtml([(unit.roomType && unit.roomType !== 'Unknown') ? unit.roomType : unit.name, rate?.board].filter(Boolean).join(' · '))}</dd>` : ''}
         ${leadGuestName ? `<dt>Lead guest</dt><dd>${escapeHtml(leadGuestName)}</dd>` : ''}
         ${specialRequests ? `<dt>Special requests</dt><dd style="font-style:italic; color:var(--text-2);">${escapeHtml(specialRequests)}</dd>` : ''}
       </dl>
     </div>
+
+    ${flightItems.length > 0 ? `
+    <div class="pdf-section">
+      ${flightItems.map(renderPdfFlightItem).join('')}
+    </div>` : ''}
+
+    ${extraItems.length > 0 ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">Airport Extras</div>
+      ${extraItems.map(renderPdfExtraItem).join('')}
+    </div>` : ''}
 
     ${totalCost != null ? `
     <div class="pdf-section">
@@ -658,9 +862,24 @@ export function renderPdfHtml(order, opts = {}) {
       <div class="pdf-pay">
         <div class="pdf-pay-box">
           <div class="pdf-pay-row">
-            <span class="label">Room rate</span>
+            <span class="label">${(flightItems.length || extraItems.length) ? 'Total holiday cost' : 'Room rate'}</span>
             <span class="value num">${escapeHtml(formatMoney(totalCost, currency))}</span>
           </div>
+          ${(flightItems.length || extraItems.length) && accomItem && typeof accomItem.price === 'number' ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Accommodation</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(accomItem.price, currency))}</span>
+          </div>` : ''}
+          ${flightItems.length > 0 ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Flights</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(flightItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${extraItems.length > 0 ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Airport extras</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(extraItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
           ${depositPaid != null ? `
           <div class="pdf-pay-row">
             <span class="label">Deposit paid</span>
