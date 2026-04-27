@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Countdown Timer · Travelgenix Widget Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-bg: #F8FAFC;
+      --tg-card: #FFFFFF;
+      --tg-text: #0F172A;
+      --tg-sub: #475569;
+      --tg-muted: #94A3B8;
+      --tg-border: #E2E8F0;
+      --tg-brand: #1B2B5B;
+      --tg-accent: #00B4D8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--tg-text);
+      background: var(--tg-bg);
+      line-height: 1.5;
+    }
+    a { color: var(--tg-accent); }
+
+    /* Top bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: saturate(180%) blur(10px);
+      border-bottom: 1px solid var(--tg-border);
+    }
+    .topbar-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 15px; color: var(--tg-text);
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+    }
+    .topbar-spacer { flex: 1; }
+    .pill {
+      font-size: 12px; font-weight: 600;
+      padding: 4px 10px; border-radius: 999px;
+      background: #ECFEFF; color: #0E7490; border: 1px solid #A5F3FC;
+    }
+    .topbar-link {
+      font-size: 13px; font-weight: 500; color: var(--tg-sub);
+      text-decoration: none;
+    }
+    .topbar-link:hover { color: var(--tg-text); }
+
+    /* Container */
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 80px; }
+    h1 {
+      font-size: 32px; font-weight: 700; letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+    .lede {
+      font-size: 16px; color: var(--tg-sub);
+      margin: 0 0 28px; max-width: 720px;
+    }
+
+    /* Controls panel */
+    .controls {
+      background: var(--tg-card);
+      border: 1px solid var(--tg-border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+    }
+    .ctrl-label {
+      display: block;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--tg-muted); margin-bottom: 6px;
+    }
+    .ctrl-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ctrl-btn {
+      appearance: none; border: 1px solid var(--tg-border);
+      background: var(--tg-card); color: var(--tg-text);
+      padding: 8px 12px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; font-family: inherit;
+      transition: all .15s ease;
+    }
+    .ctrl-btn:hover { border-color: var(--tg-accent); color: var(--tg-accent); }
+    .ctrl-btn.is-active {
+      background: var(--tg-brand); border-color: var(--tg-brand); color: #fff;
+    }
+    .ctrl-btn.is-active:hover { color: #fff; }
+    .ctrl-btn.danger {
+      background: #FEF2F2; border-color: #FECACA; color: #B91C1C;
+    }
+    .ctrl-btn.danger:hover { background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }
+
+    /* Stage */
+    .stage-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--tg-muted);
+      margin-bottom: 12px;
+    }
+    .stage {
+      background: var(--tg-card);
+      border: 1px solid var(--tg-border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      min-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+    }
+    .stage.dark {
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+      border-color: #334155;
+    }
+    .stage-inner { width: 100%; max-width: 880px; }
+    .stage[data-layout="inline"] {
+      padding: 24px 24px;
+      min-height: auto;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+    .stage[data-layout="inline"] .stage-inner {
+      max-width: none;
+      font-size: 16px; line-height: 1.7; color: var(--tg-sub);
+    }
+    .stage[data-layout="inline"].dark .stage-inner { color: #CBD5E1; }
+    .stage[data-layout="banner"] .stage-inner { max-width: 1100px; }
+    .stage[data-layout="hero"] {
+      padding: 12px;
+    }
+    .stage[data-layout="hero"] .stage-inner { max-width: 960px; }
+
+    /* Inline copy demo */
+    .inline-copy { font-size: 16px; line-height: 1.7; color: var(--tg-sub); }
+    .stage.dark .inline-copy { color: #CBD5E1; }
+
+    /* Footer */
+    .foot {
+      max-width: 1200px; margin: 0 auto; padding: 20px;
+      text-align: center; font-size: 13px; color: var(--tg-muted);
+    }
+
+    /* Debug timer display */
+    .debug-time {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      font-size: 12px; color: var(--tg-muted);
+      padding: 8px 10px; background: #F1F5F9; border-radius: 8px;
+      display: inline-block;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 24px; }
+      .controls { padding: 14px; }
+      .stage { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark"></span>
+        <span>Travelgenix</span>
+      </a>
+      <span class="pill">Countdown Timer · Demo</span>
+      <div class="topbar-spacer"></div>
+      <a class="topbar-link" href="/editor-countdown">Open editor →</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>Countdown Timer</h1>
+    <p class="lede">
+      Drive urgency around sales, peaks campaigns, summer launches, Black Friday, departure dates and early-booking deadlines.
+      Four layouts cover everything from a sticky banner to a full-width hero.
+    </p>
+
+    <div class="controls" role="region" aria-label="Demo controls">
+      <div>
+        <span class="ctrl-label">Layout</span>
+        <div class="ctrl-row" id="layoutSwitch">
+          <button class="ctrl-btn is-active" data-layout="card">Card</button>
+          <button class="ctrl-btn" data-layout="banner">Banner</button>
+          <button class="ctrl-btn" data-layout="inline">Inline</button>
+          <button class="ctrl-btn" data-layout="hero">Hero</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="ctrl-label">Theme</span>
+        <div class="ctrl-row" id="themeSwitch">
+          <button class="ctrl-btn is-active" data-theme="light">Light</button>
+          <button class="ctrl-btn" data-theme="dark">Dark</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="ctrl-label">Debug · target</span>
+        <div class="ctrl-row">
+          <button class="ctrl-btn" id="setT30s">T+30s</button>
+          <button class="ctrl-btn" id="setT5m">T+5m</button>
+          <button class="ctrl-btn" id="setT24h">T+24h</button>
+          <button class="ctrl-btn" id="setT3w">T+3w</button>
+        </div>
+        <div style="margin-top: 8px;">
+          <span class="debug-time" id="debugClock">--:--:--</span>
+        </div>
+      </div>
+
+      <div>
+        <span class="ctrl-label">Expiry behaviour</span>
+        <div class="ctrl-row" id="expirySwitch">
+          <button class="ctrl-btn is-active" data-expiry="message">Message</button>
+          <button class="ctrl-btn" data-expiry="hide">Hide</button>
+          <button class="ctrl-btn" data-expiry="cta-only">CTA only</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="stage-label" id="stageLabel">CARD LAYOUT PREVIEW</p>
+    <div class="stage" id="stage" data-layout="card">
+      <div class="stage-inner" id="stageInner">
+        <!-- Widget injected here -->
+      </div>
+    </div>
+
+    <div style="margin-top: 32px; padding: 16px 20px; background: #F1F5F9; border-radius: 12px; font-size: 13px; color: var(--tg-sub);">
+      <strong style="color: var(--tg-text);">Heads-up on client time:</strong>
+      The widget uses the viewer's device clock. The configured target is stored as a fixed UTC instant, so the moment is unambiguous worldwide — but if a viewer's clock is wildly wrong, their countdown will be wrong too. That's fine for marketing campaigns. For legally binding deadlines, server-rendered timestamps would be the safer pattern.
+    </div>
+  </main>
+
+  <footer class="foot">
+    Travelgenix Widget Suite ·
+    <a href="/" style="color: inherit;">All widgets</a>
+  </footer>
+
+  <script src="/widget-countdown.js"></script>
+  <script>
+    (function () {
+      const stage = document.getElementById('stage');
+      const stageInner = document.getElementById('stageInner');
+      const stageLabel = document.getElementById('stageLabel');
+      const debugClock = document.getElementById('debugClock');
+
+      // Demo config — will be mutated by the controls
+      const cfg = {
+        layout: 'card',
+        theme: 'light',
+        targetDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 21).toISOString(), // T+3w
+        timezone: 'Europe/London',
+        heading: 'Summer sale ends in',
+        subheading: 'Save up to 40% on package holidays. Limited departures, limited time.',
+        cta: { text: 'Browse offers', url: 'https://example.com/sale', openInNewTab: true },
+        expiry: { behaviour: 'message', message: 'This offer has now ended. Sign up for the next one.' },
+        display: { showDays: true, showHours: true, showMinutes: true, showSeconds: true },
+        repeating: { enabled: false, frequency: 'weekly', dayOfWeek: 5, time: '17:00' },
+        urgency: { enabled: true, thresholdHours: 24 },
+        animation: { tick: true },
+        colours: {
+          brand: '#1B2B5B',
+          accent: '#00B4D8',
+          bg: 'transparent',
+          card: '#FFFFFF',
+          text: '#0F172A',
+          digitBg: '#F8FAFC',
+          ctaBg: '',
+          ctaText: '#FFFFFF'
+        },
+        radius: 16
+      };
+
+      let widget = null;
+
+      function adjustForLayout() {
+        // Inline layout sits inside body copy
+        if (cfg.layout === 'inline') {
+          stageInner.innerHTML = '<p class="inline-copy">Don\'t miss out — <span id="cdHost"></span> before the season closes. New offers drop every week.</p>';
+          return document.getElementById('cdHost');
+        }
+        stageInner.innerHTML = '<div id="cdHost"></div>';
+        return document.getElementById('cdHost');
+      }
+
+      function adjustForTheme() {
+        if (cfg.theme === 'dark') {
+          stage.classList.add('dark');
+          // Dark stage = dark widget
+          cfg.colours.card = '#1E293B';
+          cfg.colours.text = '#F1F5F9';
+          cfg.colours.digitBg = '#0F172A';
+        } else {
+          stage.classList.remove('dark');
+          cfg.colours.card = '#FFFFFF';
+          cfg.colours.text = '#0F172A';
+          cfg.colours.digitBg = '#F8FAFC';
+        }
+      }
+
+      function rebuild() {
+        adjustForTheme();
+        const host = adjustForLayout();
+        host.setAttribute('data-tg-widget', 'countdown');
+        host.setAttribute('data-tg-config', JSON.stringify(cfg));
+        // Manually instantiate (skip auto-init since we control the lifecycle here)
+        if (widget) { try { widget.destroy(); } catch {} }
+        widget = new window.TGCountdownWidget(host, cfg);
+        stage.setAttribute('data-layout', cfg.layout);
+        stageLabel.textContent = cfg.layout.toUpperCase() + ' LAYOUT PREVIEW';
+      }
+
+      // Layout switch
+      document.getElementById('layoutSwitch').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-layout]');
+        if (!btn) return;
+        document.querySelectorAll('#layoutSwitch .ctrl-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        cfg.layout = btn.dataset.layout;
+        rebuild();
+      });
+
+      // Theme switch
+      document.getElementById('themeSwitch').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-theme]');
+        if (!btn) return;
+        document.querySelectorAll('#themeSwitch .ctrl-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        cfg.theme = btn.dataset.theme;
+        rebuild();
+      });
+
+      // Expiry switch
+      document.getElementById('expirySwitch').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-expiry]');
+        if (!btn) return;
+        document.querySelectorAll('#expirySwitch .ctrl-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        cfg.expiry.behaviour = btn.dataset.expiry;
+        rebuild();
+      });
+
+      // Debug target buttons
+      function setTarget(ms) {
+        cfg.targetDate = new Date(Date.now() + ms).toISOString();
+        rebuild();
+      }
+      document.getElementById('setT30s').addEventListener('click', () => setTarget(30 * 1000));
+      document.getElementById('setT5m').addEventListener('click', () => setTarget(5 * 60 * 1000));
+      document.getElementById('setT24h').addEventListener('click', () => setTarget(24 * 60 * 60 * 1000));
+      document.getElementById('setT3w').addEventListener('click', () => setTarget(21 * 24 * 60 * 60 * 1000));
+
+      // Debug clock readout
+      function updateClock() {
+        const target = new Date(cfg.targetDate);
+        const diffMs = target.getTime() - Date.now();
+        if (diffMs <= 0) {
+          debugClock.textContent = 'EXPIRED · target ' + target.toISOString().substring(11, 19) + 'Z';
+          return;
+        }
+        const s = Math.floor(diffMs / 1000) % 60;
+        const m = Math.floor(diffMs / (60 * 1000)) % 60;
+        const h = Math.floor(diffMs / (3600 * 1000)) % 24;
+        const d = Math.floor(diffMs / (86400 * 1000));
+        debugClock.textContent = 'T-' + d + 'd ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // Initial mount
+      rebuild();
+    })();
+  </script>
+</body>
+</html>
