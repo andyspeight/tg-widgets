@@ -5,9 +5,9 @@
  *
  * Mirrors retrieve-order.js exactly for auth/lookup/Travelify call so the
  * two endpoints behave identically — same env var, same widget+integration
- * resolution, same Origin handling. Differs only in output: this one renders
- * HTML via _pdf-template.js and pipes through Puppeteer to produce a PDF
- * buffer instead of returning JSON.
+ * resolution, same Origin handling, same DEMO_WIDGET_ID bypass. Differs only
+ * in output: this one renders HTML via _pdf-template.js and pipes through
+ * Puppeteer to produce a PDF buffer instead of returning JSON.
  *
  * Endpoint:
  *   POST /api/booking-pdf
@@ -45,6 +45,14 @@ const IF = {
 };
 
 const TRAVELIFY_API = 'https://api.travelify.io/account/order';
+
+// ----- Demo bypass (mirrors retrieve-order.js) -----
+// When widgetId === DEMO_WIDGET_SENTINEL, skip the Airtable widget lookup
+// and pull the demo Travelify integration directly by record ID. Same key
+// is decrypted with the same TG_ENCRYPTION_KEY. For the public
+// /demo-mybooking.html standalone test page.
+const DEMO_WIDGET_SENTINEL = 'DEMO_WIDGET_ID';
+const DEMO_INTEGRATION_RECORD_ID = 'rec6TnQI0Pz8PyrGs';
 
 // ----- Puppeteer (lazy-loaded so cold start is cheap on health checks) -----
 
@@ -148,6 +156,16 @@ async function findActiveTravelifyIntegration(clientEmail) {
   if (!res.ok) throw new Error(`Integration lookup failed: ${res.status}`);
   const data = await res.json();
   return data.records?.[0] || null;
+}
+
+// Direct fetch by record ID — used only by the demo bypass.
+async function getIntegrationById(recordId) {
+  const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${INTEGRATIONS_TABLE}/${recordId}`);
+  url.searchParams.set('returnFieldsByFieldId', 'true');
+  const res = await fetch(url.toString(), { headers: airtableHeaders() });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Integration get-by-id failed: ${res.status}`);
+  return await res.json();
 }
 
 // ----- Trim (mirrors retrieve-order.js shape so template input is identical) -----
@@ -380,31 +398,67 @@ export default async function handler(req, res) {
 
   let browser;
   try {
-    const widget = await findWidgetById(widgetId);
-    if (!widget) return notFound(res);
-
-    const widgetType = widget.fields?.WidgetType;
-    if (widgetType !== 'My Booking') return notFound(res);
-
-    const widgetStatus = widget.fields?.Status;
-    if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') return notFound(res);
-
-    const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
-    if (!clientEmail) return notFound(res);
-
-    const integration = await findActiveTravelifyIntegration(clientEmail);
-    if (!integration) return notFound(res);
-
-    const appId = integration.fields?.[IF.AppId];
-    const apiKeyEncrypted = integration.fields?.[IF.ApiKeyEncrypted];
-    if (!appId || !apiKeyEncrypted) return notFound(res);
-
+    let appId;
     let apiKey;
-    try {
-      apiKey = decrypt(apiKeyEncrypted);
-    } catch (e) {
-      console.error('PDF decryption failed:', e.message);
-      return notFound(res);
+
+    if (widgetId === DEMO_WIDGET_SENTINEL) {
+      // ----- Demo path -----
+      // Pull the pinned demo Travelify integration record directly.
+      const integration = await getIntegrationById(DEMO_INTEGRATION_RECORD_ID);
+      if (!integration) {
+        console.warn('PDF: Demo integration record not found:', DEMO_INTEGRATION_RECORD_ID);
+        return notFound(res);
+      }
+
+      const demoAppId = integration.fields?.[IF.AppId];
+      const demoApiKeyEncrypted = integration.fields?.[IF.ApiKeyEncrypted];
+      if (!demoAppId || !demoApiKeyEncrypted) {
+        console.warn('PDF: Demo integration record missing AppId or encrypted key');
+        return notFound(res);
+      }
+
+      try {
+        apiKey = decrypt(demoApiKeyEncrypted);
+      } catch (e) {
+        console.error('PDF: Demo key decryption failed:', e.message);
+        return notFound(res);
+      }
+      appId = demoAppId;
+
+      console.log('[PDF DEMO DEBUG] About to call Travelify with:', {
+        appId: String(appId),
+        keyLength: typeof apiKey === 'string' ? apiKey.length : 0,
+        keyPreview: typeof apiKey === 'string' ? `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}` : 'invalid',
+        emailAddress, departDate, orderRef,
+      });
+    } else {
+      // ----- Real client path -----
+      const widget = await findWidgetById(widgetId);
+      if (!widget) return notFound(res);
+
+      const widgetType = widget.fields?.WidgetType;
+      if (widgetType !== 'My Booking') return notFound(res);
+
+      const widgetStatus = widget.fields?.Status;
+      if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') return notFound(res);
+
+      const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
+      if (!clientEmail) return notFound(res);
+
+      const integration = await findActiveTravelifyIntegration(clientEmail);
+      if (!integration) return notFound(res);
+
+      const integrationAppId = integration.fields?.[IF.AppId];
+      const apiKeyEncrypted = integration.fields?.[IF.ApiKeyEncrypted];
+      if (!integrationAppId || !apiKeyEncrypted) return notFound(res);
+
+      try {
+        apiKey = decrypt(apiKeyEncrypted);
+      } catch (e) {
+        console.error('PDF decryption failed:', e.message);
+        return notFound(res);
+      }
+      appId = integrationAppId;
     }
 
     // Travelify requires the Origin header (without it returns a misleading 401).
@@ -419,26 +473,44 @@ export default async function handler(req, res) {
       signal: AbortSignal.timeout(12000),
     });
 
+    // Capture body as text first so we can log it on the demo path even on
+    // non-200 responses.
+    const rawText = await travelifyRes.text();
+    const isDemo = widgetId === DEMO_WIDGET_SENTINEL;
+
+    if (isDemo) {
+      console.log('[PDF DEMO DEBUG] Travelify response:', {
+        status: travelifyRes.status,
+        statusText: travelifyRes.statusText,
+        contentType: travelifyRes.headers.get('content-type'),
+        bodyPreview: rawText.slice(0, 1500),
+      });
+    }
+
     if (travelifyRes.status === 404) return notFound(res);
     if (!travelifyRes.ok) {
-      console.error(`Travelify ${travelifyRes.status} for widget ${widgetId}`);
+      console.error(`PDF: Travelify ${travelifyRes.status} for widget ${widgetId}`);
       return notFound(res);
     }
 
     let raw;
-    try { raw = await travelifyRes.json(); } catch { return notFound(res); }
+    try { raw = JSON.parse(rawText); } catch { return notFound(res); }
     if (raw && (raw.code === '404' || raw.code === 404)) return notFound(res);
 
     const order = trimOrder(raw);
     if (!order || !order.id) return notFound(res);
 
-    // Pull brand/contact/styling from widget Settings JSON
-    const widgetSettings = (() => {
-      const s = widget.fields?.Settings;
-      if (!s) return {};
-      if (typeof s === 'object') return s;
-      try { return JSON.parse(s); } catch { return {}; }
-    })();
+    // Pull brand/contact/styling from widget Settings JSON (skip on demo path
+    // since there's no widget record — use defaults).
+    let widgetSettings = {};
+    if (widgetId !== DEMO_WIDGET_SENTINEL) {
+      const widget = await findWidgetById(widgetId);
+      const s = widget?.fields?.Settings;
+      if (s) {
+        if (typeof s === 'object') widgetSettings = s;
+        else { try { widgetSettings = JSON.parse(s); } catch { widgetSettings = {}; } }
+      }
+    }
 
     const html = renderPdfHtml(order, {
       brandName: widgetSettings?.brand?.name || '',
