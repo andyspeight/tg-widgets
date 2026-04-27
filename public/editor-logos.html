@@ -826,6 +826,14 @@
 /* =================================================================
    STATE
    ================================================================= */
+
+// Inline SVG placeholder logos — never break, no network calls.
+// These are used for the default sample and the templates so the editor
+// always shows something working out of the box. Real clients upload their own.
+const mkLogo = (label, bg, fg) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 70"><rect width="200" height="70" rx="6" fill="${bg}"/><text x="100" y="44" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700" fill="${fg}" letter-spacing="1">${label}</text></svg>`
+);
+
 const DEFAULT_CONFIG = {
   layout: 'grid',
   columns: 4,
@@ -840,10 +848,10 @@ const DEFAULT_CONFIG = {
   spotlightTagline: '',
   spotlightCta: 'Visit website',
   logos: [
-    { name: 'ABTA', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/ABTA_Logo.svg/320px-ABTA_Logo.svg.png', url: 'https://www.abta.com', group: 'Accreditations', featured: true },
-    { name: 'ATOL Protected', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ATOL_Logo.svg/320px-ATOL_Logo.svg.png', url: '', group: 'Accreditations', featured: false },
-    { name: 'IATA', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IATA_logo.svg/320px-IATA_logo.svg.png', url: '', group: 'Accreditations', featured: false },
-    { name: 'TUI', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/TUI_Logo_neu.svg/320px-TUI_Logo_neu.svg.png', url: '', group: 'Suppliers', featured: false },
+    { name: 'ABTA', image: mkLogo('ABTA', '#003B7A', '#FFFFFF'), url: 'https://www.abta.com', group: 'Accreditations', featured: true },
+    { name: 'ATOL Protected', image: mkLogo('ATOL', '#FFD200', '#003B7A'), url: '', group: 'Accreditations', featured: false },
+    { name: 'IATA', image: mkLogo('IATA', '#0033A0', '#FFFFFF'), url: '', group: 'Accreditations', featured: false },
+    { name: 'TUI', image: mkLogo('TUI', '#E60019', '#FFFFFF'), url: '', group: 'Suppliers', featured: false },
   ],
   theme: { mode: 'light', brand: '#0891B2', accent: '#6366F1', bg: '', card: '', text: '', radius: 16 }
 };
@@ -851,16 +859,16 @@ const DEFAULT_CONFIG = {
 const TEMPLATES = [
   {
     name: 'UK Travel Agent',
-    desc: 'ABTA, ATOL, IATA, Trustpilot, Feefo — every accreditation that matters.',
+    desc: 'ABTA, ATOL, IATA, Trustpilot \u2014 every accreditation that matters.',
     config: {
       ...DEFAULT_CONFIG,
       title: 'Booked with confidence',
       eyebrow: 'Fully protected',
       logos: [
-        { name: 'ABTA', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/ABTA_Logo.svg/320px-ABTA_Logo.svg.png', url: 'https://www.abta.com', group: 'Accreditations', featured: true },
-        { name: 'ATOL Protected', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ATOL_Logo.svg/320px-ATOL_Logo.svg.png', url: '', group: 'Accreditations', featured: false },
-        { name: 'IATA', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IATA_logo.svg/320px-IATA_logo.svg.png', url: '', group: 'Accreditations', featured: false },
-        { name: 'Trustpilot', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Trustpilot_logo_%282022%29.svg/320px-Trustpilot_logo_%282022%29.svg.png', url: '', group: 'Reviews', featured: false },
+        { name: 'ABTA', image: mkLogo('ABTA', '#003B7A', '#FFFFFF'), url: 'https://www.abta.com', group: 'Accreditations', featured: true },
+        { name: 'ATOL Protected', image: mkLogo('ATOL', '#FFD200', '#003B7A'), url: '', group: 'Accreditations', featured: false },
+        { name: 'IATA', image: mkLogo('IATA', '#0033A0', '#FFFFFF'), url: '', group: 'Accreditations', featured: false },
+        { name: 'Trustpilot', image: mkLogo('Trustpilot', '#00B67A', '#FFFFFF'), url: '', group: 'Reviews', featured: false },
       ]
     }
   },
@@ -872,10 +880,10 @@ const TEMPLATES = [
       layout: 'marquee',
       title: 'Working with the world\u2019s best',
       logos: [
-        { name: 'TUI', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/TUI_Logo_neu.svg/320px-TUI_Logo_neu.svg.png', url: '', group: 'Suppliers', featured: false },
-        { name: 'Jet2 Holidays', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Jet2.com_logo.svg/320px-Jet2.com_logo.svg.png', url: '', group: 'Suppliers', featured: false },
-        { name: 'British Airways', image: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/42/British_Airways_Logo.svg/320px-British_Airways_Logo.svg.png', url: '', group: 'Suppliers', featured: false },
-        { name: 'Emirates', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Emirates_logo.svg/320px-Emirates_logo.svg.png', url: '', group: 'Suppliers', featured: false },
+        { name: 'TUI', image: mkLogo('TUI', '#E60019', '#FFFFFF'), url: '', group: 'Suppliers', featured: false },
+        { name: 'Jet2 Holidays', image: mkLogo('Jet2', '#E60012', '#FFFFFF'), url: '', group: 'Suppliers', featured: false },
+        { name: 'British Airways', image: mkLogo('BA', '#075AAA', '#FFFFFF'), url: '', group: 'Suppliers', featured: false },
+        { name: 'Emirates', image: mkLogo('Emirates', '#D71921', '#FFFFFF'), url: '', group: 'Suppliers', featured: false },
       ]
     }
   },
