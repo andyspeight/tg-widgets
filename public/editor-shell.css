@@ -501,6 +501,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  position: relative;
   background:
     radial-gradient(circle at 1px 1px, var(--tgse-canvas-dot) 1px, transparent 0);
   background-size: 22px 22px;
