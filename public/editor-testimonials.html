@@ -836,8 +836,8 @@
       <div class="tgse-canvas">
         <div class="tgse-frame" data-vp="desktop" id="preview-frame" data-viewport="desktop">
           <div id="tgt-mount" data-tg-widget="testimonials"></div>
+          <div class="dm-layer" id="dm-layer"></div>
         </div>
-        <div class="dm-layer" id="dm-layer"></div>
       </div>
     </section>
 
@@ -1208,6 +1208,21 @@
       else if (state.activeTab === 'content') host.innerHTML = renderContentTab();
       else host.innerHTML = renderSettingsTab();
       bindTabHandlers();
+
+      // Mount the font picker into the Typography section every time it appears.
+      // The picker only exists inside the design tab and gets destroyed on tab
+      // switch / re-render, so we (re)mount it here whenever the markup is fresh.
+      if (state.activeTab === 'design' && window.tgse && typeof window.tgse.mountFontPicker === 'function') {
+        const mount = $('#fontPickerMount');
+        if (mount) {
+          window.tgse.mountFontPicker(mount, state.config.fontFamily || 'Inter', (font) => {
+            state.config.fontFamily = font;
+            state.dirty = true;
+            syncSaveBtn();
+            updatePreview();
+          });
+        }
+      }
     }
 
     /* ============================ SECTIONS ============================ */
@@ -2271,15 +2286,17 @@
 
     function buildDMHotspots() {
       const layer = $('#dm-layer');
-      const canvas = $('.tgse-canvas') || $('#preview-canvas');  // shell uses .tgse-canvas
+      const frame = $('.tgse-frame') || $('#preview-frame');
       const mount = $('#tgt-mount');
-      if (!layer || !canvas || !mount) return;
+      if (!layer || !frame || !mount) return;
       layer.innerHTML = '';
-      // Position the layer to cover the preview canvas
-      const canvasRect = canvas.getBoundingClientRect();
+      // Layer now lives inside the frame, so position it to cover the frame.
+      // The frame has padding:36px so the widget is offset, but the layer covers
+      // the entire frame including the padding area (so hotspots can sit anywhere).
+      const frameRect = frame.getBoundingClientRect();
       layer.style.left = '0px'; layer.style.top = '0px';
-      layer.style.width = canvasRect.width + 'px';
-      layer.style.height = canvasRect.height + 'px';
+      layer.style.width = frameRect.width + 'px';
+      layer.style.height = frameRect.height + 'px';
 
       const root = mount.shadowRoot;
       if (!root) return;
@@ -2297,8 +2314,8 @@
         const hs = document.createElement('button');
         hs.className = 'dm-hotspot';
         hs.innerHTML = `<span class="dm-hotspot-label">${h.label}</span>`;
-        hs.style.left = (rect.left - canvasRect.left + canvas.scrollLeft) + 'px';
-        hs.style.top = (rect.top - canvasRect.top + canvas.scrollTop) + 'px';
+        hs.style.left = (rect.left - frameRect.left) + 'px';
+        hs.style.top = (rect.top - frameRect.top) + 'px';
         hs.style.width = rect.width + 'px';
         hs.style.height = rect.height + 'px';
         hs.addEventListener('click', (e) => openDMPopover(h.target, e.clientX, e.clientY));
@@ -2488,14 +2505,9 @@
       widgetTag: 'testimonials',
       scriptFile: 'widget-testimonials.js',
 
-      // Font picker — Testimonials widget JS already supports config.fontFamily
-      fontPickerEl: '#fontPickerMount',
-      onFontChange: (font) => {
-        state.config.fontFamily = font;
-        state.dirty = true;
-        syncSaveBtn();
-        updatePreview();
-      },
+      // Note: font picker is mounted inside renderTabBody() because the Typography
+      // section is destroyed/recreated on every tab switch and re-render. Mounting
+      // it once here would leave it orphaned. See renderTabBody() for the mount.
 
       // Shell asks us for the current config when it needs to save.
       getConfig: () => state.config,
