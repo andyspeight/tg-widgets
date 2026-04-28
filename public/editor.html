@@ -3,242 +3,361 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Widget Editor — Travelgenix</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Pricing Table — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{--bg:#F4F5F7;--sf:#FFF;--bd:#E3E5E8;--tx:#1A1D23;--sb:#6B7280;--mt:#9CA3AF;--br:#0891B2;--bl:#ECFEFF;--bk:#0E7490;--ac:#7C3AED;--dn:#EF4444;--ok:#10B981;--ft:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--ft);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden}
-[hidden]{display:none!important}
-.app{display:flex;height:100vh}
+  /* ============================================================
+     Pricing-Table-specific sidebar styles only.
+     All shell tokens come from /editor-shell.css.
+     ============================================================ */
 
-/* Editor */
-.editor{width:360px;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
-.ed-top{padding:14px 16px;border-bottom:1px solid var(--bd)}
-.ed-top-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.ed-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--br),var(--ac));display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ed-logo svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ed-info{flex:1;min-width:0}.ed-info h1{font-size:13px;font-weight:700;line-height:1.2}.ed-info span{font-size:11px;color:var(--mt)}
-.ed-name-row{display:flex;gap:6px}
-.ed-name-input{flex:1;padding:7px 10px;font-size:12px;border:1px solid var(--bd);border-radius:8px;background:#FAFBFC;font-family:var(--ft);color:var(--tx);outline:none}
-.ed-name-input:focus{border-color:var(--br);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
-.save-btn{padding:7px 14px;border:none;border-radius:8px;background:var(--br);color:#fff;font-size:12px;font-weight:600;font-family:var(--ft);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
-.save-btn:hover{background:var(--bk)}
-.save-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ed-acts{display:flex;gap:4px;margin-left:auto}
-.abtn{height:34px;padding:0 10px;border:1px solid var(--bd);background:var(--sf);border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;font-family:var(--ft);color:var(--sb);transition:all .15s}
-.abtn:hover{background:var(--bg)}.abtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.abtn.ai{color:var(--ac);border-color:#E9E5FF}.abtn.ai:hover{background:#F5F3FF}
+  /* Plan card editor */
+  .pc { background: var(--tgse-panel-2); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); margin-bottom: 8px; overflow: hidden; }
+  .pch { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; }
+  .pch:hover { background: var(--tgse-hover); }
+  .pcd { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .pcn { flex: 1; font-size: 13px; font-weight: 600; color: var(--tgse-ink); }
+  .pcp { font-size: 11px; color: var(--tgse-ink-3); font-family: 'JetBrains Mono', monospace; }
+  .pcb { padding: 12px; border-top: 1px solid var(--tgse-border); display: none; background: var(--tgse-panel); }
+  .pc.open .pcb { display: block; }
+  .pc .chv { width: 12px; height: 12px; color: var(--tgse-muted); transition: transform .15s; }
+  .pc.open .chv { transform: rotate(180deg); }
 
-.ed-tabs{display:flex;border-bottom:1px solid var(--bd)}
-.ed-tab{flex:1;padding:10px 0;font-size:12px;font-weight:600;text-align:center;border:none;background:none;cursor:pointer;color:var(--mt);position:relative;font-family:var(--ft)}
-.ed-tab.active{color:var(--br)}.ed-tab.active::after{content:'';position:absolute;bottom:0;left:12px;right:12px;height:2px;background:var(--br);border-radius:1px}
-.ed-body{flex:1;overflow-y:auto}
+  /* Field grid for plan cards */
+  .pg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 
-/* Shared field styles */
-.sec{border-bottom:1px solid var(--bd)}.sec-hd{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
-.sec-hd:hover{background:#FAFAFA}.sec-tt{font-size:12px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:8px}
-.sec-tt svg,.ico{width:14px;height:14px;stroke:var(--mt);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.chv{width:12px;height:12px;stroke:var(--mt);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
-.sec.open .chv{transform:rotate(180deg)}.sec-bd{padding:0 16px 14px;display:none}.sec.open .sec-bd{display:block}
-.fld{margin-bottom:10px}.fl{font-size:12px;font-weight:500;color:var(--sb);margin-bottom:4px;display:block}
-input[type="text"],input[type="number"],input[type="url"],select,textarea{width:100%;padding:7px 10px;font-size:12px;border:1px solid var(--bd);border-radius:8px;background:#FAFBFC;font-family:var(--ft);color:var(--tx);outline:none;transition:border .15s}
-input:focus,select:focus,textarea:focus{border-color:var(--br);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
-textarea{resize:vertical;min-height:56px}
-.cr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.cr label{font-size:12px;font-weight:500;color:var(--sb)}
-.crr{display:flex;align-items:center;gap:8px}.crr span{font-size:10px;color:var(--mt);font-family:monospace;text-transform:uppercase}
-.sw{width:28px;height:28px;border-radius:8px;border:1px solid var(--bd);overflow:hidden;position:relative;cursor:pointer}
-.sw input{position:absolute;inset:-4px;width:140%;height:140%;opacity:0;cursor:pointer}
-.presets{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
-.preset{height:32px;border-radius:8px;border:1px solid var(--bd);cursor:pointer;overflow:hidden;transition:all .15s}.preset:hover{border-color:var(--br);transform:scale(1.08)}
-.tr{display:flex;align-items:center;justify-content:space-between;padding:4px 0}.tr label{font-size:12px;font-weight:500;color:var(--sb)}
-.tgl{width:36px;height:20px;border-radius:10px;background:#D1D5DB;border:none;cursor:pointer;position:relative;transition:background .2s;padding:0}
-.tgl.on{background:var(--br)}.tgl .dot{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:transform .2s}.tgl.on .dot{transform:translateX(16px)}
-.sr{margin-bottom:10px}.sr .st{display:flex;justify-content:space-between;margin-bottom:4px}
-input[type="range"]{width:100%;height:6px;-webkit-appearance:none;background:var(--bd);border-radius:3px;outline:none;border:none;padding:0}
-input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--br);border-radius:8px;cursor:pointer}
+  /* Sidebar inputs/selects */
+  .tgse-body input[type="text"],
+  .tgse-body input[type="number"],
+  .tgse-body input[type="url"],
+  .tgse-body select,
+  .tgse-body textarea {
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 12px;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    font-family: inherit;
+    outline: none;
+    transition: border .15s;
+  }
+  .tgse-body input:focus,
+  .tgse-body select:focus,
+  .tgse-body textarea:focus {
+    border-color: var(--tgse-brand);
+    box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .tgse-body label.fl {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--tgse-ink-3);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .tgse-body .fld { margin-bottom: 10px; }
 
-/* Plan editor */
-.pc{background:#FAFBFC;border:1px solid var(--bd);border-radius:10px;margin-bottom:8px;overflow:hidden}
-.pch{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer}.pch:hover{background:#F3F4F6}
-.pcd{width:10px;height:10px;border-radius:3px;flex-shrink:0}.pcn{flex:1;font-size:12px;font-weight:600}.pcp{font-size:11px;color:var(--mt);font-family:monospace}
-.pcb{padding:10px;border-top:1px solid var(--bd);display:none}.pc.open .pcb{display:block}
-.pg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
-.fr{display:flex;align-items:center;gap:5px;margin-bottom:4px}
-.ft2{width:20px;height:20px;border-radius:4px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ft2 svg{width:10px;height:10px;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;fill:none}
-.fr input{flex:1;padding:5px 8px;font-size:11px}.fh{width:80px;font-size:10px!important}
-.fd{width:20px;height:20px;border:none;background:transparent;cursor:pointer;color:var(--mt);display:flex;align-items:center;justify-content:center;border-radius:4px;opacity:0;transition:opacity .15s}
-.fr:hover .fd{opacity:1}.fd:hover{color:var(--dn);background:#FEF2F2}.fd svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ab{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--br);background:none;border:none;cursor:pointer;padding:4px 0;font-family:var(--ft)}
-.ab:hover{color:var(--bk)}.ab svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.db{color:var(--dn)}.db:hover{color:#DC2626!important}
+  /* Feature rows */
+  .fr { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .fr input { flex: 1; }
+  .fr .fh { width: 90px; font-size: 11px; }
+  .ft2 { width: 22px; height: 22px; border-radius: 4px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ft2 svg { width: 11px; height: 11px; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  .fd { width: 22px; height: 22px; border: none; background: transparent; cursor: pointer; color: var(--tgse-muted); display: flex; align-items: center; justify-content: center; border-radius: 4px; opacity: 0; transition: opacity .15s; }
+  .fr:hover .fd { opacity: 1; }
+  .fd:hover { color: var(--tgse-danger); background: rgba(239, 68, 68, .08); }
+  .fd svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Upload */
-.up{border:2px dashed var(--bd);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px}
-.up:hover,.up.dragover{border-color:var(--br);background:var(--bl)}
-.up svg{width:20px;height:20px;stroke:var(--mt);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 4px;display:block}
-.up p{font-size:12px;color:var(--sb);font-weight:500}.up small{font-size:11px;color:var(--mt)}
-.up .dl{color:var(--br);text-decoration:underline;cursor:pointer;font-weight:600}
+  /* Inline action buttons in sidebar */
+  .ab { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--tgse-brand); background: none; border: none; cursor: pointer; padding: 4px 0; font-family: inherit; }
+  .ab:hover { color: var(--tgse-brand-dark); }
+  .ab svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ab.db { color: var(--tgse-danger); }
+  .ab.db:hover { color: #DC2626; }
 
-/* Preview */
-.pva{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.pvb{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--sf);border-bottom:1px solid var(--bd)}
-.pvd{display:flex;align-items:center;gap:4px}.pvd>span{font-size:12px;font-weight:500;color:var(--mt);margin-right:8px}
-.dbtn{width:30px;height:30px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--mt);transition:all .15s}
-.dbtn.active{background:var(--bg);color:var(--br)}.dbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.pvr{display:flex;align-items:center;gap:6px}
-.tbtn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-size:12px;font-weight:500;color:var(--sb);font-family:var(--ft);transition:all .15s}
-.tbtn:hover{background:var(--bg)}.tbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tbtn.on{background:var(--bl);border-color:var(--br);color:var(--br)}
-.pvf{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px;background:#E8ECF0;position:relative}
-.pvx{background:#fff;border-radius:12px;border:1px solid var(--bd);overflow:hidden;transition:width .3s;min-height:500px;position:relative}
+  /* Colour picker row */
+  .cr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .cr label { font-size: 12px; font-weight: 500; color: var(--tgse-ink-2); }
+  .crr { display: flex; align-items: center; gap: 8px; }
+  .crr span { font-size: 10px; color: var(--tgse-ink-3); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+  .sw { width: 28px; height: 28px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); overflow: hidden; position: relative; cursor: pointer; }
+  .sw input { position: absolute; inset: -4px; width: 140%; height: 140%; opacity: 0; cursor: pointer; }
 
-/* ═══ OVERLAY SYSTEM ═══ */
-.ov-wrap{position:absolute;inset:0;pointer-events:none;z-index:10}
-.ov-wrap.active{pointer-events:auto}
-.ov-spot{position:absolute;border:2px solid transparent;border-radius:6px;cursor:pointer;transition:all .15s;z-index:11}
-.ov-spot:hover{border-color:var(--br);background:rgba(8,145,178,.04)}
-.ov-spot:hover .ov-label{opacity:1;transform:translateY(0)}
-.ov-label{position:absolute;top:-24px;left:4px;font-size:10px;font-weight:700;color:#fff;background:var(--br);padding:2px 8px;border-radius:4px;white-space:nowrap;opacity:0;transform:translateY(4px);transition:all .15s;pointer-events:none;font-family:var(--ft)}
+  /* Preset gradients */
+  .presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+  .preset { height: 32px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); cursor: pointer; transition: all .15s; }
+  .preset:hover { border-color: var(--tgse-brand); transform: scale(1.05); }
 
-/* ═══ POPOVER ═══ */
-.pop{position:fixed;z-index:9999;background:#fff;border:1px solid var(--bd);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15),0 4px 12px rgba(0,0,0,.08);padding:14px;min-width:260px;max-width:320px;font-family:var(--ft);opacity:0;transform:translateY(6px);transition:all .15s;pointer-events:none}
-.pop.show{pointer-events:auto}
-.pop.show{opacity:1;transform:translateY(0)}
-.pop-title{font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
-.pop-close{width:20px;height:20px;border:none;background:transparent;cursor:pointer;color:var(--mt);display:flex;align-items:center;justify-content:center;border-radius:4px}
-.pop-close:hover{background:var(--bg);color:var(--tx)}
-.pop-close svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.pop .fld{margin-bottom:8px}.pop .fl{font-size:11px;margin-bottom:2px}
-.pop input,.pop select{font-size:11px;padding:6px 8px}
-.pop .pg{gap:4px;margin-bottom:6px}
+  /* Toggle switch */
+  .tr { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+  .tr label { font-size: 12px; font-weight: 500; color: var(--tgse-ink-2); }
+  .tgl { width: 36px; height: 20px; border-radius: 10px; background: #D1D5DB; border: none; cursor: pointer; position: relative; transition: background .2s; padding: 0; }
+  .tgl.on { background: var(--tgse-brand); }
+  .tgl .dot { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #FFF; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.15); transition: transform .2s; }
+  .tgl.on .dot { transform: translateX(16px); }
+  [data-theme="dark"] .tgl { background: var(--tgse-border-strong); }
 
-/* Embed */
-.emb{background:#1E293B;border-radius:10px;padding:14px;font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#CBD5E1;line-height:1.8;overflow-x:auto;margin-bottom:8px;white-space:pre-wrap;word-break:break-all}
-.emb .t{color:#67E8F9}.emb .a{color:#6EE7B7}.emb .v{color:#FCD34D}
-.cpb{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-size:11px;font-weight:600;color:var(--br);font-family:var(--ft)}
-.cpb:hover{background:var(--bl)}.cpb svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  /* Slider row */
+  .sr { margin-bottom: 10px; }
+  .sr .st { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .sr input[type="range"] { width: 100%; height: 4px; -webkit-appearance: none; background: var(--tgse-border); border-radius: 2px; outline: none; border: none; padding: 0; }
+  .sr input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--tgse-brand); border-radius: 50%; cursor: pointer; border: 2px solid var(--tgse-panel); }
 
-/* Font picker */
-.fp{position:relative}.fs{padding-left:30px!important}
-.fsi{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--mt);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-.flist{max-height:180px;overflow-y:auto;border:1px solid var(--bd);border-radius:8px;margin-top:4px;background:#fff;display:none}
-.fp.open .flist{display:block}
-.fo{padding:8px 10px;font-size:13px;cursor:pointer;transition:background .1s}.fo:hover{background:var(--bg)}.fo.act{background:var(--bl);color:var(--br);font-weight:600}
-.cfont{font-size:11px;color:var(--br);font-weight:600;margin-top:4px}
+  /* Spreadsheet upload */
+  .up { border: 2px dashed var(--tgse-border); border-radius: var(--tgse-radius-md); padding: 16px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 12px; }
+  .up:hover, .up.dragover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .up svg { width: 20px; height: 20px; stroke: var(--tgse-ink-3); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin: 0 auto 6px; display: block; }
+  .up p { font-size: 12px; color: var(--tgse-ink-2); font-weight: 600; margin: 0 0 2px; }
+  .up small { font-size: 11px; color: var(--tgse-ink-3); }
+  .up .dl { color: var(--tgse-brand); text-decoration: underline; cursor: pointer; font-weight: 600; }
 
-/* Modal */
-.mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
-.mbg.open{opacity:1;pointer-events:auto}
-.mdl{background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(8px);transition:transform .2s}
-.mbg.open .mdl{transform:translateY(0)}.mbd{padding:24px}
-.mdl h2{font-size:16px;font-weight:700;margin-bottom:4px}.mdl p{font-size:13px;color:var(--sb);margin-bottom:14px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-.chip{padding:6px 12px;border-radius:8px;border:1px solid var(--bd);background:#FAFBFC;font-size:11px;color:var(--sb);cursor:pointer;font-family:var(--ft);transition:all .15s}
-.chip:hover{border-color:var(--br);background:var(--bl);color:var(--br)}
-.mbtns{display:flex;gap:8px}.mbtns button{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ft);border:none;transition:all .15s}
-.bc{background:var(--bg);color:var(--sb)}.bc:hover{background:#E5E7EB}
-.bp{background:linear-gradient(135deg,var(--ac),var(--br));color:#fff}.bp:hover{box-shadow:0 4px 12px rgba(8,145,178,.3)}.bp:disabled{opacity:.5}
-.ahd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.aico{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--ac),var(--br));display:flex;align-items:center;justify-content:center}
-.aico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tpc{padding:12px;border:1px solid var(--bd);border-radius:10px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:all .15s}
-.tpc:hover{border-color:var(--br);background:var(--bl)}
-.tpi{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.tpi svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tpn{flex:1}.tpn strong{font-size:13px;display:block}.tpn small{font-size:11px;color:var(--mt)}
+  /* Embed snippet block */
+  .emb { background: #1E293B; border-radius: var(--tgse-radius-md); padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #CBD5E1; line-height: 1.7; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin-bottom: 8px; }
+  .emb .t { color: #67E8F9; }
+  .emb .a { color: #6EE7B7; }
+  .emb .v { color: #FCD34D; }
 
-.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
-@keyframes spin{to{transform:rotate(360deg)}}
-.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;z-index:2000;transform:translateY(60px);opacity:0;transition:all .3s;font-family:var(--ft)}
-.toast.show{transform:translateY(0);opacity:1}.toast.ok{background:var(--ok)}.toast.err{background:var(--dn)}
-.erm{color:var(--dn);font-size:12px;margin-bottom:8px;padding:6px 10px;background:#FEF2F2;border-radius:8px}
+  /* Design Mode overlay */
+  .ov-wrap { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+  .ov-wrap.active { pointer-events: auto; }
+  .ov-spot { position: absolute; border: 2px solid transparent; border-radius: 6px; cursor: pointer; transition: all .15s; z-index: 11; }
+  .ov-spot:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .ov-spot:hover .ov-label { opacity: 1; transform: translateY(0); }
+  .ov-label { position: absolute; top: -22px; left: 4px; font-size: 10px; font-weight: 700; color: #FFF; background: var(--tgse-brand); padding: 2px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; transform: translateY(4px); transition: all .15s; pointer-events: none; }
 
-/* Undo hint */
-.undo-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--mt);background:var(--sf);border:1px solid var(--bd);padding:4px 12px;border-radius:8px;box-shadow:var(--shadow);z-index:50;opacity:0;transition:opacity .3s;pointer-events:none}
-.undo-hint.show{opacity:1}
+  /* Popover (Design Mode click-to-edit) */
+  .pop { position: fixed; z-index: 9999; background: var(--tgse-panel); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); box-shadow: var(--tgse-shadow-lg); padding: 14px; min-width: 260px; max-width: 320px; opacity: 0; transform: translateY(6px); transition: all .15s; pointer-events: none; }
+  .pop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .pop-title { font-size: 11px; font-weight: 700; color: var(--tgse-ink-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .pop-close { width: 20px; height: 20px; border: none; background: transparent; cursor: pointer; color: var(--tgse-ink-3); display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .pop-close:hover { background: var(--tgse-hover); color: var(--tgse-ink); }
+  .pop-close svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-/* Keyboard shortcut badge */
-.kbd{font-size:9px;background:var(--bg);color:var(--mt);padding:2px 5px;border-radius:4px;font-family:monospace;margin-left:4px;border:1px solid var(--bd)}
+  /* Section header (mirrors shell pattern) */
+  .sec { border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); margin-bottom: 10px; background: var(--tgse-panel); overflow: visible; }
+  .sec-hd { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; user-select: none; }
+  .sec-hd:hover { background: var(--tgse-panel-2); }
+  .sec-tt { font-size: 13px; font-weight: 600; color: var(--tgse-ink); flex: 1; display: flex; align-items: center; gap: 8px; }
+  .sec-tt svg { width: 14px; height: 14px; color: var(--tgse-ink-3); stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .chv { width: 14px; height: 14px; color: var(--tgse-muted); transition: transform .15s; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .sec.open .sec-hd .chv { transform: rotate(180deg); }
+  .sec-bd { padding: 0 14px 14px; display: none; border-top: 1px solid var(--tgse-border); background: var(--tgse-panel-2); }
+  .sec.open .sec-bd { display: block; padding-top: 14px; }
+
+  /* Plan list header (Content tab) */
+  .plans-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .plans-header .ttl { font-size: 13px; font-weight: 600; color: var(--tgse-ink); }
+  .plans-header .acts { display: flex; gap: 12px; }
+
+  /* AI builder modal extras */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chip { padding: 6px 12px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); background: var(--tgse-panel-2); font-size: 11px; color: var(--tgse-ink-2); cursor: pointer; font-family: inherit; transition: all .15s; }
+  .chip:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); color: var(--tgse-brand); }
+
+  /* Templates picker */
+  .tpc { padding: 12px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; transition: all .15s; }
+  .tpc:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .tpi { width: 36px; height: 36px; border-radius: var(--tgse-radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--tgse-panel-2); }
+  .tpi svg { width: 16px; height: 16px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke: var(--tgse-ink-3); }
+  .tpn { flex: 1; }
+  .tpn strong { font-size: 13px; display: block; color: var(--tgse-ink); }
+  .tpn small { font-size: 11px; color: var(--tgse-ink-3); }
+
+  /* Spinner inside AI Generate */
+  .ai-spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #FFF; border-radius: 50%; animation: ai-spin .6s linear infinite; display: inline-block; }
+  @keyframes ai-spin { to { transform: rotate(360deg); } }
+
+  /* Error inside AI modal */
+  .erm { color: var(--tgse-danger); font-size: 12px; margin-bottom: 10px; padding: 8px 12px; background: rgba(239,68,68,.08); border-radius: var(--tgse-radius-sm); border: 1px solid rgba(239,68,68,.25); }
+
+  /* Undo hint */
+  .undo-hint { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--tgse-ink-3); background: var(--tgse-panel); border: 1px solid var(--tgse-border); padding: 6px 14px; border-radius: var(--tgse-radius-sm); box-shadow: var(--tgse-shadow-md); z-index: 50; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .undo-hint.show { opacity: 1; }
+
+  /* Preview frame override — pricing table needs full-width canvas */
+  .tgse-frame { padding: 32px; }
+  .tgse-frame[data-vp="mobile"] { padding: 16px; }
+
+  /* Inline AI/Add buttons in the plans header */
+  .plans-header .ab { padding: 4px 8px; }
 </style>
 </head>
 <body>
-<div class="app">
-<div class="editor">
-  <div class="ed-top">
-    <div class="ed-top-row">
-      <a class="abtn" href="/" title="Back to dashboard" aria-label="Back to dashboard" style="text-decoration:none;padding:0 8px"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></a>
-      <div class="ed-logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-      <div class="ed-info"><h1>Pricing Table</h1><span>Widget Editor</span></div>
-      <div class="ed-acts">
-        <button class="abtn" onclick="showTpl()" title="Templates (T)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></button>
-        <button class="abtn ai" onclick="showAI()" title="AI Builder (A)"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/><path d="M19 13l.5 2 2 .5-2 .5-.5 2-.5-2-2-.5 2-.5.5-2z"/></svg></button>
+
+<div class="tgse-app">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Pricing Table</div>
+        <div class="tgse-id-type">Widget editor</div>
       </div>
     </div>
-    <div class="ed-name-row">
-      <input type="text" class="ed-name-input" id="wName" placeholder="Widget name..." value="My Pricing Table">
-      <button class="save-btn" onclick="saveW()"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save<span class="kbd">⌘S</span></button>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
     </div>
-  </div>
-  <div class="ed-tabs">
-    <button class="ed-tab active" onclick="swTab('design',this)">Design</button>
-    <button class="ed-tab" onclick="swTab('content',this)">Content</button>
-    <button class="ed-tab" onclick="swTab('settings',this)">Settings</button>
-  </div>
-  <div class="ed-body" id="edB"></div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled pricing table" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+      <div class="tgse-panel is-active" data-tab="design" id="panel-design"></div>
+      <div class="tgse-panel" data-tab="content" id="panel-content"></div>
+      <div class="tgse-panel" data-tab="settings" id="panel-settings"></div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       PREVIEW
+       ============================================================ -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+        Design mode
+        <span class="tgse-kbd">D</span>
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div id="widget-mount"></div>
+        <div class="ov-wrap" id="ovWrap"></div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
-<div class="pva">
-  <div class="pvb">
-    <div class="pvd">
-      <span>Preview</span>
-      <button class="dbtn active" onclick="setDev('desktop',this)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
-      <button class="dbtn" onclick="setDev('tablet',this)"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></button>
-      <button class="dbtn" onclick="setDev('mobile',this)"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></button>
-    </div>
-    <div class="pvr">
-      <button class="tbtn" id="dmBtn" onclick="toggleDM()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><path d="M12 2v4m0 12v4m-7.07-15.07l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>Design Mode<span class="kbd">D</span></button>
-      <button class="tbtn" id="thBtn" onclick="toggleTh()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>Light</button>
-    </div>
-  </div>
-  <div class="pvf" id="pvf">
-    <div class="pvx" id="pvx" style="width:100%">
-      <div id="mt"></div>
-      <div class="ov-wrap" id="ovWrap"></div>
-    </div>
-  </div>
-</div>
-</div>
-
+<!-- Popover for Design Mode click-to-edit -->
 <div class="pop" id="popover"></div>
-
-<!-- Modals -->
-<div class="mbg" id="aiM"><div class="mdl"><div class="mbd">
-  <div class="ahd"><div class="aico"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/><path d="M19 13l.5 2 2 .5-2 .5-.5 2-.5-2-2-.5 2-.5.5-2z"/></svg></div><div><h2>AI Widget Builder</h2><p style="margin:0">Describe what you need in plain English</p></div></div>
-  <textarea id="aiP" style="width:100%;height:80px;margin-bottom:10px" placeholder="e.g. 3-tier pricing for a UK travel agency with prices in GBP"></textarea>
-  <div class="chips"><button class="chip" onclick="document.getElementById('aiP').value=this.textContent">3-tier pricing for a UK travel agency</button><button class="chip" onclick="document.getElementById('aiP').value=this.textContent">SaaS pricing with free tier in USD</button><button class="chip" onclick="document.getElementById('aiP').value=this.textContent">Luxury Mediterranean tour packages</button></div>
-  <div id="aiE" class="erm" style="display:none"></div>
-  <div class="mbtns"><button class="bc" onclick="closeM()">Cancel</button><button class="bp" id="aiB" onclick="genAI()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;margin-right:4px;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>Generate</button></div>
-</div></div></div>
-
-<div class="mbg" id="tpM"><div class="mdl"><div class="mbd">
-  <h2>Start Building</h2><p>Choose a template or let AI create one</p>
-  <div class="tpc" onclick="closeM();showAI()" style="border-style:dashed;border-color:#C4B5FD;background:#FAF5FF">
-    <div class="tpi" style="background:linear-gradient(135deg,var(--ac),var(--br))"><svg viewBox="0 0 24 24" style="stroke:#fff"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg></div>
-    <div class="tpn"><strong>Build with AI</strong><small>Describe what you need</small></div>
-  </div>
-  <div id="tpL"></div>
-  <button style="width:100%;margin-top:8px;padding:8px;border:none;background:none;font-size:12px;color:var(--mt);cursor:pointer;font-family:var(--ft)" onclick="closeM()">Start from scratch</button>
-</div></div></div>
-
-<div class="toast" id="toast"></div>
 <div class="undo-hint" id="undoHint">Ctrl+Z to undo</div>
 
+<!-- ============================================================
+     MODALS — AI builder & Templates (shell-styled)
+     ============================================================ -->
+<div class="tgse-modal" id="aiModal">
+  <div class="tgse-modal-card">
+    <div class="tgse-modal-head">
+      <span class="tgse-id-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+      </span>
+      <div>
+        <h2>AI pricing builder</h2>
+        <p class="tgse-modal-sub">Describe what you need in plain English.</p>
+      </div>
+    </div>
+    <div class="tgse-modal-body">
+      <textarea id="aiPrompt" rows="3" placeholder="e.g. 3-tier pricing for a UK travel agency with prices in GBP" style="width:100%;padding:10px 12px;font-size:13px;border:1px solid var(--tgse-border);border-radius:var(--tgse-radius-md);background:var(--tgse-panel-2);color:var(--tgse-ink);font-family:inherit;outline:none;resize:vertical;min-height:72px;margin-bottom:12px"></textarea>
+      <div class="chips">
+        <button class="chip" type="button">3-tier pricing for a UK travel agency</button>
+        <button class="chip" type="button">SaaS pricing with free tier in USD</button>
+        <button class="chip" type="button">Luxury Mediterranean tour packages</button>
+      </div>
+      <div id="aiErr" class="erm" style="display:none"></div>
+    </div>
+    <div class="tgse-modal-foot">
+      <button class="tgse-btn" type="button" data-close-modal="aiModal">Cancel</button>
+      <button class="tgse-btn tgse-btn--ai" type="button" id="aiGenerate">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>
+        Generate
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="tgse-modal" id="tplModal">
+  <div class="tgse-modal-card">
+    <div class="tgse-modal-head">
+      <span class="tgse-id-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </span>
+      <div>
+        <h2>Choose a starting template</h2>
+        <p class="tgse-modal-sub">Or build from AI, or start from scratch.</p>
+      </div>
+    </div>
+    <div class="tgse-modal-body" id="tplList"></div>
+    <div class="tgse-modal-foot">
+      <button class="tgse-btn" type="button" data-close-modal="tplModal">Start from scratch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shell behaviour first -->
+<script src="/editor-shell.js"></script>
+<!-- Then the widget (so window.TGPricingWidget is available for preview) -->
+<script src="/widget.js"></script>
+
 <script>
-/* ═══ STATE ═══ */
-const FONTS=['DM Sans','Inter','Poppins','Raleway','Open Sans','Lato','Montserrat','Nunito','Source Sans 3','Work Sans','Outfit','Plus Jakarta Sans','Rubik','Manrope','Sora','Space Grotesk','Figtree','Onest','Albert Sans','Urbanist','Karla','Cabin','Mulish','Josefin Sans','Quicksand','Barlow','Archivo','Red Hat Display','Overpass'];
-const TPL=[
+/* ============================================================
+   PRICING TABLE EDITOR — refactored onto unified shell
+   Shell handles: auth, save, font picker, viewport, tabs,
+   keyboard shortcuts, embed modal, theme button, design-mode button.
+   This file handles: pricing-specific config + UI.
+   ============================================================ */
+
+/* ── Templates ────────────────────────────────────────────── */
+const TPL = [
   {n:'Travel Agency',d:'Spark / Boost / Ignite',hd:{title:'Find Your Perfect Package',subtitle:'Everything you need to sell holidays online.'},plans:[
     {name:'Spark',description:'Get online fast',monthlyPrice:159,yearlyPrice:1590,currency:'£',icon:'Zap',highlighted:false,badge:'',cta:'Get Started',ctaUrl:'#',features:[{text:'Bookable website',included:true,hint:'Fully responsive'},{text:'10 supplier feeds',included:true,hint:''},{text:'Basic search widget',included:true,hint:''},{text:'Email support',included:true,hint:''},{text:'Luna AI chatbot',included:false,hint:''},{text:'Custom branding',included:false,hint:''}]},
     {name:'Boost',description:'More power, more bookings',monthlyPrice:229,yearlyPrice:2290,currency:'£',icon:'Star',highlighted:true,badge:'Most Popular',cta:'Start Free Trial',ctaUrl:'#',features:[{text:'Bookable website',included:true,hint:''},{text:'50 supplier feeds',included:true,hint:''},{text:'Advanced widget suite',included:true,hint:''},{text:'Priority support',included:true,hint:''},{text:'Luna AI chatbot',included:true,hint:''},{text:'Custom branding',included:false,hint:''}]},
@@ -249,323 +368,550 @@ const TPL=[
     {name:'Enterprise',description:'For organisations',monthlyPrice:99,yearlyPrice:990,currency:'$',icon:'Crown',highlighted:false,badge:'',cta:'Contact Us',ctaUrl:'#',features:[{text:'Unlimited everything',included:true,hint:''},{text:'1TB storage',included:true,hint:''},{text:'Dedicated support',included:true,hint:''},{text:'Full API access',included:true,hint:''}]}]}
 ];
 
-let C={header:{title:'Choose Your Plan',subtitle:'Start free, upgrade when you\'re ready.'},brandColor:'#0891B2',accentColor:'#6366F1',pageBg:'#F8FAFC',cardBg:'#FFFFFF',textColor:'#0F172A',subtextColor:'#64748B',borderRadius:16,showToggle:true,showBadge:true,showIcons:true,showDescription:true,showHints:true,showTrustStrip:true,trustText:'30-day money-back guarantee · No contracts · Cancel anytime',savingsLabel:'Save {pct}%',theme:'light',fontFamily:'DM Sans',plans:[]};
-let wId=null,dark=false,tab='design',dm=false;
-let hist=[],histIdx=-1;
+/* ── Config ───────────────────────────────────────────────── */
+let C = {
+  header: { title: 'Choose Your Plan', subtitle: "Start free, upgrade when you're ready." },
+  brandColor: '#0891B2',
+  accentColor: '#6366F1',
+  pageBg: '#F8FAFC',
+  cardBg: '#FFFFFF',
+  textColor: '#0F172A',
+  subtextColor: '#64748B',
+  borderRadius: 16,
+  showToggle: true,
+  showBadge: true,
+  showIcons: true,
+  showDescription: true,
+  showHints: true,
+  showTrustStrip: true,
+  trustText: '30-day money-back guarantee · No contracts · Cancel anytime',
+  savingsLabel: 'Save {pct}%',
+  theme: 'light',
+  fontFamily: 'DM Sans',
+  plans: []
+};
+let wId = null, dark = false, tab = 'design', dm = false;
+let hist = [], histIdx = -1;
+let openSecs = {}, openPlans = {};
+let shell = null;
 
-function snap(){const s=JSON.stringify(C);if(hist.length&&hist[histIdx]===s)return;hist=hist.slice(0,histIdx+1);hist.push(s);histIdx=hist.length-1;if(hist.length>40){hist.shift();histIdx--}}
-function undo(){if(histIdx>0){histIdx--;C=JSON.parse(hist[histIdx]);ren();renP();showHint('Undone')}}
-function redo(){if(histIdx<hist.length-1){histIdx++;C=JSON.parse(hist[histIdx]);ren();renP();showHint('Redone')}}
-function showHint(m){const h=document.getElementById('undoHint');h.textContent=m;h.classList.add('show');setTimeout(()=>h.classList.remove('show'),1500)}
+/* ── Helpers ──────────────────────────────────────────────── */
+function esc(s){ const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML.replace(/"/g,'&quot;'); }
+function snap(){ const s = JSON.stringify(C); if(hist.length && hist[histIdx]===s) return; hist = hist.slice(0, histIdx+1); hist.push(s); histIdx = hist.length-1; if(hist.length>40){ hist.shift(); histIdx--; } shell?.markDirty(); }
+function undo(){ if(histIdx>0){ histIdx--; C = JSON.parse(hist[histIdx]); ren(); renP(); showHint('Undone'); } }
+function redo(){ if(histIdx<hist.length-1){ histIdx++; C = JSON.parse(hist[histIdx]); ren(); renP(); showHint('Redone'); } }
+function showHint(m){ const h = document.getElementById('undoHint'); h.textContent = m; h.classList.add('show'); setTimeout(()=>h.classList.remove('show'), 1500); }
 
-/* ═══ INIT ═══ */
-window.addEventListener('DOMContentLoaded',()=>{
-  if(!ensureAuth())return;
-  const p=new URLSearchParams(location.search);wId=p.get('id');
-  if(wId){loadW(wId)}else{C.plans=JSON.parse(JSON.stringify(TPL[0].plans));C.header={...TPL[0].hd};snap();ren();renP()}
-  // Load Google Fonts
-  const fams=FONTS.map(f=>f.replace(/ /g,'+')).join('&family=');
-  const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+fams+'&display=swap';document.head.appendChild(l);
-});
-
-async function loadW(id){try{const r=await fetch('/api/widget-config?id='+encodeURIComponent(id));if(!r.ok)throw 0;const d=await r.json();Object.assign(C,d);document.getElementById('wName').value=C.header?.title||'';snap();ren();renP();toast('Loaded','ok')}catch(e){C.plans=JSON.parse(JSON.stringify(TPL[0].plans));snap();ren();renP()}}
-
-/* ═══ KEYBOARD SHORTCUTS ═══ */
-document.addEventListener('keydown',e=>{
-  const mod=e.metaKey||e.ctrlKey;
-  if(mod&&e.key==='s'){e.preventDefault();saveW()}
-  if(mod&&e.key==='z'&&!e.shiftKey){e.preventDefault();undo()}
-  if(mod&&(e.key==='y'||(e.key==='z'&&e.shiftKey))){e.preventDefault();redo()}
-  if(!mod&&!e.target.closest('input,textarea,select')){
-    if(e.key==='d'||e.key==='D'){e.preventDefault();toggleDM()}
-    if(e.key==='a'||e.key==='A'){e.preventDefault();showAI()}
-    if(e.key==='t'||e.key==='T'){e.preventDefault();showTpl()}
-    if(e.key==='1')swTab('design',document.querySelectorAll('.ed-tab')[0]);
-    if(e.key==='2')swTab('content',document.querySelectorAll('.ed-tab')[1]);
-    if(e.key==='3')swTab('settings',document.querySelectorAll('.ed-tab')[2]);
-    if(e.key==='Escape')closePop();
-  }
-});
-
-/* ═══ TABS ═══ */
-function swTab(t,btn){tab=t;document.querySelectorAll('.ed-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');ren()}
-function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML.replace(/"/g,'&quot;')}
-
-/* ═══ RENDER EDITOR (sidebar) ═══ */
+/* ── Render sidebar ───────────────────────────────────────── */
 function ren(){
   saveSecState();
-  const B=document.getElementById('edB');
-  if(tab==='design')B.innerHTML=dTab();else if(tab==='content')B.innerHTML=cTab();else B.innerHTML=sTab();
+  document.getElementById('panel-design').innerHTML = dTab();
+  document.getElementById('panel-content').innerHTML = cTab();
+  document.getElementById('panel-settings').innerHTML = sTab();
   restoreSecState();
   bind();
 }
 
-function sec(t,ico,o,bd){return`<div class="sec${o?' open':''}"><div class="sec-hd" onclick="this.parentElement.classList.toggle('open')"><span class="sec-tt"><svg viewBox="0 0 24 24">${ico}</svg>${t}</span><svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div><div class="sec-bd">${bd}</div></div>`}
-function colF(l,k,v){return`<div class="cr"><label>${l}</label><div class="crr"><span>${v}</span><div class="sw"><div style="width:100%;height:100%;background:${v}"></div><input type="color" value="${v}" data-bind="${k}"></div></div></div>`}
-function togF(l,k,on){return`<div class="tr"><label>${l}</label><button class="tgl${on?' on':''}" onclick="snap();C.${k}=!C.${k};ren();renP()"><span class="dot"></span></button></div>`}
+function sec(t, ico, open, body){
+  return `<div class="sec${open?' open':''}"><div class="sec-hd" onclick="this.parentElement.classList.toggle('open')"><span class="sec-tt"><svg viewBox="0 0 24 24">${ico}</svg>${t}</span><svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div><div class="sec-bd">${body}</div></div>`;
+}
+function colF(label, key, val){
+  return `<div class="cr"><label>${label}</label><div class="crr"><span>${val}</span><div class="sw"><div style="width:100%;height:100%;background:${val}"></div><input type="color" value="${val}" data-bind="${key}"></div></div></div>`;
+}
+function togF(label, key, on){
+  return `<div class="tr"><label>${label}</label><button class="tgl${on?' on':''}" type="button" onclick="snap();C.${key}=!C.${key};ren();renP()"><span class="dot"></span></button></div>`;
+}
 
 function dTab(){
-  return sec('Header','<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',true,`
+  return sec('Header', '<path d="M4 7V4h16v3" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20h6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4v16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', true, `
     <div class="fld"><label class="fl">Title</label><input type="text" value="${esc(C.header.title)}" data-bind="header.title"></div>
     <div class="fld"><label class="fl">Subtitle</label><input type="text" value="${esc(C.header.subtitle)}" data-bind="header.subtitle"></div>
-  `)+sec('Colors','<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 000 20"/>',true,`
-    ${colF('Brand','brandColor',C.brandColor)}${colF('Accent','accentColor',C.accentColor)}${colF('Page Bg','pageBg',C.pageBg)}${colF('Card Bg','cardBg',C.cardBg)}${colF('Text','textColor',C.textColor)}
-    <div style="margin-top:8px"><span class="fl">Presets</span><div class="presets">
-    ${[{b:'#0891B2',a:'#6366F1'},{b:'#7C3AED',a:'#EC4899'},{b:'#059669',a:'#0D9488'},{b:'#DC2626',a:'#F97316'},{b:'#1E293B',a:'#3B82F6'}].map(p=>`<div class="preset" onclick="snap();C.brandColor='${p.b}';C.accentColor='${p.a}';ren();renP()" style="background:linear-gradient(135deg,${p.b},${p.a})"></div>`).join('')}</div></div>
-  `)+sec('Typography','<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',false,`
-    <div class="fl" style="margin-bottom:6px">Font Family</div>
-    <div class="fp" id="fpk"><svg class="fsi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" class="fs" id="fSrc" placeholder="Search fonts..." onfocus="document.getElementById('fpk').classList.add('open')" oninput="filtF(this.value)">
-    <div class="flist" id="fL"></div></div>
-    <div class="cfont">Current: <strong>${C.fontFamily||'DM Sans'}</strong></div>
-  `)+sec('Shape','<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>',false,`
-    <div class="sr"><div class="st"><span class="fl">Border Radius</span><span style="font-size:11px;color:var(--mt);font-family:monospace">${C.borderRadius}px</span></div>
+  `) + sec('Colours', '<circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" stroke-width="2"/><path d="M2 12h20" stroke="currentColor" fill="none" stroke-width="2"/>', true, `
+    ${colF('Brand', 'brandColor', C.brandColor)}
+    ${colF('Accent', 'accentColor', C.accentColor)}
+    ${colF('Page background', 'pageBg', C.pageBg)}
+    ${colF('Card background', 'cardBg', C.cardBg)}
+    ${colF('Text', 'textColor', C.textColor)}
+    <div style="margin-top:10px"><label class="fl">Presets</label>
+    <div class="presets">
+    ${[{b:'#0891B2',a:'#6366F1'},{b:'#7C3AED',a:'#EC4899'},{b:'#059669',a:'#0D9488'},{b:'#DC2626',a:'#F97316'},{b:'#1E293B',a:'#3B82F6'}].map(p=>`<div class="preset" onclick="snap();C.brandColor='${p.b}';C.accentColor='${p.a}';ren();renP()" style="background:linear-gradient(135deg,${p.b},${p.a})"></div>`).join('')}
+    </div></div>
+  `) + sec('Typography', '<polyline points="4 7 4 4 20 4 20 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="9" y1="20" x2="15" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', false, `
+    <div class="fld"><label class="fl">Font family</label><div id="fontPickerMount"></div></div>
+  `) + sec('Shape', '<rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" fill="none" stroke-width="2"/>', false, `
+    <div class="sr"><div class="st"><span class="fl" style="margin:0">Border radius</span><span style="font-size:11px;color:var(--tgse-ink-3);font-family:'JetBrains Mono',monospace">${C.borderRadius}px</span></div>
     <input type="range" min="0" max="28" value="${C.borderRadius}" data-bind="borderRadius"></div>
   `);
 }
 
 function cTab(){
-  let h=`<div style="padding:12px 16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <span class="fl" style="font-weight:700;color:var(--tx)">Plans (${C.plans.length})</span>
-    <div style="display:flex;gap:8px"><button class="ab" onclick="showAI()"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>AI</button><button class="ab" onclick="addP()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button></div></div>
-    <div class="up" id="upZ" onclick="document.getElementById('fIn').click()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><p>Upload spreadsheet</p><small>CSV or Excel — <span class="dl" onclick="event.stopPropagation();dlTpl()">Download template</span></small><input type="file" id="fIn" accept=".csv,.xlsx,.xls" style="display:none" onchange="hFile(this)"></div>`;
-  C.plans.forEach((p,i)=>{
-    const feats=p.features.map((f,fi)=>`<div class="fr"><button class="ft2" style="background:${f.included?'#ECFEFF':'#F3F4F6'}" onclick="snap();C.plans[${i}].features[${fi}].included=!C.plans[${i}].features[${fi}].included;ren();renP()"><svg viewBox="0 0 24 24" style="stroke:${f.included?'var(--br)':'#D1D5DB'}">${f.included?'<polyline points="20 6 9 17 4 12"/>':'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'}</svg></button><input type="text" value="${esc(f.text)}" onchange="snap();C.plans[${i}].features[${fi}].text=this.value;renP()"><input type="text" class="fh" value="${esc(f.hint||'')}" placeholder="Hint" onchange="C.plans[${i}].features[${fi}].hint=this.value;renP()"><button class="fd" onclick="snap();C.plans[${i}].features.splice(${fi},1);ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div>`).join('');
-    h+=`<div class="pc" id="p${i}"><div class="pch" onclick="document.getElementById('p${i}').classList.toggle('open')"><div class="pcd" style="background:${p.highlighted?C.brandColor:'#E5E7EB'}"></div><span class="pcn">${esc(p.name)||'Untitled'}</span><span class="pcp">${esc(p.currency||'£')}${p.monthlyPrice}</span><svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
-    <div class="pcb"><div class="pg"><div class="fld"><label class="fl">Name</label><input type="text" value="${esc(p.name)}" onchange="snap();C.plans[${i}].name=this.value;ren();renP()"></div><div class="fld"><label class="fl">Icon</label><select onchange="snap();C.plans[${i}].icon=this.value;renP()">${['Zap','Star','Crown','Shield','Sparkles','Award'].map(ic=>`<option${p.icon===ic?' selected':''}>${ic}</option>`).join('')}</select></div></div>
-    <div class="fld"><label class="fl">Description</label><input type="text" value="${esc(p.description)}" onchange="snap();C.plans[${i}].description=this.value;renP()"></div>
-    <div class="pg"><div class="fld"><label class="fl">Monthly</label><input type="number" value="${p.monthlyPrice}" onchange="snap();C.plans[${i}].monthlyPrice=+this.value;ren();renP()"></div><div class="fld"><label class="fl">Yearly</label><input type="number" value="${p.yearlyPrice}" onchange="snap();C.plans[${i}].yearlyPrice=+this.value;renP()"></div></div>
-    <div class="pg"><div class="fld"><label class="fl">Currency</label><select onchange="snap();C.plans[${i}].currency=this.value;ren();renP()">${['£','$','€','A$','C$'].map(c=>`<option${(p.currency||'£')===c?' selected':''}>${c}</option>`).join('')}</select></div><div class="fld"><label class="fl">CTA</label><input type="text" value="${esc(p.cta)}" onchange="snap();C.plans[${i}].cta=this.value;renP()"></div></div>
-    <div class="fld"><label class="fl">CTA URL</label><input type="url" value="${esc(p.ctaUrl||'')}" onchange="C.plans[${i}].ctaUrl=this.value" placeholder="https://"></div>
-    ${togF('Featured','plans['+i+'].highlighted',p.highlighted)}
-    ${p.highlighted?`<div class="fld"><label class="fl">Badge</label><input type="text" value="${esc(p.badge)}" onchange="snap();C.plans[${i}].badge=this.value;renP()"></div>`:''}
-    <div style="margin-top:8px"><label class="fl">Features</label><div style="margin-top:6px">${feats}</div>
-    <button class="ab" onclick="snap();C.plans[${i}].features.push({text:'New feature',included:true,hint:''});ren();renP()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add feature</button></div>
-    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><button class="ab db" onclick="snap();C.plans.splice(${i},1);ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Remove</button></div></div></div>`;
+  let h = `<div class="plans-header">
+    <span class="ttl">Plans (${C.plans.length})</span>
+    <div class="acts">
+      <button class="ab" type="button" onclick="document.getElementById('btn-ai').click()"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>AI</button>
+      <button class="ab" type="button" onclick="addPlan()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add plan</button>
+    </div>
+  </div>
+  <div class="up" id="upZ" onclick="document.getElementById('fIn').click()">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <p>Upload spreadsheet</p>
+    <small>CSV or Excel — <span class="dl" onclick="event.stopPropagation();dlTpl()">Download template</span></small>
+    <input type="file" id="fIn" accept=".csv,.xlsx,.xls" style="display:none" onchange="hFile(this)">
+  </div>`;
+
+  C.plans.forEach((p, i) => {
+    const feats = p.features.map((f, fi) => `<div class="fr">
+      <button class="ft2" type="button" style="background:${f.included?'#ECFEFF':'#F3F4F6'}" onclick="snap();C.plans[${i}].features[${fi}].included=!C.plans[${i}].features[${fi}].included;ren();renP()">
+        <svg viewBox="0 0 24 24" style="stroke:${f.included?'var(--tgse-brand)':'#D1D5DB'}">${f.included?'<polyline points="20 6 9 17 4 12"/>':'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'}</svg>
+      </button>
+      <input type="text" value="${esc(f.text)}" onchange="snap();C.plans[${i}].features[${fi}].text=this.value;renP()">
+      <input type="text" class="fh" value="${esc(f.hint||'')}" placeholder="Hint" onchange="C.plans[${i}].features[${fi}].hint=this.value;renP()">
+      <button class="fd" type="button" onclick="snap();C.plans[${i}].features.splice(${fi},1);ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+    </div>`).join('');
+
+    h += `<div class="pc" id="p${i}">
+      <div class="pch" onclick="document.getElementById('p${i}').classList.toggle('open')">
+        <div class="pcd" style="background:${p.highlighted?C.brandColor:'#E5E7EB'}"></div>
+        <span class="pcn">${esc(p.name)||'Untitled'}</span>
+        <span class="pcp">${esc(p.currency||'£')}${p.monthlyPrice}</span>
+        <svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pcb">
+        <div class="pg">
+          <div class="fld"><label class="fl">Name</label><input type="text" value="${esc(p.name)}" onchange="snap();C.plans[${i}].name=this.value;ren();renP()"></div>
+          <div class="fld"><label class="fl">Icon</label><select onchange="snap();C.plans[${i}].icon=this.value;renP()">${['Zap','Star','Crown','Shield','Sparkles','Award'].map(ic=>`<option${p.icon===ic?' selected':''}>${ic}</option>`).join('')}</select></div>
+        </div>
+        <div class="fld"><label class="fl">Description</label><input type="text" value="${esc(p.description)}" onchange="snap();C.plans[${i}].description=this.value;renP()"></div>
+        <div class="pg">
+          <div class="fld"><label class="fl">Monthly</label><input type="number" value="${p.monthlyPrice}" onchange="snap();C.plans[${i}].monthlyPrice=+this.value;ren();renP()"></div>
+          <div class="fld"><label class="fl">Yearly</label><input type="number" value="${p.yearlyPrice}" onchange="snap();C.plans[${i}].yearlyPrice=+this.value;renP()"></div>
+        </div>
+        <div class="pg">
+          <div class="fld"><label class="fl">Currency</label><select onchange="snap();C.plans[${i}].currency=this.value;ren();renP()">${['£','$','€','A$','C$'].map(c=>`<option${(p.currency||'£')===c?' selected':''}>${c}</option>`).join('')}</select></div>
+          <div class="fld"><label class="fl">CTA</label><input type="text" value="${esc(p.cta)}" onchange="snap();C.plans[${i}].cta=this.value;renP()"></div>
+        </div>
+        <div class="fld"><label class="fl">CTA URL</label><input type="url" value="${esc(p.ctaUrl||'')}" onchange="C.plans[${i}].ctaUrl=this.value" placeholder="https://"></div>
+        ${togF('Featured', 'plans['+i+'].highlighted', p.highlighted)}
+        ${p.highlighted ? `<div class="fld"><label class="fl">Badge</label><input type="text" value="${esc(p.badge)}" onchange="snap();C.plans[${i}].badge=this.value;renP()"></div>` : ''}
+        <div style="margin-top:10px"><label class="fl">Features</label><div style="margin-top:6px">${feats}</div>
+        <button class="ab" type="button" onclick="snap();C.plans[${i}].features.push({text:'New feature',included:true,hint:''});ren();renP()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add feature</button></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--tgse-border)"><button class="ab db" type="button" onclick="snap();C.plans.splice(${i},1);ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Remove plan</button></div>
+      </div>
+    </div>`;
   });
-  return h+'</div>';
+
+  return h;
 }
 
 function sTab(){
-  const wid=wId||'YOUR_WIDGET_ID';
-  return sec('Display','<circle cx="12" cy="12" r="3"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>',true,`
-    ${togF('Billing toggle','showToggle',C.showToggle)}${togF('Badges','showBadge',C.showBadge)}${togF('Icons','showIcons',C.showIcons)}${togF('Descriptions','showDescription',C.showDescription)}${togF('Tooltips','showHints',C.showHints)}${togF('Trust strip','showTrustStrip',C.showTrustStrip)}
-    ${C.showTrustStrip?`<div class="fld" style="margin-top:6px"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" data-bind="trustText"></div>`:''}
-  `)+sec('Embed Code','<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',true,`
-    <div class="emb"><span class="t">&lt;div</span> <span class="a">data-tg-widget</span>=<span class="v">"pricing"</span>\n  <span class="a">data-tg-id</span>=<span class="v">"${wid}"</span><span class="t">&gt;&lt;/div&gt;</span>\n<span class="t">&lt;script</span> <span class="a">src</span>=<span class="v">"https://tg-widgets.vercel.app/widget.js"</span><span class="t">&gt;&lt;/script&gt;</span></div>
-    <button class="cpb" onclick="cpEmb()"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy embed code</button>
-    ${wId?`<div style="margin-top:8px;font-size:11px;color:var(--mt)">Widget ID: <code style="background:#F1F5F9;padding:2px 6px;border-radius:4px">${wId}</code></div>`:'<div style="margin-top:8px;font-size:11px;color:var(--mt)">Save to get your widget ID</div>'}
+  const wid = wId || 'YOUR_WIDGET_ID';
+  return sec('Display', '<circle cx="12" cy="12" r="3" stroke="currentColor" fill="none" stroke-width="2"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" fill="none" stroke-width="2"/>', true, `
+    ${togF('Billing toggle', 'showToggle', C.showToggle)}
+    ${togF('Badges', 'showBadge', C.showBadge)}
+    ${togF('Icons', 'showIcons', C.showIcons)}
+    ${togF('Descriptions', 'showDescription', C.showDescription)}
+    ${togF('Tooltips', 'showHints', C.showHints)}
+    ${togF('Trust strip', 'showTrustStrip', C.showTrustStrip)}
+    ${C.showTrustStrip ? `<div class="fld" style="margin-top:8px"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" data-bind="trustText"></div>` : ''}
+  `) + sec('Embed code', '<polyline points="16 18 22 12 16 6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8 6 2 12 8 18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', true, `
+    <div class="emb"><span class="t">&lt;div</span> <span class="a">data-tg-widget</span>=<span class="v">"pricing"</span>
+  <span class="a">data-tg-id</span>=<span class="v">"${wid}"</span><span class="t">&gt;&lt;/div&gt;</span>
+<span class="t">&lt;script</span> <span class="a">src</span>=<span class="v">"https://tg-widgets.vercel.app/widget.js"</span><span class="t">&gt;&lt;/script&gt;</span></div>
+    <button class="tgse-btn" type="button" onclick="document.getElementById('btn-embed').click()" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Open embed code modal</button>
+    ${wId ? `<div style="margin-top:10px;font-size:11px;color:var(--tgse-ink-3)">Widget ID: <code style="background:var(--tgse-panel-3);padding:2px 6px;border-radius:4px;font-size:10px">${wId}</code></div>` : '<div style="margin-top:10px;font-size:11px;color:var(--tgse-ink-3)">Save to get your widget ID</div>'}
   `);
 }
 
-/* ═══ BIND ═══ */
-let openSecs={},openPlans={};
-function saveSecState(){document.querySelectorAll('.sec').forEach((s,i)=>{openSecs[tab+'_'+i]=s.classList.contains('open')});document.querySelectorAll('.pc').forEach((p,i)=>{openPlans[i]=p.classList.contains('open')})}
-function restoreSecState(){document.querySelectorAll('.sec').forEach((s,i)=>{if(openSecs[tab+'_'+i])s.classList.add('open')});document.querySelectorAll('.pc').forEach((p,i)=>{if(openPlans[i])p.classList.add('open')})}
+/* ── Section state preservation ───────────────────────────── */
+function saveSecState(){
+  document.querySelectorAll('.tgse-panel.is-active .sec').forEach((s,i) => { openSecs[tab+'_'+i] = s.classList.contains('open'); });
+  document.querySelectorAll('.pc').forEach((p,i) => { openPlans[i] = p.classList.contains('open'); });
+}
+function restoreSecState(){
+  document.querySelectorAll('.tgse-panel.is-active .sec').forEach((s,i) => { if(openSecs[tab+'_'+i]) s.classList.add('open'); });
+  document.querySelectorAll('.pc').forEach((p,i) => { if(openPlans[i]) p.classList.add('open'); });
+}
+
+/* ── Bind data-bind inputs ────────────────────────────────── */
 function bind(){
-  document.querySelectorAll('[data-bind]').forEach(el=>{
-    const ev=el.type==='range'?'input':'change';
-    el.addEventListener(ev,()=>{
+  document.querySelectorAll('[data-bind]').forEach(el => {
+    const ev = el.type === 'range' ? 'input' : 'change';
+    el.addEventListener(ev, () => {
       snap();
-      const k=el.dataset.bind;
-      if(k.includes('.')){const[a,b]=k.split('.');C[a][b]=el.value}else{C[k]=el.type==='range'?+el.value:el.value}
-      // For range sliders: update display without rebuilding sidebar
-      if(el.type==='range'){
-        const disp=el.closest('.sr')?.querySelector('.st span:last-child');
-        if(disp)disp.textContent=el.value+'px';
+      const k = el.dataset.bind;
+      if (k.includes('.')) { const [a,b] = k.split('.'); C[a][b] = el.value; }
+      else { C[k] = el.type === 'range' ? +el.value : el.value; }
+
+      if (el.type === 'range') {
+        const disp = el.closest('.sr')?.querySelector('.st span:last-child');
+        if (disp) disp.textContent = el.value + 'px';
+        renP();
+      } else if (el.type === 'color') {
+        const sw = el.closest('.sw'); if (sw) sw.querySelector('div').style.background = el.value;
+        const sp = el.closest('.cr')?.querySelector('.crr span'); if (sp) sp.textContent = el.value;
         renP();
       } else {
-        // For color pickers: update swatch without rebuilding
-        if(el.type==='color'){
-          const sw=el.closest('.sw');if(sw)sw.querySelector('div').style.background=el.value;
-          const sp=el.closest('.cr')?.querySelector('.crr span');if(sp)sp.textContent=el.value;
-          renP();
-        } else {
-          saveSecState();ren();renP();restoreSecState();
-        }
+        saveSecState(); ren(); renP(); restoreSecState();
       }
     });
   });
-  const z=document.getElementById('upZ');
-  if(z){z.ondragover=e=>{e.preventDefault();z.classList.add('dragover')};z.ondragleave=()=>z.classList.remove('dragover');z.ondrop=e=>{e.preventDefault();z.classList.remove('dragover');if(e.dataTransfer.files.length)procF(e.dataTransfer.files[0])}}
-  filtF('');
-  document.addEventListener('click',e=>{const fp=document.getElementById('fpk');if(fp&&!fp.contains(e.target))fp.classList.remove('open')});
+
+  // Spreadsheet drop zone
+  const z = document.getElementById('upZ');
+  if (z) {
+    z.ondragover = e => { e.preventDefault(); z.classList.add('dragover'); };
+    z.ondragleave = () => z.classList.remove('dragover');
+    z.ondrop = e => { e.preventDefault(); z.classList.remove('dragover'); if (e.dataTransfer.files.length) procF(e.dataTransfer.files[0]); };
+  }
+
+  // Mount font picker if Typography section is in DOM
+  const fpMount = document.getElementById('fontPickerMount');
+  if (fpMount && !fpMount.querySelector('.tgse-fp')) {
+    tgse.mountFontPicker('#fontPickerMount', C.fontFamily || 'DM Sans', (font) => {
+      snap(); C.fontFamily = font; renP();
+    });
+  }
 }
 
-/* ═══ FONTS ═══ */
-function filtF(q){const l=document.getElementById('fL');if(!l)return;const fs=q?FONTS.filter(f=>f.toLowerCase().includes(q.toLowerCase())):FONTS;l.innerHTML=fs.map(f=>`<div class="fo${C.fontFamily===f?' act':''}" onclick="pickF('${f}')" style="font-family:'${f}',sans-serif">${f}</div>`).join('')}
-function pickF(f){snap();C.fontFamily=f;document.getElementById('fpk').classList.remove('open');document.getElementById('fSrc').value='';ren();renP()}
-
-/* ═══ PREVIEW ═══ */
+/* ── Preview render ───────────────────────────────────────── */
 function renP(){
-  const m=document.getElementById('mt');const cfg={...C,theme:dark?'dark':'light'};
-  m.innerHTML='';const el=document.createElement('div');el.setAttribute('data-tg-widget','pricing');m.appendChild(el);
-  if(window.TGPricingWidget)new window.TGPricingWidget(el,cfg);
-  if(dm)setTimeout(buildOv,50);
+  const m = document.getElementById('widget-mount');
+  const cfg = { ...C, theme: dark ? 'dark' : 'light' };
+  m.innerHTML = '';
+  const el = document.createElement('div');
+  el.setAttribute('data-tg-widget', 'pricing');
+  m.appendChild(el);
+  if (window.TGPricingWidget) new window.TGPricingWidget(el, cfg);
+  if (dm) setTimeout(buildOv, 50);
 }
 
-function setDev(d,btn){document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('pvx').style.width=d==='mobile'?'375px':d==='tablet'?'768px':'100%';if(dm)setTimeout(buildOv,350)}
-function toggleTh(){dark=!dark;document.getElementById('thBtn').innerHTML=dark?'<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>Dark':'<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/></svg>Light';renP()}
-
-/* ═══════════════════════════════════════════════════════════════════
-   CLICK-TO-EDIT OVERLAY SYSTEM
-   ═══════════════════════════════════════════════════════════════════ */
-function toggleDM(){
-  dm=!dm;
-  const btn=document.getElementById('dmBtn');btn.classList.toggle('on',dm);
-  const wrap=document.getElementById('ovWrap');wrap.classList.toggle('active',dm);
-  if(dm){buildOv();toast('Design Mode ON — click any element','ok')}else{clearOv();closePop()}
-}
-
-function clearOv(){document.getElementById('ovWrap').innerHTML='';closePop()}
+/* ============================================================
+   DESIGN MODE — click-to-edit overlay system
+   ============================================================ */
+function clearOv(){ document.getElementById('ovWrap').innerHTML = ''; closePop(); }
 
 function buildOv(){
-  const wrap=document.getElementById('ovWrap');wrap.innerHTML='';
-  const container=document.getElementById('pvx');
-  const mountEl=document.getElementById('mt').firstElementChild;
-  if(!mountEl||!mountEl.shadowRoot)return;
-  const shadow=mountEl.shadowRoot;
-  const cRect=container.getBoundingClientRect();
+  const wrap = document.getElementById('ovWrap');
+  wrap.innerHTML = '';
+  const container = document.getElementById('pv-frame');
+  const mountEl = document.getElementById('widget-mount').firstElementChild;
+  if (!mountEl || !mountEl.shadowRoot) return;
+  const shadow = mountEl.shadowRoot;
+  const cRect = container.getBoundingClientRect();
 
-  function spot(el,label,type,data){
-    if(!el)return;
-    const r=el.getBoundingClientRect();
-    const div=document.createElement('div');div.className='ov-spot';
-    div.style.cssText=`left:${r.left-cRect.left-2}px;top:${r.top-cRect.top-2}px;width:${r.width+4}px;height:${r.height+4}px`;
-    div.innerHTML=`<span class="ov-label">${label}</span>`;
-    div.onclick=(e)=>{e.stopPropagation();openPop(type,data,r.left-cRect.left,r.top-cRect.top+r.height+8)};
+  function spot(el, label, type, data){
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const div = document.createElement('div');
+    div.className = 'ov-spot';
+    div.style.cssText = `left:${r.left-cRect.left-2}px;top:${r.top-cRect.top-2}px;width:${r.width+4}px;height:${r.height+4}px`;
+    div.innerHTML = `<span class="ov-label">${label}</span>`;
+    div.onclick = (e) => { e.stopPropagation(); openPop(type, data, r.left-cRect.left, r.top-cRect.top + r.height + 8); };
     wrap.appendChild(div);
   }
 
-  // Header
-  spot(shadow.querySelector('.tgp-title'),'Title','text',{path:'header.title',label:'Title'});
-  spot(shadow.querySelector('.tgp-subtitle'),'Subtitle','text',{path:'header.subtitle',label:'Subtitle'});
+  spot(shadow.querySelector('.tgp-title'), 'Title', 'text', { path: 'header.title', label: 'Title' });
+  spot(shadow.querySelector('.tgp-subtitle'), 'Subtitle', 'text', { path: 'header.subtitle', label: 'Subtitle' });
+  spot(shadow.querySelector('.tgp-toggle-wrap'), 'Billing Toggle', 'toggle', {});
 
-  // Toggle
-  spot(shadow.querySelector('.tgp-toggle-wrap'),'Billing Toggle','toggle',{});
+  shadow.querySelectorAll('.tgp-card').forEach((card, i) => {
+    if (!C.plans[i]) return;
+    spot(card.querySelector('.tgp-plan-name'), `Plan ${i+1}: Name`, 'text', { path: `plans.${i}.name`, label: 'Plan Name' });
+    spot(card.querySelector('.tgp-plan-desc'), `Plan ${i+1}: Description`, 'text', { path: `plans.${i}.description`, label: 'Description' });
+    const priceEl = card.querySelector('.tgp-price'); if (priceEl) spot(priceEl, `Plan ${i+1}: Price`, 'price', { planIdx: i });
+    const ctaEl = card.querySelector('.tgp-cta'); if (ctaEl) spot(ctaEl, `Plan ${i+1}: Button`, 'button', { planIdx: i });
+    const badge = card.querySelector('.tgp-badge'); if (badge) spot(badge, 'Badge', 'badge', { planIdx: i });
 
-  // Cards
-  shadow.querySelectorAll('.tgp-card').forEach((card,i)=>{
-    if(!C.plans[i])return;
-    spot(card.querySelector('.tgp-plan-name'),`Plan ${i+1}: Name`,'text',{path:`plans.${i}.name`,label:'Plan Name'});
-    spot(card.querySelector('.tgp-plan-desc'),`Plan ${i+1}: Description`,'text',{path:`plans.${i}.description`,label:'Description'});
-    const priceEl=card.querySelector('.tgp-price');
-    if(priceEl)spot(priceEl,`Plan ${i+1}: Price`,'price',{planIdx:i});
-    const ctaEl=card.querySelector('.tgp-cta');
-    if(ctaEl)spot(ctaEl,`Plan ${i+1}: Button`,'button',{planIdx:i});
-    const badge=card.querySelector('.tgp-badge');
-    if(badge)spot(badge,`Badge`,'badge',{planIdx:i});
-
-    card.querySelectorAll('.tgp-feature').forEach((feat,fi)=>{
-      if(!C.plans[i].features[fi])return;
-      spot(feat,`Feature: ${C.plans[i].features[fi].text.slice(0,20)}`,'feature',{planIdx:i,featIdx:fi});
+    card.querySelectorAll('.tgp-feature').forEach((feat, fi) => {
+      if (!C.plans[i].features[fi]) return;
+      spot(feat, `Feature: ${C.plans[i].features[fi].text.slice(0,20)}`, 'feature', { planIdx: i, featIdx: fi });
     });
   });
 
-  // Trust
-  spot(shadow.querySelector('.tgp-trust'),'Trust Strip','trust',{});
+  spot(shadow.querySelector('.tgp-trust'), 'Trust Strip', 'trust', {});
 }
 
-/* ═══ POPOVER ═══ */
-function openPop(type,data,x,y){
-  const pop=document.getElementById('popover');
-  let html=`<div class="pop-title"><span>${type.toUpperCase()}</span><button class="pop-close" onclick="closePop()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
+function openPop(type, data, x, y){
+  const pop = document.getElementById('popover');
+  let html = `<div class="pop-title"><span>${type.toUpperCase()}</span><button class="pop-close" type="button" onclick="closePop()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
 
-  if(type==='text'){
-    const val=getPath(data.path);
-    html+=`<div class="fld"><label class="fl">${data.label}</label><input type="text" value="${esc(val)}" oninput="snap();setPath('${data.path}',this.value);renP()"></div>`;
-  }
-  else if(type==='price'){
-    const p=C.plans[data.planIdx];
-    html+=`<div class="pg"><div class="fld"><label class="fl">Monthly</label><input type="number" value="${p.monthlyPrice}" oninput="snap();C.plans[${data.planIdx}].monthlyPrice=+this.value;renP()"></div>
-    <div class="fld"><label class="fl">Yearly</label><input type="number" value="${p.yearlyPrice}" oninput="snap();C.plans[${data.planIdx}].yearlyPrice=+this.value;renP()"></div></div>
-    <div class="fld"><label class="fl">Currency</label><select onchange="snap();C.plans[${data.planIdx}].currency=this.value;renP()">${['£','$','€','A$','C$'].map(c=>`<option${(p.currency||'£')===c?' selected':''}>${c}</option>`).join('')}</select></div>`;
-  }
-  else if(type==='button'){
-    const p=C.plans[data.planIdx];
-    html+=`<div class="fld"><label class="fl">Button Text</label><input type="text" value="${esc(p.cta)}" oninput="snap();C.plans[${data.planIdx}].cta=this.value;renP()"></div>
-    <div class="fld"><label class="fl">URL</label><input type="url" value="${esc(p.ctaUrl||'')}" oninput="C.plans[${data.planIdx}].ctaUrl=this.value" placeholder="https://"></div>
-    <div class="pg"><div class="fld"><label class="fl">Style</label><select><option>Filled</option><option>Outline</option></select></div>
-    <div class="fld"><label class="fl">Radius</label><input type="range" min="4" max="24" value="${C.borderRadius}" style="margin-top:6px"></div></div>`;
-  }
-  else if(type==='badge'){
-    const p=C.plans[data.planIdx];
-    html+=`<div class="fld"><label class="fl">Badge Text</label><input type="text" value="${esc(p.badge)}" oninput="snap();C.plans[${data.planIdx}].badge=this.value;renP()"></div>
-    ${togF('Show badge','showBadge',C.showBadge)}`;
-  }
-  else if(type==='feature'){
-    const f=C.plans[data.planIdx].features[data.featIdx];
-    html+=`<div class="fld"><label class="fl">Feature</label><input type="text" value="${esc(f.text)}" oninput="snap();C.plans[${data.planIdx}].features[${data.featIdx}].text=this.value;renP()"></div>
-    <div class="fld"><label class="fl">Tooltip Hint</label><input type="text" value="${esc(f.hint||'')}" oninput="C.plans[${data.planIdx}].features[${data.featIdx}].hint=this.value;renP()" placeholder="Optional hover tooltip"></div>
-    ${togF(`Included','plans[${data.planIdx}].features[${data.featIdx}].included`,f.included)}
-    <button class="ab db" style="margin-top:6px" onclick="snap();C.plans[${data.planIdx}].features.splice(${data.featIdx},1);closePop();ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Remove</button>`;
-  }
-  else if(type==='toggle'){
-    html+=`${togF('Show toggle','showToggle',C.showToggle)}
-    <div class="fld"><label class="fl">Savings label</label><input type="text" value="${esc(C.savingsLabel)}" oninput="snap();C.savingsLabel=this.value;renP()"></div>`;
-  }
-  else if(type==='trust'){
-    html+=`<div class="fld"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" oninput="snap();C.trustText=this.value;renP()"></div>
-    ${togF('Show trust strip','showTrustStrip',C.showTrustStrip)}`;
+  if (type === 'text') {
+    const val = getPath(data.path);
+    html += `<div class="fld"><label class="fl">${data.label}</label><input type="text" value="${esc(val)}" oninput="snap();setPath('${data.path}',this.value);renP()"></div>`;
+  } else if (type === 'price') {
+    const p = C.plans[data.planIdx];
+    html += `<div class="pg"><div class="fld"><label class="fl">Monthly</label><input type="number" value="${p.monthlyPrice}" oninput="snap();C.plans[${data.planIdx}].monthlyPrice=+this.value;renP()"></div>
+      <div class="fld"><label class="fl">Yearly</label><input type="number" value="${p.yearlyPrice}" oninput="snap();C.plans[${data.planIdx}].yearlyPrice=+this.value;renP()"></div></div>
+      <div class="fld"><label class="fl">Currency</label><select onchange="snap();C.plans[${data.planIdx}].currency=this.value;renP()">${['£','$','€','A$','C$'].map(c=>`<option${(p.currency||'£')===c?' selected':''}>${c}</option>`).join('')}</select></div>`;
+  } else if (type === 'button') {
+    const p = C.plans[data.planIdx];
+    html += `<div class="fld"><label class="fl">Button text</label><input type="text" value="${esc(p.cta)}" oninput="snap();C.plans[${data.planIdx}].cta=this.value;renP()"></div>
+      <div class="fld"><label class="fl">URL</label><input type="url" value="${esc(p.ctaUrl||'')}" oninput="C.plans[${data.planIdx}].ctaUrl=this.value" placeholder="https://"></div>`;
+  } else if (type === 'badge') {
+    const p = C.plans[data.planIdx];
+    html += `<div class="fld"><label class="fl">Badge text</label><input type="text" value="${esc(p.badge)}" oninput="snap();C.plans[${data.planIdx}].badge=this.value;renP()"></div>${togF('Show badge','showBadge',C.showBadge)}`;
+  } else if (type === 'feature') {
+    const f = C.plans[data.planIdx].features[data.featIdx];
+    html += `<div class="fld"><label class="fl">Feature</label><input type="text" value="${esc(f.text)}" oninput="snap();C.plans[${data.planIdx}].features[${data.featIdx}].text=this.value;renP()"></div>
+      <div class="fld"><label class="fl">Tooltip hint</label><input type="text" value="${esc(f.hint||'')}" oninput="C.plans[${data.planIdx}].features[${data.featIdx}].hint=this.value;renP()" placeholder="Optional hover tooltip"></div>
+      ${togF('Included', `plans[${data.planIdx}].features[${data.featIdx}].included`, f.included)}
+      <button class="ab db" type="button" style="margin-top:8px" onclick="snap();C.plans[${data.planIdx}].features.splice(${data.featIdx},1);closePop();ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Remove</button>`;
+  } else if (type === 'toggle') {
+    html += `${togF('Show toggle','showToggle',C.showToggle)}
+      <div class="fld"><label class="fl">Savings label</label><input type="text" value="${esc(C.savingsLabel)}" oninput="snap();C.savingsLabel=this.value;renP()"></div>`;
+  } else if (type === 'trust') {
+    html += `<div class="fld"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" oninput="snap();C.trustText=this.value;renP()"></div>
+      ${togF('Show trust strip','showTrustStrip',C.showTrustStrip)}`;
   }
 
-  pop.innerHTML=html;
-  // Position fixed relative to viewport
-  const mountEl=document.getElementById('mt').firstElementChild;
-  if(!mountEl||!mountEl.shadowRoot){pop.classList.add('show');return}
-  // Find the clicked element's viewport position from the spot click coords
-  const pvxRect=document.getElementById('pvx').getBoundingClientRect();
-  const popX=pvxRect.left+x;
-  const popY=pvxRect.top+y;
-  // Keep within viewport
-  const vw=window.innerWidth,vh=window.innerHeight;
-  pop.style.left=Math.min(Math.max(popX,8),vw-330)+'px';
-  pop.style.top=Math.min(Math.max(popY,8),vh-300)+'px';
+  pop.innerHTML = html;
+  const pvxRect = document.getElementById('pv-frame').getBoundingClientRect();
+  const popX = pvxRect.left + x;
+  const popY = pvxRect.top + y;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  pop.style.left = Math.min(Math.max(popX, 8), vw - 330) + 'px';
+  pop.style.top = Math.min(Math.max(popY, 8), vh - 300) + 'px';
   pop.classList.add('show');
 }
 
-function closePop(){document.getElementById('popover').classList.remove('show')}
-function getPath(p){return p.split('.').reduce((o,k)=>o&&o[k],C)}
-function setPath(p,v){const keys=p.split('.');let o=C;for(let i=0;i<keys.length-1;i++)o=o[keys[i]];o[keys[keys.length-1]]=v}
+function closePop(){ document.getElementById('popover').classList.remove('show'); }
+function getPath(p){ return p.split('.').reduce((o,k)=>o&&o[k], C); }
+function setPath(p, v){ const keys = p.split('.'); let o = C; for (let i=0; i<keys.length-1; i++) o = o[keys[i]]; o[keys[keys.length-1]] = v; }
 
-// Close popover on outside click
-document.addEventListener('click',e=>{
-  const pop=document.getElementById('popover');
-  if(pop.classList.contains('show')&&!e.target.closest('.pop')&&!e.target.closest('.ov-spot')){closePop()}
+document.addEventListener('click', e => {
+  const pop = document.getElementById('popover');
+  if (pop.classList.contains('show') && !e.target.closest('.pop') && !e.target.closest('.ov-spot')) closePop();
 });
-// Rebuild overlays on scroll/resize
-document.getElementById('pvf').addEventListener('scroll',()=>{if(dm)buildOv()});
-window.addEventListener('resize',()=>{if(dm)setTimeout(buildOv,100)});
+document.querySelector('.tgse-canvas').addEventListener('scroll', () => { if (dm) buildOv(); });
+window.addEventListener('resize', () => { if (dm) setTimeout(buildOv, 100); });
 
-/* ═══ PLANS ═══ */
-function addP(){snap();C.plans.push({name:'New Plan',description:'Describe this plan',monthlyPrice:49,yearlyPrice:490,currency:C.plans[0]?.currency||'£',icon:'Zap',highlighted:false,badge:'',cta:'Get Started',ctaUrl:'#',features:[{text:'Feature one',included:true,hint:''}]});ren();renP()}
+/* ── Plans ────────────────────────────────────────────────── */
+function addPlan(){
+  snap();
+  C.plans.push({ name:'New Plan', description:'Describe this plan', monthlyPrice:49, yearlyPrice:490, currency:C.plans[0]?.currency||'£', icon:'Zap', highlighted:false, badge:'', cta:'Get Started', ctaUrl:'#', features:[{text:'Feature one',included:true,hint:''}] });
+  ren(); renP();
+}
 
-/* ═══ SPREADSHEET ═══ */
-function hFile(inp){if(inp.files.length)procF(inp.files[0]);inp.value=''}
-function procF(file){const r=new FileReader();r.onload=function(e){try{const wb=XLSX.read(e.target.result,{type:'binary'}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws);if(!rows.length){toast('No data','err');return}snap();C.plans=rows.map(row=>{const feats=[];Object.keys(row).filter(k=>k.toLowerCase().startsWith('feature')).forEach(col=>{let v=String(row[col]||'').trim();if(!v)return;let inc=true,hint='';if(v.startsWith('-')||v.startsWith('~')){inc=false;v=v.slice(1).trim()}else if(v.startsWith('+')){v=v.slice(1).trim()}if(v.includes('|')){const p=v.split('|');v=p[0].trim();hint=p[1].trim()}feats.push({text:v,included:inc,hint})});if(row.Features&&!feats.length)String(row.Features).split(/[;\n]/).forEach(line=>{let v=line.trim();if(!v)return;let inc=true,hint='';if(v.startsWith('-')){inc=false;v=v.slice(1).trim()}else if(v.startsWith('+')){v=v.slice(1).trim()}if(v.includes('|')){const p=v.split('|');v=p[0].trim();hint=p[1].trim()}feats.push({text:v,included:inc,hint})});return{name:row['Plan Name']||row.Name||row.Plan||'Untitled',description:row.Description||'',monthlyPrice:parseInt(row['Monthly Price']||row.Monthly||0),yearlyPrice:parseInt(row['Yearly Price']||row.Yearly||0),currency:row.Currency||'£',icon:row.Icon||'Zap',highlighted:String(row.Featured||'').toLowerCase()==='yes',badge:row.Badge||(String(row.Featured||'').toLowerCase()==='yes'?'Most Popular':''),cta:row.CTA||row['CTA Text']||'Get Started',ctaUrl:row['CTA URL']||'#',features:feats.length?feats:[{text:'Feature',included:true,hint:''}]}});ren();renP();toast(`Imported ${C.plans.length} plans`,'ok')}catch(e){toast('Error reading file','err')}};r.readAsBinaryString(file)}
-function dlTpl(){const h=['Plan Name','Description','Monthly Price','Yearly Price','Currency','CTA','CTA URL','Featured','Badge','Icon','Feature 1','Feature 2','Feature 3','Feature 4','Feature 5','Feature 6'];const ex=[['Starter','Basic',29,290,'£','Get Started','#','no','','Zap','Bookable website','5 suppliers','Email support','-AI chatbot','-Custom branding',''],['Pro','Grow',59,590,'£','Start Trial','#','yes','Most Popular','Star','+Bookable website','+25 suppliers|Niche ops','+Priority support|4hr','+AI chatbot','-Custom branding',''],['Enterprise','Full',99,990,'£','Contact Sales','#','no','','Crown','+Bookable website','+Unlimited suppliers','+Dedicated manager','+AI chatbot','+Custom branding|White-label','']];const ws=XLSX.utils.aoa_to_sheet([h,...ex]),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plans');XLSX.writeFile(wb,'pricing-template.xlsx')}
+/* ── Spreadsheet ──────────────────────────────────────────── */
+function hFile(inp){ if (inp.files.length) procF(inp.files[0]); inp.value = ''; }
+function procF(file){
+  const r = new FileReader();
+  r.onload = function(e){
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+      if (!rows.length) { tgse.toast('No data found in spreadsheet', 'err'); return; }
+      snap();
+      C.plans = rows.map(row => {
+        const feats = [];
+        Object.keys(row).filter(k => k.toLowerCase().startsWith('feature')).forEach(col => {
+          let v = String(row[col]||'').trim();
+          if (!v) return;
+          let inc = true, hint = '';
+          if (v.startsWith('-') || v.startsWith('~')) { inc = false; v = v.slice(1).trim(); }
+          else if (v.startsWith('+')) { v = v.slice(1).trim(); }
+          if (v.includes('|')) { const p = v.split('|'); v = p[0].trim(); hint = p[1].trim(); }
+          feats.push({ text: v, included: inc, hint });
+        });
+        if (row.Features && !feats.length) {
+          String(row.Features).split(/[;\n]/).forEach(line => {
+            let v = line.trim(); if (!v) return;
+            let inc = true, hint = '';
+            if (v.startsWith('-')) { inc = false; v = v.slice(1).trim(); }
+            else if (v.startsWith('+')) { v = v.slice(1).trim(); }
+            if (v.includes('|')) { const p = v.split('|'); v = p[0].trim(); hint = p[1].trim(); }
+            feats.push({ text: v, included: inc, hint });
+          });
+        }
+        return {
+          name: row['Plan Name']||row.Name||row.Plan||'Untitled',
+          description: row.Description||'',
+          monthlyPrice: parseInt(row['Monthly Price']||row.Monthly||0),
+          yearlyPrice: parseInt(row['Yearly Price']||row.Yearly||0),
+          currency: row.Currency||'£',
+          icon: row.Icon||'Zap',
+          highlighted: String(row.Featured||'').toLowerCase()==='yes',
+          badge: row.Badge||(String(row.Featured||'').toLowerCase()==='yes'?'Most Popular':''),
+          cta: row.CTA||row['CTA Text']||'Get Started',
+          ctaUrl: row['CTA URL']||'#',
+          features: feats.length ? feats : [{ text:'Feature', included:true, hint:'' }]
+        };
+      });
+      ren(); renP();
+      tgse.toast(`Imported ${C.plans.length} plans`, 'ok');
+    } catch (e) {
+      tgse.toast('Error reading file', 'err');
+    }
+  };
+  r.readAsBinaryString(file);
+}
+function dlTpl(){
+  const h = ['Plan Name','Description','Monthly Price','Yearly Price','Currency','CTA','CTA URL','Featured','Badge','Icon','Feature 1','Feature 2','Feature 3','Feature 4','Feature 5','Feature 6'];
+  const ex = [
+    ['Starter','Basic',29,290,'£','Get Started','#','no','','Zap','Bookable website','5 suppliers','Email support','-AI chatbot','-Custom branding',''],
+    ['Pro','Grow',59,590,'£','Start Trial','#','yes','Most Popular','Star','+Bookable website','+25 suppliers|Niche ops','+Priority support|4hr','+AI chatbot','-Custom branding',''],
+    ['Enterprise','Full',99,990,'£','Contact Sales','#','no','','Crown','+Bookable website','+Unlimited suppliers','+Dedicated manager','+AI chatbot','+Custom branding|White-label','']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([h, ...ex]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Plans');
+  XLSX.writeFile(wb, 'pricing-template.xlsx');
+}
 
-/* ═══ AI ═══ */
-function showAI(){closeM();document.getElementById('aiM').classList.add('open');document.getElementById('aiP').focus()}
-function getAuthToken(){try{return JSON.parse(sessionStorage.getItem('tgw_session'))?.token||''}catch{return''}}
-function authH(){const t=getAuthToken();const h={'Content-Type':'application/json'};if(t)h['Authorization']='Bearer '+t;return h}
-function ensureAuth(){try{const s=JSON.parse(sessionStorage.getItem('tgw_session')||'null');if(!s||!s.token||!s.user){location.href='/';return false}if(s.timestamp&&(Date.now()-s.timestamp)>86400000){sessionStorage.removeItem('tgw_session');location.href='/';return false}return true}catch(e){location.href='/';return false}}
+/* ── AI builder ───────────────────────────────────────────── */
+async function generateAI(){
+  const prompt = document.getElementById('aiPrompt').value.trim();
+  if (!prompt) return;
+  const btn = document.getElementById('aiGenerate');
+  const err = document.getElementById('aiErr');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spin"></span> Generating…';
+  err.style.display = 'none';
+  try {
+    const r = await fetch('/api/widget-ai', { method: 'POST', headers: tgse.authHeaders(), body: JSON.stringify({ prompt }) });
+    if (!r.ok) { const d = await r.json().catch(()=>({})); throw new Error(d.error || 'Failed'); }
+    const d = await r.json();
+    snap();
+    if (d.plans) C.plans = d.plans;
+    if (d.header) C.header = d.header;
+    if (d.brandColor) C.brandColor = d.brandColor;
+    if (d.accentColor) C.accentColor = d.accentColor;
+    if (d.trustText) C.trustText = d.trustText;
+    closeModal('aiModal');
+    ren(); renP();
+    tgse.toast('AI generated', 'ok');
+  } catch (e) {
+    err.textContent = e.message || 'Generation failed';
+    err.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>Generate';
+}
 
-async function genAI(){const prompt=document.getElementById('aiP').value.trim();if(!prompt)return;const btn=document.getElementById('aiB'),err=document.getElementById('aiE');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Generating...';err.style.display='none';try{const r=await fetch('/api/widget-ai',{method:'POST',headers:authH(),body:JSON.stringify({prompt})});if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.error||'Failed')}const d=await r.json();snap();if(d.plans)C.plans=d.plans;if(d.header)C.header=d.header;if(d.brandColor)C.brandColor=d.brandColor;if(d.accentColor)C.accentColor=d.accentColor;if(d.trustText)C.trustText=d.trustText;closeM();ren();renP();toast('AI generated','ok')}catch(e){err.textContent=e.message||'Generation failed';err.style.display='block'}btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;margin-right:4px;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>Generate'}
+/* ── Templates ────────────────────────────────────────────── */
+function showTplModal(){
+  const list = document.getElementById('tplList');
+  list.innerHTML = `<div class="tpc" onclick="closeModal('tplModal');setTimeout(()=>document.getElementById('btn-ai').click(),100)" style="border-style:dashed;border-color:var(--tgse-accent);background:var(--tgse-brand-tint)">
+    <div class="tpi" style="background:linear-gradient(135deg,var(--tgse-brand),var(--tgse-accent))">
+      <svg viewBox="0 0 24 24" style="stroke:#fff"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>
+    </div>
+    <div class="tpn"><strong>Build with AI</strong><small>Describe what you need</small></div>
+  </div>` + TPL.map((t,i) => `<div class="tpc" onclick="applyTemplate(${i})">
+    <div class="tpi"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+    <div class="tpn"><strong>${t.n}</strong><small>${t.d}</small></div>
+  </div>`).join('');
+  openModal('tplModal');
+}
+function applyTemplate(i){
+  snap();
+  C.plans = JSON.parse(JSON.stringify(TPL[i].plans));
+  C.header = { ...TPL[i].hd };
+  closeModal('tplModal');
+  ren(); renP();
+  tgse.toast('Template applied', 'ok');
+}
 
-/* ═══ TEMPLATES ═══ */
-function showTpl(){document.getElementById('tpL').innerHTML=TPL.map((t,i)=>`<div class="tpc" onclick="apTpl(${i})"><div class="tpi" style="background:var(--bg)"><svg viewBox="0 0 24 24" style="stroke:var(--mt)"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div><div class="tpn"><strong>${t.n}</strong><small>${t.d}</small></div></div>`).join('');document.getElementById('tpM').classList.add('open')}
-function apTpl(i){snap();C.plans=JSON.parse(JSON.stringify(TPL[i].plans));C.header={...TPL[i].hd};closeM();ren();renP();toast('Template applied','ok')}
+/* ── Modal helpers (Pricing-specific modals) ──────────────── */
+function openModal(id){ document.getElementById(id).classList.add('is-open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('is-open'); document.body.style.overflow = ''; }
+document.querySelectorAll('[data-close-modal]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+});
+document.querySelectorAll('.tgse-modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+});
+// Chips inside the AI modal — fill prompt
+document.querySelectorAll('#aiModal .chip').forEach(chip => {
+  chip.addEventListener('click', () => { document.getElementById('aiPrompt').value = chip.textContent; });
+});
+document.getElementById('aiGenerate').addEventListener('click', generateAI);
 
-/* ═══ SAVE ═══ */
-async function saveW(){try{const name=document.getElementById('wName').value||'Untitled';const body={config:C,name,widgetType:'Pricing Table'};if(wId)body.widgetId=wId;const r=await fetch('/api/widget-config',{method:'POST',headers:authH(),body:JSON.stringify(body)});if(r.status===401){sessionStorage.removeItem('tgw_session');toast('Session expired — redirecting to login','err');setTimeout(()=>location.href='/',1200);return}const d=await r.json();if(!r.ok){toast(d.error||'Save failed','err');return}if(d.widgetId){wId=d.widgetId;const u=new URL(location);u.searchParams.set('id',wId);history.replaceState(null,'',u)}ren();toast('Saved!','ok')}catch(e){toast('Save failed','err')}}
+/* ── Theme toggle button text ─────────────────────────────── */
+function updateThemeButtonLabel(){
+  const btn = document.getElementById('btn-theme');
+  if (!btn) return;
+  // Replace the text node (last child) with current state
+  const labelText = dark ? 'Dark' : 'Theme';
+  const svg = btn.querySelector('svg');
+  btn.innerHTML = '';
+  btn.appendChild(svg);
+  btn.appendChild(document.createTextNode(' ' + labelText));
+}
 
-/* ═══ UTILS ═══ */
-function closeM(){document.querySelectorAll('.mbg').forEach(m=>m.classList.remove('open'))}
-function cpEmb(){const c=`<div data-tg-widget="pricing" data-tg-id="${wId||'YOUR_WIDGET_ID'}"></div>\n<script src="https://tg-widgets.vercel.app/widget.js"><\/script>`;navigator.clipboard.writeText(c).then(()=>toast('Copied!','ok'))}
-function toast(m,t){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+t+' show';setTimeout(()=>e.classList.remove('show'),3000)}
-document.querySelectorAll('.mbg').forEach(m=>m.onclick=e=>{if(e.target===m)closeM()});
+/* ── Keyboard shortcuts (widget-specific) ─────────────────── */
+document.addEventListener('keydown', e => {
+  const mod = e.metaKey || e.ctrlKey;
+  if (mod && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  if (mod && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+  if (!mod && !e.target.closest('input,textarea,select')) {
+    if (e.key === 'Escape') closePop();
+  }
+});
+
+/* ── Load existing widget if URL has ?id ──────────────────── */
+async function loadWidget(id){
+  try {
+    const r = await fetch('/api/widget-config?id=' + encodeURIComponent(id));
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    Object.assign(C, d);
+    document.getElementById('name-input').value = C.header?.title || '';
+    snap(); ren(); renP();
+    tgse.toast('Loaded', 'ok');
+  } catch (e) {
+    C.plans = JSON.parse(JSON.stringify(TPL[0].plans));
+    snap(); ren(); renP();
+  }
+}
+
+/* ── Boot ─────────────────────────────────────────────────── */
+function boot(){
+  if (!tgse.isLoggedIn()) {
+    // Shell will show its login overlay; we'll boot again after login via onLoginSuccess
+    return;
+  }
+  const params = new URLSearchParams(location.search);
+  wId = params.get('id');
+  if (wId) {
+    loadWidget(wId);
+  } else {
+    C.plans = JSON.parse(JSON.stringify(TPL[0].plans));
+    C.header = { ...TPL[0].hd };
+    snap(); ren(); renP();
+  }
+}
+
+/* ── Initialise the shell ─────────────────────────────────── */
+shell = tgse.init({
+  widgetType: 'Pricing Table',
+  widgetTag: 'pricing',
+  scriptFile: 'widget.js',
+
+  getConfig: () => C,
+  setConfig: (c) => { Object.assign(C, c); ren(); renP(); },
+
+  onAIBuild: () => openModal('aiModal'),
+  onTemplates: () => showTplModal(),
+
+  onThemeToggle: () => {
+    dark = !dark;
+    updateThemeButtonLabel();
+    renP();
+  },
+  onDesignMode: (isOn) => {
+    dm = isOn;
+    const wrap = document.getElementById('ovWrap');
+    wrap.classList.toggle('active', dm);
+    if (dm) { buildOv(); tgse.toast('Design mode on — click any element', 'ok'); }
+    else { clearOv(); closePop(); }
+  },
+  onTabChange: (newTab) => { tab = newTab; },
+  onLoginSuccess: () => boot(),
+});
+
+document.getElementById('name-input').addEventListener('input', () => snap());
+document.addEventListener('DOMContentLoaded', boot);
 </script>
-<script src="/widget.js"></script>
 </body>
 </html>
