@@ -36,6 +36,7 @@ import sendAgentEmail    from './_lib/routing/email.js';
 import sendAutoReply     from './_lib/routing/auto-reply.js';
 import sendWebhook       from './_lib/routing/webhook.js';
 import sendToGoogleSheets from './_lib/routing/google-sheets.js';
+import sendToAgentAirtable from './_lib/routing/airtable.js';
 
 // ---------- Config -----------------------------------------------------------
 
@@ -633,7 +634,7 @@ async function fanOutRouting({ form, payload, submissionId, reference, meta }) {
     { key: 'email',          always: true,  on: f[FORM_FIELDS.routingEmail],          handler: sendAgentEmail },
     { key: 'auto-reply',     always: false, on: f[FORM_FIELDS.routingEmailAutoReply], handler: sendAutoReply },
     { key: 'google-sheets',  always: false, on: f[FORM_FIELDS.routingGoogleSheets],   handler: sendToGoogleSheets },
-    { key: 'airtable',       always: false, on: f[FORM_FIELDS.routingAirtable],       loader:  () => import('./_lib/routing/airtable.js') },
+    { key: 'airtable',       always: false, on: f[FORM_FIELDS.routingAirtable],       handler: sendToAgentAirtable },
     { key: 'webhook',        always: false, on: f[FORM_FIELDS.routingWebhook],        handler: sendWebhook },
     { key: 'luna-chat',      always: false, on: f[FORM_FIELDS.routingLunaChat],       loader:  () => import('./_lib/routing/luna-chat.js') },
     { key: 'luna-marketing', always: false, on: f[FORM_FIELDS.routingLunaMarketing],  loader:  () => import('./_lib/routing/luna-marketing.js') },
