@@ -57,6 +57,8 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
+      min-height: 0;     /* allow inner .sb-body overflow:auto to actually scroll */
+      height: 100vh;     /* explicit height so flex children can clip past it */
     }
     .sb-top {
       display: flex; align-items: center; gap: 10px;
@@ -147,7 +149,8 @@
 
     /* Body — scrollable */
     .sb-body {
-      flex: 1;
+      flex: 1 1 0;
+      min-height: 0;
       overflow-y: auto;
       padding: 0 0 24px;
     }
