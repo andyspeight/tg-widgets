@@ -35,6 +35,7 @@
     { "source": "/editor-logos",        "destination": "/editor-logos.html" },
     { "source": "/demo-textfx",          "destination": "/demo-textfx.html" },
     { "source": "/editor-textfx",        "destination": "/editor-textfx.html" },
+    { "source": "/editor-test",         "destination": "/editor-test.html" },
     { "source": "/inbox-enquiry", "destination": "/inbox-enquiry.html" }
   ],
   "headers": [
