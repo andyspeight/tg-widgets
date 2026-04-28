@@ -925,11 +925,24 @@
                   <option value="message">Show expired message</option>
                   <option value="cta-only">Show CTA only</option>
                   <option value="hide">Hide widget</option>
+                  <option value="redirect">Redirect to URL</option>
                 </select>
               </div>
               <div class="field" id="expiryMessageWrap">
                 <span class="field-label">Expired message</span>
                 <input class="input" id="expiryMessage" maxlength="160" />
+              </div>
+              <div class="field" id="expiryRedirectWrap" hidden>
+                <span class="field-label">Redirect URL</span>
+                <input class="input" id="expiryRedirectUrl" maxlength="500" placeholder="https://…" />
+                <div class="field-help">Visitor is sent here when the timer hits zero. Same URL safety rules as the CTA — must start with https://, http://, /, or #.</div>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Keep counters visible</div>
+                  <div class="toggle-sub">Show frozen 00:00:00 digits above the expired message or CTA.</div>
+                </div>
+                <button class="toggle" data-toggle="keepCounters" type="button" aria-label="Keep counters visible after expiry"></button>
               </div>
             </div>
           </div>
@@ -968,6 +981,46 @@
                   <span class="field-label">Time</span>
                   <input class="input" type="time" id="repeatTime" />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec" id="bannerPlacementSec" hidden>
+            <button class="sec-head" type="button"><span class="sec-title">Banner placement</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="field">
+                <span class="field-label">Position</span>
+                <select class="select" id="bannerPosition">
+                  <option value="static">Static — sits in the page where you embed it</option>
+                  <option value="sticky-top">Sticky — pinned to top of viewport</option>
+                  <option value="sticky-bottom">Sticky — pinned to bottom of viewport</option>
+                </select>
+                <div class="field-help">Sticky bars stay visible as the page scrolls. Static is the default — Banner sits in normal page flow wherever it's embedded.</div>
+              </div>
+              <div class="toggle-row" id="bannerDismissibleRow">
+                <div>
+                  <div class="toggle-label">Allow visitors to dismiss</div>
+                  <div class="toggle-sub">Adds a × close button. Once dismissed, the bar stays hidden for that visitor across reloads.</div>
+                </div>
+                <button class="toggle" data-toggle="bannerDismissible" type="button" aria-label="Allow dismiss"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec">
+            <button class="sec-head" type="button"><span class="sec-title">Scheduled start</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Hide until a chosen date</div>
+                  <div class="toggle-sub">Set up the widget in advance — it stays invisible on the site until the start date passes.</div>
+                </div>
+                <button class="toggle" data-toggle="scheduledStartEnabled" type="button" aria-label="Enable scheduled start"></button>
+              </div>
+              <div class="field" id="scheduledStartWrap" hidden>
+                <span class="field-label">Appear on</span>
+                <input class="input" type="datetime-local" id="scheduledStartDate" />
+                <div class="field-help">Stored as UTC. Set this earlier than the target date — otherwise the widget will never show.</div>
               </div>
             </div>
           </div>
@@ -1152,7 +1205,14 @@
         heading: 'Sale ends in',
         subheading: '',
         cta: { text: 'Browse offers', url: 'https://example.com', openInNewTab: true },
-        expiry: { behaviour: 'message', message: 'This offer has now ended.' },
+        expiry: {
+          behaviour: 'message',
+          message: 'This offer has now ended.',
+          redirectUrl: '',
+          keepCounters: false
+        },
+        banner: { position: 'static', dismissible: false },
+        scheduledStart: null,
         display: { showDays: true, showHours: true, showMinutes: true, showSeconds: true },
         repeating: { enabled: false, frequency: 'weekly', dayOfWeek: 5, time: '17:00' },
         urgency: { enabled: true, thresholdHours: 24 },
@@ -1322,6 +1382,28 @@
       setToggle('wowRing',    w.finalMinuteRing);
       setToggle('wowAurora',  w.heroAurora);
       setToggle('wowDot',     w.bannerDot);
+
+      // Expiry — redirect URL and keep counters
+      document.getElementById('expiryRedirectUrl').value = cfg.expiry.redirectUrl || '';
+      document.getElementById('expiryRedirectWrap').toggleAttribute('hidden', cfg.expiry.behaviour !== 'redirect');
+      document.getElementById('expiryMessageWrap').style.display = cfg.expiry.behaviour === 'message' ? '' : 'none';
+      setToggle('keepCounters', !!cfg.expiry.keepCounters);
+
+      // Banner placement — only relevant for the banner layout
+      const banner = cfg.banner || { position: 'static', dismissible: false };
+      const showBannerPanel = cfg.layout === 'banner';
+      document.getElementById('bannerPlacementSec').toggleAttribute('hidden', !showBannerPanel);
+      document.getElementById('bannerPosition').value = banner.position || 'static';
+      setToggle('bannerDismissible', !!banner.dismissible);
+      // Dismissible row only matters when sticky — hide it for static
+      const dismissRow = document.getElementById('bannerDismissibleRow');
+      if (dismissRow) dismissRow.style.display = (banner.position === 'static') ? 'none' : '';
+
+      // Scheduled start
+      const hasSched = !!cfg.scheduledStart;
+      setToggle('scheduledStartEnabled', hasSched);
+      document.getElementById('scheduledStartWrap').toggleAttribute('hidden', !hasSched);
+      document.getElementById('scheduledStartDate').value = hasSched ? toLocalDateTimeInput(cfg.scheduledStart) : '';
     }
 
     function setToggle(name, on) {
@@ -1402,6 +1484,9 @@
         b.addEventListener('click', () => {
           cfg.layout = b.dataset.layout;
           document.querySelectorAll('#layoutGrid .layout-card').forEach(x => x.classList.toggle('is-active', x === b));
+          // Refresh hydrated UI so the Banner placement section appears or
+          // disappears based on the new layout.
+          hydrateUI();
           rebuild(); snapshot();
         });
       });
@@ -1465,6 +1550,21 @@
           if (k === 'wowRing')    { (cfg.wow = cfg.wow || {}).finalMinuteRing = on; }
           if (k === 'wowAurora')  { (cfg.wow = cfg.wow || {}).heroAurora      = on; }
           if (k === 'wowDot')     { (cfg.wow = cfg.wow || {}).bannerDot       = on; }
+          // v1.2.0 gap-closure toggles — guard the parent objects too
+          if (k === 'keepCounters') { (cfg.expiry = cfg.expiry || {}).keepCounters = on; }
+          if (k === 'bannerDismissible') { (cfg.banner = cfg.banner || { position: 'static' }).dismissible = on; }
+          if (k === 'scheduledStartEnabled') {
+            // On = default to 24h from now (a sensible "set this up tomorrow" placeholder).
+            // Off = null (always-visible).
+            if (on) {
+              cfg.scheduledStart = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            } else {
+              cfg.scheduledStart = null;
+            }
+            // Reflect input visibility immediately
+            document.getElementById('scheduledStartWrap').toggleAttribute('hidden', !on);
+            if (on) document.getElementById('scheduledStartDate').value = toLocalDateTimeInput(cfg.scheduledStart);
+          }
           rebuild(); snapshot();
         });
       });
@@ -1494,11 +1594,40 @@
       document.getElementById('ctaUrl').addEventListener('change', () => snapshot());
       document.getElementById('expiryBehaviour').addEventListener('change', (e) => {
         cfg.expiry.behaviour = e.target.value;
+        // Field visibility: message vs redirect URL — both might be wanted
+        // simultaneously across edits, but only one is shown at a time.
         document.getElementById('expiryMessageWrap').style.display = e.target.value === 'message' ? '' : 'none';
+        document.getElementById('expiryRedirectWrap').toggleAttribute('hidden', e.target.value !== 'redirect');
         rebuild(); snapshot();
       });
       document.getElementById('expiryMessage').addEventListener('input', (e) => { cfg.expiry.message = e.target.value; rebuild(); });
       document.getElementById('expiryMessage').addEventListener('change', () => snapshot());
+      document.getElementById('expiryRedirectUrl').addEventListener('input', (e) => {
+        (cfg.expiry = cfg.expiry || {}).redirectUrl = e.target.value;
+        rebuild();
+      });
+      document.getElementById('expiryRedirectUrl').addEventListener('change', () => snapshot());
+
+      // Banner placement
+      document.getElementById('bannerPosition').addEventListener('change', (e) => {
+        (cfg.banner = cfg.banner || { dismissible: false }).position = e.target.value;
+        // Hide dismissible toggle when static — it has no effect there.
+        const dismissRow = document.getElementById('bannerDismissibleRow');
+        if (dismissRow) dismissRow.style.display = (e.target.value === 'static') ? 'none' : '';
+        rebuild(); snapshot();
+      });
+
+      // Scheduled start date input — only fires when the toggle is on
+      document.getElementById('scheduledStartDate').addEventListener('change', (e) => {
+        const v = e.target.value;
+        if (v) {
+          const local = new Date(v);
+          if (!isNaN(local.getTime())) {
+            cfg.scheduledStart = local.toISOString();
+            rebuild(); snapshot();
+          }
+        }
+      });
       document.getElementById('repeatFreq').addEventListener('change', (e) => {
         cfg.repeating.frequency = e.target.value;
         document.getElementById('repeatDayWrap').style.display = e.target.value === 'weekly' ? '' : 'none';
@@ -1768,7 +1897,7 @@
         if (data && data.config) {
           cfg = Object.assign(defaultsCfg(), data.config);
           // Deep merge nested keys
-          ['cta','expiry','display','repeating','urgency','animation','wow','colours'].forEach(k => {
+          ['cta','expiry','banner','display','repeating','urgency','animation','wow','colours'].forEach(k => {
             cfg[k] = Object.assign(defaultsCfg()[k], data.config[k] || {});
           });
           widgetId = data.id || id;
