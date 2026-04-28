@@ -1362,14 +1362,14 @@ function loadMiniPreview(w) {
 /* ═══ AUTH ═══ */
 let userData = null;
 try {
-  const sess = JSON.parse(sessionStorage.getItem('tgw_session'));
+  const sess = JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'));
   // Check expiry (24 hours)
   if (sess && sess.timestamp && (Date.now() - sess.timestamp) < 86400000) {
     userData = sess.user; signedIn = true; userEmail = sess.user?.email || '';
-  } else { sessionStorage.removeItem('tgw_session'); }
+  } else { localStorage.removeItem('tgw_session'); sessionStorage.removeItem('tgw_session'); }
 } catch(e) {}
 
-function getAuthToken() { try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; } }
+function getAuthToken() { try { return JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; } }
 function authHeaders() { const t = getAuthToken(); return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }; }
 
 function openSignIn(){document.getElementById('signInModal').classList.add('open');document.getElementById('signEmail').focus()}
@@ -1391,7 +1391,8 @@ async function doSignIn(){
     if (!r.ok) { errEl.textContent = d.error || 'Sign in failed'; errEl.style.display='block'; return; }
 
     userData = d.user;
-    sessionStorage.setItem('tgw_session', JSON.stringify({ user: d.user, token: d.token, timestamp: Date.now() }));
+    localStorage.setItem('tgw_session', JSON.stringify({ user: d.user, token: d.token, timestamp: Date.now() }));
+    sessionStorage.removeItem('tgw_session');
     signedIn = true;
     userEmail = d.user.email;
     closeSignIn();
@@ -1402,7 +1403,7 @@ async function doSignIn(){
   }
 }
 
-function signOut(){sessionStorage.removeItem('tgw_session');signedIn=false;userEmail='';userData=null;myWidgetData=[];render()}
+function signOut(){localStorage.removeItem('tgw_session');sessionStorage.removeItem('tgw_session');signedIn=false;userEmail='';userData=null;myWidgetData=[];render()}
 
 /* ═══ UTILS ═══ */
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
