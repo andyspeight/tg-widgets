@@ -863,6 +863,515 @@
             </div>
           </div>
 
+          <!-- WORD REVEAL -->
+          <div data-mode-panel="wordreveal" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="wr-text">
+                <span>Text</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <textarea id="cfg-wr-text" placeholder="Holidays handpicked by people who love travel." rows="2"></textarea>
+                </div>
+                <div class="row">
+                  <label>Reveal by</label>
+                  <select id="cfg-wr-unit">
+                    <option value="word">Word</option>
+                    <option value="letter">Letter</option>
+                  </select>
+                </div>
+                <div class="hint">Letter mode is best for short phrases — keep under 30 characters.</div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="wr-anim">
+                <span>Animation</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Style</label>
+                  <select id="cfg-wr-animation">
+                    <option value="fade-up">Fade up</option>
+                    <option value="fade">Fade</option>
+                    <option value="blur">Blur</option>
+                    <option value="slide">Slide in</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Stagger (ms)</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-wr-stagger" min="20" max="400" step="10" />
+                    <span class="range-val" id="cfg-wr-stagger-val">80</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Start delay</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-wr-startDelay" min="0" max="3000" step="100" />
+                    <span class="range-val" id="cfg-wr-startDelay-val">100</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Start on view</label>
+                  <button class="toggle" id="cfg-wr-startOnView" data-on="1"></button>
+                </div>
+                <div class="row">
+                  <label>Loop</label>
+                  <button class="toggle" id="cfg-wr-loop" data-on="0"></button>
+                </div>
+                <div class="hint">Loop hides and re-reveals continuously — use sparingly.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MARQUEE -->
+          <div data-mode-panel="marquee" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="mq-items">
+                <span>Items</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="list" id="mq-items-list"></div>
+                <button class="list-add" id="mq-items-add" style="margin-top:8px">+ Add item</button>
+                <div class="row" style="margin-top:12px">
+                  <label>Separator</label>
+                  <input type="text" id="cfg-mq-separator" maxlength="6" placeholder="•" />
+                </div>
+                <div class="hint">Separators sit between items as they scroll. Try • · — or leave blank.</div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="mq-motion">
+                <span>Motion</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Direction</label>
+                  <select id="cfg-mq-direction">
+                    <option value="left">Right to left</option>
+                    <option value="right">Left to right</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Speed (px/s)</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-mq-speed" min="20" max="200" step="5" />
+                    <span class="range-val" id="cfg-mq-speed-val">60</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Edge fade</label>
+                  <button class="toggle" id="cfg-mq-fade" data-on="1"></button>
+                </div>
+                <div class="row">
+                  <label>Pause on hover</label>
+                  <button class="toggle" id="cfg-mq-pauseOnHover" data-on="1"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OUTLINED -->
+          <div data-mode-panel="outlined" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="ol-text">
+                <span>Text</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <textarea id="cfg-ol-text" placeholder="Outlined for impact" rows="2"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="ol-stroke">
+                <span>Stroke</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Stroke colour</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-ol-strokeColor-swatch" aria-label="Stroke colour"></button>
+                      <input type="color" id="cfg-ol-strokeColor-picker" />
+                    </div>
+                    <input type="text" id="cfg-ol-strokeColor" placeholder="#0F172A" />
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Stroke width</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-ol-strokeWidth" min="0.5" max="8" step="0.5" />
+                    <span class="range-val" id="cfg-ol-strokeWidth-val">2</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Fill colour</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-ol-fillColor-swatch" aria-label="Fill colour"></button>
+                      <input type="color" id="cfg-ol-fillColor-picker" />
+                    </div>
+                    <input type="text" id="cfg-ol-fillColor" placeholder="transparent" />
+                  </div>
+                </div>
+                <div class="hint">Use "transparent" for a hollow outline. Set a colour to fill the inside.</div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="ol-hover">
+                <span>Hover effect</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Fill on hover</label>
+                  <button class="toggle" id="cfg-ol-hoverFill" data-on="0"></button>
+                </div>
+                <div class="hint">When ON, the text fills with the stroke colour as the visitor's mouse passes over it.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SPLIT COLOUR -->
+          <div data-mode-panel="splitcolor" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="sc-text">
+                <span>Text</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <textarea id="cfg-sc-text" placeholder="Two tones, one statement" rows="2"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="sc-style">
+                <span>Style</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Split style</label>
+                  <select id="cfg-sc-style">
+                    <option value="horizontal">Horizontal (top/bottom)</option>
+                    <option value="alternate">Alternate (each word)</option>
+                  </select>
+                </div>
+                <div class="row" id="cfg-sc-splitPos-row">
+                  <label>Split position</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-sc-splitPos" min="20" max="80" step="2" />
+                    <span class="range-val" id="cfg-sc-splitPos-val">50</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Colour 1</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-sc-color1-swatch" aria-label="Colour 1"></button>
+                      <input type="color" id="cfg-sc-color1-picker" />
+                    </div>
+                    <input type="text" id="cfg-sc-color1" placeholder="#0F172A" />
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Colour 2</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-sc-color2-swatch" aria-label="Colour 2"></button>
+                      <input type="color" id="cfg-sc-color2-picker" />
+                    </div>
+                    <input type="text" id="cfg-sc-color2" placeholder="#0891B2" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SPOTLIGHT FOLLOW -->
+          <div data-mode-panel="spotlight" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="sp-text">
+                <span>Text</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <textarea id="cfg-sp-text" placeholder="Hover over me" rows="2"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="sp-colors">
+                <span>Colours</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Resting</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-sp-baseColor-swatch" aria-label="Resting colour"></button>
+                      <input type="color" id="cfg-sp-baseColor-picker" />
+                    </div>
+                    <input type="text" id="cfg-sp-baseColor" placeholder="#CBD5E1" />
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Spotlight</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-sp-activeColor-swatch" aria-label="Spotlight colour"></button>
+                      <input type="color" id="cfg-sp-activeColor-picker" />
+                    </div>
+                    <input type="text" id="cfg-sp-activeColor" placeholder="#0891B2" />
+                  </div>
+                </div>
+                <div class="hint">The text rests in the dim resting colour and lights up to the spotlight colour as the cursor moves over it.</div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="sp-behaviour">
+                <span>Behaviour</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Spotlight size</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-sp-radius" min="40" max="400" step="10" />
+                    <span class="range-val" id="cfg-sp-radius-val">140</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Follow cursor</label>
+                  <button class="toggle" id="cfg-sp-followCursor" data-on="1"></button>
+                </div>
+                <div class="row">
+                  <label>Fallback</label>
+                  <select id="cfg-sp-fallbackPosition">
+                    <option value="center">Centre</option>
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
+                <div class="hint">Fallback position is used on touch devices and when reduced-motion is enabled.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STACKED EDITORIAL -->
+          <div data-mode-panel="stacked" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="stk-lines">
+                <span>Lines</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div id="stk-lines-list" style="display:flex;flex-direction:column;gap:12px"></div>
+                <button class="list-add" id="stk-lines-add" style="margin-top:12px">+ Add line</button>
+                <div class="hint" style="margin-top:8px">Each line is configured independently. Stack up to 6 lines for editorial layouts.</div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="stk-layout">
+                <span>Layout</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Gap (px)</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-stk-gap" min="0" max="40" step="2" />
+                    <span class="range-val" id="cfg-stk-gap-val">4</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Stack alignment</label>
+                  <select id="cfg-stk-alignItems">
+                    <option value="left">Left</option>
+                    <option value="center">Centre</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SPLIT BLOCK -->
+          <div data-mode-panel="splitblock" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="sb-text">
+                <span>Headline text</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <textarea id="cfg-sb-textContent" placeholder="Travel\nbooking,\nreimagined." rows="3"></textarea>
+                </div>
+                <div class="row">
+                  <label>Text align</label>
+                  <select id="cfg-sb-textAlign">
+                    <option value="left">Left</option>
+                    <option value="center">Centre</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
+                <div class="hint">Use line breaks for multi-line headlines. Font, size and colour use the main Typography panel.</div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="sb-block">
+                <span>Block</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <textarea id="cfg-sb-blockText" placeholder="Try it free" rows="2"></textarea>
+                </div>
+                <div class="row">
+                  <label>Block colour</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-sb-blockColor-swatch" aria-label="Block colour"></button>
+                      <input type="color" id="cfg-sb-blockColor-picker" />
+                    </div>
+                    <input type="text" id="cfg-sb-blockColor" placeholder="#0891B2" />
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Block text</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-sb-blockTextColor-swatch" aria-label="Block text colour"></button>
+                      <input type="color" id="cfg-sb-blockTextColor-picker" />
+                    </div>
+                    <input type="text" id="cfg-sb-blockTextColor" placeholder="#FFFFFF" />
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Text size</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-sb-blockSize" min="12" max="64" step="2" />
+                    <span class="range-val" id="cfg-sb-blockSize-val">22</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Weight</label>
+                  <select id="cfg-sb-blockWeight">
+                    <option value="400">400 Regular</option>
+                    <option value="500">500 Medium</option>
+                    <option value="600">600 Semibold</option>
+                    <option value="700">700 Bold</option>
+                    <option value="800">800 Extra Bold</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Padding</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-sb-blockPadding" min="8" max="80" step="4" />
+                    <span class="range-val" id="cfg-sb-blockPadding-val">32</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Radius</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-sb-blockRadius" min="0" max="48" step="2" />
+                    <span class="range-val" id="cfg-sb-blockRadius-val">16</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="sb-layout">
+                <span>Layout</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Text side</label>
+                  <select id="cfg-sb-textSide">
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Split ratio</label>
+                  <select id="cfg-sb-ratio">
+                    <option value="40/60">40 / 60</option>
+                    <option value="50/50">50 / 50</option>
+                    <option value="60/40">60 / 40</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Gap (px)</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-sb-gap" min="0" max="80" step="4" />
+                    <span class="range-val" id="cfg-sb-gap-val">24</span>
+                  </div>
+                </div>
+                <div class="hint">Stacks to a single column on screens narrower than 640px.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VERTICAL -->
+          <div data-mode-panel="vertical" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="vt-text">
+                <span>Text</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <input type="text" id="cfg-vt-text" placeholder="TRAVELGENIX" />
+                </div>
+                <div class="row">
+                  <label>Uppercase</label>
+                  <button class="toggle" id="cfg-vt-uppercase" data-on="1"></button>
+                </div>
+                <div class="hint">Vertical text works best for short labels — section markers, sidebar accents, decorative columns.</div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="vt-rotate">
+                <span>Rotation</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Direction</label>
+                  <select id="cfg-vt-direction">
+                    <option value="ccw">Counter-clockwise (reads bottom to top)</option>
+                    <option value="cw">Clockwise (reads top to bottom)</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Tracking</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-vt-tracking" min="0" max="0.5" step="0.01" />
+                    <span class="range-val" id="cfg-vt-tracking-val">0.15</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Container height</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-vt-height" min="80" max="500" step="10" />
+                    <span class="range-val" id="cfg-vt-height-val">200</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- =================== SETTINGS TAB =================== -->
@@ -971,14 +1480,14 @@
       { id: 'rotating',   name: 'Rotating Words', cat: 'Animated', live: true },
       { id: 'counter',    name: 'Counter', cat: 'Animated', live: true },
       { id: 'gradient',   name: 'Gradient Fill', cat: 'Visual', live: true },
-      { id: 'wordreveal', name: 'Word Reveal', cat: 'Animated', live: false },
-      { id: 'marquee',    name: 'Marquee', cat: 'Animated', live: false },
-      { id: 'outlined',   name: 'Outlined', cat: 'Visual', live: false },
-      { id: 'splitcolor', name: 'Split Colour', cat: 'Visual', live: false },
-      { id: 'spotlight',  name: 'Spotlight', cat: 'Visual', live: false },
-      { id: 'stacked',    name: 'Stacked', cat: 'Layout', live: false },
-      { id: 'splitblock', name: 'Split Block', cat: 'Layout', live: false },
-      { id: 'vertical',   name: 'Vertical', cat: 'Layout', live: false }
+      { id: 'wordreveal', name: 'Word Reveal', cat: 'Animated', live: true },
+      { id: 'marquee',    name: 'Marquee', cat: 'Animated', live: true },
+      { id: 'outlined',   name: 'Outlined', cat: 'Visual', live: true },
+      { id: 'splitcolor', name: 'Split Colour', cat: 'Visual', live: true },
+      { id: 'spotlight',  name: 'Spotlight', cat: 'Visual', live: true },
+      { id: 'stacked',    name: 'Stacked', cat: 'Layout', live: true },
+      { id: 'splitblock', name: 'Split Block', cat: 'Layout', live: true },
+      { id: 'vertical',   name: 'Vertical', cat: 'Layout', live: true }
     ];
 
     const DEFAULT_CONFIG = {
@@ -1011,6 +1520,56 @@
       gradient: {
         text: 'Made for travel professionals', colors: ['#0891B2', '#6366F1', '#0891B2'],
         angle: 90, speed: 6, static: false
+      },
+      wordreveal: {
+        text: 'Holidays handpicked by people who love travel.',
+        unit: 'word', animation: 'fade-up', stagger: 80, duration: 700,
+        startDelay: 100, startOnView: true, loop: false
+      },
+      marquee: {
+        items: ['Travel Smarter', 'Book Faster', 'Earn More', 'Stay Supported'],
+        separator: '•', speed: 60, direction: 'left', pauseOnHover: true, fade: true
+      },
+      outlined: {
+        text: 'Outlined for impact', strokeWidth: 2, strokeColor: '#0F172A',
+        fillColor: 'transparent', hoverFill: false, hoverFillColor: ''
+      },
+      splitcolor: {
+        text: 'Two tones, one statement', style: 'horizontal',
+        color1: '#0F172A', color2: '#0891B2', splitPos: 50
+      },
+      spotlight: {
+        text: 'Hover over me', baseColor: '#CBD5E1', activeColor: '#0891B2',
+        radius: 140, followCursor: true, fallbackPosition: 'center'
+      },
+      stacked: {
+        lines: [
+          { text: 'Bournemouth', size: 18, weight: 600, color: '#0891B2', italic: false, uppercase: true, align: 'center' },
+          { text: 'Travel agent', size: 96, weight: 800, color: '#0F172A', italic: false, uppercase: false, align: 'center' },
+          { text: 'of the year', size: 96, weight: 300, color: '#0F172A', italic: true, uppercase: false, align: 'center' }
+        ],
+        gap: 4, alignItems: 'center'
+      },
+      splitblock: {
+        textContent: 'Travel\nbooking,\nreimagined.',
+        blockText: 'Try it free',
+        blockColor: '#0891B2',
+        blockTextColor: '#FFFFFF',
+        textSide: 'left',
+        ratio: '50/50',
+        gap: 24,
+        blockRadius: 16,
+        blockPadding: 32,
+        textAlign: 'left',
+        blockSize: 22,
+        blockWeight: 700
+      },
+      vertical: {
+        text: 'TRAVELGENIX',
+        direction: 'ccw',
+        tracking: 0.15,
+        uppercase: true,
+        height: 200
       }
     };
 
@@ -1291,6 +1850,83 @@
       `).join('');
     }
 
+    function renderMarqueeList() {
+      const list = $('#mq-items-list');
+      if (!list) return;
+      const items = state.config.marquee.items || [];
+      list.innerHTML = items.map((it, i) => `
+        <div class="list-item">
+          <input type="text" data-list="mq-items" data-idx="${i}" value="${escapeAttr(it)}" />
+          <button class="icon-btn" data-list-remove="mq-items" data-idx="${i}" aria-label="Remove">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderStackedLines() {
+      const list = $('#stk-lines-list');
+      if (!list) return;
+      const lines = state.config.stacked.lines || [];
+      list.innerHTML = lines.map((line, i) => `
+        <div style="border:1px solid #E2E8F0;border-radius:8px;padding:10px;background:#F8FAFC">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:0.05em">Line ${i + 1}</span>
+            <div style="flex:1"></div>
+            ${lines.length > 1 ? `<button class="icon-btn" data-stk-remove="${i}" aria-label="Remove" style="width:24px;height:24px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>` : ''}
+          </div>
+          <input type="text" data-stk-field="text" data-stk-idx="${i}" value="${escapeAttr(line.text)}" placeholder="Line text" style="width:100%;height:30px;padding:0 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;margin-bottom:6px" />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+            <div>
+              <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:2px">Size</label>
+              <div style="display:flex;align-items:center;gap:6px">
+                <input type="range" data-stk-field="size" data-stk-idx="${i}" min="8" max="160" step="2" value="${line.size}" style="flex:1" />
+                <span id="stk-line-${i}-size-val" style="font-size:11px;color:#64748B;min-width:24px;text-align:right;font-variant-numeric:tabular-nums">${line.size}</span>
+              </div>
+            </div>
+            <div>
+              <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:2px">Weight</label>
+              <select data-stk-field="weight" data-stk-idx="${i}" style="width:100%;height:26px;padding:0 6px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px">
+                <option value="300" ${line.weight === 300 ? 'selected' : ''}>300 Light</option>
+                <option value="400" ${line.weight === 400 ? 'selected' : ''}>400 Regular</option>
+                <option value="500" ${line.weight === 500 ? 'selected' : ''}>500 Medium</option>
+                <option value="600" ${line.weight === 600 ? 'selected' : ''}>600 Semibold</option>
+                <option value="700" ${line.weight === 700 ? 'selected' : ''}>700 Bold</option>
+                <option value="800" ${line.weight === 800 ? 'selected' : ''}>800 Extra Bold</option>
+                <option value="900" ${line.weight === 900 ? 'selected' : ''}>900 Black</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+            <div>
+              <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:2px">Colour</label>
+              <div style="display:flex;align-items:center;gap:4px">
+                <div class="color-wrap">
+                  <button class="color-swatch" data-stk-color-swatch="${i}" style="background:${escapeAttr(line.color)};width:26px;height:26px" aria-label="Line ${i + 1} colour"></button>
+                  <input type="color" data-stk-color-picker="${i}" data-stk-idx="${i}" value="${escapeAttr(line.color)}" style="position:absolute;opacity:0;width:26px;height:26px;border:none;pointer-events:none;left:0;top:0" />
+                </div>
+                <input type="text" data-stk-field="color" data-stk-idx="${i}" value="${escapeAttr(line.color)}" style="flex:1;height:26px;padding:0 6px;border:1px solid #E2E8F0;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase" />
+              </div>
+            </div>
+            <div>
+              <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:2px">Align</label>
+              <select data-stk-field="align" data-stk-idx="${i}" style="width:100%;height:26px;padding:0 6px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px">
+                <option value="left" ${line.align === 'left' ? 'selected' : ''}>Left</option>
+                <option value="center" ${line.align === 'center' ? 'selected' : ''}>Centre</option>
+                <option value="right" ${line.align === 'right' ? 'selected' : ''}>Right</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button data-stk-toggle="italic" data-stk-idx="${i}" data-on="${line.italic ? '1' : '0'}" style="height:28px;padding:0 12px;border-radius:6px;font-size:11px;font-weight:600;font-style:italic;border:1px solid #E2E8F0;cursor:pointer;color:${line.italic ? '#fff' : '#64748B'};background:${line.italic ? '#0891B2' : '#F1F5F9'};border-color:${line.italic ? '#0891B2' : '#E2E8F0'}">italic</button>
+            <button data-stk-toggle="uppercase" data-stk-idx="${i}" data-on="${line.uppercase ? '1' : '0'}" style="height:28px;padding:0 12px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;border:1px solid #E2E8F0;cursor:pointer;color:${line.uppercase ? '#fff' : '#64748B'};background:${line.uppercase ? '#0891B2' : '#F1F5F9'};border-color:${line.uppercase ? '#0891B2' : '#E2E8F0'}">UPPER</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
     function escapeAttr(s) {
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -1498,6 +2134,186 @@
         pushHistory();
         renderPreview();
       });
+
+      // ============== WORD REVEAL ==============
+      bindText('cfg-wr-text', null, 'wordreveal', 'text');
+      bindSelect('cfg-wr-unit', null, v => v, 'wordreveal', 'unit');
+      bindSelect('cfg-wr-animation', null, v => v, 'wordreveal', 'animation');
+      bindRange('cfg-wr-stagger', null, v => parseInt(v, 10), 0, 'wordreveal', 'stagger');
+      bindRange('cfg-wr-startDelay', null, v => parseInt(v, 10), 0, 'wordreveal', 'startDelay');
+      bindToggle('cfg-wr-startOnView', null, 'wordreveal', 'startOnView');
+      bindToggle('cfg-wr-loop', null, 'wordreveal', 'loop');
+
+      // ============== MARQUEE ==============
+      bindText('cfg-mq-separator', null, 'marquee', 'separator');
+      bindSelect('cfg-mq-direction', null, v => v, 'marquee', 'direction');
+      bindRange('cfg-mq-speed', null, v => parseInt(v, 10), 0, 'marquee', 'speed');
+      bindToggle('cfg-mq-fade', null, 'marquee', 'fade');
+      bindToggle('cfg-mq-pauseOnHover', null, 'marquee', 'pauseOnHover');
+
+      $('#mq-items-list').addEventListener('input', e => {
+        const inp = e.target.closest('input[data-list="mq-items"]');
+        if (!inp) return;
+        const idx = parseInt(inp.dataset.idx, 10);
+        state.config.marquee.items[idx] = inp.value;
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+      $('#mq-items-list').addEventListener('click', e => {
+        const btn = e.target.closest('[data-list-remove="mq-items"]');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx, 10);
+        state.config.marquee.items.splice(idx, 1);
+        if (state.config.marquee.items.length === 0) state.config.marquee.items.push('Item');
+        renderMarqueeList();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+      $('#mq-items-add').addEventListener('click', () => {
+        state.config.marquee.items.push('New item');
+        renderMarqueeList();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+
+      // ============== OUTLINED ==============
+      bindText('cfg-ol-text', null, 'outlined', 'text');
+      bindRange('cfg-ol-strokeWidth', null, v => parseFloat(v), 1, 'outlined', 'strokeWidth');
+      bindColor('cfg-ol-strokeColor', null, 'outlined', 'strokeColor');
+      bindColor('cfg-ol-fillColor', null, 'outlined', 'fillColor');
+      bindToggle('cfg-ol-hoverFill', null, 'outlined', 'hoverFill');
+
+      // ============== SPLIT COLOUR ==============
+      bindText('cfg-sc-text', null, 'splitcolor', 'text');
+      bindColor('cfg-sc-color1', null, 'splitcolor', 'color1');
+      bindColor('cfg-sc-color2', null, 'splitcolor', 'color2');
+      bindRange('cfg-sc-splitPos', null, v => parseInt(v, 10), 0, 'splitcolor', 'splitPos');
+      // Style select needs to also toggle visibility of splitPos row
+      $('#cfg-sc-style').addEventListener('change', e => {
+        state.config.splitcolor.style = e.target.value;
+        const row = $('#cfg-sc-splitPos-row');
+        if (row) row.style.display = e.target.value === 'horizontal' ? 'grid' : 'none';
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+
+      // ============== SPOTLIGHT FOLLOW ==============
+      bindText('cfg-sp-text', null, 'spotlight', 'text');
+      bindColor('cfg-sp-baseColor', null, 'spotlight', 'baseColor');
+      bindColor('cfg-sp-activeColor', null, 'spotlight', 'activeColor');
+      bindRange('cfg-sp-radius', null, v => parseInt(v, 10), 0, 'spotlight', 'radius');
+      bindToggle('cfg-sp-followCursor', null, 'spotlight', 'followCursor');
+      bindSelect('cfg-sp-fallbackPosition', null, v => v, 'spotlight', 'fallbackPosition');
+
+      // ============== STACKED EDITORIAL ==============
+      bindRange('cfg-stk-gap', null, v => parseInt(v, 10), 0, 'stacked', 'gap');
+      bindSelect('cfg-stk-alignItems', null, v => v, 'stacked', 'alignItems');
+
+      // Stacked lines: complex multi-field per line, render as a list of cards
+      $('#stk-lines-list').addEventListener('input', e => {
+        const inp = e.target.closest('[data-stk-field]');
+        if (!inp) return;
+        const idx = parseInt(inp.dataset.stkIdx, 10);
+        const field = inp.dataset.stkField;
+        const line = state.config.stacked.lines[idx];
+        if (!line) return;
+        if (field === 'text') line.text = inp.value;
+        else if (field === 'color') line.color = inp.value;
+        else if (field === 'size') {
+          line.size = parseInt(inp.value, 10);
+          const valEl = $('#stk-line-' + idx + '-size-val');
+          if (valEl) valEl.textContent = line.size;
+        }
+        else if (field === 'weight') line.weight = parseInt(inp.value, 10);
+        else if (field === 'align') line.align = inp.value;
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+      $('#stk-lines-list').addEventListener('change', e => {
+        // Color picker uses change event
+        const pic = e.target.closest('[data-stk-color-picker]');
+        if (!pic) return;
+        const idx = parseInt(pic.dataset.stkIdx, 10);
+        const line = state.config.stacked.lines[idx];
+        if (!line) return;
+        line.color = pic.value;
+        const sw = $('[data-stk-color-swatch="' + idx + '"]');
+        const tx = $('[data-stk-field="color"][data-stk-idx="' + idx + '"]');
+        if (sw) sw.style.background = pic.value;
+        if (tx) tx.value = pic.value.toUpperCase();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+      $('#stk-lines-list').addEventListener('click', e => {
+        const sw = e.target.closest('[data-stk-color-swatch]');
+        if (sw) {
+          const idx = sw.dataset.stkColorSwatch;
+          const pic = $('[data-stk-color-picker="' + idx + '"]');
+          if (pic) pic.click();
+          return;
+        }
+        const tog = e.target.closest('[data-stk-toggle]');
+        if (tog) {
+          const idx = parseInt(tog.dataset.stkIdx, 10);
+          const field = tog.dataset.stkToggle;
+          const line = state.config.stacked.lines[idx];
+          const newVal = tog.dataset.on === '1' ? false : true;
+          tog.dataset.on = newVal ? '1' : '0';
+          if (field === 'italic') line.italic = newVal;
+          if (field === 'uppercase') line.uppercase = newVal;
+          markDirty();
+          pushHistory();
+          renderPreview();
+          return;
+        }
+        const rm = e.target.closest('[data-stk-remove]');
+        if (rm) {
+          const idx = parseInt(rm.dataset.stkRemove, 10);
+          state.config.stacked.lines.splice(idx, 1);
+          if (state.config.stacked.lines.length === 0) {
+            state.config.stacked.lines.push({ text: 'Line', size: 48, weight: 700, color: '#0F172A', italic: false, uppercase: false, align: 'center' });
+          }
+          renderStackedLines();
+          markDirty();
+          pushHistory();
+          renderPreview();
+        }
+      });
+      $('#stk-lines-add').addEventListener('click', () => {
+        if (state.config.stacked.lines.length >= 6) { toast('Maximum 6 lines', true); return; }
+        state.config.stacked.lines.push({ text: 'New line', size: 48, weight: 700, color: '#0F172A', italic: false, uppercase: false, align: 'center' });
+        renderStackedLines();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+
+      // ============== SPLIT BLOCK ==============
+      bindText('cfg-sb-textContent', null, 'splitblock', 'textContent');
+      bindText('cfg-sb-blockText', null, 'splitblock', 'blockText');
+      bindColor('cfg-sb-blockColor', null, 'splitblock', 'blockColor');
+      bindColor('cfg-sb-blockTextColor', null, 'splitblock', 'blockTextColor');
+      bindSelect('cfg-sb-textSide', null, v => v, 'splitblock', 'textSide');
+      bindSelect('cfg-sb-ratio', null, v => v, 'splitblock', 'ratio');
+      bindSelect('cfg-sb-textAlign', null, v => v, 'splitblock', 'textAlign');
+      bindRange('cfg-sb-gap', null, v => parseInt(v, 10), 0, 'splitblock', 'gap');
+      bindRange('cfg-sb-blockRadius', null, v => parseInt(v, 10), 0, 'splitblock', 'blockRadius');
+      bindRange('cfg-sb-blockPadding', null, v => parseInt(v, 10), 0, 'splitblock', 'blockPadding');
+      bindRange('cfg-sb-blockSize', null, v => parseInt(v, 10), 0, 'splitblock', 'blockSize');
+      bindSelect('cfg-sb-blockWeight', null, v => parseInt(v, 10), 'splitblock', 'blockWeight');
+
+      // ============== VERTICAL ==============
+      bindText('cfg-vt-text', null, 'vertical', 'text');
+      bindToggle('cfg-vt-uppercase', null, 'vertical', 'uppercase');
+      bindSelect('cfg-vt-direction', null, v => v, 'vertical', 'direction');
+      bindRange('cfg-vt-tracking', null, v => parseFloat(v), 2, 'vertical', 'tracking');
+      bindRange('cfg-vt-height', null, v => parseInt(v, 10), 0, 'vertical', 'height');
     }
 
     function bindRange(id, rootKey, parser, decimals = 0, modeKey = null, subKey = null) {
@@ -1649,6 +2465,82 @@
       $('#cfg-grad-animate').dataset.on = g.static ? '0' : '1';
       renderGradStops();
 
+      // Word Reveal
+      const wr = c.wordreveal || DEFAULT_CONFIG.wordreveal;
+      setVal('cfg-wr-text', wr.text);
+      setVal('cfg-wr-unit', wr.unit);
+      setVal('cfg-wr-animation', wr.animation);
+      setVal('cfg-wr-stagger', wr.stagger, 'cfg-wr-stagger-val', String(wr.stagger));
+      setVal('cfg-wr-startDelay', wr.startDelay, 'cfg-wr-startDelay-val', String(wr.startDelay));
+      $('#cfg-wr-startOnView').dataset.on = wr.startOnView ? '1' : '0';
+      $('#cfg-wr-loop').dataset.on = wr.loop ? '1' : '0';
+
+      // Marquee
+      const mq = c.marquee || DEFAULT_CONFIG.marquee;
+      setVal('cfg-mq-separator', mq.separator);
+      setVal('cfg-mq-direction', mq.direction);
+      setVal('cfg-mq-speed', mq.speed, 'cfg-mq-speed-val', String(mq.speed));
+      $('#cfg-mq-fade').dataset.on = mq.fade ? '1' : '0';
+      $('#cfg-mq-pauseOnHover').dataset.on = mq.pauseOnHover ? '1' : '0';
+      renderMarqueeList();
+
+      // Outlined
+      const ol = c.outlined || DEFAULT_CONFIG.outlined;
+      setVal('cfg-ol-text', ol.text);
+      setVal('cfg-ol-strokeWidth', ol.strokeWidth, 'cfg-ol-strokeWidth-val', String(ol.strokeWidth));
+      setColorUI('cfg-ol-strokeColor', ol.strokeColor);
+      setColorUI('cfg-ol-fillColor', ol.fillColor);
+      $('#cfg-ol-hoverFill').dataset.on = ol.hoverFill ? '1' : '0';
+
+      // Split Colour
+      const sc = c.splitcolor || DEFAULT_CONFIG.splitcolor;
+      setVal('cfg-sc-text', sc.text);
+      setVal('cfg-sc-style', sc.style);
+      setVal('cfg-sc-splitPos', sc.splitPos, 'cfg-sc-splitPos-val', String(sc.splitPos));
+      setColorUI('cfg-sc-color1', sc.color1);
+      setColorUI('cfg-sc-color2', sc.color2);
+      // Hide splitPos row if alternate style
+      const scRow = $('#cfg-sc-splitPos-row');
+      if (scRow) scRow.style.display = sc.style === 'horizontal' ? 'grid' : 'none';
+
+      // Spotlight Follow
+      const sp = c.spotlight || DEFAULT_CONFIG.spotlight;
+      setVal('cfg-sp-text', sp.text);
+      setColorUI('cfg-sp-baseColor', sp.baseColor);
+      setColorUI('cfg-sp-activeColor', sp.activeColor);
+      setVal('cfg-sp-radius', sp.radius, 'cfg-sp-radius-val', String(sp.radius));
+      $('#cfg-sp-followCursor').dataset.on = sp.followCursor ? '1' : '0';
+      setVal('cfg-sp-fallbackPosition', sp.fallbackPosition);
+
+      // Stacked Editorial
+      const stk = c.stacked || DEFAULT_CONFIG.stacked;
+      setVal('cfg-stk-gap', stk.gap, 'cfg-stk-gap-val', String(stk.gap));
+      setVal('cfg-stk-alignItems', stk.alignItems);
+      renderStackedLines();
+
+      // Split Block
+      const sb = c.splitblock || DEFAULT_CONFIG.splitblock;
+      setVal('cfg-sb-textContent', sb.textContent);
+      setVal('cfg-sb-blockText', sb.blockText);
+      setColorUI('cfg-sb-blockColor', sb.blockColor);
+      setColorUI('cfg-sb-blockTextColor', sb.blockTextColor);
+      setVal('cfg-sb-textSide', sb.textSide);
+      setVal('cfg-sb-ratio', sb.ratio);
+      setVal('cfg-sb-textAlign', sb.textAlign);
+      setVal('cfg-sb-gap', sb.gap, 'cfg-sb-gap-val', String(sb.gap));
+      setVal('cfg-sb-blockRadius', sb.blockRadius, 'cfg-sb-blockRadius-val', String(sb.blockRadius));
+      setVal('cfg-sb-blockPadding', sb.blockPadding, 'cfg-sb-blockPadding-val', String(sb.blockPadding));
+      setVal('cfg-sb-blockSize', sb.blockSize, 'cfg-sb-blockSize-val', String(sb.blockSize));
+      setVal('cfg-sb-blockWeight', sb.blockWeight);
+
+      // Vertical
+      const vt = c.vertical || DEFAULT_CONFIG.vertical;
+      setVal('cfg-vt-text', vt.text);
+      $('#cfg-vt-uppercase').dataset.on = vt.uppercase ? '1' : '0';
+      setVal('cfg-vt-direction', vt.direction);
+      setVal('cfg-vt-tracking', vt.tracking, 'cfg-vt-tracking-val', vt.tracking.toFixed(2));
+      setVal('cfg-vt-height', vt.height, 'cfg-vt-height-val', String(vt.height));
+
       renderEmbedCode();
     }
 
@@ -1748,7 +2640,7 @@
         state.widgetName = data.name || 'Text FX';
         state.config = Object.assign({}, deepClone(DEFAULT_CONFIG), data.config || {});
         // Ensure mode-specific objects exist after merge
-        ['typewriter', 'rotating', 'counter', 'gradient'].forEach(k => {
+        ['typewriter', 'rotating', 'counter', 'gradient', 'wordreveal', 'marquee', 'outlined', 'splitcolor', 'spotlight', 'stacked', 'splitblock', 'vertical'].forEach(k => {
           state.config[k] = Object.assign({}, DEFAULT_CONFIG[k], state.config[k] || {});
         });
         state.history = [deepClone(state.config)];
@@ -1787,6 +2679,30 @@
       } else if (mode === 'gradient') {
         modePrompt = `You are helping a UK travel agent write a single gradient headline for their website (max 60 chars). Provide just one short, confident headline that captures the brand. Context: ${prompt}`;
         schema = { text: 'string' };
+      } else if (mode === 'wordreveal') {
+        modePrompt = `You are helping a UK travel agent write a Word Reveal headline for their website. Provide one impactful sentence (max 80 chars) that benefits from being revealed word-by-word — a confident statement, a value proposition, or a benefit-led line. Avoid generic openers like "Welcome to". Context: ${prompt}`;
+        schema = { text: 'string' };
+      } else if (mode === 'marquee') {
+        modePrompt = `You are helping a UK travel agent build a marquee strip of short claims for their website. Provide 4-6 very short items (1-3 words each) that work as a scrolling list — value props, benefits, or feature highlights. Examples: "ATOL Protected", "24/7 Support", "Best Price Guarantee". Context: ${prompt}`;
+        schema = { items: 'array of short strings' };
+      } else if (mode === 'outlined') {
+        modePrompt = `You are helping a UK travel agent write a single hollow/outlined headline for their website (max 50 chars). The text will render with a stroke outline so it should be short, bold, and confident — a single clear statement. Avoid weak openers. Context: ${prompt}`;
+        schema = { text: 'string' };
+      } else if (mode === 'splitcolor') {
+        modePrompt = `You are helping a UK travel agent write a single two-tone split-colour headline for their website (max 50 chars). The text will be split between two colours so a strong, confident statement works best. Context: ${prompt}`;
+        schema = { text: 'string' };
+      } else if (mode === 'spotlight') {
+        modePrompt = `You are helping a UK travel agent write a Spotlight headline for their website (max 50 chars). The text rests in a dim colour and lights up as the visitor's cursor moves across it, so something playful or invitational works well — a hook that rewards interaction. Context: ${prompt}`;
+        schema = { text: 'string' };
+      } else if (mode === 'stacked') {
+        modePrompt = `You are helping a UK travel agent build an editorial-style stacked headline for their website hero. Provide 3 lines that work together as a single composition: a small eyebrow label (e.g. location, category — UPPERCASE works well), a large primary headline, and a contrasting secondary line (italic for editorial feel works well). Each line should be punchy and short. Context: ${prompt}`;
+        schema = { eyebrow: 'string', primary: 'string', secondary: 'string' };
+      } else if (mode === 'splitblock') {
+        modePrompt = `You are helping a UK travel agent build a split-block hero section. Provide a short multi-line headline (3-4 words across 2-3 lines, separate lines with \\n) and a short call-to-action label for the coloured block (2-4 words like "Book now" or "Try free"). The headline and CTA should fit together. Context: ${prompt}`;
+        schema = { headline: 'string with \\n line breaks', cta: 'short string' };
+      } else if (mode === 'vertical') {
+        modePrompt = `You are helping a UK travel agent build a vertical (rotated) text label for the side of their page. Provide one very short label (1-3 words, max 18 characters) that suits a sidebar or section marker. Examples: "TRAVELGENIX", "EST. 2018", "SCROLL". Context: ${prompt}`;
+        schema = { text: 'short string' };
       }
 
       try {
@@ -1822,6 +2738,33 @@
           if (typeof result.suffix === 'string') state.config.counter.suffix = result.suffix;
         } else if (mode === 'gradient') {
           if (typeof result.text === 'string') state.config.gradient.text = result.text;
+        } else if (mode === 'wordreveal') {
+          if (typeof result.text === 'string') state.config.wordreveal.text = result.text;
+        } else if (mode === 'marquee') {
+          if (Array.isArray(result.items)) state.config.marquee.items = result.items.slice(0, 8);
+        } else if (mode === 'outlined') {
+          if (typeof result.text === 'string') state.config.outlined.text = result.text;
+        } else if (mode === 'splitcolor') {
+          if (typeof result.text === 'string') state.config.splitcolor.text = result.text;
+        } else if (mode === 'spotlight') {
+          if (typeof result.text === 'string') state.config.spotlight.text = result.text;
+        } else if (mode === 'stacked') {
+          const lines = [];
+          if (typeof result.eyebrow === 'string' && result.eyebrow.trim()) {
+            lines.push({ text: result.eyebrow.trim(), size: 18, weight: 600, color: '#0891B2', italic: false, uppercase: true, align: 'center' });
+          }
+          if (typeof result.primary === 'string' && result.primary.trim()) {
+            lines.push({ text: result.primary.trim(), size: 96, weight: 800, color: '#0F172A', italic: false, uppercase: false, align: 'center' });
+          }
+          if (typeof result.secondary === 'string' && result.secondary.trim()) {
+            lines.push({ text: result.secondary.trim(), size: 96, weight: 300, color: '#0F172A', italic: true, uppercase: false, align: 'center' });
+          }
+          if (lines.length > 0) state.config.stacked.lines = lines;
+        } else if (mode === 'splitblock') {
+          if (typeof result.headline === 'string') state.config.splitblock.textContent = result.headline.replace(/\\n/g, '\n');
+          if (typeof result.cta === 'string') state.config.splitblock.blockText = result.cta;
+        } else if (mode === 'vertical') {
+          if (typeof result.text === 'string') state.config.vertical.text = result.text;
         }
 
         $('#ai-modal').hidden = true;
