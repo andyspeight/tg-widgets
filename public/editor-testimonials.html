@@ -8,7 +8,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/editor-shell.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js" defer></script>
 
   <style>
@@ -738,111 +739,115 @@
 </head>
 <body>
 
-  <!-- ======================== EDITOR LAYOUT ======================== -->
-  <main class="editor" id="editor" hidden>
-    <aside class="sidebar">
-      <div class="topbar">
-        <a class="icon-btn icon-only" href="/" id="back-btn" title="Back to dashboard" aria-label="Back to dashboard">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  <!-- ======================== EDITOR LAYOUT (unified shell) ======================== -->
+  <div class="tgse-app" id="editor" hidden>
+
+    <aside class="tgse-sidebar">
+
+      <!-- Crumb strip (40px) -->
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
         </a>
-        <span class="logo">
-          <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+      </div>
+
+      <!-- Widget identity (64px) -->
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
             <path d="M10.72 24.32c-2.27 0-4.1-.78-5.5-2.34-1.4-1.56-2.1-3.76-2.1-6.58 0-2.83.77-5.38 2.3-7.66 1.54-2.28 3.92-4.3 7.14-6.06l1.4 2.1c-1.9 1.06-3.4 2.22-4.52 3.48-1.12 1.26-1.78 2.58-1.98 3.96 1.2-.4 2.28-.6 3.24-.6 1.97 0 3.58.6 4.82 1.82 1.24 1.2 1.86 2.78 1.86 4.72 0 2.08-.66 3.77-1.98 5.06-1.32 1.4-3.03 2.1-5.12 2.1zm14 0c-2.27 0-4.1-.78-5.5-2.34-1.4-1.56-2.1-3.76-2.1-6.58 0-2.83.77-5.38 2.3-7.66 1.54-2.28 3.92-4.3 7.14-6.06l1.4 2.1c-1.9 1.06-3.4 2.22-4.52 3.48-1.12 1.26-1.78 2.58-1.98 3.96 1.2-.4 2.28-.6 3.24-.6 1.97 0 3.58.6 4.82 1.82 1.24 1.2 1.86 2.78 1.86 4.72 0 2.08-.66 3.77-1.98 5.06-1.32 1.4-3.03 2.1-5.12 2.1z"/>
           </svg>
         </span>
-        <div class="topbar-ident">
-          <div class="topbar-title">Testimonials</div>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Testimonials</div>
+          <div class="tgse-id-type">Widget editor</div>
         </div>
-        <div class="topbar-spacer"></div>
-        <button class="icon-btn icon-only" id="btn-ai" title="AI builder (A)" aria-label="AI builder">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+      </div>
+
+      <!-- Primary actions (60px) -->
+      <div class="tgse-actions">
+        <button class="tgse-btn" id="btn-templates" title="Templates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Templates
+          <span class="tgse-kbd">T</span>
         </button>
-        <button class="icon-btn icon-only" id="btn-templates" title="Templates (T)" aria-label="Templates">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+          AI builder
+          <span class="tgse-kbd">A</span>
         </button>
       </div>
 
-      <div class="name-row">
-        <input class="name-input" id="name-input" placeholder="Untitled testimonials widget" maxlength="80">
-        <button class="save-btn" id="save-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Save
+      <!-- Name + Save (60px) -->
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Untitled testimonials widget" maxlength="80">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="save-label">Save</span>
         </button>
       </div>
 
-      <nav class="tabs" role="tablist">
-        <button class="tab-btn" role="tab" data-tab="design"   aria-selected="true">Design</button>
-        <button class="tab-btn" role="tab" data-tab="content"  aria-selected="false">Content</button>
-        <button class="tab-btn" role="tab" data-tab="settings" aria-selected="false">Settings</button>
+      <!-- Tabs (48px) -->
+      <nav class="tgse-tabs" role="tablist">
+        <button data-tab="design" role="tab" aria-selected="true">Design</button>
+        <button data-tab="content" role="tab" aria-selected="false">Content</button>
+        <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
       </nav>
 
-      <div class="sidebar-body" id="sidebar-body"></div>
+      <!-- Body (scrollable) -->
+      <div class="tgse-body" id="sidebar-body"></div>
     </aside>
 
-    <section class="preview">
-      <div class="preview-toolbar">
-        <span class="preview-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 4V2M12 22v-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-          Live preview
-        </span>
-        <div style="flex:1"></div>
-        <div class="btn-group" role="group" aria-label="Viewport">
-          <button data-viewport="desktop" aria-pressed="true" title="Desktop">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
+
+        <div class="tgse-vp" role="group" aria-label="Viewport">
+          <button class="is-on" data-vp="desktop" data-viewport="desktop" title="Desktop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
           </button>
-          <button data-viewport="tablet" aria-pressed="false" title="Tablet">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          <button data-vp="tablet" data-viewport="tablet" title="Tablet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
           </button>
-          <button data-viewport="mobile" aria-pressed="false" title="Mobile">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          <button data-vp="mobile" data-viewport="mobile" title="Mobile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
           </button>
         </div>
-        <button class="icon-btn" id="btn-dm" title="Design mode (D)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-          Design mode
+
+        <div class="tgse-divider"></div>
+
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
         </button>
-        <button class="icon-btn" id="btn-embed" title="Get embed code">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          Embed
+        <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+          Design mode
+          <span class="tgse-kbd">D</span>
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
         </button>
       </div>
-      <div class="preview-canvas" id="preview-canvas">
-        <div class="preview-frame" id="preview-frame" data-viewport="desktop">
+
+      <div class="tgse-canvas">
+        <div class="tgse-frame" data-vp="desktop" id="preview-frame" data-viewport="desktop">
           <div id="tgt-mount" data-tg-widget="testimonials"></div>
         </div>
         <div class="dm-layer" id="dm-layer"></div>
       </div>
     </section>
-  </main>
 
-  <!-- ======================== LOGIN OVERLAY ======================== -->
-  <div class="login-overlay" id="login" hidden>
-    <div class="login-card">
-      <span class="login-logo">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-      </span>
-      <h1 class="login-title">Sign in to edit</h1>
-      <p class="login-sub">Use your Travelgenix credentials.</p>
-      <div class="stack">
-        <div class="field">
-          <label class="field-label" for="login-email">Email</label>
-          <input class="input" id="login-email" type="email" autocomplete="username" placeholder="you@example.com">
-        </div>
-        <div class="field">
-          <label class="field-label" for="login-code">Client code</label>
-          <input class="input" id="login-code" type="password" autocomplete="current-password" placeholder="Your code">
-        </div>
-        <button class="btn btn-primary btn-block" id="login-btn">Sign in</button>
-        <p class="field-hint" id="login-err" style="color:var(--danger); display:none;"></p>
-        <p class="field-hint"><a href="/">Back to dashboard</a></p>
-      </div>
-    </div>
   </div>
 
   <!-- ======================== DESIGN MODE POPOVER ======================== -->
   <div class="dm-popover" id="dm-popover" hidden></div>
 
-  <!-- ======================== MODALS ======================== -->
+  <!-- ======================== Testimonials MODAL LAYER (AI builder + Templates) ======================== -->
+  <!-- Note: embed modal is now provided by the shell. Login overlay too. -->
   <div class="modal-overlay" id="modal-layer" hidden>
     <div class="modal" id="modal-box"></div>
   </div>
@@ -852,6 +857,9 @@
 
   <!-- ======================== Include the widget script ======================== -->
   <script src="/widget-testimonials.js"></script>
+
+  <!-- ======================== Shell behaviour (must come BEFORE editor script) ======================== -->
+  <script src="/editor-shell.js"></script>
 
   <!-- ======================== Editor logic ======================== -->
   <script>
@@ -905,30 +913,32 @@
     const deepClone = (o) => JSON.parse(JSON.stringify(o));
     const debounce = (fn, ms) => { let t; return function(){ clearTimeout(t); const a=arguments, c=this; t=setTimeout(()=>fn.apply(c,a), ms); }; };
 
-    /* =============================== AUTH =============================== */
+    /* =============================== AUTH ===============================
+       These functions now delegate to the shell, which uses localStorage with
+       sessionStorage fallback and handles cross-tab logout. */
     function getSession() {
-      let raw;
-      try { raw = sessionStorage.getItem(STORAGE_KEY); }
-      catch (e) { console.warn('[getSession] sessionStorage read failed:', e); return null; }
-      if (!raw) { return null; }
       try {
+        const raw = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
         const s = JSON.parse(raw);
-        if (!s || typeof s !== 'object') { console.warn('[getSession] session is not an object:', raw); return null; }
-        if (!s.token) { console.warn('[getSession] session has no token — will force re-login'); return null; }
+        if (!s || typeof s !== 'object' || !s.token) return null;
         return s;
-      } catch (e) {
-        console.warn('[getSession] JSON parse failed:', e);
-        return null;
-      }
+      } catch (e) { return null; }
     }
     function setSession(s) {
-      try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
-      catch (e) { console.error('[setSession] sessionStorage write failed:', e); throw e; }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+      catch (e) { console.error('[setSession] localStorage write failed:', e); throw e; }
     }
     function clearSession() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
       try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
     }
     function authHeaders(extra) {
+      if (window.tgse && typeof window.tgse.authHeaders === 'function') {
+        const h = window.tgse.authHeaders();
+        if (extra) Object.assign(h, extra);
+        return h;
+      }
       const s = getSession();
       const h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
       if (s && s.token) h['Authorization'] = 'Bearer ' + s.token;
@@ -941,6 +951,7 @@
         layout: 'grid',                         // featured | grid | masonry | carousel | marquee | spotlight
         theme: 'light',
         radius: 16,
+        fontFamily: 'Inter',                    // Google Font, applied via shell font picker
         colors: {
           brand:  '#EC4899',
           accent: '#8B5CF6',
@@ -1167,8 +1178,12 @@
     }
 
     function syncSaveBtn() {
-      const b = $('#save-btn');
-      if (!b) return;
+      // Shell handles all visual states. We just tell it whether the editor is dirty.
+      if (window.tgse && typeof window.tgse.setSaveState === 'function') {
+        window.tgse.setSaveState(state.dirty ? 'dirty' : 'clean');
+        return;
+      }
+      const b = $('#btn-save'); if (!b) return;
       b.classList.toggle('is-dirty', state.dirty);
       b.classList.remove('is-saved');
     }
@@ -1176,7 +1191,8 @@
     /* ============================ TAB SWITCH ============================ */
     function setTab(name) {
       state.activeTab = name;
-      $$('.tab-btn').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name ? 'true' : 'false'));
+      // Shell renders tabs as .tgse-tabs button[data-tab]
+      $$('.tgse-tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name ? 'true' : 'false'));
       renderTabBody();
     }
 
@@ -1365,12 +1381,20 @@
         </div>
       `;
 
+      const typographyBody = `
+        <div class="field">
+          <label class="field-label">Font family <span class="field-hint">Applied to all text in the widget</span></label>
+          <div id="fontPickerMount"></div>
+        </div>
+      `;
+
       return `
-        ${section('layout',   'Layout',    layoutBody)}
-        ${section('theme',    'Theme',     themeBody)}
-        ${section('colours',  'Colours',   coloursBody)}
-        ${section('shape',    'Shape',     shapeBody)}
-        ${section('heading',  'Heading',   headingBody)}
+        ${section('layout',     'Layout',     layoutBody)}
+        ${section('theme',      'Theme',      themeBody)}
+        ${section('colours',    'Colours',    coloursBody)}
+        ${section('typography', 'Typography', typographyBody)}
+        ${section('shape',      'Shape',      shapeBody)}
+        ${section('heading',    'Heading',    headingBody)}
       `;
     }
 
@@ -2100,28 +2124,8 @@
     }
 
     /* ============================ EMBED MODAL ============================ */
-    function openEmbedModal() {
-      if (!state.widgetId) { showToast('Save the widget first to get an embed code', 'error'); return; }
-      const snippet = `<div data-tg-widget="testimonials" data-tg-id="${state.widgetId}"></div>\n<script src="https://tg-widgets.vercel.app/widget-testimonials.js"><\/script>`;
-      openModal({
-        title: 'Embed code',
-        body: `
-          <p class="field-hint" style="margin-bottom:12px">Paste this into any HTML page where you want your testimonials to appear.</p>
-          <div class="code-block" id="embed-code">${esc(snippet)}</div>
-          <p class="field-hint" style="margin-top:12px">The widget loads only when the page loads — no setup, no dependencies, zero impact on your page speed.</p>
-        `,
-        foot: `
-          <div style="flex:1"></div>
-          <button class="btn" data-modal-close>Close</button>
-          <button class="btn btn-primary" id="copy-embed-modal">${icn('copy', 14)}Copy code</button>
-        `,
-        onMount(root) {
-          $('#copy-embed-modal', root).addEventListener('click', () => {
-            navigator.clipboard.writeText(snippet).then(() => showToast('Copied to clipboard', 'success'));
-          });
-        }
-      });
-    }
+    /* ============================ EMBED MODAL — provided by shell ============================ */
+    /* Shell's tgse.init({ widgetTag: 'testimonials', scriptFile: 'widget-testimonials.js' }) handles this. */
 
     /* ============================ MODAL PRIMITIVE ============================ */
     function openModal({ title, body, foot, large, onMount }) {
@@ -2258,10 +2262,7 @@
     /* ============================ DESIGN MODE ============================ */
     function toggleDM() {
       state.dmEnabled = !state.dmEnabled;
-      $('#btn-dm').classList.toggle('is-on', state.dmEnabled);
-      $('#btn-dm').style.background = state.dmEnabled ? 'var(--accent)' : '';
-      $('#btn-dm').style.color = state.dmEnabled ? '#fff' : '';
-      $('#btn-dm').style.borderColor = state.dmEnabled ? 'var(--accent)' : '';
+      // Shell handles the button visual state via its onDesignMode callback
       const layer = $('#dm-layer');
       layer.innerHTML = '';
       if (state.dmEnabled) buildDMHotspots();
@@ -2270,7 +2271,7 @@
 
     function buildDMHotspots() {
       const layer = $('#dm-layer');
-      const canvas = $('#preview-canvas');
+      const canvas = $('.tgse-canvas') || $('#preview-canvas');  // shell uses .tgse-canvas
       const mount = $('#tgt-mount');
       if (!layer || !canvas || !mount) return;
       layer.innerHTML = '';
@@ -2356,10 +2357,11 @@
 
     /* ============================ SAVE / LOAD ============================ */
     async function save() {
-      const btn = $('#save-btn');
       if (!state.widgetName.trim()) state.widgetName = 'Untitled Testimonials';
-      btn.disabled = true;
-      btn.innerHTML = `${icn('sparkle', 14).replace('>','  class="spin">')}Saving…`;
+
+      const tgse = window.tgse;
+      if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('saving');
+
       try {
         const res = await fetch(API_CONFIG, {
           method: 'POST',
@@ -2372,25 +2374,25 @@
             config: state.config
           })
         });
-        if (res.status === 401) { showToast('Session expired — please sign in again', 'error'); clearSession(); location.reload(); return; }
+        if (res.status === 401) {
+          showToast('Session expired — please sign in again', 'error');
+          clearSession();
+          if (tgse && typeof tgse.showLogin === 'function') tgse.showLogin();
+          else location.reload();
+          return;
+        }
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         if (data && data.id && !state.widgetId) {
           state.widgetId = data.id;
-          // update URL without reload
           const u = new URL(window.location.href); u.searchParams.set('id', data.id); window.history.replaceState(null, '', u);
         }
         state.dirty = false;
-        btn.classList.add('is-saved'); btn.classList.remove('is-dirty');
-        btn.innerHTML = `${icn('check', 14)}Saved`;
+        if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('saved');
+        else syncSaveBtn();
         showToast('Saved', 'success');
-        setTimeout(() => {
-          btn.disabled = false; btn.classList.remove('is-saved');
-          btn.innerHTML = `${icn('copy', 14)}Save`;
-        }, 1400);
       } catch (err) {
-        btn.disabled = false;
-        btn.innerHTML = `${icn('copy', 14)}Save`;
+        if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('dirty');
         showToast('Save failed: ' + (err.message || 'unknown'), 'error');
       }
     }
@@ -2416,73 +2418,23 @@
       }
     }
 
-    /* ============================ LOGIN ============================ */
-    function showLogin() { $('#login').hidden = false; $('#editor').hidden = true; }
-    function hideLogin() { $('#login').hidden = true; $('#editor').hidden = false; }
+    /* ============================ LOGIN — provided by shell ============================ */
 
-    async function tryLogin(email, code) {
-      const res = await fetch(API_AUTH, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code })
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || ('HTTP ' + res.status));
-      }
-      const data = await res.json();
-
-      // Validate the response contains a usable token. Without this, a
-      // response like { success: true, user: {...} } (no token) would write
-      // a broken session and the editor would silently redirect back to
-      // login with the button stuck on "Signing in...".
-      if (!data || typeof data.token !== 'string' || data.token.length < 10) {
-        console.error('[tryLogin] auth response missing token', data);
-        throw new Error('Sign-in succeeded but no session token received — contact support');
-      }
-
-      // Match the dashboard's session shape so both surfaces stay in sync.
-      // Dashboard expects { user: {...}, token, timestamp } — and uses sess.timestamp
-      // for the 24hr expiry check; without it the dashboard silently logs out.
-      const user = data.user || {
-        email: data.email || email,
-        plan: data.plan,
-        clientName: data.clientName
-      };
-      setSession({ user: user, token: data.token, timestamp: Date.now() });
-      return data;
-    }
-
-    /* ============================ KEYBOARD ============================ */
+    /* ============================ KEYBOARD ============================
+       Shell handles: ⌘S save, A=AI, T=Templates, D=DesignMode, 1/2/3=Tabs, Esc=close.
+       Testimonials-only shortcuts (undo/redo) stay here. */
     function bindKeyboard() {
       document.addEventListener('keydown', (e) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); save(); return; }
-        if ((e.metaKey || e.ctrlKey) && e.key === 'z') { e.preventDefault(); undo(); return; }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
         if ((e.metaKey || e.ctrlKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redoAction(); return; }
         if (e.target.matches && e.target.matches('input, textarea, select')) return;
         if (e.key === 'Escape') { closeModal(); const pop = $('#dm-popover'); if (pop) pop.hidden = true; return; }
-        if (e.key === 'd' || e.key === 'D') toggleDM();
-        else if (e.key === 'a' || e.key === 'A') openAIModal();
-        else if (e.key === 't' || e.key === 'T') openTemplatesModal();
-        else if (e.key === '1') setTab('design');
-        else if (e.key === '2') setTab('content');
-        else if (e.key === '3') setTab('settings');
       });
     }
 
     /* ============================ INIT ============================ */
     async function init() {
-      // DIAGNOSTIC — always log what init sees
-      const sess = getSession();
-      console.log('[init] running. session found?', !!sess, '| has token?', !!sess?.token, '| url:', location.href);
-      if (!sess || !sess.token) {
-        console.log('[init] → showing login overlay (no valid session at this moment)');
-        showLogin();
-        return;
-      }
-
-      console.log('[init] → hiding login, loading editor');
-      hideLogin();
+      $('#editor').hidden = false;
 
       // Load widget if ?id= in URL
       const urlId = new URLSearchParams(location.search).get('id');
@@ -2496,22 +2448,17 @@
       renderAll();
       updatePreview();
 
-      // Tab buttons
-      $$('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+      // Name input — shell exposes #name-input
+      $('#name-input').addEventListener('input', debounce((e) => {
+        state.widgetName = e.target.value;
+        state.dirty = true;
+        syncSaveBtn();
+      }, 150));
 
-      // Name input
-      $('#name-input').addEventListener('input', debounce((e) => { state.widgetName = e.target.value; state.dirty = true; syncSaveBtn(); }, 150));
+      // Tab buttons — shell renders them as .tgse-tabs button[data-tab]
+      $$('.tgse-tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
 
-      // Save button
-      $('#save-btn').addEventListener('click', save);
-
-      // AI / Templates / Embed / DM buttons
-      $('#btn-ai').addEventListener('click', openAIModal);
-      $('#btn-templates').addEventListener('click', openTemplatesModal);
-      $('#btn-embed').addEventListener('click', openEmbedModal);
-      $('#btn-dm').addEventListener('click', toggleDM);
-
-      // Viewport toggle
+      // Viewport buttons — keep [data-viewport] for FAQ-style handler
       $$('[data-viewport]').forEach(b => b.addEventListener('click', () => {
         state.viewport = b.dataset.viewport;
         $$('[data-viewport]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.viewport === state.viewport)));
@@ -2530,54 +2477,61 @@
       bindKeyboard();
     }
 
-    /* ============================ LOGIN FORM ============================ */
-    function bindLogin() {
-      const go = async () => {
-        const email = $('#login-email').value.trim();
-        const code  = $('#login-code').value;
-        const err = $('#login-err');
-        err.style.display = 'none';
-        if (!email || !code) { err.textContent = 'Email and client code both required'; err.style.display = ''; return; }
-        const btn = $('#login-btn');
-        btn.disabled = true; btn.textContent = 'Signing in…';
-
-        // Watchdog: if anything below hangs for more than 20s, abort so the
-        // button doesn't stay stuck on "Signing in..." forever.
-        const timeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Sign-in timed out — please check your connection and try again')), 20000)
-        );
-
-        try {
-          await Promise.race([tryLogin(email, code), timeout]);
-          // At this point tryLogin has written a validated session.
-          // Verify by reading it back before running init(), to catch any
-          // environment where sessionStorage writes silently fail (private
-          // mode, storage quota, policy restrictions).
-          const sess = getSession();
-          if (!sess || !sess.token) {
-            throw new Error('Your browser blocked session storage — try a normal window or a different browser');
-          }
-          await Promise.race([init(), timeout]);
-        } catch (e) {
-          console.error('[login] failed:', e);
-          err.textContent = e.message || 'Sign-in failed';
-          err.style.display = '';
-        } finally {
-          // Always reset the button, regardless of success/failure. On
-          // success, the login overlay is hidden anyway; on failure the
-          // user can try again without being stuck on "Signing in...".
-          btn.disabled = false;
-          btn.textContent = 'Sign in';
-        }
-      };
-      $('#login-btn').addEventListener('click', go);
-      $$('#login-email, #login-code').forEach(i => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); }));
-    }
-
     /* ============================ BOOT ============================ */
-    console.log('[boot] editor-testimonials.html script running | sessionStorage keys:', Object.keys(sessionStorage));
-    bindLogin();
-    init();
+    console.log('[boot] editor-testimonials.html running | shell:', !!window.tgse);
+
+    // Hand off to the shell. It handles login overlay, save (via getConfig),
+    // save button state, theme + design-mode + embed + AI + templates triggers,
+    // SSO across tabs, keyboard shortcuts, viewport switching, FONT PICKER.
+    window.tgse.init({
+      widgetType: 'Testimonials',
+      widgetTag: 'testimonials',
+      scriptFile: 'widget-testimonials.js',
+
+      // Font picker — Testimonials widget JS already supports config.fontFamily
+      fontPickerEl: '#fontPickerMount',
+      onFontChange: (font) => {
+        state.config.fontFamily = font;
+        state.dirty = true;
+        syncSaveBtn();
+        updatePreview();
+      },
+
+      // Shell asks us for the current config when it needs to save.
+      getConfig: () => state.config,
+      setConfig: (c) => {
+        if (c && typeof c === 'object') Object.assign(state.config, c);
+        renderAll(); updatePreview();
+      },
+
+      // Hooks
+      onAIBuild: () => openAIModal(),
+      onTemplates: () => openTemplatesModal(),
+      onThemeToggle: () => {
+        // Testimonials widget supports config.theme = 'light' | 'dark'
+        state.config.theme = state.config.theme === 'dark' ? 'light' : 'dark';
+        state.dirty = true;
+        syncSaveBtn();
+        updatePreview();
+      },
+      onDesignMode: (isOn) => {
+        if (isOn !== state.dmEnabled) toggleDM();
+      },
+      onTabChange: (tab) => setTab(tab),
+      onLoginSuccess: () => init(),
+
+      // After a successful save, sync local state.
+      onAfterSave: (d) => {
+        state.dirty = false;
+        if (d && d.widgetId) state.widgetId = d.widgetId;
+      },
+    });
+
+    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+      init();
+    } else {
+      $('#editor').hidden = true;
+    }
   })();
   </script>
 </body>
