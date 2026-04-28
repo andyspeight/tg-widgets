@@ -174,10 +174,225 @@
       to { background-position: -200% 0; }
     }
 
+    /* Word Reveal mode */
+    .tgx-reveal-piece {
+      display: inline-block;
+      opacity: 0;
+      will-change: transform, opacity, filter;
+    }
+    .tgx-reveal-piece[data-anim="fade-up"] { transform: translateY(0.4em); }
+    .tgx-reveal-piece[data-anim="fade-up"].is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tgx-reveal-piece[data-anim="fade"].is-visible {
+      opacity: 1;
+      transition: opacity 700ms ease-out;
+    }
+    .tgx-reveal-piece[data-anim="blur"] { filter: blur(8px); }
+    .tgx-reveal-piece[data-anim="blur"].is-visible {
+      opacity: 1;
+      filter: blur(0);
+      transition: opacity 700ms ease-out, filter 700ms ease-out;
+    }
+    .tgx-reveal-piece[data-anim="slide"] { transform: translateX(-1em); }
+    .tgx-reveal-piece[data-anim="slide"].is-visible {
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 600ms ease-out, transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    /* Add a small gap after each word piece (but not letters) */
+    .tgx-reveal-piece[data-unit="word"] + .tgx-reveal-piece[data-unit="word"]::before {
+      content: " ";
+    }
+
+    /* Marquee mode */
+    .tgx-marquee {
+      display: flex;
+      overflow: hidden;
+      width: 100%;
+      mask-image: linear-gradient(to right, transparent, #000 var(--tgx-mq-fade, 4%), #000 calc(100% - var(--tgx-mq-fade, 4%)), transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--tgx-mq-fade, 4%), #000 calc(100% - var(--tgx-mq-fade, 4%)), transparent);
+    }
+    .tgx-marquee[data-fade="0"] {
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
+    .tgx-marquee-track {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: var(--tgx-mq-gap, 1.5em);
+      animation: tgx-mq-scroll var(--tgx-mq-duration, 25s) linear infinite;
+      will-change: transform;
+    }
+    .tgx-marquee[data-direction="right"] .tgx-marquee-track {
+      animation-direction: reverse;
+    }
+    .tgx-marquee[data-pause-hover="1"]:hover .tgx-marquee-track {
+      animation-play-state: paused;
+    }
+    .tgx-marquee-item {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .tgx-marquee-sep {
+      flex-shrink: 0;
+      opacity: 0.4;
+      align-self: center;
+    }
+    @keyframes tgx-mq-scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* Outlined mode */
+    .tgx-outlined {
+      color: var(--tgx-outline-fill, transparent);
+      -webkit-text-stroke: var(--tgx-outline-width, 2px) var(--tgx-outline-color, currentColor);
+      text-stroke: var(--tgx-outline-width, 2px) var(--tgx-outline-color, currentColor);
+      transition: color 350ms ease, -webkit-text-stroke-color 350ms ease;
+      display: inline-block;
+    }
+    .tgx-outlined[data-hover-fill="1"]:hover {
+      color: var(--tgx-outline-hover, var(--tgx-outline-color));
+    }
+
+    /* Split Colour mode — horizontal */
+    .tgx-split-h {
+      background: linear-gradient(
+        to bottom,
+        var(--tgx-split-1, #0F172A) 0%,
+        var(--tgx-split-1, #0F172A) var(--tgx-split-pos, 50%),
+        var(--tgx-split-2, #0891B2) var(--tgx-split-pos, 50%),
+        var(--tgx-split-2, #0891B2) 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      display: inline-block;
+    }
+    /* Split Colour mode — alternate words */
+    .tgx-split-alt-word {
+      display: inline-block;
+    }
+    .tgx-split-alt-word[data-tone="1"] { color: var(--tgx-split-1, #0F172A); }
+    .tgx-split-alt-word[data-tone="2"] { color: var(--tgx-split-2, #0891B2); }
+
+    /* Spotlight Follow mode */
+    .tgx-spotlight {
+      position: relative;
+      display: inline-block;
+    }
+    .tgx-spotlight-base {
+      color: var(--tgx-spot-base, #CBD5E1);
+    }
+    .tgx-spotlight-top {
+      position: absolute;
+      inset: 0;
+      color: var(--tgx-spot-active, #0891B2);
+      pointer-events: none;
+      mask-image: radial-gradient(circle var(--tgx-spot-radius, 140px) at var(--tgx-spot-x, 50%) var(--tgx-spot-y, 50%),
+        rgba(0,0,0,1) 0%,
+        rgba(0,0,0,0.95) 30%,
+        rgba(0,0,0,0) 70%);
+      -webkit-mask-image: radial-gradient(circle var(--tgx-spot-radius, 140px) at var(--tgx-spot-x, 50%) var(--tgx-spot-y, 50%),
+        rgba(0,0,0,1) 0%,
+        rgba(0,0,0,0.95) 30%,
+        rgba(0,0,0,0) 70%);
+      transition: -webkit-mask-position 80ms linear, mask-position 80ms linear;
+    }
+
+    /* Stacked Editorial mode */
+    .tgx-stacked {
+      display: flex;
+      flex-direction: column;
+      gap: var(--tgx-stk-gap, 0.1em);
+      align-items: var(--tgx-stk-align-items, center);
+    }
+    .tgx-stk-line {
+      display: block;
+      line-height: 1;
+    }
+    .tgx-stk-line[data-italic="1"] { font-style: italic; }
+    .tgx-stk-line[data-uppercase="1"] {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Split Block mode */
+    .tgx-splitblock {
+      display: grid;
+      width: 100%;
+      gap: var(--tgx-sb-gap, 24px);
+      align-items: center;
+    }
+    .tgx-splitblock[data-text-side="left"] {
+      grid-template-columns: var(--tgx-sb-text-frac, 1fr) var(--tgx-sb-block-frac, 1fr);
+    }
+    .tgx-splitblock[data-text-side="right"] {
+      grid-template-columns: var(--tgx-sb-block-frac, 1fr) var(--tgx-sb-text-frac, 1fr);
+    }
+    .tgx-sb-text {
+      text-align: var(--tgx-sb-text-align, left);
+      line-height: 1.1;
+    }
+    .tgx-sb-block {
+      background: var(--tgx-sb-block-bg, #0891B2);
+      color: var(--tgx-sb-block-text, #FFFFFF);
+      border-radius: var(--tgx-sb-radius, 16px);
+      padding: var(--tgx-sb-block-pad, 32px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: var(--tgx-sb-block-min, 120px);
+      line-height: 1.15;
+      font-size: var(--tgx-sb-block-size, 1em);
+      font-weight: var(--tgx-sb-block-weight, 600);
+    }
+    /* When text side is "right", swap the visual order so block comes first */
+    .tgx-splitblock[data-text-side="right"] .tgx-sb-text { order: 2; }
+    .tgx-splitblock[data-text-side="right"] .tgx-sb-block { order: 1; }
+    @media (max-width: 640px) {
+      .tgx-splitblock {
+        grid-template-columns: 1fr !important;
+      }
+      .tgx-splitblock[data-text-side="right"] .tgx-sb-text { order: 1; }
+      .tgx-splitblock[data-text-side="right"] .tgx-sb-block { order: 2; }
+    }
+
+    /* Vertical mode */
+    .tgx-vertical-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: var(--tgx-vt-height, 200px);
+      overflow: visible;
+      padding: 16px 0;
+    }
+    .tgx-vertical {
+      display: inline-block;
+      white-space: nowrap;
+      letter-spacing: var(--tgx-vt-tracking, 0.15em);
+      text-transform: var(--tgx-vt-case, none);
+      line-height: 1;
+      transform-origin: center center;
+    }
+    .tgx-vertical[data-direction="ccw"] { transform: rotate(-90deg); }
+    .tgx-vertical[data-direction="cw"] { transform: rotate(90deg); }
+
     @media (prefers-reduced-motion: reduce) {
       .tgx-root[data-respect-reduced-motion="1"] .tgx-cursor { animation: none; }
       .tgx-root[data-respect-reduced-motion="1"] .tgx-rot-word { transition: none; }
       .tgx-root[data-respect-reduced-motion="1"] .tgx-gradient { animation: none; background-size: 100% 100%; }
+      .tgx-root[data-respect-reduced-motion="1"] .tgx-reveal-piece {
+        opacity: 1; transform: none; filter: none; transition: none;
+      }
+      .tgx-root[data-respect-reduced-motion="1"] .tgx-marquee-track { animation: none; }
     }
 
     /* Responsive size scaling */
@@ -255,6 +470,78 @@
           angle: 90,
           speed: 6,                   // seconds per cycle
           static: false
+        },
+        wordreveal: {
+          text: 'Holidays handpicked by people who love travel.',
+          unit: 'word',                // word | letter
+          animation: 'fade-up',        // fade-up | fade | blur | slide
+          stagger: 80,                 // ms between pieces
+          duration: 700,               // total reveal time per piece (CSS handles, this is informational)
+          startDelay: 100,
+          startOnView: true,
+          loop: false                  // if true, hide and re-reveal on a cycle
+        },
+        marquee: {
+          items: ['Travel Smarter', 'Book Faster', 'Earn More', 'Stay Supported'],
+          separator: '•',              // single char or short string between items
+          speed: 60,                   // pixels per second
+          direction: 'left',           // left | right
+          pauseOnHover: true,
+          fade: true                   // edge fade mask
+        },
+        outlined: {
+          text: 'Outlined for impact',
+          strokeWidth: 2,              // px
+          strokeColor: '#0F172A',
+          fillColor: 'transparent',    // 'transparent' or a hex
+          hoverFill: false,            // when true, text fills with strokeColor on hover
+          hoverFillColor: ''           // optional explicit hover fill
+        },
+        splitcolor: {
+          text: 'Two tones, one statement',
+          style: 'horizontal',         // horizontal | alternate
+          color1: '#0F172A',
+          color2: '#0891B2',
+          splitPos: 50                 // % for horizontal style only
+        },
+        spotlight: {
+          text: 'Hover over me',
+          baseColor: '#CBD5E1',        // dim/ghost colour for resting state
+          activeColor: '#0891B2',      // vivid colour shown under the spotlight
+          radius: 140,                 // pixels
+          followCursor: true,          // false = static centred spotlight
+          fallbackPosition: 'center'   // center | left | right (for static or reduced-motion)
+        },
+        stacked: {
+          // Up to 4 independently-styled lines for editorial layouts
+          lines: [
+            { text: 'Bournemouth', size: 18, weight: 600, color: '#0891B2', italic: false, uppercase: true, align: 'center' },
+            { text: 'Travel agent', size: 96, weight: 800, color: '#0F172A', italic: false, uppercase: false, align: 'center' },
+            { text: 'of the year', size: 96, weight: 300, color: '#0F172A', italic: true, uppercase: false, align: 'center' }
+          ],
+          gap: 4,                      // pixels between lines
+          alignItems: 'center'         // overall alignment of the stack
+        },
+        splitblock: {
+          textContent: 'Travel\nbooking,\nreimagined.',
+          blockText: 'Try it free',
+          blockColor: '#0891B2',
+          blockTextColor: '#FFFFFF',
+          textSide: 'left',            // left | right
+          ratio: '50/50',              // 40/60 | 50/50 | 60/40
+          gap: 24,
+          blockRadius: 16,
+          blockPadding: 32,
+          textAlign: 'left',
+          blockSize: 22,               // px font size for the block label
+          blockWeight: 700
+        },
+        vertical: {
+          text: 'TRAVELGENIX',
+          direction: 'ccw',            // ccw (counter-clockwise, reads bottom-up) | cw (clockwise, reads top-down)
+          tracking: 0.15,              // em letter-spacing
+          uppercase: true,
+          height: 200                  // px container height to give the rotated text room
         }
       }, c);
     }
@@ -298,6 +585,14 @@
         case 'rotating':   this._renderRotating();   break;
         case 'counter':    this._renderCounter();    break;
         case 'gradient':   this._renderGradient();   break;
+        case 'wordreveal': this._renderWordReveal(); break;
+        case 'marquee':    this._renderMarquee();    break;
+        case 'outlined':   this._renderOutlined();   break;
+        case 'splitcolor': this._renderSplitColor(); break;
+        case 'spotlight':  this._renderSpotlight();  break;
+        case 'stacked':    this._renderStacked();    break;
+        case 'splitblock': this._renderSplitBlock(); break;
+        case 'vertical':   this._renderVertical();   break;
         default:           this._renderFallback();
       }
     }
@@ -307,6 +602,12 @@
       this._timers = [];
       if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
       if (this._observer) { this._observer.disconnect(); this._observer = null; }
+      if (this._spotlightHandler) {
+        this.el.removeEventListener('mousemove', this._spotlightHandler);
+        this.el.removeEventListener('mouseleave', this._spotlightLeaveHandler);
+        this._spotlightHandler = null;
+        this._spotlightLeaveHandler = null;
+      }
     }
 
     _setTimer(fn, delay) {
@@ -526,6 +827,358 @@
       this.stage.innerHTML = `
         <span class="tgx-gradient" data-static="${isStatic ? '1' : '0'}" style="${colorVars}; --tgx-grad-angle: ${angle}deg; --tgx-grad-speed: ${speed}s; background-image: linear-gradient(${angle}deg, ${gradientStops});">${esc(cfg.text || '')}</span>
       `;
+    }
+
+    // ---------- Word Reveal ----------
+    _renderWordReveal() {
+      const cfg = this.c.wordreveal;
+      const text = String(cfg.text || '');
+      if (!text) {
+        this.stage.innerHTML = '';
+        return;
+      }
+      const unit = cfg.unit === 'letter' ? 'letter' : 'word';
+      const anim = ['fade-up', 'fade', 'blur', 'slide'].includes(cfg.animation) ? cfg.animation : 'fade-up';
+      const stagger = clamp(cfg.stagger, 10, 1000);
+      const startDelay = clamp(cfg.startDelay, 0, 5000);
+
+      // Split into pieces
+      const pieces = unit === 'letter'
+        ? Array.from(text).map(ch => ({ unit: 'letter', text: ch }))
+        : text.split(/(\s+)/).filter(s => s.length > 0).map(s => ({ unit: /\s/.test(s) ? 'space' : 'word', text: s }));
+
+      // Build HTML
+      const html = pieces.map(p => {
+        if (p.unit === 'space') return p.text; // preserve whitespace as-is
+        // For letters, render non-breaking-ish: \u00a0 not needed here, just render the char
+        return `<span class="tgx-reveal-piece" data-unit="${p.unit}" data-anim="${anim}">${esc(p.text)}</span>`;
+      }).join('');
+
+      this.stage.innerHTML = `<span>${html}</span>`;
+
+      // Reduced motion: snap visible
+      if (this._prefersReduced()) {
+        this.stage.querySelectorAll('.tgx-reveal-piece').forEach(p => p.classList.add('is-visible'));
+        return;
+      }
+
+      const playReveal = () => {
+        const all = Array.from(this.stage.querySelectorAll('.tgx-reveal-piece'));
+        all.forEach((p, i) => {
+          this._setTimer(() => p.classList.add('is-visible'), startDelay + i * stagger);
+        });
+
+        // Optional loop: hide all and re-reveal after total + 2.5s
+        if (cfg.loop) {
+          const totalMs = startDelay + all.length * stagger + 700; // 700 = ~CSS duration
+          this._setTimer(() => {
+            all.forEach(p => p.classList.remove('is-visible'));
+            this._setTimer(playReveal, 600);
+          }, totalMs + 2500);
+        }
+      };
+
+      if (cfg.startOnView && 'IntersectionObserver' in window) {
+        this._observer = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              playReveal();
+              this._observer.disconnect();
+            }
+          });
+        }, { threshold: 0.3 });
+        this._observer.observe(this.el);
+      } else {
+        playReveal();
+      }
+    }
+
+    // ---------- Marquee ----------
+    _renderMarquee() {
+      const cfg = this.c.marquee;
+      const items = (Array.isArray(cfg.items) ? cfg.items : []).map(String).filter(s => s.length > 0);
+      if (items.length === 0) {
+        this.stage.innerHTML = '';
+        return;
+      }
+
+      const sep = String(cfg.separator || '').slice(0, 6);
+      const speed = clamp(cfg.speed, 10, 400);          // px/sec
+      const direction = cfg.direction === 'right' ? 'right' : 'left';
+      const pauseHover = cfg.pauseOnHover !== false;
+      const fade = cfg.fade !== false;
+
+      // Build a flat list of items + separators (sep between, not after last).
+      // Then duplicate the whole list for seamless loop. All elements are direct
+      // flex children so `gap` spaces them evenly.
+      const buildList = () => {
+        const parts = [];
+        items.forEach((it, i) => {
+          parts.push(`<span class="tgx-marquee-item">${esc(it)}</span>`);
+          if (sep && i < items.length - 1) {
+            parts.push(`<span class="tgx-marquee-sep" aria-hidden="true">${esc(sep)}</span>`);
+          }
+        });
+        return parts.join('');
+      };
+      const oneCopy = buildList();
+      // For the second copy, wrap items as aria-hidden so screen readers don't read twice.
+      // Use a fragment-style approach: same elements, just marked aria-hidden via attribute on the wrapper.
+      const buildListAriaHidden = () => {
+        const parts = [];
+        items.forEach((it, i) => {
+          parts.push(`<span class="tgx-marquee-item" aria-hidden="true">${esc(it)}</span>`);
+          if (sep && i < items.length - 1) {
+            parts.push(`<span class="tgx-marquee-sep" aria-hidden="true">${esc(sep)}</span>`);
+          }
+        });
+        return parts.join('');
+      };
+      const secondCopy = buildListAriaHidden();
+
+      this.stage.innerHTML = `
+        <div class="tgx-marquee" data-direction="${direction}" data-pause-hover="${pauseHover ? '1' : '0'}" data-fade="${fade ? '1' : '0'}" style="--tgx-mq-fade: ${fade ? '4%' : '0'}">
+          <div class="tgx-marquee-track" id="tgx-mq-track">${oneCopy}${sep ? `<span class="tgx-marquee-sep" aria-hidden="true">${esc(sep)}</span>` : ''}${secondCopy}</div>
+        </div>
+      `;
+
+      // Compute duration from track width and speed (px/sec)
+      requestAnimationFrame(() => {
+        const track = this.stage.querySelector('.tgx-marquee-track');
+        if (!track) return;
+        // Track is 2x the items + 1 bridging sep, so single-cycle distance is half scrollWidth
+        const fullW = track.scrollWidth;
+        const cycleDistance = fullW / 2;
+        const duration = Math.max(2, cycleDistance / speed);
+        track.style.setProperty('--tgx-mq-duration', duration + 's');
+      });
+    }
+
+    // ---------- Outlined ----------
+    _renderOutlined() {
+      const cfg = this.c.outlined;
+      const text = String(cfg.text || '');
+      const strokeWidth = clamp(cfg.strokeWidth, 0.5, 10);
+      const strokeColor = safeColor(cfg.strokeColor, '#0F172A');
+      const fillColor = cfg.fillColor === 'transparent' ? 'transparent' : safeColor(cfg.fillColor, 'transparent');
+      const hoverFill = cfg.hoverFill === true;
+      const hoverFillColor = cfg.hoverFillColor ? safeColor(cfg.hoverFillColor, strokeColor) : strokeColor;
+
+      const styleVars = [
+        `--tgx-outline-width: ${strokeWidth}px`,
+        `--tgx-outline-color: ${strokeColor}`,
+        `--tgx-outline-fill: ${fillColor}`,
+        `--tgx-outline-hover: ${hoverFillColor}`
+      ].join('; ');
+
+      this.stage.innerHTML = `
+        <span class="tgx-outlined" data-hover-fill="${hoverFill ? '1' : '0'}" style="${styleVars}">${esc(text)}</span>
+      `;
+    }
+
+    // ---------- Split Colour ----------
+    _renderSplitColor() {
+      const cfg = this.c.splitcolor;
+      const text = String(cfg.text || '');
+      const color1 = safeColor(cfg.color1, '#0F172A');
+      const color2 = safeColor(cfg.color2, '#0891B2');
+      const style = cfg.style === 'alternate' ? 'alternate' : 'horizontal';
+
+      const styleVars = `--tgx-split-1: ${color1}; --tgx-split-2: ${color2}`;
+
+      if (style === 'horizontal') {
+        const splitPos = clamp(cfg.splitPos, 10, 90);
+        this.stage.innerHTML = `
+          <span class="tgx-split-h" style="${styleVars}; --tgx-split-pos: ${splitPos}%">${esc(text)}</span>
+        `;
+      } else {
+        // Alternate: split into words, alternate tone 1 / tone 2
+        const words = text.split(/(\s+)/); // keep whitespace tokens
+        let toneToggle = 1;
+        const html = words.map(w => {
+          if (/^\s+$/.test(w)) return w;
+          if (w.length === 0) return '';
+          const tone = toneToggle;
+          toneToggle = toneToggle === 1 ? 2 : 1;
+          return `<span class="tgx-split-alt-word" data-tone="${tone}">${esc(w)}</span>`;
+        }).join('');
+        this.stage.innerHTML = `<span style="${styleVars}">${html}</span>`;
+      }
+    }
+
+    // ---------- Spotlight Follow ----------
+    _renderSpotlight() {
+      const cfg = this.c.spotlight;
+      const text = String(cfg.text || '');
+      const baseColor = safeColor(cfg.baseColor, '#CBD5E1');
+      const activeColor = safeColor(cfg.activeColor, '#0891B2');
+      const radius = clamp(cfg.radius, 40, 500);
+      const followCursor = cfg.followCursor !== false;
+      const fallbackPos = ['center', 'left', 'right'].includes(cfg.fallbackPosition) ? cfg.fallbackPosition : 'center';
+
+      const styleVars = [
+        `--tgx-spot-base: ${baseColor}`,
+        `--tgx-spot-active: ${activeColor}`,
+        `--tgx-spot-radius: ${radius}px`
+      ].join('; ');
+
+      // Set initial spotlight position based on fallback (used when reduced-motion or follow disabled)
+      const initialX = fallbackPos === 'left' ? '20%' : fallbackPos === 'right' ? '80%' : '50%';
+      const positionVars = `--tgx-spot-x: ${initialX}; --tgx-spot-y: 50%`;
+
+      this.stage.innerHTML = `
+        <span class="tgx-spotlight" style="${styleVars}; ${positionVars}">
+          <span class="tgx-spotlight-base">${esc(text)}</span>
+          <span class="tgx-spotlight-top" aria-hidden="true">${esc(text)}</span>
+        </span>
+      `;
+
+      // If reduced-motion is respected and active, OR follow is disabled, leave spotlight static
+      if (this._prefersReduced() || !followCursor) return;
+
+      // Track cursor on the host element. Use throttling via rAF for smoothness.
+      const spotlight = this.shadow.querySelector('.tgx-spotlight');
+      if (!spotlight) return;
+
+      let pendingFrame = false;
+      let lastEvent = null;
+
+      this._spotlightHandler = (e) => {
+        lastEvent = e;
+        if (pendingFrame) return;
+        pendingFrame = true;
+        requestAnimationFrame(() => {
+          pendingFrame = false;
+          if (!lastEvent) return;
+          const rect = spotlight.getBoundingClientRect();
+          const x = lastEvent.clientX - rect.left;
+          const y = lastEvent.clientY - rect.top;
+          spotlight.style.setProperty('--tgx-spot-x', x + 'px');
+          spotlight.style.setProperty('--tgx-spot-y', y + 'px');
+        });
+      };
+
+      this._spotlightLeaveHandler = () => {
+        // Snap back to centre on mouse leave
+        spotlight.style.setProperty('--tgx-spot-x', initialX);
+        spotlight.style.setProperty('--tgx-spot-y', '50%');
+      };
+
+      this.el.addEventListener('mousemove', this._spotlightHandler);
+      this.el.addEventListener('mouseleave', this._spotlightLeaveHandler);
+    }
+
+    // ---------- Stacked Editorial ----------
+    _renderStacked() {
+      const cfg = this.c.stacked;
+      const lines = (Array.isArray(cfg.lines) ? cfg.lines : []).slice(0, 6);
+      const gap = clamp(cfg.gap, 0, 40);
+      const alignItems = ['left', 'center', 'right'].includes(cfg.alignItems) ? cfg.alignItems : 'center';
+      const flexAlign = alignItems === 'left' ? 'flex-start' : alignItems === 'right' ? 'flex-end' : 'center';
+
+      const styleVars = `--tgx-stk-gap: ${gap}px; --tgx-stk-align-items: ${flexAlign}`;
+
+      const linesHtml = lines.map(line => {
+        const txt = String(line.text || '');
+        const size = clamp(line.size, 8, 240);
+        const weight = clamp(line.weight, 100, 900);
+        const color = safeColor(line.color, '#0F172A');
+        const italic = line.italic === true ? '1' : '0';
+        const upper = line.uppercase === true ? '1' : '0';
+        const align = ['left', 'center', 'right'].includes(line.align) ? line.align : 'center';
+        const lineStyle = [
+          `font-size: ${size}px`,
+          `font-weight: ${weight}`,
+          `color: ${color}`,
+          `text-align: ${align}`
+        ].join('; ');
+        return `<span class="tgx-stk-line" data-italic="${italic}" data-uppercase="${upper}" style="${lineStyle}">${esc(txt)}</span>`;
+      }).join('');
+
+      this.stage.innerHTML = `
+        <div class="tgx-stacked" style="${styleVars}">${linesHtml}</div>
+      `;
+    }
+
+    // ---------- Split Block ----------
+    _renderSplitBlock() {
+      const cfg = this.c.splitblock;
+      const text = String(cfg.textContent || '');
+      const blockText = String(cfg.blockText || '');
+      const blockColor = safeColor(cfg.blockColor, '#0891B2');
+      const blockTextColor = safeColor(cfg.blockTextColor, '#FFFFFF');
+      const textSide = cfg.textSide === 'right' ? 'right' : 'left';
+      const ratio = ['40/60', '50/50', '60/40'].includes(cfg.ratio) ? cfg.ratio : '50/50';
+      const gap = clamp(cfg.gap, 0, 80);
+      const blockRadius = clamp(cfg.blockRadius, 0, 48);
+      const blockPadding = clamp(cfg.blockPadding, 8, 80);
+      const textAlign = ['left', 'center', 'right'].includes(cfg.textAlign) ? cfg.textAlign : 'left';
+      const blockSize = clamp(cfg.blockSize, 12, 80);
+      const blockWeight = clamp(cfg.blockWeight, 100, 900);
+
+      // Map ratio to grid template fractions
+      const ratioMap = {
+        '40/60': { text: '2fr', block: '3fr' },
+        '50/50': { text: '1fr', block: '1fr' },
+        '60/40': { text: '3fr', block: '2fr' }
+      };
+      const r = ratioMap[ratio];
+
+      const styleVars = [
+        `--tgx-sb-gap: ${gap}px`,
+        `--tgx-sb-text-frac: ${r.text}`,
+        `--tgx-sb-block-frac: ${r.block}`,
+        `--tgx-sb-block-bg: ${blockColor}`,
+        `--tgx-sb-block-text: ${blockTextColor}`,
+        `--tgx-sb-radius: ${blockRadius}px`,
+        `--tgx-sb-block-pad: ${blockPadding}px`,
+        `--tgx-sb-text-align: ${textAlign}`,
+        `--tgx-sb-block-size: ${blockSize}px`,
+        `--tgx-sb-block-weight: ${blockWeight}`
+      ].join('; ');
+
+      // Preserve newlines in text content using <br>
+      const textHtml = esc(text).replace(/\n/g, '<br>');
+      const blockHtml = esc(blockText).replace(/\n/g, '<br>');
+
+      this.stage.innerHTML = `
+        <div class="tgx-splitblock" data-text-side="${textSide}" style="${styleVars}">
+          <div class="tgx-sb-text">${textHtml}</div>
+          <div class="tgx-sb-block">${blockHtml}</div>
+        </div>
+      `;
+    }
+
+    // ---------- Vertical ----------
+    _renderVertical() {
+      const cfg = this.c.vertical;
+      const text = String(cfg.text || '');
+      const direction = cfg.direction === 'cw' ? 'cw' : 'ccw';
+      const tracking = clamp(cfg.tracking, 0, 0.5);
+      const uppercase = cfg.uppercase !== false;
+      const height = clamp(cfg.height, 80, 600);
+
+      this.stage.innerHTML = `
+        <div class="tgx-vertical-wrap" id="tgx-vt-wrap" style="--tgx-vt-height: ${height}px">
+          <span class="tgx-vertical" id="tgx-vt-text" data-direction="${direction}" style="--tgx-vt-tracking: ${tracking}em; --tgx-vt-case: ${uppercase ? 'uppercase' : 'none'}">${esc(text)}</span>
+        </div>
+      `;
+
+      // After layout: measure the unrotated text's natural width and grow the wrap's
+      // min-height to fit, plus a 32px buffer. Without this, long strings get clipped.
+      requestAnimationFrame(() => {
+        const wrap = this.stage.querySelector('#tgx-vt-wrap');
+        const txt = this.stage.querySelector('#tgx-vt-text');
+        if (!wrap || !txt) return;
+        // The text element's natural width (before transform applies visually) is the
+        // length we need vertically. getBoundingClientRect() returns post-transform
+        // dimensions, so we use offsetWidth which is the pre-transform width.
+        const naturalW = txt.offsetWidth;
+        const required = naturalW + 32; // small buffer
+        if (required > height) {
+          wrap.style.minHeight = required + 'px';
+        }
+      });
     }
 
     _renderFallback() {
