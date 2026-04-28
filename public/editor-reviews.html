@@ -3,478 +3,885 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reviews Editor — Travelgenix</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Google Reviews — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{--bg:#F4F5F7;--sf:#FFF;--bd:#E3E5E8;--tx:#1A1D23;--sb:#6B7280;--mt:#9CA3AF;--br:#0891B2;--bl:#ECFEFF;--bk:#0E7490;--ac:#7C3AED;--dn:#EF4444;--ok:#10B981;--ft:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--ft);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden}
-[hidden]{display:none!important}
-.app{display:flex;height:100vh}
-.editor{width:360px;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
-.ed-top{padding:14px 16px;border-bottom:1px solid var(--bd)}.ed-top-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.ed-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#F59E0B,var(--ac));display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ed-logo svg{width:16px;height:16px;stroke:#fff;fill:#fff;stroke-width:0}
-.ed-info{flex:1;min-width:0}.ed-info h1{font-size:13px;font-weight:700;line-height:1.2}.ed-info span{font-size:11px;color:var(--mt)}
-.ed-name-row{display:flex;gap:6px}
-.ni{flex:1;padding:7px 10px;font-size:12px;border:1px solid var(--bd);border-radius:8px;background:#FAFBFC;font-family:var(--ft);color:var(--tx);outline:none}
-.ni:focus{border-color:var(--br);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
-.sv{padding:7px 14px;border:none;border-radius:8px;background:var(--br);color:#fff;font-size:12px;font-weight:600;font-family:var(--ft);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
-.sv:hover{background:var(--bk)}.sv svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ea{display:flex;gap:4px;margin-left:auto}
-.ab2{height:34px;padding:0 10px;border:1px solid var(--bd);background:var(--sf);border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;font-family:var(--ft);color:var(--sb);transition:all .15s}
-.ab2:hover{background:var(--bg)}.ab2 svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ab2.ai{color:var(--ac);border-color:#E9E5FF}.ab2.ai:hover{background:#F5F3FF}
-.ed-tabs{display:flex;border-bottom:1px solid var(--bd)}
-.ed-tab{flex:1;padding:10px 0;font-size:12px;font-weight:600;text-align:center;border:none;background:none;cursor:pointer;color:var(--mt);position:relative;font-family:var(--ft)}
-.ed-tab.active{color:var(--br)}.ed-tab.active::after{content:'';position:absolute;bottom:0;left:12px;right:12px;height:2px;background:var(--br);border-radius:1px}
-.ed-body{flex:1;overflow-y:auto}
-.sec{border-bottom:1px solid var(--bd)}.sec-hd{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
-.sec-hd:hover{background:#FAFAFA}.sec-tt{font-size:12px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:8px}
-.sec-tt svg,.ico{width:14px;height:14px;stroke:var(--mt);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.chv{width:12px;height:12px;stroke:var(--mt);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
-.sec.open .chv{transform:rotate(180deg)}.sec-bd{padding:0 16px 14px;display:none}.sec.open .sec-bd{display:block}
-.fld{margin-bottom:10px}.fl{font-size:12px;font-weight:500;color:var(--sb);margin-bottom:4px;display:block}
-input[type="text"],input[type="number"],input[type="url"],select,textarea{width:100%;padding:7px 10px;font-size:12px;border:1px solid var(--bd);border-radius:8px;background:#FAFBFC;font-family:var(--ft);color:var(--tx);outline:none;transition:border .15s}
-input:focus,select:focus,textarea:focus{border-color:var(--br);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
-textarea{resize:vertical;min-height:56px}
-.cr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.cr label{font-size:12px;font-weight:500;color:var(--sb)}
-.crr{display:flex;align-items:center;gap:8px}.crr span{font-size:10px;color:var(--mt);font-family:monospace;text-transform:uppercase}
-.sw{width:28px;height:28px;border-radius:8px;border:1px solid var(--bd);overflow:hidden;position:relative;cursor:pointer}
-.sw input{position:absolute;inset:-4px;width:140%;height:140%;opacity:0;cursor:pointer}
-.presets{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
-.preset{height:32px;border-radius:8px;border:1px solid var(--bd);cursor:pointer;overflow:hidden;transition:all .15s}.preset:hover{border-color:var(--br);transform:scale(1.08)}
-.tr{display:flex;align-items:center;justify-content:space-between;padding:4px 0}.tr label{font-size:12px;font-weight:500;color:var(--sb)}
-.tgl{width:36px;height:20px;border-radius:10px;background:#D1D5DB;border:none;cursor:pointer;position:relative;transition:background .2s;padding:0}
-.tgl.on{background:var(--br)}.tgl .dot{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:transform .2s}.tgl.on .dot{transform:translateX(16px)}
-.sr{margin-bottom:10px}.sr .st{display:flex;justify-content:space-between;margin-bottom:4px}
-input[type="range"]{width:100%;height:6px;-webkit-appearance:none;background:var(--bd);border-radius:3px;outline:none;border:none;padding:0}
-input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--br);border-radius:8px;cursor:pointer}
-.pg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
-.rc{background:#FAFBFC;border:1px solid var(--bd);border-radius:10px;margin-bottom:8px;overflow:hidden}
-.rch{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer}.rch:hover{background:#F3F4F6}
-.rcav{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:10px;flex-shrink:0}
-.rcn{flex:1;font-size:12px;font-weight:600}.rcs{display:flex;gap:1px;align-items:center}
-.rcs svg{width:10px;height:10px}
-.rcb{padding:10px;border-top:1px solid var(--bd);display:none}.rc.open .rcb{display:block}
-.star-pick{display:flex;gap:2px;margin-bottom:8px}.star-pick button{background:none;border:none;cursor:pointer;padding:2px}
-.star-pick svg{width:20px;height:20px;transition:all .15s}
-.star-pick button:hover svg{transform:scale(1.2)}
-.tag-input{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--bd);border-radius:8px;background:#FAFBFC;min-height:32px;align-items:center}
-.tag-chip{display:flex;align-items:center;gap:2px;padding:2px 8px;border-radius:6px;background:var(--bl);color:var(--br);font-size:10px;font-weight:600}
-.tag-chip button{background:none;border:none;cursor:pointer;color:var(--br);font-size:12px;line-height:1;padding:0 2px}
-.tag-input input{border:none;background:none;outline:none;font-size:11px;flex:1;min-width:60px;padding:2px 4px;font-family:var(--ft)}
-.up{border:2px dashed var(--bd);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px}
-.up:hover,.up.dragover{border-color:var(--br);background:var(--bl)}
-.up svg{width:20px;height:20px;stroke:var(--mt);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 4px;display:block}
-.up p{font-size:12px;color:var(--sb);font-weight:500}.up small{font-size:11px;color:var(--mt)}
-.up .dl{color:var(--br);text-decoration:underline;cursor:pointer;font-weight:600}
-.aib{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--br);background:none;border:none;cursor:pointer;padding:4px 0;font-family:var(--ft)}
-.aib:hover{color:var(--bk)}.aib svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.db{color:var(--dn)}.db:hover{color:#DC2626!important}
-/* Layout picker */
-.lp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.lp button{padding:8px 4px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-size:10px;font-weight:600;font-family:var(--ft);color:var(--sb);transition:all .15s;text-align:center}
-.lp button:hover{border-color:var(--br)}.lp button.active{background:var(--bl);border-color:var(--br);color:var(--br)}
-/* AI highlight editor */
-.aih{background:#FAFBFC;border:1px solid var(--bd);border-radius:8px;padding:8px;margin-bottom:6px}
-.aih-row{display:flex;gap:4px;align-items:center;margin-bottom:4px}
-.aih-dot{width:12px;height:12px;border-radius:6px;flex-shrink:0;position:relative;overflow:hidden;cursor:pointer}
-.aih-dot input{position:absolute;inset:-4px;width:140%;height:140%;opacity:0;cursor:pointer}
-/* Preview */
-.pva{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.pvb{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--sf);border-bottom:1px solid var(--bd)}
-.pvd{display:flex;align-items:center;gap:4px}.pvd>span{font-size:12px;font-weight:500;color:var(--mt);margin-right:8px}
-.dbtn{width:30px;height:30px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--mt);transition:all .15s}
-.dbtn.active{background:var(--bg);color:var(--br)}.dbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.pvr{display:flex;align-items:center;gap:6px}
-.tbtn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-size:12px;font-weight:500;color:var(--sb);font-family:var(--ft);transition:all .15s}
-.tbtn:hover{background:var(--bg)}.tbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tbtn.on{background:var(--bl);border-color:var(--br);color:var(--br)}
-.pvf{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px;background:#E8ECF0;position:relative}
-.pvx{background:#fff;border-radius:12px;border:1px solid var(--bd);overflow:hidden;transition:width .3s;min-height:500px;position:relative}
-.ov-wrap{position:absolute;inset:0;pointer-events:none;z-index:10}.ov-wrap.active{pointer-events:auto}
-.ov-spot{position:absolute;border:2px solid transparent;border-radius:6px;cursor:pointer;transition:all .15s;z-index:11}
-.ov-spot:hover{border-color:var(--br);background:rgba(8,145,178,.04)}
-.ov-spot:hover .ov-label{opacity:1;transform:translateY(0)}
-.ov-label{position:absolute;top:-24px;left:4px;font-size:10px;font-weight:700;color:#fff;background:var(--br);padding:2px 8px;border-radius:4px;white-space:nowrap;opacity:0;transform:translateY(4px);transition:all .15s;pointer-events:none;font-family:var(--ft)}
-.pop{position:fixed;z-index:9999;background:#fff;border:1px solid var(--bd);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15),0 4px 12px rgba(0,0,0,.08);padding:14px;min-width:260px;max-width:320px;font-family:var(--ft);opacity:0;transform:translateY(6px);transition:all .15s;pointer-events:none}
-.pop.show{pointer-events:auto;opacity:1;transform:translateY(0)}
-.pop-title{font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
-.pop-close{width:20px;height:20px;border:none;background:transparent;cursor:pointer;color:var(--mt);display:flex;align-items:center;justify-content:center;border-radius:4px}
-.pop-close:hover{background:var(--bg);color:var(--tx)}.pop-close svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.pop .fld{margin-bottom:8px}.pop .fl{font-size:11px;margin-bottom:2px}.pop input,.pop select,.pop textarea{font-size:11px;padding:6px 8px}
-.emb{background:#1E293B;border-radius:10px;padding:14px;font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#CBD5E1;line-height:1.8;overflow-x:auto;margin-bottom:8px;white-space:pre-wrap;word-break:break-all}
-.emb .t{color:#67E8F9}.emb .a{color:#6EE7B7}.emb .v{color:#FCD34D}
-.cpb{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-size:11px;font-weight:600;color:var(--br);font-family:var(--ft)}.cpb:hover{background:var(--bl)}
-.cpb svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
-.mbg.open{opacity:1;pointer-events:auto}.mdl{background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2)}.mbd{padding:24px}
-.mdl h2{font-size:16px;font-weight:700;margin-bottom:4px}.mdl p{font-size:13px;color:var(--sb);margin-bottom:14px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-.chip{padding:6px 12px;border-radius:8px;border:1px solid var(--bd);background:#FAFBFC;font-size:11px;color:var(--sb);cursor:pointer;font-family:var(--ft);transition:all .15s}
-.chip:hover{border-color:var(--br);background:var(--bl);color:var(--br)}
-.mbtns{display:flex;gap:8px}.mbtns button{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ft);border:none}
-.bc{background:var(--bg);color:var(--sb)}.bp{background:linear-gradient(135deg,var(--ac),var(--br));color:#fff}.bp:disabled{opacity:.5}
-.ahd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.aico{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--ac),var(--br));display:flex;align-items:center;justify-content:center}
-.aico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tpc{padding:12px;border:1px solid var(--bd);border-radius:10px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:all .15s}
-.tpc:hover{border-color:var(--br);background:var(--bl)}
-.tpi{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.tpi svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tpn{flex:1}.tpn strong{font-size:13px;display:block}.tpn small{font-size:11px;color:var(--mt)}
-.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
-@keyframes spin{to{transform:rotate(360deg)}}
-.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;z-index:2000;transform:translateY(60px);opacity:0;transition:all .3s;font-family:var(--ft)}
-.toast.show{transform:translateY(0);opacity:1}.toast.ok{background:var(--ok)}.toast.err{background:var(--dn)}
-.erm{color:var(--dn);font-size:12px;margin-bottom:8px;padding:6px 10px;background:#FEF2F2;border-radius:8px}
-.kbd{font-size:9px;background:var(--bg);color:var(--mt);padding:2px 5px;border-radius:4px;font-family:monospace;margin-left:4px;border:1px solid var(--bd)}
+  /* ============================================================
+     Reviews-specific sidebar styles only.
+     All shell tokens come from /editor-shell.css.
+     ============================================================ */
+
+  /* Review card editor */
+  .rc { background: var(--tgse-panel-2); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); margin-bottom: 8px; overflow: hidden; }
+  .rch { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; }
+  .rch:hover { background: var(--tgse-hover); }
+  .rcav { width: 28px; height: 28px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #FFF; font-weight: 700; font-size: 10px; flex-shrink: 0; }
+  .rcn { flex: 1; font-size: 12px; font-weight: 600; color: var(--tgse-ink); }
+  .rcs { display: flex; gap: 1px; align-items: center; }
+  .rcs svg { width: 10px; height: 10px; }
+  .rcb { padding: 12px; border-top: 1px solid var(--tgse-border); display: none; background: var(--tgse-panel); }
+  .rc.open .rcb { display: block; }
+  .rc .chv { width: 12px; height: 12px; color: var(--tgse-muted); transition: transform .15s; stroke: currentColor; fill: none; stroke-width: 2; }
+  .rc.open .chv { transform: rotate(180deg); }
+
+  /* Field grid */
+  .pg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+
+  /* Star picker */
+  .star-pick { display: flex; gap: 2px; margin-bottom: 8px; }
+  .star-pick button { background: none; border: none; cursor: pointer; padding: 2px; }
+  .star-pick svg { width: 20px; height: 20px; transition: all .15s; }
+  .star-pick button:hover svg { transform: scale(1.2); }
+
+  /* Sidebar inputs/selects */
+  .tgse-body input[type="text"],
+  .tgse-body input[type="number"],
+  .tgse-body input[type="url"],
+  .tgse-body select,
+  .tgse-body textarea {
+    width: 100%; padding: 7px 10px; font-size: 12px;
+    border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm);
+    background: var(--tgse-panel); color: var(--tgse-ink);
+    font-family: inherit; outline: none; transition: border .15s;
+  }
+  .tgse-body textarea { resize: vertical; min-height: 56px; }
+  .tgse-body input:focus, .tgse-body select:focus, .tgse-body textarea:focus {
+    border-color: var(--tgse-brand); box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .tgse-body label.fl {
+    display: block; font-size: 11px; font-weight: 600;
+    color: var(--tgse-ink-3); margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .tgse-body .fld { margin-bottom: 10px; }
+
+  /* Inline action buttons */
+  .ab { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--tgse-brand); background: none; border: none; cursor: pointer; padding: 4px 0; font-family: inherit; }
+  .ab:hover { color: var(--tgse-brand-dark); }
+  .ab svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ab.db { color: var(--tgse-danger); }
+  .ab.db:hover { color: #DC2626; }
+
+  /* Colour rows */
+  .cr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .cr label { font-size: 12px; font-weight: 500; color: var(--tgse-ink-2); }
+  .crr { display: flex; align-items: center; gap: 8px; }
+  .crr span { font-size: 10px; color: var(--tgse-ink-3); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+  .sw { width: 28px; height: 28px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); overflow: hidden; position: relative; cursor: pointer; }
+  .sw input { position: absolute; inset: -4px; width: 140%; height: 140%; opacity: 0; cursor: pointer; }
+
+  /* Preset gradients */
+  .presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+  .preset { height: 32px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); cursor: pointer; transition: all .15s; }
+  .preset:hover { border-color: var(--tgse-brand); transform: scale(1.05); }
+
+  /* Toggle switch */
+  .tr { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+  .tr label { font-size: 12px; font-weight: 500; color: var(--tgse-ink-2); }
+  .tgl { width: 36px; height: 20px; border-radius: 10px; background: #D1D5DB; border: none; cursor: pointer; position: relative; transition: background .2s; padding: 0; }
+  .tgl.on { background: var(--tgse-brand); }
+  .tgl .dot { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #FFF; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.15); transition: transform .2s; }
+  .tgl.on .dot { transform: translateX(16px); }
+
+  /* Slider */
+  .sr { margin-bottom: 10px; }
+  .sr .st { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .sr input[type="range"] { width: 100%; height: 4px; -webkit-appearance: none; background: var(--tgse-border); border-radius: 2px; outline: none; border: none; padding: 0; }
+  .sr input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--tgse-brand); border-radius: 50%; cursor: pointer; border: 2px solid var(--tgse-panel); }
+
+  /* Spreadsheet upload */
+  .up { border: 2px dashed var(--tgse-border); border-radius: var(--tgse-radius-md); padding: 16px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 12px; }
+  .up:hover, .up.dragover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .up svg { width: 20px; height: 20px; stroke: var(--tgse-ink-3); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin: 0 auto 6px; display: block; }
+  .up p { font-size: 12px; color: var(--tgse-ink-2); font-weight: 600; margin: 0 0 2px; }
+  .up small { font-size: 11px; color: var(--tgse-ink-3); }
+  .up .dl { color: var(--tgse-brand); text-decoration: underline; cursor: pointer; font-weight: 600; }
+
+  /* Embed snippet preview */
+  .emb { background: #1E293B; border-radius: var(--tgse-radius-md); padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #CBD5E1; line-height: 1.7; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin-bottom: 8px; }
+  .emb .t { color: #67E8F9; }
+  .emb .a { color: #6EE7B7; }
+  .emb .v { color: #FCD34D; }
+
+  /* Layout picker */
+  .lp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .lp button {
+    padding: 8px 4px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border);
+    background: var(--tgse-panel); cursor: pointer; font-size: 10px; font-weight: 600;
+    font-family: inherit; color: var(--tgse-ink-3); transition: all .15s; text-align: center;
+  }
+  .lp button:hover { border-color: var(--tgse-brand); }
+  .lp button.is-active { background: var(--tgse-brand-tint); border-color: var(--tgse-brand); color: var(--tgse-brand); }
+
+  /* AI highlight editor */
+  .aih { background: var(--tgse-panel-2); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); padding: 8px; margin-bottom: 6px; }
+  .aih-row { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
+  .aih-dot { width: 12px; height: 12px; border-radius: 6px; flex-shrink: 0; position: relative; overflow: hidden; cursor: pointer; }
+  .aih-dot input { position: absolute; inset: -4px; width: 140%; height: 140%; opacity: 0; cursor: pointer; }
+
+  /* Section header */
+  .sec { border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); margin-bottom: 10px; background: var(--tgse-panel); overflow: visible; }
+  .sec-hd { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; user-select: none; }
+  .sec-hd:hover { background: var(--tgse-panel-2); }
+  .sec-tt { font-size: 13px; font-weight: 600; color: var(--tgse-ink); flex: 1; display: flex; align-items: center; gap: 8px; }
+  .sec-tt svg { width: 14px; height: 14px; color: var(--tgse-ink-3); stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .chv { width: 14px; height: 14px; color: var(--tgse-muted); transition: transform .15s; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .sec.open .sec-hd .chv { transform: rotate(180deg); }
+  .sec-bd { padding: 0 14px 14px; display: none; border-top: 1px solid var(--tgse-border); background: var(--tgse-panel-2); }
+  .sec.open .sec-bd { display: block; padding-top: 14px; }
+
+  /* Reviews list header */
+  .reviews-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .reviews-header .ttl { font-size: 13px; font-weight: 600; color: var(--tgse-ink); }
+  .reviews-header .acts { display: flex; gap: 12px; }
+
+  /* Tag input */
+  .tag-input { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); background: var(--tgse-panel); min-height: 32px; align-items: center; }
+  .tag-chip { display: flex; align-items: center; gap: 2px; padding: 2px 8px; border-radius: var(--tgse-radius-sm); background: var(--tgse-brand-tint); color: var(--tgse-brand); font-size: 10px; font-weight: 600; }
+
+  /* AI builder modal extras */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chip { padding: 6px 12px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); background: var(--tgse-panel-2); font-size: 11px; color: var(--tgse-ink-2); cursor: pointer; font-family: inherit; transition: all .15s; }
+  .chip:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); color: var(--tgse-brand); }
+
+  /* Templates picker */
+  .tpc { padding: 12px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; transition: all .15s; }
+  .tpc:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .tpi { width: 36px; height: 36px; border-radius: var(--tgse-radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--tgse-panel-2); }
+  .tpi svg { width: 16px; height: 16px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke: var(--tgse-ink-3); }
+  .tpn { flex: 1; }
+  .tpn strong { font-size: 13px; display: block; color: var(--tgse-ink); }
+  .tpn small { font-size: 11px; color: var(--tgse-ink-3); }
+
+  /* Spinner */
+  .ai-spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #FFF; border-radius: 50%; animation: ai-spin .6s linear infinite; display: inline-block; }
+  @keyframes ai-spin { to { transform: rotate(360deg); } }
+  .erm { color: var(--tgse-danger); font-size: 12px; margin-bottom: 10px; padding: 8px 12px; background: rgba(239,68,68,.08); border-radius: var(--tgse-radius-sm); border: 1px solid rgba(239,68,68,.25); }
+
+  /* Design Mode overlay */
+  .ov-wrap { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+  .ov-wrap.active { pointer-events: auto; }
+  .ov-spot { position: absolute; border: 2px solid transparent; border-radius: 6px; cursor: pointer; transition: all .15s; z-index: 11; }
+  .ov-spot:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .ov-spot:hover .ov-label { opacity: 1; transform: translateY(0); }
+  .ov-label { position: absolute; top: -22px; left: 4px; font-size: 10px; font-weight: 700; color: #FFF; background: var(--tgse-brand); padding: 2px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; transform: translateY(4px); transition: all .15s; pointer-events: none; }
+
+  /* Popover */
+  .pop { position: fixed; z-index: 9999; background: var(--tgse-panel); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); box-shadow: var(--tgse-shadow-lg); padding: 14px; min-width: 260px; max-width: 320px; opacity: 0; transform: translateY(6px); transition: all .15s; pointer-events: none; }
+  .pop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .pop-title { font-size: 11px; font-weight: 700; color: var(--tgse-ink-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .pop-close { width: 20px; height: 20px; border: none; background: transparent; cursor: pointer; color: var(--tgse-ink-3); display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .pop-close:hover { background: var(--tgse-hover); color: var(--tgse-ink); }
+  .pop-close svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  /* Frame override — Reviews has a single hosted widget */
+  .tgse-frame { padding: 32px; }
+  .tgse-frame[data-vp="mobile"] { padding: 16px; }
+
+  /* Inline header buttons in the reviews list */
+  .reviews-header .ab { padding: 4px 8px; }
 </style>
 </head>
 <body>
-<div class="app">
-<div class="editor">
-  <div class="ed-top">
-    <div class="ed-top-row">
-      <a class="ab2" href="/" title="Back to dashboard" aria-label="Back to dashboard" style="text-decoration:none;padding:0 8px"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></a>
-      <div class="ed-logo"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-      <div class="ed-info"><h1>Google Reviews</h1><span>Widget Editor</span></div>
-      <div class="ea">
-        <button class="ab2" onclick="showTpl()" title="Templates (T)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></button>
-        <button class="ab2 ai" onclick="showAI()" title="AI Builder (A)"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/><path d="M19 13l.5 2 2 .5-2 .5-.5 2-.5-2-2-.5 2-.5.5-2z"/></svg></button>
+
+<div class="tgse-app">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Google Reviews</div>
+        <div class="tgse-id-type">Widget editor</div>
       </div>
     </div>
-    <div class="ed-name-row">
-      <input type="text" class="ni" id="wName" placeholder="Widget name..." value="My Reviews Widget">
-      <button class="sv" onclick="saveW()"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save<span class="kbd">⌘S</span></button>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
     </div>
-  </div>
-  <div class="ed-tabs">
-    <button class="ed-tab active" onclick="swTab('design',this)">Design</button>
-    <button class="ed-tab" onclick="swTab('content',this)">Content</button>
-    <button class="ed-tab" onclick="swTab('settings',this)">Settings</button>
-  </div>
-  <div class="ed-body" id="edB"></div>
-</div>
-<div class="pva">
-  <div class="pvb">
-    <div class="pvd">
-      <span>Preview</span>
-      <button class="dbtn active" onclick="setDev('desktop',this)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
-      <button class="dbtn" onclick="setDev('tablet',this)"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></button>
-      <button class="dbtn" onclick="setDev('mobile',this)"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></button>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled reviews widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
     </div>
-    <div class="pvr">
-      <button class="tbtn" id="dmBtn" onclick="toggleDM()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><path d="M12 2v4m0 12v4m-7.07-15.07l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>Design Mode<span class="kbd">D</span></button>
-      <button class="tbtn" id="thBtn" onclick="toggleTh()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>Light</button>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+      <div class="tgse-panel is-active" data-tab="design" id="panel-design"></div>
+      <div class="tgse-panel" data-tab="content" id="panel-content"></div>
+      <div class="tgse-panel" data-tab="settings" id="panel-settings"></div>
     </div>
-  </div>
-  <div class="pvf" id="pvf"><div class="pvx" id="pvx" style="width:100%"><div id="mt"></div><div class="ov-wrap" id="ovWrap"></div></div></div>
+  </aside>
+
+  <!-- ============================================================
+       PREVIEW
+       ============================================================ -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+        Design mode
+        <span class="tgse-kbd">D</span>
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div id="widget-mount"></div>
+        <div class="ov-wrap" id="ovWrap"></div>
+      </div>
+    </div>
+  </section>
+
 </div>
-</div>
+
+<!-- Popover for Design Mode click-to-edit -->
 <div class="pop" id="popover"></div>
 
-<div class="mbg" id="aiM"><div class="mdl"><div class="mbd">
-  <div class="ahd"><div class="aico"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/><path d="M19 13l.5 2 2 .5-2 .5-.5 2-.5-2-2-.5 2-.5.5-2z"/></svg></div><div><h2>AI Review Generator</h2><p style="margin:0">Generate realistic demo reviews for your widget</p></div></div>
-  <textarea id="aiP" style="width:100%;height:80px;margin-bottom:10px" placeholder="e.g. Generate 8 reviews for a travel agency in Bournemouth, mix of family and couples holidays"></textarea>
-  <div class="chips"><button class="chip" onclick="document.getElementById('aiP').value=this.textContent">8 reviews for a UK travel agency</button><button class="chip" onclick="document.getElementById('aiP').value=this.textContent">6 reviews for a luxury tour operator</button><button class="chip" onclick="document.getElementById('aiP').value=this.textContent">10 reviews for a holiday company, mostly 5-star</button></div>
-  <div id="aiE" class="erm" style="display:none"></div>
-  <div class="mbtns"><button class="bc" onclick="closeM()">Cancel</button><button class="bp" id="aiB" onclick="genAI()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;margin-right:4px;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>Generate</button></div>
-</div></div></div>
-
-<div class="mbg" id="tpM"><div class="mdl"><div class="mbd">
-  <h2>Templates</h2><p>Start with a pre-built review set</p>
-  <div class="tpc" onclick="closeM();showAI()" style="border-style:dashed;border-color:#C4B5FD;background:#FAF5FF">
-    <div class="tpi" style="background:linear-gradient(135deg,var(--ac),var(--br))"><svg viewBox="0 0 24 24" style="stroke:#fff"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg></div>
-    <div class="tpn"><strong>Generate with AI</strong><small>Create realistic reviews automatically</small></div>
+<!-- ============================================================
+     MODALS — AI builder & Templates (shell-styled)
+     ============================================================ -->
+<div class="tgse-modal" id="aiModal">
+  <div class="tgse-modal-card">
+    <div class="tgse-modal-head">
+      <span class="tgse-id-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+      </span>
+      <div>
+        <h2>AI review generator</h2>
+        <p class="tgse-modal-sub">Generate realistic demo reviews for your widget.</p>
+      </div>
+    </div>
+    <div class="tgse-modal-body">
+      <textarea id="aiPrompt" rows="3" placeholder="e.g. Generate 8 reviews for a travel agency in Bournemouth, mix of family and couples holidays" style="width:100%;padding:10px 12px;font-size:13px;border:1px solid var(--tgse-border);border-radius:var(--tgse-radius-md);background:var(--tgse-panel-2);color:var(--tgse-ink);font-family:inherit;outline:none;resize:vertical;min-height:72px;margin-bottom:12px"></textarea>
+      <div class="chips">
+        <button class="chip" type="button">8 reviews for a UK travel agency</button>
+        <button class="chip" type="button">6 reviews for a luxury tour operator</button>
+        <button class="chip" type="button">10 reviews for a holiday company, mostly 5-star</button>
+      </div>
+      <div id="aiErr" class="erm" style="display:none"></div>
+    </div>
+    <div class="tgse-modal-foot">
+      <button class="tgse-btn" type="button" data-close-modal="aiModal">Cancel</button>
+      <button class="tgse-btn tgse-btn--ai" type="button" id="aiGenerate">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>
+        Generate
+      </button>
+    </div>
   </div>
-  <div id="tpL"></div>
-  <button style="width:100%;margin-top:8px;padding:8px;border:none;background:none;font-size:12px;color:var(--mt);cursor:pointer;font-family:var(--ft)" onclick="closeM()">Start from scratch</button>
-</div></div></div>
+</div>
 
-<div class="toast" id="toast"></div>
+<div class="tgse-modal" id="tplModal">
+  <div class="tgse-modal-card">
+    <div class="tgse-modal-head">
+      <span class="tgse-id-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </span>
+      <div>
+        <h2>Choose a starting template</h2>
+        <p class="tgse-modal-sub">Or build from AI, or start from scratch.</p>
+      </div>
+    </div>
+    <div class="tgse-modal-body" id="tplList"></div>
+    <div class="tgse-modal-foot">
+      <button class="tgse-btn" type="button" data-close-modal="tplModal">Start from scratch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shell behaviour first -->
+<script src="/editor-shell.js"></script>
+<!-- Then the widget (so window.TGReviewsWidget is available for preview) -->
+<script src="/widget-reviews.js"></script>
 
 <script>
-/* ═══ DEMO REVIEWS ═══ */
-const DEMO_REVIEWS=[
-  {id:'1',author:'Sarah Mitchell',rating:5,date:'2 weeks ago',text:'Absolutely incredible service from start to finish. The team helped us plan a last-minute family holiday to Crete and everything was seamless — flights, hotel, transfers, even restaurant recommendations. The kids loved it!',tags:['Family','Service','Crete'],helpful:24,hasPhoto:true,photoUrl:'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=300&fit=crop',reply:{author:'Sunshine Holidays',text:'Thank you Sarah! So glad the family had a wonderful time in Crete.'}},
-  {id:'2',author:'James Robertson',rating:5,date:'1 month ago',text:'Third year booking through them and they never disappoint. Found us a stunning adults-only hotel in Tenerife at a price that beat everything online.',tags:['Couples','Value','Tenerife'],helpful:18},
-  {id:'3',author:'Emma Thompson',rating:4,date:'3 weeks ago',text:'Really good experience overall. Booking was straightforward and the website made it easy to compare options. Small delay with transfer but sorted quickly.',tags:['Service','Booking'],helpful:12,reply:{author:'Sunshine Holidays',text:'Thanks Emma! Sorry about the transfer — we have fed that back to our supplier.'}},
-  {id:'4',author:'David Chen',rating:5,date:'1 week ago',text:'Booked a honeymoon to the Maldives and it was absolutely perfect. Every detail thought of — room upgrade, sunset dinner, champagne waiting. Felt like VIPs.',tags:['Couples','Luxury','Maldives'],helpful:31,hasPhoto:true,photoUrl:'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&h=300&fit=crop'},
-  {id:'5',author:'Lisa Patel',rating:5,date:'2 months ago',text:'First time using a travel agent and I am a convert! Saved us £400 on our Turkey trip plus free airport lounge access. Personal service is on another level.',tags:['Value','Turkey','First-timer'],helpful:22},
-  {id:'6',author:'Mark Williams',rating:5,date:'3 days ago',text:'Amazing week in Majorca. Hotel was perfect for kids — splash park, kids club, right on the beach. Agent really listened to what we needed.',tags:['Family','Beach','Majorca'],helpful:8,hasPhoto:true,photoUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop'},
+/* ============================================================
+   GOOGLE REVIEWS EDITOR — refactored onto unified shell
+   ============================================================ */
+
+/* ── Demo reviews (used by default + Travel Agency template) ─── */
+const DEMO_REVIEWS = [
+  { id:'1', author:'Sarah Mitchell', rating:5, date:'2 weeks ago', text:'Absolutely incredible service from start to finish. The team helped us plan a last-minute family holiday to Crete and everything was seamless — flights, hotel, transfers, even restaurant recommendations. The kids loved it!', tags:['Family','Service','Crete'], helpful:24, hasPhoto:true, photoUrl:'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=300&fit=crop', reply:{ author:'Sunshine Holidays', text:'Thank you Sarah! So glad the family had a wonderful time in Crete.' } },
+  { id:'2', author:'James Robertson', rating:5, date:'1 month ago', text:'Third year booking through them and they never disappoint. Found us a stunning adults-only hotel in Tenerife at a price that beat everything online.', tags:['Couples','Value','Tenerife'], helpful:18 },
+  { id:'3', author:'Emma Thompson', rating:4, date:'3 weeks ago', text:'Really good experience overall. Booking was straightforward and the website made it easy to compare options. Small delay with transfer but sorted quickly.', tags:['Service','Booking'], helpful:12, reply:{ author:'Sunshine Holidays', text:'Thanks Emma! Sorry about the transfer — we have fed that back to our supplier.' } },
+  { id:'4', author:'David Chen', rating:5, date:'1 week ago', text:'Booked a honeymoon to the Maldives and it was absolutely perfect. Every detail thought of — room upgrade, sunset dinner, champagne waiting. Felt like VIPs.', tags:['Couples','Luxury','Maldives'], helpful:31, hasPhoto:true, photoUrl:'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&h=300&fit=crop' },
+  { id:'5', author:'Lisa Patel', rating:5, date:'2 months ago', text:'First time using a travel agent and I am a convert! Saved us £400 on our Turkey trip plus free airport lounge access. Personal service is on another level.', tags:['Value','Turkey','First-timer'], helpful:22 },
+  { id:'6', author:'Mark Williams', rating:5, date:'3 days ago', text:'Amazing week in Majorca. Hotel was perfect for kids — splash park, kids club, right on the beach. Agent really listened to what we needed.', tags:['Family','Beach','Majorca'], helpful:8, hasPhoto:true, photoUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop' },
 ];
 
-const TPL=[
-  {n:'Travel Agency',d:'6 reviews, families & couples',place:{name:'Sunshine Holidays',rating:4.9,total:247},reviews:DEMO_REVIEWS},
-  {n:'Hotel',d:'5 reviews, accommodation focus',place:{name:'The Grand Hotel',rating:4.7,total:189},reviews:[
-    {id:'h1',author:'Anna White',rating:5,date:'1 week ago',text:'Beautiful hotel with stunning sea views. The room was spotless and the breakfast buffet was incredible. Staff went above and beyond.',tags:['Rooms','Breakfast','Views'],helpful:15},
-    {id:'h2',author:'Peter Jones',rating:4,date:'2 weeks ago',text:'Great location and lovely rooms. Pool area was a bit crowded at peak times but otherwise excellent stay.',tags:['Location','Pool'],helpful:8},
-    {id:'h3',author:'Maria Garcia',rating:5,date:'3 days ago',text:'Absolutely loved our stay. The spa was world class and the restaurant served the best seafood we have ever tasted.',tags:['Spa','Food','Luxury'],helpful:21},
-    {id:'h4',author:'Robert Taylor',rating:5,date:'1 month ago',text:'Perfect for a romantic getaway. The suite was gorgeous and the balcony views over the harbour were breathtaking.',tags:['Couples','Views','Suite'],helpful:12},
-    {id:'h5',author:'Sophie Brown',rating:4,date:'6 weeks ago',text:'Lovely hotel, clean rooms, friendly staff. WiFi could be a bit better but everything else was spot on.',tags:['Clean','Staff','WiFi'],helpful:6},
+/* ── Templates ──────────────────────────────────────────────── */
+const TPL = [
+  { n:'Travel Agency', d:'6 reviews, families & couples', place:{ name:'Sunshine Holidays', rating:4.9, total:247 }, reviews: DEMO_REVIEWS },
+  { n:'Hotel',         d:'5 reviews, accommodation focus', place:{ name:'The Grand Hotel', rating:4.7, total:189 }, reviews: [
+    { id:'h1', author:'Anna White',    rating:5, date:'1 week ago',   text:'Beautiful hotel with stunning sea views. The room was spotless and the breakfast buffet was incredible. Staff went above and beyond.', tags:['Rooms','Breakfast','Views'], helpful:15 },
+    { id:'h2', author:'Peter Jones',   rating:4, date:'2 weeks ago',  text:'Great location and lovely rooms. Pool area was a bit crowded at peak times but otherwise excellent stay.', tags:['Location','Pool'], helpful:8 },
+    { id:'h3', author:'Maria Garcia',  rating:5, date:'3 days ago',   text:'Absolutely loved our stay. The spa was world class and the restaurant served the best seafood we have ever tasted.', tags:['Spa','Food','Luxury'], helpful:21 },
+    { id:'h4', author:'Robert Taylor', rating:5, date:'1 month ago',  text:'Perfect for a romantic getaway. The suite was gorgeous and the balcony views over the harbour were breathtaking.', tags:['Couples','Views','Suite'], helpful:12 },
+    { id:'h5', author:'Sophie Brown',  rating:4, date:'6 weeks ago',  text:'Lovely hotel, clean rooms, friendly staff. WiFi could be a bit better but everything else was spot on.', tags:['Clean','Staff','WiFi'], helpful:6 },
   ]},
 ];
 
-/* ═══ STATE ═══ */
-let C={
-  place:{name:'My Business',rating:4.8,total:50},
-  brandColor:'#0891B2',accentColor:'#6366F1',pageBg:'#F8FAFC',cardBg:'#FFFFFF',textColor:'#0F172A',subtextColor:'#64748B',borderRadius:16,
-  layout:'cards',theme:'light',
-  showHeader:true,showAI:true,showTags:true,showPhotos:true,showReplies:true,showHelpful:true,showTrust:true,showCTA:true,
-  trustText:'Verified reviews powered by Google',ctaText:'Write a Review',ctaUrl:'#',
-  aiHighlights:[
-    {label:'Most praised',value:'Personal service',color:'#EC4899',icon:'heart'},
-    {label:'98% recommend',value:'for friends and family',color:'#8B5CF6',icon:'users'},
-    {label:'Trending up',value:'Rating improved this year',color:'#10B981',icon:'trending'},
-    {label:'Top strength',value:'Great value for money',color:'#F59E0B',icon:'award'},
+/* ── Config ──────────────────────────────────────────────────── */
+let C = {
+  place: { name: 'My Business', rating: 4.8, total: 50 },
+  brandColor: '#0891B2', accentColor: '#6366F1',
+  pageBg: '#F8FAFC', cardBg: '#FFFFFF', textColor: '#0F172A', subtextColor: '#64748B',
+  borderRadius: 16, layout: 'cards', theme: 'light',
+  showHeader: true, showAI: true, showTags: true, showPhotos: true, showReplies: true, showHelpful: true, showTrust: true, showCTA: true,
+  trustText: 'Verified reviews powered by Google',
+  ctaText: 'Write a Review', ctaUrl: '#',
+  aiHighlights: [
+    { label:'Most praised',   value:'Personal service',          color:'#EC4899', icon:'heart' },
+    { label:'98% recommend',  value:'for friends and family',    color:'#8B5CF6', icon:'users' },
+    { label:'Trending up',    value:'Rating improved this year', color:'#10B981', icon:'trending' },
+    { label:'Top strength',   value:'Great value for money',     color:'#F59E0B', icon:'award' },
   ],
-  reviews:[]
+  reviews: []
 };
-let wId=null,dark=false,tab='design',dm=false,hist=[],hIdx=-1;
-let openSecs={},openRevs={};
+let wId = null, dark = false, tab = 'design', dm = false;
+let hist = [], histIdx = -1;
+let openSecs = {}, openRevs = {};
+let shell = null;
 
-function snap(){const s=JSON.stringify(C);if(hist.length&&hist[hIdx]===s)return;hist=hist.slice(0,hIdx+1);hist.push(s);hIdx=hist.length-1;if(hist.length>40){hist.shift();hIdx--}}
-function undo(){if(hIdx>0){hIdx--;C=JSON.parse(hist[hIdx]);ren();renP()}}
-function redo(){if(hIdx<hist.length-1){hIdx++;C=JSON.parse(hist[hIdx]);ren();renP()}}
+/* ── Helpers ─────────────────────────────────────────────────── */
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML.replace(/"/g, '&quot;'); }
+function snap() { const s = JSON.stringify(C); if (hist.length && hist[histIdx] === s) return; hist = hist.slice(0, histIdx+1); hist.push(s); histIdx = hist.length-1; if (hist.length > 40) { hist.shift(); histIdx--; } shell?.markDirty(); }
+function undo() { if (histIdx > 0) { histIdx--; C = JSON.parse(hist[histIdx]); ren(); renP(); showHint('Undone'); } }
+function redo() { if (histIdx < hist.length-1) { histIdx++; C = JSON.parse(hist[histIdx]); ren(); renP(); showHint('Redone'); } }
+function showHint(m) { tgse.toast(m, 'ok'); }
+function starSvg(fill) { return `<svg viewBox="0 0 24 24" style="width:10px;height:10px;fill:${fill?'#F59E0B':'none'};stroke:${fill?'#F59E0B':'#D1D5DB'};stroke-width:1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`; }
 
-/* ═══ INIT ═══ */
-window.addEventListener('DOMContentLoaded',()=>{
-  if(!ensureAuth())return;
-  const p=new URLSearchParams(location.search);wId=p.get('id');
-  if(wId){loadW(wId)}else{C.reviews=JSON.parse(JSON.stringify(TPL[0].reviews));C.place={...TPL[0].place};snap();ren();renP()}
-});
-async function loadW(id){try{const r=await fetch('/api/widget-config?id='+encodeURIComponent(id));if(!r.ok)throw 0;Object.assign(C,await r.json());document.getElementById('wName').value=C.place?.name||'';snap();ren();renP();toast('Loaded','ok')}catch(e){C.reviews=JSON.parse(JSON.stringify(TPL[0].reviews));C.place={...TPL[0].place};snap();ren();renP()}}
+/* ── Render sidebar ──────────────────────────────────────────── */
+function ren() {
+  saveSecState();
+  document.getElementById('panel-design').innerHTML = dTab();
+  document.getElementById('panel-content').innerHTML = cTab();
+  document.getElementById('panel-settings').innerHTML = sTab();
+  restoreSecState();
+  bind();
+}
 
-/* ═══ KEYBOARD ═══ */
-document.addEventListener('keydown',e=>{
-  const mod=e.metaKey||e.ctrlKey;
-  if(mod&&e.key==='s'){e.preventDefault();saveW()}
-  if(mod&&e.key==='z'&&!e.shiftKey){e.preventDefault();undo()}
-  if(mod&&(e.key==='y'||(e.key==='z'&&e.shiftKey))){e.preventDefault();redo()}
-  if(!mod&&!e.target.closest('input,textarea,select')){
-    if(e.key==='d')toggleDM();if(e.key==='a'){e.preventDefault();showAI()}if(e.key==='t'){e.preventDefault();showTpl()}
-    if(e.key==='1')swTab('design',document.querySelectorAll('.ed-tab')[0]);
-    if(e.key==='2')swTab('content',document.querySelectorAll('.ed-tab')[1]);
-    if(e.key==='3')swTab('settings',document.querySelectorAll('.ed-tab')[2]);
-    if(e.key==='Escape')closePop();
-  }
-});
+function sec(t, ico, open, body) {
+  return `<div class="sec${open?' open':''}"><div class="sec-hd" onclick="this.parentElement.classList.toggle('open')"><span class="sec-tt"><svg viewBox="0 0 24 24">${ico}</svg>${t}</span><svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div><div class="sec-bd">${body}</div></div>`;
+}
+function colF(label, key, val) {
+  return `<div class="cr"><label>${label}</label><div class="crr"><span>${val}</span><div class="sw"><div style="width:100%;height:100%;background:${val}"></div><input type="color" value="${val}" data-bind="${key}"></div></div></div>`;
+}
+function togF(label, key, on) {
+  return `<div class="tr"><label>${label}</label><button class="tgl${on?' on':''}" type="button" onclick="snap();C.${key}=!C.${key};ren();renP()"><span class="dot"></span></button></div>`;
+}
 
-/* ═══ TABS & RENDER ═══ */
-function swTab(t,btn){tab=t;document.querySelectorAll('.ed-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');ren()}
-function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML.replace(/"/g,'&quot;')}
-function saveSS(){document.querySelectorAll('.sec').forEach((s,i)=>{openSecs[tab+'_'+i]=s.classList.contains('open')});document.querySelectorAll('.rc').forEach((r,i)=>{openRevs[i]=r.classList.contains('open')})}
-function restSS(){document.querySelectorAll('.sec').forEach((s,i)=>{if(openSecs[tab+'_'+i])s.classList.add('open')});document.querySelectorAll('.rc').forEach((r,i)=>{if(openRevs[i])r.classList.add('open')})}
-function ren(){saveSS();const B=document.getElementById('edB');if(tab==='design')B.innerHTML=dTab();else if(tab==='content')B.innerHTML=cTab();else B.innerHTML=sTab();restSS();bind()}
-function sec(t,ico,o,bd){return`<div class="sec${o?' open':''}"><div class="sec-hd" onclick="this.parentElement.classList.toggle('open')"><span class="sec-tt"><svg viewBox="0 0 24 24">${ico}</svg>${t}</span><svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div><div class="sec-bd">${bd}</div></div>`}
-function colF(l,k,v){return`<div class="cr"><label>${l}</label><div class="crr"><span>${v}</span><div class="sw"><div style="width:100%;height:100%;background:${v}"></div><input type="color" value="${v}" data-bind="${k}"></div></div></div>`}
-function togF(l,k,on){return`<div class="tr"><label>${l}</label><button class="tgl${on?' on':''}" onclick="snap();C.${k}=!C.${k};ren();renP()"><span class="dot"></span></button></div>`}
-function starSvg(fill){return`<svg viewBox="0 0 24 24" style="width:10px;height:10px;fill:${fill?'#F59E0B':'none'};stroke:${fill?'#F59E0B':'#D1D5DB'};stroke-width:1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`}
-
-/* ═══ DESIGN TAB ═══ */
-function dTab(){
-  const layouts=['cards','masonry','carousel','spotlight','badge','ticker'];
-  return sec('Business Info','<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',true,`
-    <div class="fld"><label class="fl">Business Name</label><input type="text" value="${esc(C.place.name)}" data-bind="place.name"></div>
-    <div class="pg"><div class="fld"><label class="fl">Rating</label><input type="number" step="0.1" min="1" max="5" value="${C.place.rating}" data-bind="place.rating"></div>
-    <div class="fld"><label class="fl">Total Reviews</label><input type="number" value="${C.place.total}" data-bind="place.total"></div></div>
-  `)+sec('Layout','<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',true,`
-    <div class="lp">${layouts.map(l=>`<button class="${C.layout===l?'active':''}" onclick="snap();C.layout='${l}';ren();renP()">${l.charAt(0).toUpperCase()+l.slice(1)}</button>`).join('')}</div>
-  `)+sec('Colors','<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 000 20"/>',true,`
-    ${colF('Brand','brandColor',C.brandColor)}${colF('Accent','accentColor',C.accentColor)}${colF('Page Bg','pageBg',C.pageBg)}${colF('Card Bg','cardBg',C.cardBg)}${colF('Text','textColor',C.textColor)}
-    <div style="margin-top:8px"><span class="fl">Presets</span><div class="presets">
-    ${[{b:'#0891B2',a:'#6366F1'},{b:'#7C3AED',a:'#EC4899'},{b:'#059669',a:'#0D9488'},{b:'#DC2626',a:'#F97316'},{b:'#1E293B',a:'#3B82F6'}].map(p=>`<div class="preset" onclick="snap();C.brandColor='${p.b}';C.accentColor='${p.a}';ren();renP()" style="background:linear-gradient(135deg,${p.b},${p.a})"></div>`).join('')}</div></div>
-  `)+sec('Shape','<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>',false,`
-    <div class="sr"><div class="st"><span class="fl">Border Radius</span><span style="font-size:11px;color:var(--mt);font-family:monospace">${C.borderRadius}px</span></div>
+function dTab() {
+  const layouts = ['cards','masonry','carousel','spotlight','badge','ticker'];
+  return sec('Business Info', '<circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>', true, `
+    <div class="fld"><label class="fl">Business name</label><input type="text" value="${esc(C.place.name)}" data-bind="place.name"></div>
+    <div class="pg">
+      <div class="fld"><label class="fl">Rating</label><input type="number" step="0.1" min="1" max="5" value="${C.place.rating}" data-bind="place.rating"></div>
+      <div class="fld"><label class="fl">Total reviews</label><input type="number" value="${C.place.total}" data-bind="place.total"></div>
+    </div>
+  `) + sec('Layout', '<rect x="3" y="3" width="7" height="7" stroke="currentColor" fill="none" stroke-width="2"/><rect x="14" y="3" width="7" height="7" stroke="currentColor" fill="none" stroke-width="2"/><rect x="3" y="14" width="7" height="7" stroke="currentColor" fill="none" stroke-width="2"/><rect x="14" y="14" width="7" height="7" stroke="currentColor" fill="none" stroke-width="2"/>', true, `
+    <div class="lp">${layouts.map(l => `<button type="button" class="${C.layout===l?'is-active':''}" onclick="snap();C.layout='${l}';ren();renP()">${l.charAt(0).toUpperCase()+l.slice(1)}</button>`).join('')}</div>
+  `) + sec('Colours', '<circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" stroke-width="2"/><path d="M2 12h20" stroke="currentColor" fill="none" stroke-width="2"/>', true, `
+    ${colF('Brand', 'brandColor', C.brandColor)}
+    ${colF('Accent', 'accentColor', C.accentColor)}
+    ${colF('Page background', 'pageBg', C.pageBg)}
+    ${colF('Card background', 'cardBg', C.cardBg)}
+    ${colF('Text', 'textColor', C.textColor)}
+    <div style="margin-top:10px"><label class="fl">Presets</label>
+    <div class="presets">
+      ${[{b:'#0891B2',a:'#6366F1'},{b:'#7C3AED',a:'#EC4899'},{b:'#059669',a:'#0D9488'},{b:'#DC2626',a:'#F97316'},{b:'#1E293B',a:'#3B82F6'}].map(p=>`<div class="preset" onclick="snap();C.brandColor='${p.b}';C.accentColor='${p.a}';ren();renP()" style="background:linear-gradient(135deg,${p.b},${p.a})"></div>`).join('')}
+    </div></div>
+  `) + sec('Shape', '<rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" fill="none" stroke-width="2"/>', false, `
+    <div class="sr"><div class="st"><span class="fl" style="margin:0">Border radius</span><span style="font-size:11px;color:var(--tgse-ink-3);font-family:'JetBrains Mono',monospace">${C.borderRadius}px</span></div>
     <input type="range" min="0" max="28" value="${C.borderRadius}" data-bind="borderRadius"></div>
   `);
 }
 
-/* ═══ CONTENT TAB ═══ */
-function cTab(){
-  const AVCOLS=['#3B82F6','#10B981','#8B5CF6','#F59E0B','#EC4899','#0891B2','#6366F1','#14B8A6'];
-  let h=`<div style="padding:12px 16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <span class="fl" style="font-weight:700;color:var(--tx)">Reviews (${C.reviews.length})</span>
-    <div style="display:flex;gap:8px"><button class="aib" onclick="showAI()"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>AI</button><button class="aib" onclick="addRev()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button></div></div>
-    <div class="up" id="upZ" onclick="document.getElementById('fIn').click()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><p>Upload reviews spreadsheet</p><small>CSV or Excel — <span class="dl" onclick="event.stopPropagation();dlTpl()">Download template</span></small><input type="file" id="fIn" accept=".csv,.xlsx,.xls" style="display:none" onchange="hFile(this)"></div>`;
-  C.reviews.forEach((r,i)=>{
-    const col=AVCOLS[((r.author||'').charCodeAt(0))%AVCOLS.length];
-    const ini=(r.author||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    h+=`<div class="rc" id="rv${i}"><div class="rch" onclick="document.getElementById('rv${i}').classList.toggle('open')"><div class="rcav" style="background:${col}">${ini}</div><span class="rcn">${esc(r.author)||'Anonymous'}</span><span class="rcs">${[1,2,3,4,5].map(s=>starSvg(s<=r.rating)).join('')}</span><svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
-    <div class="rcb">
-      <div class="pg"><div class="fld"><label class="fl">Author</label><input type="text" value="${esc(r.author)}" onchange="snap();C.reviews[${i}].author=this.value;ren();renP()"></div>
-      <div class="fld"><label class="fl">Date</label><input type="text" value="${esc(r.date)}" onchange="snap();C.reviews[${i}].date=this.value;renP()"></div></div>
-      <div class="fld"><label class="fl">Rating</label><div class="star-pick">${[1,2,3,4,5].map(s=>`<button onclick="snap();C.reviews[${i}].rating=${s};ren();renP()"><svg viewBox="0 0 24 24" style="fill:${s<=r.rating?'#F59E0B':'none'};stroke:${s<=r.rating?'#F59E0B':'#D1D5DB'};stroke-width:1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`).join('')}</div></div>
-      <div class="fld"><label class="fl">Review Text</label><textarea onchange="snap();C.reviews[${i}].text=this.value;renP()">${esc(r.text)}</textarea></div>
-      <div class="fld"><label class="fl">Photo URL</label><input type="url" value="${esc(r.photoUrl||'')}" onchange="snap();C.reviews[${i}].photoUrl=this.value;C.reviews[${i}].hasPhoto=!!this.value;renP()" placeholder="https://..."></div>
-      <div class="fld"><label class="fl">Tags (comma separated)</label><input type="text" value="${esc((r.tags||[]).join(', '))}" onchange="snap();C.reviews[${i}].tags=this.value.split(',').map(t=>t.trim()).filter(Boolean);renP()"></div>
-      <div class="fld"><label class="fl">Helpful count</label><input type="number" value="${r.helpful||0}" onchange="snap();C.reviews[${i}].helpful=+this.value;renP()"></div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"><label class="fl">Owner Reply</label>
-        <div class="fld"><input type="text" value="${esc(r.reply?.author||C.place.name)}" placeholder="Reply author" onchange="snap();if(!C.reviews[${i}].reply)C.reviews[${i}].reply={author:'',text:''};C.reviews[${i}].reply.author=this.value;renP()"></div>
-        <div class="fld"><textarea placeholder="Reply text (leave empty for no reply)" onchange="snap();if(this.value){if(!C.reviews[${i}].reply)C.reviews[${i}].reply={author:C.place.name,text:''};C.reviews[${i}].reply.text=this.value}else{C.reviews[${i}].reply=null};renP()">${esc(r.reply?.text||'')}</textarea></div>
+function cTab() {
+  const AVCOLS = ['#3B82F6','#10B981','#8B5CF6','#F59E0B','#EC4899','#0891B2','#6366F1','#14B8A6'];
+  let h = `<div class="reviews-header">
+    <span class="ttl">Reviews (${C.reviews.length})</span>
+    <div class="acts">
+      <button class="ab" type="button" onclick="document.getElementById('btn-ai').click()"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>AI</button>
+      <button class="ab" type="button" onclick="addRev()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add review</button>
+    </div>
+  </div>
+  <div class="up" id="upZ" onclick="document.getElementById('fIn').click()">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <p>Upload reviews spreadsheet</p>
+    <small>CSV or Excel — <span class="dl" onclick="event.stopPropagation();dlTpl()">Download template</span></small>
+    <input type="file" id="fIn" accept=".csv,.xlsx,.xls" style="display:none" onchange="hFile(this)">
+  </div>`;
+
+  C.reviews.forEach((r, i) => {
+    const col = AVCOLS[((r.author||'').charCodeAt(0)) % AVCOLS.length];
+    const ini = (r.author || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    h += `<div class="rc" id="rv${i}">
+      <div class="rch" onclick="document.getElementById('rv${i}').classList.toggle('open')">
+        <div class="rcav" style="background:${col}">${ini}</div>
+        <span class="rcn">${esc(r.author) || 'Anonymous'}</span>
+        <span class="rcs">${[1,2,3,4,5].map(s => starSvg(s <= r.rating)).join('')}</span>
+        <svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"><button class="aib db" onclick="snap();C.reviews.splice(${i},1);ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Remove review</button></div>
-    </div></div>`;
+      <div class="rcb">
+        <div class="pg">
+          <div class="fld"><label class="fl">Author</label><input type="text" value="${esc(r.author)}" onchange="snap();C.reviews[${i}].author=this.value;ren();renP()"></div>
+          <div class="fld"><label class="fl">Date</label><input type="text" value="${esc(r.date)}" onchange="snap();C.reviews[${i}].date=this.value;renP()"></div>
+        </div>
+        <div class="fld"><label class="fl">Rating</label>
+          <div class="star-pick">${[1,2,3,4,5].map(s => `<button type="button" onclick="snap();C.reviews[${i}].rating=${s};ren();renP()"><svg viewBox="0 0 24 24" style="fill:${s <= r.rating ? '#F59E0B' : 'none'};stroke:${s <= r.rating ? '#F59E0B' : '#D1D5DB'};stroke-width:1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`).join('')}</div>
+        </div>
+        <div class="fld"><label class="fl">Review text</label><textarea onchange="snap();C.reviews[${i}].text=this.value;renP()">${esc(r.text)}</textarea></div>
+        <div class="fld"><label class="fl">Photo URL</label><input type="url" value="${esc(r.photoUrl||'')}" onchange="snap();C.reviews[${i}].photoUrl=this.value;C.reviews[${i}].hasPhoto=!!this.value;renP()" placeholder="https://..."></div>
+        <div class="fld"><label class="fl">Tags (comma separated)</label><input type="text" value="${esc((r.tags||[]).join(', '))}" onchange="snap();C.reviews[${i}].tags=this.value.split(',').map(t=>t.trim()).filter(Boolean);renP()"></div>
+        <div class="fld"><label class="fl">Helpful count</label><input type="number" value="${r.helpful||0}" onchange="snap();C.reviews[${i}].helpful=+this.value;renP()"></div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--tgse-border)">
+          <label class="fl">Owner reply</label>
+          <div class="fld"><input type="text" value="${esc(r.reply?.author || C.place.name)}" placeholder="Reply author" onchange="snap();if(!C.reviews[${i}].reply)C.reviews[${i}].reply={author:'',text:''};C.reviews[${i}].reply.author=this.value;renP()"></div>
+          <div class="fld"><textarea placeholder="Reply text (leave blank to remove)" onchange="snap();const t=this.value.trim();C.reviews[${i}].reply=t?{author:C.reviews[${i}].reply?.author||C.place.name,text:t}:null;renP()">${esc(r.reply?.text||'')}</textarea></div>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--tgse-border)">
+          <button class="ab db" type="button" onclick="snap();C.reviews.splice(${i},1);ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Remove review</button>
+        </div>
+      </div>
+    </div>`;
   });
-  if(!C.reviews.length)h+=`<div style="text-align:center;padding:32px 0"><p style="font-size:12px;color:var(--mt)">No reviews — add one, upload a spreadsheet, or use AI</p></div>`;
-  return h+'</div>';
+
+  return h;
 }
 
-/* ═══ SETTINGS TAB ═══ */
-function sTab(){
-  const wid=wId||'YOUR_WIDGET_ID';
-  return sec('Display','<circle cx="12" cy="12" r="3"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>',true,`
-    ${togF('Header','showHeader',C.showHeader)}${togF('AI Insights','showAI',C.showAI)}${togF('Tag filters','showTags',C.showTags)}
-    ${togF('Photos','showPhotos',C.showPhotos)}${togF('Owner replies','showReplies',C.showReplies)}${togF('Helpful votes','showHelpful',C.showHelpful)}
-    ${togF('Trust strip','showTrust',C.showTrust)}${togF('Write a Review CTA','showCTA',C.showCTA)}
-    ${C.showTrust?`<div class="fld" style="margin-top:6px"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" data-bind="trustText"></div>`:''}
-    ${C.showCTA?`<div class="pg"><div class="fld"><label class="fl">CTA text</label><input type="text" value="${esc(C.ctaText)}" data-bind="ctaText"></div><div class="fld"><label class="fl">CTA URL</label><input type="url" value="${esc(C.ctaUrl)}" data-bind="ctaUrl"></div></div>`:''}
-  `)+sec('AI Highlights','<path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/><path d="M19 13l.5 2 2 .5-2 .5-.5 2-.5-2-2-.5 2-.5.5-2z"/>',false,`
-    ${(C.aiHighlights||[]).map((a,i)=>`<div class="aih"><div class="aih-row"><div class="aih-dot" style="background:${a.color}"><input type="color" value="${a.color}" onchange="snap();C.aiHighlights[${i}].color=this.value;this.parentElement.style.background=this.value;renP()"></div><input type="text" value="${esc(a.label)}" style="flex:1" onchange="snap();C.aiHighlights[${i}].label=this.value;renP()"></div><input type="text" value="${esc(a.value)}" placeholder="Insight value" onchange="snap();C.aiHighlights[${i}].value=this.value;renP()"></div>`).join('')}
-    <button class="aib" onclick="snap();C.aiHighlights.push({label:'New insight',value:'Description',color:'#6366F1',icon:'heart'});ren();renP()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add highlight</button>
-  `)+sec('Embed Code','<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',true,`
-    <div class="emb"><span class="t">&lt;div</span> <span class="a">data-tg-widget</span>=<span class="v">"reviews"</span>\n  <span class="a">data-tg-id</span>=<span class="v">"${wid}"</span><span class="t">&gt;&lt;/div&gt;</span>\n<span class="t">&lt;script</span> <span class="a">src</span>=<span class="v">"https://tg-widgets.vercel.app/widget-reviews.js"</span><span class="t">&gt;&lt;/script&gt;</span></div>
-    <button class="cpb" onclick="cpEmb()"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy embed code</button>
-    ${wId?`<div style="margin-top:8px;font-size:11px;color:var(--mt)">Widget ID: <code style="background:#F1F5F9;padding:2px 6px;border-radius:4px">${wId}</code></div>`:'<div style="margin-top:8px;font-size:11px;color:var(--mt)">Save to get your widget ID</div>'}
+function sTab() {
+  const wid = wId || 'YOUR_WIDGET_ID';
+  return sec('Display', '<circle cx="12" cy="12" r="3" stroke="currentColor" fill="none" stroke-width="2"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" fill="none" stroke-width="2"/>', true, `
+    ${togF('Header', 'showHeader', C.showHeader)}
+    ${togF('AI Insights', 'showAI', C.showAI)}
+    ${togF('Tag filters', 'showTags', C.showTags)}
+    ${togF('Photos', 'showPhotos', C.showPhotos)}
+    ${togF('Owner replies', 'showReplies', C.showReplies)}
+    ${togF('Helpful counts', 'showHelpful', C.showHelpful)}
+    ${togF('Trust strip', 'showTrust', C.showTrust)}
+    ${togF('Write a review CTA', 'showCTA', C.showCTA)}
+    ${C.showTrust ? `<div class="fld" style="margin-top:8px"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" data-bind="trustText"></div>` : ''}
+    ${C.showCTA ? `<div class="fld"><label class="fl">CTA text</label><input type="text" value="${esc(C.ctaText)}" data-bind="ctaText"></div>
+                   <div class="fld"><label class="fl">CTA URL</label><input type="url" value="${esc(C.ctaUrl)}" data-bind="ctaUrl"></div>` : ''}
+  `) + sec('AI Highlights', '<path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', false, `
+    ${(C.aiHighlights || []).map((h, i) => `<div class="aih">
+      <div class="aih-row">
+        <div class="aih-dot" style="background:${h.color}"><input type="color" value="${h.color}" onchange="snap();C.aiHighlights[${i}].color=this.value;ren();renP()"></div>
+        <input type="text" value="${esc(h.label)}" placeholder="Label" onchange="snap();C.aiHighlights[${i}].label=this.value;renP()" style="flex:1">
+        <button class="ab db" type="button" onclick="snap();C.aiHighlights.splice(${i},1);ren();renP()" style="padding:0"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <input type="text" value="${esc(h.value)}" placeholder="Value" onchange="snap();C.aiHighlights[${i}].value=this.value;renP()">
+    </div>`).join('')}
+    <button class="ab" type="button" onclick="snap();C.aiHighlights.push({label:'New insight',value:'Description',color:'#6366F1',icon:'heart'});ren();renP()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add highlight</button>
+  `) + sec('Embed code', '<polyline points="16 18 22 12 16 6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8 6 2 12 8 18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', true, `
+    <div class="emb"><span class="t">&lt;div</span> <span class="a">data-tg-widget</span>=<span class="v">"reviews"</span>
+  <span class="a">data-tg-id</span>=<span class="v">"${wid}"</span><span class="t">&gt;&lt;/div&gt;</span>
+<span class="t">&lt;script</span> <span class="a">src</span>=<span class="v">"https://tg-widgets.vercel.app/widget-reviews.js"</span><span class="t">&gt;&lt;/script&gt;</span></div>
+    <button class="tgse-btn" type="button" onclick="document.getElementById('btn-embed').click()" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Open embed code modal</button>
+    ${wId ? `<div style="margin-top:10px;font-size:11px;color:var(--tgse-ink-3)">Widget ID: <code style="background:var(--tgse-panel-3);padding:2px 6px;border-radius:4px;font-size:10px">${wId}</code></div>` : '<div style="margin-top:10px;font-size:11px;color:var(--tgse-ink-3)">Save to get your widget ID</div>'}
   `);
 }
 
-/* ═══ BIND ═══ */
-function bind(){
-  document.querySelectorAll('[data-bind]').forEach(el=>{
-    const ev=el.type==='range'?'input':'change';
-    el.addEventListener(ev,()=>{snap();const k=el.dataset.bind;
-      if(k.includes('.')){const[a,b]=k.split('.');if(typeof C[a]==='object')C[a][b]=el.type==='number'?+el.value:el.value;else C[k]=el.value}
-      else{C[k]=el.type==='range'?+el.value:el.value}
-      if(el.type==='range'){const d=el.closest('.sr')?.querySelector('.st span:last-child');if(d)d.textContent=el.value+'px';renP()}
-      else if(el.type==='color'){const s=el.closest('.sw');if(s)s.querySelector('div').style.background=el.value;const sp=el.closest('.cr')?.querySelector('.crr span');if(sp)sp.textContent=el.value;renP()}
-      else{saveSS();ren();renP();restSS()}
+/* ── Section state preservation ──────────────────────────────── */
+function saveSecState() {
+  document.querySelectorAll('.tgse-panel.is-active .sec').forEach((s, i) => { openSecs[tab + '_' + i] = s.classList.contains('open'); });
+  document.querySelectorAll('.rc').forEach((r, i) => { openRevs[i] = r.classList.contains('open'); });
+}
+function restoreSecState() {
+  document.querySelectorAll('.tgse-panel.is-active .sec').forEach((s, i) => { if (openSecs[tab + '_' + i]) s.classList.add('open'); });
+  document.querySelectorAll('.rc').forEach((r, i) => { if (openRevs[i]) r.classList.add('open'); });
+}
+
+/* ── Bind data-bind inputs ───────────────────────────────────── */
+function bind() {
+  document.querySelectorAll('[data-bind]').forEach(el => {
+    const ev = el.type === 'range' ? 'input' : 'change';
+    el.addEventListener(ev, () => {
+      snap();
+      const k = el.dataset.bind;
+      if (k.includes('.')) {
+        const [a, b] = k.split('.');
+        if (typeof C[a] === 'object') C[a][b] = el.type === 'number' ? +el.value : el.value;
+        else C[k] = el.value;
+      } else {
+        C[k] = el.type === 'range' ? +el.value : el.value;
+      }
+      if (el.type === 'range') {
+        const disp = el.closest('.sr')?.querySelector('.st span:last-child');
+        if (disp) disp.textContent = el.value + 'px';
+        renP();
+      } else if (el.type === 'color') {
+        const sw = el.closest('.sw'); if (sw) sw.querySelector('div').style.background = el.value;
+        const sp = el.closest('.cr')?.querySelector('.crr span'); if (sp) sp.textContent = el.value;
+        renP();
+      } else {
+        saveSecState(); ren(); renP(); restoreSecState();
+      }
     });
   });
-  const z=document.getElementById('upZ');
-  if(z){z.ondragover=e=>{e.preventDefault();z.classList.add('dragover')};z.ondragleave=()=>z.classList.remove('dragover');z.ondrop=e=>{e.preventDefault();z.classList.remove('dragover');if(e.dataTransfer.files.length)procF(e.dataTransfer.files[0])}}
-}
 
-/* ═══ PREVIEW ═══ */
-function renP(){
-  const m=document.getElementById('mt');const cfg={...C,theme:dark?'dark':'light'};
-  m.innerHTML='';const el=document.createElement('div');el.setAttribute('data-tg-widget','reviews');m.appendChild(el);
-  if(window.TGReviewsWidget)new window.TGReviewsWidget(el,cfg);
-  if(dm)setTimeout(buildOv,80);
-}
-function setDev(d,btn){document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('pvx').style.width=d==='mobile'?'375px':d==='tablet'?'768px':'100%';if(dm)setTimeout(buildOv,350)}
-function toggleTh(){dark=!dark;document.getElementById('thBtn').innerHTML=dark?'<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>Dark':'<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/></svg>Light';renP()}
-
-/* ═══ DESIGN MODE ═══ */
-function toggleDM(){dm=!dm;document.getElementById('dmBtn').classList.toggle('on',dm);document.getElementById('ovWrap').classList.toggle('active',dm);if(dm){buildOv();toast('Design Mode ON','ok')}else{clearOv();closePop()}}
-function clearOv(){document.getElementById('ovWrap').innerHTML='';closePop()}
-function buildOv(){
-  const wrap=document.getElementById('ovWrap');wrap.innerHTML='';
-  const me=document.getElementById('mt').firstElementChild;
-  if(!me||!me.shadowRoot)return;
-  const sh=me.shadowRoot,cr=document.getElementById('pvx').getBoundingClientRect();
-  function spot(el,label,type,data){if(!el)return;const r=el.getBoundingClientRect();const d=document.createElement('div');d.className='ov-spot';d.style.cssText=`left:${r.left-cr.left-2}px;top:${r.top-cr.top-2}px;width:${r.width+4}px;height:${r.height+4}px`;d.innerHTML=`<span class="ov-label">${label}</span>`;d.onclick=e=>{e.stopPropagation();openPop(type,data,r.left-cr.left,r.top-cr.top+r.height+8)};wrap.appendChild(d)}
-  spot(sh.querySelector('.tgr-header'),'Header','header',{});
-  spot(sh.querySelector('.tgr-ai'),'AI Insights','ai',{});
-  spot(sh.querySelector('.tgr-tags'),'Tag Filters','tags',{});
-  spot(sh.querySelector('.tgr-trust'),'Trust Strip','trust',{});
-  spot(sh.querySelector('.tgr-cta'),'Write a Review','cta',{});
-  sh.querySelectorAll('.tgr-card').forEach((card,i)=>{if(C.reviews[i])spot(card,`Review: ${(C.reviews[i].author||'').split(' ')[0]}`,'review',{idx:i})});
-}
-function openPop(type,data,x,y){
-  const pop=document.getElementById('popover');
-  let html=`<div class="pop-title"><span>${type.toUpperCase()}</span><button class="pop-close" onclick="closePop()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
-  if(type==='header'){
-    html+=`<div class="fld"><label class="fl">Business Name</label><input type="text" value="${esc(C.place.name)}" oninput="snap();C.place.name=this.value;renP()"></div>
-    <div class="pg"><div class="fld"><label class="fl">Rating</label><input type="number" step="0.1" value="${C.place.rating}" oninput="snap();C.place.rating=+this.value;renP()"></div>
-    <div class="fld"><label class="fl">Total</label><input type="number" value="${C.place.total}" oninput="snap();C.place.total=+this.value;renP()"></div></div>`;
-  } else if(type==='review'){
-    const r=C.reviews[data.idx];
-    html+=`<div class="fld"><label class="fl">Author</label><input type="text" value="${esc(r.author)}" oninput="snap();C.reviews[${data.idx}].author=this.value;renP()"></div>
-    <div class="fld"><label class="fl">Review</label><textarea oninput="snap();C.reviews[${data.idx}].text=this.value;renP()" style="min-height:60px">${esc(r.text)}</textarea></div>
-    <div class="pg"><div class="fld"><label class="fl">Rating</label><select onchange="snap();C.reviews[${data.idx}].rating=+this.value;renP()">${[5,4,3,2,1].map(s=>`<option${r.rating===s?' selected':''}>${s} star${s>1?'s':''}</option>`).join('')}</select></div>
-    <div class="fld"><label class="fl">Date</label><input type="text" value="${esc(r.date)}" oninput="snap();C.reviews[${data.idx}].date=this.value;renP()"></div></div>`;
-  } else if(type==='trust'){
-    html+=`<div class="fld"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" oninput="snap();C.trustText=this.value;renP()"></div>${togF('Show','showTrust',C.showTrust)}`;
-  } else if(type==='cta'){
-    html+=`<div class="fld"><label class="fl">Button text</label><input type="text" value="${esc(C.ctaText)}" oninput="snap();C.ctaText=this.value;renP()"></div>
-    <div class="fld"><label class="fl">URL</label><input type="url" value="${esc(C.ctaUrl)}" oninput="snap();C.ctaUrl=this.value;renP()"></div>`;
-  } else if(type==='ai'){
-    html+=`${togF('Show AI Insights','showAI',C.showAI)}`;
-  } else if(type==='tags'){
-    html+=`${togF('Show tag filters','showTags',C.showTags)}`;
+  // Spreadsheet drop zone
+  const z = document.getElementById('upZ');
+  if (z) {
+    z.ondragover = e => { e.preventDefault(); z.classList.add('dragover'); };
+    z.ondragleave = () => z.classList.remove('dragover');
+    z.ondrop = e => { e.preventDefault(); z.classList.remove('dragover'); if (e.dataTransfer.files.length) procF(e.dataTransfer.files[0]); };
   }
-  pop.innerHTML=html;
-  const pvx=document.getElementById('pvx').getBoundingClientRect();
-  pop.style.left=Math.min(Math.max(pvx.left+x,8),window.innerWidth-330)+'px';
-  pop.style.top=Math.min(Math.max(pvx.top+y,8),window.innerHeight-300)+'px';
+}
+
+/* ── Preview render ──────────────────────────────────────────── */
+function renP() {
+  const m = document.getElementById('widget-mount');
+  const cfg = { ...C, theme: dark ? 'dark' : 'light' };
+  m.innerHTML = '';
+  const el = document.createElement('div');
+  el.setAttribute('data-tg-widget', 'reviews');
+  m.appendChild(el);
+  if (window.TGReviewsWidget) new window.TGReviewsWidget(el, cfg);
+  if (dm) setTimeout(buildOv, 50);
+}
+
+/* ============================================================
+   DESIGN MODE — click-to-edit overlay system
+   ============================================================ */
+function clearOv() { document.getElementById('ovWrap').innerHTML = ''; closePop(); }
+
+function buildOv() {
+  const wrap = document.getElementById('ovWrap');
+  wrap.innerHTML = '';
+  const container = document.getElementById('pv-frame');
+  const mountEl = document.getElementById('widget-mount').firstElementChild;
+  if (!mountEl || !mountEl.shadowRoot) return;
+  const shadow = mountEl.shadowRoot;
+  const cRect = container.getBoundingClientRect();
+
+  function spot(el, label, type, data) {
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const div = document.createElement('div');
+    div.className = 'ov-spot';
+    div.style.cssText = `left:${r.left-cRect.left-2}px;top:${r.top-cRect.top-2}px;width:${r.width+4}px;height:${r.height+4}px`;
+    div.innerHTML = `<span class="ov-label">${label}</span>`;
+    div.onclick = (e) => { e.stopPropagation(); openPop(type, data, r.left-cRect.left, r.top-cRect.top + r.height + 8); };
+    wrap.appendChild(div);
+  }
+
+  spot(shadow.querySelector('.tgr-header'), 'Header', 'header', {});
+  spot(shadow.querySelector('.tgr-ai'), 'AI Insights', 'ai', {});
+  spot(shadow.querySelector('.tgr-tags'), 'Tag Filters', 'tags', {});
+  spot(shadow.querySelector('.tgr-trust'), 'Trust Strip', 'trust', {});
+  spot(shadow.querySelector('.tgr-cta'), 'Write a Review', 'cta', {});
+
+  shadow.querySelectorAll('.tgr-card').forEach((card, i) => {
+    if (C.reviews[i]) spot(card, `Review: ${(C.reviews[i].author || '').split(' ')[0]}`, 'review', { idx: i });
+  });
+}
+
+function openPop(type, data, x, y) {
+  const pop = document.getElementById('popover');
+  let html = `<div class="pop-title"><span>${type.toUpperCase()}</span><button class="pop-close" type="button" onclick="closePop()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
+
+  if (type === 'header') {
+    html += `<div class="fld"><label class="fl">Business name</label><input type="text" value="${esc(C.place.name)}" oninput="snap();C.place.name=this.value;renP()"></div>
+      <div class="pg">
+        <div class="fld"><label class="fl">Rating</label><input type="number" step="0.1" value="${C.place.rating}" oninput="snap();C.place.rating=+this.value;renP()"></div>
+        <div class="fld"><label class="fl">Total</label><input type="number" value="${C.place.total}" oninput="snap();C.place.total=+this.value;renP()"></div>
+      </div>`;
+  } else if (type === 'review') {
+    const r = C.reviews[data.idx];
+    html += `<div class="fld"><label class="fl">Author</label><input type="text" value="${esc(r.author)}" oninput="snap();C.reviews[${data.idx}].author=this.value;renP()"></div>
+      <div class="fld"><label class="fl">Review</label><textarea oninput="snap();C.reviews[${data.idx}].text=this.value;renP()" style="min-height:60px">${esc(r.text)}</textarea></div>
+      <div class="pg">
+        <div class="fld"><label class="fl">Rating</label><select onchange="snap();C.reviews[${data.idx}].rating=+this.value;renP()">${[5,4,3,2,1].map(s => `<option${r.rating === s ? ' selected' : ''}>${s} star${s > 1 ? 's' : ''}</option>`).join('')}</select></div>
+        <div class="fld"><label class="fl">Date</label><input type="text" value="${esc(r.date)}" oninput="snap();C.reviews[${data.idx}].date=this.value;renP()"></div>
+      </div>`;
+  } else if (type === 'trust') {
+    html += `<div class="fld"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" oninput="snap();C.trustText=this.value;renP()"></div>${togF('Show', 'showTrust', C.showTrust)}`;
+  } else if (type === 'cta') {
+    html += `<div class="fld"><label class="fl">Button text</label><input type="text" value="${esc(C.ctaText)}" oninput="snap();C.ctaText=this.value;renP()"></div>
+      <div class="fld"><label class="fl">URL</label><input type="url" value="${esc(C.ctaUrl)}" oninput="snap();C.ctaUrl=this.value;renP()"></div>`;
+  } else if (type === 'ai') {
+    html += `${togF('Show AI Insights', 'showAI', C.showAI)}`;
+  } else if (type === 'tags') {
+    html += `${togF('Show tag filters', 'showTags', C.showTags)}`;
+  }
+
+  pop.innerHTML = html;
+  const pvxRect = document.getElementById('pv-frame').getBoundingClientRect();
+  const popX = pvxRect.left + x;
+  const popY = pvxRect.top + y;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  pop.style.left = Math.min(Math.max(popX, 8), vw - 330) + 'px';
+  pop.style.top = Math.min(Math.max(popY, 8), vh - 300) + 'px';
   pop.classList.add('show');
 }
-function closePop(){document.getElementById('popover').classList.remove('show')}
-document.addEventListener('click',e=>{const p=document.getElementById('popover');if(p.classList.contains('show')&&!e.target.closest('.pop')&&!e.target.closest('.ov-spot'))closePop()});
-document.getElementById('pvf').addEventListener('scroll',()=>{if(dm)buildOv()});
 
-/* ═══ ADD REVIEW ═══ */
-function addRev(){snap();C.reviews.push({id:String(Date.now()),author:'New Reviewer',rating:5,date:'Just now',text:'Great experience!',tags:[],helpful:0,hasPhoto:false,photoUrl:'',reply:null});ren();renP()}
+function closePop() { document.getElementById('popover').classList.remove('show'); }
 
-/* ═══ SPREADSHEET ═══ */
-function hFile(inp){if(inp.files.length)procF(inp.files[0]);inp.value=''}
-function procF(file){const reader=new FileReader();reader.onload=function(e){try{
-  const wb=XLSX.read(e.target.result,{type:'binary'}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws);
-  if(!rows.length){toast('No data','err');return}snap();
-  C.reviews=rows.map((row,i)=>({
-    id:String(Date.now()+i),
-    author:row.Author||row.Name||row['Reviewer']||'Anonymous',
-    rating:parseInt(row.Rating||row.Stars||5),
-    date:row.Date||row['Review Date']||'Recently',
-    text:row.Text||row.Review||row['Review Text']||'',
-    tags:(row.Tags||'').split(',').map(t=>t.trim()).filter(Boolean),
-    helpful:parseInt(row.Helpful||0),
-    hasPhoto:!!(row['Photo URL']||row.Photo),
-    photoUrl:row['Photo URL']||row.Photo||'',
-    reply:row['Reply Text']?{author:row['Reply Author']||C.place.name,text:row['Reply Text']}:null
-  }));
-  ren();renP();toast(`Imported ${C.reviews.length} reviews`,'ok');
-}catch(e){toast('Error reading file','err')}};reader.readAsBinaryString(file)}
-function dlTpl(){
-  const h=['Author','Rating','Date','Review Text','Tags','Helpful','Photo URL','Reply Author','Reply Text'];
-  const ex=[['Sarah M',5,'2 weeks ago','Amazing service, booked our family holiday and everything was perfect!','Family,Service',24,'','Sunshine Holidays','Thank you Sarah!'],['James R',5,'1 month ago','Third year booking and they never disappoint. Great prices.','Value,Couples',18,'','',''],['Emma T',4,'3 weeks ago','Good experience overall. Booking was easy.','Service,Booking',12,'','Sunshine Holidays','Thanks Emma!']];
-  const ws=XLSX.utils.aoa_to_sheet([h,...ex]),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Reviews');XLSX.writeFile(wb,'reviews-template.xlsx');
+document.addEventListener('click', e => {
+  const pop = document.getElementById('popover');
+  if (pop.classList.contains('show') && !e.target.closest('.pop') && !e.target.closest('.ov-spot')) closePop();
+});
+document.querySelector('.tgse-canvas').addEventListener('scroll', () => { if (dm) buildOv(); });
+window.addEventListener('resize', () => { if (dm) setTimeout(buildOv, 100); });
+
+/* ── Add review ─────────────────────────────────────────────── */
+function addRev() {
+  snap();
+  C.reviews.push({ id: String(Date.now()), author: 'New Reviewer', rating: 5, date: 'Just now', text: 'Great experience!', tags: [], helpful: 0, hasPhoto: false, photoUrl: '', reply: null });
+  ren(); renP();
 }
 
-/* ═══ AI ═══ */
-function getAuthToken(){try{return JSON.parse(sessionStorage.getItem('tgw_session'))?.token||''}catch{return''}}
-function authH(){const t=getAuthToken();const h={'Content-Type':'application/json'};if(t)h['Authorization']='Bearer '+t;return h}
-function ensureAuth(){try{const s=JSON.parse(sessionStorage.getItem('tgw_session')||'null');if(!s||!s.token||!s.user){location.href='/';return false}if(s.timestamp&&(Date.now()-s.timestamp)>86400000){sessionStorage.removeItem('tgw_session');location.href='/';return false}return true}catch(e){location.href='/';return false}}
-
-function showAI(){closeM();document.getElementById('aiM').classList.add('open');document.getElementById('aiP').focus()}
-async function genAI(){
-  const prompt=document.getElementById('aiP').value.trim();if(!prompt)return;
-  const btn=document.getElementById('aiB'),err=document.getElementById('aiE');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Generating...';err.style.display='none';
-  try{const r=await fetch('/api/widget-ai',{method:'POST',headers:authH(),body:JSON.stringify({prompt:`Generate Google Reviews widget data. Return ONLY JSON, no markdown. ${prompt}. Return: {"place":{"name":"Business Name","rating":4.8,"total":NUMBER},"reviews":[{"id":"unique","author":"Full Name","rating":5,"date":"relative date","text":"review text 50-150 words","tags":["Tag1","Tag2"],"helpful":NUMBER,"hasPhoto":false,"photoUrl":"","reply":{"author":"Business Name","text":"reply"} or null}],"aiHighlights":[{"label":"label","value":"value","color":"#hex","icon":"heart|users|trending|award"}]}`})});
-  if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.error||'Failed')}const d=await r.json();snap();
-  if(d.reviews)C.reviews=d.reviews;if(d.place)C.place=d.place;if(d.aiHighlights)C.aiHighlights=d.aiHighlights;
-  closeM();ren();renP();toast('AI generated reviews','ok');
-  }catch(e){err.textContent=e.message||'Generation failed';err.style.display='block'}
-  btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;margin-right:4px;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>Generate';
+/* ── Spreadsheet ─────────────────────────────────────────────── */
+function hFile(inp) { if (inp.files.length) procF(inp.files[0]); inp.value = ''; }
+function procF(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+      if (!rows.length) { tgse.toast('No data found in spreadsheet', 'err'); return; }
+      snap();
+      C.reviews = rows.map((row, i) => ({
+        id: String(Date.now() + i),
+        author: row.Author || row.Name || row['Reviewer'] || 'Anonymous',
+        rating: parseInt(row.Rating || row.Stars || 5),
+        date: row.Date || row['Review Date'] || 'Recently',
+        text: row.Text || row.Review || row['Review Text'] || '',
+        tags: (row.Tags || '').split(',').map(t => t.trim()).filter(Boolean),
+        helpful: parseInt(row.Helpful || 0),
+        hasPhoto: !!(row['Photo URL'] || row.Photo),
+        photoUrl: row['Photo URL'] || row.Photo || '',
+        reply: row['Reply Text'] ? { author: row['Reply Author'] || C.place.name, text: row['Reply Text'] } : null
+      }));
+      ren(); renP();
+      tgse.toast(`Imported ${C.reviews.length} reviews`, 'ok');
+    } catch (e) {
+      tgse.toast('Error reading file', 'err');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+function dlTpl() {
+  const h = ['Author','Rating','Date','Review Text','Tags','Helpful','Photo URL','Reply Author','Reply Text'];
+  const ex = [
+    ['Sarah M', 5, '2 weeks ago', 'Amazing service, booked our family holiday and everything was perfect!', 'Family,Service', 24, '', 'Sunshine Holidays', 'Thank you Sarah!'],
+    ['James R', 5, '1 month ago', 'Third year booking and they never disappoint. Great prices.', 'Value,Couples', 18, '', '', ''],
+    ['Emma T', 4, '3 weeks ago', 'Good experience overall. Booking was easy.', 'Service,Booking', 12, '', 'Sunshine Holidays', 'Thanks Emma!']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([h, ...ex]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Reviews');
+  XLSX.writeFile(wb, 'reviews-template.xlsx');
 }
 
-/* ═══ TEMPLATES ═══ */
-function showTpl(){document.getElementById('tpL').innerHTML=TPL.map((t,i)=>`<div class="tpc" onclick="apTpl(${i})"><div class="tpi" style="background:var(--bg)"><svg viewBox="0 0 24 24" style="stroke:var(--mt)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="tpn"><strong>${t.n}</strong><small>${t.d}</small></div></div>`).join('');document.getElementById('tpM').classList.add('open')}
-function apTpl(i){snap();C.reviews=JSON.parse(JSON.stringify(TPL[i].reviews));C.place={...TPL[i].place};closeM();ren();renP();toast('Template applied','ok')}
+/* ── AI builder ──────────────────────────────────────────────── */
+async function generateAI() {
+  const prompt = document.getElementById('aiPrompt').value.trim();
+  if (!prompt) return;
+  const btn = document.getElementById('aiGenerate');
+  const err = document.getElementById('aiErr');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spin"></span> Generating…';
+  err.style.display = 'none';
+  try {
+    const r = await fetch('/api/widget-ai', {
+      method: 'POST',
+      headers: tgse.authHeaders(),
+      body: JSON.stringify({
+        prompt: `Generate Google Reviews widget data. Return ONLY JSON, no markdown. ${prompt}. Return: {"place":{"name":"Business Name","rating":4.8,"total":NUMBER},"reviews":[{"id":"unique","author":"Full Name","rating":5,"date":"relative date","text":"review text 50-150 words","tags":["Tag1","Tag2"],"helpful":NUMBER,"hasPhoto":false,"photoUrl":"","reply":{"author":"Business Name","text":"reply"} or null}],"aiHighlights":[{"label":"label","value":"value","color":"#hex","icon":"heart|users|trending|award"}]}`
+      })
+    });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || 'Failed'); }
+    const d = await r.json();
+    snap();
+    if (d.reviews) C.reviews = d.reviews;
+    if (d.place) C.place = d.place;
+    if (d.aiHighlights) C.aiHighlights = d.aiHighlights;
+    closeModal('aiModal');
+    ren(); renP();
+    tgse.toast('AI generated reviews', 'ok');
+  } catch (e) {
+    err.textContent = e.message || 'Generation failed';
+    err.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>Generate';
+}
 
-/* ═══ SAVE ═══ */
-async function saveW(){try{const name=document.getElementById('wName').value||'Untitled';const body={config:C,name,widgetType:'Google Reviews'};if(wId)body.widgetId=wId;const r=await fetch('/api/widget-config',{method:'POST',headers:authH(),body:JSON.stringify(body)});if(r.status===401){sessionStorage.removeItem('tgw_session');toast('Session expired — redirecting to login','err');setTimeout(()=>location.href='/',1200);return}const d=await r.json();if(!r.ok){toast(d.error||'Save failed','err');return}if(d.widgetId){wId=d.widgetId;const u=new URL(location);u.searchParams.set('id',wId);history.replaceState(null,'',u)}ren();toast('Saved!','ok')}catch(e){toast('Save failed','err')}}
+/* ── Templates ───────────────────────────────────────────────── */
+function showTplModal() {
+  const list = document.getElementById('tplList');
+  list.innerHTML = `<div class="tpc" onclick="closeModal('tplModal');setTimeout(()=>document.getElementById('btn-ai').click(),100)" style="border-style:dashed;border-color:var(--tgse-accent);background:var(--tgse-brand-tint)">
+    <div class="tpi" style="background:linear-gradient(135deg,var(--tgse-brand),var(--tgse-accent))">
+      <svg viewBox="0 0 24 24" style="stroke:#fff"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>
+    </div>
+    <div class="tpn"><strong>Build with AI</strong><small>Generate realistic reviews</small></div>
+  </div>` + TPL.map((t, i) => `<div class="tpc" onclick="applyTemplate(${i})">
+    <div class="tpi"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+    <div class="tpn"><strong>${t.n}</strong><small>${t.d}</small></div>
+  </div>`).join('');
+  openModal('tplModal');
+}
+function applyTemplate(i) {
+  snap();
+  C.reviews = JSON.parse(JSON.stringify(TPL[i].reviews));
+  C.place = { ...TPL[i].place };
+  closeModal('tplModal');
+  ren(); renP();
+  tgse.toast('Template applied', 'ok');
+}
 
-/* ═══ UTILS ═══ */
-function closeM(){document.querySelectorAll('.mbg').forEach(m=>m.classList.remove('open'))}
-function cpEmb(){const c=`<div data-tg-widget="reviews" data-tg-id="${wId||'YOUR_WIDGET_ID'}"></div>\n<script src="https://tg-widgets.vercel.app/widget-reviews.js"><\/script>`;navigator.clipboard.writeText(c).then(()=>toast('Copied!','ok'))}
-function toast(m,t){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+t+' show';setTimeout(()=>e.classList.remove('show'),3000)}
-document.querySelectorAll('.mbg').forEach(m=>m.onclick=e=>{if(e.target===m)closeM()});
+/* ── Modal helpers ───────────────────────────────────────────── */
+function openModal(id) { document.getElementById(id).classList.add('is-open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('is-open'); document.body.style.overflow = ''; }
+document.querySelectorAll('[data-close-modal]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+});
+document.querySelectorAll('.tgse-modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+});
+// Chips inside the AI modal — fill prompt
+document.querySelectorAll('#aiModal .chip').forEach(chip => {
+  chip.addEventListener('click', () => { document.getElementById('aiPrompt').value = chip.textContent; });
+});
+document.getElementById('aiGenerate').addEventListener('click', generateAI);
+
+/* ── Theme toggle button ─────────────────────────────────────── */
+function updateThemeButtonLabel() {
+  const btn = document.getElementById('btn-theme');
+  if (!btn) return;
+  const labelText = dark ? 'Dark' : 'Theme';
+  const svg = btn.querySelector('svg');
+  btn.innerHTML = '';
+  btn.appendChild(svg);
+  btn.appendChild(document.createTextNode(' ' + labelText));
+}
+
+/* ── Keyboard shortcuts (widget-specific) ────────────────────── */
+document.addEventListener('keydown', e => {
+  const mod = e.metaKey || e.ctrlKey;
+  if (mod && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  if (mod && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+  if (!mod && !e.target.closest('input,textarea,select')) {
+    if (e.key === 'Escape') closePop();
+  }
+});
+
+/* ── Load existing widget if URL has ?id ─────────────────────── */
+async function loadWidget(id) {
+  try {
+    const r = await fetch('/api/widget-config?id=' + encodeURIComponent(id));
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    Object.assign(C, d);
+    document.getElementById('name-input').value = C.place?.name || '';
+    snap(); ren(); renP();
+    tgse.toast('Loaded', 'ok');
+  } catch (e) {
+    C.reviews = JSON.parse(JSON.stringify(TPL[0].reviews));
+    C.place = { ...TPL[0].place };
+    snap(); ren(); renP();
+  }
+}
+
+/* ── Boot ────────────────────────────────────────────────────── */
+function boot() {
+  if (!tgse.isLoggedIn()) return;  // Shell will show overlay; we'll boot again via onLoginSuccess
+  const params = new URLSearchParams(location.search);
+  wId = params.get('id');
+  if (wId) {
+    loadWidget(wId);
+  } else {
+    C.reviews = JSON.parse(JSON.stringify(TPL[0].reviews));
+    C.place = { ...TPL[0].place };
+    snap(); ren(); renP();
+  }
+}
+
+/* ── Initialise the shell ────────────────────────────────────── */
+shell = tgse.init({
+  widgetType: 'Google Reviews',
+  widgetTag: 'reviews',
+  scriptFile: 'widget-reviews.js',
+
+  getConfig: () => C,
+  setConfig: (c) => { Object.assign(C, c); ren(); renP(); },
+
+  onAIBuild: () => openModal('aiModal'),
+  onTemplates: () => showTplModal(),
+
+  onThemeToggle: () => {
+    dark = !dark;
+    updateThemeButtonLabel();
+    renP();
+  },
+  onDesignMode: (isOn) => {
+    dm = isOn;
+    const wrap = document.getElementById('ovWrap');
+    wrap.classList.toggle('active', dm);
+    if (dm) { buildOv(); tgse.toast('Design mode on — click any element', 'ok'); }
+    else { clearOv(); closePop(); }
+  },
+  onTabChange: (newTab) => { tab = newTab; },
+  onLoginSuccess: () => boot(),
+  onAfterSave: (d) => { if (d?.widgetId) wId = d.widgetId; },
+});
+
+document.getElementById('name-input').addEventListener('input', () => snap());
+document.addEventListener('DOMContentLoaded', boot);
 </script>
-<script src="/widget-reviews.js"></script>
 </body>
 </html>
