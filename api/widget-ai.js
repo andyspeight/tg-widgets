@@ -4,7 +4,7 @@
  *
  * ─── Request body ───────────────────────────────────────────────────
  *   {
- *     widgetType: 'FAQ' | 'PRICING' | 'REVIEWS',  // required
+ *     widgetType: 'FAQ' | 'PRICING' | 'REVIEWS' | 'SPOTLIGHT' | 'WEATHER' | 'COUNTDOWN TIMER',  // required
  *     prompt: string,                              // 5-1000 chars
  *     action?: string,                             // ignored (legacy)
  *     options?: {                                  // FAQ only for now
@@ -65,7 +65,7 @@ const FETCH_TIMEOUT_MS = 30_000;
 const PROMPT_MIN_LEN = 5;
 const PROMPT_MAX_LEN = 1000;
 
-const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'REVIEWS', 'SPOTLIGHT', 'WEATHER'];
+const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'REVIEWS', 'SPOTLIGHT', 'WEATHER', 'COUNTDOWN TIMER'];
 const ALLOWED_TONES        = ['warm', 'professional', 'casual'];
 
 // Per-plan daily caps. Adjust here without touching logic.
@@ -227,7 +227,7 @@ function parseBody(body) {
   // widgetType — strict enum
   const widgetType = String(body.widgetType || '').toUpperCase();
   if (!ALLOWED_WIDGET_TYPES.includes(widgetType)) {
-    return { error: 'Invalid widgetType. Must be FAQ, PRICING, REVIEWS, SPOTLIGHT or WEATHER.' };
+    return { error: 'Invalid widgetType. Must be FAQ, PRICING, REVIEWS, SPOTLIGHT, WEATHER or COUNTDOWN TIMER.' };
   }
 
   // prompt — trimmed, length-bounded string
@@ -372,6 +372,7 @@ function buildPrompt(widgetType, userPrompt, options) {
   if (widgetType === 'REVIEWS')   return buildReviewsPrompt(userPrompt);
   if (widgetType === 'SPOTLIGHT') return buildSpotlightPrompt(userPrompt);
   if (widgetType === 'WEATHER')   return buildWeatherPrompt(userPrompt);
+  if (widgetType === 'COUNTDOWN TIMER') return buildCountdownPrompt(userPrompt);
   throw new Error('Unreachable'); // caught by input validation above
 }
 
@@ -503,6 +504,48 @@ Rules:
   return { system: SYSTEM_SAFETY, userMsg };
 }
 
+function buildCountdownPrompt(userPrompt) {
+  // Countdown: AI generates the campaign copy and a sensible target date.
+  // The widget itself decides layout/colour from saved config — but if the
+  // user doesn't specify a campaign window, we infer one from the campaign
+  // type so a quick "summer sale" prompt produces a working timer instantly.
+  const nowISO = new Date().toISOString();
+  const userMsg = `Widget type: COUNTDOWN TIMER
+
+The Countdown Timer widget creates urgency around sales, peak campaigns, departure dates and early-booking deadlines on travel agent websites. Your task:
+
+1. Compose a heading — short, action-driving, present-tense, ending with "in" so the digits read naturally after it. 4-6 words. Examples: "Summer sale ends in", "Black Friday closes in", "Early booking deadline in", "Departing in".
+2. Optionally compose a subheading — one line of body copy with detail (saving %, departure type, urgency cue). Skip it (return empty string) if the campaign description is so short there's nothing to add.
+3. Compose CTA button text — 2-4 words, action-oriented. Examples: "Browse offers", "View deals", "Book this trip", "Enquire today". Never generic ("Click here", "Learn more").
+4. Suggest a target date as ISO 8601 UTC. Rules:
+   - If the user gives an explicit date, use exactly that (convert to UTC if a timezone is implied).
+   - If the user gives a duration ("3 weeks", "until end of month"), compute the date from now (which is ${nowISO}).
+   - If neither is given, infer from campaign type: flash sale = 7 days, generic sale = 21 days, Black Friday = next 4th Friday of November at 23:59 UTC, early booking = 42 days, last-minute departure = 9 days. Default to 14 days if unsure.
+   - Always pick a future date.
+
+<campaign_description>
+${userPrompt}
+</campaign_description>
+
+Return a single JSON object with this exact shape:
+{
+  "heading": "Sale ends in",
+  "subheading": "Up to 40% off Mediterranean packages. Limited departures.",
+  "ctaText": "Browse offers",
+  "suggestedTargetDateISO": "2026-06-15T22:59:00.000Z"
+}
+
+Rules:
+- heading must end with "in" so digits flow grammatically after it
+- subheading is optional — return "" if not warranted
+- suggestedTargetDateISO must be a valid ISO 8601 UTC string in the future
+- British English throughout
+- No em-dashes, no Oxford commas, no AI filler ("cutting-edge", "seamless", "curated", "bespoke" unless the campaign is genuinely luxury)
+- Voice is travel agent — confident, warm, plain-spoken, never marketing-jargon`;
+
+  return { system: SYSTEM_SAFETY, userMsg };
+}
+
 function buildWeatherPrompt(userPrompt) {
   // Weather content (name, climate, season) always comes from the Destination
   // Content database. The AI picks presentation: palette, layout, temperature
@@ -612,6 +655,7 @@ function parseAndValidate(widgetType, rawText, options) {
   if (widgetType === 'REVIEWS')   return validateReviewsLoose(obj);
   if (widgetType === 'SPOTLIGHT') return validateSpotlightLoose(obj);
   if (widgetType === 'WEATHER')   return validateWeatherLoose(obj);
+  if (widgetType === 'COUNTDOWN TIMER') return validateCountdownLoose(obj);
   throw new Error('Unknown widgetType in validator');
 }
 
@@ -726,4 +770,36 @@ function validateWeatherLoose(obj) {
   if (!cta.buttonLabel) cta.buttonLabel = 'Enquire now';
 
   return { brandColor, accentColor, temperatureUnit, layout, cta };
+}
+
+function validateCountdownLoose(obj) {
+  // Strict schema: countdown AI output is small and feeds directly into
+  // editor fields. We bound every string at the same maxlength the editor
+  // enforces (so a save right after AI generation never tripped by length).
+  if (!obj || typeof obj !== 'object') throw new Error('Invalid countdown response');
+
+  const heading = String(obj.heading || '').slice(0, 120).trim();
+  const subheading = String(obj.subheading || '').slice(0, 240).trim();
+  const ctaText = String(obj.ctaText || '').slice(0, 40).trim();
+
+  // Date validation: must parse, must be in the future, must be within a
+  // sensible window (1 minute to 5 years out). Anything outside falls back
+  // to "now + 14 days" — better a sensible default than an empty input.
+  let suggestedTargetDateISO = '';
+  const rawDate = typeof obj.suggestedTargetDateISO === 'string' ? obj.suggestedTargetDateISO.trim() : '';
+  const parsedMs = Date.parse(rawDate);
+  const now = Date.now();
+  const fiveYearsMs = 5 * 365 * 24 * 60 * 60 * 1000;
+  if (Number.isFinite(parsedMs) && parsedMs > now + 60_000 && parsedMs < now + fiveYearsMs) {
+    suggestedTargetDateISO = new Date(parsedMs).toISOString();
+  } else {
+    suggestedTargetDateISO = new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString();
+  }
+
+  return {
+    heading: heading || 'Sale ends in',
+    subheading,
+    ctaText: ctaText || 'Find out more',
+    suggestedTargetDateISO,
+  };
 }
