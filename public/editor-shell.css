@@ -512,13 +512,13 @@ body {
   border: 1px solid var(--tgse-border);
   border-radius: var(--tgse-radius-lg);
   box-shadow: var(--tgse-shadow-lg);
-  padding: 36px;
+  padding: 48px 40px;
   transition: max-width .25s ease;
   position: relative;
 }
 .tgse-frame[data-vp="desktop"] { max-width: 980px; }
-.tgse-frame[data-vp="tablet"] { max-width: 600px; }
-.tgse-frame[data-vp="mobile"] { max-width: 380px; padding: 24px; }
+.tgse-frame[data-vp="tablet"] { max-width: 600px; padding: 36px 28px; }
+.tgse-frame[data-vp="mobile"] { max-width: 380px; padding: 24px 16px; }
 
 /* ============================================================
    SECTION ACCORDION (sidebar body content)
