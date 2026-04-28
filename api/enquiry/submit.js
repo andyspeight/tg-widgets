@@ -30,10 +30,12 @@ import { applyRateLimit, RATE_LIMITS } from '../_auth.js';
 // reliably traced by the Vercel bundler — dynamic imports with string paths
 // are not, which caused "mod.default is not a function" errors alternating
 // between email.js and auto-reply.js per deploy. When future routing modules
-// are built (google-sheets, webhook, luna-*), import them here the same way
-// and swap their entry in the `enabled` array below from `loader` to `handler`.
-import sendAgentEmail from './_lib/routing/email.js';
-import sendAutoReply  from './_lib/routing/auto-reply.js';
+// are built (luna-*), import them here the same way and swap their entry
+// in the `enabled` array below from `loader` to `handler`.
+import sendAgentEmail    from './_lib/routing/email.js';
+import sendAutoReply     from './_lib/routing/auto-reply.js';
+import sendWebhook       from './_lib/routing/webhook.js';
+import sendToGoogleSheets from './_lib/routing/google-sheets.js';
 
 // ---------- Config -----------------------------------------------------------
 
@@ -630,9 +632,9 @@ async function fanOutRouting({ form, payload, submissionId, reference, meta }) {
   const enabled = [
     { key: 'email',          always: true,  on: f[FORM_FIELDS.routingEmail],          handler: sendAgentEmail },
     { key: 'auto-reply',     always: false, on: f[FORM_FIELDS.routingEmailAutoReply], handler: sendAutoReply },
-    { key: 'google-sheets',  always: false, on: f[FORM_FIELDS.routingGoogleSheets],   loader:  () => import('./_lib/routing/google-sheets.js') },
+    { key: 'google-sheets',  always: false, on: f[FORM_FIELDS.routingGoogleSheets],   handler: sendToGoogleSheets },
     { key: 'airtable',       always: false, on: f[FORM_FIELDS.routingAirtable],       loader:  () => import('./_lib/routing/airtable.js') },
-    { key: 'webhook',        always: false, on: f[FORM_FIELDS.routingWebhook],        loader:  () => import('./_lib/routing/webhook.js') },
+    { key: 'webhook',        always: false, on: f[FORM_FIELDS.routingWebhook],        handler: sendWebhook },
     { key: 'luna-chat',      always: false, on: f[FORM_FIELDS.routingLunaChat],       loader:  () => import('./_lib/routing/luna-chat.js') },
     { key: 'luna-marketing', always: false, on: f[FORM_FIELDS.routingLunaMarketing],  loader:  () => import('./_lib/routing/luna-marketing.js') },
     { key: 'luna-work',      always: false, on: f[FORM_FIELDS.routingLunaWork],       loader:  () => import('./_lib/routing/luna-work.js') },
