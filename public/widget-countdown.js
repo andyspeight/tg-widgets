@@ -1,11 +1,17 @@
 /**
- * Travelgenix Countdown Timer Widget v1.1.0
+ * Travelgenix Countdown Timer Widget v1.2.0
  * Self-contained, embeddable widget
  * Zero dependencies — works on any website via a single script tag
  *
- * v1.1.0 adds the "wow" effects: sliding digit reels, gradient digit cells,
+ * v1.1.0 added the "wow" effects: sliding digit reels, gradient digit cells,
  * brand glow, final-minute progress ring, hero aurora, banner pulse dot.
  * All effects respect prefers-reduced-motion.
+ *
+ * v1.2.0 adds:
+ *   - Redirect on expiry (alongside hide / message / cta-only)
+ *   - Optional frozen 00:00:00 counters above the expiry message
+ *   - Sticky top / sticky bottom Banner positioning + dismiss button
+ *   - Scheduled-start (widget hidden until a chosen date)
  *
  * Usage:
  *   <div data-tg-widget="countdown" data-tg-id="YOUR_WIDGET_ID"></div>
@@ -18,7 +24,7 @@
   'use strict';
 
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -368,6 +374,44 @@
     .tgcd-banner .tgcd-label { font-size: 10px; }
     .tgcd-banner .tgcd-sep { font-size: 22px; transform: translateY(-7px); }
     .tgcd-banner .tgcd-cta { padding: 10px 18px; font-size: 14px; min-height: 40px; }
+
+    /* Sticky-bar variants — pin to top or bottom of viewport.
+       Position: fixed inside Shadow DOM still resolves against the viewport,
+       not the host element. Tested in Chrome/Safari/Firefox. */
+    .tgcd-banner-sticky-top, .tgcd-banner-sticky-bottom {
+      position: fixed;
+      left: 0; right: 0;
+      width: 100%;
+      max-width: 100%;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      z-index: 9998;
+    }
+    .tgcd-banner-sticky-top  { top: 0;    border-top: none; }
+    .tgcd-banner-sticky-bottom { bottom: 0; border-bottom: none; }
+
+    /* Close button on dismissible sticky bars */
+    .tgcd-banner-close {
+      appearance: none;
+      background: transparent;
+      border: none;
+      color: var(--tgcd-sub, #475569);
+      font-size: 22px;
+      line-height: 1;
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+      transition: background-color .15s ease, color .15s ease;
+    }
+    .tgcd-banner-close:hover { background: rgba(0,0,0,.06); color: var(--tgcd-text); }
+    .tgcd-banner-close:focus-visible { outline: 2px solid var(--tgcd-accent); outline-offset: 2px; }
+    .tgcd-root[data-theme="dark"] .tgcd-banner-close:hover { background: rgba(255,255,255,.08); }
     /* Banner ticker dot — pulses next to the heading */
     .tgcd-banner-dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -575,7 +619,17 @@
       heading: 'Sale ends in',
       subheading: '',
       cta: { text: '', url: '', openInNewTab: true },
-      expiry: { behaviour: 'message', message: 'This offer has now ended.' }, // hide | message | cta-only
+      expiry: {
+        behaviour: 'message', // hide | message | cta-only | redirect
+        message: 'This offer has now ended.',
+        redirectUrl: '', // for behaviour: 'redirect' — must be safe URL
+        keepCounters: false // when true, show 00:00:00 digits above the expired message/CTA
+      },
+      banner: {
+        position: 'static', // static | sticky-top | sticky-bottom — applies to Banner layout only
+        dismissible: false  // adds a × close button on sticky bars (and only sticky bars)
+      },
+      scheduledStart: null, // ISO string — widget stays hidden until this date passes (null = always visible)
       display: { showDays: true, showHours: true, showMinutes: true, showSeconds: true },
       repeating: { enabled: false, frequency: 'weekly', dayOfWeek: 5, time: '17:00' },
       urgency: { enabled: true, thresholdHours: 24 },
@@ -623,6 +677,18 @@
       this.shadow = container.attachShadow({ mode: 'open' });
       this._lastValues = {};
       this._timerId = null;
+      this._dismissed = false;
+      this._redirected = false;
+
+      // Honour a previous dismissal on a sticky bar (only Banner can be
+      // dismissed, but the check is cheap and harmless for other layouts).
+      try {
+        const id = container.getAttribute('data-tg-id');
+        if (id && localStorage.getItem('tgcd-dismissed-' + id) === '1') {
+          this._dismissed = true;
+        }
+      } catch {}
+
       this._render();
     }
 
@@ -639,7 +705,13 @@
     }
 
     _stop() {
-      if (this._timerId) { clearInterval(this._timerId); this._timerId = null; }
+      if (this._timerId) {
+        // _timerId may be from setInterval (normal tick) or setTimeout
+        // (waiting for scheduledStart). Clear both to be safe.
+        clearInterval(this._timerId);
+        clearTimeout(this._timerId);
+        this._timerId = null;
+      }
     }
 
     _resolveTarget() {
@@ -656,6 +728,32 @@
 
     _render() {
       const c = this.c;
+
+      // Mount style block once per render (Shadow DOM is wiped each time)
+      const style = document.createElement('style');
+      style.textContent = STYLES;
+      this.shadow.innerHTML = '';
+      this.shadow.appendChild(style);
+
+      // ── Scheduled start: render nothing until the start date arrives ──
+      // Useful for "set up the Black Friday banner in October, leave it on the
+      // site, it appears on its own". Re-render is scheduled via setTimeout so
+      // the widget wakes up exactly when it should.
+      if (c.scheduledStart) {
+        const startMs = parseTarget(c.scheduledStart);
+        if (startMs && startMs > Date.now()) {
+          // Stay invisible. Schedule a wake-up — but cap setTimeout at
+          // 24 days because some browsers cap the int32 setTimeout argument.
+          const waitMs = Math.min(startMs - Date.now(), 24 * 24 * 60 * 60 * 1000);
+          this._stop();
+          this._timerId = setTimeout(() => this._render(), waitMs);
+          return;
+        }
+      }
+
+      // ── Dismissed: if the user closed a sticky bar, stay hidden ──
+      if (this._dismissed) return;
+
       const targetMs = this._resolveTarget();
 
       // Build root
@@ -686,36 +784,45 @@
       const wow = c.wow || {};
       if (wow.glow) root.classList.add('tgcd-glow');
 
-      // Style block
-      const style = document.createElement('style');
-      style.textContent = STYLES;
-
       // Decide what to render
       const remaining = targetMs ? computeRemaining(targetMs) : null;
       const isExpired = !targetMs || (remaining && remaining.expired);
+      const repeating = !!(c.repeating && c.repeating.enabled);
 
-      if (isExpired && !(c.repeating && c.repeating.enabled)) {
-        const node = this._buildExpired();
+      // ── Redirect on expiry — fire once, never in repeating mode, never
+      //    if scheduledStart hasn't passed (already returned above) ──
+      if (isExpired && !repeating && c.expiry && c.expiry.behaviour === 'redirect') {
+        const url = safeUrl(c.expiry.redirectUrl || '');
+        if (url && !this._redirected) {
+          this._redirected = true;
+          // Brief delay so any analytics tags can fire and so the page doesn't
+          // navigate from underneath an open form. Hidden during the wait.
+          try { setTimeout(() => { window.location.href = url; }, 250); } catch {}
+          return; // render nothing
+        }
+        // No valid URL → silently fall through to a hidden state
+        return;
+      }
+
+      if (isExpired && !repeating) {
+        const node = this._buildExpired(remaining);
         root.appendChild(node);
       } else {
         const node = this._buildLayout(remaining || { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 });
         root.appendChild(node);
       }
 
-      // Mount
-      this.shadow.innerHTML = '';
-      this.shadow.appendChild(style);
       this.shadow.appendChild(root);
       this._root = root;
 
       // Start ticking only if there's a live countdown
-      if (!isExpired || (c.repeating && c.repeating.enabled)) {
+      if (!isExpired || repeating) {
         this._tick(true);
         this._timerId = setInterval(() => this._tick(false), 1000);
       }
     }
 
-    _buildExpired() {
+    _buildExpired(remaining) {
       const c = this.c;
       const wrap = document.createElement('div');
       wrap.className = 'tgcd-expired';
@@ -725,13 +832,20 @@
         return wrap;
       }
 
+      // Optionally render frozen 00:00:00 digits above the expired UI
+      if (c.expiry.keepCounters) {
+        const frozen = { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
+        wrap.appendChild(this._buildUnits(frozen));
+      }
+
       if (c.expiry.behaviour === 'cta-only' && c.cta && c.cta.text && safeUrl(c.cta.url)) {
         const cta = this._buildCta();
         if (cta) wrap.appendChild(cta);
         return wrap;
       }
 
-      // message
+      // message (default fallback for any unknown behaviour like 'redirect'
+      // that didn't hit because of a missing/bad URL)
       const h = document.createElement('p');
       h.className = 'tgcd-heading';
       h.textContent = c.expiry.message || 'This offer has now ended.';
@@ -758,6 +872,12 @@
       const wrap = document.createElement('div');
       wrap.className = 'tgcd-banner';
 
+      // Sticky bar positioning. Only Banner supports this — the other
+      // layouts (Card/Inline/Hero) are designed to live inside the page flow.
+      const pos = (c.banner && c.banner.position) || 'static';
+      if (pos === 'sticky-top') wrap.classList.add('tgcd-banner-sticky-top');
+      else if (pos === 'sticky-bottom') wrap.classList.add('tgcd-banner-sticky-bottom');
+
       const text = document.createElement('div');
       text.className = 'tgcd-banner-text';
       if (c.wow && c.wow.bannerDot && c.heading) {
@@ -783,6 +903,29 @@
 
       const cta = this._buildCta();
       if (cta) wrap.appendChild(cta);
+
+      // Dismiss button — only when sticky AND dismissible
+      // (a static banner doesn't need a close button — it's part of the page)
+      const isSticky = pos === 'sticky-top' || pos === 'sticky-bottom';
+      if (isSticky && c.banner && c.banner.dismissible) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tgcd-banner-close';
+        btn.setAttribute('aria-label', 'Dismiss');
+        btn.textContent = '\u00D7'; // ×
+        btn.addEventListener('click', () => {
+          this._dismissed = true;
+          this._stop();
+          this.shadow.innerHTML = '';
+          // Persist across reloads using a per-widget key. Falls back silently
+          // if storage isn't available (private browsing, etc.).
+          try {
+            const key = 'tgcd-dismissed-' + (this.el.getAttribute('data-tg-id') || 'inline');
+            localStorage.setItem(key, '1');
+          } catch {}
+        });
+        wrap.appendChild(btn);
+      }
 
       return wrap;
     }
