@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Widget Editor — Travelgenix</title>
+<!--
+  ============================================================
+  TRAVELGENIX UNIFIED EDITOR SHELL — TEMPLATE
+  Copy this file as `editor-{widgetname}.html` to start a new editor.
+  Search for "TODO" and "{{...}}" placeholders to fill in.
+  ============================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /*
+    Per-editor styles ONLY.
+    Do NOT redeclare shell tokens — they live in editor-shell.css.
+    Use --tgse-* tokens for anything you need.
+  */
+
+  /* TODO: widget-specific sidebar body styles go here */
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="tgse-sidebar">
+
+    <!-- Row 1: Crumb strip (40px) — Back to dashboard -->
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <!-- Row 2: Widget identity (64px) -->
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <!-- TODO: replace with widget-specific icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">{{Widget Name}}</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <!-- Row 3: Primary actions (60px) — Templates + AI builder -->
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <!-- Row 4: Name + Save (60px) -->
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <!-- Row 5: Tabs (48px) -->
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <!-- Row 6: Scrollable body — tab panels -->
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== DESIGN TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <!-- Standard section: Colours -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <!-- TODO: widget-specific colour fields -->
+          </div>
+        </div>
+
+        <!-- Standard section: Typography (font picker mounts here) -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Standard section: Shape & spacing -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Shape &amp; spacing</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <!-- TODO: border radius, padding, etc. -->
+          </div>
+        </div>
+
+        <!-- TODO: any widget-specific Design sections after the four standard ones -->
+
+      </div>
+
+      <!-- ===== CONTENT TAB ===== -->
+      <div class="tgse-panel" data-tab="content">
+        <!-- TODO: widget-specific content editors (text, items, CSV upload, etc.) -->
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
+        <!-- TODO: display toggles, advanced options, embed code, danger zone -->
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       PREVIEW
+       ============================================================ -->
+  <section class="tgse-preview">
+    <!-- Toolbar (56px) -->
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+        Design mode
+        <span class="tgse-kbd">D</span>
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <!-- Canvas — preview frame mounts here -->
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <!-- TODO: widget mount point goes here, e.g.:
+             <div data-tg-widget="{widgettag}" id="widget-mount"></div> -->
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Shell behaviour (must come before the editor's own script) -->
+<script src="/editor-shell.js"></script>
+
+<!-- TODO: load this widget's JS for live preview, e.g.:
+     <script src="/widget-{widgetname}.js"></script> -->
+
+<script>
+  /*
+    ============================================================
+    PER-EDITOR SCRIPT
+    Initialise the shell and pass widget-specific behaviour.
+    ============================================================
+  */
+
+  // The widget config — edit through the sidebar tabs.
+  let C = {
+    // TODO: default config for this widget
+    fontFamily: 'DM Sans',
+  };
+
+  // Initialise the shell
+  const shell = tgse.init({
+    widgetType: 'TODO',          // must match Airtable WidgetType singleSelect option
+    widgetTag: 'TODO',           // value used in data-tg-widget attribute
+    scriptFile: 'widget-TODO.js',// widget JS filename for embed code
+
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); render(); },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; render(); },
+
+    onAIBuild: () => {
+      // TODO: open widget-specific AI modal
+      tgse.toast('AI builder — TODO', 'ok');
+    },
+    onTemplates: () => {
+      // TODO: open widget-specific Templates modal
+      tgse.toast('Templates — TODO', 'ok');
+    },
+    onThemeToggle: (isDark) => {
+      // TODO: tell the widget to re-render in dark mode
+      C.theme = isDark ? 'dark' : 'light';
+      render();
+    },
+    onDesignMode: (isOn) => {
+      // TODO: toggle widget-specific Design Mode overlay
+    },
+    onTabChange: (tab) => {
+      // optional — runs after a tab switches
+    },
+    onLoginSuccess: () => {
+      // optional — runs after the user logs in via the overlay
+      loadFromUrl();
+    },
+  });
+
+  function render() {
+    // TODO: re-render the preview using current C
+    // tgse marks dirty automatically when font picker fires.
+    // For other config changes, call: shell.markDirty()
+  }
+
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) { render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) Object.assign(C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  // Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    if (tgse.isLoggedIn()) loadFromUrl();
+    // If not logged in, the shell shows the login overlay; onLoginSuccess will call loadFromUrl()
+  });
+
+  // Mark dirty on any name input change
+  document.getElementById('name-input')?.addEventListener('input', () => shell.markDirty());
+</script>
+
+</body>
+</html>
