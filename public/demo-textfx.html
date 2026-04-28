@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Text FX — Travelgenix Widget Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #F8FAFC;
+      color: #0F172A;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .demo-shell { max-width: 1200px; margin: 0 auto; padding: 48px 24px 96px; }
+    .demo-header { margin-bottom: 64px; }
+    .demo-eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #0891B2;
+      background: #ECFEFF;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    .demo-header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+    }
+    .demo-header p {
+      font-size: 18px;
+      color: #475569;
+      max-width: 640px;
+      margin: 0;
+    }
+
+    .demo-section {
+      margin-bottom: 56px;
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #E2E8F0;
+      overflow: hidden;
+    }
+    .demo-section-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #F1F5F9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .demo-section-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .demo-section-header .tag {
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748B;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #F1F5F9;
+    }
+    .demo-stage {
+      padding: 56px 24px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .demo-stage[data-bg="dark"] {
+      background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+    }
+
+    .demo-footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid #E2E8F0;
+      text-align: center;
+      color: #64748B;
+      font-size: 14px;
+    }
+    .demo-footer a { color: #0891B2; text-decoration: none; }
+    .demo-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .demo-shell { padding: 24px 16px 64px; }
+      .demo-header h1 { font-size: 28px; }
+      .demo-stage { padding: 40px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-shell">
+    <div class="demo-header">
+      <span class="demo-eyebrow">Travelgenix Widget Suite</span>
+      <h1>Text FX — Kinetic Typography</h1>
+      <p>Twelve text effects in a single widget. Phase 1 ships with four: Typewriter, Rotating Words, Counter, and Gradient Fill. Eight more land in Phase 2.</p>
+    </div>
+
+    <!-- TYPEWRITER -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Typewriter</h2>
+        <span class="tag">Animated</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "typewriter",
+          "fontSize": 56,
+          "fontWeight": 800,
+          "textColor": "#0F172A",
+          "typewriter": {
+            "phrases": ["Find your perfect beach holiday.", "Find your perfect city break.", "Find your perfect adventure."],
+            "typeSpeed": 65,
+            "deleteSpeed": 35,
+            "holdDuration": 1500,
+            "cursorStyle": "bar",
+            "loop": true
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- ROTATING WORDS -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Rotating Words</h2>
+        <span class="tag">Animated</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "rotating",
+          "fontSize": 56,
+          "fontWeight": 800,
+          "textColor": "#0F172A",
+          "rotating": {
+            "prefix": "Holidays for ",
+            "words": ["families", "couples", "explorers", "foodies", "honeymooners"],
+            "suffix": ".",
+            "interval": 2200,
+            "animation": "slide",
+            "wordColor": "#0891B2"
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- COUNTER -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Counter</h2>
+        <span class="tag">Animated</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "counter",
+          "fontSize": 84,
+          "fontWeight": 800,
+          "textColor": "#0F172A",
+          "counter": {
+            "prefix": "£",
+            "suffix": "+",
+            "from": 0,
+            "to": 2300000,
+            "duration": 2400,
+            "decimals": 0,
+            "thousandsSeparator": ",",
+            "easing": "quart",
+            "startOnView": true
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- GRADIENT (light) -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Gradient Fill</h2>
+        <span class="tag">Visual</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "gradient",
+          "fontSize": 64,
+          "fontWeight": 800,
+          "gradient": {
+            "text": "Made for travel professionals",
+            "colors": ["#0891B2", "#6366F1", "#EC4899", "#0891B2"],
+            "angle": 90,
+            "speed": 6,
+            "static": false
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- GRADIENT (dark backdrop) -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Gradient on Dark</h2>
+        <span class="tag">Visual</span>
+      </div>
+      <div class="demo-stage" data-bg="dark">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "gradient",
+          "fontSize": 72,
+          "fontWeight": 900,
+          "theme": "dark",
+          "gradient": {
+            "text": "Built for modern travel",
+            "colors": ["#22D3EE", "#A78BFA", "#F472B6", "#22D3EE"],
+            "angle": 110,
+            "speed": 8,
+            "static": false
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <div class="demo-footer">
+      Travelgenix Widget Suite · <a href="/">Back to dashboard</a> · <a href="/editor-textfx">Open editor</a>
+    </div>
+  </div>
+
+  <script src="/widget-textfx.js"></script>
+</body>
+</html>
