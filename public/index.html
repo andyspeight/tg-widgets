@@ -433,6 +433,21 @@ const WIDGETS = [
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'textfx',
+    name: 'Text FX',
+    airtableType: 'Text FX',
+    description: 'Kinetic typography for hero headlines, stats and accents. Twelve effects in one widget — typewriter, rotating words, counters, gradient fills, marquees, outlines and more. Pick a mode per instance.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>'},
+    color: '#6366F1',
+    editorUrl: '/editor-textfx',
+    demoUrl: '/demo-textfx',
+    widgetTag: 'textfx',
+    scriptFile: 'widget-textfx.js',
+    access: { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'team',
     name: 'Team Showcase',
     description: 'Present your team with photos, roles, bios, and social links. Multiple layout options including grid, carousel, and cards.',
@@ -1250,6 +1265,27 @@ function loadMiniPreview(w) {
       theme: { mode: 'light', brand: w.color || '#0891B2', radius: 12 }
     });
   }
+
+  if (w.id === 'textfx' && window.TGTextFxWidget) {
+    container.innerHTML = '<div data-tg-widget="textfx"></div>';
+    const inner = container.querySelector('[data-tg-widget="textfx"]');
+    new window.TGTextFxWidget(inner, {
+      mode: 'gradient',
+      fontSize: 32,
+      fontWeight: 800,
+      letterSpacing: -0.02,
+      paddingY: 16,
+      paddingX: 12,
+      respectReducedMotion: false,
+      gradient: {
+        text: 'Bring text to life',
+        colors: ['#0891B2', '#6366F1', '#EC4899', '#0891B2'],
+        angle: 90,
+        speed: 5,
+        static: false
+      }
+    });
+  }
 }
 
 /* ═══ AUTH ═══ */
@@ -1315,5 +1351,6 @@ render();
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
 <script src="/widget-countdown.js"></script>
+<script src="/widget-textfx.js"></script>
 </body>
 </html>
