@@ -497,6 +497,21 @@ export default async function handler(req, res) {
           return res.status(403).json({ error: 'You do not have permission to edit this form' });
         }
 
+        // Auto-generate webhook secret on first enable.
+        // Mirrors the CREATE path: when the agent toggles webhook routing ON
+        // for the first time, mint a fresh signing secret server-side. The
+        // submit endpoint requires this secret to sign HMAC headers — without
+        // it, every webhook delivery will fail closed with "signing secret
+        // missing". This block patches the gap that existed pre-2026-04-28
+        // where the secret was only generated on CREATE.
+        const webhookBeingEnabled = payload.routing && payload.routing.webhook && payload.routing.webhook.enabled === true;
+        const existingSecret = efRec.fields[EF.webhookSecret];
+        const callerSuppliedSecret = payload.routing && payload.routing.webhook && payload.routing.webhook.secret;
+        if (webhookBeingEnabled && !existingSecret && !callerSuppliedSecret) {
+          payload.routing.webhook.secret = generateWebhookSecret();
+          console.log('[enquiry-form-config] Auto-generated webhook secret on update for', widgetId);
+        }
+
         // Build the Enquiry Forms update body
         let efFields;
         try {
