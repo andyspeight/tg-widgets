@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Text FX Editor — Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #F1F5F9;
+      color: #0F172A;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    input, select, textarea { font-family: inherit; font-size: inherit; }
+    [hidden] { display: none !important; }
+
+    /* ======== LAYOUT ======== */
+    .shell { display: grid; grid-template-columns: 360px 1fr; height: 100vh; }
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid #E2E8F0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .preview-pane {
+      background: #F1F5F9;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ======== SIDEBAR TOP ======== */
+    .sb-top {
+      padding: 16px;
+      border-bottom: 1px solid #F1F5F9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sb-logo {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0891B2, #6366F1);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .sb-title-wrap { flex: 1; min-width: 0; }
+    .sb-title { font-size: 14px; font-weight: 600; line-height: 1.2; }
+    .sb-subtitle { font-size: 11px; color: #64748B; }
+    .icon-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 1px solid #E2E8F0;
+      background: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #475569;
+      transition: all 120ms;
+    }
+    .icon-btn:hover { background: #F8FAFC; border-color: #CBD5E1; color: #0F172A; }
+    .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Name + save */
+    .sb-name {
+      padding: 12px 16px;
+      border-bottom: 1px solid #F1F5F9;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .sb-name input {
+      flex: 1;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      background: #F8FAFC;
+      font-weight: 500;
+    }
+    .sb-name input:focus { outline: none; border-color: #0891B2; background: #fff; }
+    .save-btn {
+      height: 36px;
+      padding: 0 14px;
+      border: none;
+      border-radius: 8px;
+      background: #0891B2;
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 120ms;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .save-btn:hover { background: #0E7490; }
+    .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .save-btn[data-dirty="0"] { background: #10B981; }
+
+    /* Tabs */
+    .sb-tabs {
+      display: flex;
+      padding: 8px 12px;
+      gap: 4px;
+      border-bottom: 1px solid #F1F5F9;
+    }
+    .sb-tab {
+      flex: 1;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 13px;
+      color: #64748B;
+      transition: all 120ms;
+    }
+    .sb-tab:hover { background: #F8FAFC; color: #0F172A; }
+    .sb-tab[data-active="1"] { background: #0F172A; color: #fff; }
+
+    .sb-body { flex: 1; overflow-y: auto; }
+
+    /* Sections */
+    .section {
+      border-bottom: 1px solid #F1F5F9;
+    }
+    .section-head {
+      width: 100%;
+      padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: transparent;
+      border: none;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #0F172A;
+    }
+    .section-head:hover { background: #F8FAFC; }
+    .section-head .chev {
+      transition: transform 200ms;
+      color: #94A3B8;
+    }
+    .section[data-open="0"] .chev { transform: rotate(-90deg); }
+    .section[data-open="0"] .section-body { display: none; }
+    .section-body { padding: 4px 16px 16px; }
+
+    /* Form rows */
+    .row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .row.full { grid-template-columns: 1fr; }
+    .row label {
+      font-size: 12px;
+      color: #475569;
+      font-weight: 500;
+    }
+    .row input[type="text"],
+    .row input[type="number"],
+    .row select,
+    .row textarea {
+      width: 100%;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 13px;
+    }
+    .row textarea { height: auto; padding: 8px 10px; resize: vertical; min-height: 60px; }
+    .row input:focus, .row select:focus, .row textarea:focus {
+      outline: none; border-color: #0891B2; box-shadow: 0 0 0 3px rgba(8,145,178,0.15);
+    }
+    .row input[type="range"] {
+      width: 100%; height: 4px;
+      -webkit-appearance: none; appearance: none;
+      background: #E2E8F0; border-radius: 2px;
+    }
+    .row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #0891B2; cursor: pointer; border: 2px solid #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .range-row { display: flex; align-items: center; gap: 10px; }
+    .range-row .range-val { font-size: 12px; color: #64748B; min-width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    .color-row { display: flex; align-items: center; gap: 8px; }
+    .color-swatch {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      border: 1px solid #E2E8F0;
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .color-row input[type="text"] { flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; }
+    .color-row input[type="color"] {
+      position: absolute; opacity: 0; width: 32px; height: 32px; border: none; pointer-events: none;
+    }
+    .color-wrap { position: relative; }
+
+    /* Mode picker */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      padding: 4px 16px 12px;
+    }
+    .mode-tile {
+      aspect-ratio: 1.4;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 150ms;
+      position: relative;
+      overflow: hidden;
+      text-align: left;
+    }
+    .mode-tile:hover { border-color: #CBD5E1; }
+    .mode-tile[data-active="1"] {
+      border-color: #0891B2;
+      background: #F0FDFA;
+      box-shadow: 0 0 0 3px rgba(8,145,178,0.12);
+    }
+    .mode-tile[data-locked="1"] { opacity: 0.5; cursor: not-allowed; }
+    .mode-tile[data-locked="1"]:hover { border-color: #E2E8F0; }
+    .mode-tile-name { font-weight: 600; font-size: 12px; color: #0F172A; }
+    .mode-tile-cat { font-size: 10px; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+    .mode-tile-soon {
+      position: absolute; top: 6px; right: 6px;
+      font-size: 9px; padding: 2px 6px;
+      background: #F1F5F9; color: #64748B;
+      border-radius: 4px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+
+    /* Toggle */
+    .toggle {
+      width: 36px; height: 22px;
+      border-radius: 999px;
+      background: #E2E8F0;
+      position: relative;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      transition: background 150ms;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 150ms;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle[data-on="1"] { background: #0891B2; }
+    .toggle[data-on="1"]::after { transform: translateX(14px); }
+
+    /* Phrase / word lists */
+    .list { display: flex; flex-direction: column; gap: 6px; }
+    .list-item {
+      display: flex; gap: 6px; align-items: center;
+    }
+    .list-item input { flex: 1; }
+    .list-item .icon-btn { width: 28px; height: 28px; }
+    .list-add {
+      height: 32px;
+      border: 1px dashed #CBD5E1;
+      border-radius: 6px;
+      background: transparent;
+      color: #64748B;
+      font-size: 12px;
+      font-weight: 500;
+      width: 100%;
+    }
+    .list-add:hover { border-color: #0891B2; color: #0891B2; }
+
+    /* Gradient stops */
+    .grad-stops { display: flex; flex-direction: column; gap: 6px; }
+    .grad-stop { display: flex; gap: 6px; align-items: center; }
+
+    /* ======== PREVIEW TOOLBAR ======== */
+    .preview-toolbar {
+      height: 52px;
+      background: #fff;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 10px;
+    }
+    .ctx-tabs { display: flex; background: #F1F5F9; border-radius: 8px; padding: 3px; gap: 2px; }
+    .ctx-tab {
+      height: 28px;
+      padding: 0 12px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748B;
+    }
+    .ctx-tab[data-active="1"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .toolbar-spacer { flex: 1; }
+    .theme-toggle {
+      display: flex; background: #F1F5F9; border-radius: 8px; padding: 3px;
+    }
+    .theme-toggle button { height: 28px; padding: 0 10px; border: none; background: transparent; border-radius: 6px; font-size: 12px; color: #64748B; }
+    .theme-toggle button[data-active="1"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+    /* ======== PREVIEW STAGE ======== */
+    .preview-stage {
+      flex: 1;
+      overflow: auto;
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-stage[data-bg="dark"] { background: #0F172A; }
+    .preview-frame {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 56px 32px;
+      width: 100%;
+      transition: max-width 200ms;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .preview-frame[data-ctx="hero"] { max-width: 1200px; }
+    .preview-frame[data-ctx="section"] { max-width: 800px; }
+    .preview-frame[data-ctx="inline"] { max-width: 400px; padding: 32px 24px; }
+    .preview-stage[data-bg="dark"] .preview-frame { background: #1E293B; border-color: #334155; }
+    .ctx-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #94A3B8;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .preview-stage[data-bg="dark"] .ctx-label { color: #64748B; }
+
+    /* ======== TOAST ======== */
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #0F172A; color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 200ms;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast[data-error="1"] { background: #DC2626; }
+
+    /* ======== LOGIN OVERLAY ======== */
+    .login-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: #fff;
+      width: 100%; max-width: 400px;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    }
+    .login-card h2 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }
+    .login-card p { margin: 0 0 20px; color: #64748B; font-size: 14px; }
+    .login-card label { display: block; font-size: 12px; font-weight: 500; color: #475569; margin-bottom: 4px; }
+    .login-card input { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E2E8F0; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+    .login-card input:focus { outline: none; border-color: #0891B2; box-shadow: 0 0 0 3px rgba(8,145,178,0.15); }
+    .login-error { color: #DC2626; font-size: 13px; margin-bottom: 12px; }
+    .login-card .save-btn { width: 100%; justify-content: center; height: 40px; }
+    .login-card a { color: #0891B2; text-decoration: none; font-size: 13px; }
+
+    /* ======== AI MODAL ======== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 150;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #fff;
+      width: 100%; max-width: 480px;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    }
+    .modal-card h2 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
+    .modal-card p { margin: 0 0 16px; color: #64748B; font-size: 13px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+    .btn-secondary {
+      height: 36px; padding: 0 14px;
+      border: 1px solid #E2E8F0;
+      background: #fff;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 13px;
+      color: #475569;
+    }
+    .btn-secondary:hover { background: #F8FAFC; }
+
+    /* Spinner */
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 600ms linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Helper */
+    .hint { font-size: 11px; color: #94A3B8; margin-top: 4px; line-height: 1.4; }
+
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { max-height: 50vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <!-- Top bar -->
+      <div class="sb-top">
+        <div class="sb-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+        </div>
+        <div class="sb-title-wrap">
+          <div class="sb-title">Text FX</div>
+          <div class="sb-subtitle">Kinetic typography widget</div>
+        </div>
+        <button class="icon-btn" id="ai-btn" title="AI builder (A)" aria-label="AI builder">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.5 5.5L21 11l-5.5 2.5L13 19l-2.5-5.5L5 11l5.5-2.5L13 3z"/></svg>
+        </button>
+        <a href="/" class="icon-btn" title="Back to dashboard" aria-label="Back to dashboard" style="text-decoration:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </a>
+      </div>
+
+      <!-- Name + Save -->
+      <div class="sb-name">
+        <input type="text" id="widget-name" placeholder="Widget name" />
+        <button class="save-btn" id="save-btn" data-dirty="1">
+          <span id="save-label">Save</span>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="sb-tabs">
+        <button class="sb-tab" data-tab="design" data-active="1">Design</button>
+        <button class="sb-tab" data-tab="content">Content</button>
+        <button class="sb-tab" data-tab="settings">Settings</button>
+      </div>
+
+      <!-- Body -->
+      <div class="sb-body" id="sb-body">
+
+        <!-- =================== DESIGN TAB =================== -->
+        <div data-tab-panel="design">
+
+          <!-- Mode picker -->
+          <div class="section" data-open="1" data-section="mode">
+            <button class="section-head" data-toggle="mode">
+              <span>Effect mode</span>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="mode-grid" id="mode-grid"></div>
+            </div>
+          </div>
+
+          <!-- Typography -->
+          <div class="section" data-open="1" data-section="typography">
+            <button class="section-head" data-toggle="typography">
+              <span>Typography</span>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="row">
+                <label>Font</label>
+                <select id="cfg-fontFamily">
+                  <option value="Inter">Inter</option>
+                  <option value="Manrope">Manrope</option>
+                  <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                  <option value="DM Sans">DM Sans</option>
+                  <option value="Space Grotesk">Space Grotesk</option>
+                  <option value="Poppins">Poppins</option>
+                  <option value="Outfit">Outfit</option>
+                  <option value="Sora">Sora</option>
+                  <option value="Lexend">Lexend</option>
+                  <option value="Geist">Geist</option>
+                  <option value="Playfair Display">Playfair Display</option>
+                  <option value="Fraunces">Fraunces</option>
+                  <option value="Cormorant Garamond">Cormorant Garamond</option>
+                </select>
+              </div>
+              <div class="row">
+                <label>Weight</label>
+                <select id="cfg-fontWeight">
+                  <option value="400">400 Regular</option>
+                  <option value="500">500 Medium</option>
+                  <option value="600">600 Semibold</option>
+                  <option value="700">700 Bold</option>
+                  <option value="800" selected>800 Extra Bold</option>
+                  <option value="900">900 Black</option>
+                </select>
+              </div>
+              <div class="row">
+                <label>Size</label>
+                <div class="range-row">
+                  <input type="range" id="cfg-fontSize" min="16" max="160" step="2" />
+                  <span class="range-val" id="cfg-fontSize-val">64</span>
+                </div>
+              </div>
+              <div class="row">
+                <label>Tracking</label>
+                <div class="range-row">
+                  <input type="range" id="cfg-letterSpacing" min="-0.08" max="0.1" step="0.005" />
+                  <span class="range-val" id="cfg-letterSpacing-val">-0.020</span>
+                </div>
+              </div>
+              <div class="row">
+                <label>Line height</label>
+                <div class="range-row">
+                  <input type="range" id="cfg-lineHeight" min="0.9" max="1.8" step="0.05" />
+                  <span class="range-val" id="cfg-lineHeight-val">1.15</span>
+                </div>
+              </div>
+              <div class="row">
+                <label>Alignment</label>
+                <select id="cfg-align">
+                  <option value="left">Left</option>
+                  <option value="center" selected>Centre</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colours -->
+          <div class="section" data-open="1" data-section="colors">
+            <button class="section-head" data-toggle="colors">
+              <span>Colour & background</span>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="row">
+                <label>Text colour</label>
+                <div class="color-row">
+                  <div class="color-wrap">
+                    <button class="color-swatch" id="cfg-textColor-swatch" aria-label="Text colour"></button>
+                    <input type="color" id="cfg-textColor-picker" />
+                  </div>
+                  <input type="text" id="cfg-textColor" placeholder="#0F172A" />
+                </div>
+              </div>
+              <div class="row">
+                <label>Background</label>
+                <div class="color-row">
+                  <div class="color-wrap">
+                    <button class="color-swatch" id="cfg-background-swatch" aria-label="Background colour"></button>
+                    <input type="color" id="cfg-background-picker" />
+                  </div>
+                  <input type="text" id="cfg-background" placeholder="transparent" />
+                </div>
+                <div></div>
+                <div class="hint">Use "transparent" to inherit page background.</div>
+              </div>
+              <div class="row">
+                <label>Padding Y</label>
+                <div class="range-row">
+                  <input type="range" id="cfg-paddingY" min="0" max="120" step="4" />
+                  <span class="range-val" id="cfg-paddingY-val">24</span>
+                </div>
+              </div>
+              <div class="row">
+                <label>Padding X</label>
+                <div class="range-row">
+                  <input type="range" id="cfg-paddingX" min="0" max="120" step="4" />
+                  <span class="range-val" id="cfg-paddingX-val">16</span>
+                </div>
+              </div>
+              <div class="row">
+                <label>Radius</label>
+                <div class="range-row">
+                  <input type="range" id="cfg-radius" min="0" max="48" step="2" />
+                  <span class="range-val" id="cfg-radius-val">16</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- =================== CONTENT TAB =================== -->
+        <div data-tab-panel="content" hidden>
+
+          <!-- TYPEWRITER -->
+          <div data-mode-panel="typewriter">
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="tw-phrases">
+                <span>Phrases</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="list" id="tw-phrases-list"></div>
+                <button class="list-add" id="tw-phrases-add" style="margin-top:8px">+ Add phrase</button>
+                <div class="hint" style="margin-top:8px">Each phrase types out, holds, then deletes before the next one starts.</div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="tw-timing">
+                <span>Timing</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Type speed</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-tw-typeSpeed" min="20" max="200" step="5" />
+                    <span class="range-val" id="cfg-tw-typeSpeed-val">70</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Delete speed</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-tw-deleteSpeed" min="20" max="200" step="5" />
+                    <span class="range-val" id="cfg-tw-deleteSpeed-val">40</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Hold (ms)</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-tw-holdDuration" min="200" max="5000" step="100" />
+                    <span class="range-val" id="cfg-tw-holdDuration-val">1600</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Cursor</label>
+                  <select id="cfg-tw-cursorStyle">
+                    <option value="bar">Bar |</option>
+                    <option value="block">Block █</option>
+                    <option value="underscore">Underscore _</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Loop</label>
+                  <button class="toggle" id="cfg-tw-loop" data-on="1"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ROTATING -->
+          <div data-mode-panel="rotating" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="rot-text">
+                <span>Text</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Prefix</label>
+                  <input type="text" id="cfg-rot-prefix" placeholder="Holidays for " />
+                </div>
+                <div class="row">
+                  <label>Suffix</label>
+                  <input type="text" id="cfg-rot-suffix" placeholder="" />
+                </div>
+                <div class="row full">
+                  <label>Rotating words</label>
+                </div>
+                <div class="list" id="rot-words-list"></div>
+                <button class="list-add" id="rot-words-add" style="margin-top:8px">+ Add word</button>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="rot-anim">
+                <span>Animation</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Style</label>
+                  <select id="cfg-rot-animation">
+                    <option value="slide">Slide up</option>
+                    <option value="fade">Fade</option>
+                    <option value="flip">Flip</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Interval (ms)</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-rot-interval" min="800" max="6000" step="100" />
+                    <span class="range-val" id="cfg-rot-interval-val">2200</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Word colour</label>
+                  <div class="color-row">
+                    <div class="color-wrap">
+                      <button class="color-swatch" id="cfg-rot-wordColor-swatch" aria-label="Word colour"></button>
+                      <input type="color" id="cfg-rot-wordColor-picker" />
+                    </div>
+                    <input type="text" id="cfg-rot-wordColor" placeholder="#0891B2" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COUNTER -->
+          <div data-mode-panel="counter" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="cnt-values">
+                <span>Values</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Prefix</label>
+                  <input type="text" id="cfg-cnt-prefix" placeholder="£" />
+                </div>
+                <div class="row">
+                  <label>From</label>
+                  <input type="number" id="cfg-cnt-from" />
+                </div>
+                <div class="row">
+                  <label>To</label>
+                  <input type="number" id="cfg-cnt-to" />
+                </div>
+                <div class="row">
+                  <label>Suffix</label>
+                  <input type="text" id="cfg-cnt-suffix" placeholder="+" />
+                </div>
+                <div class="row">
+                  <label>Decimals</label>
+                  <select id="cfg-cnt-decimals">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Separator</label>
+                  <select id="cfg-cnt-thousandsSeparator">
+                    <option value=",">Comma (1,000)</option>
+                    <option value=".">Period (1.000)</option>
+                    <option value=" ">Space (1 000)</option>
+                    <option value="">None (1000)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="cnt-anim">
+                <span>Animation</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row">
+                  <label>Duration (ms)</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-cnt-duration" min="400" max="6000" step="100" />
+                    <span class="range-val" id="cfg-cnt-duration-val">2000</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Easing</label>
+                  <select id="cfg-cnt-easing">
+                    <option value="cubic">Cubic out</option>
+                    <option value="quart">Quartic out</option>
+                    <option value="linear">Linear</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <label>Start on view</label>
+                  <button class="toggle" id="cfg-cnt-startOnView" data-on="1"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GRADIENT -->
+          <div data-mode-panel="gradient" hidden>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="grad-text">
+                <span>Text</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <textarea id="cfg-grad-text" placeholder="Made for travel professionals" rows="2"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="section" data-open="1">
+              <button class="section-head" data-toggle="grad-colors">
+                <span>Gradient</span>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="section-body">
+                <div class="row full">
+                  <label>Colour stops (2–4)</label>
+                </div>
+                <div class="grad-stops" id="grad-stops-list"></div>
+                <button class="list-add" id="grad-stops-add" style="margin-top:8px">+ Add stop</button>
+                <div class="row" style="margin-top:12px">
+                  <label>Angle</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-grad-angle" min="0" max="360" step="5" />
+                    <span class="range-val" id="cfg-grad-angle-val">90</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Speed (s)</label>
+                  <div class="range-row">
+                    <input type="range" id="cfg-grad-speed" min="1" max="20" step="0.5" />
+                    <span class="range-val" id="cfg-grad-speed-val">6</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <label>Animate</label>
+                  <button class="toggle" id="cfg-grad-animate" data-on="1"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- =================== SETTINGS TAB =================== -->
+        <div data-tab-panel="settings" hidden>
+          <div class="section" data-open="1">
+            <button class="section-head" data-toggle="motion">
+              <span>Motion & accessibility</span>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="row">
+                <label>Respect reduced motion</label>
+                <button class="toggle" id="cfg-respectReducedMotion" data-on="1"></button>
+              </div>
+              <div class="hint">When ON, visitors who've enabled "reduce motion" in their OS will see a static fallback. Recommended.</div>
+            </div>
+          </div>
+          <div class="section" data-open="1">
+            <button class="section-head" data-toggle="embed">
+              <span>Embed code</span>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <textarea id="embed-code" readonly rows="4" style="font-family:'JetBrains Mono',monospace;font-size:11px;width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:6px;resize:none"></textarea>
+              <button class="btn-secondary" id="copy-embed" style="margin-top:8px;width:100%">Copy embed code</button>
+              <div class="hint" style="margin-top:8px">Paste this into any HTML page where you want the widget to appear.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ============ PREVIEW PANE ============ -->
+    <main class="preview-pane">
+      <div class="preview-toolbar">
+        <div class="ctx-tabs">
+          <button class="ctx-tab" data-ctx="hero" data-active="1">Hero</button>
+          <button class="ctx-tab" data-ctx="section">Section</button>
+          <button class="ctx-tab" data-ctx="inline">Inline</button>
+        </div>
+        <div class="toolbar-spacer"></div>
+        <button class="icon-btn" id="undo-btn" title="Undo (⌘Z)" aria-label="Undo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+        </button>
+        <button class="icon-btn" id="redo-btn" title="Redo (⌘Y)" aria-label="Redo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg>
+        </button>
+        <div class="theme-toggle">
+          <button data-theme="light" data-active="1">Light</button>
+          <button data-theme="dark">Dark</button>
+        </div>
+      </div>
+      <div class="preview-stage" id="preview-stage" data-bg="light">
+        <div style="width:100%">
+          <div class="ctx-label" id="ctx-label">HERO CONTEXT — 1200PX</div>
+          <div class="preview-frame" id="preview-frame" data-ctx="hero">
+            <div id="preview-mount"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ============ TOAST ============ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ============ LOGIN OVERLAY ============ -->
+  <div class="login-overlay" id="login-overlay" hidden>
+    <div class="login-card">
+      <h2>Sign in to save</h2>
+      <p>Enter your Travelgenix client credentials to save and publish this widget.</p>
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" placeholder="you@yourcompany.com" />
+      <label for="login-code">Client code</label>
+      <input type="password" id="login-code" placeholder="Your client code" />
+      <div class="login-error" id="login-error" hidden></div>
+      <button class="save-btn" id="login-submit"><span id="login-label">Sign in</span></button>
+      <p style="margin-top:16px;text-align:center"><a href="/">Back to dashboard</a></p>
+    </div>
+  </div>
+
+  <!-- ============ AI MODAL ============ -->
+  <div class="modal-overlay" id="ai-modal" hidden>
+    <div class="modal-card">
+      <h2>AI builder</h2>
+      <p id="ai-prompt-help">Describe what you want and Claude will draft the content for the current mode.</p>
+      <textarea id="ai-prompt" rows="4" placeholder="e.g. A luxury beach holiday hero, agent based in Bournemouth" style="width:100%;padding:10px 12px;border:1px solid #E2E8F0;border-radius:8px;resize:vertical;font-size:13px"></textarea>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="ai-cancel">Cancel</button>
+        <button class="save-btn" id="ai-generate"><span id="ai-label">Generate</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/widget-textfx.js"></script>
+  <script>
+    /* ============================================================
+       STATE & CONSTANTS
+       ============================================================ */
+    const $ = (s, root = document) => root.querySelector(s);
+    const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+
+    const MODES = [
+      { id: 'typewriter', name: 'Typewriter', cat: 'Animated', live: true },
+      { id: 'rotating',   name: 'Rotating Words', cat: 'Animated', live: true },
+      { id: 'counter',    name: 'Counter', cat: 'Animated', live: true },
+      { id: 'gradient',   name: 'Gradient Fill', cat: 'Visual', live: true },
+      { id: 'wordreveal', name: 'Word Reveal', cat: 'Animated', live: false },
+      { id: 'marquee',    name: 'Marquee', cat: 'Animated', live: false },
+      { id: 'outlined',   name: 'Outlined', cat: 'Visual', live: false },
+      { id: 'splitcolor', name: 'Split Colour', cat: 'Visual', live: false },
+      { id: 'spotlight',  name: 'Spotlight', cat: 'Visual', live: false },
+      { id: 'stacked',    name: 'Stacked', cat: 'Layout', live: false },
+      { id: 'splitblock', name: 'Split Block', cat: 'Layout', live: false },
+      { id: 'vertical',   name: 'Vertical', cat: 'Layout', live: false }
+    ];
+
+    const DEFAULT_CONFIG = {
+      mode: 'typewriter',
+      theme: 'light',
+      align: 'center',
+      fontFamily: 'Inter',
+      fontWeight: 800,
+      fontSize: 64,
+      letterSpacing: -0.02,
+      lineHeight: 1.15,
+      textColor: '#0F172A',
+      background: 'transparent',
+      paddingY: 24,
+      paddingX: 16,
+      radius: 16,
+      respectReducedMotion: true,
+      typewriter: {
+        phrases: ['Find your perfect beach holiday.', 'Find your perfect city break.', 'Find your perfect adventure.'],
+        typeSpeed: 70, deleteSpeed: 40, holdDuration: 1600, loop: true, cursorStyle: 'bar', startDelay: 200
+      },
+      rotating: {
+        prefix: 'Holidays for ', words: ['families', 'couples', 'explorers', 'foodies'], suffix: '.',
+        interval: 2200, animation: 'slide', wordColor: '#0891B2'
+      },
+      counter: {
+        prefix: '£', suffix: '+', from: 0, to: 2300000, duration: 2400, decimals: 0,
+        thousandsSeparator: ',', easing: 'quart', startOnView: true
+      },
+      gradient: {
+        text: 'Made for travel professionals', colors: ['#0891B2', '#6366F1', '#0891B2'],
+        angle: 90, speed: 6, static: false
+      }
+    };
+
+    const state = {
+      widgetId: null,
+      widgetName: 'My Text FX',
+      config: deepClone(DEFAULT_CONFIG),
+      isDirty: true,
+      activeTab: 'design',
+      ctx: 'hero',
+      previewTheme: 'light',
+      history: [],
+      historyIdx: -1
+    };
+
+    function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+    function uid() { return 'tgw_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
+
+    /* ============================================================
+       AUTH (matches the FAQ/Logos pattern — no exp check)
+       ============================================================ */
+    const SESSION_KEY = 'tgw_session';
+    function getSession() { try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch { return null; } }
+    function isLoggedIn() { const s = getSession(); return !!(s && s.token); }
+    function getAuthToken() { const s = getSession(); return s && s.token ? s.token : ''; }
+    function authH() {
+      const t = getAuthToken();
+      const h = { 'Content-Type': 'application/json' };
+      if (t) h['Authorization'] = 'Bearer ' + t;
+      return h;
+    }
+    function showLogin() { $('#login-overlay').hidden = false; setTimeout(() => $('#login-email').focus(), 50); }
+    function hideLogin() { $('#login-overlay').hidden = true; $('#login-error').hidden = true; }
+
+    async function doLogin() {
+      const email = $('#login-email').value.trim();
+      const code = $('#login-code').value;
+      if (!email || !code) {
+        $('#login-error').textContent = 'Email and client code required';
+        $('#login-error').hidden = false;
+        return;
+      }
+      const btn = $('#login-submit');
+      btn.disabled = true;
+      $('#login-label').innerHTML = '<span class="spinner"></span>';
+      try {
+        const res = await fetch('/api/widget-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.token) {
+          $('#login-error').textContent = data.error || 'Sign-in failed';
+          $('#login-error').hidden = false;
+          btn.disabled = false;
+          $('#login-label').textContent = 'Sign in';
+          return;
+        }
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+          user: data.user || { email },
+          token: data.token,
+          timestamp: Date.now()
+        }));
+        hideLogin();
+        toast('Signed in');
+        btn.disabled = false;
+        $('#login-label').textContent = 'Sign in';
+      } catch (e) {
+        $('#login-error').textContent = 'Network error — try again';
+        $('#login-error').hidden = false;
+        btn.disabled = false;
+        $('#login-label').textContent = 'Sign in';
+      }
+    }
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    let toastTimer = null;
+    function toast(msg, error = false) {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.dataset.error = error ? '1' : '0';
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    /* ============================================================
+       PREVIEW
+       ============================================================ */
+    let previewWidget = null;
+    function renderPreview() {
+      const mount = $('#preview-mount');
+      mount.innerHTML = '<div id="tg-preview"></div>';
+      const el = $('#tg-preview');
+      el.setAttribute('data-tg-widget', 'textfx');
+      const cfg = deepClone(state.config);
+      cfg.theme = state.previewTheme;
+      el.setAttribute('data-tg-config', JSON.stringify(cfg));
+      // Force a fresh init (the auto-initialiser uses __tgInited guard)
+      delete el.__tgInited;
+      previewWidget = new window.TGTextFxWidget(el, cfg);
+    }
+
+    function setCtx(ctx) {
+      state.ctx = ctx;
+      $$('.ctx-tab').forEach(b => b.dataset.active = b.dataset.ctx === ctx ? '1' : '0');
+      $('#preview-frame').dataset.ctx = ctx;
+      const labels = { hero: 'HERO CONTEXT — 1200PX', section: 'SECTION CONTEXT — 800PX', inline: 'INLINE CONTEXT — 400PX' };
+      $('#ctx-label').textContent = labels[ctx];
+    }
+
+    function setTheme(theme) {
+      state.previewTheme = theme;
+      $$('.theme-toggle button').forEach(b => b.dataset.active = b.dataset.theme === theme ? '1' : '0');
+      $('#preview-stage').dataset.bg = theme;
+      renderPreview();
+    }
+
+    /* ============================================================
+       MUTATION HELPERS
+       ============================================================ */
+    function setRoot(key, value) {
+      state.config[key] = value;
+      markDirty();
+      pushHistory();
+      renderPreview();
+    }
+    function setMode(mode, key, value) {
+      state.config[mode][key] = value;
+      markDirty();
+      pushHistory();
+      renderPreview();
+    }
+    function markDirty() {
+      state.isDirty = true;
+      const btn = $('#save-btn');
+      btn.dataset.dirty = '1';
+      $('#save-label').textContent = 'Save';
+    }
+    function markClean() {
+      state.isDirty = false;
+      const btn = $('#save-btn');
+      btn.dataset.dirty = '0';
+      $('#save-label').textContent = 'Saved';
+    }
+
+    /* ============================================================
+       UNDO / REDO (40-state history)
+       ============================================================ */
+    let pushTimer = null;
+    function pushHistory() {
+      // Debounce — don't push every slider tick
+      clearTimeout(pushTimer);
+      pushTimer = setTimeout(() => {
+        const snap = deepClone(state.config);
+        // Trim future
+        state.history = state.history.slice(0, state.historyIdx + 1);
+        state.history.push(snap);
+        if (state.history.length > 40) state.history.shift();
+        else state.historyIdx++;
+      }, 300);
+    }
+    function undo() {
+      if (state.historyIdx <= 0) return;
+      state.historyIdx--;
+      state.config = deepClone(state.history[state.historyIdx]);
+      syncUIFromState();
+      markDirty();
+      renderPreview();
+    }
+    function redo() {
+      if (state.historyIdx >= state.history.length - 1) return;
+      state.historyIdx++;
+      state.config = deepClone(state.history[state.historyIdx]);
+      syncUIFromState();
+      markDirty();
+      renderPreview();
+    }
+
+    /* ============================================================
+       MODE PICKER
+       ============================================================ */
+    function renderModeGrid() {
+      const grid = $('#mode-grid');
+      grid.innerHTML = MODES.map(m => `
+        <button class="mode-tile"
+          data-mode="${m.id}"
+          data-active="${state.config.mode === m.id ? '1' : '0'}"
+          data-locked="${m.live ? '0' : '1'}"
+          ${!m.live ? 'disabled' : ''}>
+          <div>
+            <div class="mode-tile-cat">${m.cat}</div>
+            <div class="mode-tile-name">${m.name}</div>
+          </div>
+          ${!m.live ? '<span class="mode-tile-soon">Phase 2</span>' : ''}
+        </button>
+      `).join('');
+      grid.addEventListener('click', e => {
+        const tile = e.target.closest('.mode-tile');
+        if (!tile || tile.dataset.locked === '1') return;
+        const mode = tile.dataset.mode;
+        if (mode === state.config.mode) return;
+        state.config.mode = mode;
+        $$('.mode-tile').forEach(t => t.dataset.active = t.dataset.mode === mode ? '1' : '0');
+        showModePanel(mode);
+        markDirty();
+        pushHistory();
+        renderPreview();
+      }, { once: true });
+      // Re-attach (once: true means we need to call again next render) — fix:
+      // simpler to just rebind without once
+      grid.onclick = e => {
+        const tile = e.target.closest('.mode-tile');
+        if (!tile || tile.dataset.locked === '1') return;
+        const mode = tile.dataset.mode;
+        if (mode === state.config.mode) return;
+        state.config.mode = mode;
+        $$('.mode-tile').forEach(t => t.dataset.active = t.dataset.mode === mode ? '1' : '0');
+        showModePanel(mode);
+        markDirty();
+        pushHistory();
+        renderPreview();
+      };
+    }
+
+    function showModePanel(mode) {
+      $$('[data-mode-panel]').forEach(p => {
+        p.hidden = p.dataset.modePanel !== mode;
+      });
+    }
+
+    /* ============================================================
+       LIST EDITORS (phrases, words, gradient stops)
+       ============================================================ */
+    function renderPhraseList() {
+      const list = $('#tw-phrases-list');
+      const phrases = state.config.typewriter.phrases || [];
+      list.innerHTML = phrases.map((p, i) => `
+        <div class="list-item">
+          <input type="text" data-list="phrases" data-idx="${i}" value="${escapeAttr(p)}" />
+          <button class="icon-btn" data-list-remove="phrases" data-idx="${i}" aria-label="Remove">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderWordList() {
+      const list = $('#rot-words-list');
+      const words = state.config.rotating.words || [];
+      list.innerHTML = words.map((w, i) => `
+        <div class="list-item">
+          <input type="text" data-list="words" data-idx="${i}" value="${escapeAttr(w)}" />
+          <button class="icon-btn" data-list-remove="words" data-idx="${i}" aria-label="Remove">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderGradStops() {
+      const list = $('#grad-stops-list');
+      const stops = state.config.gradient.colors || [];
+      list.innerHTML = stops.map((c, i) => `
+        <div class="grad-stop">
+          <div class="color-wrap">
+            <button class="color-swatch" data-stop-swatch="${i}" style="background:${escapeAttr(c)}" aria-label="Stop ${i + 1}"></button>
+            <input type="color" data-stop-picker="${i}" value="${escapeAttr(c)}" />
+          </div>
+          <input type="text" data-stop-text="${i}" value="${escapeAttr(c)}" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase" />
+          ${stops.length > 2 ? `<button class="icon-btn" data-stop-remove="${i}" aria-label="Remove">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function escapeAttr(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    /* ============================================================
+       UI -> STATE BINDINGS
+       ============================================================ */
+    function bindCommonControls() {
+      // Tabs
+      $$('.sb-tab').forEach(t => t.addEventListener('click', () => {
+        $$('.sb-tab').forEach(x => x.dataset.active = '0');
+        t.dataset.active = '1';
+        const tab = t.dataset.tab;
+        state.activeTab = tab;
+        $$('[data-tab-panel]').forEach(p => p.hidden = p.dataset.tabPanel !== tab);
+      }));
+
+      // Section toggles
+      $$('.section-head').forEach(h => h.addEventListener('click', () => {
+        const sec = h.parentElement;
+        sec.dataset.open = sec.dataset.open === '1' ? '0' : '1';
+      }));
+
+      // Name
+      $('#widget-name').addEventListener('input', e => { state.widgetName = e.target.value; markDirty(); });
+
+      // Typography sliders
+      bindRange('cfg-fontSize', 'fontSize', v => parseInt(v, 10));
+      bindRange('cfg-letterSpacing', 'letterSpacing', v => parseFloat(v), 3);
+      bindRange('cfg-lineHeight', 'lineHeight', v => parseFloat(v), 2);
+      bindSelect('cfg-fontFamily', 'fontFamily');
+      bindSelect('cfg-fontWeight', 'fontWeight', v => parseInt(v, 10));
+      bindSelect('cfg-align', 'align');
+
+      // Colours
+      bindColor('cfg-textColor', 'textColor');
+      bindColor('cfg-background', 'background');
+      bindRange('cfg-paddingY', 'paddingY', v => parseInt(v, 10));
+      bindRange('cfg-paddingX', 'paddingX', v => parseInt(v, 10));
+      bindRange('cfg-radius', 'radius', v => parseInt(v, 10));
+
+      // Settings
+      bindToggle('cfg-respectReducedMotion', 'respectReducedMotion');
+
+      // Theme + ctx tabs
+      $$('.ctx-tab').forEach(b => b.addEventListener('click', () => setCtx(b.dataset.ctx)));
+      $$('.theme-toggle button').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
+
+      // Topbar
+      $('#save-btn').addEventListener('click', saveWidget);
+      $('#ai-btn').addEventListener('click', () => $('#ai-modal').hidden = false);
+      $('#ai-cancel').addEventListener('click', () => $('#ai-modal').hidden = true);
+      $('#ai-generate').addEventListener('click', generateAI);
+      $('#undo-btn').addEventListener('click', undo);
+      $('#redo-btn').addEventListener('click', redo);
+
+      // Login
+      $('#login-submit').addEventListener('click', doLogin);
+      $('#login-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+      // Embed
+      $('#copy-embed').addEventListener('click', copyEmbed);
+
+      // ============== TYPEWRITER ==============
+      bindRange('cfg-tw-typeSpeed', null, v => parseInt(v, 10), 0, 'typewriter', 'typeSpeed');
+      bindRange('cfg-tw-deleteSpeed', null, v => parseInt(v, 10), 0, 'typewriter', 'deleteSpeed');
+      bindRange('cfg-tw-holdDuration', null, v => parseInt(v, 10), 0, 'typewriter', 'holdDuration');
+      bindSelect('cfg-tw-cursorStyle', null, v => v, 'typewriter', 'cursorStyle');
+      bindToggle('cfg-tw-loop', null, 'typewriter', 'loop');
+
+      // Phrase list interactions (delegated)
+      $('#tw-phrases-list').addEventListener('input', e => {
+        const inp = e.target.closest('input[data-list="phrases"]');
+        if (!inp) return;
+        const idx = parseInt(inp.dataset.idx, 10);
+        state.config.typewriter.phrases[idx] = inp.value;
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+      $('#tw-phrases-list').addEventListener('click', e => {
+        const btn = e.target.closest('[data-list-remove="phrases"]');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx, 10);
+        state.config.typewriter.phrases.splice(idx, 1);
+        if (state.config.typewriter.phrases.length === 0) state.config.typewriter.phrases.push('');
+        renderPhraseList();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+      $('#tw-phrases-add').addEventListener('click', () => {
+        state.config.typewriter.phrases.push('New phrase');
+        renderPhraseList();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+
+      // ============== ROTATING ==============
+      bindText('cfg-rot-prefix', null, 'rotating', 'prefix');
+      bindText('cfg-rot-suffix', null, 'rotating', 'suffix');
+      bindSelect('cfg-rot-animation', null, v => v, 'rotating', 'animation');
+      bindRange('cfg-rot-interval', null, v => parseInt(v, 10), 0, 'rotating', 'interval');
+      bindColor('cfg-rot-wordColor', null, 'rotating', 'wordColor');
+
+      $('#rot-words-list').addEventListener('input', e => {
+        const inp = e.target.closest('input[data-list="words"]');
+        if (!inp) return;
+        const idx = parseInt(inp.dataset.idx, 10);
+        state.config.rotating.words[idx] = inp.value;
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+      $('#rot-words-list').addEventListener('click', e => {
+        const btn = e.target.closest('[data-list-remove="words"]');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx, 10);
+        state.config.rotating.words.splice(idx, 1);
+        if (state.config.rotating.words.length === 0) state.config.rotating.words.push('word');
+        renderWordList();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+      $('#rot-words-add').addEventListener('click', () => {
+        state.config.rotating.words.push('new');
+        renderWordList();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+
+      // ============== COUNTER ==============
+      bindText('cfg-cnt-prefix', null, 'counter', 'prefix');
+      bindText('cfg-cnt-suffix', null, 'counter', 'suffix');
+      bindNumber('cfg-cnt-from', null, 'counter', 'from');
+      bindNumber('cfg-cnt-to', null, 'counter', 'to');
+      bindSelect('cfg-cnt-decimals', null, v => parseInt(v, 10), 'counter', 'decimals');
+      bindSelect('cfg-cnt-thousandsSeparator', null, v => v, 'counter', 'thousandsSeparator');
+      bindRange('cfg-cnt-duration', null, v => parseInt(v, 10), 0, 'counter', 'duration');
+      bindSelect('cfg-cnt-easing', null, v => v, 'counter', 'easing');
+      bindToggle('cfg-cnt-startOnView', null, 'counter', 'startOnView');
+
+      // ============== GRADIENT ==============
+      bindText('cfg-grad-text', null, 'gradient', 'text');
+      bindRange('cfg-grad-angle', null, v => parseInt(v, 10), 0, 'gradient', 'angle');
+      bindRange('cfg-grad-speed', null, v => parseFloat(v), 1, 'gradient', 'speed');
+      // Animate toggle (inverted: toggle ON means animate, so static = !on)
+      $('#cfg-grad-animate').addEventListener('click', e => {
+        const btn = e.currentTarget;
+        const on = btn.dataset.on === '1' ? '0' : '1';
+        btn.dataset.on = on;
+        state.config.gradient.static = on === '0';
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+
+      $('#grad-stops-list').addEventListener('input', e => {
+        const txt = e.target.closest('input[data-stop-text]');
+        const pic = e.target.closest('input[data-stop-picker]');
+        if (txt) {
+          const idx = parseInt(txt.dataset.stopText, 10);
+          state.config.gradient.colors[idx] = txt.value;
+          const sw = $(`[data-stop-swatch="${idx}"]`);
+          if (sw) sw.style.background = txt.value;
+          markDirty();
+          pushHistory();
+          renderPreview();
+        } else if (pic) {
+          const idx = parseInt(pic.dataset.stopPicker, 10);
+          state.config.gradient.colors[idx] = pic.value;
+          const sw = $(`[data-stop-swatch="${idx}"]`);
+          const tx = $(`[data-stop-text="${idx}"]`);
+          if (sw) sw.style.background = pic.value;
+          if (tx) tx.value = pic.value.toUpperCase();
+          markDirty();
+          pushHistory();
+          renderPreview();
+        }
+      });
+      $('#grad-stops-list').addEventListener('click', e => {
+        const sw = e.target.closest('[data-stop-swatch]');
+        const rm = e.target.closest('[data-stop-remove]');
+        if (sw) {
+          const idx = sw.dataset.stopSwatch;
+          $(`[data-stop-picker="${idx}"]`).click();
+        } else if (rm) {
+          const idx = parseInt(rm.dataset.stopRemove, 10);
+          state.config.gradient.colors.splice(idx, 1);
+          renderGradStops();
+          markDirty();
+          pushHistory();
+          renderPreview();
+        }
+      });
+      $('#grad-stops-add').addEventListener('click', () => {
+        if (state.config.gradient.colors.length >= 4) { toast('Maximum 4 colour stops', true); return; }
+        state.config.gradient.colors.push('#EC4899');
+        renderGradStops();
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+    }
+
+    function bindRange(id, rootKey, parser, decimals = 0, modeKey = null, subKey = null) {
+      const inp = $('#' + id);
+      const valEl = $('#' + id + '-val');
+      if (!inp) return;
+      inp.addEventListener('input', e => {
+        const v = parser(e.target.value);
+        if (modeKey) state.config[modeKey][subKey] = v;
+        else state.config[rootKey] = v;
+        if (valEl) valEl.textContent = decimals ? v.toFixed(decimals) : String(v);
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+    }
+    function bindSelect(id, rootKey, parser, modeKey = null, subKey = null) {
+      parser = parser || (v => v);
+      const sel = $('#' + id);
+      if (!sel) return;
+      sel.addEventListener('change', e => {
+        const v = parser(e.target.value);
+        if (modeKey) state.config[modeKey][subKey] = v;
+        else state.config[rootKey] = v;
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+    }
+    function bindText(id, rootKey, modeKey = null, subKey = null) {
+      const inp = $('#' + id);
+      if (!inp) return;
+      inp.addEventListener('input', e => {
+        if (modeKey) state.config[modeKey][subKey] = e.target.value;
+        else state.config[rootKey] = e.target.value;
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+    }
+    function bindNumber(id, rootKey, modeKey = null, subKey = null) {
+      const inp = $('#' + id);
+      if (!inp) return;
+      inp.addEventListener('input', e => {
+        const v = e.target.value === '' ? 0 : Number(e.target.value);
+        if (modeKey) state.config[modeKey][subKey] = v;
+        else state.config[rootKey] = v;
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+    }
+    function bindToggle(id, rootKey, modeKey = null, subKey = null) {
+      const btn = $('#' + id);
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        const on = btn.dataset.on === '1' ? '0' : '1';
+        btn.dataset.on = on;
+        if (modeKey) state.config[modeKey][subKey] = on === '1';
+        else state.config[rootKey] = on === '1';
+        markDirty();
+        pushHistory();
+        renderPreview();
+      });
+    }
+    function bindColor(idBase, rootKey, modeKey = null, subKey = null) {
+      const text = $('#' + idBase);
+      const sw = $('#' + idBase + '-swatch');
+      const pic = $('#' + idBase + '-picker');
+      if (!text || !sw || !pic) return;
+
+      const apply = (val) => {
+        if (modeKey) state.config[modeKey][subKey] = val;
+        else state.config[rootKey] = val;
+        sw.style.background = val === 'transparent' ? 'repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 0 0/12px 12px' : val;
+        markDirty();
+        pushHistory();
+        renderPreview();
+      };
+      text.addEventListener('input', e => apply(e.target.value));
+      pic.addEventListener('input', e => { text.value = e.target.value.toUpperCase(); apply(e.target.value); });
+      sw.addEventListener('click', () => pic.click());
+    }
+
+    /* ============================================================
+       SYNC UI <- STATE
+       ============================================================ */
+    function syncUIFromState() {
+      const c = state.config;
+      $('#widget-name').value = state.widgetName;
+
+      // Mode picker
+      $$('.mode-tile').forEach(t => t.dataset.active = t.dataset.mode === c.mode ? '1' : '0');
+      showModePanel(c.mode);
+
+      // Typography
+      setVal('cfg-fontSize', c.fontSize, 'cfg-fontSize-val', String(c.fontSize));
+      setVal('cfg-letterSpacing', c.letterSpacing, 'cfg-letterSpacing-val', c.letterSpacing.toFixed(3));
+      setVal('cfg-lineHeight', c.lineHeight, 'cfg-lineHeight-val', c.lineHeight.toFixed(2));
+      setVal('cfg-fontFamily', c.fontFamily);
+      setVal('cfg-fontWeight', c.fontWeight);
+      setVal('cfg-align', c.align);
+
+      // Colours
+      setColorUI('cfg-textColor', c.textColor);
+      setColorUI('cfg-background', c.background);
+      setVal('cfg-paddingY', c.paddingY, 'cfg-paddingY-val', String(c.paddingY));
+      setVal('cfg-paddingX', c.paddingX, 'cfg-paddingX-val', String(c.paddingX));
+      setVal('cfg-radius', c.radius, 'cfg-radius-val', String(c.radius));
+
+      // Settings
+      $('#cfg-respectReducedMotion').dataset.on = c.respectReducedMotion ? '1' : '0';
+
+      // Typewriter
+      const tw = c.typewriter;
+      setVal('cfg-tw-typeSpeed', tw.typeSpeed, 'cfg-tw-typeSpeed-val', String(tw.typeSpeed));
+      setVal('cfg-tw-deleteSpeed', tw.deleteSpeed, 'cfg-tw-deleteSpeed-val', String(tw.deleteSpeed));
+      setVal('cfg-tw-holdDuration', tw.holdDuration, 'cfg-tw-holdDuration-val', String(tw.holdDuration));
+      setVal('cfg-tw-cursorStyle', tw.cursorStyle);
+      $('#cfg-tw-loop').dataset.on = tw.loop ? '1' : '0';
+      renderPhraseList();
+
+      // Rotating
+      const rot = c.rotating;
+      setVal('cfg-rot-prefix', rot.prefix);
+      setVal('cfg-rot-suffix', rot.suffix);
+      setVal('cfg-rot-animation', rot.animation);
+      setVal('cfg-rot-interval', rot.interval, 'cfg-rot-interval-val', String(rot.interval));
+      setColorUI('cfg-rot-wordColor', rot.wordColor);
+      renderWordList();
+
+      // Counter
+      const cnt = c.counter;
+      setVal('cfg-cnt-prefix', cnt.prefix);
+      setVal('cfg-cnt-suffix', cnt.suffix);
+      setVal('cfg-cnt-from', cnt.from);
+      setVal('cfg-cnt-to', cnt.to);
+      setVal('cfg-cnt-decimals', cnt.decimals);
+      setVal('cfg-cnt-thousandsSeparator', cnt.thousandsSeparator);
+      setVal('cfg-cnt-duration', cnt.duration, 'cfg-cnt-duration-val', String(cnt.duration));
+      setVal('cfg-cnt-easing', cnt.easing);
+      $('#cfg-cnt-startOnView').dataset.on = cnt.startOnView ? '1' : '0';
+
+      // Gradient
+      const g = c.gradient;
+      setVal('cfg-grad-text', g.text);
+      setVal('cfg-grad-angle', g.angle, 'cfg-grad-angle-val', String(g.angle));
+      setVal('cfg-grad-speed', g.speed, 'cfg-grad-speed-val', String(g.speed));
+      $('#cfg-grad-animate').dataset.on = g.static ? '0' : '1';
+      renderGradStops();
+
+      renderEmbedCode();
+    }
+
+    function setVal(id, value, valId, valText) {
+      const el = $('#' + id);
+      if (el) el.value = value;
+      if (valId && valText !== undefined) {
+        const v = $('#' + valId);
+        if (v) v.textContent = valText;
+      }
+    }
+    function setColorUI(idBase, value) {
+      const text = $('#' + idBase);
+      const sw = $('#' + idBase + '-swatch');
+      const pic = $('#' + idBase + '-picker');
+      if (text) text.value = value || '';
+      if (sw) {
+        if (value === 'transparent') {
+          sw.style.background = 'repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 0 0/12px 12px';
+        } else {
+          sw.style.background = value || '#000';
+        }
+      }
+      if (pic && value && value.startsWith('#')) pic.value = value;
+    }
+
+    /* ============================================================
+       EMBED CODE
+       ============================================================ */
+    function renderEmbedCode() {
+      const id = state.widgetId || 'YOUR_WIDGET_ID';
+      const code = `<div data-tg-widget="textfx" data-tg-id="${id}"></div>
+<script src="https://tg-widgets.vercel.app/widget-textfx.js"><\/script>`;
+      $('#embed-code').value = code;
+    }
+    function copyEmbed() {
+      const ta = $('#embed-code');
+      ta.select();
+      ta.setSelectionRange(0, 99999);
+      try { document.execCommand('copy'); toast('Embed code copied'); } catch { toast('Copy failed', true); }
+    }
+
+    /* ============================================================
+       SAVE
+       ============================================================ */
+    async function saveWidget() {
+      if (!isLoggedIn()) { showLogin(); return; }
+      const btn = $('#save-btn');
+      btn.disabled = true;
+      $('#save-label').innerHTML = '<span class="spinner"></span>';
+      try {
+        const sess = getSession();
+        const body = {
+          widgetType: 'Text FX',
+          name: state.widgetName || 'Text FX',
+          config: state.config,
+          clientEmail: sess && sess.user ? sess.user.email : '',
+        };
+        if (state.widgetId) body.widgetId = state.widgetId;
+
+        const res = await fetch('/api/widget-config', {
+          method: 'POST',
+          headers: authH(),
+          body: JSON.stringify(body)
+        });
+        if (res.status === 401) { showLogin(); btn.disabled = false; $('#save-label').textContent = 'Save'; return; }
+        const data = await res.json();
+        if (!res.ok) {
+          toast(data.error || 'Save failed', true);
+          btn.disabled = false;
+          $('#save-label').textContent = 'Save';
+          return;
+        }
+        state.widgetId = data.widgetId || data.id || state.widgetId;
+        markClean();
+        btn.disabled = false;
+        renderEmbedCode();
+        if (state.widgetId) {
+          const u = new URL(window.location.href);
+          u.searchParams.set('id', state.widgetId);
+          window.history.replaceState({}, '', u.toString());
+        }
+        toast('Saved');
+      } catch (e) {
+        toast('Network error', true);
+        btn.disabled = false;
+        $('#save-label').textContent = 'Save';
+      }
+    }
+
+    async function loadWidget(id) {
+      try {
+        const res = await fetch(`/api/widget-config?id=${encodeURIComponent(id)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        state.widgetId = data.widgetId || data.id || id;
+        state.widgetName = data.name || 'Text FX';
+        state.config = Object.assign({}, deepClone(DEFAULT_CONFIG), data.config || {});
+        // Ensure mode-specific objects exist after merge
+        ['typewriter', 'rotating', 'counter', 'gradient'].forEach(k => {
+          state.config[k] = Object.assign({}, DEFAULT_CONFIG[k], state.config[k] || {});
+        });
+        state.history = [deepClone(state.config)];
+        state.historyIdx = 0;
+        markClean();
+        syncUIFromState();
+        renderPreview();
+      } catch (e) {
+        console.warn('Load failed', e);
+      }
+    }
+
+    /* ============================================================
+       AI BUILDER
+       ============================================================ */
+    async function generateAI() {
+      if (!isLoggedIn()) { showLogin(); return; }
+      const prompt = $('#ai-prompt').value.trim();
+      if (!prompt) { toast('Describe what you want', true); return; }
+      const btn = $('#ai-generate');
+      btn.disabled = true;
+      $('#ai-label').innerHTML = '<span class="spinner"></span>';
+
+      const mode = state.config.mode;
+      let modePrompt = '';
+      let schema = null;
+      if (mode === 'typewriter') {
+        modePrompt = `You are helping a UK travel agent write typewriter phrases for their website hero. Generate 3-5 short, punchy phrases (max 60 chars each) that share a sentence structure but vary the ending — like "Find your perfect [beach holiday]" / "Find your perfect [city break]". Context: ${prompt}`;
+        schema = { phrases: 'array of strings' };
+      } else if (mode === 'rotating') {
+        modePrompt = `You are helping a UK travel agent write rotating words for a sentence on their website. Provide a prefix (the fixed part of the sentence ending with a space), 4-6 single rotating words, and an optional suffix (often a full stop). Example: prefix="Holidays for ", words=["families","couples","explorers"], suffix=".". Context: ${prompt}`;
+        schema = { prefix: 'string', words: 'array of strings', suffix: 'string' };
+      } else if (mode === 'counter') {
+        modePrompt = `You are helping a UK travel agent build a stat counter for their website. Suggest a meaningful number (the "to" value), a prefix (e.g. £, +, or empty), and a suffix (e.g. +, %, or empty), based on the description. Context: ${prompt}`;
+        schema = { to: 'number', prefix: 'string', suffix: 'string' };
+      } else if (mode === 'gradient') {
+        modePrompt = `You are helping a UK travel agent write a single gradient headline for their website (max 60 chars). Provide just one short, confident headline that captures the brand. Context: ${prompt}`;
+        schema = { text: 'string' };
+      }
+
+      try {
+        const res = await fetch('/api/widget-ai', {
+          method: 'POST',
+          headers: authH(),
+          body: JSON.stringify({
+            widgetType: 'Text FX',
+            prompt: modePrompt,
+            responseFormat: 'json',
+            schema
+          })
+        });
+        if (res.status === 401) { showLogin(); btn.disabled = false; $('#ai-label').textContent = 'Generate'; return; }
+        const data = await res.json();
+        if (!res.ok) {
+          toast(data.error || 'AI failed', true);
+          btn.disabled = false;
+          $('#ai-label').textContent = 'Generate';
+          return;
+        }
+        // Apply to state
+        const result = data.result || data;
+        if (mode === 'typewriter' && Array.isArray(result.phrases)) {
+          state.config.typewriter.phrases = result.phrases.slice(0, 8);
+        } else if (mode === 'rotating') {
+          if (typeof result.prefix === 'string') state.config.rotating.prefix = result.prefix;
+          if (Array.isArray(result.words)) state.config.rotating.words = result.words.slice(0, 8);
+          if (typeof result.suffix === 'string') state.config.rotating.suffix = result.suffix;
+        } else if (mode === 'counter') {
+          if (typeof result.to === 'number') state.config.counter.to = result.to;
+          if (typeof result.prefix === 'string') state.config.counter.prefix = result.prefix;
+          if (typeof result.suffix === 'string') state.config.counter.suffix = result.suffix;
+        } else if (mode === 'gradient') {
+          if (typeof result.text === 'string') state.config.gradient.text = result.text;
+        }
+
+        $('#ai-modal').hidden = true;
+        $('#ai-prompt').value = '';
+        markDirty();
+        pushHistory();
+        syncUIFromState();
+        renderPreview();
+        toast('Generated');
+        btn.disabled = false;
+        $('#ai-label').textContent = 'Generate';
+      } catch (e) {
+        toast('Network error', true);
+        btn.disabled = false;
+        $('#ai-label').textContent = 'Generate';
+      }
+    }
+
+    /* ============================================================
+       KEYBOARD SHORTCUTS
+       ============================================================ */
+    document.addEventListener('keydown', e => {
+      const cmd = e.metaKey || e.ctrlKey;
+      // Ignore when typing in inputs (except for cmd-shortcuts)
+      const inField = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
+
+      if (cmd && e.key === 's') { e.preventDefault(); saveWidget(); return; }
+      if (cmd && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+      if ((cmd && e.key === 'y') || (cmd && e.shiftKey && e.key === 'z')) { e.preventDefault(); redo(); return; }
+      if (e.key === 'Escape') { $('#ai-modal').hidden = true; return; }
+
+      if (inField) return;
+      if (e.key === '1') { $$('.sb-tab')[0].click(); }
+      if (e.key === '2') { $$('.sb-tab')[1].click(); }
+      if (e.key === '3') { $$('.sb-tab')[2].click(); }
+      if (e.key === 'a') { $('#ai-modal').hidden = false; }
+    });
+
+    /* ============================================================
+       INIT
+       ============================================================ */
+    function init() {
+      renderModeGrid();
+      bindCommonControls();
+
+      // History seed
+      state.history = [deepClone(state.config)];
+      state.historyIdx = 0;
+
+      syncUIFromState();
+      renderPreview();
+
+      // Load existing widget if id in URL
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (id) {
+        if (isLoggedIn()) loadWidget(id);
+        else showLogin();
+      } else {
+        if (!isLoggedIn()) showLogin();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
