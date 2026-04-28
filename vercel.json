@@ -33,6 +33,8 @@
     { "source": "/editor-mybooking",    "destination": "/editor-mybooking.html" },
     { "source": "/editor-countdown",    "destination": "/editor-countdown.html" },
     { "source": "/editor-logos",        "destination": "/editor-logos.html" },
+    { "source": "/demo-textfx",          "destination": "/demo-textfx.html" },
+    { "source": "/editor-textfx",        "destination": "/editor-textfx.html" },
     { "source": "/inbox-enquiry", "destination": "/inbox-enquiry.html" }
   ],
   "headers": [
@@ -110,6 +112,14 @@
     },
     {
       "source": "/widget-logos.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-textfx.js",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
