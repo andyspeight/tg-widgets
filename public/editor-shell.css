@@ -625,16 +625,12 @@
 }
 .tgse-fp.is-open .tgse-fp-current svg { transform: rotate(180deg); }
 .tgse-fp-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
+  margin-top: 4px;
   background: var(--tgse-panel);
   border: 1px solid var(--tgse-border);
   border-radius: var(--tgse-radius-md);
-  box-shadow: var(--tgse-shadow-lg);
+  box-shadow: var(--tgse-shadow-sm);
   display: none;
-  z-index: 10;
   overflow: hidden;
 }
 .tgse-fp.is-open .tgse-fp-dropdown { display: block; }
