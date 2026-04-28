@@ -436,7 +436,7 @@ const WIDGETS = [
     id: 'textfx',
     name: 'Text FX',
     airtableType: 'Text FX',
-    description: 'Kinetic typography for hero headlines, stats and accents. Twelve effects in one widget — typewriter, rotating words, counters, gradient fills, marquees, outlines and more. Pick a mode per instance.',
+    description: 'Twelve text effects in one widget — animated, visual, layout. One instance, one mode.',
     category: 'Content',
     status: 'live',
     icon: {viewBox:'0 0 24 24', paths:'<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>'},
@@ -1267,22 +1267,93 @@ function loadMiniPreview(w) {
   }
 
   if (w.id === 'textfx' && window.TGTextFxWidget) {
-    container.innerHTML = '<div data-tg-widget="textfx"></div>';
-    const inner = container.querySelector('[data-tg-widget="textfx"]');
-    new window.TGTextFxWidget(inner, {
-      mode: 'gradient',
-      fontSize: 32,
-      fontWeight: 800,
-      letterSpacing: -0.02,
-      paddingY: 16,
-      paddingX: 12,
-      respectReducedMotion: false,
-      gradient: {
-        text: 'Bring text to life',
-        colors: ['#0891B2', '#6366F1', '#EC4899', '#0891B2'],
-        angle: 90,
-        speed: 5,
-        static: false
+    // Cycling showcase: 4 effects rotate every ~3.2s with a crossfade.
+    // The .w-card-preview-inner container is 700×340 and gets scale(0.55) applied,
+    // so we render at real production sizes (the same as the demo page) and let
+    // the scale do the work — this matches every other widget tile.
+    container.innerHTML = `
+      <div style="position:relative;width:100%;height:100%;min-height:340px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <div id="tfx_stage_${w.id}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:32px;transition:opacity 350ms ease"></div>
+        <div id="tfx_dots_${w.id}" style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2"></div>
+      </div>
+    `;
+    const stage = container.querySelector(`#tfx_stage_${w.id}`);
+    const dots = container.querySelector(`#tfx_dots_${w.id}`);
+
+    const FX_CYCLE = [
+      {
+        mode: 'typewriter', fontSize: 56, fontWeight: 800, letterSpacing: -0.02, lineHeight: 1.15,
+        textColor: '#0F172A', paddingY: 16, paddingX: 16, respectReducedMotion: false,
+        typewriter: {
+          phrases: ['Find your perfect beach holiday.', 'Find your perfect adventure.'],
+          typeSpeed: 50, deleteSpeed: 28, holdDuration: 800, loop: true, cursorStyle: 'bar', startDelay: 0
+        }
+      },
+      {
+        mode: 'rotating', fontSize: 56, fontWeight: 800, letterSpacing: -0.02, lineHeight: 1.15,
+        textColor: '#0F172A', paddingY: 16, paddingX: 16, respectReducedMotion: false,
+        rotating: {
+          prefix: 'Holidays for ', words: ['families', 'couples', 'foodies'], suffix: '.',
+          interval: 1000, animation: 'slide', wordColor: '#0891B2'
+        }
+      },
+      {
+        mode: 'counter', fontSize: 56, fontWeight: 800, letterSpacing: -0.02, lineHeight: 1.1,
+        textColor: '#0F172A', paddingY: 16, paddingX: 16, respectReducedMotion: false,
+        counter: {
+          prefix: '£', suffix: '+', from: 0, to: 2300000, duration: 2400, decimals: 0,
+          thousandsSeparator: ',', easing: 'quart', startOnView: false
+        }
+      },
+      {
+        mode: 'gradient', fontSize: 60, fontWeight: 800, letterSpacing: -0.02, lineHeight: 1.15,
+        textColor: '#0F172A', paddingY: 16, paddingX: 16, respectReducedMotion: false,
+        gradient: {
+          text: 'Bring text to life',
+          colors: ['#0891B2', '#6366F1', '#EC4899', '#0891B2'],
+          angle: 90, speed: 4, static: false
+        }
+      }
+    ];
+
+    // Build cycle indicator dots — these render at real size too, will be scaled
+    dots.innerHTML = FX_CYCLE.map((_, i) =>
+      `<span data-tfx-dot="${i}" style="width:9px;height:9px;border-radius:50%;background:${i === 0 ? '#0891B2' : '#CBD5E1'};transition:background 200ms"></span>`
+    ).join('');
+
+    let fxIdx = 0;
+    let fxWidget = null;
+    let fxTimer = null;
+
+    function mountFx(idx) {
+      stage.style.opacity = '0';
+      setTimeout(() => {
+        if (fxWidget && typeof fxWidget.destroy === 'function') fxWidget.destroy();
+        stage.innerHTML = '<div data-tg-widget="textfx" style="width:100%"></div>';
+        const el = stage.querySelector('[data-tg-widget="textfx"]');
+        fxWidget = new window.TGTextFxWidget(el, FX_CYCLE[idx]);
+        dots.querySelectorAll('[data-tfx-dot]').forEach((d, i) => {
+          d.style.background = i === idx ? '#0891B2' : '#CBD5E1';
+        });
+        stage.style.opacity = '1';
+      }, 350);
+    }
+
+    function nextFx() {
+      fxIdx = (fxIdx + 1) % FX_CYCLE.length;
+      mountFx(fxIdx);
+    }
+
+    mountFx(0);
+    fxTimer = setInterval(nextFx, 3200);
+
+    // Pause cycle if tab hidden — saves CPU on dashboards left open
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        clearInterval(fxTimer);
+        fxTimer = null;
+      } else if (!fxTimer) {
+        fxTimer = setInterval(nextFx, 3200);
       }
     });
   }
