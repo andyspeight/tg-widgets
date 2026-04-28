@@ -231,6 +231,222 @@
       </div>
     </section>
 
+    <!-- WORD REVEAL -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Word Reveal</h2>
+        <span class="tag">Animated</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "wordreveal",
+          "fontSize": 56,
+          "fontWeight": 800,
+          "textColor": "#0F172A",
+          "wordreveal": {
+            "text": "Holidays handpicked by people who love travel.",
+            "unit": "word",
+            "animation": "fade-up",
+            "stagger": 90,
+            "startDelay": 200,
+            "startOnView": true,
+            "loop": false
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Marquee</h2>
+        <span class="tag">Animated</span>
+      </div>
+      <div class="demo-stage" style="padding-left:0;padding-right:0">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "marquee",
+          "fontSize": 36,
+          "fontWeight": 700,
+          "textColor": "#0F172A",
+          "paddingX": 0,
+          "marquee": {
+            "items": ["ATOL Protected", "ABTA Member", "24/7 Support", "Best Price Guarantee", "Free Cancellation"],
+            "separator": "•",
+            "speed": 70,
+            "direction": "left",
+            "pauseOnHover": true,
+            "fade": true
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- OUTLINED -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Outlined</h2>
+        <span class="tag">Visual</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "outlined",
+          "fontSize": 88,
+          "fontWeight": 900,
+          "letterSpacing": -0.03,
+          "textColor": "#0F172A",
+          "outlined": {
+            "text": "Outlined for impact",
+            "strokeWidth": 2.5,
+            "strokeColor": "#0F172A",
+            "fillColor": "transparent",
+            "hoverFill": true
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- SPLIT COLOUR -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Split Colour — Horizontal</h2>
+        <span class="tag">Visual</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "splitcolor",
+          "fontSize": 80,
+          "fontWeight": 800,
+          "splitcolor": {
+            "text": "Two tones",
+            "style": "horizontal",
+            "color1": "#0F172A",
+            "color2": "#0891B2",
+            "splitPos": 50
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Split Colour — Alternate</h2>
+        <span class="tag">Visual</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "splitcolor",
+          "fontSize": 56,
+          "fontWeight": 800,
+          "splitcolor": {
+            "text": "Travel made beautifully simple",
+            "style": "alternate",
+            "color1": "#0F172A",
+            "color2": "#0891B2"
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- SPOTLIGHT FOLLOW -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Spotlight Follow</h2>
+        <span class="tag">Visual</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "spotlight",
+          "fontSize": 80,
+          "fontWeight": 800,
+          "letterSpacing": -0.02,
+          "spotlight": {
+            "text": "Move your mouse",
+            "baseColor": "#CBD5E1",
+            "activeColor": "#0891B2",
+            "radius": 180,
+            "followCursor": true,
+            "fallbackPosition": "center"
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- STACKED EDITORIAL -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Stacked Editorial</h2>
+        <span class="tag">Layout</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "stacked",
+          "stacked": {
+            "lines": [
+              { "text": "Bournemouth", "size": 18, "weight": 600, "color": "#0891B2", "italic": false, "uppercase": true, "align": "center" },
+              { "text": "Travel agent", "size": 96, "weight": 800, "color": "#0F172A", "italic": false, "uppercase": false, "align": "center" },
+              { "text": "of the year", "size": 96, "weight": 300, "color": "#0F172A", "italic": true, "uppercase": false, "align": "center" }
+            ],
+            "gap": 4,
+            "alignItems": "center"
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- SPLIT BLOCK -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Split Block</h2>
+        <span class="tag">Layout</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "splitblock",
+          "fontSize": 64,
+          "fontWeight": 800,
+          "letterSpacing": -0.02,
+          "textColor": "#0F172A",
+          "splitblock": {
+            "textContent": "Travel\nbooking,\nreimagined.",
+            "blockText": "Try it free for 14 days",
+            "blockColor": "#0891B2",
+            "blockTextColor": "#FFFFFF",
+            "textSide": "left",
+            "ratio": "50/50",
+            "gap": 24,
+            "blockRadius": 16,
+            "blockPadding": 40,
+            "textAlign": "left",
+            "blockSize": 24,
+            "blockWeight": 700
+          }
+        }'></div>
+      </div>
+    </section>
+
+    <!-- VERTICAL -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Vertical</h2>
+        <span class="tag">Layout</span>
+      </div>
+      <div class="demo-stage">
+        <div data-tg-widget="textfx" data-tg-config='{
+          "mode": "vertical",
+          "fontSize": 22,
+          "fontWeight": 700,
+          "textColor": "#0891B2",
+          "vertical": {
+            "text": "TRAVELGENIX · EST. 2018",
+            "direction": "ccw",
+            "tracking": 0.18,
+            "uppercase": true,
+            "height": 280
+          }
+        }'></div>
+      </div>
+    </section>
+
     <div class="demo-footer">
       Travelgenix Widget Suite · <a href="/">Back to dashboard</a> · <a href="/editor-textfx">Open editor</a>
     </div>
