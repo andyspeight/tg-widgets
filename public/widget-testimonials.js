@@ -327,6 +327,7 @@
         box-shadow: var(--tgt-shadow);
         display: flex; flex-direction: column; gap: 16px;
         position: relative;
+        min-width: 0;
         transition: transform 200ms cubic-bezier(.4,0,.2,1), box-shadow 200ms;
       }
       .tgt-card:hover {
