@@ -132,6 +132,7 @@
     root.id = 'tgse-login-overlay';
     root.className = 'tgse-login';
     root.setAttribute('hidden', '');
+    root.style.display = 'none';
     root.innerHTML = `
       <div class="tgse-login-card" role="dialog" aria-labelledby="tgse-login-title">
         <div class="tgse-login-head">
@@ -213,13 +214,16 @@
       const sub = root.querySelector('#tgse-login-sub');
       if (sub) sub.textContent = message;
     }
-    root.hidden = false;
+    root.removeAttribute('hidden');
+    root.style.display = 'flex';
     setTimeout(() => root.querySelector('#tgse-login-email')?.focus(), 50);
   }
 
   function hideLogin() {
     const root = document.getElementById('tgse-login-overlay');
-    if (root) root.hidden = true;
+    if (!root) return;
+    root.setAttribute('hidden', '');
+    root.style.display = 'none';
   }
 
   // Gate: ensure we're logged in before doing anything else
