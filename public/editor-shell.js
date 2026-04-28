@@ -255,7 +255,10 @@
 
   function mountFontPicker(containerEl, currentFont, onChange) {
     const el = (typeof containerEl === 'string') ? document.querySelector(containerEl) : containerEl;
-    if (!el) return null;
+    if (!el) {
+      console.warn('[tgse] mountFontPicker: container not found:', containerEl);
+      return null;
+    }
 
     let current = currentFont || FONTS[0];
     el.innerHTML = `
@@ -286,15 +289,19 @@
     }
     renderList();
 
-    trigger.addEventListener('click', () => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const open = wrap.classList.toggle('is-open');
       trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) { search.value = ''; renderList(); search.focus(); }
+      if (open) { search.value = ''; renderList(); setTimeout(() => search.focus(), 0); }
     });
 
     search.addEventListener('input', () => renderList(search.value));
+    search.addEventListener('click', (e) => e.stopPropagation());
 
     list.addEventListener('click', (e) => {
+      e.stopPropagation();
       const opt = e.target.closest('.tgse-fp-option');
       if (!opt) return;
       const font = opt.dataset.font;
@@ -306,9 +313,9 @@
       if (typeof onChange === 'function') onChange(font);
     });
 
-    // Close on outside click
+    // Close on outside click (ignore clicks inside the picker itself)
     document.addEventListener('click', (e) => {
-      if (!wrap.contains(e.target)) {
+      if (!wrap.contains(e.target) && wrap.classList.contains('is-open')) {
         wrap.classList.remove('is-open');
         trigger.setAttribute('aria-expanded', 'false');
       }
