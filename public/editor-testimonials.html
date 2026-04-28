@@ -1161,16 +1161,21 @@
 
     /* ============================ PREVIEW MOUNT ============================ */
     function updatePreview() {
-      const mount = $('#tgt-mount');
+      let mount = $('#tgt-mount');
       if (!mount) return;
       try {
-        if (state.widget && typeof state.widget.update === 'function') {
-          state.widget.update(deepClone(state.config));
-        } else if (window.TGTestimonials) {
-          try { mount.innerHTML = ''; } catch(e){}
-          mount.removeAttribute('data-tg-initialised');
+        // Tear down the old widget cleanly. Shadow roots are sticky — calling
+        // mount.innerHTML = '' does NOT remove them, and attachShadow() on a
+        // host that already has a shadow root throws. So we replace the mount
+        // node entirely; the old shadow goes with the old node.
+        const fresh = document.createElement('div');
+        fresh.id = 'tgt-mount';
+        fresh.setAttribute('data-tg-widget', 'testimonials');
+        mount.parentNode.replaceChild(fresh, mount);
+        mount = fresh;
+
+        if (window.TGTestimonials) {
           state.widget = new window.TGTestimonials.Widget(mount, deepClone(state.config));
-          mount.setAttribute('data-tg-initialised', 'true');
         }
         // If Design mode active, refresh hotspots
         if (state.dmEnabled) requestAnimationFrame(buildDMHotspots);
