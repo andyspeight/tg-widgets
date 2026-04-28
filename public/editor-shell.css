@@ -8,6 +8,11 @@
 /* ── Box reset (scoped to editor shell consumers) ─────────── */
 .tgse-app *, .tgse-app *::before, .tgse-app *::after { box-sizing: border-box; }
 
+/* ── Body font baseline — covers modals/login/toast appended outside .tgse-app ── */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 /* ── Tokens (light) ───────────────────────────────────────── */
 :root {
   --tgse-brand: #0891B2;
@@ -679,6 +684,8 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--tgse-ink);
 }
 .tgse-login-card {
   background: var(--tgse-panel);
@@ -766,6 +773,8 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity .2s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--tgse-ink);
 }
 .tgse-modal.is-open { opacity: 1; pointer-events: auto; }
 .tgse-modal-card {
@@ -826,6 +835,7 @@
   opacity: 0;
   transition: all .3s ease;
   box-shadow: var(--tgse-shadow-lg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 .tgse-toast.is-show { transform: translateY(0); opacity: 1; }
 .tgse-toast--ok { background: var(--tgse-success); }
