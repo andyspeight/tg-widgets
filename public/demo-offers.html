@@ -17,6 +17,7 @@
     --success: #059669;
     --error: #dc2626;
     --warn: #d97706;
+    --strike: #9ca3af;
   }
   * { box-sizing: border-box; }
   body {
@@ -107,7 +108,7 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 16px;
   }
 
@@ -153,6 +154,22 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
+  .card-pill {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(255,255,255,0.95);
+    color: var(--text);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+  }
+  .card-pill.deal {
+    background: var(--success);
+    color: white;
+  }
   .card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
   .card-name { font-weight: 600; font-size: 15px; line-height: 1.3; }
   .card-location { font-size: 13px; color: var(--muted); }
@@ -162,41 +179,126 @@
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
+    gap: 12px;
   }
-  .card-price { font-weight: 700; font-size: 18px; color: var(--text); }
+  .card-price-block { display: flex; flex-direction: column; gap: 2px; }
+  .card-price { font-weight: 700; font-size: 20px; color: var(--text); line-height: 1; }
+  .card-price-was { font-size: 12px; color: var(--strike); text-decoration: line-through; }
   .card-price-sub { font-size: 11px; color: var(--muted); font-weight: normal; }
   .card-link {
     color: var(--accent);
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
+    white-space: nowrap;
   }
   .card-link:hover { text-decoration: underline; }
 
+  /* Flight-specific styling */
   .flight-route {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px 12px;
+    background: var(--accent-soft);
+    border-bottom: 1px solid var(--border);
+  }
+  .flight-airport { display: flex; flex-direction: column; gap: 2px; }
+  .flight-airport.right { text-align: right; }
+  .flight-iata {
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 22px;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .flight-airport-name {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.2;
+  }
+  .flight-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--muted);
+  }
+  .flight-arrow-line {
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+    position: relative;
+  }
+  .flight-arrow-line::after {
+    content: '✈';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 0 4px;
+    font-size: 14px;
+  }
+  .flight-stops-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .flight-duration {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 6px 16px 0;
+    background: var(--accent-soft);
+    border-bottom: 1px solid var(--border);
+  }
+  .flight-detail {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 10px 14px;
-    background: var(--accent-soft);
     border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .flight-detail:last-of-type { border-bottom: none; }
+  .flight-detail-label {
+    font-weight: 600;
+    color: var(--text);
+    min-width: 60px;
+  }
+  .flight-detail-value {
+    color: var(--muted);
+  }
+  .flight-carrier-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
     font-size: 13px;
   }
-  .flight-route .iata {
+  .flight-carrier-code {
+    background: var(--text);
+    color: white;
     font-weight: 700;
-    color: var(--accent);
-    font-size: 15px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    letter-spacing: 1px;
   }
-  .flight-route .arrow { color: var(--muted); }
-  .flight-leg {
-    padding: 8px 14px;
-    font-size: 12px;
+  .flight-carrier-name { font-weight: 600; }
+  .flight-pax {
+    font-size: 11px;
     color: var(--muted);
-    border-bottom: 1px solid var(--border);
+    margin-left: auto;
   }
-  .flight-leg:last-of-type { border-bottom: none; }
-  .flight-leg strong { color: var(--text); font-weight: 600; }
 
   details {
     margin-top: 32px;
@@ -206,12 +308,7 @@
     padding: 12px 16px;
   }
   details[open] { padding-bottom: 16px; }
-  details summary {
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 14px;
-    user-select: none;
-  }
+  details summary { cursor: pointer; font-weight: 500; font-size: 14px; user-select: none; }
   pre {
     background: #1f2937;
     color: #d1d5db;
@@ -409,6 +506,8 @@
     return payload;
   }
 
+  // ── Renderers ─────────────────────────────────────────────────────
+
   function renderAccommodationCard(o) {
     const acc = o.accommodation || {};
     const dest = acc.destination || {};
@@ -433,40 +532,79 @@
     `;
   }
 
+  // Real Flights shape: flight.{origin, destination, outboundDate, returnDate, cabinClass, direct, stops, duration, carrier, image, pricing}
   function renderFlightCard(o) {
-    const ob = o.outbound || o.flight?.outbound || {};
-    const ib = o.inbound || o.flight?.inbound || null;
-    const flight = o.flight || {};
-    const fromCode = ob.originCode || ob.origin?.code || ob.departureAirport?.code || flight.originCode || '???';
-    const toCode = ob.destinationCode || ob.destination?.code || ob.arrivalAirport?.code || flight.destinationCode || '???';
-    const carrier = ob.carrierCode || ob.carrier?.code || flight.carrierCode || '';
-    const carrierName = ob.carrierName || ob.carrier?.name || flight.carrierName || carrier;
-    const cabin = ob.cabinClass || flight.cabinClass || '';
-    const departTime = ob.departureTime || ob.departureDate || ob.departDate || '';
-    const returnTime = ib ? (ib.departureTime || ib.departureDate || ib.departDate || '') : '';
-    const tripType = ib ? 'Return' : 'One-way';
+    const f = o.flight || {};
+    const og = f.origin || {};
+    const dest = f.destination || {};
+    const carrier = f.carrier || {};
+    const pricing = f.pricing || {};
+
+    const img = f.image?.url || '';
+    const isDirect = f.direct === true;
+    const stops = f.stops || 0;
+    const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : `${stops} stops`);
+
+    const durationLabel = f.duration ? formatDuration(f.duration) : '';
+    const cabin = f.cabinClass ? formatEnum(f.cabinClass) : '';
+    const refundability = pricing.refundability ? formatEnum(pricing.refundability) : '';
+
+    const outbound = formatDateTime(f.outboundDate);
+    const returnLeg = f.returnDate ? formatDateTime(f.returnDate) : null;
+    const tripType = returnLeg ? 'Return' : 'One-way';
+
+    const priceChanged = pricing.priceChanged === true && pricing.priceBeforeChange;
+    const isLeadIn = pricing.isLeadIn === true;
+
     return `
       <div class="card">
-        <div class="flight-route">
-          <span class="iata">${escapeHtml(fromCode)}</span>
-          <span class="arrow">${ib ? '⇌' : '→'}</span>
-          <span class="iata">${escapeHtml(toCode)}</span>
-          <span style="margin-left:auto; font-size:11px; color:var(--muted); text-transform:uppercase; font-weight:600;">${tripType}</span>
-        </div>
-        <div class="flight-leg">
-          <strong>Outbound</strong> · ${escapeHtml(formatDate(departTime))}
-          ${carrierName ? ` · ${escapeHtml(carrierName)}` : ''}
-        </div>
-        ${ib ? `
-          <div class="flight-leg">
-            <strong>Return</strong> · ${escapeHtml(formatDate(returnTime))}
+        ${img ? `
+          <div class="card-image" style="background-image: url('${escapeHtml(img)}'); aspect-ratio: 16/9;">
+            <div class="card-type-badge">Flight</div>
+            ${isLeadIn ? `<div class="card-pill deal">Lead-in price</div>` : ''}
           </div>
         ` : ''}
-        <div class="card-body">
-          ${cabin ? `<div class="card-meta">${escapeHtml(formatEnum(cabin))} class</div>` : ''}
-          <div class="card-meta" style="font-size:11px; opacity:0.7;">Adults: ${o.adults || 1}${o.children ? ', Children: ' + o.children : ''}</div>
+
+        <div class="flight-route">
+          <div class="flight-airport">
+            <div class="flight-iata">${escapeHtml(og.iataCode || '???')}</div>
+            <div class="flight-airport-name">${escapeHtml(og.name || '')}</div>
+          </div>
+          <div class="flight-arrow">
+            <div class="flight-arrow-line"></div>
+            <div class="flight-stops-label">${escapeHtml(stopsLabel)}</div>
+          </div>
+          <div class="flight-airport right">
+            <div class="flight-iata">${escapeHtml(dest.iataCode || '???')}</div>
+            <div class="flight-airport-name">${escapeHtml(dest.name || '')}</div>
+          </div>
         </div>
-        ${renderPriceFooter(o)}
+        ${durationLabel ? `<div class="flight-duration">${durationLabel} · ${tripType}${cabin ? ' · ' + cabin : ''}</div>` : ''}
+
+        <div class="flight-carrier-row">
+          ${carrier.code ? `<span class="flight-carrier-code">${escapeHtml(carrier.code)}</span>` : ''}
+          <span class="flight-carrier-name">${escapeHtml(carrier.name || 'Unknown carrier')}</span>
+          <span class="flight-pax">${o.adults || 1} adult${(o.adults || 1) === 1 ? '' : 's'}${o.children ? ', ' + o.children + ' child' + (o.children === 1 ? '' : 'ren') : ''}</span>
+        </div>
+
+        <div class="flight-detail">
+          <span class="flight-detail-label">Outbound</span>
+          <span class="flight-detail-value">${escapeHtml(outbound)}</span>
+        </div>
+        ${returnLeg ? `
+          <div class="flight-detail">
+            <span class="flight-detail-label">Return</span>
+            <span class="flight-detail-value">${escapeHtml(returnLeg)}</span>
+          </div>
+        ` : ''}
+        ${refundability ? `
+          <div class="flight-detail">
+            <span class="flight-detail-label">Fare</span>
+            <span class="flight-detail-value">${escapeHtml(refundability)}</span>
+          </div>
+        ` : ''}
+
+        ${renderPriceFooter(o, priceChanged ? `£${Math.round(pricing.priceBeforeChange)}` : null)}
       </div>
     `;
   }
@@ -480,11 +618,11 @@
     const rating = acc.rating ? '★'.repeat(Math.round(acc.rating)) : '';
     const nights = acc.nights || pkg.nights;
     const board = acc.boardBasis || pkg.boardBasis;
-    const fromCode = ob.originCode || ob.origin?.code || '???';
+    const fromCode = ob.iataCode || ob.origin?.iataCode || ob.originCode || '';
     const meta = [
       nights ? `${nights} nights` : '',
       board ? formatEnum(board) : '',
-      fromCode !== '???' ? `from ${fromCode}` : '',
+      fromCode ? `from ${fromCode}` : '',
     ].filter(Boolean).join(' · ');
     return `
       <div class="card">
@@ -548,12 +686,13 @@
     `;
   }
 
-  function renderPriceFooter(o) {
+  function renderPriceFooter(o, wasPrice) {
     const price = o.formattedPPPrice || o.formattedPrice || '';
     const sub = o.formattedPPPrice ? 'per person' : (o.formattedPrice ? 'total' : '');
     return `
       <div class="card-footer">
-        <div>
+        <div class="card-price-block">
+          ${wasPrice ? `<div class="card-price-was">${escapeHtml(wasPrice)}</div>` : ''}
           <div class="card-price">${escapeHtml(price)}</div>
           ${sub ? `<div class="card-price-sub">${sub}</div>` : ''}
         </div>
@@ -580,6 +719,8 @@
     }).join('');
   }
 
+  // ── Helpers ───────────────────────────────────────────────────────
+
   function formatEnum(s) {
     if (!s) return '';
     return String(s).replace(/([A-Z])/g, ' $1').trim();
@@ -592,6 +733,26 @@
       if (isNaN(d.getTime())) return iso;
       return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     } catch { return iso; }
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const date = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      return `${date}, ${time}`;
+    } catch { return iso; }
+  }
+
+  function formatDuration(minutes) {
+    if (!minutes || isNaN(minutes)) return '';
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    if (h && m) return `${h}h ${m}m`;
+    if (h) return `${h}h`;
+    return `${m}m`;
   }
 
   function escapeHtml(s) {
