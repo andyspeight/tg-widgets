@@ -592,7 +592,8 @@
         },
         seo: {
           enableSchema: true
-        }
+        },
+        fontFamily: ''   // empty = use Inter
       };
       const merged = Object.assign({}, base, c || {});
       merged.colors = Object.assign({}, base.colors, (c && c.colors) || {});
@@ -658,6 +659,12 @@
       const brandSoft = hexToRgba(c.brand, 0.10) || 'rgba(8,145,178,0.10)';
       const accentSoft = hexToRgba(c.accent, 0.15) || 'rgba(99,102,241,0.15)';
       const radius = Math.max(0, parseInt(this.c.radius, 10) || 12);
+      // Optional font override — when fontFamily is set, override the host's
+      // hardcoded Inter stack. .tgf-root cascades to descendants and beats
+      // :host because root is more specific.
+      const fontRule = (this.c.fontFamily && typeof this.c.fontFamily === 'string')
+        ? `font-family: '${esc(this.c.fontFamily.replace(/'/g, ''))}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;`
+        : '';
       return `.tgf-root {
         --tgf-brand: ${esc(c.brand || '#0891B2')};
         --tgf-accent: ${esc(c.accent || '#6366F1')};
@@ -670,6 +677,7 @@
         --tgf-accent-soft: ${accentSoft};
         --tgf-radius: ${radius + 4}px;
         --tgf-radius-sm: ${Math.max(4, radius - 2)}px;
+        ${fontRule}
       }`;
     }
 
