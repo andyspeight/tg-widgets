@@ -683,36 +683,53 @@
     }
 
     /* Field cards — draggable, deletable, clickable */
+    /* ── Field card: lifelike preview of the rendered form field ──
+       The card shows the field as it will look in the live form, with a
+       thin "chrome" bar at the top for drag handle, type chip, badges and
+       delete button. The body shows a real-looking preview of the field
+       (input, segmented buttons, star cards, etc) so the agent can see
+       what they're building as they build it. */
     .field-card {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
+      border-radius: var(--radius-lg);
+      padding: 0;
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex-direction: column;
       cursor: pointer;
-      transition: all .12s ease;
+      transition: border-color .12s ease, box-shadow .12s ease, opacity .12s ease;
       position: relative;
+      overflow: hidden;
     }
     .field-card:hover {
       border-color: var(--border-strong);
-      box-shadow: var(--shadow-xs);
+      box-shadow: var(--shadow-sm);
     }
     .field-card.is-selected {
       border-color: var(--brand);
-      background: var(--brand-soft);
       box-shadow: 0 0 0 3px var(--brand-soft);
     }
-    .field-card.is-dragging {
-      opacity: .4;
+    .field-card.is-dragging { opacity: .4; }
+    .field-card.is-hidden  { opacity: .55; }
+
+    /* Top chrome bar — drag handle, type chip, required/hidden badges, delete */
+    .field-card-chrome {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--border);
+      min-height: 36px;
     }
-    .field-card.is-hidden {
-      opacity: .5;
+    .field-card.is-selected .field-card-chrome {
+      background: var(--brand-soft);
+      border-bottom-color: rgba(8,145,178,.25);
     }
+
     .field-card-handle {
       width: 16px;
-      height: 16px;
+      height: 18px;
       color: var(--muted);
       cursor: grab;
       flex-shrink: 0;
@@ -721,46 +738,26 @@
       justify-content: center;
     }
     .field-card-handle:active { cursor: grabbing; }
-    .field-card-handle:hover { color: var(--sub); }
-    .field-card-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: var(--accent-soft);
-      color: var(--accent);
+    .field-card:hover .field-card-handle { color: var(--sub); }
+
+    .field-card-chip {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .field-card.is-selected .field-card-icon {
-      background: rgba(255,255,255,.8);
-    }
-    .field-card-info {
-      flex: 1;
-      min-width: 0;
-      line-height: 1.3;
-    }
-    .field-card-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--ink);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .field-card-sub {
+      gap: 5px;
+      padding: 3px 8px;
       font-size: 11px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 1px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-radius: 999px;
+      letter-spacing: .01em;
     }
+    .field-card-chip svg { width: 12px; height: 12px; }
+
     .field-card-badge {
       display: inline-flex;
       align-items: center;
-      padding: 1px 6px;
+      padding: 2px 7px;
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
@@ -768,13 +765,15 @@
       border-radius: 3px;
     }
     .field-card-badge.required { background: var(--danger-soft); color: var(--danger); }
-    .field-card-badge.optional { background: var(--hover); color: var(--muted); }
-    .field-card-badge.hidden  { background: var(--warning); color: #fff; opacity: .9; }
+    .field-card-badge.hidden   { background: var(--warning); color: #fff; opacity: .9; }
+
+    .field-card-spacer { flex: 1; }
+
     .field-card-delete {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       border: 0;
-      border-radius: 5px;
+      border-radius: 6px;
       background: transparent;
       color: var(--muted);
       cursor: pointer;
@@ -786,12 +785,351 @@
       flex-shrink: 0;
     }
     .field-card:hover .field-card-delete,
-    .field-card.is-selected .field-card-delete {
-      opacity: 1;
-    }
+    .field-card.is-selected .field-card-delete { opacity: 1; }
     .field-card-delete:hover {
       background: var(--danger-soft);
       color: var(--danger);
+    }
+
+    /* ── Field preview body — looks like the real rendered form field ── */
+    .field-card-body {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none; /* so clicks bubble to the card for selection */
+      user-select: none;
+      /* Default to editor tokens; renderFieldCard injects the agent's own
+         buttonColour/accentColour as inline overrides so the preview reflects
+         actual branding choices from the Design tab. */
+      --fp-brand: var(--brand);
+      --fp-brand-soft: var(--brand-soft);
+      --fp-accent: var(--accent);
+      --fp-accent-soft: var(--accent-soft);
+    }
+    .field-preview-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.35;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .field-preview-label .req-star {
+      color: var(--danger);
+      font-weight: 700;
+    }
+    .field-preview-help {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: -4px;
+    }
+
+    /* Generic input shell — looks like a real text input */
+    .fp-input {
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 12px;
+      background: var(--bg);
+      color: var(--sub);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fp-input.is-textarea {
+      height: auto;
+      min-height: 72px;
+      padding: 10px 12px;
+      align-items: flex-start;
+    }
+    .fp-input .fp-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .fp-input .fp-placeholder { color: var(--muted); }
+
+    /* Two-column inputs (name, contact) */
+    .fp-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Segmented buttons (board basis, duration) */
+    .fp-seg {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .fp-seg-btn {
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--sub);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+    .fp-seg-btn.is-active {
+      color: var(--fp-brand);
+      background: var(--fp-brand-soft);
+      border-color: var(--fp-brand);
+      font-weight: 600;
+    }
+
+    /* Pill chips (interests) */
+    .fp-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .fp-chip {
+      padding: 6px 11px;
+      font-size: 12px;
+      color: var(--sub);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .fp-chip.is-active {
+      color: var(--fp-accent);
+      background: var(--fp-accent-soft);
+      border-color: var(--fp-accent);
+    }
+    .fp-chip-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border-strong);
+      flex-shrink: 0;
+      background: var(--panel);
+    }
+    .fp-chip.is-active .fp-chip-dot {
+      background: var(--fp-accent);
+      border-color: var(--fp-accent);
+      box-shadow: inset 0 0 0 2px var(--panel);
+    }
+
+    /* Star rating cards */
+    .fp-star-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .fp-star-card {
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .fp-star-card.is-active {
+      border-color: var(--fp-brand);
+      background: var(--fp-brand-soft);
+    }
+    .fp-star-card.luxury {
+      border-color: var(--warning);
+      background: rgba(245,158,11,.08);
+    }
+    .fp-star-icons {
+      display: inline-flex;
+      gap: 1px;
+      color: var(--warning);
+    }
+    .fp-star-icons svg { width: 12px; height: 12px; }
+    .fp-star-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .fp-star-desc {
+      font-size: 10.5px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    /* Date range — two date inputs */
+    .fp-dates {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .fp-date {
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 12px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Travellers — counter rows */
+    .fp-counters {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .fp-counter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+    }
+    .fp-counter-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    .fp-counter-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .fp-counter-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .fp-counter-buttons {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fp-counter-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--sub);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .fp-counter-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      min-width: 14px;
+      text-align: center;
+    }
+
+    /* Budget slider */
+    .fp-budget {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .fp-budget-amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--fp-brand);
+    }
+    .fp-slider {
+      height: 5px;
+      background: var(--border);
+      border-radius: 999px;
+      position: relative;
+    }
+    .fp-slider-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 45%;
+      background: var(--fp-brand);
+      border-radius: 999px;
+    }
+    .fp-slider-thumb {
+      position: absolute;
+      left: 45%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 2px solid var(--fp-brand);
+      box-shadow: var(--shadow-xs);
+    }
+    .fp-slider-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Consent — a couple of checkbox rows */
+    .fp-consent {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .fp-consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+    }
+    .fp-checkbox {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--panel);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .fp-checkbox.is-checked {
+      background: var(--fp-brand);
+      border-color: var(--fp-brand);
+      position: relative;
+    }
+    .fp-checkbox.is-checked::after {
+      content: '';
+      position: absolute;
+      left: 4px; top: 1px;
+      width: 4px; height: 8px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .fp-consent-text {
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.4;
+    }
+
+    /* Empty / unknown placeholder */
+    .fp-empty {
+      padding: 14px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
     }
 
     /* Drop indicator — a real DOM element that appears between cards.
@@ -3300,7 +3638,13 @@
         // Unknown field type — render a muted card rather than crashing
         const unknown = document.createElement('div');
         unknown.className = 'field-card is-hidden';
-        unknown.textContent = 'Unknown field type: ' + field.type;
+        const body = document.createElement('div');
+        body.className = 'field-card-body';
+        const empty = document.createElement('div');
+        empty.className = 'fp-empty';
+        empty.textContent = 'Unknown field type: ' + field.type;
+        body.appendChild(empty);
+        unknown.appendChild(body);
         return unknown;
       }
 
@@ -3327,7 +3671,10 @@
         endDrag();
       });
 
-      // Drag handle (visual + cursor affordance)
+      // ── Top chrome bar — drag handle, type chip, badges, delete ──
+      const chrome = document.createElement('div');
+      chrome.className = 'field-card-chrome';
+
       const handle = document.createElement('span');
       handle.className = 'field-card-handle';
       handle.setAttribute('aria-label', 'Drag to reorder');
@@ -3335,44 +3682,34 @@
         '<circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/>',
         14
       ));
-      card.appendChild(handle);
+      chrome.appendChild(handle);
 
-      // Type icon
-      const typeIcon = document.createElement('span');
-      typeIcon.className = 'field-card-icon';
-      typeIcon.appendChild(iconSvg(def.icon, 14));
-      card.appendChild(typeIcon);
+      const chip = document.createElement('span');
+      chip.className = 'field-card-chip';
+      chip.appendChild(iconSvg(def.icon, 12));
+      const chipLabel = document.createElement('span');
+      chipLabel.textContent = def.name;
+      chip.appendChild(chipLabel);
+      chrome.appendChild(chip);
 
-      // Label + badges
-      const info = document.createElement('div');
-      info.className = 'field-card-info';
-
-      const label = document.createElement('div');
-      label.className = 'field-card-label';
-      label.textContent = field.label || def.defaultLabel;
-      info.appendChild(label);
-
-      const sub = document.createElement('div');
-      sub.className = 'field-card-sub';
-      const typeSpan = document.createElement('span');
-      typeSpan.textContent = def.name;
-      sub.appendChild(typeSpan);
-
-      const badge = document.createElement('span');
-      badge.className = 'field-card-badge ' + (field.required ? 'required' : 'optional');
-      badge.textContent = field.required ? 'Required' : 'Optional';
-      sub.appendChild(badge);
+      if (field.required) {
+        const req = document.createElement('span');
+        req.className = 'field-card-badge required';
+        req.textContent = 'Required';
+        chrome.appendChild(req);
+      }
 
       if (field.visible === false) {
         const hiddenBadge = document.createElement('span');
         hiddenBadge.className = 'field-card-badge hidden';
         hiddenBadge.textContent = 'Hidden';
-        sub.appendChild(hiddenBadge);
+        chrome.appendChild(hiddenBadge);
       }
-      info.appendChild(sub);
-      card.appendChild(info);
 
-      // Delete button
+      const spacer = document.createElement('span');
+      spacer.className = 'field-card-spacer';
+      chrome.appendChild(spacer);
+
       const del = document.createElement('button');
       del.className = 'field-card-delete';
       del.setAttribute('type', 'button');
@@ -3383,9 +3720,347 @@
         e.stopPropagation();
         removeField(field.id);
       });
-      card.appendChild(del);
+      chrome.appendChild(del);
+
+      card.appendChild(chrome);
+
+      // ── Body: lifelike preview of the rendered field ──
+      const body = document.createElement('div');
+      body.className = 'field-card-body';
+      // Inject the agent's actual brand + accent colours so the preview reflects
+      // their Design tab choices, not the editor's own teal/indigo tokens.
+      const bC = (state.config && state.config.buttonColour) || '';
+      const aC = (state.config && state.config.accentColour) || '';
+      if (bC) {
+        body.style.setProperty('--fp-brand', bC);
+        body.style.setProperty('--fp-brand-soft', hexToSoft(bC, 0.1));
+      }
+      if (aC) {
+        body.style.setProperty('--fp-accent', aC);
+        body.style.setProperty('--fp-accent-soft', hexToSoft(aC, 0.1));
+      }
+
+      // Field label (as it appears in the live form)
+      const labelEl = document.createElement('div');
+      labelEl.className = 'field-preview-label';
+      const labelText = document.createElement('span');
+      labelText.textContent = field.label || def.defaultLabel;
+      labelEl.appendChild(labelText);
+      if (field.required) {
+        const star = document.createElement('span');
+        star.className = 'req-star';
+        star.setAttribute('aria-hidden', 'true');
+        star.textContent = '*';
+        labelEl.appendChild(star);
+      }
+      body.appendChild(labelEl);
+
+      // Help text (if present)
+      const helpText = (field.help && String(field.help).trim())
+        || (def.defaultOptions && def.defaultOptions.help)
+        || '';
+      if (helpText) {
+        const help = document.createElement('div');
+        help.className = 'field-preview-help';
+        help.textContent = helpText;
+        body.appendChild(help);
+      }
+
+      // Type-specific lifelike preview
+      const preview = renderFieldPreview(field, def);
+      if (preview) body.appendChild(preview);
+
+      card.appendChild(body);
 
       return card;
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────
+       renderFieldPreview — returns a DOM node that visually approximates
+       what the field will look like in the live form. Decorative only:
+       all interactive elements are non-focusable and clicks bubble up to
+       the card for selection. Uses the editor's CSS tokens, not the
+       per-form branding — that's what the iframe-style preview mode is for.
+       ────────────────────────────────────────────────────────────────────── */
+    function renderFieldPreview(field, def) {
+      const opts = field.options || {};
+      switch (field.type) {
+        case 'destination': {
+          // Search-style input with magnifier
+          return inputShell({
+            iconPath: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+            placeholder: 'e.g. Maldives, Crete, Cape Town…'
+          });
+        }
+        case 'airport': {
+          return inputShell({
+            iconPath: '<path d="M17.8 19.2 16 11l3.5-3.5A2.41 2.41 0 0 0 17 5l-3.5 3.5L5.3 6.2 4 7.5l8.5 4-3 3L7 14l-1.3 1.3 3.5 1.7 1.7 3.5L12 19l-.5-2.5 3-3 4 8.5 1.3-1.3z"/>',
+            placeholder: 'Choose your departure airport'
+          });
+        }
+        case 'daterange': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-dates';
+          ['Depart', 'Return'].forEach(label => {
+            const d = document.createElement('div');
+            d.className = 'fp-date';
+            d.appendChild(svgEl('<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>', 14));
+            const t = document.createElement('span');
+            t.textContent = label;
+            d.appendChild(t);
+            wrap.appendChild(d);
+          });
+          return wrap;
+        }
+        case 'duration': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-seg';
+          ['3–5 nights', '7 nights', '10 nights', '14 nights', 'Custom'].forEach((lab, i) => {
+            const b = document.createElement('span');
+            b.className = 'fp-seg-btn' + (i === 1 ? ' is-active' : '');
+            b.textContent = lab;
+            wrap.appendChild(b);
+          });
+          return wrap;
+        }
+        case 'travellers': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-counters';
+          [
+            { name: 'Adults', sub: '18+', value: 2 },
+            { name: 'Children', sub: '2–17', value: 0 },
+            { name: 'Infants', sub: 'Under 2', value: 0 }
+          ].forEach(row => {
+            const r = document.createElement('div');
+            r.className = 'fp-counter-row';
+            const meta = document.createElement('div');
+            meta.className = 'fp-counter-meta';
+            const name = document.createElement('span');
+            name.className = 'fp-counter-name';
+            name.textContent = row.name;
+            meta.appendChild(name);
+            const sub = document.createElement('span');
+            sub.className = 'fp-counter-sub';
+            sub.textContent = row.sub;
+            meta.appendChild(sub);
+            r.appendChild(meta);
+
+            const ctrls = document.createElement('div');
+            ctrls.className = 'fp-counter-buttons';
+            const minus = document.createElement('span');
+            minus.className = 'fp-counter-btn';
+            minus.textContent = '−';
+            ctrls.appendChild(minus);
+            const val = document.createElement('span');
+            val.className = 'fp-counter-value';
+            val.textContent = String(row.value);
+            ctrls.appendChild(val);
+            const plus = document.createElement('span');
+            plus.className = 'fp-counter-btn';
+            plus.textContent = '+';
+            ctrls.appendChild(plus);
+            r.appendChild(ctrls);
+            wrap.appendChild(r);
+          });
+          return wrap;
+        }
+        case 'budget': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-budget';
+          const amt = document.createElement('div');
+          amt.className = 'fp-budget-amount';
+          amt.textContent = '£3,500';
+          wrap.appendChild(amt);
+          const slider = document.createElement('div');
+          slider.className = 'fp-slider';
+          const fill = document.createElement('div');
+          fill.className = 'fp-slider-fill';
+          slider.appendChild(fill);
+          const thumb = document.createElement('div');
+          thumb.className = 'fp-slider-thumb';
+          slider.appendChild(thumb);
+          wrap.appendChild(slider);
+          const meta = document.createElement('div');
+          meta.className = 'fp-slider-meta';
+          const min = document.createElement('span');
+          min.textContent = '£500';
+          meta.appendChild(min);
+          const max = document.createElement('span');
+          max.textContent = '£10,000+';
+          meta.appendChild(max);
+          wrap.appendChild(meta);
+          return wrap;
+        }
+        case 'stars': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-star-grid';
+          [
+            { stars: 3, name: 'Comfortable', desc: '3-star. Great value.' },
+            { stars: 4, name: 'Superior',    desc: '4-star. The sweet spot.', active: true },
+            { stars: 5, name: 'Luxury',      desc: '5-star. The full treatment.', luxury: true }
+          ].forEach(s => {
+            const c = document.createElement('div');
+            c.className = 'fp-star-card' + (s.active ? ' is-active' : '') + (s.luxury ? ' luxury' : '');
+            const icons = document.createElement('div');
+            icons.className = 'fp-star-icons';
+            for (let i = 0; i < s.stars; i++) {
+              icons.appendChild(svgEl('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>', 12, 'currentColor'));
+            }
+            c.appendChild(icons);
+            const n = document.createElement('div');
+            n.className = 'fp-star-name';
+            n.textContent = s.name;
+            c.appendChild(n);
+            const d = document.createElement('div');
+            d.className = 'fp-star-desc';
+            d.textContent = s.desc;
+            c.appendChild(d);
+            wrap.appendChild(c);
+          });
+          return wrap;
+        }
+        case 'board': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-seg';
+          [
+            { v: 'RO', label: 'Room only', active: true },
+            { v: 'BB', label: 'B&B' },
+            { v: 'HB', label: 'Half board' },
+            { v: 'FB', label: 'Full board' },
+            { v: 'AI', label: 'All inclusive' }
+          ].forEach(o => {
+            const b = document.createElement('span');
+            b.className = 'fp-seg-btn' + (o.active ? ' is-active' : '');
+            b.textContent = o.label;
+            wrap.appendChild(b);
+          });
+          return wrap;
+        }
+        case 'interests': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-chips';
+          [
+            { label: 'Beach', active: true },
+            { label: 'City' },
+            { label: 'Culture', active: true },
+            { label: 'Food & wine' },
+            { label: 'Adventure' },
+            { label: 'Family' },
+            { label: 'Wellness' },
+            { label: 'Honeymoon' }
+          ].forEach(o => {
+            const c = document.createElement('span');
+            c.className = 'fp-chip' + (o.active ? ' is-active' : '');
+            const dot = document.createElement('span');
+            dot.className = 'fp-chip-dot';
+            c.appendChild(dot);
+            const t = document.createElement('span');
+            t.textContent = o.label;
+            c.appendChild(t);
+            wrap.appendChild(c);
+          });
+          return wrap;
+        }
+        case 'name': {
+          const row = document.createElement('div');
+          row.className = 'fp-row';
+          row.appendChild(inputShell({ placeholder: 'First name' }));
+          row.appendChild(inputShell({ placeholder: 'Last name' }));
+          return row;
+        }
+        case 'contact': {
+          const wrap = document.createElement('div');
+          wrap.style.display = 'flex';
+          wrap.style.flexDirection = 'column';
+          wrap.style.gap = '10px';
+          wrap.appendChild(inputShell({
+            iconPath: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+            placeholder: 'you@example.com'
+          }));
+          wrap.appendChild(inputShell({
+            iconPath: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+            placeholder: 'Phone (optional)'
+          }));
+          return wrap;
+        }
+        case 'notes': {
+          return inputShell({
+            placeholder: opts.placeholder || 'Dietary requirements, accessibility needs, special occasions…',
+            textarea: true
+          });
+        }
+        case 'consent': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-consent';
+          [
+            { checked: true,  text: 'I agree to be contacted about this enquiry and have read the privacy policy.' },
+            { checked: false, text: "I'd like to receive occasional travel inspiration and offers (optional)." }
+          ].forEach(c => {
+            const row = document.createElement('div');
+            row.className = 'fp-consent-row';
+            const cb = document.createElement('span');
+            cb.className = 'fp-checkbox' + (c.checked ? ' is-checked' : '');
+            row.appendChild(cb);
+            const t = document.createElement('span');
+            t.className = 'fp-consent-text';
+            t.textContent = c.text;
+            row.appendChild(t);
+            wrap.appendChild(row);
+          });
+          return wrap;
+        }
+        default: {
+          return inputShell({ placeholder: def.desc || '' });
+        }
+      }
+    }
+
+    // Helper: build an SVG element from a path string. Returns an SVG node.
+    function svgEl(pathHtml, size, fill) {
+      const ns = 'http://www.w3.org/2000/svg';
+      const s = document.createElementNS(ns, 'svg');
+      s.setAttribute('viewBox', '0 0 24 24');
+      s.setAttribute('fill', fill || 'none');
+      s.setAttribute('stroke', 'currentColor');
+      s.setAttribute('stroke-width', '2');
+      s.setAttribute('stroke-linecap', 'round');
+      s.setAttribute('stroke-linejoin', 'round');
+      s.setAttribute('width', String(size || 14));
+      s.setAttribute('height', String(size || 14));
+      s.setAttribute('aria-hidden', 'true');
+      s.innerHTML = pathHtml;
+      return s;
+    }
+
+    // Helper: convert a #rrggbb / #rgb hex to an rgba string at the given
+    // alpha. Falls back to the input untouched for non-hex values (rgb/rgba/
+    // named colours just won't get a soft variant — caller already handled
+    // the empty-string case).
+    function hexToSoft(hex, alpha) {
+      if (typeof hex !== 'string') return hex;
+      let h = hex.trim().replace(/^#/, '');
+      if (h.length === 3) h = h.split('').map(c => c + c).join('');
+      if (!/^[0-9a-fA-F]{6}$/.test(h)) return hex;
+      const r = parseInt(h.slice(0, 2), 16);
+      const g = parseInt(h.slice(2, 4), 16);
+      const b = parseInt(h.slice(4, 6), 16);
+      return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+    }
+
+    // Helper: build an input-style preview element
+    function inputShell({ iconPath, placeholder, textarea }) {
+      const w = document.createElement('div');
+      w.className = 'fp-input' + (textarea ? ' is-textarea' : '');
+      if (iconPath) {
+        const ic = svgEl(iconPath, 16);
+        ic.setAttribute('class', 'fp-icon');
+        w.appendChild(ic);
+      }
+      const p = document.createElement('span');
+      p.className = 'fp-placeholder';
+      p.textContent = placeholder || '';
+      w.appendChild(p);
+      return w;
     }
 
     function renderFieldsEmpty() {
