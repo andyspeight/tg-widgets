@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Travelify Offers — Connection Test</title>
+<title>Travelify Offers — Type Explorer</title>
 <style>
   :root {
     --bg: #f7f8fa;
@@ -13,8 +13,10 @@
     --muted: #6b7280;
     --accent: #1857c4;
     --accent-hover: #143e8e;
+    --accent-soft: #eff6ff;
     --success: #059669;
     --error: #dc2626;
+    --warn: #d97706;
   }
   * { box-sizing: border-box; }
   body {
@@ -29,6 +31,32 @@
   h1 { font-size: 24px; margin: 0 0 4px; }
   .subtitle { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
 
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tab:hover { background: var(--accent-soft); color: var(--accent); }
+  .tab.active { background: var(--accent); color: white; }
+
   .controls {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -41,6 +69,7 @@
     align-items: end;
   }
   .field { display: flex; flex-direction: column; gap: 4px; }
+  .field.hidden { display: none; }
   label { font-size: 12px; color: var(--muted); font-weight: 500; }
   input, select {
     padding: 8px 10px;
@@ -74,12 +103,14 @@
   .status.success { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
   .status.error { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
   .status.loading { background: #eff6ff; color: var(--accent); border: 1px solid #bfdbfe; }
+  .status.warn { background: #fffbeb; color: var(--warn); border: 1px solid #fde68a; }
 
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 16px;
   }
+
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -98,7 +129,7 @@
     background: #e5e7eb center/cover no-repeat;
     position: relative;
   }
-  .card-rating {
+  .card-badge {
     position: absolute;
     top: 8px;
     left: 8px;
@@ -108,6 +139,19 @@
     border-radius: 6px;
     font-size: 12px;
     font-weight: 500;
+  }
+  .card-type-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--accent);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   .card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
   .card-name { font-weight: 600; font-size: 15px; line-height: 1.3; }
@@ -130,6 +174,30 @@
   }
   .card-link:hover { text-decoration: underline; }
 
+  .flight-route {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--accent-soft);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .flight-route .iata {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 15px;
+  }
+  .flight-route .arrow { color: var(--muted); }
+  .flight-leg {
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .flight-leg:last-of-type { border-bottom: none; }
+  .flight-leg strong { color: var(--text); font-weight: 600; }
+
   details {
     margin-top: 32px;
     background: var(--surface);
@@ -137,7 +205,13 @@
     border-radius: 12px;
     padding: 12px 16px;
   }
-  details summary { cursor: pointer; font-weight: 500; font-size: 14px; }
+  details[open] { padding-bottom: 16px; }
+  details summary {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    user-select: none;
+  }
   pre {
     background: #1f2937;
     color: #d1d5db;
@@ -146,9 +220,9 @@
     overflow-x: auto;
     font-size: 12px;
     margin-top: 12px;
-    max-height: 400px;
+    max-height: 500px;
+    line-height: 1.4;
   }
-
   .empty {
     text-align: center;
     padding: 48px 16px;
@@ -161,38 +235,23 @@
 </head>
 <body>
 <div class="container">
-  <h1>Travelify Offers — Connection Test</h1>
-  <p class="subtitle">Direct browser call to the Travelify offers cache. Tweak the filters and hit Search.</p>
+  <h1>Travelify Offers — Type Explorer</h1>
+  <p class="subtitle">Switch between offer types to see what each returns. Raw response panel below shows the real data shape.</p>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-type="Accommodation">Accommodation</button>
+    <button class="tab" data-type="Flights">Flights</button>
+    <button class="tab" data-type="Packages">Packages</button>
+    <button class="tab" data-type="CarRental">Car Rental</button>
+    <button class="tab" data-type="Any">Any (mixed)</button>
+  </div>
 
   <div class="controls">
-    <div class="field">
-      <label for="destination">Destination</label>
-      <input id="destination" type="text" placeholder="e.g. ES, IT, GR" value="ES" />
-    </div>
-    <div class="field">
-      <label for="boardBasis">Board basis</label>
-      <select id="boardBasis">
-        <option value="">Any</option>
-        <option value="RoomOnly">Room Only</option>
-        <option value="BedAndBreakfast">B&amp;B</option>
-        <option value="HalfBoard">Half Board</option>
-        <option value="FullBoard">Full Board</option>
-        <option value="AllInclusive" selected>All Inclusive</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="budgetMax">Max budget (£)</label>
-      <input id="budgetMax" type="number" value="800" min="50" />
-    </div>
-    <div class="field">
-      <label for="ratingMin">Min star rating</label>
-      <input id="ratingMin" type="number" value="3" min="0" max="5" step="0.5" />
-    </div>
-    <div class="field">
+    <div class="field" data-show="all">
       <label for="maxOffers">Max offers</label>
       <input id="maxOffers" type="number" value="20" min="1" max="50" />
     </div>
-    <div class="field">
+    <div class="field" data-show="all">
       <label for="sort">Sort</label>
       <select id="sort">
         <option value="price:asc" selected>Price (low to high)</option>
@@ -200,32 +259,102 @@
         <option value="random">Random</option>
       </select>
     </div>
-    <div class="field">
+    <div class="field" data-show="all">
+      <label for="budgetMax">Max budget (£)</label>
+      <input id="budgetMax" type="number" value="2000" min="50" />
+    </div>
+    <div class="field" data-show="Flights,Packages">
+      <label for="origin">Origin (airport/country)</label>
+      <input id="origin" type="text" placeholder="e.g. LGW, LON, GB" value="LON" />
+    </div>
+    <div class="field" data-show="Accommodation,Flights,Packages,Any">
+      <label for="destination">Destination</label>
+      <input id="destination" type="text" placeholder="e.g. ES, IT, MAD" value="ES" />
+    </div>
+    <div class="field" data-show="Accommodation,Packages">
+      <label for="boardBasis">Board basis</label>
+      <select id="boardBasis">
+        <option value="">Any</option>
+        <option value="RoomOnly">Room Only</option>
+        <option value="BedAndBreakfast">B&amp;B</option>
+        <option value="HalfBoard">Half Board</option>
+        <option value="FullBoard">Full Board</option>
+        <option value="AllInclusive">All Inclusive</option>
+      </select>
+    </div>
+    <div class="field" data-show="Accommodation,Packages">
+      <label for="ratingMin">Min star rating</label>
+      <input id="ratingMin" type="number" value="3" min="0" max="5" step="0.5" />
+    </div>
+    <div class="field" data-show="Flights,Packages">
+      <label for="cabinClass">Cabin class</label>
+      <select id="cabinClass">
+        <option value="">Any</option>
+        <option value="Economy">Economy</option>
+        <option value="PremiumEconomy">Premium Economy</option>
+        <option value="Business">Business</option>
+        <option value="First">First</option>
+      </select>
+    </div>
+    <div class="field" data-show="Packages">
+      <label for="packageType">Package type</label>
+      <select id="packageType">
+        <option value="Any" selected>Any</option>
+        <option value="DynamicPackages">Dynamic</option>
+        <option value="PackageHolidays">Package Holiday</option>
+      </select>
+    </div>
+    <div class="field" data-show="Accommodation,Packages">
+      <label for="durationMax">Max nights</label>
+      <input id="durationMax" type="number" value="14" min="1" max="50" />
+    </div>
+    <div class="field" data-show="all">
       <button id="searchBtn">Search</button>
     </div>
   </div>
 
   <div id="status" class="status"></div>
+  <div id="typeBreakdown" class="status"></div>
 
   <div id="results" class="grid"></div>
 
-  <details>
-    <summary>Raw API response</summary>
+  <details open>
+    <summary>Raw API response (sample record per type + full data)</summary>
     <pre id="rawResponse">(no request made yet)</pre>
   </details>
 </div>
 
 <script>
-  // Travelify offers API — public endpoint, key safe to expose per Travelify devs
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
   const APP_ID = '250';
   const PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
 
   const $ = (id) => document.getElementById(id);
   const statusEl = $('status');
+  const breakdownEl = $('typeBreakdown');
   const resultsEl = $('results');
   const rawEl = $('rawResponse');
   const btn = $('searchBtn');
+
+  let currentType = 'Accommodation';
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentType = tab.dataset.type;
+      updateFieldVisibility();
+      search();
+    });
+  });
+
+  function updateFieldVisibility() {
+    document.querySelectorAll('.field[data-show]').forEach(f => {
+      const types = f.dataset.show;
+      const visible = types === 'all' || types.split(',').includes(currentType);
+      f.classList.toggle('hidden', !visible);
+    });
+  }
 
   function setStatus(message, type) {
     statusEl.textContent = message;
@@ -233,10 +362,8 @@
   }
 
   function buildPayload() {
-    const destination = $('destination').value.trim();
-    const board = $('boardBasis').value;
     const payload = {
-      type: 'Accommodation',
+      type: currentType,
       deduping: 'Aggressive',
       currency: 'GBP',
       language: 'en',
@@ -245,14 +372,194 @@
       rollingDates: true,
       DatesMin: 7,
       DatesMax: 90,
-      ratingMin: parseFloat($('ratingMin').value) || 0,
-      budgetMax: parseInt($('budgetMax').value) || 9999,
       sort: $('sort').value,
       pricingByType: 'Person',
     };
-    if (destination) payload.destinations = [destination];
-    if (board) payload.boardBases = [board];
+    const budgetMax = parseInt($('budgetMax').value);
+    if (budgetMax) payload.budgetMax = budgetMax;
+
+    if (currentType === 'Accommodation' || currentType === 'Packages') {
+      const board = $('boardBasis').value;
+      const rating = parseFloat($('ratingMin').value);
+      const dest = $('destination').value.trim();
+      const durationMax = parseInt($('durationMax').value);
+      if (board) payload.boardBases = [board];
+      if (rating) payload.ratingMin = rating;
+      if (dest) payload.destinations = [dest];
+      if (durationMax) payload.durationMax = durationMax;
+    }
+    if (currentType === 'Flights' || currentType === 'Packages') {
+      const origin = $('origin').value.trim();
+      const cabin = $('cabinClass').value;
+      if (origin) payload.origins = [origin];
+      if (cabin) payload.cabinClasses = [cabin];
+    }
+    if (currentType === 'Flights') {
+      const dest = $('destination').value.trim();
+      if (dest) payload.destinations = [dest];
+    }
+    if (currentType === 'Packages') {
+      const pt = $('packageType').value;
+      if (pt && pt !== 'Any') payload.packageType = pt;
+    }
+    if (currentType === 'Any') {
+      const dest = $('destination').value.trim();
+      if (dest) payload.destinations = [dest];
+    }
     return payload;
+  }
+
+  function renderAccommodationCard(o) {
+    const acc = o.accommodation || {};
+    const dest = acc.destination || {};
+    const img = acc.image?.url || '';
+    const rating = acc.rating ? '★'.repeat(Math.round(acc.rating)) : '';
+    const nights = acc.nights ? `${acc.nights} night${acc.nights === 1 ? '' : 's'}` : '';
+    const board = acc.boardBasis ? formatEnum(acc.boardBasis) : '';
+    const meta = [nights, board].filter(Boolean).join(' · ');
+    return `
+      <div class="card">
+        <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
+          ${rating ? `<div class="card-badge">${rating}</div>` : ''}
+          <div class="card-type-badge">Hotel</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">${escapeHtml(acc.name || 'Unnamed property')}</div>
+          <div class="card-location">${escapeHtml(dest.name || '')}${dest.countryCode ? ', ' + escapeHtml(dest.countryCode) : ''}</div>
+          ${meta ? `<div class="card-meta">${meta}</div>` : ''}
+        </div>
+        ${renderPriceFooter(o)}
+      </div>
+    `;
+  }
+
+  function renderFlightCard(o) {
+    const ob = o.outbound || o.flight?.outbound || {};
+    const ib = o.inbound || o.flight?.inbound || null;
+    const flight = o.flight || {};
+    const fromCode = ob.originCode || ob.origin?.code || ob.departureAirport?.code || flight.originCode || '???';
+    const toCode = ob.destinationCode || ob.destination?.code || ob.arrivalAirport?.code || flight.destinationCode || '???';
+    const carrier = ob.carrierCode || ob.carrier?.code || flight.carrierCode || '';
+    const carrierName = ob.carrierName || ob.carrier?.name || flight.carrierName || carrier;
+    const cabin = ob.cabinClass || flight.cabinClass || '';
+    const departTime = ob.departureTime || ob.departureDate || ob.departDate || '';
+    const returnTime = ib ? (ib.departureTime || ib.departureDate || ib.departDate || '') : '';
+    const tripType = ib ? 'Return' : 'One-way';
+    return `
+      <div class="card">
+        <div class="flight-route">
+          <span class="iata">${escapeHtml(fromCode)}</span>
+          <span class="arrow">${ib ? '⇌' : '→'}</span>
+          <span class="iata">${escapeHtml(toCode)}</span>
+          <span style="margin-left:auto; font-size:11px; color:var(--muted); text-transform:uppercase; font-weight:600;">${tripType}</span>
+        </div>
+        <div class="flight-leg">
+          <strong>Outbound</strong> · ${escapeHtml(formatDate(departTime))}
+          ${carrierName ? ` · ${escapeHtml(carrierName)}` : ''}
+        </div>
+        ${ib ? `
+          <div class="flight-leg">
+            <strong>Return</strong> · ${escapeHtml(formatDate(returnTime))}
+          </div>
+        ` : ''}
+        <div class="card-body">
+          ${cabin ? `<div class="card-meta">${escapeHtml(formatEnum(cabin))} class</div>` : ''}
+          <div class="card-meta" style="font-size:11px; opacity:0.7;">Adults: ${o.adults || 1}${o.children ? ', Children: ' + o.children : ''}</div>
+        </div>
+        ${renderPriceFooter(o)}
+      </div>
+    `;
+  }
+
+  function renderPackageCard(o) {
+    const pkg = o.package || {};
+    const acc = pkg.accommodation || o.accommodation || {};
+    const ob = pkg.outbound || o.outbound || {};
+    const dest = acc.destination || pkg.destination || {};
+    const img = acc.image?.url || pkg.image?.url || '';
+    const rating = acc.rating ? '★'.repeat(Math.round(acc.rating)) : '';
+    const nights = acc.nights || pkg.nights;
+    const board = acc.boardBasis || pkg.boardBasis;
+    const fromCode = ob.originCode || ob.origin?.code || '???';
+    const meta = [
+      nights ? `${nights} nights` : '',
+      board ? formatEnum(board) : '',
+      fromCode !== '???' ? `from ${fromCode}` : '',
+    ].filter(Boolean).join(' · ');
+    return `
+      <div class="card">
+        <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
+          ${rating ? `<div class="card-badge">${rating}</div>` : ''}
+          <div class="card-type-badge">Package</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">${escapeHtml(acc.name || pkg.name || 'Unnamed package')}</div>
+          <div class="card-location">${escapeHtml(dest.name || '')}${dest.countryCode ? ', ' + escapeHtml(dest.countryCode) : ''}</div>
+          ${meta ? `<div class="card-meta">${meta}</div>` : ''}
+        </div>
+        ${renderPriceFooter(o)}
+      </div>
+    `;
+  }
+
+  function renderCarRentalCard(o) {
+    const car = o.carRental || o.car || o.vehicle || o.rental || {};
+    const pickup = car.pickup || car.pickupLocation || car.location || {};
+    const vehicle = car.vehicle || car;
+    const img = vehicle.image?.url || car.image?.url || '';
+    const name = vehicle.name || vehicle.model || car.name || 'Car rental';
+    const company = car.supplier || car.company || vehicle.company || '';
+    const days = car.days || car.duration || '';
+    const meta = [
+      company ? escapeHtml(company) : '',
+      days ? `${days} day${days === 1 ? '' : 's'}` : '',
+    ].filter(Boolean).join(' · ');
+    return `
+      <div class="card">
+        ${img ? `
+          <div class="card-image" style="background-image: url('${escapeHtml(img)}'); aspect-ratio: 16/9;">
+            <div class="card-type-badge">Car</div>
+          </div>
+        ` : `
+          <div class="card-image" style="background: linear-gradient(135deg, #e5e7eb, #d1d5db); aspect-ratio: 16/9; display:flex; align-items:center; justify-content:center; font-size:40px;">
+            🚗
+            <div class="card-type-badge">Car</div>
+          </div>
+        `}
+        <div class="card-body">
+          <div class="card-name">${escapeHtml(name)}</div>
+          ${pickup.name ? `<div class="card-location">${escapeHtml(pickup.name)}</div>` : ''}
+          ${meta ? `<div class="card-meta">${meta}</div>` : ''}
+        </div>
+        ${renderPriceFooter(o)}
+      </div>
+    `;
+  }
+
+  function renderUnknownCard(o) {
+    return `
+      <div class="card">
+        <div class="card-body" style="padding:20px;">
+          <div class="card-name">Unknown offer type: ${escapeHtml(o.type || 'no type field')}</div>
+          <div class="card-meta">See raw response below for shape.</div>
+        </div>
+        ${renderPriceFooter(o)}
+      </div>
+    `;
+  }
+
+  function renderPriceFooter(o) {
+    const price = o.formattedPPPrice || o.formattedPrice || '';
+    const sub = o.formattedPPPrice ? 'per person' : (o.formattedPrice ? 'total' : '');
+    return `
+      <div class="card-footer">
+        <div>
+          <div class="card-price">${escapeHtml(price)}</div>
+          ${sub ? `<div class="card-price-sub">${sub}</div>` : ''}
+        </div>
+        <a class="card-link" href="${escapeHtml(o.url || '#')}" target="_blank" rel="noopener">View deal →</a>
+      </div>
+    `;
   }
 
   function renderOffers(offers) {
@@ -260,40 +567,31 @@
       resultsEl.innerHTML = '<div class="empty">No offers matched. Try widening the filters.</div>';
       return;
     }
-
     resultsEl.innerHTML = offers.map(o => {
-      const acc = o.accommodation || {};
-      const dest = acc.destination || {};
-      const img = acc.image?.url || '';
-      const rating = acc.rating ? '★'.repeat(Math.round(acc.rating)) : '';
-      const nights = acc.nights ? `${acc.nights} night${acc.nights === 1 ? '' : 's'}` : '';
-      const board = acc.boardBasis ? formatBoard(acc.boardBasis) : '';
-      const meta = [nights, board].filter(Boolean).join(' · ');
-
-      return `
-        <div class="card">
-          <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
-            ${rating ? `<div class="card-rating">${rating}</div>` : ''}
-          </div>
-          <div class="card-body">
-            <div class="card-name">${escapeHtml(acc.name || 'Unnamed property')}</div>
-            <div class="card-location">${escapeHtml(dest.name || '')}${dest.countryCode ? ', ' + escapeHtml(dest.countryCode) : ''}</div>
-            ${meta ? `<div class="card-meta">${meta}</div>` : ''}
-          </div>
-          <div class="card-footer">
-            <div>
-              <div class="card-price">${escapeHtml(o.formattedPPPrice || o.formattedPrice || '')}</div>
-              <div class="card-price-sub">${o.formattedPPPrice ? 'per person' : 'total'}</div>
-            </div>
-            <a class="card-link" href="${escapeHtml(o.url || '#')}" target="_blank" rel="noopener">View deal →</a>
-          </div>
-        </div>
-      `;
+      switch (o.type) {
+        case 'Accommodation': return renderAccommodationCard(o);
+        case 'Flights':
+        case 'Flight':       return renderFlightCard(o);
+        case 'Packages':
+        case 'Package':      return renderPackageCard(o);
+        case 'CarRental':    return renderCarRentalCard(o);
+        default:             return renderUnknownCard(o);
+      }
     }).join('');
   }
 
-  function formatBoard(b) {
-    return b.replace(/([A-Z])/g, ' $1').trim();
+  function formatEnum(s) {
+    if (!s) return '';
+    return String(s).replace(/([A-Z])/g, ' $1').trim();
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch { return iso; }
   }
 
   function escapeHtml(s) {
@@ -303,9 +601,34 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
+  function buildBreakdown(offers) {
+    if (!offers || offers.length === 0) return '';
+    const counts = {};
+    offers.forEach(o => {
+      const t = o.type || 'unknown';
+      counts[t] = (counts[t] || 0) + 1;
+    });
+    return Object.entries(counts).map(([t, n]) => `${n} ${t}`).join(' · ');
+  }
+
+  function buildRawSample(offers) {
+    if (!offers || offers.length === 0) return '(empty data array)';
+    const samples = {};
+    offers.forEach(o => {
+      const t = o.type || 'unknown';
+      if (!samples[t]) samples[t] = o;
+    });
+    return JSON.stringify({
+      _summary: `${offers.length} total offers, ${Object.keys(samples).length} distinct type(s)`,
+      _sampleRecordPerType: samples,
+      _allOffers: offers,
+    }, null, 2);
+  }
+
   async function search() {
     btn.disabled = true;
-    setStatus('Fetching offers...', 'loading');
+    setStatus(`Fetching ${currentType} offers...`, 'loading');
+    breakdownEl.className = 'status';
     resultsEl.innerHTML = '';
 
     const payload = buildPayload();
@@ -320,16 +643,25 @@
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      rawEl.textContent = JSON.stringify(data, null, 2);
+      rawEl.textContent = buildRawSample(data.data || []);
 
       if (!data.success) {
         setStatus(`API error: ${data.error || 'Unknown error'}`, 'error');
+        rawEl.textContent = JSON.stringify(data, null, 2);
         return;
       }
 
-      const count = data.data?.length || 0;
-      setStatus(`Got ${count} offer${count === 1 ? '' : 's'} from the cache.`, 'success');
-      renderOffers(data.data);
+      const offers = data.data || [];
+      const count = offers.length;
+      setStatus(`Got ${count} offer${count === 1 ? '' : 's'}.`, 'success');
+
+      const breakdown = buildBreakdown(offers);
+      if (breakdown && currentType === 'Any') {
+        breakdownEl.textContent = `Type breakdown: ${breakdown}`;
+        breakdownEl.className = 'status show warn';
+      }
+
+      renderOffers(offers);
     } catch (err) {
       setStatus(`Request failed: ${err.message}`, 'error');
       rawEl.textContent = err.stack || err.message;
@@ -340,7 +672,7 @@
 
   btn.addEventListener('click', search);
 
-  // Run a search on load so the page isn't empty
+  updateFieldVisibility();
   search();
 </script>
 </body>
