@@ -1,4 +1,3 @@
-
 /**
  * Widget Config API (Hardened)
  * GET  /api/widget-config?id=WIDGET_ID  → public, returns config JSON (cached)
@@ -29,6 +28,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Enquiry Form',
   'My Booking',
   'Text FX',
+  'Logo Showcase',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
