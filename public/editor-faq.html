@@ -1384,12 +1384,22 @@
         </div>
       `;
 
+      // Typography — shell font picker mounts into #fontPickerMount after render
+      const typographyBody = `
+        <div class="field">
+          <label class="field-label">Font family</label>
+          <div id="fontPickerMount"></div>
+          <p class="field-hint" style="margin-top:6px">Applied to all text in the widget.</p>
+        </div>
+      `;
+
       return `
-        ${section('layout',   'Layout',    layoutBody)}
-        ${section('theme',    'Theme',     themeBody)}
-        ${section('colours',  'Colours',   coloursBody)}
-        ${section('shape',    'Shape',     shapeBody)}
-        ${section('heading',  'Heading',   headingBody)}
+        ${section('layout',     'Layout',      layoutBody)}
+        ${section('theme',      'Theme',       themeBody)}
+        ${section('colours',    'Colours',     coloursBody)}
+        ${section('shape',      'Shape',       shapeBody)}
+        ${section('typography', 'Typography',  typographyBody)}
+        ${section('heading',    'Heading',     headingBody)}
       `;
     }
 
@@ -1829,6 +1839,23 @@
         });
         renderTabBody();
       });
+
+      // Font picker — only present on the Design tab. Re-mount on every render
+      // because the sidebar HTML gets blown away each time renderTabBody runs.
+      mountFontPickerShell();
+    }
+
+    function mountFontPickerShell() {
+      const mount = document.getElementById('fontPickerMount');
+      if (!mount || !window.tgse || typeof window.tgse.mountFontPicker !== 'function') return;
+      window.tgse.mountFontPicker(
+        mount,
+        state.config.fontFamily || 'Inter',
+        (font) => {
+          mutate(c => { c.fontFamily = font; });
+          if (typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+        }
+      );
     }
 
     /* ============================ QUESTION EDITOR ============================ */
