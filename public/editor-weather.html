@@ -1348,10 +1348,12 @@ ${escHtml(code)}
        ============================================================ */
     async function loadExisting(id) {
       try {
-        // cache: 'no-store' bypasses both browser and CDN cache.
-        // The GET endpoint sets s-maxage=300 (5min CDN) for public widget
-        // embeds, but the editor needs fresh data after every save.
-        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id), { cache: 'no-store' });
+        // Cache-bust with a fresh query param. cache: 'no-store' alone only
+        // controls the browser cache — the Vercel CDN serves cached responses
+        // by URL, so we need a unique URL per load to actually get fresh data
+        // after a save. Public widget embeds keep their cached path.
+        const bust = '&_=' + Date.now();
+        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id) + bust, { cache: 'no-store' });
         if (!res.ok) throw new Error('Could not load widget');
         const data = await res.json();
         // API returns { config, name, ...config } — config is the canonical
