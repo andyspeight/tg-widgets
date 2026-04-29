@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="/shared/logo-picker.css" />
+<script src="/shared/logo-picker.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -652,9 +654,13 @@
           </div>
           <div class="section-body">
             <div class="logo-list" id="logo-list"></div>
-            <button class="add-row-btn" id="add-logo">
+            <button class="add-row-btn" id="pick-logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              Pick from library
+            </button>
+            <button class="add-row-btn" id="add-logo" style="margin-top:6px;background:transparent;color:var(--tg-text-2)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add logo
+              Add blank logo
             </button>
             <div class="action-grid">
               <button class="action-btn" id="csv-upload">
@@ -1534,6 +1540,37 @@ function bindEvents() {
     state.openLogoIdx = state.config.logos.length - 1;
     pushHistory();
     syncUIFromState();
+  });
+
+  // Pick from Travelgenix Logo Library
+  $('#pick-logo').addEventListener('click', () => {
+    if (typeof window.LogoPicker === 'undefined') {
+      alert('Logo picker is still loading. Try again in a moment.');
+      return;
+    }
+    window.LogoPicker.open({
+      onSelect: (brand) => {
+        // Prefer SVG, fall back to PNG-Transparent, then anything
+        const svg = (brand.assets || []).find(a => a.type === 'SVG');
+        const pngT = (brand.assets || []).find(a => a.type === 'PNG-Transparent');
+        const imageUrl = (svg && svg.url) || (pngT && pngT.url) || brand.preferredUrl || '';
+
+        const websiteUrl = brand.domain ? `https://${brand.domain}` : '';
+
+        state.config.logos.push({
+          name: brand.name,
+          image: imageUrl,
+          url: websiteUrl,
+          group: brand.category || '',
+          featured: false,
+          // Stash the domain so the runtime can resolve to latest URL on render.
+          tgDomain: brand.domain || ''
+        });
+        state.openLogoIdx = state.config.logos.length - 1;
+        pushHistory();
+        syncUIFromState();
+      }
+    });
   });
 
   // CSV
