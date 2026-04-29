@@ -1568,6 +1568,7 @@
         brand: { name: '' },
         colors: {},
         radius: 12,
+        fontFamily: '',
         support: {},
         display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showLocalFees: true },
         widgetId: c?.widgetId || null,
@@ -1606,6 +1607,13 @@
         '--tgm-radius-xl': Math.round(radius * 1.33) + 'px',
         '--tgm-radius-2xl': Math.round(radius * 1.66) + 'px',
       };
+      // When fontFamily is set, override the host's hardcoded Inter stack.
+      // .tgm-root inherits from the shadow host; setting font-family on the root
+      // (with !important to defeat the :host rule) propagates everywhere via
+      // the font-family: inherit on inputs/buttons/etc.
+      if (this.c.fontFamily && typeof this.c.fontFamily === 'string') {
+        overrides['font-family'] = "'" + this.c.fontFamily.replace(/'/g, "") + "', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+      }
       return Object.entries(overrides)
         .map(([k, v]) => k + ':' + v + ';')
         .join('');
