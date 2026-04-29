@@ -9,10 +9,6 @@
     "api/booking-email.js": {
       "memory": 512,
       "maxDuration": 30
-    },
-    "api/offers.js": {
-      "memory": 256,
-      "maxDuration": 15
     }
   },
   "rewrites": [
