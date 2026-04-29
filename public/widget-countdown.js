@@ -652,7 +652,8 @@
         ctaBg: '',     // empty = use brand
         ctaText: '#FFFFFF'
       },
-      radius: 16
+      radius: 16,
+      fontFamily: ''   // empty = use Inter
     };
   }
 
@@ -779,6 +780,12 @@
       if (typeof c.radius === 'number') {
         root.style.setProperty('--tgcd-radius', c.radius + 'px');
         root.style.setProperty('--tgcd-radius-sm', Math.max(4, c.radius - 6) + 'px');
+      }
+      // Font override — when fontFamily is set, override the host's hardcoded
+      // Inter stack. Setting font-family on the root cascades to all descendants
+      // and beats the :host rule because root is more specific.
+      if (c.fontFamily && typeof c.fontFamily === 'string') {
+        root.style.fontFamily = "'" + c.fontFamily.replace(/'/g, '') + "', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       }
       // Wow flags — opt-in CSS classes on the root
       const wow = c.wow || {};
