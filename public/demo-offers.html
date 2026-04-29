@@ -1,1030 +1,1740 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Travelify Offers — Type Explorer</title>
-<style>
-  :root {
-    --bg: #f7f8fa;
-    --surface: #ffffff;
-    --border: #e5e7eb;
-    --text: #111827;
-    --muted: #6b7280;
-    --accent: #1857c4;
-    --accent-hover: #143e8e;
-    --accent-soft: #eff6ff;
-    --success: #059669;
-    --success-soft: #d1fae5;
-    --error: #dc2626;
-    --warn: #d97706;
-    --warn-soft: #fef3c7;
-    --strike: #9ca3af;
-    --package-holiday: #059669;
-    --package-dynamic: #1857c4;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 24px;
-    line-height: 1.5;
-  }
-  .container { max-width: 1200px; margin: 0 auto; }
-  h1 { font-size: 24px; margin: 0 0 4px; }
-  .subtitle { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Weather Widget Editor · Travelgenix</title>
 
-  .tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 4px;
-    flex-wrap: wrap;
-  }
-  .tab {
-    flex: 1;
-    min-width: 120px;
-    padding: 10px 14px;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-  }
-  .tab:hover { background: var(--accent-soft); color: var(--accent); }
-  .tab.active { background: var(--accent); color: white; }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/editor-shell.css">
 
-  .controls {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    align-items: end;
-  }
-  .field { display: flex; flex-direction: column; gap: 4px; }
-  .field.hidden { display: none; }
-  .field-hint { font-size: 10px; color: var(--muted); }
-  .field.dedupe-field {
-    grid-column: span 2;
-    background: var(--warn-soft);
-    border-radius: 8px;
-    padding: 8px 10px;
-    margin: -4px;
-  }
-  .field.dedupe-field label { color: var(--warn); font-weight: 600; }
-  label { font-size: 12px; color: var(--muted); font-weight: 500; }
-  input, select {
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-  }
-  button {
-    padding: 9px 16px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  button:hover { background: var(--accent-hover); }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  button.secondary { background: white; color: var(--accent); border: 1px solid var(--accent); }
-  button.secondary:hover { background: var(--accent-soft); }
-  button.diagnostic { background: var(--warn); color: white; }
-  button.diagnostic:hover { background: #b45309; }
+  <style>
+    /* ============================================================
+       Editor chrome — matches the other editors in the suite
+       ============================================================ */
+    :root {
+      --bg: #F8FAFC;
+      --panel: #FFFFFF;
+      --panel-2: #F8FAFC;
+      --ink: #0F172A;
+      --sub: #475569;
+      --muted: #94A3B8;
+      --border: #E2E8F0;
+      --border-strong: #CBD5E1;
+      --hover: #F1F5F9;
+      --brand: #1B2B5B;
+      --brand-soft: rgba(27,43,91,.10);
+      --accent: #00B4D8;
+      --accent-soft: rgba(0,180,216,.12);
+      --success: #10B981;
+      --success-soft: rgba(16,185,129,.1);
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --radius-sm: 6px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
+      --shadow-sm: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+      --shadow-md: 0 4px 12px rgba(15,23,42,.08), 0 2px 4px rgba(15,23,42,.04);
+      --shadow-lg: 0 10px 24px rgba(15,23,42,.12), 0 4px 8px rgba(15,23,42,.06);
+      --shadow-xl: 0 24px 48px rgba(15,23,42,.14), 0 8px 16px rgba(15,23,42,.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--panel-2);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    [hidden] { display: none !important; }
 
-  .action-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .editor { display: grid; grid-template-columns: 380px 1fr; height: 100vh; }
+    .sidebar { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; }
+    .preview { background: var(--panel-2); display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 
-  .status {
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    display: none;
-  }
-  .status.show { display: block; }
-  .status.success { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
-  .status.error { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
-  .status.loading { background: #eff6ff; color: var(--accent); border: 1px solid #bfdbfe; }
-  .status.warn { background: #fffbeb; color: var(--warn); border: 1px solid #fde68a; }
+    /* ---- topbar ---- */
+    .topbar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .logo {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #fff; box-shadow: var(--shadow-sm); flex-shrink: 0;
+    }
+    .topbar-ident { min-width: 0; flex-shrink: 1; }
+    .topbar-title { font-weight: 700; font-size: 14px; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topbar-sub { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .topbar-spacer { flex: 1; }
+    .icon-btn {
+      height: 32px; padding: 0 10px; border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--panel); color: var(--sub);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s ease; text-decoration: none;
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .icon-btn:hover { border-color: var(--border-strong); color: var(--ink); background: var(--hover); }
+    .icon-btn svg { flex-shrink: 0; }
+    .icon-btn.icon-only { width: 32px; padding: 0; justify-content: center; }
 
-  .dedupe-stats {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--warn);
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    font-size: 13px;
-    display: none;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .dedupe-stats.show { display: flex; }
-  .dedupe-stat { display: flex; flex-direction: column; gap: 2px; }
-  .dedupe-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-  .dedupe-stat-value { font-size: 18px; font-weight: 700; color: var(--text); }
-  .dedupe-stat-value.collapsed { color: var(--warn); }
+    /* ---- name row ---- */
+    .name-row { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--panel-2); }
+    .name-input {
+      flex: 1; height: 36px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 7px;
+      background: var(--panel); font-size: 13px; font-weight: 500;
+      outline: none; transition: all .15s ease; min-width: 0;
+    }
+    .name-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .save-btn {
+      height: 36px; padding: 0 14px; border: 0; border-radius: 7px;
+      background: var(--brand); color: #fff;
+      font-weight: 600; font-size: 13px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s ease; white-space: nowrap;
+    }
+    .save-btn:hover { background: color-mix(in srgb, var(--brand) 88%, #000); }
+    .save-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .save-btn.is-dirty { background: var(--warning); }
+    .save-btn.is-dirty:hover { background: color-mix(in srgb, var(--warning) 88%, #000); }
+    .save-btn.is-saved { background: var(--success); pointer-events: none; }
 
-  /* Diagnostic panel */
-  .diag-panel { background: var(--surface); border: 2px solid var(--warn); border-radius: 12px; padding: 16px; margin-bottom: 24px; display: none; }
-  .diag-panel.show { display: block; }
-  .diag-title { font-size: 16px; font-weight: 700; color: var(--warn); margin: 0 0 4px; }
-  .diag-subtitle { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
-  .diag-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; align-items: center; }
-  .diag-row:last-child { border-bottom: none; }
-  .diag-label { color: var(--text); }
-  .diag-label-muted { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .diag-count { font-weight: 700; font-size: 18px; color: var(--text); min-width: 50px; text-align: right; }
-  .diag-count.pending { color: var(--muted); font-weight: 400; font-size: 14px; }
-  .diag-count.zero { color: var(--error); }
-  .diag-count.same { color: var(--muted); }
-  .diag-count.better { color: var(--success); }
-  .diag-delta { font-size: 11px; color: var(--muted); min-width: 60px; text-align: right; }
-  .diag-delta.positive { color: var(--success); font-weight: 600; }
-  .diag-conclusion { margin-top: 16px; padding: 12px; background: var(--warn-soft); border-radius: 8px; font-size: 13px; line-height: 1.5; }
+    /* ---- tabs ---- */
+    .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid var(--border); background: var(--panel); }
+    .tab-btn {
+      height: 42px; border: 0; background: transparent;
+      color: var(--sub); font-size: 13px; font-weight: 600; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all .15s ease;
+    }
+    .tab-btn:hover { color: var(--ink); background: var(--hover); }
+    .tab-btn[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); background: var(--brand-soft); }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.15s, box-shadow 0.15s; position: relative; }
-  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.08); }
-  .card-image { aspect-ratio: 16 / 10; background: #e5e7eb center/cover no-repeat; position: relative; }
-  .card-badge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; }
-  .card-type-badge { position: absolute; top: 8px; right: 8px; background: var(--accent); color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-  .card-type-badge.package-holiday { background: var(--package-holiday); }
-  .card-type-badge.package-dynamic { background: var(--package-dynamic); }
-  .card-pill { position: absolute; bottom: 8px; left: 8px; background: rgba(255,255,255,0.95); color: var(--text); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-  .card-pill.deal { background: var(--success); color: white; }
-  .card-variants {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: var(--accent);
-    color: white;
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-  }
-  .card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
-  .card-name { font-weight: 600; font-size: 15px; line-height: 1.3; }
-  .card-location { font-size: 13px; color: var(--muted); }
-  .card-meta { font-size: 12px; color: var(--muted); }
-  .card-footer { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
-  .card-price-block { display: flex; flex-direction: column; gap: 2px; }
-  .card-price { font-weight: 700; font-size: 20px; color: var(--text); line-height: 1; }
-  .card-price-was { font-size: 12px; color: var(--strike); text-decoration: line-through; }
-  .card-price-sub { font-size: 11px; color: var(--muted); font-weight: normal; }
-  .card-link { color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 500; white-space: nowrap; }
-  .card-link:hover { text-decoration: underline; }
+    /* ---- sidebar body ---- */
+    .sidebar-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
+    .sidebar-body::-webkit-scrollbar { width: 10px; }
+    .sidebar-body::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; border: 2px solid var(--panel); }
+    .sidebar-body::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
 
-  .flight-route { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 14px 16px 12px; background: var(--accent-soft); border-bottom: 1px solid var(--border); }
-  .flight-airport { display: flex; flex-direction: column; gap: 2px; }
-  .flight-airport.right { text-align: right; }
-  .flight-iata { font-weight: 800; color: var(--accent); font-size: 22px; letter-spacing: 1px; line-height: 1; }
-  .flight-airport-name { font-size: 11px; color: var(--muted); line-height: 1.2; }
-  .flight-arrow { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--muted); }
-  .flight-arrow-line { width: 40px; height: 1px; background: var(--accent); position: relative; }
-  .flight-arrow-line::after { content: '✈'; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); background: var(--accent-soft); color: var(--accent); padding: 0 4px; font-size: 14px; }
-  .flight-stops-label { font-size: 10px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-  .flight-duration { text-align: center; font-size: 11px; color: var(--muted); padding: 6px 16px 0; background: var(--accent-soft); border-bottom: 1px solid var(--border); }
-  .flight-detail { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
-  .flight-detail:last-of-type { border-bottom: none; }
-  .flight-detail-label { font-weight: 600; color: var(--text); min-width: 60px; }
-  .flight-detail-value { color: var(--muted); }
-  .flight-carrier-row { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border); background: #fafbfc; font-size: 13px; }
-  .flight-carrier-code { background: var(--text); color: white; font-weight: 700; padding: 3px 7px; border-radius: 4px; font-size: 11px; letter-spacing: 1px; }
-  .flight-carrier-name { font-weight: 600; }
-  .flight-pax { font-size: 11px; color: var(--muted); margin-left: auto; }
+    /* ---- section ---- */
+    .section { border-bottom: 1px solid var(--border); }
+    .section-head {
+      width: 100%; display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px; border: 0; background: transparent;
+      color: var(--ink); font-size: 12px; font-weight: 700;
+      letter-spacing: .04em; text-transform: uppercase;
+      cursor: pointer; transition: all .15s ease;
+    }
+    .section-head:hover { background: var(--hover); }
+    .section-head-chev { margin-left: auto; transition: transform .2s ease; color: var(--muted); }
+    .section[data-open="true"] .section-head-chev { transform: rotate(180deg); }
+    .section-body { padding: 4px 16px 16px; display: none; }
+    .section[data-open="true"] .section-body { display: block; }
 
-  .package-summary { padding: 12px 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: #fafbfc; display: flex; flex-direction: column; gap: 6px; }
-  .package-line { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); line-height: 1.4; }
-  .package-icon { flex: 0 0 18px; color: var(--accent); font-size: 14px; text-align: center; }
-  .package-operator { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--success-soft); border-bottom: 1px solid var(--border); font-size: 12px; }
-  .package-operator-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--success); font-weight: 700; }
-  .package-operator-name { font-weight: 600; color: var(--text); }
-  .package-operator-atol { margin-left: auto; background: var(--success); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; }
+    /* ---- form controls ---- */
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field-label { display: block; font-size: 11px; font-weight: 600; color: var(--sub); margin-bottom: 6px; letter-spacing: .02em; }
+    .field-help { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .input, .textarea, .select {
+      width: 100%; padding: 8px 10px; font-size: 13px;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--panel); color: var(--ink); outline: none;
+      transition: all .15s ease;
+    }
+    .input:focus, .textarea:focus, .select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .textarea { resize: vertical; min-height: 60px; font-family: inherit; line-height: 1.5; }
 
-  details { margin-top: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; }
-  details[open] { padding-bottom: 16px; }
-  details summary { cursor: pointer; font-weight: 500; font-size: 14px; user-select: none; }
-  pre { background: #1f2937; color: #d1d5db; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 12px; margin-top: 12px; max-height: 400px; line-height: 1.4; }
-  .empty { text-align: center; padding: 48px 16px; color: var(--muted); background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; }
-</style>
+    /* colour pickers */
+    .colour-row { display: flex; gap: 8px; align-items: center; }
+    .colour-swatch {
+      width: 34px; height: 34px; border-radius: 6px;
+      border: 1px solid var(--border); cursor: pointer; overflow: hidden;
+      position: relative; background: #fff;
+    }
+    .colour-swatch input[type="color"] {
+      position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
+      border: 0; padding: 0; cursor: pointer; opacity: 1;
+    }
+    .colour-hex {
+      flex: 1; padding: 0 10px; height: 34px;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--panel); font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+      outline: none;
+    }
+    .colour-hex:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+
+    /* presets */
+    .presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .preset {
+      height: 36px; border-radius: 6px; border: 2px solid transparent;
+      cursor: pointer; overflow: hidden; position: relative;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .preset:hover { transform: scale(1.04); border-color: var(--border-strong); }
+    .preset[aria-pressed="true"] { border-color: var(--ink); }
+    .preset-inner { width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+
+    /* slider */
+    .slider-row { display: flex; align-items: center; gap: 10px; }
+    .slider { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--brand); border: 2px solid var(--panel); box-shadow: var(--shadow-sm); cursor: pointer;
+    }
+    .slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brand); border: 2px solid var(--panel); box-shadow: var(--shadow-sm); cursor: pointer; border: 0; }
+    .slider-value { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--sub); font-weight: 600; min-width: 34px; text-align: right; }
+
+    /* segmented */
+    .segmented { display: inline-flex; padding: 3px; background: var(--hover); border-radius: 7px; gap: 2px; width: 100%; }
+    .segmented button {
+      flex: 1; border: 0; background: transparent; padding: 6px 10px;
+      font-size: 12px; font-weight: 600; color: var(--sub);
+      border-radius: 5px; cursor: pointer; transition: all .15s ease;
+    }
+    .segmented button:hover { color: var(--ink); }
+    .segmented button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow-xs); }
+
+    /* toggle */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+    .toggle-row + .toggle-row { border-top: 1px solid var(--border); }
+    .toggle-label { font-size: 13px; color: var(--ink); font-weight: 500; }
+    .toggle-help { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .toggle {
+      position: relative; width: 36px; height: 20px; flex-shrink: 0;
+      background: var(--border); border-radius: 999px; cursor: pointer;
+      transition: background .2s ease;
+    }
+    .toggle::after {
+      content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+      background: #fff; border-radius: 50%; box-shadow: var(--shadow-sm);
+      transition: transform .2s ease;
+    }
+    .toggle[aria-checked="true"] { background: var(--brand); }
+    .toggle[aria-checked="true"]::after { transform: translateX(16px); }
+
+    /* destination picker */
+    .picker-wrap { position: relative; }
+    .picker-results {
+      position: absolute; top: 100%; left: 0; right: 0;
+      margin-top: 4px; max-height: 280px; overflow-y: auto;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; box-shadow: var(--shadow-md);
+      z-index: 10;
+    }
+    .picker-result {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .picker-result:last-child { border-bottom: 0; }
+    .picker-result:hover { background: var(--hover); }
+    .picker-result-name { font-weight: 500; color: var(--ink); }
+    .picker-result-level {
+      font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--brand-soft); color: var(--brand);
+    }
+    .picker-result-level[data-level="city"] { background: rgba(6,182,212,.12); color: #0891B2; }
+    .picker-result-level[data-level="resort"] { background: rgba(99,102,241,.12); color: #4F46E5; }
+    .picker-status { padding: 12px; text-align: center; font-size: 12px; color: var(--muted); }
+
+    .selected-dest {
+      padding: 10px 12px;
+      background: var(--brand-soft); border: 1px solid var(--brand);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-top: 6px;
+    }
+    .selected-dest-name { font-weight: 600; font-size: 13px; color: var(--ink); }
+    .selected-dest-level { font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--brand); }
+    .selected-dest-clear {
+      background: transparent; border: 0; color: var(--sub);
+      cursor: pointer; padding: 4px; border-radius: 4px;
+      display: inline-flex; align-items: center;
+    }
+    .selected-dest-clear:hover { color: var(--danger); background: rgba(239,68,68,.1); }
+
+    /* embed code */
+    .embed {
+      background: #0F172A; color: #94A3B8;
+      padding: 10px 12px; border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-all;
+      position: relative;
+    }
+    .embed-copy {
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(255,255,255,.1); border: 0; color: #CBD5E1;
+      padding: 4px 8px; border-radius: 4px; font-size: 10px;
+      cursor: pointer; font-weight: 600;
+    }
+    .embed-copy:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+    /* ---- preview pane ---- */
+    .preview-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--panel);
+    }
+    .preview-toolbar-left { flex: 1; font-size: 12px; font-weight: 600; color: var(--sub); letter-spacing: .02em; text-transform: uppercase; }
+    .viewport-seg { display: inline-flex; padding: 3px; background: var(--hover); border-radius: 7px; gap: 2px; }
+    .viewport-seg button {
+      border: 0; background: transparent; padding: 6px 12px; font-size: 12px; font-weight: 600;
+      color: var(--sub); border-radius: 5px; cursor: pointer; transition: all .15s ease;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .viewport-seg button:hover { color: var(--ink); }
+    .viewport-seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow-xs); }
+
+    .preview-scroll { flex: 1; overflow: auto; display: flex; justify-content: center; padding: 32px; }
+    .preview-frame-wrap {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: var(--shadow-md); overflow: hidden;
+      transition: width .2s ease; max-width: 100%;
+    }
+    .preview-frame { width: 100%; min-height: 1400px; border: 0; display: block; }
+
+    /* ---- modal (AI, Templates) ---- */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 20px;
+    }
+    .modal {
+      background: var(--panel); border-radius: 12px; box-shadow: var(--shadow-xl);
+      max-width: 520px; width: 100%; max-height: 90vh; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+    .modal-close { background: transparent; border: 0; padding: 4px; color: var(--muted); cursor: pointer; border-radius: 4px; display: inline-flex; }
+    .modal-close:hover { color: var(--ink); background: var(--hover); }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-primary {
+      height: 36px; padding: 0 16px; border: 0; border-radius: 7px;
+      background: var(--brand); color: #fff; font-weight: 600; font-size: 13px;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { background: color-mix(in srgb, var(--brand) 88%, #000); }
+    .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-secondary {
+      height: 36px; padding: 0 14px; border: 1px solid var(--border); border-radius: 7px;
+      background: var(--panel); color: var(--ink); font-weight: 600; font-size: 13px; cursor: pointer;
+    }
+    .btn-secondary:hover { background: var(--hover); }
+
+    /* template cards */
+    .templates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .template-card {
+      padding: 12px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer;
+      transition: all .15s ease; background: var(--panel);
+      text-align: left;
+    }
+    .template-card:hover { border-color: var(--brand); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .template-swatches { display: flex; gap: 4px; margin-bottom: 10px; }
+    .template-swatch { flex: 1; height: 16px; border-radius: 3px; }
+    .template-name { font-weight: 600; font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+    .template-dest { font-size: 11px; color: var(--muted); }
+
+    /* login overlay (Flavour 2 — embedded) */
+    .login-overlay {
+      position: fixed; inset: 0; background: var(--panel-2);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--panel); border-radius: 14px; box-shadow: var(--shadow-xl);
+      padding: 36px 32px; max-width: 400px; width: 100%;
+    }
+    .login-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      margin: 0 auto 18px; display: flex; align-items: center; justify-content: center;
+      color: #fff; box-shadow: var(--shadow-md);
+    }
+    .login-title { text-align: center; font-size: 20px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 4px; }
+    .login-sub { text-align: center; font-size: 13px; color: var(--sub); margin: 0 0 24px; }
+    .login-field { margin-bottom: 12px; }
+    .login-input {
+      width: 100%; height: 40px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--panel); font-size: 14px; outline: none;
+      transition: all .15s ease;
+    }
+    .login-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .login-btn {
+      width: 100%; height: 42px; border: 0; border-radius: 8px;
+      background: var(--brand); color: #fff; font-weight: 600; font-size: 14px;
+      cursor: pointer; margin-top: 8px;
+    }
+    .login-btn:hover { background: color-mix(in srgb, var(--brand) 88%, #000); }
+    .login-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .login-err { font-size: 12px; color: var(--danger); margin-top: 8px; text-align: center; min-height: 16px; }
+    .login-footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 18px; }
+
+    /* toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      background: var(--ink); color: #fff; box-shadow: var(--shadow-lg); z-index: 300;
+      display: flex; align-items: center; gap: 8px;
+      animation: toast-in .2s ease;
+    }
+    .toast.is-success { background: var(--success); }
+    .toast.is-error { background: var(--danger); }
+    @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+    /* responsive fallback — editor is desktop-first */
+    @media (max-width: 900px) {
+      .editor { grid-template-columns: 1fr; }
+      .sidebar { height: 50vh; border-right: 0; border-bottom: 1px solid var(--border); }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>Travelify Offers — Type Explorer</h1>
-  <p class="subtitle">Pulls all offers from the cache (no upstream deduping). Dedupe is applied client-side so we keep control. Switch strategies in the dedupe dropdown to see the effect live.</p>
 
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-type="Accommodation">Accommodation</button>
-    <button class="tab" data-type="Flights">Flights</button>
-    <button class="tab" data-type="Packages">Packages</button>
-    <button class="tab" data-type="CarRental">Car Rental</button>
-    <button class="tab" data-type="Any">Any (mixed)</button>
+  <!-- Login overlay is now handled by the shell. -->
+
+  <!-- Editor -->
+  <div class="tgse-app" id="editor" hidden>
+
+    <aside class="tgse-sidebar">
+
+      <!-- Crumb strip -->
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
+        </a>
+      </div>
+
+      <!-- Widget identity -->
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        </span>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Weather</div>
+          <div class="tgse-id-type" id="topbarSub">New widget</div>
+        </div>
+      </div>
+
+      <!-- Primary actions -->
+      <div class="tgse-actions">
+        <button class="tgse-btn" id="btn-templates" title="Templates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Templates
+          <span class="tgse-kbd">T</span>
+        </button>
+        <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+          AI builder
+          <span class="tgse-kbd">A</span>
+        </button>
+      </div>
+
+      <!-- Name + Save -->
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Widget name" maxlength="100">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="save-label">Save</span>
+        </button>
+      </div>
+
+      <!-- Tabs — keep existing IDs for editor's bind code, add data-tab for shell -->
+      <nav class="tgse-tabs" role="tablist">
+        <button id="tabDesign" data-tab="design" role="tab" aria-selected="true">Design</button>
+        <button id="tabContent" data-tab="content" role="tab" aria-selected="false">Content</button>
+        <button id="tabSettings" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
+
+      <!-- Body (scrollable) -->
+      <div class="sidebar-body">
+
+        <!-- DESIGN TAB -->
+        <div id="panelDesign">
+          <!-- Theme moved to preview toolbar (consistent with other editors) -->
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Colours
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Brand colour</label>
+                <div class="colour-row">
+                  <label class="colour-swatch" id="brandSwatch"><input type="color" id="brandColor" value="#1B2B5B" /></label>
+                  <input class="colour-hex" id="brandHex" maxlength="7" value="#1B2B5B" />
+                </div>
+                <div class="field-help">Used for section headings and the CTA panel background.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Accent colour</label>
+                <div class="colour-row">
+                  <label class="colour-swatch" id="accentSwatch"><input type="color" id="accentColor" value="#00B4D8" /></label>
+                  <input class="colour-hex" id="accentHex" maxlength="7" value="#00B4D8" />
+                </div>
+                <div class="field-help">Used for links, active states and the climate chart "best season" bars.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Presets</label>
+                <div class="presets" id="presets">
+                  <!-- injected by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Shape &amp; type
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Corner radius</label>
+                <div class="slider-row">
+                  <input class="slider" id="radius" type="range" min="0" max="24" value="16" />
+                  <span class="slider-value" id="radiusVal">16px</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Font family</label>
+                <div id="fontPickerMount"></div>
+                <div class="field-help" style="margin-top:6px;font-size:11px;color:var(--muted)">Applied to all text in the widget</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Layout style</label>
+                <div class="segmented" role="group" aria-label="Layout" id="layoutSeg">
+                  <button type="button" data-layout="compact">Compact</button>
+                  <button type="button" data-layout="standard" aria-pressed="true">Standard</button>
+                  <button type="button" data-layout="wide">Wide</button>
+                </div>
+                <div class="field-help"><strong>Compact</strong> (~380px) fits sidebars. <strong>Standard</strong> (~440px) works mid-article. <strong>Wide</strong> (~820px) works as a hero strip above the fold. All three collapse gracefully on mobile.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Climate chart
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Temperature unit (default)</label>
+                <div class="segmented" role="group" aria-label="Temperature unit">
+                  <button type="button" id="unitC" aria-pressed="true">°C</button>
+                  <button type="button" id="unitF" aria-pressed="false">°F</button>
+                </div>
+                <div class="field-help">Readers can flip between °C and °F on the widget. This is just the default.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTENT TAB -->
+        <div id="panelContent" hidden>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Destination
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Fixed destination</label>
+                <div class="picker-wrap">
+                  <input class="input" id="destSearch" placeholder="Search countries, cities, resorts…" autocomplete="off" />
+                  <div class="picker-results" id="pickerResults" hidden></div>
+                </div>
+                <div id="selectedDest"></div>
+                <div class="field-help">Pick the destination this widget should show. This overrides auto-detect.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Auto-detect
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Slug source</label>
+                <select class="select" id="slugSource">
+                  <option value="last-path-segment">Last URL path segment (e.g. /destinations/greece → "greece")</option>
+                  <option value="query-param">URL query parameter</option>
+                  <option value="custom-selector">Custom CSS selector</option>
+                </select>
+              </div>
+              <div class="field" id="slugExtraWrap" hidden>
+                <label class="field-label" id="slugExtraLabel">Parameter name</label>
+                <input class="input" id="slugExtra" placeholder="e.g. dest" />
+              </div>
+              <div class="field">
+                <label class="field-label">Lookup order</label>
+                <div class="field-help">Searches each level in this order until a match is found. Most specific first matches best.</div>
+                <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
+                  <span style="font-size:12px;color:var(--sub);font-weight:600;">Resort</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  <span style="font-size:12px;color:var(--sub);font-weight:600;">City</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  <span style="font-size:12px;color:var(--sub);font-weight:600;">Country</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Call to action
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Title</label>
+                <input class="input" id="ctaTitle" maxlength="120" placeholder="Plan your trip" />
+              </div>
+              <div class="field">
+                <label class="field-label">Subtitle (optional)</label>
+                <textarea class="textarea" id="ctaSubtitle" maxlength="200" rows="2" placeholder="Warm one-line invitation"></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label">Button label</label>
+                <input class="input" id="ctaButton" maxlength="40" placeholder="Enquire now" />
+              </div>
+              <div class="field">
+                <label class="field-label">Button URL</label>
+                <input class="input" id="ctaUrl" placeholder="https://youragency.com/enquire" />
+                <div class="field-help">Must start with <code>http://</code>, <code>https://</code>, <code>mailto:</code> or <code>tel:</code>.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Section headings
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Climate chart heading</label>
+                <input class="input" id="hClimate" maxlength="40" placeholder="12-month climate" />
+              </div>
+              <div class="field">
+                <label class="field-label">Best months heading</label>
+                <input class="input" id="hBestMonths" maxlength="40" placeholder="Best months to visit" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="panelSettings" hidden>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Section visibility
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body" id="sectionTogglesWrap">
+              <!-- injected by JS -->
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Extras
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Show country flag</div>
+                  <div class="toggle-help">Appears next to the destination name in the header. Only shown for country-level destinations.</div>
+                </div>
+                <button type="button" class="toggle" id="togFlag" role="switch" aria-checked="true"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Embed code
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div id="embedWrap">
+                <div class="field-help" id="embedHelp">Save the widget first to get your embed code.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Preview pane -->
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
+
+        <div class="tgse-vp" role="group" aria-label="Viewport">
+          <button class="is-on" data-vp="desktop" id="vpDesktop" title="Desktop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+          <button data-vp="tablet" id="vpTablet" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+          <button data-vp="mobile" id="vpMobile" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        </div>
+
+        <div class="tgse-divider"></div>
+
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
+        </button>
+      </div>
+
+      <!-- IFRAME PREVIEW — kept exactly as-is. Weather loads inside an iframe
+           with its config because of how the data:text/html template is built. -->
+      <div class="tgse-canvas">
+        <div class="preview-frame-wrap" id="previewWrap" style="width: 1280px;">
+          <iframe class="preview-frame" id="previewFrame" title="Widget preview"></iframe>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <div class="controls">
-    <div class="field dedupe-field" data-show="all">
-      <label for="dedupeStrategy">Dedupe strategy (client-side)</label>
-      <select id="dedupeStrategy">
-        <option value="none">None — show everything</option>
-        <option value="hotel" selected>One per hotel (cheapest wins)</option>
-        <option value="hotel-board">One per hotel + board basis</option>
-        <option value="hotel-duration">One per hotel + duration</option>
-        <option value="hotel-departure">One per hotel + departure</option>
-        <option value="route">One per route (flights)</option>
-        <option value="route-carrier">One per route + carrier (flights)</option>
-      </select>
-      <span class="field-hint">Travelify always returns everything — we control the dedupe</span>
-    </div>
-    <div class="field" data-show="all">
-      <label for="maxOffers">Max offers (from API)</label>
-      <input id="maxOffers" type="number" value="250" min="1" max="250" />
-    </div>
-    <div class="field" data-show="all">
-      <label for="sort">Sort</label>
-      <select id="sort">
-        <option value="price:asc" selected>Price (low to high)</option>
-        <option value="price:desc">Price (high to low)</option>
-        <option value="random">Random</option>
-      </select>
-    </div>
-    <div class="field" data-show="all">
-      <label for="budgetMax">Max budget (£)</label>
-      <input id="budgetMax" type="number" value="2000" min="50" />
-    </div>
-    <div class="field" data-show="Flights,Packages">
-      <label for="origin">Origin</label>
-      <input id="origin" type="text" placeholder="e.g. LGW, MAN, GB" value="GB" />
-      <span class="field-hint">Comma-separated for multiple</span>
-    </div>
-    <div class="field" data-show="Accommodation,Flights,Packages,Any">
-      <label for="destination">Destination</label>
-      <input id="destination" type="text" placeholder="e.g. ES, IT, MAD" value="ES" />
-      <span class="field-hint">Comma-separated for multiple</span>
-    </div>
-    <div class="field" data-show="Accommodation,Packages">
-      <label for="boardBasis">Board basis</label>
-      <select id="boardBasis">
-        <option value="">Any</option>
-        <option value="RoomOnly">Room Only</option>
-        <option value="BedAndBreakfast">B&amp;B</option>
-        <option value="HalfBoard">Half Board</option>
-        <option value="FullBoard">Full Board</option>
-        <option value="AllInclusive">All Inclusive</option>
-      </select>
-    </div>
-    <div class="field" data-show="Accommodation,Packages">
-      <label for="ratingMin">Min star rating</label>
-      <input id="ratingMin" type="number" value="3" min="0" max="5" step="0.5" />
-    </div>
-    <div class="field" data-show="Flights,Packages">
-      <label for="cabinClass">Cabin class</label>
-      <select id="cabinClass">
-        <option value="">Any</option>
-        <option value="Economy">Economy</option>
-        <option value="PremiumEconomy">Premium Economy</option>
-        <option value="Business">Business</option>
-        <option value="First">First</option>
-      </select>
-    </div>
-    <div class="field" data-show="Packages">
-      <label for="packageType">Package type</label>
-      <select id="packageType">
-        <option value="Any" selected>Any</option>
-        <option value="DynamicPackages">Dynamic (Flight + Hotel)</option>
-        <option value="PackageHolidays">Package Holiday (operator)</option>
-      </select>
-    </div>
-    <div class="field" data-show="Accommodation,Packages">
-      <label for="durationMax">Max nights</label>
-      <input id="durationMax" type="number" value="14" min="1" max="50" />
+  <!-- AI Modal -->
+  <div class="modal-backdrop" id="aiModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">AI suggestions</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label class="field-label">Describe your travel business</label>
+          <textarea class="textarea" id="aiPrompt" rows="5" placeholder="e.g. Small agency in Edinburgh specialising in Greek islands and Croatia. Warm, informal tone. Mostly couples and honeymooners." maxlength="1000"></textarea>
+          <div class="field-help">AI will suggest a colour palette, a layout that suits your audience, and CTA copy. Climate data always comes from the Travelgenix destination database.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close>Cancel</button>
+        <button class="btn-primary" id="aiGenerate">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2m0 14v2M5.5 5.5l1.4 1.4m10.2 10.2 1.4 1.4M3 12h2m14 0h2M5.5 18.5l1.4-1.4m10.2-10.2 1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>
+          Generate
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="action-row">
-    <button id="searchBtn">Search</button>
-    <button id="redupeBtn" class="secondary">Re-apply dedupe (no API call)</button>
-    <button id="diagBtn" class="diagnostic">🔍 Run cache diagnostic</button>
-  </div>
-
-  <div id="status" class="status"></div>
-  <div id="typeBreakdown" class="status"></div>
-
-  <div id="dedupeStats" class="dedupe-stats">
-    <div class="dedupe-stat">
-      <span class="dedupe-stat-label">Raw from API</span>
-      <span class="dedupe-stat-value" id="statRaw">0</span>
-    </div>
-    <div class="dedupe-stat">
-      <span class="dedupe-stat-label">Strategy</span>
-      <span class="dedupe-stat-value" id="statStrategy" style="font-size:14px;">–</span>
-    </div>
-    <div class="dedupe-stat">
-      <span class="dedupe-stat-label">After dedupe</span>
-      <span class="dedupe-stat-value" id="statDeduped">0</span>
-    </div>
-    <div class="dedupe-stat">
-      <span class="dedupe-stat-label">Collapsed</span>
-      <span class="dedupe-stat-value collapsed" id="statCollapsed">0</span>
+  <!-- Templates Modal -->
+  <div class="modal-backdrop" id="templatesModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Templates</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="templates-grid" id="templatesGrid"></div>
+      </div>
     </div>
   </div>
 
-  <div id="diagPanel" class="diag-panel">
-    <h3 class="diag-title">Cache diagnostic</h3>
-    <p class="diag-subtitle">Same search, progressively relaxed filters. Counts shown are raw API responses (before client-side dedupe).</p>
-    <div id="diagRows"></div>
-    <div id="diagConclusion"></div>
-  </div>
+  <!-- Shell behaviour first — exposes window.tgse -->
+  <script src="/editor-shell.js"></script>
 
-  <div id="results" class="grid"></div>
+  <script>
+    /* ============================================================
+       State + helpers
+       ============================================================ */
+    const API_AUTH = '/api/widget-auth';
+    const API_CONFIG = '/api/widget-config';
+    const API_AI = '/api/widget-ai';
+    const API_SEARCH = '/api/destination-search';
+    const API_CONTENT = '/api/destination-content';
+    const WIDGET_TYPE = 'Weather';
 
-  <details>
-    <summary>Request inspector — see exactly what was sent to Travelify</summary>
-    <pre id="rawRequest">(no request made yet)</pre>
-  </details>
+    const urlParams = new URLSearchParams(window.location.search);
+    const widgetIdFromUrl = urlParams.get('id');
 
-  <details>
-    <summary>Raw API response (sample record per type + full data)</summary>
-    <pre id="rawResponse">(no request made yet)</pre>
-  </details>
-</div>
-
-<script>
-  const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
-  const APP_ID = '250';
-  const PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
-
-  const $ = (id) => document.getElementById(id);
-  const statusEl = $('status');
-  const breakdownEl = $('typeBreakdown');
-  const resultsEl = $('results');
-  const rawReqEl = $('rawRequest');
-  const rawEl = $('rawResponse');
-  const btn = $('searchBtn');
-  const redupeBtn = $('redupeBtn');
-  const diagBtn = $('diagBtn');
-  const diagPanel = $('diagPanel');
-  const diagRows = $('diagRows');
-  const diagConclusion = $('diagConclusion');
-  const dedupeStrategyEl = $('dedupeStrategy');
-
-  let currentType = 'Accommodation';
-  // Cache the last raw response so we can re-dedupe without hitting the API
-  let lastRawOffers = [];
-
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentType = tab.dataset.type;
-      updateFieldVisibility();
-      diagPanel.classList.remove('show');
-      search();
-    });
-  });
-
-  // When dedupe strategy changes, re-render from cached raw offers (no API call)
-  dedupeStrategyEl.addEventListener('change', () => {
-    if (lastRawOffers.length > 0) {
-      reapplyDedupe();
-    }
-  });
-
-  redupeBtn.addEventListener('click', () => {
-    if (lastRawOffers.length === 0) {
-      setStatus('Run a search first.', 'warn');
-    } else {
-      reapplyDedupe();
-    }
-  });
-
-  function updateFieldVisibility() {
-    document.querySelectorAll('.field[data-show]').forEach(f => {
-      const types = f.dataset.show;
-      const visible = types === 'all' || types.split(',').includes(currentType);
-      f.classList.toggle('hidden', !visible);
-    });
-  }
-
-  function setStatus(message, type) {
-    statusEl.textContent = message;
-    statusEl.className = `status show ${type}`;
-  }
-
-  function parseList(raw) {
-    if (!raw) return [];
-    return raw.split(',').map(s => s.trim()).filter(Boolean);
-  }
-
-  function buildPayload() {
-    // ALWAYS deduping: 'None' — we dedupe client-side
-    const payload = {
-      type: currentType,
-      deduping: 'None',
-      currency: 'GBP',
-      language: 'en',
-      nationality: 'GB',
-      maxOffers: parseInt($('maxOffers').value) || 250,
-      rollingDates: true,
-      DatesMin: 7,
-      DatesMax: 90,
-      sort: $('sort').value,
-      pricingByType: 'Person',
-    };
-    const budgetMax = parseInt($('budgetMax').value);
-    if (budgetMax) payload.budgetMax = budgetMax;
-
-    if (currentType === 'Accommodation' || currentType === 'Packages') {
-      const board = $('boardBasis').value;
-      const rating = parseFloat($('ratingMin').value);
-      const dests = parseList($('destination').value);
-      const durationMax = parseInt($('durationMax').value);
-      if (board) payload.boardBases = [board];
-      if (rating) payload.ratingMin = rating;
-      if (dests.length) payload.destinations = dests;
-      if (durationMax) payload.durationMax = durationMax;
-    }
-    if (currentType === 'Flights' || currentType === 'Packages') {
-      const origins = parseList($('origin').value);
-      const cabin = $('cabinClass').value;
-      if (origins.length) payload.origins = origins;
-      if (cabin) payload.cabinClasses = [cabin];
-    }
-    if (currentType === 'Flights') {
-      const dests = parseList($('destination').value);
-      if (dests.length) payload.destinations = dests;
-    }
-    if (currentType === 'Packages') {
-      const pt = $('packageType').value;
-      if (pt && pt !== 'Any') payload.packageType = pt;
-    }
-    if (currentType === 'Any') {
-      const dests = parseList($('destination').value);
-      if (dests.length) payload.destinations = dests;
-    }
-    return payload;
-  }
-
-  // ── Client-side dedupe ────────────────────────────────────────────
-
-  // Extract a numeric price from an offer for comparison purposes
-  function getNumericPrice(o) {
-    // Prefer the raw price values, fall back to parsing the formatted string
-    const candidates = [
-      o.accommodation?.pricing?.price,
-      o.flight?.pricing?.price,
-      o.package?.pricing?.price,
-      o.pricing?.price,
-    ];
-    for (const c of candidates) {
-      if (typeof c === 'number') return c;
-    }
-    // Fallback: parse "£86" or "£1,299"
-    const formatted = o.formattedPPPrice || o.formattedPrice || '';
-    const match = formatted.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
-    return match ? parseFloat(match[1]) : Infinity;
-  }
-
-  // Build a dedupe key for an offer based on the chosen strategy
-  function getDedupeKey(offer, strategy) {
-    const acc = offer.accommodation || offer.package?.accommodation || {};
-    const flight = offer.flight || offer.package?.flight || {};
-    const dest = acc.destination || flight.destination || {};
-
-    const hotelKey = (acc.name || '').toLowerCase().trim() +
-      '|' + (dest.countryCode || dest.name || '').toLowerCase().trim();
-    const routeKey = (flight.origin?.iataCode || '') + '→' + (flight.destination?.iataCode || '');
-    const carrierKey = flight.carrier?.code || '';
-    const board = (acc.boardBasis || '').toLowerCase();
-    const nights = acc.nights || '';
-    const departure = (flight.outboundDate || '').slice(0, 10); // date only
-
-    switch (strategy) {
-      case 'none':
-        return offer.id || Math.random();  // unique per offer = no dedupe
-      case 'hotel':
-        return hotelKey;
-      case 'hotel-board':
-        return hotelKey + '|' + board;
-      case 'hotel-duration':
-        return hotelKey + '|' + nights;
-      case 'hotel-departure':
-        return hotelKey + '|' + departure;
-      case 'route':
-        return routeKey;
-      case 'route-carrier':
-        return routeKey + '|' + carrierKey;
-      default:
-        return hotelKey;
-    }
-  }
-
-  // Dedupe offers: group by key, keep cheapest per group, attach variant count
-  function dedupeOffers(offers, strategy) {
-    if (strategy === 'none') {
-      return offers.map(o => ({ ...o, _variantCount: 1 }));
-    }
-
-    const groups = new Map();
-    offers.forEach(o => {
-      const key = getDedupeKey(o, strategy);
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(o);
-    });
-
-    const deduped = [];
-    groups.forEach(group => {
-      group.sort((a, b) => getNumericPrice(a) - getNumericPrice(b));
-      const winner = { ...group[0], _variantCount: group.length };
-      deduped.push(winner);
-    });
-
-    // Re-sort by current sort preference
-    const sortPref = $('sort').value;
-    if (sortPref === 'price:asc') {
-      deduped.sort((a, b) => getNumericPrice(a) - getNumericPrice(b));
-    } else if (sortPref === 'price:desc') {
-      deduped.sort((a, b) => getNumericPrice(b) - getNumericPrice(a));
-    } else if (sortPref === 'random') {
-      deduped.sort(() => Math.random() - 0.5);
-    }
-
-    return deduped;
-  }
-
-  function strategyLabel(strategy) {
-    const labels = {
-      'none': 'None',
-      'hotel': 'One per hotel',
-      'hotel-board': 'Per hotel + board',
-      'hotel-duration': 'Per hotel + duration',
-      'hotel-departure': 'Per hotel + date',
-      'route': 'Per route',
-      'route-carrier': 'Per route + carrier',
-    };
-    return labels[strategy] || strategy;
-  }
-
-  function updateDedupeStats(rawCount, dedupedCount, strategy) {
-    $('statRaw').textContent = rawCount;
-    $('statDeduped').textContent = dedupedCount;
-    $('statCollapsed').textContent = rawCount - dedupedCount;
-    $('statStrategy').textContent = strategyLabel(strategy);
-    $('dedupeStats').classList.add('show');
-  }
-
-  function reapplyDedupe() {
-    const strategy = dedupeStrategyEl.value;
-    const deduped = dedupeOffers(lastRawOffers, strategy);
-    updateDedupeStats(lastRawOffers.length, deduped.length, strategy);
-    renderOffers(deduped);
-    setStatus(`Re-deduped: ${lastRawOffers.length} raw → ${deduped.length} after "${strategyLabel(strategy)}"`, 'success');
-  }
-
-  // ── API ───────────────────────────────────────────────────────────
-
-  async function callApi(payload) {
-    const startTime = Date.now();
-    try {
-      const res = await fetch(TRAVELIFY_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${APP_ID}:${PUBLIC_KEY}`,
-          'Content-Type': 'application/json',
+    // Default config — matches widget-weather.js defaults
+    function defaultConfig() {
+      return {
+        theme: 'light',
+        brandColor: '#1B2B5B',
+        accentColor: '#00B4D8',
+        radius: 16,
+        fontFamily: '',
+        layout: 'standard',
+        temperatureUnit: 'C',
+        sections: {
+          header: true, callout: true, climate: true,
+          bestMonths: true, cta: true,
         },
-        body: JSON.stringify(payload),
+        showFlag: true,
+        // Phase 2 hook — forced off in Phase 1 until lat/lng fields land.
+        showLiveWeather: false,
+        headings: {
+          climate: '12-month climate',
+          bestMonths: 'Best months to visit',
+        },
+        cta: {
+          title: 'Plan your trip',
+          subtitle: '',
+          buttonLabel: 'Enquire now',
+          url: '',
+        },
+        destination: null,
+        autoDetect: {
+          enabled: false,
+          slugSource: 'last-path-segment',
+          slugExtra: '',
+          lookupOrder: ['resort', 'city', 'country'],
+        },
+      };
+    }
+
+    let state = {
+      widgetId: widgetIdFromUrl || null,
+      airtableRecordId: null,
+      name: '',
+      config: defaultConfig(),
+      dirty: false,
+    };
+
+    // Undo/redo — 40 states
+    let history = [];
+    let historyIdx = -1;
+    const HISTORY_MAX = 40;
+
+    function pushHistory() {
+      history = history.slice(0, historyIdx + 1);
+      history.push(JSON.stringify({ name: state.name, config: state.config }));
+      if (history.length > HISTORY_MAX) history.shift();
+      historyIdx = history.length - 1;
+    }
+    function undo() {
+      if (historyIdx <= 0) return;
+      historyIdx--;
+      applyHistory(history[historyIdx]);
+    }
+    function redo() {
+      if (historyIdx >= history.length - 1) return;
+      historyIdx++;
+      applyHistory(history[historyIdx]);
+    }
+    function applyHistory(snapshot) {
+      try {
+        const obj = JSON.parse(snapshot);
+        state.name = obj.name || '';
+        state.config = obj.config;
+        hydrateUI();
+        state.dirty = true;
+        refreshSaveBtn();
+        renderPreview();
+      } catch (err) { console.error('undo/redo apply failed', err); }
+    }
+
+    /* ---------- auth (delegates to shell) ---------- */
+    function getToken() {
+      try {
+        const raw = localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session');
+        return raw ? (JSON.parse(raw)?.token || '') : '';
+      } catch { return ''; }
+    }
+    function authH() {
+      if (window.tgse && typeof window.tgse.authHeaders === 'function') {
+        return window.tgse.authHeaders();
+      }
+      const t = getToken();
+      const h = { 'Content-Type': 'application/json' };
+      if (t) h['Authorization'] = 'Bearer ' + t;
+      return h;
+    }
+    function isLoggedIn() {
+      if (window.tgse && typeof window.tgse.isLoggedIn === 'function') {
+        return window.tgse.isLoggedIn();
+      }
+      try {
+        const raw = localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session');
+        const s = raw ? JSON.parse(raw) : null;
+        return !!(s && s.token);
+      } catch { return false; }
+    }
+
+    /* ---------- toast ---------- */
+    let toastTimer = null;
+    function toast(msg, kind) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      if (toastTimer) clearTimeout(toastTimer);
+      const el = document.createElement('div');
+      el.className = 'toast' + (kind ? ' is-' + kind : '');
+      el.textContent = msg;
+      document.body.appendChild(el);
+      toastTimer = setTimeout(() => el.remove(), 3200);
+    }
+
+    /* ============================================================
+       Login — handled by shell
+       ============================================================ */
+    // showLogin / hideLogin / doLogin / loginForm are all handled by the shell.
+    // We hand off via tgse.init({ onLoginSuccess: () => boot() }) below.
+
+    /* ============================================================
+       Tabs
+       ============================================================ */
+    function setTab(which) {
+      const tabs = ['Design', 'Content', 'Settings'];
+      for (const t of tabs) {
+        const btn = document.getElementById('tab' + t);
+        const panel = document.getElementById('panel' + t);
+        const active = (t === which);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        panel.hidden = !active;
+      }
+    }
+    // Tab click handlers wired by the shell via onTabChange.
+
+    /* ============================================================
+       Collapsible sections
+       ============================================================ */
+    document.querySelectorAll('[data-section]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sec = btn.closest('.section');
+        const isOpen = sec.getAttribute('data-open') === 'true';
+        sec.setAttribute('data-open', isOpen ? 'false' : 'true');
       });
-      const data = await res.json();
-      const duration = Date.now() - startTime;
-      return { success: data.success, count: (data.data || []).length, data, duration };
-    } catch (err) {
-      return { success: false, count: 0, error: err.message, duration: Date.now() - startTime };
-    }
-  }
-
-  async function search() {
-    btn.disabled = true;
-    setStatus(`Fetching ${currentType} offers (no upstream dedupe)...`, 'loading');
-    breakdownEl.className = 'status';
-    resultsEl.innerHTML = '';
-
-    const payload = buildPayload();
-    rawReqEl.textContent = JSON.stringify(payload, null, 2);
-
-    const result = await callApi(payload);
-    rawEl.textContent = buildRawSample(result.data?.data || []);
-
-    if (!result.success) {
-      setStatus(`API error: ${result.error || result.data?.error || 'Unknown'}`, 'error');
-      rawEl.textContent = JSON.stringify(result.data, null, 2);
-      btn.disabled = false;
-      return;
-    }
-
-    lastRawOffers = result.data.data || [];
-    const strategy = dedupeStrategyEl.value;
-    const deduped = dedupeOffers(lastRawOffers, strategy);
-
-    updateDedupeStats(lastRawOffers.length, deduped.length, strategy);
-    setStatus(`Got ${lastRawOffers.length} raw offers in ${result.duration}ms → ${deduped.length} after dedupe.`, 'success');
-
-    const breakdown = buildBreakdown(deduped);
-    if (breakdown && currentType === 'Any') {
-      breakdownEl.textContent = `Type breakdown (post-dedupe): ${breakdown}`;
-      breakdownEl.className = 'status show warn';
-    }
-
-    renderOffers(deduped);
-    btn.disabled = false;
-  }
-
-  // ── Diagnostic ────────────────────────────────────────────────────
-
-  function buildDiagnosticTests() {
-    const base = buildPayload();
-    const tests = [];
-    tests.push({ label: 'Your current settings (deduping: None)', sublabel: 'Already pulling everything', payload: { ...base } });
-    tests.push({ label: 'maxOffers raised to 250', sublabel: 'Hits the API hard ceiling', payload: { ...base, maxOffers: 250 } });
-    tests.push({ label: '+ DatesMax 365', sublabel: 'Full year window, not just 90 days', payload: { ...base, maxOffers: 250, DatesMax: 365 } });
-    const noBudget = { ...base, maxOffers: 250, DatesMax: 365 };
-    delete noBudget.budgetMax;
-    tests.push({ label: '+ no budget cap', sublabel: 'Premium offers included', payload: noBudget });
-    const noRating = { ...noBudget };
-    delete noRating.ratingMin;
-    tests.push({ label: '+ no rating filter', sublabel: 'Any star rating', payload: noRating });
-    const noDuration = { ...noRating };
-    delete noDuration.durationMax;
-    tests.push({ label: '+ no duration cap', sublabel: 'Any trip length', payload: noDuration });
-    tests.push({ label: 'Bare minimum (type + required only)', sublabel: 'Absolute ceiling for this type', payload: { type: currentType, currency: 'GBP', language: 'en', nationality: 'GB', maxOffers: 250, deduping: 'None' } });
-    tests.push({ label: 'Total cache size (type: Any)', sublabel: 'Every offer of every type in the cache', payload: { type: 'Any', currency: 'GBP', language: 'en', nationality: 'GB', maxOffers: 250, deduping: 'None' } });
-    return tests;
-  }
-
-  async function runDiagnostic() {
-    diagBtn.disabled = true;
-    btn.disabled = true;
-    diagRows.innerHTML = '';
-    diagConclusion.innerHTML = '';
-    diagPanel.classList.add('show');
-    setStatus('Running diagnostic...', 'loading');
-
-    const tests = buildDiagnosticTests();
-    tests.forEach((t, i) => {
-      diagRows.innerHTML += `
-        <div class="diag-row" data-index="${i}">
-          <div>
-            <div class="diag-label">${escapeHtml(t.label)}</div>
-            <div class="diag-label-muted">${escapeHtml(t.sublabel)}</div>
-          </div>
-          <div class="diag-count pending" data-count="${i}">…</div>
-          <div class="diag-delta" data-delta="${i}"></div>
-        </div>
-      `;
     });
 
-    const results = [];
-    let prevCount = null;
-    for (let i = 0; i < tests.length; i++) {
-      const t = tests[i];
-      const result = await callApi(t.payload);
-      results.push({ ...t, ...result });
-      const countEl = document.querySelector(`[data-count="${i}"]`);
-      const deltaEl = document.querySelector(`[data-delta="${i}"]`);
-      countEl.classList.remove('pending');
-      countEl.textContent = result.success ? result.count : 'ERR';
-      if (!result.success || result.count === 0) {
-        countEl.classList.add('zero');
-      } else if (prevCount !== null && result.count > prevCount) {
-        countEl.classList.add('better');
-        deltaEl.textContent = `+${result.count - prevCount}`;
-        deltaEl.classList.add('positive');
-      } else if (prevCount !== null && result.count === prevCount) {
-        countEl.classList.add('same');
-      }
-      prevCount = result.success ? result.count : prevCount;
-      await new Promise(r => setTimeout(r, 200));
+    /* ============================================================
+       Colour presets
+       ============================================================ */
+    const PRESETS = [
+      { name: 'Mediterranean', brand: '#1B2B5B', accent: '#00B4D8' },
+      { name: 'Sunset',        brand: '#7C2D12', accent: '#F59E0B' },
+      { name: 'Forest',        brand: '#14532D', accent: '#22C55E' },
+      { name: 'Plum',          brand: '#581C87', accent: '#C084FC' },
+      { name: 'Coral',         brand: '#9F1239', accent: '#FB7185' },
+    ];
+    function renderPresets() {
+      const wrap = document.getElementById('presets');
+      wrap.innerHTML = '';
+      PRESETS.forEach((p, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'preset';
+        btn.title = p.name;
+        btn.setAttribute('aria-pressed', 'false');
+        btn.innerHTML = `<div class="preset-inner"><div style="background:${p.brand}"></div><div style="background:${p.accent}"></div></div>`;
+        btn.addEventListener('click', () => {
+          state.config.brandColor = p.brand;
+          state.config.accentColor = p.accent;
+          onConfigChange();
+          hydrateUI();
+        });
+        wrap.appendChild(btn);
+      });
     }
 
-    const baseline = results[0].count;
-    const ceiling = results[results.length - 2].count;
-    const totalCache = results[results.length - 1].count;
-    let verdict;
-    if (totalCache <= 50) {
-      verdict = `<strong>The cache is small.</strong> The total cache for AppId 250 across <em>all types</em> contains only ${totalCache} offers. This is a demo/test cache. A production AppId with active suppliers would return thousands.`;
-    } else if (ceiling <= baseline * 2) {
-      verdict = `<strong>Cache constrained, not filter constrained.</strong> Even with every filter relaxed, only ${ceiling} ${currentType} offers exist in the cache.`;
-    } else {
-      let biggestJump = 0;
-      let biggestJumpStep = '';
-      for (let i = 1; i < results.length - 1; i++) {
-        const jump = results[i].count - results[i - 1].count;
-        if (jump > biggestJump) { biggestJump = jump; biggestJumpStep = results[i].label; }
-      }
-      verdict = `<strong>Filter constrained.</strong> Your settings returned ${baseline}, the relaxed ceiling is ${ceiling}. Biggest unlock: <em>${biggestJumpStep}</em> (+${biggestJump} offers).`;
+    /* ============================================================
+       Font picker — handled by the shell.
+       Mounted in renderFontPickerShell() called from boot().
+       ============================================================ */
+    function renderFontPickerShell() {
+      const mount = document.getElementById('fontPickerMount');
+      if (!mount || !window.tgse || typeof window.tgse.mountFontPicker !== 'function') return;
+      window.tgse.mountFontPicker(mount, state.config.fontFamily || 'Inter', (font) => {
+        state.config.fontFamily = font;
+        onConfigChange();
+      });
     }
-    diagConclusion.innerHTML = `<div class="diag-conclusion">${verdict}</div>`;
-    setStatus('Diagnostic complete.', 'success');
-    diagBtn.disabled = false;
-    btn.disabled = false;
-  }
 
-  // ── Renderers ─────────────────────────────────────────────────────
-
-  function variantBadge(o) {
-    if (!o._variantCount || o._variantCount <= 1) return '';
-    return `<div class="card-variants">+${o._variantCount - 1} more</div>`;
-  }
-
-  function renderAccommodationCard(o) {
-    const acc = o.accommodation || {};
-    const dest = acc.destination || {};
-    const img = acc.image?.url || '';
-    const rating = acc.rating ? '★'.repeat(Math.round(acc.rating)) : '';
-    const nights = acc.nights ? `${acc.nights} night${acc.nights === 1 ? '' : 's'}` : '';
-    const board = acc.boardBasis ? formatEnum(acc.boardBasis) : '';
-    const meta = [nights, board].filter(Boolean).join(' · ');
-    return `
-      <div class="card">
-        <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
-          ${rating ? `<div class="card-badge">${rating}</div>` : ''}
-          <div class="card-type-badge">Hotel</div>
-          ${variantBadge(o)}
-        </div>
-        <div class="card-body">
-          <div class="card-name">${escapeHtml(acc.name || 'Unnamed property')}</div>
-          <div class="card-location">${escapeHtml(dest.name || '')}${dest.countryCode ? ', ' + escapeHtml(dest.countryCode) : ''}</div>
-          ${meta ? `<div class="card-meta">${meta}</div>` : ''}
-        </div>
-        ${renderPriceFooter(o)}
-      </div>
-    `;
-  }
-
-  function renderFlightCard(o) {
-    const f = o.flight || {};
-    const og = f.origin || {};
-    const dest = f.destination || {};
-    const carrier = f.carrier || {};
-    const pricing = f.pricing || {};
-    const img = f.image?.url || '';
-    const isDirect = f.direct === true;
-    const stops = f.stops || 0;
-    const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : `${stops} stops`);
-    const durationLabel = f.duration ? formatDuration(f.duration) : '';
-    const cabin = f.cabinClass ? formatEnum(f.cabinClass) : '';
-    const refundability = pricing.refundability ? formatEnum(pricing.refundability) : '';
-    const outbound = formatDateTime(f.outboundDate);
-    const returnLeg = f.returnDate ? formatDateTime(f.returnDate) : null;
-    const tripType = returnLeg ? 'Return' : 'One-way';
-    const priceChanged = pricing.priceChanged === true && pricing.priceBeforeChange;
-    const isLeadIn = pricing.isLeadIn === true;
-    return `
-      <div class="card">
-        ${img ? `
-          <div class="card-image" style="background-image: url('${escapeHtml(img)}'); aspect-ratio: 16/9;">
-            <div class="card-type-badge">Flight</div>
-            ${isLeadIn ? `<div class="card-pill deal">Lead-in price</div>` : ''}
-            ${variantBadge(o)}
+    /* ============================================================
+       Section toggles (Settings tab)
+       ============================================================ */
+    const SECTION_TOGGLES = [
+      { key: 'header',     label: 'Header',              help: 'Destination name and region eyebrow.' },
+      { key: 'callout',    label: 'Current month callout', help: 'Season pill + headline for the current month.' },
+      { key: 'climate',    label: 'Climate chart',       help: '12-month temperature bars with rainfall strip and season colours.' },
+      { key: 'bestMonths', label: 'Best months panel',   help: 'Up to 3 months flagged as the best time to visit, with reasoning.' },
+      { key: 'cta',        label: 'Call to action',      help: 'Brandable button at the bottom of the widget.' },
+    ];
+    function renderSectionToggles() {
+      const wrap = document.getElementById('sectionTogglesWrap');
+      wrap.innerHTML = '';
+      SECTION_TOGGLES.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'toggle-row';
+        row.innerHTML = `
+          <div>
+            <div class="toggle-label">${s.label}</div>
+            <div class="toggle-help">${s.help}</div>
           </div>
-        ` : ''}
-        <div class="flight-route">
-          <div class="flight-airport"><div class="flight-iata">${escapeHtml(og.iataCode || '???')}</div><div class="flight-airport-name">${escapeHtml(og.name || '')}</div></div>
-          <div class="flight-arrow"><div class="flight-arrow-line"></div><div class="flight-stops-label">${escapeHtml(stopsLabel)}</div></div>
-          <div class="flight-airport right"><div class="flight-iata">${escapeHtml(dest.iataCode || '???')}</div><div class="flight-airport-name">${escapeHtml(dest.name || '')}</div></div>
-        </div>
-        ${durationLabel ? `<div class="flight-duration">${durationLabel} · ${tripType}${cabin ? ' · ' + cabin : ''}</div>` : ''}
-        <div class="flight-carrier-row">
-          ${carrier.code ? `<span class="flight-carrier-code">${escapeHtml(carrier.code)}</span>` : ''}
-          <span class="flight-carrier-name">${escapeHtml(carrier.name || 'Unknown carrier')}</span>
-          <span class="flight-pax">${o.adults || 1} adult${(o.adults || 1) === 1 ? '' : 's'}${o.children ? ', ' + o.children + ' child' + (o.children === 1 ? '' : 'ren') : ''}</span>
-        </div>
-        <div class="flight-detail"><span class="flight-detail-label">Outbound</span><span class="flight-detail-value">${escapeHtml(outbound)}</span></div>
-        ${returnLeg ? `<div class="flight-detail"><span class="flight-detail-label">Return</span><span class="flight-detail-value">${escapeHtml(returnLeg)}</span></div>` : ''}
-        ${refundability ? `<div class="flight-detail"><span class="flight-detail-label">Fare</span><span class="flight-detail-value">${escapeHtml(refundability)}</span></div>` : ''}
-        ${renderPriceFooter(o, priceChanged ? `£${Math.round(pricing.priceBeforeChange)}` : null)}
-      </div>
-    `;
-  }
-
-  function detectPackageType(o) {
-    const direct = o.packageType || o.package?.packageType || o.package?.type;
-    if (direct === 'PackageHolidays' || direct === 'PackageHoliday') return 'PackageHolidays';
-    if (direct === 'DynamicPackages' || direct === 'DynamicPackage' || direct === 'Dynamic') return 'DynamicPackages';
-    const operator = o.package?.operator || o.package?.operatorName || o.package?.supplier || o.operator || o.supplier;
-    if (operator) return 'PackageHolidays';
-    if ((o.flight || o.outbound) && o.accommodation) return 'DynamicPackages';
-    return null;
-  }
-
-  function renderPackageCard(o) {
-    const pkg = o.package || {};
-    const acc = pkg.accommodation || o.accommodation || {};
-    const f = pkg.flight || o.flight || {};
-    const ob = pkg.outbound || o.outbound || f.outbound || {};
-    const dest = acc.destination || pkg.destination || f.destination || {};
-    const img = acc.image?.url || pkg.image?.url || f.image?.url || '';
-    const rating = acc.rating ? '★'.repeat(Math.round(acc.rating)) : '';
-    const nights = acc.nights || pkg.nights;
-    const board = acc.boardBasis || pkg.boardBasis;
-    const fromCode = (f.origin?.iataCode) || (ob.origin?.iataCode) || ob.iataCode || '';
-    const toCode = (f.destination?.iataCode) || (ob.destination?.iataCode) || dest.iataCode || '';
-    const carrierName = f.carrier?.name || ob.carrier?.name || pkg.carrier?.name || '';
-    const isDirect = f.direct === true || ob.direct === true;
-    const stops = f.stops ?? ob.stops ?? null;
-    const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : (stops > 1 ? `${stops} stops` : ''));
-    const outboundDate = f.outboundDate || ob.outboundDate || ob.departureDate || ob.departureTime || '';
-    const packageType = detectPackageType(o);
-    const operator = pkg.operator || pkg.operatorName || pkg.supplier || o.operator || o.supplier || '';
-    const atol = pkg.atolProtected === true || pkg.isAtolProtected === true || o.atolProtected === true;
-    const isHoliday = packageType === 'PackageHolidays';
-    const pricing = o.pricing || pkg.pricing || acc.pricing || f.pricing || {};
-    const priceChanged = pricing.priceChanged === true && pricing.priceBeforeChange;
-    const badgeText = isHoliday ? 'Package Holiday' : (packageType === 'DynamicPackages' ? 'Flight + Hotel' : 'Package');
-    const badgeClass = isHoliday ? 'package-holiday' : (packageType === 'DynamicPackages' ? 'package-dynamic' : '');
-    const flightLineParts = [];
-    if (fromCode && toCode) flightLineParts.push(`${fromCode} → ${toCode}`);
-    if (carrierName) flightLineParts.push(carrierName);
-    if (stopsLabel) flightLineParts.push(stopsLabel);
-    const flightLine = flightLineParts.join(' · ');
-    const hotelLineParts = [];
-    if (nights) hotelLineParts.push(`${nights} night${nights === 1 ? '' : 's'}`);
-    if (board) hotelLineParts.push(formatEnum(board));
-    const hotelLine = hotelLineParts.join(' · ');
-    return `
-      <div class="card">
-        <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
-          ${rating ? `<div class="card-badge">${rating}</div>` : ''}
-          <div class="card-type-badge ${badgeClass}">${escapeHtml(badgeText)}</div>
-          ${variantBadge(o)}
-        </div>
-        ${(isHoliday && operator) ? `
-          <div class="package-operator">
-            <span class="package-operator-label">Operator</span>
-            <span class="package-operator-name">${escapeHtml(operator)}</span>
-            ${atol ? `<span class="package-operator-atol">ATOL</span>` : ''}
-          </div>
-        ` : ''}
-        <div class="card-body">
-          <div class="card-name">${escapeHtml(acc.name || pkg.name || 'Package holiday')}</div>
-          <div class="card-location">${escapeHtml(dest.name || '')}${dest.countryCode ? ', ' + escapeHtml(dest.countryCode) : ''}</div>
-        </div>
-        ${(flightLine || hotelLine) ? `
-          <div class="package-summary">
-            ${flightLine ? `<div class="package-line"><span class="package-icon">✈</span><span>${escapeHtml(flightLine)}${outboundDate ? ' · ' + escapeHtml(formatDate(outboundDate)) : ''}</span></div>` : ''}
-            ${hotelLine ? `<div class="package-line"><span class="package-icon">🏨</span><span>${escapeHtml(hotelLine)}</span></div>` : ''}
-          </div>
-        ` : ''}
-        ${renderPriceFooter(o, priceChanged ? `£${Math.round(pricing.priceBeforeChange)}` : null)}
-      </div>
-    `;
-  }
-
-  function renderCarRentalCard(o) {
-    const car = o.carRental || o.car || o.vehicle || o.rental || {};
-    const pickup = car.pickup || car.pickupLocation || car.location || {};
-    const vehicle = car.vehicle || car;
-    const img = vehicle.image?.url || car.image?.url || '';
-    const name = vehicle.name || vehicle.model || car.name || 'Car rental';
-    const company = car.supplier || car.company || vehicle.company || '';
-    const days = car.days || car.duration || '';
-    const meta = [company ? escapeHtml(company) : '', days ? `${days} day${days === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ');
-    return `
-      <div class="card">
-        ${img ? `
-          <div class="card-image" style="background-image: url('${escapeHtml(img)}'); aspect-ratio: 16/9;">
-            <div class="card-type-badge">Car</div>
-            ${variantBadge(o)}
-          </div>
-        ` : `
-          <div class="card-image" style="background: linear-gradient(135deg, #e5e7eb, #d1d5db); aspect-ratio: 16/9; display:flex; align-items:center; justify-content:center; font-size:40px;">
-            🚗
-            <div class="card-type-badge">Car</div>
-            ${variantBadge(o)}
-          </div>
-        `}
-        <div class="card-body">
-          <div class="card-name">${escapeHtml(name)}</div>
-          ${pickup.name ? `<div class="card-location">${escapeHtml(pickup.name)}</div>` : ''}
-          ${meta ? `<div class="card-meta">${meta}</div>` : ''}
-        </div>
-        ${renderPriceFooter(o)}
-      </div>
-    `;
-  }
-
-  function renderUnknownCard(o) {
-    return `
-      <div class="card">
-        <div class="card-body" style="padding:20px;">
-          <div class="card-name">Unknown offer type: ${escapeHtml(o.type || 'no type field')}</div>
-          <div class="card-meta">See raw response below for shape.</div>
-        </div>
-        ${renderPriceFooter(o)}
-      </div>
-    `;
-  }
-
-  function renderPriceFooter(o, wasPrice) {
-    const price = o.formattedPPPrice || o.formattedPrice || '';
-    const sub = o.formattedPPPrice ? 'per person' : (o.formattedPrice ? 'total' : '');
-    return `
-      <div class="card-footer">
-        <div class="card-price-block">
-          ${wasPrice ? `<div class="card-price-was">${escapeHtml(wasPrice)}</div>` : ''}
-          <div class="card-price">${escapeHtml(price)}</div>
-          ${sub ? `<div class="card-price-sub">${sub}</div>` : ''}
-        </div>
-        <a class="card-link" href="${escapeHtml(o.url || '#')}" target="_blank" rel="noopener">View deal →</a>
-      </div>
-    `;
-  }
-
-  function renderOffers(offers) {
-    if (!offers || offers.length === 0) {
-      resultsEl.innerHTML = '<div class="empty">No offers matched. Try the diagnostic button to find out why.</div>';
-      return;
+          <button type="button" class="toggle" data-section-toggle="${s.key}" role="switch" aria-checked="true"></button>
+        `;
+        wrap.appendChild(row);
+      });
+      wrap.querySelectorAll('[data-section-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-section-toggle');
+          state.config.sections[key] = !state.config.sections[key];
+          btn.setAttribute('aria-checked', state.config.sections[key] ? 'true' : 'false');
+          onConfigChange();
+        });
+      });
     }
-    resultsEl.innerHTML = offers.map(o => {
-      switch (o.type) {
-        case 'Accommodation': return renderAccommodationCard(o);
-        case 'Flights':
-        case 'Flight':       return renderFlightCard(o);
-        case 'Packages':
-        case 'Package':      return renderPackageCard(o);
-        case 'CarRental':    return renderCarRentalCard(o);
-        default:             return renderUnknownCard(o);
+
+    /* ============================================================
+       Destination picker (debounced, authenticated search)
+       ============================================================ */
+    let searchAbort = null;
+    let searchTimer = null;
+    function searchDestinations(q) {
+      if (searchTimer) clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => runSearch(q), 200);
+    }
+    async function runSearch(q) {
+      const results = document.getElementById('pickerResults');
+      if (!q || q.length < 2) {
+        results.hidden = true;
+        results.innerHTML = '';
+        return;
       }
-    }).join('');
-  }
+      if (searchAbort) searchAbort.abort();
+      searchAbort = new AbortController();
+      results.hidden = false;
+      results.innerHTML = '<div class="picker-status">Searching…</div>';
+      try {
+        const res = await fetch(API_SEARCH + '?q=' + encodeURIComponent(q), {
+          headers: authH(), signal: searchAbort.signal,
+        });
+        if (res.status === 401) {
+          results.innerHTML = '<div class="picker-status">Please sign in to search.</div>';
+          return;
+        }
+        const data = await res.json();
+        const list = data.results || [];
+        if (list.length === 0) {
+          results.innerHTML = '<div class="picker-status">No matches.</div>';
+          return;
+        }
+        results.innerHTML = '';
+        list.forEach(r => {
+          const row = document.createElement('div');
+          row.className = 'picker-result';
+          row.innerHTML = `
+            <span class="picker-result-name">${escHtml(r.name)}</span>
+            <span class="picker-result-level" data-level="${r.level}">${r.level}</span>
+          `;
+          row.addEventListener('click', () => pickDestination(r));
+          results.appendChild(row);
+        });
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        results.innerHTML = '<div class="picker-status">Search failed. Try again.</div>';
+      }
+    }
+    function pickDestination(r) {
+      state.config.destination = { level: r.level, recordId: r.recordId, name: r.name };
+      document.getElementById('pickerResults').hidden = true;
+      document.getElementById('destSearch').value = '';
+      renderSelectedDestination();
+      onConfigChange();
+      fetchDestinationData(r.level, r.recordId); // preload for preview
+    }
 
-  function formatEnum(s) { if (!s) return ''; return String(s).replace(/([A-Z])/g, ' $1').trim(); }
-  function formatDate(iso) {
-    if (!iso) return '';
-    try { const d = new Date(iso); if (isNaN(d.getTime())) return iso; return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return iso; }
-  }
-  function formatDateTime(iso) {
-    if (!iso) return '';
-    try { const d = new Date(iso); if (isNaN(d.getTime())) return iso;
-      const date = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-      const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-      return `${date}, ${time}`;
-    } catch { return iso; }
-  }
-  function formatDuration(minutes) {
-    if (!minutes || isNaN(minutes)) return '';
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (h && m) return `${h}h ${m}m`;
-    if (h) return `${h}h`;
-    return `${m}m`;
-  }
-  function escapeHtml(s) {
-    if (s == null) return '';
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-  }
-  function buildBreakdown(offers) {
-    if (!offers || offers.length === 0) return '';
-    const counts = {};
-    offers.forEach(o => { const t = o.type || 'unknown'; counts[t] = (counts[t] || 0) + 1; });
-    return Object.entries(counts).map(([t, n]) => `${n} ${t}`).join(' · ');
-  }
-  function buildRawSample(offers) {
-    if (!offers || offers.length === 0) return '(empty data array)';
-    const samples = {};
-    offers.forEach(o => { const t = o.type || 'unknown'; if (!samples[t]) samples[t] = o; });
-    return JSON.stringify({
-      _summary: `${offers.length} total offers, ${Object.keys(samples).length} distinct type(s)`,
-      _sampleRecordPerType: samples,
-      _allOffers: offers,
-    }, null, 2);
-  }
+    // Cached destination payloads so we don't re-fetch on every preview render.
+    // Keyed by `${level}:${recordId}`. Set when the agent picks a destination,
+    // cleared when they clear the selection.
+    let destCache = {};
+    let destInFlight = null;
+    async function fetchDestinationData(level, recordId) {
+      const key = level + ':' + recordId;
+      if (destCache[key]) {
+        schedulePreview();
+        return;
+      }
+      // Abort any in-flight fetch — the user may have picked a new destination
+      if (destInFlight) destInFlight.abort();
+      destInFlight = new AbortController();
+      try {
+        const res = await fetch(
+          API_CONTENT + '?level=' + encodeURIComponent(level) + '&recordId=' + encodeURIComponent(recordId),
+          { headers: authH(), signal: destInFlight.signal }
+        );
+        if (res.status === 401) {
+          toast('Session expired. Please sign in.', 'error');
+          if (window.tgse && typeof window.tgse.showLogin === 'function') window.tgse.showLogin();
+          else location.reload();
+          return;
+        }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to load destination');
+        }
+        destCache[key] = await res.json();
+        schedulePreview();
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.error('[editor] destination fetch failed', err);
+        toast('Could not load destination data for preview', 'error');
+      }
+    }
+    function renderSelectedDestination() {
+      const wrap = document.getElementById('selectedDest');
+      const d = state.config.destination;
+      if (!d) { wrap.innerHTML = ''; return; }
+      wrap.innerHTML = `
+        <div class="selected-dest">
+          <div>
+            <div class="selected-dest-name">${escHtml(d.name || '(unnamed)')}</div>
+            <div class="selected-dest-level">${d.level}</div>
+          </div>
+          <button type="button" class="selected-dest-clear" id="clearDest" title="Clear">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>`;
+      document.getElementById('clearDest').addEventListener('click', () => {
+        state.config.destination = null;
+        destCache = {};
+        renderSelectedDestination();
+        onConfigChange();
+      });
+    }
 
-  btn.addEventListener('click', search);
-  diagBtn.addEventListener('click', runDiagnostic);
+    function escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
 
-  updateFieldVisibility();
-  search();
-</script>
+    /* ============================================================
+       Hydrate UI from state.config
+       ============================================================ */
+    function hydrateUI() {
+      const c = state.config;
+      // Name (shell uses kebab-case ID)
+      document.getElementById('name-input').value = state.name || '';
+      // Theme — handled by shell's btn-theme button
+      // Font — handled by shell's mountFontPicker (mounted in renderFontPickerShell)
+      // Colours
+      document.getElementById('brandColor').value = c.brandColor;
+      document.getElementById('brandHex').value   = c.brandColor.toUpperCase();
+      document.getElementById('accentColor').value = c.accentColor;
+      document.getElementById('accentHex').value   = c.accentColor.toUpperCase();
+      // Preset highlight
+      document.querySelectorAll('.preset').forEach((btn, i) => {
+        const p = PRESETS[i];
+        const match = (p.brand.toLowerCase() === c.brandColor.toLowerCase()
+                    && p.accent.toLowerCase() === c.accentColor.toLowerCase());
+        btn.setAttribute('aria-pressed', match ? 'true' : 'false');
+      });
+      // Radius
+      document.getElementById('radius').value = c.radius;
+      document.getElementById('radiusVal').textContent = c.radius + 'px';
+      // Layout
+      document.querySelectorAll('#layoutSeg [data-layout]').forEach(btn => {
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-layout') === c.layout ? 'true' : 'false');
+      });
+      // Unit
+      document.getElementById('unitC').setAttribute('aria-pressed', c.temperatureUnit === 'F' ? 'false' : 'true');
+      document.getElementById('unitF').setAttribute('aria-pressed', c.temperatureUnit === 'F' ? 'true' : 'false');
+      // CTA
+      document.getElementById('ctaTitle').value = (c.cta && c.cta.title) || '';
+      document.getElementById('ctaSubtitle').value = (c.cta && c.cta.subtitle) || '';
+      document.getElementById('ctaButton').value = (c.cta && c.cta.buttonLabel) || '';
+      document.getElementById('ctaUrl').value = (c.cta && c.cta.url) || '';
+      // Headings
+      document.getElementById('hClimate').value = (c.headings && c.headings.climate) || '';
+      document.getElementById('hBestMonths').value = (c.headings && c.headings.bestMonths) || '';
+      // Auto-detect
+      const ad = c.autoDetect || {};
+      document.getElementById('slugSource').value = ad.slugSource || 'last-path-segment';
+      document.getElementById('slugExtra').value = ad.slugExtra || '';
+      updateSlugExtraVisibility();
+      // Section toggles
+      document.querySelectorAll('[data-section-toggle]').forEach(btn => {
+        const k = btn.getAttribute('data-section-toggle');
+        btn.setAttribute('aria-checked', c.sections[k] ? 'true' : 'false');
+      });
+      // Extras
+      document.getElementById('togFlag').setAttribute('aria-checked', c.showFlag ? 'true' : 'false');
+      // Destination
+      renderSelectedDestination();
+      // Embed
+      renderEmbed();
+    }
+
+    function updateSlugExtraVisibility() {
+      const src = document.getElementById('slugSource').value;
+      const wrap = document.getElementById('slugExtraWrap');
+      const label = document.getElementById('slugExtraLabel');
+      if (src === 'query-param') {
+        wrap.hidden = false; label.textContent = 'Parameter name'; document.getElementById('slugExtra').placeholder = 'e.g. dest';
+      } else if (src === 'custom-selector') {
+        wrap.hidden = false; label.textContent = 'CSS selector (data-attribute expected)'; document.getElementById('slugExtra').placeholder = 'e.g. [data-destination]';
+      } else {
+        wrap.hidden = true;
+      }
+    }
+
+    /* ============================================================
+       Input wiring — every input updates config + triggers preview
+       ============================================================ */
+    function onConfigChange() {
+      state.dirty = true;
+      refreshSaveBtn();
+      renderEmbed();
+      schedulePreview();
+      schedulePushHistory();
+    }
+    let historyTimer = null;
+    function schedulePushHistory() {
+      if (historyTimer) clearTimeout(historyTimer);
+      historyTimer = setTimeout(pushHistory, 500);
+    }
+
+    // Name (shell uses kebab-case ID)
+    document.getElementById('name-input').addEventListener('input', (e) => {
+      state.name = e.target.value;
+      state.dirty = true;
+      refreshSaveBtn();
+      schedulePushHistory();
+    });
+
+    // Theme — handled by shell's btn-theme via tgse.init({ onThemeToggle })
+    // Font — handled by shell's mountFontPicker (in renderFontPickerShell)
+
+    // Colour pickers
+    function bindColour(pickerId, hexId, key) {
+      const picker = document.getElementById(pickerId);
+      const hex = document.getElementById(hexId);
+      picker.addEventListener('input', () => {
+        state.config[key] = picker.value;
+        hex.value = picker.value.toUpperCase();
+        hydrateUI();
+        onConfigChange();
+      });
+      hex.addEventListener('change', () => {
+        let v = hex.value.trim();
+        if (!/^#[0-9a-f]{6}$/i.test(v)) { hex.value = state.config[key].toUpperCase(); return; }
+        state.config[key] = v.toLowerCase();
+        hydrateUI();
+        onConfigChange();
+      });
+    }
+    bindColour('brandColor', 'brandHex', 'brandColor');
+    bindColour('accentColor', 'accentHex', 'accentColor');
+
+    // Radius
+    document.getElementById('radius').addEventListener('input', (e) => {
+      state.config.radius = parseInt(e.target.value, 10) || 0;
+      document.getElementById('radiusVal').textContent = state.config.radius + 'px';
+      onConfigChange();
+    });
+
+    // Unit
+    document.getElementById('unitC').onclick = () => { state.config.temperatureUnit = 'C'; hydrateUI(); onConfigChange(); };
+    document.getElementById('unitF').onclick = () => { state.config.temperatureUnit = 'F'; hydrateUI(); onConfigChange(); };
+
+    // Layout
+    document.querySelectorAll('#layoutSeg [data-layout]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.config.layout = btn.getAttribute('data-layout');
+        hydrateUI();
+        onConfigChange();
+      });
+    });
+
+    // CTA
+    document.getElementById('ctaTitle').addEventListener('input', e => { state.config.cta.title = e.target.value; onConfigChange(); });
+    document.getElementById('ctaSubtitle').addEventListener('input', e => { state.config.cta.subtitle = e.target.value; onConfigChange(); });
+    document.getElementById('ctaButton').addEventListener('input', e => { state.config.cta.buttonLabel = e.target.value; onConfigChange(); });
+    document.getElementById('ctaUrl').addEventListener('input', e => { state.config.cta.url = e.target.value; onConfigChange(); });
+
+    // Headings
+    document.getElementById('hClimate').addEventListener('input', e => { state.config.headings.climate = e.target.value; onConfigChange(); });
+    document.getElementById('hBestMonths').addEventListener('input', e => { state.config.headings.bestMonths = e.target.value; onConfigChange(); });
+
+    // Auto-detect
+    document.getElementById('slugSource').addEventListener('change', e => {
+      state.config.autoDetect.slugSource = e.target.value;
+      updateSlugExtraVisibility();
+      onConfigChange();
+    });
+    document.getElementById('slugExtra').addEventListener('input', e => {
+      state.config.autoDetect.slugExtra = e.target.value;
+      onConfigChange();
+    });
+
+    // Extras toggles
+    document.getElementById('togFlag').addEventListener('click', (e) => {
+      state.config.showFlag = !state.config.showFlag;
+      e.currentTarget.setAttribute('aria-checked', state.config.showFlag ? 'true' : 'false');
+      onConfigChange();
+    });
+
+    // Destination picker input
+    document.getElementById('destSearch').addEventListener('input', (e) => searchDestinations(e.target.value.trim()));
+    document.getElementById('destSearch').addEventListener('focus', (e) => {
+      if (e.target.value.trim().length >= 2) document.getElementById('pickerResults').hidden = false;
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.picker-wrap')) document.getElementById('pickerResults').hidden = true;
+    });
+
+    /* ============================================================
+       Save + Embed code
+       ============================================================ */
+    function refreshSaveBtn() {
+      // Shell handles all visual states; we just notify it whether dirty or clean.
+      if (window.tgse && typeof window.tgse.setSaveState === 'function') {
+        window.tgse.setSaveState(state.dirty ? 'dirty' : 'clean');
+        return;
+      }
+      const btn = document.getElementById('btn-save');
+      if (!btn) return;
+      btn.classList.toggle('is-dirty', state.dirty);
+      btn.classList.remove('is-saved');
+    }
+    function renderEmbed() {
+      const wrap = document.getElementById('embedWrap');
+      if (!state.widgetId) {
+        wrap.innerHTML = '<div class="field-help">Save the widget first to get your embed code.</div>';
+        return;
+      }
+      const code = `<div data-tg-widget="weather" data-tg-id="${state.widgetId}"></div>\n<script src="https://tg-widgets.vercel.app/widget-weather.js"></scr` + `ipt>`;
+      wrap.innerHTML = `
+        <div class="embed">
+          <button class="embed-copy" id="embedCopy">Copy</button>
+${escHtml(code)}
+        </div>
+        <div class="field-help" style="margin-top:6px;">Paste this snippet anywhere on your site where you want the widget to appear.</div>
+      `;
+      document.getElementById('embedCopy').addEventListener('click', () => {
+        navigator.clipboard.writeText(code).then(() => toast('Embed code copied', 'success'));
+      });
+    }
+
+    /* save() function removed — the shell handles save entirely via
+       getConfig() (returns state.config). The editor reacts via the
+       onAfterSave hook in tgse.init() to update topbarSub, embed snippet,
+       and URL. See the bottom of this file. */
+
+    /* ============================================================
+       Load existing widget (if ?id=...)
+       ============================================================ */
+    async function loadExisting(id) {
+      try {
+        // cache: 'no-store' bypasses both browser and CDN cache.
+        // The GET endpoint sets s-maxage=300 (5min CDN) for public widget
+        // embeds, but the editor needs fresh data after every save.
+        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id), { cache: 'no-store' });
+        if (!res.ok) throw new Error('Could not load widget');
+        const data = await res.json();
+        // API returns { config, name, ...config } — config is the canonical
+        // source. Fall back to root for legacy responses.
+        const cfg = (data && data.config && typeof data.config === 'object') ? data.config : data;
+        state.config = Object.assign(defaultConfig(), cfg);
+        state.config.sections = Object.assign(defaultConfig().sections, cfg.sections || {});
+        state.config.headings = Object.assign(defaultConfig().headings, cfg.headings || {});
+        state.config.cta = Object.assign(defaultConfig().cta, cfg.cta || {});
+        state.config.autoDetect = Object.assign(defaultConfig().autoDetect, cfg.autoDetect || {});
+        state.widgetId = id;
+        state.name = (data && typeof data.name === 'string') ? data.name : '';
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) nameInput.value = state.name;
+        document.getElementById('topbarSub').textContent = id;
+        hydrateUI();
+        // Preload destination for preview
+        if (state.config.destination && state.config.destination.recordId) {
+          fetchDestinationData(state.config.destination.level, state.config.destination.recordId);
+        }
+      } catch (ex) {
+        toast('Could not load the widget. Starting fresh.', 'error');
+      }
+    }
+
+    /* ============================================================
+       Live preview — sandboxed iframe, inline config
+       ============================================================ */
+    let previewTimer = null;
+    function schedulePreview() {
+      if (previewTimer) clearTimeout(previewTimer);
+      previewTimer = setTimeout(renderPreview, 120);
+    }
+    function renderPreview() {
+      const frame = document.getElementById('previewFrame');
+      const cfg = JSON.parse(JSON.stringify(state.config));
+
+      // Inject the cached destination payload so the widget skips its own API
+      // call and renders immediately. This is why the widget exposes the
+      // `destinationData` escape hatch — editor preview is the intended user.
+      if (cfg.destination && cfg.destination.recordId) {
+        const key = cfg.destination.level + ':' + cfg.destination.recordId;
+        if (destCache[key]) {
+          cfg.destinationData = destCache[key];
+        }
+        // If not cached yet, kick off a fetch. The preview will re-render when
+        // the fetch lands. In the meantime the widget shows its loading/notice
+        // state which is fine.
+        else {
+          fetchDestinationData(cfg.destination.level, cfg.destination.recordId);
+        }
+      }
+
+      const font = cfg.fontFamily ? encodeURIComponent(cfg.fontFamily) : '';
+      // Stage sizing — reflects how the widget would behave inside a real
+      // page column. The stage max-width matches the layout's natural width
+      // (with a little breathing room) so the widget renders at the right
+      // size instead of floating tiny in a wide preview pane.
+      const layout = cfg.layout || 'standard';
+      const stageMax = layout === 'wide' ? 880 : layout === 'standard' ? 500 : 420;
+      const html = `<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;500;600;700&display=swap" rel="stylesheet">` : ''}
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: ${cfg.theme==='dark'?'#0F172A':'#F8FAFC'};
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .stage {
+    width: 100%;
+    max-width: ${stageMax}px;
+  }
+  .stage-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: ${cfg.theme==='dark'?'#64748B':'#94A3B8'};
+    margin: 0 0 12px;
+    text-align: center;
+  }
+</style>
+</head><body>
+<div class="stage">
+  <p class="stage-label">${escHtml(layout)} layout preview</p>
+  <div data-tg-widget="weather" data-tg-config='${escAttr(JSON.stringify(cfg))}'></div>
+</div>
+<script>window.__TG_PREVIEW__=true;<` + `/script>
+<script src="${location.origin}/widget-weather.js"><` + `/script>
+</body></html>`;
+      // Safer blob-based load than srcdoc for large docs
+      frame.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+    }
+    function escAttr(s) { return String(s || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;'); }
+
+    /* ============================================================
+       Viewport switcher
+       ============================================================ */
+    function setViewport(px, which) {
+      const wrap = document.getElementById('previewWrap');
+      wrap.style.width = px + 'px';
+      // Update both is-on (for shell button styling) and aria-pressed (legacy)
+      ['Desktop','Tablet','Mobile'].forEach(v => {
+        const btn = document.getElementById('vp' + v);
+        const active = v === which;
+        btn.classList.toggle('is-on', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+    }
+    document.getElementById('vpDesktop').onclick = () => setViewport(1280, 'Desktop');
+    document.getElementById('vpTablet').onclick = () => setViewport(768, 'Tablet');
+    document.getElementById('vpMobile').onclick = () => setViewport(375, 'Mobile');
+
+    /* ============================================================
+       AI Modal / Templates Modal
+       ============================================================ */
+    function openModal(id) { document.getElementById(id).hidden = false; }
+    function closeModal(id) { document.getElementById(id).hidden = true; }
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const m = btn.closest('.modal-backdrop');
+        if (m) m.hidden = true;
+      });
+    });
+    // AI / Templates buttons are wired by the shell via tgse.init({ onAIBuild, onTemplates }).
+
+    document.getElementById('aiGenerate').addEventListener('click', async () => {
+      const prompt = document.getElementById('aiPrompt').value.trim();
+      if (prompt.length < 10) { toast('Please describe your business in a bit more detail', 'error'); return; }
+      const btn = document.getElementById('aiGenerate');
+      btn.disabled = true; btn.textContent = 'Generating…';
+      try {
+        const res = await fetch(API_AI, {
+          method: 'POST',
+          headers: authH(),
+          body: JSON.stringify({ widgetType: 'WEATHER', prompt }),
+        });
+        if (res.status === 401) {
+          toast('Your session expired. Please sign in.', 'error');
+          if (window.tgse && typeof window.tgse.showLogin === 'function') window.tgse.showLogin();
+          else location.reload();
+          return;
+        }
+        if (res.status === 429) {
+          const data = await res.json().catch(() => ({}));
+          toast(data.error || 'AI limit reached. Try again later.', 'error');
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'AI generation failed');
+        // Apply the AI's suggestions
+        if (data.brandColor) state.config.brandColor = data.brandColor;
+        if (data.accentColor) state.config.accentColor = data.accentColor;
+        if (data.temperatureUnit) state.config.temperatureUnit = data.temperatureUnit;
+        if (data.layout && ['compact','standard','wide'].includes(data.layout)) {
+          state.config.layout = data.layout;
+        }
+        if (data.cta) {
+          if (data.cta.title) state.config.cta.title = data.cta.title;
+          if (data.cta.subtitle) state.config.cta.subtitle = data.cta.subtitle;
+          if (data.cta.buttonLabel) state.config.cta.buttonLabel = data.cta.buttonLabel;
+        }
+        hydrateUI();
+        onConfigChange();
+        closeModal('aiModal');
+        toast('AI suggestions applied', 'success');
+      } catch (ex) {
+        toast(ex.message || 'AI generation failed', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2m0 14v2M5.5 5.5l1.4 1.4m10.2 10.2 1.4 1.4M3 12h2m14 0h2M5.5 18.5l1.4-1.4m10.2-10.2 1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg> Generate';
+      }
+    });
+
+    /* ============================================================
+       Templates — curated starting points
+       Each template sets colours + CTA copy + unit + suggests a matching
+       demo destination that the agent can accept or replace.
+       ============================================================ */
+    const TEMPLATES = [
+      {
+        name: 'Mediterranean',
+        destHint: 'Greece',
+        brandColor: '#1B2B5B', accentColor: '#00B4D8',
+        temperatureUnit: 'C',
+        layout: 'standard',
+        cta: {
+          title: 'Plan your Mediterranean escape',
+          subtitle: 'Whitewashed villages, cobalt seas and long lunches. Handpicked stays across the Med.',
+          buttonLabel: 'Start planning',
+        },
+      },
+      {
+        name: 'Winter Sun',
+        destHint: 'Barbados',
+        brandColor: '#7C2D12', accentColor: '#F59E0B',
+        temperatureUnit: 'C',
+        layout: 'wide',
+        cta: {
+          title: 'Escape the British winter',
+          subtitle: 'Warm sand, warm sea, warm welcome. Long-haul escapes when the UK turns grey.',
+          buttonLabel: 'Find your sunshine',
+        },
+      },
+      {
+        name: 'Tropical',
+        destHint: 'Maldives',
+        brandColor: '#581C87', accentColor: '#C084FC',
+        temperatureUnit: 'C',
+        layout: 'compact',
+        cta: {
+          title: 'Paradise, to your schedule',
+          subtitle: 'Overwater villas and private atolls.',
+          buttonLabel: 'Speak to a specialist',
+        },
+      },
+      {
+        name: 'Adventure',
+        destHint: 'Kenya',
+        brandColor: '#14532D', accentColor: '#22C55E',
+        temperatureUnit: 'C',
+        layout: 'standard',
+        cta: {
+          title: 'Design your next adventure',
+          subtitle: 'Safari, summit, surf or sand — travel that earns the photographs.',
+          buttonLabel: 'Start planning',
+        },
+      },
+      {
+        name: 'City Break',
+        destHint: 'Italy',
+        brandColor: '#9F1239', accentColor: '#FB7185',
+        temperatureUnit: 'C',
+        layout: 'wide',
+        cta: {
+          title: "Weekends worth booking a Monday off for",
+          subtitle: "Europe's best short breaks, the restaurants to book, the hotels worth the walk.",
+          buttonLabel: 'Find yours',
+        },
+      },
+    ];
+    function renderTemplates() {
+      const grid = document.getElementById('templatesGrid');
+      grid.innerHTML = '';
+      TEMPLATES.forEach((t, i) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'template-card';
+        card.innerHTML = `
+          <div class="template-swatches">
+            <div class="template-swatch" style="background:${t.brandColor}"></div>
+            <div class="template-swatch" style="background:${t.accentColor}"></div>
+          </div>
+          <div class="template-name">${t.name}</div>
+          <div class="template-dest">Example destination: ${t.destHint}</div>
+        `;
+        card.addEventListener('click', () => applyTemplate(t));
+        grid.appendChild(card);
+      });
+    }
+    async function applyTemplate(t) {
+      state.config.brandColor = t.brandColor;
+      state.config.accentColor = t.accentColor;
+      state.config.temperatureUnit = t.temperatureUnit;
+      if (t.layout && ['compact','standard','wide'].includes(t.layout)) {
+        state.config.layout = t.layout;
+      }
+      state.config.cta.title = t.cta.title;
+      state.config.cta.subtitle = t.cta.subtitle;
+      state.config.cta.buttonLabel = t.cta.buttonLabel;
+      // Try to auto-select the hinted destination if the user hasn't set one
+      if (!state.config.destination && t.destHint) {
+        try {
+          const res = await fetch(API_SEARCH + '?q=' + encodeURIComponent(t.destHint), { headers: authH() });
+          if (res.ok) {
+            const data = await res.json();
+            const first = (data.results || [])[0];
+            if (first) {
+              state.config.destination = { level: first.level, recordId: first.recordId, name: first.name };
+              fetchDestinationData(first.level, first.recordId);
+            }
+          }
+        } catch (err) { /* best-effort */ }
+      }
+      hydrateUI();
+      onConfigChange();
+      closeModal('templatesModal');
+      toast(t.name + ' template applied', 'success');
+    }
+
+    /* ============================================================
+       Keyboard shortcuts (shell handles ⌘S, A, T, D, 1/2/3)
+       ============================================================ */
+    document.addEventListener('keydown', (e) => {
+      // ⌘Z / ⌘⇧Z — undo/redo
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
+      // Esc closes modals
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop:not([hidden])').forEach(m => m.hidden = true);
+        const pr = document.getElementById('pickerResults');
+        if (pr) pr.hidden = true;
+        return;
+      }
+    });
+
+    /* ============================================================
+       Boot
+       ============================================================ */
+    async function boot() {
+      // Show the editor surface (it starts hidden so the page is blank
+      // until either the shell login overlay or boot() runs).
+      const editor = document.getElementById('editor');
+      if (editor) editor.hidden = false;
+
+      renderPresets();
+      renderFontPickerShell();   // shell-mounted font picker
+      renderSectionToggles();
+      renderTemplates();
+      if (widgetIdFromUrl) await loadExisting(widgetIdFromUrl);
+      hydrateUI();
+      pushHistory();
+      renderPreview();
+      refreshSaveBtn();
+    }
+
+    /* ============================================================
+       Hand off to the shell. It handles login overlay, save (via getConfig
+       + onAfterSave), save button state, theme + AI + templates + embed
+       triggers, SSO across tabs, keyboard shortcuts, viewport switching.
+       ============================================================ */
+    window.tgse.init({
+      widgetType: WIDGET_TYPE,
+      widgetTag: 'weather',
+      scriptFile: 'widget-weather.js',
+
+      getConfig: () => state.config,
+      setConfig: (c) => {
+        if (c && typeof c === 'object') Object.assign(state.config, c);
+        hydrateUI();
+        renderPreview();
+      },
+
+      onAIBuild: () => openModal('aiModal'),
+      onTemplates: () => openModal('templatesModal'),
+      onThemeToggle: () => {
+        state.config.theme = state.config.theme === 'dark' ? 'light' : 'dark';
+        state.dirty = true;
+        refreshSaveBtn();
+        renderPreview();
+      },
+      // No onDesignMode — Weather has no design-mode hotspot system.
+      onTabChange: (tabName) => {
+        const map = { design: 'Design', content: 'Content', settings: 'Settings' };
+        if (map[tabName]) setTab(map[tabName]);
+      },
+      onLoginSuccess: () => boot(),
+
+      onAfterSave: (d) => {
+        state.dirty = false;
+        if (d && d.widgetId) state.widgetId = d.widgetId;
+        if (d && d.recordId) state.airtableRecordId = d.recordId;
+        document.getElementById('topbarSub').textContent = state.widgetId || 'Saved';
+        renderEmbed();
+      },
+    });
+
+    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+      boot();
+    }
+    // else shell shows login overlay, we'll boot via onLoginSuccess
+  </script>
+
 </body>
 </html>
