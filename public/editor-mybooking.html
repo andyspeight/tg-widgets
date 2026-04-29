@@ -363,6 +363,20 @@
           </div></div>
         </div>
 
+        <div class="section" data-section="typography">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg> Typography</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="field">
+              <label>Font family</label>
+              <div id="fontPickerMount"></div>
+              <div class="field-help">Applied to all text in the widget.</div>
+            </div>
+          </div></div>
+        </div>
+
       </div>
 
       <!-- CONTENT TAB -->
@@ -1353,8 +1367,25 @@ import { renderEmailHtml } from '/_email-template.js';
     }
     await loadIntegration();
     renderLunaStatus();
+    mountFontPickerShell();
     renderPreview();
     updateEmbedCode();
+  }
+
+  // Mount the shell font picker into the Typography section. Called from
+  // bootstrap() (after loadWidget so we have the right initial value).
+  function mountFontPickerShell() {
+    const mount = document.getElementById('fontPickerMount');
+    if (!mount || !window.tgse || typeof window.tgse.mountFontPicker !== 'function') return;
+    window.tgse.mountFontPicker(
+      mount,
+      state.config.fontFamily || 'Inter',
+      (font) => {
+        state.config.fontFamily = font;
+        if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+        renderPreview();
+      }
+    );
   }
 
   // Boot only if logged in. If not, the shell's overlay is up — boot will fire
