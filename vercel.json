@@ -9,6 +9,10 @@
     "api/booking-email.js": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "api/offers.js": {
+      "memory": 256,
+      "maxDuration": 15
     }
   },
   "rewrites": [
@@ -21,6 +25,7 @@
     { "source": "/demo-enquiry",      "destination": "/demo-enquiry.html" },
     { "source": "/demo-mybooking",    "destination": "/demo-mybooking.html" },
     { "source": "/demo-countdown",    "destination": "/demo-countdown.html" },
+    { "source": "/demo-offers",       "destination": "/demo-offers.html" },
     { "source": "/wow-showcase",      "destination": "/wow-showcase.html" },
     { "source": "/demo-logos",        "destination": "/demo-logos.html" },
     { "source": "/editor",              "destination": "/editor.html" },
