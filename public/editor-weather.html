@@ -8,7 +8,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/editor-shell.css">
 
   <style>
     /* ============================================================
@@ -405,84 +406,68 @@
 </head>
 <body>
 
-  <!-- Login overlay (Flavour 2) -->
-  <div class="login-overlay" id="loginOverlay" hidden>
-    <div class="login-card">
-      <div class="login-logo">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-      </div>
-      <h1 class="login-title">Sign in</h1>
-      <p class="login-sub">Access your Travelgenix Widget Suite</p>
-      <form id="loginForm">
-        <div class="login-field"><input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" autocomplete="email" required></div>
-        <div class="login-field"><input class="login-input" id="loginCode" type="password" placeholder="Client code" autocomplete="current-password" required></div>
-        <button type="submit" class="login-btn" id="loginBtn">Sign in</button>
-        <div class="login-err" id="loginErr"></div>
-      </form>
-      <p class="login-footer">Need help? Contact your Travelgenix account manager.</p>
-    </div>
-  </div>
+  <!-- Login overlay is now handled by the shell. -->
 
   <!-- Editor -->
-  <div class="editor" id="editor" hidden>
+  <div class="tgse-app" id="editor" hidden>
 
-    <aside class="sidebar">
-      <!-- Topbar -->
-      <div class="topbar">
-        <a class="icon-btn icon-only" href="/" title="Back to dashboard" aria-label="Back to dashboard">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    <aside class="tgse-sidebar">
+
+      <!-- Crumb strip -->
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
         </a>
-        <div class="logo">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      </div>
+
+      <!-- Widget identity -->
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        </span>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Weather</div>
+          <div class="tgse-id-type" id="topbarSub">New widget</div>
         </div>
-        <div class="topbar-ident">
-          <div class="topbar-title">Weather Editor</div>
-          <div class="topbar-sub" id="topbarSub">New widget</div>
-        </div>
-        <div class="topbar-spacer"></div>
-        <button class="icon-btn icon-only" id="aiBtn" title="AI suggestions (A)" aria-label="AI suggestions">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2m0 14v2M5.5 5.5l1.4 1.4m10.2 10.2 1.4 1.4M3 12h2m14 0h2M5.5 18.5l1.4-1.4m10.2-10.2 1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>
+      </div>
+
+      <!-- Primary actions -->
+      <div class="tgse-actions">
+        <button class="tgse-btn" id="btn-templates" title="Templates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Templates
+          <span class="tgse-kbd">T</span>
         </button>
-        <button class="icon-btn icon-only" id="templatesBtn" title="Templates (T)" aria-label="Templates">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+          AI builder
+          <span class="tgse-kbd">A</span>
         </button>
       </div>
 
       <!-- Name + Save -->
-      <div class="name-row">
-        <input class="name-input" id="nameInput" placeholder="Widget name" maxlength="100" />
-        <button class="save-btn" id="saveBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Save
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Widget name" maxlength="100">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="save-label">Save</span>
         </button>
       </div>
 
-      <!-- Tabs -->
-      <div class="tabs" role="tablist">
-        <button class="tab-btn" id="tabDesign" role="tab" aria-selected="true">Design</button>
-        <button class="tab-btn" id="tabContent" role="tab" aria-selected="false">Content</button>
-        <button class="tab-btn" id="tabSettings" role="tab" aria-selected="false">Settings</button>
-      </div>
+      <!-- Tabs — keep existing IDs for editor's bind code, add data-tab for shell -->
+      <nav class="tgse-tabs" role="tablist">
+        <button id="tabDesign" data-tab="design" role="tab" aria-selected="true">Design</button>
+        <button id="tabContent" data-tab="content" role="tab" aria-selected="false">Content</button>
+        <button id="tabSettings" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
 
-      <!-- Body -->
+      <!-- Body (scrollable) -->
       <div class="sidebar-body">
 
         <!-- DESIGN TAB -->
         <div id="panelDesign">
-          <div class="section" data-open="true">
-            <button class="section-head" data-section>Theme
-              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="section-body">
-              <div class="field">
-                <label class="field-label">Mode</label>
-                <div class="segmented" role="group" aria-label="Theme mode">
-                  <button type="button" id="themeLight" aria-pressed="true">Light</button>
-                  <button type="button" id="themeDark" aria-pressed="false">Dark</button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Theme moved to preview toolbar (consistent with other editors) -->
 
           <div class="section" data-open="true">
             <button class="section-head" data-section>Colours
@@ -528,10 +513,8 @@
               </div>
               <div class="field">
                 <label class="field-label">Font family</label>
-                <select class="select" id="fontFamily">
-                  <option value="">Inter (default)</option>
-                  <!-- injected by JS -->
-                </select>
+                <div id="fontPickerMount"></div>
+                <div class="field-help" style="margin-top:6px;font-size:11px;color:var(--muted)">Applied to all text in the widget</div>
               </div>
             </div>
           </div>
@@ -704,25 +687,32 @@
     </aside>
 
     <!-- Preview pane -->
-    <section class="preview">
-      <div class="preview-toolbar">
-        <div class="preview-toolbar-left">Live preview</div>
-        <div class="viewport-seg" role="group" aria-label="Viewport">
-          <button type="button" id="vpDesktop" aria-pressed="true" title="Desktop">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            1280
-          </button>
-          <button type="button" id="vpTablet" aria-pressed="false" title="Tablet">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-            768
-          </button>
-          <button type="button" id="vpMobile" aria-pressed="false" title="Mobile">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-            375
-          </button>
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
+
+        <div class="tgse-vp" role="group" aria-label="Viewport">
+          <button class="is-on" data-vp="desktop" id="vpDesktop" title="Desktop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+          <button data-vp="tablet" id="vpTablet" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+          <button data-vp="mobile" id="vpMobile" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
         </div>
+
+        <div class="tgse-divider"></div>
+
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
+        </button>
       </div>
-      <div class="preview-scroll">
+
+      <!-- IFRAME PREVIEW — kept exactly as-is. Weather loads inside an iframe
+           with its config because of how the data:text/html template is built. -->
+      <div class="tgse-canvas">
         <div class="preview-frame-wrap" id="previewWrap" style="width: 1280px;">
           <iframe class="preview-frame" id="previewFrame" title="Widget preview"></iframe>
         </div>
@@ -770,6 +760,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Shell behaviour first — exposes window.tgse -->
+  <script src="/editor-shell.js"></script>
 
   <script>
     /* ============================================================
@@ -863,24 +856,29 @@
       } catch (err) { console.error('undo/redo apply failed', err); }
     }
 
-    /* ---------- auth ---------- */
+    /* ---------- auth (delegates to shell) ---------- */
     function getToken() {
-      try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.token || ''; }
-      catch { return ''; }
+      try {
+        const raw = localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session');
+        return raw ? (JSON.parse(raw)?.token || '') : '';
+      } catch { return ''; }
     }
     function authH() {
+      if (window.tgse && typeof window.tgse.authHeaders === 'function') {
+        return window.tgse.authHeaders();
+      }
       const t = getToken();
       const h = { 'Content-Type': 'application/json' };
       if (t) h['Authorization'] = 'Bearer ' + t;
       return h;
     }
     function isLoggedIn() {
+      if (window.tgse && typeof window.tgse.isLoggedIn === 'function') {
+        return window.tgse.isLoggedIn();
+      }
       try {
-        const s = JSON.parse(sessionStorage.getItem('tgw_session'));
-        // Match FAQ/Testimonials editors: just check a token exists. The server
-        // re-validates tokens on every request (via _auth.js) so the client
-        // doesn't need to enforce expiry here — if a token has expired, the
-        // next save/AI/search call returns 401 and we showLogin() then.
+        const raw = localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session');
+        const s = raw ? JSON.parse(raw) : null;
         return !!(s && s.token);
       } catch { return false; }
     }
@@ -899,50 +897,10 @@
     }
 
     /* ============================================================
-       Login
+       Login — handled by shell
        ============================================================ */
-    function showLogin() {
-      document.getElementById('loginOverlay').hidden = false;
-      document.getElementById('editor').hidden = true;
-      setTimeout(() => document.getElementById('loginEmail').focus(), 50);
-    }
-    function hideLogin() {
-      document.getElementById('loginOverlay').hidden = true;
-      document.getElementById('editor').hidden = false;
-    }
-    async function doLogin(email, code) {
-      const res = await fetch(API_AUTH, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || ('Sign in failed (' + res.status + ')'));
-      sessionStorage.setItem('tgw_session', JSON.stringify({
-        token: data.token, email: data.email, plan: data.plan, clientName: data.clientName,
-        exp: Date.now() + (23 * 60 * 60 * 1000),
-      }));
-      return data;
-    }
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const err = document.getElementById('loginErr');
-      const btn = document.getElementById('loginBtn');
-      err.textContent = '';
-      btn.disabled = true; btn.textContent = 'Signing in…';
-      try {
-        await doLogin(
-          document.getElementById('loginEmail').value.trim(),
-          document.getElementById('loginCode').value
-        );
-        hideLogin();
-        await boot();
-      } catch (ex) {
-        err.textContent = ex.message || 'Something went wrong. Please try again.';
-      } finally {
-        btn.disabled = false; btn.textContent = 'Sign in';
-      }
-    });
+    // showLogin / hideLogin / doLogin / loginForm are all handled by the shell.
+    // We hand off via tgse.init({ onLoginSuccess: () => boot() }) below.
 
     /* ============================================================
        Tabs
@@ -957,9 +915,7 @@
         panel.hidden = !active;
       }
     }
-    document.getElementById('tabDesign').onclick = () => setTab('Design');
-    document.getElementById('tabContent').onclick = () => setTab('Content');
-    document.getElementById('tabSettings').onclick = () => setTab('Settings');
+    // Tab click handlers wired by the shell via onTabChange.
 
     /* ============================================================
        Collapsible sections
@@ -1003,22 +959,15 @@
     }
 
     /* ============================================================
-       Font picker — 30 Google Fonts
+       Font picker — handled by the shell.
+       Mounted in renderFontPickerShell() called from boot().
        ============================================================ */
-    const FONTS = [
-      'Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Poppins', 'Raleway',
-      'Nunito', 'Source Sans Pro', 'Merriweather', 'Playfair Display', 'Lora',
-      'PT Serif', 'Libre Baskerville', 'Roboto Slab', 'Oswald', 'DM Sans',
-      'Plus Jakarta Sans', 'Space Grotesk', 'Manrope', 'Work Sans', 'Rubik',
-      'Mulish', 'Karla', 'Cabin', 'Quicksand', 'Fraunces', 'Outfit',
-      'Figtree', 'Albert Sans',
-    ];
-    function renderFontPicker() {
-      const sel = document.getElementById('fontFamily');
-      FONTS.forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f; opt.textContent = f;
-        sel.appendChild(opt);
+    function renderFontPickerShell() {
+      const mount = document.getElementById('fontPickerMount');
+      if (!mount || !window.tgse || typeof window.tgse.mountFontPicker !== 'function') return;
+      window.tgse.mountFontPicker(mount, state.config.fontFamily || 'Inter', (font) => {
+        state.config.fontFamily = font;
+        onConfigChange();
       });
     }
 
@@ -1137,7 +1086,8 @@
         );
         if (res.status === 401) {
           toast('Session expired. Please sign in.', 'error');
-          showLogin();
+          if (window.tgse && typeof window.tgse.showLogin === 'function') window.tgse.showLogin();
+          else location.reload();
           return;
         }
         if (!res.ok) {
@@ -1185,11 +1135,10 @@
        ============================================================ */
     function hydrateUI() {
       const c = state.config;
-      // Name
-      document.getElementById('nameInput').value = state.name || '';
-      // Theme
-      document.getElementById('themeLight').setAttribute('aria-pressed', c.theme === 'light' ? 'true' : 'false');
-      document.getElementById('themeDark').setAttribute('aria-pressed',  c.theme === 'dark'  ? 'true' : 'false');
+      // Name (shell uses kebab-case ID)
+      document.getElementById('name-input').value = state.name || '';
+      // Theme — handled by shell's btn-theme button
+      // Font — handled by shell's mountFontPicker (mounted in renderFontPickerShell)
       // Colours
       document.getElementById('brandColor').value = c.brandColor;
       document.getElementById('brandHex').value   = c.brandColor.toUpperCase();
@@ -1205,8 +1154,6 @@
       // Radius
       document.getElementById('radius').value = c.radius;
       document.getElementById('radiusVal').textContent = c.radius + 'px';
-      // Font
-      document.getElementById('fontFamily').value = c.fontFamily || '';
       // Layout
       document.querySelectorAll('#layoutSeg [data-layout]').forEach(btn => {
         btn.setAttribute('aria-pressed', btn.getAttribute('data-layout') === c.layout ? 'true' : 'false');
@@ -1269,17 +1216,16 @@
       historyTimer = setTimeout(pushHistory, 500);
     }
 
-    // Name
-    document.getElementById('nameInput').addEventListener('input', (e) => {
+    // Name (shell uses kebab-case ID)
+    document.getElementById('name-input').addEventListener('input', (e) => {
       state.name = e.target.value;
       state.dirty = true;
       refreshSaveBtn();
       schedulePushHistory();
     });
 
-    // Theme
-    document.getElementById('themeLight').onclick = () => { state.config.theme = 'light'; hydrateUI(); onConfigChange(); };
-    document.getElementById('themeDark').onclick  = () => { state.config.theme = 'dark';  hydrateUI(); onConfigChange(); };
+    // Theme — handled by shell's btn-theme via tgse.init({ onThemeToggle })
+    // Font — handled by shell's mountFontPicker (in renderFontPickerShell)
 
     // Colour pickers
     function bindColour(pickerId, hexId, key) {
@@ -1306,12 +1252,6 @@
     document.getElementById('radius').addEventListener('input', (e) => {
       state.config.radius = parseInt(e.target.value, 10) || 0;
       document.getElementById('radiusVal').textContent = state.config.radius + 'px';
-      onConfigChange();
-    });
-
-    // Font
-    document.getElementById('fontFamily').addEventListener('change', (e) => {
-      state.config.fontFamily = e.target.value;
       onConfigChange();
     });
 
@@ -1369,10 +1309,15 @@
        Save + Embed code
        ============================================================ */
     function refreshSaveBtn() {
-      const btn = document.getElementById('saveBtn');
+      // Shell handles all visual states; we just notify it whether dirty or clean.
+      if (window.tgse && typeof window.tgse.setSaveState === 'function') {
+        window.tgse.setSaveState(state.dirty ? 'dirty' : 'clean');
+        return;
+      }
+      const btn = document.getElementById('btn-save');
+      if (!btn) return;
+      btn.classList.toggle('is-dirty', state.dirty);
       btn.classList.remove('is-saved');
-      if (state.dirty) btn.classList.add('is-dirty');
-      else btn.classList.remove('is-dirty');
     }
     function renderEmbed() {
       const wrap = document.getElementById('embedWrap');
@@ -1393,74 +1338,34 @@ ${escHtml(code)}
       });
     }
 
-    async function save() {
-      if (!state.name || !state.name.trim()) {
-        toast('Give the widget a name first', 'error');
-        document.getElementById('nameInput').focus();
-        return;
-      }
-      const btn = document.getElementById('saveBtn');
-      btn.disabled = true;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving…';
-      try {
-        const body = {
-          widgetId: state.widgetId,
-          name: state.name.trim(),
-          widgetType: WIDGET_TYPE,
-          config: state.config,
-        };
-        const res = await fetch(API_CONFIG, {
-          method: 'POST',
-          headers: authH(),
-          body: JSON.stringify(body),
-        });
-        if (res.status === 401) {
-          toast('Your session expired. Please sign in again.', 'error');
-          sessionStorage.removeItem('tgw_session');
-          showLogin();
-          return;
-        }
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || ('Save failed (' + res.status + ')'));
-        state.widgetId = data.widgetId || state.widgetId;
-        state.airtableRecordId = data.recordId || state.airtableRecordId;
-        state.dirty = false;
-        // Reflect in URL if we didn't have an ID
-        if (!widgetIdFromUrl && state.widgetId) {
-          const u = new URL(window.location.href);
-          u.searchParams.set('id', state.widgetId);
-          history.length = 0; historyIdx = -1; pushHistory();
-          window.history.replaceState({}, '', u.toString());
-        }
-        document.getElementById('topbarSub').textContent = state.widgetId || 'Saved';
-        btn.classList.remove('is-dirty');
-        btn.classList.add('is-saved');
-        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved';
-        renderEmbed();
-        setTimeout(() => { btn.classList.remove('is-saved'); btn.innerHTML = originalText; btn.disabled = false; }, 1800);
-      } catch (ex) {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        toast(ex.message || 'Save failed', 'error');
-      }
-    }
-    document.getElementById('saveBtn').addEventListener('click', save);
+    /* save() function removed — the shell handles save entirely via
+       getConfig() (returns state.config). The editor reacts via the
+       onAfterSave hook in tgse.init() to update topbarSub, embed snippet,
+       and URL. See the bottom of this file. */
 
     /* ============================================================
        Load existing widget (if ?id=...)
        ============================================================ */
     async function loadExisting(id) {
       try {
-        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id));
+        // cache: 'no-store' bypasses both browser and CDN cache.
+        // The GET endpoint sets s-maxage=300 (5min CDN) for public widget
+        // embeds, but the editor needs fresh data after every save.
+        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id), { cache: 'no-store' });
         if (!res.ok) throw new Error('Could not load widget');
         const data = await res.json();
-        state.config = Object.assign(defaultConfig(), data);
-        state.config.sections = Object.assign(defaultConfig().sections, data.sections || {});
-        state.config.headings = Object.assign(defaultConfig().headings, data.headings || {});
-        state.config.cta = Object.assign(defaultConfig().cta, data.cta || {});
-        state.config.autoDetect = Object.assign(defaultConfig().autoDetect, data.autoDetect || {});
+        // API returns { config, name, ...config } — config is the canonical
+        // source. Fall back to root for legacy responses.
+        const cfg = (data && data.config && typeof data.config === 'object') ? data.config : data;
+        state.config = Object.assign(defaultConfig(), cfg);
+        state.config.sections = Object.assign(defaultConfig().sections, cfg.sections || {});
+        state.config.headings = Object.assign(defaultConfig().headings, cfg.headings || {});
+        state.config.cta = Object.assign(defaultConfig().cta, cfg.cta || {});
+        state.config.autoDetect = Object.assign(defaultConfig().autoDetect, cfg.autoDetect || {});
         state.widgetId = id;
+        state.name = (data && typeof data.name === 'string') ? data.name : '';
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) nameInput.value = state.name;
         document.getElementById('topbarSub').textContent = id;
         hydrateUI();
         // Preload destination for preview
@@ -1546,7 +1451,7 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
   <div data-tg-widget="weather" data-tg-config='${escAttr(JSON.stringify(cfg))}'></div>
 </div>
 <script>window.__TG_PREVIEW__=true;<` + `/script>
-<script src="https://tg-widgets.vercel.app/widget-weather.js"><` + `/script>
+<script src="${location.origin}/widget-weather.js"><` + `/script>
 </body></html>`;
       // Safer blob-based load than srcdoc for large docs
       frame.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
@@ -1559,8 +1464,12 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
     function setViewport(px, which) {
       const wrap = document.getElementById('previewWrap');
       wrap.style.width = px + 'px';
+      // Update both is-on (for shell button styling) and aria-pressed (legacy)
       ['Desktop','Tablet','Mobile'].forEach(v => {
-        document.getElementById('vp' + v).setAttribute('aria-pressed', v === which ? 'true' : 'false');
+        const btn = document.getElementById('vp' + v);
+        const active = v === which;
+        btn.classList.toggle('is-on', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
     }
     document.getElementById('vpDesktop').onclick = () => setViewport(1280, 'Desktop');
@@ -1568,7 +1477,7 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
     document.getElementById('vpMobile').onclick = () => setViewport(375, 'Mobile');
 
     /* ============================================================
-       AI Modal
+       AI Modal / Templates Modal
        ============================================================ */
     function openModal(id) { document.getElementById(id).hidden = false; }
     function closeModal(id) { document.getElementById(id).hidden = true; }
@@ -1578,8 +1487,7 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
         if (m) m.hidden = true;
       });
     });
-    document.getElementById('aiBtn').onclick = () => openModal('aiModal');
-    document.getElementById('templatesBtn').onclick = () => openModal('templatesModal');
+    // AI / Templates buttons are wired by the shell via tgse.init({ onAIBuild, onTemplates }).
 
     document.getElementById('aiGenerate').addEventListener('click', async () => {
       const prompt = document.getElementById('aiPrompt').value.trim();
@@ -1592,7 +1500,12 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
           headers: authH(),
           body: JSON.stringify({ widgetType: 'WEATHER', prompt }),
         });
-        if (res.status === 401) { toast('Your session expired. Please sign in.', 'error'); showLogin(); return; }
+        if (res.status === 401) {
+          toast('Your session expired. Please sign in.', 'error');
+          if (window.tgse && typeof window.tgse.showLogin === 'function') window.tgse.showLogin();
+          else location.reload();
+          return;
+        }
         if (res.status === 429) {
           const data = await res.json().catch(() => ({}));
           toast(data.error || 'AI limit reached. Try again later.', 'error');
@@ -1741,52 +1654,86 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
     }
 
     /* ============================================================
-       Keyboard shortcuts
+       Keyboard shortcuts (shell handles ⌘S, A, T, D, 1/2/3)
        ============================================================ */
     document.addEventListener('keydown', (e) => {
-      // Ignore when typing in inputs/textareas (except the shortcuts that should always work)
-      const inField = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT');
-      // ⌘S / Ctrl+S — save
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(); return; }
       // ⌘Z / ⌘⇧Z — undo/redo
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
       // Esc closes modals
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-backdrop:not([hidden])').forEach(m => m.hidden = true);
-        document.getElementById('pickerResults').hidden = true;
+        const pr = document.getElementById('pickerResults');
+        if (pr) pr.hidden = true;
         return;
       }
-      if (inField) return;
-      // Letters
-      if (e.key === 'a' || e.key === 'A') { e.preventDefault(); openModal('aiModal'); return; }
-      if (e.key === 't' || e.key === 'T') { e.preventDefault(); openModal('templatesModal'); return; }
-      if (e.key === '1') { e.preventDefault(); setTab('Design'); return; }
-      if (e.key === '2') { e.preventDefault(); setTab('Content'); return; }
-      if (e.key === '3') { e.preventDefault(); setTab('Settings'); return; }
     });
 
     /* ============================================================
        Boot
        ============================================================ */
     async function boot() {
+      // Show the editor surface (it starts hidden so the page is blank
+      // until either the shell login overlay or boot() runs).
+      const editor = document.getElementById('editor');
+      if (editor) editor.hidden = false;
+
       renderPresets();
-      renderFontPicker();
+      renderFontPickerShell();   // shell-mounted font picker
       renderSectionToggles();
       renderTemplates();
       if (widgetIdFromUrl) await loadExisting(widgetIdFromUrl);
       hydrateUI();
       pushHistory();
       renderPreview();
+      refreshSaveBtn();
     }
-    (async () => {
-      if (!isLoggedIn()) {
-        showLogin();
-      } else {
-        hideLogin();
-        await boot();
-      }
-    })();
+
+    /* ============================================================
+       Hand off to the shell. It handles login overlay, save (via getConfig
+       + onAfterSave), save button state, theme + AI + templates + embed
+       triggers, SSO across tabs, keyboard shortcuts, viewport switching.
+       ============================================================ */
+    window.tgse.init({
+      widgetType: WIDGET_TYPE,
+      widgetTag: 'weather',
+      scriptFile: 'widget-weather.js',
+
+      getConfig: () => state.config,
+      setConfig: (c) => {
+        if (c && typeof c === 'object') Object.assign(state.config, c);
+        hydrateUI();
+        renderPreview();
+      },
+
+      onAIBuild: () => openModal('aiModal'),
+      onTemplates: () => openModal('templatesModal'),
+      onThemeToggle: () => {
+        state.config.theme = state.config.theme === 'dark' ? 'light' : 'dark';
+        state.dirty = true;
+        refreshSaveBtn();
+        renderPreview();
+      },
+      // No onDesignMode — Weather has no design-mode hotspot system.
+      onTabChange: (tabName) => {
+        const map = { design: 'Design', content: 'Content', settings: 'Settings' };
+        if (map[tabName]) setTab(map[tabName]);
+      },
+      onLoginSuccess: () => boot(),
+
+      onAfterSave: (d) => {
+        state.dirty = false;
+        if (d && d.widgetId) state.widgetId = d.widgetId;
+        if (d && d.recordId) state.airtableRecordId = d.recordId;
+        document.getElementById('topbarSub').textContent = state.widgetId || 'Saved';
+        renderEmbed();
+      },
+    });
+
+    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+      boot();
+    }
+    // else shell shows login overlay, we'll boot via onLoginSuccess
   </script>
 
 </body>
