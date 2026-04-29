@@ -594,6 +594,7 @@
       .tgw-climate-months, .tgw-climate-rain { gap: 3px; }
       .tgw-climate-temp { font-size: 9px; }
       .tgw-cta { flex-direction: column; align-items: stretch; text-align: center; }
+      .tgw-cta-body { flex: 0 0 auto; }
       .tgw-cta-btn { justify-content: center; }
     }
 
