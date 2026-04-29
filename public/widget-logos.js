@@ -400,6 +400,7 @@
         spotlightTagline: cfg.spotlightTagline || '',
         spotlightCta: cfg.spotlightCta || '',
         logos: Array.isArray(cfg.logos) ? cfg.logos : [],
+        fontFamily: typeof cfg.fontFamily === 'string' ? cfg.fontFamily : '',
         theme: {
           mode: cfg.theme && cfg.theme.mode === 'dark' ? 'dark' : 'light',
           brand: (cfg.theme && cfg.theme.brand) || '#0891B2',
@@ -446,6 +447,13 @@
       }
       if (this.c.layout === 'grid') parts.push(`--tgl-cols:${this.c.columns}`);
       if (this.c.layout === 'marquee') parts.push(`--tgl-marquee-speed:${this.c.marqueeSpeed}s`);
+      // Font override — when fontFamily is set, override the host's hardcoded
+      // Inter stack. Setting font-family on .tgl-root cascades to descendants
+      // and beats :host because the root is more specific.
+      if (this.c.fontFamily && typeof this.c.fontFamily === 'string') {
+        const safe = this.c.fontFamily.replace(/'/g, '');
+        parts.push(`font-family:'${safe}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
+      }
       return parts.join(';');
     }
 
