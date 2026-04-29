@@ -1628,6 +1628,11 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
        Boot
        ============================================================ */
     async function boot() {
+      // Show the editor surface (it starts hidden so the page is blank
+      // until either the shell login overlay or boot() runs).
+      const editor = document.getElementById('editor');
+      if (editor) editor.hidden = false;
+
       renderPresets();
       renderFontPickerShell();   // shell-mounted font picker
       renderSectionToggles();
