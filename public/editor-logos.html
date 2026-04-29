@@ -640,6 +640,20 @@
             <div class="field-help">A classic "trust bar" pattern — logos appear muted until hovered, drawing the eye smoothly across the row.</div>
           </div>
         </div>
+
+        <div class="section">
+          <div class="section-head">
+            <h3>Typography</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label>Font family</label>
+              <div id="fontPickerMount"></div>
+              <div class="field-help">Applied to all text in the widget.</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ============ CONTENT PANEL ============ -->
@@ -1264,6 +1278,7 @@ async function loadWidget(id) {
     state.isDirty = false;
     syncUIFromState();
     updateSaveButton();
+    mountFontPickerShell();  // remount with loaded fontFamily as seed
   } catch (e) {
     console.warn('Load failed', e);
   }
@@ -1663,10 +1678,31 @@ function boot() {
   const id = params.get('id');
   if (id) {
     state.widgetId = id;
-    loadWidget(id);
+    loadWidget(id);  // async — will call mountFontPickerShell again after load
   }
   syncUIFromState();
   updateSaveButton();
+  mountFontPickerShell();
+}
+
+// Mount the shell font picker into the Typography section.
+// Logos uses state.config (root-level fontFamily), state.isDirty, syncUIFromState
+// for re-render via renderPreview at the end of syncUIFromState.
+function mountFontPickerShell() {
+  const mount = $('#fontPickerMount');
+  if (!mount || !window.tgse || typeof window.tgse.mountFontPicker !== 'function') return;
+  window.tgse.mountFontPicker(
+    mount,
+    state.config.fontFamily || 'Inter',
+    (font) => {
+      state.config.fontFamily = font;
+      state.isDirty = true;
+      pushHistory();
+      renderPreview();
+      updateSaveButton();
+      if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+    }
+  );
 }
 
 /* =================================================================
