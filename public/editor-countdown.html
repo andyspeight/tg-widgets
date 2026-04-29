@@ -6,7 +6,8 @@
   <title>Countdown Editor · Travelgenix Widget Suite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/editor-shell.css" />
   <style>
     :root {
       --bg: #F8FAFC;
@@ -648,60 +649,60 @@
 </head>
 <body>
 
-  <!-- Login overlay -->
-  <div class="login" id="loginBox" hidden>
-    <div class="login-box">
-      <h2>Sign in to continue</h2>
-      <p>Use your Travelgenix Widget Suite credentials.</p>
-      <form id="loginForm" autocomplete="on">
-        <div class="field">
-          <label class="field-label" for="loginEmail">Email</label>
-          <input class="input" id="loginEmail" type="email" autocomplete="username" required />
-        </div>
-        <div class="field">
-          <label class="field-label" for="loginPwd">Client code</label>
-          <input class="input" id="loginPwd" type="password" autocomplete="current-password" required />
-        </div>
-        <div class="login-err" id="loginErr"></div>
-        <button class="login-submit" type="submit" id="loginBtn">Sign in</button>
-      </form>
-    </div>
-  </div>
+  <!-- Login overlay handled by the shell. -->
 
   <!-- App -->
-  <div class="app" id="app" hidden>
-    <aside class="sidebar">
-      <!-- Top -->
-      <div class="sb-top">
-        <a class="sb-back" href="/" title="Back to dashboard" aria-label="Back to dashboard">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  <div class="tgse-app" id="app" hidden>
+    <aside class="tgse-sidebar">
+
+      <!-- Crumb strip -->
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
         </a>
-        <span class="sb-mark"></span>
-        <span class="sb-title">Countdown Timer</span>
-        <button class="sb-action" id="btnAi" title="AI builder (A)" aria-label="AI builder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2zM18 14l.7 2.3L21 17l-2.3.7L18 20l-.7-2.3L15 17l2.3-.7L18 14z"/></svg>
+      </div>
+
+      <!-- Widget identity -->
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </span>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Countdown Timer</div>
+          <div class="tgse-id-type" id="topbarSub">New widget</div>
+        </div>
+      </div>
+
+      <!-- Primary actions -->
+      <div class="tgse-actions">
+        <button class="tgse-btn" id="btn-templates" title="Templates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Templates
+          <span class="tgse-kbd">T</span>
         </button>
-        <button class="sb-action" id="btnTpl" title="Templates (T)" aria-label="Templates">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        </button>
-        <button class="sb-action" id="btnUndo" title="Undo (⌘Z)" aria-label="Undo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15.5-6L3 13"/></svg>
-        </button>
-        <button class="sb-action" id="btnRedo" title="Redo (⌘Y)" aria-label="Redo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15.5-6L21 13"/></svg>
+        <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+          AI builder
+          <span class="tgse-kbd">A</span>
         </button>
       </div>
 
-      <div class="sb-name">
-        <input id="widgetName" placeholder="Widget name…" />
-        <button class="sb-save" id="btnSave">Save</button>
+      <!-- Name + Save -->
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Widget name…" maxlength="100">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="save-label">Save</span>
+        </button>
       </div>
 
-      <div class="tabs" role="tablist">
-        <button class="tab is-active" data-tab="design" role="tab">Design</button>
-        <button class="tab" data-tab="content" role="tab">Content</button>
-        <button class="tab" data-tab="settings" role="tab">Settings</button>
-      </div>
+      <!-- Tabs — keep .tab class for editor's bind code, add data-tab for shell -->
+      <nav class="tgse-tabs" role="tablist">
+        <button class="tab is-active" data-tab="design" role="tab" aria-selected="true">Design</button>
+        <button class="tab" data-tab="content" role="tab" aria-selected="false">Content</button>
+        <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
 
       <div class="sb-body">
 
@@ -1078,24 +1079,38 @@
     </aside>
 
     <!-- Preview -->
-    <main class="preview">
-      <div class="pv-bar">
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
+
         <span class="pv-bar-pill" id="pvLayoutPill">CARD</span>
         <span class="pv-bar-pill" id="pvThemePill" style="background:#FEF3C7;color:#92400E;border-color:#FDE68A">LIGHT</span>
-        <div class="pv-bar-spacer"></div>
-        <button class="pv-bar-btn" id="btnDesignMode" title="Design mode (D)">
+
+        <div class="tgse-divider"></div>
+
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Design mode (D)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           Design mode
+          <span class="tgse-kbd">D</span>
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
         </button>
       </div>
-      <div class="pv-frame">
+      <div class="tgse-canvas">
         <div class="pv-stage" id="pvStage" data-layout="card">
           <span class="pv-stage-label" id="pvStageLabel">CARD LAYOUT</span>
           <div id="pvHost"></div>
           <div class="dm-overlay" id="dmOverlay" hidden></div>
         </div>
       </div>
-    </main>
+    </section>
   </div>
 
   <!-- Toast -->
@@ -1132,6 +1147,8 @@
     </div>
   </div>
 
+  <!-- Shell behaviour first — exposes window.tgse -->
+  <script src="/editor-shell.js"></script>
   <script src="/widget-countdown.js"></script>
   <script>
     /* =========================================================
@@ -1139,62 +1156,45 @@
        ========================================================= */
     const SESSION_KEY = 'tgw_session';
     function getSession() {
-      try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch { return null; }
+      try {
+        const raw = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch { return null; }
     }
     function isLoggedIn() {
+      if (window.tgse && typeof window.tgse.isLoggedIn === 'function') {
+        return window.tgse.isLoggedIn();
+      }
       const s = getSession();
       return !!(s && s.token);
     }
     function getAuthToken() {
-      try { return JSON.parse(sessionStorage.getItem(SESSION_KEY))?.token || ''; } catch { return ''; }
+      const s = getSession();
+      return s?.token || '';
     }
     function authH() {
+      if (window.tgse && typeof window.tgse.authHeaders === 'function') {
+        return window.tgse.authHeaders();
+      }
       const t = getAuthToken();
       const h = { 'Content-Type': 'application/json' };
       if (t) h['Authorization'] = 'Bearer ' + t;
       return h;
     }
     function showLogin() {
-      document.getElementById('app').setAttribute('hidden', '');
-      document.getElementById('loginBox').removeAttribute('hidden');
+      // Delegated to shell — the shell shows its own login overlay.
+      if (window.tgse && typeof window.tgse.showLogin === 'function') {
+        window.tgse.showLogin();
+      }
     }
     function showApp() {
-      document.getElementById('loginBox').setAttribute('hidden', '');
+      // Shell hides its login overlay automatically on successful login. We
+      // just need to make sure the editor app is visible.
       document.getElementById('app').removeAttribute('hidden');
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const pwd = document.getElementById('loginPwd').value;
-      const err = document.getElementById('loginErr');
-      const btn = document.getElementById('loginBtn');
-      err.textContent = '';
-      btn.textContent = 'Signing in…';
-      btn.disabled = true;
-      try {
-        const res = await fetch('/api/widget-auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, code: pwd })
-        });
-        if (!res.ok) {
-          err.textContent = res.status === 429 ? 'Too many attempts. Try again later.' : 'Invalid credentials.';
-          return;
-        }
-        const data = await res.json();
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
-          user: data.user, token: data.token, timestamp: Date.now()
-        }));
-        showApp();
-        boot();
-      } catch (ex) {
-        err.textContent = 'Network error. Please try again.';
-      } finally {
-        btn.textContent = 'Sign in';
-        btn.disabled = false;
-      }
-    });
+    // Login form handling moved to the shell — the loginBox/loginForm markup
+    // has been removed. The shell calls our boot() via onLoginSuccess.
 
     /* =========================================================
        App state
@@ -1265,7 +1265,7 @@
         const o = JSON.parse(str);
         cfg = o.cfg;
         widgetName = o.name || '';
-        document.getElementById('widgetName').value = widgetName;
+        document.getElementById('name-input').value = widgetName;
         undoLock = true;
         hydrateUI();
         rebuild();
@@ -1640,16 +1640,19 @@
       document.getElementById('repeatTime').addEventListener('change', (e) => { cfg.repeating.time = e.target.value; rebuild(); snapshot(); });
 
       // Name
-      document.getElementById('widgetName').addEventListener('input', (e) => { widgetName = e.target.value; });
+      document.getElementById('name-input').addEventListener('input', (e) => { widgetName = e.target.value; });
 
-      // Save
-      document.getElementById('btnSave').addEventListener('click', save);
+      // Save click is wired by the shell. The shell calls our getConfig() and
+      // posts to /api/widget-config with widgetId/name/widgetType/config — same
+      // shape Countdown was using, but using widgetId (the field the API actually
+      // reads). After save, the shell calls our onAfterSave hook below to sync
+      // URL + embed snippet. This also fixes a pre-existing bug where Countdown
+      // sent body.id (ignored by the API) instead of body.widgetId.
 
-      // Top icons
-      document.getElementById('btnAi').addEventListener('click', () => openModal('aiModal'));
-      document.getElementById('btnTpl').addEventListener('click', () => openModal('tplModal'));
-      document.getElementById('btnUndo').addEventListener('click', undo);
-      document.getElementById('btnRedo').addEventListener('click', redo);
+      // AI / Templates click bindings are wired by the shell via tgse.init({
+      // onAIBuild, onTemplates }) — see boot block at the bottom.
+      // Undo/Redo buttons removed from chrome — ⌘Z / ⌘⇧Z (or ⌘Y) still work
+      // via the keyboard shortcut handler below.
 
       // Modal close
       document.querySelectorAll('[data-close]').forEach(b => {
@@ -1663,30 +1666,22 @@
       buildTemplates();
 
       // Design mode
-      document.getElementById('btnDesignMode').addEventListener('click', toggleDesignMode);
+      // Design mode click is wired by the shell via tgse.init({ onDesignMode }).
+      // Keyboard shortcut (D) is also handled by the shell.
 
       // Copy embed
       document.getElementById('copyBtn').addEventListener('click', copyEmbed);
 
-      // Keyboard
+      // Keyboard — shell handles ⌘S, A, T, D, 1/2/3.
+      // We only own undo/redo (Countdown-specific snapshot/history) and
+      // Escape-to-close-modal-or-popover.
       document.addEventListener('keydown', (e) => {
-        const tag = (e.target.tagName || '').toLowerCase();
-        const inField = ['input', 'textarea', 'select'].includes(tag);
-        // Always-on shortcuts
-        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(); return; }
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
         if (e.key === 'Escape') {
-          closeModal('aiModal'); closeModal('tplModal'); closeDesignPopover();
-          return;
+          closeModal('aiModal'); closeModal('tplModal');
+          if (typeof closeDesignPopover === 'function') closeDesignPopover();
         }
-        if (inField) return;
-        if (e.key === 'd' || e.key === 'D') { e.preventDefault(); toggleDesignMode(); }
-        if (e.key === 'a' || e.key === 'A') { e.preventDefault(); openModal('aiModal'); }
-        if (e.key === 't' || e.key === 'T') { e.preventDefault(); openModal('tplModal'); }
-        if (e.key === '1') { document.querySelector('.tab[data-tab="design"]').click(); }
-        if (e.key === '2') { document.querySelector('.tab[data-tab="content"]').click(); }
-        if (e.key === '3') { document.querySelector('.tab[data-tab="settings"]').click(); }
       });
     }
 
@@ -1795,7 +1790,7 @@
           cfg = merged;
           if (!widgetName) {
             widgetName = t.name + ' countdown';
-            document.getElementById('widgetName').value = widgetName;
+            document.getElementById('name-input').value = widgetName;
           }
           hydrateUI();
           rebuild();
@@ -1858,7 +1853,7 @@
        Save / Load
        ========================================================= */
     async function save() {
-      const btn = document.getElementById('btnSave');
+      const btn = document.getElementById('btn-save');
       btn.disabled = true; btn.textContent = 'Saving…';
       try {
         const body = {
@@ -1905,7 +1900,7 @@
           });
           widgetId = data.id || id;
           widgetName = data.name || '';
-          document.getElementById('widgetName').value = widgetName;
+          document.getElementById('name-input').value = widgetName;
           return true;
         }
       } catch {}
@@ -1940,7 +1935,7 @@
     let designModeOn = false;
     function toggleDesignMode() {
       designModeOn = !designModeOn;
-      const btn = document.getElementById('btnDesignMode');
+      const btn = document.getElementById('btn-design-mode');
       btn.classList.toggle('is-on', designModeOn);
       const overlay = document.getElementById('dmOverlay');
       if (designModeOn) {
@@ -2078,6 +2073,7 @@
        Boot
        ========================================================= */
     async function boot() {
+      showApp();
       buildPresets();
       wire();
       const url = new URL(window.location.href);
@@ -2091,12 +2087,62 @@
       snapshot();
     }
 
-    if (isLoggedIn()) {
-      showApp();
-      boot();
-    } else {
-      showLogin();
+    /* =========================================================
+       Shell wiring
+       ========================================================= */
+    if (window.tgse && typeof window.tgse.init === 'function') {
+      window.tgse.init({
+        widgetType: 'Countdown',
+        widgetTag: 'countdown',
+        scriptFile: 'widget-countdown.js',
+
+        getConfig: () => cfg,
+        setConfig: (c) => {
+          if (c && typeof c === 'object') Object.assign(cfg, c);
+          hydrateUI();
+          rebuild();
+        },
+
+        onAIBuild: () => openModal('aiModal'),
+        onTemplates: () => openModal('tplModal'),
+        onThemeToggle: () => {
+          cfg.theme = cfg.theme === 'dark' ? 'light' : 'dark';
+          hydrateUI();
+          rebuild();
+          snapshot();
+        },
+        onDesignMode: (isOn) => {
+          // Shell has already toggled .is-on on btn-design-mode. We just need
+          // to mirror that into Countdown's internal designModeOn flag and
+          // refresh the overlay. Countdown's toggleDesignMode flips designModeOn
+          // and updates the overlay — call it to align state if mismatched.
+          if (typeof designModeOn !== 'undefined' && designModeOn !== isOn) {
+            toggleDesignMode();
+          }
+        },
+        onTabChange: (tabName) => {
+          // Mirror to Countdown's .tab buttons + .tab-panel visibility
+          document.querySelectorAll('.tgse-tabs button').forEach(b => b.classList.toggle('is-active', b.dataset.tab === tabName));
+          document.querySelectorAll('.tab-panel').forEach(p => p.toggleAttribute('hidden', p.dataset.panel !== tabName));
+        },
+        onLoginSuccess: () => boot(),
+        onAfterSave: (d) => {
+          if (d && d.widgetId) {
+            widgetId = d.widgetId;
+            // URL is already synced by the shell, but make sure the embed
+            // snippet reflects the new ID and the topbar shows the ID.
+            if (typeof updateEmbed === 'function') updateEmbed();
+            const sub = document.getElementById('topbarSub');
+            if (sub) sub.textContent = widgetId;
+          }
+        },
+      });
     }
+
+    if (isLoggedIn()) {
+      boot();
+    }
+    // else shell shows login overlay; we'll boot via onLoginSuccess
   </script>
 </body>
 </html>
