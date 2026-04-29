@@ -104,10 +104,14 @@ export default async function handler(req, res) {
       }
 
       const configStr = data.records[0].fields.Config || '{}';
+      const name = data.records[0].fields.Name || '';
       try {
         const config = JSON.parse(configStr);
         res.setHeader('Cache-Control', 's-maxage=300, max-age=60, stale-while-revalidate=600');
-        return res.status(200).json(config);
+        // Returns { config, name } so the editor can restore the widget name on
+        // load. Pre-existing clients reading the response as the config object
+        // directly are still supported via _legacy fields spread on the root.
+        return res.status(200).json({ config, name, ...config });
       } catch {
         return res.status(500).json({ error: 'Widget data corrupted' });
       }
