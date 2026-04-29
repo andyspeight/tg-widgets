@@ -15,9 +15,12 @@
     --accent-hover: #143e8e;
     --accent-soft: #eff6ff;
     --success: #059669;
+    --success-soft: #d1fae5;
     --error: #dc2626;
     --warn: #d97706;
     --strike: #9ca3af;
+    --package-holiday: #059669;
+    --package-dynamic: #1857c4;
   }
   * { box-sizing: border-box; }
   body {
@@ -71,6 +74,7 @@
   }
   .field { display: flex; flex-direction: column; gap: 4px; }
   .field.hidden { display: none; }
+  .field-hint { font-size: 10px; color: var(--muted); }
   label { font-size: 12px; color: var(--muted); font-weight: 500; }
   input, select {
     padding: 8px 10px;
@@ -108,7 +112,7 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 16px;
   }
 
@@ -147,13 +151,15 @@
     right: 8px;
     background: var(--accent);
     color: white;
-    padding: 4px 8px;
+    padding: 4px 10px;
     border-radius: 6px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
+  .card-type-badge.package-holiday { background: var(--package-holiday); }
+  .card-type-badge.package-dynamic { background: var(--package-dynamic); }
   .card-pill {
     position: absolute;
     bottom: 8px;
@@ -166,10 +172,7 @@
     font-weight: 600;
     backdrop-filter: blur(4px);
   }
-  .card-pill.deal {
-    background: var(--success);
-    color: white;
-  }
+  .card-pill.deal { background: var(--success); color: white; }
   .card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
   .card-name { font-weight: 600; font-size: 15px; line-height: 1.3; }
   .card-location { font-size: 13px; color: var(--muted); }
@@ -195,7 +198,6 @@
   }
   .card-link:hover { text-decoration: underline; }
 
-  /* Flight-specific styling */
   .flight-route {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -214,18 +216,8 @@
     letter-spacing: 1px;
     line-height: 1;
   }
-  .flight-airport-name {
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.2;
-  }
-  .flight-arrow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    color: var(--muted);
-  }
+  .flight-airport-name { font-size: 11px; color: var(--muted); line-height: 1.2; }
+  .flight-arrow { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--muted); }
   .flight-arrow-line {
     width: 40px;
     height: 1px;
@@ -267,14 +259,8 @@
     font-size: 12px;
   }
   .flight-detail:last-of-type { border-bottom: none; }
-  .flight-detail-label {
-    font-weight: 600;
-    color: var(--text);
-    min-width: 60px;
-  }
-  .flight-detail-value {
-    color: var(--muted);
-  }
+  .flight-detail-label { font-weight: 600; color: var(--text); min-width: 60px; }
+  .flight-detail-value { color: var(--muted); }
   .flight-carrier-row {
     display: flex;
     align-items: center;
@@ -294,14 +280,57 @@
     letter-spacing: 1px;
   }
   .flight-carrier-name { font-weight: 600; }
-  .flight-pax {
-    font-size: 11px;
-    color: var(--muted);
+  .flight-pax { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+  .package-summary {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .package-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .package-icon { flex: 0 0 18px; color: var(--accent); font-size: 14px; text-align: center; }
+  .package-line strong { font-weight: 600; }
+  .package-operator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--success-soft);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .package-operator-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--success);
+    font-weight: 700;
+  }
+  .package-operator-name { font-weight: 600; color: var(--text); }
+  .package-operator-atol {
     margin-left: auto;
+    background: var(--success);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
   }
 
   details {
-    margin-top: 32px;
+    margin-top: 16px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -317,7 +346,7 @@
     overflow-x: auto;
     font-size: 12px;
     margin-top: 12px;
-    max-height: 500px;
+    max-height: 400px;
     line-height: 1.4;
   }
   .empty {
@@ -328,12 +357,25 @@
     border: 1px dashed var(--border);
     border-radius: 12px;
   }
+
+  .insight {
+    background: var(--accent-soft);
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--text);
+    display: none;
+  }
+  .insight.show { display: block; }
+  .insight strong { color: var(--accent); }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Travelify Offers — Type Explorer</h1>
-  <p class="subtitle">Switch between offer types to see what each returns. Raw response panel below shows the real data shape.</p>
+  <p class="subtitle">Switch between offer types to see what each returns. Origins/destinations accept comma-separated lists. Open the request inspector below to see exactly what was sent.</p>
 
   <div class="tabs" id="tabs">
     <button class="tab active" data-type="Accommodation">Accommodation</button>
@@ -362,11 +404,13 @@
     </div>
     <div class="field" data-show="Flights,Packages">
       <label for="origin">Origin (airport/country)</label>
-      <input id="origin" type="text" placeholder="e.g. LGW, LON, GB" value="LON" />
+      <input id="origin" type="text" placeholder="e.g. LGW, MAN, GB" value="GB" />
+      <span class="field-hint">Comma-separated for multiple</span>
     </div>
     <div class="field" data-show="Accommodation,Flights,Packages,Any">
       <label for="destination">Destination</label>
       <input id="destination" type="text" placeholder="e.g. ES, IT, MAD" value="ES" />
+      <span class="field-hint">Comma-separated for multiple</span>
     </div>
     <div class="field" data-show="Accommodation,Packages">
       <label for="boardBasis">Board basis</label>
@@ -397,8 +441,8 @@
       <label for="packageType">Package type</label>
       <select id="packageType">
         <option value="Any" selected>Any</option>
-        <option value="DynamicPackages">Dynamic</option>
-        <option value="PackageHolidays">Package Holiday</option>
+        <option value="DynamicPackages">Dynamic (Flight + Hotel)</option>
+        <option value="PackageHolidays">Package Holiday (operator)</option>
       </select>
     </div>
     <div class="field" data-show="Accommodation,Packages">
@@ -412,10 +456,16 @@
 
   <div id="status" class="status"></div>
   <div id="typeBreakdown" class="status"></div>
+  <div id="insight" class="insight"></div>
 
   <div id="results" class="grid"></div>
 
-  <details open>
+  <details>
+    <summary>Request inspector — see exactly what was sent to Travelify</summary>
+    <pre id="rawRequest">(no request made yet)</pre>
+  </details>
+
+  <details>
     <summary>Raw API response (sample record per type + full data)</summary>
     <pre id="rawResponse">(no request made yet)</pre>
   </details>
@@ -429,7 +479,9 @@
   const $ = (id) => document.getElementById(id);
   const statusEl = $('status');
   const breakdownEl = $('typeBreakdown');
+  const insightEl = $('insight');
   const resultsEl = $('results');
+  const rawReqEl = $('rawRequest');
   const rawEl = $('rawResponse');
   const btn = $('searchBtn');
 
@@ -458,6 +510,12 @@
     statusEl.className = `status show ${type}`;
   }
 
+  // Parse comma-separated lists into arrays of trimmed, uppercased values
+  function parseList(raw) {
+    if (!raw) return [];
+    return raw.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
   function buildPayload() {
     const payload = {
       type: currentType,
@@ -478,35 +536,71 @@
     if (currentType === 'Accommodation' || currentType === 'Packages') {
       const board = $('boardBasis').value;
       const rating = parseFloat($('ratingMin').value);
-      const dest = $('destination').value.trim();
+      const dests = parseList($('destination').value);
       const durationMax = parseInt($('durationMax').value);
       if (board) payload.boardBases = [board];
       if (rating) payload.ratingMin = rating;
-      if (dest) payload.destinations = [dest];
+      if (dests.length) payload.destinations = dests;
       if (durationMax) payload.durationMax = durationMax;
     }
     if (currentType === 'Flights' || currentType === 'Packages') {
-      const origin = $('origin').value.trim();
+      const origins = parseList($('origin').value);
       const cabin = $('cabinClass').value;
-      if (origin) payload.origins = [origin];
+      if (origins.length) payload.origins = origins;
       if (cabin) payload.cabinClasses = [cabin];
     }
     if (currentType === 'Flights') {
-      const dest = $('destination').value.trim();
-      if (dest) payload.destinations = [dest];
+      const dests = parseList($('destination').value);
+      if (dests.length) payload.destinations = dests;
     }
     if (currentType === 'Packages') {
       const pt = $('packageType').value;
       if (pt && pt !== 'Any') payload.packageType = pt;
     }
     if (currentType === 'Any') {
-      const dest = $('destination').value.trim();
-      if (dest) payload.destinations = [dest];
+      const dests = parseList($('destination').value);
+      if (dests.length) payload.destinations = dests;
     }
     return payload;
   }
 
-  // ── Renderers ─────────────────────────────────────────────────────
+  // ── Insight: tell the user what we actually got back vs what they asked for
+  function buildInsight(payload, offers) {
+    if (!offers || offers.length === 0) return '';
+
+    const requestedOrigins = payload.origins || [];
+    const requestedDests = payload.destinations || [];
+
+    // Extract actual origins and destinations from offers
+    const actualOrigins = new Set();
+    const actualDests = new Set();
+    offers.forEach(o => {
+      const f = o.flight || {};
+      const ob = o.outbound || {};
+      const ogIata = (f.origin?.iataCode) || (ob.origin?.iataCode);
+      const ogCountry = (f.origin?.countryCode) || (ob.origin?.countryCode);
+      if (ogIata) actualOrigins.add(ogIata);
+
+      const acc = o.accommodation || {};
+      const dCountry = acc.destination?.countryCode || f.destination?.countryCode;
+      const dIata = f.destination?.iataCode;
+      if (dCountry) actualDests.add(dCountry);
+      if (dIata) actualDests.add(dIata);
+    });
+
+    const parts = [];
+    if (requestedOrigins.length) {
+      const seen = [...actualOrigins].sort().join(', ');
+      parts.push(`<strong>Requested origins:</strong> ${requestedOrigins.join(', ')} → <strong>cache returned:</strong> ${seen || '(none)'}`);
+    }
+    if (requestedDests.length) {
+      const seen = [...actualDests].sort().slice(0, 6).join(', ');
+      parts.push(`<strong>Requested destinations:</strong> ${requestedDests.join(', ')} → <strong>cache returned:</strong> ${seen || '(none)'}`);
+    }
+    return parts.join('<br>');
+  }
+
+  // ── Renderers (unchanged from previous version) ───────────────────
 
   function renderAccommodationCard(o) {
     const acc = o.accommodation || {};
@@ -532,27 +626,22 @@
     `;
   }
 
-  // Real Flights shape: flight.{origin, destination, outboundDate, returnDate, cabinClass, direct, stops, duration, carrier, image, pricing}
   function renderFlightCard(o) {
     const f = o.flight || {};
     const og = f.origin || {};
     const dest = f.destination || {};
     const carrier = f.carrier || {};
     const pricing = f.pricing || {};
-
     const img = f.image?.url || '';
     const isDirect = f.direct === true;
     const stops = f.stops || 0;
     const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : `${stops} stops`);
-
     const durationLabel = f.duration ? formatDuration(f.duration) : '';
     const cabin = f.cabinClass ? formatEnum(f.cabinClass) : '';
     const refundability = pricing.refundability ? formatEnum(pricing.refundability) : '';
-
     const outbound = formatDateTime(f.outboundDate);
     const returnLeg = f.returnDate ? formatDateTime(f.returnDate) : null;
     const tripType = returnLeg ? 'Return' : 'One-way';
-
     const priceChanged = pricing.priceChanged === true && pricing.priceBeforeChange;
     const isLeadIn = pricing.isLeadIn === true;
 
@@ -564,7 +653,6 @@
             ${isLeadIn ? `<div class="card-pill deal">Lead-in price</div>` : ''}
           </div>
         ` : ''}
-
         <div class="flight-route">
           <div class="flight-airport">
             <div class="flight-iata">${escapeHtml(og.iataCode || '???')}</div>
@@ -580,13 +668,11 @@
           </div>
         </div>
         ${durationLabel ? `<div class="flight-duration">${durationLabel} · ${tripType}${cabin ? ' · ' + cabin : ''}</div>` : ''}
-
         <div class="flight-carrier-row">
           ${carrier.code ? `<span class="flight-carrier-code">${escapeHtml(carrier.code)}</span>` : ''}
           <span class="flight-carrier-name">${escapeHtml(carrier.name || 'Unknown carrier')}</span>
           <span class="flight-pax">${o.adults || 1} adult${(o.adults || 1) === 1 ? '' : 's'}${o.children ? ', ' + o.children + ' child' + (o.children === 1 ? '' : 'ren') : ''}</span>
         </div>
-
         <div class="flight-detail">
           <span class="flight-detail-label">Outbound</span>
           <span class="flight-detail-value">${escapeHtml(outbound)}</span>
@@ -603,39 +689,93 @@
             <span class="flight-detail-value">${escapeHtml(refundability)}</span>
           </div>
         ` : ''}
-
         ${renderPriceFooter(o, priceChanged ? `£${Math.round(pricing.priceBeforeChange)}` : null)}
       </div>
     `;
   }
 
+  function detectPackageType(o) {
+    const direct = o.packageType || o.package?.packageType || o.package?.type;
+    if (direct === 'PackageHolidays' || direct === 'PackageHoliday') return 'PackageHolidays';
+    if (direct === 'DynamicPackages' || direct === 'DynamicPackage' || direct === 'Dynamic') return 'DynamicPackages';
+    const operator = o.package?.operator || o.package?.operatorName || o.package?.supplier
+      || o.operator || o.supplier;
+    if (operator) return 'PackageHolidays';
+    if ((o.flight || o.outbound) && o.accommodation) return 'DynamicPackages';
+    return null;
+  }
+
   function renderPackageCard(o) {
     const pkg = o.package || {};
     const acc = pkg.accommodation || o.accommodation || {};
-    const ob = pkg.outbound || o.outbound || {};
-    const dest = acc.destination || pkg.destination || {};
-    const img = acc.image?.url || pkg.image?.url || '';
+    const f = pkg.flight || o.flight || {};
+    const ob = pkg.outbound || o.outbound || f.outbound || {};
+    const dest = acc.destination || pkg.destination || f.destination || {};
+    const img = acc.image?.url || pkg.image?.url || f.image?.url || '';
     const rating = acc.rating ? '★'.repeat(Math.round(acc.rating)) : '';
     const nights = acc.nights || pkg.nights;
     const board = acc.boardBasis || pkg.boardBasis;
-    const fromCode = ob.iataCode || ob.origin?.iataCode || ob.originCode || '';
-    const meta = [
-      nights ? `${nights} nights` : '',
-      board ? formatEnum(board) : '',
-      fromCode ? `from ${fromCode}` : '',
-    ].filter(Boolean).join(' · ');
+    const fromCode = (f.origin?.iataCode) || (ob.origin?.iataCode) || ob.iataCode || '';
+    const toCode = (f.destination?.iataCode) || (ob.destination?.iataCode) || dest.iataCode || '';
+    const carrierName = f.carrier?.name || ob.carrier?.name || pkg.carrier?.name || '';
+    const isDirect = f.direct === true || ob.direct === true;
+    const stops = f.stops ?? ob.stops ?? null;
+    const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : (stops > 1 ? `${stops} stops` : ''));
+    const outboundDate = f.outboundDate || ob.outboundDate || ob.departureDate || ob.departureTime || '';
+    const packageType = detectPackageType(o);
+    const operator = pkg.operator || pkg.operatorName || pkg.supplier || o.operator || o.supplier || '';
+    const atol = pkg.atolProtected === true || pkg.isAtolProtected === true || o.atolProtected === true;
+    const isHoliday = packageType === 'PackageHolidays';
+    const pricing = o.pricing || pkg.pricing || acc.pricing || f.pricing || {};
+    const priceChanged = pricing.priceChanged === true && pricing.priceBeforeChange;
+    const badgeText = isHoliday ? 'Package Holiday' : (packageType === 'DynamicPackages' ? 'Flight + Hotel' : 'Package');
+    const badgeClass = isHoliday ? 'package-holiday' : (packageType === 'DynamicPackages' ? 'package-dynamic' : '');
+
+    const flightLineParts = [];
+    if (fromCode && toCode) flightLineParts.push(`${fromCode} → ${toCode}`);
+    if (carrierName) flightLineParts.push(carrierName);
+    if (stopsLabel) flightLineParts.push(stopsLabel);
+    const flightLine = flightLineParts.join(' · ');
+
+    const hotelLineParts = [];
+    if (nights) hotelLineParts.push(`${nights} night${nights === 1 ? '' : 's'}`);
+    if (board) hotelLineParts.push(formatEnum(board));
+    const hotelLine = hotelLineParts.join(' · ');
+
     return `
       <div class="card">
         <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
           ${rating ? `<div class="card-badge">${rating}</div>` : ''}
-          <div class="card-type-badge">Package</div>
+          <div class="card-type-badge ${badgeClass}">${escapeHtml(badgeText)}</div>
         </div>
+        ${(isHoliday && operator) ? `
+          <div class="package-operator">
+            <span class="package-operator-label">Operator</span>
+            <span class="package-operator-name">${escapeHtml(operator)}</span>
+            ${atol ? `<span class="package-operator-atol">ATOL</span>` : ''}
+          </div>
+        ` : ''}
         <div class="card-body">
-          <div class="card-name">${escapeHtml(acc.name || pkg.name || 'Unnamed package')}</div>
+          <div class="card-name">${escapeHtml(acc.name || pkg.name || 'Package holiday')}</div>
           <div class="card-location">${escapeHtml(dest.name || '')}${dest.countryCode ? ', ' + escapeHtml(dest.countryCode) : ''}</div>
-          ${meta ? `<div class="card-meta">${meta}</div>` : ''}
         </div>
-        ${renderPriceFooter(o)}
+        ${(flightLine || hotelLine) ? `
+          <div class="package-summary">
+            ${flightLine ? `
+              <div class="package-line">
+                <span class="package-icon">✈</span>
+                <span>${escapeHtml(flightLine)}${outboundDate ? ' · ' + escapeHtml(formatDate(outboundDate)) : ''}</span>
+              </div>
+            ` : ''}
+            ${hotelLine ? `
+              <div class="package-line">
+                <span class="package-icon">🏨</span>
+                <span>${escapeHtml(hotelLine)}</span>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+        ${renderPriceFooter(o, priceChanged ? `£${Math.round(pricing.priceBeforeChange)}` : null)}
       </div>
     `;
   }
@@ -703,7 +843,7 @@
 
   function renderOffers(offers) {
     if (!offers || offers.length === 0) {
-      resultsEl.innerHTML = '<div class="empty">No offers matched. Try widening the filters.</div>';
+      resultsEl.innerHTML = '<div class="empty">No offers matched. Try widening the filters or try comma-separated values like "LGW, MAN, EDI".</div>';
       return;
     }
     resultsEl.innerHTML = offers.map(o => {
@@ -718,8 +858,6 @@
       }
     }).join('');
   }
-
-  // ── Helpers ───────────────────────────────────────────────────────
 
   function formatEnum(s) {
     if (!s) return '';
@@ -790,9 +928,11 @@
     btn.disabled = true;
     setStatus(`Fetching ${currentType} offers...`, 'loading');
     breakdownEl.className = 'status';
+    insightEl.className = 'insight';
     resultsEl.innerHTML = '';
 
     const payload = buildPayload();
+    rawReqEl.textContent = JSON.stringify(payload, null, 2);
 
     try {
       const res = await fetch(TRAVELIFY_ENDPOINT, {
@@ -820,6 +960,12 @@
       if (breakdown && currentType === 'Any') {
         breakdownEl.textContent = `Type breakdown: ${breakdown}`;
         breakdownEl.className = 'status show warn';
+      }
+
+      const insight = buildInsight(payload, offers);
+      if (insight) {
+        insightEl.innerHTML = insight;
+        insightEl.className = 'insight show';
       }
 
       renderOffers(offers);
