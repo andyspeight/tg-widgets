@@ -1362,7 +1362,8 @@ ${escHtml(code)}
         // cache: 'no-store' bypasses both browser and CDN cache.
         // The GET endpoint sets s-maxage=300 (5min CDN) for public widget
         // embeds, but the editor needs fresh data after every save.
-        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id), { cache: 'no-store' });
+        const bust = '&_=' + Date.now();
+        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id) + bust, { cache: 'no-store' });
         if (!res.ok) throw new Error('Could not load widget');
         const data = await res.json();
         // API returns { config, name, ...config } — config is the canonical
