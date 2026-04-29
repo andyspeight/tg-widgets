@@ -1269,6 +1269,8 @@
       else if (state.activeTab === 'content') host.innerHTML = renderContentTab();
       else host.innerHTML = renderSettingsTab();
       bindTabHandlers();
+      // Mount font picker (only the Design tab has the mount element)
+      mountFontPickerShell();
     }
 
     /* ============================ SECTIONS ============================ */
@@ -1839,10 +1841,6 @@
         });
         renderTabBody();
       });
-
-      // Font picker — only present on the Design tab. Re-mount on every render
-      // because the sidebar HTML gets blown away each time renderTabBody runs.
-      mountFontPickerShell();
     }
 
     function mountFontPickerShell() {
