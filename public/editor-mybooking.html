@@ -6,7 +6,8 @@
 <title>My Booking — Editor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
 <style>
   :root {
     --primary: #1B2B5B;
@@ -209,30 +210,48 @@
 </head>
 <body>
 
-<div class="editor">
+<div class="tgse-app">
 
   <!-- ============ SIDEBAR ============ -->
-  <aside class="sidebar">
-    <div class="sb-top">
-      <div class="logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8"/><rect x="3" y="5" width="18" height="14" rx="2" ry="2"/></svg>
-      </div>
-      <div class="name">My Booking</div>
-      <a href="/" class="topbtn" title="Back to dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+  <aside class="tgse-sidebar">
+
+    <!-- Crumb strip -->
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
       </a>
     </div>
 
-    <div class="sb-save">
-      <input type="text" id="widget-name" placeholder="Untitled My Booking widget" value="My Booking">
-      <button class="save-btn" id="save-btn">Save</button>
+    <!-- Widget identity -->
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8"/><rect x="3" y="5" width="18" height="14" rx="2" ry="2"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">My Booking</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
     </div>
 
-    <div class="tabs">
-      <button class="active" data-tab="design">Design</button>
-      <button data-tab="content">Content</button>
-      <button data-tab="settings">Settings</button>
+    <!-- Primary actions (no AI/Templates for MyBooking — credentials-driven) -->
+    <!-- Skipped: MyBooking has no AI builder or template picker. -->
+
+    <!-- Name + Save -->
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled My Booking widget" maxlength="100">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
     </div>
+
+    <!-- Tabs — shell wires clicks via data-tab; editor's own tab handler still works -->
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" class="active" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
 
     <div class="sb-body">
 
@@ -499,7 +518,18 @@
   </aside>
 
   <!-- ============ PREVIEW PANE ============ -->
-  <main class="preview-pane">
+  <section class="tgse-preview">
+    <!-- Top toolbar — minimal, since MyBooking has its own Widget/PDF/Email tabs below -->
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <!-- Widget-specific 3-mode preview kept intact -->
     <div class="preview-tabs">
       <button class="preview-tab active" data-preview="widget" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
@@ -540,7 +570,7 @@
         <iframe id="email-iframe" title="Email preview" sandbox="allow-same-origin"></iframe>
       </div>
     </div>
-  </main>
+  </section>
 
 </div>
 
@@ -564,6 +594,8 @@
   </div>
 </div>
 
+<!-- Shell behaviour first — exposes window.tgse -->
+<script src="/editor-shell.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script type="module">
 import { renderPdfHtml } from '/_pdf-template.js';
@@ -671,32 +703,36 @@ import { renderEmailHtml } from '/_email-template.js';
   };
 
   // ===== Auth =====
-  // Matches the dashboard auth pattern. If session is missing or expired,
-  // bounce back to the dashboard at "/" — the dashboard owns sign-in.
+  // MyBooking now uses the shared editor shell. The shell handles login (overlay),
+  // session storage, and SSO across tabs. We keep a redirectToDashboard() fallback
+  // in case the shell hasn't loaded yet or is somehow unavailable.
   function getAuthToken() {
-    try { return JSON.parse(sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; }
+    try {
+      const raw = localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session');
+      return raw ? (JSON.parse(raw)?.token || '') : '';
+    } catch { return ''; }
   }
   function authH() {
+    if (window.tgse && typeof window.tgse.authHeaders === 'function') {
+      return window.tgse.authHeaders();
+    }
     const t = getAuthToken();
     const h = { 'Content-Type': 'application/json' };
     if (t) h['Authorization'] = 'Bearer ' + t;
     return h;
   }
   function isLoggedIn() {
+    if (window.tgse && typeof window.tgse.isLoggedIn === 'function') {
+      return window.tgse.isLoggedIn();
+    }
     try {
-      const s = JSON.parse(sessionStorage.getItem('tgw_session'));
-      // Honour the same 24-hour expiry the dashboard uses
-      if (!s || !s.token) return false;
-      if (s.timestamp && (Date.now() - s.timestamp) > 86400000) {
-        sessionStorage.removeItem('tgw_session');
-        return false;
-      }
-      return true;
+      const raw = localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session');
+      const s = raw ? JSON.parse(raw) : null;
+      return !!(s && s.token);
     } catch { return false; }
   }
   function redirectToDashboard() {
-    // Preserve where the user was trying to go so the dashboard can bring
-    // them back after sign-in (dashboard can read this if it wants to).
+    // Used as fallback only — the shell normally surfaces a login overlay instead.
     try {
       sessionStorage.setItem('tgw_post_login_redirect', window.location.pathname + window.location.search);
     } catch {}
@@ -704,7 +740,12 @@ import { renderEmailHtml } from '/_email-template.js';
   }
   function ensureAuth() {
     if (!isLoggedIn()) {
-      redirectToDashboard();
+      // Prefer in-place login via shell; redirect only if shell is unavailable.
+      if (window.tgse && typeof window.tgse.showLogin === 'function') {
+        window.tgse.showLogin();
+      } else {
+        redirectToDashboard();
+      }
       return false;
     }
     return true;
@@ -721,9 +762,11 @@ import { renderEmailHtml } from '/_email-template.js';
   }
 
   // ===== Tabs =====
-  document.querySelectorAll('.tabs button').forEach(btn => {
+  // Shell wires .tgse-tabs button[data-tab] clicks too (for shell button styling).
+  // We add our own listener to update .tab-content visibility (widget-specific).
+  document.querySelectorAll('.tgse-tabs button').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tgse-tabs button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const tab = btn.dataset.tab;
       document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.dataset.tab === tab));
@@ -825,8 +868,9 @@ import { renderEmailHtml } from '/_email-template.js';
     });
   });
 
-  document.getElementById('widget-name').addEventListener('input', e => {
+  document.getElementById('name-input').addEventListener('input', e => {
     state.name = e.target.value;
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
   });
 
   // ===== Preview rendering =====
@@ -935,19 +979,15 @@ import { renderEmailHtml } from '/_email-template.js';
   });
 
   // ===== Save widget =====
-  document.getElementById('save-btn').addEventListener('click', saveWidget);
-  document.addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-      e.preventDefault();
-      saveWidget();
-    }
-  });
+  // Click handler is wired by the shell via tgse.init({ onSave }) below.
+  // We keep the save logic here because it does MyBooking-specific things
+  // (updateEmbedCode, etc) that the shell's generic save doesn't do.
+  // Keyboard ⌘S is also wired by the shell.
 
   async function saveWidget() {
     if (!ensureAuth()) return;
-    const btn = document.getElementById('save-btn');
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
+    const tgse = window.tgse;
+    if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('saving');
     try {
       const body = {
         widgetType: 'My Booking',
@@ -962,7 +1002,8 @@ import { renderEmailHtml } from '/_email-template.js';
         body: JSON.stringify(body),
       });
       if (res.status === 401) {
-        redirectToDashboard();
+        if (tgse && typeof tgse.showLogin === 'function') tgse.showLogin();
+        else redirectToDashboard();
         return;
       }
       const data = await res.json();
@@ -971,25 +1012,17 @@ import { renderEmailHtml } from '/_email-template.js';
       const newId = data.id || data.widgetId;
       if (newId && !state.widgetId) {
         state.widgetId = newId;
-        // Update URL so refresh keeps the same widget
         const url = new URL(window.location.href);
         url.searchParams.set('id', newId);
         window.history.replaceState({}, '', url.toString());
       }
 
-      btn.textContent = 'Saved';
-      btn.classList.add('saved');
-      setTimeout(() => {
-        btn.textContent = 'Save';
-        btn.classList.remove('saved');
-      }, 1500);
+      if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('saved');
       toast('Saved');
       updateEmbedCode();
     } catch (e) {
-      btn.textContent = 'Save';
+      if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('dirty');
       toast('Save failed: ' + e.message, 'error');
-    } finally {
-      btn.disabled = false;
     }
   }
 
@@ -1001,8 +1034,9 @@ import { renderEmailHtml } from '/_email-template.js';
         headers: authH(),
       });
       if (res.status === 401) {
-        // Session expired — same flow as the main save button.
-        redirectToDashboard();
+        // Session expired — surface login overlay (or fall back to dashboard).
+        if (window.tgse && typeof window.tgse.showLogin === 'function') window.tgse.showLogin();
+        else redirectToDashboard();
         return;
       }
       if (!res.ok) {
@@ -1081,7 +1115,8 @@ import { renderEmailHtml } from '/_email-template.js';
         body: JSON.stringify({ service: 'Travelify', appId, apiKey }),
       });
       if (res.status === 401) {
-        redirectToDashboard();
+        if (window.tgse && typeof window.tgse.showLogin === 'function') window.tgse.showLogin();
+        else redirectToDashboard();
         return;
       }
       const data = await res.json();
@@ -1180,7 +1215,7 @@ import { renderEmailHtml } from '/_email-template.js';
           method: 'DELETE',
           headers: authH(),
         });
-        if (res.status === 401) { redirectToDashboard(); return; }
+        if (res.status === 401) { if (window.tgse?.showLogin) window.tgse.showLogin(); else redirectToDashboard(); return; }
         if (!res.ok) throw new Error('Revoke failed');
         state.integration = null;
         renderCredsStatus();
@@ -1222,7 +1257,7 @@ import { renderEmailHtml } from '/_email-template.js';
         if (typeof state.config.radius !== 'number') state.config.radius = 12;
       }
       // Populate UI
-      document.getElementById('widget-name').value = state.name;
+      document.getElementById('name-input').value = state.name;
       document.getElementById('copy-title').value = state.config.title || '';
       document.getElementById('copy-subtitle').value = state.config.subtitle || '';
       document.getElementById('copy-subtitle-short').value = state.config.subtitleShort || '';
@@ -1260,6 +1295,54 @@ import { renderEmailHtml } from '/_email-template.js';
     }
   }
 
+  // ===== Shell wiring =====
+  // The shell handles login overlay, save button visual state, theme/embed
+  // button clicks, save keyboard shortcut, SSO across tabs. We hand off via
+  // tgse.init() so the shell knows what to call when those things happen.
+  if (window.tgse && typeof window.tgse.init === 'function') {
+    window.tgse.init({
+      widgetType: 'My Booking',
+      widgetTag: 'mybooking',
+      scriptFile: 'widget-mybooking.js',
+
+      // Shell asks us for the current config when the user hits ⌘S directly.
+      // But we want our own saveWidget() to run because it does extra things
+      // (updateEmbedCode, the URL ?id sync, etc). So we wire btn-save click
+      // ourselves below — and also override the shell's save by passing
+      // getConfig that returns null, which makes the shell skip its own save.
+      // Cleaner: we just attach to btn-save click and also intercept ⌘S.
+      getConfig: () => state.config,
+      setConfig: (c) => { if (c && typeof c === 'object') Object.assign(state.config, c); renderPreview(); },
+
+      // No AI/templates buttons in the chrome (MyBooking doesn't have them)
+      // so onAIBuild and onTemplates aren't needed.
+
+      // No theme button on MyBooking — there's an internal toggle in Design tab.
+      // No design mode hotspots either.
+
+      onTabChange: (tabName) => {
+        // Sync .tab-content visibility — shell's button state is already updated
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.dataset.tab === tabName));
+      },
+
+      onLoginSuccess: () => bootstrap(),
+    });
+  }
+
+  // Wire the shell's save button to our own saveWidget (with all the extras).
+  document.getElementById('btn-save')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    saveWidget();
+  });
+  // Catch ⌘S — let our save run instead of the shell's generic one.
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      e.stopPropagation();
+      saveWidget();
+    }
+  }, true);  // useCapture so we run before the shell
+
   // ===== Bootstrap =====
   async function bootstrap() {
     if (!ensureAuth()) return;
@@ -1274,7 +1357,15 @@ import { renderEmailHtml } from '/_email-template.js';
     updateEmbedCode();
   }
 
-  bootstrap();
+  // Boot only if logged in. If not, the shell's overlay is up — boot will fire
+  // via onLoginSuccess after sign-in. If the shell isn't loaded, ensureAuth()
+  // bounces to dashboard.
+  if (window.tgse && typeof window.tgse.isLoggedIn === 'function') {
+    if (window.tgse.isLoggedIn()) bootstrap();
+    // else shell shows login overlay; we'll boot via onLoginSuccess
+  } else {
+    bootstrap();
+  }
 })();
 </script>
 
