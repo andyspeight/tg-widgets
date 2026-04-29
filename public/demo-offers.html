@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Travelify Offers — Connection Test</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --accent: #1857c4;
+    --accent-hover: #143e8e;
+    --success: #059669;
+    --error: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+
+  .controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  input, select {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+  }
+  button {
+    padding: 9px 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button:hover { background: var(--accent-hover); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .status {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    display: none;
+  }
+  .status.show { display: block; }
+  .status.success { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
+  .status.error { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
+  .status.loading { background: #eff6ff; color: var(--accent); border: 1px solid #bfdbfe; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+  }
+  .card-image {
+    aspect-ratio: 16 / 10;
+    background: #e5e7eb center/cover no-repeat;
+    position: relative;
+  }
+  .card-rating {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .card-name { font-weight: 600; font-size: 15px; line-height: 1.3; }
+  .card-location { font-size: 13px; color: var(--muted); }
+  .card-meta { font-size: 12px; color: var(--muted); }
+  .card-footer {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-price { font-weight: 700; font-size: 18px; color: var(--text); }
+  .card-price-sub { font-size: 11px; color: var(--muted); font-weight: normal; }
+  .card-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .card-link:hover { text-decoration: underline; }
+
+  details {
+    margin-top: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  details summary { cursor: pointer; font-weight: 500; font-size: 14px; }
+  pre {
+    background: #1f2937;
+    color: #d1d5db;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 12px;
+    margin-top: 12px;
+    max-height: 400px;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Travelify Offers — Connection Test</h1>
+  <p class="subtitle">Test widget for the offers cache API. Tweak the filters and hit Search.</p>
+
+  <div class="controls">
+    <div class="field">
+      <label for="destination">Destination</label>
+      <input id="destination" type="text" placeholder="e.g. ES, IT, GR" value="ES" />
+    </div>
+    <div class="field">
+      <label for="boardBasis">Board basis</label>
+      <select id="boardBasis">
+        <option value="">Any</option>
+        <option value="RoomOnly">Room Only</option>
+        <option value="BedAndBreakfast">B&amp;B</option>
+        <option value="HalfBoard">Half Board</option>
+        <option value="FullBoard">Full Board</option>
+        <option value="AllInclusive" selected>All Inclusive</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="budgetMax">Max budget (£)</label>
+      <input id="budgetMax" type="number" value="800" min="50" />
+    </div>
+    <div class="field">
+      <label for="ratingMin">Min star rating</label>
+      <input id="ratingMin" type="number" value="3" min="0" max="5" step="0.5" />
+    </div>
+    <div class="field">
+      <label for="maxOffers">Max offers</label>
+      <input id="maxOffers" type="number" value="20" min="1" max="50" />
+    </div>
+    <div class="field">
+      <label for="sort">Sort</label>
+      <select id="sort">
+        <option value="price:asc" selected>Price (low to high)</option>
+        <option value="price:desc">Price (high to low)</option>
+        <option value="random">Random</option>
+      </select>
+    </div>
+    <div class="field">
+      <button id="searchBtn">Search</button>
+    </div>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <div id="results" class="grid"></div>
+
+  <details>
+    <summary>Raw API response</summary>
+    <pre id="rawResponse">(no request made yet)</pre>
+  </details>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const statusEl = $('status');
+  const resultsEl = $('results');
+  const rawEl = $('rawResponse');
+  const btn = $('searchBtn');
+
+  function setStatus(message, type) {
+    statusEl.textContent = message;
+    statusEl.className = `status show ${type}`;
+  }
+  function clearStatus() {
+    statusEl.className = 'status';
+  }
+
+  function buildPayload() {
+    const destination = $('destination').value.trim();
+    const board = $('boardBasis').value;
+    const payload = {
+      type: 'Accommodation',
+      currency: 'GBP',
+      language: 'en',
+      nationality: 'GB',
+      maxOffers: parseInt($('maxOffers').value) || 20,
+      rollingDates: true,
+      DatesMin: 7,
+      DatesMax: 90,
+      ratingMin: parseFloat($('ratingMin').value) || 0,
+      budgetMax: parseInt($('budgetMax').value) || 9999,
+      sort: $('sort').value,
+      pricingByType: 'Person',
+    };
+    if (destination) payload.destinations = [destination];
+    if (board) payload.boardBases = [board];
+    return payload;
+  }
+
+  function renderOffers(offers) {
+    if (!offers || offers.length === 0) {
+      resultsEl.innerHTML = '<div class="empty">No offers matched. Try widening the filters.</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = offers.map(o => {
+      const acc = o.accommodation || {};
+      const dest = acc.destination || {};
+      const img = acc.image?.url || '';
+      const rating = acc.rating ? '★'.repeat(Math.round(acc.rating)) : '';
+      const nights = acc.nights ? `${acc.nights} night${acc.nights === 1 ? '' : 's'}` : '';
+      const board = acc.boardBasis ? formatBoard(acc.boardBasis) : '';
+      const meta = [nights, board].filter(Boolean).join(' · ');
+
+      return `
+        <div class="card">
+          <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
+            ${rating ? `<div class="card-rating">${rating}</div>` : ''}
+          </div>
+          <div class="card-body">
+            <div class="card-name">${escapeHtml(acc.name || 'Unnamed property')}</div>
+            <div class="card-location">${escapeHtml(dest.name || '')}${dest.countryCode ? ', ' + escapeHtml(dest.countryCode) : ''}</div>
+            ${meta ? `<div class="card-meta">${meta}</div>` : ''}
+          </div>
+          <div class="card-footer">
+            <div>
+              <div class="card-price">${escapeHtml(o.formattedPPPrice || o.formattedPrice || '')}</div>
+              <div class="card-price-sub">${o.formattedPPPrice ? 'per person' : 'total'}</div>
+            </div>
+            <a class="card-link" href="${escapeHtml(o.url || '#')}" target="_blank" rel="noopener">View deal →</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function formatBoard(b) {
+    return b.replace(/([A-Z])/g, ' $1').trim();
+  }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  async function search() {
+    btn.disabled = true;
+    setStatus('Fetching offers...', 'loading');
+    resultsEl.innerHTML = '';
+
+    const payload = buildPayload();
+
+    try {
+      const res = await fetch('/api/offers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      rawEl.textContent = JSON.stringify(data, null, 2);
+
+      if (!data.success) {
+        setStatus(`API error: ${data.error || 'Unknown error'}`, 'error');
+        return;
+      }
+
+      const count = data.data?.length || 0;
+      setStatus(`Got ${count} offer${count === 1 ? '' : 's'} from the cache.`, 'success');
+      renderOffers(data.data);
+    } catch (err) {
+      setStatus(`Request failed: ${err.message}`, 'error');
+      rawEl.textContent = err.stack || err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  btn.addEventListener('click', search);
+
+  // Run a search on load so the page isn't empty
+  search();
+</script>
+</body>
+</html>
