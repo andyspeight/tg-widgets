@@ -1362,11 +1362,17 @@ ${escHtml(code)}
         const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id));
         if (!res.ok) throw new Error('Could not load widget');
         const data = await res.json();
-        state.config = Object.assign(defaultConfig(), data);
-        state.config.sections = Object.assign(defaultConfig().sections, data.sections || {});
-        state.config.cta = Object.assign(defaultConfig().cta, data.cta || {});
-        state.config.autoDetect = Object.assign(defaultConfig().autoDetect, data.autoDetect || {});
+        // API returns { config, name, ...config } — config is the canonical
+        // source. Fall back to root for legacy responses.
+        const cfg = (data && data.config && typeof data.config === 'object') ? data.config : data;
+        state.config = Object.assign(defaultConfig(), cfg);
+        state.config.sections = Object.assign(defaultConfig().sections, cfg.sections || {});
+        state.config.cta = Object.assign(defaultConfig().cta, cfg.cta || {});
+        state.config.autoDetect = Object.assign(defaultConfig().autoDetect, cfg.autoDetect || {});
         state.widgetId = id;
+        state.name = (data && typeof data.name === 'string') ? data.name : '';
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) nameInput.value = state.name;
         document.getElementById('topbarSub').textContent = id;
         hydrateUI();
         // Preload destination for preview
