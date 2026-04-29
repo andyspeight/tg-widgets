@@ -162,7 +162,7 @@
 <body>
 <div class="container">
   <h1>Travelify Offers — Connection Test</h1>
-  <p class="subtitle">Test widget for the offers cache API. Tweak the filters and hit Search.</p>
+  <p class="subtitle">Direct browser call to the Travelify offers cache. Tweak the filters and hit Search.</p>
 
   <div class="controls">
     <div class="field">
@@ -216,6 +216,11 @@
 </div>
 
 <script>
+  // Travelify offers API — public endpoint, key safe to expose per Travelify devs
+  const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
+  const APP_ID = '250';
+  const PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
+
   const $ = (id) => document.getElementById(id);
   const statusEl = $('status');
   const resultsEl = $('results');
@@ -226,15 +231,13 @@
     statusEl.textContent = message;
     statusEl.className = `status show ${type}`;
   }
-  function clearStatus() {
-    statusEl.className = 'status';
-  }
 
   function buildPayload() {
     const destination = $('destination').value.trim();
     const board = $('boardBasis').value;
     const payload = {
       type: 'Accommodation',
+      deduping: 'Aggressive',
       currency: 'GBP',
       language: 'en',
       nationality: 'GB',
@@ -308,9 +311,12 @@
     const payload = buildPayload();
 
     try {
-      const res = await fetch('/api/offers', {
+      const res = await fetch(TRAVELIFY_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Token ${APP_ID}:${PUBLIC_KEY}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
