@@ -47,6 +47,7 @@ const PLAN_WIDGET_LIMITS = {
   'Enquiry Form':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'My Booking':            { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Text FX':               { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
+  'Logo Showcase':         { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
 };
 
 // Count existing widgets owned by this user, of a specific type.
