@@ -76,6 +76,14 @@
   .field { display: flex; flex-direction: column; gap: 4px; }
   .field.hidden { display: none; }
   .field-hint { font-size: 10px; color: var(--muted); }
+  .field.dedupe-field {
+    grid-column: span 2;
+    background: var(--warn-soft);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: -4px;
+  }
+  .field.dedupe-field label { color: var(--warn); font-weight: 600; }
   label { font-size: 12px; color: var(--muted); font-weight: 500; }
   input, select {
     padding: 8px 10px;
@@ -97,24 +105,12 @@
   }
   button:hover { background: var(--accent-hover); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
-  button.secondary {
-    background: white;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-  }
+  button.secondary { background: white; color: var(--accent); border: 1px solid var(--accent); }
   button.secondary:hover { background: var(--accent-soft); }
-  button.diagnostic {
-    background: var(--warn);
-    color: white;
-  }
+  button.diagnostic { background: var(--warn); color: white; }
   button.diagnostic:hover { background: #b45309; }
 
-  .action-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
+  .action-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
 
   .status {
     padding: 12px 16px;
@@ -129,85 +125,46 @@
   .status.loading { background: #eff6ff; color: var(--accent); border: 1px solid #bfdbfe; }
   .status.warn { background: #fffbeb; color: var(--warn); border: 1px solid #fde68a; }
 
-  /* Diagnostic panel */
-  .diag-panel {
+  .dedupe-stats {
     background: var(--surface);
-    border: 2px solid var(--warn);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 24px;
-    display: none;
-  }
-  .diag-panel.show { display: block; }
-  .diag-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--warn);
-    margin: 0 0 4px;
-  }
-  .diag-subtitle {
-    font-size: 12px;
-    color: var(--muted);
-    margin: 0 0 12px;
-  }
-  .diag-row {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--warn);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
     font-size: 13px;
+    display: none;
     align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
   }
+  .dedupe-stats.show { display: flex; }
+  .dedupe-stat { display: flex; flex-direction: column; gap: 2px; }
+  .dedupe-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .dedupe-stat-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .dedupe-stat-value.collapsed { color: var(--warn); }
+
+  /* Diagnostic panel */
+  .diag-panel { background: var(--surface); border: 2px solid var(--warn); border-radius: 12px; padding: 16px; margin-bottom: 24px; display: none; }
+  .diag-panel.show { display: block; }
+  .diag-title { font-size: 16px; font-weight: 700; color: var(--warn); margin: 0 0 4px; }
+  .diag-subtitle { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+  .diag-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; align-items: center; }
   .diag-row:last-child { border-bottom: none; }
   .diag-label { color: var(--text); }
   .diag-label-muted { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .diag-count {
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--text);
-    min-width: 50px;
-    text-align: right;
-  }
+  .diag-count { font-weight: 700; font-size: 18px; color: var(--text); min-width: 50px; text-align: right; }
   .diag-count.pending { color: var(--muted); font-weight: 400; font-size: 14px; }
   .diag-count.zero { color: var(--error); }
   .diag-count.same { color: var(--muted); }
   .diag-count.better { color: var(--success); }
-  .diag-delta {
-    font-size: 11px;
-    color: var(--muted);
-    min-width: 60px;
-    text-align: right;
-  }
+  .diag-delta { font-size: 11px; color: var(--muted); min-width: 60px; text-align: right; }
   .diag-delta.positive { color: var(--success); font-weight: 600; }
-  .diag-conclusion {
-    margin-top: 16px;
-    padding: 12px;
-    background: var(--warn-soft);
-    border-radius: 8px;
-    font-size: 13px;
-    line-height: 1.5;
-  }
+  .diag-conclusion { margin-top: 16px; padding: 12px; background: var(--warn-soft); border-radius: 8px; font-size: 13px; line-height: 1.5; }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 16px;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.15s, box-shadow 0.15s; position: relative; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.08); }
   .card-image { aspect-ratio: 16 / 10; background: #e5e7eb center/cover no-repeat; position: relative; }
   .card-badge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; }
   .card-type-badge { position: absolute; top: 8px; right: 8px; background: var(--accent); color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -215,6 +172,18 @@
   .card-type-badge.package-dynamic { background: var(--package-dynamic); }
   .card-pill { position: absolute; bottom: 8px; left: 8px; background: rgba(255,255,255,0.95); color: var(--text); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
   .card-pill.deal { background: var(--success); color: white; }
+  .card-variants {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: var(--accent);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
   .card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
   .card-name { font-weight: 600; font-size: 15px; line-height: 1.3; }
   .card-location { font-size: 13px; color: var(--muted); }
@@ -259,15 +228,12 @@
   details summary { cursor: pointer; font-weight: 500; font-size: 14px; user-select: none; }
   pre { background: #1f2937; color: #d1d5db; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 12px; margin-top: 12px; max-height: 400px; line-height: 1.4; }
   .empty { text-align: center; padding: 48px 16px; color: var(--muted); background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; }
-  .insight { background: var(--accent-soft); border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: var(--text); display: none; }
-  .insight.show { display: block; }
-  .insight strong { color: var(--accent); }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Travelify Offers — Type Explorer</h1>
-  <p class="subtitle">Switch between offer types. Use the diagnostic button below to find out exactly what's limiting your result count.</p>
+  <p class="subtitle">Pulls all offers from the cache (no upstream deduping). Dedupe is applied client-side so we keep control. Switch strategies in the dedupe dropdown to see the effect live.</p>
 
   <div class="tabs" id="tabs">
     <button class="tab active" data-type="Accommodation">Accommodation</button>
@@ -278,8 +244,21 @@
   </div>
 
   <div class="controls">
+    <div class="field dedupe-field" data-show="all">
+      <label for="dedupeStrategy">Dedupe strategy (client-side)</label>
+      <select id="dedupeStrategy">
+        <option value="none">None — show everything</option>
+        <option value="hotel" selected>One per hotel (cheapest wins)</option>
+        <option value="hotel-board">One per hotel + board basis</option>
+        <option value="hotel-duration">One per hotel + duration</option>
+        <option value="hotel-departure">One per hotel + departure</option>
+        <option value="route">One per route (flights)</option>
+        <option value="route-carrier">One per route + carrier (flights)</option>
+      </select>
+      <span class="field-hint">Travelify always returns everything — we control the dedupe</span>
+    </div>
     <div class="field" data-show="all">
-      <label for="maxOffers">Max offers</label>
+      <label for="maxOffers">Max offers (from API)</label>
       <input id="maxOffers" type="number" value="250" min="1" max="250" />
     </div>
     <div class="field" data-show="all">
@@ -345,16 +324,35 @@
 
   <div class="action-row">
     <button id="searchBtn">Search</button>
+    <button id="redupeBtn" class="secondary">Re-apply dedupe (no API call)</button>
     <button id="diagBtn" class="diagnostic">🔍 Run cache diagnostic</button>
   </div>
 
   <div id="status" class="status"></div>
   <div id="typeBreakdown" class="status"></div>
-  <div id="insight" class="insight"></div>
+
+  <div id="dedupeStats" class="dedupe-stats">
+    <div class="dedupe-stat">
+      <span class="dedupe-stat-label">Raw from API</span>
+      <span class="dedupe-stat-value" id="statRaw">0</span>
+    </div>
+    <div class="dedupe-stat">
+      <span class="dedupe-stat-label">Strategy</span>
+      <span class="dedupe-stat-value" id="statStrategy" style="font-size:14px;">–</span>
+    </div>
+    <div class="dedupe-stat">
+      <span class="dedupe-stat-label">After dedupe</span>
+      <span class="dedupe-stat-value" id="statDeduped">0</span>
+    </div>
+    <div class="dedupe-stat">
+      <span class="dedupe-stat-label">Collapsed</span>
+      <span class="dedupe-stat-value collapsed" id="statCollapsed">0</span>
+    </div>
+  </div>
 
   <div id="diagPanel" class="diag-panel">
     <h3 class="diag-title">Cache diagnostic</h3>
-    <p class="diag-subtitle">Same search, progressively relaxed filters. Shows exactly which filter is the bottleneck.</p>
+    <p class="diag-subtitle">Same search, progressively relaxed filters. Counts shown are raw API responses (before client-side dedupe).</p>
     <div id="diagRows"></div>
     <div id="diagConclusion"></div>
   </div>
@@ -380,17 +378,20 @@
   const $ = (id) => document.getElementById(id);
   const statusEl = $('status');
   const breakdownEl = $('typeBreakdown');
-  const insightEl = $('insight');
   const resultsEl = $('results');
   const rawReqEl = $('rawRequest');
   const rawEl = $('rawResponse');
   const btn = $('searchBtn');
+  const redupeBtn = $('redupeBtn');
   const diagBtn = $('diagBtn');
   const diagPanel = $('diagPanel');
   const diagRows = $('diagRows');
   const diagConclusion = $('diagConclusion');
+  const dedupeStrategyEl = $('dedupeStrategy');
 
   let currentType = 'Accommodation';
+  // Cache the last raw response so we can re-dedupe without hitting the API
+  let lastRawOffers = [];
 
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -401,6 +402,21 @@
       diagPanel.classList.remove('show');
       search();
     });
+  });
+
+  // When dedupe strategy changes, re-render from cached raw offers (no API call)
+  dedupeStrategyEl.addEventListener('change', () => {
+    if (lastRawOffers.length > 0) {
+      reapplyDedupe();
+    }
+  });
+
+  redupeBtn.addEventListener('click', () => {
+    if (lastRawOffers.length === 0) {
+      setStatus('Run a search first.', 'warn');
+    } else {
+      reapplyDedupe();
+    }
   });
 
   function updateFieldVisibility() {
@@ -422,9 +438,10 @@
   }
 
   function buildPayload() {
+    // ALWAYS deduping: 'None' — we dedupe client-side
     const payload = {
       type: currentType,
-      deduping: 'Aggressive',
+      deduping: 'None',
       currency: 'GBP',
       language: 'en',
       nationality: 'GB',
@@ -469,7 +486,123 @@
     return payload;
   }
 
-  // ── Cache diagnostic ──────────────────────────────────────────────
+  // ── Client-side dedupe ────────────────────────────────────────────
+
+  // Extract a numeric price from an offer for comparison purposes
+  function getNumericPrice(o) {
+    // Prefer the raw price values, fall back to parsing the formatted string
+    const candidates = [
+      o.accommodation?.pricing?.price,
+      o.flight?.pricing?.price,
+      o.package?.pricing?.price,
+      o.pricing?.price,
+    ];
+    for (const c of candidates) {
+      if (typeof c === 'number') return c;
+    }
+    // Fallback: parse "£86" or "£1,299"
+    const formatted = o.formattedPPPrice || o.formattedPrice || '';
+    const match = formatted.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+    return match ? parseFloat(match[1]) : Infinity;
+  }
+
+  // Build a dedupe key for an offer based on the chosen strategy
+  function getDedupeKey(offer, strategy) {
+    const acc = offer.accommodation || offer.package?.accommodation || {};
+    const flight = offer.flight || offer.package?.flight || {};
+    const dest = acc.destination || flight.destination || {};
+
+    const hotelKey = (acc.name || '').toLowerCase().trim() +
+      '|' + (dest.countryCode || dest.name || '').toLowerCase().trim();
+    const routeKey = (flight.origin?.iataCode || '') + '→' + (flight.destination?.iataCode || '');
+    const carrierKey = flight.carrier?.code || '';
+    const board = (acc.boardBasis || '').toLowerCase();
+    const nights = acc.nights || '';
+    const departure = (flight.outboundDate || '').slice(0, 10); // date only
+
+    switch (strategy) {
+      case 'none':
+        return offer.id || Math.random();  // unique per offer = no dedupe
+      case 'hotel':
+        return hotelKey;
+      case 'hotel-board':
+        return hotelKey + '|' + board;
+      case 'hotel-duration':
+        return hotelKey + '|' + nights;
+      case 'hotel-departure':
+        return hotelKey + '|' + departure;
+      case 'route':
+        return routeKey;
+      case 'route-carrier':
+        return routeKey + '|' + carrierKey;
+      default:
+        return hotelKey;
+    }
+  }
+
+  // Dedupe offers: group by key, keep cheapest per group, attach variant count
+  function dedupeOffers(offers, strategy) {
+    if (strategy === 'none') {
+      return offers.map(o => ({ ...o, _variantCount: 1 }));
+    }
+
+    const groups = new Map();
+    offers.forEach(o => {
+      const key = getDedupeKey(o, strategy);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(o);
+    });
+
+    const deduped = [];
+    groups.forEach(group => {
+      group.sort((a, b) => getNumericPrice(a) - getNumericPrice(b));
+      const winner = { ...group[0], _variantCount: group.length };
+      deduped.push(winner);
+    });
+
+    // Re-sort by current sort preference
+    const sortPref = $('sort').value;
+    if (sortPref === 'price:asc') {
+      deduped.sort((a, b) => getNumericPrice(a) - getNumericPrice(b));
+    } else if (sortPref === 'price:desc') {
+      deduped.sort((a, b) => getNumericPrice(b) - getNumericPrice(a));
+    } else if (sortPref === 'random') {
+      deduped.sort(() => Math.random() - 0.5);
+    }
+
+    return deduped;
+  }
+
+  function strategyLabel(strategy) {
+    const labels = {
+      'none': 'None',
+      'hotel': 'One per hotel',
+      'hotel-board': 'Per hotel + board',
+      'hotel-duration': 'Per hotel + duration',
+      'hotel-departure': 'Per hotel + date',
+      'route': 'Per route',
+      'route-carrier': 'Per route + carrier',
+    };
+    return labels[strategy] || strategy;
+  }
+
+  function updateDedupeStats(rawCount, dedupedCount, strategy) {
+    $('statRaw').textContent = rawCount;
+    $('statDeduped').textContent = dedupedCount;
+    $('statCollapsed').textContent = rawCount - dedupedCount;
+    $('statStrategy').textContent = strategyLabel(strategy);
+    $('dedupeStats').classList.add('show');
+  }
+
+  function reapplyDedupe() {
+    const strategy = dedupeStrategyEl.value;
+    const deduped = dedupeOffers(lastRawOffers, strategy);
+    updateDedupeStats(lastRawOffers.length, deduped.length, strategy);
+    renderOffers(deduped);
+    setStatus(`Re-deduped: ${lastRawOffers.length} raw → ${deduped.length} after "${strategyLabel(strategy)}"`, 'success');
+  }
+
+  // ── API ───────────────────────────────────────────────────────────
 
   async function callApi(payload) {
     const startTime = Date.now();
@@ -490,101 +623,62 @@
     }
   }
 
-  function buildDiagnosticTests() {
-    // Build a sequence of progressively relaxed payloads
-    const base = buildPayload();
-    const tests = [];
+  async function search() {
+    btn.disabled = true;
+    setStatus(`Fetching ${currentType} offers (no upstream dedupe)...`, 'loading');
+    breakdownEl.className = 'status';
+    resultsEl.innerHTML = '';
 
-    tests.push({
-      label: 'Your current settings',
-      sublabel: JSON.stringify(filterSummary(base)),
-      payload: { ...base },
-    });
+    const payload = buildPayload();
+    rawReqEl.textContent = JSON.stringify(payload, null, 2);
 
-    // 1. Raise maxOffers to ceiling
-    tests.push({
-      label: 'maxOffers raised to 250',
-      sublabel: 'Hits the API hard ceiling',
-      payload: { ...base, maxOffers: 250 },
-    });
+    const result = await callApi(payload);
+    rawEl.textContent = buildRawSample(result.data?.data || []);
 
-    // 2. Disable deduping
-    tests.push({
-      label: '+ deduping disabled',
-      sublabel: 'Show every cached variant, no collapsing',
-      payload: { ...base, maxOffers: 250, deduping: 'None' },
-    });
+    if (!result.success) {
+      setStatus(`API error: ${result.error || result.data?.error || 'Unknown'}`, 'error');
+      rawEl.textContent = JSON.stringify(result.data, null, 2);
+      btn.disabled = false;
+      return;
+    }
 
-    // 3. Widen the date window to 1 year
-    tests.push({
-      label: '+ DatesMax 365',
-      sublabel: 'Looking out to a full year, not just 90 days',
-      payload: { ...base, maxOffers: 250, deduping: 'None', DatesMax: 365 },
-    });
+    lastRawOffers = result.data.data || [];
+    const strategy = dedupeStrategyEl.value;
+    const deduped = dedupeOffers(lastRawOffers, strategy);
 
-    // 4. Remove budget cap
-    const noBudget = { ...base, maxOffers: 250, deduping: 'None', DatesMax: 365 };
-    delete noBudget.budgetMax;
-    tests.push({
-      label: '+ no budget cap',
-      sublabel: 'Premium offers included',
-      payload: noBudget,
-    });
+    updateDedupeStats(lastRawOffers.length, deduped.length, strategy);
+    setStatus(`Got ${lastRawOffers.length} raw offers in ${result.duration}ms → ${deduped.length} after dedupe.`, 'success');
 
-    // 5. Remove rating filter
-    const noRating = { ...noBudget };
-    delete noRating.ratingMin;
-    tests.push({
-      label: '+ no rating filter',
-      sublabel: 'Any star rating',
-      payload: noRating,
-    });
+    const breakdown = buildBreakdown(deduped);
+    if (breakdown && currentType === 'Any') {
+      breakdownEl.textContent = `Type breakdown (post-dedupe): ${breakdown}`;
+      breakdownEl.className = 'status show warn';
+    }
 
-    // 6. Remove duration cap
-    const noDuration = { ...noRating };
-    delete noDuration.durationMax;
-    tests.push({
-      label: '+ no duration cap',
-      sublabel: 'Any trip length',
-      payload: noDuration,
-    });
-
-    // 7. Strip ALL filters except required + type
-    tests.push({
-      label: 'Bare minimum (type + required only)',
-      sublabel: 'Absolute ceiling for this type in the cache',
-      payload: {
-        type: currentType,
-        currency: 'GBP',
-        language: 'en',
-        nationality: 'GB',
-        maxOffers: 250,
-        deduping: 'None',
-      },
-    });
-
-    // 8. Bare minimum with type=Any — total cache size
-    tests.push({
-      label: 'Total cache size (type: Any)',
-      sublabel: 'Every offer of every type in the cache',
-      payload: {
-        type: 'Any',
-        currency: 'GBP',
-        language: 'en',
-        nationality: 'GB',
-        maxOffers: 250,
-        deduping: 'None',
-      },
-    });
-
-    return tests;
+    renderOffers(deduped);
+    btn.disabled = false;
   }
 
-  function filterSummary(p) {
-    const keys = ['destinations', 'origins', 'boardBases', 'ratingMin', 'budgetMax', 'durationMax', 'DatesMax', 'deduping'];
-    const out = {};
-    keys.forEach(k => { if (p[k] !== undefined) out[k] = p[k]; });
-    return out;
+  // ── Diagnostic ────────────────────────────────────────────────────
+
+  function buildDiagnosticTests() {
+    const base = buildPayload();
+    const tests = [];
+    tests.push({ label: 'Your current settings (deduping: None)', sublabel: 'Already pulling everything', payload: { ...base } });
+    tests.push({ label: 'maxOffers raised to 250', sublabel: 'Hits the API hard ceiling', payload: { ...base, maxOffers: 250 } });
+    tests.push({ label: '+ DatesMax 365', sublabel: 'Full year window, not just 90 days', payload: { ...base, maxOffers: 250, DatesMax: 365 } });
+    const noBudget = { ...base, maxOffers: 250, DatesMax: 365 };
+    delete noBudget.budgetMax;
+    tests.push({ label: '+ no budget cap', sublabel: 'Premium offers included', payload: noBudget });
+    const noRating = { ...noBudget };
+    delete noRating.ratingMin;
+    tests.push({ label: '+ no rating filter', sublabel: 'Any star rating', payload: noRating });
+    const noDuration = { ...noRating };
+    delete noDuration.durationMax;
+    tests.push({ label: '+ no duration cap', sublabel: 'Any trip length', payload: noDuration });
+    tests.push({ label: 'Bare minimum (type + required only)', sublabel: 'Absolute ceiling for this type', payload: { type: currentType, currency: 'GBP', language: 'en', nationality: 'GB', maxOffers: 250, deduping: 'None' } });
+    tests.push({ label: 'Total cache size (type: Any)', sublabel: 'Every offer of every type in the cache', payload: { type: 'Any', currency: 'GBP', language: 'en', nationality: 'GB', maxOffers: 250, deduping: 'None' } });
+    return tests;
   }
 
   async function runDiagnostic() {
@@ -596,9 +690,6 @@
     setStatus('Running diagnostic...', 'loading');
 
     const tests = buildDiagnosticTests();
-    const results = [];
-
-    // Render skeleton rows first so user can see progress
     tests.forEach((t, i) => {
       diagRows.innerHTML += `
         <div class="diag-row" data-index="${i}">
@@ -612,21 +703,17 @@
       `;
     });
 
-    // Run each sequentially to avoid hammering the API
+    const results = [];
     let prevCount = null;
     for (let i = 0; i < tests.length; i++) {
       const t = tests[i];
       const result = await callApi(t.payload);
       results.push({ ...t, ...result });
-
       const countEl = document.querySelector(`[data-count="${i}"]`);
       const deltaEl = document.querySelector(`[data-delta="${i}"]`);
       countEl.classList.remove('pending');
       countEl.textContent = result.success ? result.count : 'ERR';
-
-      if (!result.success) {
-        countEl.classList.add('zero');
-      } else if (result.count === 0) {
+      if (!result.success || result.count === 0) {
         countEl.classList.add('zero');
       } else if (prevCount !== null && result.count > prevCount) {
         countEl.classList.add('better');
@@ -636,42 +723,38 @@
         countEl.classList.add('same');
       }
       prevCount = result.success ? result.count : prevCount;
-
-      // Small delay between calls to be gentle
       await new Promise(r => setTimeout(r, 200));
     }
 
-    // Build a conclusion
     const baseline = results[0].count;
-    const ceiling = results[results.length - 2].count;  // Bare minimum for current type
-    const totalCache = results[results.length - 1].count; // Any type
-
-    let verdict = '';
+    const ceiling = results[results.length - 2].count;
+    const totalCache = results[results.length - 1].count;
+    let verdict;
     if (totalCache <= 50) {
-      verdict = `<strong>The cache is small.</strong> The total cache for AppId 250 across <em>all types</em> contains only ${totalCache} offers. This is a demo/test cache — it has nothing to do with our filters. A production AppId with active suppliers (RateHawk, WebBeds, Jet2, etc.) would return thousands.`;
+      verdict = `<strong>The cache is small.</strong> The total cache for AppId 250 across <em>all types</em> contains only ${totalCache} offers. This is a demo/test cache. A production AppId with active suppliers would return thousands.`;
     } else if (ceiling <= baseline * 2) {
-      verdict = `<strong>Cache constrained, not filter constrained.</strong> Even with every filter relaxed, only ${ceiling} ${currentType} offers exist in the cache. Your filters aren't the problem — the cache for AppId 250 just doesn't have many offers of this type.`;
+      verdict = `<strong>Cache constrained, not filter constrained.</strong> Even with every filter relaxed, only ${ceiling} ${currentType} offers exist in the cache.`;
     } else {
-      // Find which step caused the biggest jump
       let biggestJump = 0;
       let biggestJumpStep = '';
       for (let i = 1; i < results.length - 1; i++) {
         const jump = results[i].count - results[i - 1].count;
-        if (jump > biggestJump) {
-          biggestJump = jump;
-          biggestJumpStep = results[i].label;
-        }
+        if (jump > biggestJump) { biggestJump = jump; biggestJumpStep = results[i].label; }
       }
-      verdict = `<strong>Filter constrained.</strong> Your settings returned ${baseline}, the relaxed ceiling is ${ceiling} — that's ${ceiling - baseline} more offers available. Biggest unlock: <em>${biggestJumpStep}</em> (+${biggestJump} offers). Adjust your filters to surface more.`;
+      verdict = `<strong>Filter constrained.</strong> Your settings returned ${baseline}, the relaxed ceiling is ${ceiling}. Biggest unlock: <em>${biggestJumpStep}</em> (+${biggestJump} offers).`;
     }
-
     diagConclusion.innerHTML = `<div class="diag-conclusion">${verdict}</div>`;
     setStatus('Diagnostic complete.', 'success');
     diagBtn.disabled = false;
     btn.disabled = false;
   }
 
-  // ── Renderers (unchanged) ─────────────────────────────────────────
+  // ── Renderers ─────────────────────────────────────────────────────
+
+  function variantBadge(o) {
+    if (!o._variantCount || o._variantCount <= 1) return '';
+    return `<div class="card-variants">+${o._variantCount - 1} more</div>`;
+  }
 
   function renderAccommodationCard(o) {
     const acc = o.accommodation || {};
@@ -686,6 +769,7 @@
         <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
           ${rating ? `<div class="card-badge">${rating}</div>` : ''}
           <div class="card-type-badge">Hotel</div>
+          ${variantBadge(o)}
         </div>
         <div class="card-body">
           <div class="card-name">${escapeHtml(acc.name || 'Unnamed property')}</div>
@@ -715,28 +799,19 @@
     const tripType = returnLeg ? 'Return' : 'One-way';
     const priceChanged = pricing.priceChanged === true && pricing.priceBeforeChange;
     const isLeadIn = pricing.isLeadIn === true;
-
     return `
       <div class="card">
         ${img ? `
           <div class="card-image" style="background-image: url('${escapeHtml(img)}'); aspect-ratio: 16/9;">
             <div class="card-type-badge">Flight</div>
             ${isLeadIn ? `<div class="card-pill deal">Lead-in price</div>` : ''}
+            ${variantBadge(o)}
           </div>
         ` : ''}
         <div class="flight-route">
-          <div class="flight-airport">
-            <div class="flight-iata">${escapeHtml(og.iataCode || '???')}</div>
-            <div class="flight-airport-name">${escapeHtml(og.name || '')}</div>
-          </div>
-          <div class="flight-arrow">
-            <div class="flight-arrow-line"></div>
-            <div class="flight-stops-label">${escapeHtml(stopsLabel)}</div>
-          </div>
-          <div class="flight-airport right">
-            <div class="flight-iata">${escapeHtml(dest.iataCode || '???')}</div>
-            <div class="flight-airport-name">${escapeHtml(dest.name || '')}</div>
-          </div>
+          <div class="flight-airport"><div class="flight-iata">${escapeHtml(og.iataCode || '???')}</div><div class="flight-airport-name">${escapeHtml(og.name || '')}</div></div>
+          <div class="flight-arrow"><div class="flight-arrow-line"></div><div class="flight-stops-label">${escapeHtml(stopsLabel)}</div></div>
+          <div class="flight-airport right"><div class="flight-iata">${escapeHtml(dest.iataCode || '???')}</div><div class="flight-airport-name">${escapeHtml(dest.name || '')}</div></div>
         </div>
         ${durationLabel ? `<div class="flight-duration">${durationLabel} · ${tripType}${cabin ? ' · ' + cabin : ''}</div>` : ''}
         <div class="flight-carrier-row">
@@ -744,22 +819,9 @@
           <span class="flight-carrier-name">${escapeHtml(carrier.name || 'Unknown carrier')}</span>
           <span class="flight-pax">${o.adults || 1} adult${(o.adults || 1) === 1 ? '' : 's'}${o.children ? ', ' + o.children + ' child' + (o.children === 1 ? '' : 'ren') : ''}</span>
         </div>
-        <div class="flight-detail">
-          <span class="flight-detail-label">Outbound</span>
-          <span class="flight-detail-value">${escapeHtml(outbound)}</span>
-        </div>
-        ${returnLeg ? `
-          <div class="flight-detail">
-            <span class="flight-detail-label">Return</span>
-            <span class="flight-detail-value">${escapeHtml(returnLeg)}</span>
-          </div>
-        ` : ''}
-        ${refundability ? `
-          <div class="flight-detail">
-            <span class="flight-detail-label">Fare</span>
-            <span class="flight-detail-value">${escapeHtml(refundability)}</span>
-          </div>
-        ` : ''}
+        <div class="flight-detail"><span class="flight-detail-label">Outbound</span><span class="flight-detail-value">${escapeHtml(outbound)}</span></div>
+        ${returnLeg ? `<div class="flight-detail"><span class="flight-detail-label">Return</span><span class="flight-detail-value">${escapeHtml(returnLeg)}</span></div>` : ''}
+        ${refundability ? `<div class="flight-detail"><span class="flight-detail-label">Fare</span><span class="flight-detail-value">${escapeHtml(refundability)}</span></div>` : ''}
         ${renderPriceFooter(o, priceChanged ? `£${Math.round(pricing.priceBeforeChange)}` : null)}
       </div>
     `;
@@ -769,8 +831,7 @@
     const direct = o.packageType || o.package?.packageType || o.package?.type;
     if (direct === 'PackageHolidays' || direct === 'PackageHoliday') return 'PackageHolidays';
     if (direct === 'DynamicPackages' || direct === 'DynamicPackage' || direct === 'Dynamic') return 'DynamicPackages';
-    const operator = o.package?.operator || o.package?.operatorName || o.package?.supplier
-      || o.operator || o.supplier;
+    const operator = o.package?.operator || o.package?.operatorName || o.package?.supplier || o.operator || o.supplier;
     if (operator) return 'PackageHolidays';
     if ((o.flight || o.outbound) && o.accommodation) return 'DynamicPackages';
     return null;
@@ -801,23 +862,21 @@
     const priceChanged = pricing.priceChanged === true && pricing.priceBeforeChange;
     const badgeText = isHoliday ? 'Package Holiday' : (packageType === 'DynamicPackages' ? 'Flight + Hotel' : 'Package');
     const badgeClass = isHoliday ? 'package-holiday' : (packageType === 'DynamicPackages' ? 'package-dynamic' : '');
-
     const flightLineParts = [];
     if (fromCode && toCode) flightLineParts.push(`${fromCode} → ${toCode}`);
     if (carrierName) flightLineParts.push(carrierName);
     if (stopsLabel) flightLineParts.push(stopsLabel);
     const flightLine = flightLineParts.join(' · ');
-
     const hotelLineParts = [];
     if (nights) hotelLineParts.push(`${nights} night${nights === 1 ? '' : 's'}`);
     if (board) hotelLineParts.push(formatEnum(board));
     const hotelLine = hotelLineParts.join(' · ');
-
     return `
       <div class="card">
         <div class="card-image" style="background-image: url('${escapeHtml(img)}')">
           ${rating ? `<div class="card-badge">${rating}</div>` : ''}
           <div class="card-type-badge ${badgeClass}">${escapeHtml(badgeText)}</div>
+          ${variantBadge(o)}
         </div>
         ${(isHoliday && operator) ? `
           <div class="package-operator">
@@ -832,18 +891,8 @@
         </div>
         ${(flightLine || hotelLine) ? `
           <div class="package-summary">
-            ${flightLine ? `
-              <div class="package-line">
-                <span class="package-icon">✈</span>
-                <span>${escapeHtml(flightLine)}${outboundDate ? ' · ' + escapeHtml(formatDate(outboundDate)) : ''}</span>
-              </div>
-            ` : ''}
-            ${hotelLine ? `
-              <div class="package-line">
-                <span class="package-icon">🏨</span>
-                <span>${escapeHtml(hotelLine)}</span>
-              </div>
-            ` : ''}
+            ${flightLine ? `<div class="package-line"><span class="package-icon">✈</span><span>${escapeHtml(flightLine)}${outboundDate ? ' · ' + escapeHtml(formatDate(outboundDate)) : ''}</span></div>` : ''}
+            ${hotelLine ? `<div class="package-line"><span class="package-icon">🏨</span><span>${escapeHtml(hotelLine)}</span></div>` : ''}
           </div>
         ` : ''}
         ${renderPriceFooter(o, priceChanged ? `£${Math.round(pricing.priceBeforeChange)}` : null)}
@@ -859,20 +908,19 @@
     const name = vehicle.name || vehicle.model || car.name || 'Car rental';
     const company = car.supplier || car.company || vehicle.company || '';
     const days = car.days || car.duration || '';
-    const meta = [
-      company ? escapeHtml(company) : '',
-      days ? `${days} day${days === 1 ? '' : 's'}` : '',
-    ].filter(Boolean).join(' · ');
+    const meta = [company ? escapeHtml(company) : '', days ? `${days} day${days === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ');
     return `
       <div class="card">
         ${img ? `
           <div class="card-image" style="background-image: url('${escapeHtml(img)}'); aspect-ratio: 16/9;">
             <div class="card-type-badge">Car</div>
+            ${variantBadge(o)}
           </div>
         ` : `
           <div class="card-image" style="background: linear-gradient(135deg, #e5e7eb, #d1d5db); aspect-ratio: 16/9; display:flex; align-items:center; justify-content:center; font-size:40px;">
             🚗
             <div class="card-type-badge">Car</div>
+            ${variantBadge(o)}
           </div>
         `}
         <div class="card-body">
@@ -914,7 +962,7 @@
 
   function renderOffers(offers) {
     if (!offers || offers.length === 0) {
-      resultsEl.innerHTML = '<div class="empty">No offers matched. Try the diagnostic button above to find out why.</div>';
+      resultsEl.innerHTML = '<div class="empty">No offers matched. Try the diagnostic button to find out why.</div>';
       return;
     }
     resultsEl.innerHTML = offers.map(o => {
@@ -955,14 +1003,12 @@
     if (s == null) return '';
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
-
   function buildBreakdown(offers) {
     if (!offers || offers.length === 0) return '';
     const counts = {};
     offers.forEach(o => { const t = o.type || 'unknown'; counts[t] = (counts[t] || 0) + 1; });
     return Object.entries(counts).map(([t, n]) => `${n} ${t}`).join(' · ');
   }
-
   function buildRawSample(offers) {
     if (!offers || offers.length === 0) return '(empty data array)';
     const samples = {};
@@ -972,68 +1018,6 @@
       _sampleRecordPerType: samples,
       _allOffers: offers,
     }, null, 2);
-  }
-
-  function buildInsight(payload, offers) {
-    if (!offers || offers.length === 0) return '';
-    const reqOrigins = payload.origins || [];
-    const reqDests = payload.destinations || [];
-    const actualOrigins = new Set();
-    const actualDests = new Set();
-    offers.forEach(o => {
-      const f = o.flight || {};
-      const ob = o.outbound || {};
-      const ogIata = (f.origin?.iataCode) || (ob.origin?.iataCode);
-      if (ogIata) actualOrigins.add(ogIata);
-      const acc = o.accommodation || {};
-      const dCountry = acc.destination?.countryCode || f.destination?.countryCode;
-      const dIata = f.destination?.iataCode;
-      if (dCountry) actualDests.add(dCountry);
-      if (dIata) actualDests.add(dIata);
-    });
-    const parts = [];
-    if (reqOrigins.length) parts.push(`<strong>Requested origins:</strong> ${reqOrigins.join(', ')} → <strong>cache returned:</strong> ${[...actualOrigins].sort().join(', ') || '(none)'}`);
-    if (reqDests.length) parts.push(`<strong>Requested destinations:</strong> ${reqDests.join(', ')} → <strong>cache returned:</strong> ${[...actualDests].sort().slice(0, 6).join(', ') || '(none)'}`);
-    return parts.join('<br>');
-  }
-
-  async function search() {
-    btn.disabled = true;
-    setStatus(`Fetching ${currentType} offers...`, 'loading');
-    breakdownEl.className = 'status';
-    insightEl.className = 'insight';
-    resultsEl.innerHTML = '';
-
-    const payload = buildPayload();
-    rawReqEl.textContent = JSON.stringify(payload, null, 2);
-
-    const result = await callApi(payload);
-    rawEl.textContent = buildRawSample(result.data?.data || []);
-
-    if (!result.success) {
-      setStatus(`API error: ${result.error || result.data?.error || 'Unknown'}`, 'error');
-      rawEl.textContent = JSON.stringify(result.data, null, 2);
-      btn.disabled = false;
-      return;
-    }
-
-    const offers = result.data.data || [];
-    setStatus(`Got ${offers.length} offer${offers.length === 1 ? '' : 's'} in ${result.duration}ms.`, 'success');
-
-    const breakdown = buildBreakdown(offers);
-    if (breakdown && currentType === 'Any') {
-      breakdownEl.textContent = `Type breakdown: ${breakdown}`;
-      breakdownEl.className = 'status show warn';
-    }
-
-    const insight = buildInsight(payload, offers);
-    if (insight) {
-      insightEl.innerHTML = insight;
-      insightEl.className = 'insight show';
-    }
-
-    renderOffers(offers);
-    btn.disabled = false;
   }
 
   btn.addEventListener('click', search);
