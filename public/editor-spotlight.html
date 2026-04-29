@@ -1428,7 +1428,7 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
 </head><body>
 <div data-tg-widget="spotlight" data-tg-config='${escAttr(JSON.stringify(cfg))}'></div>
 <script>window.__TG_PREVIEW__=true;<` + `/script>
-<script src="https://tg-widgets.vercel.app/widget-spotlight.js"><` + `/script>
+<script src="${location.origin}/widget-spotlight.js"><` + `/script>
 </body></html>`;
       // Safer blob-based load than srcdoc for large docs
       frame.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
