@@ -6,7 +6,8 @@
   <title>Text FX Editor — Travelgenix</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/editor-shell.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
@@ -451,40 +452,53 @@
   </style>
 </head>
 <body>
-  <div class="shell">
+  <div class="tgse-app">
     <!-- ============ SIDEBAR ============ -->
-    <aside class="sidebar">
-      <!-- Top bar -->
-      <div class="sb-top">
-        <div class="sb-logo">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-        </div>
-        <div class="sb-title-wrap">
-          <div class="sb-title">Text FX</div>
-          <div class="sb-subtitle">Kinetic typography widget</div>
-        </div>
-        <button class="icon-btn" id="ai-btn" title="AI builder (A)" aria-label="AI builder">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.5 5.5L21 11l-5.5 2.5L13 19l-2.5-5.5L5 11l5.5-2.5L13 3z"/></svg>
-        </button>
-        <a href="/" class="icon-btn" title="Back to dashboard" aria-label="Back to dashboard" style="text-decoration:none">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <aside class="tgse-sidebar">
+
+      <!-- Crumb strip -->
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
         </a>
       </div>
 
+      <!-- Widget identity -->
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+        </span>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Text FX</div>
+          <div class="tgse-id-type" id="topbarSub">Kinetic typography</div>
+        </div>
+      </div>
+
+      <!-- Primary actions (TextFX has AI but no Templates) -->
+      <div class="tgse-actions">
+        <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder" style="grid-column: span 2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+          AI builder
+          <span class="tgse-kbd">A</span>
+        </button>
+      </div>
+
       <!-- Name + Save -->
-      <div class="sb-name">
-        <input type="text" id="widget-name" placeholder="Widget name" />
-        <button class="save-btn" id="save-btn" data-dirty="1">
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Widget name" maxlength="100">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           <span id="save-label">Save</span>
         </button>
       </div>
 
-      <!-- Tabs -->
-      <div class="sb-tabs">
-        <button class="sb-tab" data-tab="design" data-active="1">Design</button>
-        <button class="sb-tab" data-tab="content">Content</button>
-        <button class="sb-tab" data-tab="settings">Settings</button>
-      </div>
+      <!-- Tabs — keep .sb-tab class for editor's selectors, add data-tab for shell -->
+      <nav class="tgse-tabs" role="tablist">
+        <button class="sb-tab" data-tab="design" data-active="1" role="tab" aria-selected="true">Design</button>
+        <button class="sb-tab" data-tab="content" role="tab" aria-selected="false">Content</button>
+        <button class="sb-tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
 
       <!-- Body -->
       <div class="sb-body" id="sb-body">
@@ -512,21 +526,7 @@
             <div class="section-body">
               <div class="row">
                 <label>Font</label>
-                <select id="cfg-fontFamily">
-                  <option value="Inter">Inter</option>
-                  <option value="Manrope">Manrope</option>
-                  <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
-                  <option value="DM Sans">DM Sans</option>
-                  <option value="Space Grotesk">Space Grotesk</option>
-                  <option value="Poppins">Poppins</option>
-                  <option value="Outfit">Outfit</option>
-                  <option value="Sora">Sora</option>
-                  <option value="Lexend">Lexend</option>
-                  <option value="Geist">Geist</option>
-                  <option value="Playfair Display">Playfair Display</option>
-                  <option value="Fraunces">Fraunces</option>
-                  <option value="Cormorant Garamond">Cormorant Garamond</option>
-                </select>
+                <div id="fontPickerMount" style="flex: 1"></div>
               </div>
               <div class="row">
                 <label>Weight</label>
@@ -1406,53 +1406,47 @@
     </aside>
 
     <!-- ============ PREVIEW PANE ============ -->
-    <main class="preview-pane">
-      <div class="preview-toolbar">
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
+
+        <!-- ctx-tabs are widget-specific (Hero/Section/Inline preview contexts) -->
         <div class="ctx-tabs">
           <button class="ctx-tab" data-ctx="hero" data-active="1">Hero</button>
           <button class="ctx-tab" data-ctx="section">Section</button>
           <button class="ctx-tab" data-ctx="inline">Inline</button>
         </div>
-        <div class="toolbar-spacer"></div>
-        <button class="icon-btn" id="undo-btn" title="Undo (⌘Z)" aria-label="Undo">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+
+        <div class="tgse-divider"></div>
+
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
         </button>
-        <button class="icon-btn" id="redo-btn" title="Redo (⌘Y)" aria-label="Redo">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
         </button>
-        <div class="theme-toggle">
-          <button data-theme="light" data-active="1">Light</button>
-          <button data-theme="dark">Dark</button>
-        </div>
       </div>
-      <div class="preview-stage" id="preview-stage" data-bg="light">
-        <div style="width:100%">
-          <div class="ctx-label" id="ctx-label">HERO CONTEXT — 1200PX</div>
-          <div class="preview-frame" id="preview-frame" data-ctx="hero">
-            <div id="preview-mount"></div>
+      <div class="tgse-canvas">
+        <div class="preview-stage" id="preview-stage" data-bg="light">
+          <div style="width:100%">
+            <div class="ctx-label" id="ctx-label">HERO CONTEXT — 1200PX</div>
+            <div class="preview-frame" id="preview-frame" data-ctx="hero">
+              <div id="preview-mount"></div>
+            </div>
           </div>
         </div>
       </div>
-    </main>
+    </section>
   </div>
 
   <!-- ============ TOAST ============ -->
   <div class="toast" id="toast"></div>
 
-  <!-- ============ LOGIN OVERLAY ============ -->
-  <div class="login-overlay" id="login-overlay" hidden>
-    <div class="login-card">
-      <h2>Sign in to save</h2>
-      <p>Enter your Travelgenix client credentials to save and publish this widget.</p>
-      <label for="login-email">Email</label>
-      <input type="email" id="login-email" placeholder="you@yourcompany.com" />
-      <label for="login-code">Client code</label>
-      <input type="password" id="login-code" placeholder="Your client code" />
-      <div class="login-error" id="login-error" hidden></div>
-      <button class="save-btn" id="login-submit"><span id="login-label">Sign in</span></button>
-      <p style="margin-top:16px;text-align:center"><a href="/">Back to dashboard</a></p>
-    </div>
-  </div>
+  <!-- Login overlay handled by the shell. Stub kept for ID-existence checks. -->
+  <div class="login-overlay" id="login-overlay" hidden style="display:none"></div>
 
   <!-- ============ AI MODAL ============ -->
   <div class="modal-overlay" id="ai-modal" hidden>
@@ -1467,6 +1461,8 @@
     </div>
   </div>
 
+  <!-- Shell behaviour first — exposes window.tgse -->
+  <script src="/editor-shell.js"></script>
   <script src="/widget-textfx.js"></script>
   <script>
     /* ============================================================
@@ -1589,62 +1585,45 @@
     function uid() { return 'tgw_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
 
     /* ============================================================
-       AUTH (matches the FAQ/Logos pattern — no exp check)
+       AUTH (delegates to shell)
        ============================================================ */
     const SESSION_KEY = 'tgw_session';
-    function getSession() { try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch { return null; } }
-    function isLoggedIn() { const s = getSession(); return !!(s && s.token); }
+    function getSession() {
+      try {
+        const raw = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch { return null; }
+    }
+    function isLoggedIn() {
+      if (window.tgse && typeof window.tgse.isLoggedIn === 'function') {
+        return window.tgse.isLoggedIn();
+      }
+      const s = getSession();
+      return !!(s && s.token);
+    }
     function getAuthToken() { const s = getSession(); return s && s.token ? s.token : ''; }
     function authH() {
+      if (window.tgse && typeof window.tgse.authHeaders === 'function') {
+        return window.tgse.authHeaders();
+      }
       const t = getAuthToken();
       const h = { 'Content-Type': 'application/json' };
       if (t) h['Authorization'] = 'Bearer ' + t;
       return h;
     }
-    function showLogin() { $('#login-overlay').hidden = false; setTimeout(() => $('#login-email').focus(), 50); }
-    function hideLogin() { $('#login-overlay').hidden = true; $('#login-error').hidden = true; }
-
-    async function doLogin() {
-      const email = $('#login-email').value.trim();
-      const code = $('#login-code').value;
-      if (!email || !code) {
-        $('#login-error').textContent = 'Email and client code required';
-        $('#login-error').hidden = false;
-        return;
-      }
-      const btn = $('#login-submit');
-      btn.disabled = true;
-      $('#login-label').innerHTML = '<span class="spinner"></span>';
-      try {
-        const res = await fetch('/api/widget-auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, code })
-        });
-        const data = await res.json();
-        if (!res.ok || !data.token) {
-          $('#login-error').textContent = data.error || 'Sign-in failed';
-          $('#login-error').hidden = false;
-          btn.disabled = false;
-          $('#login-label').textContent = 'Sign in';
-          return;
-        }
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
-          user: data.user || { email },
-          token: data.token,
-          timestamp: Date.now()
-        }));
-        hideLogin();
-        toast('Signed in');
-        btn.disabled = false;
-        $('#login-label').textContent = 'Sign in';
-      } catch (e) {
-        $('#login-error').textContent = 'Network error — try again';
-        $('#login-error').hidden = false;
-        btn.disabled = false;
-        $('#login-label').textContent = 'Sign in';
+    function showLogin() {
+      if (window.tgse && typeof window.tgse.showLogin === 'function') {
+        window.tgse.showLogin();
       }
     }
+    function hideLogin() {
+      if (window.tgse && typeof window.tgse.hideLogin === 'function') {
+        window.tgse.hideLogin();
+      }
+    }
+
+    // doLogin removed — the shell handles login. The shell calls our boot()
+    // via tgse.init({ onLoginSuccess }).
 
     /* ============================================================
        TOAST
@@ -1708,13 +1687,13 @@
     }
     function markDirty() {
       state.isDirty = true;
-      const btn = $('#save-btn');
+      const btn = $('#btn-save');
       btn.dataset.dirty = '1';
       $('#save-label').textContent = 'Save';
     }
     function markClean() {
       state.isDirty = false;
-      const btn = $('#save-btn');
+      const btn = $('#btn-save');
       btn.dataset.dirty = '0';
       $('#save-label').textContent = 'Saved';
     }
@@ -1952,13 +1931,24 @@
       }));
 
       // Name
-      $('#widget-name').addEventListener('input', e => { state.widgetName = e.target.value; markDirty(); });
+      $('#name-input').addEventListener('input', e => { state.widgetName = e.target.value; markDirty(); });
 
       // Typography sliders
       bindRange('cfg-fontSize', 'fontSize', v => parseInt(v, 10));
       bindRange('cfg-letterSpacing', 'letterSpacing', v => parseFloat(v), 3);
       bindRange('cfg-lineHeight', 'lineHeight', v => parseFloat(v), 2);
-      bindSelect('cfg-fontFamily', 'fontFamily');
+      // Font family — shell picker (29 fonts shared across all editors)
+      if (window.tgse && typeof window.tgse.mountFontPicker === 'function') {
+        const mount = $('#fontPickerMount');
+        if (mount) {
+          window.tgse.mountFontPicker(mount, state.config.fontFamily || 'Inter', (font) => {
+            state.config.fontFamily = font;
+            markDirty();
+            pushHistory();
+            renderPreview();
+          });
+        }
+      }
       bindSelect('cfg-fontWeight', 'fontWeight', v => parseInt(v, 10));
       bindSelect('cfg-align', 'align');
 
@@ -1974,19 +1964,17 @@
 
       // Theme + ctx tabs
       $$('.ctx-tab').forEach(b => b.addEventListener('click', () => setCtx(b.dataset.ctx)));
-      $$('.theme-toggle button').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
+      // theme-toggle buttons removed — shell's btn-theme handles theme via tgse.init({ onThemeToggle })
 
       // Topbar
-      $('#save-btn').addEventListener('click', saveWidget);
-      $('#ai-btn').addEventListener('click', () => $('#ai-modal').hidden = false);
+      // btn-save / btn-ai click handlers are wired by the shell via tgse.init().
+      // Modal close/open and AI generate stay editor-owned.
       $('#ai-cancel').addEventListener('click', () => $('#ai-modal').hidden = true);
       $('#ai-generate').addEventListener('click', generateAI);
-      $('#undo-btn').addEventListener('click', undo);
-      $('#redo-btn').addEventListener('click', redo);
+      // Undo/redo buttons removed from chrome — ⌘Z / ⌘⇧Z still work via the
+      // keyboard handler below.
 
-      // Login
-      $('#login-submit').addEventListener('click', doLogin);
-      $('#login-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+      // Login form removed — shell handles it.
 
       // Embed
       $('#copy-embed').addEventListener('click', copyEmbed);
@@ -2403,7 +2391,7 @@
        ============================================================ */
     function syncUIFromState() {
       const c = state.config;
-      $('#widget-name').value = state.widgetName;
+      $('#name-input').value = state.widgetName;
 
       // Mode picker
       $$('.mode-tile').forEach(t => t.dataset.active = t.dataset.mode === c.mode ? '1' : '0');
@@ -2588,7 +2576,7 @@
        ============================================================ */
     async function saveWidget() {
       if (!isLoggedIn()) { showLogin(); return; }
-      const btn = $('#save-btn');
+      const btn = $('#btn-save');
       btn.disabled = true;
       $('#save-label').innerHTML = '<span class="spinner"></span>';
       try {
@@ -2785,28 +2773,19 @@
 
     /* ============================================================
        KEYBOARD SHORTCUTS
+       (Shell handles ⌘S, A, D, 1/2/3. We own undo/redo and Esc-to-close-modal.)
        ============================================================ */
     document.addEventListener('keydown', e => {
       const cmd = e.metaKey || e.ctrlKey;
-      // Ignore when typing in inputs (except for cmd-shortcuts)
-      const inField = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
-
-      if (cmd && e.key === 's') { e.preventDefault(); saveWidget(); return; }
       if (cmd && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
       if ((cmd && e.key === 'y') || (cmd && e.shiftKey && e.key === 'z')) { e.preventDefault(); redo(); return; }
       if (e.key === 'Escape') { $('#ai-modal').hidden = true; return; }
-
-      if (inField) return;
-      if (e.key === '1') { $$('.sb-tab')[0].click(); }
-      if (e.key === '2') { $$('.sb-tab')[1].click(); }
-      if (e.key === '3') { $$('.sb-tab')[2].click(); }
-      if (e.key === 'a') { $('#ai-modal').hidden = false; }
     });
 
     /* ============================================================
        INIT
        ============================================================ */
-    function init() {
+    function boot() {
       renderModeGrid();
       bindCommonControls();
 
@@ -2820,15 +2799,58 @@
       // Load existing widget if id in URL
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
-      if (id) {
-        if (isLoggedIn()) loadWidget(id);
-        else showLogin();
-      } else {
-        if (!isLoggedIn()) showLogin();
-      }
+      if (id) loadWidget(id);
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    /* ============================================================
+       SHELL WIRING
+       ============================================================ */
+    if (window.tgse && typeof window.tgse.init === 'function') {
+      window.tgse.init({
+        widgetType: 'Text FX',
+        widgetTag: 'textfx',
+        scriptFile: 'widget-textfx.js',
+
+        getConfig: () => state.config,
+        setConfig: (c) => {
+          if (c && typeof c === 'object') Object.assign(state.config, c);
+          syncUIFromState();
+          renderPreview();
+        },
+
+        onAIBuild: () => $('#ai-modal').hidden = false,
+        // No onTemplates — TextFX has no templates
+
+        onThemeToggle: () => {
+          const next = state.previewTheme === 'dark' ? 'light' : 'dark';
+          setTheme(next);
+          markDirty();
+        },
+        // No onDesignMode — TextFX has no hotspot system
+
+        onTabChange: (tabName) => {
+          // Mirror shell tab change to TextFX's [data-tab-panel] visibility.
+          // The editor's own .sb-tab click handler also runs (belt-and-braces).
+          $$('[data-tab-panel]').forEach(p => p.style.display = p.dataset.tabPanel === tabName ? '' : 'none');
+          $$('.sb-tab').forEach(b => b.dataset.active = b.dataset.tab === tabName ? '1' : '0');
+        },
+
+        onLoginSuccess: () => boot(),
+
+        onAfterSave: (d) => {
+          if (d && d.widgetId) {
+            state.widgetId = d.widgetId;
+            markClean();
+            if (typeof renderEmbed === 'function') renderEmbed();
+          }
+        },
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (isLoggedIn()) boot();
+      // else shell shows login overlay; we'll boot via onLoginSuccess
+    });
   </script>
 </body>
 </html>
