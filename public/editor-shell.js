@@ -409,17 +409,29 @@
         return;
       }
 
-      // If a new widget, persist the new ID into URL
-      if (d.widgetId && !wId) {
-        const u = new URL(location);
-        u.searchParams.set('id', d.widgetId);
-        history.replaceState(null, '', u);
-      }
-
+      // Success — toast first so the user sees it even if a downstream step
+      // (URL sync, save state UI) throws unexpectedly.
       saveDirty = false;
-      setSaveState('saved');
+      try { setSaveState('saved'); } catch (e) { console.error('[tgse] setSaveState threw', e); }
       toast('Saved', 'ok');
+
+      // Sync URL with the widgetId the API returned. The API mints a fresh
+      // widgetId on the CREATE path even if the client sent one (anti-squatting),
+      // so we must always trust the response — not just on first save.
+      try {
+        if (d.widgetId && d.widgetId !== wId) {
+          const u = new URL(location);
+          u.searchParams.set('id', d.widgetId);
+          history.replaceState(null, '', u);
+        }
+      } catch (e) { console.error('[tgse] URL sync threw', e); }
+
+      // Let the editor react (e.g. clear its own dirty flag, refresh embed code)
+      if (typeof opts.onAfterSave === 'function') {
+        try { opts.onAfterSave(d); } catch (e) { console.error('[tgse] onAfterSave threw:', e); }
+      }
     } catch (e) {
+      console.error('[tgse] Save failed in catch block:', e);
       toast('Save failed — network error', 'err');
       setSaveState('dirty');
     }
