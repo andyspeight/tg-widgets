@@ -208,62 +208,6 @@
     @media (prefers-reduced-motion: reduce) {
       .preview-stage { transition: none; }
     }
-
-    /* Undo toast — slides up from the bottom-centre of the canvas when the
-       user hides a section via the design-mode x. Auto-dismisses after 6s. */
-    .tgo-toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(0);
-      z-index: 1000;
-      background: var(--ink, #0F172A);
-      color: white;
-      padding: 12px 16px 12px 18px;
-      border-radius: 12px;
-      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.35);
-      display: flex; align-items: center; gap: 14px;
-      font-size: 13px;
-      max-width: calc(100vw - 48px);
-      pointer-events: auto;
-      opacity: 1;
-      transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .tgo-toast[hidden] {
-      display: none;
-    }
-    .tgo-toast.is-leaving {
-      opacity: 0;
-      transform: translateX(-50%) translateY(20px);
-    }
-    .tgo-toast-text { font-weight: 500; }
-    .tgo-toast-text strong { font-weight: 700; }
-    .tgo-toast-undo {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: white;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font: inherit;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease;
-    }
-    .tgo-toast-undo:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.5);
-    }
-    .tgo-toast-close {
-      background: transparent; border: 0; padding: 4px;
-      color: rgba(255, 255, 255, 0.6); cursor: pointer;
-      display: flex; align-items: center;
-    }
-    .tgo-toast-close:hover { color: white; }
-    @media (prefers-reduced-motion: reduce) {
-      .tgo-toast { transition: opacity 0.2s ease; }
-      .tgo-toast.is-leaving { transform: translateX(-50%); }
-    }
     .switch {
       width: 36px; height: 20px;
       background: var(--border-strong); border-radius: 999px;
@@ -1110,10 +1054,6 @@
       div.setAttribute('data-tg-widget', 'offers');
       mount.appendChild(div);
       previewWidget = new window.TGOffersWidget(div, cfg);
-      // Turn on the per-section x close buttons in the preview only.
-      // The widget exposes setDesignMode() which sets data-design-mode on the
-      // shadow root so the CSS reveals the buttons.
-      try { previewWidget.setDesignMode(true); } catch (e) { /* old widget version */ }
     }
 
     /* ============================================================
@@ -1289,90 +1229,7 @@
           panel.className = 'breakdown-panel';
           panel.innerHTML = html;
         });
-
-        // ── Design-mode hide-section + undo toast (issue #3) ───────
-        // The widget fires `tgo:hideSection` when a user clicks an x on a card
-        // section. We flip the matching show.* toggle in state, sync the UI
-        // toggle, and surface a toast with an Undo button. Undo flips back.
-        const TOGGLE_KEY_TO_BUTTON_ID = {
-          propertyType: 'showPropertyType', chain: 'showChain', location: 'showLocation',
-          summary: 'showSummary', stayDetails: 'showStayDetails',
-          amenities: 'showAmenities', reviews: 'showReviews', refundability: 'showRefundability',
-          variantCount: 'showVariantCount', leadInPill: 'showLeadInPill',
-          wasPrice: 'showWasPrice', paxBasis: 'showPaxBasis',
-          flightImage: 'showFlightImage', flightSchedule: 'showFlightSchedule',
-          flightDuration: 'showFlightDuration', cabinClass: 'showCabinClass',
-          packageSummary: 'showPackageSummary', packageOperator: 'showPackageOperator',
-        };
-        const HUMAN_LABEL = {
-          propertyType: 'Property type', chain: 'Hotel chain', location: 'Location',
-          summary: 'Property summary', stayDetails: 'Stay details',
-          amenities: 'Amenities', reviews: 'TripAdvisor reviews', refundability: 'Refundability',
-          variantCount: 'Variant count', leadInPill: 'Lead-in pill',
-          wasPrice: 'Was-price', paxBasis: 'Pax basis line',
-          flightImage: 'Flight image', flightSchedule: 'Flight schedule',
-          flightDuration: 'Duration row', cabinClass: 'Cabin class',
-          packageSummary: 'Package summary', packageOperator: 'Operator strip',
-        };
-
-        previewMount.addEventListener('tgo:hideSection', (ev) => {
-          const key = ev.detail && ev.detail.key;
-          if (!key) return;
-          // Update state + sync the matching toggle UI
-          state.config.show = state.config.show || {};
-          state.config.show[key] = false;
-          const btnId = TOGGLE_KEY_TO_BUTTON_ID[key];
-          const btn = btnId ? $(btnId) : null;
-          if (btn) btn.setAttribute('aria-pressed', 'false');
-          markDirtyAndPreview();
-
-          // Toast with undo
-          showToast({
-            label: HUMAN_LABEL[key] || key,
-            onUndo: () => {
-              state.config.show[key] = true;
-              if (btn) btn.setAttribute('aria-pressed', 'true');
-              markDirtyAndPreview();
-            },
-          });
-        });
       }
-    }
-
-    /* ============================================================
-       Toast (used for undo)
-       ============================================================ */
-    let toastTimer = null;
-    function showToast({ label, onUndo, duration = 6000 }) {
-      // Remove any existing toast first
-      const existing = document.querySelector('.tgo-toast');
-      if (existing) existing.remove();
-      if (toastTimer) clearTimeout(toastTimer);
-
-      const t = document.createElement('div');
-      t.className = 'tgo-toast';
-      t.setAttribute('role', 'status');
-      t.innerHTML =
-        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
-        '<div class="tgo-toast-text"><strong></strong> hidden on all cards</div>' +
-        '<button type="button" class="tgo-toast-undo">Undo</button>' +
-        '<button type="button" class="tgo-toast-close" aria-label="Dismiss">' +
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
-        '</button>';
-      t.querySelector('strong').textContent = label;
-      document.body.appendChild(t);
-
-      const dismiss = () => {
-        t.classList.add('is-leaving');
-        setTimeout(() => t.remove(), 250);
-        if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
-      };
-      t.querySelector('.tgo-toast-undo').addEventListener('click', () => {
-        if (typeof onUndo === 'function') onUndo();
-        dismiss();
-      });
-      t.querySelector('.tgo-toast-close').addEventListener('click', dismiss);
-      toastTimer = setTimeout(dismiss, duration);
     }
 
     /* ============================================================
