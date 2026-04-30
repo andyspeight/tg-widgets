@@ -118,6 +118,107 @@
     return match ? parseFloat(match[1]) : Infinity;
   }
 
+  // Pull the currency symbol out of a formatted price string like "£476" or "€1,200"
+  function currencySymbol(str) {
+    if (!str) return '£';
+    const m = String(str).match(/^[^\d\-.,\s]+/);
+    return m ? m[0] : '£';
+  }
+
+  // Format a numeric value back into a formatted-price string using the same symbol.
+  // We round to the nearest whole — Travelify's formattedPrice always shows whole numbers.
+  function formatMoney(amount, sym) {
+    if (!isFinite(amount)) return '';
+    const rounded = Math.round(amount);
+    return (sym || '£') + rounded.toLocaleString('en-GB');
+  }
+
+  // Pax count — adults + children (infants don't count toward per-person pricing)
+  function paxCount(o) {
+    return Math.max(1, (o.adults || 0) + (o.children || 0));
+  }
+
+  // Number of nights from accommodation.nights — flights alone have none
+  function nightsCount(o) {
+    return (o.accommodation && o.accommodation.nights) || 0;
+  }
+
+  // Compute the price to display based on cfg.priceDisplay mode.
+  // Returns { primary, sub } where primary is the prominent price string and
+  // sub is the small label underneath (e.g. "per person", "per night").
+  // Auto mode preserves the existing behaviour: formattedPPPrice if available,
+  // otherwise formattedPrice. Other modes derive from raw numeric where possible.
+  function computeDisplayPrice(o, mode) {
+    const totalStr = o.formattedPrice || '';
+    const ppStr = o.formattedPPPrice || '';
+    const sym = currencySymbol(totalStr || ppStr);
+    const numeric = getNumericPrice(o);
+    const pax = paxCount(o);
+    const nights = nightsCount(o);
+    // Determine the currency-aware total in raw numbers.
+    // formattedPPPrice is per person; multiply by pax to derive total.
+    // formattedPrice is total; if ppStr missing, divide by pax for per-person.
+    let total = null, perPerson = null;
+    if (totalStr) {
+      const m = totalStr.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+      if (m) total = parseFloat(m[1]);
+    }
+    if (ppStr) {
+      const m = ppStr.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+      if (m) perPerson = parseFloat(m[1]);
+    }
+    // Fallbacks
+    if (total == null && perPerson != null) total = perPerson * pax;
+    if (perPerson == null && total != null) perPerson = total / pax;
+    if (total == null && perPerson == null && isFinite(numeric)) {
+      total = numeric;
+      perPerson = numeric / pax;
+    }
+
+    const m = (mode || 'auto').toLowerCase();
+
+    // Per-night requires nights > 0 — fall back gracefully when absent (e.g. flight-only)
+    if ((m === 'pernight' || m === 'perpersonpernight') && !nights) {
+      // Fall through to perperson or total
+      if (m === 'perpersonpernight' && perPerson != null) return { primary: formatMoney(perPerson, sym), sub: 'per person' };
+      if (total != null) return { primary: formatMoney(total, sym), sub: 'total' };
+    }
+
+    if (m === 'total') {
+      return { primary: total != null ? formatMoney(total, sym) : (totalStr || ppStr), sub: 'total' };
+    }
+    if (m === 'perperson') {
+      return { primary: perPerson != null ? formatMoney(perPerson, sym) : (ppStr || totalStr), sub: 'per person' };
+    }
+    if (m === 'pernight') {
+      const v = total != null && nights ? total / nights : null;
+      return { primary: v != null ? formatMoney(v, sym) : (totalStr || ppStr), sub: 'per night' };
+    }
+    if (m === 'perpersonpernight') {
+      const v = perPerson != null && nights ? perPerson / nights : null;
+      return { primary: v != null ? formatMoney(v, sym) : (ppStr || totalStr), sub: 'per person, per night' };
+    }
+    // auto
+    return {
+      primary: ppStr || totalStr,
+      sub: ppStr ? 'per person' : (totalStr ? 'total' : ''),
+    };
+  }
+
+  function paxBasisLabel(o) {
+    const a = o.adults || 0;
+    const c = o.children || 0;
+    const i = o.infants || 0;
+    const parts = [];
+    if (a) parts.push(a + ' adult' + (a === 1 ? '' : 's'));
+    if (c) parts.push(c + ' child' + (c === 1 ? '' : 'ren'));
+    if (i) parts.push(i + ' infant' + (i === 1 ? '' : 's'));
+    if (!parts.length) return '';
+    // Only say "sharing" when there's a hotel involved (more than 1 person stays in a room)
+    const sharing = (o.accommodation && (a + c) > 1);
+    return 'Based on ' + parts.join(', ') + (sharing ? ' sharing' : '');
+  }
+
   function getPackageType(o) {
     return o.packageType || null;
   }
@@ -491,11 +592,34 @@
       font-size: 11px; font-weight: 700;
     }
     .tgo-card-variants {
-      position: absolute; bottom: 10px; right: 10px;
+      position: absolute; top: 10px; right: 10px;
       background: rgba(0,0,0,0.7); color: white;
       padding: 3px 9px; border-radius: 999px;
       font-size: 10px; font-weight: 600;
       letter-spacing: 0.3px;
+    }
+    /* When the type badge is present, variants sits just under it */
+    .tgo-card-image .tgo-card-type-badge + .tgo-card-variants {
+      top: 42px;
+    }
+    /* TripAdvisor chip on the image bottom-right */
+    .tgo-trip-chip {
+      position: absolute; bottom: 10px; right: 10px;
+      background: rgba(0, 0, 0, 0.78); color: white;
+      padding: 5px 10px;
+      border-radius: 6px;
+      display: inline-flex; align-items: center; gap: 8px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .tgo-trip-chip-img { height: 14px; width: auto; display: block; }
+    .tgo-trip-chip-score {
+      font-size: 12px; font-weight: 700; color: #FFD166;
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .tgo-trip-chip-count {
+      font-size: 10px; color: rgba(255,255,255,0.85);
+      font-weight: 500;
     }
 
     .tgo-card-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
@@ -560,27 +684,6 @@
       background: var(--tgo-card); border: 1px solid var(--tgo-border);
       padding: 3px 8px; border-radius: 999px;
       font-size: 10px; color: var(--tgo-text); font-weight: 500;
-    }
-
-    /* TripAdvisor row */
-    .tgo-reviews {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 16px; border-top: 1px solid var(--tgo-border);
-    }
-    .tgo-review-img { height: 16px; width: auto; }
-    .tgo-review-score {
-      background: var(--tgo-accent); color: white; font-weight: 700;
-      padding: 5px 9px; border-radius: 6px; font-size: 13px;
-      min-width: 40px; text-align: center;
-    }
-    .tgo-review-score.high { background: var(--tgo-success); }
-    .tgo-review-score.mid { background: var(--tgo-warn); }
-    .tgo-review-text { flex: 1; font-size: 12px; color: var(--tgo-text); }
-    .tgo-review-count { font-size: 11px; color: var(--tgo-sub); }
-    .tgo-review-source {
-      font-size: 10px; color: var(--tgo-sub);
-      text-transform: uppercase; letter-spacing: 0.5px;
-      font-weight: 600;
     }
 
     /* Flight route bar */
@@ -699,7 +802,7 @@
       background: var(--tgo-card);
       margin-top: auto;
     }
-    .tgo-price-block { display: flex; flex-direction: column; gap: 2px; }
+    .tgo-price-block { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .tgo-price {
       font-weight: 800; font-size: 22px; color: var(--tgo-text);
       line-height: 1;
@@ -709,6 +812,127 @@
       text-decoration: line-through;
     }
     .tgo-price-sub { font-size: 11px; color: var(--tgo-sub); }
+
+    /* Pax-basis trigger — dotted underline marks it as interactive */
+    .tgo-pax-basis {
+      background: transparent; border: 0; padding: 4px 0 0;
+      font: inherit; cursor: pointer; text-align: left;
+      font-size: 11px; color: var(--tgo-sub);
+      text-decoration: underline dotted; text-underline-offset: 3px;
+      transition: color 0.15s ease;
+    }
+    .tgo-pax-basis:hover { color: var(--tgo-accent); }
+    .tgo-pax-basis:focus-visible {
+      outline: 2px solid var(--tgo-accent); outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* Pax popover — rendered into the shadow root, positioned absolutely. */
+    .tgo-popover-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 9998;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .tgo-popover {
+      background: var(--tgo-card);
+      border: 1px solid var(--tgo-border);
+      border-radius: var(--tgo-radius);
+      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
+      width: 100%; max-width: 320px;
+      padding: 18px 18px 16px;
+      color: var(--tgo-text);
+    }
+    .tgo-popover-title {
+      font-size: 14px; font-weight: 700; margin: 0 0 4px;
+    }
+    .tgo-popover-sub {
+      font-size: 12px; color: var(--tgo-sub); margin: 0 0 14px;
+    }
+    .tgo-pax-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-top: 1px solid var(--tgo-border);
+    }
+    .tgo-pax-row:first-of-type { border-top: 0; }
+    .tgo-pax-row-label { font-size: 13px; font-weight: 600; color: var(--tgo-text); }
+    .tgo-pax-row-help { font-size: 10px; color: var(--tgo-sub); display: block; margin-top: 1px; }
+    .tgo-pax-stepper {
+      display: inline-flex; align-items: center; gap: 0;
+      border: 1px solid var(--tgo-border); border-radius: 8px;
+      overflow: hidden; background: var(--tgo-card);
+    }
+    .tgo-pax-stepper button {
+      width: 28px; height: 28px;
+      background: transparent; border: 0; padding: 0;
+      font-size: 16px; font-weight: 700; color: var(--tgo-text);
+      cursor: pointer;
+      transition: background 0.12s ease;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tgo-pax-stepper button:hover:not(:disabled) { background: var(--tgo-card-alt); }
+    .tgo-pax-stepper button:disabled { color: var(--tgo-muted); cursor: not-allowed; }
+    .tgo-pax-stepper-value {
+      min-width: 30px; text-align: center;
+      font-size: 13px; font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      padding: 0 4px;
+    }
+    .tgo-popover-actions {
+      display: flex; gap: 8px; justify-content: flex-end;
+      margin-top: 14px; padding-top: 12px;
+      border-top: 1px solid var(--tgo-border);
+    }
+    .tgo-popover-btn {
+      padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600;
+      border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--tgo-border); background: var(--tgo-card);
+      color: var(--tgo-text);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .tgo-popover-btn:hover { background: var(--tgo-card-alt); }
+    .tgo-popover-btn--primary {
+      background: var(--tgo-accent); color: white; border-color: var(--tgo-accent);
+    }
+    .tgo-popover-btn--primary:hover { background: var(--tgo-accent-hover); border-color: var(--tgo-accent-hover); }
+
+    /* Design-mode close x buttons on each section — only visible when
+       data-design-mode="true" is set on the root (which the editor sets).
+       Hidden by default on live deployed widgets. */
+    .tgo-section-x {
+      position: absolute; top: 6px; right: 6px;
+      width: 22px; height: 22px;
+      background: rgba(15, 23, 42, 0.7);
+      color: white;
+      border: 0; border-radius: 999px;
+      cursor: pointer;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 0;
+      transition: background 0.15s ease, transform 0.12s ease;
+      z-index: 5;
+    }
+    .tgo-section-x svg { width: 12px; height: 12px; }
+    .tgo-section-x:hover {
+      background: var(--tgo-error);
+      transform: scale(1.1);
+    }
+    .tgo-root[data-design-mode="true"] .tgo-section-x { display: inline-flex; }
+    /* Make every section a positioning context so the x can pin to the corner */
+    .tgo-root[data-design-mode="true"] [data-tgo-section] { position: relative; }
+    /* On the image, the existing chips already use absolute positioning, so the
+       x sits on top — give it a stronger background to stand out */
+    .tgo-root[data-design-mode="true"] .tgo-card-image .tgo-section-x {
+      background: rgba(15, 23, 42, 0.85);
+    }
+    .tgo-root[data-design-mode="true"] [data-tgo-section]:hover {
+      outline: 2px dashed var(--tgo-accent);
+      outline-offset: -2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tgo-section-x { transition: none; }
+      .tgo-section-x:hover { transform: none; }
+    }
     .tgo-cta {
       color: white;
       background: var(--tgo-accent);
@@ -768,6 +992,7 @@
         cabinClass: true,
         packageOperator: true,
         packageSummary: true,
+        paxBasis: true,
         poweredBy: false,
       };
       return {
@@ -800,6 +1025,8 @@
         accentColor: c.accentColor || '',
         radius: typeof c.radius === 'number' ? c.radius : 14,
         fontFamily: c.fontFamily || '',
+
+        priceDisplay: c.priceDisplay || 'auto',
 
         show: Object.assign({}, defaultShow, c.show || {}),
 
@@ -843,8 +1070,149 @@
       this.root.className = 'tgo-root';
       this._applyHostStyles();
       this.shadow.appendChild(this.root);
+      this._wireShadowEvents();
       this._showLoading();
       this._fetchAndRender();
+    }
+
+    // Delegated click handler inside the shadow root. Handles:
+    //   1. Design-mode close x — hides the corresponding section across all cards
+    //      by dispatching tgo:hideSection from the host. The editor listens.
+    //   2. Pax-basis chip — opens the popover so the user can adjust adults /
+    //      children / infants for the click-through URL.
+    _wireShadowEvents() {
+      this.root.addEventListener('click', (ev) => {
+        // Design-mode x — only fires when the editor has set data-design-mode
+        const xBtn = ev.target.closest('[data-tgo-x]');
+        if (xBtn) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const key = xBtn.getAttribute('data-tgo-x');
+          // Optimistic: also flip our own cfg.show locally so the next render
+          // hides it. The editor will receive the event and update its toggle UI.
+          if (this.cfg.show && key) {
+            this.cfg.show[key] = false;
+            this._renderOffers();
+          }
+          this._dispatch('tgo:hideSection', { key });
+          return;
+        }
+        // Pax-basis chip — open popover
+        const paxBtn = ev.target.closest('[data-tgo-pax]');
+        if (paxBtn) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          let data;
+          try { data = JSON.parse(paxBtn.getAttribute('data-tgo-pax') || '{}'); }
+          catch { return; }
+          this._openPaxPopover(data);
+          return;
+        }
+      });
+    }
+
+    _dispatch(name, detail) {
+      try {
+        const ev = new CustomEvent(name, { bubbles: true, composed: true, detail: detail });
+        this.el.dispatchEvent(ev);
+      } catch { /* CustomEvent unavailable */ }
+    }
+
+    // Open the pax popover, prefilled with the offer's pax. On confirm,
+    // open the click-through URL with adt/chd/inf query params appended.
+    // We can't change Travelify's cached pricing; the params hint to the
+    // destination booking site about preferred occupancy.
+    _openPaxPopover(data) {
+      // Remove any existing popover first
+      const existing = this.shadow.querySelector('.tgo-popover-backdrop');
+      if (existing) existing.remove();
+
+      const adults = Math.max(1, data.adults || 2);
+      const children = Math.max(0, data.children || 0);
+      const infants = Math.max(0, data.infants || 0);
+      const url = data.url || '';
+
+      const backdrop = document.createElement('div');
+      backdrop.className = 'tgo-popover-backdrop';
+      backdrop.innerHTML = '<div class="tgo-popover" role="dialog" aria-modal="true" aria-labelledby="tgoPaxTitle">'
+        + '<h3 class="tgo-popover-title" id="tgoPaxTitle">Travellers</h3>'
+        + '<p class="tgo-popover-sub">Set your group for this enquiry. We\'ll pass it through to the search.</p>'
+        + this._paxRow('adults', 'Adults', '16+ years', adults, 1, 9)
+        + this._paxRow('children', 'Children', '2 to 15 years', children, 0, 8)
+        + this._paxRow('infants', 'Infants', 'Under 2', infants, 0, 4)
+        + '<div class="tgo-popover-actions">'
+        + '<button type="button" class="tgo-popover-btn" data-tgo-popover-cancel>Cancel</button>'
+        + '<button type="button" class="tgo-popover-btn tgo-popover-btn--primary" data-tgo-popover-confirm>View deal</button>'
+        + '</div>'
+        + '</div>';
+
+      // Local state for the steppers
+      const state = { adults, children, infants };
+
+      const update = (kind, delta) => {
+        const limits = { adults: [1, 9], children: [0, 8], infants: [0, 4] };
+        const [min, max] = limits[kind];
+        state[kind] = Math.max(min, Math.min(max, state[kind] + delta));
+        const valEl = backdrop.querySelector('[data-tgo-pax-val="' + kind + '"]');
+        if (valEl) valEl.textContent = state[kind];
+        // Update disabled buttons
+        backdrop.querySelectorAll('[data-tgo-pax-btn]').forEach((b) => {
+          const k = b.getAttribute('data-tgo-pax-btn').split(':')[0];
+          const dir = b.getAttribute('data-tgo-pax-btn').split(':')[1];
+          if (dir === 'minus') b.disabled = state[k] <= limits[k][0];
+          else b.disabled = state[k] >= limits[k][1];
+        });
+      };
+
+      backdrop.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-tgo-pax-btn]');
+        if (btn) {
+          const [kind, dir] = btn.getAttribute('data-tgo-pax-btn').split(':');
+          update(kind, dir === 'minus' ? -1 : 1);
+          return;
+        }
+        if (ev.target.matches('[data-tgo-popover-cancel]') || ev.target === backdrop) {
+          backdrop.remove();
+          return;
+        }
+        if (ev.target.matches('[data-tgo-popover-confirm]')) {
+          // Open the URL with pax appended as query params. Most click-through
+          // trackers preserve query strings to the destination; if Travelify
+          // doesn't, it falls back to the offer's cached pax which is fine.
+          const sep = url.indexOf('?') >= 0 ? '&' : '?';
+          const newUrl = url + sep + 'adt=' + state.adults + '&chd=' + state.children + '&inf=' + state.infants;
+          window.open(safeUrl(newUrl), '_blank', 'noopener,noreferrer');
+          backdrop.remove();
+          return;
+        }
+      });
+
+      // Initial disabled-state pass
+      this.shadow.appendChild(backdrop);
+      update('adults', 0);
+      update('children', 0);
+      update('infants', 0);
+    }
+
+    _paxRow(kind, label, help, value, min, max) {
+      return '<div class="tgo-pax-row">'
+        + '<div>'
+        + '<div class="tgo-pax-row-label">' + esc(label) + '</div>'
+        + '<small class="tgo-pax-row-help">' + esc(help) + '</small>'
+        + '</div>'
+        + '<div class="tgo-pax-stepper">'
+        + '<button type="button" data-tgo-pax-btn="' + kind + ':minus" aria-label="Decrease ' + label + '">−</button>'
+        + '<span class="tgo-pax-stepper-value" data-tgo-pax-val="' + kind + '">' + value + '</span>'
+        + '<button type="button" data-tgo-pax-btn="' + kind + ':plus" aria-label="Increase ' + label + '">+</button>'
+        + '</div>'
+        + '</div>';
+    }
+
+    // Public method called by the editor when toggling design mode
+    setDesignMode(on) {
+      if (this.root) {
+        this.root.setAttribute('data-design-mode', on ? 'true' : 'false');
+      }
     }
 
     _showLoading() {
@@ -1030,29 +1398,26 @@
       return '<div class="tgo-card-stars">' + stars + '</div>';
     }
 
-    // CRITICAL: TripAdvisor support. acc.reviewImgUrl is the official Travelify-served
-    // SVG (e.g. tripadvisor-4.5.svg). Prefer it over numeric rendering.
-    _renderReviews(acc) {
+    // TripAdvisor chip — sits on the bottom-right of the image overlay.
+    // Renders nothing if the offer has no review data, or if the toggle is off.
+    // Travelify's reviewImgUrl is the official tripadvisor-X.X.svg badge.
+    _renderTripAdvisorChip(acc) {
       if (!this.cfg.show.reviews) return '';
       const score = acc.reviewRating;
       const count = acc.reviewCount;
       const reviewImg = safeImgUrl(acc.reviewImgUrl || '');
       if (!score && !count && !reviewImg) return '';
 
-      let html = '<div class="tgo-reviews">';
+      let inner = '';
       if (reviewImg) {
-        html += '<img class="tgo-review-img" src="' + esc(reviewImg) + '" alt="TripAdvisor rating" loading="lazy" />';
+        inner += '<img class="tgo-trip-chip-img" src="' + esc(reviewImg) + '" alt="TripAdvisor rating" loading="lazy" />';
       } else if (score) {
-        const cls = score >= 4 ? 'high' : score >= 3 ? 'mid' : '';
-        html += '<div class="tgo-review-score ' + cls + '">' + esc(score.toFixed(1)) + '</div>';
+        inner += '<span class="tgo-trip-chip-score">' + esc(score.toFixed(1)) + '</span>';
       }
-      html += '<div class="tgo-review-text">';
-      if (count) html += '<div>' + esc(count.toLocaleString()) + ' reviews</div>';
-      if (reviewImg) {
-        html += '<div class="tgo-review-source">TripAdvisor</div>';
+      if (count) {
+        inner += '<span class="tgo-trip-chip-count">' + esc(count.toLocaleString()) + '</span>';
       }
-      html += '</div></div>';
-      return html;
+      return '<div class="tgo-trip-chip" title="TripAdvisor rating">' + inner + '</div>';
     }
 
     _renderRefundability(refundability) {
@@ -1069,15 +1434,37 @@
     }
 
     _renderPriceFooter(o, wasPrice) {
-      const price = o.formattedPPPrice || o.formattedPrice || '';
-      const sub = o.formattedPPPrice ? 'per person' : (o.formattedPrice ? 'total' : '');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
       const url = safeUrl(o.url || '#');
       const wasHtml = (this.cfg.show.wasPrice && wasPrice) ? '<div class="tgo-price-was">' + esc(wasPrice) + '</div>' : '';
+
+      // Pax-basis trigger — opens the popover. Encoded as a button so keyboard users
+      // can tab to it. The full popover only shows on click; the underline + tooltip
+      // hint that it's interactive.
+      let basisHtml = '';
+      if (this.cfg.show.paxBasis) {
+        const label = paxBasisLabel(o);
+        if (label) {
+          // Encode the offer's pax + URL into data attributes so the popover opens
+          // with the right values preloaded and can rewrite the click-through URL
+          // with the user's chosen pax on confirm.
+          const paxData = JSON.stringify({
+            adults: o.adults || 0,
+            children: o.children || 0,
+            infants: o.infants || 0,
+            url: o.url || '',
+          });
+          basisHtml = '<button type="button" class="tgo-pax-basis" data-tgo-pax="' + esc(paxData) + '">'
+            + esc(label) + '</button>';
+        }
+      }
+
       return '<div class="tgo-card-footer">'
         + '<div class="tgo-price-block">'
         + wasHtml
-        + '<div class="tgo-price">' + esc(price) + '</div>'
-        + (sub ? '<div class="tgo-price-sub">' + esc(sub) + '</div>' : '')
+        + '<div class="tgo-price">' + esc(display.primary) + '</div>'
+        + (display.sub ? '<div class="tgo-price-sub">' + esc(display.sub) + '</div>' : '')
+        + basisHtml
         + '</div>'
         + '<a class="tgo-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">View deal</a>'
         + '</div>';
@@ -1099,50 +1486,57 @@
       if (acc.rating) html += this._starsBadge(acc.rating);
       html += '<div class="tgo-card-type-badge">Hotel</div>';
       html += this._variantBadge(o);
-      if (this.cfg.show.leadInPill && isLeadIn) html += '<div class="tgo-card-pill">Lead-in price</div>';
+      if (this.cfg.show.leadInPill && isLeadIn) {
+        html += this._section('leadInPill', 'Lead-in pill', '<div class="tgo-card-pill">Lead-in price</div>');
+      }
+      const trip = this._renderTripAdvisorChip(acc);
+      if (trip) html += this._section('reviews', 'TripAdvisor', trip);
       html += '</div>';
 
       // Body
       html += '<div class="tgo-card-body">';
       if (this.cfg.show.propertyType && acc.propertyType) {
-        html += '<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>';
+        html += this._section('propertyType', 'Property type',
+          '<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>');
       }
       html += '<h3 class="tgo-card-name">' + esc(acc.name || 'Hotel') + '</h3>';
       if (this.cfg.show.chain && acc.chain) {
-        html += '<div class="tgo-card-chain">' + esc(acc.chain) + '</div>';
+        html += this._section('chain', 'Hotel chain',
+          '<div class="tgo-card-chain">' + esc(acc.chain) + '</div>');
       }
       if (this.cfg.show.location) {
-        html += '<div class="tgo-card-location">' + icon('mapPin', 12)
-          + '<span>' + esc(dest.name || '') + (dest.countryCode ? ', ' + esc(dest.countryCode) : '') + '</span></div>';
+        html += this._section('location', 'Location',
+          '<div class="tgo-card-location">' + icon('mapPin', 12)
+          + '<span>' + esc(dest.name || '') + (dest.countryCode ? ', ' + esc(dest.countryCode) : '') + '</span></div>');
       }
       if (this.cfg.show.summary && acc.summary) {
-        html += '<div class="tgo-card-summary">' + esc(acc.summary) + '</div>';
+        html += this._section('summary', 'Property summary',
+          '<div class="tgo-card-summary">' + esc(acc.summary) + '</div>');
       }
       html += '</div>';
 
-      // TripAdvisor reviews
-      html += this._renderReviews(acc);
-
       // Stay details
       if (this.cfg.show.stayDetails) {
-        html += '<div class="tgo-section">'
+        html += this._section('stayDetails', 'Stay details',
+          '<div class="tgo-section">'
           + '<div class="tgo-section-title">Stay details</div>'
           + this._row('calendar', 'Check-in', formatDate(acc.checkinDate))
           + this._row('moon', 'Nights', acc.nights ? String(acc.nights) : '')
           + this._row('utensils', 'Board', formatEnum(acc.boardBasis))
           + this._row('users', 'Travelling', paxString(o))
           + this._renderRefundability(pricing.refundability)
-          + '</div>';
+          + '</div>');
       }
 
       // Amenities
       if (this.cfg.show.amenities && amenities.length) {
         const visible = amenities.slice(0, 10);
         const extras = amenities.length - visible.length;
-        html += '<div class="tgo-section"><div class="tgo-section-title">Amenities</div><div class="tgo-amenities">';
-        for (const a of visible) html += '<span class="tgo-amenity">' + esc(formatEnum(a)) + '</span>';
-        if (extras > 0) html += '<span class="tgo-amenity">+' + extras + '</span>';
-        html += '</div></div>';
+        let amenHtml = '<div class="tgo-section"><div class="tgo-section-title">Amenities</div><div class="tgo-amenities">';
+        for (const a of visible) amenHtml += '<span class="tgo-amenity">' + esc(formatEnum(a)) + '</span>';
+        if (extras > 0) amenHtml += '<span class="tgo-amenity">+' + extras + '</span>';
+        amenHtml += '</div></div>';
+        html += this._section('amenities', 'Amenities', amenHtml);
       }
 
       const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? '£' + Math.round(pricing.priceBeforeChange) : null;
@@ -1169,14 +1563,17 @@
 
       // Hero image (destination shot)
       if (this.cfg.show.flightImage && img) {
-        html += '<div class="tgo-card-image flight" ' + cssBgUrl(img) + '>'
+        let imgInner = '<div class="tgo-card-image flight" ' + cssBgUrl(img) + '>'
           + '<div class="tgo-card-type-badge">Flight</div>'
-          + this._variantBadge(o)
-          + (this.cfg.show.leadInPill && isLeadIn ? '<div class="tgo-card-pill">Lead-in price</div>' : '')
-          + '</div>';
+          + this._variantBadge(o);
+        if (this.cfg.show.leadInPill && isLeadIn) {
+          imgInner += this._section('leadInPill', 'Lead-in pill', '<div class="tgo-card-pill">Lead-in price</div>');
+        }
+        imgInner += '</div>';
+        html += this._section('flightImage', 'Flight image', imgInner);
       }
 
-      // Route bar
+      // Route bar (always shown — core info, not user-hideable)
       html += '<div class="tgo-route">'
         + '<div class="tgo-airport">'
         + '<div class="tgo-iata">' + esc(og.iataCode || '???') + '</div>'
@@ -1196,14 +1593,15 @@
 
       // Duration row
       if (this.cfg.show.flightDuration && f.duration) {
-        html += '<div class="tgo-flight-duration-row">'
+        html += this._section('flightDuration', 'Duration / trip type',
+          '<div class="tgo-flight-duration-row">'
           + esc(formatDuration(f.duration))
           + ' · ' + esc(tripType)
           + (this.cfg.show.cabinClass && f.cabinClass ? ' · ' + esc(formatEnum(f.cabinClass)) : '')
-          + '</div>';
+          + '</div>');
       }
 
-      // Carrier row
+      // Carrier row (core)
       html += '<div class="tgo-carrier-row">'
         + (carrier.code ? '<span class="tgo-carrier-code">' + esc(carrier.code) + '</span>' : '')
         + '<span class="tgo-carrier-name">' + esc(carrier.name || 'Carrier') + '</span>'
@@ -1212,12 +1610,13 @@
 
       // Schedule
       if (this.cfg.show.flightSchedule) {
-        html += '<div class="tgo-section">'
+        html += this._section('flightSchedule', 'Flight schedule',
+          '<div class="tgo-section">'
           + '<div class="tgo-section-title">Schedule</div>'
           + this._row('calendar', 'Outbound', formatDateTime(f.outboundDate))
           + (f.returnDate ? this._row('calendar', 'Return', formatDateTime(f.returnDate)) : '')
           + this._renderRefundability(pricing.refundability)
-          + '</div>';
+          + '</div>');
       }
 
       const wasPrice = priceChanged ? '£' + Math.round(pricing.priceBeforeChange) : null;
@@ -1268,38 +1667,44 @@
       if (acc.rating) html += this._starsBadge(acc.rating);
       html += '<div class="tgo-card-type-badge ' + badgeClass + '">' + esc(badgeText) + '</div>';
       html += this._variantBadge(o);
-      if (this.cfg.show.leadInPill && isLeadIn) html += '<div class="tgo-card-pill">Lead-in price</div>';
+      if (this.cfg.show.leadInPill && isLeadIn) {
+        html += this._section('leadInPill', 'Lead-in pill', '<div class="tgo-card-pill">Lead-in price</div>');
+      }
+      const trip = this._renderTripAdvisorChip(acc);
+      if (trip) html += this._section('reviews', 'TripAdvisor', trip);
       html += '</div>';
 
       // Operator strip — PackageHoliday only
       if (this.cfg.show.packageOperator && isHoliday && operatorName) {
-        html += '<div class="tgo-package-operator">'
+        let opHtml = '<div class="tgo-package-operator">'
           + '<span class="tgo-operator-label">Operator</span>'
           + '<span class="tgo-operator-name">' + esc(operatorName) + '</span>';
-        if (atol) html += '<span class="tgo-operator-atol">ATOL</span>';
-        html += '</div>';
+        if (atol) opHtml += '<span class="tgo-operator-atol">ATOL</span>';
+        opHtml += '</div>';
+        html += this._section('packageOperator', 'Operator strip', opHtml);
       }
 
       // Body
       html += '<div class="tgo-card-body">';
       if (this.cfg.show.propertyType && acc.propertyType) {
-        html += '<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>';
+        html += this._section('propertyType', 'Property type',
+          '<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>');
       }
       html += '<h3 class="tgo-card-name">' + esc(acc.name || 'Package holiday') + '</h3>';
       if (this.cfg.show.chain && acc.chain) {
-        html += '<div class="tgo-card-chain">' + esc(acc.chain) + '</div>';
+        html += this._section('chain', 'Hotel chain',
+          '<div class="tgo-card-chain">' + esc(acc.chain) + '</div>');
       }
       if (this.cfg.show.location) {
-        html += '<div class="tgo-card-location">' + icon('mapPin', 12)
-          + '<span>' + esc(dest.name || '') + (dest.countryCode ? ', ' + esc(dest.countryCode) : '') + '</span></div>';
+        html += this._section('location', 'Location',
+          '<div class="tgo-card-location">' + icon('mapPin', 12)
+          + '<span>' + esc(dest.name || '') + (dest.countryCode ? ', ' + esc(dest.countryCode) : '') + '</span></div>');
       }
       if (this.cfg.show.summary && acc.summary) {
-        html += '<div class="tgo-card-summary">' + esc(acc.summary) + '</div>';
+        html += this._section('summary', 'Property summary',
+          '<div class="tgo-card-summary">' + esc(acc.summary) + '</div>');
       }
       html += '</div>';
-
-      // TripAdvisor reviews
-      html += this._renderReviews(acc);
 
       // Package summary — flight + hotel + pax
       if (this.cfg.show.packageSummary) {
@@ -1315,48 +1720,51 @@
         const hotelLine = hotelLineParts.join(' · ');
 
         if (flightLine || hotelLine) {
-          html += '<div class="tgo-package-summary">';
+          let psHtml = '<div class="tgo-package-summary">';
           if (flightLine) {
-            html += '<div class="tgo-package-line">'
+            psHtml += '<div class="tgo-package-line">'
               + '<span class="tgo-package-icon">' + icon('plane', 16) + '</span>'
               + '<span><strong>' + esc(flightLine) + '</strong>';
             if (f.outboundDate) {
-              html += '<div class="tgo-package-line-detail">Departs ' + esc(formatDate(f.outboundDate));
-              if (f.returnDate) html += ' · Returns ' + esc(formatDate(f.returnDate));
-              if (f.duration) html += ' · ' + esc(formatDuration(f.duration));
-              if (this.cfg.show.cabinClass && f.cabinClass) html += ' · ' + esc(formatEnum(f.cabinClass));
-              html += '</div>';
+              psHtml += '<div class="tgo-package-line-detail">Departs ' + esc(formatDate(f.outboundDate));
+              if (f.returnDate) psHtml += ' · Returns ' + esc(formatDate(f.returnDate));
+              if (f.duration) psHtml += ' · ' + esc(formatDuration(f.duration));
+              if (this.cfg.show.cabinClass && f.cabinClass) psHtml += ' · ' + esc(formatEnum(f.cabinClass));
+              psHtml += '</div>';
             }
-            html += '</span></div>';
+            psHtml += '</span></div>';
           }
           if (hotelLine) {
-            html += '<div class="tgo-package-line">'
+            psHtml += '<div class="tgo-package-line">'
               + '<span class="tgo-package-icon">' + icon('hotel', 16) + '</span>'
               + '<span><strong>' + esc(hotelLine) + '</strong>';
-            if (acc.checkinDate) html += '<div class="tgo-package-line-detail">Check-in ' + esc(formatDate(acc.checkinDate)) + '</div>';
-            html += '</span></div>';
+            if (acc.checkinDate) psHtml += '<div class="tgo-package-line-detail">Check-in ' + esc(formatDate(acc.checkinDate)) + '</div>';
+            psHtml += '</span></div>';
           }
-          html += '<div class="tgo-package-line">'
+          psHtml += '<div class="tgo-package-line">'
             + '<span class="tgo-package-icon">' + icon('users', 16) + '</span>'
             + '<span>' + esc(paxString(o) || 'Travellers') + '</span></div>';
-          html += '</div>';
+          psHtml += '</div>';
+          html += this._section('packageSummary', 'Package summary', psHtml);
         }
       }
 
       // Refundability
       if (this.cfg.show.refundability && (flightPricing.refundability || accPricing.refundability)) {
         const r = flightPricing.refundability || accPricing.refundability;
-        html += '<div class="tgo-section">' + this._renderRefundability(r) + '</div>';
+        html += this._section('refundability', 'Refundability',
+          '<div class="tgo-section">' + this._renderRefundability(r) + '</div>');
       }
 
       // Amenities
       if (this.cfg.show.amenities && amenities.length) {
         const visible = amenities.slice(0, 10);
         const extras = amenities.length - visible.length;
-        html += '<div class="tgo-section"><div class="tgo-section-title">Amenities</div><div class="tgo-amenities">';
-        for (const a of visible) html += '<span class="tgo-amenity">' + esc(formatEnum(a)) + '</span>';
-        if (extras > 0) html += '<span class="tgo-amenity">+' + extras + '</span>';
-        html += '</div></div>';
+        let amenHtml = '<div class="tgo-section"><div class="tgo-section-title">Amenities</div><div class="tgo-amenities">';
+        for (const a of visible) amenHtml += '<span class="tgo-amenity">' + esc(formatEnum(a)) + '</span>';
+        if (extras > 0) amenHtml += '<span class="tgo-amenity">+' + extras + '</span>';
+        amenHtml += '</div></div>';
+        html += this._section('amenities', 'Amenities', amenHtml);
       }
 
       html += this._renderPriceFooter(o, wasPrice);
@@ -1380,6 +1788,21 @@
         + '</div>';
     }
 
+    // Wrap a chunk of HTML in a section that can be hidden via the design-mode x.
+    // The x button is always rendered but CSS hides it unless the root has
+    // data-design-mode="true". Clicking it dispatches tgo:hideSection from
+    // the host element, so the editor can flip the cfg.show key.
+    _section(showKey, label, contentHtml) {
+      if (!contentHtml) return '';
+      const xBtn = '<button type="button" class="tgo-section-x"'
+        + ' data-tgo-x="' + esc(showKey) + '"'
+        + ' aria-label="Hide ' + esc(label) + ' on all cards"'
+        + ' title="Hide ' + esc(label) + '">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>'
+        + '</button>';
+      return '<div data-tgo-section="' + esc(showKey) + '">' + contentHtml + xBtn + '</div>';
+    }
+
     update(newConfig) {
       this.cfg = this._defaults(Object.assign({}, this.cfg, newConfig));
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
@@ -1387,6 +1810,7 @@
       this.root.className = 'tgo-root';
       this._applyHostStyles();
       this.shadow.appendChild(this.root);
+      this._wireShadowEvents();
       this._showLoading();
       this._fetchAndRender();
     }
