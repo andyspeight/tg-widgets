@@ -57,7 +57,9 @@
     .field:first-child { margin-top: 0; }
     .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 6px; }
     .field-help { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .field-row:first-child { margin-top: 0; }
+    .field-row .field { margin-top: 0; }
 
     input[type="text"], input[type="number"], select, textarea {
       width: 100%; padding: 8px 10px; border: 1px solid var(--border);
@@ -130,6 +132,82 @@
     .toggle-row + .toggle-row { border-top: 1px solid var(--border); }
     .toggle-label { flex: 1; font-size: 13px; color: var(--ink); cursor: pointer; }
     .toggle-help { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .toggle-group-heading {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 14px 0 4px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .toggle-group-heading:first-child {
+      border-top: 0;
+      margin-top: 0;
+      padding-top: 4px;
+    }
+    /* When a heading immediately follows a toggle-row, the toggle-row's bottom
+       border becomes redundant — the heading's top border takes over. */
+    .toggle-row:has(+ .toggle-group-heading) { border-bottom: 0; }
+
+    /* Dedupe breakdown panel — fed by tgo:dataLoaded event */
+    .breakdown-panel {
+      margin-top: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 11px;
+    }
+    .breakdown-panel.is-empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 14px 12px;
+    }
+    .breakdown-panel-title {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;
+    }
+    .breakdown-list { display: flex; flex-direction: column; gap: 2px; }
+    .breakdown-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px dashed var(--border);
+      font-size: 12px;
+    }
+    .breakdown-row:last-child { border-bottom: 0; }
+    .breakdown-row.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .breakdown-strategy { color: var(--ink); }
+    .breakdown-row.active .breakdown-strategy { color: var(--accent); }
+    .breakdown-count {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-variant-numeric: tabular-nums;
+      color: var(--sub); font-weight: 600;
+    }
+    .breakdown-row.active .breakdown-count { color: var(--accent); }
+    .breakdown-raw {
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+      display: flex; justify-content: space-between;
+    }
+    .breakdown-raw strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+    /* Viewport-aware preview */
+    .preview-stage {
+      transition: max-width 0.25s ease;
+      margin: 0 auto;
+    }
+    .preview-stage[data-vp="desktop"] { max-width: none; }
+    .preview-stage[data-vp="tablet"]  { max-width: 768px; }
+    .preview-stage[data-vp="mobile"]  { max-width: 380px; }
+    @media (prefers-reduced-motion: reduce) {
+      .preview-stage { transition: none; }
+    }
     .switch {
       width: 36px; height: 20px;
       background: var(--border-strong); border-radius: 999px;
@@ -345,21 +423,21 @@
                   <option value="AllInclusivePlus">All Inclusive Plus</option>
                 </select>
               </div>
-              <div class="field-row">
-                <div class="field">
-                  <label class="field-label" for="cfgRating">Min star rating</label>
-                  <input id="cfgRating" type="number" min="0" max="5" step="0.5" value="0" />
-                </div>
-                <div class="field">
-                  <label class="field-label" for="cfgCabin">Cabin class</label>
-                  <select id="cfgCabin">
-                    <option value="">Any</option>
-                    <option value="Economy">Economy</option>
-                    <option value="PremiumEconomy">Premium Economy</option>
-                    <option value="Business">Business</option>
-                    <option value="First">First</option>
-                  </select>
-                </div>
+              <div class="field" id="ratingField">
+                <label class="field-label" for="cfgRating">Min star rating</label>
+                <input id="cfgRating" type="number" min="0" max="5" step="0.5" value="0" />
+                <div class="field-help">Hotel-only. 0 = any rating.</div>
+              </div>
+              <div class="field" id="cabinField">
+                <label class="field-label" for="cfgCabin">Cabin class</label>
+                <select id="cfgCabin">
+                  <option value="">Any</option>
+                  <option value="Economy">Economy</option>
+                  <option value="PremiumEconomy">Premium Economy</option>
+                  <option value="Business">Business</option>
+                  <option value="First">First</option>
+                </select>
+                <div class="field-help">Flights and packages only.</div>
               </div>
               <div class="field-row">
                 <div class="field">
@@ -488,7 +566,7 @@
                   <button type="button" data-density="standard" aria-pressed="true">Standard</button>
                   <button type="button" data-density="detailed">Detailed</button>
                 </div>
-                <div class="field-help"><strong>Compact</strong> shows the basics. <strong>Standard</strong> (recommended) shows summaries and reviews. <strong>Detailed</strong> includes amenities and full schedule data.</div>
+                <div class="field-help"><strong>Compact</strong>, <strong>Standard</strong> and <strong>Detailed</strong> control how wide each card is — they don't switch fields on or off. Use the toggles below to choose what's displayed.</div>
               </div>
             </div>
           </div>
@@ -498,16 +576,30 @@
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="section-body">
-              <div class="toggle-row"><span class="toggle-label">Property summary</span><button class="switch" id="showSummary" aria-pressed="true"></button></div>
+              <div class="toggle-group-heading">Universal</div>
               <div class="toggle-row"><span class="toggle-label">Property type tag</span><button class="switch" id="showPropertyType" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Hotel chain</span><button class="switch" id="showChain" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Location (city, country)</span><button class="switch" id="showLocation" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Property summary</span><button class="switch" id="showSummary" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Stay details panel<div class="toggle-help">Check-in, nights, board, travellers</div></span><button class="switch" id="showStayDetails" aria-pressed="true"></button></div>
               <div class="toggle-row"><span class="toggle-label">Amenities</span><button class="switch" id="showAmenities" aria-pressed="true"></button></div>
-              <div class="toggle-row"><span class="toggle-label">Review score</span><button class="switch" id="showReviews" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">TripAdvisor reviews</span><button class="switch" id="showReviews" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Refundability</span><button class="switch" id="showRefundability" aria-pressed="true"></button></div>
               <div class="toggle-row"><span class="toggle-label">Variant count badge<div class="toggle-help">"+5 more" pill when dedupe collapsed alternatives</div></span><button class="switch" id="showVariantCount" aria-pressed="true"></button></div>
               <div class="toggle-row"><span class="toggle-label">Lead-in price pill</span><button class="switch" id="showLeadInPill" aria-pressed="true"></button></div>
               <div class="toggle-row"><span class="toggle-label">Strikethrough was-price</span><button class="switch" id="showWasPrice" aria-pressed="true"></button></div>
-              <div class="toggle-row"><span class="toggle-label">Flight destination image</span><button class="switch" id="showCarrierImage" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Flights</div>
+              <div class="toggle-row"><span class="toggle-label">Flight destination image</span><button class="switch" id="showFlightImage" aria-pressed="true"></button></div>
               <div class="toggle-row"><span class="toggle-label">Flight schedule details</span><button class="switch" id="showFlightSchedule" aria-pressed="true"></button></div>
-              <div class="toggle-row"><span class="toggle-label">Package operator strip</span><button class="switch" id="showPackageOperator" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Duration / trip type</span><button class="switch" id="showFlightDuration" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Cabin class</span><button class="switch" id="showCabinClass" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Packages</div>
+              <div class="toggle-row"><span class="toggle-label">Package summary panel<div class="toggle-help">Flight + hotel + travellers</div></span><button class="switch" id="showPackageSummary" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Operator strip<div class="toggle-help">Package Holiday operator + ATOL badge</div></span><button class="switch" id="showPackageOperator" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Footer</div>
               <div class="toggle-row"><span class="toggle-label">"Powered by Travelgenix" footer</span><button class="switch" id="showPoweredBy"></button></div>
             </div>
           </div>
@@ -534,6 +626,9 @@
                   <option value="route-carrier">One per route + carrier</option>
                 </select>
                 <div class="field-help">The widget always pulls everything from Travelify (no upstream dedupe), then applies your rule client-side.</div>
+                <div class="breakdown-panel is-empty" id="breakdownPanel">
+                  Load a preview to see how each strategy affects offer counts.
+                </div>
               </div>
             </div>
           </div>
@@ -624,7 +719,7 @@
       </div>
 
       <div class="tgse-canvas">
-        <div class="preview-stage" id="previewStage">
+        <div class="preview-stage" id="previewStage" data-vp="desktop">
           <div id="previewMount"></div>
         </div>
       </div>
@@ -708,9 +803,17 @@
         brandColor: '#1B2B5B', accentColor: '#00B4D8',
         radius: 14, fontFamily: '',
         show: {
-          summary: true, propertyType: true, amenities: true, reviews: true,
+          // Universal
+          propertyType: true, chain: true, location: true,
+          summary: true, stayDetails: true, amenities: true,
+          reviews: true, refundability: true,
           variantCount: true, leadInPill: true, wasPrice: true,
-          carrierImage: true, flightSchedule: true, packageOperator: true,
+          // Flights
+          flightImage: true, flightSchedule: true,
+          flightDuration: true, cabinClass: true,
+          // Packages
+          packageSummary: true, packageOperator: true,
+          // Footer
           poweredBy: false,
         },
         dedupeStrategy: 'hotel',
@@ -857,11 +960,14 @@
 
       const show = c.show || {};
       const toggleMap = {
-        showSummary: 'summary', showPropertyType: 'propertyType',
-        showAmenities: 'amenities', showReviews: 'reviews',
+        showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
+        showSummary: 'summary', showStayDetails: 'stayDetails',
+        showAmenities: 'amenities', showReviews: 'reviews', showRefundability: 'refundability',
         showVariantCount: 'variantCount', showLeadInPill: 'leadInPill',
-        showWasPrice: 'wasPrice', showCarrierImage: 'carrierImage',
-        showFlightSchedule: 'flightSchedule', showPackageOperator: 'packageOperator',
+        showWasPrice: 'wasPrice',
+        showFlightImage: 'flightImage', showFlightSchedule: 'flightSchedule',
+        showFlightDuration: 'flightDuration', showCabinClass: 'cabinClass',
+        showPackageSummary: 'packageSummary', showPackageOperator: 'packageOperator',
         showPoweredBy: 'poweredBy',
       };
       Object.entries(toggleMap).forEach(([id, key]) => {
@@ -888,6 +994,11 @@
       $('originField').style.display = isFlightLike ? '' : 'none';
       $('boardField').style.display = isAccLike ? '' : 'none';
       $('durationRow').style.display = isAccLike ? '' : 'none';
+      // Cabin class is flight-only — hiding it when type is Accommodation removes
+      // confusion about a filter that the API would silently ignore.
+      $('cabinField').style.display = isFlightLike ? '' : 'none';
+      // Star rating is accommodation-only.
+      $('ratingField').style.display = isAccLike ? '' : 'none';
     }
 
     function updateEmptyDetailsVisibility() {
@@ -1013,11 +1124,14 @@
       });
 
       const toggleMap = {
-        showSummary: 'summary', showPropertyType: 'propertyType',
-        showAmenities: 'amenities', showReviews: 'reviews',
+        showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
+        showSummary: 'summary', showStayDetails: 'stayDetails',
+        showAmenities: 'amenities', showReviews: 'reviews', showRefundability: 'refundability',
         showVariantCount: 'variantCount', showLeadInPill: 'leadInPill',
-        showWasPrice: 'wasPrice', showCarrierImage: 'carrierImage',
-        showFlightSchedule: 'flightSchedule', showPackageOperator: 'packageOperator',
+        showWasPrice: 'wasPrice',
+        showFlightImage: 'flightImage', showFlightSchedule: 'flightSchedule',
+        showFlightDuration: 'flightDuration', showCabinClass: 'cabinClass',
+        showPackageSummary: 'packageSummary', showPackageOperator: 'packageOperator',
         showPoweredBy: 'poweredBy',
       };
       Object.entries(toggleMap).forEach(([id, key]) => {
@@ -1031,6 +1145,66 @@
           markDirtyAndPreview();
         });
       });
+
+      // ── Viewport switcher (issue #11) ────────────────────────
+      // The shell renders the buttons; we wire the actual width change here.
+      // CSS handles the transition via .preview-stage[data-vp="..."].
+      document.querySelectorAll('.tgse-vp button[data-vp]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const vp = btn.getAttribute('data-vp');
+          document.querySelectorAll('.tgse-vp button[data-vp]').forEach(b => b.classList.toggle('is-on', b === btn));
+          const stage = $('previewStage');
+          if (stage) stage.setAttribute('data-vp', vp);
+        });
+      });
+
+      // ── Dedupe breakdown panel (issue #10) ──────────────────
+      // The widget fires `tgo:dataLoaded` after every fetch with the offer
+      // counts that each strategy WOULD produce on the same raw data. We listen
+      // on the previewMount because the event bubbles from the shadow root.
+      const STRATEGY_LABELS = {
+        'none': 'None — every variant',
+        'hotel': 'Per hotel',
+        'hotel-board': 'Per hotel + board',
+        'hotel-duration': 'Per hotel + duration',
+        'hotel-departure': 'Per hotel + departure',
+        'route': 'Per flight route',
+        'route-carrier': 'Per route + carrier',
+      };
+      const previewMount = $('previewMount');
+      if (previewMount) {
+        previewMount.addEventListener('tgo:dataLoaded', (ev) => {
+          const panel = $('breakdownPanel');
+          if (!panel) return;
+          const detail = ev.detail || {};
+          const breakdown = detail.breakdown || {};
+          const raw = detail.rawCount || 0;
+          const active = state.config.dedupeStrategy || 'hotel';
+
+          if (raw === 0) {
+            panel.className = 'breakdown-panel is-empty';
+            panel.innerHTML = 'No offers returned. Adjust filters and try again.';
+            return;
+          }
+
+          let html = '<div class="breakdown-panel-title">Dedupe preview</div>';
+          html += '<div class="breakdown-list">';
+          Object.entries(STRATEGY_LABELS).forEach(([key, label]) => {
+            const count = breakdown[key];
+            const isActive = key === active;
+            html += '<div class="breakdown-row' + (isActive ? ' active' : '') + '">'
+              + '<span class="breakdown-strategy">' + label + '</span>'
+              + '<span class="breakdown-count">' + (count != null ? count : '—') + '</span>'
+              + '</div>';
+          });
+          html += '</div>';
+          html += '<div class="breakdown-raw">'
+            + '<span>Raw from API</span><strong>' + raw + ' offers</strong>'
+            + '</div>';
+          panel.className = 'breakdown-panel';
+          panel.innerHTML = html;
+        });
+      }
     }
 
     /* ============================================================
