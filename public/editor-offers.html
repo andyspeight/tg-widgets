@@ -202,7 +202,10 @@
       transition: max-width 0.25s ease;
       margin: 0 auto;
     }
-    .preview-stage[data-vp="desktop"] { max-width: none; }
+    /* Desktop: cap at a generous but bounded width to prevent widgets in
+       carousel mode from stretching to fill arbitrarily wide canvas areas.
+       1280px matches the most common content max-width for live sites. */
+    .preview-stage[data-vp="desktop"] { max-width: 1280px; }
     .preview-stage[data-vp="tablet"]  { max-width: 768px; }
     .preview-stage[data-vp="mobile"]  { max-width: 380px; }
     @media (prefers-reduced-motion: reduce) {
