@@ -539,6 +539,136 @@
       }
     }
 
+    /* ===== Carousel =====
+       Native horizontal scroll with scroll-snap. Cards size at exactly 1/3
+       of the track on desktop, 1/2 on tablet, full width on mobile. Mobile
+       gets edge padding so the active card isn't flush with the screen edge.
+       Arrows + dots are layered on top with absolute positioning. */
+    .tgo-carousel {
+      position: relative;
+      /* Container padding gives arrows room outside the track on desktop */
+      padding: 0 44px;
+    }
+    @media (max-width: 640px) {
+      .tgo-carousel {
+        padding: 0;
+      }
+    }
+    .tgo-carousel-track {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      /* Hide native scrollbar — we have dots and arrows instead */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      /* Compensate for shadow clipping at top/bottom by adding padding */
+      padding: 4px 0 12px;
+    }
+    .tgo-carousel-track::-webkit-scrollbar { display: none; }
+
+    .tgo-carousel-track > .tgo-card {
+      /* Each card is exactly one slot of the visible cards-per-view.
+         The --tgo-cards-per-view CSS var is set by JS based on container width. */
+      flex: 0 0 calc((100% - 16px * (var(--tgo-cards-per-view, 3) - 1)) / var(--tgo-cards-per-view, 3));
+      min-width: 0; /* prevent overflow when content wider than card */
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    /* On mobile, give cards a subtle edge peek so users see there's more */
+    @media (max-width: 640px) {
+      .tgo-carousel-track {
+        padding-left: 16px;
+        padding-right: 16px;
+        gap: 12px;
+      }
+      .tgo-carousel-track > .tgo-card {
+        flex: 0 0 calc(100% - 32px);
+      }
+    }
+
+    /* Arrows */
+    .tgo-carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid var(--tgo-border);
+      background: var(--tgo-card);
+      color: var(--tgo-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10);
+      transition: background 0.15s ease, transform 0.12s ease, opacity 0.2s ease;
+    }
+    .tgo-carousel-arrow:hover:not(:disabled) {
+      background: var(--tgo-card-alt);
+      transform: translateY(-50%) scale(1.06);
+    }
+    .tgo-carousel-arrow:focus-visible {
+      outline: 2px solid var(--tgo-accent);
+      outline-offset: 2px;
+    }
+    .tgo-carousel-arrow:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .tgo-carousel-arrow svg {
+      width: 18px;
+      height: 18px;
+    }
+    .tgo-carousel-arrow[data-dir="prev"] { left: 0; }
+    .tgo-carousel-arrow[data-dir="next"] { right: 0; }
+
+    /* Hide arrows on mobile — touch swipe is the navigation */
+    @media (max-width: 640px) {
+      .tgo-carousel-arrow { display: none; }
+    }
+
+    /* Page dots */
+    .tgo-carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 0;
+      list-style: none;
+    }
+    .tgo-carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 0;
+      padding: 0;
+      background: var(--tgo-border);
+      cursor: pointer;
+      transition: background 0.18s ease, width 0.2s ease;
+    }
+    .tgo-carousel-dot:hover { background: var(--tgo-sub); }
+    .tgo-carousel-dot[aria-current="true"] {
+      background: var(--tgo-accent);
+      width: 22px;
+    }
+    .tgo-carousel-dot:focus-visible {
+      outline: 2px solid var(--tgo-accent);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tgo-carousel-track { scroll-behavior: auto; }
+      .tgo-carousel-arrow { transition: none; }
+      .tgo-carousel-arrow:hover:not(:disabled) { transform: translateY(-50%); }
+      .tgo-carousel-dot { transition: none; }
+    }
+
     /* Card */
     .tgo-card {
       background: var(--tgo-card);
@@ -832,8 +962,9 @@
     .tgo-popover-layer {
       position: fixed;
       inset: 0;
-      z-index: 9998;
+      z-index: 2147483647; /* Top of the stacking world — beat anything */
       pointer-events: none;
+      isolation: isolate;
     }
     .tgo-popover-clickaway {
       position: absolute;
@@ -844,24 +975,35 @@
     .tgo-popover {
       position: absolute;
       pointer-events: auto;
-      background: var(--tgo-card);
-      border: 1px solid var(--tgo-border);
+      /* Solid background — never inherit transparency from host */
+      background-color: #FFFFFF;
+      background-image: none;
+      border: 1px solid #E2E8F0;
       border-radius: 12px;
-      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.22), 0 4px 8px rgba(15, 23, 42, 0.06);
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.22), 0 4px 8px rgba(15, 23, 42, 0.08);
       width: 280px;
       max-width: calc(100vw - 24px);
       padding: 14px 16px 12px;
-      color: var(--tgo-text);
-      animation: tgo-popover-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+      color: #0F172A;
+      isolation: isolate;
+      /* Animate transform only — opacity transitions can look like transparency */
+      animation: tgo-popover-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    /* Dark theme — solid dark background, never see-through */
+    :host([data-theme="dark"]) .tgo-popover,
+    .tgo-root[data-theme="dark"] ~ .tgo-popover-layer .tgo-popover {
+      background-color: #1E293B;
+      border-color: #334155;
+      color: #F1F5F9;
     }
     @keyframes tgo-popover-in {
-      from { opacity: 0; transform: translateY(4px) scale(0.98); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      from { transform: translateY(4px); }
+      to   { transform: translateY(0); }
     }
     @media (prefers-reduced-motion: reduce) {
       .tgo-popover { animation: none; }
     }
-    /* Arrow pointer — direction set by data-arrow="up|down" */
+    /* Arrow pointer — direction set by data-arrow="up|down". Match popover bg. */
     .tgo-popover[data-arrow="down"]::after {
       content: '';
       position: absolute;
@@ -869,9 +1011,9 @@
       left: var(--tgo-arrow-x, 50%);
       transform: translateX(-50%) rotate(45deg);
       width: 12px; height: 12px;
-      background: var(--tgo-card);
-      border-right: 1px solid var(--tgo-border);
-      border-bottom: 1px solid var(--tgo-border);
+      background-color: #FFFFFF;
+      border-right: 1px solid #E2E8F0;
+      border-bottom: 1px solid #E2E8F0;
     }
     .tgo-popover[data-arrow="up"]::after {
       content: '';
@@ -880,62 +1022,64 @@
       left: var(--tgo-arrow-x, 50%);
       transform: translateX(-50%) rotate(45deg);
       width: 12px; height: 12px;
-      background: var(--tgo-card);
-      border-left: 1px solid var(--tgo-border);
-      border-top: 1px solid var(--tgo-border);
+      background-color: #FFFFFF;
+      border-left: 1px solid #E2E8F0;
+      border-top: 1px solid #E2E8F0;
     }
     .tgo-popover-title {
       font-size: 13px; font-weight: 700; margin: 0 0 2px;
+      color: inherit;
     }
     .tgo-popover-sub {
-      font-size: 11px; color: var(--tgo-sub); margin: 0 0 10px;
+      font-size: 11px; color: #64748B; margin: 0 0 10px;
       line-height: 1.4;
     }
     .tgo-pax-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 0; border-top: 1px solid var(--tgo-border);
+      padding: 8px 0; border-top: 1px solid #E2E8F0;
     }
     .tgo-pax-row:first-of-type { border-top: 0; padding-top: 4px; }
-    .tgo-pax-row-label { font-size: 13px; font-weight: 600; color: var(--tgo-text); }
-    .tgo-pax-row-help { font-size: 10px; color: var(--tgo-sub); display: block; margin-top: 1px; }
+    .tgo-pax-row-label { font-size: 13px; font-weight: 600; color: inherit; }
+    .tgo-pax-row-help { font-size: 10px; color: #64748B; display: block; margin-top: 1px; }
     .tgo-pax-stepper {
       display: inline-flex; align-items: center; gap: 0;
-      border: 1px solid var(--tgo-border); border-radius: 8px;
-      overflow: hidden; background: var(--tgo-card);
+      border: 1px solid #E2E8F0; border-radius: 8px;
+      overflow: hidden; background-color: #FFFFFF;
     }
     .tgo-pax-stepper button {
       width: 28px; height: 28px;
       background: transparent; border: 0; padding: 0;
-      font-size: 16px; font-weight: 700; color: var(--tgo-text);
+      font-size: 16px; font-weight: 700; color: inherit;
       cursor: pointer;
       transition: background 0.12s ease;
       display: flex; align-items: center; justify-content: center;
     }
-    .tgo-pax-stepper button:hover:not(:disabled) { background: var(--tgo-card-alt); }
-    .tgo-pax-stepper button:disabled { color: var(--tgo-muted); cursor: not-allowed; }
+    .tgo-pax-stepper button:hover:not(:disabled) { background: #F1F5F9; }
+    .tgo-pax-stepper button:disabled { color: #CBD5E1; cursor: not-allowed; }
     .tgo-pax-stepper-value {
       min-width: 28px; text-align: center;
       font-size: 13px; font-weight: 600;
       font-variant-numeric: tabular-nums;
       padding: 0 4px;
+      color: inherit;
     }
     .tgo-popover-actions {
       display: flex; gap: 8px; justify-content: flex-end;
       margin-top: 10px; padding-top: 10px;
-      border-top: 1px solid var(--tgo-border);
+      border-top: 1px solid #E2E8F0;
     }
     .tgo-popover-btn {
       padding: 7px 13px; font: inherit; font-size: 12px; font-weight: 600;
       border-radius: 7px; cursor: pointer;
-      border: 1px solid var(--tgo-border); background: var(--tgo-card);
-      color: var(--tgo-text);
+      border: 1px solid #E2E8F0; background-color: #FFFFFF;
+      color: inherit;
       transition: background 0.15s ease, border-color 0.15s ease;
     }
-    .tgo-popover-btn:hover { background: var(--tgo-card-alt); }
+    .tgo-popover-btn:hover { background: #F1F5F9; }
     .tgo-popover-btn--primary {
-      background: var(--tgo-accent); color: white; border-color: var(--tgo-accent);
+      background-color: var(--tgo-accent); color: #FFFFFF; border-color: var(--tgo-accent);
     }
-    .tgo-popover-btn--primary:hover { background: var(--tgo-accent-hover); border-color: var(--tgo-accent-hover); }
+    .tgo-popover-btn--primary:hover { background-color: var(--tgo-accent-hover); border-color: var(--tgo-accent-hover); }
     .tgo-cta {
       color: white;
       background: var(--tgo-accent);
@@ -1031,6 +1175,10 @@
 
         priceDisplay: c.priceDisplay || 'auto',
 
+        // Carousel-specific
+        carouselAutoplay: !!c.carouselAutoplay,
+        carouselInterval: typeof c.carouselInterval === 'number' ? c.carouselInterval : 6,
+
         show: Object.assign({}, defaultShow, c.show || {}),
 
         dedupeStrategy: c.dedupeStrategy || 'hotel',
@@ -1100,11 +1248,14 @@
     // the offer's pax. On confirm, opens the click-through URL with adt/chd/inf
     // query params appended.
     //
-    // Positioning: above the trigger by default. If there isn't enough space
-    // above, flip below. If horizontally clipped at viewport edge, slide along
-    // the edge. Arrow points back at the trigger.
+    // Positioning rules:
+    //   1. Find the parent .tgo-card so we can clamp horizontally to its bounds
+    //      (a popover should never escape its card visually).
+    //   2. Place above the trigger by default. Flip below if no space above.
+    //   3. Clamp left/right to the card's horizontal range, falling back to
+    //      viewport if that would still cut off the popover (e.g. very narrow card).
+    //   4. The arrow always points back at the trigger button's centre.
     _openPaxPopover(data, triggerEl) {
-      // Remove any existing popover first
       const existing = this.shadow.querySelector('.tgo-popover-layer');
       if (existing) existing.remove();
 
@@ -1113,7 +1264,6 @@
       const infants = Math.max(0, data.infants || 0);
       const url = data.url || '';
 
-      // The full-viewport layer captures click-outside, popover sits inside it.
       const layer = document.createElement('div');
       layer.className = 'tgo-popover-layer';
       layer.innerHTML = '<div class="tgo-popover-clickaway"></div>'
@@ -1130,48 +1280,58 @@
         + '</div>';
 
       this.shadow.appendChild(layer);
-
       const popover = layer.querySelector('.tgo-popover');
 
-      // ── Position relative to the trigger ────────────────────────
-      // getBoundingClientRect gives viewport-relative coords. Since the
-      // popover uses position:fixed (via its parent layer using fixed inset),
-      // these coords work directly.
+      // Find the parent card to clamp within
+      const cardEl = triggerEl ? triggerEl.closest('.tgo-card') : null;
+
       const positionPopover = () => {
         if (!triggerEl) {
           // Fallback: centre in viewport
-          popover.style.left = '50%';
-          popover.style.top = '50%';
-          popover.style.transform = 'translate(-50%, -50%)';
+          const popW = popover.offsetWidth;
+          const popH = popover.offsetHeight;
+          popover.style.left = ((window.innerWidth - popW) / 2) + 'px';
+          popover.style.top = ((window.innerHeight - popH) / 2) + 'px';
           return;
         }
         const trig = triggerEl.getBoundingClientRect();
         const popW = popover.offsetWidth;
         const popH = popover.offsetHeight;
-        const margin = 8;
         const arrowOffset = 12;
+        const edgeMargin = 8;
 
-        // Try to place above the trigger first
+        // ── Vertical: above by default, flip below if no room ─────
         const spaceAbove = trig.top;
         const spaceBelow = window.innerHeight - trig.bottom;
-        const placeBelow = (spaceAbove < popH + arrowOffset + margin) && (spaceBelow > spaceAbove);
+        const placeBelow = (spaceAbove < popH + arrowOffset + edgeMargin) && (spaceBelow > spaceAbove);
+        const top = placeBelow
+          ? trig.bottom + arrowOffset
+          : trig.top - popH - arrowOffset;
+        const arrow = placeBelow ? 'up' : 'down';
 
-        let top, arrow;
-        if (placeBelow) {
-          top = trig.bottom + arrowOffset;
-          arrow = 'up';
-        } else {
-          top = trig.top - popH - arrowOffset;
-          arrow = 'down';
-        }
-
-        // Horizontal: align centre-of-popover with centre-of-trigger,
-        // then clamp to viewport with margin.
+        // ── Horizontal: clamp to card bounds, then to viewport ────
         const trigCentre = trig.left + (trig.width / 2);
         let left = trigCentre - (popW / 2);
-        left = Math.max(margin, Math.min(window.innerWidth - popW - margin, left));
 
-        // Arrow x coordinate within the popover — points back at trigger centre
+        // Constrain to card width if we have a card and the card is wide enough
+        if (cardEl) {
+          const cardRect = cardEl.getBoundingClientRect();
+          if (cardRect.width >= popW) {
+            // Card wider than popover — keep popover fully inside card
+            const cardLeft = cardRect.left + edgeMargin;
+            const cardRight = cardRect.right - edgeMargin;
+            left = Math.max(cardLeft, Math.min(cardRight - popW, left));
+          } else {
+            // Card narrower than popover — centre popover on card centre
+            left = cardRect.left + (cardRect.width / 2) - (popW / 2);
+          }
+        }
+
+        // Final viewport clamp as a safety net (catches edge cases like
+        // mobile where viewport is narrow and card sits at page edge)
+        left = Math.max(edgeMargin, Math.min(window.innerWidth - popW - edgeMargin, left));
+
+        // Arrow x within the popover — points back at the trigger centre
         const arrowX = Math.max(16, Math.min(popW - 16, trigCentre - left));
 
         popover.style.left = left + 'px';
@@ -1180,10 +1340,8 @@
         popover.style.setProperty('--tgo-arrow-x', arrowX + 'px');
       };
 
-      // First paint, then position (need offsetWidth/Height to be calculated)
       requestAnimationFrame(positionPopover);
 
-      // Reposition on scroll/resize while open — the trigger may move
       const repositionOnScroll = () => positionPopover();
       window.addEventListener('scroll', repositionOnScroll, true);
       window.addEventListener('resize', repositionOnScroll);
@@ -1228,22 +1386,17 @@
           return;
         }
         if (ev.target.matches('[data-tgo-popover-confirm]')) {
-          // Append pax as query params on the click-through. Most click-tracker
-          // forwarders preserve query strings to the destination; if Travelify
-          // doesn't, the offer still opens with its cached pax (graceful fallback).
           const sep = url.indexOf('?') >= 0 ? '&' : '?';
           const newUrl = url + sep + 'adt=' + state.adults + '&chd=' + state.children + '&inf=' + state.infants;
           window.open(safeUrl(newUrl), '_blank', 'noopener,noreferrer');
           close();
           return;
         }
-        // Click outside on the clickaway — close
         if (ev.target.classList.contains('tgo-popover-clickaway')) {
           close();
         }
       });
 
-      // Initial disabled-state pass
       update('adults', 0);
       update('children', 0);
       update('infants', 0);
@@ -1411,23 +1564,242 @@
         return;
       }
 
-      const cols = this.cfg.columns === 'auto' ? '' : ' data-cols="' + esc(this.cfg.columns) + '"';
-      let html = '<div class="tgo-grid"' + cols + '>';
-      for (const o of deduped) {
-        switch (o.type) {
-          case 'Accommodation': html += this._renderAccommodation(o); break;
-          case 'Flights':
-          case 'Flight': html += this._renderFlight(o); break;
-          case 'Packages':
-          case 'Package': html += this._renderPackage(o); break;
-          default: html += this._renderUnknown(o);
+      const isCarousel = this.cfg.layout === 'carousel';
+
+      let html;
+      if (isCarousel) {
+        html = this._renderCarousel(deduped);
+      } else {
+        const cols = this.cfg.columns === 'auto' ? '' : ' data-cols="' + esc(this.cfg.columns) + '"';
+        html = '<div class="tgo-grid"' + cols + '>';
+        for (const o of deduped) {
+          html += this._renderOfferCard(o);
         }
+        html += '</div>';
       }
-      html += '</div>';
+
       if (this.cfg.show.poweredBy) {
         html += '<div class="tgo-powered">Powered by Travelgenix</div>';
       }
       this.root.innerHTML = html;
+
+      // Wire carousel interactivity now that DOM exists
+      if (isCarousel) {
+        this._wireCarousel(deduped.length);
+      }
+    }
+
+    _renderOfferCard(o) {
+      switch (o.type) {
+        case 'Accommodation': return this._renderAccommodation(o);
+        case 'Flights':
+        case 'Flight': return this._renderFlight(o);
+        case 'Packages':
+        case 'Package': return this._renderPackage(o);
+        default: return this._renderUnknown(o);
+      }
+    }
+
+    // Carousel layout — native scroll-snap track with arrows and dots overlay.
+    // Page count is computed at wire time from the actual cards-per-view (which
+    // depends on container width), not from the initial config — so resizing
+    // the viewport recalculates pages correctly.
+    _renderCarousel(offers) {
+      let html = '<div class="tgo-carousel" data-tgo-carousel>';
+      html += '<button type="button" class="tgo-carousel-arrow" data-dir="prev" aria-label="Previous offers">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
+        + '</button>';
+      html += '<div class="tgo-carousel-track" data-tgo-track tabindex="0" aria-label="Travel offers">';
+      for (const o of offers) html += this._renderOfferCard(o);
+      html += '</div>';
+      html += '<button type="button" class="tgo-carousel-arrow" data-dir="next" aria-label="More offers">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+        + '</button>';
+      // Dot rail rendered as empty container; populated in _wireCarousel
+      // because the page count depends on cards-per-view.
+      html += '<ul class="tgo-carousel-dots" data-tgo-dots role="tablist" aria-label="Carousel pages"></ul>';
+      html += '</div>';
+      return html;
+    }
+
+    // Wire up the carousel after render: figure out cards-per-view based on
+    // container width, set the CSS var, build dot rail, attach arrow handlers,
+    // attach scroll listener for active-dot tracking, and start autoplay.
+    _wireCarousel(totalOffers) {
+      const carousel = this.root.querySelector('[data-tgo-carousel]');
+      const track = this.root.querySelector('[data-tgo-track]');
+      const dotRail = this.root.querySelector('[data-tgo-dots]');
+      const prevBtn = this.root.querySelector('.tgo-carousel-arrow[data-dir="prev"]');
+      const nextBtn = this.root.querySelector('.tgo-carousel-arrow[data-dir="next"]');
+      if (!track || !dotRail) return;
+
+      // Compute cards-per-view from container width
+      const computeCardsPerView = () => {
+        const w = carousel.clientWidth;
+        if (w >= 1024) return 3;
+        if (w >= 640) return 2;
+        return 1;
+      };
+
+      const computePageCount = (cpv) => {
+        // Each "page" advances by cpv cards. Last page may have fewer cards.
+        return Math.max(1, Math.ceil(totalOffers / cpv));
+      };
+
+      // Build dot rail for the given page count
+      const buildDots = (pageCount) => {
+        let html = '';
+        for (let i = 0; i < pageCount; i++) {
+          html += '<li><button type="button" class="tgo-carousel-dot"'
+            + ' data-tgo-dot="' + i + '"'
+            + ' role="tab"'
+            + ' aria-label="Page ' + (i + 1) + ' of ' + pageCount + '"'
+            + (i === 0 ? ' aria-current="true"' : '')
+            + '></button></li>';
+        }
+        dotRail.innerHTML = html;
+        // Hide the rail entirely if there's only one page
+        dotRail.style.display = pageCount > 1 ? 'flex' : 'none';
+      };
+
+      // Get current page index from scroll position
+      const getCurrentPage = () => {
+        const cpv = computeCardsPerView();
+        const cards = track.querySelectorAll(':scope > .tgo-card');
+        if (!cards.length) return 0;
+        const cardWidth = cards[0].offsetWidth + parseFloat(getComputedStyle(track).gap || 16);
+        const cardsScrolled = Math.round(track.scrollLeft / cardWidth);
+        return Math.min(computePageCount(cpv) - 1, Math.floor(cardsScrolled / cpv));
+      };
+
+      // Update which dot is active and which arrows are enabled
+      const updateState = () => {
+        const cpv = computeCardsPerView();
+        const pageCount = computePageCount(cpv);
+        const current = getCurrentPage();
+        dotRail.querySelectorAll('[data-tgo-dot]').forEach((el, i) => {
+          if (i === current) el.setAttribute('aria-current', 'true');
+          else el.removeAttribute('aria-current');
+        });
+        // Arrow disabled state
+        const atStart = track.scrollLeft <= 1;
+        const atEnd = (track.scrollLeft + track.clientWidth) >= (track.scrollWidth - 1);
+        if (prevBtn) prevBtn.disabled = atStart;
+        if (nextBtn) nextBtn.disabled = atEnd;
+      };
+
+      // Scroll the track by one page (cardsPerView cards)
+      const scrollByPage = (direction) => {
+        const cpv = computeCardsPerView();
+        const cards = track.querySelectorAll(':scope > .tgo-card');
+        if (!cards.length) return;
+        const cardWidth = cards[0].offsetWidth + parseFloat(getComputedStyle(track).gap || 16);
+        const delta = cardWidth * cpv * direction;
+        track.scrollBy({ left: delta, behavior: 'smooth' });
+      };
+
+      // Scroll to a specific page
+      const scrollToPage = (pageIndex) => {
+        const cpv = computeCardsPerView();
+        const cards = track.querySelectorAll(':scope > .tgo-card');
+        if (!cards.length) return;
+        const cardWidth = cards[0].offsetWidth + parseFloat(getComputedStyle(track).gap || 16);
+        track.scrollTo({ left: cardWidth * cpv * pageIndex, behavior: 'smooth' });
+      };
+
+      // Set the CSS var so cards size correctly
+      const applyCardsPerView = () => {
+        const cpv = computeCardsPerView();
+        carousel.style.setProperty('--tgo-cards-per-view', cpv);
+        buildDots(computePageCount(cpv));
+        updateState();
+      };
+      applyCardsPerView();
+
+      // Event listeners
+      if (prevBtn) prevBtn.addEventListener('click', () => { stopAutoplay(); scrollByPage(-1); });
+      if (nextBtn) nextBtn.addEventListener('click', () => { stopAutoplay(); scrollByPage(1); });
+
+      dotRail.addEventListener('click', (ev) => {
+        const dot = ev.target.closest('[data-tgo-dot]');
+        if (!dot) return;
+        stopAutoplay();
+        scrollToPage(parseInt(dot.getAttribute('data-tgo-dot'), 10));
+      });
+
+      // Throttled scroll listener using rAF (cheaper than setTimeout)
+      let scrollRaf = 0;
+      track.addEventListener('scroll', () => {
+        if (scrollRaf) return;
+        scrollRaf = requestAnimationFrame(() => {
+          updateState();
+          scrollRaf = 0;
+        });
+      });
+
+      // Resize handling — recompute cards-per-view + dots
+      const ro = new ResizeObserver(() => {
+        applyCardsPerView();
+      });
+      ro.observe(carousel);
+      // Track on this instance so update() can disconnect when re-rendering
+      this._carouselResizeObserver = ro;
+
+      // Keyboard navigation when the track has focus
+      track.addEventListener('keydown', (ev) => {
+        if (ev.key === 'ArrowLeft') { ev.preventDefault(); stopAutoplay(); scrollByPage(-1); }
+        else if (ev.key === 'ArrowRight') { ev.preventDefault(); stopAutoplay(); scrollByPage(1); }
+        else if (ev.key === 'Home') { ev.preventDefault(); stopAutoplay(); scrollToPage(0); }
+        else if (ev.key === 'End') {
+          ev.preventDefault(); stopAutoplay();
+          scrollToPage(computePageCount(computeCardsPerView()) - 1);
+        }
+      });
+
+      // ── Autoplay ────────────────────────────────────────
+      // Configurable: cfg.carouselAutoplay (boolean) + cfg.carouselInterval (seconds)
+      const autoplayOn = !!this.cfg.carouselAutoplay;
+      const intervalMs = Math.max(2, Math.min(20, this.cfg.carouselInterval || 6)) * 1000;
+      let autoplayTimer = null;
+
+      const startAutoplay = () => {
+        if (!autoplayOn || autoplayTimer) return;
+        autoplayTimer = setInterval(() => {
+          // If we're at the end, loop back to start
+          const atEnd = (track.scrollLeft + track.clientWidth) >= (track.scrollWidth - 1);
+          if (atEnd) {
+            track.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            scrollByPage(1);
+          }
+        }, intervalMs);
+      };
+
+      const stopAutoplay = () => {
+        if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
+      };
+
+      // Pause on user interaction so they're not yanked away
+      if (autoplayOn) {
+        carousel.addEventListener('mouseenter', stopAutoplay);
+        carousel.addEventListener('mouseleave', startAutoplay);
+        carousel.addEventListener('focusin', stopAutoplay);
+        carousel.addEventListener('focusout', () => {
+          // Only resume if focus has left the carousel entirely
+          if (!carousel.contains(this.shadow.activeElement || document.activeElement)) {
+            startAutoplay();
+          }
+        });
+        carousel.addEventListener('touchstart', stopAutoplay, { passive: true });
+        // Pause when tab is hidden so we don't waste cycles
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) stopAutoplay();
+          else if (!carousel.matches(':hover')) startAutoplay();
+        });
+        startAutoplay();
+        // Track on instance for cleanup
+        this._carouselAutoplayStop = stopAutoplay;
+      }
     }
 
     // ── Card renderers ────────────────────────────────────────────
@@ -1447,21 +1819,25 @@
     }
 
     // TripAdvisor chip — sits on the bottom-right of the image overlay.
-    // Renders nothing if the offer has no review data, or if the toggle is off.
-    // Travelify's reviewImgUrl is the official tripadvisor-X.X.svg badge.
+    // Renders nothing unless we have a valid TripAdvisor image URL from
+    // Travelify (the official tripadvisor-X.X.svg badge). If the image fails
+    // to load (404, network), an onerror handler removes the chip entirely
+    // so we never show a broken-image placeholder.
     _renderTripAdvisorChip(acc) {
       if (!this.cfg.show.reviews) return '';
-      const score = acc.reviewRating;
-      const count = acc.reviewCount;
       const reviewImg = safeImgUrl(acc.reviewImgUrl || '');
-      if (!score && !count && !reviewImg) return '';
+      // Require the official TripAdvisor SVG — without it, there's no logo
+      // and the chip is meaningless. Bare scores or counts don't earn a pill.
+      if (!reviewImg || !/tripadvisor/i.test(reviewImg)) return '';
 
-      let inner = '';
-      if (reviewImg) {
-        inner += '<img class="tgo-trip-chip-img" src="' + esc(reviewImg) + '" alt="TripAdvisor rating" loading="lazy" />';
-      } else if (score) {
-        inner += '<span class="tgo-trip-chip-score">' + esc(score.toFixed(1)) + '</span>';
-      }
+      const count = acc.reviewCount;
+      // If image fails to load, hide the whole chip (parent <div>) so the
+      // user doesn't see a broken-image icon on the photo.
+      const onerror = "this.parentElement && (this.parentElement.style.display='none')";
+
+      let inner = '<img class="tgo-trip-chip-img" src="' + esc(reviewImg)
+        + '" alt="TripAdvisor rating" loading="lazy"'
+        + ' onerror="' + onerror + '" />';
       if (count) {
         inner += '<span class="tgo-trip-chip-count">' + esc(count.toLocaleString()) + '</span>';
       }
@@ -1825,6 +2201,9 @@
     }
 
     update(newConfig) {
+      // Clean up any active carousel resources before tearing down the DOM
+      this._cleanupCarousel();
+
       this.cfg = this._defaults(Object.assign({}, this.cfg, newConfig));
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.root = document.createElement('div');
@@ -1834,6 +2213,17 @@
       this._wireShadowEvents();
       this._showLoading();
       this._fetchAndRender();
+    }
+
+    _cleanupCarousel() {
+      if (this._carouselResizeObserver) {
+        try { this._carouselResizeObserver.disconnect(); } catch {}
+        this._carouselResizeObserver = null;
+      }
+      if (this._carouselAutoplayStop) {
+        try { this._carouselAutoplayStop(); } catch {}
+        this._carouselAutoplayStop = null;
+      }
     }
   }
 
