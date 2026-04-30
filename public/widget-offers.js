@@ -48,6 +48,19 @@
     return s;
   }
 
+  // Build a safe background-image style attribute. The URL goes inside
+  // CSS url(), wrapped in single quotes, with single quotes and backslashes
+  // in the URL escaped so it can't break out. The whole thing then sits
+  // inside an HTML attribute value that uses double quotes — which is fine
+  // because we never use raw double quotes in the value. This was previously
+  // built with JSON.stringify which embedded literal double quotes inside
+  // the style attribute and broke every image.
+  function cssBgUrl(url) {
+    if (!url) return '';
+    const safe = String(url).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return 'style="background-image:url(\'' + safe + '\')"';
+  }
+
   function formatEnum(s) {
     if (!s) return '';
     return String(s).replace(/([A-Z])/g, ' $1').trim();
@@ -1081,7 +1094,7 @@
       let html = '<div class="tgo-card">';
 
       // Image
-      const imgStyle = img ? 'style="background-image:url(' + JSON.stringify(img) + ')"' : '';
+      const imgStyle = cssBgUrl(img);
       html += '<div class="tgo-card-image" ' + imgStyle + '>';
       if (acc.rating) html += this._starsBadge(acc.rating);
       html += '<div class="tgo-card-type-badge">Hotel</div>';
@@ -1156,7 +1169,7 @@
 
       // Hero image (destination shot)
       if (this.cfg.show.flightImage && img) {
-        html += '<div class="tgo-card-image flight" style="background-image:url(' + JSON.stringify(img) + ')">'
+        html += '<div class="tgo-card-image flight" ' + cssBgUrl(img) + '>'
           + '<div class="tgo-card-type-badge">Flight</div>'
           + this._variantBadge(o)
           + (this.cfg.show.leadInPill && isLeadIn ? '<div class="tgo-card-pill">Lead-in price</div>' : '')
@@ -1250,7 +1263,7 @@
       let html = '<div class="tgo-card">';
 
       // Hero image
-      const imgStyle = img ? 'style="background-image:url(' + JSON.stringify(img) + ')"' : '';
+      const imgStyle = cssBgUrl(img);
       html += '<div class="tgo-card-image" ' + imgStyle + '>';
       if (acc.rating) html += this._starsBadge(acc.rating);
       html += '<div class="tgo-card-type-badge ' + badgeClass + '">' + esc(badgeText) + '</div>';
