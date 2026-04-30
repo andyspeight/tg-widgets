@@ -467,6 +467,21 @@ const WIDGETS = [
     color: '#F97316',
     access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
+  {
+    id: 'offers',
+    name: 'Travel Offers',
+    airtableType: 'Travel Offers',
+    description: 'Live offer cards from your Travelify cache — accommodation, flights, dynamic packages and operator package holidays. Client-side dedupe with seven strategies, 15-minute browser cache, and full filter control.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M3 7h18v10H3z"/><path d="M7 3v4M17 3v4"/><path d="M3 11h18"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-offers',
+    demoUrl: '/demo-offers',
+    widgetTag: 'offers',
+    scriptFile: 'widget-offers.js',
+    access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  },
 ];
 
 const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
@@ -1357,6 +1372,93 @@ function loadMiniPreview(w) {
       }
     });
   }
+
+  if (w.id === 'offers') {
+    // Static HTML mockup — same approach as mybooking. The real Travel Offers
+    // widget calls Travelify on every render, which would be wasteful at tile
+    // size and slow the catalogue. This mockup gives a visual taste of the grid:
+    // three card stubs with hero image, type badge, name, and price footer.
+    container.innerHTML = `
+      <div style="
+        width: 100%; height: 100%;
+        background: #FFFFFF;
+        border-radius: 14px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        padding: 12px;
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      ">
+        <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="position:relative;aspect-ratio:16/10;background-image:linear-gradient(180deg,rgba(15,23,42,0) 40%,rgba(15,23,42,.4) 100%),url('https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=480&q=80');background-size:cover;background-position:center;">
+            <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.7);color:#FFD166;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;">★★★★</div>
+            <div style="position:absolute;top:6px;right:6px;background:${w.color};color:#FFFFFF;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Hotel</div>
+          </div>
+          <div style="padding:8px 10px;flex:1;display:flex;flex-direction:column;gap:2px;">
+            <div style="font-size:11px;font-weight:700;color:#0F172A;line-height:1.2;">Atlantica Aegean Park</div>
+            <div style="font-size:9px;color:#64748B;">Kos, Greece</div>
+          </div>
+          <div style="padding:6px 10px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:flex-end;background:#FAFBFC;">
+            <div>
+              <div style="font-size:14px;font-weight:800;color:#0F172A;line-height:1;">£549</div>
+              <div style="font-size:8px;color:#64748B;">per person</div>
+            </div>
+            <div style="background:${w.color};color:#FFFFFF;font-size:9px;font-weight:600;padding:4px 7px;border-radius:5px;">View</div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="position:relative;background:#E0F4FA;padding:14px 10px 10px;display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;">
+            <div style="position:absolute;top:6px;right:6px;background:#059669;color:#FFFFFF;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Package</div>
+            <div>
+              <div style="font-size:14px;font-weight:800;color:${w.color};line-height:1;">LGW</div>
+              <div style="font-size:8px;color:#64748B;">London</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div style="width:30px;height:1px;background:${w.color};position:relative;">
+                <span style="position:absolute;top:-7px;left:50%;transform:translateX(-50%);background:#E0F4FA;color:${w.color};font-size:11px;">✈</span>
+              </div>
+              <div style="font-size:7px;font-weight:700;color:#10B981;text-transform:uppercase;">Direct</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:14px;font-weight:800;color:${w.color};line-height:1;">PMI</div>
+              <div style="font-size:8px;color:#64748B;">Mallorca</div>
+            </div>
+          </div>
+          <div style="padding:6px 10px;flex:1;font-size:9px;color:#64748B;border-top:1px solid #E2E8F0;">
+            <strong style="color:#0F172A;">Jet2 Holidays</strong> · 7 nts AI
+          </div>
+          <div style="padding:6px 10px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:flex-end;background:#FAFBFC;">
+            <div>
+              <div style="font-size:14px;font-weight:800;color:#0F172A;line-height:1;">£729</div>
+              <div style="font-size:8px;color:#64748B;">per person</div>
+            </div>
+            <div style="background:${w.color};color:#FFFFFF;font-size:9px;font-weight:600;padding:4px 7px;border-radius:5px;">View</div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="position:relative;aspect-ratio:16/10;background-image:linear-gradient(180deg,rgba(15,23,42,0) 40%,rgba(15,23,42,.4) 100%),url('https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=480&q=80');background-size:cover;background-position:center;">
+            <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.7);color:#FFD166;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;">★★★★★</div>
+            <div style="position:absolute;top:6px;right:6px;background:${w.color};color:#FFFFFF;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Hotel</div>
+            <div style="position:absolute;bottom:6px;left:6px;background:#10B981;color:#FFFFFF;padding:2px 7px;border-radius:99px;font-size:8px;font-weight:700;">Lead-in</div>
+          </div>
+          <div style="padding:8px 10px;flex:1;display:flex;flex-direction:column;gap:2px;">
+            <div style="font-size:11px;font-weight:700;color:#0F172A;line-height:1.2;">Hotel Marquês de Pombal</div>
+            <div style="font-size:9px;color:#64748B;">Lisbon, Portugal</div>
+          </div>
+          <div style="padding:6px 10px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:flex-end;background:#FAFBFC;">
+            <div>
+              <div style="font-size:9px;color:#94A3B8;text-decoration:line-through;line-height:1;">£489</div>
+              <div style="font-size:14px;font-weight:800;color:#0F172A;line-height:1;">£389</div>
+            </div>
+            <div style="background:${w.color};color:#FFFFFF;font-size:9px;font-weight:600;padding:4px 7px;border-radius:5px;">View</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 }
 
 /* ═══ AUTH ═══ */
@@ -1424,5 +1526,6 @@ render();
 <script src="/widget-logos.js"></script>
 <script src="/widget-countdown.js"></script>
 <script src="/widget-textfx.js"></script>
+<script src="/widget-offers.js"></script>
 </body>
 </html>
