@@ -381,6 +381,13 @@
     }
     *, *::before, *::after { box-sizing: border-box; }
 
+    /* Host element fills its container but never exceeds it. */
+    :host {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
     .tgo-root {
       --tgo-brand: #1B2B5B;
       --tgo-accent: #00B4D8;
@@ -406,6 +413,11 @@
       --tgo-shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.08);
       background: var(--tgo-bg);
       color: var(--tgo-text);
+      /* Critical: never exceed parent width. Without this the carousel can
+         push the root wider than its parent in unconstrained layouts. */
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .tgo-root[data-theme="dark"] {
@@ -540,14 +552,20 @@
     }
 
     /* ===== Carousel =====
-       Native horizontal scroll with scroll-snap. Cards size at exactly 1/3
-       of the track on desktop, 1/2 on tablet, full width on mobile. Mobile
-       gets edge padding so the active card isn't flush with the screen edge.
-       Arrows + dots are layered on top with absolute positioning. */
+       JS computes the exact pixel width for each card based on the carousel's
+       own width and the cards-per-view count. This avoids the circular sizing
+       problem where percentage-based widths interact badly with overflow-x:auto
+       in containers without an explicit width constraint. */
     .tgo-carousel {
       position: relative;
       /* Container padding gives arrows room outside the track on desktop */
       padding: 0 44px;
+      /* Hard width constraint — prevents the carousel from growing wider than
+         its parent. min-width:0 + width:100% breaks circular sizing chains. */
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
     @media (max-width: 640px) {
       .tgo-carousel {
@@ -566,14 +584,19 @@
       -ms-overflow-style: none;
       /* Compensate for shadow clipping at top/bottom by adding padding */
       padding: 4px 0 12px;
+      /* Same width constraint as carousel — never grow beyond parent */
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
     .tgo-carousel-track::-webkit-scrollbar { display: none; }
 
     .tgo-carousel-track > .tgo-card {
-      /* Each card is exactly one slot of the visible cards-per-view.
-         The --tgo-cards-per-view CSS var is set by JS based on container width. */
-      flex: 0 0 calc((100% - 16px * (var(--tgo-cards-per-view, 3) - 1)) / var(--tgo-cards-per-view, 3));
-      min-width: 0; /* prevent overflow when content wider than card */
+      /* Width is set by JS via inline style. Fallback flex-basis lets the
+         widget render sanely even if JS hasn't run yet (e.g. SSR / no JS). */
+      flex: 0 0 320px;
+      min-width: 0;
+      max-width: 100%;
       scroll-snap-align: start;
       scroll-snap-stop: always;
     }
@@ -584,9 +607,6 @@
         padding-left: 16px;
         padding-right: 16px;
         gap: 12px;
-      }
-      .tgo-carousel-track > .tgo-card {
-        flex: 0 0 calc(100% - 32px);
       }
     }
 
@@ -1623,27 +1643,65 @@
     }
 
     // Wire up the carousel after render: figure out cards-per-view based on
-    // container width, set the CSS var, build dot rail, attach arrow handlers,
-    // attach scroll listener for active-dot tracking, and start autoplay.
+    // container width, set explicit pixel widths on each card (much more
+    // reliable than percentage flex-basis in unconstrained parents), build
+    // dot rail, attach arrow handlers, attach scroll listener for active-dot
+    // tracking, and start autoplay.
     _wireCarousel(totalOffers) {
       const carousel = this.root.querySelector('[data-tgo-carousel]');
       const track = this.root.querySelector('[data-tgo-track]');
       const dotRail = this.root.querySelector('[data-tgo-dots]');
       const prevBtn = this.root.querySelector('.tgo-carousel-arrow[data-dir="prev"]');
       const nextBtn = this.root.querySelector('.tgo-carousel-arrow[data-dir="next"]');
-      if (!track || !dotRail) return;
+      if (!track || !dotRail || !carousel) return;
 
-      // Compute cards-per-view from container width
-      const computeCardsPerView = () => {
-        const w = carousel.clientWidth;
-        if (w >= 1024) return 3;
-        if (w >= 640) return 2;
+      // Measure the carousel's available width — but only use it if it's sane.
+      // If the carousel reports an enormous width (because its parent is
+      // unconstrained), fall back to the host element or a sensible default.
+      const measureWidth = () => {
+        let w = carousel.clientWidth;
+        // If carousel is somehow huge (>3000px), the parent isn't constraining.
+        // Fall back to host element width, then to a sensible default.
+        if (w > 3000 || w < 1) {
+          const hostWidth = this.el.clientWidth;
+          if (hostWidth > 0 && hostWidth <= 3000) {
+            w = hostWidth;
+          } else {
+            // Last-resort fallback — assume a desktop width
+            w = Math.min(window.innerWidth || 1280, 1280);
+          }
+        }
+        return w;
+      };
+
+      const computeCardsPerView = (width) => {
+        if (width >= 1024) return 3;
+        if (width >= 640) return 2;
         return 1;
       };
 
       const computePageCount = (cpv) => {
-        // Each "page" advances by cpv cards. Last page may have fewer cards.
         return Math.max(1, Math.ceil(totalOffers / cpv));
+      };
+
+      // Set explicit pixel widths on every card based on the carousel's actual
+      // width. This is bulletproof: cards can never push the carousel wider
+      // than its parent because their width is calculated from the parent.
+      const applyCardWidths = () => {
+        const carouselWidth = measureWidth();
+        const cpv = computeCardsPerView(carouselWidth);
+        // The padding on .tgo-carousel is 44px each side on desktop, 0 on mobile
+        const isMobile = carouselWidth < 640;
+        const padding = isMobile ? 0 : 88; // 44px × 2
+        const gap = isMobile ? 12 : 16;
+        const trackWidth = carouselWidth - padding;
+        const cardWidth = (trackWidth - gap * (cpv - 1)) / cpv;
+        // Apply to every card
+        track.querySelectorAll(':scope > .tgo-card').forEach((card) => {
+          card.style.flex = '0 0 ' + cardWidth + 'px';
+          card.style.width = cardWidth + 'px';
+        });
+        return { cpv, cardWidth, gap };
       };
 
       // Build dot rail for the given page count
@@ -1664,7 +1722,8 @@
 
       // Get current page index from scroll position
       const getCurrentPage = () => {
-        const cpv = computeCardsPerView();
+        const carouselWidth = measureWidth();
+        const cpv = computeCardsPerView(carouselWidth);
         const cards = track.querySelectorAll(':scope > .tgo-card');
         if (!cards.length) return 0;
         const cardWidth = cards[0].offsetWidth + parseFloat(getComputedStyle(track).gap || 16);
@@ -1674,14 +1733,11 @@
 
       // Update which dot is active and which arrows are enabled
       const updateState = () => {
-        const cpv = computeCardsPerView();
-        const pageCount = computePageCount(cpv);
         const current = getCurrentPage();
         dotRail.querySelectorAll('[data-tgo-dot]').forEach((el, i) => {
           if (i === current) el.setAttribute('aria-current', 'true');
           else el.removeAttribute('aria-current');
         });
-        // Arrow disabled state
         const atStart = track.scrollLeft <= 1;
         const atEnd = (track.scrollLeft + track.clientWidth) >= (track.scrollWidth - 1);
         if (prevBtn) prevBtn.disabled = atStart;
@@ -1690,31 +1746,31 @@
 
       // Scroll the track by one page (cardsPerView cards)
       const scrollByPage = (direction) => {
-        const cpv = computeCardsPerView();
+        const carouselWidth = measureWidth();
+        const cpv = computeCardsPerView(carouselWidth);
         const cards = track.querySelectorAll(':scope > .tgo-card');
         if (!cards.length) return;
         const cardWidth = cards[0].offsetWidth + parseFloat(getComputedStyle(track).gap || 16);
-        const delta = cardWidth * cpv * direction;
-        track.scrollBy({ left: delta, behavior: 'smooth' });
+        track.scrollBy({ left: cardWidth * cpv * direction, behavior: 'smooth' });
       };
 
       // Scroll to a specific page
       const scrollToPage = (pageIndex) => {
-        const cpv = computeCardsPerView();
+        const carouselWidth = measureWidth();
+        const cpv = computeCardsPerView(carouselWidth);
         const cards = track.querySelectorAll(':scope > .tgo-card');
         if (!cards.length) return;
         const cardWidth = cards[0].offsetWidth + parseFloat(getComputedStyle(track).gap || 16);
         track.scrollTo({ left: cardWidth * cpv * pageIndex, behavior: 'smooth' });
       };
 
-      // Set the CSS var so cards size correctly
-      const applyCardsPerView = () => {
-        const cpv = computeCardsPerView();
-        carousel.style.setProperty('--tgo-cards-per-view', cpv);
+      // Apply sizing + dots on initial wire and on every resize
+      const applyAll = () => {
+        const { cpv } = applyCardWidths();
         buildDots(computePageCount(cpv));
         updateState();
       };
-      applyCardsPerView();
+      applyAll();
 
       // Event listeners
       if (prevBtn) prevBtn.addEventListener('click', () => { stopAutoplay(); scrollByPage(-1); });
@@ -1727,7 +1783,6 @@
         scrollToPage(parseInt(dot.getAttribute('data-tgo-dot'), 10));
       });
 
-      // Throttled scroll listener using rAF (cheaper than setTimeout)
       let scrollRaf = 0;
       track.addEventListener('scroll', () => {
         if (scrollRaf) return;
@@ -1737,12 +1792,19 @@
         });
       });
 
-      // Resize handling — recompute cards-per-view + dots
+      // Resize handling — recompute card widths + dots
+      // We observe the host element (this.el) rather than the carousel itself,
+      // because the carousel's width is derived from the host. If we observed
+      // the carousel, a feedback loop could form.
+      let resizeRaf = 0;
       const ro = new ResizeObserver(() => {
-        applyCardsPerView();
+        if (resizeRaf) return;
+        resizeRaf = requestAnimationFrame(() => {
+          applyAll();
+          resizeRaf = 0;
+        });
       });
-      ro.observe(carousel);
-      // Track on this instance so update() can disconnect when re-rendering
+      ro.observe(this.el);
       this._carouselResizeObserver = ro;
 
       // Keyboard navigation when the track has focus
@@ -1752,12 +1814,11 @@
         else if (ev.key === 'Home') { ev.preventDefault(); stopAutoplay(); scrollToPage(0); }
         else if (ev.key === 'End') {
           ev.preventDefault(); stopAutoplay();
-          scrollToPage(computePageCount(computeCardsPerView()) - 1);
+          scrollToPage(computePageCount(computeCardsPerView(measureWidth())) - 1);
         }
       });
 
       // ── Autoplay ────────────────────────────────────────
-      // Configurable: cfg.carouselAutoplay (boolean) + cfg.carouselInterval (seconds)
       const autoplayOn = !!this.cfg.carouselAutoplay;
       const intervalMs = Math.max(2, Math.min(20, this.cfg.carouselInterval || 6)) * 1000;
       let autoplayTimer = null;
@@ -1765,7 +1826,6 @@
       const startAutoplay = () => {
         if (!autoplayOn || autoplayTimer) return;
         autoplayTimer = setInterval(() => {
-          // If we're at the end, loop back to start
           const atEnd = (track.scrollLeft + track.clientWidth) >= (track.scrollWidth - 1);
           if (atEnd) {
             track.scrollTo({ left: 0, behavior: 'smooth' });
@@ -1779,25 +1839,21 @@
         if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
       };
 
-      // Pause on user interaction so they're not yanked away
       if (autoplayOn) {
         carousel.addEventListener('mouseenter', stopAutoplay);
         carousel.addEventListener('mouseleave', startAutoplay);
         carousel.addEventListener('focusin', stopAutoplay);
         carousel.addEventListener('focusout', () => {
-          // Only resume if focus has left the carousel entirely
           if (!carousel.contains(this.shadow.activeElement || document.activeElement)) {
             startAutoplay();
           }
         });
         carousel.addEventListener('touchstart', stopAutoplay, { passive: true });
-        // Pause when tab is hidden so we don't waste cycles
         document.addEventListener('visibilitychange', () => {
           if (document.hidden) stopAutoplay();
           else if (!carousel.matches(':hover')) startAutoplay();
         });
         startAutoplay();
-        // Track on instance for cleanup
         this._carouselAutoplayStop = stopAutoplay;
       }
     }
