@@ -551,6 +551,16 @@
             </button>
             <div class="section-body">
               <div class="field">
+                <label class="field-label">Layout style</label>
+                <div class="segmented" id="layoutSeg">
+                  <button type="button" data-layout="grid" aria-pressed="true">Grid</button>
+                  <button type="button" data-layout="carousel">Carousel</button>
+                </div>
+                <div class="field-help"><strong>Grid</strong> shows all offers stacked. <strong>Carousel</strong> shows a few at a time with arrows and swipe — 3 on desktop, 2 on tablet, 1 on mobile.</div>
+              </div>
+
+              <!-- Grid-only -->
+              <div class="field" data-when-layout="grid">
                 <label class="field-label">Columns</label>
                 <div class="segmented" id="columnsSeg">
                   <button type="button" data-cols="auto" aria-pressed="true">Auto</button>
@@ -559,6 +569,26 @@
                   <button type="button" data-cols="4">4</button>
                 </div>
               </div>
+
+              <!-- Carousel-only -->
+              <div class="field" data-when-layout="carousel" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Auto-rotate
+                    <div class="toggle-help">Off by default — pauses on hover and touch when on</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgCarouselAutoplay" aria-pressed="false"></button>
+                </label>
+              </div>
+              <div class="field" data-when-layout="carousel" data-when-autoplay="true" hidden>
+                <label class="field-label" for="cfgCarouselInterval">Rotate every</label>
+                <select id="cfgCarouselInterval">
+                  <option value="4">4 seconds</option>
+                  <option value="6" selected>6 seconds</option>
+                  <option value="8">8 seconds</option>
+                  <option value="10">10 seconds</option>
+                </select>
+              </div>
+
               <div class="field">
                 <label class="field-label">Card density</label>
                 <div class="segmented" id="densitySeg">
@@ -823,6 +853,9 @@
         brandColor: '#1B2B5B', accentColor: '#00B4D8',
         radius: 14, fontFamily: '',
         priceDisplay: 'auto',
+        layout: 'grid',
+        carouselAutoplay: false,
+        carouselInterval: 6,
         show: {
           // Universal
           propertyType: true, chain: true, location: true,
@@ -979,6 +1012,14 @@
       document.querySelectorAll('#densitySeg button').forEach(b => {
         b.setAttribute('aria-pressed', b.dataset.density === (c.density || 'standard') ? 'true' : 'false');
       });
+      document.querySelectorAll('#layoutSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.layout === (c.layout || 'grid') ? 'true' : 'false');
+      });
+      $('cfgCarouselAutoplay').setAttribute('aria-pressed', c.carouselAutoplay ? 'true' : 'false');
+      $('cfgCarouselInterval').value = String(c.carouselInterval || 6);
+
+      // Apply conditional visibility for layout-specific fields
+      updateLayoutVisibility();
 
       const show = c.show || {};
       const toggleMap = {
@@ -1036,6 +1077,21 @@
       state.dirty = true;
       if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
       schedulePreview();
+    }
+
+    /* Show / hide layout-specific fields. Grid-only fields (Columns) hide when
+       layout = carousel. Carousel-only fields (autoplay toggle, interval select)
+       hide when layout = grid. The interval select also requires autoplay = on. */
+    function updateLayoutVisibility() {
+      const layout = state.config.layout || 'grid';
+      const autoplay = !!state.config.carouselAutoplay;
+      document.querySelectorAll('[data-when-layout]').forEach((el) => {
+        const want = el.getAttribute('data-when-layout');
+        const wantAutoplay = el.getAttribute('data-when-autoplay');
+        let visible = (want === layout);
+        if (visible && wantAutoplay === 'true') visible = autoplay;
+        el.hidden = !visible;
+      });
     }
 
     function schedulePreview() {
@@ -1146,6 +1202,27 @@
           b.setAttribute('aria-pressed', 'true');
           markDirtyAndPreview();
         });
+      });
+      document.querySelectorAll('#layoutSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.layout = b.dataset.layout;
+          document.querySelectorAll('#layoutSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          updateLayoutVisibility();
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgCarouselAutoplay').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.carouselAutoplay = next;
+        updateLayoutVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgCarouselInterval').addEventListener('change', () => {
+        state.config.carouselInterval = parseInt($('cfgCarouselInterval').value, 10) || 6;
+        markDirtyAndPreview();
       });
 
       const toggleMap = {
