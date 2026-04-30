@@ -602,23 +602,23 @@
     .tgo-card-image .tgo-card-type-badge + .tgo-card-variants {
       top: 42px;
     }
-    /* TripAdvisor chip on the image bottom-right */
+    /* TripAdvisor chip on the image bottom-right — white background so the
+       TripAdvisor logo and rating are clearly readable on any photo */
     .tgo-trip-chip {
       position: absolute; bottom: 10px; right: 10px;
-      background: rgba(0, 0, 0, 0.78); color: white;
+      background: #FFFFFF; color: #0F172A;
       padding: 5px 10px;
       border-radius: 6px;
       display: inline-flex; align-items: center; gap: 8px;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
     }
-    .tgo-trip-chip-img { height: 14px; width: auto; display: block; }
+    .tgo-trip-chip-img { height: 16px; width: auto; display: block; }
     .tgo-trip-chip-score {
-      font-size: 12px; font-weight: 700; color: #FFD166;
+      font-size: 12px; font-weight: 700; color: #0F172A;
       font-variant-numeric: tabular-nums; line-height: 1;
     }
     .tgo-trip-chip-count {
-      font-size: 10px; color: rgba(255,255,255,0.85);
+      font-size: 10px; color: #64748B;
       font-weight: 500;
     }
 
@@ -827,34 +827,75 @@
       border-radius: 2px;
     }
 
-    /* Pax popover — rendered into the shadow root, positioned absolutely. */
-    .tgo-popover-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(15, 23, 42, 0.5);
+    /* Pax popover — anchored to the trigger button (not centred). Sits above
+       the button by default, repositions if it would overflow viewport. */
+    .tgo-popover-layer {
+      position: fixed;
+      inset: 0;
       z-index: 9998;
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px;
+      pointer-events: none;
+    }
+    .tgo-popover-clickaway {
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      pointer-events: auto;
     }
     .tgo-popover {
+      position: absolute;
+      pointer-events: auto;
       background: var(--tgo-card);
       border: 1px solid var(--tgo-border);
-      border-radius: var(--tgo-radius);
-      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
-      width: 100%; max-width: 320px;
-      padding: 18px 18px 16px;
+      border-radius: 12px;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.22), 0 4px 8px rgba(15, 23, 42, 0.06);
+      width: 280px;
+      max-width: calc(100vw - 24px);
+      padding: 14px 16px 12px;
       color: var(--tgo-text);
+      animation: tgo-popover-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes tgo-popover-in {
+      from { opacity: 0; transform: translateY(4px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tgo-popover { animation: none; }
+    }
+    /* Arrow pointer — direction set by data-arrow="up|down" */
+    .tgo-popover[data-arrow="down"]::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: var(--tgo-arrow-x, 50%);
+      transform: translateX(-50%) rotate(45deg);
+      width: 12px; height: 12px;
+      background: var(--tgo-card);
+      border-right: 1px solid var(--tgo-border);
+      border-bottom: 1px solid var(--tgo-border);
+    }
+    .tgo-popover[data-arrow="up"]::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: var(--tgo-arrow-x, 50%);
+      transform: translateX(-50%) rotate(45deg);
+      width: 12px; height: 12px;
+      background: var(--tgo-card);
+      border-left: 1px solid var(--tgo-border);
+      border-top: 1px solid var(--tgo-border);
     }
     .tgo-popover-title {
-      font-size: 14px; font-weight: 700; margin: 0 0 4px;
+      font-size: 13px; font-weight: 700; margin: 0 0 2px;
     }
     .tgo-popover-sub {
-      font-size: 12px; color: var(--tgo-sub); margin: 0 0 14px;
+      font-size: 11px; color: var(--tgo-sub); margin: 0 0 10px;
+      line-height: 1.4;
     }
     .tgo-pax-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 0; border-top: 1px solid var(--tgo-border);
+      padding: 8px 0; border-top: 1px solid var(--tgo-border);
     }
-    .tgo-pax-row:first-of-type { border-top: 0; }
+    .tgo-pax-row:first-of-type { border-top: 0; padding-top: 4px; }
     .tgo-pax-row-label { font-size: 13px; font-weight: 600; color: var(--tgo-text); }
     .tgo-pax-row-help { font-size: 10px; color: var(--tgo-sub); display: block; margin-top: 1px; }
     .tgo-pax-stepper {
@@ -873,19 +914,19 @@
     .tgo-pax-stepper button:hover:not(:disabled) { background: var(--tgo-card-alt); }
     .tgo-pax-stepper button:disabled { color: var(--tgo-muted); cursor: not-allowed; }
     .tgo-pax-stepper-value {
-      min-width: 30px; text-align: center;
+      min-width: 28px; text-align: center;
       font-size: 13px; font-weight: 600;
       font-variant-numeric: tabular-nums;
       padding: 0 4px;
     }
     .tgo-popover-actions {
       display: flex; gap: 8px; justify-content: flex-end;
-      margin-top: 14px; padding-top: 12px;
+      margin-top: 10px; padding-top: 10px;
       border-top: 1px solid var(--tgo-border);
     }
     .tgo-popover-btn {
-      padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600;
-      border-radius: 8px; cursor: pointer;
+      padding: 7px 13px; font: inherit; font-size: 12px; font-weight: 600;
+      border-radius: 7px; cursor: pointer;
       border: 1px solid var(--tgo-border); background: var(--tgo-card);
       color: var(--tgo-text);
       transition: background 0.15s ease, border-color 0.15s ease;
@@ -895,44 +936,6 @@
       background: var(--tgo-accent); color: white; border-color: var(--tgo-accent);
     }
     .tgo-popover-btn--primary:hover { background: var(--tgo-accent-hover); border-color: var(--tgo-accent-hover); }
-
-    /* Design-mode close x buttons on each section — only visible when
-       data-design-mode="true" is set on the root (which the editor sets).
-       Hidden by default on live deployed widgets. */
-    .tgo-section-x {
-      position: absolute; top: 6px; right: 6px;
-      width: 22px; height: 22px;
-      background: rgba(15, 23, 42, 0.7);
-      color: white;
-      border: 0; border-radius: 999px;
-      cursor: pointer;
-      display: none;
-      align-items: center; justify-content: center;
-      padding: 0;
-      transition: background 0.15s ease, transform 0.12s ease;
-      z-index: 5;
-    }
-    .tgo-section-x svg { width: 12px; height: 12px; }
-    .tgo-section-x:hover {
-      background: var(--tgo-error);
-      transform: scale(1.1);
-    }
-    .tgo-root[data-design-mode="true"] .tgo-section-x { display: inline-flex; }
-    /* Make every section a positioning context so the x can pin to the corner */
-    .tgo-root[data-design-mode="true"] [data-tgo-section] { position: relative; }
-    /* On the image, the existing chips already use absolute positioning, so the
-       x sits on top — give it a stronger background to stand out */
-    .tgo-root[data-design-mode="true"] .tgo-card-image .tgo-section-x {
-      background: rgba(15, 23, 42, 0.85);
-    }
-    .tgo-root[data-design-mode="true"] [data-tgo-section]:hover {
-      outline: 2px dashed var(--tgo-accent);
-      outline-offset: -2px;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .tgo-section-x { transition: none; }
-      .tgo-section-x:hover { transform: none; }
-    }
     .tgo-cta {
       color: white;
       background: var(--tgo-accent);
@@ -1075,29 +1078,11 @@
       this._fetchAndRender();
     }
 
-    // Delegated click handler inside the shadow root. Handles:
-    //   1. Design-mode close x — hides the corresponding section across all cards
-    //      by dispatching tgo:hideSection from the host. The editor listens.
-    //   2. Pax-basis chip — opens the popover so the user can adjust adults /
-    //      children / infants for the click-through URL.
+    // Delegated click handler inside the shadow root — pax-basis chip opens
+    // the popover so the user can adjust adults / children / infants for the
+    // click-through URL.
     _wireShadowEvents() {
       this.root.addEventListener('click', (ev) => {
-        // Design-mode x — only fires when the editor has set data-design-mode
-        const xBtn = ev.target.closest('[data-tgo-x]');
-        if (xBtn) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          const key = xBtn.getAttribute('data-tgo-x');
-          // Optimistic: also flip our own cfg.show locally so the next render
-          // hides it. The editor will receive the event and update its toggle UI.
-          if (this.cfg.show && key) {
-            this.cfg.show[key] = false;
-            this._renderOffers();
-          }
-          this._dispatch('tgo:hideSection', { key });
-          return;
-        }
-        // Pax-basis chip — open popover
         const paxBtn = ev.target.closest('[data-tgo-pax]');
         if (paxBtn) {
           ev.preventDefault();
@@ -1105,26 +1090,22 @@
           let data;
           try { data = JSON.parse(paxBtn.getAttribute('data-tgo-pax') || '{}'); }
           catch { return; }
-          this._openPaxPopover(data);
+          this._openPaxPopover(data, paxBtn);
           return;
         }
       });
     }
 
-    _dispatch(name, detail) {
-      try {
-        const ev = new CustomEvent(name, { bubbles: true, composed: true, detail: detail });
-        this.el.dispatchEvent(ev);
-      } catch { /* CustomEvent unavailable */ }
-    }
-
-    // Open the pax popover, prefilled with the offer's pax. On confirm,
-    // open the click-through URL with adt/chd/inf query params appended.
-    // We can't change Travelify's cached pricing; the params hint to the
-    // destination booking site about preferred occupancy.
-    _openPaxPopover(data) {
+    // Open the pax popover, anchored to the trigger button. Prefilled with
+    // the offer's pax. On confirm, opens the click-through URL with adt/chd/inf
+    // query params appended.
+    //
+    // Positioning: above the trigger by default. If there isn't enough space
+    // above, flip below. If horizontally clipped at viewport edge, slide along
+    // the edge. Arrow points back at the trigger.
+    _openPaxPopover(data, triggerEl) {
       // Remove any existing popover first
-      const existing = this.shadow.querySelector('.tgo-popover-backdrop');
+      const existing = this.shadow.querySelector('.tgo-popover-layer');
       if (existing) existing.remove();
 
       const adults = Math.max(1, data.adults || 2);
@@ -1132,9 +1113,11 @@
       const infants = Math.max(0, data.infants || 0);
       const url = data.url || '';
 
-      const backdrop = document.createElement('div');
-      backdrop.className = 'tgo-popover-backdrop';
-      backdrop.innerHTML = '<div class="tgo-popover" role="dialog" aria-modal="true" aria-labelledby="tgoPaxTitle">'
+      // The full-viewport layer captures click-outside, popover sits inside it.
+      const layer = document.createElement('div');
+      layer.className = 'tgo-popover-layer';
+      layer.innerHTML = '<div class="tgo-popover-clickaway"></div>'
+        + '<div class="tgo-popover" role="dialog" aria-modal="false" aria-labelledby="tgoPaxTitle">'
         + '<h3 class="tgo-popover-title" id="tgoPaxTitle">Travellers</h3>'
         + '<p class="tgo-popover-sub">Set your group for this enquiry. We\'ll pass it through to the search.</p>'
         + this._paxRow('adults', 'Adults', '16+ years', adults, 1, 9)
@@ -1146,49 +1129,121 @@
         + '</div>'
         + '</div>';
 
-      // Local state for the steppers
+      this.shadow.appendChild(layer);
+
+      const popover = layer.querySelector('.tgo-popover');
+
+      // ── Position relative to the trigger ────────────────────────
+      // getBoundingClientRect gives viewport-relative coords. Since the
+      // popover uses position:fixed (via its parent layer using fixed inset),
+      // these coords work directly.
+      const positionPopover = () => {
+        if (!triggerEl) {
+          // Fallback: centre in viewport
+          popover.style.left = '50%';
+          popover.style.top = '50%';
+          popover.style.transform = 'translate(-50%, -50%)';
+          return;
+        }
+        const trig = triggerEl.getBoundingClientRect();
+        const popW = popover.offsetWidth;
+        const popH = popover.offsetHeight;
+        const margin = 8;
+        const arrowOffset = 12;
+
+        // Try to place above the trigger first
+        const spaceAbove = trig.top;
+        const spaceBelow = window.innerHeight - trig.bottom;
+        const placeBelow = (spaceAbove < popH + arrowOffset + margin) && (spaceBelow > spaceAbove);
+
+        let top, arrow;
+        if (placeBelow) {
+          top = trig.bottom + arrowOffset;
+          arrow = 'up';
+        } else {
+          top = trig.top - popH - arrowOffset;
+          arrow = 'down';
+        }
+
+        // Horizontal: align centre-of-popover with centre-of-trigger,
+        // then clamp to viewport with margin.
+        const trigCentre = trig.left + (trig.width / 2);
+        let left = trigCentre - (popW / 2);
+        left = Math.max(margin, Math.min(window.innerWidth - popW - margin, left));
+
+        // Arrow x coordinate within the popover — points back at trigger centre
+        const arrowX = Math.max(16, Math.min(popW - 16, trigCentre - left));
+
+        popover.style.left = left + 'px';
+        popover.style.top = top + 'px';
+        popover.setAttribute('data-arrow', arrow);
+        popover.style.setProperty('--tgo-arrow-x', arrowX + 'px');
+      };
+
+      // First paint, then position (need offsetWidth/Height to be calculated)
+      requestAnimationFrame(positionPopover);
+
+      // Reposition on scroll/resize while open — the trigger may move
+      const repositionOnScroll = () => positionPopover();
+      window.addEventListener('scroll', repositionOnScroll, true);
+      window.addEventListener('resize', repositionOnScroll);
+
+      // ── Stepper state ───────────────────────────────────────────
       const state = { adults, children, infants };
+      const limits = { adults: [1, 9], children: [0, 8], infants: [0, 4] };
 
       const update = (kind, delta) => {
-        const limits = { adults: [1, 9], children: [0, 8], infants: [0, 4] };
         const [min, max] = limits[kind];
         state[kind] = Math.max(min, Math.min(max, state[kind] + delta));
-        const valEl = backdrop.querySelector('[data-tgo-pax-val="' + kind + '"]');
+        const valEl = layer.querySelector('[data-tgo-pax-val="' + kind + '"]');
         if (valEl) valEl.textContent = state[kind];
-        // Update disabled buttons
-        backdrop.querySelectorAll('[data-tgo-pax-btn]').forEach((b) => {
-          const k = b.getAttribute('data-tgo-pax-btn').split(':')[0];
-          const dir = b.getAttribute('data-tgo-pax-btn').split(':')[1];
+        layer.querySelectorAll('[data-tgo-pax-btn]').forEach((b) => {
+          const [k, dir] = b.getAttribute('data-tgo-pax-btn').split(':');
           if (dir === 'minus') b.disabled = state[k] <= limits[k][0];
           else b.disabled = state[k] >= limits[k][1];
         });
       };
 
-      backdrop.addEventListener('click', (ev) => {
+      const close = () => {
+        window.removeEventListener('scroll', repositionOnScroll, true);
+        window.removeEventListener('resize', repositionOnScroll);
+        document.removeEventListener('keydown', escHandler);
+        layer.remove();
+      };
+
+      const escHandler = (ev) => {
+        if (ev.key === 'Escape') { ev.preventDefault(); close(); }
+      };
+      document.addEventListener('keydown', escHandler);
+
+      layer.addEventListener('click', (ev) => {
         const btn = ev.target.closest('[data-tgo-pax-btn]');
         if (btn) {
           const [kind, dir] = btn.getAttribute('data-tgo-pax-btn').split(':');
           update(kind, dir === 'minus' ? -1 : 1);
           return;
         }
-        if (ev.target.matches('[data-tgo-popover-cancel]') || ev.target === backdrop) {
-          backdrop.remove();
+        if (ev.target.matches('[data-tgo-popover-cancel]')) {
+          close();
           return;
         }
         if (ev.target.matches('[data-tgo-popover-confirm]')) {
-          // Open the URL with pax appended as query params. Most click-through
-          // trackers preserve query strings to the destination; if Travelify
-          // doesn't, it falls back to the offer's cached pax which is fine.
+          // Append pax as query params on the click-through. Most click-tracker
+          // forwarders preserve query strings to the destination; if Travelify
+          // doesn't, the offer still opens with its cached pax (graceful fallback).
           const sep = url.indexOf('?') >= 0 ? '&' : '?';
           const newUrl = url + sep + 'adt=' + state.adults + '&chd=' + state.children + '&inf=' + state.infants;
           window.open(safeUrl(newUrl), '_blank', 'noopener,noreferrer');
-          backdrop.remove();
+          close();
           return;
+        }
+        // Click outside on the clickaway — close
+        if (ev.target.classList.contains('tgo-popover-clickaway')) {
+          close();
         }
       });
 
       // Initial disabled-state pass
-      this.shadow.appendChild(backdrop);
       update('adults', 0);
       update('children', 0);
       update('infants', 0);
@@ -1206,13 +1261,6 @@
         + '<button type="button" data-tgo-pax-btn="' + kind + ':plus" aria-label="Increase ' + label + '">+</button>'
         + '</div>'
         + '</div>';
-    }
-
-    // Public method called by the editor when toggling design mode
-    setDesignMode(on) {
-      if (this.root) {
-        this.root.setAttribute('data-design-mode', on ? 'true' : 'false');
-      }
     }
 
     _showLoading() {
@@ -1487,38 +1535,33 @@
       html += '<div class="tgo-card-type-badge">Hotel</div>';
       html += this._variantBadge(o);
       if (this.cfg.show.leadInPill && isLeadIn) {
-        html += this._section('leadInPill', 'Lead-in pill', '<div class="tgo-card-pill">Lead-in price</div>');
+        html += ('<div class="tgo-card-pill">Lead-in price</div>');
       }
       const trip = this._renderTripAdvisorChip(acc);
-      if (trip) html += this._section('reviews', 'TripAdvisor', trip);
+      if (trip) html += (trip);
       html += '</div>';
 
       // Body
       html += '<div class="tgo-card-body">';
       if (this.cfg.show.propertyType && acc.propertyType) {
-        html += this._section('propertyType', 'Property type',
-          '<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>');
+        html += ('<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>');
       }
       html += '<h3 class="tgo-card-name">' + esc(acc.name || 'Hotel') + '</h3>';
       if (this.cfg.show.chain && acc.chain) {
-        html += this._section('chain', 'Hotel chain',
-          '<div class="tgo-card-chain">' + esc(acc.chain) + '</div>');
+        html += ('<div class="tgo-card-chain">' + esc(acc.chain) + '</div>');
       }
       if (this.cfg.show.location) {
-        html += this._section('location', 'Location',
-          '<div class="tgo-card-location">' + icon('mapPin', 12)
+        html += ('<div class="tgo-card-location">' + icon('mapPin', 12)
           + '<span>' + esc(dest.name || '') + (dest.countryCode ? ', ' + esc(dest.countryCode) : '') + '</span></div>');
       }
       if (this.cfg.show.summary && acc.summary) {
-        html += this._section('summary', 'Property summary',
-          '<div class="tgo-card-summary">' + esc(acc.summary) + '</div>');
+        html += ('<div class="tgo-card-summary">' + esc(acc.summary) + '</div>');
       }
       html += '</div>';
 
       // Stay details
       if (this.cfg.show.stayDetails) {
-        html += this._section('stayDetails', 'Stay details',
-          '<div class="tgo-section">'
+        html += ('<div class="tgo-section">'
           + '<div class="tgo-section-title">Stay details</div>'
           + this._row('calendar', 'Check-in', formatDate(acc.checkinDate))
           + this._row('moon', 'Nights', acc.nights ? String(acc.nights) : '')
@@ -1536,7 +1579,7 @@
         for (const a of visible) amenHtml += '<span class="tgo-amenity">' + esc(formatEnum(a)) + '</span>';
         if (extras > 0) amenHtml += '<span class="tgo-amenity">+' + extras + '</span>';
         amenHtml += '</div></div>';
-        html += this._section('amenities', 'Amenities', amenHtml);
+        html += (amenHtml);
       }
 
       const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? '£' + Math.round(pricing.priceBeforeChange) : null;
@@ -1567,10 +1610,10 @@
           + '<div class="tgo-card-type-badge">Flight</div>'
           + this._variantBadge(o);
         if (this.cfg.show.leadInPill && isLeadIn) {
-          imgInner += this._section('leadInPill', 'Lead-in pill', '<div class="tgo-card-pill">Lead-in price</div>');
+          imgInner += ('<div class="tgo-card-pill">Lead-in price</div>');
         }
         imgInner += '</div>';
-        html += this._section('flightImage', 'Flight image', imgInner);
+        html += (imgInner);
       }
 
       // Route bar (always shown — core info, not user-hideable)
@@ -1593,8 +1636,7 @@
 
       // Duration row
       if (this.cfg.show.flightDuration && f.duration) {
-        html += this._section('flightDuration', 'Duration / trip type',
-          '<div class="tgo-flight-duration-row">'
+        html += ('<div class="tgo-flight-duration-row">'
           + esc(formatDuration(f.duration))
           + ' · ' + esc(tripType)
           + (this.cfg.show.cabinClass && f.cabinClass ? ' · ' + esc(formatEnum(f.cabinClass)) : '')
@@ -1610,8 +1652,7 @@
 
       // Schedule
       if (this.cfg.show.flightSchedule) {
-        html += this._section('flightSchedule', 'Flight schedule',
-          '<div class="tgo-section">'
+        html += ('<div class="tgo-section">'
           + '<div class="tgo-section-title">Schedule</div>'
           + this._row('calendar', 'Outbound', formatDateTime(f.outboundDate))
           + (f.returnDate ? this._row('calendar', 'Return', formatDateTime(f.returnDate)) : '')
@@ -1668,10 +1709,10 @@
       html += '<div class="tgo-card-type-badge ' + badgeClass + '">' + esc(badgeText) + '</div>';
       html += this._variantBadge(o);
       if (this.cfg.show.leadInPill && isLeadIn) {
-        html += this._section('leadInPill', 'Lead-in pill', '<div class="tgo-card-pill">Lead-in price</div>');
+        html += ('<div class="tgo-card-pill">Lead-in price</div>');
       }
       const trip = this._renderTripAdvisorChip(acc);
-      if (trip) html += this._section('reviews', 'TripAdvisor', trip);
+      if (trip) html += (trip);
       html += '</div>';
 
       // Operator strip — PackageHoliday only
@@ -1681,28 +1722,24 @@
           + '<span class="tgo-operator-name">' + esc(operatorName) + '</span>';
         if (atol) opHtml += '<span class="tgo-operator-atol">ATOL</span>';
         opHtml += '</div>';
-        html += this._section('packageOperator', 'Operator strip', opHtml);
+        html += (opHtml);
       }
 
       // Body
       html += '<div class="tgo-card-body">';
       if (this.cfg.show.propertyType && acc.propertyType) {
-        html += this._section('propertyType', 'Property type',
-          '<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>');
+        html += ('<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>');
       }
       html += '<h3 class="tgo-card-name">' + esc(acc.name || 'Package holiday') + '</h3>';
       if (this.cfg.show.chain && acc.chain) {
-        html += this._section('chain', 'Hotel chain',
-          '<div class="tgo-card-chain">' + esc(acc.chain) + '</div>');
+        html += ('<div class="tgo-card-chain">' + esc(acc.chain) + '</div>');
       }
       if (this.cfg.show.location) {
-        html += this._section('location', 'Location',
-          '<div class="tgo-card-location">' + icon('mapPin', 12)
+        html += ('<div class="tgo-card-location">' + icon('mapPin', 12)
           + '<span>' + esc(dest.name || '') + (dest.countryCode ? ', ' + esc(dest.countryCode) : '') + '</span></div>');
       }
       if (this.cfg.show.summary && acc.summary) {
-        html += this._section('summary', 'Property summary',
-          '<div class="tgo-card-summary">' + esc(acc.summary) + '</div>');
+        html += ('<div class="tgo-card-summary">' + esc(acc.summary) + '</div>');
       }
       html += '</div>';
 
@@ -1745,15 +1782,14 @@
             + '<span class="tgo-package-icon">' + icon('users', 16) + '</span>'
             + '<span>' + esc(paxString(o) || 'Travellers') + '</span></div>';
           psHtml += '</div>';
-          html += this._section('packageSummary', 'Package summary', psHtml);
+          html += (psHtml);
         }
       }
 
       // Refundability
       if (this.cfg.show.refundability && (flightPricing.refundability || accPricing.refundability)) {
         const r = flightPricing.refundability || accPricing.refundability;
-        html += this._section('refundability', 'Refundability',
-          '<div class="tgo-section">' + this._renderRefundability(r) + '</div>');
+        html += ('<div class="tgo-section">' + this._renderRefundability(r) + '</div>');
       }
 
       // Amenities
@@ -1764,7 +1800,7 @@
         for (const a of visible) amenHtml += '<span class="tgo-amenity">' + esc(formatEnum(a)) + '</span>';
         if (extras > 0) amenHtml += '<span class="tgo-amenity">+' + extras + '</span>';
         amenHtml += '</div></div>';
-        html += this._section('amenities', 'Amenities', amenHtml);
+        html += (amenHtml);
       }
 
       html += this._renderPriceFooter(o, wasPrice);
@@ -1786,21 +1822,6 @@
         + '<span class="tgo-data-label">' + esc(label) + '</span>'
         + '<span class="tgo-data-value">' + esc(String(value)) + '</span>'
         + '</div>';
-    }
-
-    // Wrap a chunk of HTML in a section that can be hidden via the design-mode x.
-    // The x button is always rendered but CSS hides it unless the root has
-    // data-design-mode="true". Clicking it dispatches tgo:hideSection from
-    // the host element, so the editor can flip the cfg.show key.
-    _section(showKey, label, contentHtml) {
-      if (!contentHtml) return '';
-      const xBtn = '<button type="button" class="tgo-section-x"'
-        + ' data-tgo-x="' + esc(showKey) + '"'
-        + ' aria-label="Hide ' + esc(label) + ' on all cards"'
-        + ' title="Hide ' + esc(label) + '">'
-        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>'
-        + '</button>';
-      return '<div data-tgo-section="' + esc(showKey) + '">' + contentHtml + xBtn + '</div>';
     }
 
     update(newConfig) {
