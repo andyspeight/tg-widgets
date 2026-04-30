@@ -337,6 +337,139 @@
     }
   }
 
+  // ── Departure-board template helpers ─────────────────────────────────
+  //
+  // The departure-board template renders flights as an airport-style board.
+  // It needs: airport lookup with coordinates (for nearest-airport detection),
+  // haversine distance, IP geolocation, and time/date formatters specific to
+  // a board look. These constants and helpers live here so the template can
+  // reference them.
+
+  const GEO_API_URL = 'https://ipapi.co/json/';
+  const GEO_CACHE_KEY = 'tgo_db_geo_v1';
+
+  // UK + Ireland airports with lat/lng for haversine nearest-airport.
+  // Weighted toward airports UK leisure travellers actually use.
+  const UK_AIRPORTS = [
+    { code: 'LHR', name: 'Heathrow', city: 'London', lat: 51.4700, lng: -0.4543 },
+    { code: 'LGW', name: 'Gatwick', city: 'London', lat: 51.1481, lng: -0.1903 },
+    { code: 'STN', name: 'Stansted', city: 'London', lat: 51.8860, lng: 0.2389 },
+    { code: 'LTN', name: 'Luton', city: 'London', lat: 51.8747, lng: -0.3683 },
+    { code: 'LCY', name: 'City', city: 'London', lat: 51.5048, lng: 0.0495 },
+    { code: 'SEN', name: 'Southend', city: 'Southend', lat: 51.5714, lng: 0.6956 },
+    { code: 'MAN', name: 'Manchester', city: 'Manchester', lat: 53.3537, lng: -2.2750 },
+    { code: 'BHX', name: 'Birmingham', city: 'Birmingham', lat: 52.4539, lng: -1.7480 },
+    { code: 'EMA', name: 'East Midlands', city: 'Nottingham', lat: 52.8311, lng: -1.3281 },
+    { code: 'EDI', name: 'Edinburgh', city: 'Edinburgh', lat: 55.9500, lng: -3.3725 },
+    { code: 'GLA', name: 'Glasgow', city: 'Glasgow', lat: 55.8642, lng: -4.4331 },
+    { code: 'PIK', name: 'Prestwick', city: 'Glasgow', lat: 55.5094, lng: -4.5867 },
+    { code: 'NCL', name: 'Newcastle', city: 'Newcastle', lat: 55.0375, lng: -1.6917 },
+    { code: 'LBA', name: 'Leeds Bradford', city: 'Leeds', lat: 53.8659, lng: -1.6605 },
+    { code: 'BRS', name: 'Bristol', city: 'Bristol', lat: 51.3827, lng: -2.7191 },
+    { code: 'CWL', name: 'Cardiff', city: 'Cardiff', lat: 51.3967, lng: -3.3433 },
+    { code: 'LPL', name: 'Liverpool', city: 'Liverpool', lat: 53.3336, lng: -2.8497 },
+    { code: 'BFS', name: 'Belfast Intl', city: 'Belfast', lat: 54.6575, lng: -6.2158 },
+    { code: 'BHD', name: 'Belfast City', city: 'Belfast', lat: 54.6181, lng: -5.8725 },
+    { code: 'ABZ', name: 'Aberdeen', city: 'Aberdeen', lat: 57.2019, lng: -2.1978 },
+    { code: 'INV', name: 'Inverness', city: 'Inverness', lat: 57.5425, lng: -4.0475 },
+    { code: 'SOU', name: 'Southampton', city: 'Southampton', lat: 50.9503, lng: -1.3568 },
+    { code: 'EXT', name: 'Exeter', city: 'Exeter', lat: 50.7344, lng: -3.4139 },
+    { code: 'BOH', name: 'Bournemouth', city: 'Bournemouth', lat: 50.7800, lng: -1.8425 },
+    { code: 'NWI', name: 'Norwich', city: 'Norwich', lat: 52.6758, lng: 1.2828 },
+    { code: 'HUY', name: 'Humberside', city: 'Hull', lat: 53.5744, lng: -0.3508 },
+    { code: 'DUB', name: 'Dublin', city: 'Dublin', lat: 53.4214, lng: -6.2700 },
+    { code: 'ORK', name: 'Cork', city: 'Cork', lat: 51.8413, lng: -8.4911 },
+    { code: 'JER', name: 'Jersey', city: 'Jersey', lat: 49.2079, lng: -2.1955 },
+    { code: 'GCI', name: 'Guernsey', city: 'Guernsey', lat: 49.4350, lng: -2.6020 },
+  ];
+  const AIRPORT_BY_CODE = UK_AIRPORTS.reduce((m, a) => { m[a.code] = a; return m; }, {});
+
+  function haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2
+      + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function nearestAirport(lat, lng) {
+    let best = null, bestDist = Infinity;
+    for (const a of UK_AIRPORTS) {
+      const d = haversine(lat, lng, a.lat, a.lng);
+      if (d < bestDist) { bestDist = d; best = a; }
+    }
+    return best;
+  }
+
+  // Try to find the visitor's nearest airport via IP geolocation. Cached in
+  // sessionStorage so we only call once per visit. Falls back to the supplied
+  // default if anything goes wrong (offline, blocked, non-UK visitor).
+  async function detectAirport(defaultCode) {
+    try {
+      const cached = sessionStorage.getItem(GEO_CACHE_KEY);
+      if (cached) {
+        const obj = JSON.parse(cached);
+        if (obj && obj.code && AIRPORT_BY_CODE[obj.code]) return AIRPORT_BY_CODE[obj.code];
+      }
+    } catch { /* ignore */ }
+
+    try {
+      const ctrl = new AbortController();
+      const timeout = setTimeout(() => ctrl.abort(), 3000);
+      const res = await fetch(GEO_API_URL, { signal: ctrl.signal });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error('geo failed');
+      const json = await res.json();
+      const lat = parseFloat(json.latitude);
+      const lng = parseFloat(json.longitude);
+      if (!isFinite(lat) || !isFinite(lng)) throw new Error('no coords');
+      const airport = nearestAirport(lat, lng);
+      if (airport) {
+        try { sessionStorage.setItem(GEO_CACHE_KEY, JSON.stringify({ code: airport.code })); } catch { /* ignore */ }
+        return airport;
+      }
+    } catch { /* ignore */ }
+
+    return AIRPORT_BY_CODE[defaultCode] || AIRPORT_BY_CODE.LHR || UK_AIRPORTS[0];
+  }
+
+  // Format an outbound ISO date as the board's "TIME" column (HH:MM 24-hour)
+  function formatBoardTime(iso) {
+    if (!iso) return '--:--';
+    try {
+      const d = new Date(iso);
+      const h = String(d.getUTCHours()).padStart(2, '0');
+      const m = String(d.getUTCMinutes()).padStart(2, '0');
+      return h + ':' + m;
+    } catch { return '--:--'; }
+  }
+
+  function formatBoardDate(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase();
+    } catch { return ''; }
+  }
+
+  function formatBoardNow() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  // 'today' / 'thisWeek' / 'soon' / 'later' for status pill logic
+  function dateProximity(iso) {
+    if (!iso) return 'later';
+    const dep = new Date(iso);
+    const diffMs = dep.getTime() - Date.now();
+    const diffDays = diffMs / 86400000;
+    if (diffDays < 1) return 'today';
+    if (diffDays < 7) return 'thisWeek';
+    if (diffDays < 30) return 'soon';
+    return 'later';
+  }
+
   function dedupeOffers(offers, strategy, sortPref) {
     if (!offers || !offers.length) return [];
     if (strategy === 'none') return offers.map(o => Object.assign({}, o, { _variantCount: 1 }));
@@ -1124,6 +1257,362 @@
       color: var(--tgo-muted);
       letter-spacing: 0.5px;
     }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       DEPARTURE-BOARD TEMPLATE
+       Uses tdb- prefix throughout to avoid colliding with the cards
+       template's tgo- classes. Has its own theme (dark/light) and font
+       stack (monospace columns are essential to the airport-board look).
+       ═══════════════════════════════════════════════════════════════════ */
+    .tdb-root {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      font-family: var(--tdb-font-body, 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+      color: var(--tdb-text);
+      background: var(--tdb-bg);
+      border-radius: var(--tdb-radius, 14px);
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .tdb-root[data-theme="dark"] {
+      --tdb-bg: #0A0E14;
+      --tdb-surface: #11161F;
+      --tdb-text: #E8EAED;
+      --tdb-text-dim: #94A3B8;
+      --tdb-accent: #FFB400;
+      --tdb-accent-soft: rgba(255, 180, 0, 0.12);
+      --tdb-border: rgba(255, 255, 255, 0.08);
+      --tdb-row-alt: rgba(255, 255, 255, 0.02);
+      --tdb-pill-cheap-bg: rgba(255, 180, 0, 0.18);
+      --tdb-pill-cheap-fg: #FFD15C;
+      --tdb-pill-today-bg: rgba(239, 68, 68, 0.18);
+      --tdb-pill-today-fg: #FCA5A5;
+      --tdb-pill-week-bg: rgba(56, 189, 248, 0.16);
+      --tdb-pill-week-fg: #7DD3FC;
+      --tdb-live: #4ADE80;
+    }
+    .tdb-root[data-theme="light"] {
+      --tdb-bg: #FFFFFF;
+      --tdb-surface: #F8FAFC;
+      --tdb-text: #0F172A;
+      --tdb-text-dim: #64748B;
+      --tdb-accent: #1B2B5B;
+      --tdb-accent-soft: rgba(27, 43, 91, 0.08);
+      --tdb-border: #E2E8F0;
+      --tdb-row-alt: #F8FAFC;
+      --tdb-pill-cheap-bg: #FEF3C7;
+      --tdb-pill-cheap-fg: #92400E;
+      --tdb-pill-today-bg: #FEE2E2;
+      --tdb-pill-today-fg: #B91C1C;
+      --tdb-pill-week-bg: #DBEAFE;
+      --tdb-pill-week-fg: #1E40AF;
+      --tdb-live: #10B981;
+    }
+    .tdb-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      background: var(--tdb-surface);
+      border-bottom: 1px solid var(--tdb-border);
+    }
+    .tdb-header-left {
+      display: flex; align-items: center; gap: 14px;
+      min-width: 0;
+    }
+    .tdb-icon {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--tdb-accent-soft);
+      color: var(--tdb-accent);
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .tdb-icon svg { width: 20px; height: 20px; }
+    .tdb-title-block { min-width: 0; }
+    .tdb-title {
+      font-family: var(--tdb-font-mono, 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--tdb-text);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 0;
+      line-height: 1.2;
+    }
+    .tdb-airport-pick {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: transparent; border: 0; padding: 0;
+      font: inherit; cursor: pointer; color: inherit;
+    }
+    .tdb-airport-pick:hover { color: var(--tdb-accent); }
+    .tdb-airport-pick svg { width: 12px; height: 12px; transition: transform 0.15s ease; }
+    .tdb-airport-pick[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .tdb-subtitle {
+      font-size: 11px; color: var(--tdb-text-dim);
+      margin: 3px 0 0;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .tdb-now {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--tdb-font-mono, 'JetBrains Mono', monospace);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tdb-text-dim);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .tdb-live-dot {
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: var(--tdb-live);
+      box-shadow: 0 0 0 0 currentColor;
+      animation: tdb-pulse 2s infinite;
+      color: var(--tdb-live);
+    }
+    @keyframes tdb-pulse {
+      0%   { box-shadow: 0 0 0 0 currentColor; }
+      70%  { box-shadow: 0 0 0 6px transparent; }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tdb-live-dot { animation: none; }
+    }
+
+    /* Airport switcher */
+    .tdb-switcher { position: relative; }
+    .tdb-switcher-menu {
+      position: absolute;
+      top: calc(100% + 6px); left: 0;
+      z-index: 10;
+      min-width: 240px;
+      max-height: 260px;
+      overflow-y: auto;
+      background: var(--tdb-surface);
+      border: 1px solid var(--tdb-border);
+      border-radius: 10px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+      padding: 4px;
+      list-style: none;
+      margin: 0;
+    }
+    .tdb-switcher-menu[hidden] { display: none; }
+    .tdb-switcher-item {
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+      padding: 8px 10px;
+      background: transparent; border: 0;
+      border-radius: 6px;
+      font: inherit; font-size: 13px;
+      color: var(--tdb-text);
+      cursor: pointer;
+      text-align: left;
+    }
+    .tdb-switcher-item:hover { background: var(--tdb-accent-soft); }
+    .tdb-switcher-item[aria-current="true"] {
+      background: var(--tdb-accent-soft);
+      color: var(--tdb-accent);
+    }
+    .tdb-switcher-code {
+      font-family: var(--tdb-font-mono, monospace);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      color: var(--tdb-text-dim);
+    }
+
+    /* Table */
+    .tdb-table {
+      font-family: var(--tdb-font-mono, 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace);
+      font-size: 13px;
+    }
+    .tdb-row {
+      display: grid;
+      grid-template-columns: 64px 1fr 1.2fr 60px 90px 90px 96px;
+      gap: 12px;
+      padding: 14px 22px;
+      align-items: center;
+      border-bottom: 1px solid var(--tdb-border);
+    }
+    .tdb-row:last-child { border-bottom: 0; }
+    .tdb-row.tdb-head {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--tdb-text-dim);
+      padding-top: 12px; padding-bottom: 12px;
+      background: var(--tdb-row-alt);
+    }
+    .tdb-row.tdb-data:nth-child(odd) { background: var(--tdb-row-alt); }
+    .tdb-time {
+      font-weight: 700; font-size: 16px;
+      letter-spacing: 0.05em;
+      color: var(--tdb-text);
+    }
+    .tdb-route {
+      font-weight: 700; font-size: 14px;
+      letter-spacing: 0.04em;
+      min-width: 0;
+    }
+    .tdb-route-codes {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--tdb-text);
+    }
+    .tdb-route-codes .tdb-arrow { color: var(--tdb-accent); font-weight: 400; }
+    .tdb-route-cities {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--tdb-text-dim);
+      letter-spacing: 0.04em;
+      margin-top: 3px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tdb-carrier {
+      font-size: 12px;
+      color: var(--tdb-text);
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tdb-carrier-code {
+      display: inline-block;
+      font-weight: 700;
+      color: var(--tdb-accent);
+      margin-right: 6px;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+    .tdb-stops {
+      text-align: center;
+      font-size: 12px;
+      color: var(--tdb-text-dim);
+      letter-spacing: 0.04em;
+    }
+    .tdb-stops.tdb-direct { color: var(--tdb-live); font-weight: 600; }
+    .tdb-date {
+      font-size: 11px;
+      color: var(--tdb-text-dim);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .tdb-status { display: flex; justify-content: flex-start; }
+    .tdb-pill {
+      display: inline-flex; align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-family: var(--tdb-font-body, 'Inter', system-ui, sans-serif);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .tdb-pill[data-kind="cheapest"] { background: var(--tdb-pill-cheap-bg); color: var(--tdb-pill-cheap-fg); }
+    .tdb-pill[data-kind="today"]    { background: var(--tdb-pill-today-bg); color: var(--tdb-pill-today-fg); }
+    .tdb-pill[data-kind="week"]     { background: var(--tdb-pill-week-bg); color: var(--tdb-pill-week-fg); }
+    .tdb-fare {
+      text-align: right;
+      font-weight: 800; font-size: 16px;
+      letter-spacing: 0.02em;
+      color: var(--tdb-text);
+    }
+    .tdb-row.tdb-data {
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .tdb-row.tdb-data:hover { background: var(--tdb-accent-soft); }
+
+    /* Split-flap animation */
+    .tdb-flip { display: inline-block; will-change: contents; }
+    .tdb-flip.is-flipping { animation: tdb-flip-fade 0.2s ease; }
+    @keyframes tdb-flip-fade {
+      0%   { opacity: 0.4; transform: translateY(-2px); }
+      100% { opacity: 1;   transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tdb-flip.is-flipping { animation: none; }
+    }
+
+    /* Footer */
+    .tdb-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+      padding: 14px 22px;
+      background: var(--tdb-surface);
+      border-top: 1px solid var(--tdb-border);
+      font-size: 11px;
+      color: var(--tdb-text-dim);
+      letter-spacing: 0.04em;
+    }
+    .tdb-footer-meta {
+      font-family: var(--tdb-font-mono, monospace);
+      text-transform: uppercase;
+    }
+    .tdb-refresh {
+      background: transparent; border: 1px solid var(--tdb-border);
+      padding: 6px 12px; border-radius: 6px;
+      font: inherit; font-size: 11px; font-weight: 600;
+      color: var(--tdb-text); cursor: pointer;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .tdb-refresh:hover {
+      background: var(--tdb-accent-soft);
+      border-color: var(--tdb-accent);
+      color: var(--tdb-accent);
+    }
+    .tdb-refresh svg { width: 12px; height: 12px; transition: transform 0.4s ease; }
+    .tdb-refresh.is-loading svg { animation: tdb-spin 0.8s linear infinite; }
+    @keyframes tdb-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .tdb-refresh.is-loading svg { animation: none; }
+    }
+
+    /* Empty state */
+    .tdb-empty {
+      padding: 60px 22px;
+      text-align: center;
+      font-family: var(--tdb-font-mono, monospace);
+      font-size: 12px;
+      color: var(--tdb-text-dim);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .tdb-empty-title {
+      font-size: 14px;
+      color: var(--tdb-text);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    /* Responsive */
+    @media (max-width: 760px) {
+      .tdb-header { padding: 14px 16px; }
+      .tdb-row { padding: 12px 16px; gap: 8px; grid-template-columns: 52px 1fr 1fr 70px 84px; }
+      .tdb-row .tdb-stops, .tdb-row .tdb-date { display: none; }
+      .tdb-row.tdb-head .tdb-stops, .tdb-row.tdb-head .tdb-date { display: none; }
+      .tdb-route-cities { font-size: 9px; }
+      .tdb-time { font-size: 14px; }
+      .tdb-fare { font-size: 14px; }
+      .tdb-footer { padding: 12px 16px; flex-direction: column; align-items: stretch; gap: 8px; }
+    }
+    @media (max-width: 460px) {
+      .tdb-row { grid-template-columns: 48px 1fr 70px; }
+      .tdb-row .tdb-carrier, .tdb-row .tdb-status { display: none; }
+      .tdb-row.tdb-head .tdb-carrier, .tdb-row.tdb-head .tdb-status { display: none; }
+    }
   `;
 
   // ── Widget Class ──────────────────────────────────────────────────
@@ -1195,9 +1684,27 @@
 
         priceDisplay: c.priceDisplay || 'auto',
 
-        // Carousel-specific
+        // Template — picks the visual layout. 'cards' is the existing
+        // grid/carousel render. 'departure-board' is the airport-style table.
+        // Default 'cards' preserves existing widget behaviour exactly.
+        template: c.template || 'cards',
+
+        // Carousel-specific (used when template='cards' and layout='carousel')
         carouselAutoplay: !!c.carouselAutoplay,
         carouselInterval: typeof c.carouselInterval === 'number' ? c.carouselInterval : 6,
+
+        // Departure-board-specific (used when template='departure-board')
+        // Each template gets its own namespace so switching templates doesn't
+        // collapse state. The widget reads these only when the matching
+        // template is active.
+        boardTheme: c.boardTheme || 'dark',
+        boardDefaultAirport: (c.boardDefaultAirport || 'LHR').toUpperCase(),
+        boardAutoDetect: c.boardAutoDetect !== false,
+        boardAllowSwitcher: c.boardAllowSwitcher !== false,
+        boardAnimate: c.boardAnimate !== false,
+        boardAutoRefresh: c.boardAutoRefresh !== false,
+        boardRefreshSeconds: typeof c.boardRefreshSeconds === 'number' ? c.boardRefreshSeconds : 300,
+        boardDateRange: typeof c.boardDateRange === 'number' ? c.boardDateRange : 30,
 
         show: Object.assign({}, defaultShow, c.show || {}),
 
@@ -1493,6 +2000,13 @@
         packageType = 'Any';
       }
 
+      // The departure-board template is flight-only by definition. Override
+      // whatever offer-type the user picked — the template implies the data.
+      if (this.cfg.template === 'departure-board') {
+        apiType = 'Flights';
+        packageType = null;
+      }
+
       const p = {
         type: apiType,
         deduping: 'None',
@@ -1516,12 +2030,31 @@
       if (this.cfg.destinations.length) p.destinations = this.cfg.destinations;
       if (this.cfg.boardBases.length) p.boardBases = this.cfg.boardBases;
       if (this.cfg.cabinClasses.length) p.cabinClasses = this.cfg.cabinClasses;
+
+      // Departure-board template: filter to the chosen origin airport,
+      // widen date window per cfg.boardDateRange, and tighten maxOffers
+      // to fit the visible row cap (the template sets its own cap).
+      if (this.cfg.template === 'departure-board' && this._boardAirport) {
+        p.origin = this._boardAirport.code;
+        p.DatesMin = 1;
+        p.DatesMax = this.cfg.boardDateRange || 30;
+        // Sort by price ascending — board shows cheapest first
+        p.sort = 'price:asc';
+      }
+
       return p;
     }
 
     async _fetchAndRender() {
       if (!this.cfg.appId || !this.cfg.apiKey) {
         this._showError('Missing Travelify credentials. Configure in the editor.');
+        return;
+      }
+
+      // Departure-board template runs its own fetch flow because the request
+      // depends on the detected/picked airport. Hand off here.
+      if (this.cfg.template === 'departure-board') {
+        this._renderDepartureBoard();
         return;
       }
 
@@ -1577,6 +2110,17 @@
     }
 
     _renderOffers() {
+      // Departure-board template doesn't dedupe (it's a fares list, not a
+      // shop-around grid), so pass raw offers straight in. Cards template
+      // dedupes per the user's strategy.
+      if (this.cfg.template === 'departure-board') {
+        this._renderDepartureBoard();
+        return;
+      }
+      this._renderCardsTemplate();
+    }
+
+    _renderCardsTemplate() {
       const deduped = dedupeOffers(this.rawOffers, this.cfg.dedupeStrategy, this.cfg.sort);
 
       if (!deduped.length) {
@@ -2256,11 +2800,363 @@
         + '</div>';
     }
 
-    update(newConfig) {
-      // Clean up any active carousel resources before tearing down the DOM
-      this._cleanupCarousel();
+    /* ═══════════════════════════════════════════════════════════════════
+       DEPARTURE-BOARD TEMPLATE METHODS
+       Flight-only template that styles like an airport board. Auto-detects
+       visitor's nearest airport, refetches on a timer, animates with
+       split-flap fade. Self-contained — uses tdb- classes throughout to
+       avoid touching the cards template's tgo- classes.
+       ═══════════════════════════════════════════════════════════════════ */
+    async _renderDepartureBoard() {
+      // First call: detect airport then refetch with the right origin filter.
+      // Subsequent calls (refresh button, auto-refresh) skip detection.
+      if (!this._boardAirport) {
+        if (this.cfg.boardAutoDetect) {
+          this._boardAirport = await detectAirport(this.cfg.boardDefaultAirport);
+        } else {
+          this._boardAirport = AIRPORT_BY_CODE[this.cfg.boardDefaultAirport] || AIRPORT_BY_CODE.LHR;
+        }
+        // Re-fetch with the correct origin filter — _buildPayload now sees
+        // _boardAirport and adds origin to the request body.
+        if (this._boardAirport) {
+          await this._fetchAndRenderBoard();
+          return;
+        }
+      }
 
+      this._renderBoardShell();
+      this._renderBoardRows();
+      this._wireBoardEvents();
+      this._startBoardClock();
+      this._scheduleBoardRefresh();
+      if (this.cfg.boardAnimate) this._runBoardFlipAnimation();
+    }
+
+    // Re-runs the Travelify fetch with the board-specific filters and
+    // re-renders. Used when switching airports or hitting refresh.
+    async _fetchAndRenderBoard() {
+      try {
+        const payload = this._buildPayload();
+        const res = await fetch(TRAVELIFY_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Token ' + this.cfg.appId + ':' + this.cfg.apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('API ' + res.status);
+        const data = await res.json();
+        this.rawOffers = (data && data.data) ? data.data : [];
+      } catch (err) {
+        console.warn('[TGOffers/board]', err);
+      }
+      this._renderBoardShell();
+      this._renderBoardRows();
+      this._wireBoardEvents();
+      this._startBoardClock();
+      this._scheduleBoardRefresh();
+      if (this.cfg.boardAnimate) this._runBoardFlipAnimation();
+    }
+
+    _renderBoardShell() {
+      const a = this._boardAirport || AIRPORT_BY_CODE.LHR;
+      const radius = (typeof this.cfg.radius === 'number' ? this.cfg.radius : 14) + 'px';
+      const fontFamily = this.cfg.fontFamily || '';
+      const switcherChev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+      const refreshIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
+
+      // Wipe any prior tgo-root content and redraw root with the tdb- classes.
+      // We keep this.root pointing at the same shadow-attached div, just
+      // change its class + style so tdb- CSS applies.
+      this.root.className = 'tdb-root';
+      this.root.setAttribute('data-theme', this.cfg.boardTheme === 'light' ? 'light' : 'dark');
+      this.root.style.setProperty('--tdb-radius', radius);
+      if (fontFamily) this.root.style.setProperty('--tdb-font-body', fontFamily);
+
+      let html = '<div class="tdb-header">'
+        + '<div class="tdb-header-left">'
+        + '<div class="tdb-icon">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>'
+        + '</div>'
+        + '<div class="tdb-title-block">'
+        + '<div class="tdb-title">Departures from '
+        + (this.cfg.boardAllowSwitcher
+          ? '<span class="tdb-switcher">'
+          + '<button type="button" class="tdb-airport-pick" data-tdb-switcher aria-haspopup="listbox" aria-expanded="false">'
+          + '<span data-tdb-airport-label>' + esc(a.city + ' (' + a.code + ')') + '</span>'
+          + switcherChev
+          + '</button>'
+          + '<ul class="tdb-switcher-menu" role="listbox" hidden></ul>'
+          + '</span>'
+          : '<span>' + esc(a.city + ' (' + a.code + ')') + '</span>')
+        + '</div>'
+        + '<div class="tdb-subtitle">Cheapest fares · next ' + (this.cfg.boardDateRange || 30) + ' days</div>'
+        + '</div></div>'
+        + '<div class="tdb-now">'
+        + '<span class="tdb-live-dot" aria-hidden="true"></span>'
+        + 'Live · <span data-tdb-clock>' + formatBoardNow() + '</span>'
+        + '</div>'
+        + '</div>';
+
+      html += '<div class="tdb-table">'
+        + '<div class="tdb-row tdb-head">'
+        + '<span>Time</span>'
+        + '<span>Route</span>'
+        + '<span class="tdb-carrier">Carrier</span>'
+        + '<span class="tdb-stops">Stops</span>'
+        + '<span class="tdb-date">Date</span>'
+        + '<span class="tdb-status">Status</span>'
+        + '<span class="tdb-fare" style="text-align:right;">Fare</span>'
+        + '</div>'
+        + '<div data-tdb-rows></div>'
+        + '</div>';
+
+      html += '<div class="tdb-footer">'
+        + '<div class="tdb-footer-meta" data-tdb-meta>—</div>'
+        + '<button type="button" class="tdb-refresh" data-tdb-refresh>'
+        + refreshIcon
+        + '<span>Refresh</span>'
+        + '</button>'
+        + '</div>';
+
+      this.root.innerHTML = html;
+      this._populateBoardSwitcher();
+    }
+
+    _renderBoardRows() {
+      const rowsEl = this.root.querySelector('[data-tdb-rows]');
+      if (!rowsEl) return;
+
+      // Sort by visible price ascending — formattedPrice is what the user sees
+      const parsePrice = (s) => {
+        if (!s) return Infinity;
+        const m = String(s).replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+        return m ? parseFloat(m[1]) : Infinity;
+      };
+      const cap = Math.max(5, Math.min(15, this.cfg.maxOffers || 8));
+      const flights = (this.rawOffers || [])
+        .filter((o) => o.flight && o.flight.pricing)
+        .sort((a, b) => parsePrice(a.formattedPrice || a.formattedPPPrice)
+                      - parsePrice(b.formattedPrice || b.formattedPPPrice))
+        .slice(0, cap);
+
+      if (!flights.length) {
+        rowsEl.innerHTML = '<div class="tdb-empty">'
+          + '<div class="tdb-empty-title">No flights found</div>'
+          + 'Try widening the date range or changing the departure airport.'
+          + '</div>';
+        this._updateBoardMeta(0);
+        return;
+      }
+
+      // Cheapest gets the gold pill
+      let cheapestPrice = Infinity, cheapestId = null;
+      for (const o of flights) {
+        const p = parsePrice(o.formattedPrice || o.formattedPPPrice);
+        if (p < cheapestPrice) { cheapestPrice = p; cheapestId = o.id; }
+      }
+
+      let html = '';
+      for (const o of flights) {
+        const f = o.flight || {};
+        const og = f.origin || {};
+        const dest = f.destination || {};
+        const carrier = f.carrier || {};
+        const url = safeUrl(o.url || '#');
+        const time = formatBoardTime(f.outboundDate);
+        const date = formatBoardDate(f.outboundDate);
+        const stops = f.direct || f.stops === 0
+          ? '<span class="tdb-direct">DIRECT</span>'
+          : (f.stops === 1 ? '1 STOP' : (f.stops || 1) + ' STOPS');
+        const isCheapest = (o.id === cheapestId);
+        const proximity = dateProximity(f.outboundDate);
+
+        let pillHtml = '';
+        if (isCheapest) {
+          pillHtml = '<span class="tdb-pill" data-kind="cheapest">★ Cheapest</span>';
+        } else if (proximity === 'today') {
+          pillHtml = '<span class="tdb-pill" data-kind="today">Today</span>';
+        } else if (proximity === 'thisWeek') {
+          pillHtml = '<span class="tdb-pill" data-kind="week">This week</span>';
+        }
+
+        const cityLine = (og.name ? og.name.replace(/\s*\([A-Z]{3}\)\s*$/, '') : '')
+          + ' → '
+          + (dest.name ? dest.name.replace(/\s*\([A-Z]{3}\)\s*$/, '') : '');
+
+        html += '<a class="tdb-row tdb-data" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;">'
+          + '<div class="tdb-time"><span class="tdb-flip">' + esc(time) + '</span></div>'
+          + '<div class="tdb-route">'
+          + '<div class="tdb-route-codes">'
+          + '<span class="tdb-flip">' + esc(og.iataCode || '???') + '</span>'
+          + '<span class="tdb-arrow">→</span>'
+          + '<span class="tdb-flip">' + esc(dest.iataCode || '???') + '</span>'
+          + '</div>'
+          + '<div class="tdb-route-cities">' + esc(cityLine) + '</div>'
+          + '</div>'
+          + '<div class="tdb-carrier">'
+          + (carrier.code ? '<span class="tdb-carrier-code">' + esc(carrier.code) + '</span>' : '')
+          + '<span>' + esc(carrier.name || '—') + '</span>'
+          + '</div>'
+          + '<div class="tdb-stops ' + (f.direct ? 'tdb-direct' : '') + '">' + stops + '</div>'
+          + '<div class="tdb-date"><span class="tdb-flip">' + esc(date) + '</span></div>'
+          + '<div class="tdb-status">' + pillHtml + '</div>'
+          + '<div class="tdb-fare"><span class="tdb-flip">' + esc(o.formattedPrice || o.formattedPPPrice || '—') + '</span></div>'
+          + '</a>';
+      }
+      rowsEl.innerHTML = html;
+      this._updateBoardMeta(flights.length);
+    }
+
+    _populateBoardSwitcher() {
+      const menu = this.root.querySelector('.tdb-switcher-menu');
+      if (!menu) return;
+      const current = this._boardAirport ? this._boardAirport.code : '';
+      let html = '';
+      for (const a of UK_AIRPORTS) {
+        html += '<li>'
+          + '<button type="button" class="tdb-switcher-item"'
+          + ' data-tdb-airport="' + a.code + '"'
+          + (a.code === current ? ' aria-current="true"' : '')
+          + '>'
+          + '<span>' + esc(a.city) + ' · ' + esc(a.name) + '</span>'
+          + '<span class="tdb-switcher-code">' + esc(a.code) + '</span>'
+          + '</button>'
+          + '</li>';
+      }
+      menu.innerHTML = html;
+    }
+
+    _wireBoardEvents() {
+      if (this._boardWired) return;
+      this._boardWired = true;
+
+      this.shadow.addEventListener('click', async (ev) => {
+        // Only handle when the departure-board template is active
+        if (this.cfg.template !== 'departure-board') return;
+
+        const trigger = ev.target.closest('[data-tdb-switcher]');
+        if (trigger) {
+          ev.preventDefault();
+          const menu = this.root.querySelector('.tdb-switcher-menu');
+          const open = trigger.getAttribute('aria-expanded') === 'true';
+          trigger.setAttribute('aria-expanded', open ? 'false' : 'true');
+          if (menu) menu.hidden = open;
+          return;
+        }
+        const item = ev.target.closest('[data-tdb-airport]');
+        if (item) {
+          ev.preventDefault();
+          const code = item.getAttribute('data-tdb-airport');
+          if (AIRPORT_BY_CODE[code]) {
+            this._boardAirport = AIRPORT_BY_CODE[code];
+            try { sessionStorage.setItem(GEO_CACHE_KEY, JSON.stringify({ code })); } catch { /* ignore */ }
+            await this._fetchAndRenderBoard();
+          }
+          return;
+        }
+        const refresh = ev.target.closest('[data-tdb-refresh]');
+        if (refresh) {
+          ev.preventDefault();
+          refresh.classList.add('is-loading');
+          await this._fetchAndRenderBoard();
+          refresh.classList.remove('is-loading');
+          return;
+        }
+        // Click outside closes any open switcher
+        if (!ev.target.closest('.tdb-switcher')) {
+          const trig = this.root.querySelector('[data-tdb-switcher]');
+          const menu = this.root.querySelector('.tdb-switcher-menu');
+          if (trig) trig.setAttribute('aria-expanded', 'false');
+          if (menu) menu.hidden = true;
+        }
+      });
+    }
+
+    _startBoardClock() {
+      if (this._boardClockTimer) clearInterval(this._boardClockTimer);
+      const tick = () => {
+        const el = this.root.querySelector('[data-tdb-clock]');
+        if (el) el.textContent = formatBoardNow();
+      };
+      tick();
+      this._boardClockTimer = setInterval(tick, 30000);
+    }
+
+    _updateBoardMeta(count) {
+      const meta = this.root.querySelector('[data-tdb-meta]');
+      if (!meta) return;
+      meta.textContent = count + ' flight' + (count === 1 ? '' : 's')
+        + ' · updated ' + formatBoardNow();
+    }
+
+    _scheduleBoardRefresh() {
+      if (this._boardRefreshTimer) { clearInterval(this._boardRefreshTimer); this._boardRefreshTimer = null; }
+      if (!this.cfg.boardAutoRefresh) return;
+      const ms = Math.max(60, this.cfg.boardRefreshSeconds || 300) * 1000;
+      this._boardRefreshTimer = setInterval(() => {
+        if (document.hidden) return;
+        this._fetchAndRenderBoard();
+      }, ms);
+      if (!this._boardVisHandler) {
+        this._boardVisHandler = () => {
+          if (!document.hidden && this.cfg.template === 'departure-board') {
+            this._fetchAndRenderBoard();
+          }
+        };
+        document.addEventListener('visibilitychange', this._boardVisHandler);
+      }
+    }
+
+    // Stagger flip animation across rows + columns so it walks down the
+    // board like a real mechanical split-flap display
+    _runBoardFlipAnimation() {
+      if (this._boardFlipTimers) this._boardFlipTimers.forEach(clearTimeout);
+      this._boardFlipTimers = [];
+      const rows = this.root.querySelectorAll('[data-tdb-rows] .tdb-row.tdb-data');
+      rows.forEach((row, rowIdx) => {
+        const flips = row.querySelectorAll('.tdb-flip');
+        flips.forEach((flip, colIdx) => {
+          const delay = rowIdx * 60 + colIdx * 30;
+          const t = setTimeout(() => {
+            flip.classList.remove('is-flipping');
+            void flip.offsetWidth;
+            flip.classList.add('is-flipping');
+          }, delay);
+          this._boardFlipTimers.push(t);
+        });
+      });
+    }
+
+    _cleanupDepartureBoard() {
+      if (this._boardClockTimer) { clearInterval(this._boardClockTimer); this._boardClockTimer = null; }
+      if (this._boardRefreshTimer) { clearInterval(this._boardRefreshTimer); this._boardRefreshTimer = null; }
+      if (this._boardFlipTimers) { this._boardFlipTimers.forEach(clearTimeout); this._boardFlipTimers = []; }
+      if (this._boardVisHandler) {
+        document.removeEventListener('visibilitychange', this._boardVisHandler);
+        this._boardVisHandler = null;
+      }
+    }
+    /* ═══════════════════════════════════════════════════════════════════
+       END DEPARTURE-BOARD TEMPLATE METHODS
+       ═══════════════════════════════════════════════════════════════════ */
+
+    update(newConfig) {
+      // Clean up resources from any active templates before tearing down DOM
+      this._cleanupCarousel();
+      this._cleanupDepartureBoard();
+
+      // Detect template change so we know whether to reset board state
+      const prevTemplate = this.cfg && this.cfg.template;
       this.cfg = this._defaults(Object.assign({}, this.cfg, newConfig));
+      // If template changed away from or to departure-board, drop the cached
+      // airport so detection happens fresh next time
+      if (prevTemplate !== this.cfg.template) {
+        this._boardAirport = null;
+        this._boardWired = false;
+      }
+
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.root = document.createElement('div');
       this.root.className = 'tgo-root';
