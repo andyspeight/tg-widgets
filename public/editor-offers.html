@@ -320,7 +320,8 @@
       padding: 0;
       margin-bottom: 16px;
       overflow: hidden;
-      min-height: 540px;
+      min-height: 640px;
+      width: 100%;
       pointer-events: none;
       user-select: none;
     }
@@ -757,7 +758,7 @@
             </div>
           </div>
 
-          <div class="section" data-open="true" data-when-template="cards magazine ticker">
+          <div class="section" data-open="true" data-when-template="cards magazine ticker popup">
             <button class="section-head" data-section>Offer type
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -1234,6 +1235,15 @@
                   <option value="mini">Mini — text-only banner pills</option>
                 </select>
                 <div class="field-help"><strong>Auto</strong> picks a sensible mode for each layout: compact for slide-in/centered/drawer/fullscreen, single for floating-card, mini for top/bottom bars. Override only if you want to force a specific feel — e.g. compact in a floating-card.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Compact arrangement</label>
+                <div class="segmented" id="popupCompactLayoutSeg">
+                  <button type="button" data-popup-compact-layout="stacked" aria-pressed="true">Stacked</button>
+                  <button type="button" data-popup-compact-layout="grid">Grid</button>
+                  <button type="button" data-popup-compact-layout="hero-list">Hero + list</button>
+                </div>
+                <div class="field-help"><strong>Stacked</strong> shows offers as full-width image-left rows — readable, dense. <strong>Grid</strong> arranges them as 2-column image-top tiles — more visual, fewer offers fit. <strong>Hero + list</strong> features the first offer with a big image, the rest as compact text rows — best for "today's best deal + 3 alternatives".</div>
               </div>
             </div>
           </div>
@@ -1781,6 +1791,7 @@
         popupRenderMode: 'auto',
         popupRotateInterval: 8000,
         popupMaxRender: 6,
+        popupCompactLayout: 'stacked',
         show: {
           // Universal
           propertyType: true, chain: true, location: true,
@@ -2004,6 +2015,10 @@
         b.setAttribute('aria-pressed', b.dataset.popupSide === (c.popupSideDrawerSide || 'right') ? 'true' : 'false');
       });
       $('cfgPopupRenderMode').value = c.popupRenderMode || 'auto';
+      const compactLayout = c.popupCompactLayout || 'stacked';
+      document.querySelectorAll('#popupCompactLayoutSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.popupCompactLayout === compactLayout ? 'true' : 'false');
+      });
       $('cfgPopupTrigger').value = c.popupTrigger || 'load';
       $('cfgPopupTriggerDelay').value = c.popupTriggerDelay != null ? c.popupTriggerDelay : 5000;
       $('cfgPopupTriggerScrollPercent').value = c.popupTriggerScrollPercent != null ? c.popupTriggerScrollPercent : 50;
@@ -2630,6 +2645,15 @@
         });
       });
       bindPopupSelect('cfgPopupRenderMode', 'popupRenderMode');
+      // Compact-arrangement segmented control
+      document.querySelectorAll('#popupCompactLayoutSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.popupCompactLayout = b.dataset.popupCompactLayout;
+          document.querySelectorAll('#popupCompactLayoutSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
       bindPopupSelect('cfgPopupTrigger', 'popupTrigger', updatePopupTriggerVisibility);
       bindPopupNumber('cfgPopupTriggerDelay', 'popupTriggerDelay', 5000);
       bindPopupNumber('cfgPopupTriggerScrollPercent', 'popupTriggerScrollPercent', 50);
