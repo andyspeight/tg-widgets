@@ -2846,6 +2846,29 @@
       z-index: 2147483000;
       font-family: var(--tgo-font, system-ui, sans-serif);
     }
+    /* Editor-preview banner — only rendered when cfg._preview is true */
+    .tgop-preview-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      margin: 0 auto 16px;
+      max-width: 720px;
+      background: rgba(0, 180, 216, 0.08);
+      border: 1px dashed rgba(0, 180, 216, 0.4);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--tgo-sub, #475569);
+      font-family: var(--tgo-font, system-ui, sans-serif);
+    }
+    .tgop-preview-banner svg {
+      flex-shrink: 0;
+      color: var(--tgo-accent, #00B4D8);
+    }
+    .tgop-preview-banner strong {
+      color: var(--tgo-text, #0F172A);
+      font-weight: 600;
+    }
     .tgop-backdrop {
       position: absolute;
       inset: 0;
@@ -2949,9 +2972,24 @@
     }
 
     /* Layout: inline — popup attaches to its mount point, not fixed */
-    .tgop-layout-inline { position: relative; inset: auto; }
-    .tgop-layout-inline .tgop-container { position: relative; inset: auto; }
-    .tgop-layout-inline .tgop-card { width: 100%; max-width: 720px; margin: 0 auto; }
+    .tgop-layout-inline {
+      position: relative;
+      inset: auto;
+      pointer-events: auto;
+    }
+    .tgop-layout-inline .tgop-container {
+      position: relative;
+      inset: auto;
+      pointer-events: auto;
+      padding: 0;
+    }
+    .tgop-layout-inline .tgop-card {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      transform: none !important;
+      opacity: 1 !important;
+    }
 
     /* ───── Shared elements ───── */
     .tgop-bar {
@@ -6322,7 +6360,27 @@
       else if (mode === 'single') content = this._popupRenderSingle(offers);
       else content = this._popupRenderCompact(offers);
 
-      let html = '<div class="tgop-root ' + layoutClass + '" style="--tgop-overlay-opacity:' + opacity + '">';
+      let html = '';
+      // Preview banner: shown only when in editor preview mode. Tells the user
+      // the saved layout/trigger so they understand this isn't how it'll fire
+      // in production.
+      if (cfg._preview && this._popupOriginalLayout) {
+        const trigger = cfg.popupTrigger || 'load';
+        const triggerLabels = {
+          'load': 'on page load',
+          'time': 'after a delay',
+          'scroll': 'on scroll',
+          'exit-intent': 'on exit intent',
+          'click': 'on click',
+          'inactivity': 'on inactivity',
+          'pageviews': 'after pageviews'
+        };
+        html += '<div class="tgop-preview-banner">'
+          + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+          + '<span>Preview · in production this will appear as a <strong>' + esc(this._popupOriginalLayout) + '</strong> popup, firing <strong>' + esc(triggerLabels[trigger] || trigger) + '</strong></span>'
+          + '</div>';
+      }
+      html += '<div class="tgop-root ' + layoutClass + '" style="--tgop-overlay-opacity:' + opacity + '">';
       if (showBackdrop) html += '<div class="tgop-backdrop" data-tgop-backdrop></div>';
       html += '<div class="tgop-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(cfg.popupHeading || 'Live deals') + '">';
       html += '<div class="tgop-card" data-tgop-card>';
@@ -6360,12 +6418,18 @@
       });
 
       this._popupBind();
-      popupRecordShown(cfg);
 
-      const layout = cfg.popupLayout || 'slide-in';
-      if (cfg.popupOverlay && ['centered', 'fullscreen', 'side-drawer'].includes(layout)) {
-        this._popupOrigOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
+      // In preview mode, skip the side effects that would interfere with the
+      // editor — don't record the show (would trigger frequency suppression
+      // on next preview render) and don't lock body scroll (would prevent
+      // scrolling the editor itself).
+      if (!cfg._preview) {
+        popupRecordShown(cfg);
+        const layout = cfg.popupLayout || 'slide-in';
+        if (cfg.popupOverlay && ['centered', 'fullscreen', 'side-drawer'].includes(layout)) {
+          this._popupOrigOverflow = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+        }
       }
 
       this._popupStartRotation();
@@ -6463,6 +6527,25 @@
 
     // Entry point — called from _renderOffers when template='popup'.
     _renderPopupTemplate() {
+      // Preview mode (editor preview pane): skip eligibility + frequency +
+      // trigger entirely. Render the popup chassis inline so the user can
+      // actually see the content. Force inline layout regardless of saved
+      // popupLayout — the saved layout is what they get in production, the
+      // preview's job is to show the content arrangement.
+      if (this.cfg._preview) {
+        if (!this.rawOffers || !this.rawOffers.length) {
+          this._renderEmpty();
+          return;
+        }
+        // Force inline layout for preview, save original to restore for any
+        // later interactions (rotation, mode-pick logic still uses real layout)
+        this._popupOriginalLayout = this.cfg.popupLayout;
+        this.cfg.popupLayout = 'inline';
+        // Open immediately, no trigger
+        this._popupOpen();
+        return;
+      }
+
       // Eligibility check first
       const eligibility = popupShouldShow(this.cfg);
       if (!eligibility.show) {
