@@ -2886,27 +2886,42 @@
     }
     .tgop-layout-centered .tgop-card { width: 460px; }
 
-    /* Layout: slide-in (corners) */
+    /* Layout: slide-in (8 positions: 4 corners + 4 edge-centres) */
     .tgop-layout-slide-in .tgop-container { padding: 16px; }
+    /* Corners */
     .tgop-layout-slide-in.tgop-pos-bottom-right .tgop-container { justify-content: flex-end; align-items: flex-end; }
     .tgop-layout-slide-in.tgop-pos-bottom-left .tgop-container { justify-content: flex-start; align-items: flex-end; }
     .tgop-layout-slide-in.tgop-pos-top-right .tgop-container { justify-content: flex-end; align-items: flex-start; }
     .tgop-layout-slide-in.tgop-pos-top-left .tgop-container { justify-content: flex-start; align-items: flex-start; }
+    /* Edge centres */
+    .tgop-layout-slide-in.tgop-pos-top-center .tgop-container { justify-content: center; align-items: flex-start; }
+    .tgop-layout-slide-in.tgop-pos-bottom-center .tgop-container { justify-content: center; align-items: flex-end; }
+    .tgop-layout-slide-in.tgop-pos-left-center .tgop-container { justify-content: flex-start; align-items: center; }
+    .tgop-layout-slide-in.tgop-pos-right-center .tgop-container { justify-content: flex-end; align-items: center; }
     .tgop-layout-slide-in .tgop-card {
       width: 420px;
       max-width: calc(100vw - 32px);
       transform: translateY(40px);
     }
+    /* Slide direction matches edge — top positions slide down, bottom up,
+       left positions slide right, right positions slide left */
     .tgop-layout-slide-in.tgop-pos-top-right .tgop-card,
-    .tgop-layout-slide-in.tgop-pos-top-left .tgop-card { transform: translateY(-40px); }
-    .tgop-layout-slide-in .tgop-card.tgop-open { transform: translateY(0); }
+    .tgop-layout-slide-in.tgop-pos-top-left .tgop-card,
+    .tgop-layout-slide-in.tgop-pos-top-center .tgop-card { transform: translateY(-40px); }
+    .tgop-layout-slide-in.tgop-pos-left-center .tgop-card { transform: translateX(-40px); }
+    .tgop-layout-slide-in.tgop-pos-right-center .tgop-card { transform: translateX(40px); }
+    .tgop-layout-slide-in .tgop-card.tgop-open { transform: translate(0, 0); }
 
-    /* Layout: floating-card (corners, no backdrop, smaller) */
+    /* Layout: floating-card (8 positions, no backdrop, smaller) */
     .tgop-layout-floating-card .tgop-container { padding: 16px; }
     .tgop-layout-floating-card.tgop-pos-bottom-right .tgop-container { justify-content: flex-end; align-items: flex-end; }
     .tgop-layout-floating-card.tgop-pos-bottom-left .tgop-container { justify-content: flex-start; align-items: flex-end; }
     .tgop-layout-floating-card.tgop-pos-top-right .tgop-container { justify-content: flex-end; align-items: flex-start; }
     .tgop-layout-floating-card.tgop-pos-top-left .tgop-container { justify-content: flex-start; align-items: flex-start; }
+    .tgop-layout-floating-card.tgop-pos-top-center .tgop-container { justify-content: center; align-items: flex-start; }
+    .tgop-layout-floating-card.tgop-pos-bottom-center .tgop-container { justify-content: center; align-items: flex-end; }
+    .tgop-layout-floating-card.tgop-pos-left-center .tgop-container { justify-content: flex-start; align-items: center; }
+    .tgop-layout-floating-card.tgop-pos-right-center .tgop-container { justify-content: flex-end; align-items: center; }
     .tgop-layout-floating-card .tgop-card { width: 320px; max-width: calc(100vw - 32px); }
 
     /* Layout: top-bar */
@@ -3602,6 +3617,489 @@
       border-radius: 8px;
       text-decoration: none;
       flex-shrink: 0;
+    }
+
+    /* ───── CAROUSEL MODE ───── */
+    .tgop-content-carousel {
+      display: flex;
+      flex-direction: column;
+      max-height: 600px;
+    }
+    .tgop-carousel-window {
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+    }
+    .tgop-carousel-track {
+      display: flex;
+      transition: transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+    .tgop-carousel-card {
+      flex: 0 0 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      background: var(--tgo-card, #fff);
+      transform: none !important;
+      opacity: 1 !important;
+      box-shadow: none !important;
+    }
+    .tgop-carousel-img {
+      width: 100%;
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--tgo-card-alt, #F1F5F9);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .tgop-carousel-img-placeholder {
+      background-image: linear-gradient(135deg, rgba(0, 180, 216, 0.15), rgba(27, 43, 91, 0.15));
+    }
+    .tgop-carousel-discount {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #10B981;
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 5px 11px;
+      border-radius: 999px;
+      letter-spacing: -0.01em;
+    }
+    .tgop-carousel-body { padding: 16px 20px 20px; }
+    .tgop-carousel-kicker {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tgo-muted, #94A3B8);
+      margin-bottom: 6px;
+    }
+    .tgop-carousel-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--tgo-text, #0F172A);
+      margin-bottom: 4px;
+    }
+    .tgop-carousel-flight {
+      font-size: 12px;
+      color: var(--tgo-sub, #475569);
+      margin-bottom: 14px;
+    }
+    .tgop-carousel-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--tgo-border, #E2E8F0);
+    }
+    .tgop-carousel-price { display: flex; flex-direction: column; line-height: 1.1; }
+    .tgop-carousel-was {
+      font-size: 11px;
+      color: var(--tgo-muted, #94A3B8);
+      text-decoration: line-through;
+      margin-bottom: 2px;
+    }
+    .tgop-carousel-now {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-carousel-sub { font-size: 10px; color: var(--tgo-muted, #94A3B8); margin-top: 2px; }
+    .tgop-carousel-cta {
+      background: var(--tgo-accent, #00B4D8);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .tgop-carousel-card:hover .tgop-carousel-cta { background: var(--tgo-brand, #1B2B5B); }
+    .tgop-carousel-nav {
+      position: absolute;
+      top: 100px;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--tgo-border, #E2E8F0);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      cursor: pointer;
+      color: var(--tgo-text, #0F172A);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.15s;
+      z-index: 2;
+    }
+    .tgop-carousel-prev { left: 12px; }
+    .tgop-carousel-next { right: 12px; }
+    .tgop-carousel-nav:hover { background: white; transform: translateY(-50%) scale(1.06); }
+    .tgop-carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px;
+    }
+
+    /* ───── SPLIT MODE — two-column hero + details ───── */
+    .tgop-content-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 460px;
+      max-height: 600px;
+      position: relative;
+    }
+    .tgop-split-left {
+      position: relative;
+      overflow: hidden;
+    }
+    .tgop-split-img {
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--tgo-card-alt, #F1F5F9);
+      position: relative;
+    }
+    .tgop-split-img-placeholder {
+      background-image: linear-gradient(135deg, rgba(0, 180, 216, 0.15), rgba(27, 43, 91, 0.15));
+    }
+    .tgop-split-imgfade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 60%, rgba(0,0,0,0.25) 100%);
+    }
+    .tgop-split-discount {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: #10B981;
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 999px;
+      letter-spacing: -0.01em;
+      z-index: 2;
+    }
+    .tgop-split-right {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .tgop-split-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--tgo-card-alt, #F1F5F9);
+      border-radius: 999px;
+      align-self: flex-start;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--tgo-text, #0F172A);
+      margin-bottom: 16px;
+    }
+    .tgop-split-kicker {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tgo-muted, #94A3B8);
+      margin-bottom: 6px;
+    }
+    .tgop-split-name {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--tgo-text, #0F172A);
+      margin-bottom: 6px;
+    }
+    .tgop-split-flight {
+      font-size: 13px;
+      color: var(--tgo-sub, #475569);
+      margin-bottom: 16px;
+    }
+    .tgop-split-price {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .tgop-split-was {
+      font-size: 14px;
+      color: var(--tgo-muted, #94A3B8);
+      text-decoration: line-through;
+    }
+    .tgop-split-now {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-split-sub {
+      font-size: 11px;
+      color: var(--tgo-muted, #94A3B8);
+    }
+    .tgop-split-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--tgo-accent, #00B4D8);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      align-self: flex-start;
+      margin-bottom: 24px;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .tgop-split-cta:hover { background: var(--tgo-brand, #1B2B5B); transform: translateY(-1px); }
+    .tgop-split-alts-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--tgo-muted, #94A3B8);
+      margin-bottom: 10px;
+      padding-top: 16px;
+      border-top: 1px solid var(--tgo-border, #E2E8F0);
+    }
+    .tgop-split-alts {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .tgop-split-alt {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      color: inherit;
+      font-family: inherit;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .tgop-split-alt:hover {
+      background: var(--tgo-card-alt, #F8FAFC);
+      border-color: var(--tgo-border, #E2E8F0);
+    }
+    .tgop-split-alt-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .tgop-split-alt-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--tgo-text, #0F172A);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgop-split-alt-kicker {
+      font-size: 10px;
+      color: var(--tgo-muted, #94A3B8);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgop-split-alt-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--tgo-text, #0F172A);
+      flex-shrink: 0;
+    }
+
+    /* ───── COUNTDOWN MODE ───── */
+    .tgop-content-countdown {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 16px;
+    }
+    .tgop-countdown-stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--tgo-card-alt, #F1F5F9);
+      border-radius: 999px;
+      align-self: flex-start;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-countdown-timer-wrap {
+      text-align: center;
+      padding: 16px 8px;
+      background: linear-gradient(135deg, rgba(0, 180, 216, 0.08), rgba(27, 43, 91, 0.08));
+      border-radius: 12px;
+    }
+    .tgop-countdown-caption {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tgo-sub, #475569);
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+    .tgop-countdown-timer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .tgop-countdown-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 56px;
+      padding: 8px 6px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .tgop-countdown-num {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--tgo-text, #0F172A);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .tgop-countdown-lbl {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--tgo-muted, #94A3B8);
+      margin-top: 4px;
+    }
+    .tgop-countdown-sep {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--tgo-muted, #94A3B8);
+      margin: 0 -2px;
+      align-self: flex-start;
+      padding-top: 6px;
+    }
+    .tgop-countdown-card {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--tgo-border, #E2E8F0);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .tgop-countdown-card:hover {
+      border-color: var(--tgo-accent, #00B4D8);
+      box-shadow: 0 8px 18px -10px rgba(0,0,0,0.15);
+    }
+    .tgop-countdown-img {
+      width: 100%;
+      height: 140px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--tgo-card-alt, #F1F5F9);
+      position: relative;
+    }
+    .tgop-countdown-discount {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #DC2626;
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 5px 11px;
+      border-radius: 999px;
+      letter-spacing: -0.01em;
+    }
+    .tgop-countdown-card-body { padding: 14px 16px 16px; }
+    .tgop-countdown-kicker {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tgo-muted, #94A3B8);
+      margin-bottom: 4px;
+    }
+    .tgop-countdown-name {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--tgo-text, #0F172A);
+      margin-bottom: 4px;
+    }
+    .tgop-countdown-flight { font-size: 11px; color: var(--tgo-sub, #475569); margin-bottom: 12px; }
+    .tgop-countdown-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .tgop-countdown-price { display: flex; flex-direction: column; line-height: 1.1; }
+    .tgop-countdown-was {
+      font-size: 11px;
+      color: var(--tgo-muted, #94A3B8);
+      text-decoration: line-through;
+      margin-bottom: 2px;
+    }
+    .tgop-countdown-now {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-countdown-sub { font-size: 10px; color: var(--tgo-muted, #94A3B8); }
+    .tgop-countdown-cta {
+      background: #DC2626;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 9px 14px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      letter-spacing: 0.01em;
+    }
+    .tgop-countdown-card:hover .tgop-countdown-cta { background: #B91C1C; }
+    .tgop-rot-countdown {
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;
+      justify-content: center;
+      padding-top: 4px;
     }
 
     /* ───── MINI MODE (top-bar / bottom-bar) ───── */
@@ -4351,7 +4849,7 @@
         // Renders the offers inside a popup chassis instead of inline.
         // All popup-specific keys are prefixed 'popup' to avoid collision.
         popupLayout: ['centered','slide-in','top-bar','bottom-bar','fullscreen','side-drawer','floating-card','inline'].includes(c.popupLayout) ? c.popupLayout : 'slide-in',
-        popupPosition: ['top-left','top-right','bottom-left','bottom-right'].includes(c.popupPosition) ? c.popupPosition : 'bottom-right',
+        popupPosition: ['top-left','top-right','bottom-left','bottom-right','top-center','bottom-center','left-center','right-center'].includes(c.popupPosition) ? c.popupPosition : 'bottom-right',
         popupSideDrawerSide: c.popupSideDrawerSide === 'left' ? 'left' : 'right',
         popupTrigger: ['load','time','scroll','exit-intent','click','inactivity','pageviews'].includes(c.popupTrigger) ? c.popupTrigger : 'load',
         popupTriggerDelay: typeof c.popupTriggerDelay === 'number' ? c.popupTriggerDelay : 5000, // ms
@@ -4377,7 +4875,14 @@
         popupFooterCtaText: typeof c.popupFooterCtaText === 'string' ? c.popupFooterCtaText : '',
         popupFooterCtaUrl: typeof c.popupFooterCtaUrl === 'string' ? c.popupFooterCtaUrl : '',
         // Render mode inside the popup — auto picks based on layout, override sets specific
-        popupRenderMode: ['auto','compact','single','mini'].includes(c.popupRenderMode) ? c.popupRenderMode : 'auto',
+        popupRenderMode: ['auto','compact','single','mini','carousel','split','countdown'].includes(c.popupRenderMode) ? c.popupRenderMode : 'auto',
+        // ISO date string (YYYY-MM-DDTHH:MM:SSZ) — used by countdown render mode
+        // to display a live countdown to that date/time. Past dates render as
+        // "Ended" and the popup falls back to the single render look.
+        popupCountdownEnd: typeof c.popupCountdownEnd === 'string' ? c.popupCountdownEnd : '',
+        // Optional countdown caption (displayed above the timer digits).
+        // Falls back to "Offers end in" when blank.
+        popupCountdownCaption: typeof c.popupCountdownCaption === 'string' ? c.popupCountdownCaption : '',
         popupRotateInterval: typeof c.popupRotateInterval === 'number' ? c.popupRotateInterval : 8000, // ms; 0 = no rotation
         // Cap how many offers the popup actually renders, separate from the
         // main maxOffers (which controls the API fetch). The popup is small
@@ -6282,7 +6787,16 @@
     // Pick the right render mode for the current popup layout, with override.
     _popupPickRenderMode() {
       const override = this.cfg.popupRenderMode;
-      if (override === 'compact' || override === 'single' || override === 'mini') return override;
+      const allOverrides = ['compact','single','mini','carousel','split','countdown'];
+      if (allOverrides.includes(override)) {
+        // Split only makes sense in centered/fullscreen — fall back to single
+        // for narrower layouts since two columns don't fit in a 420px slide-in
+        if (override === 'split') {
+          const layout = this.cfg.popupLayout || 'slide-in';
+          if (!['centered','fullscreen'].includes(layout)) return 'single';
+        }
+        return override;
+      }
       const layout = this.cfg.popupLayout || 'slide-in';
       if (layout === 'top-bar' || layout === 'bottom-bar') return 'mini';
       if (layout === 'floating-card') return 'single';
@@ -6698,6 +7212,290 @@
       return html;
     }
 
+    /* ════════════════════════════════════════════════════════════════
+       CAROUSEL mode — horizontal swipeable cards with dots indicator.
+       One card visible at a time (sometimes with a peek of the next).
+       Dots show count and current position. Click dots to navigate.
+       Auto-rotates if popupRotateInterval > 0.
+       ════════════════════════════════════════════════════════════════ */
+    _popupRenderCarousel(offers) {
+      const cfg = this.cfg;
+      const idx = (this._popupOffersIndex || 0) % offers.length;
+
+      let html = '<div class="tgop-content tgop-content-carousel">';
+      // Header bar — same pattern as compact
+      html += '<div class="tgop-bar">';
+      html += this._popupHeader();
+      html += this._popupCloseBtn();
+      html += '</div>';
+
+      // Track containing all cards, translated horizontally to show current
+      html += '<div class="tgop-carousel-window">';
+      html += '<div class="tgop-carousel-track" style="transform: translateX(-' + (idx * 100) + '%)">';
+      for (const o of offers) {
+        html += this._popupCarouselCard(o);
+      }
+      html += '</div>';
+
+      // Prev/next arrows
+      if (offers.length > 1) {
+        html += '<button type="button" class="tgop-carousel-nav tgop-carousel-prev" data-tgop-carousel-prev aria-label="Previous offer">';
+        html += '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+        html += '</button>';
+        html += '<button type="button" class="tgop-carousel-nav tgop-carousel-next" data-tgop-carousel-next aria-label="Next offer">';
+        html += '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+        html += '</button>';
+      }
+      html += '</div>';
+
+      // Dots indicator
+      if (offers.length > 1) {
+        html += '<div class="tgop-carousel-dots">';
+        for (let i = 0; i < offers.length; i++) {
+          const active = (i === idx) ? ' tgop-rot-active' : '';
+          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="Go to offer ' + (i + 1) + '"></button>';
+        }
+        html += '</div>';
+      }
+
+      // Footer — only when both text and CTA present
+      if (cfg.popupFooterText && cfg.popupFooterCtaText && cfg.popupFooterCtaUrl) {
+        html += '<div class="tgop-foot">';
+        html += '<span class="tgop-foot-text">' + esc(cfg.popupFooterText) + '</span>';
+        html += '<a class="tgop-foot-cta" href="' + esc(safeUrl(cfg.popupFooterCtaUrl)) + '" target="_blank" rel="noopener" data-tgop-conv>'
+          + esc(cfg.popupFooterCtaText) + '</a>';
+        html += '</div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    _popupCarouselCard(o) {
+      const headline = this._popupHeadlineText(o);
+      if (!headline) return '';
+      const kicker = this._popupKickerText(o);
+      const flightStrip = this._popupFlightStripText(o);
+      const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
+        || (o.flight && o.flight.image && o.flight.image.url) || '');
+      const display = this._popupPriceContext(o);
+      const url = safeUrl(o.url || '#');
+      const wasPrice = this._popupWasPrice(o);
+      const discount = this._popupDiscountPercent(o);
+
+      let html = '<a class="tgop-carousel-card" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
+      if (img) {
+        html += '<div class="tgop-carousel-img" ' + cssBgUrl(img) + '>';
+        if (discount && discount > 0) {
+          html += '<span class="tgop-carousel-discount">-' + discount + '%</span>';
+        }
+        html += '</div>';
+      } else {
+        html += '<div class="tgop-carousel-img tgop-carousel-img-placeholder"></div>';
+      }
+      html += '<div class="tgop-carousel-body">';
+      if (kicker) html += '<div class="tgop-carousel-kicker">' + esc(kicker) + '</div>';
+      html += '<div class="tgop-carousel-name">' + esc(headline) + '</div>';
+      if (flightStrip) html += '<div class="tgop-carousel-flight">' + esc(flightStrip) + '</div>';
+      html += '<div class="tgop-carousel-foot">';
+      html += '<div class="tgop-carousel-price">';
+      if (wasPrice) html += '<span class="tgop-carousel-was">' + esc(wasPrice) + '</span>';
+      if (display.primary) {
+        html += '<span class="tgop-carousel-now">' + esc(display.primary) + '</span>';
+        if (display.sub) html += '<span class="tgop-carousel-sub">' + esc(display.sub) + '</span>';
+      }
+      html += '</div>';
+      html += '<span class="tgop-carousel-cta">View deal →</span>';
+      html += '</div>';
+      html += '</div>';
+      html += '</a>';
+      return html;
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       SPLIT mode — two-column layout: left = hero image of current
+       featured offer, right = offer details + small list of other offers.
+       Best for centered / fullscreen layouts. Falls back to single for
+       narrower layouts via _popupPickRenderMode.
+       ════════════════════════════════════════════════════════════════ */
+    _popupRenderSplit(offers) {
+      const cfg = this.cfg;
+      const idx = (this._popupOffersIndex || 0) % offers.length;
+      const focused = offers[idx];
+      const headline = this._popupHeadlineText(focused);
+      const kicker = this._popupKickerText(focused);
+      const flightStrip = this._popupFlightStripText(focused);
+      const img = safeImgUrl((focused.accommodation && focused.accommodation.image && focused.accommodation.image.url)
+        || (focused.flight && focused.flight.image && focused.flight.image.url) || '');
+      const display = this._popupPriceContext(focused);
+      const url = safeUrl(focused.url || '#');
+      const wasPrice = this._popupWasPrice(focused);
+      const discount = this._popupDiscountPercent(focused);
+
+      let html = '<div class="tgop-content tgop-content-split">';
+      // Close button overlaid in top-right
+      html += this._popupCloseBtn();
+
+      // LEFT — image hero
+      html += '<div class="tgop-split-left">';
+      if (img) {
+        html += '<div class="tgop-split-img" ' + cssBgUrl(img) + '>';
+        if (discount && discount > 0) {
+          html += '<span class="tgop-split-discount">-' + discount + '% off</span>';
+        }
+        html += '<div class="tgop-split-imgfade"></div>';
+        html += '</div>';
+      } else {
+        html += '<div class="tgop-split-img tgop-split-img-placeholder"></div>';
+      }
+      html += '</div>';
+
+      // RIGHT — details + alternative offers
+      html += '<div class="tgop-split-right">';
+      // Header
+      html += '<div class="tgop-split-header">';
+      if (cfg.popupShowPulse !== false) html += '<span class="tgop-pulse"></span>';
+      html += '<span>' + esc(cfg.popupHeading || 'Live deals') + '</span>';
+      html += '</div>';
+      // Featured offer body
+      if (kicker) html += '<div class="tgop-split-kicker">' + esc(kicker) + '</div>';
+      html += '<div class="tgop-split-name">' + esc(headline) + '</div>';
+      if (flightStrip) html += '<div class="tgop-split-flight">' + esc(flightStrip) + '</div>';
+      html += '<div class="tgop-split-price">';
+      if (wasPrice) html += '<span class="tgop-split-was">' + esc(wasPrice) + '</span>';
+      html += '<span class="tgop-split-now">' + esc(display.primary || '') + '</span>';
+      if (display.sub) html += '<span class="tgop-split-sub">' + esc(display.sub) + '</span>';
+      html += '</div>';
+      html += '<a class="tgop-split-cta" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>View this deal →</a>';
+
+      // Alternative offers list (small rows)
+      if (offers.length > 1) {
+        html += '<div class="tgop-split-alts-label">More offers</div>';
+        html += '<div class="tgop-split-alts">';
+        for (let i = 0; i < offers.length; i++) {
+          if (i === idx) continue;
+          const other = offers[i];
+          const otherHead = this._popupHeadlineText(other);
+          if (!otherHead) continue;
+          const otherKick = this._popupKickerText(other);
+          const otherDisplay = this._popupPriceContext(other);
+          html += '<button type="button" class="tgop-split-alt" data-tgop-rot-dot="' + i + '">';
+          html += '<div class="tgop-split-alt-text">';
+          html += '<div class="tgop-split-alt-name">' + esc(otherHead) + '</div>';
+          if (otherKick) html += '<div class="tgop-split-alt-kicker">' + esc(otherKick) + '</div>';
+          html += '</div>';
+          if (otherDisplay.primary) {
+            html += '<span class="tgop-split-alt-price">' + esc(otherDisplay.primary) + '</span>';
+          }
+          html += '</button>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+      html += '</div>';
+      return html;
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       COUNTDOWN mode — featured offer with prominent countdown timer.
+       Drives urgency for time-bound campaigns ("flash sale ends in").
+       Timer counts to popupCountdownEnd ISO string. When the date
+       passes, falls back to single render with no timer.
+       ════════════════════════════════════════════════════════════════ */
+    _popupRenderCountdown(offers) {
+      const cfg = this.cfg;
+      const endIso = cfg.popupCountdownEnd || '';
+      const endTs = endIso ? Date.parse(endIso) : 0;
+      const now = Date.now();
+      const remainingMs = endTs - now;
+
+      // No valid end date or already past — fall back to single render
+      if (!endTs || remainingMs <= 0) {
+        return this._popupRenderSingle(offers);
+      }
+
+      const idx = (this._popupOffersIndex || 0) % offers.length;
+      const focused = offers[idx];
+      const headline = this._popupHeadlineText(focused);
+      const kicker = this._popupKickerText(focused);
+      const flightStrip = this._popupFlightStripText(focused);
+      const img = safeImgUrl((focused.accommodation && focused.accommodation.image && focused.accommodation.image.url)
+        || (focused.flight && focused.flight.image && focused.flight.image.url) || '');
+      const display = this._popupPriceContext(focused);
+      const url = safeUrl(focused.url || '#');
+      const wasPrice = this._popupWasPrice(focused);
+      const discount = this._popupDiscountPercent(focused);
+
+      // Compute initial timer parts (will be ticked by _popupStartCountdown)
+      const days = Math.floor(remainingMs / 86400000);
+      const hours = Math.floor((remainingMs % 86400000) / 3600000);
+      const mins = Math.floor((remainingMs % 3600000) / 60000);
+      const secs = Math.floor((remainingMs % 60000) / 1000);
+
+      let html = '<div class="tgop-content tgop-content-countdown">';
+      html += this._popupCloseBtn();
+
+      // Stamp at top
+      html += '<div class="tgop-countdown-stamp">';
+      if (cfg.popupShowPulse !== false) html += '<span class="tgop-pulse"></span>';
+      html += '<span>' + esc(cfg.popupHeading || 'Live deals') + '</span>';
+      html += '</div>';
+
+      // Countdown timer
+      const caption = cfg.popupCountdownCaption || 'Offers end in';
+      html += '<div class="tgop-countdown-timer-wrap">';
+      html += '<div class="tgop-countdown-caption">' + esc(caption) + '</div>';
+      html += '<div class="tgop-countdown-timer" data-tgop-countdown-end="' + esc(endIso) + '">';
+      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-d>' + days + '</span><span class="tgop-countdown-lbl">days</span></div>';
+      html += '<div class="tgop-countdown-sep">:</div>';
+      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-h>' + String(hours).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">hrs</span></div>';
+      html += '<div class="tgop-countdown-sep">:</div>';
+      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-m>' + String(mins).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">min</span></div>';
+      html += '<div class="tgop-countdown-sep">:</div>';
+      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-s>' + String(secs).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">sec</span></div>';
+      html += '</div>';
+      html += '</div>';
+
+      // Featured offer hero
+      html += '<a class="tgop-countdown-card" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
+      if (img) {
+        html += '<div class="tgop-countdown-img" ' + cssBgUrl(img) + '>';
+        if (discount && discount > 0) {
+          html += '<span class="tgop-countdown-discount">-' + discount + '%</span>';
+        }
+        html += '</div>';
+      }
+      html += '<div class="tgop-countdown-card-body">';
+      if (kicker) html += '<div class="tgop-countdown-kicker">' + esc(kicker) + '</div>';
+      html += '<div class="tgop-countdown-name">' + esc(headline) + '</div>';
+      if (flightStrip) html += '<div class="tgop-countdown-flight">' + esc(flightStrip) + '</div>';
+      html += '<div class="tgop-countdown-foot">';
+      html += '<div class="tgop-countdown-price">';
+      if (wasPrice) html += '<span class="tgop-countdown-was">' + esc(wasPrice) + '</span>';
+      if (display.primary) {
+        html += '<span class="tgop-countdown-now">' + esc(display.primary) + '</span>';
+        if (display.sub) html += '<span class="tgop-countdown-sub">' + esc(display.sub) + '</span>';
+      }
+      html += '</div>';
+      html += '<span class="tgop-countdown-cta">Book now →</span>';
+      html += '</div>';
+      html += '</div>';
+      html += '</a>';
+
+      // Rotation dots if multiple offers
+      if (offers.length > 1) {
+        html += '<div class="tgop-rot tgop-rot-countdown">';
+        for (let i = 0; i < offers.length; i++) {
+          const active = (i === idx) ? ' tgop-rot-active' : '';
+          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="Show offer ' + (i + 1) + '"></button>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    /* End of new render modes (carousel, split, countdown) */
+
     // ───── MINI mode — banner pills (top-bar / bottom-bar) ─────
     _popupRenderMini(offers) {
       const cfg = this.cfg;
@@ -6790,6 +7588,9 @@
       let content;
       if (mode === 'mini') content = this._popupRenderMini(offers);
       else if (mode === 'single') content = this._popupRenderSingle(offers);
+      else if (mode === 'carousel') content = this._popupRenderCarousel(offers);
+      else if (mode === 'split') content = this._popupRenderSplit(offers);
+      else if (mode === 'countdown') content = this._popupRenderCountdown(offers);
       else content = this._popupRenderCompact(offers);
 
       let html = '';
@@ -6863,6 +7664,10 @@
         clearInterval(this._popupRotationTimer);
         this._popupRotationTimer = null;
       }
+      if (this._popupCountdownTicker) {
+        clearInterval(this._popupCountdownTicker);
+        this._popupCountdownTicker = null;
+      }
       if (this._popupEscHandler) {
         document.removeEventListener('keydown', this._popupEscHandler);
         this._popupEscHandler = null;
@@ -6906,6 +7711,68 @@
           self._popupRerender();
         });
       });
+
+      // Carousel prev/next arrows
+      const prevBtn = root.querySelector('[data-tgop-carousel-prev]');
+      if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const total = (self._popupOffers || []).length || 1;
+          self._popupOffersIndex = ((self._popupOffersIndex || 0) - 1 + total) % total;
+          if (self._popupRotationTimer) {
+            clearInterval(self._popupRotationTimer);
+            self._popupRotationTimer = null;
+          }
+          self._popupRerender();
+        });
+      }
+      const nextBtn = root.querySelector('[data-tgop-carousel-next]');
+      if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const total = (self._popupOffers || []).length || 1;
+          self._popupOffersIndex = ((self._popupOffersIndex || 0) + 1) % total;
+          if (self._popupRotationTimer) {
+            clearInterval(self._popupRotationTimer);
+            self._popupRotationTimer = null;
+          }
+          self._popupRerender();
+        });
+      }
+
+      // Countdown timer ticker — updates digits every second.
+      // Stops automatically when the end date passes (renders flip to single).
+      const cdEl = root.querySelector('[data-tgop-countdown-end]');
+      if (cdEl) {
+        if (this._popupCountdownTicker) {
+          clearInterval(this._popupCountdownTicker);
+        }
+        const endIso = cdEl.getAttribute('data-tgop-countdown-end');
+        const endTs = endIso ? Date.parse(endIso) : 0;
+        const tickFn = () => {
+          const remaining = endTs - Date.now();
+          if (remaining <= 0) {
+            // Time's up — re-render so the popup falls back to single mode
+            clearInterval(self._popupCountdownTicker);
+            self._popupCountdownTicker = null;
+            self._popupRerender();
+            return;
+          }
+          const days = Math.floor(remaining / 86400000);
+          const hours = Math.floor((remaining % 86400000) / 3600000);
+          const mins = Math.floor((remaining % 3600000) / 60000);
+          const secs = Math.floor((remaining % 60000) / 1000);
+          const dEl = cdEl.querySelector('[data-tgop-cd-d]');
+          const hEl = cdEl.querySelector('[data-tgop-cd-h]');
+          const mEl = cdEl.querySelector('[data-tgop-cd-m]');
+          const sEl = cdEl.querySelector('[data-tgop-cd-s]');
+          if (dEl) dEl.textContent = String(days);
+          if (hEl) hEl.textContent = String(hours).padStart(2,'0');
+          if (mEl) mEl.textContent = String(mins).padStart(2,'0');
+          if (sEl) sEl.textContent = String(secs).padStart(2,'0');
+        };
+        this._popupCountdownTicker = setInterval(tickFn, 1000);
+      }
     }
 
     _popupRerender() {
@@ -6915,6 +7782,9 @@
       let content;
       if (mode === 'mini') content = this._popupRenderMini(this._popupOffers);
       else if (mode === 'single') content = this._popupRenderSingle(this._popupOffers);
+      else if (mode === 'carousel') content = this._popupRenderCarousel(this._popupOffers);
+      else if (mode === 'split') content = this._popupRenderSplit(this._popupOffers);
+      else if (mode === 'countdown') content = this._popupRenderCountdown(this._popupOffers);
       else content = this._popupRenderCompact(this._popupOffers);
       card.innerHTML = content;
       this._popupBind();
@@ -6925,7 +7795,8 @@
       const interval = Math.max(0, cfg.popupRotateInterval || 0);
       if (!interval) return;
       const mode = this._popupPickRenderMode();
-      if (mode !== 'single') return;
+      // Rotation only meaningful for modes that show one focused offer at a time
+      if (!['single','carousel','split','countdown'].includes(mode)) return;
       if (!this._popupOffers || this._popupOffers.length < 2) return;
       try {
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
