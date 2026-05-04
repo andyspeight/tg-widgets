@@ -1,575 +1,2391 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Travel Offers · Travelgenix Widget Suite</title>
-<style>
-  :root {
-    --tg-bg: #F7F9FB;
-    --tg-surface: #FFFFFF;
-    --tg-border: #E2E8F0;
-    --tg-text: #0F172A;
-    --tg-sub: #475569;
-    --tg-muted: #94A3B8;
-    --tg-brand: #1B2B5B;
-    --tg-accent: #00B4D8;
-    --tg-accent-hover: #0096B7;
-    --tg-accent-soft: #E0F4FA;
-  }
-  [data-theme="dark"] {
-    --tg-bg: #0B1220;
-    --tg-surface: #111B2E;
-    --tg-border: #1E293B;
-    --tg-text: #F1F5F9;
-    --tg-sub: #94A3B8;
-    --tg-muted: #64748B;
-    --tg-brand: #4A6FE0;
-    --tg-accent: #38BDF8;
-    --tg-accent-soft: rgba(56, 189, 248, 0.12);
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--tg-bg);
-    color: var(--tg-text);
-    line-height: 1.5;
-    transition: background 0.2s, color 0.2s;
-  }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Travel Offers Widget Editor · Travelgenix</title>
 
-  /* Topbar */
-  .topbar {
-    background: var(--tg-surface);
-    border-bottom: 1px solid var(--tg-border);
-    padding: 12px 24px;
-    display: flex; align-items: center; gap: 16px;
-  }
-  .topbar-inner {
-    max-width: 1280px;
-    margin: 0 auto;
-    width: 100%;
-    display: flex; align-items: center; gap: 16px;
-  }
-  .brand {
-    display: flex; align-items: center; gap: 10px;
-    text-decoration: none; color: var(--tg-text); font-weight: 700;
-  }
-  .brand-mark {
-    width: 28px; height: 28px;
-    background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent));
-    border-radius: 8px;
-  }
-  .pill {
-    padding: 4px 10px; background: var(--tg-accent-soft); color: var(--tg-accent);
-    border-radius: 999px; font-size: 12px; font-weight: 600;
-  }
-  .topbar-spacer { flex: 1; }
-  .topbar-link {
-    color: var(--tg-sub); text-decoration: none; font-size: 14px;
-    padding: 6px 12px; border-radius: 6px;
-  }
-  .topbar-link:hover { background: var(--tg-bg); color: var(--tg-text); }
-  .theme-toggle {
-    background: none; border: 1px solid var(--tg-border); color: var(--tg-text);
-    width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-  .theme-toggle:hover { background: var(--tg-bg); }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/editor-shell.css">
 
-  .wrap {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 32px 24px;
-  }
-  h1 {
-    font-size: 32px; font-weight: 800; margin: 0 0 8px;
-    letter-spacing: -0.5px;
-  }
-  .lede {
-    color: var(--tg-sub); font-size: 16px; max-width: 760px;
-    margin: 0 0 24px; line-height: 1.6;
-  }
+  <style>
+    :root {
+      --bg: #F8FAFC; --panel: #FFFFFF; --panel-2: #F8FAFC;
+      --ink: #0F172A; --sub: #475569; --muted: #94A3B8;
+      --border: #E2E8F0; --border-strong: #CBD5E1; --hover: #F1F5F9;
+      --brand: #1B2B5B; --brand-soft: rgba(27,43,91,.10);
+      --accent: #00B4D8; --accent-soft: rgba(0,180,216,.12);
+      --success: #10B981; --danger: #EF4444; --warning: #F59E0B;
+      --radius-sm: 6px; --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
+      --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
+      --shadow-sm: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+      --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+      --shadow-lg: 0 10px 24px rgba(15,23,42,.12);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--panel-2); color: var(--ink); font-size: 14px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
 
-  /* Demo controls — primary row (always visible) */
-  .controls {
-    background: var(--tg-surface);
-    border: 1px solid var(--tg-border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    align-items: end;
-  }
-  /* Subordinate row — template-specific options */
-  .controls-sub {
-    background: var(--tg-surface);
-    border: 1px solid var(--tg-border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 24px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    align-items: end;
-  }
-  .controls-sub[hidden] { display: none; }
-  .controls-sub-label {
-    grid-column: 1 / -1;
-    font-size: 11px;
-    color: var(--tg-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    font-weight: 600;
-    margin-bottom: -4px;
-  }
-  .field { display: flex; flex-direction: column; gap: 4px; }
-  .field[hidden] { display: none; }
-  label {
-    font-size: 11px; color: var(--tg-sub); font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  select, input {
-    padding: 8px 10px;
-    border: 1px solid var(--tg-border);
-    border-radius: 8px;
-    font-size: 14px;
-    background: var(--tg-surface);
-    color: var(--tg-text);
-    font-family: inherit;
-  }
-  select:focus, input:focus {
-    outline: 2px solid var(--tg-accent);
-    outline-offset: 1px;
-    border-color: var(--tg-accent);
-  }
-  /* Toggle switch (mirrors the editor's tap target) */
-  .toggle {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 38px; height: 22px;
-    background: var(--tg-border);
-    border-radius: 999px;
-    position: relative;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    flex-shrink: 0;
-  }
-  .toggle::after {
-    content: '';
-    position: absolute;
-    top: 2px; left: 2px;
-    width: 18px; height: 18px;
-    background: white;
-    border-radius: 50%;
-    transition: transform 0.15s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
-  }
-  .toggle:checked { background: var(--tg-accent); }
-  .toggle:checked::after { transform: translateX(16px); }
-  .toggle-label-row {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 8px;
-    padding: 6px 0;
-  }
-  .toggle-label-row label { margin: 0; }
+    .sidebar-body { flex: 1; overflow-y: auto; padding: 16px; }
 
-  /* Stage */
-  .stage-label {
-    font-size: 11px;
-    color: var(--tg-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-  .stage {
-    background: var(--tg-bg);
-    border: 1px solid var(--tg-border);
-    border-radius: 16px;
-    padding: 32px;
-    margin-bottom: 32px;
-    transition: background 0.2s;
-  }
-  [data-theme="dark"] .stage {
-    background: #050B17;
-  }
+    .section {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden;
+    }
+    .section-head {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; background: var(--panel); border: 0;
+      font-size: 13px; font-weight: 600; color: var(--ink);
+      cursor: pointer; text-align: left;
+    }
+    .section-head:hover { background: var(--hover); }
+    .section-head-chev { transition: transform 0.15s ease; color: var(--muted); }
+    .section[data-open="false"] .section-head-chev { transform: rotate(-90deg); }
+    .section[data-open="false"] .section-body { display: none; }
+    .section-body { padding: 4px 14px 14px; border-top: 1px solid var(--border); }
 
-  /* Footer */
-  .foot {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 20px 24px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--tg-muted);
-  }
-  .foot a { color: inherit; }
-</style>
+    .field { margin-top: 12px; }
+    .field:first-child { margin-top: 0; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 6px; }
+    .field-help { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .field-row:first-child { margin-top: 0; }
+    .field-row .field { margin-top: 0; }
+
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+      border-radius: var(--radius); font-size: 13px;
+      background: var(--panel); color: var(--ink); font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    textarea { resize: vertical; min-height: 64px; }
+
+    .colour-row { display: flex; gap: 8px; align-items: center; }
+    .colour-swatch {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      cursor: pointer; overflow: hidden; position: relative; flex-shrink: 0;
+    }
+    .colour-swatch input[type="color"] {
+      position: absolute; inset: -4px;
+      width: calc(100% + 8px); height: calc(100% + 8px);
+      border: 0; cursor: pointer; padding: 0;
+    }
+    .colour-hex {
+      flex: 1;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      text-transform: uppercase;
+    }
+
+    .slider-row { display: flex; gap: 12px; align-items: center; }
+    .slider {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 4px; background: var(--border); border-radius: 2px; outline: none;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 16px; height: 16px; background: var(--accent);
+      border-radius: 50%; cursor: pointer; box-shadow: var(--shadow-sm);
+    }
+    .slider::-moz-range-thumb {
+      width: 16px; height: 16px; background: var(--accent);
+      border-radius: 50%; cursor: pointer; border: 0;
+    }
+    .slider-value {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px; color: var(--sub); min-width: 40px; text-align: right;
+    }
+
+    .segmented {
+      display: flex; background: var(--panel-2);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 2px; gap: 2px;
+    }
+    .segmented button {
+      flex: 1; background: none; border: 0; padding: 6px 10px;
+      font-size: 12px; font-weight: 500; color: var(--sub);
+      border-radius: 6px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .segmented button:hover { color: var(--ink); }
+    .segmented button[aria-pressed="true"] {
+      background: var(--panel); color: var(--ink); box-shadow: var(--shadow-xs);
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
+       Template grid — visual card grid replacing the segmented control
+       for the top-level template picker. Scales to N templates without
+       overcrowding because rows wrap naturally. Each card has a tiny
+       SVG preview of its layout so users pick by shape, not just label.
+       ───────────────────────────────────────────────────────────────── */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .template-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      text-align: left;
+      font-family: inherit;
+    }
+    .template-card:hover {
+      border-color: var(--accent);
+      background: var(--panel);
+    }
+    .template-card[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--panel);
+      box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.15);
+    }
+    .template-card[aria-pressed="true"]::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 7l2.5 2.5L10.5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+      background-size: contain;
+    }
+    .template-card .preview {
+      aspect-ratio: 16 / 9;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .template-card[aria-pressed="true"] .preview {
+      background: var(--panel-2);
+    }
+    .template-card .preview svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Preview shape colours — use design tokens so they theme correctly */
+    .template-card .preview .shape {
+      fill: var(--border);
+      transition: fill 0.15s;
+    }
+    .template-card .preview .shape-strong {
+      fill: var(--muted);
+      transition: fill 0.15s;
+    }
+    .template-card[aria-pressed="true"] .preview .shape-strong {
+      fill: var(--accent);
+    }
+    .template-card .preview .line {
+      stroke: var(--border);
+      stroke-width: 1;
+      fill: none;
+    }
+    .template-card .label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.005em;
+    }
+    .template-card .sublabel {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; gap: 12px;
+    }
+    .toggle-row + .toggle-row { border-top: 1px solid var(--border); }
+    .toggle-label { flex: 1; font-size: 13px; color: var(--ink); cursor: pointer; }
+    .toggle-help { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .toggle-group-heading {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 14px 0 4px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .toggle-group-heading:first-child {
+      border-top: 0;
+      margin-top: 0;
+      padding-top: 4px;
+    }
+    /* When a heading immediately follows a toggle-row, the toggle-row's bottom
+       border becomes redundant — the heading's top border takes over. */
+    .toggle-row:has(+ .toggle-group-heading) { border-bottom: 0; }
+
+    /* Dedupe breakdown panel — fed by tgo:dataLoaded event */
+    .breakdown-panel {
+      margin-top: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 11px;
+    }
+    .breakdown-panel.is-empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 14px 12px;
+    }
+    .breakdown-panel-title {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;
+    }
+    .breakdown-list { display: flex; flex-direction: column; gap: 2px; }
+    .breakdown-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px dashed var(--border);
+      font-size: 12px;
+    }
+    .breakdown-row:last-child { border-bottom: 0; }
+    .breakdown-row.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .breakdown-strategy { color: var(--ink); }
+    .breakdown-row.active .breakdown-strategy { color: var(--accent); }
+    .breakdown-count {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-variant-numeric: tabular-nums;
+      color: var(--sub); font-weight: 600;
+    }
+    .breakdown-row.active .breakdown-count { color: var(--accent); }
+    .breakdown-raw {
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+      display: flex; justify-content: space-between;
+    }
+    .breakdown-raw strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+    /* Viewport-aware preview */
+    .preview-stage {
+      transition: max-width 0.25s ease;
+      margin: 0 auto;
+    }
+    /* Desktop: cap at a generous but bounded width to prevent widgets in
+       carousel mode from stretching to fill arbitrarily wide canvas areas.
+       1280px matches the most common content max-width for live sites. */
+    .preview-stage[data-vp="desktop"] { max-width: 1280px; }
+    .preview-stage[data-vp="tablet"]  { max-width: 768px; }
+    .preview-stage[data-vp="mobile"]  { max-width: 380px; }
+    @media (prefers-reduced-motion: reduce) {
+      .preview-stage { transition: none; }
+    }
+    .switch {
+      width: 36px; height: 20px;
+      background: var(--border-strong); border-radius: 999px;
+      position: relative; cursor: pointer; transition: background 0.15s;
+      flex-shrink: 0; border: 0; padding: 0;
+    }
+    .switch::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px; width: 16px; height: 16px;
+      background: white; border-radius: 50%;
+      transition: left 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .switch[aria-pressed="true"] { background: var(--accent); }
+    .switch[aria-pressed="true"]::after { left: 18px; }
+
+    .chips {
+      display: flex; flex-wrap: wrap; gap: 4px; padding: 6px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      min-height: 38px; background: var(--panel);
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--accent-soft); color: var(--accent);
+      padding: 3px 8px; border-radius: 6px;
+      font-size: 12px; font-weight: 500;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .chip button {
+      background: none; border: 0; padding: 0; color: inherit;
+      opacity: 0.5; cursor: pointer; font-size: 14px; line-height: 1;
+    }
+    .chip button:hover { opacity: 1; }
+    .chips-input {
+      flex: 1; min-width: 80px; border: 0;
+      padding: 4px 6px; font-size: 12px; outline: none; background: none;
+    }
+
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);
+      z-index: 100; display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.15s;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: var(--panel); border-radius: var(--radius-xl);
+      max-width: 560px; width: calc(100% - 32px); max-height: 85vh;
+      overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title { font-size: 15px; font-weight: 600; }
+    .modal-close {
+      background: none; border: 0; padding: 4px;
+      color: var(--muted); cursor: pointer; border-radius: 6px;
+    }
+    .modal-close:hover { background: var(--hover); color: var(--ink); }
+    .modal-body { padding: 20px; overflow-y: auto; }
+
+    .embed-code {
+      background: #0F172A; color: #E2E8F0;
+      border-radius: var(--radius); padding: 12px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-all;
+      position: relative;
+    }
+    .embed-copy {
+      position: absolute; top: 8px; right: 8px;
+      padding: 4px 10px; background: rgba(255,255,255,0.1);
+      border: 0; color: white; border-radius: 6px;
+      font-size: 11px; cursor: pointer; font-family: inherit;
+    }
+    .embed-copy:hover { background: rgba(255,255,255,0.2); }
+
+    .preview-stage { padding: 24px; min-height: 100%; }
+
+    .templates-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .template-card {
+      padding: 14px; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); cursor: pointer;
+      background: var(--panel); transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .template-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+    .template-card-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+    .template-card-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+    .ai-suggest-grid { display: grid; gap: 8px; }
+    .ai-suggest {
+      padding: 12px; border: 1px solid var(--border); border-radius: var(--radius);
+      cursor: pointer; background: var(--panel);
+      transition: border-color 0.15s; font-size: 13px;
+    }
+    .ai-suggest:hover { border-color: var(--accent); background: var(--accent-soft); }
+  </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="/">
-      <span class="brand-mark"></span>
-      <span>Travelgenix</span>
-    </a>
-    <span class="pill">Travel Offers · Demo</span>
-    <div class="topbar-spacer"></div>
-    <a class="topbar-link" href="/editor-offers">Open editor →</a>
-    <button class="theme-toggle" id="themeBtn" title="Toggle theme">🌙</button>
+
+  <!-- Login overlay is now handled by the shell. -->
+
+  <div class="tgse-app" id="editor" hidden>
+
+    <aside class="tgse-sidebar">
+
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
+        </a>
+      </div>
+
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v10H3z"/><path d="M7 3v4M17 3v4"/><path d="M3 11h18"/></svg>
+        </span>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Travel Offers</div>
+          <div class="tgse-id-type" id="topbarSub">New widget</div>
+        </div>
+      </div>
+
+      <div class="tgse-actions">
+        <button class="tgse-btn" id="btn-templates" title="Templates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Templates
+          <span class="tgse-kbd">T</span>
+        </button>
+        <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+          AI builder
+          <span class="tgse-kbd">A</span>
+        </button>
+      </div>
+
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Widget name" maxlength="100">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="save-label">Save</span>
+        </button>
+      </div>
+
+      <nav class="tgse-tabs" role="tablist">
+        <button id="tabContent" data-tab="content" role="tab" aria-selected="true">Content</button>
+        <button id="tabDesign" data-tab="design" role="tab" aria-selected="false">Design</button>
+        <button id="tabSettings" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
+
+      <div class="sidebar-body">
+
+        <!-- ================ CONTENT TAB ================ -->
+        <div id="panelContent">
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Layout template
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Template</label>
+                <div class="template-grid" id="templateGrid" role="radiogroup" aria-label="Template">
+                  <!-- Cards: three rectangles in a row -->
+                  <button type="button" class="template-card" data-template="cards" aria-pressed="true" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <rect class="shape" x="4" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape" x="29" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="54" y="10" width="22" height="25" rx="2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Cards</div>
+                      <div class="sublabel">Grid, carousel or list</div>
+                    </div>
+                  </button>
+
+                  <!-- Magazine: hero banner on top, banner row, then 3-up with pull-quote in middle -->
+                  <button type="button" class="template-card" data-template="magazine" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Hero -->
+                        <rect class="shape-strong" x="4" y="3" width="72" height="14" rx="2"/>
+                        <!-- Banner row -->
+                        <rect class="shape" x="4" y="20" width="72" height="8" rx="2"/>
+                        <!-- 3-up with quote in middle -->
+                        <rect class="shape" x="4" y="31" width="22" height="11" rx="2"/>
+                        <rect class="shape-strong" x="29" y="31" width="22" height="11" rx="2" opacity="0.6"/>
+                        <rect class="shape" x="54" y="31" width="22" height="11" rx="2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Magazine</div>
+                      <div class="sublabel">Hero with editorial mosaic</div>
+                    </div>
+                  </button>
+
+                  <!-- Departure board: stacked rows with darker leftmost segment (time column) -->
+                  <button type="button" class="template-card" data-template="departure-board" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Header bar -->
+                        <rect class="shape" x="4" y="4" width="72" height="6" rx="1"/>
+                        <!-- Five rows: time column (strong) + body (subtle) -->
+                        <rect class="shape-strong" x="4" y="13" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="13" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="20" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="20" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="27" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="27" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="34" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="34" width="56" height="5" rx="1"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Departure board</div>
+                      <div class="sublabel">Live airport-style fares</div>
+                    </div>
+                  </button>
+
+                  <!-- Boarding pass: two pass shapes with perforation -->
+                  <button type="button" class="template-card" data-template="boarding-pass" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Left pass: main + stub -->
+                        <rect class="shape" x="4" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="27" y="10" width="9" height="25" rx="2"/>
+                        <line x1="26" y1="11" x2="26" y2="34" class="line" stroke-dasharray="1,1"/>
+                        <!-- Right pass: main + stub -->
+                        <rect class="shape" x="44" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="67" y="10" width="9" height="25" rx="2"/>
+                        <line x1="66" y1="11" x2="66" y2="34" class="line" stroke-dasharray="1,1"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Boarding pass</div>
+                      <div class="sublabel">Flights as paper passes</div>
+                    </div>
+                  </button>
+
+                  <!-- Ticker: horizontal row of pills suggesting marquee crawl -->
+                  <button type="button" class="template-card" data-template="ticker" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- "Live deals" label badge on the left, accent strong -->
+                        <rect class="shape-strong" x="2" y="17" width="16" height="11" rx="2"/>
+                        <!-- Row of pills crawling — first one half-cut suggests motion -->
+                        <rect class="shape" x="-2" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="22" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="38" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="54" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="70" y="19" width="14" height="7" rx="2"/>
+                        <!-- Subtle motion dots on the right edge to imply it keeps going -->
+                        <circle class="shape" cx="78" cy="22.5" r="0.6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Ticker</div>
+                      <div class="sublabel">Marquee crawl of offers</div>
+                    </div>
+                  </button>
+                </div>
+                <div class="field-help" style="margin-top: 8px;"><strong>Cards</strong> works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with an editorial mosaic below. <strong>Departure board</strong> and <strong>Boarding pass</strong> are flights only. <strong>Ticker</strong> is a compact horizontal crawl, ideal for site headers and footers.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="departure-board" hidden>
+            <button class="section-head" data-section>Departure airport
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row">
+                <span class="toggle-label">Auto-detect from visitor location
+                  <div class="toggle-help">Looks up the visitor's nearest UK airport via IP geolocation. Falls back to the default below.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardAutoDetect" aria-pressed="true"></button>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label class="field-label" for="cfgBoardDefaultAirport">Default / fallback airport</label>
+                <select id="cfgBoardDefaultAirport"></select>
+                <div class="field-help">Used when auto-detect is off, when geolocation fails, or for non-UK visitors.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Allow visitor to switch airport
+                  <div class="toggle-help">Adds a tap-to-change menu to the header so visitors can pick a different nearby airport.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardAllowSwitcher" aria-pressed="true"></button>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label class="field-label">Date window</label>
+                <div class="segmented" id="cfgBoardDateRangeSeg">
+                  <button type="button" data-range="14">14 days</button>
+                  <button type="button" data-range="30" aria-pressed="true">30 days</button>
+                  <button type="button" data-range="60">60 days</button>
+                  <button type="button" data-range="90">90 days</button>
+                </div>
+                <div class="field-help">How far ahead to look for cheap fares.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards magazine ticker">
+            <button class="section-head" data-section>Offer type
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgType">What to fetch</label>
+                <select id="cfgType">
+                  <option value="Accommodation">Accommodation only</option>
+                  <option value="Flights">Flights only</option>
+                  <option value="DynamicPackages">Dynamic packages (Flight + Hotel)</option>
+                  <option value="PackageHolidays">Package holidays (operator)</option>
+                  <option value="BothPackages">Both package types</option>
+                  <option value="Any">Mixed (everything)</option>
+                </select>
+                <div class="field-help">Each type returns a different card layout.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Where
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Destinations</label>
+                <div class="chips" id="destChips">
+                  <input class="chips-input" id="destInput" placeholder="ES, IT, MAD…" />
+                </div>
+                <div class="field-help">Country codes, IATA codes, or city/resort names. Type and press Enter to add.</div>
+              </div>
+              <div class="field" id="originField">
+                <label class="field-label">Origins (flights/packages)</label>
+                <div class="chips" id="originChips">
+                  <input class="chips-input" id="originInput" placeholder="LGW, MAN, GB…" />
+                </div>
+                <div class="field-help">Airport IATAs or country codes for departure points.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Filters
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field" id="boardField">
+                <label class="field-label" for="cfgBoard">Board basis</label>
+                <select id="cfgBoard">
+                  <option value="">Any</option>
+                  <option value="RoomOnly">Room Only</option>
+                  <option value="BedAndBreakfast">B&amp;B</option>
+                  <option value="HalfBoard">Half Board</option>
+                  <option value="FullBoard">Full Board</option>
+                  <option value="AllInclusive">All Inclusive</option>
+                  <option value="AllInclusivePlus">All Inclusive Plus</option>
+                </select>
+              </div>
+              <div class="field" id="ratingField">
+                <label class="field-label" for="cfgRating">Min star rating</label>
+                <input id="cfgRating" type="number" min="0" max="5" step="0.5" value="0" />
+                <div class="field-help">Hotel-only. 0 = any rating.</div>
+              </div>
+              <div class="field" id="cabinField">
+                <label class="field-label" for="cfgCabin">Cabin class</label>
+                <select id="cfgCabin">
+                  <option value="">Any</option>
+                  <option value="Economy">Economy</option>
+                  <option value="PremiumEconomy">Premium Economy</option>
+                  <option value="Business">Business</option>
+                  <option value="First">First</option>
+                </select>
+                <div class="field-help">Flights and packages only.</div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label" for="cfgBudgetMin">Min budget (£pp)</label>
+                  <input id="cfgBudgetMin" type="number" min="0" value="0" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgBudgetMax">Max budget (£pp)</label>
+                  <input id="cfgBudgetMax" type="number" min="0" value="2000" />
+                </div>
+              </div>
+              <div class="field-row" id="durationRow">
+                <div class="field">
+                  <label class="field-label" for="cfgDurationMin">Min nights</label>
+                  <input id="cfgDurationMin" type="number" min="0" value="0" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgDurationMax">Max nights</label>
+                  <input id="cfgDurationMax" type="number" min="0" value="14" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Date window &amp; sorting
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label" for="cfgDatesMin">From (days ahead)</label>
+                  <input id="cfgDatesMin" type="number" min="0" value="7" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgDatesMax">To (days ahead)</label>
+                  <input id="cfgDatesMax" type="number" min="0" value="180" />
+                </div>
+              </div>
+              <div class="field-help">Rolling window starting from today.</div>
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label" for="cfgMaxOffers">Max offers from API</label>
+                  <input id="cfgMaxOffers" type="number" min="1" max="250" value="100" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgSort">Sort</label>
+                  <select id="cfgSort">
+                    <option value="price:asc">Price (low to high)</option>
+                    <option value="price:desc">Price (high to low)</option>
+                    <option value="random">Random</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-help">Higher max = more raw data to dedupe from. 100 is plenty for most cases.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================ DESIGN TAB ================ -->
+        <div id="panelDesign" hidden>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Colours
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Brand colour</label>
+                <div class="colour-row">
+                  <label class="colour-swatch"><input type="color" id="brandColor" value="#1B2B5B" /></label>
+                  <input class="colour-hex" id="brandHex" maxlength="7" value="#1B2B5B" />
+                </div>
+                <div class="field-help">Reserved for future tier styling.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Accent colour</label>
+                <div class="colour-row">
+                  <label class="colour-swatch"><input type="color" id="accentColor" value="#00B4D8" /></label>
+                  <input class="colour-hex" id="accentHex" maxlength="7" value="#00B4D8" />
+                </div>
+                <div class="field-help">Used for IATA codes, CTAs, badges.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Shape &amp; type
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Card corner radius</label>
+                <div class="slider-row">
+                  <input class="slider" id="radius" type="range" min="0" max="24" value="14" />
+                  <span class="slider-value" id="radiusVal">14px</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Font family</label>
+                <div id="fontPickerMount"></div>
+                <div class="field-help">Applied to all text in the widget.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards">
+            <button class="section-head" data-section>Layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Layout style</label>
+                <div class="segmented" id="layoutSeg">
+                  <button type="button" data-layout="grid" aria-pressed="true">Grid</button>
+                  <button type="button" data-layout="carousel">Carousel</button>
+                  <button type="button" data-layout="list">List</button>
+                </div>
+                <div class="field-help"><strong>Grid</strong> stacks all offers. <strong>Carousel</strong> rotates through them with arrows and swipe. <strong>List</strong> renders compact horizontal rows — ideal for scanning lots of properties fast.</div>
+              </div>
+
+              <!-- Grid-only -->
+              <div class="field" data-when-layout="grid">
+                <label class="field-label">Columns</label>
+                <div class="segmented" id="columnsSeg">
+                  <button type="button" data-cols="auto" aria-pressed="true">Auto</button>
+                  <button type="button" data-cols="2">2</button>
+                  <button type="button" data-cols="3">3</button>
+                  <button type="button" data-cols="4">4</button>
+                </div>
+              </div>
+
+              <!-- Carousel-only -->
+              <div class="field" data-when-layout="carousel" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Auto-rotate
+                    <div class="toggle-help">Off by default — pauses on hover and touch when on</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgCarouselAutoplay" aria-pressed="false"></button>
+                </label>
+              </div>
+              <div class="field" data-when-layout="carousel" data-when-autoplay="true" hidden>
+                <label class="field-label" for="cfgCarouselInterval">Rotate every</label>
+                <select id="cfgCarouselInterval">
+                  <option value="4">4 seconds</option>
+                  <option value="6" selected>6 seconds</option>
+                  <option value="8">8 seconds</option>
+                  <option value="10">10 seconds</option>
+                </select>
+              </div>
+
+              <!-- List-only -->
+              <div class="field" data-when-layout="list" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Show meta row
+                    <div class="toggle-help">Stars, location, nights, board basis, schedule. Turn off for a stripped-back list.</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgListShowMeta" aria-pressed="true"></button>
+                </label>
+              </div>
+              <div class="field" data-when-layout="list" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Show tag chips
+                    <div class="toggle-help">Up to four amenity or trip-type tags below each row.</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgListShowAmenities" aria-pressed="true"></button>
+                </label>
+              </div>
+
+              <div class="field">
+                <label class="field-label">Card density</label>
+                <div class="segmented" id="densitySeg">
+                  <button type="button" data-density="compact">Compact</button>
+                  <button type="button" data-density="standard" aria-pressed="true">Standard</button>
+                  <button type="button" data-density="detailed">Detailed</button>
+                </div>
+                <div class="field-help"><strong>Compact</strong>, <strong>Standard</strong> and <strong>Detailed</strong> control how wide each card is — they don't switch fields on or off. Use the toggles below to choose what's displayed.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="departure-board" hidden>
+            <button class="section-head" data-section>Departure board theme &amp; behaviour
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Look</label>
+                <div class="segmented" id="boardThemeSeg">
+                  <button type="button" data-board-theme="dark" aria-pressed="true">Dark (classic)</button>
+                  <button type="button" data-board-theme="light">Light</button>
+                </div>
+                <div class="field-help"><strong>Dark</strong> evokes a real airport board — best for hero sections. <strong>Light</strong> blends into bright marketing pages.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Split-flap animation
+                  <div class="toggle-help">Subtle character flicker on each refresh. Honours reduced-motion preferences.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardAnimate" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Auto-refresh
+                  <div class="toggle-help">Re-fetches fares on a timer. Always refreshes when the visitor returns to the tab.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardAutoRefresh" aria-pressed="true"></button>
+              </div>
+              <div class="field" data-when-board-autorefresh="true">
+                <label class="field-label" for="cfgBoardRefreshSeconds">Refresh every</label>
+                <select id="cfgBoardRefreshSeconds">
+                  <option value="120">2 minutes</option>
+                  <option value="300" selected>5 minutes</option>
+                  <option value="600">10 minutes</option>
+                  <option value="1800">30 minutes</option>
+                </select>
+              </div>
+
+              <div class="toggle-group-heading" style="margin-top: 16px;">Status pills</div>
+              <div class="field-help" style="margin-bottom: 8px;">One pill per row maximum, picked by priority. <strong>Cheapest</strong>, <strong>Today</strong> and <strong>This week</strong> are always on. The three below are optional.</div>
+              <div class="toggle-row">
+                <span class="toggle-label">Tomorrow pill
+                  <div class="toggle-help">Orange pill for flights departing in 24-48 hours.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowTomorrow" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Going soon pill
+                  <div class="toggle-help">Teal pill for flights departing within the next N days. Threshold below.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowGoingSoon" aria-pressed="true"></button>
+              </div>
+              <div class="field" data-when-board-going-soon="true">
+                <label class="field-label" for="cfgBoardGoingSoonDays">Going soon threshold</label>
+                <select id="cfgBoardGoingSoonDays">
+                  <option value="7">Within 7 days</option>
+                  <option value="14" selected>Within 14 days</option>
+                  <option value="21">Within 21 days</option>
+                  <option value="30">Within 30 days</option>
+                </select>
+                <div class="field-help">Luxury operators may want a tighter window (7 days), budget specialists looser (21–30 days). Default is 14.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Premium cabin pill
+                  <div class="toggle-help">Purple pill for Business and First class fares.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowPremiumCabin" aria-pressed="true"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════ Magazine template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="magazine" hidden>
+            <button class="section-head" data-section>Magazine layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Hero offer selection</label>
+                <select id="cfgMagazineHeroStrategy">
+                  <option value="discount" selected>Biggest discount</option>
+                  <option value="featured">Featured (falls back to discount)</option>
+                  <option value="cheapest">Cheapest</option>
+                  <option value="first">First returned</option>
+                </select>
+                <div class="field-help"><strong>Biggest discount</strong> picks the offer with the largest "was vs now" saving. <strong>Featured</strong> picks the first offer with featured=true if any (falls back to biggest discount). <strong>Cheapest</strong> uses the lowest price. <strong>First</strong> uses whatever Travelify returned first.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Feature spotlight</label>
+                <div class="segmented" id="magazineFeatureEverySeg">
+                  <button type="button" data-feature-every="0">Off</button>
+                  <button type="button" data-feature-every="3">Every 3rd</button>
+                  <button type="button" data-feature-every="4" aria-pressed="true">Every 4th</button>
+                  <button type="button" data-feature-every="5">Every 5th</button>
+                </div>
+                <div class="field-help">Every Nth banner gets the feature treatment — taller image, larger headline, more body copy. Like the cover stories in a print magazine. Set to <strong>Off</strong> for uniform banners throughout.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Editorial dividers
+                  <div class="toggle-help">Small caps text between sections (e.g. "8 more handpicked stays") for editorial feel.</div>
+                </span>
+                <button type="button" class="switch" id="cfgMagazineShowDividers" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top: 6px;">Below the hero, every offer is rendered as a full-width banner card. Banners alternate sides — image left, image right, image left — for visual rhythm. On mobile, all banners collapse to single column with image on top.</div>
+            </div>
+          </div>
+
+          <!-- ═══════ Boarding-pass template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="boarding-pass" hidden>
+            <button class="section-head" data-section>Boarding pass layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Passes per row</label>
+                <div class="segmented" id="boardingPassColumnsSeg">
+                  <button type="button" data-bp-cols="1">1</button>
+                  <button type="button" data-bp-cols="2" aria-pressed="true">2</button>
+                </div>
+                <div class="field-help">Two columns on desktop, falls back to one on mobile regardless. Set 1 for a tighter, more vertical look on full-width sections.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show barcode strip
+                  <div class="toggle-help">Decorative barcode on the stub. Turn off for a cleaner pass shape.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardingPassShowBarcode" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top:6px;">Boarding pass is flights only — accommodation and package filters are ignored when this template is active. Use the same flight filters as cards (origin, cabin class, dates).</div>
+            </div>
+          </div>
+
+          <!-- ═══════ Ticker template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="ticker" hidden>
+            <button class="section-head" data-section>Ticker layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Visual style</label>
+                <div class="segmented" id="tickerStyleSeg">
+                  <button type="button" data-ticker-style="pills" aria-pressed="true">Pills</button>
+                  <button type="button" data-ticker-style="ribbon">Ribbon</button>
+                </div>
+                <div class="field-help"><strong>Pills</strong> shows offers as discrete card pills with hover states — works on most sites. <strong>Ribbon</strong> is a continuous strip with diamond separators, like an airport flight info display.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Speed</label>
+                <div class="segmented" id="tickerSpeedSeg">
+                  <button type="button" data-ticker-speed="slow">Slow</button>
+                  <button type="button" data-ticker-speed="medium" aria-pressed="true">Medium</button>
+                  <button type="button" data-ticker-speed="fast">Fast</button>
+                </div>
+                <div class="field-help">How fast the ticker crawls. <strong>Medium</strong> (80s loop) is a comfortable reading pace. <strong>Slow</strong> may feel static; <strong>Fast</strong> is decorative motion rather than readable info.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show label badge
+                  <div class="toggle-help">"Live deals" stamp on the left edge with a green pulse indicator.</div>
+                </span>
+                <button type="button" class="switch" id="cfgTickerShowLabel" aria-pressed="true"></button>
+              </div>
+              <div class="field" data-when-ticker-show-label="true">
+                <label class="field-label" for="cfgTickerLabel">Label text</label>
+                <input type="text" id="cfgTickerLabel" maxlength="20" placeholder="Live deals" />
+                <div class="field-help">Short text — keep under 20 characters. Examples: "Live deals", "Flight deals", "This week's offers".</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Pause on hover
+                  <div class="toggle-help">Visitor hovers anywhere on the ticker, the crawl pauses so they can read or click. Recommended on.</div>
+                </span>
+                <button type="button" class="switch" id="cfgTickerPauseOnHover" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top:6px;">The ticker shows offers as a horizontal marquee — best placed in a site header, footer band, or between content sections. Works for accommodation, flights, and packages. The ticker honours <em>prefers-reduced-motion</em> and falls back to a static snapshot for visitors who've turned animations off.</div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards magazine boarding-pass ticker">
+            <button class="section-head" data-section>Price display
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPriceDisplay">How prices are shown</label>
+                <select id="cfgPriceDisplay">
+                  <option value="auto" selected>Auto (per person if available, else total)</option>
+                  <option value="total">Total</option>
+                  <option value="perPerson">Per person</option>
+                  <option value="perNight">Per night</option>
+                  <option value="perPersonPerNight">Per person, per night</option>
+                </select>
+                <div class="field-help">Per-night options need accommodation nights — they fall back gracefully on flight-only offers.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false" data-when-template="cards">
+            <button class="section-head" data-section>Show on cards
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-group-heading">Universal</div>
+              <div class="toggle-row"><span class="toggle-label">Property type tag</span><button class="switch" id="showPropertyType" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Hotel chain</span><button class="switch" id="showChain" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Location (city, country)</span><button class="switch" id="showLocation" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Property summary</span><button class="switch" id="showSummary" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Stay details panel<div class="toggle-help">Check-in, nights, board, travellers</div></span><button class="switch" id="showStayDetails" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Amenities</span><button class="switch" id="showAmenities" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">TripAdvisor reviews</span><button class="switch" id="showReviews" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Refundability</span><button class="switch" id="showRefundability" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Variant count badge<div class="toggle-help">"+5 more" pill when dedupe collapsed alternatives</div></span><button class="switch" id="showVariantCount" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Lead-in price pill</span><button class="switch" id="showLeadInPill" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Strikethrough was-price</span><button class="switch" id="showWasPrice" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">"Based on N sharing" line<div class="toggle-help">Tap-to-edit pax popover next to price</div></span><button class="switch" id="showPaxBasis" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Flights</div>
+              <div class="toggle-row"><span class="toggle-label">Flight destination image</span><button class="switch" id="showFlightImage" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Flight schedule details</span><button class="switch" id="showFlightSchedule" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Duration / trip type</span><button class="switch" id="showFlightDuration" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Cabin class</span><button class="switch" id="showCabinClass" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Packages</div>
+              <div class="toggle-row"><span class="toggle-label">Package summary panel<div class="toggle-help">Flight + hotel + travellers</div></span><button class="switch" id="showPackageSummary" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Operator strip<div class="toggle-help">Package Holiday operator + ATOL badge</div></span><button class="switch" id="showPackageOperator" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Footer</div>
+              <div class="toggle-row"><span class="toggle-label">"Powered by Travelgenix" footer</span><button class="switch" id="showPoweredBy"></button></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================ SETTINGS TAB ================ -->
+        <div id="panelSettings" hidden>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Deduplication
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgDedupe">Strategy</label>
+                <select id="cfgDedupe">
+                  <option value="none">None — show every variant</option>
+                  <option value="hotel" selected>One per hotel (cheapest wins)</option>
+                  <option value="hotel-board">One per hotel + board basis</option>
+                  <option value="hotel-duration">One per hotel + duration</option>
+                  <option value="hotel-departure">One per hotel + departure date</option>
+                  <option value="route">One per flight route</option>
+                  <option value="route-carrier">One per route + carrier</option>
+                </select>
+                <div class="field-help">The widget always pulls everything from Travelify (no upstream dedupe), then applies your rule client-side.</div>
+                <div class="breakdown-panel is-empty" id="breakdownPanel">
+                  Load a preview to see how each strategy affects offer counts.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Cache
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgCache">Cache duration (minutes)</label>
+                <input id="cfgCache" type="number" min="0" max="240" value="15" />
+                <div class="field-help">0 = always fresh on every page load. 15 mins recommended. Cached per-visitor in their browser session.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Empty state
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgEmptyBehaviour">If no offers match</label>
+                <select id="cfgEmptyBehaviour">
+                  <option value="show" selected>Show friendly empty state</option>
+                  <option value="hide">Hide widget entirely</option>
+                </select>
+              </div>
+              <div id="emptyDetailsWrap">
+                <div class="field">
+                  <label class="field-label" for="cfgEmptyHeading">Heading</label>
+                  <input id="cfgEmptyHeading" type="text" value="No offers available right now" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgEmptyBody">Body text</label>
+                  <textarea id="cfgEmptyBody" rows="2">We couldn't find any matching offers. Check back soon, or try our search.</textarea>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label class="field-label" for="cfgEmptyCtaText">CTA text (optional)</label>
+                    <input id="cfgEmptyCtaText" type="text" placeholder="Search now" />
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="cfgEmptyCtaUrl">CTA URL (optional)</label>
+                    <input id="cfgEmptyCtaUrl" type="text" placeholder="https://..." />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Travelify credentials
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field-help">Your Travelify Offers credentials are stored at your Travelgenix account level — same set used across all your widgets. To update them, contact support.</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </aside>
+
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
+
+        <div class="tgse-vp" role="group" aria-label="Viewport">
+          <button class="is-on" data-vp="desktop" id="vpDesktop" title="Desktop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+          <button data-vp="tablet" id="vpTablet" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+          <button data-vp="mobile" id="vpMobile" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        </div>
+
+        <div class="tgse-divider"></div>
+
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
+        </button>
+      </div>
+
+      <div class="tgse-canvas">
+        <div class="preview-stage" id="previewStage" data-vp="desktop">
+          <div id="previewMount"></div>
+        </div>
+      </div>
+    </section>
   </div>
-</header>
 
-<main class="wrap">
-  <h1>Travel Offers</h1>
-  <p class="lede">
-    Live offers from your Travelify cache, rendered five ways. Pick a template — Cards (with Grid,
-    Carousel or List layouts), Magazine (hero + grid), Departure board (live airport-style fares),
-    or Boarding pass (paper passes for flights). Cards reads accommodation, flights, dynamic
-    flight + hotel packages, or true package holidays. Departure board and Boarding pass force
-    flights regardless of the picker.
-  </p>
-
-  <!-- ─── Primary controls — always visible ─────────────────────── -->
-  <div class="controls">
-    <div class="field">
-      <label for="ctrlTemplate">Template</label>
-      <select id="ctrlTemplate">
-        <option value="cards" selected>Cards</option>
-        <option value="magazine">Magazine</option>
-        <option value="departure-board">Departure board</option>
-        <option value="boarding-pass">Boarding pass</option>
-      </select>
-    </div>
-    <div class="field" id="fieldLayout">
-      <label for="ctrlLayout">Layout (Cards only)</label>
-      <select id="ctrlLayout">
-        <option value="grid" selected>Grid</option>
-        <option value="carousel">Carousel</option>
-        <option value="list">List</option>
-      </select>
-    </div>
-    <div class="field" id="fieldType">
-      <label for="ctrlType">Offer type</label>
-      <select id="ctrlType">
-        <option value="Accommodation" selected>Accommodation</option>
-        <option value="Flights">Flights</option>
-        <option value="DynamicPackages">Dynamic packages (Flight + Hotel)</option>
-        <option value="PackageHolidays">Package holidays</option>
-        <option value="BothPackages">Both package types</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="ctrlDest">Destination</label>
-      <input id="ctrlDest" type="text" value="ES" />
-    </div>
-    <div class="field">
-      <label for="ctrlOrigin">Origin (flights/packages)</label>
-      <input id="ctrlOrigin" type="text" value="GB" />
-    </div>
-    <div class="field">
-      <label for="ctrlDedupe">Dedupe strategy</label>
-      <select id="ctrlDedupe">
-        <option value="none">None (show everything)</option>
-        <option value="hotel" selected>One per hotel</option>
-        <option value="hotel-board">Per hotel + board</option>
-        <option value="hotel-duration">Per hotel + duration</option>
-        <option value="hotel-departure">Per hotel + departure</option>
-        <option value="route">Per route</option>
-        <option value="route-carrier">Per route + carrier</option>
-      </select>
-    </div>
-    <div class="field" id="fieldDensity">
-      <label for="ctrlDensity">Card density</label>
-      <select id="ctrlDensity">
-        <option value="compact">Compact</option>
-        <option value="standard" selected>Standard</option>
-        <option value="detailed">Detailed</option>
-      </select>
-    </div>
-    <div class="field" id="fieldCols">
-      <label for="ctrlCols">Columns (Grid only)</label>
-      <select id="ctrlCols">
-        <option value="auto" selected>Auto-fit</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- ─── Magazine-specific controls ─────────────────────────────── -->
-  <div class="controls-sub" id="subMagazine" hidden>
-    <div class="controls-sub-label">Magazine options</div>
-    <div class="field">
-      <label for="ctrlMagHero">Hero offer</label>
-      <select id="ctrlMagHero">
-        <option value="discount" selected>Biggest discount</option>
-        <option value="featured">Featured (fallback to discount)</option>
-        <option value="cheapest">Cheapest</option>
-        <option value="first">First returned</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="ctrlMagCols">Sub-grid columns</label>
-      <select id="ctrlMagCols">
-        <option value="2">2</option>
-        <option value="3" selected>3</option>
-        <option value="4">4</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- ─── Boarding-pass-specific controls ────────────────────────── -->
-  <div class="controls-sub" id="subBoardingPass" hidden>
-    <div class="controls-sub-label">Boarding pass options</div>
-    <div class="field">
-      <label for="ctrlBpCols">Passes per row</label>
-      <select id="ctrlBpCols">
-        <option value="1">1</option>
-        <option value="2" selected>2</option>
-      </select>
-    </div>
-    <div class="field">
-      <div class="toggle-label-row">
-        <label for="ctrlBpBarcode">Show barcode</label>
-        <input class="toggle" type="checkbox" id="ctrlBpBarcode" checked />
+  <!-- AI Modal -->
+  <div class="modal-backdrop" id="aiModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">AI suggestions</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:12px;">Pick a starting point and the AI will configure the widget for you.</div>
+        <div class="ai-suggest-grid" id="aiSuggestGrid"></div>
       </div>
     </div>
   </div>
 
-  <!-- ─── List-layout specific controls ──────────────────────────── -->
-  <div class="controls-sub" id="subList" hidden>
-    <div class="controls-sub-label">List layout options</div>
-    <div class="field">
-      <div class="toggle-label-row">
-        <label for="ctrlListMeta">Show meta row</label>
-        <input class="toggle" type="checkbox" id="ctrlListMeta" checked />
+  <!-- Templates Modal -->
+  <div class="modal-backdrop" id="templatesModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Templates</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
-    </div>
-    <div class="field">
-      <div class="toggle-label-row">
-        <label for="ctrlListAmenities">Show tag chips</label>
-        <input class="toggle" type="checkbox" id="ctrlListAmenities" checked />
-      </div>
-    </div>
-  </div>
-
-  <!-- ─── Departure-board specific controls ──────────────────────── -->
-  <div class="controls-sub" id="subDepartureBoard" hidden>
-    <div class="controls-sub-label">Departure board options</div>
-    <div class="field">
-      <label for="ctrlBoardTheme">Theme</label>
-      <select id="ctrlBoardTheme">
-        <option value="dark" selected>Dark (classic)</option>
-        <option value="light">Light</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="ctrlBoardAirport">Default airport</label>
-      <select id="ctrlBoardAirport">
-        <option value="LHR" selected>LHR · Heathrow</option>
-        <option value="LGW">LGW · Gatwick</option>
-        <option value="STN">STN · Stansted</option>
-        <option value="MAN">MAN · Manchester</option>
-        <option value="BHX">BHX · Birmingham</option>
-        <option value="EDI">EDI · Edinburgh</option>
-        <option value="GLA">GLA · Glasgow</option>
-        <option value="BRS">BRS · Bristol</option>
-        <option value="DUB">DUB · Dublin</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="ctrlBoardRange">Date range</label>
-      <select id="ctrlBoardRange">
-        <option value="14">14 days</option>
-        <option value="30" selected>30 days</option>
-        <option value="60">60 days</option>
-        <option value="90">90 days</option>
-      </select>
-    </div>
-    <div class="field">
-      <div class="toggle-label-row">
-        <label for="ctrlBoardAnimate">Split-flap animation</label>
-        <input class="toggle" type="checkbox" id="ctrlBoardAnimate" checked />
-      </div>
-    </div>
-    <div class="field">
-      <div class="toggle-label-row">
-        <label for="ctrlBoardSound">Click sound</label>
-        <input class="toggle" type="checkbox" id="ctrlBoardSound" />
+      <div class="modal-body">
+        <div class="templates-grid" id="templatesGrid"></div>
       </div>
     </div>
   </div>
 
-  <div class="stage-label" id="stageLabel">Live preview · Travelify offers cache · AppId 250</div>
-  <div class="stage">
-    <div id="widgetMount"></div>
+  <!-- Embed Modal -->
+  <div class="modal-backdrop" id="embedModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Embed code</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:12px;">Paste this into any HTML page on your site. Save the widget first if you haven't already.</div>
+        <div class="embed-code" id="embedCode">Save the widget first to generate the embed code.</div>
+      </div>
+    </div>
   </div>
-</main>
 
-<footer class="foot">
-  Travelgenix Widget Suite · <a href="/">All widgets</a>
-</footer>
+  <script src="/widget-offers.js"></script>
+  <script src="/editor-shell.js"></script>
 
-<script src="/widget-offers.js"></script>
-<script>
-  /* ───────────────────────────────────────────────────────────────
-     Theme toggle — applies to host page AND propagates to widget
-     ─────────────────────────────────────────────────────────────── */
-  const themeBtn = document.getElementById('themeBtn');
-  function applyTheme(t) {
-    document.documentElement.setAttribute('data-theme', t);
-    themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-  }
-  themeBtn.addEventListener('click', () => {
-    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    rebuild();
-  });
-  applyTheme('light');
+  <script>
+    /* ============================================================
+       State + helpers
+       ============================================================ */
+    const API_CONFIG = '/api/widget-config';
+    const API_AI = '/api/widget-ai';
+    const WIDGET_TYPE = 'Travel Offers';
 
-  /* ───────────────────────────────────────────────────────────────
-     Conditional control visibility based on template + layout.
-     Mirrors the editor's data-when-template / data-when-layout system,
-     just lighter-weight (we know all the IDs up front).
-     ─────────────────────────────────────────────────────────────── */
-  function $(id) { return document.getElementById(id); }
+    const TG_TRAVELIFY_APPID = '250';
+    const TG_TRAVELIFY_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
 
-  function updateVisibility() {
-    const tmpl = $('ctrlTemplate').value;
-    const layout = $('ctrlLayout').value;
+    const urlParams = new URLSearchParams(window.location.search);
+    const widgetIdFromUrl = urlParams.get('id');
 
-    const isCards = tmpl === 'cards';
-    const isMagazine = tmpl === 'magazine';
-    const isDepartureBoard = tmpl === 'departure-board';
-    const isBoardingPass = tmpl === 'boarding-pass';
+    function defaultConfig() {
+      return {
+        // Template — picks the visual layout. 'cards' is the existing
+        // grid/carousel render. 'departure-board' is the airport-style
+        // table. Default 'cards' keeps existing widgets identical.
+        template: 'cards',
+        type: 'Accommodation',
+        destinations: [], origins: [],
+        boardBases: [], cabinClasses: [],
+        ratingMin: 0, budgetMin: 0, budgetMax: 2000,
+        durationMin: 0, durationMax: 14,
+        DatesMin: 7, DatesMax: 180,
+        maxOffers: 100, sort: 'price:asc',
+        columns: 'auto', density: 'standard', theme: 'light',
+        brandColor: '#1B2B5B', accentColor: '#00B4D8',
+        radius: 14, fontFamily: '',
+        priceDisplay: 'auto',
+        layout: 'grid',
+        carouselAutoplay: false,
+        carouselInterval: 6,
+        // Departure-board template config (used only when template='departure-board')
+        boardTheme: 'dark',
+        boardDefaultAirport: 'LHR',
+        boardAutoDetect: true,
+        boardAllowSwitcher: true,
+        boardAnimate: true,
+        boardAutoRefresh: true,
+        boardRefreshSeconds: 300,
+        boardDateRange: 30,
+        // Departure-board status pill config
+        boardShowTomorrow: true,
+        boardShowGoingSoon: true,
+        boardGoingSoonDays: 14,
+        boardShowPremiumCabin: true,
+        // List-layout config (used when template='cards' AND layout='list')
+        listShowMeta: true,
+        listShowAmenities: true,
+        // Magazine template config (used only when template='magazine')
+        // Stacked-banner layout — every offer below the hero is a banner card,
+        // alternating sides. Every Nth banner is a feature spotlight.
+        magazineHeroStrategy: 'discount',
+        magazineShowDividers: true,
+        magazineFeatureEvery: 4,
+        // Boarding-pass template config (used only when template='boarding-pass')
+        boardingPassColumns: 2,
+        boardingPassShowBarcode: true,
+        // Ticker template config (used only when template='ticker')
+        tickerStyle: 'pills',
+        tickerSpeed: 'medium',
+        tickerLabel: 'Live deals',
+        tickerShowLabel: true,
+        tickerPauseOnHover: true,
+        show: {
+          // Universal
+          propertyType: true, chain: true, location: true,
+          summary: true, stayDetails: true, amenities: true,
+          reviews: true, refundability: true,
+          variantCount: true, leadInPill: true, wasPrice: true,
+          paxBasis: true,
+          // Flights
+          flightImage: true, flightSchedule: true,
+          flightDuration: true, cabinClass: true,
+          // Packages
+          packageSummary: true, packageOperator: true,
+          // Footer
+          poweredBy: false,
+        },
+        dedupeStrategy: 'hotel',
+        cacheMinutes: 15,
+        emptyBehaviour: 'show',
+        emptyHeading: 'No offers available right now',
+        emptyBody: "We couldn't find any matching offers. Check back soon, or try our search.",
+        emptyCtaText: '', emptyCtaUrl: '',
+      };
+    }
 
-    // Layout selector — only relevant for cards
-    $('fieldLayout').hidden = !isCards;
-
-    // Offer type — relevant for cards and magazine; departure-board and
-    // boarding-pass force flights regardless
-    $('fieldType').hidden = isDepartureBoard || isBoardingPass;
-
-    // Density — only meaningful for cards (magazine, board, pass have
-    // their own intrinsic sizing)
-    $('fieldDensity').hidden = !isCards;
-
-    // Columns — grid layout only, inside cards template
-    $('fieldCols').hidden = !(isCards && layout === 'grid');
-
-    // Subordinate option panels
-    $('subMagazine').hidden = !isMagazine;
-    $('subBoardingPass').hidden = !isBoardingPass;
-    $('subList').hidden = !(isCards && layout === 'list');
-    $('subDepartureBoard').hidden = !isDepartureBoard;
-
-    // Stage label reflects the active template
-    const labels = {
-      'cards': 'Cards template · ' + layout + ' layout',
-      'magazine': 'Magazine template · hero + grid',
-      'departure-board': 'Departure board template · live fares',
-      'boarding-pass': 'Boarding pass template · flights only',
+    let state = {
+      widgetId: widgetIdFromUrl || null,
+      airtableRecordId: null,
+      name: '',
+      config: defaultConfig(),
+      dirty: false,
     };
-    $('stageLabel').textContent = 'Live preview · ' + (labels[tmpl] || tmpl);
-  }
 
-  /* ───────────────────────────────────────────────────────────────
-     Build a fresh config from current control values
-     ─────────────────────────────────────────────────────────────── */
-  const mount = document.getElementById('widgetMount');
+    let previewWidget = null;
+    let previewTimer = null;
 
-  function parseList(s) {
-    return (s || '').split(',').map(x => x.trim()).filter(Boolean);
-  }
+    function $(id) { return document.getElementById(id); }
 
-  function buildConfig() {
-    const tmpl = $('ctrlTemplate').value;
-    const layout = $('ctrlLayout').value;
+    /* ============================================================
+       Tab switching (driven by shell's onTabChange)
+       ============================================================ */
+    function setTab(name) {
+      const map = { content: 'tabContent', design: 'tabDesign', settings: 'tabSettings' };
+      const panelMap = { content: 'panelContent', design: 'panelDesign', settings: 'panelSettings' };
+      Object.entries(map).forEach(([k, id]) => {
+        const btn = $(id);
+        if (btn) btn.setAttribute('aria-selected', k === name ? 'true' : 'false');
+      });
+      Object.entries(panelMap).forEach(([k, id]) => {
+        const p = $(id);
+        if (p) p.hidden = k !== name;
+      });
+    }
 
-    return {
-      // Travelify test creds — public, safe to embed
-      appId: '250',
-      apiKey: 'A41D180E-CBFE-4E30-A47D-FAAB424A650D',
-
-      // Template + layout
-      template: tmpl,
-      layout: layout,
-
-      // Core filters
-      type: $('ctrlType').value,
-      destinations: parseList($('ctrlDest').value),
-      origins: parseList($('ctrlOrigin').value),
-      dedupeStrategy: $('ctrlDedupe').value,
-      density: $('ctrlDensity').value,
-      columns: $('ctrlCols').value,
-      theme: document.documentElement.getAttribute('data-theme'),
-      maxOffers: 100,
-      DatesMin: 7,
-      DatesMax: 180,
-      cacheMinutes: 0,  // No cache in demo so changes are instant
-      sort: 'price:asc',
-
-      // Magazine options (read regardless — widget ignores when not magazine)
-      magazineHeroStrategy: $('ctrlMagHero').value,
-      magazineColumns: parseInt($('ctrlMagCols').value, 10) || 3,
-
-      // Boarding-pass options
-      boardingPassColumns: parseInt($('ctrlBpCols').value, 10) || 2,
-      boardingPassShowBarcode: $('ctrlBpBarcode').checked,
-
-      // List options
-      listShowMeta: $('ctrlListMeta').checked,
-      listShowAmenities: $('ctrlListAmenities').checked,
-
-      // Departure-board options
-      boardTheme: $('ctrlBoardTheme').value,
-      boardDefaultAirport: $('ctrlBoardAirport').value,
-      boardDateRange: parseInt($('ctrlBoardRange').value, 10) || 30,
-      boardAnimate: $('ctrlBoardAnimate').checked,
-      boardSound: $('ctrlBoardSound').checked,
-      // Auto-detect off in demo so the airport picker is the source of truth
-      boardAutoDetect: false,
-      boardAllowSwitcher: true,
-      boardAutoRefresh: false,
-    };
-  }
-
-  /* ───────────────────────────────────────────────────────────────
-     Rebuild the widget on any control change
-     ─────────────────────────────────────────────────────────────── */
-  function rebuild() {
-    updateVisibility();
-    mount.innerHTML = '';
-    const div = document.createElement('div');
-    div.setAttribute('data-tg-widget', 'offers');
-    div.setAttribute('data-tg-config', JSON.stringify(buildConfig()));
-    mount.appendChild(div);
-    new window.TGOffersWidget(div, buildConfig());
-  }
-
-  /* ───────────────────────────────────────────────────────────────
-     Wire every control. Selects + checkboxes rebuild on change;
-     text inputs debounce so typing doesn't fire dozens of fetches.
-     ─────────────────────────────────────────────────────────────── */
-  document.querySelectorAll('.controls select, .controls-sub select, .controls-sub input[type="checkbox"]').forEach(el => {
-    el.addEventListener('change', rebuild);
-  });
-  document.querySelectorAll('.controls input[type="text"], .controls input[type="number"]').forEach(el => {
-    el.addEventListener('input', () => {
-      clearTimeout(el._t);
-      el._t = setTimeout(rebuild, 400);
+    /* ============================================================
+       Section collapse/expand
+       ============================================================ */
+    document.addEventListener('click', (e) => {
+      const head = e.target.closest('[data-section]');
+      if (!head) return;
+      const section = head.closest('.section');
+      const open = section.getAttribute('data-open') === 'true';
+      section.setAttribute('data-open', open ? 'false' : 'true');
     });
-  });
 
-  // Initial render
-  rebuild();
-</script>
+    /* ============================================================
+       Chips
+       ============================================================ */
+    function renderChips(container, list, onRemove) {
+      container.querySelectorAll('.chip').forEach(c => c.remove());
+      const input = container.querySelector('.chips-input');
+      list.forEach((val, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = '<span></span><button type="button" aria-label="Remove">×</button>';
+        chip.querySelector('span').textContent = val;
+        chip.querySelector('button').addEventListener('click', () => onRemove(i));
+        container.insertBefore(chip, input);
+      });
+    }
+
+    function wireChips(containerId, inputId, listKey) {
+      const container = $(containerId);
+      const input = $(inputId);
+      const refresh = () => renderChips(container, state.config[listKey], (i) => {
+        state.config[listKey].splice(i, 1);
+        refresh();
+        markDirtyAndPreview();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          const val = input.value.trim().toUpperCase();
+          if (val && !state.config[listKey].includes(val)) {
+            state.config[listKey].push(val);
+            refresh();
+            markDirtyAndPreview();
+          }
+          input.value = '';
+        } else if (e.key === 'Backspace' && !input.value && state.config[listKey].length) {
+          state.config[listKey].pop();
+          refresh();
+          markDirtyAndPreview();
+        }
+      });
+      input.addEventListener('blur', () => {
+        const val = input.value.trim().toUpperCase();
+        if (val && !state.config[listKey].includes(val)) {
+          state.config[listKey].push(val);
+          refresh();
+          markDirtyAndPreview();
+          input.value = '';
+        }
+      });
+      container.addEventListener('click', (e) => {
+        if (e.target === container) input.focus();
+      });
+      return refresh;
+    }
+
+    let refreshDestChips, refreshOriginChips;
+
+    /* ============================================================
+       Hydrate UI from state.config
+       ============================================================ */
+    function hydrateUI() {
+      const c = state.config;
+      $('name-input').value = state.name || '';
+
+      // Template picker
+      document.querySelectorAll('#templateGrid .template-card').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.template === (c.template || 'cards') ? 'true' : 'false');
+      });
+
+      // Departure-board fields
+      populateBoardAirportPicker();
+      $('cfgBoardDefaultAirport').value = c.boardDefaultAirport || 'LHR';
+      $('cfgBoardAutoDetect').setAttribute('aria-pressed', c.boardAutoDetect !== false ? 'true' : 'false');
+      $('cfgBoardAllowSwitcher').setAttribute('aria-pressed', c.boardAllowSwitcher !== false ? 'true' : 'false');
+      document.querySelectorAll('#cfgBoardDateRangeSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(c.boardDateRange || 30) === b.dataset.range ? 'true' : 'false');
+      });
+      document.querySelectorAll('#boardThemeSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.boardTheme === (c.boardTheme || 'dark') ? 'true' : 'false');
+      });
+      $('cfgBoardAnimate').setAttribute('aria-pressed', c.boardAnimate !== false ? 'true' : 'false');
+      $('cfgBoardAutoRefresh').setAttribute('aria-pressed', c.boardAutoRefresh !== false ? 'true' : 'false');
+      $('cfgBoardRefreshSeconds').value = String(c.boardRefreshSeconds || 300);
+      // Status pill toggles
+      $('cfgBoardShowTomorrow').setAttribute('aria-pressed', c.boardShowTomorrow !== false ? 'true' : 'false');
+      $('cfgBoardShowGoingSoon').setAttribute('aria-pressed', c.boardShowGoingSoon !== false ? 'true' : 'false');
+      $('cfgBoardGoingSoonDays').value = String(c.boardGoingSoonDays || 14);
+      $('cfgBoardShowPremiumCabin').setAttribute('aria-pressed', c.boardShowPremiumCabin !== false ? 'true' : 'false');
+
+      $('cfgType').value = c.type || 'Accommodation';
+      refreshDestChips && refreshDestChips();
+      refreshOriginChips && refreshOriginChips();
+      $('cfgBoard').value = (c.boardBases && c.boardBases[0]) || '';
+      $('cfgCabin').value = (c.cabinClasses && c.cabinClasses[0]) || '';
+      $('cfgRating').value = c.ratingMin || 0;
+      $('cfgBudgetMin').value = c.budgetMin || 0;
+      $('cfgBudgetMax').value = c.budgetMax || 2000;
+      $('cfgDurationMin').value = c.durationMin || 0;
+      $('cfgDurationMax').value = c.durationMax || 14;
+      $('cfgDatesMin').value = c.DatesMin || 7;
+      $('cfgDatesMax').value = c.DatesMax || 180;
+      $('cfgMaxOffers').value = c.maxOffers || 100;
+      $('cfgSort').value = c.sort || 'price:asc';
+
+      $('brandColor').value = c.brandColor || '#1B2B5B';
+      $('brandHex').value = c.brandColor || '#1B2B5B';
+      $('accentColor').value = c.accentColor || '#00B4D8';
+      $('accentHex').value = c.accentColor || '#00B4D8';
+      $('radius').value = c.radius != null ? c.radius : 14;
+      $('radiusVal').textContent = ($('radius').value) + 'px';
+
+      document.querySelectorAll('#columnsSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.cols === (c.columns || 'auto') ? 'true' : 'false');
+      });
+      document.querySelectorAll('#densitySeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.density === (c.density || 'standard') ? 'true' : 'false');
+      });
+      document.querySelectorAll('#layoutSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.layout === (c.layout || 'grid') ? 'true' : 'false');
+      });
+      $('cfgCarouselAutoplay').setAttribute('aria-pressed', c.carouselAutoplay ? 'true' : 'false');
+      $('cfgCarouselInterval').value = String(c.carouselInterval || 6);
+
+      // List-layout fields
+      $('cfgListShowMeta').setAttribute('aria-pressed', c.listShowMeta !== false ? 'true' : 'false');
+      $('cfgListShowAmenities').setAttribute('aria-pressed', c.listShowAmenities !== false ? 'true' : 'false');
+
+      // Magazine template fields
+      $('cfgMagazineHeroStrategy').value = c.magazineHeroStrategy || 'discount';
+      const featureEvery = typeof c.magazineFeatureEvery === 'number' ? c.magazineFeatureEvery : 4;
+      document.querySelectorAll('#magazineFeatureEverySeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(featureEvery) === b.dataset.featureEvery ? 'true' : 'false');
+      });
+      $('cfgMagazineShowDividers').setAttribute('aria-pressed', c.magazineShowDividers !== false ? 'true' : 'false');
+
+      // Boarding-pass template fields
+      document.querySelectorAll('#boardingPassColumnsSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(c.boardingPassColumns || 2) === b.dataset.bpCols ? 'true' : 'false');
+      });
+      $('cfgBoardingPassShowBarcode').setAttribute('aria-pressed', c.boardingPassShowBarcode !== false ? 'true' : 'false');
+
+      // Ticker template fields
+      document.querySelectorAll('#tickerStyleSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.tickerStyle === (c.tickerStyle || 'pills') ? 'true' : 'false');
+      });
+      document.querySelectorAll('#tickerSpeedSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.tickerSpeed === (c.tickerSpeed || 'medium') ? 'true' : 'false');
+      });
+      $('cfgTickerShowLabel').setAttribute('aria-pressed', c.tickerShowLabel !== false ? 'true' : 'false');
+      $('cfgTickerLabel').value = c.tickerLabel || 'Live deals';
+      $('cfgTickerPauseOnHover').setAttribute('aria-pressed', c.tickerPauseOnHover !== false ? 'true' : 'false');
+
+      // Apply conditional visibility for layout-specific fields
+      updateLayoutVisibility();
+
+      const show = c.show || {};
+      const toggleMap = {
+        showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
+        showSummary: 'summary', showStayDetails: 'stayDetails',
+        showAmenities: 'amenities', showReviews: 'reviews', showRefundability: 'refundability',
+        showVariantCount: 'variantCount', showLeadInPill: 'leadInPill',
+        showWasPrice: 'wasPrice', showPaxBasis: 'paxBasis',
+        showFlightImage: 'flightImage', showFlightSchedule: 'flightSchedule',
+        showFlightDuration: 'flightDuration', showCabinClass: 'cabinClass',
+        showPackageSummary: 'packageSummary', showPackageOperator: 'packageOperator',
+        showPoweredBy: 'poweredBy',
+      };
+      Object.entries(toggleMap).forEach(([id, key]) => {
+        const el = $(id);
+        if (el) el.setAttribute('aria-pressed', show[key] ? 'true' : 'false');
+      });
+
+      $('cfgPriceDisplay').value = c.priceDisplay || 'auto';
+
+      $('cfgDedupe').value = c.dedupeStrategy || 'hotel';
+      $('cfgCache').value = c.cacheMinutes != null ? c.cacheMinutes : 15;
+      $('cfgEmptyBehaviour').value = c.emptyBehaviour || 'show';
+      $('cfgEmptyHeading').value = c.emptyHeading || '';
+      $('cfgEmptyBody').value = c.emptyBody || '';
+      $('cfgEmptyCtaText').value = c.emptyCtaText || '';
+      $('cfgEmptyCtaUrl').value = c.emptyCtaUrl || '';
+
+      updateConditionalVisibility();
+      updateTemplateVisibility();
+      updateBoardAutoRefreshVisibility();
+      updateBoardGoingSoonVisibility();
+      updateTickerLabelVisibility();
+      updateEmptyDetailsVisibility();
+    }
+
+    /* ============================================================
+       Departure-board UK airport list (mirrors widget JS)
+       ============================================================ */
+    const UK_AIRPORTS_EDITOR = [
+      { code: 'LHR', city: 'London', name: 'Heathrow' },
+      { code: 'LGW', city: 'London', name: 'Gatwick' },
+      { code: 'STN', city: 'London', name: 'Stansted' },
+      { code: 'LTN', city: 'London', name: 'Luton' },
+      { code: 'LCY', city: 'London', name: 'City' },
+      { code: 'SEN', city: 'Southend', name: 'Southend' },
+      { code: 'MAN', city: 'Manchester', name: 'Manchester' },
+      { code: 'BHX', city: 'Birmingham', name: 'Birmingham' },
+      { code: 'EMA', city: 'Nottingham', name: 'East Midlands' },
+      { code: 'EDI', city: 'Edinburgh', name: 'Edinburgh' },
+      { code: 'GLA', city: 'Glasgow', name: 'Glasgow' },
+      { code: 'PIK', city: 'Glasgow', name: 'Prestwick' },
+      { code: 'NCL', city: 'Newcastle', name: 'Newcastle' },
+      { code: 'LBA', city: 'Leeds', name: 'Leeds Bradford' },
+      { code: 'BRS', city: 'Bristol', name: 'Bristol' },
+      { code: 'CWL', city: 'Cardiff', name: 'Cardiff' },
+      { code: 'LPL', city: 'Liverpool', name: 'Liverpool' },
+      { code: 'BFS', city: 'Belfast', name: 'Belfast Intl' },
+      { code: 'BHD', city: 'Belfast', name: 'Belfast City' },
+      { code: 'ABZ', city: 'Aberdeen', name: 'Aberdeen' },
+      { code: 'INV', city: 'Inverness', name: 'Inverness' },
+      { code: 'SOU', city: 'Southampton', name: 'Southampton' },
+      { code: 'EXT', city: 'Exeter', name: 'Exeter' },
+      { code: 'BOH', city: 'Bournemouth', name: 'Bournemouth' },
+      { code: 'NWI', city: 'Norwich', name: 'Norwich' },
+      { code: 'HUY', city: 'Hull', name: 'Humberside' },
+      { code: 'DUB', city: 'Dublin', name: 'Dublin' },
+      { code: 'ORK', city: 'Cork', name: 'Cork' },
+      { code: 'JER', city: 'Jersey', name: 'Jersey' },
+      { code: 'GCI', city: 'Guernsey', name: 'Guernsey' },
+    ];
+
+    function populateBoardAirportPicker() {
+      const sel = $('cfgBoardDefaultAirport');
+      if (!sel || sel.options.length > 0) return;
+      let html = '';
+      for (const a of UK_AIRPORTS_EDITOR) {
+        html += '<option value="' + a.code + '">' + a.city + ' — ' + a.name + ' (' + a.code + ')</option>';
+      }
+      sel.innerHTML = html;
+    }
+
+    function updateTemplateVisibility() {
+      const t = state.config.template || 'cards';
+      document.querySelectorAll('[data-when-template]').forEach(el => {
+        // Support multi-value lists: data-when-template="cards magazine"
+        // means show when current template is either cards OR magazine.
+        const tokens = (el.dataset.whenTemplate || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(t) : el.dataset.whenTemplate !== t;
+      });
+    }
+
+    function updateBoardAutoRefreshVisibility() {
+      const on = !!state.config.boardAutoRefresh;
+      document.querySelectorAll('[data-when-board-autorefresh]').forEach(el => {
+        el.hidden = !on;
+      });
+    }
+
+    function updateBoardGoingSoonVisibility() {
+      const on = state.config.boardShowGoingSoon !== false;
+      document.querySelectorAll('[data-when-board-going-soon]').forEach(el => {
+        el.hidden = !on;
+      });
+    }
+
+    function updateTickerLabelVisibility() {
+      const on = state.config.tickerShowLabel !== false;
+      document.querySelectorAll('[data-when-ticker-show-label]').forEach(el => {
+        el.hidden = !on;
+      });
+    }
+
+    function updateConditionalVisibility() {
+      const t = state.config.type || 'Accommodation';
+      const isFlightLike = ['Flights', 'DynamicPackages', 'PackageHolidays', 'BothPackages', 'Any'].includes(t);
+      const isAccLike = ['Accommodation', 'DynamicPackages', 'PackageHolidays', 'BothPackages', 'Any'].includes(t);
+      $('originField').style.display = isFlightLike ? '' : 'none';
+      $('boardField').style.display = isAccLike ? '' : 'none';
+      $('durationRow').style.display = isAccLike ? '' : 'none';
+      // Cabin class is flight-only — hiding it when type is Accommodation removes
+      // confusion about a filter that the API would silently ignore.
+      $('cabinField').style.display = isFlightLike ? '' : 'none';
+      // Star rating is accommodation-only.
+      $('ratingField').style.display = isAccLike ? '' : 'none';
+    }
+
+    function updateEmptyDetailsVisibility() {
+      $('emptyDetailsWrap').style.display = state.config.emptyBehaviour === 'hide' ? 'none' : '';
+    }
+
+    /* ============================================================
+       Mark dirty + schedule preview
+       ============================================================ */
+    function markDirtyAndPreview() {
+      state.dirty = true;
+      if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+      schedulePreview();
+    }
+
+    /* Show / hide layout-specific fields. Grid-only fields (Columns) hide when
+       layout = carousel. Carousel-only fields (autoplay toggle, interval select)
+       hide when layout = grid. The interval select also requires autoplay = on. */
+    function updateLayoutVisibility() {
+      const layout = state.config.layout || 'grid';
+      const autoplay = !!state.config.carouselAutoplay;
+      document.querySelectorAll('[data-when-layout]').forEach((el) => {
+        const want = el.getAttribute('data-when-layout');
+        const wantAutoplay = el.getAttribute('data-when-autoplay');
+        let visible = (want === layout);
+        if (visible && wantAutoplay === 'true') visible = autoplay;
+        el.hidden = !visible;
+      });
+    }
+
+    function schedulePreview() {
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(renderPreview, 300);
+    }
+
+    function renderPreview() {
+      const mount = $('previewMount');
+      mount.innerHTML = '';
+      const cfg = JSON.parse(JSON.stringify(state.config));
+      cfg.appId = TG_TRAVELIFY_APPID;
+      cfg.apiKey = TG_TRAVELIFY_KEY;
+      cfg.cacheMinutes = 0;
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'offers');
+      mount.appendChild(div);
+      previewWidget = new window.TGOffersWidget(div, cfg);
+    }
+
+    /* ============================================================
+       Wire all inputs
+       ============================================================ */
+    function wireInputs() {
+      $('name-input').addEventListener('input', (e) => {
+        state.name = e.target.value;
+        state.dirty = true;
+        if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+      });
+
+      const fieldMap = {
+        cfgType: 'type', cfgBoard: 'boardBasis_singleton', cfgCabin: 'cabinClass_singleton',
+        cfgRating: 'ratingMin', cfgBudgetMin: 'budgetMin', cfgBudgetMax: 'budgetMax',
+        cfgDurationMin: 'durationMin', cfgDurationMax: 'durationMax',
+        cfgDatesMin: 'DatesMin', cfgDatesMax: 'DatesMax',
+        cfgMaxOffers: 'maxOffers', cfgSort: 'sort',
+        cfgDedupe: 'dedupeStrategy', cfgCache: 'cacheMinutes',
+        cfgEmptyBehaviour: 'emptyBehaviour',
+        cfgEmptyHeading: 'emptyHeading', cfgEmptyBody: 'emptyBody',
+        cfgEmptyCtaText: 'emptyCtaText', cfgEmptyCtaUrl: 'emptyCtaUrl',
+        cfgPriceDisplay: 'priceDisplay',
+      };
+      Object.entries(fieldMap).forEach(([id, key]) => {
+        const el = $(id);
+        if (!el) return;
+        const handler = () => {
+          const raw = el.value;
+          if (key === 'boardBasis_singleton') {
+            state.config.boardBases = raw ? [raw] : [];
+          } else if (key === 'cabinClass_singleton') {
+            state.config.cabinClasses = raw ? [raw] : [];
+          } else if (el.type === 'number') {
+            state.config[key] = parseFloat(raw) || 0;
+          } else {
+            state.config[key] = raw;
+          }
+          if (key === 'type') updateConditionalVisibility();
+          if (key === 'emptyBehaviour') updateEmptyDetailsVisibility();
+          markDirtyAndPreview();
+        };
+        el.addEventListener('change', handler);
+        if (el.type === 'text' || el.type === 'number' || el.tagName === 'TEXTAREA') {
+          el.addEventListener('input', () => {
+            clearTimeout(el._t);
+            el._t = setTimeout(handler, 250);
+          });
+        }
+      });
+
+      function wireColour(pickerId, hexId, configKey) {
+        const picker = $(pickerId);
+        const hex = $(hexId);
+        picker.addEventListener('input', () => {
+          state.config[configKey] = picker.value.toUpperCase();
+          hex.value = picker.value.toUpperCase();
+          markDirtyAndPreview();
+        });
+        hex.addEventListener('input', () => {
+          if (/^#[0-9A-Fa-f]{6}$/.test(hex.value)) {
+            picker.value = hex.value;
+            state.config[configKey] = hex.value.toUpperCase();
+            markDirtyAndPreview();
+          }
+        });
+      }
+      wireColour('brandColor', 'brandHex', 'brandColor');
+      wireColour('accentColor', 'accentHex', 'accentColor');
+
+      $('radius').addEventListener('input', () => {
+        const v = parseInt($('radius').value);
+        state.config.radius = v;
+        $('radiusVal').textContent = v + 'px';
+        markDirtyAndPreview();
+      });
+
+      document.querySelectorAll('#columnsSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.columns = b.dataset.cols;
+          document.querySelectorAll('#columnsSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#densitySeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.density = b.dataset.density;
+          document.querySelectorAll('#densitySeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#layoutSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.layout = b.dataset.layout;
+          document.querySelectorAll('#layoutSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          updateLayoutVisibility();
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgCarouselAutoplay').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.carouselAutoplay = next;
+        updateLayoutVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgCarouselInterval').addEventListener('change', () => {
+        state.config.carouselInterval = parseInt($('cfgCarouselInterval').value, 10) || 6;
+        markDirtyAndPreview();
+      });
+
+      // ── Template picker ──────────────────────────────────────────
+      // Switches between Cards (default), Magazine, Departure board, and
+      // Boarding pass. updateTemplateVisibility() shows/hides the right
+      // sidebar sections.
+      document.querySelectorAll('#templateGrid .template-card').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.template = b.dataset.template;
+          document.querySelectorAll('#templateGrid .template-card').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          updateTemplateVisibility();
+          markDirtyAndPreview();
+        });
+      });
+
+      // ── Departure-board fields ───────────────────────────────────
+      $('cfgBoardDefaultAirport').addEventListener('change', () => {
+        state.config.boardDefaultAirport = $('cfgBoardDefaultAirport').value;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardAutoDetect').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardAutoDetect = next;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardAllowSwitcher').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardAllowSwitcher = next;
+        markDirtyAndPreview();
+      });
+      document.querySelectorAll('#cfgBoardDateRangeSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.dataset.range, 10);
+          state.config.boardDateRange = v;
+          document.querySelectorAll('#cfgBoardDateRangeSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#boardThemeSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.boardTheme = b.dataset.boardTheme;
+          document.querySelectorAll('#boardThemeSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgBoardAnimate').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardAnimate = next;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardAutoRefresh').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardAutoRefresh = next;
+        updateBoardAutoRefreshVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgBoardRefreshSeconds').addEventListener('change', () => {
+        state.config.boardRefreshSeconds = parseInt($('cfgBoardRefreshSeconds').value, 10) || 300;
+        markDirtyAndPreview();
+      });
+      // Status pill toggles
+      $('cfgBoardShowTomorrow').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowTomorrow = next;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardShowGoingSoon').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowGoingSoon = next;
+        updateBoardGoingSoonVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgBoardGoingSoonDays').addEventListener('change', () => {
+        state.config.boardGoingSoonDays = parseInt($('cfgBoardGoingSoonDays').value, 10) || 14;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardShowPremiumCabin').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowPremiumCabin = next;
+        markDirtyAndPreview();
+      });
+
+      // ── List-layout fields ────────────────────────────────────────
+      $('cfgListShowMeta').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.listShowMeta = next;
+        markDirtyAndPreview();
+      });
+      $('cfgListShowAmenities').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.listShowAmenities = next;
+        markDirtyAndPreview();
+      });
+
+      // ── Magazine template fields ─────────────────────────────────
+      $('cfgMagazineHeroStrategy').addEventListener('change', () => {
+        state.config.magazineHeroStrategy = $('cfgMagazineHeroStrategy').value;
+        markDirtyAndPreview();
+      });
+      document.querySelectorAll('#magazineFeatureEverySeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.dataset.featureEvery, 10);
+          state.config.magazineFeatureEvery = v;
+          document.querySelectorAll('#magazineFeatureEverySeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgMagazineShowDividers').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.magazineShowDividers = next;
+        markDirtyAndPreview();
+      });
+
+      // ── Boarding-pass template fields ────────────────────────────
+      document.querySelectorAll('#boardingPassColumnsSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.dataset.bpCols, 10);
+          state.config.boardingPassColumns = v;
+          document.querySelectorAll('#boardingPassColumnsSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgBoardingPassShowBarcode').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardingPassShowBarcode = next;
+        markDirtyAndPreview();
+      });
+
+      // ── Ticker template fields ───────────────────────────────────
+      document.querySelectorAll('#tickerStyleSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.tickerStyle = b.dataset.tickerStyle;
+          document.querySelectorAll('#tickerStyleSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#tickerSpeedSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.tickerSpeed = b.dataset.tickerSpeed;
+          document.querySelectorAll('#tickerSpeedSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgTickerShowLabel').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.tickerShowLabel = next;
+        updateTickerLabelVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgTickerLabel').addEventListener('input', () => {
+        // Slight debounce so we don't re-render on every keystroke
+        clearTimeout($('cfgTickerLabel')._t);
+        $('cfgTickerLabel')._t = setTimeout(() => {
+          state.config.tickerLabel = $('cfgTickerLabel').value || 'Live deals';
+          markDirtyAndPreview();
+        }, 250);
+      });
+      $('cfgTickerPauseOnHover').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.tickerPauseOnHover = next;
+        markDirtyAndPreview();
+      });
+
+      const toggleMap = {
+        showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
+        showSummary: 'summary', showStayDetails: 'stayDetails',
+        showAmenities: 'amenities', showReviews: 'reviews', showRefundability: 'refundability',
+        showVariantCount: 'variantCount', showLeadInPill: 'leadInPill',
+        showWasPrice: 'wasPrice', showPaxBasis: 'paxBasis',
+        showFlightImage: 'flightImage', showFlightSchedule: 'flightSchedule',
+        showFlightDuration: 'flightDuration', showCabinClass: 'cabinClass',
+        showPackageSummary: 'packageSummary', showPackageOperator: 'packageOperator',
+        showPoweredBy: 'poweredBy',
+      };
+      Object.entries(toggleMap).forEach(([id, key]) => {
+        const el = $(id);
+        if (!el) return;
+        el.addEventListener('click', () => {
+          const next = el.getAttribute('aria-pressed') !== 'true';
+          el.setAttribute('aria-pressed', next ? 'true' : 'false');
+          state.config.show = state.config.show || {};
+          state.config.show[key] = next;
+          markDirtyAndPreview();
+        });
+      });
+
+      // ── Viewport switcher (issue #11) ────────────────────────
+      // The shell renders the buttons; we wire the actual width change here.
+      // CSS handles the transition via .preview-stage[data-vp="..."].
+      document.querySelectorAll('.tgse-vp button[data-vp]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const vp = btn.getAttribute('data-vp');
+          document.querySelectorAll('.tgse-vp button[data-vp]').forEach(b => b.classList.toggle('is-on', b === btn));
+          const stage = $('previewStage');
+          if (stage) stage.setAttribute('data-vp', vp);
+        });
+      });
+
+      // ── Dedupe breakdown panel (issue #10) ──────────────────
+      // The widget fires `tgo:dataLoaded` after every fetch with the offer
+      // counts that each strategy WOULD produce on the same raw data. We listen
+      // on the previewMount because the event bubbles from the shadow root.
+      const STRATEGY_LABELS = {
+        'none': 'None — every variant',
+        'hotel': 'Per hotel',
+        'hotel-board': 'Per hotel + board',
+        'hotel-duration': 'Per hotel + duration',
+        'hotel-departure': 'Per hotel + departure',
+        'route': 'Per flight route',
+        'route-carrier': 'Per route + carrier',
+      };
+      const previewMount = $('previewMount');
+      if (previewMount) {
+        previewMount.addEventListener('tgo:dataLoaded', (ev) => {
+          const panel = $('breakdownPanel');
+          if (!panel) return;
+          const detail = ev.detail || {};
+          const breakdown = detail.breakdown || {};
+          const raw = detail.rawCount || 0;
+          const active = state.config.dedupeStrategy || 'hotel';
+
+          if (raw === 0) {
+            panel.className = 'breakdown-panel is-empty';
+            panel.innerHTML = 'No offers returned. Adjust filters and try again.';
+            return;
+          }
+
+          let html = '<div class="breakdown-panel-title">Dedupe preview</div>';
+          html += '<div class="breakdown-list">';
+          Object.entries(STRATEGY_LABELS).forEach(([key, label]) => {
+            const count = breakdown[key];
+            const isActive = key === active;
+            html += '<div class="breakdown-row' + (isActive ? ' active' : '') + '">'
+              + '<span class="breakdown-strategy">' + label + '</span>'
+              + '<span class="breakdown-count">' + (count != null ? count : '—') + '</span>'
+              + '</div>';
+          });
+          html += '</div>';
+          html += '<div class="breakdown-raw">'
+            + '<span>Raw from API</span><strong>' + raw + ' offers</strong>'
+            + '</div>';
+          panel.className = 'breakdown-panel';
+          panel.innerHTML = html;
+        });
+      }
+    }
+
+    /* ============================================================
+       Modals
+       ============================================================ */
+    function openModal(id) { $(id).hidden = false; }
+    function closeModal(id) { $(id).hidden = true; }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('[data-close]') || e.target.closest('[data-close]')) {
+        const modal = e.target.closest('.modal-backdrop');
+        if (modal) modal.hidden = true;
+      } else if (e.target.classList.contains('modal-backdrop')) {
+        e.target.hidden = true;
+      }
+    });
+
+    /* ============================================================
+       Embed code
+       ============================================================ */
+    function renderEmbed() {
+      const box = $('embedCode');
+      if (!state.widgetId) {
+        box.textContent = 'Save the widget first to generate the embed code.';
+        return;
+      }
+      const code = '<div data-tg-widget="offers" data-tg-id="' + state.widgetId + '"></div>\n'
+        + '<script src="https://tg-widgets.vercel.app/widget-offers.js"><\/script>';
+      box.innerHTML = '';
+      const text = document.createElement('span');
+      text.textContent = code;
+      box.appendChild(text);
+      const btn = document.createElement('button');
+      btn.className = 'embed-copy';
+      btn.textContent = 'Copy';
+      btn.onclick = () => {
+        navigator.clipboard.writeText(code).then(() => {
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+        });
+      };
+      box.appendChild(btn);
+    }
+
+    /* ============================================================
+       Templates
+       ============================================================ */
+    const TEMPLATES = [
+      {
+        name: 'Spain hotels — bestsellers',
+        desc: 'Top accommodations across Spain, deduped by hotel',
+        config: { type: 'Accommodation', destinations: ['ES'], dedupeStrategy: 'hotel', density: 'standard', columns: 'auto' },
+      },
+      {
+        name: 'Greek islands — All-inclusive packages',
+        desc: 'Operator-named package holidays to Greece',
+        config: { type: 'PackageHolidays', destinations: ['GR'], boardBases: ['AllInclusive'], origins: ['GB'], density: 'detailed' },
+      },
+      {
+        name: 'Cheap flights — Europe',
+        desc: 'Flights to popular European destinations, deduped by route+carrier',
+        config: { type: 'Flights', origins: ['LGW', 'MAN', 'STN'], destinations: ['ES', 'IT', 'GR', 'PT'], dedupeStrategy: 'route-carrier', columns: '3' },
+      },
+      {
+        name: 'Family beach holidays',
+        desc: 'Mid-range packages with B&B, AI or HB board',
+        config: { type: 'BothPackages', destinations: ['ES', 'GR', 'TR'], origins: ['GB'], budgetMax: 1500, durationMax: 14, density: 'standard' },
+      },
+      {
+        name: 'Luxury escapes',
+        desc: 'High-end accommodations, 4+ star, detailed cards',
+        config: { type: 'Accommodation', ratingMin: 4, density: 'detailed', columns: '2', dedupeStrategy: 'hotel' },
+      },
+      {
+        name: 'Last-minute departures',
+        desc: 'Anything departing in the next 30 days, mixed types',
+        config: { type: 'Any', DatesMin: 1, DatesMax: 30, sort: 'price:asc', density: 'compact', columns: '4' },
+      },
+      {
+        name: 'Hotel comparison list',
+        desc: 'Compact list view — scan many properties at a glance',
+        config: { template: 'cards', layout: 'list', type: 'Accommodation', destinations: ['ES'], dedupeStrategy: 'hotel', listShowMeta: true, listShowAmenities: true },
+      },
+      {
+        name: 'Editorial showcase — Magazine',
+        desc: 'Featured hero offer with a 3-column grid below',
+        config: { template: 'magazine', type: 'PackageHolidays', destinations: ['MV', 'MU', 'GR'], origins: ['GB'], magazineHeroStrategy: 'discount', magazineFeatureEvery: 4, magazineShowDividers: true, density: 'standard' },
+      },
+      {
+        name: 'Boarding-pass flights',
+        desc: 'Flight fares as paper boarding passes',
+        config: { template: 'boarding-pass', type: 'Flights', origins: ['LHR', 'LGW', 'MAN'], destinations: ['ES', 'IT', 'PT'], boardingPassColumns: 2, boardingPassShowBarcode: true },
+      },
+      {
+        name: 'Live deals ticker',
+        desc: 'Marquee crawl of offers — for site headers and footers',
+        config: { template: 'ticker', type: 'Any', tickerStyle: 'pills', tickerSpeed: 'medium', tickerLabel: 'Live deals', tickerShowLabel: true, tickerPauseOnHover: true, maxOffers: 30 },
+      },
+    ];
+
+    function renderTemplates() {
+      const grid = $('templatesGrid');
+      grid.innerHTML = '';
+      TEMPLATES.forEach((t) => {
+        const card = document.createElement('div');
+        card.className = 'template-card';
+        card.innerHTML = '<div class="template-card-title"></div><div class="template-card-desc"></div>';
+        card.querySelector('.template-card-title').textContent = t.name;
+        card.querySelector('.template-card-desc').textContent = t.desc;
+        card.addEventListener('click', () => {
+          state.config = Object.assign(defaultConfig(), t.config);
+          state.dirty = true;
+          if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+          hydrateUI();
+          renderPreview();
+          closeModal('templatesModal');
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    /* ============================================================
+       AI suggestions
+       ============================================================ */
+    const AI_SUGGESTS = [
+      'Show all-inclusive Spain holidays under £600',
+      'Show family-friendly beach holidays with high reviews',
+      'Show budget flights from London to Europe',
+      'Show last-minute deals to anywhere',
+      'Show luxury 5-star hotels in Greece',
+    ];
+
+    function renderAiSuggestions() {
+      const grid = $('aiSuggestGrid');
+      grid.innerHTML = '';
+      AI_SUGGESTS.forEach((prompt) => {
+        const card = document.createElement('div');
+        card.className = 'ai-suggest';
+        card.textContent = prompt;
+        card.addEventListener('click', async () => {
+          const original = card.textContent;
+          card.textContent = 'Thinking…';
+          try {
+            const res = await fetch(API_AI, {
+              method: 'POST',
+              headers: window.tgse.authHeaders(),
+              body: JSON.stringify({
+                widgetType: WIDGET_TYPE,
+                prompt: prompt,
+                currentConfig: state.config,
+              }),
+            });
+            if (res.status === 401) { window.tgse.showLogin(); return; }
+            const data = await res.json();
+            if (data.config) {
+              state.config = Object.assign(defaultConfig(), state.config, data.config);
+              state.dirty = true;
+              if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+              hydrateUI();
+              renderPreview();
+              closeModal('aiModal');
+            } else {
+              card.textContent = original;
+              window.tgse.toast && window.tgse.toast('AI did not return a config — try a more specific prompt', 'error');
+            }
+          } catch (err) {
+            card.textContent = original;
+            window.tgse.toast && window.tgse.toast('AI request failed: ' + err.message, 'error');
+          }
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    /* ============================================================
+       Load widget by ID
+       ============================================================ */
+    async function loadWidget(id) {
+      try {
+        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id));
+        if (!res.ok) throw new Error('Load failed (' + res.status + ')');
+        const data = await res.json();
+        if (data.config) {
+          state.config = Object.assign(defaultConfig(), data.config);
+        }
+        if (data.name) state.name = data.name;
+        if (data.recordId) state.airtableRecordId = data.recordId;
+        state.widgetId = id;
+        $('topbarSub').textContent = id;
+        hydrateUI();
+        renderPreview();
+        renderEmbed();
+      } catch (err) {
+        if (window.tgse && window.tgse.toast) window.tgse.toast('Failed to load widget: ' + err.message, 'error');
+      }
+    }
+
+    /* ============================================================
+       Boot — once shell is initialised + user is logged in
+       ============================================================ */
+    function boot() {
+      $('editor').hidden = false;
+
+      refreshDestChips = wireChips('destChips', 'destInput', 'destinations');
+      refreshOriginChips = wireChips('originChips', 'originInput', 'origins');
+
+      wireInputs();
+      renderTemplates();
+      renderAiSuggestions();
+
+      const fontMount = $('fontPickerMount');
+      if (fontMount && window.tgse && window.tgse.mountFontPicker) {
+        window.tgse.mountFontPicker(fontMount, state.config.fontFamily || 'Inter', (font) => {
+          state.config.fontFamily = font;
+          markDirtyAndPreview();
+        });
+      }
+
+      if (state.widgetId) {
+        loadWidget(state.widgetId);
+      } else {
+        hydrateUI();
+        renderPreview();
+        renderEmbed();
+      }
+    }
+
+    /* ============================================================
+       Hand off to the shell
+       ============================================================ */
+    window.tgse.init({
+      widgetType: WIDGET_TYPE,
+      widgetTag: 'offers',
+      scriptFile: 'widget-offers.js',
+
+      getConfig: () => {
+        // Strip Travelify creds — they're account-level, never persisted on the widget config
+        const out = JSON.parse(JSON.stringify(state.config));
+        delete out.appId;
+        delete out.apiKey;
+        return out;
+      },
+      setConfig: (c) => {
+        if (c && typeof c === 'object') Object.assign(state.config, c);
+        hydrateUI();
+        renderPreview();
+      },
+
+      onAIBuild: () => openModal('aiModal'),
+      onTemplates: () => openModal('templatesModal'),
+      onThemeToggle: () => {
+        state.config.theme = state.config.theme === 'dark' ? 'light' : 'dark';
+        markDirtyAndPreview();
+      },
+      onTabChange: (tabName) => setTab(tabName),
+      onLoginSuccess: () => boot(),
+
+      onAfterSave: (d) => {
+        state.dirty = false;
+        if (d && d.widgetId) state.widgetId = d.widgetId;
+        if (d && d.recordId) state.airtableRecordId = d.recordId;
+        $('topbarSub').textContent = state.widgetId || 'Saved';
+        renderEmbed();
+      },
+    });
+
+    // Embed button explicit wire — opens our modal (in case shell doesn't have an onEmbed hook)
+    $('btn-embed').addEventListener('click', (e) => {
+      e.preventDefault();
+      renderEmbed();
+      openModal('embedModal');
+    });
+
+    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+      boot();
+    }
+    // else shell shows login overlay, we'll boot via onLoginSuccess
+  </script>
+
 </body>
 </html>
