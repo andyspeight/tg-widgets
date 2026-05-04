@@ -57,6 +57,45 @@
     .field:first-child { margin-top: 0; }
     .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 6px; }
     .field-help { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    /* Field callout — inline notice/warning inside an inspector field.
+       Used to flag config issues like "Split needs a wider layout".
+       Less alarming than an error, more visible than a help line. */
+    .field-callout {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+    .field-callout svg {
+      flex-shrink: 0;
+      color: #B45309;
+      margin-top: 1px;
+    }
+    .field-callout-body { flex: 1; }
+    .field-callout-action {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 10px;
+      background: var(--panel);
+      border: 1px solid var(--border-strong, var(--border));
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .field-callout-action:hover {
+      background: var(--panel-2);
+      border-color: var(--accent, #00B4D8);
+    }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
     .field-row:first-child { margin-top: 0; }
     .field-row .field { margin-top: 0; }
@@ -1321,6 +1360,18 @@
                 </select>
                 <div class="field-help"><strong>Auto</strong> picks a sensible mode for each layout. <strong>Carousel</strong> works best in slide-in / centered. <strong>Split</strong> needs a wide layout (centered or fullscreen) — falls back to single if too narrow. <strong>Countdown</strong> is for time-bound campaigns with a deadline.</div>
               </div>
+              <!-- Inline warning shown when Split is picked but the current
+                   layout is too narrow. Visibility driven by JS in
+                   updatePopupRenderModeVisibility. -->
+              <div class="field" id="popupSplitFallbackNotice" hidden>
+                <div class="field-callout">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div class="field-callout-body">
+                    <strong>Split needs Centered or Fullscreen layout.</strong> The current layout is too narrow for two columns, so the popup will render as <strong>single</strong> mode instead.
+                    <button type="button" class="field-callout-action" id="popupSplitFixLayoutBtn">Switch to Centered</button>
+                  </div>
+                </div>
+              </div>
               <div class="field" data-when-popup-render-mode="compact">
                 <label class="field-label">Compact arrangement</label>
                 <div class="segmented" id="popupCompactLayoutSeg">
@@ -2298,18 +2349,34 @@
     // countdown end date, etc). When 'auto' is selected, infer the actual
     // render mode based on the layout, since fields like "compact arrangement"
     // are only relevant when the resolved render mode is 'compact'.
+    // Also handles the split-fallback warning callout: shown when the user
+    // has explicitly picked Split but the current layout is too narrow.
     function updatePopupRenderModeVisibility() {
-      let mode = state.config.popupRenderMode || 'auto';
+      const rawMode = state.config.popupRenderMode || 'auto';
+      const layout = state.config.popupLayout || 'slide-in';
+      let mode = rawMode;
       if (mode === 'auto') {
-        const layout = state.config.popupLayout || 'slide-in';
         if (layout === 'top-bar' || layout === 'bottom-bar') mode = 'mini';
         else if (layout === 'floating-card') mode = 'single';
         else mode = 'compact';
       }
+      // Mirror the widget's fallback rule: split only renders in centered/fullscreen.
+      // We use the resolved mode (post-fallback) to drive conditional fields, so
+      // the user sees fields appropriate to what's actually rendering.
+      let resolvedMode = mode;
+      if (mode === 'split' && !['centered', 'fullscreen'].includes(layout)) {
+        resolvedMode = 'single';
+      }
       document.querySelectorAll('[data-when-popup-render-mode]').forEach(el => {
         const tokens = (el.dataset.whenPopupRenderMode || '').split(/\s+/).filter(Boolean);
-        el.hidden = tokens.length ? !tokens.includes(mode) : el.dataset.whenPopupRenderMode !== mode;
+        el.hidden = tokens.length ? !tokens.includes(resolvedMode) : el.dataset.whenPopupRenderMode !== resolvedMode;
       });
+      // Split fallback notice — visible only when the user explicitly chose
+      // split AND the current layout doesn't support it.
+      const splitNotice = document.getElementById('popupSplitFallbackNotice');
+      if (splitNotice) {
+        splitNotice.hidden = !(rawMode === 'split' && !['centered', 'fullscreen'].includes(layout));
+      }
     }
 
     // Show / hide popup-frequency-conditional fields (days input only when every-n-days)
@@ -2782,6 +2849,19 @@
         });
       });
       bindPopupSelect('cfgPopupRenderMode', 'popupRenderMode', updatePopupRenderModeVisibility);
+      // "Switch to Centered" quick-fix in the split fallback warning callout.
+      // Updates layout to centered, refreshes layout dropdown + visibility,
+      // and re-renders the preview so the user instantly sees split working.
+      const splitFixBtn = document.getElementById('popupSplitFixLayoutBtn');
+      if (splitFixBtn) {
+        splitFixBtn.addEventListener('click', () => {
+          state.config.popupLayout = 'centered';
+          $('cfgPopupLayout').value = 'centered';
+          updatePopupLayoutVisibility();
+          updatePopupRenderModeVisibility();
+          markDirtyAndPreview();
+        });
+      }
       // Compact-arrangement segmented control
       document.querySelectorAll('#popupCompactLayoutSeg button').forEach(b => {
         b.addEventListener('click', () => {
