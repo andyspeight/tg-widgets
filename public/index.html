@@ -418,6 +418,21 @@ const WIDGETS = [
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'popup',
+    name: 'Popup',
+    airtableType: 'Popup',
+    description: 'Capture leads and announce offers with eight layouts — modal, slide-in, top bar, bottom bar, fullscreen, side drawer, floating card and inline. Six content types include announcements, email capture, discount codes, images, two-step forms and video. Seven triggers: page load, time, scroll, exit-intent, click, inactivity, and pageview count. Routes leads to Google Sheets, webhooks, email and more.',
+    category: 'Lead Gen',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/><circle cx="7" cy="7" r="0.6" fill="currentColor"/><circle cx="9.5" cy="7" r="0.6" fill="currentColor"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-popup',
+    demoUrl: '/demo-popup',
+    widgetTag: 'popup',
+    scriptFile: 'widget-popup.js',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'logos',
     name: 'Logo Showcase',
     airtableType: 'Logo Showcase',
@@ -1462,6 +1477,70 @@ function loadMiniPreview(w) {
               <div style="font-size:10px;color:#64748B;margin-top:2px;">per person</div>
             </div>
             <div style="background:${w.color};color:#FFFFFF;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;">View deal</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (w.id === 'popup') {
+    // Static HTML mockup — same approach as enquiry, mybooking and offers.
+    // The real Popup widget is a full-screen overlay so a tile-size live
+    // render makes no visual sense. Built at production size 700x340 with
+    // scale(0.55) applied externally. Shows a centred modal sitting over
+    // a faux travel agency page — the most recognisable "popup" image.
+    container.innerHTML = `
+      <div style="
+        width: 700px;
+        height: 340px;
+        background: #F8FAFC;
+        border-radius: 16px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        position: relative;
+        overflow: hidden;
+        box-sizing: border-box;
+      ">
+        <!-- Faux client site backdrop -->
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+          <div style="background:#1B2B5B;color:#FFFFFF;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;font-size:14px;flex-shrink:0;">
+            <div style="font-weight:700;letter-spacing:-.01em;">Sunshine Holidays</div>
+            <div style="display:flex;gap:18px;opacity:.85;font-size:12px;">
+              <span>Destinations</span><span>Cruises</span><span>Late Deals</span><span>About</span>
+            </div>
+          </div>
+          <div style="flex:1;padding:24px 28px;background:#FFFFFF;">
+            <div style="font-size:24px;font-weight:700;color:#1B2B5B;margin-bottom:8px;letter-spacing:-.02em;">Find your next holiday</div>
+            <div style="color:#64748B;font-size:13px;line-height:1.6;margin-bottom:20px;max-width:520px;">Browse handpicked breaks across Europe, the Caribbean and beyond — all ABTA and ATOL protected.</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:520px;">
+              <div style="background:linear-gradient(135deg,#0096B7,#48CAE4);height:78px;border-radius:8px;opacity:.9;"></div>
+              <div style="background:linear-gradient(135deg,#F59E0B,#EF4444);height:78px;border-radius:8px;opacity:.9;"></div>
+              <div style="background:linear-gradient(135deg,#10B981,#06B6D4);height:78px;border-radius:8px;opacity:.9;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backdrop dim overlay -->
+        <div style="position:absolute;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);"></div>
+
+        <!-- The popup itself — centred modal -->
+        <div style="
+          position:absolute;
+          top:50%;left:50%;transform:translate(-50%,-50%);
+          width:380px;
+          background:#FFFFFF;
+          border-radius:16px;
+          box-shadow:0 20px 60px rgba(15,23,42,.25),0 4px 12px rgba(15,23,42,.1);
+          overflow:hidden;
+        ">
+          <!-- Hero strip -->
+          <div style="height:90px;background:linear-gradient(135deg,${w.color},#48CAE4);position:relative;">
+            <div style="position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:14px;font-weight:600;line-height:1;">×</div>
+          </div>
+          <!-- Body -->
+          <div style="padding:22px 24px 24px;">
+            <div style="font-size:20px;font-weight:700;color:#0F172A;line-height:1.25;letter-spacing:-.01em;margin-bottom:6px;">Late summer deals</div>
+            <div style="font-size:13px;color:#64748B;line-height:1.55;margin-bottom:16px;">Save up to 35% on Mediterranean cruises departing in September and October. Early bird offer ends Friday.</div>
+            <button style="display:block;width:100%;height:42px;background:${w.color};color:#FFFFFF;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:-.005em;">See the deals →</button>
           </div>
         </div>
       </div>
