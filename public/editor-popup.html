@@ -323,14 +323,30 @@
             <div class="sec-body" id="sb-trigger"></div>
           </div>
 
-          <!-- Colours (deferred to 1B — placeholder) -->
+          <!-- Colours -->
+          <div class="sec is-open">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Colours</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-colours"></div>
+          </div>
+
+          <!-- Shape -->
           <div class="sec">
             <button class="sec-head" type="button">
-              <span class="sec-title">Colours &amp; theme</span>
+              <span class="sec-title">Shape</span>
               <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="sec-body">
-              <div class="empty-state">Theme controls land in the next update — for now the popup uses your brand defaults.</div>
+              <div class="field">
+                <label class="field-label">Corner radius</label>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <input type="range" min="0" max="32" step="1" id="rad-slider" style="flex:1" value="16">
+                  <input type="number" class="input" id="rad-input" min="0" max="32" value="16" style="width:64px">
+                </div>
+                <div class="field-hint">0 = sharp corners, 32 = very rounded.</div>
+              </div>
             </div>
           </div>
 
@@ -651,6 +667,7 @@
         C.layout = b.getAttribute('data-layout');
         shell.markDirty();
         renderLayoutPicker();
+        renderColoursSection();  // backdrop-opacity field depends on layout
         render();
       });
     });
@@ -904,11 +921,7 @@
   }
 
   function bindContentInputs() {
-    // Section toggle (the shell wires top-level sections automatically; we
-    // wire newly-rendered ones so dynamic content sections work too).
-    $$('#sb-content-fields .sec-head').forEach(h => {
-      h.addEventListener('click', () => h.parentElement.classList.toggle('is-open'));
-    });
+    // Section toggles handled by global delegated click handler at the bottom of script.
     // Text inputs / textareas / urls
     $$('[data-bind]').forEach(el => {
       const key = el.getAttribute('data-bind');
@@ -1034,10 +1047,144 @@
   function renderAll() {
     renderLayoutPicker();
     renderTriggerPicker();
+    renderColoursSection();
+    renderRadiusSection();
     renderContentTypePicker();
     renderContentFields();
     bindSettingsSwitches();
     render();
+  }
+
+  /* ── Colours section ──────────────────────────────────── */
+  function colourField(label, key, hint) {
+    const val = C[key] || '#000000';
+    return `<div class="field">
+      <label class="field-label">${escHtml(label)}</label>
+      <div class="colour-row">
+        <label class="colour-swatch-wrap" style="background:${escHtml(val)}">
+          <input type="color" data-bind-colour="${key}" value="${escHtml(val)}">
+        </label>
+        <input type="text" class="input colour-hex" data-bind-colour-text="${key}" value="${escHtml(val)}" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+      </div>
+      ${hint ? `<div class="field-hint">${escHtml(hint)}</div>` : ''}
+    </div>`;
+  }
+
+  function renderColoursSection() {
+    const host = $('#sb-colours');
+    if (!host) return;
+
+    let html = '';
+    // Theme picker
+    html += `<div class="field">
+      <label class="field-label">Theme</label>
+      <select class="select" id="theme-select">
+        <option value="light" ${C.theme === 'light' ? 'selected' : ''}>Light</option>
+        <option value="dark" ${C.theme === 'dark' ? 'selected' : ''}>Dark</option>
+        <option value="auto" ${C.theme === 'auto' ? 'selected' : ''}>Auto (match visitor's device)</option>
+      </select>
+    </div>`;
+
+    // Brand & accent (always shown)
+    html += colourField('Brand colour', 'brand', 'Used for primary buttons and highlights.');
+    html += colourField('Accent colour', 'accent', 'Used for focus rings and secondary highlights.');
+
+    // Background & text — only relevant for non-image popups
+    html += colourField('Background', 'bg');
+    html += colourField('Text colour', 'text');
+    html += colourField('Text on brand', 'textOnBrand', 'Text colour used on primary buttons.');
+
+    // Backdrop opacity (only for overlay layouts)
+    if (['centered', 'fullscreen', 'side-drawer'].includes(C.layout)) {
+      html += `<div class="field">
+        <label class="field-label">Backdrop opacity</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="range" min="0" max="100" step="5" id="overlay-slider" style="flex:1" value="${C.overlayOpacity || 60}">
+          <input type="number" class="input" id="overlay-input" min="0" max="100" value="${C.overlayOpacity || 60}" style="width:64px">
+        </div>
+        <div class="field-hint">0 = no backdrop, 100 = solid.</div>
+      </div>`;
+    }
+
+    host.innerHTML = html;
+
+    // Wire up
+    $('#theme-select')?.addEventListener('change', e => {
+      C.theme = e.target.value;
+      shell.markDirty();
+      render();
+    });
+
+    $$('[data-bind-colour]', host).forEach(el => {
+      const key = el.getAttribute('data-bind-colour');
+      el.addEventListener('input', () => {
+        const v = el.value;
+        C[key] = v;
+        // Sync the swatch background and hex input
+        const swatch = el.parentElement;
+        if (swatch) swatch.style.background = v;
+        const text = host.querySelector(`[data-bind-colour-text="${key}"]`);
+        if (text) text.value = v.toUpperCase();
+        shell.markDirty();
+        debounceRender();
+      });
+    });
+
+    $$('[data-bind-colour-text]', host).forEach(el => {
+      const key = el.getAttribute('data-bind-colour-text');
+      el.addEventListener('input', () => {
+        const v = el.value.trim();
+        if (!/^#[0-9A-Fa-f]{6}$/.test(v)) return;
+        C[key] = v;
+        const colour = host.querySelector(`[data-bind-colour="${key}"]`);
+        if (colour) {
+          colour.value = v;
+          colour.parentElement.style.background = v;
+        }
+        shell.markDirty();
+        debounceRender();
+      });
+    });
+
+    const ovSlider = $('#overlay-slider');
+    const ovInput = $('#overlay-input');
+    if (ovSlider) ovSlider.addEventListener('input', () => {
+      C.overlayOpacity = Number(ovSlider.value);
+      ovInput.value = ovSlider.value;
+      shell.markDirty();
+      debounceRender();
+    });
+    if (ovInput) ovInput.addEventListener('change', () => {
+      const v = Math.max(0, Math.min(100, Number(ovInput.value) || 0));
+      C.overlayOpacity = v;
+      ovInput.value = v;
+      ovSlider.value = v;
+      shell.markDirty();
+      render();
+    });
+  }
+
+  /* ── Radius (shape) section ──────────────────────────── */
+  function renderRadiusSection() {
+    const slider = $('#rad-slider');
+    const input = $('#rad-input');
+    if (!slider || !input) return;
+    slider.value = C.radius != null ? C.radius : 16;
+    input.value = C.radius != null ? C.radius : 16;
+    slider.addEventListener('input', () => {
+      C.radius = Number(slider.value);
+      input.value = slider.value;
+      shell.markDirty();
+      debounceRender();
+    });
+    input.addEventListener('change', () => {
+      const v = Math.max(0, Math.min(32, Number(input.value) || 0));
+      C.radius = v;
+      input.value = v;
+      slider.value = v;
+      shell.markDirty();
+      render();
+    });
   }
 
   /* ── Embed code modal ──────────────────────────────────── */
@@ -1077,6 +1224,22 @@
 
   /* ── Name input → mark dirty ───────────────────────────── */
   document.getElementById('name-input')?.addEventListener('input', () => shell.markDirty());
+
+  /* ── Global section-toggle wiring ──────────────────────
+     Delegated click handler so it works for both static
+     sections (Layout, When to show, Colours, Shape, Typography
+     in the Design tab; Behaviour, Frequency in the Settings tab)
+     AND dynamically-rendered sections (in renderContentFields).
+     The unified shell does this only for .tgse-section-head;
+     we use .sec-head so we wire our own. */
+  document.addEventListener('click', (e) => {
+    const head = e.target.closest('.sec-head');
+    if (!head) return;
+    const sec = head.parentElement;
+    if (sec && sec.classList.contains('sec')) {
+      sec.classList.toggle('is-open');
+    }
+  });
 
   /* ── Boot ──────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', () => {
