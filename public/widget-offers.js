@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.3.0
+ * Travelgenix Travel Offers Widget v1.4.0
  * Self-contained, embeddable widget pulling live data from the Travelify offers cache.
  *
  * Usage:
@@ -18,16 +18,17 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
- *   v1.3.0 (May 2026) — Hyper-realistic Solari split-flap departure board:
- *     • Replaced opacity-fade animation with proper 3D flap mechanism
- *     • Each character cell scrambles through the alphabet (Grafana-style
- *       shortest-path) — letter cells through A–Z, digit cells through 0–9
- *     • Top half reveals new glyph immediately; bottom half stays old until
- *       the falling flap covers it (correct mechanical physics)
- *     • Per-flap duration 80ms, row stagger 120ms, column stagger 40ms,
- *       per-cell ±15ms jitter — total board settle ~3s for 8 rows
- *     • Optional Web Audio click sound (config: boardSound, default off)
- *     • prefers-reduced-motion still short-circuits to instant text update
+ *   v1.4.0 (May 2026) — Magazine mosaic + departure-board status pills:
+ *     • Magazine template redesigned as editorial mosaic — hero, banner row,
+ *       3-up with pull-quote card in middle, then more tiles
+ *     • Pull-quote source 3-tier fallback: o.editorialQuote → o.accommodation.summary → fall back to standard tile
+ *     • Editorial dividers (small caps typography) between sections
+ *     • Departure board: three new status pills — Tomorrow (orange), Going soon
+ *       (teal, configurable threshold), Premium cabin (purple)
+ *     • Pill priority: Cheapest > Premium > Today > Tomorrow > This week > Going soon
+ *     • New config keys: boardShowTomorrow, boardShowGoingSoon, boardGoingSoonDays,
+ *       boardShowPremiumCabin, magazineShowQuote, magazineShowDividers
+ *   v1.3.0 — Hyper-realistic Solari split-flap departure board
  *   v1.2.0 — Added three new visual options: List layout, Magazine template,
  *     Boarding-pass template
  *   v1.1.0 — Carousel layout + departure-board template + pax popover.
@@ -37,7 +38,7 @@
 
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ── XSS-safe helpers ──────────────────────────────────────────────
@@ -473,16 +474,21 @@
     return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   }
 
-  // 'today' / 'thisWeek' / 'soon' / 'later' for status pill logic
+  // Returns { category, days } where category is 'today' / 'tomorrow' /
+  // 'thisWeek' / 'soon' / 'later' for status pill logic, and days is the
+  // raw days-from-now (used when callers need a configurable threshold).
+  // Negative days = past departures (treated as 'later').
   function dateProximity(iso) {
-    if (!iso) return 'later';
+    if (!iso) return { category: 'later', days: Infinity };
     const dep = new Date(iso);
     const diffMs = dep.getTime() - Date.now();
     const diffDays = diffMs / 86400000;
-    if (diffDays < 1) return 'today';
-    if (diffDays < 7) return 'thisWeek';
-    if (diffDays < 30) return 'soon';
-    return 'later';
+    if (diffDays < 0) return { category: 'later', days: diffDays };
+    if (diffDays < 1) return { category: 'today', days: diffDays };
+    if (diffDays < 2) return { category: 'tomorrow', days: diffDays };
+    if (diffDays < 7) return { category: 'thisWeek', days: diffDays };
+    if (diffDays < 30) return { category: 'soon', days: diffDays };
+    return { category: 'later', days: diffDays };
   }
 
   function dedupeOffers(offers, strategy, sortPref) {
@@ -1303,8 +1309,14 @@
       --tdb-pill-cheap-fg: #FFD15C;
       --tdb-pill-today-bg: rgba(239, 68, 68, 0.18);
       --tdb-pill-today-fg: #FCA5A5;
+      --tdb-pill-tomorrow-bg: rgba(245, 158, 11, 0.18);
+      --tdb-pill-tomorrow-fg: #FCD34D;
       --tdb-pill-week-bg: rgba(56, 189, 248, 0.16);
       --tdb-pill-week-fg: #7DD3FC;
+      --tdb-pill-soon-bg: rgba(20, 184, 166, 0.18);
+      --tdb-pill-soon-fg: #5EEAD4;
+      --tdb-pill-premium-bg: rgba(168, 85, 247, 0.18);
+      --tdb-pill-premium-fg: #D8B4FE;
       --tdb-live: #4ADE80;
     }
     .tdb-root[data-theme="light"] {
@@ -1320,8 +1332,14 @@
       --tdb-pill-cheap-fg: #92400E;
       --tdb-pill-today-bg: #FEE2E2;
       --tdb-pill-today-fg: #B91C1C;
+      --tdb-pill-tomorrow-bg: #FED7AA;
+      --tdb-pill-tomorrow-fg: #9A3412;
       --tdb-pill-week-bg: #DBEAFE;
       --tdb-pill-week-fg: #1E40AF;
+      --tdb-pill-soon-bg: #CCFBF1;
+      --tdb-pill-soon-fg: #115E59;
+      --tdb-pill-premium-bg: #F3E8FF;
+      --tdb-pill-premium-fg: #6B21A8;
       --tdb-live: #10B981;
     }
     .tdb-header {
@@ -1534,7 +1552,10 @@
     }
     .tdb-pill[data-kind="cheapest"] { background: var(--tdb-pill-cheap-bg); color: var(--tdb-pill-cheap-fg); }
     .tdb-pill[data-kind="today"]    { background: var(--tdb-pill-today-bg); color: var(--tdb-pill-today-fg); }
+    .tdb-pill[data-kind="tomorrow"] { background: var(--tdb-pill-tomorrow-bg); color: var(--tdb-pill-tomorrow-fg); }
     .tdb-pill[data-kind="week"]     { background: var(--tdb-pill-week-bg); color: var(--tdb-pill-week-fg); }
+    .tdb-pill[data-kind="soon"]     { background: var(--tdb-pill-soon-bg); color: var(--tdb-pill-soon-fg); }
+    .tdb-pill[data-kind="premium"]  { background: var(--tdb-pill-premium-bg); color: var(--tdb-pill-premium-fg); }
     .tdb-fare {
       text-align: right;
       font-weight: 800; font-size: 16px;
@@ -1947,39 +1968,254 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════════
-       MAGAZINE TEMPLATE
-       Hero card spanning full width over a sub-grid. Editorial aesthetic.
-       Reuses .tgo-card for sub-grid items so they look identical to grid mode.
+       MAGAZINE TEMPLATE — editorial mosaic
+       Hero on top, then editorial divider, then full-width banner card,
+       then a 3-up mosaic where the centre cell can be a navy pull-quote
+       card instead of a tile. Then optional further rows of standard tiles.
+       Reuses .tgo-card for standard tiles so they look identical to grid mode.
        ═══════════════════════════════════════════════════════════════════ */
     .tgo-mag {
       display: grid;
       grid-template-columns: 1fr;
       gap: 24px;
     }
-    .tgo-mag-grid {
+
+    /* Editorial divider — small typographic moment between sections */
+    .tgo-mag-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 8px 0 -4px;
+    }
+    .tgo-mag-divider::before,
+    .tgo-mag-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--tgo-border);
+    }
+    .tgo-mag-divider-label {
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tgo-muted);
+      white-space: nowrap;
+    }
+    .tgo-mag-divider-label strong {
+      color: var(--tgo-text);
+      font-weight: 600;
+    }
+
+    /* Full-width banner card — second-billing offer below the hero */
+    .tgo-mag-banner {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      background: var(--tgo-card);
+      border: 1px solid var(--tgo-border);
+      border-radius: var(--tgo-radius);
+      overflow: hidden;
+      min-height: 220px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .tgo-mag-banner:hover {
+      border-color: var(--tgo-accent);
+      box-shadow: var(--tgo-shadow-hover);
+    }
+    .tgo-mag-banner-img {
+      background: var(--tgo-card-alt) center/cover no-repeat;
+      position: relative;
+      min-height: 180px;
+    }
+    .tgo-mag-banner-overlay {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: var(--tgo-accent);
+      color: #fff;
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .tgo-mag-banner-body {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .tgo-mag-banner-kicker {
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--tgo-muted);
+      margin-bottom: 8px;
+    }
+    .tgo-mag-banner-body h3 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      margin: 0 0 10px;
+      line-height: 1.2;
+      color: var(--tgo-text);
+    }
+    .tgo-mag-banner-body p {
+      font-size: 13px;
+      color: var(--tgo-sub);
+      margin: 0 0 16px;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .tgo-mag-banner-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .tgo-mag-banner-foot .price {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--tgo-text);
+    }
+    .tgo-mag-banner-foot .price small {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--tgo-muted);
+      margin-left: 4px;
+    }
+    .tgo-mag-banner-foot .cta {
+      background: var(--tgo-brand);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .tgo-mag-banner-foot .cta:hover {
+      background: var(--tgo-brand-hover, var(--tgo-accent-hover));
+    }
+
+    /* Mosaic 3-up grid — standard tiles + an optional pull-quote card in the centre */
+    .tgo-mag-mosaic {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
-    .tgo-mag-grid[data-cols="2"] { grid-template-columns: repeat(2, 1fr); }
-    .tgo-mag-grid[data-cols="4"] { grid-template-columns: repeat(4, 1fr); }
-    @media (max-width: 1024px) {
-      .tgo-mag-grid,
-      .tgo-mag-grid[data-cols="3"],
-      .tgo-mag-grid[data-cols="4"] {
-        grid-template-columns: repeat(2, 1fr);
-      }
+
+    /* Pull-quote card — sits in the centre cell of the mosaic.
+       Navy background, oversized italic quote, no image. */
+    .tgo-mag-quote {
+      background: var(--tgo-brand);
+      color: #fff;
+      padding: 28px;
+      border-radius: var(--tgo-radius);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-    @media (max-width: 600px) {
-      .tgo-mag-grid,
-      .tgo-mag-grid[data-cols="2"],
-      .tgo-mag-grid[data-cols="3"],
-      .tgo-mag-grid[data-cols="4"] {
-        grid-template-columns: 1fr;
-      }
+    .tgo-mag-quote:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--tgo-shadow-hover);
+    }
+    .tgo-mag-quote::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 16px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+      font-size: 140px;
+      color: rgba(255, 255, 255, 0.08);
+      line-height: 1;
+      font-weight: 600;
+      pointer-events: none;
+    }
+    .tgo-mag-quote-kicker {
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--tgo-accent-light, #48CAE4);
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .tgo-mag-quote blockquote {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+      font-size: 18px;
+      line-height: 1.4;
+      margin: 0 0 16px;
+      font-weight: 500;
+      color: #fff;
+      position: relative;
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .tgo-mag-quote-foot {
+      margin-top: auto;
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      gap: 8px;
+    }
+    .tgo-mag-quote-foot .price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .tgo-mag-quote-foot .price small {
+      font-size: 10px;
+      font-weight: 500;
+      opacity: 0.7;
+      margin-left: 4px;
+    }
+    .tgo-mag-quote-foot .cta {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tgo-accent-light, #48CAE4);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
     }
 
-    /* Hero */
+    /* Responsive: collapse mosaic and banner gracefully */
+    @media (max-width: 900px) {
+      .tgo-mag-mosaic { grid-template-columns: repeat(2, 1fr); }
+      .tgo-mag-banner { grid-template-columns: 1fr; min-height: 0; }
+      .tgo-mag-banner-img { min-height: 200px; }
+      .tgo-mag-banner-body { padding: 20px 24px; }
+      .tgo-mag-banner-body h3 { font-size: 18px; }
+    }
+    @media (max-width: 600px) {
+      .tgo-mag-mosaic { grid-template-columns: 1fr; }
+    }
+
+    /* Hero (unchanged from previous version — kept inline for completeness) */
     .tgo-mag-hero {
       position: relative;
       border-radius: var(--tgo-radius);
@@ -2726,18 +2962,24 @@
         listShowMeta: c.listShowMeta !== false,
         listShowAmenities: c.listShowAmenities !== false,
 
-        // Magazine template — hero card + sub-grid below. Hero picked by:
-        //   'featured'  — first offer with o.featured=true, else falls back
-        //   'discount'  — biggest absolute discount (priceBeforeChange - price)
-        //   'cheapest'  — lowest numeric price
-        //   'first'     — whatever Travelify returned first
+        // Magazine template config (used only when template='magazine')
+        // Mosaic layout: hero → banner → 3-up with quote → more tiles
         magazineHeroStrategy: c.magazineHeroStrategy || 'discount',
-        magazineColumns: typeof c.magazineColumns === 'number' ? c.magazineColumns : 3,
-
-        // Boarding-pass template — flights-only specialist (like departure-board).
-        // _buildPayload forces type='Flights' when this template is active.
+        magazineShowQuote: c.magazineShowQuote !== false,       // pull-quote card in mosaic centre
+        magazineShowDividers: c.magazineShowDividers !== false, // editorial divider strips between sections
+        // Boarding-pass template config (used only when template='boarding-pass')
         boardingPassColumns: typeof c.boardingPassColumns === 'number' ? c.boardingPassColumns : 2,
         boardingPassShowBarcode: c.boardingPassShowBarcode !== false,
+
+        // Departure-board status pill toggles. Cheapest, Today, This week
+        // are always-on (foundational signals). Tomorrow, Going soon, and
+        // Premium cabin are opt-in but default ON. Going-soon threshold is
+        // configurable so different brand tones (luxury vs budget) can
+        // tune what "going soon" means for their audience.
+        boardShowTomorrow: c.boardShowTomorrow !== false,
+        boardShowGoingSoon: c.boardShowGoingSoon !== false,
+        boardGoingSoonDays: typeof c.boardGoingSoonDays === 'number' ? c.boardGoingSoonDays : 14,
+        boardShowPremiumCabin: c.boardShowPremiumCabin !== false,
 
         show: Object.assign({}, defaultShow, c.show || {}),
 
@@ -4110,15 +4352,22 @@
        ═══════════════════════════════════════════════════════════════════ */
 
     /* ═══════════════════════════════════════════════════════════════════
-       MAGAZINE TEMPLATE
-       Hero card spanning full width over a sub-grid of standard cards.
-       Hero is auto-promoted by magazineHeroStrategy:
+       MAGAZINE TEMPLATE — editorial mosaic
+       Layout sequence (when enough offers):
+         1. Hero               (full-width, 21:9, picked by magazineHeroStrategy)
+         2. Editorial divider  (small caps "EIGHT MORE STAYS · UP TO 22% OFF")
+         3. Banner             (full-width, second-billing offer)
+         4. Mosaic 3-up        (tile + quote-card + tile)
+         5. Mosaic 3-up        (tile + tile + tile, repeating until offers exhausted)
+       Hero strategy:
          featured  — first offer with o.featured=true (falls back if none)
-         discount  — biggest absolute discount
+         discount  — biggest absolute discount (priceBeforeChange - price)
          cheapest  — lowest numeric price
          first     — whatever Travelify returned first
-       Reuses _renderOfferCard for the sub-grid so the cards look exactly
-       like grid mode — only the hero is a new render.
+       Pull-quote source (3-tier fallback):
+         o.editorialQuote        (curated field — wins if present)
+         o.accommodation.summary (default — usually populated)
+         null                    → cell falls back to a regular tile
        ═══════════════════════════════════════════════════════════════════ */
     _renderMagazineTemplate() {
       const deduped = dedupeOffers(this.rawOffers, this.cfg.dedupeStrategy, this.cfg.sort);
@@ -4128,20 +4377,89 @@
         return;
       }
 
+      // Pick hero
       const heroIdx = this._pickMagazineHero(deduped);
       const hero = deduped[heroIdx];
-      const rest = deduped.slice(0, heroIdx).concat(deduped.slice(heroIdx + 1));
+      const remaining = deduped.slice(0, heroIdx).concat(deduped.slice(heroIdx + 1));
 
+      // Pick banner — second-best offer (highest discount after hero, else cheapest)
+      // Only shown if we have at least 2 offers total (i.e. at least 1 remaining)
+      const bannerIdx = remaining.length ? this._pickMagazineBanner(remaining) : -1;
+      const banner = bannerIdx >= 0 ? remaining[bannerIdx] : null;
+      const mosaicOffers = bannerIdx >= 0
+        ? remaining.slice(0, bannerIdx).concat(remaining.slice(bannerIdx + 1))
+        : remaining;
+
+      // Pick the offer for the pull-quote card (if enabled). Walks mosaicOffers
+      // looking for the first one with a usable quote source. If found, that
+      // offer is removed from mosaicOffers and slotted into position 1 of the
+      // first mosaic row instead.
+      let quoteOffer = null;
+      let quoteIdx = -1;
+      const showQuote = this.cfg.magazineShowQuote !== false;
+      if (showQuote && mosaicOffers.length >= 3) {
+        // Need at least 3 mosaic offers for a 3-up row; quote takes one of them.
+        for (let i = 0; i < mosaicOffers.length; i++) {
+          if (this._magQuoteText(mosaicOffers[i])) {
+            quoteOffer = mosaicOffers[i];
+            quoteIdx = i;
+            break;
+          }
+        }
+      }
+
+      // Build HTML
       let html = '<div class="tgo-mag">';
+
+      // 1. Hero
       html += this._renderMagazineHero(hero);
 
-      if (rest.length) {
-        const cols = Math.min(4, Math.max(2, this.cfg.magazineColumns || 3));
-        html += '<div class="tgo-mag-grid" data-cols="' + cols + '">';
-        for (const o of rest) html += this._renderOfferCard(o);
-        html += '</div>';
+      // 2. Editorial divider (only if we have more content below)
+      if (this.cfg.magazineShowDividers !== false && (banner || mosaicOffers.length)) {
+        const totalRemaining = (banner ? 1 : 0) + mosaicOffers.length;
+        const label = totalRemaining + ' more handpicked '
+          + (totalRemaining === 1 ? 'stay' : 'stays');
+        html += this._renderMagazineDivider(label);
       }
-      html += '</div>';
+
+      // 3. Banner
+      if (banner) {
+        html += this._renderMagazineBanner(banner);
+      }
+
+      // 4 + 5. Mosaic rows
+      // The first row contains [tile, quote, tile] if we have a quote, else [tile, tile, tile]
+      // Subsequent rows are all [tile, tile, tile] continuing through the offers
+      if (mosaicOffers.length) {
+        // Pull the quote out of the offer pool so it doesn't appear twice
+        const remainingForMosaic = quoteIdx >= 0
+          ? mosaicOffers.slice(0, quoteIdx).concat(mosaicOffers.slice(quoteIdx + 1))
+          : mosaicOffers;
+
+        if (quoteOffer && remainingForMosaic.length >= 2) {
+          // First row with quote in centre
+          html += '<div class="tgo-mag-mosaic">';
+          html += this._renderOfferCard(remainingForMosaic[0]);
+          html += this._renderMagazineQuoteCard(quoteOffer);
+          html += this._renderOfferCard(remainingForMosaic[1]);
+          html += '</div>';
+
+          // Subsequent rows
+          if (remainingForMosaic.length > 2) {
+            const more = remainingForMosaic.slice(2);
+            html += '<div class="tgo-mag-mosaic">';
+            for (const o of more) html += this._renderOfferCard(o);
+            html += '</div>';
+          }
+        } else {
+          // No quote, or quote eaten too much — straight mosaic
+          html += '<div class="tgo-mag-mosaic">';
+          for (const o of remainingForMosaic) html += this._renderOfferCard(o);
+          html += '</div>';
+        }
+      }
+
+      html += '</div>';  // /tgo-mag
 
       if (this.cfg.show.poweredBy) {
         html += '<div class="tgo-powered">Powered by Travelgenix</div>';
@@ -4184,10 +4502,35 @@
       return bestIdx;
     }
 
+    // The banner is the second-billing offer below the hero. Same picking
+    // strategy as the hero would use, but applied to the remaining offers
+    // pool (so it never duplicates the hero).
+    _pickMagazineBanner(offers) {
+      // Use the same strategy as the hero so the user's preference applies
+      // to the banner too — the banner is the "runner-up" by the same metric.
+      return this._pickMagazineHero(offers);
+    }
+
+    // Returns the quote text for an offer, or null if no usable source.
+    // Three-tier fallback: editorialQuote → accommodation.summary → null.
+    _magQuoteText(o) {
+      if (!o) return null;
+      // Tier 1 — manually curated quote (optional Airtable field)
+      if (typeof o.editorialQuote === 'string' && o.editorialQuote.trim().length > 20) {
+        return o.editorialQuote.trim();
+      }
+      // Tier 2 — accommodation summary (Travelify field)
+      const acc = o.accommodation || {};
+      if (typeof acc.summary === 'string' && acc.summary.trim().length > 30) {
+        return acc.summary.trim();
+      }
+      // Tier 3 — no usable quote, this offer can't be the quote-card
+      return null;
+    }
+
     // The hero card. Picks the right hero variant for the offer's type so
     // the headline reads naturally (hotel name vs route vs operator+hotel).
     _renderMagazineHero(o) {
-      // Pick a hero image and a primary headline based on type
       const acc = o.accommodation || {};
       const f = o.flight || {};
       const dest = acc.destination || f.destination || {};
@@ -4274,6 +4617,142 @@
       html += '</div>'; // /tgo-mag-hero-content
       html += '</article>';
       return html;
+    }
+
+    // The full-width banner card. Image left, content right. Reads like a
+    // "second cover story" below the hero — gives the runner-up offer
+    // weight without competing with the hero for attention.
+    _renderMagazineBanner(o) {
+      const acc = o.accommodation || {};
+      const f = o.flight || {};
+      const dest = acc.destination || f.destination || {};
+      const isAcc = o.type === 'Accommodation';
+      const isFlight = o.type === 'Flight' || o.type === 'Flights';
+      const isPkg = o.type === 'Package' || o.type === 'Packages';
+
+      const img = safeImgUrl(
+        (acc.image && acc.image.url)
+        || (f.image && f.image.url)
+        || ''
+      );
+
+      // Optional overlay tag — uses operator name on packages, "Direct" on flights, etc.
+      let overlay = '';
+      if (isPkg && acc.operator && acc.operator.name) {
+        overlay = acc.operator.name;
+      } else if (isFlight && f.direct) {
+        overlay = 'Direct';
+      } else if (isAcc && acc.rating >= 5) {
+        overlay = '5★';
+      }
+
+      // Headline + kicker
+      let kicker = '';
+      let headline = '';
+      let summary = '';
+      if (isAcc) {
+        const bits = [];
+        if (dest.name) bits.push(dest.name);
+        if (acc.nights) bits.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
+        if (acc.boardBasis) bits.push(formatEnum(acc.boardBasis));
+        kicker = bits.join(' · ');
+        headline = acc.name || 'Featured stay';
+        summary = acc.summary || '';
+      } else if (isFlight) {
+        const og = f.origin || {};
+        const fd = f.destination || {};
+        const bits = [];
+        if (og.iataCode && fd.iataCode) bits.push(og.iataCode + ' → ' + fd.iataCode);
+        if (f.duration) bits.push(formatDuration(f.duration));
+        if ((f.carrier || {}).name) bits.push(f.carrier.name);
+        kicker = bits.join(' · ');
+        headline = ((fd.name || fd.iataCode || '') + (f.direct ? ' direct' : '')).trim() || 'Featured flight';
+        summary = '';
+      } else if (isPkg) {
+        const bits = [];
+        if (dest.name) bits.push(dest.name);
+        if (acc.nights) bits.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
+        if (acc.boardBasis) bits.push(formatEnum(acc.boardBasis));
+        kicker = bits.join(' · ');
+        headline = acc.name || 'Featured package';
+        summary = acc.summary || '';
+      } else {
+        headline = 'Featured offer';
+      }
+
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const url = safeUrl(o.url || '#');
+
+      let html = '<a class="tgo-mag-banner" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">';
+      html += '<div class="tgo-mag-banner-img" ' + cssBgUrl(img) + '>';
+      if (overlay) {
+        html += '<span class="tgo-mag-banner-overlay">' + esc(overlay) + '</span>';
+      }
+      html += '</div>';
+      html += '<div class="tgo-mag-banner-body">';
+      if (kicker) html += '<div class="tgo-mag-banner-kicker">' + esc(kicker) + '</div>';
+      html += '<h3>' + esc(headline) + '</h3>';
+      if (summary && this.cfg.show.summary) {
+        html += '<p>' + esc(summary) + '</p>';
+      }
+      html += '<div class="tgo-mag-banner-foot">';
+      html += '<span class="price">' + esc(display.primary)
+        + (display.sub ? '<small>' + esc(display.sub) + '</small>' : '')
+        + '</span>';
+      html += '<span class="cta">View deal →</span>';
+      html += '</div>';
+      html += '</div>';  // /tgo-mag-banner-body
+      html += '</a>';
+      return html;
+    }
+
+    // The pull-quote card. Sits in the centre cell of the first mosaic row.
+    // Navy background, oversized italic quote, no image. The whole card is
+    // a link to the offer.
+    _renderMagazineQuoteCard(o) {
+      const acc = o.accommodation || {};
+      const dest = acc.destination || (o.flight && o.flight.destination) || {};
+      const quote = this._magQuoteText(o);
+      // Caller has already verified quote is present, but defend anyway
+      if (!quote) return this._renderOfferCard(o);
+
+      // Truncate for visual consistency — anything over ~160 chars looks
+      // unbalanced in the card. Add ellipsis.
+      const truncated = quote.length > 160
+        ? quote.slice(0, 160).replace(/\s+\S*$/, '') + '…'
+        : quote;
+
+      // Kicker — use destination name + nights/board if available, else "Editor's pick"
+      let kicker = "Editor's pick";
+      if (dest.name && acc.nights) {
+        kicker = dest.name + ' · ' + acc.nights + ' nt';
+        if (acc.boardBasis) kicker += ' · ' + formatEnum(acc.boardBasis);
+      } else if (dest.name) {
+        kicker = dest.name;
+      }
+
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const url = safeUrl(o.url || '#');
+
+      let html = '<a class="tgo-mag-quote" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">';
+      html += '<div class="tgo-mag-quote-kicker">' + esc(kicker) + '</div>';
+      html += '<blockquote>' + esc(truncated) + '</blockquote>';
+      html += '<div class="tgo-mag-quote-foot">';
+      html += '<span class="price">' + esc(display.primary)
+        + (display.sub ? '<small>' + esc(display.sub) + '</small>' : '')
+        + '</span>';
+      html += '<span class="cta">Book →</span>';
+      html += '</div>';
+      html += '</a>';
+      return html;
+    }
+
+    // Editorial divider between sections. Small caps typography with horizontal
+    // rules either side. Optional <strong> for stat emphasis (passed in label).
+    _renderMagazineDivider(label) {
+      return '<div class="tgo-mag-divider">'
+        + '<span class="tgo-mag-divider-label">' + esc(label) + '</span>'
+        + '</div>';
     }
     /* ═══════════════════════════════════════════════════════════════════
        END MAGAZINE TEMPLATE
@@ -4594,16 +5073,7 @@
           ? '<span class="tdb-direct">DIRECT</span>'
           : (f.stops === 1 ? '1 STOP' : (f.stops || 1) + ' STOPS');
         const isCheapest = (o.id === cheapestId);
-        const proximity = dateProximity(f.outboundDate);
-
-        let pillHtml = '';
-        if (isCheapest) {
-          pillHtml = '<span class="tdb-pill" data-kind="cheapest">★ Cheapest</span>';
-        } else if (proximity === 'today') {
-          pillHtml = '<span class="tdb-pill" data-kind="today">Today</span>';
-        } else if (proximity === 'thisWeek') {
-          pillHtml = '<span class="tdb-pill" data-kind="week">This week</span>';
-        }
+        const pillHtml = this._pickBoardPill(o, isCheapest);
 
         const cityLine = (og.name ? og.name.replace(/\s*\([A-Z]{3}\)\s*$/, '') : '')
           + ' → '
@@ -4646,6 +5116,62 @@
       // pairs the target dict with the row DOM element.
       this._sfRowTargets = rowTargets;
       this._updateBoardMeta(flights.length);
+    }
+
+    // Pick at most ONE status pill per row, by priority order.
+    // Priority (highest to lowest):
+    //   Cheapest          (★ gold, always-on)
+    //   Premium cabin     (purple, opt-in via boardShowPremiumCabin)
+    //   Today             (red, always-on)
+    //   Tomorrow          (orange, opt-in via boardShowTomorrow)
+    //   This week         (blue, always-on)
+    //   Going soon        (teal, opt-in via boardShowGoingSoon, threshold = boardGoingSoonDays)
+    //   null              (most rows show no pill — the default state)
+    _pickBoardPill(o, isCheapest) {
+      const f = o.flight || {};
+      const cabin = (f.cabinClass || '').toLowerCase();
+      const proximity = dateProximity(f.outboundDate);
+      const days = proximity.days;
+
+      // 1. Cheapest — always wins
+      if (isCheapest) {
+        return '<span class="tdb-pill" data-kind="cheapest">★ Cheapest</span>';
+      }
+
+      // 2. Premium cabin — opt-in. Beats date proximity because cabin is a
+      // quality signal that's relevant regardless of when the flight is.
+      if (this.cfg.boardShowPremiumCabin
+          && (cabin === 'business' || cabin === 'first' || cabin === 'businessclass' || cabin === 'firstclass')) {
+        const label = (cabin === 'first' || cabin === 'firstclass') ? 'First class' : 'Business';
+        return '<span class="tdb-pill" data-kind="premium">' + esc(label) + '</span>';
+      }
+
+      // 3. Today — always-on. Departing in less than 24 hours.
+      if (proximity.category === 'today') {
+        return '<span class="tdb-pill" data-kind="today">Today</span>';
+      }
+
+      // 4. Tomorrow — opt-in. 24-48 hours from now.
+      if (this.cfg.boardShowTomorrow && proximity.category === 'tomorrow') {
+        return '<span class="tdb-pill" data-kind="tomorrow">Tomorrow</span>';
+      }
+
+      // 5. This week — always-on. 2-7 days from now.
+      if (proximity.category === 'thisWeek') {
+        return '<span class="tdb-pill" data-kind="week">This week</span>';
+      }
+
+      // 6. Going soon — opt-in, configurable threshold (default 14 days).
+      // Triggers when the flight is past 'thisWeek' (so 7+ days) and
+      // within boardGoingSoonDays of departure.
+      if (this.cfg.boardShowGoingSoon) {
+        const threshold = this.cfg.boardGoingSoonDays || 14;
+        if (days >= 7 && days <= threshold) {
+          return '<span class="tdb-pill" data-kind="soon">Going soon</span>';
+        }
+      }
+
+      return '';
     }
 
     _populateBoardSwitcher() {
