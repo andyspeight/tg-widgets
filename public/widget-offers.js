@@ -3757,10 +3757,15 @@
     /* Card needs to be substantially wider than the default centered 460px
        to fit two usable columns. The tgop-card-mode-split class is applied
        to the card when render mode is split, allowing per-mode width overrides
-       without needing :has() (which has wider but not universal support). */
+       without needing :has() (which has wider but not universal support).
+       Width target: 760px when there's room. Falls back to filling the
+       container minus a small gutter on narrower viewports / faux-sites.
+       Critical: max-width uses 100% (relative to popup container) instead
+       of 100vw (viewport) so the card respects the faux-site bounds in
+       the editor preview. */
     .tgop-layout-centered .tgop-card-mode-split {
-      width: 820px;
-      max-width: calc(100vw - 32px);
+      width: 760px;
+      max-width: calc(100% - 32px);
     }
     .tgop-layout-fullscreen .tgop-card-mode-split {
       width: 100%;
@@ -3770,8 +3775,11 @@
     }
     .tgop-content-split {
       display: grid;
-      grid-template-columns: minmax(280px, 1fr) minmax(360px, 1.1fr);
-      min-height: 480px;
+      /* On wider cards (≥640px) we get a true 2-column split. Below that
+         the right column min-width forces the left column to shrink. We
+         use a media-style ratio so neither column dominates. */
+      grid-template-columns: minmax(220px, 1fr) minmax(320px, 1.2fr);
+      min-height: 460px;
       max-height: 600px;
       position: relative;
     }
@@ -3791,6 +3799,7 @@
       overflow: hidden;
       background: var(--tgo-card-alt, #F1F5F9);
       min-height: 100%;
+      min-width: 0;
     }
     .tgop-split-img {
       position: absolute;
@@ -3823,10 +3832,11 @@
       z-index: 2;
     }
     .tgop-split-right {
-      padding: 24px 28px;
+      padding: 24px 24px 24px 24px;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
+      min-width: 0; /* allow grid cell to shrink — without this, content forces grid to overflow */
     }
     .tgop-split-header {
       display: inline-flex;
@@ -3845,25 +3855,29 @@
     }
     .tgop-split-kicker {
       font-family: var(--tgo-font-mono, ui-monospace, monospace);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       color: var(--tgo-muted, #94A3B8);
       margin-bottom: 6px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
     .tgop-split-name {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: -0.02em;
-      line-height: 1.2;
+      line-height: 1.25;
       color: var(--tgo-text, #0F172A);
       margin-bottom: 6px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
     .tgop-split-flight {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--tgo-sub, #475569);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .tgop-split-price {
       display: flex;
