@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.4.2
+ * Travelgenix Travel Offers Widget v1.5.0
  * Self-contained, embeddable widget pulling live data from the Travelify offers cache.
  *
  * Usage:
@@ -18,14 +18,19 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
- *   v1.4.2 (May 2026) — Magazine packages now show flight info:
- *     • Added a flight strip to hero + banner for Dynamic Packages and
- *       Package Holidays — shows route, carrier, direct/stops, departure date
- *     • Single line with a small accent-coloured plane icon, restrained
- *       styling so it complements the editorial typography rather than
- *       competing with it
- *     • Only renders on package types — pure Flights show route in the kicker
- *       already, and Accommodation has no flight info to show
+ *   v1.5.0 (May 2026) — Ticker template:
+ *     • New "Ticker" template — horizontal marquee crawl of offers, ideal for
+ *       site headers / footers / between-section bands
+ *     • Two visual styles: 'pills' (discrete card pills, default) and 'ribbon'
+ *       (continuous strip with diamond separators, like a financial market crawl)
+ *     • Three speed presets — slow (120s loop) / medium (80s, default) / fast (50s)
+ *     • Hover-to-pause for accessibility (default on, configurable)
+ *     • Customisable label badge with green-pulse "live" indicator (text configurable)
+ *     • Edge masking so pills fade in/out at boundaries instead of hard cuts
+ *     • Honours prefers-reduced-motion (falls back to static snapshot)
+ *     • New config keys: tickerStyle, tickerSpeed, tickerLabel, tickerShowLabel,
+ *       tickerPauseOnHover
+ *   v1.4.2 — Magazine packages now show flight info
  *   v1.4.1 — Magazine layout simplified to stacked alternating banners
  *   v1.4.0 — Magazine mosaic + departure-board status pills
  *   v1.3.0 — Hyper-realistic Solari split-flap departure board
@@ -38,7 +43,7 @@
 
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
-  const VERSION = '1.4.2';
+  const VERSION = '1.5.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ── XSS-safe helpers ──────────────────────────────────────────────
@@ -2365,6 +2370,243 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════════
+       TICKER TEMPLATE
+       Horizontal marquee crawl of offers. Two visual styles:
+         pills    — discrete card pills with borders, hover changes background
+         ribbon   — continuous strip with diamond separators, no card edges
+       Hover pauses the whole crawl. Edge mask fades pills in/out at boundaries.
+       Honours prefers-reduced-motion (falls back to static snapshot).
+       Uses tgt- prefix to avoid colliding with other templates.
+       ═══════════════════════════════════════════════════════════════════ */
+    .tgt-ticker {
+      position: relative;
+      overflow: hidden;
+      background: var(--tgo-card);
+      border: 1px solid var(--tgo-border);
+      border-radius: var(--tgo-radius);
+      /* Edge mask — pills fade in/out at boundaries instead of hard cut-off */
+      -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+              mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+    }
+    .tgt-track {
+      display: flex;
+      flex-shrink: 0;
+      animation: tgt-scroll 80s linear infinite;
+      will-change: transform;
+    }
+    /* Hover-to-pause — gated by config but enabled by default in CSS */
+    .tgt-ticker[data-pause-on-hover="true"]:hover .tgt-track {
+      animation-play-state: paused;
+    }
+    /* Each track contains the offer set rendered TWICE so the loop is seamless —
+       the second set rolls into view as the first rolls off. */
+    .tgt-set {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+    }
+    @keyframes tgt-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    /* Speed presets */
+    .tgt-ticker[data-speed="slow"] .tgt-track   { animation-duration: 120s; }
+    .tgt-ticker[data-speed="medium"] .tgt-track { animation-duration: 80s; }
+    .tgt-ticker[data-speed="fast"] .tgt-track   { animation-duration: 50s; }
+
+    /* Reduced motion — drop the animation, drop the edge mask */
+    @media (prefers-reduced-motion: reduce) {
+      .tgt-track { animation: none; }
+      .tgt-ticker { -webkit-mask-image: none; mask-image: none; }
+    }
+
+    /* ───── Label badge (left edge, persistent, "Live deals") ───── */
+    .tgt-label {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 28px 0 16px;
+      background: var(--tgo-brand);
+      color: #fff;
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      /* Diagonal cut so it feels stamped on, not boxed in */
+      clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+    }
+    .tgt-label-pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+      animation: tgt-pulse 2s ease-out infinite;
+    }
+    @keyframes tgt-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      100% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    /* When label is present, indent track so pills don't slide under it */
+    .tgt-ticker[data-has-label="true"] .tgt-track {
+      padding-left: 130px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tgt-label-pulse { animation: none; }
+    }
+
+    /* ───── Style A: PILLS — discrete card pills ───── */
+    .tgt-ticker[data-style="pills"] .tgt-set {
+      gap: 10px;
+      padding: 8px 5px;
+    }
+    .tgt-ticker[data-style="pills"] .tgt-pill {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: var(--tgo-card-alt, var(--tgo-card));
+      border: 1px solid var(--tgo-border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--tgo-text);
+      transition: border-color 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+    .tgt-ticker[data-style="pills"] .tgt-pill:hover {
+      border-color: var(--tgo-accent);
+      background: var(--tgo-card);
+    }
+
+    /* ───── Style B: RIBBON — continuous strip ───── */
+    .tgt-ticker[data-style="ribbon"] .tgt-set {
+      padding: 0 16px;
+    }
+    .tgt-ticker[data-style="ribbon"] .tgt-pill {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 14px;
+      text-decoration: none;
+      color: var(--tgo-text);
+      transition: color 0.15s ease;
+      white-space: nowrap;
+      position: relative;
+    }
+    .tgt-ticker[data-style="ribbon"] .tgt-pill:hover {
+      color: var(--tgo-accent);
+    }
+    .tgt-ticker[data-style="ribbon"] .tgt-pill::after {
+      content: '◆';
+      position: absolute;
+      right: -2px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 7px;
+      color: var(--tgo-muted);
+      opacity: 0.5;
+      line-height: 1;
+    }
+
+    /* ───── Pill content (shared by both styles) ───── */
+    .tgt-pill-icon {
+      flex-shrink: 0;
+      color: var(--tgo-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tgt-pill-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+    .tgt-pill-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--tgo-muted);
+      letter-spacing: 0.04em;
+    }
+    .tgt-pill-meta strong {
+      color: var(--tgo-sub);
+      font-weight: 600;
+    }
+    .tgt-pill-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--tgo-text);
+      letter-spacing: -0.005em;
+    }
+    .tgt-pill-route {
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: var(--tgo-text);
+    }
+    .tgt-pill-arrow {
+      color: var(--tgo-muted);
+      font-size: 10px;
+      margin: 0 -2px;
+    }
+    .tgt-pill-price {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--tgo-text);
+      padding-left: 12px;
+      border-left: 1px solid var(--tgo-border);
+    }
+    /* Ribbon style — drop the price separator, accent-colour the price */
+    .tgt-ticker[data-style="ribbon"] .tgt-pill-price {
+      border-left: 0;
+      padding-left: 0;
+      color: var(--tgo-accent);
+    }
+    .tgt-pill-price small {
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--tgo-muted);
+      margin-left: 3px;
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+    }
+    .tgt-pill-pill {
+      background: var(--tgo-accent);
+      color: #fff;
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .tgt-pill-pill[data-kind="cheapest"] { background: #F59E0B; color: #fff; }
+
+    /* Empty state — just text, no animation */
+    .tgt-empty {
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--tgo-muted);
+    }
+    /* ═══════════════════════════════════════════════════════════════════
+       END TICKER TEMPLATE
+       ═══════════════════════════════════════════════════════════════════ */
+
+    /* ═══════════════════════════════════════════════════════════════════
        BOARDING-PASS TEMPLATE (FLIGHTS ONLY)
        Paper boarding-pass shape with perforated stub and CSS barcode.
        Uses tgbp- prefix to avoid colliding with other templates.
@@ -2979,6 +3221,15 @@
         boardingPassColumns: typeof c.boardingPassColumns === 'number' ? c.boardingPassColumns : 2,
         boardingPassShowBarcode: c.boardingPassShowBarcode !== false,
 
+        // Ticker template config (used only when template='ticker')
+        // Marquee crawl of offers — for headers, footers, between-section bands.
+        // Two visual styles: pills (discrete cards) or ribbon (continuous strip).
+        tickerStyle: c.tickerStyle === 'ribbon' ? 'ribbon' : 'pills',
+        tickerSpeed: ['slow', 'medium', 'fast'].includes(c.tickerSpeed) ? c.tickerSpeed : 'medium',
+        tickerLabel: typeof c.tickerLabel === 'string' && c.tickerLabel.length ? c.tickerLabel : 'Live deals',
+        tickerShowLabel: c.tickerShowLabel !== false,
+        tickerPauseOnHover: c.tickerPauseOnHover !== false,
+
         // Departure-board status pill toggles. Cheapest, Today, This week
         // are always-on (foundational signals). Tomorrow, Going soon, and
         // Premium cabin are opt-in but default ON. Going-soon threshold is
@@ -3400,14 +3651,18 @@
         this._renderDepartureBoard();
         return;
       }
-      // Magazine + boarding-pass + cards all dedupe per the user's strategy
-      // before rendering — same data path, different visual templates.
+      // Magazine + boarding-pass + ticker + cards all dedupe per the user's
+      // strategy before rendering — same data path, different visual templates.
       if (this.cfg.template === 'magazine') {
         this._renderMagazineTemplate();
         return;
       }
       if (this.cfg.template === 'boarding-pass') {
         this._renderBoardingPassTemplate();
+        return;
+      }
+      if (this.cfg.template === 'ticker') {
+        this._renderTickerTemplate();
         return;
       }
       this._renderCardsTemplate();
@@ -4700,6 +4955,149 @@
     }
     /* ═══════════════════════════════════════════════════════════════════
        END MAGAZINE TEMPLATE
+       ═══════════════════════════════════════════════════════════════════ */
+
+    /* ═══════════════════════════════════════════════════════════════════
+       TICKER TEMPLATE
+       Marquee crawl of offers — for site headers, footers, between-section
+       bands. Two visual styles (pills/ribbon), three speed presets, hover-
+       to-pause, edge-mask fade. Renders the offer set TWICE inside the track
+       so the CSS animation loops seamlessly (when the first set rolls fully
+       off-screen, the second set is already in view).
+       Uses tgt- prefix to avoid colliding with cards (tgo-), magazine
+       (tgo-mag-), board (tdb-) or boarding-pass (tgbp-).
+       ═══════════════════════════════════════════════════════════════════ */
+    _renderTickerTemplate() {
+      const deduped = dedupeOffers(this.rawOffers, this.cfg.dedupeStrategy, this.cfg.sort);
+
+      if (!deduped.length) {
+        this.root.innerHTML = '<div class="tgt-ticker"><div class="tgt-empty">No offers to display</div></div>';
+        return;
+      }
+
+      // Compose the inner pills HTML once — we'll inject it twice into the
+      // track for a seamless loop.
+      let pillsHtml = '';
+      for (const o of deduped) {
+        pillsHtml += this._renderTickerPill(o);
+      }
+
+      const style = this.cfg.tickerStyle || 'pills';
+      const speed = this.cfg.tickerSpeed || 'medium';
+      const showLabel = this.cfg.tickerShowLabel !== false;
+      const pauseOnHover = this.cfg.tickerPauseOnHover !== false;
+      const labelText = this.cfg.tickerLabel || 'Live deals';
+
+      let html = '<div class="tgt-ticker"'
+        + ' data-style="' + esc(style) + '"'
+        + ' data-speed="' + esc(speed) + '"'
+        + ' data-pause-on-hover="' + (pauseOnHover ? 'true' : 'false') + '"'
+        + (showLabel ? ' data-has-label="true"' : '')
+        + '>';
+
+      if (showLabel) {
+        html += '<div class="tgt-label">'
+          + '<span class="tgt-label-pulse"></span>'
+          + '<span>' + esc(labelText) + '</span>'
+          + '</div>';
+      }
+
+      html += '<div class="tgt-track">';
+      // Set 1
+      html += '<div class="tgt-set">' + pillsHtml + '</div>';
+      // Set 2 — duplicate for seamless loop
+      html += '<div class="tgt-set" aria-hidden="true">' + pillsHtml + '</div>';
+      html += '</div>';
+      html += '</div>';
+
+      if (this.cfg.show.poweredBy) {
+        html += '<div class="tgo-powered">Powered by Travelgenix</div>';
+      }
+      this.root.innerHTML = html;
+    }
+
+    // Render a single ticker pill. Picks the right content shape based on
+    // offer type — flights show route, hotels show name, packages show name
+    // with a route hint. All compact enough to read at marquee speed.
+    _renderTickerPill(o) {
+      if (!o) return '';
+      const acc = o.accommodation || {};
+      const f = o.flight || {};
+      const dest = acc.destination || f.destination || {};
+      const isAcc = o.type === 'Accommodation';
+      const isFlight = o.type === 'Flight' || o.type === 'Flights';
+      const isPkg = o.type === 'Package' || o.type === 'Packages';
+
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const url = safeUrl(o.url || '#');
+
+      // Compose the content based on offer type
+      let inner = '';
+
+      if (isFlight) {
+        // Flights: ✈ LHR → JFK · BA · 12 May · £389
+        const og = f.origin || {};
+        const fd = f.destination || {};
+        const fromCode = og.iataCode || '';
+        const toCode = fd.iataCode || '';
+        inner += '<span class="tgt-pill-icon">' + icon('plane', 14) + '</span>';
+        if (fromCode && toCode) {
+          inner += '<span class="tgt-pill-route">' + esc(fromCode)
+            + ' <span class="tgt-pill-arrow">→</span> '
+            + esc(toCode) + '</span>';
+        }
+        const metaParts = [];
+        if (f.carrier && f.carrier.code) metaParts.push('<strong>' + esc(f.carrier.code) + '</strong>');
+        if (f.outboundDate) metaParts.push(esc(formatDate(f.outboundDate)));
+        if (f.direct) metaParts.push('Direct');
+        if (metaParts.length) {
+          inner += '<span class="tgt-pill-meta">' + metaParts.join(' · ') + '</span>';
+        }
+      } else if (isAcc) {
+        // Hotels: 🏨 Atlantis The Royal · Dubai · 7 nts · HB · £2,449
+        inner += '<span class="tgt-pill-icon">' + icon('hotel', 14) + '</span>';
+        inner += '<span class="tgt-pill-name">' + esc(acc.name || 'Featured stay') + '</span>';
+        const metaParts = [];
+        if (dest.name) metaParts.push(esc(dest.name));
+        if (acc.nights) metaParts.push('<strong>' + acc.nights + ' nt' + (acc.nights === 1 ? '' : 's') + '</strong>');
+        if (acc.boardBasis) metaParts.push(esc(formatEnum(acc.boardBasis)));
+        if (metaParts.length) {
+          inner += '<span class="tgt-pill-meta">' + metaParts.join(' · ') + '</span>';
+        }
+      } else if (isPkg) {
+        // Packages: 🏨 Costa Adeje · MAN→TFS · Jet2 · 7 nts · AI · £1,189
+        inner += '<span class="tgt-pill-icon">' + icon('hotel', 14) + '</span>';
+        inner += '<span class="tgt-pill-name">' + esc(acc.name || 'Featured package') + '</span>';
+        const metaParts = [];
+        const og = f.origin || {};
+        const fd = f.destination || dest;
+        if (og.iataCode && fd.iataCode) {
+          metaParts.push(esc(og.iataCode + '→' + fd.iataCode));
+        } else if (dest.name) {
+          metaParts.push(esc(dest.name));
+        }
+        if (f.carrier && f.carrier.code) metaParts.push('<strong>' + esc(f.carrier.code) + '</strong>');
+        if (acc.nights) metaParts.push(acc.nights + ' nt' + (acc.nights === 1 ? '' : 's'));
+        if (acc.boardBasis) metaParts.push(esc(formatEnum(acc.boardBasis)));
+        if (metaParts.length) {
+          inner += '<span class="tgt-pill-meta">' + metaParts.join(' · ') + '</span>';
+        }
+      } else {
+        // Unknown type — minimal fallback
+        inner += '<span class="tgt-pill-name">Featured offer</span>';
+      }
+
+      // Price always last
+      inner += '<span class="tgt-pill-price">' + esc(display.primary)
+        + (display.sub ? '<small>' + esc(display.sub) + '</small>' : '')
+        + '</span>';
+
+      return '<a class="tgt-pill" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">'
+        + inner
+        + '</a>';
+    }
+    /* ═══════════════════════════════════════════════════════════════════
+       END TICKER TEMPLATE
        ═══════════════════════════════════════════════════════════════════ */
 
     /* ═══════════════════════════════════════════════════════════════════
