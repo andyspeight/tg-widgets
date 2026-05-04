@@ -568,8 +568,31 @@
                       <div class="sublabel">Marquee crawl of offers</div>
                     </div>
                   </button>
+                  <button type="button" class="template-card" data-template="popup" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Faint background "page" suggesting a host site -->
+                        <rect class="shape" x="3" y="6" width="74" height="33" rx="2" opacity="0.25"/>
+                        <line class="line" x1="9" y1="13" x2="38" y2="13"/>
+                        <line class="line" x1="9" y1="17" x2="32" y2="17"/>
+                        <line class="line" x1="9" y1="22" x2="40" y2="22"/>
+                        <!-- The popup card itself, bottom-right slide-in style, accented to draw the eye -->
+                        <rect class="shape-strong" x="46" y="22" width="29" height="15" rx="2.5"/>
+                        <!-- Tiny content bars inside the popup card -->
+                        <rect class="shape" x="49" y="25" width="9" height="2" rx="0.5" opacity="0.6"/>
+                        <rect class="shape" x="49" y="29" width="14" height="2.5" rx="0.5" opacity="0.6"/>
+                        <rect class="shape" x="49" y="33" width="6" height="2" rx="0.5" opacity="0.6"/>
+                        <!-- Pulse dot bottom-right of popup -->
+                        <circle class="shape" cx="71" cy="34" r="1.2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Popup</div>
+                      <div class="sublabel">Slide-in, modal or banner</div>
+                    </div>
+                  </button>
                 </div>
-                <div class="field-help" style="margin-top: 8px;"><strong>Cards</strong> works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with an editorial mosaic below. <strong>Departure board</strong> and <strong>Boarding pass</strong> are flights only. <strong>Ticker</strong> is a compact horizontal crawl, ideal for site headers and footers.</div>
+                <div class="field-help" style="margin-top: 8px;"><strong>Cards</strong> works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with an editorial mosaic below. <strong>Departure board</strong> and <strong>Boarding pass</strong> are flights only. <strong>Ticker</strong> is a compact horizontal crawl, ideal for site headers and footers. <strong>Popup</strong> shows offers in a slide-in panel, modal or banner triggered by visitor behaviour.</div>
               </div>
             </div>
           </div>
@@ -1037,7 +1060,240 @@
             </div>
           </div>
 
-          <div class="section" data-open="true" data-when-template="cards magazine boarding-pass ticker">
+          <!-- ════════════════════════════════════════════════════════
+               POPUP TEMPLATE — behaviour, layout, triggers, frequency
+               Only visible when template === 'popup'.
+               ════════════════════════════════════════════════════════ -->
+          <div class="section" data-open="true" data-when-template="popup" hidden>
+            <button class="section-head" data-section>Popup layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupLayout">Where the popup appears</label>
+                <select id="cfgPopupLayout">
+                  <option value="slide-in">Slide-in panel (corner)</option>
+                  <option value="centered">Centered modal (overlay)</option>
+                  <option value="floating-card">Floating card (corner, no backdrop)</option>
+                  <option value="top-bar">Top banner (full width)</option>
+                  <option value="bottom-bar">Bottom banner (full width)</option>
+                  <option value="side-drawer">Side drawer (full height)</option>
+                  <option value="fullscreen">Fullscreen takeover</option>
+                  <option value="inline">Inline (renders in place)</option>
+                </select>
+                <div class="field-help"><strong>Slide-in</strong> is the friendliest default — sits in a corner, dismissible. <strong>Centered modal</strong> is more disruptive but higher attention. <strong>Top/bottom banner</strong> shows offers as a strip across the page. <strong>Floating card</strong> shows a single offer at a time, ideal for the rotating "ambient deals" effect. <strong>Side drawer</strong> takes a full vertical edge.</div>
+              </div>
+              <div class="field" id="popupPositionField" data-when-popup-layout="slide-in floating-card">
+                <label class="field-label" for="cfgPopupPosition">Corner position</label>
+                <select id="cfgPopupPosition">
+                  <option value="bottom-right">Bottom right</option>
+                  <option value="bottom-left">Bottom left</option>
+                  <option value="top-right">Top right</option>
+                  <option value="top-left">Top left</option>
+                </select>
+                <div class="field-help">Bottom-right is the convention. Bottom-left works for sites with a chat widget on the right.</div>
+              </div>
+              <div class="field" id="popupSideDrawerField" data-when-popup-layout="side-drawer">
+                <label class="field-label">Side</label>
+                <div class="segmented" id="popupSideDrawerSeg">
+                  <button type="button" data-popup-side="left">Left</button>
+                  <button type="button" data-popup-side="right" aria-pressed="true">Right</button>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupRenderMode">Internal render mode</label>
+                <select id="cfgPopupRenderMode">
+                  <option value="auto">Auto — picks based on layout (recommended)</option>
+                  <option value="compact">Compact — multi-card list</option>
+                  <option value="single">Single — one offer with hero image</option>
+                  <option value="mini">Mini — text-only banner pills</option>
+                </select>
+                <div class="field-help"><strong>Auto</strong> picks a sensible mode for each layout: compact for slide-in/centered/drawer/fullscreen, single for floating-card, mini for top/bottom bars. Override only if you want to force a specific feel — e.g. compact in a floating-card.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="popup" hidden>
+            <button class="section-head" data-section>When the popup fires
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupTrigger">Trigger</label>
+                <select id="cfgPopupTrigger">
+                  <option value="load">On page load</option>
+                  <option value="time">After time delay</option>
+                  <option value="scroll">After scroll percentage</option>
+                  <option value="exit-intent">On exit intent (mouse leaves page)</option>
+                  <option value="click">On click of a specific element</option>
+                  <option value="inactivity">After inactivity</option>
+                  <option value="pageviews">After N pageviews in this session</option>
+                </select>
+                <div class="field-help"><strong>On load</strong> with a 5-10 second delay is the friendliest. <strong>Exit intent</strong> catches the visitor as they leave — high attention, can feel pushy. <strong>Scroll</strong> means they're already engaged. <strong>Click</strong> is for explicit "Show me deals" buttons.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="load time">
+                <label class="field-label" for="cfgPopupTriggerDelay">Delay (milliseconds)</label>
+                <input type="number" id="cfgPopupTriggerDelay" min="0" step="500" placeholder="5000" />
+                <div class="field-help">5000ms (5 seconds) is the standard. Anything under 2 seconds feels rude. Above 30 seconds and most visitors will have left.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="scroll">
+                <label class="field-label" for="cfgPopupTriggerScrollPercent">Scroll percentage</label>
+                <input type="number" id="cfgPopupTriggerScrollPercent" min="1" max="100" step="5" placeholder="50" />
+                <div class="field-help">Fires when the visitor has scrolled this far down the page. 50% is engaged, 75% is committed.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="inactivity">
+                <label class="field-label" for="cfgPopupTriggerInactivitySeconds">Seconds of inactivity</label>
+                <input type="number" id="cfgPopupTriggerInactivitySeconds" min="5" step="5" placeholder="30" />
+                <div class="field-help">Fires after N seconds with no mouse / keyboard / scroll / touch activity. Catches visitors who've stalled.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="pageviews">
+                <label class="field-label" for="cfgPopupTriggerPageviews">Pageviews required</label>
+                <input type="number" id="cfgPopupTriggerPageviews" min="1" step="1" placeholder="2" />
+                <div class="field-help">Fires once the visitor has viewed this many pages in their session. 2-3 means they're actually browsing.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="click">
+                <label class="field-label" for="cfgPopupTriggerSelector">CSS selector to listen on</label>
+                <input type="text" id="cfgPopupTriggerSelector" placeholder=".deals-button, #show-offers" />
+                <div class="field-help">Any click on an element matching this selector opens the popup. Use a class or ID — keep it simple. Example: <code>.show-deals</code> or <code>#header-deals-link</code>.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false" data-when-template="popup" hidden>
+            <button class="section-head" data-section>How often to show
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupFrequency">Frequency</label>
+                <select id="cfgPopupFrequency">
+                  <option value="session">Once per session</option>
+                  <option value="visitor">Once per visitor (ever)</option>
+                  <option value="every-visit">Every visit</option>
+                  <option value="every-n-days">Once every N days</option>
+                </select>
+                <div class="field-help"><strong>Once per session</strong> is the polite default. <strong>Every visit</strong> is aggressive and only suits true offer-led sites. <strong>Once per visitor</strong> is for major announcements you only want shown once.</div>
+              </div>
+              <div class="field" data-when-popup-frequency="every-n-days">
+                <label class="field-label" for="cfgPopupFrequencyDays">Days between shows</label>
+                <input type="number" id="cfgPopupFrequencyDays" min="1" step="1" placeholder="7" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupSuppressAfterDismissDays">Suppress after dismiss (days)</label>
+                <input type="number" id="cfgPopupSuppressAfterDismissDays" min="0" step="1" placeholder="0" />
+                <div class="field-help">If the visitor dismisses the popup, don't show it again for this many days. <strong>0</strong> means no extra suppression on top of the frequency rule. <strong>7</strong> gives them a clear week's break.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupSuppressAfterConversionDays">Suppress after click (days)</label>
+                <input type="number" id="cfgPopupSuppressAfterConversionDays" min="0" step="1" placeholder="30" />
+                <div class="field-help">If the visitor clicks an offer (a "conversion"), don't show the popup again for this many days. The default 30 means we don't pester someone who already engaged.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false" data-when-template="popup" hidden>
+            <button class="section-head" data-section>Page &amp; device targeting
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupPageInclude">Show only on these pages</label>
+                <input type="text" id="cfgPopupPageInclude" placeholder="/deals, /destinations/*, /offers/*" />
+                <div class="field-help">Comma-separated list. Supports <code>*</code> wildcards. Leave empty to show on every page. Example: <code>/destinations/*</code> matches any destination page.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupPageExclude">Don't show on these pages</label>
+                <input type="text" id="cfgPopupPageExclude" placeholder="/checkout, /booking/*" />
+                <div class="field-help">Same syntax as above. Common: exclude <code>/checkout</code> and <code>/booking/*</code> so you don't distract visitors who are already buying.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Show on devices</label>
+                <div class="toggle-row">
+                  <span class="toggle-label">Desktop</span>
+                  <button type="button" class="switch" id="cfgPopupDeviceDesktop" aria-pressed="true"></button>
+                </div>
+                <div class="toggle-row">
+                  <span class="toggle-label">Tablet</span>
+                  <button type="button" class="switch" id="cfgPopupDeviceTablet" aria-pressed="true"></button>
+                </div>
+                <div class="toggle-row">
+                  <span class="toggle-label">Mobile</span>
+                  <button type="button" class="switch" id="cfgPopupDeviceMobile" aria-pressed="true"></button>
+                </div>
+                <div class="field-help">Mobile popups are riskier — small screens mean even a slide-in feels like an interruption. Consider mobile-off if your popup is centered or fullscreen.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false" data-when-template="popup" hidden>
+            <button class="section-head" data-section>Content &amp; behaviour
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupHeading">Heading text</label>
+                <input type="text" id="cfgPopupHeading" maxlength="40" placeholder="Live deals" />
+                <div class="field-help">Short label shown at the top of the popup. Examples: "Live deals", "Today's offers", "Hand-picked".</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show pulse indicator
+                  <div class="toggle-help">Green pulsing dot next to the heading — communicates "live" / "real-time".</div>
+                </span>
+                <button type="button" class="switch" id="cfgPopupShowPulse" aria-pressed="true"></button>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupMaxRender">Maximum offers to show in popup</label>
+                <input type="number" id="cfgPopupMaxRender" min="1" max="20" step="1" placeholder="6" />
+                <div class="field-help">How many offers actually render inside the popup. Separate from the main "Max offers from API" — that controls how many come back from Travelify. This caps how many fit in the popup itself. <strong>6</strong> is comfortable for a slide-in panel; <strong>3</strong> feels premium for a centred modal; <strong>1</strong> for a floating card with rotation.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupRotateInterval">Auto-rotate interval (ms)</label>
+                <input type="number" id="cfgPopupRotateInterval" min="0" step="1000" placeholder="8000" />
+                <div class="field-help">For the floating-card layout (single-offer mode), how often to switch to the next offer. <strong>0</strong> disables rotation. <strong>8000</strong> (8 seconds) feels natural. Honours <em>prefers-reduced-motion</em> automatically.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupFooterText">Footer text (optional)</label>
+                <input type="text" id="cfgPopupFooterText" maxlength="60" placeholder="3 of 12 deals shown" />
+                <div class="field-help">Shown at the bottom of the compact card list. Only displays if both this and the footer CTA are filled in.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupFooterCtaText">Footer CTA text (optional)</label>
+                <input type="text" id="cfgPopupFooterCtaText" maxlength="20" placeholder="View all" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupFooterCtaUrl">Footer CTA URL</label>
+                <input type="text" id="cfgPopupFooterCtaUrl" placeholder="/deals" />
+                <div class="field-help">Where the footer CTA button links to. Usually your full deals page.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show close button</span>
+                <button type="button" class="switch" id="cfgPopupShowCloseButton" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Close on Escape key</span>
+                <button type="button" class="switch" id="cfgPopupCloseOnEscape" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Close on backdrop click
+                  <div class="toggle-help">Visitor clicks the dimmed background — popup closes. Only applies to centered, fullscreen, side-drawer.</div>
+                </span>
+                <button type="button" class="switch" id="cfgPopupCloseOnBackdropClick" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show backdrop overlay
+                  <div class="toggle-help">Dimmed background behind the popup. Off means the popup floats over the page without dimming. Slide-in / floating-card / banners ignore this.</div>
+                </span>
+                <button type="button" class="switch" id="cfgPopupOverlay" aria-pressed="true"></button>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupOverlayOpacity">Backdrop opacity (%)</label>
+                <input type="number" id="cfgPopupOverlayOpacity" min="0" max="100" step="5" placeholder="60" />
+                <div class="field-help">How dark the backdrop is. 60% is comfortable. Below 30% feels weak; above 80% feels heavy.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards magazine boarding-pass ticker popup">
             <button class="section-head" data-section>Price display
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -1328,6 +1584,36 @@
         tickerLabel: 'Live deals',
         tickerShowLabel: true,
         tickerPauseOnHover: true,
+        // Popup template config (used only when template='popup')
+        popupLayout: 'slide-in',
+        popupPosition: 'bottom-right',
+        popupSideDrawerSide: 'right',
+        popupTrigger: 'load',
+        popupTriggerDelay: 5000,
+        popupTriggerScrollPercent: 50,
+        popupTriggerInactivitySeconds: 30,
+        popupTriggerPageviews: 2,
+        popupTriggerSelector: '',
+        popupFrequency: 'session',
+        popupFrequencyDays: 7,
+        popupSuppressAfterDismissDays: 0,
+        popupSuppressAfterConversionDays: 30,
+        popupPageInclude: [],
+        popupPageExclude: [],
+        popupDevices: { desktop: true, tablet: true, mobile: true },
+        popupCloseOnEscape: true,
+        popupCloseOnBackdropClick: true,
+        popupShowCloseButton: true,
+        popupOverlay: true,
+        popupOverlayOpacity: 60,
+        popupHeading: 'Live deals',
+        popupShowPulse: true,
+        popupFooterText: '',
+        popupFooterCtaText: '',
+        popupFooterCtaUrl: '',
+        popupRenderMode: 'auto',
+        popupRotateInterval: 8000,
+        popupMaxRender: 6,
         show: {
           // Universal
           propertyType: true, chain: true, location: true,
@@ -1544,6 +1830,45 @@
       $('cfgTickerLabel').value = c.tickerLabel || 'Live deals';
       $('cfgTickerPauseOnHover').setAttribute('aria-pressed', c.tickerPauseOnHover !== false ? 'true' : 'false');
 
+      // Popup template fields
+      $('cfgPopupLayout').value = c.popupLayout || 'slide-in';
+      $('cfgPopupPosition').value = c.popupPosition || 'bottom-right';
+      document.querySelectorAll('#popupSideDrawerSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.popupSide === (c.popupSideDrawerSide || 'right') ? 'true' : 'false');
+      });
+      $('cfgPopupRenderMode').value = c.popupRenderMode || 'auto';
+      $('cfgPopupTrigger').value = c.popupTrigger || 'load';
+      $('cfgPopupTriggerDelay').value = c.popupTriggerDelay != null ? c.popupTriggerDelay : 5000;
+      $('cfgPopupTriggerScrollPercent').value = c.popupTriggerScrollPercent != null ? c.popupTriggerScrollPercent : 50;
+      $('cfgPopupTriggerInactivitySeconds').value = c.popupTriggerInactivitySeconds != null ? c.popupTriggerInactivitySeconds : 30;
+      $('cfgPopupTriggerPageviews').value = c.popupTriggerPageviews != null ? c.popupTriggerPageviews : 2;
+      $('cfgPopupTriggerSelector').value = c.popupTriggerSelector || '';
+      $('cfgPopupFrequency').value = c.popupFrequency || 'session';
+      $('cfgPopupFrequencyDays').value = c.popupFrequencyDays != null ? c.popupFrequencyDays : 7;
+      $('cfgPopupSuppressAfterDismissDays').value = c.popupSuppressAfterDismissDays != null ? c.popupSuppressAfterDismissDays : 0;
+      $('cfgPopupSuppressAfterConversionDays').value = c.popupSuppressAfterConversionDays != null ? c.popupSuppressAfterConversionDays : 30;
+      $('cfgPopupPageInclude').value = (c.popupPageInclude || []).join(', ');
+      $('cfgPopupPageExclude').value = (c.popupPageExclude || []).join(', ');
+      const devs = c.popupDevices || { desktop: true, tablet: true, mobile: true };
+      $('cfgPopupDeviceDesktop').setAttribute('aria-pressed', devs.desktop !== false ? 'true' : 'false');
+      $('cfgPopupDeviceTablet').setAttribute('aria-pressed', devs.tablet !== false ? 'true' : 'false');
+      $('cfgPopupDeviceMobile').setAttribute('aria-pressed', devs.mobile !== false ? 'true' : 'false');
+      $('cfgPopupHeading').value = c.popupHeading || 'Live deals';
+      $('cfgPopupShowPulse').setAttribute('aria-pressed', c.popupShowPulse !== false ? 'true' : 'false');
+      $('cfgPopupRotateInterval').value = c.popupRotateInterval != null ? c.popupRotateInterval : 8000;
+      $('cfgPopupMaxRender').value = c.popupMaxRender != null ? c.popupMaxRender : 6;
+      $('cfgPopupFooterText').value = c.popupFooterText || '';
+      $('cfgPopupFooterCtaText').value = c.popupFooterCtaText || '';
+      $('cfgPopupFooterCtaUrl').value = c.popupFooterCtaUrl || '';
+      $('cfgPopupShowCloseButton').setAttribute('aria-pressed', c.popupShowCloseButton !== false ? 'true' : 'false');
+      $('cfgPopupCloseOnEscape').setAttribute('aria-pressed', c.popupCloseOnEscape !== false ? 'true' : 'false');
+      $('cfgPopupCloseOnBackdropClick').setAttribute('aria-pressed', c.popupCloseOnBackdropClick !== false ? 'true' : 'false');
+      $('cfgPopupOverlay').setAttribute('aria-pressed', c.popupOverlay !== false ? 'true' : 'false');
+      $('cfgPopupOverlayOpacity').value = c.popupOverlayOpacity != null ? c.popupOverlayOpacity : 60;
+      updatePopupLayoutVisibility();
+      updatePopupTriggerVisibility();
+      updatePopupFrequencyVisibility();
+
       // Apply conditional visibility for layout-specific fields
       updateLayoutVisibility();
 
@@ -1656,6 +1981,33 @@
       const on = state.config.tickerShowLabel !== false;
       document.querySelectorAll('[data-when-ticker-show-label]').forEach(el => {
         el.hidden = !on;
+      });
+    }
+
+    // Show / hide popup-layout-conditional fields (corner position, side-drawer side)
+    function updatePopupLayoutVisibility() {
+      const layout = state.config.popupLayout || 'slide-in';
+      document.querySelectorAll('[data-when-popup-layout]').forEach(el => {
+        const tokens = (el.dataset.whenPopupLayout || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(layout) : el.dataset.whenPopupLayout !== layout;
+      });
+    }
+
+    // Show / hide popup-trigger-conditional fields (delay, scroll %, inactivity, pageviews, selector)
+    function updatePopupTriggerVisibility() {
+      const trigger = state.config.popupTrigger || 'load';
+      document.querySelectorAll('[data-when-popup-trigger]').forEach(el => {
+        const tokens = (el.dataset.whenPopupTrigger || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(trigger) : el.dataset.whenPopupTrigger !== trigger;
+      });
+    }
+
+    // Show / hide popup-frequency-conditional fields (days input only when every-n-days)
+    function updatePopupFrequencyVisibility() {
+      const freq = state.config.popupFrequency || 'session';
+      document.querySelectorAll('[data-when-popup-frequency]').forEach(el => {
+        const tokens = (el.dataset.whenPopupFrequency || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(freq) : el.dataset.whenPopupFrequency !== freq;
       });
     }
 
@@ -1833,15 +2185,20 @@
       });
 
       // ── Template picker ──────────────────────────────────────────
-      // Switches between Cards (default), Magazine, Departure board, and
-      // Boarding pass. updateTemplateVisibility() shows/hides the right
-      // sidebar sections.
+      // Switches between Cards (default), Magazine, Departure board,
+      // Boarding pass, Ticker, and Popup. updateTemplateVisibility()
+      // shows/hides the right sidebar sections.
       document.querySelectorAll('#templateGrid .template-card').forEach(b => {
         b.addEventListener('click', () => {
           state.config.template = b.dataset.template;
           document.querySelectorAll('#templateGrid .template-card').forEach(x => x.setAttribute('aria-pressed', 'false'));
           b.setAttribute('aria-pressed', 'true');
           updateTemplateVisibility();
+          // Refresh popup-internal conditionals so the right trigger/layout
+          // fields are visible if the user just selected Popup.
+          updatePopupLayoutVisibility();
+          updatePopupTriggerVisibility();
+          updatePopupFrequencyVisibility();
           markDirtyAndPreview();
         });
       });
@@ -2026,6 +2383,100 @@
         markDirtyAndPreview();
       });
 
+      // ── Popup template fields ─────────────────────────────────
+      // Helpers for the various popup inputs
+      function bindPopupSelect(id, key, after) {
+        $(id).addEventListener('change', () => {
+          state.config[key] = $(id).value;
+          if (after) after();
+          markDirtyAndPreview();
+        });
+      }
+      function bindPopupNumber(id, key, defaultVal) {
+        $(id).addEventListener('input', () => {
+          const v = parseInt($(id).value, 10);
+          state.config[key] = isNaN(v) ? defaultVal : v;
+          markDirtyAndPreview();
+        });
+      }
+      function bindPopupText(id, key, defaultVal) {
+        $(id).addEventListener('input', () => {
+          clearTimeout($(id)._t);
+          $(id)._t = setTimeout(() => {
+            state.config[key] = $(id).value || defaultVal;
+            markDirtyAndPreview();
+          }, 250);
+        });
+      }
+      function bindPopupSwitch(id, key) {
+        $(id).addEventListener('click', (ev) => {
+          const btn = ev.currentTarget;
+          const next = btn.getAttribute('aria-pressed') !== 'true';
+          btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+          state.config[key] = next;
+          markDirtyAndPreview();
+        });
+      }
+      function bindPopupList(id, key) {
+        $(id).addEventListener('input', () => {
+          clearTimeout($(id)._t);
+          $(id)._t = setTimeout(() => {
+            const raw = $(id).value || '';
+            state.config[key] = raw.split(',').map(s => s.trim()).filter(Boolean);
+            markDirtyAndPreview();
+          }, 250);
+        });
+      }
+      function bindPopupDeviceSwitch(id, deviceKey) {
+        $(id).addEventListener('click', (ev) => {
+          const btn = ev.currentTarget;
+          const next = btn.getAttribute('aria-pressed') !== 'true';
+          btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+          state.config.popupDevices = state.config.popupDevices || { desktop: true, tablet: true, mobile: true };
+          state.config.popupDevices[deviceKey] = next;
+          markDirtyAndPreview();
+        });
+      }
+
+      bindPopupSelect('cfgPopupLayout', 'popupLayout', updatePopupLayoutVisibility);
+      bindPopupSelect('cfgPopupPosition', 'popupPosition');
+      document.querySelectorAll('#popupSideDrawerSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.popupSideDrawerSide = b.dataset.popupSide;
+          document.querySelectorAll('#popupSideDrawerSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      bindPopupSelect('cfgPopupRenderMode', 'popupRenderMode');
+      bindPopupSelect('cfgPopupTrigger', 'popupTrigger', updatePopupTriggerVisibility);
+      bindPopupNumber('cfgPopupTriggerDelay', 'popupTriggerDelay', 5000);
+      bindPopupNumber('cfgPopupTriggerScrollPercent', 'popupTriggerScrollPercent', 50);
+      bindPopupNumber('cfgPopupTriggerInactivitySeconds', 'popupTriggerInactivitySeconds', 30);
+      bindPopupNumber('cfgPopupTriggerPageviews', 'popupTriggerPageviews', 2);
+      bindPopupText('cfgPopupTriggerSelector', 'popupTriggerSelector', '');
+      bindPopupSelect('cfgPopupFrequency', 'popupFrequency', updatePopupFrequencyVisibility);
+      bindPopupNumber('cfgPopupFrequencyDays', 'popupFrequencyDays', 7);
+      bindPopupNumber('cfgPopupSuppressAfterDismissDays', 'popupSuppressAfterDismissDays', 0);
+      bindPopupNumber('cfgPopupSuppressAfterConversionDays', 'popupSuppressAfterConversionDays', 30);
+      bindPopupList('cfgPopupPageInclude', 'popupPageInclude');
+      bindPopupList('cfgPopupPageExclude', 'popupPageExclude');
+      bindPopupDeviceSwitch('cfgPopupDeviceDesktop', 'desktop');
+      bindPopupDeviceSwitch('cfgPopupDeviceTablet', 'tablet');
+      bindPopupDeviceSwitch('cfgPopupDeviceMobile', 'mobile');
+      bindPopupText('cfgPopupHeading', 'popupHeading', 'Live deals');
+      bindPopupSwitch('cfgPopupShowPulse', 'popupShowPulse');
+      bindPopupNumber('cfgPopupRotateInterval', 'popupRotateInterval', 8000);
+      bindPopupNumber('cfgPopupMaxRender', 'popupMaxRender', 6);
+      bindPopupText('cfgPopupFooterText', 'popupFooterText', '');
+      bindPopupText('cfgPopupFooterCtaText', 'popupFooterCtaText', '');
+      bindPopupText('cfgPopupFooterCtaUrl', 'popupFooterCtaUrl', '');
+      bindPopupSwitch('cfgPopupShowCloseButton', 'popupShowCloseButton');
+      bindPopupSwitch('cfgPopupCloseOnEscape', 'popupCloseOnEscape');
+      bindPopupSwitch('cfgPopupCloseOnBackdropClick', 'popupCloseOnBackdropClick');
+      bindPopupSwitch('cfgPopupOverlay', 'popupOverlay');
+      bindPopupNumber('cfgPopupOverlayOpacity', 'popupOverlayOpacity', 60);
+
       const toggleMap = {
         showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
         showSummary: 'summary', showStayDetails: 'stayDetails',
@@ -2205,6 +2656,30 @@
         name: 'Live deals ticker',
         desc: 'Marquee crawl of offers — for site headers and footers',
         config: { template: 'ticker', type: 'Any', tickerStyle: 'pills', tickerSpeed: 'medium', tickerLabel: 'Live deals', tickerShowLabel: true, tickerPauseOnHover: true, maxOffers: 30 },
+      },
+      {
+        name: 'Live deals popup',
+        desc: 'Slide-in offers panel — fires after 5 seconds, once per session',
+        config: {
+          template: 'popup',
+          type: 'BothPackages',
+          maxOffers: 6,
+          popupLayout: 'slide-in',
+          popupPosition: 'bottom-right',
+          popupTrigger: 'load',
+          popupTriggerDelay: 5000,
+          popupFrequency: 'session',
+          popupSuppressAfterDismissDays: 1,
+          popupSuppressAfterConversionDays: 30,
+          popupHeading: 'Live deals',
+          popupShowPulse: true,
+          popupShowCloseButton: true,
+          popupCloseOnEscape: true,
+          popupRotateInterval: 8000,
+          popupFooterText: '',
+          popupFooterCtaText: 'View all',
+          popupFooterCtaUrl: '/deals'
+        },
       },
     ];
 
