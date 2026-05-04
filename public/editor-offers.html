@@ -125,6 +125,100 @@
       background: var(--panel); color: var(--ink); box-shadow: var(--shadow-xs);
     }
 
+    /* ─────────────────────────────────────────────────────────────────
+       Template grid — visual card grid replacing the segmented control
+       for the top-level template picker. Scales to N templates without
+       overcrowding because rows wrap naturally. Each card has a tiny
+       SVG preview of its layout so users pick by shape, not just label.
+       ───────────────────────────────────────────────────────────────── */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .template-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      text-align: left;
+      font-family: inherit;
+    }
+    .template-card:hover {
+      border-color: var(--accent);
+      background: var(--panel);
+    }
+    .template-card[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--panel);
+      box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.15);
+    }
+    .template-card[aria-pressed="true"]::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 7l2.5 2.5L10.5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+      background-size: contain;
+    }
+    .template-card .preview {
+      aspect-ratio: 16 / 9;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .template-card[aria-pressed="true"] .preview {
+      background: var(--panel-2);
+    }
+    .template-card .preview svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Preview shape colours — use design tokens so they theme correctly */
+    .template-card .preview .shape {
+      fill: var(--border);
+      transition: fill 0.15s;
+    }
+    .template-card .preview .shape-strong {
+      fill: var(--muted);
+      transition: fill 0.15s;
+    }
+    .template-card[aria-pressed="true"] .preview .shape-strong {
+      fill: var(--accent);
+    }
+    .template-card .preview .line {
+      stroke: var(--border);
+      stroke-width: 1;
+      fill: none;
+    }
+    .template-card .label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.005em;
+    }
+    .template-card .sublabel {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
     .toggle-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 0; gap: 12px;
@@ -374,13 +468,86 @@
             <div class="section-body">
               <div class="field">
                 <label class="field-label">Template</label>
-                <div class="segmented" id="templateSeg">
-                  <button type="button" data-template="cards" aria-pressed="true">Cards</button>
-                  <button type="button" data-template="magazine">Magazine</button>
-                  <button type="button" data-template="departure-board">Departure board</button>
-                  <button type="button" data-template="boarding-pass">Boarding pass</button>
+                <div class="template-grid" id="templateGrid" role="radiogroup" aria-label="Template">
+                  <!-- Cards: three rectangles in a row -->
+                  <button type="button" class="template-card" data-template="cards" aria-pressed="true" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <rect class="shape" x="4" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape" x="29" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="54" y="10" width="22" height="25" rx="2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Cards</div>
+                      <div class="sublabel">Grid, carousel or list</div>
+                    </div>
+                  </button>
+
+                  <!-- Magazine: hero banner on top, banner row, then 3-up with pull-quote in middle -->
+                  <button type="button" class="template-card" data-template="magazine" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Hero -->
+                        <rect class="shape-strong" x="4" y="3" width="72" height="14" rx="2"/>
+                        <!-- Banner row -->
+                        <rect class="shape" x="4" y="20" width="72" height="8" rx="2"/>
+                        <!-- 3-up with quote in middle -->
+                        <rect class="shape" x="4" y="31" width="22" height="11" rx="2"/>
+                        <rect class="shape-strong" x="29" y="31" width="22" height="11" rx="2" opacity="0.6"/>
+                        <rect class="shape" x="54" y="31" width="22" height="11" rx="2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Magazine</div>
+                      <div class="sublabel">Hero with editorial mosaic</div>
+                    </div>
+                  </button>
+
+                  <!-- Departure board: stacked rows with darker leftmost segment (time column) -->
+                  <button type="button" class="template-card" data-template="departure-board" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Header bar -->
+                        <rect class="shape" x="4" y="4" width="72" height="6" rx="1"/>
+                        <!-- Five rows: time column (strong) + body (subtle) -->
+                        <rect class="shape-strong" x="4" y="13" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="13" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="20" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="20" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="27" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="27" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="34" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="34" width="56" height="5" rx="1"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Departure board</div>
+                      <div class="sublabel">Live airport-style fares</div>
+                    </div>
+                  </button>
+
+                  <!-- Boarding pass: two pass shapes with perforation -->
+                  <button type="button" class="template-card" data-template="boarding-pass" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Left pass: main + stub -->
+                        <rect class="shape" x="4" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="27" y="10" width="9" height="25" rx="2"/>
+                        <line x1="26" y1="11" x2="26" y2="34" class="line" stroke-dasharray="1,1"/>
+                        <!-- Right pass: main + stub -->
+                        <rect class="shape" x="44" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="67" y="10" width="9" height="25" rx="2"/>
+                        <line x1="66" y1="11" x2="66" y2="34" class="line" stroke-dasharray="1,1"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Boarding pass</div>
+                      <div class="sublabel">Flights as paper passes</div>
+                    </div>
+                  </button>
                 </div>
-                <div class="field-help"><strong>Cards</strong> shows offers as a grid, carousel or list — works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with a grid below. <strong>Departure board</strong> styles flights only as a live airport-style fares board. <strong>Boarding pass</strong> shows flights only as paper boarding passes.</div>
+                <div class="field-help" style="margin-top: 8px;"><strong>Cards</strong> works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with an editorial mosaic below. <strong>Departure board</strong> and <strong>Boarding pass</strong> are flights only.</div>
               </div>
             </div>
           </div>
@@ -1171,7 +1338,7 @@
       $('name-input').value = state.name || '';
 
       // Template picker
-      document.querySelectorAll('#templateSeg button').forEach(b => {
+      document.querySelectorAll('#templateGrid .template-card').forEach(b => {
         b.setAttribute('aria-pressed', b.dataset.template === (c.template || 'cards') ? 'true' : 'false');
       });
 
@@ -1513,12 +1680,13 @@
       });
 
       // ── Template picker ──────────────────────────────────────────
-      // Switches between cards (default) and departure-board layouts.
-      // updateTemplateVisibility() shows/hides the right sidebar sections.
-      document.querySelectorAll('#templateSeg button').forEach(b => {
+      // Switches between Cards (default), Magazine, Departure board, and
+      // Boarding pass. updateTemplateVisibility() shows/hides the right
+      // sidebar sections.
+      document.querySelectorAll('#templateGrid .template-card').forEach(b => {
         b.addEventListener('click', () => {
           state.config.template = b.dataset.template;
-          document.querySelectorAll('#templateSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          document.querySelectorAll('#templateGrid .template-card').forEach(x => x.setAttribute('aria-pressed', 'false'));
           b.setAttribute('aria-pressed', 'true');
           updateTemplateVisibility();
           markDirtyAndPreview();
