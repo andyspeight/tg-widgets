@@ -250,7 +250,7 @@
         header: { title: '', subtitle: '' },
         brandColor: '#0891B2', accentColor: '#6366F1', pageBg: '#F8FAFC', cardBg: '#FFFFFF',
         textColor: '#0F172A', subtextColor: '#64748B', borderRadius: 16,
-        layout: 'cards', theme: 'light',
+        layout: 'cards', theme: 'light', fontFamily: '',
         showHeader: true, showAI: true, showTags: true, showPhotos: true,
         showReplies: true, showHelpful: true, showTrust: true, showCTA: true,
         trustText: 'Verified reviews powered by Google',
@@ -287,6 +287,17 @@
       if (c.showTrust) html += this._trust();
       html += `</div>`;
       this.shadow.innerHTML = html;
+
+      // Font override — when fontFamily is set, override the host's hardcoded
+      // Inter stack. Setting font-family on the root cascades to all descendants
+      // and beats the :host rule because root is more specific.
+      if (c.fontFamily && typeof c.fontFamily === 'string') {
+        const root = this.shadow.querySelector('.tgr-root');
+        if (root) {
+          root.style.fontFamily = "'" + c.fontFamily.replace(/'/g, '') + "', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        }
+      }
+
       this._bind();
     }
 
