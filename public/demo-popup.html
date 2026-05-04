@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Popup Widget Demo — Travelgenix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC;
+    color: #0F172A;
+    min-height: 100vh;
+  }
+
+  /* Simulated client travel agency site */
+  .site-header {
+    background: #1B2B5B;
+    color: #fff;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .site-logo {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .site-nav {
+    display: flex;
+    gap: 28px;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  .site-nav a { color: #fff; text-decoration: none; }
+  .site-nav a:hover { opacity: 0.7; }
+
+  .hero {
+    padding: 72px 32px 56px;
+    text-align: center;
+    background: linear-gradient(135deg, #FAFBFC 0%, #EFF6FF 100%);
+    border-bottom: 1px solid #E2E8F0;
+  }
+  .hero h1 {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    color: #1B2B5B;
+  }
+  .hero p {
+    font-size: 18px;
+    color: #475569;
+    max-width: 580px;
+    margin: 0 auto 24px;
+    line-height: 1.6;
+  }
+
+  /* Demo controls */
+  .controls-wrap {
+    max-width: 1200px;
+    margin: 32px auto;
+    padding: 0 32px;
+  }
+  .controls-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  }
+  .controls-card h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #0F172A;
+  }
+  .controls-card p {
+    margin: 0 0 20px;
+    color: #64748B;
+    font-size: 14px;
+  }
+  .control-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .control-group {
+    flex: 1;
+    min-width: 220px;
+  }
+  .control-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #64748B;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .control-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .pill {
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 160ms ease;
+    font-family: inherit;
+  }
+  .pill:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+  }
+  .pill.active {
+    background: #1B2B5B;
+    border-color: #1B2B5B;
+    color: #FFFFFF;
+  }
+
+  .show-btn {
+    padding: 14px 28px;
+    background: #00B4D8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 160ms ease, transform 160ms ease;
+    margin-top: 12px;
+  }
+  .show-btn:hover { background: #0096B7; }
+  .show-btn:active { transform: translateY(1px); }
+
+  .reset-btn {
+    background: transparent;
+    color: #64748B;
+    border: 1px solid #E2E8F0;
+    margin-left: 8px;
+  }
+  .reset-btn:hover { background: #F1F5F9; }
+
+  /* Faux content below */
+  .content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 32px 80px;
+  }
+  .content h2 {
+    font-size: 28px;
+    margin: 40px 0 16px;
+    color: #1B2B5B;
+  }
+  .content p {
+    color: #475569;
+    line-height: 1.7;
+    font-size: 16px;
+    margin: 0 0 16px;
+    max-width: 720px;
+  }
+  .content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 32px 0;
+  }
+  .content-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .content-card-img {
+    height: 180px;
+    background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+  }
+  .content-card-body {
+    padding: 20px;
+  }
+  .content-card h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    color: #0F172A;
+  }
+  .content-card p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748B;
+  }
+
+  /* Inline embed target */
+  .inline-embed-section {
+    background: #1B2B5B;
+    background-image: linear-gradient(135deg, #1B2B5B 0%, #2A3F7A 100%);
+    padding: 64px 32px;
+    margin: 48px 0 0;
+    text-align: center;
+  }
+  .inline-embed-section h2 {
+    color: #fff;
+    margin: 0 0 8px;
+    font-size: 28px;
+  }
+  .inline-embed-section p {
+    color: #CBD5E1;
+    margin: 0 auto 32px;
+    max-width: 540px;
+  }
+  #inline-target { max-width: 720px; margin: 0 auto; }
+
+  .footer {
+    background: #0F172A;
+    color: #94A3B8;
+    text-align: center;
+    padding: 24px;
+    font-size: 13px;
+  }
+
+  /* Trigger-test-only button for click trigger */
+  #click-trigger-test {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    color: #1B2B5B;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 16px 0;
+    font-family: inherit;
+  }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 30px; }
+    .hero { padding: 48px 20px 32px; }
+    .site-nav { display: none; }
+    .controls-wrap, .content { padding: 0 20px; }
+    .controls-card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Simulated client site -->
+<header class="site-header">
+  <div class="site-logo">Sunshine Holidays</div>
+  <nav class="site-nav">
+    <a href="#">Destinations</a>
+    <a href="#">Cruises</a>
+    <a href="#">Late Deals</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Popup Widget Demo</h1>
+  <p>Choose a layout, content type and trigger below — then hit the demo button. The popup renders on this page exactly as it would on a client site.</p>
+</section>
+
+<div class="controls-wrap">
+  <div class="controls-card">
+    <h2>Configure the demo</h2>
+    <p>All 8 layouts and 6 content types are interactive. Storage rules are bypassed for testing — the popup will reopen each time you click "Show popup".</p>
+
+    <div class="control-row">
+      <div class="control-group">
+        <label class="control-label">Layout</label>
+        <div class="control-pills" data-pills="layout">
+          <button class="pill active" data-val="centered">Centered</button>
+          <button class="pill" data-val="slide-in">Slide-in</button>
+          <button class="pill" data-val="top-bar">Top bar</button>
+          <button class="pill" data-val="bottom-bar">Bottom bar</button>
+          <button class="pill" data-val="fullscreen">Fullscreen</button>
+          <button class="pill" data-val="side-drawer">Side drawer</button>
+          <button class="pill" data-val="floating-card">Floating card</button>
+          <button class="pill" data-val="inline">Inline</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-row">
+      <div class="control-group">
+        <label class="control-label">Content type</label>
+        <div class="control-pills" data-pills="contentType">
+          <button class="pill active" data-val="announcement">Announcement</button>
+          <button class="pill" data-val="email-capture">Email capture</button>
+          <button class="pill" data-val="discount">Discount code</button>
+          <button class="pill" data-val="image">Image</button>
+          <button class="pill" data-val="two-step">Two-step</button>
+          <button class="pill" data-val="video">Video</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-row">
+      <div class="control-group">
+        <label class="control-label">Position (slide-in / floating / drawer only)</label>
+        <div class="control-pills" data-pills="position">
+          <button class="pill" data-val="top-left">Top left</button>
+          <button class="pill" data-val="top-right">Top right</button>
+          <button class="pill" data-val="bottom-left">Bottom left</button>
+          <button class="pill active" data-val="bottom-right">Bottom right</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Theme</label>
+        <div class="control-pills" data-pills="theme">
+          <button class="pill active" data-val="light">Light</button>
+          <button class="pill" data-val="dark">Dark</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="show-btn" id="show-popup">Show popup</button>
+    <button class="show-btn reset-btn" id="reset-storage">Reset storage</button>
+  </div>
+</div>
+
+<!-- Faux travel agency content -->
+<main class="content">
+  <h2>Featured destinations</h2>
+  <p>This is placeholder content showing how the popup widget overlays a typical travel agency website. Scroll down, click around, or trigger the popup to see how it integrates with real page content.</p>
+
+  <div class="content-grid">
+    <div class="content-card">
+      <div class="content-card-img" style="background:linear-gradient(135deg,#0096B7,#48CAE4)"></div>
+      <div class="content-card-body">
+        <h3>Mediterranean cruises</h3>
+        <p>Seven nights from £899 per person, sailing from Southampton.</p>
+      </div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-img" style="background:linear-gradient(135deg,#F59E0B,#EF4444)"></div>
+      <div class="content-card-body">
+        <h3>Algarve breaks</h3>
+        <p>Family-friendly resorts with kids clubs and stunning beaches.</p>
+      </div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-img" style="background:linear-gradient(135deg,#10B981,#06B6D4)"></div>
+      <div class="content-card-body">
+        <h3>Caribbean escapes</h3>
+        <p>All-inclusive luxury in St Lucia, Barbados and Antigua.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>Why book with us</h2>
+  <p>ABTA and ATOL protected. Award-winning customer service. Lowest price guaranteed. Friendly, expert advice from real travel consultants who've been to the destinations themselves.</p>
+
+  <button id="click-trigger-test">Click trigger test (when configured)</button>
+
+  <p>This button has the selector <code>#click-trigger-test</code> — useful if you want to test the click trigger.</p>
+</main>
+
+<!-- Inline embed target — only relevant when layout=inline -->
+<section class="inline-embed-section" id="inline-section" style="display:none">
+  <h2>Stay in the loop</h2>
+  <p>The "inline" layout renders the popup inline within page content rather than as an overlay — perfect for newsletter sign-ups in the footer or sidebar.</p>
+  <div id="inline-target"></div>
+</section>
+
+<footer class="footer">
+  Sunshine Holidays Ltd · ABTA Y1234 · ATOL 9876 · Powered by Travelgenix
+</footer>
+
+<!-- Demo script -->
+<script>
+  const STORAGE_PREFIX = 'tgp_';
+  const state = {
+    layout: 'centered',
+    contentType: 'announcement',
+    position: 'bottom-right',
+    theme: 'light'
+  };
+
+  // Wire up pill groups
+  document.querySelectorAll('[data-pills]').forEach(group => {
+    const key = group.getAttribute('data-pills');
+    group.querySelectorAll('.pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state[key] = btn.getAttribute('data-val');
+      });
+    });
+  });
+
+  // Reset storage button
+  document.getElementById('reset-storage').addEventListener('click', () => {
+    try {
+      Object.keys(localStorage).forEach(k => { if (k.startsWith(STORAGE_PREFIX)) localStorage.removeItem(k); });
+      Object.keys(sessionStorage).forEach(k => { if (k.startsWith(STORAGE_PREFIX)) sessionStorage.removeItem(k); });
+    } catch {}
+    alert('Popup storage cleared. Frequency rules will reset.');
+  });
+
+  // Build a config based on the chosen content type
+  function buildConfig() {
+    const base = {
+      layout: state.layout,
+      contentType: state.contentType,
+      position: state.position,
+      sideDrawerSide: state.position.includes('left') ? 'left' : 'right',
+      theme: state.theme,
+      brand: '#1B2B5B',
+      accent: '#00B4D8',
+      bg: state.theme === 'dark' ? '#1E293B' : '#FFFFFF',
+      text: state.theme === 'dark' ? '#F8FAFC' : '#0F172A',
+      trigger: 'load',
+      triggerDelay: 0,
+      frequency: 'every-visit',
+      widgetId: 'demo-' + Date.now()
+    };
+
+    if (state.contentType === 'announcement') {
+      Object.assign(base, {
+        title: 'Late summer deals',
+        body: 'Save up to 35% on Mediterranean cruises departing September and October. Early bird offer ends Friday.',
+        ctaText: 'See the deals',
+        ctaUrl: '#',
+        secondaryCtaText: 'Maybe later'
+      });
+    } else if (state.contentType === 'email-capture') {
+      Object.assign(base, {
+        title: 'Get the brochure',
+        body: 'Drop your email and we\'ll send our 2026 holiday brochure straight to your inbox.',
+        emailRequireName: true,
+        emailNameLabel: 'Your name',
+        emailEmailLabel: 'Email address',
+        emailSubmitLabel: 'Send my brochure',
+        emailSuccessTitle: 'Brochure on its way',
+        emailSuccessMessage: 'Check your inbox in the next few minutes.',
+        emailConsentText: 'By submitting you agree to our privacy policy. Unsubscribe at any time.'
+      });
+    } else if (state.contentType === 'discount') {
+      Object.assign(base, {
+        title: 'Here\'s 10% off',
+        body: 'Apply this code at checkout to save on any 2026 booking.',
+        discountCode: 'SUNSHINE10',
+        discountTerms: 'Valid until 31 December 2026. T&Cs apply.',
+        ctaText: 'Browse holidays',
+        ctaUrl: '#'
+      });
+    } else if (state.contentType === 'image') {
+      Object.assign(base, {
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+        imageAlt: 'Tropical beach',
+        ctaUrl: '#'
+      });
+    } else if (state.contentType === 'two-step') {
+      Object.assign(base, {
+        twoStepQuestion: 'Want £100 off your next holiday?',
+        twoStepYesLabel: 'Yes please',
+        twoStepNoLabel: 'No thanks',
+        title: 'Brilliant — quick details',
+        body: 'Drop your email and we\'ll send your £100 voucher.',
+        emailRequireName: false,
+        emailEmailLabel: 'Email',
+        emailSubmitLabel: 'Get my voucher',
+        emailSuccessTitle: 'Voucher sent',
+        emailSuccessMessage: 'Check your inbox shortly.'
+      });
+    } else if (state.contentType === 'video') {
+      Object.assign(base, {
+        title: 'Watch our brand story',
+        body: '60 seconds on why thousands trust us with their holidays.',
+        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        videoAutoplay: false
+      });
+    }
+
+    return base;
+  }
+
+  // Show popup — clear storage flags so we can reopen freely in demo mode
+  document.getElementById('show-popup').addEventListener('click', () => {
+    // Clear show-state for the demo widget IDs (pattern match on demo-*)
+    try {
+      Object.keys(sessionStorage).forEach(k => { if (k.startsWith(STORAGE_PREFIX)) sessionStorage.removeItem(k); });
+    } catch {}
+
+    const config = buildConfig();
+
+    // Clean up any existing popup
+    const existing = document.getElementById('demo-popup-host');
+    if (existing) existing.remove();
+    const inlineExisting = document.querySelector('#inline-target [data-tg-widget="popup"]');
+    if (inlineExisting) inlineExisting.remove();
+
+    // Show/hide the inline section
+    document.getElementById('inline-section').style.display = state.layout === 'inline' ? 'block' : 'none';
+
+    // Mount the popup
+    const host = document.createElement('div');
+    host.setAttribute('data-tg-widget', 'popup');
+    host.setAttribute('data-tg-config', JSON.stringify(config));
+    host.id = 'demo-popup-host';
+
+    if (state.layout === 'inline') {
+      document.getElementById('inline-target').appendChild(host);
+      // Smooth scroll to inline section
+      setTimeout(() => {
+        document.getElementById('inline-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    } else {
+      document.body.appendChild(host);
+    }
+
+    // Re-trigger init on the new element (since auto-init only runs once)
+    if (window.TGPopupWidget) {
+      try {
+        new window.TGPopupWidget(host, config);
+      } catch (e) {
+        console.error('Popup init failed:', e);
+      }
+    }
+  });
+</script>
+
+<!-- Load the widget script -->
+<script src="/widget-popup.js"></script>
+
+</body>
+</html>
