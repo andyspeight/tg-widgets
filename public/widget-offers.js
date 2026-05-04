@@ -3758,30 +3758,50 @@
        to fit two usable columns. The tgop-card-mode-split class is applied
        to the card when render mode is split, allowing per-mode width overrides
        without needing :has() (which has wider but not universal support).
-       Width target: 760px when there's room. Falls back to filling the
-       container minus a small gutter on narrower viewports / faux-sites.
-       Critical: max-width uses 100% (relative to popup container) instead
-       of 100vw (viewport) so the card respects the faux-site bounds in
-       the editor preview. */
+       Width: min() pattern — aspires to 760px when the container is wide
+       enough, otherwise compresses to fit the popup container. The container
+       already has 16px padding so we don't need an additional gutter here.
+       This handles both real client sites (where 760px works) and the editor
+       preview (where the faux-site is narrower). */
     .tgop-layout-centered .tgop-card-mode-split {
-      width: 760px;
-      max-width: calc(100% - 32px);
+      width: min(760px, 100%);
+      container-type: inline-size;
+      container-name: tgopsplit;
     }
     .tgop-layout-fullscreen .tgop-card-mode-split {
       width: 100%;
       max-width: 1100px;
       height: auto;
       max-height: 90vh;
+      container-type: inline-size;
+      container-name: tgopsplit;
     }
+    /* Default: stacked vertically (image on top, details below).
+       This is the safe layout when the card is narrow. */
     .tgop-content-split {
-      display: grid;
-      /* On wider cards (≥640px) we get a true 2-column split. Below that
-         the right column min-width forces the left column to shrink. We
-         use a media-style ratio so neither column dominates. */
-      grid-template-columns: minmax(220px, 1fr) minmax(320px, 1.2fr);
+      display: flex;
+      flex-direction: column;
       min-height: 460px;
       max-height: 600px;
       position: relative;
+    }
+    .tgop-split-left {
+      min-height: 200px;
+      flex-shrink: 0;
+    }
+    /* When the card is ≥640px wide (i.e. genuine split territory), switch
+       to a 2-column grid. Below that, the stacked default applies. This
+       guarantees split looks good when there's room and degrades gracefully
+       on smaller cards instead of clipping content. */
+    @container tgopsplit (min-width: 640px) {
+      .tgop-content-split {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(360px, 1.4fr);
+        flex-direction: initial;
+      }
+      .tgop-split-left {
+        min-height: 100%;
+      }
     }
     /* Close button must NOT participate in the grid — absolute over the
        top-right of the content so it doesn't push the columns out of order. */
@@ -3798,8 +3818,9 @@
       position: relative;
       overflow: hidden;
       background: var(--tgo-card-alt, #F1F5F9);
-      min-height: 100%;
       min-width: 0;
+      min-height: 200px;
+      flex-shrink: 0;
     }
     .tgop-split-img {
       position: absolute;
