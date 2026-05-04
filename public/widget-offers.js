@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.1.0
+ * Travelgenix Travel Offers Widget v1.2.0
  * Self-contained, embeddable widget pulling live data from the Travelify offers cache.
  *
  * Usage:
@@ -16,13 +16,23 @@
  *   - PackageHoliday operator: o.accommodation.operator.{code, name, message}
  *   - TripAdvisor:    o.accommodation.{reviewRating, reviewCount, reviewImgUrl}
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
+ *
+ * Changelog:
+ *   v1.2.0 (May 2026) — Added three new visual options:
+ *     • List layout — third option alongside Grid and Carousel inside the Cards template.
+ *       Compact horizontal rows reusing the same card data shape.
+ *     • Magazine template — hero card + sub-grid editorial layout. Picks hero by
+ *       featured flag → biggest discount → cheapest → first.
+ *     • Boarding-pass template — flights-only specialist with paper-pass shape,
+ *       perforated stub and barcode strip. Pairs with departure-board.
+ *   v1.1.0 — Carousel layout + departure-board template + pax popover.
  */
 (function () {
   'use strict';
 
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ── XSS-safe helpers ──────────────────────────────────────────────
@@ -1613,6 +1623,684 @@
       .tdb-row .tdb-carrier, .tdb-row .tdb-status { display: none; }
       .tdb-row.tdb-head .tdb-carrier, .tdb-row.tdb-head .tdb-status { display: none; }
     }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       LIST LAYOUT (within Cards template)
+       Compact horizontal rows. Image left, body middle, price right.
+       Uses tgo- prefix because it shares variables with the cards template.
+       ═══════════════════════════════════════════════════════════════════ */
+    .tgo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tgo-list-row {
+      display: grid;
+      grid-template-columns: 220px 1fr 200px;
+      gap: 0;
+      background: var(--tgo-card);
+      border: 1px solid var(--tgo-border);
+      border-radius: var(--tgo-radius);
+      overflow: hidden;
+      transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .tgo-list-row:hover {
+      border-color: var(--tgo-accent);
+      transform: translateY(-1px);
+      box-shadow: var(--tgo-shadow-hover);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tgo-list-row { transition: none; }
+      .tgo-list-row:hover { transform: none; }
+    }
+    .tgo-list-img {
+      position: relative;
+      background: var(--tgo-card-alt) center/cover no-repeat;
+      min-height: 160px;
+    }
+    .tgo-list-img-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--tgo-card);
+      color: var(--tgo-text);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      box-shadow: var(--tgo-shadow);
+    }
+    .tgo-list-img-badge.lead-in {
+      background: var(--tgo-accent);
+      color: white;
+    }
+    .tgo-list-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .tgo-list-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0 0 4px;
+      color: var(--tgo-text);
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tgo-list-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      font-size: 12px;
+      color: var(--tgo-sub);
+    }
+    .tgo-list-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tgo-list-meta svg {
+      color: var(--tgo-muted);
+      flex-shrink: 0;
+    }
+    .tgo-list-stars {
+      display: inline-flex;
+      gap: 2px;
+      color: #FFB400;
+    }
+    .tgo-list-stars svg {
+      width: 13px;
+      height: 13px;
+      color: #FFB400;
+    }
+    .tgo-list-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .tgo-list-tag {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--tgo-sub);
+      background: var(--tgo-card-alt);
+      border: 1px solid var(--tgo-border);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .tgo-list-price {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 4px;
+      border-left: 1px solid var(--tgo-border);
+      background: var(--tgo-card-alt);
+    }
+    .tgo-list-was {
+      font-size: 12px;
+      color: var(--tgo-strike);
+      text-decoration: line-through;
+    }
+    .tgo-list-now {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--tgo-text);
+      line-height: 1;
+    }
+    .tgo-list-sub {
+      font-size: 11px;
+      color: var(--tgo-sub);
+    }
+    .tgo-list-cta {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--tgo-accent);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.15s ease;
+      white-space: nowrap;
+    }
+    .tgo-list-cta:hover { background: var(--tgo-accent-hover); }
+    @media (prefers-reduced-motion: reduce) {
+      .tgo-list-cta { transition: none; }
+    }
+    @media (max-width: 768px) {
+      .tgo-list-row {
+        grid-template-columns: 1fr;
+      }
+      .tgo-list-img {
+        min-height: 180px;
+      }
+      .tgo-list-body {
+        padding: 16px;
+      }
+      .tgo-list-price {
+        padding: 14px 16px;
+        border-left: 0;
+        border-top: 1px solid var(--tgo-border);
+        align-items: stretch;
+        flex-direction: row;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .tgo-list-cta {
+        margin-top: 0;
+        margin-left: auto;
+        justify-content: center;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MAGAZINE TEMPLATE
+       Hero card spanning full width over a sub-grid. Editorial aesthetic.
+       Reuses .tgo-card for sub-grid items so they look identical to grid mode.
+       ═══════════════════════════════════════════════════════════════════ */
+    .tgo-mag {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .tgo-mag-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .tgo-mag-grid[data-cols="2"] { grid-template-columns: repeat(2, 1fr); }
+    .tgo-mag-grid[data-cols="4"] { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 1024px) {
+      .tgo-mag-grid,
+      .tgo-mag-grid[data-cols="3"],
+      .tgo-mag-grid[data-cols="4"] {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .tgo-mag-grid,
+      .tgo-mag-grid[data-cols="2"],
+      .tgo-mag-grid[data-cols="3"],
+      .tgo-mag-grid[data-cols="4"] {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Hero */
+    .tgo-mag-hero {
+      position: relative;
+      border-radius: var(--tgo-radius);
+      overflow: hidden;
+      aspect-ratio: 21 / 9;
+      background: var(--tgo-card-alt) center/cover no-repeat;
+      box-shadow: var(--tgo-shadow);
+      transition: box-shadow 0.15s ease;
+    }
+    .tgo-mag-hero:hover { box-shadow: var(--tgo-shadow-hover); }
+    .tgo-mag-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 30%, rgba(15, 23, 42, 0.85) 100%);
+      pointer-events: none;
+    }
+    .tgo-mag-hero-badge {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--tgo-text);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+    }
+    .tgo-mag-hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--tgo-accent);
+    }
+    .tgo-mag-hero-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 2;
+      padding: 32px;
+      color: #fff;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: end;
+    }
+    .tgo-mag-hero-kicker {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 8px;
+    }
+    .tgo-mag-hero-title {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin: 0 0 12px;
+      line-height: 1.1;
+      color: #fff;
+      max-width: 600px;
+    }
+    .tgo-mag-hero-summary {
+      font-size: 14px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.85);
+      max-width: 540px;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .tgo-mag-hero-price {
+      text-align: right;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+    .tgo-mag-hero-from {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .tgo-mag-hero-was {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: line-through;
+    }
+    .tgo-mag-hero-now {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: #fff;
+    }
+    .tgo-mag-hero-sub {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 12px;
+    }
+    .tgo-mag-hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--tgo-accent);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.15s ease;
+      margin-top: 4px;
+    }
+    .tgo-mag-hero-cta:hover { background: var(--tgo-accent-hover); }
+    @media (max-width: 768px) {
+      .tgo-mag-hero { aspect-ratio: 4 / 5; }
+      .tgo-mag-hero-content {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+      .tgo-mag-hero-title { font-size: 22px; }
+      .tgo-mag-hero-price { text-align: left; align-items: flex-start; }
+      .tgo-mag-hero-now { font-size: 28px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       BOARDING-PASS TEMPLATE (FLIGHTS ONLY)
+       Paper boarding-pass shape with perforated stub and CSS barcode.
+       Uses tgbp- prefix to avoid colliding with other templates.
+       ═══════════════════════════════════════════════════════════════════ */
+    .tgbp-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .tgbp-grid[data-cols="1"] { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+      .tgbp-grid, .tgbp-grid[data-cols="2"] { grid-template-columns: 1fr; }
+    }
+
+    .tgbp {
+      display: grid;
+      grid-template-columns: 1fr 110px;
+      background: var(--tgo-card);
+      border-radius: var(--tgo-radius);
+      box-shadow: var(--tgo-shadow);
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid var(--tgo-border);
+    }
+    .tgbp:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--tgo-shadow-hover);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tgbp { transition: none; }
+      .tgbp:hover { transform: none; }
+    }
+
+    /* Perforation between main and stub — pure CSS, no images */
+    .tgbp::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 110px;
+      width: 1px;
+      background-image: linear-gradient(to bottom, var(--tgo-border) 50%, transparent 50%);
+      background-size: 1px 8px;
+      z-index: 2;
+    }
+    .tgbp::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      bottom: -8px;
+      right: 102px;
+      width: 16px;
+      background-image:
+        radial-gradient(circle at 8px 8px, var(--tgo-bg, transparent) 7px, transparent 8px),
+        radial-gradient(circle at 8px calc(100% - 8px), var(--tgo-bg, transparent) 7px, transparent 8px);
+      background-repeat: no-repeat;
+      z-index: 1;
+      pointer-events: none;
+    }
+    /* When the host doesn't set --tgo-bg (transparent default), the perforation
+       half-circles need a real colour or they'll look like grey blobs against
+       a coloured page background. Use the body-equivalent surface colour. */
+    .tgo-root[data-theme="light"] .tgbp::after {
+      background-image:
+        radial-gradient(circle at 8px 8px, #F7F9FB 7px, transparent 8px),
+        radial-gradient(circle at 8px calc(100% - 8px), #F7F9FB 7px, transparent 8px);
+    }
+    .tgo-root[data-theme="dark"] .tgbp::after {
+      background-image:
+        radial-gradient(circle at 8px 8px, #0B1220 7px, transparent 8px),
+        radial-gradient(circle at 8px calc(100% - 8px), #0B1220 7px, transparent 8px);
+    }
+
+    .tgbp-main {
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .tgbp-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--tgo-border);
+    }
+    .tgbp-airline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .tgbp-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      background: var(--tgo-brand);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+    .tgbp-airline-text {
+      min-width: 0;
+    }
+    .tgbp-airline-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--tgo-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgbp-airline-sub {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--tgo-muted);
+      letter-spacing: 0.04em;
+    }
+    .tgbp-class {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--tgo-muted);
+      padding: 4px 8px;
+      border: 1px solid var(--tgo-border);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .tgbp-route {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    .tgbp-route-end { min-width: 0; }
+    .tgbp-route-end.right { text-align: right; }
+    .tgbp-iata {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--tgo-text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .tgbp-airport-name {
+      font-size: 11px;
+      color: var(--tgo-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgbp-plane {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--tgo-accent);
+    }
+    .tgbp-plane-icon {
+      transform: rotate(90deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tgbp-plane-line {
+      width: 56px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--tgo-accent), transparent);
+    }
+
+    .tgbp-detail-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .tgbp-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .tgbp-detail-label {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--tgo-muted);
+    }
+    .tgbp-detail-value {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--tgo-text);
+      letter-spacing: 0.02em;
+    }
+
+    /* Stub */
+    .tgbp-stub {
+      background: var(--tgo-card-alt);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+    }
+    .tgbp-stub-top {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: center;
+    }
+    .tgbp-stub-label {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--tgo-muted);
+    }
+    .tgbp-stub-was {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--tgo-strike);
+      text-decoration: line-through;
+    }
+    .tgbp-stub-price {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--tgo-text);
+      line-height: 1;
+    }
+    .tgbp-barcode {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: center;
+      width: 100%;
+    }
+    .tgbp-barcode-bars {
+      width: 100%;
+      height: 32px;
+      background-image: repeating-linear-gradient(
+        90deg,
+        var(--tgo-text) 0,
+        var(--tgo-text) 1px,
+        transparent 1px,
+        transparent 3px,
+        var(--tgo-text) 3px,
+        var(--tgo-text) 5px,
+        transparent 5px,
+        transparent 6px,
+        var(--tgo-text) 6px,
+        var(--tgo-text) 9px,
+        transparent 9px,
+        transparent 11px
+      );
+      opacity: 0.85;
+    }
+    .tgbp-barcode-num {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 8px;
+      font-weight: 500;
+      color: var(--tgo-muted);
+      letter-spacing: 0.06em;
+    }
+    .tgbp-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--tgo-accent);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 9px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      width: 100%;
+      transition: background 0.15s ease;
+    }
+    .tgbp-cta:hover { background: var(--tgo-accent-hover); }
+    @media (prefers-reduced-motion: reduce) {
+      .tgbp-cta { transition: none; }
+    }
+
+    @media (max-width: 600px) {
+      .tgbp {
+        grid-template-columns: 1fr;
+      }
+      .tgbp::before, .tgbp::after { display: none; }
+      .tgbp-stub {
+        flex-direction: row;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        border-top: 1px dashed var(--tgo-border);
+        padding: 14px 18px;
+      }
+      .tgbp-stub-top { flex-direction: row; gap: 10px; align-items: center; }
+      .tgbp-barcode { width: auto; flex: 1 1 100%; }
+      .tgbp-barcode-bars { width: 100%; height: 24px; }
+      .tgbp-cta { width: auto; flex: 1; }
+      .tgbp-iata { font-size: 24px; }
+    }
   `;
 
   // ── Widget Class ──────────────────────────────────────────────────
@@ -1705,6 +2393,25 @@
         boardAutoRefresh: c.boardAutoRefresh !== false,
         boardRefreshSeconds: typeof c.boardRefreshSeconds === 'number' ? c.boardRefreshSeconds : 300,
         boardDateRange: typeof c.boardDateRange === 'number' ? c.boardDateRange : 30,
+
+        // List-layout options (used when template='cards' AND layout='list')
+        // Same data shape as grid/carousel cards, just rendered as horizontal
+        // rows. Toggles let clients dial density without dropping back to grid.
+        listShowMeta: c.listShowMeta !== false,
+        listShowAmenities: c.listShowAmenities !== false,
+
+        // Magazine template — hero card + sub-grid below. Hero picked by:
+        //   'featured'  — first offer with o.featured=true, else falls back
+        //   'discount'  — biggest absolute discount (priceBeforeChange - price)
+        //   'cheapest'  — lowest numeric price
+        //   'first'     — whatever Travelify returned first
+        magazineHeroStrategy: c.magazineHeroStrategy || 'discount',
+        magazineColumns: typeof c.magazineColumns === 'number' ? c.magazineColumns : 3,
+
+        // Boarding-pass template — flights-only specialist (like departure-board).
+        // _buildPayload forces type='Flights' when this template is active.
+        boardingPassColumns: typeof c.boardingPassColumns === 'number' ? c.boardingPassColumns : 2,
+        boardingPassShowBarcode: c.boardingPassShowBarcode !== false,
 
         show: Object.assign({}, defaultShow, c.show || {}),
 
@@ -2000,9 +2707,10 @@
         packageType = 'Any';
       }
 
-      // The departure-board template is flight-only by definition. Override
-      // whatever offer-type the user picked — the template implies the data.
-      if (this.cfg.template === 'departure-board') {
+      // The departure-board AND boarding-pass templates are flight-only by
+      // definition. Override whatever offer-type the user picked — the
+      // template implies the data.
+      if (this.cfg.template === 'departure-board' || this.cfg.template === 'boarding-pass') {
         apiType = 'Flights';
         packageType = null;
       }
@@ -2111,10 +2819,19 @@
 
     _renderOffers() {
       // Departure-board template doesn't dedupe (it's a fares list, not a
-      // shop-around grid), so pass raw offers straight in. Cards template
-      // dedupes per the user's strategy.
+      // shop-around grid), so pass raw offers straight in.
       if (this.cfg.template === 'departure-board') {
         this._renderDepartureBoard();
+        return;
+      }
+      // Magazine + boarding-pass + cards all dedupe per the user's strategy
+      // before rendering — same data path, different visual templates.
+      if (this.cfg.template === 'magazine') {
+        this._renderMagazineTemplate();
+        return;
+      }
+      if (this.cfg.template === 'boarding-pass') {
+        this._renderBoardingPassTemplate();
         return;
       }
       this._renderCardsTemplate();
@@ -2129,10 +2846,13 @@
       }
 
       const isCarousel = this.cfg.layout === 'carousel';
+      const isList = this.cfg.layout === 'list';
 
       let html;
       if (isCarousel) {
         html = this._renderCarousel(deduped);
+      } else if (isList) {
+        html = this._renderListLayout(deduped);
       } else {
         const cols = this.cfg.columns === 'auto' ? '' : ' data-cols="' + esc(this.cfg.columns) + '"';
         html = '<div class="tgo-grid"' + cols + '>';
@@ -2799,6 +3519,573 @@
         + '<span class="tgo-data-value">' + esc(String(value)) + '</span>'
         + '</div>';
     }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       LIST LAYOUT (within the Cards template)
+       Compact horizontal rows: image left, content middle, price right.
+       Reuses the same offer data shape as grid/carousel — no separate
+       data path. Each renderer below knows how to lay itself out as a row
+       given the offer's type. Falls back to stacked layout below 768px.
+       ═══════════════════════════════════════════════════════════════════ */
+    _renderListLayout(offers) {
+      let html = '<div class="tgo-list">';
+      for (const o of offers) html += this._renderListRow(o);
+      html += '</div>';
+      return html;
+    }
+
+    _renderListRow(o) {
+      switch (o.type) {
+        case 'Accommodation': return this._renderListAccommodation(o);
+        case 'Flights':
+        case 'Flight': return this._renderListFlight(o);
+        case 'Packages':
+        case 'Package': return this._renderListPackage(o);
+        default: return this._renderListUnknown(o);
+      }
+    }
+
+    // List-row equivalent of _renderAccommodation. Content is a slimmed-down
+    // version: image + name + meta row (location, stars, nights, board) +
+    // optional amenities tags. Price column on the right.
+    _renderListAccommodation(o) {
+      const acc = o.accommodation || {};
+      const dest = acc.destination || {};
+      const pricing = acc.pricing || {};
+      const img = safeImgUrl((acc.image && acc.image.url) || '');
+      const amenities = Array.isArray(acc.amenities) ? acc.amenities : [];
+      const isLeadIn = pricing.isLeadIn === true;
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? '£' + Math.round(pricing.priceBeforeChange) : null;
+
+      let html = '<article class="tgo-list-row">';
+      html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
+      if (this.cfg.show.leadInPill && isLeadIn) {
+        html += '<span class="tgo-list-img-badge lead-in">Lead-in price</span>';
+      }
+      html += '</div>';
+
+      html += '<div class="tgo-list-body">';
+      html += '<div>';
+      html += '<h3 class="tgo-list-title">' + esc(acc.name || 'Hotel') + '</h3>';
+
+      if (this.cfg.listShowMeta) {
+        html += '<div class="tgo-list-meta">';
+        if (acc.rating) {
+          let stars = '';
+          const n = Math.round(acc.rating);
+          for (let i = 0; i < n; i++) stars += icon('star', 12);
+          html += '<span class="tgo-list-stars">' + stars + '</span>';
+        }
+        if (this.cfg.show.location) {
+          html += '<span>' + icon('mapPin', 12)
+            + esc(dest.name || '') + (dest.countryCode ? ', ' + esc(dest.countryCode) : '')
+            + '</span>';
+        }
+        if (acc.nights) {
+          html += '<span>' + icon('moon', 12) + acc.nights + ' night' + (acc.nights === 1 ? '' : 's') + '</span>';
+        }
+        if (acc.boardBasis) {
+          html += '<span>' + icon('utensils', 12) + esc(formatEnum(acc.boardBasis)) + '</span>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+
+      if (this.cfg.listShowAmenities && this.cfg.show.amenities && amenities.length) {
+        const visible = amenities.slice(0, 4);
+        const extras = amenities.length - visible.length;
+        html += '<div class="tgo-list-tags">';
+        for (const a of visible) html += '<span class="tgo-list-tag">' + esc(formatEnum(a)) + '</span>';
+        if (extras > 0) html += '<span class="tgo-list-tag">+' + extras + '</span>';
+        html += '</div>';
+      }
+      html += '</div>'; // /tgo-list-body
+
+      html += this._renderListPrice(o, wasPrice);
+      html += '</article>';
+      return html;
+    }
+
+    _renderListFlight(o) {
+      const f = o.flight || {};
+      const og = f.origin || {};
+      const dest = f.destination || {};
+      const carrier = f.carrier || {};
+      const pricing = f.pricing || {};
+      const img = safeImgUrl((f.image && f.image.url) || '');
+      const isDirect = f.direct === true;
+      const stops = f.stops || 0;
+      const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : stops + ' stops');
+      const tripType = f.returnDate ? 'Return' : 'One-way';
+      const isLeadIn = pricing.isLeadIn === true;
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? '£' + Math.round(pricing.priceBeforeChange) : null;
+
+      let html = '<article class="tgo-list-row">';
+      html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
+      if (this.cfg.show.leadInPill && isLeadIn) {
+        html += '<span class="tgo-list-img-badge lead-in">Lead-in price</span>';
+      } else if (isDirect) {
+        html += '<span class="tgo-list-img-badge">Direct</span>';
+      }
+      html += '</div>';
+
+      html += '<div class="tgo-list-body">';
+      html += '<div>';
+      html += '<h3 class="tgo-list-title">'
+        + esc((og.iataCode || '???') + ' → ' + (dest.iataCode || '???'))
+        + (carrier.name ? ' · ' + esc(carrier.name) : '')
+        + '</h3>';
+
+      if (this.cfg.listShowMeta) {
+        html += '<div class="tgo-list-meta">';
+        html += '<span>' + icon('plane', 12) + esc(stopsLabel) + '</span>';
+        if (this.cfg.show.flightDuration && f.duration) {
+          html += '<span>' + icon('clock', 12) + esc(formatDuration(f.duration)) + '</span>';
+        }
+        if (this.cfg.show.flightSchedule && f.outboundDate) {
+          html += '<span>' + icon('calendar', 12) + esc(formatDateTime(f.outboundDate)) + '</span>';
+        }
+        if (tripType) {
+          html += '<span>' + esc(tripType) + '</span>';
+        }
+        if (this.cfg.show.cabinClass && f.cabinClass) {
+          html += '<span>' + esc(formatEnum(f.cabinClass)) + '</span>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+      html += '</div>'; // /tgo-list-body
+
+      html += this._renderListPrice(o, wasPrice);
+      html += '</article>';
+      return html;
+    }
+
+    _renderListPackage(o) {
+      const acc = o.accommodation || {};
+      const f = o.flight || {};
+      const dest = acc.destination || f.destination || {};
+      const accPricing = acc.pricing || {};
+      const flightPricing = f.pricing || {};
+      const img = safeImgUrl((acc.image && acc.image.url) || (f.image && f.image.url) || '');
+      const fromCode = (f.origin && f.origin.iataCode) || '';
+      const toCode = (f.destination && f.destination.iataCode) || '';
+      const operator = acc.operator || null;
+      const operatorName = operator ? operator.name : '';
+      const atol = isAtolMessage(operator ? operator.message : '');
+      const pkgType = getPackageType(o);
+      const isHoliday = pkgType === 'PackageHolidays';
+      const isLeadIn = (accPricing.isLeadIn === true) || (flightPricing.isLeadIn === true);
+      const wasPrice = (flightPricing.priceChanged && flightPricing.priceBeforeChange)
+        ? '£' + Math.round(flightPricing.priceBeforeChange) : null;
+
+      let html = '<article class="tgo-list-row">';
+      html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
+      if (operatorName && this.cfg.show.packageOperator) {
+        html += '<span class="tgo-list-img-badge">' + esc(operatorName) + '</span>';
+      } else if (this.cfg.show.leadInPill && isLeadIn) {
+        html += '<span class="tgo-list-img-badge lead-in">Lead-in price</span>';
+      }
+      html += '</div>';
+
+      html += '<div class="tgo-list-body">';
+      html += '<div>';
+      html += '<h3 class="tgo-list-title">' + esc(acc.name || 'Package holiday') + '</h3>';
+
+      if (this.cfg.listShowMeta) {
+        html += '<div class="tgo-list-meta">';
+        if (acc.rating) {
+          let stars = '';
+          const n = Math.round(acc.rating);
+          for (let i = 0; i < n; i++) stars += icon('star', 12);
+          html += '<span class="tgo-list-stars">' + stars + '</span>';
+        }
+        if (this.cfg.show.location) {
+          html += '<span>' + icon('mapPin', 12)
+            + esc(dest.name || '') + (dest.countryCode ? ', ' + esc(dest.countryCode) : '')
+            + '</span>';
+        }
+        if (fromCode && toCode) {
+          html += '<span>' + icon('plane', 12) + esc(fromCode + ' → ' + toCode) + '</span>';
+        }
+        if (acc.nights) {
+          html += '<span>' + icon('moon', 12) + acc.nights + ' nt' + '</span>';
+        }
+        if (acc.boardBasis) {
+          html += '<span>' + icon('utensils', 12) + esc(formatEnum(acc.boardBasis)) + '</span>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+
+      if (this.cfg.listShowAmenities) {
+        const tags = [];
+        if (atol && isHoliday) tags.push('ATOL');
+        if (isHoliday) tags.push('Package');
+        else tags.push('Flight + Hotel');
+        if (tags.length) {
+          html += '<div class="tgo-list-tags">';
+          for (const t of tags) html += '<span class="tgo-list-tag">' + esc(t) + '</span>';
+          html += '</div>';
+        }
+      }
+      html += '</div>'; // /tgo-list-body
+
+      html += this._renderListPrice(o, wasPrice);
+      html += '</article>';
+      return html;
+    }
+
+    _renderListUnknown(o) {
+      let html = '<article class="tgo-list-row">';
+      html += '<div class="tgo-list-img"></div>';
+      html += '<div class="tgo-list-body"><div>';
+      html += '<h3 class="tgo-list-title">Offer</h3>';
+      html += '<div class="tgo-list-meta"><span>' + esc(o.type || 'Unknown type') + '</span></div>';
+      html += '</div></div>';
+      html += this._renderListPrice(o, null);
+      html += '</article>';
+      return html;
+    }
+
+    // Price column for the list layout. Same logic as _renderPriceFooter but
+    // restyled for a vertical right-side column.
+    _renderListPrice(o, wasPrice) {
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const url = safeUrl(o.url || '#');
+      const wasHtml = (this.cfg.show.wasPrice && wasPrice)
+        ? '<span class="tgo-list-was">' + esc(wasPrice) + '</span>' : '';
+
+      let basisHtml = '';
+      if (this.cfg.show.paxBasis) {
+        const label = paxBasisLabel(o);
+        if (label) {
+          const paxData = JSON.stringify({
+            adults: o.adults || 0,
+            children: o.children || 0,
+            infants: o.infants || 0,
+            url: o.url || '',
+          });
+          basisHtml = '<button type="button" class="tgo-pax-basis" data-tgo-pax="' + esc(paxData) + '" style="font-size:10px;padding-top:2px;">'
+            + esc(label) + '</button>';
+        }
+      }
+
+      return '<div class="tgo-list-price">'
+        + wasHtml
+        + '<span class="tgo-list-now">' + esc(display.primary) + '</span>'
+        + (display.sub ? '<span class="tgo-list-sub">' + esc(display.sub) + '</span>' : '')
+        + basisHtml
+        + '<a class="tgo-list-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">View deal</a>'
+        + '</div>';
+    }
+    /* ═══════════════════════════════════════════════════════════════════
+       END LIST LAYOUT
+       ═══════════════════════════════════════════════════════════════════ */
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MAGAZINE TEMPLATE
+       Hero card spanning full width over a sub-grid of standard cards.
+       Hero is auto-promoted by magazineHeroStrategy:
+         featured  — first offer with o.featured=true (falls back if none)
+         discount  — biggest absolute discount
+         cheapest  — lowest numeric price
+         first     — whatever Travelify returned first
+       Reuses _renderOfferCard for the sub-grid so the cards look exactly
+       like grid mode — only the hero is a new render.
+       ═══════════════════════════════════════════════════════════════════ */
+    _renderMagazineTemplate() {
+      const deduped = dedupeOffers(this.rawOffers, this.cfg.dedupeStrategy, this.cfg.sort);
+
+      if (!deduped.length) {
+        this._showEmpty();
+        return;
+      }
+
+      const heroIdx = this._pickMagazineHero(deduped);
+      const hero = deduped[heroIdx];
+      const rest = deduped.slice(0, heroIdx).concat(deduped.slice(heroIdx + 1));
+
+      let html = '<div class="tgo-mag">';
+      html += this._renderMagazineHero(hero);
+
+      if (rest.length) {
+        const cols = Math.min(4, Math.max(2, this.cfg.magazineColumns || 3));
+        html += '<div class="tgo-mag-grid" data-cols="' + cols + '">';
+        for (const o of rest) html += this._renderOfferCard(o);
+        html += '</div>';
+      }
+      html += '</div>';
+
+      if (this.cfg.show.poweredBy) {
+        html += '<div class="tgo-powered">Powered by Travelgenix</div>';
+      }
+      this.root.innerHTML = html;
+    }
+
+    _pickMagazineHero(offers) {
+      const strat = this.cfg.magazineHeroStrategy || 'discount';
+
+      if (strat === 'featured') {
+        const idx = offers.findIndex(o => o && o.featured === true);
+        if (idx >= 0) return idx;
+        // Fall through to discount when no featured offer found
+      }
+
+      if (strat === 'first' || !offers.length) return 0;
+
+      if (strat === 'cheapest') {
+        let bestIdx = 0, bestPrice = Infinity;
+        offers.forEach((o, i) => {
+          const p = getNumericPrice(o);
+          if (p < bestPrice) { bestPrice = p; bestIdx = i; }
+        });
+        return bestIdx;
+      }
+
+      // discount (default)
+      let bestIdx = 0, bestSaving = -Infinity;
+      offers.forEach((o, i) => {
+        const acc = (o.accommodation && o.accommodation.pricing) || {};
+        const fl = (o.flight && o.flight.pricing) || {};
+        const before = (acc.priceChanged && acc.priceBeforeChange) || (fl.priceChanged && fl.priceBeforeChange) || 0;
+        const now = getNumericPrice(o);
+        const saving = (before && isFinite(now)) ? (before - now) : 0;
+        if (saving > bestSaving) { bestSaving = saving; bestIdx = i; }
+      });
+      // If no offer has a recorded saving, fall back to first
+      if (bestSaving <= 0) return 0;
+      return bestIdx;
+    }
+
+    // The hero card. Picks the right hero variant for the offer's type so
+    // the headline reads naturally (hotel name vs route vs operator+hotel).
+    _renderMagazineHero(o) {
+      // Pick a hero image and a primary headline based on type
+      const acc = o.accommodation || {};
+      const f = o.flight || {};
+      const dest = acc.destination || f.destination || {};
+      const isAcc = o.type === 'Accommodation';
+      const isFlight = o.type === 'Flight' || o.type === 'Flights';
+      const isPkg = o.type === 'Package' || o.type === 'Packages';
+
+      const img = safeImgUrl(
+        (acc.image && acc.image.url)
+        || (f.image && f.image.url)
+        || ''
+      );
+
+      // Headline + kicker
+      let kicker = '';
+      let headline = '';
+      let summary = '';
+      if (isAcc) {
+        const bits = [];
+        if (dest.name) bits.push(dest.name);
+        if (acc.nights) bits.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
+        if (acc.boardBasis) bits.push(formatEnum(acc.boardBasis));
+        kicker = bits.join(' · ');
+        headline = acc.name || 'Featured stay';
+        summary = acc.summary || '';
+      } else if (isFlight) {
+        const og = f.origin || {};
+        const fd = f.destination || {};
+        const bits = [];
+        if (og.iataCode && fd.iataCode) bits.push(og.iataCode + ' → ' + fd.iataCode);
+        if (f.direct) bits.push('Direct');
+        if (f.duration) bits.push(formatDuration(f.duration));
+        kicker = bits.join(' · ');
+        headline = (f.carrier && f.carrier.name) ? f.carrier.name + ' to ' + (fd.name || fd.iataCode || 'destination') : 'Featured flight';
+        summary = '';
+      } else if (isPkg) {
+        const pkgType = getPackageType(o);
+        const isHoliday = pkgType === 'PackageHolidays';
+        const bits = [];
+        if (dest.name) bits.push(dest.name);
+        if (acc.nights) bits.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
+        if (acc.boardBasis) bits.push(formatEnum(acc.boardBasis));
+        if (isHoliday && acc.operator && acc.operator.name) bits.push('with ' + acc.operator.name);
+        kicker = bits.join(' · ');
+        headline = acc.name || 'Featured package';
+        summary = acc.summary || '';
+      } else {
+        kicker = '';
+        headline = 'Featured offer';
+        summary = '';
+      }
+
+      // Price block on the right of the hero
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const url = safeUrl(o.url || '#');
+      const accPricing = acc.pricing || {};
+      const flightPricing = f.pricing || {};
+      const wasPrice = (accPricing.priceChanged && accPricing.priceBeforeChange)
+        ? '£' + Math.round(accPricing.priceBeforeChange)
+        : (flightPricing.priceChanged && flightPricing.priceBeforeChange)
+          ? '£' + Math.round(flightPricing.priceBeforeChange)
+          : null;
+
+      let html = '<article class="tgo-mag-hero" ' + cssBgUrl(img) + '>';
+      html += '<span class="tgo-mag-hero-badge">Featured</span>';
+      html += '<div class="tgo-mag-hero-content">';
+      html += '<div>';
+      if (kicker) html += '<div class="tgo-mag-hero-kicker">' + esc(kicker) + '</div>';
+      html += '<h3 class="tgo-mag-hero-title">' + esc(headline) + '</h3>';
+      if (summary && this.cfg.show.summary) {
+        html += '<p class="tgo-mag-hero-summary">' + esc(summary) + '</p>';
+      }
+      html += '</div>';
+
+      html += '<div class="tgo-mag-hero-price">';
+      html += '<span class="tgo-mag-hero-from">From</span>';
+      if (this.cfg.show.wasPrice && wasPrice) {
+        html += '<span class="tgo-mag-hero-was">' + esc(wasPrice) + '</span>';
+      }
+      html += '<span class="tgo-mag-hero-now">' + esc(display.primary) + '</span>';
+      if (display.sub) html += '<span class="tgo-mag-hero-sub">' + esc(display.sub) + '</span>';
+      html += '<a class="tgo-mag-hero-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Reserve this trip</a>';
+      html += '</div>';
+      html += '</div>'; // /tgo-mag-hero-content
+      html += '</article>';
+      return html;
+    }
+    /* ═══════════════════════════════════════════════════════════════════
+       END MAGAZINE TEMPLATE
+       ═══════════════════════════════════════════════════════════════════ */
+
+    /* ═══════════════════════════════════════════════════════════════════
+       BOARDING-PASS TEMPLATE (FLIGHTS ONLY)
+       Paper boarding-pass shape with perforated stub, mono flight numbers
+       and a CSS-rendered barcode strip. Forced to flights-only via
+       _buildPayload's type override (see departure-board precedent).
+       Uses tgbp- prefix to avoid colliding with cards (tgo-) or board (tdb-).
+       ═══════════════════════════════════════════════════════════════════ */
+    _renderBoardingPassTemplate() {
+      const deduped = dedupeOffers(this.rawOffers, this.cfg.dedupeStrategy, this.cfg.sort);
+
+      // Filter strictly to flights (defensive — the API should only return
+      // flights given the type override, but guard anyway).
+      const flights = deduped.filter((o) => o.type === 'Flight' || o.type === 'Flights');
+
+      if (!flights.length) {
+        this._showEmpty();
+        return;
+      }
+
+      const cols = Math.min(2, Math.max(1, this.cfg.boardingPassColumns || 2));
+      let html = '<div class="tgbp-grid" data-cols="' + cols + '">';
+      for (const o of flights) html += this._renderBoardingPass(o);
+      html += '</div>';
+
+      if (this.cfg.show.poweredBy) {
+        html += '<div class="tgo-powered">Powered by Travelgenix</div>';
+      }
+      this.root.innerHTML = html;
+    }
+
+    _renderBoardingPass(o) {
+      const f = o.flight || {};
+      const og = f.origin || {};
+      const dest = f.destination || {};
+      const carrier = f.carrier || {};
+      const pricing = f.pricing || {};
+
+      const url = safeUrl(o.url || '#');
+      const carrierCode = (carrier.code || '').slice(0, 2).toUpperCase() || 'XX';
+      const carrierName = carrier.name || 'Carrier';
+      const flightNumber = (carrier.code && f.flightNumber) ? carrier.code + ' ' + f.flightNumber : (carrier.code || '');
+      const cabinClass = f.cabinClass ? formatEnum(f.cabinClass) : 'Economy';
+      const isDirect = f.direct === true;
+      const stops = f.stops || 0;
+      const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : (stops > 0 ? stops + ' stops' : 'Direct'));
+
+      // Format depart/arrive times
+      const depart = formatBoardTime(f.outboundDate);
+      const arrive = formatBoardTime(f.arrivalDate || f.outboundArrivalDate);
+      const date = formatBoardDate(f.outboundDate);
+      const duration = f.duration ? formatDuration(f.duration) : '';
+
+      // Price
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange)
+        ? '£' + Math.round(pricing.priceBeforeChange) : null;
+
+      // Barcode "number" — synthetic, derived from carrier + flight + date
+      const barcodeNum = (carrier.code || 'XX') + (f.flightNumber || '0000') + '·' + (date || '').replace(/\s/g, '');
+
+      let html = '<article class="tgbp">';
+
+      // Main panel
+      html += '<div class="tgbp-main">';
+
+      // Header: airline + cabin class
+      html += '<div class="tgbp-head">';
+      html += '<div class="tgbp-airline">';
+      html += '<div class="tgbp-mark">' + esc(carrierCode) + '</div>';
+      html += '<div class="tgbp-airline-text">';
+      html += '<div class="tgbp-airline-name">' + esc(carrierName) + '</div>';
+      html += '<div class="tgbp-airline-sub">' + esc(flightNumber || stopsLabel) + (flightNumber && stopsLabel ? ' · ' + esc(stopsLabel) : '') + '</div>';
+      html += '</div>';
+      html += '</div>';
+      if (this.cfg.show.cabinClass) {
+        html += '<span class="tgbp-class">' + esc(cabinClass) + '</span>';
+      }
+      html += '</div>';
+
+      // Route block: ORIGIN → DEST
+      html += '<div class="tgbp-route">';
+      html += '<div class="tgbp-route-end">';
+      html += '<div class="tgbp-iata">' + esc(og.iataCode || '???') + '</div>';
+      html += '<div class="tgbp-airport-name">' + esc((og.name || '').replace(/\s*\([A-Z]{3}\)\s*$/, '')) + '</div>';
+      html += '</div>';
+      html += '<div class="tgbp-plane">';
+      html += '<div class="tgbp-plane-line"></div>';
+      html += '<div class="tgbp-plane-icon">' + icon('plane', 18) + '</div>';
+      html += '<div class="tgbp-plane-line"></div>';
+      html += '</div>';
+      html += '<div class="tgbp-route-end right">';
+      html += '<div class="tgbp-iata">' + esc(dest.iataCode || '???') + '</div>';
+      html += '<div class="tgbp-airport-name">' + esc((dest.name || '').replace(/\s*\([A-Z]{3}\)\s*$/, '')) + '</div>';
+      html += '</div>';
+      html += '</div>';
+
+      // Detail row: date / depart / arrive / duration
+      html += '<div class="tgbp-detail-row">';
+      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">Date</span><span class="tgbp-detail-value">' + esc(date || '—') + '</span></div>';
+      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">Depart</span><span class="tgbp-detail-value">' + esc(depart) + '</span></div>';
+      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">Arrive</span><span class="tgbp-detail-value">' + esc(arrive) + '</span></div>';
+      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">Duration</span><span class="tgbp-detail-value">' + esc(duration || '—') + '</span></div>';
+      html += '</div>';
+
+      html += '</div>'; // /tgbp-main
+
+      // Stub
+      html += '<div class="tgbp-stub">';
+      html += '<div class="tgbp-stub-top">';
+      html += '<span class="tgbp-stub-label">Fare</span>';
+      if (this.cfg.show.wasPrice && wasPrice) {
+        html += '<span class="tgbp-stub-was">' + esc(wasPrice) + '</span>';
+      }
+      html += '<span class="tgbp-stub-price">' + esc(display.primary) + '</span>';
+      html += '</div>';
+
+      if (this.cfg.boardingPassShowBarcode) {
+        html += '<div class="tgbp-barcode">';
+        html += '<div class="tgbp-barcode-bars" aria-hidden="true"></div>';
+        html += '<div class="tgbp-barcode-num">' + esc(barcodeNum) + '</div>';
+        html += '</div>';
+      }
+
+      html += '<a class="tgbp-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Book</a>';
+      html += '</div>'; // /tgbp-stub
+
+      html += '</article>';
+      return html;
+    }
+    /* ═══════════════════════════════════════════════════════════════════
+       END BOARDING-PASS TEMPLATE
+       ═══════════════════════════════════════════════════════════════════ */
+
 
     /* ═══════════════════════════════════════════════════════════════════
        DEPARTURE-BOARD TEMPLATE METHODS
