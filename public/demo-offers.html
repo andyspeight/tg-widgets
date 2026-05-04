@@ -245,6 +245,7 @@
         <option value="departure-board">Departure board</option>
         <option value="boarding-pass">Boarding pass</option>
         <option value="ticker">Ticker</option>
+        <option value="popup">Popup</option>
       </select>
     </div>
     <div class="field" id="fieldLayout">
@@ -380,6 +381,87 @@
     </div>
   </div>
 
+  <!-- ─── Popup specific controls ────────────────────────────────── -->
+  <div class="controls-sub" id="subPopup" hidden>
+    <div class="controls-sub-label">Popup options</div>
+    <div class="field">
+      <label for="ctrlPopupLayout">Layout</label>
+      <select id="ctrlPopupLayout">
+        <option value="slide-in" selected>Slide-in panel</option>
+        <option value="centered">Centered modal</option>
+        <option value="floating-card">Floating card</option>
+        <option value="top-bar">Top banner</option>
+        <option value="bottom-bar">Bottom banner</option>
+        <option value="side-drawer">Side drawer</option>
+        <option value="fullscreen">Fullscreen</option>
+        <option value="inline">Inline</option>
+      </select>
+    </div>
+    <div class="field" id="fieldPopupPosition">
+      <label for="ctrlPopupPosition">Corner</label>
+      <select id="ctrlPopupPosition">
+        <option value="bottom-right" selected>Bottom right</option>
+        <option value="bottom-left">Bottom left</option>
+        <option value="top-right">Top right</option>
+        <option value="top-left">Top left</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlPopupRenderMode">Render mode</label>
+      <select id="ctrlPopupRenderMode">
+        <option value="auto" selected>Auto</option>
+        <option value="compact">Compact (cards)</option>
+        <option value="single">Single (hero)</option>
+        <option value="mini">Mini (banner pills)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlPopupTrigger">Trigger</label>
+      <select id="ctrlPopupTrigger">
+        <option value="load" selected>On page load</option>
+        <option value="time">After time delay</option>
+        <option value="scroll">After scroll %</option>
+        <option value="exit-intent">Exit intent</option>
+        <option value="inactivity">After inactivity</option>
+      </select>
+    </div>
+    <div class="field" id="fieldPopupDelay">
+      <label for="ctrlPopupDelay">Delay (ms)</label>
+      <input id="ctrlPopupDelay" type="number" min="0" step="500" value="3000" />
+    </div>
+    <div class="field" id="fieldPopupScroll" hidden>
+      <label for="ctrlPopupScroll">Scroll %</label>
+      <input id="ctrlPopupScroll" type="number" min="1" max="100" step="5" value="50" />
+    </div>
+    <div class="field" id="fieldPopupInactivity" hidden>
+      <label for="ctrlPopupInactivity">Inactivity (s)</label>
+      <input id="ctrlPopupInactivity" type="number" min="5" step="5" value="30" />
+    </div>
+    <div class="field">
+      <label for="ctrlPopupHeading">Heading</label>
+      <input id="ctrlPopupHeading" type="text" value="Live deals" maxlength="40" />
+    </div>
+    <div class="field">
+      <label for="ctrlPopupRotate">Rotate every (ms)</label>
+      <input id="ctrlPopupRotate" type="number" min="0" step="1000" value="8000" />
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlPopupShowPulse">Show pulse</label>
+        <input class="toggle" type="checkbox" id="ctrlPopupShowPulse" checked />
+      </div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlPopupCloseBtn">Close button</label>
+        <input class="toggle" type="checkbox" id="ctrlPopupCloseBtn" checked />
+      </div>
+    </div>
+    <div class="field">
+      <button type="button" id="ctrlPopupReset" style="width:100%;font-size:11px;padding:8px 12px;background:#fff;border:1px solid #cbd5e1;color:#475569;border-radius:6px;cursor:pointer;font-weight:500;">Reset frequency &amp; show again</button>
+    </div>
+  </div>
+
   <!-- ─── List-layout specific controls ──────────────────────────── -->
   <div class="controls-sub" id="subList" hidden>
     <div class="controls-sub-label">List layout options</div>
@@ -487,11 +569,12 @@
     const isDepartureBoard = tmpl === 'departure-board';
     const isBoardingPass = tmpl === 'boarding-pass';
     const isTicker = tmpl === 'ticker';
+    const isPopup = tmpl === 'popup';
 
     // Layout selector — only relevant for cards
     $('fieldLayout').hidden = !isCards;
 
-    // Offer type — relevant for cards, magazine, and ticker.
+    // Offer type — relevant for cards, magazine, ticker, popup.
     // Departure-board and boarding-pass force flights regardless.
     $('fieldType').hidden = isDepartureBoard || isBoardingPass;
 
@@ -507,6 +590,17 @@
     $('subList').hidden = !(isCards && layout === 'list');
     $('subDepartureBoard').hidden = !isDepartureBoard;
     $('subTicker').hidden = !isTicker;
+    $('subPopup').hidden = !isPopup;
+
+    // Popup conditional fields (within subPopup)
+    if (isPopup) {
+      const popupLayout = $('ctrlPopupLayout').value;
+      $('fieldPopupPosition').hidden = !(popupLayout === 'slide-in' || popupLayout === 'floating-card');
+      const trig = $('ctrlPopupTrigger').value;
+      $('fieldPopupDelay').hidden = !(trig === 'load' || trig === 'time');
+      $('fieldPopupScroll').hidden = !(trig === 'scroll');
+      $('fieldPopupInactivity').hidden = !(trig === 'inactivity');
+    }
 
     // Stage label reflects the active template
     const labels = {
@@ -515,6 +609,7 @@
       'departure-board': 'Departure board template · live fares',
       'boarding-pass': 'Boarding pass template · flights only',
       'ticker': 'Ticker template · marquee crawl',
+      'popup': 'Popup template · ' + $('ctrlPopupLayout').value,
     };
     $('stageLabel').textContent = 'Live preview · ' + (labels[tmpl] || tmpl);
   }
@@ -584,6 +679,26 @@
       tickerLabel: $('ctrlTickerLabel').value || 'Live deals',
       tickerShowLabel: $('ctrlTickerShowLabel').checked,
       tickerPauseOnHover: $('ctrlTickerPauseOnHover').checked,
+
+      // Popup options — read regardless, widget only uses when template==='popup'.
+      // The demo deliberately uses 'every-visit' frequency and no suppression so
+      // every config change triggers the popup again. In production these would
+      // default to session frequency with sensible suppression.
+      popupLayout: $('ctrlPopupLayout').value,
+      popupPosition: $('ctrlPopupPosition').value,
+      popupRenderMode: $('ctrlPopupRenderMode').value,
+      popupTrigger: $('ctrlPopupTrigger').value,
+      popupTriggerDelay: parseInt($('ctrlPopupDelay').value, 10) || 3000,
+      popupTriggerScrollPercent: parseInt($('ctrlPopupScroll').value, 10) || 50,
+      popupTriggerInactivitySeconds: parseInt($('ctrlPopupInactivity').value, 10) || 30,
+      popupHeading: $('ctrlPopupHeading').value || 'Live deals',
+      popupShowPulse: $('ctrlPopupShowPulse').checked,
+      popupShowCloseButton: $('ctrlPopupCloseBtn').checked,
+      popupRotateInterval: parseInt($('ctrlPopupRotate').value, 10) || 0,
+      // Force every-visit so demo tweaks always re-fire
+      popupFrequency: 'every-visit',
+      popupSuppressAfterDismissDays: 0,
+      popupSuppressAfterConversionDays: 0,
     };
   }
 
@@ -607,11 +722,29 @@
   document.querySelectorAll('.controls select, .controls-sub select, .controls-sub input[type="checkbox"]').forEach(el => {
     el.addEventListener('change', rebuild);
   });
-  document.querySelectorAll('.controls input[type="text"], .controls input[type="number"]').forEach(el => {
+  document.querySelectorAll('.controls input[type="text"], .controls input[type="number"], .controls-sub input[type="text"], .controls-sub input[type="number"]').forEach(el => {
     el.addEventListener('input', () => {
       clearTimeout(el._t);
       el._t = setTimeout(rebuild, 400);
     });
+  });
+
+  // Reset button for popup demo — clears stored frequency state for this
+  // widget so the popup fires again. Useful when you want to retest after
+  // dismissing it.
+  $('ctrlPopupReset').addEventListener('click', () => {
+    try {
+      // Clear any tgop_ prefixed sessionStorage / localStorage keys
+      for (const storage of [window.sessionStorage, window.localStorage]) {
+        const keys = [];
+        for (let i = 0; i < storage.length; i++) {
+          const k = storage.key(i);
+          if (k && k.startsWith('tgop_')) keys.push(k);
+        }
+        keys.forEach(k => storage.removeItem(k));
+      }
+    } catch {}
+    rebuild();
   });
 
   // Initial render
