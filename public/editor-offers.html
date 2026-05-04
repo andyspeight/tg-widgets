@@ -2065,6 +2065,12 @@
       cfg.appId = TG_TRAVELIFY_APPID;
       cfg.apiKey = TG_TRAVELIFY_KEY;
       cfg.cacheMinutes = 0;
+      // Editor-only preview flag. The widget reads this to render the popup
+      // template inline (forcing popupLayout='inline' and bypassing the
+      // trigger/eligibility checks) so the user can see the popup content
+      // without waiting for triggers to fire or worrying about frequency
+      // suppression. The flag has no effect on the other templates.
+      cfg._preview = true;
       const div = document.createElement('div');
       div.setAttribute('data-tg-widget', 'offers');
       mount.appendChild(div);
