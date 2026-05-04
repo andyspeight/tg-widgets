@@ -2893,7 +2893,7 @@
     .tgop-layout-slide-in.tgop-pos-top-right .tgop-container { justify-content: flex-end; align-items: flex-start; }
     .tgop-layout-slide-in.tgop-pos-top-left .tgop-container { justify-content: flex-start; align-items: flex-start; }
     .tgop-layout-slide-in .tgop-card {
-      width: 360px;
+      width: 420px;
       max-width: calc(100vw - 32px);
       transform: translateY(40px);
     }
@@ -3151,9 +3151,21 @@
       font-family: var(--tgo-font-mono, ui-monospace, monospace);
     }
     .tgop-offer-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       font-size: 11px;
       font-weight: 600;
-      color: var(--tgo-accent, #00B4D8);
+      color: white;
+      background: var(--tgo-accent, #00B4D8);
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background 0.15s ease, transform 0.15s ease;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .tgop-content-compact a.tgop-offer:hover .tgop-offer-cta {
+      background: var(--tgo-brand, #1B2B5B);
     }
     .tgop-foot {
       padding: 12px 16px;
@@ -3174,6 +3186,280 @@
       padding: 8px 14px;
       border-radius: 8px;
       text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    /* ───── COMPACT — GRID layout (2-col image-top tiles) ───── */
+    .tgop-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 12px;
+      max-height: 540px;
+      overflow-y: auto;
+    }
+    .tgop-tile {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--tgo-border, #E2E8F0);
+      border-radius: 12px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      background: var(--tgo-card, #fff);
+      box-shadow: none;
+      transform: none;
+      opacity: 1;
+    }
+    .tgop-tile:hover {
+      border-color: var(--tgo-accent, #00B4D8);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px -8px rgba(0,0,0,0.12);
+    }
+    .tgop-tile-img {
+      width: 100%;
+      height: 100px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--tgo-card-alt, #F1F5F9);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .tgop-tile-img-placeholder {
+      background-image: linear-gradient(135deg, rgba(0, 180, 216, 0.15), rgba(27, 43, 91, 0.15));
+    }
+    .tgop-tile-discount {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #10B981;
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 7px;
+      border-radius: 999px;
+      letter-spacing: -0.01em;
+    }
+    .tgop-tile-body {
+      padding: 8px 10px 10px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .tgop-tile-kicker {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tgo-muted, #94A3B8);
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgop-tile-name {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      line-height: 1.3;
+      color: var(--tgo-text, #0F172A);
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .tgop-tile-foot {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .tgop-tile-price {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-tile-was {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--tgo-muted, #94A3B8);
+      text-decoration: line-through;
+      margin-right: 4px;
+    }
+    .tgop-tile-sub {
+      font-size: 10px;
+      color: var(--tgo-muted, #94A3B8);
+    }
+
+    /* ───── COMPACT — HERO-LIST layout (first big, rest small rows) ───── */
+    .tgop-hero-wrap {
+      padding: 12px 12px 0;
+    }
+    .tgop-hero {
+      display: block;
+      border-radius: 12px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      background: var(--tgo-card, #fff);
+      border: 1px solid var(--tgo-border, #E2E8F0);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: none;
+      transform: none;
+      opacity: 1;
+    }
+    .tgop-hero:hover {
+      border-color: var(--tgo-accent, #00B4D8);
+      box-shadow: 0 8px 20px -10px rgba(0,0,0,0.12);
+    }
+    .tgop-hero-img {
+      width: 100%;
+      height: 140px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--tgo-card-alt, #F1F5F9);
+      position: relative;
+    }
+    .tgop-hero-imgfade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15,23,42,0.45) 0%, transparent 50%);
+    }
+    .tgop-hero-discount {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #10B981;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 999px;
+      letter-spacing: -0.01em;
+      z-index: 2;
+    }
+    .tgop-hero-body {
+      padding: 12px 14px 14px;
+    }
+    .tgop-hero-kicker {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tgo-muted, #94A3B8);
+      margin-bottom: 4px;
+    }
+    .tgop-hero-name {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      color: var(--tgo-text, #0F172A);
+      margin-bottom: 4px;
+    }
+    .tgop-hero-flight {
+      font-size: 11px;
+      color: var(--tgo-sub, #475569);
+      margin-bottom: 10px;
+    }
+    .tgop-hero-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--tgo-border, #E2E8F0);
+    }
+    .tgop-hero-price {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .tgop-hero-was {
+      font-size: 11px;
+      color: var(--tgo-muted, #94A3B8);
+      text-decoration: line-through;
+      margin-bottom: 2px;
+    }
+    .tgop-hero-now {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-hero-sub {
+      font-size: 10px;
+      color: var(--tgo-muted, #94A3B8);
+    }
+    .tgop-hero-cta {
+      background: var(--tgo-accent, #00B4D8);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .tgop-hero:hover .tgop-hero-cta {
+      background: var(--tgo-brand, #1B2B5B);
+    }
+
+    .tgop-mini-rows {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .tgop-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--tgo-border, #E2E8F0);
+      border-radius: 8px;
+      text-decoration: none;
+      color: inherit;
+      background: var(--tgo-card, #fff);
+      transition: border-color 0.15s ease, background 0.15s ease;
+      box-shadow: none;
+      transform: none;
+      opacity: 1;
+    }
+    .tgop-row:hover {
+      border-color: var(--tgo-accent, #00B4D8);
+      background: var(--tgo-card-alt, #F8FAFC);
+    }
+    .tgop-row-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .tgop-row-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tgo-text, #0F172A);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgop-row-kicker {
+      font-size: 10px;
+      color: var(--tgo-muted, #94A3B8);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgop-row-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--tgo-text, #0F172A);
       flex-shrink: 0;
     }
 
@@ -4098,6 +4384,11 @@
         // real-estate so we cap render to a sensible number even if the user
         // fetched 100 offers. Default 6 = a comfortable compact list at 360px.
         popupMaxRender: typeof c.popupMaxRender === 'number' ? Math.max(1, Math.min(20, c.popupMaxRender)) : 6,
+        // Inner-card layout when render mode is 'compact':
+        //   stacked    — vertical list of full-width offer cards (image-left, text-right)
+        //   grid       — 2-column grid of image-top tiles
+        //   hero-list  — first offer hero-style, rest as small text rows below
+        popupCompactLayout: ['stacked','grid','hero-list'].includes(c.popupCompactLayout) ? c.popupCompactLayout : 'stacked',
 
         // Departure-board status pill toggles. Cheapest, Today, This week
         // are always-on (foundational signals). Tomorrow, Going soon, and
@@ -6153,16 +6444,40 @@
     // ───── COMPACT mode — multi-card vertical list ─────
     _popupRenderCompact(offers) {
       const cfg = this.cfg;
-      let html = '<div class="tgop-content tgop-content-compact">';
+      const layout = cfg.popupCompactLayout || 'stacked';
+      const layoutClass = ' tgop-content-compact-' + layout;
+      let html = '<div class="tgop-content tgop-content-compact' + layoutClass + '">';
       html += '<div class="tgop-bar">';
       html += this._popupHeader();
       html += this._popupCloseBtn();
       html += '</div>';
-      html += '<div class="tgop-list">';
-      for (const o of offers) {
-        html += this._popupCompactCard(o);
+
+      // Dispatch based on inner-layout mode
+      if (layout === 'grid') {
+        html += '<div class="tgop-grid">';
+        for (const o of offers) {
+          html += this._popupGridTile(o);
+        }
+        html += '</div>';
+      } else if (layout === 'hero-list' && offers.length > 1) {
+        // First offer renders as hero, rest as small rows
+        html += '<div class="tgop-hero-wrap">';
+        html += this._popupHeroCard(offers[0]);
+        html += '</div>';
+        html += '<div class="tgop-mini-rows">';
+        for (let i = 1; i < offers.length; i++) {
+          html += this._popupMiniRow(offers[i]);
+        }
+        html += '</div>';
+      } else {
+        // Stacked (default) — vertical list of full-width compact cards
+        html += '<div class="tgop-list">';
+        for (const o of offers) {
+          html += this._popupCompactCard(o);
+        }
+        html += '</div>';
       }
-      html += '</div>';
+
       // Optional bottom strip — only when both text and CTA present
       if (cfg.popupFooterText && cfg.popupFooterCtaText && cfg.popupFooterCtaUrl) {
         html += '<div class="tgop-foot">';
@@ -6172,6 +6487,108 @@
         html += '</div>';
       }
       html += '</div>';
+      return html;
+    }
+
+    // Grid tile — image on top, text below. Used by 'grid' compact layout.
+    _popupGridTile(o) {
+      const headline = this._popupHeadlineText(o);
+      if (!headline) return '';
+      const kicker = this._popupKickerText(o);
+      const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
+        || (o.flight && o.flight.image && o.flight.image.url) || '');
+      const display = this._popupPriceContext(o);
+      const url = safeUrl(o.url || '#');
+      const wasPrice = this._popupWasPrice(o);
+      const discount = this._popupDiscountPercent(o);
+
+      let html = '<a class="tgop-tile" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
+      if (img) {
+        html += '<div class="tgop-tile-img" ' + cssBgUrl(img) + '>';
+        if (discount && discount > 0) {
+          html += '<span class="tgop-tile-discount">-' + discount + '%</span>';
+        }
+        html += '</div>';
+      } else {
+        html += '<div class="tgop-tile-img tgop-tile-img-placeholder"></div>';
+      }
+      html += '<div class="tgop-tile-body">';
+      if (kicker) html += '<div class="tgop-tile-kicker">' + esc(kicker) + '</div>';
+      html += '<div class="tgop-tile-name">' + esc(headline) + '</div>';
+      html += '<div class="tgop-tile-foot">';
+      if (display.primary) {
+        html += '<span class="tgop-tile-price">';
+        if (wasPrice) html += '<span class="tgop-tile-was">' + esc(wasPrice) + '</span>';
+        html += esc(display.primary);
+        html += '</span>';
+        if (display.sub) html += '<span class="tgop-tile-sub">' + esc(display.sub) + '</span>';
+      }
+      html += '</div>';
+      html += '</div>';
+      html += '</a>';
+      return html;
+    }
+
+    // Hero card — used as the first offer in 'hero-list' layout. Bigger image,
+    // more prominent name, full-width CTA.
+    _popupHeroCard(o) {
+      const headline = this._popupHeadlineText(o);
+      if (!headline) return '';
+      const kicker = this._popupKickerText(o);
+      const flightStrip = this._popupFlightStripText(o);
+      const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
+        || (o.flight && o.flight.image && o.flight.image.url) || '');
+      const display = this._popupPriceContext(o);
+      const url = safeUrl(o.url || '#');
+      const wasPrice = this._popupWasPrice(o);
+      const discount = this._popupDiscountPercent(o);
+
+      let html = '<a class="tgop-hero" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
+      if (img) {
+        html += '<div class="tgop-hero-img" ' + cssBgUrl(img) + '>';
+        if (discount && discount > 0) {
+          html += '<span class="tgop-hero-discount">-' + discount + '%</span>';
+        }
+        html += '<div class="tgop-hero-imgfade"></div>';
+        html += '</div>';
+      }
+      html += '<div class="tgop-hero-body">';
+      if (kicker) html += '<div class="tgop-hero-kicker">' + esc(kicker) + '</div>';
+      html += '<div class="tgop-hero-name">' + esc(headline) + '</div>';
+      if (flightStrip) html += '<div class="tgop-hero-flight">' + esc(flightStrip) + '</div>';
+      html += '<div class="tgop-hero-foot">';
+      html += '<div class="tgop-hero-price">';
+      if (wasPrice) html += '<span class="tgop-hero-was">' + esc(wasPrice) + '</span>';
+      if (display.primary) {
+        html += '<span class="tgop-hero-now">' + esc(display.primary) + '</span>';
+        if (display.sub) html += '<span class="tgop-hero-sub">' + esc(display.sub) + '</span>';
+      }
+      html += '</div>';
+      html += '<span class="tgop-hero-cta">View deal →</span>';
+      html += '</div>';
+      html += '</div>';
+      html += '</a>';
+      return html;
+    }
+
+    // Mini row — used as secondary offers in 'hero-list' layout. Text-only
+    // single-line row, no image, with a small price chip on the right.
+    _popupMiniRow(o) {
+      const headline = this._popupHeadlineText(o);
+      if (!headline) return '';
+      const kicker = this._popupKickerText(o);
+      const display = this._popupPriceContext(o);
+      const url = safeUrl(o.url || '#');
+
+      let html = '<a class="tgop-row" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
+      html += '<div class="tgop-row-text">';
+      html += '<div class="tgop-row-name">' + esc(headline) + '</div>';
+      if (kicker) html += '<div class="tgop-row-kicker">' + esc(kicker) + '</div>';
+      html += '</div>';
+      if (display.primary) {
+        html += '<span class="tgop-row-price">' + esc(display.primary) + '</span>';
+      }
+      html += '</a>';
       return html;
     }
 
