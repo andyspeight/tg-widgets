@@ -295,6 +295,7 @@
     .preview-stage {
       transition: max-width 0.25s ease;
       margin: 0 auto;
+      position: relative;
     }
     /* Desktop: cap at a generous but bounded width to prevent widgets in
        carousel mode from stretching to fill arbitrarily wide canvas areas.
@@ -304,6 +305,130 @@
     .preview-stage[data-vp="mobile"]  { max-width: 380px; }
     @media (prefers-reduced-motion: reduce) {
       .preview-stage { transition: none; }
+    }
+
+    /* Faux-site mockup — shown behind popups so users see real context.
+       Also acts as the containing block for fixed-position popup chassis,
+       so position:fixed resolves to this faux-site instead of the viewport. */
+    .faux-site {
+      position: relative;
+      transform: translateZ(0);  /* creates containing block for fixed-pos children */
+      isolation: isolate;
+      background: linear-gradient(180deg, #fafbfc 0%, #f0f4f8 100%);
+      border: 1px solid var(--border, #E2E8F0);
+      border-radius: 12px;
+      padding: 0;
+      margin-bottom: 16px;
+      overflow: hidden;
+      min-height: 540px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .faux-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border, #E2E8F0);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+    }
+    .faux-logo {
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text, #0F172A);
+      font-size: 14px;
+    }
+    .faux-nav-links {
+      display: flex;
+      gap: 22px;
+      color: var(--muted, #64748B);
+      font-size: 12px;
+    }
+    .faux-hero {
+      padding: 40px 28px 28px;
+    }
+    .faux-h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text, #0F172A);
+      margin: 0 0 8px;
+    }
+    .faux-p {
+      color: var(--muted, #64748B);
+      font-size: 13px;
+      margin: 0 0 18px;
+      max-width: 480px;
+    }
+    .faux-search {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px 10px 16px;
+      background: white;
+      border: 1px solid var(--border, #E2E8F0);
+      border-radius: 999px;
+      box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.05);
+    }
+    .faux-search-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid #94A3B8;
+      flex-shrink: 0;
+    }
+    .faux-search-text {
+      font-size: 12px;
+      color: var(--muted, #94A3B8);
+      padding-right: 32px;
+    }
+    .faux-search-btn {
+      background: var(--accent, #00B4D8);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+    .faux-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 0 28px 24px;
+    }
+    .faux-card {
+      height: 100px;
+      background: white;
+      border: 1px solid var(--border, #E2E8F0);
+      border-radius: 10px;
+    }
+    .faux-content {
+      padding: 16px 28px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .faux-line {
+      height: 8px;
+      background: rgba(15, 23, 42, 0.05);
+      border-radius: 4px;
+      width: 100%;
+    }
+    .faux-line.short { width: 60%; }
+    .faux-line.med { width: 80%; }
+
+    /* Mount inside the faux-site (for popup template). Sits absolute over
+       the faux-site content; popup chassis renders with position:fixed which
+       resolves to the faux-site (because .faux-site has transform:translateZ(0)
+       creating a containing block). */
+    #previewMountPopup {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    #previewMountPopup * {
+      pointer-events: auto;
     }
     .switch {
       width: 36px; height: 20px;
@@ -1462,6 +1587,48 @@
 
       <div class="tgse-canvas">
         <div class="preview-stage" id="previewStage" data-vp="desktop">
+          <!-- Faux-site mockup — only visible when the popup template is
+               selected. Gives popups a realistic host-site context so the
+               user sees what visitors will actually see. The previewMount
+               lives INSIDE the faux-site when popup is active so the
+               position:fixed popup chassis is contained within the faux-site
+               (via transform:translateZ(0) on .faux-site creating a
+               containing block for fixed-position descendants). -->
+          <div id="previewFauxSite" class="faux-site" hidden>
+            <div class="faux-nav">
+              <span class="faux-logo">Travel Co.</span>
+              <span class="faux-nav-links">
+                <span>Holidays</span>
+                <span>Destinations</span>
+                <span>Deals</span>
+                <span>About</span>
+              </span>
+            </div>
+            <div class="faux-hero">
+              <h2 class="faux-h2">Your next great escape</h2>
+              <p class="faux-p">Hand-picked offers from over 200 trusted operators. ATOL protected.</p>
+              <div class="faux-search">
+                <span class="faux-search-icon"></span>
+                <span class="faux-search-text">Where would you like to go?</span>
+                <span class="faux-search-btn">Search</span>
+              </div>
+            </div>
+            <div class="faux-cards">
+              <div class="faux-card"></div>
+              <div class="faux-card"></div>
+              <div class="faux-card"></div>
+            </div>
+            <div class="faux-content">
+              <div class="faux-line"></div>
+              <div class="faux-line short"></div>
+              <div class="faux-line"></div>
+              <div class="faux-line"></div>
+              <div class="faux-line med"></div>
+            </div>
+            <!-- Mount lives inside the faux-site for popup template only -->
+            <div id="previewMountPopup"></div>
+          </div>
+          <!-- Mount for inline templates (cards, magazine, board, boarding-pass, ticker) -->
           <div id="previewMount"></div>
         </div>
       </div>
@@ -1961,6 +2128,9 @@
         const tokens = (el.dataset.whenTemplate || '').split(/\s+/).filter(Boolean);
         el.hidden = tokens.length ? !tokens.includes(t) : el.dataset.whenTemplate !== t;
       });
+      // Faux-site mockup — only show when popup template is active
+      const fauxSite = document.getElementById('previewFauxSite');
+      if (fauxSite) fauxSite.hidden = (t !== 'popup');
     }
 
     function updateBoardAutoRefreshVisibility() {
@@ -2059,17 +2229,22 @@
     }
 
     function renderPreview() {
-      const mount = $('previewMount');
+      const isPopup = state.config.template === 'popup';
+      // Use the faux-site mount for popup template, normal mount for others
+      const mount = isPopup ? $('previewMountPopup') : $('previewMount');
+      // Clear both mounts to prevent double-render when switching templates
+      const otherMount = isPopup ? $('previewMount') : $('previewMountPopup');
+      if (otherMount) otherMount.innerHTML = '';
+      if (!mount) return;
       mount.innerHTML = '';
       const cfg = JSON.parse(JSON.stringify(state.config));
       cfg.appId = TG_TRAVELIFY_APPID;
       cfg.apiKey = TG_TRAVELIFY_KEY;
       cfg.cacheMinutes = 0;
-      // Editor-only preview flag. The widget reads this to render the popup
-      // template inline (forcing popupLayout='inline' and bypassing the
-      // trigger/eligibility checks) so the user can see the popup content
-      // without waiting for triggers to fire or worrying about frequency
-      // suppression. The flag has no effect on the other templates.
+      // Editor-only preview flag. The widget reads this to skip eligibility,
+      // frequency and trigger logic for popup template, opening immediately
+      // with the saved layout. Faux-site mockup wraps the mount so popup
+      // overlays a realistic host-site context.
       cfg._preview = true;
       const div = document.createElement('div');
       div.setAttribute('data-tg-widget', 'offers');
@@ -2665,11 +2840,15 @@
       },
       {
         name: 'Live deals popup',
-        desc: 'Slide-in offers panel — fires after 5 seconds, once per session',
+        desc: 'Slide-in package deals — fires after 5 seconds, once per session',
         config: {
           template: 'popup',
           type: 'BothPackages',
           maxOffers: 6,
+          // Constrain to actual holidays — minimum 7 nights, max 21
+          // — so we don't show 1-night hotel stays in a "live deals" popup
+          durationMin: 7,
+          durationMax: 21,
           popupLayout: 'slide-in',
           popupPosition: 'bottom-right',
           popupTrigger: 'load',
