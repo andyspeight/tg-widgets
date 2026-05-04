@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.2.0
+ * Travelgenix Travel Offers Widget v1.3.0
  * Self-contained, embeddable widget pulling live data from the Travelify offers cache.
  *
  * Usage:
@@ -18,13 +18,18 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
- *   v1.2.0 (May 2026) — Added three new visual options:
- *     • List layout — third option alongside Grid and Carousel inside the Cards template.
- *       Compact horizontal rows reusing the same card data shape.
- *     • Magazine template — hero card + sub-grid editorial layout. Picks hero by
- *       featured flag → biggest discount → cheapest → first.
- *     • Boarding-pass template — flights-only specialist with paper-pass shape,
- *       perforated stub and barcode strip. Pairs with departure-board.
+ *   v1.3.0 (May 2026) — Hyper-realistic Solari split-flap departure board:
+ *     • Replaced opacity-fade animation with proper 3D flap mechanism
+ *     • Each character cell scrambles through the alphabet (Grafana-style
+ *       shortest-path) — letter cells through A–Z, digit cells through 0–9
+ *     • Top half reveals new glyph immediately; bottom half stays old until
+ *       the falling flap covers it (correct mechanical physics)
+ *     • Per-flap duration 80ms, row stagger 120ms, column stagger 40ms,
+ *       per-cell ±15ms jitter — total board settle ~3s for 8 rows
+ *     • Optional Web Audio click sound (config: boardSound, default off)
+ *     • prefers-reduced-motion still short-circuits to instant text update
+ *   v1.2.0 — Added three new visual options: List layout, Magazine template,
+ *     Boarding-pass template
  *   v1.1.0 — Carousel layout + departure-board template + pax popover.
  */
 (function () {
@@ -32,7 +37,7 @@
 
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ── XSS-safe helpers ──────────────────────────────────────────────
@@ -1542,15 +1547,151 @@
     }
     .tdb-row.tdb-data:hover { background: var(--tdb-accent-soft); }
 
-    /* Split-flap animation */
-    .tdb-flip { display: inline-block; will-change: contents; }
-    .tdb-flip.is-flipping { animation: tdb-flip-fade 0.2s ease; }
-    @keyframes tdb-flip-fade {
-      0%   { opacity: 0.4; transform: translateY(-2px); }
-      100% { opacity: 1;   transform: translateY(0); }
+    /* ═══════════════════════════════════════════════════════════════════
+       SOLARI SPLIT-FLAP MECHANISM
+       Each animatable cell becomes a "flap stack" with three layers:
+         .tdb-sf-top     — the static top half showing the CURRENT or NEW glyph
+         .tdb-sf-bottom  — the static bottom half showing the OLD glyph
+         .tdb-sf-flap    — the falling flap, animates rotateX from 0deg to 90deg,
+                           with the OLD glyph on its front face and a hinge to
+                           reveal the new bottom half once it lands.
+       After each flap lands, the JS scheduler advances to the next glyph in
+       the scramble path until the target glyph is reached.
+       ═══════════════════════════════════════════════════════════════════ */
+    .tdb-sf {
+      display: inline-block;
+      vertical-align: middle;
+      perspective: 200px;
+      line-height: 1;
+      /* Each flap-stack cell holds its own width — match the mono digit em. */
+      width: 0.7em;
+      height: 1.15em;
+      position: relative;
+      /* The wrapper has the glyph background colour so the seam between
+         halves looks like a single tile, not two stacked elements. */
+      background: var(--tdb-flap-bg, var(--tdb-surface));
+      border-radius: 2px;
+      margin: 0 0.5px;
+      overflow: hidden;
+      /* GPU compositing — flat tiles never paint while their neighbours animate */
+      contain: layout paint;
     }
+    /* Multi-character flap (used for IATA codes — 3 chars per cell as one unit) */
+    .tdb-sf-wide {
+      width: auto;
+      padding: 0 4px;
+    }
+    /* Glyph half — top and bottom each show the right half of the same character.
+       The split is achieved by clipping at 50% height and offsetting the bottom
+       half so both halves draw the same character but only one half is visible. */
+    .tdb-sf-half {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--tdb-flap-bg, var(--tdb-surface));
+      color: var(--tdb-text);
+      font-family: inherit;
+      font-weight: inherit;
+      font-size: inherit;
+      letter-spacing: inherit;
+      backface-visibility: hidden;
+    }
+    .tdb-sf-top {
+      top: 0;
+      align-items: flex-end;
+      padding-bottom: 1px;
+      /* Subtle top highlight — incoming light on a real flap */
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    .tdb-sf-bottom {
+      bottom: 0;
+      align-items: flex-start;
+      padding-top: 1px;
+      /* Centring trick: render full character but clip top half so we see the
+         bottom half of the glyph in this half of the tile. */
+    }
+    .tdb-sf-half-inner {
+      /* The glyph itself rendered at full height — the parent half clips */
+      display: block;
+      transform-origin: center center;
+      will-change: transform;
+    }
+    .tdb-sf-top .tdb-sf-half-inner {
+      transform: translateY(50%);
+    }
+    .tdb-sf-bottom .tdb-sf-half-inner {
+      transform: translateY(-50%);
+    }
+    /* The falling flap — top half of the OLD glyph that rotates down to reveal
+       the new bottom half. Pinned to top, hinged at its bottom edge. */
+    .tdb-sf-flap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 50%;
+      transform-origin: center bottom;
+      transform: rotateX(0deg);
+      background: var(--tdb-flap-bg, var(--tdb-surface));
+      color: var(--tdb-text);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 1px;
+      overflow: hidden;
+      pointer-events: none;
+      backface-visibility: hidden;
+      /* Light/shadow gradient sells the 3D — top of flap catches light, bottom
+         picks up shadow from the seam below. */
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .tdb-sf-flap .tdb-sf-half-inner {
+      transform: translateY(50%);
+    }
+    .tdb-sf-flap.is-falling {
+      animation: tdb-sf-fall 80ms cubic-bezier(0.4, 0, 0.6, 1) forwards;
+    }
+    @keyframes tdb-sf-fall {
+      0%   { transform: rotateX(0deg);   }
+      100% { transform: rotateX(-90deg); }
+    }
+    /* Centre seam — the dividing line between the two halves. Real boards
+       have a tiny gap with a shadow that catches the light. */
+    .tdb-sf::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: rgba(0, 0, 0, 0.35);
+      transform: translateY(-0.5px);
+      z-index: 4;
+      pointer-events: none;
+    }
+    .tdb-root[data-theme="light"] .tdb-sf::after {
+      background: rgba(0, 0, 0, 0.18);
+    }
+    /* Theme-specific flap surface — slightly different from the row background
+       so each tile reads as a distinct mechanical element. */
+    .tdb-root[data-theme="dark"] {
+      --tdb-flap-bg: #161D2A;
+    }
+    .tdb-root[data-theme="light"] {
+      --tdb-flap-bg: #F1F5F9;
+    }
+    /* Reduced-motion: short-circuit to instant text replacement. The widget JS
+       checks the same media query and skips the scrambler — this CSS is just
+       belt-and-braces in case JS doesn't catch it. */
     @media (prefers-reduced-motion: reduce) {
-      .tdb-flip.is-flipping { animation: none; }
+      .tdb-sf-flap.is-falling {
+        animation: none;
+      }
     }
 
     /* Footer */
@@ -2303,6 +2444,190 @@
     }
   `;
 
+  // ── Solari split-flap mechanism ───────────────────────────────────
+  //
+  // Per-cell character scrambler. Each instance owns the DOM for one
+  // animatable cell on the departure board and knows how to flip from
+  // its current glyph to a new target glyph using the Grafana-style
+  // shortest-path scramble: characters rotate forward through their
+  // glyph set (numbers through 0–9, letters through A–Z) one flap at a
+  // time at 80ms per flap, until they land on the target.
+  //
+  // The scheduler that orchestrates row/column cascade lives on the
+  // widget class as _runBoardFlipAnimation. SolariFlap itself only
+  // knows how to animate one cell.
+
+  // Glyph paths — what each character cell can flip through, in order.
+  // Real Solari boards always rotate forward (the drum can only turn one
+  // direction), so we always go forward through the path until we hit
+  // the target — but we wrap from the end back to the start.
+  const SF_DIGITS = '0123456789'.split('');
+  const SF_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  // Mixed alphanumeric for fare strings like £1,289 — preserve the
+  // currency symbol and comma, only flip the digits.
+  // We treat "non-flippable" chars (£, comma, space, colon) as static.
+  function sfPathFor(ch) {
+    if (/[0-9]/.test(ch)) return SF_DIGITS;
+    if (/[A-Z]/.test(ch)) return SF_LETTERS;
+    return null;  // Static — no flipping
+  }
+
+  // Click sound — created lazily on first play because AudioContext
+  // construction can throw on iOS Safari before user interaction.
+  let _sfAudioCtx = null;
+  function sfClick() {
+    try {
+      if (!_sfAudioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        _sfAudioCtx = new Ctx();
+      }
+      const ctx = _sfAudioCtx;
+      // Short percussive click — square-wave burst into a tight envelope.
+      // Frequency picked to evoke a flap landing on a hinge stop.
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 1800 + Math.random() * 200;  // tiny pitch variation per click
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.04);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.05);
+    } catch { /* sound is opt-in, never let it break the board */ }
+  }
+
+  class SolariFlap {
+    // Build the DOM for one animatable cell. `initial` is the starting
+    // glyph (single character), or empty string for "blank, ready to
+    // flip in". Returns a root element to be inserted into the row HTML.
+    constructor(initial) {
+      this.current = initial || ' ';
+      this.target = this.current;
+      this.timer = null;
+      this.soundEnabled = false;
+
+      this.root = document.createElement('span');
+      this.root.className = 'tdb-sf';
+
+      this.topHalf = document.createElement('span');
+      this.topHalf.className = 'tdb-sf-half tdb-sf-top';
+      this.topInner = document.createElement('span');
+      this.topInner.className = 'tdb-sf-half-inner';
+      this.topInner.textContent = this.current;
+      this.topHalf.appendChild(this.topInner);
+
+      this.bottomHalf = document.createElement('span');
+      this.bottomHalf.className = 'tdb-sf-half tdb-sf-bottom';
+      this.bottomInner = document.createElement('span');
+      this.bottomInner.className = 'tdb-sf-half-inner';
+      this.bottomInner.textContent = this.current;
+      this.bottomHalf.appendChild(this.bottomInner);
+
+      // The falling flap — sits on top, animates rotateX, shows the OLD
+      // top-half glyph during the fall.
+      this.flap = document.createElement('span');
+      this.flap.className = 'tdb-sf-flap';
+      this.flapInner = document.createElement('span');
+      this.flapInner.className = 'tdb-sf-half-inner';
+      this.flapInner.textContent = this.current;
+      this.flap.appendChild(this.flapInner);
+
+      this.root.appendChild(this.bottomHalf);
+      this.root.appendChild(this.flap);
+      this.root.appendChild(this.topHalf);
+    }
+
+    // Reset to a known glyph without animation (used when the row data
+    // changes type — e.g. switching airports — so we don't try to scramble
+    // through 26 letters from a cached state).
+    setInstant(ch) {
+      this.current = ch || ' ';
+      this.target = this.current;
+      this.topInner.textContent = this.current;
+      this.bottomInner.textContent = this.current;
+      this.flapInner.textContent = this.current;
+      this.flap.classList.remove('is-falling');
+    }
+
+    // Schedule the next flap. Calls `onSettle` once the cell reaches its
+    // target glyph. `delay` is the delay before the FIRST flap starts.
+    scrambleTo(target, delay, onSettle) {
+      target = (target || ' ').toUpperCase();
+      this.target = target;
+      // Static (non-flippable) glyph — just swap instantly after delay
+      const path = sfPathFor(this.current === ' ' ? target : this.current) || sfPathFor(target);
+      if (!path) {
+        this.timer = setTimeout(() => {
+          this.setInstant(target);
+          if (onSettle) onSettle();
+        }, delay);
+        return;
+      }
+      // If already at target, settle immediately
+      if (this.current === target) {
+        if (onSettle) onSettle();
+        return;
+      }
+      this.timer = setTimeout(() => this._flipOne(path, onSettle), delay);
+    }
+
+    // Animate one flap from current → next-glyph-in-path. When the flap
+    // finishes falling, we either keep going (if we haven't hit target)
+    // or call onSettle.
+    _flipOne(path, onSettle) {
+      const FLAP_MS = 80;
+
+      // Find next glyph in the path
+      const idx = path.indexOf(this.current);
+      const nextIdx = (idx === -1) ? 0 : (idx + 1) % path.length;
+      const nextGlyph = path[nextIdx];
+
+      // The OLD glyph stays on the flap front face and on the bottom half
+      // until the flap covers it. The NEW glyph is already on the top half
+      // (revealed immediately as the flap starts falling).
+      this.topInner.textContent = nextGlyph;
+      this.flapInner.textContent = this.current;
+      // Bottom half stays on OLD glyph; the falling flap covers it visually
+      // until rotateX > 90deg, at which point we swap.
+
+      // Force a reflow so the animation restart actually fires
+      // (without this, removing+adding the class in the same frame is a no-op)
+      this.flap.classList.remove('is-falling');
+      void this.flap.offsetHeight;
+      this.flap.classList.add('is-falling');
+
+      // Halfway through the fall (40ms), swap the bottom half to the new
+      // glyph so when the flap finishes falling and disappears, the bottom
+      // half already shows the new value.
+      const halfwaySwap = setTimeout(() => {
+        this.bottomInner.textContent = nextGlyph;
+      }, FLAP_MS / 2);
+
+      // After the full flap duration, reset the flap and either continue
+      // scrambling or settle.
+      this.timer = setTimeout(() => {
+        clearTimeout(halfwaySwap);
+        this.flap.classList.remove('is-falling');
+        this.flapInner.textContent = nextGlyph;
+        this.current = nextGlyph;
+
+        if (this.soundEnabled) sfClick();
+
+        if (this.current === this.target) {
+          if (onSettle) onSettle();
+        } else {
+          this._flipOne(path, onSettle);
+        }
+      }, FLAP_MS);
+    }
+
+    cancel() {
+      if (this.timer) { clearTimeout(this.timer); this.timer = null; }
+    }
+  }
+
   // ── Widget Class ──────────────────────────────────────────────────
 
   class TGOffersWidget {
@@ -2390,6 +2715,7 @@
         boardAutoDetect: c.boardAutoDetect !== false,
         boardAllowSwitcher: c.boardAllowSwitcher !== false,
         boardAnimate: c.boardAnimate !== false,
+        boardSound: c.boardSound === true,  // Web Audio click on each flap. Default OFF (intrusive on host sites).
         boardAutoRefresh: c.boardAutoRefresh !== false,
         boardRefreshSeconds: typeof c.boardRefreshSeconds === 'number' ? c.boardRefreshSeconds : 300,
         boardDateRange: typeof c.boardDateRange === 'number' ? c.boardDateRange : 30,
@@ -4234,6 +4560,8 @@
           + 'Try widening the date range or changing the departure airport.'
           + '</div>';
         this._updateBoardMeta(0);
+        // No rows to animate — make sure any prior flap registry is cleared
+        this._sfRows = [];
         return;
       }
 
@@ -4244,15 +4572,24 @@
         if (p < cheapestPrice) { cheapestPrice = p; cheapestId = o.id; }
       }
 
+      // Build each row's HTML with placeholders for the animatable cells.
+      // The placeholder format: <span class="tdb-sf-cell" data-sf-target="LHR"></span>
+      // After insertion, the scheduler walks every .tdb-sf-cell, populates
+      // it with SolariFlap instances (one per character), and runs the cascade.
       let html = '';
+      const rowTargets = [];  // collect per-row target strings for the scheduler
+
       for (const o of flights) {
         const f = o.flight || {};
         const og = f.origin || {};
         const dest = f.destination || {};
         const carrier = f.carrier || {};
         const url = safeUrl(o.url || '#');
-        const time = formatBoardTime(f.outboundDate);
-        const date = formatBoardDate(f.outboundDate);
+        const time = formatBoardTime(f.outboundDate);                    // "12:35"
+        const date = formatBoardDate(f.outboundDate);                    // "12 MAY"
+        const fromIata = (og.iataCode || '???').toUpperCase();
+        const toIata = (dest.iataCode || '???').toUpperCase();
+        const fareText = o.formattedPrice || o.formattedPPPrice || '—';
         const stops = f.direct || f.stops === 0
           ? '<span class="tdb-direct">DIRECT</span>'
           : (f.stops === 1 ? '1 STOP' : (f.stops || 1) + ' STOPS');
@@ -4272,13 +4609,24 @@
           + ' → '
           + (dest.name ? dest.name.replace(/\s*\([A-Z]{3}\)\s*$/, '') : '');
 
+        // Per-row targets in the order they appear left-to-right.
+        // The scheduler reads these, the keys must match the placeholder
+        // class on each cell.
+        rowTargets.push({
+          time: time,
+          fromIata: fromIata,
+          toIata: toIata,
+          date: date,
+          fare: fareText,
+        });
+
         html += '<a class="tdb-row tdb-data" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;">'
-          + '<div class="tdb-time"><span class="tdb-flip">' + esc(time) + '</span></div>'
+          + '<div class="tdb-time"><span class="tdb-sf-cell" data-sf-key="time" data-sf-target="' + esc(time) + '"></span></div>'
           + '<div class="tdb-route">'
           + '<div class="tdb-route-codes">'
-          + '<span class="tdb-flip">' + esc(og.iataCode || '???') + '</span>'
+          + '<span class="tdb-sf-cell" data-sf-key="fromIata" data-sf-target="' + esc(fromIata) + '"></span>'
           + '<span class="tdb-arrow">→</span>'
-          + '<span class="tdb-flip">' + esc(dest.iataCode || '???') + '</span>'
+          + '<span class="tdb-sf-cell" data-sf-key="toIata" data-sf-target="' + esc(toIata) + '"></span>'
           + '</div>'
           + '<div class="tdb-route-cities">' + esc(cityLine) + '</div>'
           + '</div>'
@@ -4287,12 +4635,16 @@
           + '<span>' + esc(carrier.name || '—') + '</span>'
           + '</div>'
           + '<div class="tdb-stops ' + (f.direct ? 'tdb-direct' : '') + '">' + stops + '</div>'
-          + '<div class="tdb-date"><span class="tdb-flip">' + esc(date) + '</span></div>'
+          + '<div class="tdb-date"><span class="tdb-sf-cell" data-sf-key="date" data-sf-target="' + esc(date) + '"></span></div>'
           + '<div class="tdb-status">' + pillHtml + '</div>'
-          + '<div class="tdb-fare"><span class="tdb-flip">' + esc(o.formattedPrice || o.formattedPPPrice || '—') + '</span></div>'
+          + '<div class="tdb-fare"><span class="tdb-sf-cell" data-sf-key="fare" data-sf-target="' + esc(fareText) + '"></span></div>'
           + '</a>';
       }
       rowsEl.innerHTML = html;
+
+      // Stash row target data on the instance for the scheduler. Each entry
+      // pairs the target dict with the row DOM element.
+      this._sfRowTargets = rowTargets;
       this._updateBoardMeta(flights.length);
     }
 
@@ -4396,23 +4748,120 @@
       }
     }
 
-    // Stagger flip animation across rows + columns so it walks down the
-    // board like a real mechanical split-flap display
+    // Real Solari split-flap scheduler.
+    //
+    // For each row, walk the placeholder cells (.tdb-sf-cell), instantiate
+    // a SolariFlap per character, and schedule each character's scramble
+    // with a row+column cascade so the board updates like a real
+    // mechanical display.
+    //
+    // Cascade timing (researched from real Solari boards + Grafana panel):
+    //   Per-flap duration: 80ms (one rotation of one drum step)
+    //   Row stagger: 120ms (board updates top-down)
+    //   Column stagger within row: 40ms (left-to-right ripple)
+    //   Per-character jitter: ±15ms (avoid metronome regularity)
+    //
+    // If `boardSound` is on and the AudioContext is available, each flap
+    // landing plays a short percussive click. If `prefers-reduced-motion`
+    // is set, the scheduler skips animation entirely and just updates text.
     _runBoardFlipAnimation() {
-      if (this._boardFlipTimers) this._boardFlipTimers.forEach(clearTimeout);
-      this._boardFlipTimers = [];
-      const rows = this.root.querySelectorAll('[data-tdb-rows] .tdb-row.tdb-data');
-      rows.forEach((row, rowIdx) => {
-        const flips = row.querySelectorAll('.tdb-flip');
-        flips.forEach((flip, colIdx) => {
-          const delay = rowIdx * 60 + colIdx * 30;
-          const t = setTimeout(() => {
-            flip.classList.remove('is-flipping');
-            void flip.offsetWidth;
-            flip.classList.add('is-flipping');
-          }, delay);
-          this._boardFlipTimers.push(t);
+      // Cancel any in-flight scramble from a prior render
+      this._cancelBoardFlaps();
+
+      // Honour prefers-reduced-motion — no animation, just settle the values
+      const prefersReducedMotion = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const cells = this.root.querySelectorAll('[data-tdb-rows] .tdb-sf-cell');
+      if (!cells.length) return;
+
+      // Build a registry of SolariFlap instances per cell.
+      // Structure: this._sfFlaps = [ [flap, flap, ...], [flap, flap, ...], ... ]
+      // outer = row index, inner = flat list of every character flap in the row,
+      // ordered left-to-right across all cells in that row.
+      this._sfFlaps = [];
+
+      const rowEls = this.root.querySelectorAll('[data-tdb-rows] .tdb-row.tdb-data');
+      rowEls.forEach((rowEl, rowIdx) => {
+        const rowFlaps = [];
+        const rowCells = rowEl.querySelectorAll('.tdb-sf-cell');
+
+        rowCells.forEach((cellEl) => {
+          const target = (cellEl.getAttribute('data-sf-target') || '').toUpperCase();
+          // Build one SolariFlap per character of the target.
+          // We use an empty initial state so first render scrambles in.
+          // (On subsequent renders, we'll preserve previous chars — see below.)
+          const prevFlaps = this._sfPrevFlaps && this._sfPrevFlaps[rowIdx];
+          // Find a previous flap for this cell (matched by data-sf-key) so we
+          // can carry over its current glyph and only flip the diff.
+          // For now, simple approach: always start blank if no previous.
+          const chars = target.split('');
+          const cellFlaps = [];
+          // Clear placeholder content
+          cellEl.innerHTML = '';
+          chars.forEach((ch) => {
+            // Try to match a previous flap at the same character position
+            // in the same cell, so re-renders only flip the chars that
+            // actually changed.
+            let initial = ' ';
+            if (prevFlaps) {
+              const prev = prevFlaps.find(p =>
+                p.cellKey === cellEl.getAttribute('data-sf-key')
+                && p.charIdx === cellFlaps.length
+              );
+              if (prev) initial = prev.flap.current;
+            }
+            const flap = new SolariFlap(initial);
+            flap.soundEnabled = !!this.cfg.boardSound && !prefersReducedMotion;
+            cellEl.appendChild(flap.root);
+            cellFlaps.push({
+              flap: flap,
+              cellKey: cellEl.getAttribute('data-sf-key'),
+              charIdx: cellFlaps.length,
+              target: ch,
+            });
+          });
+          rowFlaps.push(...cellFlaps);
         });
+
+        this._sfFlaps.push(rowFlaps);
+      });
+
+      // Reduced-motion: short-circuit. Just set every flap to its target
+      // instantly without animation.
+      if (prefersReducedMotion) {
+        this._sfFlaps.forEach(rowFlaps => {
+          rowFlaps.forEach(({ flap, target }) => flap.setInstant(target));
+        });
+        // Save state so future re-renders can compare
+        this._sfPrevFlaps = this._sfFlaps;
+        return;
+      }
+
+      // Schedule the cascade.
+      const ROW_STAGGER = 120;   // ms between row starts
+      const COL_STAGGER = 40;    // ms between character starts within a row
+      const JITTER = 15;         // ±ms per-character random jitter
+
+      this._sfFlaps.forEach((rowFlaps, rowIdx) => {
+        rowFlaps.forEach(({ flap, target }, colIdx) => {
+          const baseDelay = (rowIdx * ROW_STAGGER) + (colIdx * COL_STAGGER);
+          const jitter = (Math.random() * 2 - 1) * JITTER;
+          const delay = Math.max(0, baseDelay + jitter);
+          flap.scrambleTo(target, delay, null);
+        });
+      });
+
+      // Save state so future re-renders can do diff-based animation.
+      // Each entry: { flap, cellKey, charIdx, target }
+      this._sfPrevFlaps = this._sfFlaps;
+    }
+
+    // Cancel any pending flap timers — used on cleanup or before re-rendering
+    _cancelBoardFlaps() {
+      if (!this._sfFlaps) return;
+      this._sfFlaps.forEach(row => {
+        row.forEach(({ flap }) => flap.cancel());
       });
     }
 
@@ -4420,6 +4869,11 @@
       if (this._boardClockTimer) { clearInterval(this._boardClockTimer); this._boardClockTimer = null; }
       if (this._boardRefreshTimer) { clearInterval(this._boardRefreshTimer); this._boardRefreshTimer = null; }
       if (this._boardFlipTimers) { this._boardFlipTimers.forEach(clearTimeout); this._boardFlipTimers = []; }
+      // Cancel any in-flight Solari flap animations
+      this._cancelBoardFlaps();
+      this._sfFlaps = null;
+      this._sfPrevFlaps = null;
+      this._sfRowTargets = null;
       if (this._boardVisHandler) {
         document.removeEventListener('visibilitychange', this._boardVisHandler);
         this._boardVisHandler = null;
