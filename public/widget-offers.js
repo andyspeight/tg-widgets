@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.4.0
+ * Travelgenix Travel Offers Widget v1.4.2
  * Self-contained, embeddable widget pulling live data from the Travelify offers cache.
  *
  * Usage:
@@ -18,14 +18,15 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
- *   v1.4.1 (May 2026) — Magazine layout simplified to stacked alternating banners:
- *     • Removed the 3-up mosaic and pull-quote card after editorial review
- *     • Below the hero: vertical stream of full-width banner cards
- *     • Banners alternate sides — image-left, image-right, image-left… —
- *       to give the layout reading rhythm without breaking the editorial feel
- *     • Every 4th banner is rendered as a "feature spotlight" — taller image,
- *       larger headline, more body copy — like the cover stories within a magazine
- *     • Removed magazineShowQuote config (no quote card any more)
+ *   v1.4.2 (May 2026) — Magazine packages now show flight info:
+ *     • Added a flight strip to hero + banner for Dynamic Packages and
+ *       Package Holidays — shows route, carrier, direct/stops, departure date
+ *     • Single line with a small accent-coloured plane icon, restrained
+ *       styling so it complements the editorial typography rather than
+ *       competing with it
+ *     • Only renders on package types — pure Flights show route in the kicker
+ *       already, and Accommodation has no flight info to show
+ *   v1.4.1 — Magazine layout simplified to stacked alternating banners
  *   v1.4.0 — Magazine mosaic + departure-board status pills
  *   v1.3.0 — Hyper-realistic Solari split-flap departure board
  *   v1.2.0 — Added three new visual options: List layout, Magazine template,
@@ -37,7 +38,7 @@
 
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
-  const VERSION = '1.4.1';
+  const VERSION = '1.4.2';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ── XSS-safe helpers ──────────────────────────────────────────────
@@ -2075,6 +2076,46 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+
+    /* Flight strip — single line of flight info shown on packages.
+       Sits between the headline and the body summary on banners,
+       and between the headline and the summary on the hero (where it
+       gets a white-on-image variant). Uses mono kicker styling so it
+       reads as data, not narrative. */
+    .tgo-mag-flightstrip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--tgo-sub);
+      margin: -4px 0 14px;
+      line-height: 1.4;
+    }
+    .tgo-mag-flightstrip svg {
+      flex-shrink: 0;
+      color: var(--tgo-accent);
+    }
+    .tgo-mag-flightstrip-sep {
+      opacity: 0.4;
+      margin: 0 2px;
+    }
+    /* Hero variant — over the dark gradient overlay, white text + light icon */
+    .tgo-mag-hero-content .tgo-mag-flightstrip {
+      color: rgba(255, 255, 255, 0.85);
+      margin: 0 0 14px;
+      font-size: 12px;
+    }
+    .tgo-mag-hero-content .tgo-mag-flightstrip svg {
+      color: var(--tgo-accent-light, #48CAE4);
+    }
+    /* Feature banner variant — a touch larger to match the larger type */
+    .tgo-mag-banner[data-feature="true"] .tgo-mag-flightstrip {
+      font-size: 12px;
+      margin-bottom: 18px;
     }
     .tgo-mag-banner-foot {
       display: flex;
@@ -4494,6 +4535,8 @@
       html += '<div>';
       if (kicker) html += '<div class="tgo-mag-hero-kicker">' + esc(kicker) + '</div>';
       html += '<h3 class="tgo-mag-hero-title">' + esc(headline) + '</h3>';
+      // Flight strip — packages only, returns empty string otherwise
+      html += this._renderMagazineFlightStrip(o);
       if (summary && this.cfg.show.summary) {
         html += '<p class="tgo-mag-hero-summary">' + esc(summary) + '</p>';
       }
@@ -4593,6 +4636,8 @@
       html += '<div class="tgo-mag-banner-body">';
       if (kicker) html += '<div class="tgo-mag-banner-kicker">' + esc(kicker) + '</div>';
       html += '<h3>' + esc(headline) + '</h3>';
+      // Flight strip — packages only, returns empty string otherwise
+      html += this._renderMagazineFlightStrip(o);
       if (summary && this.cfg.show.summary) {
         html += '<p>' + esc(summary) + '</p>';
       }
@@ -4612,6 +4657,45 @@
     _renderMagazineDivider(label) {
       return '<div class="tgo-mag-divider">'
         + '<span class="tgo-mag-divider-label">' + esc(label) + '</span>'
+        + '</div>';
+    }
+
+    // Flight info strip for package offers in magazine layouts. Returns a
+    // single inline-flex line: ✈ MAN → TFS · Jet2 · Direct · 14 May
+    // Returns empty string for non-packages or when there's nothing to show.
+    // Used in both the hero and banner — CSS variants handle styling per context.
+    _renderMagazineFlightStrip(o) {
+      if (!o) return '';
+      const isPkg = o.type === 'Package' || o.type === 'Packages';
+      if (!isPkg) return '';
+
+      const f = o.flight || {};
+      const og = f.origin || {};
+      const dest = f.destination || {};
+      const fromCode = og.iataCode || '';
+      const toCode = dest.iataCode || '';
+      const carrier = (f.carrier && f.carrier.name) ? f.carrier.name : '';
+      const isDirect = f.direct === true;
+      const stops = f.stops;
+      const stopsLabel = isDirect
+        ? 'Direct'
+        : (stops === 1 ? '1 stop' : (stops > 1 ? stops + ' stops' : ''));
+      const departLabel = f.outboundDate ? formatDate(f.outboundDate) : '';
+
+      // Defensive — if we have absolutely nothing useful, render nothing
+      const parts = [];
+      if (fromCode && toCode) parts.push(esc(fromCode + ' → ' + toCode));
+      if (carrier) parts.push(esc(carrier));
+      if (stopsLabel) parts.push(esc(stopsLabel));
+      if (departLabel) parts.push(esc('Departs ' + departLabel));
+      if (!parts.length) return '';
+
+      // Join with styled separator so the whitespace doesn't fight the mono font
+      const joined = parts.join('<span class="tgo-mag-flightstrip-sep">·</span>');
+
+      return '<div class="tgo-mag-flightstrip">'
+        + icon('plane', 14)
+        + '<span>' + joined + '</span>'
         + '</div>';
     }
     /* ═══════════════════════════════════════════════════════════════════
