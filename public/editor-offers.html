@@ -126,6 +126,78 @@
     }
 
     /* ─────────────────────────────────────────────────────────────────
+       Position picker — 3x3 grid showing each viewport position as a
+       clickable cell. The centre cell is a label (since "centred" is
+       a separate layout, not a position option). Selected cell is
+       highlighted with the brand colour.
+       ───────────────────────────────────────────────────────────────── */
+    .position-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 56px);
+      gap: 4px;
+      padding: 6px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 240px;
+    }
+    .pos-btn {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      padding: 0;
+    }
+    .pos-btn::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 9px;
+      background: var(--sub);
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+    .pos-btn[data-popup-pos="top-left"]::after { top: 6px; left: 6px; }
+    .pos-btn[data-popup-pos="top-center"]::after { top: 6px; left: 50%; transform: translateX(-50%); }
+    .pos-btn[data-popup-pos="top-right"]::after { top: 6px; right: 6px; }
+    .pos-btn[data-popup-pos="left-center"]::after { left: 6px; top: 50%; transform: translateY(-50%); }
+    .pos-btn[data-popup-pos="right-center"]::after { right: 6px; top: 50%; transform: translateY(-50%); }
+    .pos-btn[data-popup-pos="bottom-left"]::after { bottom: 6px; left: 6px; }
+    .pos-btn[data-popup-pos="bottom-center"]::after { bottom: 6px; left: 50%; transform: translateX(-50%); }
+    .pos-btn[data-popup-pos="bottom-right"]::after { bottom: 6px; right: 6px; }
+    .pos-btn:hover {
+      border-color: var(--accent, #00B4D8);
+    }
+    .pos-btn:hover::after {
+      background: var(--accent, #00B4D8);
+    }
+    .pos-btn[aria-pressed="true"] {
+      background: rgba(0, 180, 216, 0.08);
+      border-color: var(--accent, #00B4D8);
+    }
+    .pos-btn[aria-pressed="true"]::after {
+      background: var(--accent, #00B4D8);
+    }
+    .pos-center-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.3;
+      padding: 4px;
+      border: 1px dashed var(--border-strong, var(--border));
+      border-radius: 6px;
+      background: transparent;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
        Template grid — visual card grid replacing the segmented control
        for the top-level template picker. Scales to N templates without
        overcrowding because rows wrap naturally. Each card has a tiny
@@ -320,11 +392,16 @@
       padding: 0;
       margin-bottom: 16px;
       overflow: hidden;
-      min-height: 640px;
+      min-height: 820px;
       width: 100%;
       pointer-events: none;
       user-select: none;
     }
+    /* When popup template is selected, preview-stage drops its desktop max-width
+       so the faux-site spans the full canvas. The popup chassis fills the
+       widened faux-site and feels properly proportioned. */
+    .preview-stage.popup-active[data-vp="desktop"] { max-width: none; }
+    .preview-stage.popup-active { padding: 16px; }
     .faux-nav {
       display: flex;
       align-items: center;
@@ -1210,14 +1287,19 @@
                 <div class="field-help"><strong>Slide-in</strong> is the friendliest default — sits in a corner, dismissible. <strong>Centered modal</strong> is more disruptive but higher attention. <strong>Top/bottom banner</strong> shows offers as a strip across the page. <strong>Floating card</strong> shows a single offer at a time, ideal for the rotating "ambient deals" effect. <strong>Side drawer</strong> takes a full vertical edge.</div>
               </div>
               <div class="field" id="popupPositionField" data-when-popup-layout="slide-in floating-card">
-                <label class="field-label" for="cfgPopupPosition">Corner position</label>
-                <select id="cfgPopupPosition">
-                  <option value="bottom-right">Bottom right</option>
-                  <option value="bottom-left">Bottom left</option>
-                  <option value="top-right">Top right</option>
-                  <option value="top-left">Top left</option>
-                </select>
-                <div class="field-help">Bottom-right is the convention. Bottom-left works for sites with a chat widget on the right.</div>
+                <label class="field-label">Position</label>
+                <div class="position-picker" id="popupPositionPicker" role="radiogroup" aria-label="Popup position">
+                  <button type="button" class="pos-btn" data-popup-pos="top-left" aria-label="Top left" title="Top left"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="top-center" aria-label="Top centre" title="Top centre"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="top-right" aria-label="Top right" title="Top right"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="left-center" aria-label="Left centre" title="Left centre"></button>
+                  <span class="pos-center-label" aria-hidden="true">use<br>centered<br>layout</span>
+                  <button type="button" class="pos-btn" data-popup-pos="right-center" aria-label="Right centre" title="Right centre"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="bottom-left" aria-label="Bottom left" title="Bottom left"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="bottom-center" aria-label="Bottom centre" title="Bottom centre"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="bottom-right" aria-label="Bottom right" title="Bottom right" aria-pressed="true"></button>
+                </div>
+                <div class="field-help">Click any of the 8 positions. <strong>Bottom-right</strong> is the convention — sits where users expect the popup to appear without blocking key content. For dead-centre, switch the layout to <strong>centered</strong>.</div>
               </div>
               <div class="field" id="popupSideDrawerField" data-when-popup-layout="side-drawer">
                 <label class="field-label">Side</label>
@@ -1233,10 +1315,13 @@
                   <option value="compact">Compact — multi-card list</option>
                   <option value="single">Single — one offer with hero image</option>
                   <option value="mini">Mini — text-only banner pills</option>
+                  <option value="carousel">Carousel — swipeable cards with dots</option>
+                  <option value="split">Split — image left, details right</option>
+                  <option value="countdown">Countdown — featured offer + timer</option>
                 </select>
-                <div class="field-help"><strong>Auto</strong> picks a sensible mode for each layout: compact for slide-in/centered/drawer/fullscreen, single for floating-card, mini for top/bottom bars. Override only if you want to force a specific feel — e.g. compact in a floating-card.</div>
+                <div class="field-help"><strong>Auto</strong> picks a sensible mode for each layout. <strong>Carousel</strong> works best in slide-in / centered. <strong>Split</strong> needs a wide layout (centered or fullscreen) — falls back to single if too narrow. <strong>Countdown</strong> is for time-bound campaigns with a deadline.</div>
               </div>
-              <div class="field">
+              <div class="field" data-when-popup-render-mode="compact">
                 <label class="field-label">Compact arrangement</label>
                 <div class="segmented" id="popupCompactLayoutSeg">
                   <button type="button" data-popup-compact-layout="stacked" aria-pressed="true">Stacked</button>
@@ -1244,6 +1329,16 @@
                   <button type="button" data-popup-compact-layout="hero-list">Hero + list</button>
                 </div>
                 <div class="field-help"><strong>Stacked</strong> shows offers as full-width image-left rows — readable, dense. <strong>Grid</strong> arranges them as 2-column image-top tiles — more visual, fewer offers fit. <strong>Hero + list</strong> features the first offer with a big image, the rest as compact text rows — best for "today's best deal + 3 alternatives".</div>
+              </div>
+              <div class="field" data-when-popup-render-mode="countdown">
+                <label class="field-label" for="cfgPopupCountdownEnd">Countdown ends</label>
+                <input type="datetime-local" id="cfgPopupCountdownEnd" />
+                <div class="field-help">Date and time the deal expires. Timer ticks down to this. Once passed, the popup gracefully falls back to the single-offer view.</div>
+              </div>
+              <div class="field" data-when-popup-render-mode="countdown">
+                <label class="field-label" for="cfgPopupCountdownCaption">Timer caption</label>
+                <input type="text" id="cfgPopupCountdownCaption" placeholder="Offers end in" maxlength="60" />
+                <div class="field-help">Small text shown above the timer digits. Defaults to "Offers end in".</div>
               </div>
             </div>
           </div>
@@ -1792,6 +1887,8 @@
         popupRotateInterval: 8000,
         popupMaxRender: 6,
         popupCompactLayout: 'stacked',
+        popupCountdownEnd: '',
+        popupCountdownCaption: '',
         show: {
           // Universal
           propertyType: true, chain: true, location: true,
@@ -2010,7 +2107,10 @@
 
       // Popup template fields
       $('cfgPopupLayout').value = c.popupLayout || 'slide-in';
-      $('cfgPopupPosition').value = c.popupPosition || 'bottom-right';
+      const popupPos = c.popupPosition || 'bottom-right';
+      document.querySelectorAll('#popupPositionPicker .pos-btn').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.popupPos === popupPos ? 'true' : 'false');
+      });
       document.querySelectorAll('#popupSideDrawerSeg button').forEach(b => {
         b.setAttribute('aria-pressed', b.dataset.popupSide === (c.popupSideDrawerSide || 'right') ? 'true' : 'false');
       });
@@ -2047,9 +2147,13 @@
       $('cfgPopupCloseOnBackdropClick').setAttribute('aria-pressed', c.popupCloseOnBackdropClick !== false ? 'true' : 'false');
       $('cfgPopupOverlay').setAttribute('aria-pressed', c.popupOverlay !== false ? 'true' : 'false');
       $('cfgPopupOverlayOpacity').value = c.popupOverlayOpacity != null ? c.popupOverlayOpacity : 60;
+      // Countdown render-mode-specific fields
+      $('cfgPopupCountdownEnd').value = c.popupCountdownEnd || '';
+      $('cfgPopupCountdownCaption').value = c.popupCountdownCaption || '';
       updatePopupLayoutVisibility();
       updatePopupTriggerVisibility();
       updatePopupFrequencyVisibility();
+      updatePopupRenderModeVisibility();
 
       // Apply conditional visibility for layout-specific fields
       updateLayoutVisibility();
@@ -2146,6 +2250,9 @@
       // Faux-site mockup — only show when popup template is active
       const fauxSite = document.getElementById('previewFauxSite');
       if (fauxSite) fauxSite.hidden = (t !== 'popup');
+      // Preview stage gets the popup-active modifier so it widens to fill canvas
+      const stage = document.getElementById('previewStage');
+      if (stage) stage.classList.toggle('popup-active', t === 'popup');
     }
 
     function updateBoardAutoRefreshVisibility() {
@@ -2184,6 +2291,24 @@
       document.querySelectorAll('[data-when-popup-trigger]').forEach(el => {
         const tokens = (el.dataset.whenPopupTrigger || '').split(/\s+/).filter(Boolean);
         el.hidden = tokens.length ? !tokens.includes(trigger) : el.dataset.whenPopupTrigger !== trigger;
+      });
+    }
+
+    // Show / hide popup-render-mode-conditional fields (compact arrangement,
+    // countdown end date, etc). When 'auto' is selected, infer the actual
+    // render mode based on the layout, since fields like "compact arrangement"
+    // are only relevant when the resolved render mode is 'compact'.
+    function updatePopupRenderModeVisibility() {
+      let mode = state.config.popupRenderMode || 'auto';
+      if (mode === 'auto') {
+        const layout = state.config.popupLayout || 'slide-in';
+        if (layout === 'top-bar' || layout === 'bottom-bar') mode = 'mini';
+        else if (layout === 'floating-card') mode = 'single';
+        else mode = 'compact';
+      }
+      document.querySelectorAll('[data-when-popup-render-mode]').forEach(el => {
+        const tokens = (el.dataset.whenPopupRenderMode || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(mode) : el.dataset.whenPopupRenderMode !== mode;
       });
     }
 
@@ -2395,6 +2520,7 @@
           updatePopupLayoutVisibility();
           updatePopupTriggerVisibility();
           updatePopupFrequencyVisibility();
+          updatePopupRenderModeVisibility();
           markDirtyAndPreview();
         });
       });
@@ -2634,8 +2760,19 @@
         });
       }
 
-      bindPopupSelect('cfgPopupLayout', 'popupLayout', updatePopupLayoutVisibility);
-      bindPopupSelect('cfgPopupPosition', 'popupPosition');
+      bindPopupSelect('cfgPopupLayout', 'popupLayout', () => {
+        updatePopupLayoutVisibility();
+        updatePopupRenderModeVisibility();
+      });
+      // Position picker — 3x3 visual grid for slide-in / floating-card layouts
+      document.querySelectorAll('#popupPositionPicker .pos-btn').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.popupPosition = b.dataset.popupPos;
+          document.querySelectorAll('#popupPositionPicker .pos-btn').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
       document.querySelectorAll('#popupSideDrawerSeg button').forEach(b => {
         b.addEventListener('click', () => {
           state.config.popupSideDrawerSide = b.dataset.popupSide;
@@ -2644,7 +2781,7 @@
           markDirtyAndPreview();
         });
       });
-      bindPopupSelect('cfgPopupRenderMode', 'popupRenderMode');
+      bindPopupSelect('cfgPopupRenderMode', 'popupRenderMode', updatePopupRenderModeVisibility);
       // Compact-arrangement segmented control
       document.querySelectorAll('#popupCompactLayoutSeg button').forEach(b => {
         b.addEventListener('click', () => {
@@ -2653,6 +2790,15 @@
           b.setAttribute('aria-pressed', 'true');
           markDirtyAndPreview();
         });
+      });
+      // Countdown render-mode-specific fields
+      $('cfgPopupCountdownEnd').addEventListener('input', () => {
+        state.config.popupCountdownEnd = $('cfgPopupCountdownEnd').value;
+        markDirtyAndPreview();
+      });
+      $('cfgPopupCountdownCaption').addEventListener('input', () => {
+        state.config.popupCountdownCaption = $('cfgPopupCountdownCaption').value;
+        markDirtyAndPreview();
       });
       bindPopupSelect('cfgPopupTrigger', 'popupTrigger', updatePopupTriggerVisibility);
       bindPopupNumber('cfgPopupTriggerDelay', 'popupTriggerDelay', 5000);
