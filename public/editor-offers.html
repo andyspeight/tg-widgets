@@ -877,6 +877,37 @@
                   <option value="1800">30 minutes</option>
                 </select>
               </div>
+
+              <div class="toggle-group-heading" style="margin-top: 16px;">Status pills</div>
+              <div class="field-help" style="margin-bottom: 8px;">One pill per row maximum, picked by priority. <strong>Cheapest</strong>, <strong>Today</strong> and <strong>This week</strong> are always on. The three below are optional.</div>
+              <div class="toggle-row">
+                <span class="toggle-label">Tomorrow pill
+                  <div class="toggle-help">Orange pill for flights departing in 24-48 hours.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowTomorrow" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Going soon pill
+                  <div class="toggle-help">Teal pill for flights departing within the next N days. Threshold below.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowGoingSoon" aria-pressed="true"></button>
+              </div>
+              <div class="field" data-when-board-going-soon="true">
+                <label class="field-label" for="cfgBoardGoingSoonDays">Going soon threshold</label>
+                <select id="cfgBoardGoingSoonDays">
+                  <option value="7">Within 7 days</option>
+                  <option value="14" selected>Within 14 days</option>
+                  <option value="21">Within 21 days</option>
+                  <option value="30">Within 30 days</option>
+                </select>
+                <div class="field-help">Luxury operators may want a tighter window (7 days), budget specialists looser (21–30 days). Default is 14.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Premium cabin pill
+                  <div class="toggle-help">Purple pill for Business and First class fares.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowPremiumCabin" aria-pressed="true"></button>
+              </div>
             </div>
           </div>
 
@@ -897,14 +928,22 @@
                 <div class="field-help"><strong>Biggest discount</strong> picks the offer with the largest "was vs now" saving. <strong>Featured</strong> picks the first offer with featured=true if any (falls back to biggest discount). <strong>Cheapest</strong> uses the lowest price. <strong>First</strong> uses whatever Travelify returned first.</div>
               </div>
               <div class="field">
-                <label class="field-label">Sub-grid columns</label>
-                <div class="segmented" id="magazineColumnsSeg">
-                  <button type="button" data-mag-cols="2">2</button>
-                  <button type="button" data-mag-cols="3" aria-pressed="true">3</button>
-                  <button type="button" data-mag-cols="4">4</button>
+                <label class="field-label">Feature spotlight</label>
+                <div class="segmented" id="magazineFeatureEverySeg">
+                  <button type="button" data-feature-every="0">Off</button>
+                  <button type="button" data-feature-every="3">Every 3rd</button>
+                  <button type="button" data-feature-every="4" aria-pressed="true">Every 4th</button>
+                  <button type="button" data-feature-every="5">Every 5th</button>
                 </div>
-                <div class="field-help">Number of cards in the grid below the hero. Falls back to 2 columns on tablet, 1 on mobile.</div>
+                <div class="field-help">Every Nth banner gets the feature treatment — taller image, larger headline, more body copy. Like the cover stories in a print magazine. Set to <strong>Off</strong> for uniform banners throughout.</div>
               </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Editorial dividers
+                  <div class="toggle-help">Small caps text between sections (e.g. "8 more handpicked stays") for editorial feel.</div>
+                </span>
+                <button type="button" class="switch" id="cfgMagazineShowDividers" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top: 6px;">Below the hero, every offer is rendered as a full-width banner card. Banners alternate sides — image left, image right, image left — for visual rhythm. On mobile, all banners collapse to single column with image on top.</div>
             </div>
           </div>
 
@@ -1200,12 +1239,20 @@
         boardAutoRefresh: true,
         boardRefreshSeconds: 300,
         boardDateRange: 30,
+        // Departure-board status pill config
+        boardShowTomorrow: true,
+        boardShowGoingSoon: true,
+        boardGoingSoonDays: 14,
+        boardShowPremiumCabin: true,
         // List-layout config (used when template='cards' AND layout='list')
         listShowMeta: true,
         listShowAmenities: true,
         // Magazine template config (used only when template='magazine')
+        // Stacked-banner layout — every offer below the hero is a banner card,
+        // alternating sides. Every Nth banner is a feature spotlight.
         magazineHeroStrategy: 'discount',
-        magazineColumns: 3,
+        magazineShowDividers: true,
+        magazineFeatureEvery: 4,
         // Boarding-pass template config (used only when template='boarding-pass')
         boardingPassColumns: 2,
         boardingPassShowBarcode: true,
@@ -1356,6 +1403,11 @@
       $('cfgBoardAnimate').setAttribute('aria-pressed', c.boardAnimate !== false ? 'true' : 'false');
       $('cfgBoardAutoRefresh').setAttribute('aria-pressed', c.boardAutoRefresh !== false ? 'true' : 'false');
       $('cfgBoardRefreshSeconds').value = String(c.boardRefreshSeconds || 300);
+      // Status pill toggles
+      $('cfgBoardShowTomorrow').setAttribute('aria-pressed', c.boardShowTomorrow !== false ? 'true' : 'false');
+      $('cfgBoardShowGoingSoon').setAttribute('aria-pressed', c.boardShowGoingSoon !== false ? 'true' : 'false');
+      $('cfgBoardGoingSoonDays').value = String(c.boardGoingSoonDays || 14);
+      $('cfgBoardShowPremiumCabin').setAttribute('aria-pressed', c.boardShowPremiumCabin !== false ? 'true' : 'false');
 
       $('cfgType').value = c.type || 'Accommodation';
       refreshDestChips && refreshDestChips();
@@ -1397,9 +1449,11 @@
 
       // Magazine template fields
       $('cfgMagazineHeroStrategy').value = c.magazineHeroStrategy || 'discount';
-      document.querySelectorAll('#magazineColumnsSeg button').forEach(b => {
-        b.setAttribute('aria-pressed', String(c.magazineColumns || 3) === b.dataset.magCols ? 'true' : 'false');
+      const featureEvery = typeof c.magazineFeatureEvery === 'number' ? c.magazineFeatureEvery : 4;
+      document.querySelectorAll('#magazineFeatureEverySeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(featureEvery) === b.dataset.featureEvery ? 'true' : 'false');
       });
+      $('cfgMagazineShowDividers').setAttribute('aria-pressed', c.magazineShowDividers !== false ? 'true' : 'false');
 
       // Boarding-pass template fields
       document.querySelectorAll('#boardingPassColumnsSeg button').forEach(b => {
@@ -1440,6 +1494,7 @@
       updateConditionalVisibility();
       updateTemplateVisibility();
       updateBoardAutoRefreshVisibility();
+      updateBoardGoingSoonVisibility();
       updateEmptyDetailsVisibility();
     }
 
@@ -1502,6 +1557,13 @@
     function updateBoardAutoRefreshVisibility() {
       const on = !!state.config.boardAutoRefresh;
       document.querySelectorAll('[data-when-board-autorefresh]').forEach(el => {
+        el.hidden = !on;
+      });
+    }
+
+    function updateBoardGoingSoonVisibility() {
+      const on = state.config.boardShowGoingSoon !== false;
+      document.querySelectorAll('[data-when-board-going-soon]').forEach(el => {
         el.hidden = !on;
       });
     }
@@ -1748,6 +1810,33 @@
         state.config.boardRefreshSeconds = parseInt($('cfgBoardRefreshSeconds').value, 10) || 300;
         markDirtyAndPreview();
       });
+      // Status pill toggles
+      $('cfgBoardShowTomorrow').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowTomorrow = next;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardShowGoingSoon').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowGoingSoon = next;
+        updateBoardGoingSoonVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgBoardGoingSoonDays').addEventListener('change', () => {
+        state.config.boardGoingSoonDays = parseInt($('cfgBoardGoingSoonDays').value, 10) || 14;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardShowPremiumCabin').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowPremiumCabin = next;
+        markDirtyAndPreview();
+      });
 
       // ── List-layout fields ────────────────────────────────────────
       $('cfgListShowMeta').addEventListener('click', (ev) => {
@@ -1770,14 +1859,21 @@
         state.config.magazineHeroStrategy = $('cfgMagazineHeroStrategy').value;
         markDirtyAndPreview();
       });
-      document.querySelectorAll('#magazineColumnsSeg button').forEach(b => {
+      document.querySelectorAll('#magazineFeatureEverySeg button').forEach(b => {
         b.addEventListener('click', () => {
-          const v = parseInt(b.dataset.magCols, 10);
-          state.config.magazineColumns = v;
-          document.querySelectorAll('#magazineColumnsSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          const v = parseInt(b.dataset.featureEvery, 10);
+          state.config.magazineFeatureEvery = v;
+          document.querySelectorAll('#magazineFeatureEverySeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
           b.setAttribute('aria-pressed', 'true');
           markDirtyAndPreview();
         });
+      });
+      $('cfgMagazineShowDividers').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.magazineShowDividers = next;
+        markDirtyAndPreview();
       });
 
       // ── Boarding-pass template fields ────────────────────────────
@@ -1966,7 +2062,7 @@
       {
         name: 'Editorial showcase — Magazine',
         desc: 'Featured hero offer with a 3-column grid below',
-        config: { template: 'magazine', type: 'PackageHolidays', destinations: ['MV', 'MU', 'GR'], origins: ['GB'], magazineHeroStrategy: 'discount', magazineColumns: 3, density: 'standard' },
+        config: { template: 'magazine', type: 'PackageHolidays', destinations: ['MV', 'MU', 'GR'], origins: ['GB'], magazineHeroStrategy: 'discount', magazineFeatureEvery: 4, magazineShowDividers: true, density: 'standard' },
       },
       {
         name: 'Boarding-pass flights',
