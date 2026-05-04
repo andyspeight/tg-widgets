@@ -620,6 +620,17 @@
       shell.markDirty();
       render();
     },
+    onTabChange: (tabName) => {
+      // Mirror the shell's tab state to our .tab-panel markup.
+      // The shell wires .tgse-panel[data-tab] but we use .tab-panel[data-panel],
+      // so we sync manually here. (Same pattern as editor-countdown.)
+      document.querySelectorAll('.tgse-tabs button').forEach(b => {
+        b.classList.toggle('is-active', b.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.tab-panel').forEach(p => {
+        p.classList.toggle('is-active', p.dataset.panel === tabName);
+      });
+    },
     onAfterSave: (d) => {
       // shell handles the URL sync; nothing extra needed here
     },
