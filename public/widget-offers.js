@@ -2846,29 +2846,6 @@
       z-index: 2147483000;
       font-family: var(--tgo-font, system-ui, sans-serif);
     }
-    /* Editor-preview banner — only rendered when cfg._preview is true */
-    .tgop-preview-banner {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      margin: 0 auto 16px;
-      max-width: 720px;
-      background: rgba(0, 180, 216, 0.08);
-      border: 1px dashed rgba(0, 180, 216, 0.4);
-      border-radius: 8px;
-      font-size: 12px;
-      color: var(--tgo-sub, #475569);
-      font-family: var(--tgo-font, system-ui, sans-serif);
-    }
-    .tgop-preview-banner svg {
-      flex-shrink: 0;
-      color: var(--tgo-accent, #00B4D8);
-    }
-    .tgop-preview-banner strong {
-      color: var(--tgo-text, #0F172A);
-      font-weight: 600;
-    }
     .tgop-backdrop {
       position: absolute;
       inset: 0;
@@ -6114,6 +6091,44 @@
       return Math.round(((before - now) / before) * 100);
     }
 
+    // Popup-specific price formatter. Unlike the generic computeDisplayPrice,
+    // this gives the popup richer context — total + party size + duration —
+    // so a £16 1-night-room price doesn't look like £16 for a holiday.
+    // Returns { primary, sub } where primary is the headline price and sub
+    // is contextual (e.g. "2 adults · 1 night" or "per person").
+    _popupPriceContext(o) {
+      const cfg = this.cfg;
+      const display = computeDisplayPrice(o, cfg.priceDisplay || 'auto');
+      if (!display.primary) return { primary: '', sub: '' };
+
+      // For Accommodation-only offers the user genuinely needs context — a
+      // bare "£8 per person" looks wrong without knowing it's 1 night for 2.
+      // For Flight or Package offers the existing per-person label is fine
+      // because those imply the full holiday price.
+      const isAcc = o.type === 'Accommodation';
+      if (!isAcc) return display;
+
+      // Build a context line for accommodation
+      const parts = [];
+      const a = o.adults || 0;
+      const c = o.children || 0;
+      const nights = (o.accommodation && o.accommodation.nights) || 0;
+      if (a) parts.push(a + ' adult' + (a === 1 ? '' : 's'));
+      if (c) parts.push(c + ' child' + (c === 1 ? '' : 'ren'));
+      if (nights) parts.push(nights + ' night' + (nights === 1 ? '' : 's'));
+
+      // For accommodation we want to display TOTAL by default in popup, since
+      // the per-person framing is misleading for short hotel-only stays.
+      // Use the formattedPrice (total) if available, otherwise fall through.
+      let primary = display.primary;
+      if (o.formattedPrice) primary = o.formattedPrice;
+
+      return {
+        primary: primary,
+        sub: parts.length ? parts.join(' · ') : 'total'
+      };
+    }
+
     // Close button shared across all three render modes
     _popupCloseBtn() {
       if (!this.cfg.popupShowCloseButton) return '';
@@ -6167,7 +6182,7 @@
       const flightStrip = this._popupFlightStripText(o);
       const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
         || (o.flight && o.flight.image && o.flight.image.url) || '');
-      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const display = this._popupPriceContext(o);
       const url = safeUrl(o.url || '#');
       const wasPrice = this._popupWasPrice(o);
 
@@ -6211,7 +6226,7 @@
       const flightStrip = this._popupFlightStripText(o);
       const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
         || (o.flight && o.flight.image && o.flight.image.url) || '');
-      const display = computeDisplayPrice(o, cfg.priceDisplay || 'auto');
+      const display = this._popupPriceContext(o);
       const wasPrice = this._popupWasPrice(o);
       const discount = this._popupDiscountPercent(o);
       const url = safeUrl(o.url || '#');
@@ -6296,7 +6311,7 @@
       const isFlight = o.type === 'Flight' || o.type === 'Flights';
       const isPkg = o.type === 'Package' || o.type === 'Packages';
       const url = safeUrl(o.url || '#');
-      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const display = this._popupPriceContext(o);
       if (!display.primary) return '';
 
       let html = '<a class="tgop-mini-pill" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
@@ -6361,25 +6376,6 @@
       else content = this._popupRenderCompact(offers);
 
       let html = '';
-      // Preview banner: shown only when in editor preview mode. Tells the user
-      // the saved layout/trigger so they understand this isn't how it'll fire
-      // in production.
-      if (cfg._preview && this._popupOriginalLayout) {
-        const trigger = cfg.popupTrigger || 'load';
-        const triggerLabels = {
-          'load': 'on page load',
-          'time': 'after a delay',
-          'scroll': 'on scroll',
-          'exit-intent': 'on exit intent',
-          'click': 'on click',
-          'inactivity': 'on inactivity',
-          'pageviews': 'after pageviews'
-        };
-        html += '<div class="tgop-preview-banner">'
-          + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
-          + '<span>Preview · in production this will appear as a <strong>' + esc(this._popupOriginalLayout) + '</strong> popup, firing <strong>' + esc(triggerLabels[trigger] || trigger) + '</strong></span>'
-          + '</div>';
-      }
       html += '<div class="tgop-root ' + layoutClass + '" style="--tgop-overlay-opacity:' + opacity + '">';
       if (showBackdrop) html += '<div class="tgop-backdrop" data-tgop-backdrop></div>';
       html += '<div class="tgop-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(cfg.popupHeading || 'Live deals') + '">';
@@ -6537,7 +6533,7 @@
       try {
         let n = this.el;
         while (n) {
-          if (n.id === 'previewMount') return true;
+          if (n.id === 'previewMount' || n.id === 'previewMountPopup') return true;
           n = n.parentElement;
         }
       } catch {}
@@ -6547,22 +6543,19 @@
     // Entry point — called from _renderOffers when template='popup'.
     _renderPopupTemplate() {
       // Preview mode (editor preview pane): skip eligibility + frequency +
-      // trigger entirely. Render the popup chassis inline so the user can
-      // actually see the content. Force inline layout regardless of saved
-      // popupLayout — the saved layout is what they get in production, the
-      // preview's job is to show the content arrangement.
+      // trigger entirely. Open the popup immediately with its actual saved
+      // layout — the editor wraps the preview in a faux-site mockup so the
+      // popup overlays the faux-site exactly as it would in production.
+      // Side effects (recordShown, body scroll lock) are skipped via cfg._preview.
       if (this._isPreviewMode()) {
         if (!this.rawOffers || !this.rawOffers.length) {
           this._showEmpty();
           return;
         }
-        // Force inline layout for preview, save original to restore for any
-        // later interactions (rotation, mode-pick logic still uses real layout)
-        this._popupOriginalLayout = this.cfg.popupLayout;
-        this.cfg.popupLayout = 'inline';
         // Mark cfg._preview so _popupOpen / _popupBuildHtml see it consistently
+        // (used to skip recordShown and body scroll lock)
         this.cfg._preview = true;
-        // Open immediately, no trigger
+        // Open immediately, no trigger, with actual saved layout
         this._popupOpen();
         return;
       }
