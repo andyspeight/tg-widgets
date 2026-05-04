@@ -546,8 +546,30 @@
                       <div class="sublabel">Flights as paper passes</div>
                     </div>
                   </button>
+
+                  <!-- Ticker: horizontal row of pills suggesting marquee crawl -->
+                  <button type="button" class="template-card" data-template="ticker" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- "Live deals" label badge on the left, accent strong -->
+                        <rect class="shape-strong" x="2" y="17" width="16" height="11" rx="2"/>
+                        <!-- Row of pills crawling — first one half-cut suggests motion -->
+                        <rect class="shape" x="-2" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="22" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="38" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="54" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="70" y="19" width="14" height="7" rx="2"/>
+                        <!-- Subtle motion dots on the right edge to imply it keeps going -->
+                        <circle class="shape" cx="78" cy="22.5" r="0.6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Ticker</div>
+                      <div class="sublabel">Marquee crawl of offers</div>
+                    </div>
+                  </button>
                 </div>
-                <div class="field-help" style="margin-top: 8px;"><strong>Cards</strong> works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with an editorial mosaic below. <strong>Departure board</strong> and <strong>Boarding pass</strong> are flights only.</div>
+                <div class="field-help" style="margin-top: 8px;"><strong>Cards</strong> works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with an editorial mosaic below. <strong>Departure board</strong> and <strong>Boarding pass</strong> are flights only. <strong>Ticker</strong> is a compact horizontal crawl, ideal for site headers and footers.</div>
               </div>
             </div>
           </div>
@@ -587,7 +609,7 @@
             </div>
           </div>
 
-          <div class="section" data-open="true" data-when-template="cards magazine">
+          <div class="section" data-open="true" data-when-template="cards magazine ticker">
             <button class="section-head" data-section>Offer type
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -971,7 +993,51 @@
             </div>
           </div>
 
-          <div class="section" data-open="true" data-when-template="cards magazine boarding-pass">
+          <!-- ═══════ Ticker template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="ticker" hidden>
+            <button class="section-head" data-section>Ticker layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Visual style</label>
+                <div class="segmented" id="tickerStyleSeg">
+                  <button type="button" data-ticker-style="pills" aria-pressed="true">Pills</button>
+                  <button type="button" data-ticker-style="ribbon">Ribbon</button>
+                </div>
+                <div class="field-help"><strong>Pills</strong> shows offers as discrete card pills with hover states — works on most sites. <strong>Ribbon</strong> is a continuous strip with diamond separators, like an airport flight info display.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Speed</label>
+                <div class="segmented" id="tickerSpeedSeg">
+                  <button type="button" data-ticker-speed="slow">Slow</button>
+                  <button type="button" data-ticker-speed="medium" aria-pressed="true">Medium</button>
+                  <button type="button" data-ticker-speed="fast">Fast</button>
+                </div>
+                <div class="field-help">How fast the ticker crawls. <strong>Medium</strong> (80s loop) is a comfortable reading pace. <strong>Slow</strong> may feel static; <strong>Fast</strong> is decorative motion rather than readable info.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show label badge
+                  <div class="toggle-help">"Live deals" stamp on the left edge with a green pulse indicator.</div>
+                </span>
+                <button type="button" class="switch" id="cfgTickerShowLabel" aria-pressed="true"></button>
+              </div>
+              <div class="field" data-when-ticker-show-label="true">
+                <label class="field-label" for="cfgTickerLabel">Label text</label>
+                <input type="text" id="cfgTickerLabel" maxlength="20" placeholder="Live deals" />
+                <div class="field-help">Short text — keep under 20 characters. Examples: "Live deals", "Flight deals", "This week's offers".</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Pause on hover
+                  <div class="toggle-help">Visitor hovers anywhere on the ticker, the crawl pauses so they can read or click. Recommended on.</div>
+                </span>
+                <button type="button" class="switch" id="cfgTickerPauseOnHover" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top:6px;">The ticker shows offers as a horizontal marquee — best placed in a site header, footer band, or between content sections. Works for accommodation, flights, and packages. The ticker honours <em>prefers-reduced-motion</em> and falls back to a static snapshot for visitors who've turned animations off.</div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards magazine boarding-pass ticker">
             <button class="section-head" data-section>Price display
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -1256,6 +1322,12 @@
         // Boarding-pass template config (used only when template='boarding-pass')
         boardingPassColumns: 2,
         boardingPassShowBarcode: true,
+        // Ticker template config (used only when template='ticker')
+        tickerStyle: 'pills',
+        tickerSpeed: 'medium',
+        tickerLabel: 'Live deals',
+        tickerShowLabel: true,
+        tickerPauseOnHover: true,
         show: {
           // Universal
           propertyType: true, chain: true, location: true,
@@ -1461,6 +1533,17 @@
       });
       $('cfgBoardingPassShowBarcode').setAttribute('aria-pressed', c.boardingPassShowBarcode !== false ? 'true' : 'false');
 
+      // Ticker template fields
+      document.querySelectorAll('#tickerStyleSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.tickerStyle === (c.tickerStyle || 'pills') ? 'true' : 'false');
+      });
+      document.querySelectorAll('#tickerSpeedSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.tickerSpeed === (c.tickerSpeed || 'medium') ? 'true' : 'false');
+      });
+      $('cfgTickerShowLabel').setAttribute('aria-pressed', c.tickerShowLabel !== false ? 'true' : 'false');
+      $('cfgTickerLabel').value = c.tickerLabel || 'Live deals';
+      $('cfgTickerPauseOnHover').setAttribute('aria-pressed', c.tickerPauseOnHover !== false ? 'true' : 'false');
+
       // Apply conditional visibility for layout-specific fields
       updateLayoutVisibility();
 
@@ -1495,6 +1578,7 @@
       updateTemplateVisibility();
       updateBoardAutoRefreshVisibility();
       updateBoardGoingSoonVisibility();
+      updateTickerLabelVisibility();
       updateEmptyDetailsVisibility();
     }
 
@@ -1564,6 +1648,13 @@
     function updateBoardGoingSoonVisibility() {
       const on = state.config.boardShowGoingSoon !== false;
       document.querySelectorAll('[data-when-board-going-soon]').forEach(el => {
+        el.hidden = !on;
+      });
+    }
+
+    function updateTickerLabelVisibility() {
+      const on = state.config.tickerShowLabel !== false;
+      document.querySelectorAll('[data-when-ticker-show-label]').forEach(el => {
         el.hidden = !on;
       });
     }
@@ -1894,6 +1985,47 @@
         markDirtyAndPreview();
       });
 
+      // ── Ticker template fields ───────────────────────────────────
+      document.querySelectorAll('#tickerStyleSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.tickerStyle = b.dataset.tickerStyle;
+          document.querySelectorAll('#tickerStyleSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#tickerSpeedSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.tickerSpeed = b.dataset.tickerSpeed;
+          document.querySelectorAll('#tickerSpeedSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgTickerShowLabel').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.tickerShowLabel = next;
+        updateTickerLabelVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgTickerLabel').addEventListener('input', () => {
+        // Slight debounce so we don't re-render on every keystroke
+        clearTimeout($('cfgTickerLabel')._t);
+        $('cfgTickerLabel')._t = setTimeout(() => {
+          state.config.tickerLabel = $('cfgTickerLabel').value || 'Live deals';
+          markDirtyAndPreview();
+        }, 250);
+      });
+      $('cfgTickerPauseOnHover').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.tickerPauseOnHover = next;
+        markDirtyAndPreview();
+      });
+
       const toggleMap = {
         showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
         showSummary: 'summary', showStayDetails: 'stayDetails',
@@ -2068,6 +2200,11 @@
         name: 'Boarding-pass flights',
         desc: 'Flight fares as paper boarding passes',
         config: { template: 'boarding-pass', type: 'Flights', origins: ['LHR', 'LGW', 'MAN'], destinations: ['ES', 'IT', 'PT'], boardingPassColumns: 2, boardingPassShowBarcode: true },
+      },
+      {
+        name: 'Live deals ticker',
+        desc: 'Marquee crawl of offers — for site headers and footers',
+        config: { template: 'ticker', type: 'Any', tickerStyle: 'pills', tickerSpeed: 'medium', tickerLabel: 'Live deals', tickerShowLabel: true, tickerPauseOnHover: true, maxOffers: 30 },
       },
     ];
 
