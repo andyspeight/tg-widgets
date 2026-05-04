@@ -1,546 +1,1415 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Popup Widget Demo — Travelgenix</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Popup Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
 <style>
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #F8FAFC;
-    color: #0F172A;
-    min-height: 100vh;
-  }
+  /* ───────────────────────────────────────────────────────────
+     Per-editor styles — ONLY popup-specific bits.
+     All shell tokens come from editor-shell.css (--tgse-*).
+     ─────────────────────────────────────────────────────────── */
 
-  /* Simulated client travel agency site */
-  .site-header {
-    background: #1B2B5B;
-    color: #fff;
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .site-logo {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-  .site-nav {
-    display: flex;
-    gap: 28px;
-    font-size: 14px;
-    opacity: 0.9;
-  }
-  .site-nav a { color: #fff; text-decoration: none; }
-  .site-nav a:hover { opacity: 0.7; }
+  /* Sidebar body — matches the inner pattern used by countdown */
+  .sb-body { padding: 0; }
+  .tab-panel { display: none; padding: 12px 14px 24px; }
+  .tab-panel.is-active { display: block; }
 
-  .hero {
-    padding: 72px 32px 56px;
-    text-align: center;
-    background: linear-gradient(135deg, #FAFBFC 0%, #EFF6FF 100%);
-    border-bottom: 1px solid #E2E8F0;
-  }
-  .hero h1 {
-    font-size: 44px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin: 0 0 16px;
-    color: #1B2B5B;
-  }
-  .hero p {
-    font-size: 18px;
-    color: #475569;
-    max-width: 580px;
-    margin: 0 auto 24px;
-    line-height: 1.6;
-  }
-
-  /* Demo controls */
-  .controls-wrap {
-    max-width: 1200px;
-    margin: 32px auto;
-    padding: 0 32px;
-  }
-  .controls-card {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  }
-  .controls-card h2 {
-    margin: 0 0 6px;
-    font-size: 18px;
-    font-weight: 600;
-    color: #0F172A;
-  }
-  .controls-card p {
-    margin: 0 0 20px;
-    color: #64748B;
-    font-size: 14px;
-  }
-  .control-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    align-items: flex-start;
-    margin-bottom: 18px;
-  }
-  .control-group {
-    flex: 1;
-    min-width: 220px;
-  }
-  .control-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: #64748B;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .control-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .pill {
-    border: 1px solid #E2E8F0;
-    background: #FFFFFF;
-    padding: 7px 13px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #475569;
-    cursor: pointer;
-    transition: all 160ms ease;
-    font-family: inherit;
-  }
-  .pill:hover {
-    background: #F8FAFC;
-    border-color: #CBD5E1;
-  }
-  .pill.active {
-    background: #1B2B5B;
-    border-color: #1B2B5B;
-    color: #FFFFFF;
-  }
-
-  .show-btn {
-    padding: 14px 28px;
-    background: #00B4D8;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 160ms ease, transform 160ms ease;
-    margin-top: 12px;
-  }
-  .show-btn:hover { background: #0096B7; }
-  .show-btn:active { transform: translateY(1px); }
-
-  .reset-btn {
-    background: transparent;
-    color: #64748B;
-    border: 1px solid #E2E8F0;
-    margin-left: 8px;
-  }
-  .reset-btn:hover { background: #F1F5F9; }
-
-  /* Faux content below */
-  .content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px 32px 80px;
-  }
-  .content h2 {
-    font-size: 28px;
-    margin: 40px 0 16px;
-    color: #1B2B5B;
-  }
-  .content p {
-    color: #475569;
-    line-height: 1.7;
-    font-size: 16px;
-    margin: 0 0 16px;
-    max-width: 720px;
-  }
-  .content-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin: 32px 0;
-  }
-  .content-card {
-    background: #fff;
-    border: 1px solid #E2E8F0;
-    border-radius: 16px;
+  /* Sections (collapsible) */
+  .sec {
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    background: var(--tgse-panel);
+    margin-bottom: 10px;
     overflow: hidden;
   }
-  .content-card-img {
-    height: 180px;
-    background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+  .sec-head {
+    width: 100%; display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px;
+    background: var(--tgse-panel-2);
+    border: 0; border-bottom: 1px solid var(--tgse-border);
+    text-align: left; cursor: pointer;
+    font: 600 12px/1 'Inter', sans-serif;
+    color: var(--tgse-ink);
+    text-transform: uppercase; letter-spacing: .04em;
   }
-  .content-card-body {
-    padding: 20px;
+  .sec-title { flex: 1; }
+  .sec-chev {
+    width: 14px; height: 14px;
+    color: var(--tgse-ink-3);
+    transition: transform .18s ease;
   }
-  .content-card h3 {
-    margin: 0 0 8px;
-    font-size: 18px;
-    color: #0F172A;
+  .sec.is-open .sec-chev { transform: rotate(180deg); }
+  .sec.is-open .sec-head { border-bottom-color: var(--tgse-border); }
+  .sec-body { display: none; padding: 14px 12px 16px; }
+  .sec.is-open .sec-body { display: block; }
+
+  /* Field — label + control */
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: block;
+    font: 500 12px/1.3 'Inter', sans-serif;
+    color: var(--tgse-ink);
+    margin-bottom: 5px;
   }
-  .content-card p {
-    margin: 0;
-    font-size: 14px;
-    color: #64748B;
+  .field-hint {
+    font: 400 11px/1.4 'Inter', sans-serif;
+    color: var(--tgse-ink-3);
+    margin-top: 5px;
+  }
+  .input, .textarea, .select {
+    width: 100%; padding: 7px 10px; height: 32px;
+    background: var(--tgse-panel); color: var(--tgse-ink);
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm);
+    font: 400 13px/1 'Inter', sans-serif;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .textarea {
+    height: auto; min-height: 64px; padding: 8px 10px;
+    line-height: 1.5; resize: vertical;
+    font-family: 'Inter', sans-serif;
+  }
+  .select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .input:focus, .textarea:focus, .select:focus {
+    outline: 0;
+    border-color: var(--tgse-brand);
+    box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .field-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   }
 
-  /* Inline embed target */
-  .inline-embed-section {
-    background: #1B2B5B;
-    background-image: linear-gradient(135deg, #1B2B5B 0%, #2A3F7A 100%);
-    padding: 64px 32px;
-    margin: 48px 0 0;
-    text-align: center;
+  /* Layout / Content / Trigger picker grids */
+  .pickers {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
   }
-  .inline-embed-section h2 {
-    color: #fff;
-    margin: 0 0 8px;
-    font-size: 28px;
+  .pickers--list { grid-template-columns: 1fr; }
+  .picker {
+    display: flex; flex-direction: column; gap: 5px;
+    background: var(--tgse-panel);
+    border: 1.5px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    padding: 8px; cursor: pointer; text-align: left;
+    transition: all .12s ease;
   }
-  .inline-embed-section p {
-    color: #CBD5E1;
-    margin: 0 auto 32px;
-    max-width: 540px;
+  .picker:hover { border-color: var(--tgse-border-strong); background: var(--tgse-hover); }
+  .picker.is-active {
+    border-color: var(--tgse-brand);
+    background: var(--tgse-brand-tint);
   }
-  #inline-target { max-width: 720px; margin: 0 auto; }
+  .picker-thumb {
+    height: 46px;
+    background: var(--tgse-panel-3);
+    border-radius: var(--tgse-radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .picker.is-active .picker-thumb { background: rgba(255,255,255,.6); }
+  .picker-name { font: 600 11.5px/1.3 'Inter', sans-serif; color: var(--tgse-ink); }
+  .picker-desc { font: 400 10.5px/1.3 'Inter', sans-serif; color: var(--tgse-ink-3); }
+  .picker--row {
+    flex-direction: row; align-items: center; gap: 10px; padding: 8px 10px;
+  }
+  .picker--row .picker-thumb { width: 32px; height: 32px; flex-shrink: 0; }
+  .picker--row > div:last-child { flex: 1; min-width: 0; }
+  .picker-icon { width: 18px; height: 18px; color: var(--tgse-brand); }
 
-  .footer {
-    background: #0F172A;
-    color: #94A3B8;
-    text-align: center;
-    padding: 24px;
+  /* CSS-art layout thumbnails */
+  .lt { width: 36px; height: 26px; background: #fff; border: 1px solid var(--tgse-border-strong); border-radius: 2px; position: relative; overflow: hidden; }
+  .lt-centered::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 18px; height: 12px; background: var(--tgse-brand); border-radius: 1px; }
+  .lt-slide-in::after { content: ''; position: absolute; bottom: 3px; right: 3px; width: 14px; height: 10px; background: var(--tgse-brand); border-radius: 1px; }
+  .lt-top-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--tgse-brand); }
+  .lt-bottom-bar::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: var(--tgse-brand); }
+  .lt-fullscreen::after { content: ''; position: absolute; inset: 3px; background: var(--tgse-brand); border-radius: 1px; }
+  .lt-side-drawer::after { content: ''; position: absolute; top: 0; bottom: 0; right: 0; width: 12px; background: var(--tgse-brand); }
+  .lt-floating-card::after { content: ''; position: absolute; bottom: 3px; right: 3px; width: 12px; height: 8px; background: var(--tgse-brand); border-radius: 1px; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+  .lt-inline { display: flex; align-items: center; justify-content: center; }
+  .lt-inline::after { content: ''; width: 24px; height: 6px; background: var(--tgse-brand); border-radius: 1px; }
+
+  /* Switch */
+  .switch-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0;
+  }
+  .switch-text { flex: 1; }
+  .switch-text-title { font: 500 12px/1.3 'Inter', sans-serif; color: var(--tgse-ink); }
+  .switch-text-sub { font: 400 11px/1.3 'Inter', sans-serif; color: var(--tgse-ink-3); margin-top: 2px; }
+  .switch {
+    position: relative; width: 34px; height: 20px;
+    background: var(--tgse-border-strong);
+    border-radius: 999px; cursor: pointer;
+    transition: background .15s; flex-shrink: 0;
+    border: 0; padding: 0;
+  }
+  .switch::after {
+    content: ''; position: absolute; left: 2px; top: 2px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    transition: transform .15s;
+  }
+  .switch.is-on { background: var(--tgse-brand); }
+  .switch.is-on::after { transform: translateX(14px); }
+
+  /* Color row */
+  .colour-row { display: flex; align-items: center; gap: 8px; }
+  .colour-swatch-wrap {
+    width: 32px; height: 32px; padding: 0;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm);
+    overflow: hidden; flex-shrink: 0;
+    cursor: pointer;
+  }
+  .colour-swatch-wrap input[type="color"] {
+    width: 200%; height: 200%; margin: -25%;
+    border: 0; padding: 0; cursor: pointer;
+  }
+  .colour-hex {
+    flex: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  /* Trigger config sub-block (highlighted background) */
+  .trigger-config {
+    background: var(--tgse-panel-2);
+    border-radius: var(--tgse-radius-md);
+    padding: 12px; margin-top: 10px;
+    border: 1px solid var(--tgse-border);
+  }
+
+  /* Preview canvas — faux travel agency page backdrop */
+  .pv-faux {
+    position: relative;
+    width: 100%; max-width: 720px;
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.04);
+    overflow: hidden;
+    min-height: 480px;
+    isolation: isolate;
+    transform: translateZ(0); /* containing block for fixed-position popup */
+  }
+  .pv-faux-header {
+    background: #1B2B5B; color: #fff;
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
     font-size: 13px;
   }
+  .pv-faux-header .logo { font-weight: 600; }
+  .pv-faux-header .nav { display: flex; gap: 16px; opacity: .8; font-size: 12px; }
+  .pv-faux-content { padding: 28px 24px; }
+  .pv-faux-content h1 { margin: 0 0 8px; font-size: 22px; color: #0F172A; font-weight: 700; }
+  .pv-faux-content p { margin: 0 0 14px; color: #64748B; font-size: 13px; line-height: 1.6; }
+  .pv-faux-blocks {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px;
+  }
+  .pv-faux-block { border-radius: 8px; height: 90px; opacity: .9; }
+  .pv-faux-block:nth-child(1) { background: linear-gradient(135deg, #0096B7, #48CAE4); }
+  .pv-faux-block:nth-child(2) { background: linear-gradient(135deg, #F59E0B, #EF4444); }
+  .pv-faux-block:nth-child(3) { background: linear-gradient(135deg, #10B981, #06B6D4); }
+  .pv-mount-overlay { position: absolute; inset: 0; pointer-events: auto; }
+  .pv-mount-inline { margin: 18px 0 6px; }
 
-  /* Trigger-test-only button for click trigger */
-  #click-trigger-test {
-    display: inline-block;
-    padding: 10px 20px;
-    background: #F1F5F9;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    color: #1B2B5B;
-    font-weight: 600;
-    cursor: pointer;
-    margin: 16px 0;
-    font-family: inherit;
+  /* Embed snippet box */
+  .embed-box {
+    background: var(--tgse-panel-3);
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    padding: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; line-height: 1.55;
+    color: var(--tgse-ink-2);
+    white-space: pre-wrap; word-break: break-all;
   }
 
-  @media (max-width: 640px) {
-    .hero h1 { font-size: 30px; }
-    .hero { padding: 48px 20px 32px; }
-    .site-nav { display: none; }
-    .controls-wrap, .content { padding: 0 20px; }
-    .controls-card { padding: 20px; }
+  /* Helper text */
+  .empty-state {
+    padding: 18px 14px;
+    text-align: center;
+    color: var(--tgse-ink-3);
+    font-size: 12px; line-height: 1.5;
   }
 </style>
 </head>
 <body>
 
-<!-- Simulated client site -->
-<header class="site-header">
-  <div class="site-logo">Sunshine Holidays</div>
-  <nav class="site-nav">
-    <a href="#">Destinations</a>
-    <a href="#">Cruises</a>
-    <a href="#">Late Deals</a>
-    <a href="#">About</a>
-    <a href="#">Contact</a>
-  </nav>
-</header>
+<div class="tgse-app">
 
-<section class="hero">
-  <h1>Popup Widget Demo</h1>
-  <p>Choose a layout, content type and trigger below — then hit the demo button. The popup renders on this page exactly as it would on a client site.</p>
-</section>
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="tgse-sidebar">
 
-<div class="controls-wrap">
-  <div class="controls-card">
-    <h2>Configure the demo</h2>
-    <p>All 8 layouts and 6 content types are interactive. Storage rules are bypassed for testing — the popup will reopen each time you click "Show popup".</p>
+    <!-- Row 1: Crumb -->
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
 
-    <div class="control-row">
-      <div class="control-group">
-        <label class="control-label">Layout</label>
-        <div class="control-pills" data-pills="layout">
-          <button class="pill active" data-val="centered">Centered</button>
-          <button class="pill" data-val="slide-in">Slide-in</button>
-          <button class="pill" data-val="top-bar">Top bar</button>
-          <button class="pill" data-val="bottom-bar">Bottom bar</button>
-          <button class="pill" data-val="fullscreen">Fullscreen</button>
-          <button class="pill" data-val="side-drawer">Side drawer</button>
-          <button class="pill" data-val="floating-card">Floating card</button>
-          <button class="pill" data-val="inline">Inline</button>
-        </div>
+    <!-- Row 2: Widget identity -->
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/><circle cx="7" cy="7" r=".6" fill="currentColor"/><circle cx="9.5" cy="7" r=".6" fill="currentColor"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Popup</div>
+        <div class="tgse-id-type">Widget editor</div>
       </div>
     </div>
 
-    <div class="control-row">
-      <div class="control-group">
-        <label class="control-label">Content type</label>
-        <div class="control-pills" data-pills="contentType">
-          <button class="pill active" data-val="announcement">Announcement</button>
-          <button class="pill" data-val="email-capture">Email capture</button>
-          <button class="pill" data-val="discount">Discount code</button>
-          <button class="pill" data-val="image">Image</button>
-          <button class="pill" data-val="two-step">Two-step</button>
-          <button class="pill" data-val="video">Video</button>
-        </div>
-      </div>
+    <!-- Row 3: Primary actions — Templates + AI builder -->
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
     </div>
 
-    <div class="control-row">
-      <div class="control-group">
-        <label class="control-label">Position (slide-in / floating / drawer only)</label>
-        <div class="control-pills" data-pills="position">
-          <button class="pill" data-val="top-left">Top left</button>
-          <button class="pill" data-val="top-right">Top right</button>
-          <button class="pill" data-val="bottom-left">Bottom left</button>
-          <button class="pill active" data-val="bottom-right">Bottom right</button>
-        </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label">Theme</label>
-        <div class="control-pills" data-pills="theme">
-          <button class="pill active" data-val="light">Light</button>
-          <button class="pill" data-val="dark">Dark</button>
-        </div>
-      </div>
+    <!-- Row 4: Name + Save -->
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled popup" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
     </div>
 
-    <button class="show-btn" id="show-popup">Show popup</button>
-    <button class="show-btn reset-btn" id="reset-storage">Reset storage</button>
-  </div>
+    <!-- Row 5: Tabs -->
+    <nav class="tgse-tabs" role="tablist">
+      <button class="tab is-active" data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button class="tab" data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <!-- Row 6: Scrollable body -->
+    <div class="tgse-body" id="sb-body">
+      <div class="sb-body">
+
+        <!-- ===== DESIGN TAB ===== -->
+        <div class="tab-panel is-active" data-panel="design">
+
+          <!-- Layout picker -->
+          <div class="sec is-open">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Layout</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-layout"></div>
+          </div>
+
+          <!-- Trigger picker -->
+          <div class="sec is-open">
+            <button class="sec-head" type="button">
+              <span class="sec-title">When to show</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-trigger"></div>
+          </div>
+
+          <!-- Colours -->
+          <div class="sec is-open">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Colours</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-colours"></div>
+          </div>
+
+          <!-- Shape -->
+          <div class="sec">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Shape</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body">
+              <div class="field">
+                <label class="field-label">Corner radius</label>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <input type="range" min="0" max="32" step="1" id="rad-slider" style="flex:1" value="16">
+                  <input type="number" class="input" id="rad-input" min="0" max="32" value="16" style="width:64px">
+                </div>
+                <div class="field-hint">0 = sharp corners, 32 = very rounded.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typography (font picker — shell mounts it) -->
+          <div class="sec">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Typography</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body">
+              <div class="field">
+                <label class="field-label">Font family</label>
+                <div id="fontPickerMount"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===== CONTENT TAB ===== -->
+        <div class="tab-panel" data-panel="content">
+
+          <!-- Content type picker -->
+          <div class="sec is-open">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Content type</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-content-type"></div>
+          </div>
+
+          <!-- Content fields — re-rendered per content type -->
+          <div id="sb-content-fields"></div>
+
+        </div>
+
+        <!-- ===== SETTINGS TAB ===== -->
+        <div class="tab-panel" data-panel="settings">
+
+          <div class="sec is-open">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Behaviour</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body">
+              <div class="switch-row">
+                <div class="switch-text">
+                  <div class="switch-text-title">Show close button</div>
+                  <div class="switch-text-sub">Adds an X in the top-right corner.</div>
+                </div>
+                <button class="switch" type="button" data-bind-switch="showCloseButton" aria-label="Toggle close button"></button>
+              </div>
+              <div class="switch-row">
+                <div class="switch-text">
+                  <div class="switch-text-title">Close on Escape</div>
+                  <div class="switch-text-sub">Pressing Esc dismisses the popup.</div>
+                </div>
+                <button class="switch" type="button" data-bind-switch="closeOnEscape" aria-label="Toggle Escape to close"></button>
+              </div>
+              <div class="switch-row">
+                <div class="switch-text">
+                  <div class="switch-text-title">Close on backdrop click</div>
+                  <div class="switch-text-sub">Click outside the popup to close.</div>
+                </div>
+                <button class="switch" type="button" data-bind-switch="closeOnBackdropClick" aria-label="Toggle backdrop close"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Frequency</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-frequency"></div>
+          </div>
+
+          <div class="sec">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Page targeting</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-pages"></div>
+          </div>
+
+          <div class="sec">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Devices</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-devices"></div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       PREVIEW
+       ============================================================ -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <!-- Faux page + popup mount injected here -->
+      </div>
+    </div>
+  </section>
+
 </div>
 
-<!-- Faux travel agency content -->
-<main class="content">
-  <h2>Featured destinations</h2>
-  <p>This is placeholder content showing how the popup widget overlays a typical travel agency website. Scroll down, click around, or trigger the popup to see how it integrates with real page content.</p>
+<!-- Shell behaviour first -->
+<script src="/editor-shell.js"></script>
 
-  <div class="content-grid">
-    <div class="content-card">
-      <div class="content-card-img" style="background:linear-gradient(135deg,#0096B7,#48CAE4)"></div>
-      <div class="content-card-body">
-        <h3>Mediterranean cruises</h3>
-        <p>Seven nights from £899 per person, sailing from Southampton.</p>
-      </div>
-    </div>
-    <div class="content-card">
-      <div class="content-card-img" style="background:linear-gradient(135deg,#F59E0B,#EF4444)"></div>
-      <div class="content-card-body">
-        <h3>Algarve breaks</h3>
-        <p>Family-friendly resorts with kids clubs and stunning beaches.</p>
-      </div>
-    </div>
-    <div class="content-card">
-      <div class="content-card-img" style="background:linear-gradient(135deg,#10B981,#06B6D4)"></div>
-      <div class="content-card-body">
-        <h3>Caribbean escapes</h3>
-        <p>All-inclusive luxury in St Lucia, Barbados and Antigua.</p>
-      </div>
-    </div>
-  </div>
+<!-- The popup widget — used to render the live preview -->
+<script src="/widget-popup.js"></script>
 
-  <h2>Why book with us</h2>
-  <p>ABTA and ATOL protected. Award-winning customer service. Lowest price guaranteed. Friendly, expert advice from real travel consultants who've been to the destinations themselves.</p>
-
-  <button id="click-trigger-test">Click trigger test (when configured)</button>
-
-  <p>This button has the selector <code>#click-trigger-test</code> — useful if you want to test the click trigger.</p>
-</main>
-
-<!-- Inline embed target — only relevant when layout=inline -->
-<section class="inline-embed-section" id="inline-section" style="display:none">
-  <h2>Stay in the loop</h2>
-  <p>The "inline" layout renders the popup inline within page content rather than as an overlay — perfect for newsletter sign-ups in the footer or sidebar.</p>
-  <div id="inline-target"></div>
-</section>
-
-<footer class="footer">
-  Sunshine Holidays Ltd · ABTA Y1234 · ATOL 9876 · Powered by Travelgenix
-</footer>
-
-<!-- Demo script -->
 <script>
-  const STORAGE_PREFIX = 'tgp_';
-  const state = {
+  /* ============================================================
+     POPUP EDITOR — per-editor script
+     Built on the unified shell (tgse).
+     ============================================================ */
+
+  /* ── Defaults ────────────────────────────────────────────── */
+  const DEFAULTS = {
+    name: 'Untitled popup',
     layout: 'centered',
-    contentType: 'announcement',
     position: 'bottom-right',
-    theme: 'light'
+    sideDrawerSide: 'right',
+    contentType: 'announcement',
+    title: 'Welcome aboard!',
+    body: 'Sign up to get exclusive travel deals straight to your inbox.',
+    image: '', imageAlt: '',
+    ctaText: 'Find out more', ctaUrl: '#',
+    secondaryCtaText: '', secondaryCtaUrl: '',
+    emailNameLabel: 'Your name',
+    emailNamePlaceholder: 'Sarah Smith',
+    emailEmailLabel: 'Email address',
+    emailEmailPlaceholder: 'you@example.com',
+    emailSubmitLabel: 'Subscribe',
+    emailRequireName: true,
+    emailSuccessTitle: "You're on the list",
+    emailSuccessMessage: "Thanks for signing up — we'll be in touch.",
+    emailConsentText: '',
+    discountCode: 'TRAVEL10',
+    discountCopyLabel: 'Copy code',
+    discountCopiedLabel: 'Copied!',
+    discountTerms: '',
+    twoStepQuestion: 'Want £100 off your next holiday?',
+    twoStepYesLabel: 'Yes please',
+    twoStepNoLabel: 'No thanks',
+    videoUrl: '',
+    videoAutoplay: true,
+    trigger: 'load',
+    triggerDelay: 0,
+    triggerScrollPercent: 50,
+    triggerInactivitySeconds: 30,
+    triggerPageviews: 2,
+    triggerSelector: '',
+    frequency: 'session',
+    frequencyDays: 7,
+    suppressAfterDismissDays: 0,
+    suppressAfterConversionDays: 30,
+    pageInclude: [],
+    pageExclude: [],
+    devices: { desktop: true, tablet: true, mobile: true },
+    closeOnEscape: true,
+    closeOnBackdropClick: true,
+    showCloseButton: true,
+    overlay: true,
+    overlayOpacity: 60,
+    theme: 'light',
+    brand: '#1B2B5B',
+    accent: '#00B4D8',
+    bg: '#FFFFFF',
+    text: '#0F172A',
+    textOnBrand: '#FFFFFF',
+    radius: 16,
+    fontFamily: 'Inter',
+    animation: 'fade-up',
   };
 
-  // Wire up pill groups
-  document.querySelectorAll('[data-pills]').forEach(group => {
-    const key = group.getAttribute('data-pills');
-    group.querySelectorAll('.pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        group.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state[key] = btn.getAttribute('data-val');
+  const LAYOUTS = [
+    { id: 'centered',      name: 'Centered',      desc: 'Backdrop modal' },
+    { id: 'slide-in',      name: 'Slide-in',      desc: 'Corner toast' },
+    { id: 'top-bar',       name: 'Top bar',       desc: 'Announcement strip' },
+    { id: 'bottom-bar',    name: 'Bottom bar',    desc: 'Sticky footer' },
+    { id: 'fullscreen',    name: 'Fullscreen',    desc: 'Full takeover' },
+    { id: 'side-drawer',   name: 'Side drawer',   desc: 'Slides from side' },
+    { id: 'floating-card', name: 'Floating card', desc: 'Corner, no backdrop' },
+    { id: 'inline',        name: 'Inline',        desc: 'Inside page content' },
+  ];
+
+  const CONTENT_TYPES = [
+    { id: 'announcement',  name: 'Announcement',  desc: 'Title + body + CTAs' },
+    { id: 'email-capture', name: 'Email capture', desc: 'Lead-magnet form' },
+    { id: 'discount',      name: 'Discount code', desc: 'Copyable code' },
+    { id: 'image',         name: 'Image',         desc: 'Banner with link' },
+    { id: 'two-step',      name: 'Two-step',      desc: 'Yes/No → form' },
+    { id: 'video',         name: 'Video',         desc: 'YouTube/Vimeo' },
+  ];
+
+  const TRIGGERS = [
+    { id: 'load',        name: 'Page load',     desc: 'After a delay' },
+    { id: 'time',        name: 'Time on page',  desc: 'After N seconds' },
+    { id: 'scroll',      name: 'Scroll depth',  desc: 'At N% of page' },
+    { id: 'exit-intent', name: 'Exit intent',   desc: 'Before they leave' },
+    { id: 'click',       name: 'Click',         desc: 'On a CSS selector' },
+    { id: 'inactivity',  name: 'Inactivity',    desc: 'After idle time' },
+    { id: 'pageviews',   name: 'Pageviews',     desc: 'After N pages' },
+  ];
+
+  /* ── State ──────────────────────────────────────────────── */
+  let C = JSON.parse(JSON.stringify(DEFAULTS));
+  let widgetInst = null;
+  let renderTimer = null;
+
+  /* ── Initialise the shell ──────────────────────────────── */
+  const shell = tgse.init({
+    widgetType: 'Popup',
+    widgetTag: 'popup',
+    scriptFile: 'widget-popup.js',
+
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); render(); },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => {
+      C.fontFamily = f;
+      shell.markDirty();
+      render();
+    },
+
+    onAIBuild: () => {
+      tgse.toast('AI builder coming soon', 'ok');
+    },
+    onTemplates: () => {
+      tgse.toast('Templates coming soon', 'ok');
+    },
+    onThemeToggle: (isDark) => {
+      C.theme = isDark ? 'dark' : 'light';
+      shell.markDirty();
+      render();
+    },
+    onAfterSave: (d) => {
+      // shell handles the URL sync; nothing extra needed here
+    },
+    onLoginSuccess: () => loadFromUrl(),
+  });
+
+  /* ── Helpers ────────────────────────────────────────────── */
+  function $(s, p) { return (p || document).querySelector(s); }
+  function $$(s, p) { return (p || document).querySelectorAll(s); }
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function debounceRender() {
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(render, 220);
+  }
+
+  /* ── Layout picker ──────────────────────────────────────── */
+  function renderLayoutPicker() {
+    const host = $('#sb-layout');
+    let html = '<div class="pickers">';
+    LAYOUTS.forEach(l => {
+      const active = C.layout === l.id;
+      html += `<button class="picker ${active ? 'is-active' : ''}" data-layout="${l.id}" type="button">
+        <div class="picker-thumb"><div class="lt lt-${l.id}"></div></div>
+        <div class="picker-name">${escHtml(l.name)}</div>
+        <div class="picker-desc">${escHtml(l.desc)}</div>
+      </button>`;
+    });
+    html += '</div>';
+
+    // Position controls when relevant
+    if (C.layout === 'slide-in' || C.layout === 'floating-card') {
+      html += `<div class="field" style="margin-top:12px">
+        <label class="field-label">Position</label>
+        <select class="select" id="pos-select">
+          ${['top-left','top-right','bottom-left','bottom-right'].map(p =>
+            `<option value="${p}" ${C.position === p ? 'selected' : ''}>${p.replace('-',' ')}</option>`
+          ).join('')}
+        </select>
+      </div>`;
+    }
+    if (C.layout === 'side-drawer') {
+      html += `<div class="field" style="margin-top:12px">
+        <label class="field-label">Drawer side</label>
+        <select class="select" id="drawer-select">
+          ${['left','right'].map(s =>
+            `<option value="${s}" ${C.sideDrawerSide === s ? 'selected' : ''}>${s}</option>`
+          ).join('')}
+        </select>
+      </div>`;
+    }
+    host.innerHTML = html;
+
+    $$('[data-layout]', host).forEach(b => {
+      b.addEventListener('click', () => {
+        C.layout = b.getAttribute('data-layout');
+        shell.markDirty();
+        renderLayoutPicker();
+        renderColoursSection();  // backdrop-opacity field depends on layout
+        render();
       });
+    });
+    const ps = $('#pos-select');
+    if (ps) ps.addEventListener('change', () => { C.position = ps.value; shell.markDirty(); render(); });
+    const ds = $('#drawer-select');
+    if (ds) ds.addEventListener('change', () => { C.sideDrawerSide = ds.value; shell.markDirty(); render(); });
+  }
+
+  /* ── Trigger picker ─────────────────────────────────────── */
+  const TRIGGER_ICONS = {
+    'load': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',
+    'time': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    'scroll': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>',
+    'exit-intent': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+    'click': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/></svg>',
+    'inactivity': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+    'pageviews': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  };
+
+  const CONTENT_ICONS = {
+    'announcement': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>',
+    'email-capture': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+    'discount': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="9" x2="15" y2="15"/><circle cx="9.5" cy="9.5" r=".7" fill="currentColor"/><circle cx="14.5" cy="14.5" r=".7" fill="currentColor"/><path d="M2 9h7l3-7 3 7h7l-5 5 2 7-7-4-7 4 2-7-5-5z"/></svg>',
+    'image': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+    'two-step': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>',
+    'video': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+  };
+
+  function renderTriggerPicker() {
+    const host = $('#sb-trigger');
+    let html = '<div class="pickers pickers--list">';
+    TRIGGERS.forEach(t => {
+      const active = C.trigger === t.id;
+      html += `<button class="picker picker--row ${active ? 'is-active' : ''}" data-tr="${t.id}" type="button">
+        <div class="picker-thumb">${TRIGGER_ICONS[t.id] || ''}</div>
+        <div>
+          <div class="picker-name">${escHtml(t.name)}</div>
+          <div class="picker-desc">${escHtml(t.desc)}</div>
+        </div>
+      </button>`;
+    });
+    html += '</div>';
+
+    // Trigger-specific config
+    html += '<div class="trigger-config">';
+    if (C.trigger === 'load') {
+      html += `<div class="field">
+        <label class="field-label">Delay before showing (seconds)</label>
+        <input type="number" min="0" max="60" step="0.5" class="input" id="t-delay" value="${(C.triggerDelay || 0) / 1000}">
+        <div class="field-hint">0 means show immediately on page load.</div>
+      </div>`;
+    } else if (C.trigger === 'time') {
+      html += `<div class="field">
+        <label class="field-label">Show after (seconds)</label>
+        <input type="number" min="1" max="600" class="input" id="t-time" value="${(C.triggerDelay || 5000) / 1000}">
+      </div>`;
+    } else if (C.trigger === 'scroll') {
+      html += `<div class="field">
+        <label class="field-label">Show after scrolling (% of page)</label>
+        <input type="number" min="1" max="100" class="input" id="t-scroll" value="${C.triggerScrollPercent || 50}">
+      </div>`;
+    } else if (C.trigger === 'exit-intent') {
+      html += `<div class="field-hint" style="margin:0">Fires when the visitor's mouse leaves the viewport on desktop, or scrolls back up sharply on mobile. No extra config needed.</div>`;
+    } else if (C.trigger === 'click') {
+      html += `<div class="field">
+        <label class="field-label">CSS selector to listen on</label>
+        <input type="text" class="input" id="t-selector" value="${escHtml(C.triggerSelector || '')}" placeholder=".cta-button, #subscribe-btn">
+        <div class="field-hint">When any matching element is clicked, the popup opens.</div>
+      </div>`;
+    } else if (C.trigger === 'inactivity') {
+      html += `<div class="field">
+        <label class="field-label">Idle for (seconds)</label>
+        <input type="number" min="5" max="600" class="input" id="t-inactive" value="${C.triggerInactivitySeconds || 30}">
+      </div>`;
+    } else if (C.trigger === 'pageviews') {
+      html += `<div class="field">
+        <label class="field-label">Show after this many pageviews in one session</label>
+        <input type="number" min="1" max="20" class="input" id="t-pv" value="${C.triggerPageviews || 2}">
+      </div>`;
+    }
+    html += '</div>';
+
+    host.innerHTML = html;
+
+    $$('[data-tr]', host).forEach(b => {
+      b.addEventListener('click', () => {
+        C.trigger = b.getAttribute('data-tr');
+        shell.markDirty();
+        renderTriggerPicker();
+      });
+    });
+    const dly = $('#t-delay'); if (dly) dly.addEventListener('change', () => { C.triggerDelay = Math.max(0, Number(dly.value) * 1000); shell.markDirty(); });
+    const t   = $('#t-time');  if (t)   t.addEventListener('change',   () => { C.triggerDelay = Math.max(1000, Number(t.value) * 1000); shell.markDirty(); });
+    const sc  = $('#t-scroll');if (sc)  sc.addEventListener('change',  () => { C.triggerScrollPercent = Math.max(1, Math.min(100, Number(sc.value) || 50)); shell.markDirty(); });
+    const sel = $('#t-selector');if (sel) sel.addEventListener('input', () => { C.triggerSelector = sel.value; shell.markDirty(); });
+    const ina = $('#t-inactive');if (ina) ina.addEventListener('change', () => { C.triggerInactivitySeconds = Math.max(5, Number(ina.value) || 30); shell.markDirty(); });
+    const pv  = $('#t-pv');    if (pv)  pv.addEventListener('change',  () => { C.triggerPageviews = Math.max(1, Number(pv.value) || 2); shell.markDirty(); });
+  }
+
+  /* ── Content type picker ─────────────────────────────── */
+  function renderContentTypePicker() {
+    const host = $('#sb-content-type');
+    let html = '<div class="pickers pickers--list">';
+    CONTENT_TYPES.forEach(c => {
+      const active = C.contentType === c.id;
+      html += `<button class="picker picker--row ${active ? 'is-active' : ''}" data-ct="${c.id}" type="button">
+        <div class="picker-thumb">${CONTENT_ICONS[c.id] || ''}</div>
+        <div>
+          <div class="picker-name">${escHtml(c.name)}</div>
+          <div class="picker-desc">${escHtml(c.desc)}</div>
+        </div>
+      </button>`;
+    });
+    html += '</div>';
+    host.innerHTML = html;
+
+    $$('[data-ct]', host).forEach(b => {
+      b.addEventListener('click', () => {
+        C.contentType = b.getAttribute('data-ct');
+        shell.markDirty();
+        renderContentTypePicker();
+        renderContentFields();
+        render();
+      });
+    });
+  }
+
+  /* ── Content fields per content type ───────────────────── */
+  function fieldText(label, key, opts) {
+    opts = opts || {};
+    return `<div class="field">
+      <label class="field-label">${escHtml(label)}</label>
+      <input type="text" class="input" data-bind="${key}" value="${escHtml(C[key] || '')}" ${opts.placeholder ? `placeholder="${escHtml(opts.placeholder)}"` : ''}>
+      ${opts.hint ? `<div class="field-hint">${escHtml(opts.hint)}</div>` : ''}
+    </div>`;
+  }
+  function fieldTextarea(label, key, opts) {
+    opts = opts || {};
+    return `<div class="field">
+      <label class="field-label">${escHtml(label)}</label>
+      <textarea class="textarea" data-bind="${key}" rows="3" ${opts.placeholder ? `placeholder="${escHtml(opts.placeholder)}"` : ''}>${escHtml(C[key] || '')}</textarea>
+      ${opts.hint ? `<div class="field-hint">${escHtml(opts.hint)}</div>` : ''}
+    </div>`;
+  }
+  function fieldUrl(label, key, opts) {
+    opts = opts || {};
+    return `<div class="field">
+      <label class="field-label">${escHtml(label)}</label>
+      <input type="url" class="input" data-bind="${key}" value="${escHtml(C[key] || '')}" placeholder="${escHtml(opts.placeholder || 'https://example.com')}">
+      ${opts.hint ? `<div class="field-hint">${escHtml(opts.hint)}</div>` : ''}
+    </div>`;
+  }
+  function fieldSwitch(label, sub, key) {
+    const checked = !!C[key];
+    return `<div class="switch-row">
+      <div class="switch-text">
+        <div class="switch-text-title">${escHtml(label)}</div>
+        ${sub ? `<div class="switch-text-sub">${escHtml(sub)}</div>` : ''}
+      </div>
+      <button class="switch ${checked ? 'is-on' : ''}" type="button" data-bind-switch="${key}" aria-label="${escHtml(label)}"></button>
+    </div>`;
+  }
+
+  function renderContentFields() {
+    const host = $('#sb-content-fields');
+    const ct = C.contentType;
+    let html = '';
+
+    // Hero image — relevant for several content types
+    if (ct !== 'video' && ct !== 'image' && ct !== 'two-step') {
+      html += `<div class="sec is-open">
+        <button class="sec-head" type="button">
+          <span class="sec-title">Hero image (optional)</span>
+          <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="sec-body">
+          ${fieldUrl('Image URL', 'image', { placeholder: 'https://…' })}
+          ${fieldText('Alt text', 'imageAlt', { hint: 'Describe the image for accessibility.' })}
+        </div>
+      </div>`;
+    }
+
+    if (ct === 'announcement') {
+      html += sec('Headline', `${fieldText('Title', 'title')}${fieldTextarea('Body text', 'body')}`);
+      html += sec('Primary call-to-action', `${fieldText('Button text', 'ctaText')}${fieldUrl('Button URL', 'ctaUrl')}`);
+      html += sec('Secondary CTA (optional)', `${fieldText('Button text', 'secondaryCtaText', { placeholder: 'Maybe later' })}${fieldUrl('Button URL', 'secondaryCtaUrl')}`);
+    }
+    else if (ct === 'email-capture') {
+      html += sec('Headline', `${fieldText('Title', 'title')}${fieldTextarea('Body text', 'body')}`);
+      const formFields = `
+        ${fieldSwitch('Collect name as well as email', 'Adds a Name field above email', 'emailRequireName')}
+        ${C.emailRequireName ? fieldText('Name field label', 'emailNameLabel') + fieldText('Name placeholder', 'emailNamePlaceholder') : ''}
+        ${fieldText('Email field label', 'emailEmailLabel')}
+        ${fieldText('Email placeholder', 'emailEmailPlaceholder')}
+        ${fieldText('Submit button text', 'emailSubmitLabel')}
+        ${fieldTextarea('Consent text (below button)', 'emailConsentText', { placeholder: 'By signing up you agree to…' })}
+      `;
+      html += sec('Form fields', formFields);
+      html += sec('After submission', `${fieldText('Success title', 'emailSuccessTitle')}${fieldTextarea('Success message', 'emailSuccessMessage')}`);
+    }
+    else if (ct === 'discount') {
+      html += sec('Headline', `${fieldText('Title', 'title')}${fieldTextarea('Body text', 'body')}`);
+      html += sec('The code', `
+        ${fieldText('Discount code', 'discountCode', { hint: 'Shown in large bold text. Visitors can copy with one click.' })}
+        ${fieldText('Copy button label', 'discountCopyLabel')}
+        ${fieldText('Copied label (after click)', 'discountCopiedLabel')}
+        ${fieldTextarea('Terms (small print)', 'discountTerms')}
+      `);
+      html += sec('Optional CTA below code', `${fieldText('Button text', 'ctaText', { placeholder: 'Browse holidays' })}${fieldUrl('Button URL', 'ctaUrl')}`);
+    }
+    else if (ct === 'image') {
+      html += sec('Image', `
+        ${fieldUrl('Image URL', 'image', { placeholder: 'https://…' })}
+        ${fieldText('Alt text', 'imageAlt')}
+        ${fieldUrl('Click destination (optional)', 'ctaUrl', { hint: 'Where visitors go when they click the image.' })}
+      `);
+    }
+    else if (ct === 'two-step') {
+      html += sec('Step 1: the question', `${fieldText('Question', 'twoStepQuestion')}${fieldText('Yes button text', 'twoStepYesLabel')}${fieldText('No button text', 'twoStepNoLabel')}`);
+      html += sec('Step 2: the form (after Yes)', `
+        ${fieldText('Form title', 'title')}
+        ${fieldTextarea('Form body', 'body')}
+        ${fieldSwitch('Collect name as well as email', '', 'emailRequireName')}
+        ${fieldText('Email field label', 'emailEmailLabel')}
+        ${fieldText('Submit button text', 'emailSubmitLabel')}
+      `);
+      html += sec('After submission', `${fieldText('Success title', 'emailSuccessTitle')}${fieldTextarea('Success message', 'emailSuccessMessage')}`);
+    }
+    else if (ct === 'video') {
+      html += sec('Video', `
+        ${fieldUrl('Video URL', 'videoUrl', { placeholder: 'https://www.youtube.com/watch?v=…', hint: 'YouTube or Vimeo URL. The widget embeds automatically.' })}
+        ${fieldSwitch('Try to autoplay', 'Most browsers block autoplay with sound — video may start muted.', 'videoAutoplay')}
+      `);
+      html += sec('Caption (optional)', `${fieldText('Title shown below video', 'title')}${fieldTextarea('Body text', 'body')}`);
+    }
+
+    host.innerHTML = html;
+    bindContentInputs();
+  }
+
+  function sec(title, body, open) {
+    const isOpen = open !== false;
+    return `<div class="sec ${isOpen ? 'is-open' : ''}">
+      <button class="sec-head" type="button">
+        <span class="sec-title">${escHtml(title)}</span>
+        <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="sec-body">${body}</div>
+    </div>`;
+  }
+
+  function bindContentInputs() {
+    // Section toggles handled by global delegated click handler at the bottom of script.
+    // Text inputs / textareas / urls
+    $$('[data-bind]').forEach(el => {
+      const key = el.getAttribute('data-bind');
+      el.addEventListener('input', () => {
+        C[key] = el.value;
+        shell.markDirty();
+        debounceRender();
+      });
+    });
+    // Switches
+    $$('[data-bind-switch]').forEach(el => {
+      const key = el.getAttribute('data-bind-switch');
+      el.addEventListener('click', () => {
+        C[key] = !C[key];
+        el.classList.toggle('is-on', !!C[key]);
+        shell.markDirty();
+        // Re-render the content fields if this switch reveals/hides fields
+        if (key === 'emailRequireName') renderContentFields();
+        render();
+      });
+    });
+  }
+
+  /* ── Settings tab switches ─────────────────────────────── */
+  function bindSettingsSwitches() {
+    $$('.tab-panel[data-panel="settings"] [data-bind-switch]').forEach(el => {
+      const key = el.getAttribute('data-bind-switch');
+      // Initial state
+      el.classList.toggle('is-on', !!C[key]);
+      el.addEventListener('click', () => {
+        C[key] = !C[key];
+        el.classList.toggle('is-on', !!C[key]);
+        shell.markDirty();
+        render();
+      });
+    });
+  }
+
+  /* ── Live preview ──────────────────────────────────────── */
+  function buildFauxPage(layout) {
+    return `<div class="pv-faux" id="pv-faux">
+      <div class="pv-faux-header">
+        <span class="logo">Sunshine Holidays</span>
+        <span class="nav"><span>Destinations</span><span>Cruises</span><span>Late Deals</span></span>
+      </div>
+      <div class="pv-faux-content">
+        <h1>Find your next holiday</h1>
+        <p>This sample page provides context for the popup preview. The popup overlays this content the same way it would on a real client site.</p>
+        ${layout === 'inline' ? '<div class="pv-mount-inline" id="pv-host-inline"></div>' : ''}
+        <div class="pv-faux-blocks">
+          <div class="pv-faux-block"></div>
+          <div class="pv-faux-block"></div>
+          <div class="pv-faux-block"></div>
+        </div>
+      </div>
+      ${layout !== 'inline' ? '<div class="pv-mount-overlay" id="pv-host-overlay"></div>' : ''}
+    </div>`;
+  }
+
+  function render() {
+    const frame = $('#pv-frame');
+    if (!frame) return;
+
+    // Tear down previous instance
+    if (widgetInst) { try { widgetInst.destroy(); } catch {} widgetInst = null; }
+
+    frame.innerHTML = buildFauxPage(C.layout);
+
+    // Build a preview-time config that bypasses storage/triggers
+    const previewConfig = Object.assign({}, C, {
+      frequency: 'every-visit',
+      trigger: 'load',
+      triggerDelay: 0,
+      widgetId: '__preview__',
+    });
+
+    const hostId = C.layout === 'inline' ? 'pv-host-inline' : 'pv-host-overlay';
+    const host = document.getElementById(hostId);
+    if (!host) return;
+
+    if (C.layout !== 'inline') {
+      host.style.position = 'absolute';
+      host.style.inset = '0';
+    }
+
+    requestAnimationFrame(() => {
+      try {
+        widgetInst = new window.TGPopupWidget(host, previewConfig);
+      } catch (err) {
+        console.error('Preview render failed:', err);
+        frame.innerHTML += `<div style="padding:24px;color:#EF4444;font-size:13px">Preview failed: ${escHtml(err.message || String(err))}</div>`;
+      }
+    });
+  }
+
+  /* ── Load / save ────────────────────────────────────────── */
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) {
+      $('#name-input').value = '';
+      renderAll();
+      return;
+    }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) {
+          tgse.toast('Could not load popup', 'err');
+          renderAll();
+          return;
+        }
+        if (d.config) C = Object.assign({}, DEFAULTS, d.config);
+        if (d.name) $('#name-input').value = d.name;
+        renderAll();
+      })
+      .catch(() => {
+        tgse.toast('Failed to load widget', 'err');
+        renderAll();
+      });
+  }
+
+  function renderAll() {
+    renderLayoutPicker();
+    renderTriggerPicker();
+    renderColoursSection();
+    renderRadiusSection();
+    renderContentTypePicker();
+    renderContentFields();
+    bindSettingsSwitches();
+    renderFrequencySection();
+    renderPagesSection();
+    renderDevicesSection();
+    render();
+  }
+
+  /* ── Colours section ──────────────────────────────────── */
+  function colourField(label, key, hint) {
+    const val = C[key] || '#000000';
+    return `<div class="field">
+      <label class="field-label">${escHtml(label)}</label>
+      <div class="colour-row">
+        <label class="colour-swatch-wrap" style="background:${escHtml(val)}">
+          <input type="color" data-bind-colour="${key}" value="${escHtml(val)}">
+        </label>
+        <input type="text" class="input colour-hex" data-bind-colour-text="${key}" value="${escHtml(val)}" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+      </div>
+      ${hint ? `<div class="field-hint">${escHtml(hint)}</div>` : ''}
+    </div>`;
+  }
+
+  function renderColoursSection() {
+    const host = $('#sb-colours');
+    if (!host) return;
+
+    let html = '';
+    // Theme picker
+    html += `<div class="field">
+      <label class="field-label">Theme</label>
+      <select class="select" id="theme-select">
+        <option value="light" ${C.theme === 'light' ? 'selected' : ''}>Light</option>
+        <option value="dark" ${C.theme === 'dark' ? 'selected' : ''}>Dark</option>
+        <option value="auto" ${C.theme === 'auto' ? 'selected' : ''}>Auto (match visitor's device)</option>
+      </select>
+    </div>`;
+
+    // Brand & accent (always shown)
+    html += colourField('Brand colour', 'brand', 'Used for primary buttons and highlights.');
+    html += colourField('Accent colour', 'accent', 'Used for focus rings and secondary highlights.');
+
+    // Background & text — only relevant for non-image popups
+    html += colourField('Background', 'bg');
+    html += colourField('Text colour', 'text');
+    html += colourField('Text on brand', 'textOnBrand', 'Text colour used on primary buttons.');
+
+    // Backdrop opacity (only for overlay layouts)
+    if (['centered', 'fullscreen', 'side-drawer'].includes(C.layout)) {
+      html += `<div class="field">
+        <label class="field-label">Backdrop opacity</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="range" min="0" max="100" step="5" id="overlay-slider" style="flex:1" value="${C.overlayOpacity || 60}">
+          <input type="number" class="input" id="overlay-input" min="0" max="100" value="${C.overlayOpacity || 60}" style="width:64px">
+        </div>
+        <div class="field-hint">0 = no backdrop, 100 = solid.</div>
+      </div>`;
+    }
+
+    host.innerHTML = html;
+
+    // Wire up
+    $('#theme-select')?.addEventListener('change', e => {
+      C.theme = e.target.value;
+      shell.markDirty();
+      render();
+    });
+
+    $$('[data-bind-colour]', host).forEach(el => {
+      const key = el.getAttribute('data-bind-colour');
+      el.addEventListener('input', () => {
+        const v = el.value;
+        C[key] = v;
+        // Sync the swatch background and hex input
+        const swatch = el.parentElement;
+        if (swatch) swatch.style.background = v;
+        const text = host.querySelector(`[data-bind-colour-text="${key}"]`);
+        if (text) text.value = v.toUpperCase();
+        shell.markDirty();
+        debounceRender();
+      });
+    });
+
+    $$('[data-bind-colour-text]', host).forEach(el => {
+      const key = el.getAttribute('data-bind-colour-text');
+      el.addEventListener('input', () => {
+        const v = el.value.trim();
+        if (!/^#[0-9A-Fa-f]{6}$/.test(v)) return;
+        C[key] = v;
+        const colour = host.querySelector(`[data-bind-colour="${key}"]`);
+        if (colour) {
+          colour.value = v;
+          colour.parentElement.style.background = v;
+        }
+        shell.markDirty();
+        debounceRender();
+      });
+    });
+
+    const ovSlider = $('#overlay-slider');
+    const ovInput = $('#overlay-input');
+    if (ovSlider) ovSlider.addEventListener('input', () => {
+      C.overlayOpacity = Number(ovSlider.value);
+      ovInput.value = ovSlider.value;
+      shell.markDirty();
+      debounceRender();
+    });
+    if (ovInput) ovInput.addEventListener('change', () => {
+      const v = Math.max(0, Math.min(100, Number(ovInput.value) || 0));
+      C.overlayOpacity = v;
+      ovInput.value = v;
+      ovSlider.value = v;
+      shell.markDirty();
+      render();
+    });
+  }
+
+  /* ── Radius (shape) section ──────────────────────────── */
+  function renderRadiusSection() {
+    const slider = $('#rad-slider');
+    const input = $('#rad-input');
+    if (!slider || !input) return;
+    slider.value = C.radius != null ? C.radius : 16;
+    input.value = C.radius != null ? C.radius : 16;
+    slider.addEventListener('input', () => {
+      C.radius = Number(slider.value);
+      input.value = slider.value;
+      shell.markDirty();
+      debounceRender();
+    });
+    input.addEventListener('change', () => {
+      const v = Math.max(0, Math.min(32, Number(input.value) || 0));
+      C.radius = v;
+      input.value = v;
+      slider.value = v;
+      shell.markDirty();
+      render();
+    });
+  }
+
+  /* ── Frequency section ───────────────────────────────── */
+  function renderFrequencySection() {
+    const host = $('#sb-frequency');
+    if (!host) return;
+
+    const freq = C.frequency || 'session';
+    let html = `<div class="field">
+      <label class="field-label">How often should the same visitor see this popup?</label>
+      <select class="select" id="freq-select">
+        <option value="session"      ${freq === 'session' ? 'selected' : ''}>Once per session</option>
+        <option value="visitor"      ${freq === 'visitor' ? 'selected' : ''}>Once per visitor (forever)</option>
+        <option value="every-n-days" ${freq === 'every-n-days' ? 'selected' : ''}>Once every N days</option>
+        <option value="every-visit"  ${freq === 'every-visit' ? 'selected' : ''}>Every visit</option>
+      </select>
+      <div class="field-hint">"Session" is the most common — shows once until they close the browser tab.</div>
+    </div>`;
+
+    if (freq === 'every-n-days') {
+      html += `<div class="field">
+        <label class="field-label">N (days between showings)</label>
+        <input type="number" min="1" max="365" class="input" id="freq-days" value="${C.frequencyDays || 7}">
+      </div>`;
+    }
+
+    html += `<div class="field">
+      <label class="field-label">After visitor dismisses, suppress for (days)</label>
+      <input type="number" min="0" max="365" class="input" id="freq-dismiss" value="${C.suppressAfterDismissDays || 0}">
+      <div class="field-hint">Extra cool-down once they've actively closed the popup. 0 means use the frequency rule above.</div>
+    </div>`;
+
+    html += `<div class="field">
+      <label class="field-label">After visitor converts, suppress for (days)</label>
+      <input type="number" min="0" max="365" class="input" id="freq-convert" value="${C.suppressAfterConversionDays || 30}">
+      <div class="field-hint">Stop showing once they've signed up, copied a code, or submitted a form.</div>
+    </div>`;
+
+    host.innerHTML = html;
+
+    $('#freq-select').addEventListener('change', e => {
+      C.frequency = e.target.value;
+      shell.markDirty();
+      renderFrequencySection();
+    });
+    $('#freq-days')?.addEventListener('change', e => {
+      C.frequencyDays = Math.max(1, Math.min(365, Number(e.target.value) || 7));
+      e.target.value = C.frequencyDays;
+      shell.markDirty();
+    });
+    $('#freq-dismiss').addEventListener('change', e => {
+      C.suppressAfterDismissDays = Math.max(0, Math.min(365, Number(e.target.value) || 0));
+      e.target.value = C.suppressAfterDismissDays;
+      shell.markDirty();
+    });
+    $('#freq-convert').addEventListener('change', e => {
+      C.suppressAfterConversionDays = Math.max(0, Math.min(365, Number(e.target.value) || 0));
+      e.target.value = C.suppressAfterConversionDays;
+      shell.markDirty();
+    });
+  }
+
+  /* ── Page targeting section ──────────────────────────── */
+  function renderPagesSection() {
+    const host = $('#sb-pages');
+    if (!host) return;
+
+    const include = Array.isArray(C.pageInclude) ? C.pageInclude : [];
+    const exclude = Array.isArray(C.pageExclude) ? C.pageExclude : [];
+
+    const hint = `Use URL paths or wildcards. <code style="background:var(--tgse-panel-3);padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px">/blog/*</code> matches any page under /blog. <code style="background:var(--tgse-panel-3);padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px">*</code> matches everything. One pattern per line.`;
+
+    host.innerHTML = `<div class="field">
+      <label class="field-label">Show only on these pages (Include)</label>
+      <textarea class="textarea" id="pages-include" rows="3" placeholder="Leave empty to show on all pages&#10;e.g. /book/*&#10;/late-deals">${escHtml(include.join('\n'))}</textarea>
+      <div class="field-hint">${hint}<br>Empty = show on all pages.</div>
+    </div>
+    <div class="field">
+      <label class="field-label">Never show on these pages (Exclude)</label>
+      <textarea class="textarea" id="pages-exclude" rows="3" placeholder="e.g. /thank-you&#10;/checkout/*">${escHtml(exclude.join('\n'))}</textarea>
+      <div class="field-hint">Excludes always win — even if a page matches Include, it won't show if it matches Exclude.</div>
+    </div>`;
+
+    function parseLines(s) {
+      return String(s || '')
+        .split('\n')
+        .map(l => l.trim())
+        .filter(Boolean)
+        .slice(0, 50); // sanity cap — 50 patterns is plenty
+    }
+
+    $('#pages-include').addEventListener('input', e => {
+      C.pageInclude = parseLines(e.target.value);
+      shell.markDirty();
+    });
+    $('#pages-exclude').addEventListener('input', e => {
+      C.pageExclude = parseLines(e.target.value);
+      shell.markDirty();
+    });
+  }
+
+  /* ── Device targeting section ────────────────────────── */
+  function renderDevicesSection() {
+    const host = $('#sb-devices');
+    if (!host) return;
+
+    const dev = C.devices || { desktop: true, tablet: true, mobile: true };
+    // Normalise so missing keys default to true
+    if (typeof dev.desktop !== 'boolean') dev.desktop = true;
+    if (typeof dev.tablet !== 'boolean')  dev.tablet  = true;
+    if (typeof dev.mobile !== 'boolean')  dev.mobile  = true;
+    C.devices = dev;
+
+    host.innerHTML = `
+      <div class="switch-row">
+        <div class="switch-text">
+          <div class="switch-text-title">Desktop</div>
+          <div class="switch-text-sub">Show to visitors on laptops and desktops.</div>
+        </div>
+        <button class="switch ${dev.desktop ? 'is-on' : ''}" type="button" data-device="desktop" aria-label="Toggle desktop"></button>
+      </div>
+      <div class="switch-row">
+        <div class="switch-text">
+          <div class="switch-text-title">Tablet</div>
+          <div class="switch-text-sub">Show to visitors on tablets.</div>
+        </div>
+        <button class="switch ${dev.tablet ? 'is-on' : ''}" type="button" data-device="tablet" aria-label="Toggle tablet"></button>
+      </div>
+      <div class="switch-row">
+        <div class="switch-text">
+          <div class="switch-text-title">Mobile</div>
+          <div class="switch-text-sub">Show to visitors on phones.</div>
+        </div>
+        <button class="switch ${dev.mobile ? 'is-on' : ''}" type="button" data-device="mobile" aria-label="Toggle mobile"></button>
+      </div>
+      <div class="field-hint" style="margin-top:8px">If you turn all three off, the popup will never show.</div>
+    `;
+
+    $$('[data-device]', host).forEach(b => {
+      b.addEventListener('click', () => {
+        const k = b.getAttribute('data-device');
+        C.devices[k] = !C.devices[k];
+        b.classList.toggle('is-on', C.devices[k]);
+        shell.markDirty();
+      });
+    });
+  }
+
+  /* ── Embed code modal ──────────────────────────────────── */
+  $('#btn-embed').addEventListener('click', () => {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) {
+      tgse.toast('Save first to get an embed code', 'err');
+      return;
+    }
+    const origin = location.origin;
+    const snippet = `<div data-tg-widget="popup" data-tg-id="${wId}"></div>\n<script src="${origin}/widget-popup.js" defer><\/script>`;
+    // Open a quick modal — keep it lightweight
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Inter,sans-serif';
+    ov.innerHTML = `<div style="background:#fff;padding:24px;border-radius:12px;width:540px;max-width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.18)">
+      <h3 style="margin:0 0 6px;font-size:16px;font-weight:600;color:#0F172A">Embed code</h3>
+      <p style="margin:0 0 14px;font-size:13px;color:#64748B;line-height:1.5">Paste this just before the closing &lt;/body&gt; tag on the pages where you want the popup to appear.</p>
+      <div class="embed-box" id="emb-text">${escHtml(snippet)}</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button id="emb-copy" style="flex:1;height:36px;background:#0891B2;color:#fff;border:0;border-radius:8px;font:600 13px Inter;cursor:pointer">Copy to clipboard</button>
+        <button id="emb-close" style="height:36px;padding:0 14px;background:#fff;color:#475569;border:1px solid #E2E8F0;border-radius:8px;font:500 13px Inter;cursor:pointer">Close</button>
+      </div>
+    </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+    ov.querySelector('#emb-close').addEventListener('click', () => ov.remove());
+    ov.querySelector('#emb-copy').addEventListener('click', () => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = snippet; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        tgse.toast('Copied', 'ok');
+      } catch { tgse.toast('Copy failed — select manually', 'err'); }
     });
   });
 
-  // Reset storage button
-  document.getElementById('reset-storage').addEventListener('click', () => {
-    try {
-      Object.keys(localStorage).forEach(k => { if (k.startsWith(STORAGE_PREFIX)) localStorage.removeItem(k); });
-      Object.keys(sessionStorage).forEach(k => { if (k.startsWith(STORAGE_PREFIX)) sessionStorage.removeItem(k); });
-    } catch {}
-    alert('Popup storage cleared. Frequency rules will reset.');
+  /* ── Name input → mark dirty ───────────────────────────── */
+  document.getElementById('name-input')?.addEventListener('input', () => shell.markDirty());
+
+  /* ── Global section-toggle wiring ──────────────────────
+     Delegated click handler so it works for both static
+     sections (Layout, When to show, Colours, Shape, Typography
+     in the Design tab; Behaviour, Frequency in the Settings tab)
+     AND dynamically-rendered sections (in renderContentFields).
+     The unified shell does this only for .tgse-section-head;
+     we use .sec-head so we wire our own. */
+  document.addEventListener('click', (e) => {
+    const head = e.target.closest('.sec-head');
+    if (!head) return;
+    const sec = head.parentElement;
+    if (sec && sec.classList.contains('sec')) {
+      sec.classList.toggle('is-open');
+    }
   });
 
-  // Build a config based on the chosen content type
-  function buildConfig() {
-    const base = {
-      layout: state.layout,
-      contentType: state.contentType,
-      position: state.position,
-      sideDrawerSide: state.position.includes('left') ? 'left' : 'right',
-      theme: state.theme,
-      brand: '#1B2B5B',
-      accent: '#00B4D8',
-      bg: state.theme === 'dark' ? '#1E293B' : '#FFFFFF',
-      text: state.theme === 'dark' ? '#F8FAFC' : '#0F172A',
-      trigger: 'load',
-      triggerDelay: 0,
-      frequency: 'every-visit',
-      widgetId: 'demo-' + Date.now()
-    };
-
-    if (state.contentType === 'announcement') {
-      Object.assign(base, {
-        title: 'Late summer deals',
-        body: 'Save up to 35% on Mediterranean cruises departing September and October. Early bird offer ends Friday.',
-        ctaText: 'See the deals',
-        ctaUrl: '#',
-        secondaryCtaText: 'Maybe later'
-      });
-    } else if (state.contentType === 'email-capture') {
-      Object.assign(base, {
-        title: 'Get the brochure',
-        body: 'Drop your email and we\'ll send our 2026 holiday brochure straight to your inbox.',
-        emailRequireName: true,
-        emailNameLabel: 'Your name',
-        emailEmailLabel: 'Email address',
-        emailSubmitLabel: 'Send my brochure',
-        emailSuccessTitle: 'Brochure on its way',
-        emailSuccessMessage: 'Check your inbox in the next few minutes.',
-        emailConsentText: 'By submitting you agree to our privacy policy. Unsubscribe at any time.'
-      });
-    } else if (state.contentType === 'discount') {
-      Object.assign(base, {
-        title: 'Here\'s 10% off',
-        body: 'Apply this code at checkout to save on any 2026 booking.',
-        discountCode: 'SUNSHINE10',
-        discountTerms: 'Valid until 31 December 2026. T&Cs apply.',
-        ctaText: 'Browse holidays',
-        ctaUrl: '#'
-      });
-    } else if (state.contentType === 'image') {
-      Object.assign(base, {
-        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
-        imageAlt: 'Tropical beach',
-        ctaUrl: '#'
-      });
-    } else if (state.contentType === 'two-step') {
-      Object.assign(base, {
-        twoStepQuestion: 'Want £100 off your next holiday?',
-        twoStepYesLabel: 'Yes please',
-        twoStepNoLabel: 'No thanks',
-        title: 'Brilliant — quick details',
-        body: 'Drop your email and we\'ll send your £100 voucher.',
-        emailRequireName: false,
-        emailEmailLabel: 'Email',
-        emailSubmitLabel: 'Get my voucher',
-        emailSuccessTitle: 'Voucher sent',
-        emailSuccessMessage: 'Check your inbox shortly.'
-      });
-    } else if (state.contentType === 'video') {
-      Object.assign(base, {
-        title: 'Watch our brand story',
-        body: '60 seconds on why thousands trust us with their holidays.',
-        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        videoAutoplay: false
-      });
-    }
-
-    return base;
-  }
-
-  // Show popup — clear storage flags so we can reopen freely in demo mode
-  document.getElementById('show-popup').addEventListener('click', () => {
-    // Clear show-state for the demo widget IDs (pattern match on demo-*)
-    try {
-      Object.keys(sessionStorage).forEach(k => { if (k.startsWith(STORAGE_PREFIX)) sessionStorage.removeItem(k); });
-    } catch {}
-
-    const config = buildConfig();
-
-    // Clean up any existing popup
-    const existing = document.getElementById('demo-popup-host');
-    if (existing) existing.remove();
-    const inlineExisting = document.querySelector('#inline-target [data-tg-widget="popup"]');
-    if (inlineExisting) inlineExisting.remove();
-
-    // Show/hide the inline section
-    document.getElementById('inline-section').style.display = state.layout === 'inline' ? 'block' : 'none';
-
-    // Mount the popup
-    const host = document.createElement('div');
-    host.setAttribute('data-tg-widget', 'popup');
-    host.setAttribute('data-tg-config', JSON.stringify(config));
-    host.id = 'demo-popup-host';
-
-    if (state.layout === 'inline') {
-      document.getElementById('inline-target').appendChild(host);
-      // Smooth scroll to inline section
-      setTimeout(() => {
-        document.getElementById('inline-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-    } else {
-      document.body.appendChild(host);
-    }
-
-    // Re-trigger init on the new element (since auto-init only runs once)
-    if (window.TGPopupWidget) {
-      try {
-        new window.TGPopupWidget(host, config);
-      } catch (e) {
-        console.error('Popup init failed:', e);
-      }
-    }
+  /* ── Boot ──────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    if (tgse.isLoggedIn()) loadFromUrl();
+    // Otherwise the shell shows the login overlay; onLoginSuccess calls loadFromUrl.
   });
 </script>
-
-<!-- Load the widget script -->
-<script src="/widget-popup.js"></script>
 
 </body>
 </html>
