@@ -376,9 +376,11 @@
                 <label class="field-label">Template</label>
                 <div class="segmented" id="templateSeg">
                   <button type="button" data-template="cards" aria-pressed="true">Cards</button>
+                  <button type="button" data-template="magazine">Magazine</button>
                   <button type="button" data-template="departure-board">Departure board</button>
+                  <button type="button" data-template="boarding-pass">Boarding pass</button>
                 </div>
-                <div class="field-help"><strong>Cards</strong> shows offers as a grid or carousel — works for hotels, flights, and packages. <strong>Departure board</strong> styles flights only as a live airport-style fares board.</div>
+                <div class="field-help"><strong>Cards</strong> shows offers as a grid, carousel or list — works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with a grid below. <strong>Departure board</strong> styles flights only as a live airport-style fares board. <strong>Boarding pass</strong> shows flights only as paper boarding passes.</div>
               </div>
             </div>
           </div>
@@ -418,7 +420,7 @@
             </div>
           </div>
 
-          <div class="section" data-open="true" data-when-template="cards">
+          <div class="section" data-open="true" data-when-template="cards magazine">
             <button class="section-head" data-section>Offer type
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -609,8 +611,9 @@
                 <div class="segmented" id="layoutSeg">
                   <button type="button" data-layout="grid" aria-pressed="true">Grid</button>
                   <button type="button" data-layout="carousel">Carousel</button>
+                  <button type="button" data-layout="list">List</button>
                 </div>
-                <div class="field-help"><strong>Grid</strong> shows all offers stacked. <strong>Carousel</strong> shows a few at a time with arrows and swipe — 3 on desktop, 2 on tablet, 1 on mobile.</div>
+                <div class="field-help"><strong>Grid</strong> stacks all offers. <strong>Carousel</strong> rotates through them with arrows and swipe. <strong>List</strong> renders compact horizontal rows — ideal for scanning lots of properties fast.</div>
               </div>
 
               <!-- Grid-only -->
@@ -641,6 +644,24 @@
                   <option value="8">8 seconds</option>
                   <option value="10">10 seconds</option>
                 </select>
+              </div>
+
+              <!-- List-only -->
+              <div class="field" data-when-layout="list" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Show meta row
+                    <div class="toggle-help">Stars, location, nights, board basis, schedule. Turn off for a stripped-back list.</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgListShowMeta" aria-pressed="true"></button>
+                </label>
+              </div>
+              <div class="field" data-when-layout="list" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Show tag chips
+                    <div class="toggle-help">Up to four amenity or trip-type tags below each row.</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgListShowAmenities" aria-pressed="true"></button>
+                </label>
               </div>
 
               <div class="field">
@@ -692,7 +713,59 @@
             </div>
           </div>
 
-          <div class="section" data-open="true" data-when-template="cards">
+          <!-- ═══════ Magazine template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="magazine" hidden>
+            <button class="section-head" data-section>Magazine layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Hero offer selection</label>
+                <select id="cfgMagazineHeroStrategy">
+                  <option value="discount" selected>Biggest discount</option>
+                  <option value="featured">Featured (falls back to discount)</option>
+                  <option value="cheapest">Cheapest</option>
+                  <option value="first">First returned</option>
+                </select>
+                <div class="field-help"><strong>Biggest discount</strong> picks the offer with the largest "was vs now" saving. <strong>Featured</strong> picks the first offer with featured=true if any (falls back to biggest discount). <strong>Cheapest</strong> uses the lowest price. <strong>First</strong> uses whatever Travelify returned first.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Sub-grid columns</label>
+                <div class="segmented" id="magazineColumnsSeg">
+                  <button type="button" data-mag-cols="2">2</button>
+                  <button type="button" data-mag-cols="3" aria-pressed="true">3</button>
+                  <button type="button" data-mag-cols="4">4</button>
+                </div>
+                <div class="field-help">Number of cards in the grid below the hero. Falls back to 2 columns on tablet, 1 on mobile.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════ Boarding-pass template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="boarding-pass" hidden>
+            <button class="section-head" data-section>Boarding pass layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Passes per row</label>
+                <div class="segmented" id="boardingPassColumnsSeg">
+                  <button type="button" data-bp-cols="1">1</button>
+                  <button type="button" data-bp-cols="2" aria-pressed="true">2</button>
+                </div>
+                <div class="field-help">Two columns on desktop, falls back to one on mobile regardless. Set 1 for a tighter, more vertical look on full-width sections.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show barcode strip
+                  <div class="toggle-help">Decorative barcode on the stub. Turn off for a cleaner pass shape.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardingPassShowBarcode" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top:6px;">Boarding pass is flights only — accommodation and package filters are ignored when this template is active. Use the same flight filters as cards (origin, cabin class, dates).</div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards magazine boarding-pass">
             <button class="section-head" data-section>Price display
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -960,6 +1033,15 @@
         boardAutoRefresh: true,
         boardRefreshSeconds: 300,
         boardDateRange: 30,
+        // List-layout config (used when template='cards' AND layout='list')
+        listShowMeta: true,
+        listShowAmenities: true,
+        // Magazine template config (used only when template='magazine')
+        magazineHeroStrategy: 'discount',
+        magazineColumns: 3,
+        // Boarding-pass template config (used only when template='boarding-pass')
+        boardingPassColumns: 2,
+        boardingPassShowBarcode: true,
         show: {
           // Universal
           propertyType: true, chain: true, location: true,
@@ -1142,6 +1224,22 @@
       $('cfgCarouselAutoplay').setAttribute('aria-pressed', c.carouselAutoplay ? 'true' : 'false');
       $('cfgCarouselInterval').value = String(c.carouselInterval || 6);
 
+      // List-layout fields
+      $('cfgListShowMeta').setAttribute('aria-pressed', c.listShowMeta !== false ? 'true' : 'false');
+      $('cfgListShowAmenities').setAttribute('aria-pressed', c.listShowAmenities !== false ? 'true' : 'false');
+
+      // Magazine template fields
+      $('cfgMagazineHeroStrategy').value = c.magazineHeroStrategy || 'discount';
+      document.querySelectorAll('#magazineColumnsSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(c.magazineColumns || 3) === b.dataset.magCols ? 'true' : 'false');
+      });
+
+      // Boarding-pass template fields
+      document.querySelectorAll('#boardingPassColumnsSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(c.boardingPassColumns || 2) === b.dataset.bpCols ? 'true' : 'false');
+      });
+      $('cfgBoardingPassShowBarcode').setAttribute('aria-pressed', c.boardingPassShowBarcode !== false ? 'true' : 'false');
+
       // Apply conditional visibility for layout-specific fields
       updateLayoutVisibility();
 
@@ -1227,7 +1325,10 @@
     function updateTemplateVisibility() {
       const t = state.config.template || 'cards';
       document.querySelectorAll('[data-when-template]').forEach(el => {
-        el.hidden = el.dataset.whenTemplate !== t;
+        // Support multi-value lists: data-when-template="cards magazine"
+        // means show when current template is either cards OR magazine.
+        const tokens = (el.dataset.whenTemplate || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(t) : el.dataset.whenTemplate !== t;
       });
     }
 
@@ -1480,6 +1581,55 @@
         markDirtyAndPreview();
       });
 
+      // ── List-layout fields ────────────────────────────────────────
+      $('cfgListShowMeta').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.listShowMeta = next;
+        markDirtyAndPreview();
+      });
+      $('cfgListShowAmenities').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.listShowAmenities = next;
+        markDirtyAndPreview();
+      });
+
+      // ── Magazine template fields ─────────────────────────────────
+      $('cfgMagazineHeroStrategy').addEventListener('change', () => {
+        state.config.magazineHeroStrategy = $('cfgMagazineHeroStrategy').value;
+        markDirtyAndPreview();
+      });
+      document.querySelectorAll('#magazineColumnsSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.dataset.magCols, 10);
+          state.config.magazineColumns = v;
+          document.querySelectorAll('#magazineColumnsSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+
+      // ── Boarding-pass template fields ────────────────────────────
+      document.querySelectorAll('#boardingPassColumnsSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.dataset.bpCols, 10);
+          state.config.boardingPassColumns = v;
+          document.querySelectorAll('#boardingPassColumnsSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgBoardingPassShowBarcode').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardingPassShowBarcode = next;
+        markDirtyAndPreview();
+      });
+
       const toggleMap = {
         showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
         showSummary: 'summary', showStayDetails: 'stayDetails',
@@ -1639,6 +1789,21 @@
         name: 'Last-minute departures',
         desc: 'Anything departing in the next 30 days, mixed types',
         config: { type: 'Any', DatesMin: 1, DatesMax: 30, sort: 'price:asc', density: 'compact', columns: '4' },
+      },
+      {
+        name: 'Hotel comparison list',
+        desc: 'Compact list view — scan many properties at a glance',
+        config: { template: 'cards', layout: 'list', type: 'Accommodation', destinations: ['ES'], dedupeStrategy: 'hotel', listShowMeta: true, listShowAmenities: true },
+      },
+      {
+        name: 'Editorial showcase — Magazine',
+        desc: 'Featured hero offer with a 3-column grid below',
+        config: { template: 'magazine', type: 'PackageHolidays', destinations: ['MV', 'MU', 'GR'], origins: ['GB'], magazineHeroStrategy: 'discount', magazineColumns: 3, density: 'standard' },
+      },
+      {
+        name: 'Boarding-pass flights',
+        desc: 'Flight fares as paper boarding passes',
+        config: { template: 'boarding-pass', type: 'Flights', origins: ['LHR', 'LGW', 'MAN'], destinations: ['ES', 'IT', 'PT'], boardingPassColumns: 2, boardingPassShowBarcode: true },
       },
     ];
 
