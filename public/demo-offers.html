@@ -399,6 +399,12 @@
         <input class="toggle" type="checkbox" id="ctrlBoardAnimate" checked />
       </div>
     </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlBoardSound">Click sound</label>
+        <input class="toggle" type="checkbox" id="ctrlBoardSound" />
+      </div>
+    </div>
   </div>
 
   <div class="stage-label" id="stageLabel">Live preview · Travelify offers cache · AppId 250</div>
@@ -527,6 +533,7 @@
       boardDefaultAirport: $('ctrlBoardAirport').value,
       boardDateRange: parseInt($('ctrlBoardRange').value, 10) || 30,
       boardAnimate: $('ctrlBoardAnimate').checked,
+      boardSound: $('ctrlBoardSound').checked,
       // Auto-detect off in demo so the airport picker is the source of truth
       boardAutoDetect: false,
       boardAllowSwitcher: true,
