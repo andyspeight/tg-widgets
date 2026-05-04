@@ -3028,14 +3028,16 @@
       background: var(--tgo-border, #E2E8F0);
       border-radius: 3px;
     }
-    .tgop-card-link, .tgop-card a, .tgop-card {
+    .tgop-offer {
       /* card vs popup-card — these are the inner-content cards */
     }
-    .tgop-content-compact .tgop-card,
-    .tgop-content-compact a.tgop-card {
+    .tgop-content-compact .tgop-offer,
+    .tgop-content-compact a.tgop-offer {
       display: flex;
       gap: 12px;
       padding: 10px;
+      min-height: 104px;
+      align-items: stretch;
       border: 1px solid var(--tgo-border, #E2E8F0);
       border-radius: 12px;
       text-decoration: none;
@@ -3046,30 +3048,35 @@
       opacity: 1;
       background: var(--tgo-card, #fff);
     }
-    .tgop-content-compact a.tgop-card:hover {
+    .tgop-content-compact a.tgop-offer:hover {
       border-color: var(--tgo-accent, #00B4D8);
       background: var(--tgo-card-alt, #F8FAFC);
     }
-    .tgop-card-img {
-      width: 84px;
-      height: 84px;
+    .tgop-offer-img {
+      width: 84px !important;
+      height: 84px !important;
+      flex: 0 0 84px !important;
       flex-shrink: 0;
       border-radius: 8px;
       background-size: cover;
       background-position: center;
       background-color: var(--tgo-card-alt, #F1F5F9);
+      transform: none !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+      transition: none !important;
     }
-    .tgop-card-img-placeholder {
+    .tgop-offer-img-placeholder {
       background-image: linear-gradient(135deg, rgba(0, 180, 216, 0.15), rgba(27, 43, 91, 0.15));
     }
-    .tgop-card-body {
+    .tgop-offer-body {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       min-width: 0;
     }
-    .tgop-card-kicker {
+    .tgop-offer-kicker {
       font-family: var(--tgo-font-mono, ui-monospace, monospace);
       font-size: 9px;
       font-weight: 600;
@@ -3081,7 +3088,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .tgop-card-name {
+    .tgop-offer-name {
       font-size: 14px;
       font-weight: 600;
       letter-spacing: -0.005em;
@@ -3091,7 +3098,7 @@
       text-overflow: ellipsis;
       color: var(--tgo-text, #0F172A);
     }
-    .tgop-card-meta {
+    .tgop-offer-meta {
       font-size: 11px;
       color: var(--tgo-sub, #475569);
       margin-top: 4px;
@@ -3099,14 +3106,14 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .tgop-card-foot {
+    .tgop-offer-foot {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 8px;
       margin-top: 6px;
     }
-    .tgop-card-price {
+    .tgop-offer-price {
       font-size: 16px;
       font-weight: 700;
       letter-spacing: -0.015em;
@@ -3115,20 +3122,20 @@
       align-items: baseline;
       gap: 6px;
     }
-    .tgop-card-was {
+    .tgop-offer-was {
       font-size: 11px;
       font-weight: 500;
       color: var(--tgo-muted, #94A3B8);
       text-decoration: line-through;
     }
-    .tgop-card-price small {
+    .tgop-offer-price small {
       font-size: 9px;
       font-weight: 500;
       color: var(--tgo-muted, #94A3B8);
       margin-left: 1px;
       font-family: var(--tgo-font-mono, ui-monospace, monospace);
     }
-    .tgop-card-cta {
+    .tgop-offer-cta {
       font-size: 11px;
       font-weight: 600;
       color: var(--tgo-accent, #00B4D8);
@@ -4071,6 +4078,11 @@
         // Render mode inside the popup — auto picks based on layout, override sets specific
         popupRenderMode: ['auto','compact','single','mini'].includes(c.popupRenderMode) ? c.popupRenderMode : 'auto',
         popupRotateInterval: typeof c.popupRotateInterval === 'number' ? c.popupRotateInterval : 8000, // ms; 0 = no rotation
+        // Cap how many offers the popup actually renders, separate from the
+        // main maxOffers (which controls the API fetch). The popup is small
+        // real-estate so we cap render to a sensible number even if the user
+        // fetched 100 offers. Default 6 = a comfortable compact list at 360px.
+        popupMaxRender: typeof c.popupMaxRender === 'number' ? Math.max(1, Math.min(20, c.popupMaxRender)) : 6,
 
         // Departure-board status pill toggles. Cheapest, Today, This week
         // are always-on (foundational signals). Tomorrow, Going soon, and
@@ -6121,27 +6133,27 @@
       const url = safeUrl(o.url || '#');
       const wasPrice = this._popupWasPrice(o);
 
-      let html = '<a class="tgop-card" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
+      let html = '<a class="tgop-offer" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
       if (img) {
-        html += '<div class="tgop-card-img" ' + cssBgUrl(img) + '></div>';
+        html += '<div class="tgop-offer-img" ' + cssBgUrl(img) + '></div>';
       } else {
-        html += '<div class="tgop-card-img tgop-card-img-placeholder"></div>';
+        html += '<div class="tgop-offer-img tgop-offer-img-placeholder"></div>';
       }
-      html += '<div class="tgop-card-body">';
-      html += '<div class="tgop-card-top">';
-      if (kicker) html += '<div class="tgop-card-kicker">' + esc(kicker) + '</div>';
-      html += '<div class="tgop-card-name">' + esc(headline) + '</div>';
-      if (flightStrip) html += '<div class="tgop-card-meta">' + esc(flightStrip) + '</div>';
+      html += '<div class="tgop-offer-body">';
+      html += '<div class="tgop-offer-top">';
+      if (kicker) html += '<div class="tgop-offer-kicker">' + esc(kicker) + '</div>';
+      html += '<div class="tgop-offer-name">' + esc(headline) + '</div>';
+      if (flightStrip) html += '<div class="tgop-offer-meta">' + esc(flightStrip) + '</div>';
       html += '</div>';
-      html += '<div class="tgop-card-foot">';
+      html += '<div class="tgop-offer-foot">';
       if (display.primary) {
-        html += '<span class="tgop-card-price">';
-        if (wasPrice) html += '<span class="tgop-card-was">' + esc(wasPrice) + '</span>';
+        html += '<span class="tgop-offer-price">';
+        if (wasPrice) html += '<span class="tgop-offer-was">' + esc(wasPrice) + '</span>';
         html += esc(display.primary);
         if (display.sub) html += '<small>' + esc(display.sub) + '</small>';
         html += '</span>';
       }
-      html += '<span class="tgop-card-cta">View →</span>';
+      html += '<span class="tgop-offer-cta">View →</span>';
       html += '</div>';
       html += '</div>';
       html += '</a>';
@@ -6323,7 +6335,13 @@
     _popupOpen() {
       if (this._popupIsOpen) return;
       const cfg = this.cfg;
-      const offers = (this.rawOffers || []).filter(o => this._popupHeadlineText(o));
+      // Filter offers to ones with a usable headline, then cap to popupMaxRender.
+      // The cap keeps the popup compact even when maxOffers fetched 100+ from
+      // the API. Different render modes get different caps via popupMaxRender.
+      const cap = Math.max(1, Math.min(20, cfg.popupMaxRender || 6));
+      const offers = (this.rawOffers || [])
+        .filter(o => this._popupHeadlineText(o))
+        .slice(0, cap);
       if (!offers.length) {
         // Silent — better no popup than empty popup
         return;
