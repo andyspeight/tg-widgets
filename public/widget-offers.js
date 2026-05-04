@@ -3754,24 +3754,52 @@
     }
 
     /* ───── SPLIT MODE — two-column hero + details ───── */
+    /* Card needs to be substantially wider than the default centered 460px
+       to fit two usable columns. The tgop-card-mode-split class is applied
+       to the card when render mode is split, allowing per-mode width overrides
+       without needing :has() (which has wider but not universal support). */
+    .tgop-layout-centered .tgop-card-mode-split {
+      width: 820px;
+      max-width: calc(100vw - 32px);
+    }
+    .tgop-layout-fullscreen .tgop-card-mode-split {
+      width: 100%;
+      max-width: 1100px;
+      height: auto;
+      max-height: 90vh;
+    }
     .tgop-content-split {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 460px;
+      grid-template-columns: minmax(280px, 1fr) minmax(360px, 1.1fr);
+      min-height: 480px;
       max-height: 600px;
       position: relative;
+    }
+    /* Close button must NOT participate in the grid — absolute over the
+       top-right of the content so it doesn't push the columns out of order. */
+    .tgop-content-split > .tgop-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 5;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
     }
     .tgop-split-left {
       position: relative;
       overflow: hidden;
+      background: var(--tgo-card-alt, #F1F5F9);
+      min-height: 100%;
     }
     .tgop-split-img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       background-size: cover;
       background-position: center;
       background-color: var(--tgo-card-alt, #F1F5F9);
-      position: relative;
     }
     .tgop-split-img-placeholder {
       background-image: linear-gradient(135deg, rgba(0, 180, 216, 0.15), rgba(27, 43, 91, 0.15));
@@ -3941,6 +3969,13 @@
       flex-direction: column;
       padding: 20px;
       gap: 16px;
+      position: relative;
+    }
+    .tgop-content-countdown > .tgop-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 5;
     }
     .tgop-countdown-stamp {
       display: inline-flex;
@@ -7597,7 +7632,7 @@
       html += '<div class="tgop-root ' + layoutClass + '" style="--tgop-overlay-opacity:' + opacity + '">';
       if (showBackdrop) html += '<div class="tgop-backdrop" data-tgop-backdrop></div>';
       html += '<div class="tgop-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(cfg.popupHeading || 'Live deals') + '">';
-      html += '<div class="tgop-card" data-tgop-card>';
+      html += '<div class="tgop-card tgop-card-mode-' + mode + '" data-tgop-card>';
       html += content;
       html += '</div></div></div>';
       return html;
