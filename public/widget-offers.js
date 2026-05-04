@@ -6525,6 +6525,25 @@
       this._popupRotationTimer = setInterval(tick, interval);
     }
 
+    // Detect whether the widget is being rendered inside the editor's preview
+    // pane. Two signals are checked:
+    //   1. cfg._preview === true (set by the editor's renderPreview())
+    //   2. Structural — the widget element is inside #previewMount (fallback
+    //      in case the editor file deployed doesn't pass the flag yet)
+    // If either is true, we skip triggers/eligibility and render inline so
+    // the editor preview shows the popup content immediately.
+    _isPreviewMode() {
+      if (this.cfg._preview === true) return true;
+      try {
+        let n = this.el;
+        while (n) {
+          if (n.id === 'previewMount') return true;
+          n = n.parentElement;
+        }
+      } catch {}
+      return false;
+    }
+
     // Entry point — called from _renderOffers when template='popup'.
     _renderPopupTemplate() {
       // Preview mode (editor preview pane): skip eligibility + frequency +
@@ -6532,15 +6551,17 @@
       // actually see the content. Force inline layout regardless of saved
       // popupLayout — the saved layout is what they get in production, the
       // preview's job is to show the content arrangement.
-      if (this.cfg._preview) {
+      if (this._isPreviewMode()) {
         if (!this.rawOffers || !this.rawOffers.length) {
-          this._renderEmpty();
+          this._showEmpty();
           return;
         }
         // Force inline layout for preview, save original to restore for any
         // later interactions (rotation, mode-pick logic still uses real layout)
         this._popupOriginalLayout = this.cfg.popupLayout;
         this.cfg.popupLayout = 'inline';
+        // Mark cfg._preview so _popupOpen / _popupBuildHtml see it consistently
+        this.cfg._preview = true;
         // Open immediately, no trigger
         this._popupOpen();
         return;
