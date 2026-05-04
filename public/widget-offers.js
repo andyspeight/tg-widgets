@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.5.0
+ * Travelgenix Travel Offers Widget v1.6.0
  * Self-contained, embeddable widget pulling live data from the Travelify offers cache.
  *
  * Usage:
@@ -18,18 +18,20 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
- *   v1.5.0 (May 2026) — Ticker template:
- *     • New "Ticker" template — horizontal marquee crawl of offers, ideal for
- *       site headers / footers / between-section bands
- *     • Two visual styles: 'pills' (discrete card pills, default) and 'ribbon'
- *       (continuous strip with diamond separators, like a financial market crawl)
- *     • Three speed presets — slow (120s loop) / medium (80s, default) / fast (50s)
- *     • Hover-to-pause for accessibility (default on, configurable)
- *     • Customisable label badge with green-pulse "live" indicator (text configurable)
- *     • Edge masking so pills fade in/out at boundaries instead of hard cuts
- *     • Honours prefers-reduced-motion (falls back to static snapshot)
- *     • New config keys: tickerStyle, tickerSpeed, tickerLabel, tickerShowLabel,
- *       tickerPauseOnHover
+ *   v1.6.0 (May 2026) — Popup template:
+ *     • New "Popup" template — renders offers inside a configurable popup chassis
+ *       instead of inline on the page
+ *     • 8 popup layouts (centered, slide-in, top-bar, bottom-bar, fullscreen,
+ *       side-drawer, floating-card, inline)
+ *     • 7 trigger types (load, time, scroll, exit-intent, click, inactivity, pageviews)
+ *     • Frequency rules: session / visitor / every-N-days, with suppress-after-dismiss
+ *       and suppress-after-conversion
+ *     • Page targeting (include/exclude URL patterns) and device targeting
+ *     • Three render modes (compact / single / mini) auto-picked from popup layout
+ *     • Popup never opens with empty data — silent failure if Travelify returns nothing
+ *     • All popup-specific config keys prefixed with 'popup' to avoid collision
+ *     • Verified-data-only: every field defensively checked, nothing fabricated
+ *   v1.5.0 — Ticker template
  *   v1.4.2 — Magazine packages now show flight info
  *   v1.4.1 — Magazine layout simplified to stacked alternating banners
  *   v1.4.0 — Magazine mosaic + departure-board status pills
@@ -43,7 +45,7 @@
 
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
-  const VERSION = '1.5.0';
+  const VERSION = '1.6.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ── XSS-safe helpers ──────────────────────────────────────────────
@@ -494,6 +496,227 @@
     if (diffDays < 7) return { category: 'thisWeek', days: diffDays };
     if (diffDays < 30) return { category: 'soon', days: diffDays };
     return { category: 'later', days: diffDays };
+  }
+
+  // ============================================================
+  // Popup chassis — only used when template='popup'.
+  // Self-contained: storage, trigger registry, eligibility check,
+  // tracking, URL/device matching. All functions module-private,
+  // namespaced 'popup' to avoid collision with the rest of the widget.
+  // ============================================================
+
+  // sessionStorage / localStorage helpers with TTL support
+  function popupStorage(type) {
+    try {
+      return type === 'local' ? window.localStorage : window.sessionStorage;
+    } catch { return null; }
+  }
+  const POPUP_STORAGE_PREFIX = 'tgop_';
+  function popupReadKey(key, type) {
+    const s = popupStorage(type);
+    if (!s) return null;
+    try { return JSON.parse(s.getItem(POPUP_STORAGE_PREFIX + key) || 'null'); } catch { return null; }
+  }
+  function popupWriteKey(key, val, type) {
+    const s = popupStorage(type);
+    if (!s) return;
+    try { s.setItem(POPUP_STORAGE_PREFIX + key, JSON.stringify(val)); } catch {}
+  }
+
+  // Device detection — desktop / tablet / mobile
+  function popupGetDeviceType() {
+    const w = window.innerWidth;
+    const ua = navigator.userAgent || '';
+    const isTabletUA = /iPad|Tablet|PlayBook|Silk/i.test(ua);
+    if (isTabletUA || (w >= 600 && w < 1024)) return 'tablet';
+    if (w < 600) return 'mobile';
+    return 'desktop';
+  }
+
+  // URL pattern matching — supports glob '*' and exact match
+  function popupUrlMatches(pattern, url) {
+    if (!pattern) return false;
+    const p = pattern.trim();
+    if (!p) return false;
+    if (p === url || p === url + '/') return true;
+    try {
+      const re = new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
+      return re.test(url);
+    } catch { return false; }
+  }
+
+  // Eligibility check — frequency rules + page targeting + device targeting.
+  // Returns { show: boolean, reason: string }. Centralised so we can give
+  // useful debug output when the popup doesn't fire.
+  function popupShouldShow(cfg) {
+    if (!cfg.popupDevices) cfg.popupDevices = { desktop: true, tablet: true, mobile: true };
+
+    // Device targeting
+    const dev = popupGetDeviceType();
+    if (cfg.popupDevices[dev] === false) return { show: false, reason: 'device-excluded:' + dev };
+
+    // Page targeting
+    const path = window.location.pathname + window.location.search;
+    if (Array.isArray(cfg.popupPageInclude) && cfg.popupPageInclude.length) {
+      const matchAny = cfg.popupPageInclude.some(p => popupUrlMatches(p, path));
+      if (!matchAny) return { show: false, reason: 'page-not-included' };
+    }
+    if (Array.isArray(cfg.popupPageExclude) && cfg.popupPageExclude.length) {
+      const matchAny = cfg.popupPageExclude.some(p => popupUrlMatches(p, path));
+      if (matchAny) return { show: false, reason: 'page-excluded' };
+    }
+
+    // Frequency check — keyed by widget ID so multiple popups don't interfere
+    const widgetId = cfg._widgetId || cfg.widgetId || 'default';
+    const shownKey = 'shown_' + widgetId;
+    const dismissKey = 'dismiss_' + widgetId;
+    const convKey = 'conv_' + widgetId;
+
+    const freq = cfg.popupFrequency || 'session';
+    const now = Date.now();
+
+    // Suppress after conversion (overrides everything if set)
+    const conv = popupReadKey(convKey, 'local');
+    if (conv && cfg.popupSuppressAfterConversionDays > 0) {
+      const cutoff = conv + cfg.popupSuppressAfterConversionDays * 86400000;
+      if (now < cutoff) return { show: false, reason: 'suppressed-after-conversion' };
+    }
+    // Suppress after dismiss
+    const dismiss = popupReadKey(dismissKey, 'local');
+    if (dismiss && cfg.popupSuppressAfterDismissDays > 0) {
+      const cutoff = dismiss + cfg.popupSuppressAfterDismissDays * 86400000;
+      if (now < cutoff) return { show: false, reason: 'suppressed-after-dismiss' };
+    }
+
+    // Frequency rule
+    if (freq === 'session') {
+      const shown = popupReadKey(shownKey, 'session');
+      if (shown) return { show: false, reason: 'already-shown-this-session' };
+    } else if (freq === 'visitor') {
+      const shown = popupReadKey(shownKey, 'local');
+      if (shown) return { show: false, reason: 'already-shown' };
+    } else if (freq === 'every-n-days') {
+      const shown = popupReadKey(shownKey, 'local');
+      if (shown) {
+        const cutoff = shown + Math.max(1, cfg.popupFrequencyDays || 7) * 86400000;
+        if (now < cutoff) return { show: false, reason: 'within-frequency-window' };
+      }
+    }
+    // every-visit always passes through
+
+    return { show: true, reason: 'ok' };
+  }
+
+  function popupRecordShown(cfg) {
+    const widgetId = cfg._widgetId || cfg.widgetId || 'default';
+    const key = 'shown_' + widgetId;
+    const freq = cfg.popupFrequency || 'session';
+    if (freq === 'session') popupWriteKey(key, Date.now(), 'session');
+    else popupWriteKey(key, Date.now(), 'local');
+  }
+  function popupRecordDismissed(cfg) {
+    const widgetId = cfg._widgetId || cfg.widgetId || 'default';
+    if (cfg.popupSuppressAfterDismissDays > 0) {
+      popupWriteKey('dismiss_' + widgetId, Date.now(), 'local');
+    }
+  }
+  function popupRecordConverted(cfg) {
+    const widgetId = cfg._widgetId || cfg.widgetId || 'default';
+    if (cfg.popupSuppressAfterConversionDays > 0) {
+      popupWriteKey('conv_' + widgetId, Date.now(), 'local');
+    }
+  }
+
+  // Trigger registry — attaches the right listener for the chosen trigger,
+  // calls onFire when it should pop. Returns a cleanup function.
+  function popupAttachTrigger(cfg, onFire) {
+    const trigger = cfg.popupTrigger || 'load';
+    let aborted = false;
+    let cleanup = () => { aborted = true; };
+    function fire() {
+      if (aborted) return;
+      onFire();
+    }
+
+    if (trigger === 'load') {
+      const t = setTimeout(fire, Math.max(0, cfg.popupTriggerDelay || 0));
+      cleanup = () => { aborted = true; clearTimeout(t); };
+    } else if (trigger === 'time') {
+      const t = setTimeout(fire, Math.max(0, cfg.popupTriggerDelay || 5000));
+      cleanup = () => { aborted = true; clearTimeout(t); };
+    } else if (trigger === 'scroll') {
+      const pct = Math.max(1, Math.min(100, cfg.popupTriggerScrollPercent || 50));
+      function check() {
+        if (aborted) return;
+        const docH = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
+        if (docH <= 0) return;
+        const scrolled = (window.scrollY || window.pageYOffset) / docH * 100;
+        if (scrolled >= pct) {
+          window.removeEventListener('scroll', check, { passive: true });
+          fire();
+        }
+      }
+      window.addEventListener('scroll', check, { passive: true });
+      cleanup = () => { aborted = true; window.removeEventListener('scroll', check); };
+    } else if (trigger === 'exit-intent') {
+      const isMobile = popupGetDeviceType() === 'mobile';
+      let lastY = window.scrollY || 0;
+      function onMouseLeave(e) {
+        if (e.clientY <= 0) { document.removeEventListener('mouseleave', onMouseLeave); fire(); }
+      }
+      function onScrollMobile() {
+        if (aborted) return;
+        const y = window.scrollY || 0;
+        if (y < lastY - 80) { window.removeEventListener('scroll', onScrollMobile); fire(); }
+        lastY = y;
+      }
+      if (isMobile) {
+        window.addEventListener('scroll', onScrollMobile, { passive: true });
+        cleanup = () => { aborted = true; window.removeEventListener('scroll', onScrollMobile); };
+      } else {
+        document.addEventListener('mouseleave', onMouseLeave);
+        cleanup = () => { aborted = true; document.removeEventListener('mouseleave', onMouseLeave); };
+      }
+    } else if (trigger === 'click') {
+      const sel = (cfg.popupTriggerSelector || '').trim();
+      if (!sel) return cleanup;
+      function onClick(e) {
+        try {
+          const target = e.target.closest && e.target.closest(sel);
+          if (target) { e.preventDefault(); fire(); }
+        } catch {}
+      }
+      document.addEventListener('click', onClick);
+      cleanup = () => { aborted = true; document.removeEventListener('click', onClick); };
+    } else if (trigger === 'inactivity') {
+      const secs = Math.max(5, cfg.popupTriggerInactivitySeconds || 30);
+      let timer = null;
+      function reset() {
+        if (aborted) return;
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(fire, secs * 1000);
+      }
+      const events = ['mousemove', 'keydown', 'scroll', 'touchstart'];
+      events.forEach(e => document.addEventListener(e, reset, { passive: true }));
+      reset();
+      cleanup = () => {
+        aborted = true;
+        if (timer) clearTimeout(timer);
+        events.forEach(e => document.removeEventListener(e, reset));
+      };
+    } else if (trigger === 'pageviews') {
+      const required = Math.max(1, cfg.popupTriggerPageviews || 2);
+      const widgetId = cfg._widgetId || cfg.widgetId || 'default';
+      const key = 'pv_' + widgetId;
+      const current = (popupReadKey(key, 'session') || 0) + 1;
+      popupWriteKey(key, current, 'session');
+      if (current >= required) {
+        const t = setTimeout(fire, 0);
+        cleanup = () => { aborted = true; clearTimeout(t); };
+      }
+    }
+
+    return cleanup;
   }
 
   function dedupeOffers(offers, strategy, sortPref) {
@@ -2607,6 +2830,592 @@
        ═══════════════════════════════════════════════════════════════════ */
 
     /* ═══════════════════════════════════════════════════════════════════
+       POPUP TEMPLATE
+       Renders offers inside a popup chassis. Three internal render modes
+       (compact/single/mini) plus full popup chassis (overlay, layouts,
+       positioning, animations). Uses tgop- prefix throughout.
+
+       The popup root is position:fixed so it overlays the host page. The
+       widget container element doesn't need to take page space — the popup
+       floats above everything else.
+       ═══════════════════════════════════════════════════════════════════ */
+    .tgop-root {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2147483000;
+      font-family: var(--tgo-font, system-ui, sans-serif);
+    }
+    .tgop-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, var(--tgop-overlay-opacity, 0.6));
+      opacity: 0;
+      transition: opacity 240ms ease;
+      pointer-events: auto;
+    }
+    .tgop-backdrop.tgop-open { opacity: 1; }
+    .tgop-container {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      pointer-events: none;
+    }
+    .tgop-card {
+      pointer-events: auto;
+      background: var(--tgo-card, #fff);
+      color: var(--tgo-text, #0F172A);
+      border-radius: var(--tgo-radius, 16px);
+      box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.18), 0 8px 16px -8px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      transform: translateY(20px) scale(0.96);
+      opacity: 0;
+      transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 240ms ease;
+      max-width: 100%;
+    }
+    .tgop-card.tgop-open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    /* Layout: centered */
+    .tgop-layout-centered .tgop-container {
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .tgop-layout-centered .tgop-card { width: 460px; }
+
+    /* Layout: slide-in (corners) */
+    .tgop-layout-slide-in .tgop-container { padding: 16px; }
+    .tgop-layout-slide-in.tgop-pos-bottom-right .tgop-container { justify-content: flex-end; align-items: flex-end; }
+    .tgop-layout-slide-in.tgop-pos-bottom-left .tgop-container { justify-content: flex-start; align-items: flex-end; }
+    .tgop-layout-slide-in.tgop-pos-top-right .tgop-container { justify-content: flex-end; align-items: flex-start; }
+    .tgop-layout-slide-in.tgop-pos-top-left .tgop-container { justify-content: flex-start; align-items: flex-start; }
+    .tgop-layout-slide-in .tgop-card {
+      width: 360px;
+      max-width: calc(100vw - 32px);
+      transform: translateY(40px);
+    }
+    .tgop-layout-slide-in.tgop-pos-top-right .tgop-card,
+    .tgop-layout-slide-in.tgop-pos-top-left .tgop-card { transform: translateY(-40px); }
+    .tgop-layout-slide-in .tgop-card.tgop-open { transform: translateY(0); }
+
+    /* Layout: floating-card (corners, no backdrop, smaller) */
+    .tgop-layout-floating-card .tgop-container { padding: 16px; }
+    .tgop-layout-floating-card.tgop-pos-bottom-right .tgop-container { justify-content: flex-end; align-items: flex-end; }
+    .tgop-layout-floating-card.tgop-pos-bottom-left .tgop-container { justify-content: flex-start; align-items: flex-end; }
+    .tgop-layout-floating-card.tgop-pos-top-right .tgop-container { justify-content: flex-end; align-items: flex-start; }
+    .tgop-layout-floating-card.tgop-pos-top-left .tgop-container { justify-content: flex-start; align-items: flex-start; }
+    .tgop-layout-floating-card .tgop-card { width: 320px; max-width: calc(100vw - 32px); }
+
+    /* Layout: top-bar */
+    .tgop-layout-top-bar .tgop-container { align-items: flex-start; justify-content: stretch; }
+    .tgop-layout-top-bar .tgop-card {
+      width: 100%;
+      border-radius: 0;
+      transform: translateY(-100%);
+    }
+    .tgop-layout-top-bar .tgop-card.tgop-open { transform: translateY(0); }
+
+    /* Layout: bottom-bar */
+    .tgop-layout-bottom-bar .tgop-container { align-items: flex-end; justify-content: stretch; }
+    .tgop-layout-bottom-bar .tgop-card {
+      width: 100%;
+      border-radius: 0;
+      transform: translateY(100%);
+    }
+    .tgop-layout-bottom-bar .tgop-card.tgop-open { transform: translateY(0); }
+
+    /* Layout: side-drawer */
+    .tgop-layout-side-drawer.tgop-pos-right .tgop-container { justify-content: flex-end; align-items: stretch; }
+    .tgop-layout-side-drawer.tgop-pos-left .tgop-container { justify-content: flex-start; align-items: stretch; }
+    .tgop-layout-side-drawer .tgop-card {
+      width: 420px;
+      max-width: 100vw;
+      height: 100%;
+      border-radius: 0;
+    }
+    .tgop-layout-side-drawer.tgop-pos-right .tgop-card { transform: translateX(100%); }
+    .tgop-layout-side-drawer.tgop-pos-left .tgop-card { transform: translateX(-100%); }
+    .tgop-layout-side-drawer .tgop-card.tgop-open { transform: translateX(0); }
+
+    /* Layout: fullscreen */
+    .tgop-layout-fullscreen .tgop-container { align-items: stretch; justify-content: stretch; }
+    .tgop-layout-fullscreen .tgop-card {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+    }
+
+    /* Layout: inline — popup attaches to its mount point, not fixed */
+    .tgop-layout-inline { position: relative; inset: auto; }
+    .tgop-layout-inline .tgop-container { position: relative; inset: auto; }
+    .tgop-layout-inline .tgop-card { width: 100%; max-width: 720px; margin: 0 auto; }
+
+    /* ───── Shared elements ───── */
+    .tgop-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--tgo-border, #E2E8F0);
+    }
+    .tgop-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--tgo-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--tgo-brand, #1B2B5B);
+    }
+    .tgop-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+      animation: tgop-pulse 2s ease-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes tgop-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      100% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tgop-pulse { animation: none; }
+      .tgop-card { transition: opacity 100ms ease !important; transform: none !important; }
+      .tgop-backdrop { transition: opacity 100ms ease !important; }
+    }
+    .tgop-close {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--tgo-card-alt, #F1F5F9);
+      border: 0;
+      border-radius: 50%;
+      color: var(--tgo-text, #0F172A);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s ease;
+    }
+    .tgop-close:hover { background: var(--tgo-border, #E2E8F0); }
+    .tgop-empty {
+      padding: 28px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--tgo-muted, #94A3B8);
+    }
+
+    /* ───── COMPACT MODE ───── */
+    .tgop-list {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+    .tgop-list::-webkit-scrollbar { width: 6px; }
+    .tgop-list::-webkit-scrollbar-track { background: transparent; }
+    .tgop-list::-webkit-scrollbar-thumb {
+      background: var(--tgo-border, #E2E8F0);
+      border-radius: 3px;
+    }
+    .tgop-card-link, .tgop-card a, .tgop-card {
+      /* card vs popup-card — these are the inner-content cards */
+    }
+    .tgop-content-compact .tgop-card,
+    .tgop-content-compact a.tgop-card {
+      display: flex;
+      gap: 12px;
+      padding: 10px;
+      border: 1px solid var(--tgo-border, #E2E8F0);
+      border-radius: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      box-shadow: none;
+      transform: none;
+      opacity: 1;
+      background: var(--tgo-card, #fff);
+    }
+    .tgop-content-compact a.tgop-card:hover {
+      border-color: var(--tgo-accent, #00B4D8);
+      background: var(--tgo-card-alt, #F8FAFC);
+    }
+    .tgop-card-img {
+      width: 84px;
+      height: 84px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--tgo-card-alt, #F1F5F9);
+    }
+    .tgop-card-img-placeholder {
+      background-image: linear-gradient(135deg, rgba(0, 180, 216, 0.15), rgba(27, 43, 91, 0.15));
+    }
+    .tgop-card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+    }
+    .tgop-card-kicker {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tgo-muted, #94A3B8);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgop-card-name {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-card-meta {
+      font-size: 11px;
+      color: var(--tgo-sub, #475569);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgop-card-foot {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .tgop-card-price {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--tgo-text, #0F172A);
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .tgop-card-was {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--tgo-muted, #94A3B8);
+      text-decoration: line-through;
+    }
+    .tgop-card-price small {
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--tgo-muted, #94A3B8);
+      margin-left: 1px;
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+    }
+    .tgop-card-cta {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--tgo-accent, #00B4D8);
+    }
+    .tgop-foot {
+      padding: 12px 16px;
+      border-top: 1px solid var(--tgo-border, #E2E8F0);
+      background: var(--tgo-card-alt, #F8FAFC);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+    }
+    .tgop-foot-text { color: var(--tgo-sub, #475569); }
+    .tgop-foot-cta {
+      background: var(--tgo-brand, #1B2B5B);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    /* ───── SINGLE MODE ───── */
+    .tgop-content-single { position: relative; }
+    .tgop-rot {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
+      z-index: 4;
+    }
+    .tgop-rot-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      transition: background 0.2s ease, width 0.2s ease;
+    }
+    .tgop-rot-dot:hover { background: rgba(255, 255, 255, 0.8); }
+    .tgop-rot-active {
+      background: white;
+      width: 16px;
+      border-radius: 4px;
+    }
+    .tgop-single-hero {
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--tgo-card-alt, #F1F5F9);
+      position: relative;
+    }
+    .tgop-single-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.55) 0%, transparent 50%);
+    }
+    .tgop-single-discount {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #10B981;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 9px;
+      border-radius: 999px;
+      letter-spacing: -0.01em;
+      z-index: 3;
+    }
+    .tgop-single-close-wrap {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 3;
+    }
+    .tgop-single-close-wrap .tgop-close {
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      color: white;
+    }
+    .tgop-single-close-wrap .tgop-close:hover { background: rgba(0, 0, 0, 0.65); }
+    .tgop-single-body { padding: 16px 18px 18px; }
+    .tgop-single-kicker {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tgo-muted, #94A3B8);
+      margin-bottom: 6px;
+    }
+    .tgop-single-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      margin: 0 0 10px;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-single-flight {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 11px;
+      color: var(--tgo-sub, #475569);
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      background: var(--tgo-card-alt, #F8FAFC);
+      border-radius: 6px;
+    }
+    .tgop-single-flight svg {
+      color: var(--tgo-accent, #00B4D8);
+      flex-shrink: 0;
+    }
+    .tgop-single-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--tgo-border, #E2E8F0);
+    }
+    .tgop-single-price {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .tgop-single-was {
+      font-size: 11px;
+      color: var(--tgo-muted, #94A3B8);
+      text-decoration: line-through;
+      margin-bottom: 2px;
+    }
+    .tgop-single-now {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--tgo-text, #0F172A);
+    }
+    .tgop-single-now small {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--tgo-muted, #94A3B8);
+      margin-left: 3px;
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+    }
+    .tgop-single-cta {
+      background: var(--tgo-brand, #1B2B5B);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 11px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    /* ───── MINI MODE (top-bar / bottom-bar) ───── */
+    .tgop-content-mini {
+      display: flex;
+      align-items: stretch;
+      background: var(--tgo-brand, #1B2B5B);
+      color: #fff;
+      width: 100%;
+    }
+    .tgop-mini-stamp {
+      flex-shrink: 0;
+      padding: 12px 24px 12px 16px;
+      background: rgba(0, 0, 0, 0.18);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+    }
+    .tgop-mini-list {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 8px;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tgop-mini-list::-webkit-scrollbar { display: none; }
+    .tgop-mini-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 12px;
+      white-space: nowrap;
+      position: relative;
+      flex-shrink: 0;
+      transition: opacity 0.15s ease;
+    }
+    .tgop-mini-pill:hover { opacity: 0.85; }
+    .tgop-mini-pill:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      height: 14px;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-50%);
+    }
+    .tgop-mini-pill-route {
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .tgop-mini-pill-name {
+      font-weight: 600;
+      max-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgop-mini-pill-meta {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 11px;
+    }
+    .tgop-mini-pill-price {
+      color: var(--tgo-accent-light, #48CAE4);
+      font-weight: 700;
+      font-family: var(--tgo-font-mono, ui-monospace, monospace);
+    }
+    .tgop-mini-cta {
+      flex-shrink: 0;
+      background: var(--tgo-accent, #00B4D8);
+      color: #fff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 12px 20px;
+      display: inline-flex;
+      align-items: center;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .tgop-mini-close {
+      flex-shrink: 0;
+      width: 36px;
+      background: transparent;
+      border: 0;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s ease;
+    }
+    .tgop-mini-close:hover { color: white; }
+
+    /* Mobile responsive */
+    @media (max-width: 600px) {
+      .tgop-layout-slide-in .tgop-card,
+      .tgop-layout-floating-card .tgop-card,
+      .tgop-layout-centered .tgop-card {
+        width: calc(100vw - 24px);
+      }
+      .tgop-layout-side-drawer .tgop-card {
+        width: 100vw;
+      }
+    }
+    /* ═══════════════════════════════════════════════════════════════════
+       END POPUP TEMPLATE
+       ═══════════════════════════════════════════════════════════════════ */
+
+    /* ═══════════════════════════════════════════════════════════════════
        BOARDING-PASS TEMPLATE (FLIGHTS ONLY)
        Paper boarding-pass shape with perforated stub and CSS barcode.
        Uses tgbp- prefix to avoid colliding with other templates.
@@ -3230,6 +4039,39 @@
         tickerShowLabel: c.tickerShowLabel !== false,
         tickerPauseOnHover: c.tickerPauseOnHover !== false,
 
+        // Popup template config (used only when template='popup')
+        // Renders the offers inside a popup chassis instead of inline.
+        // All popup-specific keys are prefixed 'popup' to avoid collision.
+        popupLayout: ['centered','slide-in','top-bar','bottom-bar','fullscreen','side-drawer','floating-card','inline'].includes(c.popupLayout) ? c.popupLayout : 'slide-in',
+        popupPosition: ['top-left','top-right','bottom-left','bottom-right'].includes(c.popupPosition) ? c.popupPosition : 'bottom-right',
+        popupSideDrawerSide: c.popupSideDrawerSide === 'left' ? 'left' : 'right',
+        popupTrigger: ['load','time','scroll','exit-intent','click','inactivity','pageviews'].includes(c.popupTrigger) ? c.popupTrigger : 'load',
+        popupTriggerDelay: typeof c.popupTriggerDelay === 'number' ? c.popupTriggerDelay : 5000, // ms
+        popupTriggerScrollPercent: typeof c.popupTriggerScrollPercent === 'number' ? c.popupTriggerScrollPercent : 50,
+        popupTriggerInactivitySeconds: typeof c.popupTriggerInactivitySeconds === 'number' ? c.popupTriggerInactivitySeconds : 30,
+        popupTriggerPageviews: typeof c.popupTriggerPageviews === 'number' ? c.popupTriggerPageviews : 2,
+        popupTriggerSelector: typeof c.popupTriggerSelector === 'string' ? c.popupTriggerSelector : '',
+        popupFrequency: ['session','visitor','every-visit','every-n-days'].includes(c.popupFrequency) ? c.popupFrequency : 'session',
+        popupFrequencyDays: typeof c.popupFrequencyDays === 'number' ? c.popupFrequencyDays : 7,
+        popupSuppressAfterDismissDays: typeof c.popupSuppressAfterDismissDays === 'number' ? c.popupSuppressAfterDismissDays : 0,
+        popupSuppressAfterConversionDays: typeof c.popupSuppressAfterConversionDays === 'number' ? c.popupSuppressAfterConversionDays : 30,
+        popupPageInclude: Array.isArray(c.popupPageInclude) ? c.popupPageInclude : [],
+        popupPageExclude: Array.isArray(c.popupPageExclude) ? c.popupPageExclude : [],
+        popupDevices: Object.assign({ desktop: true, tablet: true, mobile: true }, c.popupDevices || {}),
+        popupCloseOnEscape: c.popupCloseOnEscape !== false,
+        popupCloseOnBackdropClick: c.popupCloseOnBackdropClick !== false,
+        popupShowCloseButton: c.popupShowCloseButton !== false,
+        popupOverlay: c.popupOverlay !== false,
+        popupOverlayOpacity: typeof c.popupOverlayOpacity === 'number' ? c.popupOverlayOpacity : 60,
+        popupHeading: typeof c.popupHeading === 'string' && c.popupHeading.length ? c.popupHeading : 'Live deals',
+        popupShowPulse: c.popupShowPulse !== false,
+        popupFooterText: typeof c.popupFooterText === 'string' ? c.popupFooterText : '',
+        popupFooterCtaText: typeof c.popupFooterCtaText === 'string' ? c.popupFooterCtaText : '',
+        popupFooterCtaUrl: typeof c.popupFooterCtaUrl === 'string' ? c.popupFooterCtaUrl : '',
+        // Render mode inside the popup — auto picks based on layout, override sets specific
+        popupRenderMode: ['auto','compact','single','mini'].includes(c.popupRenderMode) ? c.popupRenderMode : 'auto',
+        popupRotateInterval: typeof c.popupRotateInterval === 'number' ? c.popupRotateInterval : 8000, // ms; 0 = no rotation
+
         // Departure-board status pill toggles. Cheapest, Today, This week
         // are always-on (foundational signals). Tomorrow, Going soon, and
         // Premium cabin are opt-in but default ON. Going-soon threshold is
@@ -3651,7 +4493,7 @@
         this._renderDepartureBoard();
         return;
       }
-      // Magazine + boarding-pass + ticker + cards all dedupe per the user's
+      // Magazine + boarding-pass + ticker + cards + popup all dedupe per the user's
       // strategy before rendering — same data path, different visual templates.
       if (this.cfg.template === 'magazine') {
         this._renderMagazineTemplate();
@@ -3663,6 +4505,12 @@
       }
       if (this.cfg.template === 'ticker') {
         this._renderTickerTemplate();
+        return;
+      }
+      if (this.cfg.template === 'popup') {
+        // Popup template doesn't render inline. It attaches a trigger and waits
+        // for it to fire before rendering. Eligibility check happens inside.
+        this._renderPopupTemplate();
         return;
       }
       this._renderCardsTemplate();
@@ -5099,6 +5947,521 @@
     /* ═══════════════════════════════════════════════════════════════════
        END TICKER TEMPLATE
        ═══════════════════════════════════════════════════════════════════ */
+
+    /* ═══════════════════════════════════════════════════════════════════
+       POPUP TEMPLATE
+       Renders offers inside a configurable popup chassis. Uses tgop- prefix
+       to avoid collision with anything else. Eight popup layouts (centered,
+       slide-in, top-bar, bottom-bar, fullscreen, side-drawer, floating-card,
+       inline). Seven trigger types. Three internal render modes (compact,
+       single, mini) auto-picked from layout.
+
+       Lifecycle: when template='popup' is active, the widget fetches offers
+       in the background but does NOT render until the trigger fires. If the
+       fetch returns nothing, the popup never appears.
+       ═══════════════════════════════════════════════════════════════════ */
+
+    // Pick the right render mode for the current popup layout, with override.
+    _popupPickRenderMode() {
+      const override = this.cfg.popupRenderMode;
+      if (override === 'compact' || override === 'single' || override === 'mini') return override;
+      const layout = this.cfg.popupLayout || 'slide-in';
+      if (layout === 'top-bar' || layout === 'bottom-bar') return 'mini';
+      if (layout === 'floating-card') return 'single';
+      // centered, slide-in, side-drawer, fullscreen, inline → compact
+      return 'compact';
+    }
+
+    // Build the kicker line for an offer. Defensive — every field guarded.
+    _popupKickerText(o) {
+      if (!o) return '';
+      const acc = o.accommodation || {};
+      const f = o.flight || {};
+      const dest = acc.destination || f.destination || {};
+      const isAcc = o.type === 'Accommodation';
+      const isFlight = o.type === 'Flight' || o.type === 'Flights';
+      const isPkg = o.type === 'Package' || o.type === 'Packages';
+      const parts = [];
+      if (isAcc || isPkg) {
+        if (dest.name) parts.push(dest.name);
+        if (acc.nights) parts.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
+        if (acc.boardBasis) parts.push(formatEnum(acc.boardBasis));
+      } else if (isFlight) {
+        if (f.origin && f.origin.iataCode && f.destination && f.destination.iataCode) {
+          parts.push(f.origin.iataCode + ' → ' + f.destination.iataCode);
+        }
+        if (f.direct === true) parts.push('Direct');
+        if (f.carrier && f.carrier.name) parts.push(f.carrier.name);
+      }
+      return parts.join(' · ');
+    }
+
+    // Headline for an offer. Returns empty string if nothing usable —
+    // caller should skip the offer.
+    _popupHeadlineText(o) {
+      if (!o) return '';
+      const acc = o.accommodation || {};
+      const f = o.flight || {};
+      const isFlight = o.type === 'Flight' || o.type === 'Flights';
+      if (isFlight) {
+        const dest = f.destination || {};
+        if (dest.name) return dest.name;
+        if (dest.iataCode) return dest.iataCode;
+        return '';
+      }
+      return acc.name || '';
+    }
+
+    // Flight info strip text — only for packages, only when fields exist.
+    _popupFlightStripText(o) {
+      if (!o) return '';
+      const isPkg = o.type === 'Package' || o.type === 'Packages';
+      if (!isPkg) return '';
+      const f = o.flight || {};
+      const og = f.origin || {};
+      const dest = f.destination || {};
+      const parts = [];
+      if (og.iataCode && dest.iataCode) parts.push(og.iataCode + ' → ' + dest.iataCode);
+      if (f.carrier && f.carrier.name) parts.push(f.carrier.name);
+      if (f.direct === true) parts.push('Direct');
+      if (f.outboundDate) parts.push('Departs ' + formatDate(f.outboundDate));
+      return parts.join(' · ');
+    }
+
+    // Compute "was" price (strike-through) only if verified discount data exists.
+    _popupWasPrice(o) {
+      if (!o) return null;
+      const acc = o.accommodation || {};
+      const f = o.flight || {};
+      const accP = acc.pricing || {};
+      const flP = f.pricing || {};
+      if (accP.priceChanged && accP.priceBeforeChange) {
+        return '£' + Math.round(accP.priceBeforeChange).toLocaleString('en-GB');
+      }
+      if (flP.priceChanged && flP.priceBeforeChange) {
+        return '£' + Math.round(flP.priceBeforeChange).toLocaleString('en-GB');
+      }
+      return null;
+    }
+
+    // Verified discount percentage. Returns null unless the calculation is
+    // meaningful (priceChanged flag, before > now, both numbers present).
+    _popupDiscountPercent(o) {
+      if (!o) return null;
+      const acc = o.accommodation || {};
+      const f = o.flight || {};
+      const accP = acc.pricing || {};
+      const flP = f.pricing || {};
+      let before = 0, now = 0;
+      if (accP.priceChanged && accP.priceBeforeChange) {
+        before = accP.priceBeforeChange;
+        now = accP.price;
+      } else if (flP.priceChanged && flP.priceBeforeChange) {
+        before = flP.priceBeforeChange;
+        now = flP.price;
+      }
+      if (!before || !now || before <= now) return null;
+      return Math.round(((before - now) / before) * 100);
+    }
+
+    // Close button shared across all three render modes
+    _popupCloseBtn() {
+      if (!this.cfg.popupShowCloseButton) return '';
+      return '<button class="tgop-close" data-tgop-close aria-label="Close">'
+        + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">'
+        + '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
+        + '</svg></button>';
+    }
+
+    _popupHeader() {
+      const cfg = this.cfg;
+      const heading = cfg.popupHeading || '';
+      const showPulse = cfg.popupShowPulse !== false;
+      if (!heading && !showPulse) return '';
+      let html = '<div class="tgop-header">';
+      if (showPulse) html += '<span class="tgop-pulse"></span>';
+      if (heading) html += '<span class="tgop-heading">' + esc(heading) + '</span>';
+      html += '</div>';
+      return html;
+    }
+
+    // ───── COMPACT mode — multi-card vertical list ─────
+    _popupRenderCompact(offers) {
+      const cfg = this.cfg;
+      let html = '<div class="tgop-content tgop-content-compact">';
+      html += '<div class="tgop-bar">';
+      html += this._popupHeader();
+      html += this._popupCloseBtn();
+      html += '</div>';
+      html += '<div class="tgop-list">';
+      for (const o of offers) {
+        html += this._popupCompactCard(o);
+      }
+      html += '</div>';
+      // Optional bottom strip — only when both text and CTA present
+      if (cfg.popupFooterText && cfg.popupFooterCtaText && cfg.popupFooterCtaUrl) {
+        html += '<div class="tgop-foot">';
+        html += '<span class="tgop-foot-text">' + esc(cfg.popupFooterText) + '</span>';
+        html += '<a class="tgop-foot-cta" href="' + esc(safeUrl(cfg.popupFooterCtaUrl)) + '" target="_blank" rel="noopener" data-tgop-conv>'
+          + esc(cfg.popupFooterCtaText) + '</a>';
+        html += '</div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    _popupCompactCard(o) {
+      const headline = this._popupHeadlineText(o);
+      if (!headline) return '';
+      const kicker = this._popupKickerText(o);
+      const flightStrip = this._popupFlightStripText(o);
+      const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
+        || (o.flight && o.flight.image && o.flight.image.url) || '');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const url = safeUrl(o.url || '#');
+      const wasPrice = this._popupWasPrice(o);
+
+      let html = '<a class="tgop-card" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
+      if (img) {
+        html += '<div class="tgop-card-img" ' + cssBgUrl(img) + '></div>';
+      } else {
+        html += '<div class="tgop-card-img tgop-card-img-placeholder"></div>';
+      }
+      html += '<div class="tgop-card-body">';
+      html += '<div class="tgop-card-top">';
+      if (kicker) html += '<div class="tgop-card-kicker">' + esc(kicker) + '</div>';
+      html += '<div class="tgop-card-name">' + esc(headline) + '</div>';
+      if (flightStrip) html += '<div class="tgop-card-meta">' + esc(flightStrip) + '</div>';
+      html += '</div>';
+      html += '<div class="tgop-card-foot">';
+      if (display.primary) {
+        html += '<span class="tgop-card-price">';
+        if (wasPrice) html += '<span class="tgop-card-was">' + esc(wasPrice) + '</span>';
+        html += esc(display.primary);
+        if (display.sub) html += '<small>' + esc(display.sub) + '</small>';
+        html += '</span>';
+      }
+      html += '<span class="tgop-card-cta">View →</span>';
+      html += '</div>';
+      html += '</div>';
+      html += '</a>';
+      return html;
+    }
+
+    // ───── SINGLE mode — one offer, hero treatment, optional rotation ─────
+    _popupRenderSingle(offers) {
+      const cfg = this.cfg;
+      const idx = this._popupOffersIndex || 0;
+      const o = offers[idx % offers.length];
+      const headline = this._popupHeadlineText(o);
+      if (!headline) {
+        return '<div class="tgop-content tgop-empty">No offer to display</div>';
+      }
+      const kicker = this._popupKickerText(o);
+      const flightStrip = this._popupFlightStripText(o);
+      const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
+        || (o.flight && o.flight.image && o.flight.image.url) || '');
+      const display = computeDisplayPrice(o, cfg.priceDisplay || 'auto');
+      const wasPrice = this._popupWasPrice(o);
+      const discount = this._popupDiscountPercent(o);
+      const url = safeUrl(o.url || '#');
+
+      let html = '<div class="tgop-content tgop-content-single">';
+
+      if (offers.length > 1) {
+        html += '<div class="tgop-rot">';
+        for (let i = 0; i < offers.length; i++) {
+          const active = (i === idx % offers.length) ? ' tgop-rot-active' : '';
+          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="Show offer ' + (i + 1) + '"></button>';
+        }
+        html += '</div>';
+      }
+
+      if (img) {
+        html += '<div class="tgop-single-hero" ' + cssBgUrl(img) + '>';
+        html += '<div class="tgop-single-hero-overlay"></div>';
+        if (discount && discount > 0) {
+          html += '<span class="tgop-single-discount">-' + discount + '%</span>';
+        }
+        if (cfg.popupShowCloseButton) {
+          html += '<div class="tgop-single-close-wrap">' + this._popupCloseBtn() + '</div>';
+        }
+        html += '</div>';
+      } else {
+        html += '<div class="tgop-bar">' + this._popupHeader() + this._popupCloseBtn() + '</div>';
+      }
+
+      html += '<div class="tgop-single-body">';
+      if (kicker) html += '<div class="tgop-single-kicker">' + esc(kicker) + '</div>';
+      html += '<h3 class="tgop-single-name">' + esc(headline) + '</h3>';
+      if (flightStrip) {
+        html += '<div class="tgop-single-flight">'
+          + '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>'
+          + '<span>' + esc(flightStrip) + '</span></div>';
+      }
+      html += '<div class="tgop-single-foot">';
+      html += '<div class="tgop-single-price">';
+      if (wasPrice) html += '<span class="tgop-single-was">' + esc(wasPrice) + '</span>';
+      if (display.primary) {
+        html += '<span class="tgop-single-now">' + esc(display.primary);
+        if (display.sub) html += '<small>' + esc(display.sub) + '</small>';
+        html += '</span>';
+      }
+      html += '</div>';
+      html += '<a class="tgop-single-cta" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>View deal</a>';
+      html += '</div>';
+      html += '</div>';
+
+      html += '</div>';
+      return html;
+    }
+
+    // ───── MINI mode — banner pills (top-bar / bottom-bar) ─────
+    _popupRenderMini(offers) {
+      const cfg = this.cfg;
+      let html = '<div class="tgop-content tgop-content-mini">';
+      html += '<div class="tgop-mini-stamp">';
+      if (cfg.popupShowPulse !== false) html += '<span class="tgop-pulse"></span>';
+      html += '<span>' + esc(cfg.popupHeading || 'Live deals') + '</span>';
+      html += '</div>';
+      html += '<div class="tgop-mini-list">';
+      for (const o of offers) {
+        html += this._popupMiniPill(o);
+      }
+      html += '</div>';
+      if (cfg.popupFooterCtaText && cfg.popupFooterCtaUrl) {
+        html += '<a class="tgop-mini-cta" href="' + esc(safeUrl(cfg.popupFooterCtaUrl)) + '" target="_blank" rel="noopener" data-tgop-conv>'
+          + esc(cfg.popupFooterCtaText) + '</a>';
+      }
+      if (cfg.popupShowCloseButton) {
+        html += '<button type="button" class="tgop-mini-close" data-tgop-close aria-label="Close">'
+          + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+          + '</button>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    _popupMiniPill(o) {
+      const isFlight = o.type === 'Flight' || o.type === 'Flights';
+      const isPkg = o.type === 'Package' || o.type === 'Packages';
+      const url = safeUrl(o.url || '#');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      if (!display.primary) return '';
+
+      let html = '<a class="tgop-mini-pill" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
+
+      if (isFlight) {
+        const f = o.flight || {};
+        const og = f.origin || {};
+        const dest = f.destination || {};
+        if (og.iataCode && dest.iataCode) {
+          html += '<span class="tgop-mini-pill-route">' + esc(og.iataCode + ' → ' + dest.iataCode) + '</span>';
+        }
+        if (f.carrier && f.carrier.code) {
+          html += '<span class="tgop-mini-pill-meta">' + esc(f.carrier.code) + '</span>';
+        } else if (f.carrier && f.carrier.name) {
+          html += '<span class="tgop-mini-pill-meta">' + esc(f.carrier.name) + '</span>';
+        }
+      } else {
+        const headline = this._popupHeadlineText(o);
+        if (!headline) return '';
+        html += '<span class="tgop-mini-pill-name">' + esc(headline) + '</span>';
+        const acc = o.accommodation || {};
+        const dest = (acc.destination && acc.destination.name) || '';
+        const nights = acc.nights ? acc.nights + ' nt' + (acc.nights === 1 ? '' : 's') : '';
+        const metaParts = [];
+        if (isPkg) {
+          const f = o.flight || {};
+          if (f.origin && f.origin.iataCode && f.destination && f.destination.iataCode) {
+            metaParts.push(f.origin.iataCode + '→' + f.destination.iataCode);
+          }
+        }
+        if (dest) metaParts.push(dest);
+        if (nights) metaParts.push(nights);
+        if (metaParts.length) {
+          html += '<span class="tgop-mini-pill-meta">' + esc(metaParts.join(' · ')) + '</span>';
+        }
+      }
+
+      html += '<span class="tgop-mini-pill-price">' + esc(display.primary) + '</span>';
+      html += '</a>';
+      return html;
+    }
+
+    // Build the full popup HTML — chassis + content. Called by _popupOpen.
+    _popupBuildHtml(offers) {
+      const cfg = this.cfg;
+      const layout = cfg.popupLayout || 'slide-in';
+      const showBackdrop = ['centered', 'fullscreen', 'side-drawer'].includes(layout) && cfg.popupOverlay !== false;
+      const opacity = Math.max(0, Math.min(100, cfg.popupOverlayOpacity || 60)) / 100;
+
+      let posClass = '';
+      if (layout === 'slide-in' || layout === 'floating-card') {
+        posClass = ' tgop-pos-' + (cfg.popupPosition || 'bottom-right');
+      } else if (layout === 'side-drawer') {
+        posClass = ' tgop-pos-' + (cfg.popupSideDrawerSide || 'right');
+      }
+      const layoutClass = 'tgop-layout-' + layout + posClass;
+
+      const mode = this._popupPickRenderMode();
+      let content;
+      if (mode === 'mini') content = this._popupRenderMini(offers);
+      else if (mode === 'single') content = this._popupRenderSingle(offers);
+      else content = this._popupRenderCompact(offers);
+
+      let html = '<div class="tgop-root ' + layoutClass + '" style="--tgop-overlay-opacity:' + opacity + '">';
+      if (showBackdrop) html += '<div class="tgop-backdrop" data-tgop-backdrop></div>';
+      html += '<div class="tgop-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(cfg.popupHeading || 'Live deals') + '">';
+      html += '<div class="tgop-card" data-tgop-card>';
+      html += content;
+      html += '</div></div></div>';
+      return html;
+    }
+
+    // Open the popup — called by trigger fire.
+    _popupOpen() {
+      if (this._popupIsOpen) return;
+      const cfg = this.cfg;
+      const offers = (this.rawOffers || []).filter(o => this._popupHeadlineText(o));
+      if (!offers.length) {
+        // Silent — better no popup than empty popup
+        return;
+      }
+      this._popupOffers = offers;
+      this._popupOffersIndex = 0;
+      this._popupIsOpen = true;
+
+      this.root.innerHTML = this._popupBuildHtml(offers);
+
+      requestAnimationFrame(() => {
+        const card = this.root.querySelector('[data-tgop-card]');
+        const backdrop = this.root.querySelector('[data-tgop-backdrop]');
+        if (card) card.classList.add('tgop-open');
+        if (backdrop) backdrop.classList.add('tgop-open');
+      });
+
+      this._popupBind();
+      popupRecordShown(cfg);
+
+      const layout = cfg.popupLayout || 'slide-in';
+      if (cfg.popupOverlay && ['centered', 'fullscreen', 'side-drawer'].includes(layout)) {
+        this._popupOrigOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+      }
+
+      this._popupStartRotation();
+    }
+
+    _popupClose(reason) {
+      if (!this._popupIsOpen) return;
+      this._popupIsOpen = false;
+      const card = this.root.querySelector('[data-tgop-card]');
+      const backdrop = this.root.querySelector('[data-tgop-backdrop]');
+      if (card) card.classList.remove('tgop-open');
+      if (backdrop) backdrop.classList.remove('tgop-open');
+      if (this._popupOrigOverflow !== undefined) {
+        document.body.style.overflow = this._popupOrigOverflow;
+        this._popupOrigOverflow = undefined;
+      }
+      if (this._popupRotationTimer) {
+        clearInterval(this._popupRotationTimer);
+        this._popupRotationTimer = null;
+      }
+      if (this._popupEscHandler) {
+        document.removeEventListener('keydown', this._popupEscHandler);
+        this._popupEscHandler = null;
+      }
+      if (reason === 'converted') popupRecordConverted(this.cfg);
+      else popupRecordDismissed(this.cfg);
+      setTimeout(() => {
+        if (!this._popupIsOpen) this.root.innerHTML = '';
+      }, 320);
+    }
+
+    _popupBind() {
+      const root = this.root;
+      const self = this;
+      const cfg = this.cfg;
+
+      root.querySelectorAll('[data-tgop-close]').forEach(btn => {
+        btn.addEventListener('click', () => self._popupClose('dismissed'));
+      });
+      if (cfg.popupCloseOnBackdropClick) {
+        const bd = root.querySelector('[data-tgop-backdrop]');
+        if (bd) bd.addEventListener('click', () => self._popupClose('dismissed'));
+      }
+      if (cfg.popupCloseOnEscape && !this._popupEscHandler) {
+        const onEsc = (e) => { if (e.key === 'Escape') self._popupClose('dismissed'); };
+        document.addEventListener('keydown', onEsc);
+        this._popupEscHandler = onEsc;
+      }
+      root.querySelectorAll('[data-tgop-conv]').forEach(link => {
+        link.addEventListener('click', () => popupRecordConverted(cfg));
+      });
+      root.querySelectorAll('[data-tgop-rot-dot]').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const i = parseInt(dot.getAttribute('data-tgop-rot-dot'), 10) || 0;
+          self._popupOffersIndex = i;
+          if (self._popupRotationTimer) {
+            clearInterval(self._popupRotationTimer);
+            self._popupRotationTimer = null;
+          }
+          self._popupRerender();
+        });
+      });
+    }
+
+    _popupRerender() {
+      const card = this.root.querySelector('[data-tgop-card]');
+      if (!card) return;
+      const mode = this._popupPickRenderMode();
+      let content;
+      if (mode === 'mini') content = this._popupRenderMini(this._popupOffers);
+      else if (mode === 'single') content = this._popupRenderSingle(this._popupOffers);
+      else content = this._popupRenderCompact(this._popupOffers);
+      card.innerHTML = content;
+      this._popupBind();
+    }
+
+    _popupStartRotation() {
+      const cfg = this.cfg;
+      const interval = Math.max(0, cfg.popupRotateInterval || 0);
+      if (!interval) return;
+      const mode = this._popupPickRenderMode();
+      if (mode !== 'single') return;
+      if (!this._popupOffers || this._popupOffers.length < 2) return;
+      try {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      } catch {}
+      const tick = () => {
+        if (!this._popupIsOpen) return;
+        this._popupOffersIndex = (this._popupOffersIndex + 1) % this._popupOffers.length;
+        this._popupRerender();
+      };
+      this._popupRotationTimer = setInterval(tick, interval);
+    }
+
+    // Entry point — called from _renderOffers when template='popup'.
+    _renderPopupTemplate() {
+      // Eligibility check first
+      const eligibility = popupShouldShow(this.cfg);
+      if (!eligibility.show) {
+        if (window.console && console.debug) console.debug('[TG Offers Popup] Not shown:', eligibility.reason);
+        return;
+      }
+      if (!this.rawOffers || !this.rawOffers.length) {
+        if (window.console && console.debug) console.debug('[TG Offers Popup] No offers — popup will not show');
+        return;
+      }
+      const cleanup = popupAttachTrigger(this.cfg, () => this._popupOpen());
+      this._popupTriggerCleanup = cleanup;
+    }
+    /* ═══════════════════════════════════════════════════════════════════
+       END POPUP TEMPLATE
+       ═══════════════════════════════════════════════════════════════════ */
+
 
     /* ═══════════════════════════════════════════════════════════════════
        BOARDING-PASS TEMPLATE (FLIGHTS ONLY)
