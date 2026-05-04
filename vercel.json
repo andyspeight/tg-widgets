@@ -38,6 +38,7 @@
     { "source": "/editor-logos",        "destination": "/editor-logos.html" },
     { "source": "/editor-offers",       "destination": "/editor-offers.html" },
     { "source": "/editor-textfx",       "destination": "/editor-textfx.html" },
+    { "source": "/editor-popup",        "destination": "/editor-popup.html" },
     { "source": "/editor-test",         "destination": "/editor-test.html" },
     { "source": "/inbox-enquiry",       "destination": "/inbox-enquiry.html" }
   ],
