@@ -442,6 +442,10 @@
       <input id="ctrlPopupHeading" type="text" value="Live deals" maxlength="40" />
     </div>
     <div class="field">
+      <label for="ctrlPopupMaxRender">Max offers in popup</label>
+      <input id="ctrlPopupMaxRender" type="number" min="1" max="20" step="1" value="6" />
+    </div>
+    <div class="field">
       <label for="ctrlPopupRotate">Rotate every (ms)</label>
       <input id="ctrlPopupRotate" type="number" min="0" step="1000" value="8000" />
     </div>
@@ -695,6 +699,7 @@
       popupShowPulse: $('ctrlPopupShowPulse').checked,
       popupShowCloseButton: $('ctrlPopupCloseBtn').checked,
       popupRotateInterval: parseInt($('ctrlPopupRotate').value, 10) || 0,
+      popupMaxRender: parseInt($('ctrlPopupMaxRender').value, 10) || 6,
       // Force every-visit so demo tweaks always re-fire
       popupFrequency: 'every-visit',
       popupSuppressAfterDismissDays: 0,
