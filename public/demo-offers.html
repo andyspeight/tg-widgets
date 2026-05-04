@@ -89,12 +89,24 @@
     letter-spacing: -0.5px;
   }
   .lede {
-    color: var(--tg-sub); font-size: 16px; max-width: 720px;
+    color: var(--tg-sub); font-size: 16px; max-width: 760px;
     margin: 0 0 24px; line-height: 1.6;
   }
 
-  /* Demo controls */
+  /* Demo controls — primary row (always visible) */
   .controls {
+    background: var(--tg-surface);
+    border: 1px solid var(--tg-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+  /* Subordinate row — template-specific options */
+  .controls-sub {
     background: var(--tg-surface);
     border: 1px solid var(--tg-border);
     border-radius: 12px;
@@ -105,7 +117,18 @@
     gap: 12px;
     align-items: end;
   }
+  .controls-sub[hidden] { display: none; }
+  .controls-sub-label {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    color: var(--tg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+    margin-bottom: -4px;
+  }
   .field { display: flex; flex-direction: column; gap: 4px; }
+  .field[hidden] { display: none; }
   label {
     font-size: 11px; color: var(--tg-sub); font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.5px;
@@ -124,6 +147,36 @@
     outline-offset: 1px;
     border-color: var(--tg-accent);
   }
+  /* Toggle switch (mirrors the editor's tap target) */
+  .toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 38px; height: 22px;
+    background: var(--tg-border);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  }
+  .toggle:checked { background: var(--tg-accent); }
+  .toggle:checked::after { transform: translateX(16px); }
+  .toggle-label-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+  }
+  .toggle-label-row label { margin: 0; }
 
   /* Stage */
   .stage-label {
@@ -175,13 +228,33 @@
 <main class="wrap">
   <h1>Travel Offers</h1>
   <p class="lede">
-    Live offers from your Travelify cache, rendered as cards on your site. Pulls accommodation, flights,
-    dynamic flight + hotel packages, or true package holidays. Client-side dedupe keeps you in control —
-    no upstream collapsing of variants.
+    Live offers from your Travelify cache, rendered five ways. Pick a template — Cards (with Grid,
+    Carousel or List layouts), Magazine (hero + grid), Departure board (live airport-style fares),
+    or Boarding pass (paper passes for flights). Cards reads accommodation, flights, dynamic
+    flight + hotel packages, or true package holidays. Departure board and Boarding pass force
+    flights regardless of the picker.
   </p>
 
+  <!-- ─── Primary controls — always visible ─────────────────────── -->
   <div class="controls">
     <div class="field">
+      <label for="ctrlTemplate">Template</label>
+      <select id="ctrlTemplate">
+        <option value="cards" selected>Cards</option>
+        <option value="magazine">Magazine</option>
+        <option value="departure-board">Departure board</option>
+        <option value="boarding-pass">Boarding pass</option>
+      </select>
+    </div>
+    <div class="field" id="fieldLayout">
+      <label for="ctrlLayout">Layout (Cards only)</label>
+      <select id="ctrlLayout">
+        <option value="grid" selected>Grid</option>
+        <option value="carousel">Carousel</option>
+        <option value="list">List</option>
+      </select>
+    </div>
+    <div class="field" id="fieldType">
       <label for="ctrlType">Offer type</label>
       <select id="ctrlType">
         <option value="Accommodation" selected>Accommodation</option>
@@ -211,7 +284,7 @@
         <option value="route-carrier">Per route + carrier</option>
       </select>
     </div>
-    <div class="field">
+    <div class="field" id="fieldDensity">
       <label for="ctrlDensity">Card density</label>
       <select id="ctrlDensity">
         <option value="compact">Compact</option>
@@ -219,8 +292,8 @@
         <option value="detailed">Detailed</option>
       </select>
     </div>
-    <div class="field">
-      <label for="ctrlCols">Columns</label>
+    <div class="field" id="fieldCols">
+      <label for="ctrlCols">Columns (Grid only)</label>
       <select id="ctrlCols">
         <option value="auto" selected>Auto-fit</option>
         <option value="2">2</option>
@@ -230,7 +303,105 @@
     </div>
   </div>
 
-  <div class="stage-label">Live preview · Travelify offers cache · AppId 250</div>
+  <!-- ─── Magazine-specific controls ─────────────────────────────── -->
+  <div class="controls-sub" id="subMagazine" hidden>
+    <div class="controls-sub-label">Magazine options</div>
+    <div class="field">
+      <label for="ctrlMagHero">Hero offer</label>
+      <select id="ctrlMagHero">
+        <option value="discount" selected>Biggest discount</option>
+        <option value="featured">Featured (fallback to discount)</option>
+        <option value="cheapest">Cheapest</option>
+        <option value="first">First returned</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlMagCols">Sub-grid columns</label>
+      <select id="ctrlMagCols">
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ─── Boarding-pass-specific controls ────────────────────────── -->
+  <div class="controls-sub" id="subBoardingPass" hidden>
+    <div class="controls-sub-label">Boarding pass options</div>
+    <div class="field">
+      <label for="ctrlBpCols">Passes per row</label>
+      <select id="ctrlBpCols">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlBpBarcode">Show barcode</label>
+        <input class="toggle" type="checkbox" id="ctrlBpBarcode" checked />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── List-layout specific controls ──────────────────────────── -->
+  <div class="controls-sub" id="subList" hidden>
+    <div class="controls-sub-label">List layout options</div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlListMeta">Show meta row</label>
+        <input class="toggle" type="checkbox" id="ctrlListMeta" checked />
+      </div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlListAmenities">Show tag chips</label>
+        <input class="toggle" type="checkbox" id="ctrlListAmenities" checked />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Departure-board specific controls ──────────────────────── -->
+  <div class="controls-sub" id="subDepartureBoard" hidden>
+    <div class="controls-sub-label">Departure board options</div>
+    <div class="field">
+      <label for="ctrlBoardTheme">Theme</label>
+      <select id="ctrlBoardTheme">
+        <option value="dark" selected>Dark (classic)</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlBoardAirport">Default airport</label>
+      <select id="ctrlBoardAirport">
+        <option value="LHR" selected>LHR · Heathrow</option>
+        <option value="LGW">LGW · Gatwick</option>
+        <option value="STN">STN · Stansted</option>
+        <option value="MAN">MAN · Manchester</option>
+        <option value="BHX">BHX · Birmingham</option>
+        <option value="EDI">EDI · Edinburgh</option>
+        <option value="GLA">GLA · Glasgow</option>
+        <option value="BRS">BRS · Bristol</option>
+        <option value="DUB">DUB · Dublin</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlBoardRange">Date range</label>
+      <select id="ctrlBoardRange">
+        <option value="14">14 days</option>
+        <option value="30" selected>30 days</option>
+        <option value="60">60 days</option>
+        <option value="90">90 days</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlBoardAnimate">Split-flap animation</label>
+        <input class="toggle" type="checkbox" id="ctrlBoardAnimate" checked />
+      </div>
+    </div>
+  </div>
+
+  <div class="stage-label" id="stageLabel">Live preview · Travelify offers cache · AppId 250</div>
   <div class="stage">
     <div id="widgetMount"></div>
   </div>
@@ -242,7 +413,9 @@
 
 <script src="/widget-offers.js"></script>
 <script>
-  // Theme toggle
+  /* ───────────────────────────────────────────────────────────────
+     Theme toggle — applies to host page AND propagates to widget
+     ─────────────────────────────────────────────────────────────── */
   const themeBtn = document.getElementById('themeBtn');
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
@@ -255,47 +428,134 @@
   });
   applyTheme('light');
 
-  // Controls
+  /* ───────────────────────────────────────────────────────────────
+     Conditional control visibility based on template + layout.
+     Mirrors the editor's data-when-template / data-when-layout system,
+     just lighter-weight (we know all the IDs up front).
+     ─────────────────────────────────────────────────────────────── */
+  function $(id) { return document.getElementById(id); }
+
+  function updateVisibility() {
+    const tmpl = $('ctrlTemplate').value;
+    const layout = $('ctrlLayout').value;
+
+    const isCards = tmpl === 'cards';
+    const isMagazine = tmpl === 'magazine';
+    const isDepartureBoard = tmpl === 'departure-board';
+    const isBoardingPass = tmpl === 'boarding-pass';
+
+    // Layout selector — only relevant for cards
+    $('fieldLayout').hidden = !isCards;
+
+    // Offer type — relevant for cards and magazine; departure-board and
+    // boarding-pass force flights regardless
+    $('fieldType').hidden = isDepartureBoard || isBoardingPass;
+
+    // Density — only meaningful for cards (magazine, board, pass have
+    // their own intrinsic sizing)
+    $('fieldDensity').hidden = !isCards;
+
+    // Columns — grid layout only, inside cards template
+    $('fieldCols').hidden = !(isCards && layout === 'grid');
+
+    // Subordinate option panels
+    $('subMagazine').hidden = !isMagazine;
+    $('subBoardingPass').hidden = !isBoardingPass;
+    $('subList').hidden = !(isCards && layout === 'list');
+    $('subDepartureBoard').hidden = !isDepartureBoard;
+
+    // Stage label reflects the active template
+    const labels = {
+      'cards': 'Cards template · ' + layout + ' layout',
+      'magazine': 'Magazine template · hero + grid',
+      'departure-board': 'Departure board template · live fares',
+      'boarding-pass': 'Boarding pass template · flights only',
+    };
+    $('stageLabel').textContent = 'Live preview · ' + (labels[tmpl] || tmpl);
+  }
+
+  /* ───────────────────────────────────────────────────────────────
+     Build a fresh config from current control values
+     ─────────────────────────────────────────────────────────────── */
   const mount = document.getElementById('widgetMount');
-  let currentWidget = null;
 
   function parseList(s) {
     return (s || '').split(',').map(x => x.trim()).filter(Boolean);
   }
 
   function buildConfig() {
+    const tmpl = $('ctrlTemplate').value;
+    const layout = $('ctrlLayout').value;
+
     return {
       // Travelify test creds — public, safe to embed
       appId: '250',
       apiKey: 'A41D180E-CBFE-4E30-A47D-FAAB424A650D',
-      type: document.getElementById('ctrlType').value,
-      destinations: parseList(document.getElementById('ctrlDest').value),
-      origins: parseList(document.getElementById('ctrlOrigin').value),
-      dedupeStrategy: document.getElementById('ctrlDedupe').value,
-      density: document.getElementById('ctrlDensity').value,
-      columns: document.getElementById('ctrlCols').value,
+
+      // Template + layout
+      template: tmpl,
+      layout: layout,
+
+      // Core filters
+      type: $('ctrlType').value,
+      destinations: parseList($('ctrlDest').value),
+      origins: parseList($('ctrlOrigin').value),
+      dedupeStrategy: $('ctrlDedupe').value,
+      density: $('ctrlDensity').value,
+      columns: $('ctrlCols').value,
       theme: document.documentElement.getAttribute('data-theme'),
       maxOffers: 100,
       DatesMin: 7,
       DatesMax: 180,
       cacheMinutes: 0,  // No cache in demo so changes are instant
       sort: 'price:asc',
+
+      // Magazine options (read regardless — widget ignores when not magazine)
+      magazineHeroStrategy: $('ctrlMagHero').value,
+      magazineColumns: parseInt($('ctrlMagCols').value, 10) || 3,
+
+      // Boarding-pass options
+      boardingPassColumns: parseInt($('ctrlBpCols').value, 10) || 2,
+      boardingPassShowBarcode: $('ctrlBpBarcode').checked,
+
+      // List options
+      listShowMeta: $('ctrlListMeta').checked,
+      listShowAmenities: $('ctrlListAmenities').checked,
+
+      // Departure-board options
+      boardTheme: $('ctrlBoardTheme').value,
+      boardDefaultAirport: $('ctrlBoardAirport').value,
+      boardDateRange: parseInt($('ctrlBoardRange').value, 10) || 30,
+      boardAnimate: $('ctrlBoardAnimate').checked,
+      // Auto-detect off in demo so the airport picker is the source of truth
+      boardAutoDetect: false,
+      boardAllowSwitcher: true,
+      boardAutoRefresh: false,
     };
   }
 
+  /* ───────────────────────────────────────────────────────────────
+     Rebuild the widget on any control change
+     ─────────────────────────────────────────────────────────────── */
   function rebuild() {
+    updateVisibility();
     mount.innerHTML = '';
     const div = document.createElement('div');
     div.setAttribute('data-tg-widget', 'offers');
     div.setAttribute('data-tg-config', JSON.stringify(buildConfig()));
     mount.appendChild(div);
-    currentWidget = new window.TGOffersWidget(div, buildConfig());
+    new window.TGOffersWidget(div, buildConfig());
   }
 
-  document.querySelectorAll('.controls select, .controls input').forEach(el => {
+  /* ───────────────────────────────────────────────────────────────
+     Wire every control. Selects + checkboxes rebuild on change;
+     text inputs debounce so typing doesn't fire dozens of fetches.
+     ─────────────────────────────────────────────────────────────── */
+  document.querySelectorAll('.controls select, .controls-sub select, .controls-sub input[type="checkbox"]').forEach(el => {
     el.addEventListener('change', rebuild);
+  });
+  document.querySelectorAll('.controls input[type="text"], .controls input[type="number"]').forEach(el => {
     el.addEventListener('input', () => {
-      // Debounce text inputs
       clearTimeout(el._t);
       el._t = setTimeout(rebuild, 400);
     });
