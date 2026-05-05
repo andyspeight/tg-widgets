@@ -25,6 +25,7 @@
     { "source": "/demo-logos",        "destination": "/demo-logos.html" },
     { "source": "/demo-textfx",       "destination": "/demo-textfx.html" },
     { "source": "/demo-popup",        "destination": "/demo-popup.html" },
+    { "source": "/demo-events",       "destination": "/demo-events.html" },
     { "source": "/wow-showcase",      "destination": "/wow-showcase.html" },
     { "source": "/editor",              "destination": "/editor.html" },
     { "source": "/editor-reviews",      "destination": "/editor-reviews.html" },
@@ -39,6 +40,7 @@
     { "source": "/editor-offers",       "destination": "/editor-offers.html" },
     { "source": "/editor-textfx",       "destination": "/editor-textfx.html" },
     { "source": "/editor-popup",        "destination": "/editor-popup.html" },
+    { "source": "/editor-events",       "destination": "/editor-events.html" },
     { "source": "/editor-test",         "destination": "/editor-test.html" },
     { "source": "/inbox-enquiry",       "destination": "/inbox-enquiry.html" },
     { "source": "/signin",              "destination": "/signin.html" },
@@ -145,6 +147,14 @@
     },
     {
       "source": "/widget-popup.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-events.js",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
