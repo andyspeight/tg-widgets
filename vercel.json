@@ -40,7 +40,11 @@
     { "source": "/editor-textfx",       "destination": "/editor-textfx.html" },
     { "source": "/editor-popup",        "destination": "/editor-popup.html" },
     { "source": "/editor-test",         "destination": "/editor-test.html" },
-    { "source": "/inbox-enquiry",       "destination": "/inbox-enquiry.html" }
+    { "source": "/inbox-enquiry",       "destination": "/inbox-enquiry.html" },
+    { "source": "/signin",              "destination": "/signin.html" },
+    { "source": "/forgot-password",     "destination": "/forgot-password.html" },
+    { "source": "/reset-password",      "destination": "/reset-password.html" },
+    { "source": "/accept-invite",       "destination": "/accept-invite.html" }
   ],
   "headers": [
     {
@@ -145,6 +149,23 @@
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
         { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/(signin|forgot-password|reset-password|accept-invite)(\\.html)?",
+      "headers": [
+        { "key": "X-Frame-Options",            "value": "DENY" },
+        { "key": "Referrer-Policy",            "value": "no-referrer" },
+        { "key": "Strict-Transport-Security",  "value": "max-age=31536000; includeSubDomains" },
+        { "key": "Content-Security-Policy",    "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'" }
+      ]
+    },
+    {
+      "source": "/api/auth/(.*)",
+      "headers": [
+        { "key": "Cache-Control",          "value": "no-store" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy",        "value": "no-referrer" }
       ]
     }
   ]
