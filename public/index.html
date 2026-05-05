@@ -1637,14 +1637,29 @@ function loadMiniPreview(w) {
 /* ═══ AUTH ═══ */
 let userData = null;
 try {
-  const sess = JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'));
-  // Check expiry (24 hours)
-  if (sess && sess.timestamp && (Date.now() - sess.timestamp) < 86400000) {
-    userData = sess.user; signedIn = true; userEmail = sess.user?.email || '';
-  } else { localStorage.removeItem('tgw_session'); sessionStorage.removeItem('tgw_session'); }
+  // Primary: read keys written by /signin.html (new auth flow)
+  const tok = localStorage.getItem('tg_token');
+  const usrRaw = localStorage.getItem('tg_user');
+  if (tok && usrRaw) {
+    const usr = JSON.parse(usrRaw);
+    userData = usr; signedIn = true; userEmail = usr?.email || '';
+  } else {
+    // Legacy fallback: tgw_session blob from the old /api/widget-auth flow
+    const sess = JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'));
+    if (sess && sess.timestamp && (Date.now() - sess.timestamp) < 86400000) {
+      userData = sess.user; signedIn = true; userEmail = sess.user?.email || '';
+    } else {
+      localStorage.removeItem('tgw_session'); sessionStorage.removeItem('tgw_session');
+    }
+  }
 } catch(e) {}
 
-function getAuthToken() { try { return JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; } }
+function getAuthToken() {
+  // Prefer the new key, fall back to legacy
+  const t = localStorage.getItem('tg_token');
+  if (t) return t;
+  try { return JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; }
+}
 function authHeaders() { const t = getAuthToken(); return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }; }
 
 function openSignIn(){location.href='/signin.html?next='+encodeURIComponent(location.pathname+location.search+location.hash)}
@@ -1678,7 +1693,7 @@ async function doSignIn(){
   }
 }
 
-function signOut(){localStorage.removeItem('tgw_session');sessionStorage.removeItem('tgw_session');signedIn=false;userEmail='';userData=null;myWidgetData=[];render()}
+function signOut(){localStorage.removeItem('tg_token');localStorage.removeItem('tg_user');localStorage.removeItem('tg_client');localStorage.removeItem('tgw_session');sessionStorage.removeItem('tgw_session');signedIn=false;userEmail='';userData=null;myWidgetData=[];render()}
 
 /* ═══ UTILS ═══ */
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
