@@ -123,6 +123,13 @@ function buildFormula(filters, monthsAhead) {
     `DATETIME_DIFF({${FIELDS.dateStart}}, DATETIME_PARSE('${horizonStr}', 'YYYY-MM-DD'), 'days') <= 0`,
     // Must have a valid start date at all
     `NOT(BLANK()={${FIELDS.dateStart}})`,
+    // Status filter — show events that are approved OR have no Status set.
+    // Events with Status = "pending" or "rejected" (typically AI-generated
+    // events awaiting review) are hidden until Andy reviews them.
+    // Using OR with BLANK() so the formula works whether or not the Status
+    // field exists on the table — if the field doesn't exist the {Status}
+    // reference evaluates to blank which matches BLANK()={Status}.
+    `OR({Status}='approved', BLANK()={Status})`,
   ];
 
   const filterClauses = [];
