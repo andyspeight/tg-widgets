@@ -1647,8 +1647,8 @@ try {
 function getAuthToken() { try { return JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; } }
 function authHeaders() { const t = getAuthToken(); return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }; }
 
-function openSignIn(){document.getElementById('signInModal').classList.add('open');document.getElementById('signEmail').focus()}
-function closeSignIn(){document.getElementById('signInModal').classList.remove('open');document.getElementById('signErr').style.display='none'}
+function openSignIn(){location.href='/signin.html?next='+encodeURIComponent(location.pathname+location.search+location.hash)}
+function closeSignIn(){const m=document.getElementById('signInModal');if(m)m.classList.remove('open');const e=document.getElementById('signErr');if(e)e.style.display='none'}
 
 async function doSignIn(){
   const email=document.getElementById('signEmail').value.trim();
@@ -1682,7 +1682,7 @@ function signOut(){localStorage.removeItem('tgw_session');sessionStorage.removeI
 
 /* ═══ UTILS ═══ */
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
-document.getElementById('signInModal').addEventListener('click',e=>{if(e.target.id==='signInModal')closeSignIn()});
+(function(){const m=document.getElementById('signInModal');if(m)m.addEventListener('click',e=>{if(e.target.id==='signInModal')closeSignIn()})})();
 
 /* ═══ INIT ═══ */
 render();
