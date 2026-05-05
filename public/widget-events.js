@@ -1028,7 +1028,12 @@
           const headers = (window.__TG_EDITOR_AUTH_HEADERS__ && typeof window.__TG_EDITOR_AUTH_HEADERS__ === 'function')
             ? window.__TG_EDITOR_AUTH_HEADERS__() : {};
           const r = await fetch(url, { headers });
-          if (!r.ok) throw new Error('events-fetch-' + r.status);
+          if (!r.ok) {
+            let detail = '';
+            try { const j = await r.json(); detail = j.hint || j.error || ''; } catch {}
+            console.error('[tg-events] fetch failed', r.status, detail);
+            throw new Error('events-fetch-' + r.status);
+          }
           const j = await r.json();
           this.curatedEvents = normaliseEvents(j.events || [], 'curated');
         } catch (err) {
@@ -1043,7 +1048,12 @@
       try {
         const url = EVENTS_API + '?id=' + encodeURIComponent(this.cfg.widgetId);
         const r = await fetch(url);
-        if (!r.ok) throw new Error('events-fetch-' + r.status);
+        if (!r.ok) {
+          let detail = '';
+          try { const j = await r.json(); detail = j.hint || j.error || ''; } catch {}
+          console.error('[tg-events] fetch failed', r.status, detail);
+          throw new Error('events-fetch-' + r.status);
+        }
         const j = await r.json();
         this.curatedEvents = normaliseEvents(j.events || [], 'curated');
       } catch (err) {
