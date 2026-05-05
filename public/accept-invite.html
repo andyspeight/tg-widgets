@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accept invitation · Travelgenix</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/editor-shell.css">
+<link rel="stylesheet" href="/auth.css">
+</head>
+<body>
+<main class="auth-shell" role="main">
+  <div class="auth-brand">Travelgenix</div>
+  <div class="auth-card">
+    <h1 id="heading">Accept invitation</h1>
+    <p class="lede" id="lede">Loading invitation…</p>
+
+    <div id="msg" class="auth-msg" role="status" aria-live="polite"></div>
+
+    <form id="acceptForm" class="auth-form" novalidate style="display:none;">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="username" disabled>
+      </div>
+      <div class="field">
+        <label for="fullName">Your full name</label>
+        <input type="text" id="fullName" name="fullName" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="newPassword">Password</label>
+        <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" required minlength="10">
+        <span class="hint">At least 10 characters.</span>
+      </div>
+      <div class="field">
+        <label for="confirmPassword">Confirm password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required minlength="10">
+      </div>
+      <button type="submit" class="auth-submit" id="submitBtn">Create account &amp; sign in</button>
+    </form>
+  </div>
+  <p class="auth-foot">Travelgenix · Bournemouth, UK · part of Agendas Group</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  const form = document.getElementById('acceptForm');
+  const heading = document.getElementById('heading');
+  const lede = document.getElementById('lede');
+  const msg = document.getElementById('msg');
+  const emailEl = document.getElementById('email');
+  const nameEl = document.getElementById('fullName');
+  const pw1 = document.getElementById('newPassword');
+  const pw2 = document.getElementById('confirmPassword');
+  const submitBtn = document.getElementById('submitBtn');
+
+  const params = new URLSearchParams(location.search);
+  const token = params.get('token');
+  function showMsg(text, kind) { msg.textContent = text; msg.className = 'auth-msg ' + (kind || 'info'); }
+
+  if (!token) {
+    showMsg('This invitation link is invalid.', 'error');
+    lede.textContent = 'Please ask your admin to send a new invitation.';
+    return;
+  }
+
+  // Fetch invite info
+  (async () => {
+    try {
+      const res = await fetch('/api/auth/invite/info?token=' + encodeURIComponent(token));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        const code = data.code || 'error';
+        const friendly = code === 'expired_token'
+          ? 'This invitation has expired. Please ask your admin to resend it.'
+          : code === 'used_token'
+          ? 'This invitation has already been used.'
+          : 'This invitation is invalid.';
+        showMsg(friendly, 'error');
+        lede.textContent = '';
+        return;
+      }
+      heading.textContent = `Join ${data.clientName || 'your team'}`;
+      lede.textContent = `You've been invited as a ${data.role}. Set up your account below.`;
+      emailEl.value = data.email;
+      if (data.fullName) nameEl.value = data.fullName;
+      form.style.display = '';
+    } catch {
+      showMsg('Network error. Please try again.', 'error');
+    }
+  })();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fullName = nameEl.value.trim();
+    const a = pw1.value, b = pw2.value;
+    if (!fullName) { showMsg('Please enter your full name.', 'error'); return; }
+    if (a.length < 10) { showMsg('Password must be at least 10 characters.', 'error'); return; }
+    if (a !== b) { showMsg("Passwords don't match.", 'error'); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account…';
+    try {
+      const res = await fetch('/api/auth/invite/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, fullName, password: a })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        const code = data.code || 'error';
+        const friendly = code === 'expired_token' ? 'This invitation has expired.'
+          : code === 'invalid_token' ? 'This invitation is invalid or has been used.'
+          : code === 'invalid_password' ? (data.error || 'Password too weak.')
+          : code === 'rate_limit' ? 'Too many attempts. Please wait.'
+          : 'Something went wrong.';
+        showMsg(friendly, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account & sign in';
+        return;
+      }
+      try {
+        localStorage.setItem('tg_token', data.token);
+        localStorage.setItem('tg_user', JSON.stringify(data.user || {}));
+        if (data.client) localStorage.setItem('tg_client', JSON.stringify(data.client));
+      } catch {}
+      showMsg('Welcome aboard. Taking you to your dashboard…', 'success');
+      setTimeout(() => { location.href = '/'; }, 800);
+    } catch {
+      showMsg('Network error. Please try again.', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create account & sign in';
+    }
+  });
+})();
+</script>
+</body>
+</html>
