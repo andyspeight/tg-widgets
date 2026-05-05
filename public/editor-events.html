@@ -860,15 +860,27 @@
       try { widgetInst.destroy(); } catch {}
       widgetInst = null;
     }
-    const host = $('#widget-mount');
-    if (!host) return;
-    host.innerHTML = '';
-    host.removeAttribute('data-tg-rendered');
+
+    // CRITICAL: tear down the host element entirely and replace with a fresh
+    // div. attachShadow() throws NotSupportedError if called twice on the same
+    // element — and in some browsers it fails silently, leaving the preview
+    // blank. A brand-new host gets a brand-new shadow root.
+    const oldHost = $('#widget-mount');
+    if (!oldHost) return;
+    const host = document.createElement('div');
+    host.id = 'widget-mount';
+    host.setAttribute('data-tg-widget', 'events');
+    oldHost.replaceWith(host);
 
     // In editor mode the widget needs to know to use the preview-mode API path
     // when there is no saved widget ID yet. We pass the preview filters via the config.
     const previewCfg = Object.assign({}, C);
     previewCfg.widgetId = previewCfg.widgetId || '';
+
+    if (!window.TGEventsWidget) {
+      console.error('[editor-events] TGEventsWidget not loaded');
+      return;
+    }
 
     widgetInst = new window.TGEventsWidget(host, previewCfg);
   }
