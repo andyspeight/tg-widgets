@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in · Travelgenix Widget Suite</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  :root {
+    --auth-card-max: 440px;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: var(--surface-0, #f5f5f5);
+    color: var(--text, #111);
+    font-family: var(--font-family, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  .auth-shell { width: 100%; max-width: var(--auth-card-max); }
+  .auth-brand {
+    display: flex; align-items: center; gap: 8px;
+    margin: 0 0 24px; font-weight: 600; font-size: 14px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted, #666);
+  }
+  .auth-card {
+    background: var(--surface-1, #fff);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+    border: 1px solid var(--border, #ececec);
+  }
+  .auth-card h1 {
+    margin: 0 0 8px; font-size: 22px; font-weight: 600;
+    letter-spacing: -.01em; color: var(--text, #111);
+  }
+  .auth-card p.lede {
+    margin: 0 0 24px; font-size: 14px; color: var(--text-muted, #666); line-height: 1.5;
+  }
+  .auth-oauth {
+    display: grid; gap: 8px; margin-bottom: 20px;
+  }
+  .auth-oauth button {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 11px 16px;
+    background: var(--surface-1, #fff); color: var(--text, #111);
+    border: 1px solid var(--border, #ddd);
+    border-radius: 10px; font: inherit; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background .12s ease, border-color .12s ease;
+    position: relative;
+  }
+  .auth-oauth button:hover:not(:disabled) {
+    background: var(--surface-2, #f7f7f7);
+  }
+  .auth-oauth button:disabled {
+    opacity: .55; cursor: not-allowed;
+  }
+  .auth-oauth .badge-soon {
+    font-size: 10px; padding: 2px 6px; border-radius: 4px;
+    background: var(--surface-2, #eee); color: var(--text-muted, #666);
+    font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  }
+  .auth-oauth svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .auth-divider {
+    display: flex; align-items: center; gap: 12px; margin: 18px 0;
+    color: var(--text-muted, #999); font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: ""; flex: 1; height: 1px; background: var(--border, #e6e6e6);
+  }
+  .auth-form { display: grid; gap: 14px; }
+  .field { display: grid; gap: 6px; }
+  .field label {
+    font-size: 13px; font-weight: 500; color: var(--text, #222);
+  }
+  .field input {
+    width: 100%; box-sizing: border-box; padding: 11px 14px;
+    border: 1px solid var(--border, #ddd); border-radius: 10px;
+    font: inherit; font-size: 14px; background: var(--surface-1, #fff); color: var(--text, #111);
+    transition: border-color .12s ease, box-shadow .12s ease;
+  }
+  .field input:focus {
+    outline: none; border-color: var(--accent, #0a6cff);
+    box-shadow: 0 0 0 3px rgba(10, 108, 255, .15);
+  }
+  .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .link-btn {
+    background: none; border: 0; padding: 0; font: inherit; font-size: 13px;
+    color: var(--accent, #0a6cff); cursor: pointer;
+  }
+  .link-btn:hover { text-decoration: underline; }
+  .auth-submit {
+    width: 100%; padding: 12px 16px; margin-top: 4px;
+    background: var(--accent, #0a6cff); color: #fff;
+    border: 0; border-radius: 10px; font: inherit; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background .12s ease;
+  }
+  .auth-submit:hover:not(:disabled) { background: var(--accent-hover, #095fe0); }
+  .auth-submit:disabled { opacity: .65; cursor: not-allowed; }
+  .auth-msg {
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 8px;
+    display: none;
+  }
+  .auth-msg.error { background: #fff0ef; color: #b3261e; border: 1px solid #f5d6d2; display: block; }
+  .auth-msg.info  { background: #ebf3ff; color: #1f4d99; border: 1px solid #d3e3ff; display: block; }
+  .auth-foot {
+    text-align: center; margin-top: 20px; font-size: 12px; color: var(--text-muted, #888);
+  }
+  .magic-toggle {
+    text-align: center; margin-top: 14px; font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<main class="auth-shell" role="main">
+  <div class="auth-brand">Travelgenix</div>
+
+  <div class="auth-card">
+    <h1>Sign in</h1>
+    <p class="lede">Welcome back. Sign in to manage your widgets.</p>
+
+    <div id="msg" class="auth-msg" role="status" aria-live="polite"></div>
+
+    <!-- Phase 2: OAuth buttons. Disabled for now. -->
+    <div class="auth-oauth" aria-label="Single sign-on options">
+      <button type="button" disabled aria-disabled="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.75h3.57c2.08-1.92 3.28-4.74 3.28-8.07z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.75c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.28-1.93-6.14-4.53H2.17v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.86 14.12a6.6 6.6 0 0 1 0-4.24V7.04H2.17a11 11 0 0 0 0 9.92l3.69-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.17 7.04l3.69 2.84C6.72 7.31 9.14 5.38 12 5.38z"/></svg>
+        Continue with Google
+        <span class="badge-soon">Soon</span>
+      </button>
+      <button type="button" disabled aria-disabled="true">
+        <svg viewBox="0 0 23 23" aria-hidden="true"><path fill="#F25022" d="M1 1h10v10H1z"/><path fill="#7FBA00" d="M12 1h10v10H12z"/><path fill="#00A4EF" d="M1 12h10v10H1z"/><path fill="#FFB900" d="M12 12h10v10H12z"/></svg>
+        Continue with Microsoft
+        <span class="badge-soon">Soon</span>
+      </button>
+    </div>
+
+    <div class="auth-divider">or sign in with email</div>
+
+    <form id="signinForm" class="auth-form" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <div class="row-between">
+          <label for="password">Password</label>
+          <button type="button" class="link-btn" id="forgotBtn">Forgot password?</button>
+        </div>
+        <input type="password" id="password" name="password" autocomplete="current-password" required minlength="10">
+      </div>
+      <button type="submit" class="auth-submit" id="submitBtn">Sign in</button>
+    </form>
+
+    <p class="magic-toggle" style="opacity:.6">Magic link sign-in coming soon</p>
+  </div>
+
+  <p class="auth-foot">Travelgenix · Bournemouth, UK · part of Agendas Group</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const form = document.getElementById('signinForm');
+  const emailEl = document.getElementById('email');
+  const pwEl = document.getElementById('password');
+  const submitBtn = document.getElementById('submitBtn');
+  const forgotBtn = document.getElementById('forgotBtn');
+  const msg = document.getElementById('msg');
+
+  function showMsg(text, kind) {
+    msg.textContent = text;
+    msg.className = 'auth-msg ' + (kind || 'info');
+  }
+  function clearMsg() { msg.className = 'auth-msg'; msg.textContent = ''; }
+
+  // Restore email if remembered
+  try {
+    const saved = localStorage.getItem('tg_signin_email');
+    if (saved) emailEl.value = saved;
+  } catch {}
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMsg();
+
+    const email = emailEl.value.trim().toLowerCase();
+    const password = pwEl.value;
+    if (!email || !password) {
+      showMsg('Please enter your email and password.', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing in…';
+    try {
+      const res = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        const code = data.code || 'error';
+        const friendly = code === 'rate_limit'
+          ? 'Too many attempts. Please wait a moment and try again.'
+          : code === 'suspended'
+          ? 'Your account is suspended. Please contact support.'
+          : 'Email or password is incorrect.';
+        showMsg(friendly, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign in';
+        return;
+      }
+
+      // Persist session token
+      try {
+        localStorage.setItem('tg_token', data.token);
+        localStorage.setItem('tg_user', JSON.stringify(data.user || {}));
+        if (data.client) localStorage.setItem('tg_client', JSON.stringify(data.client));
+        localStorage.setItem('tg_signin_email', email);
+      } catch {}
+
+      // Force-reset users go straight to set-password
+      if (data.user && data.user.mustResetPassword) {
+        location.href = '/reset-password?forced=1';
+        return;
+      }
+
+      // Otherwise to dashboard
+      const next = new URLSearchParams(location.search).get('next') || '/';
+      location.href = next;
+    } catch (err) {
+      showMsg('Network error. Please try again.', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign in';
+    }
+  });
+
+  forgotBtn.addEventListener('click', () => {
+    const email = encodeURIComponent(emailEl.value.trim().toLowerCase());
+    location.href = '/forgot-password' + (email ? '?email=' + email : '');
+  });
+})();
+</script>
+</body>
+</html>
