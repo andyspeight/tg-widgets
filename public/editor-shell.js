@@ -55,13 +55,33 @@
 
   function getSession() {
     try {
-      // 1. Try localStorage (new home)
+      // 1. Primary: new auth flow keys written by /signin.html
+      const tok = localStorage.getItem('tg_token');
+      const usrRaw = localStorage.getItem('tg_user');
+      if (tok && usrRaw) {
+        const usr = JSON.parse(usrRaw);
+        let cli = null;
+        try { cli = JSON.parse(localStorage.getItem('tg_client') || 'null'); } catch {}
+        // plan may be a string ("Bespoke") or a singleSelect object ({name:"Bespoke"})
+        const rawPlan = cli?.plan ?? usr?.plan;
+        const planStr = (rawPlan && typeof rawPlan === 'object') ? (rawPlan.name || '') : (rawPlan || '');
+        return {
+          token: tok,
+          user: {
+            ...usr,
+            plan: planStr,
+            clientName: cli?.clientName || usr?.clientName || '',
+            clientRecordId: cli?.recordId || null
+          },
+          timestamp: Date.now()
+        };
+      }
+      // 2. Legacy fallback: tgw_session blob
       let raw = localStorage.getItem(SESSION_KEY);
       if (raw) return JSON.parse(raw);
-      // 2. Fall back to sessionStorage (legacy — pre-shell editors)
+      // 3. Even older fallback: sessionStorage
       raw = sessionStorage.getItem(SESSION_KEY);
       if (raw) {
-        // Migrate transparently: copy to localStorage so next read is faster
         const s = JSON.parse(raw);
         if (s && s.token) {
           localStorage.setItem(SESSION_KEY, raw);
@@ -86,6 +106,11 @@
 
   function clearSession() {
     try {
+      // Clear new auth keys
+      localStorage.removeItem('tg_token');
+      localStorage.removeItem('tg_user');
+      localStorage.removeItem('tg_client');
+      // Clear legacy keys
       localStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem(SESSION_KEY);
     } catch {}
@@ -209,14 +234,11 @@
   }
 
   function showLogin(message) {
-    const root = buildLoginOverlay();
-    if (message) {
-      const sub = root.querySelector('#tgse-login-sub');
-      if (sub) sub.textContent = message;
-    }
-    root.removeAttribute('hidden');
-    root.style.display = 'flex';
-    setTimeout(() => root.querySelector('#tgse-login-email')?.focus(), 50);
+    // Redirect to the canonical sign-in page (the legacy inline modal is
+    // wired to /api/widget-auth which is now disconnected from the new
+    // bcrypt-based Users table).
+    const here = location.pathname + location.search + location.hash;
+    location.href = '/signin.html?next=' + encodeURIComponent(here);
   }
 
   function hideLogin() {
