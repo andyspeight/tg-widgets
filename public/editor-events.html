@@ -679,7 +679,7 @@
 
     // Layout
     layout: 'list',
-    monthsAhead: 6,
+    monthsAhead: 12,
     cardCount: 6,
 
     // Header
@@ -753,17 +753,17 @@
     {
       id: 'tg-curated-list', name: 'Travelgenix mix', icon: '✨',
       desc: 'Curated travel events alongside your own — chronological list',
-      patch: { layout: 'list', useCuratedEvents: true, curatedCategories: [], curatedCountries: [], title: 'Upcoming events', subtitle: 'Festivals, holidays and travel highlights' }
+      patch: { layout: 'list', useCuratedEvents: true, title: 'Upcoming events', subtitle: 'Festivals, holidays and travel highlights' }
     },
     {
-      id: 'tg-month-uk', name: 'UK month view', icon: '🇬🇧',
-      desc: 'Month grid focused on UK festivals, holidays and sporting events',
-      patch: { layout: 'month', useCuratedEvents: true, curatedCountries: ['United Kingdom'], curatedCategories: [], title: 'What\'s on this month', subtitle: 'Across the UK' }
+      id: 'tg-month', name: 'Monthly grid', icon: '📅',
+      desc: 'Calendar grid layout — see the whole month at a glance',
+      patch: { layout: 'month', useCuratedEvents: true, title: 'What\'s on this month', subtitle: 'Festivals, holidays and travel highlights' }
     },
     {
-      id: 'global-festivals', name: 'World festivals', icon: '🎉',
-      desc: 'A card showcase of the world\'s biggest festivals and cultural events',
-      patch: { layout: 'card', useCuratedEvents: true, curatedCategories: ['Festival', 'Cultural'], curatedCountries: [], title: 'Festivals around the world', subtitle: 'Time it right — celebrate where it matters' }
+      id: 'global-festivals', name: 'Festival showcase', icon: '🎉',
+      desc: 'A card showcase of upcoming festivals and travel-driving events',
+      patch: { layout: 'card', useCuratedEvents: true, title: 'Festivals around the world', subtitle: 'Time it right — celebrate where it matters' }
     },
     {
       id: 'agency-only', name: 'In-house events', icon: '🏢',
@@ -772,8 +772,8 @@
     },
     {
       id: 'sporting', name: 'Sporting calendar', icon: '🏆',
-      desc: 'Major sporting events with destinations to plan around',
-      patch: { layout: 'list', useCuratedEvents: true, curatedCategories: ['Sporting Event'], curatedCountries: [], title: 'Sporting calendar', subtitle: 'The events worth booking around' }
+      desc: 'Major sporting events worth planning bookings around',
+      patch: { layout: 'list', useCuratedEvents: true, title: 'Sporting calendar', subtitle: 'The events worth booking around' }
     },
     {
       id: 'minimal', name: 'Minimal & clean', icon: '⚪',
@@ -910,8 +910,8 @@
     if (C.layout === 'list' || C.layout === 'card') {
       html += '<div class="field" style="margin-top:12px"><label class="field-label">How far ahead to look</label>'
         + '<div class="slider-row">'
-          + '<input type="range" min="1" max="24" value="' + (C.monthsAhead || 6) + '" id="months-range">'
-          + '<span class="slider-val">' + (C.monthsAhead || 6) + ' mo</span>'
+          + '<input type="range" min="1" max="24" value="' + (C.monthsAhead || 12) + '" id="months-range">'
+          + '<span class="slider-val">' + (C.monthsAhead || 12) + ' mo</span>'
         + '</div></div>';
     }
     if (C.layout === 'card') {
@@ -994,7 +994,7 @@
     });
   }
 
-  /* ── Section: Curated source ────────────────────────────── */
+  /* ── Section: Curated source (just an on/off toggle now) ── */
   function renderCurated() {
     const host = $('#sb-curated');
     host.innerHTML = ''
@@ -1002,29 +1002,14 @@
         + '<div class="source-head">'
           + '<span class="source-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg></span>'
           + '<div class="source-meta">'
-            + '<div class="source-title">Travelgenix curated events</div>'
-            + '<div class="source-desc">Festivals, holidays and travel-driving moments — kept up to date for you.</div>'
+            + '<div class="source-title">Travelgenix events feed</div>'
+            + '<div class="source-desc">All upcoming festivals, holidays, sporting events and travel-driving moments — kept up to date for you. Your visitors filter by category using the chips on the calendar itself.</div>'
           + '</div>'
         + '</div>'
       + '</div>'
-      + switchRow('Show Travelgenix events', 'useCuratedEvents', 'Mix our curated events into your calendar')
-      + (C.useCuratedEvents ? ''
-        + '<div class="field"><label class="field-label">Filter by country</label>'
-          + chipInput('curatedCountries', SUGGESTED_COUNTRIES, 'Type a country and press Enter')
-          + '<div class="field-hint">Leave empty to show events from any country.</div>'
-        + '</div>'
-        + '<div class="field"><label class="field-label">Filter by category</label>'
-          + chipInput('curatedCategories', SUGGESTED_CATEGORIES, 'Type a category and press Enter')
-          + '<div class="field-hint">Leave empty to show all categories.</div>'
-        + '</div>'
-        + '<div class="field"><label class="field-label">Filter by audience</label>'
-          + chipInput('curatedAudience', SUGGESTED_AUDIENCES, 'Type an audience and press Enter')
-          + '<div class="field-hint">Useful for honeymoon, family or adventure-focused calendars.</div>'
-        + '</div>'
-      : '');
+      + switchRow('Show Travelgenix events', 'useCuratedEvents', 'Mix our curated calendar in alongside your own events');
 
     bindSwitches(host);
-    bindChipInputs(host);
   }
 
   /* ── Section: Custom events ─────────────────────────────── */
