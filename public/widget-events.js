@@ -464,6 +464,16 @@
       color: var(--tge-sub);
       margin-top: 4px;
     }
+    .tge-list-date-multi .tge-list-day { font-size: 20px; }
+    .tge-list-date-multi .tge-list-mon { margin-top: 2px; }
+    .tge-list-day-end { color: var(--tge-sub); }
+    .tge-list-sep {
+      font-size: 11px;
+      color: var(--tge-sub);
+      margin: 4px 0 2px;
+      opacity: 0.7;
+      line-height: 1;
+    }
     .tge-list-content { min-width: 0; }
     .tge-list-name {
       font-size: 15px;
@@ -1245,12 +1255,21 @@
         const meta = categoryMeta(e.category);
         const catRgb = hexToRgb(e.catColor || meta.color) || '8, 145, 178';
         const dateRange = fmtRange(e.startDate, e.endDate);
+        const endDt = parseDate(e.endDate);
+        const isMultiDay = endDt && !sameDay(dt, endDt);
+        const datePillHtml = isMultiDay
+          ? '<div class="tge-list-day">' + dt.getDate() + '</div>'
+            + '<div class="tge-list-mon">' + MONTH_SHORT[dt.getMonth()] + '</div>'
+            + '<div class="tge-list-sep" aria-hidden="true">→</div>'
+            + '<div class="tge-list-day tge-list-day-end">' + endDt.getDate() + '</div>'
+            + '<div class="tge-list-mon">' + MONTH_SHORT[endDt.getMonth()] + '</div>'
+          : '<div class="tge-list-day">' + dt.getDate() + '</div>'
+            + '<div class="tge-list-mon">' + MONTH_SHORT[dt.getMonth()] + '</div>';
         out.push(
           '<button class="tge-list-item" data-event-id="' + esc(e.id) + '" type="button" '
           + 'style="--tge-cat:' + (e.catColor || meta.color) + ';--tge-cat-rgb:' + catRgb + '">'
-          + '<div class="tge-list-date">'
-            + '<div class="tge-list-day">' + dt.getDate() + '</div>'
-            + '<div class="tge-list-mon">' + MONTH_SHORT[dt.getMonth()] + '</div>'
+          + '<div class="tge-list-date' + (isMultiDay ? ' tge-list-date-multi' : '') + '">'
+            + datePillHtml
           + '</div>'
           + '<div class="tge-list-content">'
             + '<div class="tge-list-name">'
