@@ -102,32 +102,27 @@ function memSet(key, data) {
 // ── Airtable query builder ──────────────────────────────
 
 function buildFormula(filters, monthsAhead) {
-  // Always restrict to events whose end date is on/after today,
-  // and whose start date is on/before our horizon.
+  // Restrict to events that haven't yet ended, and start within our horizon.
   //
-  // We wrap the literal dates in DATETIME_PARSE so Airtable treats them
-  // as date values, not strings — IS_AFTER/IS_BEFORE/IS_SAME silently
-  // return wrong results otherwise. We also guard against blank date
-  // fields with NOT(BLANK()) — required when scanning a free-form
-  // calendar where some rows are missing the end date.
+  // We use DATETIME_DIFF to compute the number of days between the event's
+  // end (or start, if end is blank) and today, then keep rows where that
+  // diff is >= 0. Same approach for the horizon. This avoids the various
+  // gotchas of IS_AFTER/IS_BEFORE with quoted-string dates.
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
   const horizon = new Date(today.getTime() + Math.max(1, Math.min(24, monthsAhead || 12)) * 31 * 86400000);
   const horizonStr = horizon.toISOString().slice(0, 10);
 
+  // IF(end is blank, use start, else use end) — this is the "last day" of the event
+  const lastDayExpr = `IF(BLANK()={${FIELDS.dateEnd}}, {${FIELDS.dateStart}}, {${FIELDS.dateEnd}})`;
+
   const dateClauses = [
-    // start <= horizon
-    `IS_BEFORE({${FIELDS.dateStart}}, DATETIME_PARSE('${horizonStr}', 'YYYY-MM-DD'))`,
-    // (end OR start) >= today  -- covers events that are ongoing today
-    // or starting in the future. Falls back to start when end is blank.
-    `OR(`
-      + `IS_AFTER({${FIELDS.dateEnd}}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD')),`
-      + `IS_SAME({${FIELDS.dateEnd}}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD'), 'day'),`
-      + `AND(BLANK()={${FIELDS.dateEnd}}, OR(`
-        + `IS_AFTER({${FIELDS.dateStart}}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD')),`
-        + `IS_SAME({${FIELDS.dateStart}}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD'), 'day')`
-      + `))`
-    + `)`,
+    // Event hasn't ended yet (last day is today or later)
+    `DATETIME_DIFF(${lastDayExpr}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD'), 'days') >= 0`,
+    // Event starts within the horizon
+    `DATETIME_DIFF({${FIELDS.dateStart}}, DATETIME_PARSE('${horizonStr}', 'YYYY-MM-DD'), 'days') <= 0`,
+    // Must have a valid start date at all
+    `NOT(BLANK()={${FIELDS.dateStart}})`,
   ];
 
   const filterClauses = [];
@@ -138,13 +133,11 @@ function buildFormula(filters, monthsAhead) {
   }
 
   if (filters.countries && filters.countries.length) {
-    // Countries field is free text, comma-separated. Use FIND() to match substrings.
     const cos = filters.countries.slice(0, 24).map(c => `FIND('${escForFormula(c)}', {${FIELDS.countries}})>0`);
     filterClauses.push('OR(' + cos.join(',') + ')');
   }
 
   if (filters.audiences && filters.audiences.length) {
-    // Audience is multipleSelects. Use FIND() against the implicit array string.
     const auds = filters.audiences.slice(0, 12).map(a => `FIND('${escForFormula(a)}', ARRAYJOIN({${FIELDS.audience}}, ', '))>0`);
     filterClauses.push('OR(' + auds.join(',') + ')');
   }
