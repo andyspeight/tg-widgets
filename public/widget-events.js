@@ -1215,10 +1215,21 @@
       const cfg = this.cfg;
       if (!events.length) return this._renderEmpty();
 
-      // Group by month. Filter to those starting from today onwards if on the future-only path.
-      const now = Date.now();
-      const horizon = now + (cfg.monthsAhead || 6) * 31 * 86400000;
-      const upcoming = events.filter(e => e.endTs >= now && e.startTs <= horizon);
+      // Filter to events that have not yet ended.
+      // We treat "today" as start-of-day local so an event with a single
+      // date today still shows. An event whose end date is yesterday or
+      // earlier is hidden, even if its end timestamp technically rolls to
+      // ~midnight tomorrow in some timezones.
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const todayMs = startOfToday.getTime();
+      const horizon = todayMs + (cfg.monthsAhead || 6) * 31 * 86400000;
+
+      const upcoming = events.filter(e => {
+        // Use whichever is later: endTs or startTs (some events have no end date)
+        const lastDayMs = Math.max(e.endTs || 0, e.startTs || 0);
+        return lastDayMs >= todayMs && (e.startTs || lastDayMs) <= horizon;
+      });
       if (!upcoming.length) return this._renderEmpty();
 
       const out = [];
@@ -1334,8 +1345,13 @@
 
     _renderCards(events) {
       const cfg = this.cfg;
-      const now = Date.now();
-      const upcoming = events.filter(e => e.endTs >= now).slice(0, Math.max(1, Math.min(36, cfg.cardCount || 6)));
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const todayMs = startOfToday.getTime();
+      const upcoming = events.filter(e => {
+        const lastDayMs = Math.max(e.endTs || 0, e.startTs || 0);
+        return lastDayMs >= todayMs;
+      }).slice(0, Math.max(1, Math.min(36, cfg.cardCount || 6)));
       if (!upcoming.length) return this._renderEmpty();
 
       const cards = upcoming.map(e => {
