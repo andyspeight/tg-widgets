@@ -151,7 +151,7 @@
 
     // Layout
     layout: 'list',            // month | list | card
-    monthsAhead: 6,            // list & card view: how far forward to look
+    monthsAhead: 12,           // list & card view: how far forward to look
     cardCount: 6,              // card view: how many to show
 
     // Header
@@ -270,27 +270,40 @@
       overflow: hidden;
     }
 
+    /* Custom focus ring — replaces ugly browser default outline. */
+    .tge-root :focus-visible {
+      outline: 2px solid var(--tge-brand);
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+    .tge-root button:focus { outline: none; }
+    .tge-root button:focus-visible {
+      outline: 2px solid var(--tge-brand);
+      outline-offset: 2px;
+    }
+
     /* ---------- Header ---------- */
     .tge-header {
-      padding: 20px 24px 16px;
+      padding: 22px 24px 18px;
       border-bottom: 1px solid var(--tge-border);
       display: flex;
-      gap: 14px;
-      align-items: flex-end;
+      gap: 16px;
+      align-items: center;
       flex-wrap: wrap;
     }
     .tge-title-block { flex: 1; min-width: 200px; }
     .tge-title {
-      font-size: 22px;
+      font-size: 19px;
       font-weight: 700;
-      line-height: 1.2;
-      letter-spacing: -0.01em;
-      margin: 0 0 4px;
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+      margin: 0 0 3px;
     }
     .tge-subtitle {
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--tge-sub);
       margin: 0;
+      line-height: 1.4;
     }
 
     .tge-switcher {
@@ -299,144 +312,186 @@
       padding: 3px;
       background: var(--tge-bg-alt);
       border: 1px solid var(--tge-border);
-      border-radius: 10px;
+      border-radius: 9px;
     }
     .tge-switcher button {
       all: unset;
       cursor: pointer;
-      padding: 7px 12px;
-      font-size: 13px;
+      padding: 6px 11px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--tge-sub);
-      border-radius: 7px;
-      transition: background 160ms ease, color 160ms ease;
+      border-radius: 6px;
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
     .tge-switcher button:hover { color: var(--tge-text); }
     .tge-switcher button[aria-pressed="true"] {
       background: var(--tge-bg);
       color: var(--tge-text);
-      box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 0 0 1px rgba(15, 23, 42, .04);
     }
-    .tge-switcher svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .tge-switcher svg { width: 13px; height: 13px; flex-shrink: 0; }
 
     /* ---------- Filters bar ---------- */
     .tge-filters {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      padding: 14px 24px;
+      padding: 12px 20px;
       border-bottom: 1px solid var(--tge-border);
-      background: var(--tge-bg-alt);
+      align-items: center;
+    }
+    .tge-filters-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--tge-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-right: 4px;
     }
     .tge-chip {
       all: unset;
       cursor: pointer;
-      padding: 6px 12px;
-      font-size: 13px;
+      padding: 5px 11px;
+      font-size: 12.5px;
       font-weight: 500;
-      color: var(--tge-sub);
-      background: var(--tge-bg);
+      color: var(--tge-text);
+      background: transparent;
       border: 1px solid var(--tge-border);
       border-radius: 99px;
-      transition: all 160ms ease;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      line-height: 1.4;
     }
     .tge-chip:hover {
       border-color: var(--tge-border-strong);
-      color: var(--tge-text);
+      background: var(--tge-bg-alt);
     }
     .tge-chip[aria-pressed="true"] {
+      background: rgba(var(--tge-cat-rgb, var(--tge-brand-rgb)), 0.10);
+      border-color: rgba(var(--tge-cat-rgb, var(--tge-brand-rgb)), 0.35);
+      color: var(--tge-cat, var(--tge-brand));
+    }
+    .tge-chip--all[aria-pressed="true"] {
       background: var(--tge-text);
-      color: var(--tge-bg);
       border-color: var(--tge-text);
+      color: var(--tge-bg);
     }
     .tge-chip-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 99px;
       background: currentColor;
-      opacity: 0.7;
+      flex-shrink: 0;
+    }
+    .tge-chip-count {
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.65;
+      margin-left: 2px;
+      font-variant-numeric: tabular-nums;
     }
 
     /* ---------- LIST view ---------- */
-    .tge-list { padding: 8px 0; }
+    .tge-list { padding: 4px 0 8px; }
     .tge-list-month {
-      padding: 14px 24px 6px;
+      padding: 18px 24px 8px;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--tge-sub);
-      position: sticky;
-      top: 0;
       background: var(--tge-bg);
-      z-index: 1;
     }
+    .tge-list-month:first-child { padding-top: 14px; }
+
     .tge-list-item {
-      display: grid;
-      grid-template-columns: 78px 1fr auto;
-      gap: 18px;
-      padding: 14px 24px;
-      align-items: center;
+      all: unset;
       cursor: pointer;
+      box-sizing: border-box;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 64px 1fr auto;
+      gap: 16px;
+      padding: 14px 24px 14px 21px;
+      align-items: center;
+      position: relative;
       border-top: 1px solid var(--tge-border);
       transition: background 160ms ease;
     }
-    .tge-list-item:first-child { border-top: 0; }
+    .tge-list-item:first-of-type { border-top: 0; }
+    .tge-list-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: var(--tge-cat, var(--tge-brand));
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
     .tge-list-item:hover { background: var(--tge-bg-alt); }
+    .tge-list-item:hover::before { opacity: 1; }
 
     .tge-list-date {
       text-align: center;
-      padding: 8px 0;
-      border-radius: var(--tge-radius-sm);
-      background: var(--tge-bg-alt);
-      border: 1px solid var(--tge-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
     }
     .tge-list-day {
-      font-size: 22px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.02em;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--tge-text);
+      font-variant-numeric: tabular-nums;
     }
     .tge-list-mon {
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       color: var(--tge-sub);
       margin-top: 4px;
     }
     .tge-list-content { min-width: 0; }
     .tge-list-name {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
-      line-height: 1.3;
+      line-height: 1.35;
       letter-spacing: -0.005em;
       margin: 0 0 4px;
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
+      color: var(--tge-text);
     }
     .tge-list-name-text {
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .tge-list-meta {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--tge-sub);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       flex-wrap: wrap;
+      line-height: 1.4;
     }
-    .tge-list-meta svg { width: 13px; height: 13px; flex-shrink: 0; }
-    .tge-list-meta-item { display: inline-flex; align-items: center; gap: 4px; }
+    .tge-list-meta svg { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.7; }
+    .tge-list-meta-item { display: inline-flex; align-items: center; gap: 5px; }
     .tge-cat-tag {
       display: inline-flex;
       align-items: center;
@@ -445,24 +500,26 @@
       font-size: 11px;
       font-weight: 600;
       border-radius: 99px;
-      background: rgba(var(--tge-cat-rgb, 8, 145, 178), 0.10);
-      color: var(--tge-cat, var(--tge-accent));
-      letter-spacing: 0.01em;
+      background: rgba(var(--tge-cat-rgb, var(--tge-brand-rgb)), 0.10);
+      color: var(--tge-cat, var(--tge-brand));
+      letter-spacing: 0.005em;
     }
     .tge-cat-tag-dot {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       border-radius: 99px;
       background: currentColor;
     }
     .tge-list-arrow {
       color: var(--tge-sub);
       transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), color 160ms ease;
+      opacity: 0.5;
     }
-    .tge-list-arrow svg { width: 18px; height: 18px; }
+    .tge-list-arrow svg { width: 16px; height: 16px; }
     .tge-list-item:hover .tge-list-arrow {
-      color: var(--tge-brand);
+      color: var(--tge-cat, var(--tge-brand));
       transform: translateX(3px);
+      opacity: 1;
     }
 
     /* ---------- MONTH view ---------- */
@@ -611,12 +668,10 @@
       position: relative;
     }
     .tge-card-img--placeholder {
-      background-image: linear-gradient(135deg, rgba(var(--tge-cat-rgb, 8, 145, 178), 0.18), rgba(var(--tge-cat-rgb, 8, 145, 178), 0.08));
+      background-image: linear-gradient(135deg, rgba(var(--tge-cat-rgb, 8, 145, 178), 0.18), rgba(var(--tge-cat-rgb, 8, 145, 178), 0.05));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 56px;
-      filter: saturate(1.1);
     }
     .tge-card-cat-badge {
       position: absolute;
@@ -1000,16 +1055,15 @@
     }
 
     _buildCuratedQuery() {
-      // Editor-preview path: pass filters directly, requires auth header
-      const cats = Array.isArray(this.cfg.curatedCategories) ? this.cfg.curatedCategories.slice(0, 12) : [];
-      const cos  = Array.isArray(this.cfg.curatedCountries)  ? this.cfg.curatedCountries.slice(0, 24)  : [];
-      const aud  = Array.isArray(this.cfg.curatedAudience)   ? this.cfg.curatedAudience.slice(0, 12)   : [];
+      // Editor-preview path. We deliberately do NOT send category/country/
+      // audience filters: the editor is meant to show ALL events from the
+      // feed and the visitor filters down using the on-widget chip row.
+      // The cfg.curatedCountries / curatedCategories / curatedAudience
+      // arrays remain in the schema for backward compatibility but are
+      // no longer used to query Airtable.
       const params = new URLSearchParams();
       params.set('preview', '1');
-      params.set('months', String(Math.min(24, Math.max(1, this.cfg.monthsAhead || 6))));
-      cats.forEach(c => c && params.append('cat', c));
-      cos.forEach(c => c && params.append('country', c));
-      aud.forEach(a => a && params.append('aud', a));
+      params.set('months', String(Math.min(24, Math.max(1, this.cfg.monthsAhead || 12))));
       return params;
     }
 
@@ -1112,17 +1166,30 @@
       if (!cfg.showFilters || !cfg.showCategoryFilter) return '';
       const cats = this._categories(events);
       if (cats.length <= 1) return '';
-      const buttons = ['<button class="tge-chip" data-cat="all" aria-pressed="' + (this.activeCategory === 'all') + '" type="button">All events</button>']
-        .concat(cats.map(c => {
-          const meta = categoryMeta(c);
-          const active = (this.activeCategory.toLowerCase() === c.toLowerCase());
-          return '<button class="tge-chip" data-cat="' + esc(c) + '" aria-pressed="' + active + '" '
-            + 'style="' + (!active ? '--tge-cat:' + meta.color + ';color:' + meta.color : '') + '" type="button">'
-            + '<span class="tge-chip-dot" style="background:' + meta.color + '"></span>'
-            + esc(c)
-            + '</button>';
-        }));
-      return '<div class="tge-filters">' + buttons.join('') + '</div>';
+
+      const allCount = events.length;
+      const allActive = this.activeCategory === 'all';
+      let html = '<div class="tge-filters">';
+      html += '<button class="tge-chip tge-chip--all" data-cat="all" aria-pressed="' + allActive + '" type="button">'
+        + 'All events'
+        + '<span class="tge-chip-count">' + allCount + '</span>'
+        + '</button>';
+
+      cats.forEach(c => {
+        const meta = categoryMeta(c);
+        const active = (this.activeCategory.toLowerCase() === c.toLowerCase());
+        const count = events.filter(e => (e.category || '').toLowerCase() === c.toLowerCase()).length;
+        const rgb = hexToRgb(meta.color) || '8, 145, 178';
+        html += '<button class="tge-chip" data-cat="' + esc(c) + '" aria-pressed="' + active + '" '
+          + 'style="--tge-cat:' + meta.color + ';--tge-cat-rgb:' + rgb + '" type="button">'
+          + '<span class="tge-chip-dot" style="background:' + meta.color + '"></span>'
+          + esc(c)
+          + '<span class="tge-chip-count">' + count + '</span>'
+          + '</button>';
+      });
+
+      html += '</div>';
+      return html;
     }
 
     _bindFilters() {
@@ -1265,9 +1332,10 @@
         const meta = categoryMeta(e.category);
         const catColor = e.catColor || meta.color;
         const catRgb = hexToRgb(catColor) || '8, 145, 178';
+        const placeholderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;color:var(--tge-cat, var(--tge-brand));opacity:0.55"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
         const img = (cfg.showImages !== false && e.image)
           ? '<div class="tge-card-img" style="background-image:url(' + esc(e.image) + ')">'
-          : '<div class="tge-card-img tge-card-img--placeholder" style="--tge-cat-rgb:' + catRgb + '"><span aria-hidden="true">' + (e.catIcon || meta.icon || '📅') + '</span>';
+          : '<div class="tge-card-img tge-card-img--placeholder" style="--tge-cat-rgb:' + catRgb + '">' + placeholderSvg;
         const dateRange = fmtRange(e.startDate, e.endDate);
         return '<button class="tge-card" data-event-id="' + esc(e.id) + '" type="button" '
           + 'style="--tge-cat:' + catColor + ';--tge-cat-rgb:' + catRgb + '">'
