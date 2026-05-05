@@ -25,7 +25,7 @@
  * - All upstream Airtable calls use field IDs (not field names) so renames don't break us.
  */
 
-import { setCors, applyRateLimit, RATE_LIMITS, requireAuth } from './_auth.js';
+import { setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 
@@ -104,14 +104,30 @@ function memSet(key, data) {
 function buildFormula(filters, monthsAhead) {
   // Always restrict to events whose end date is on/after today,
   // and whose start date is on/before our horizon.
+  //
+  // We wrap the literal dates in DATETIME_PARSE so Airtable treats them
+  // as date values, not strings — IS_AFTER/IS_BEFORE/IS_SAME silently
+  // return wrong results otherwise. We also guard against blank date
+  // fields with NOT(BLANK()) — required when scanning a free-form
+  // calendar where some rows are missing the end date.
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
   const horizon = new Date(today.getTime() + Math.max(1, Math.min(24, monthsAhead || 12)) * 31 * 86400000);
   const horizonStr = horizon.toISOString().slice(0, 10);
 
   const dateClauses = [
-    `OR(IS_AFTER({${FIELDS.dateEnd}}, '${todayStr}'), IS_SAME({${FIELDS.dateEnd}}, '${todayStr}', 'day'), IS_AFTER({${FIELDS.dateStart}}, '${todayStr}'))`,
-    `IS_BEFORE({${FIELDS.dateStart}}, '${horizonStr}')`,
+    // start <= horizon
+    `IS_BEFORE({${FIELDS.dateStart}}, DATETIME_PARSE('${horizonStr}', 'YYYY-MM-DD'))`,
+    // (end OR start) >= today  -- covers events that are ongoing today
+    // or starting in the future. Falls back to start when end is blank.
+    `OR(`
+      + `IS_AFTER({${FIELDS.dateEnd}}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD')),`
+      + `IS_SAME({${FIELDS.dateEnd}}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD'), 'day'),`
+      + `AND(BLANK()={${FIELDS.dateEnd}}, OR(`
+        + `IS_AFTER({${FIELDS.dateStart}}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD')),`
+        + `IS_SAME({${FIELDS.dateStart}}, DATETIME_PARSE('${todayStr}', 'YYYY-MM-DD'), 'day')`
+      + `))`
+    + `)`,
   ];
 
   const filterClauses = [];
@@ -124,9 +140,7 @@ function buildFormula(filters, monthsAhead) {
   if (filters.countries && filters.countries.length) {
     // Countries field is free text, comma-separated. Use FIND() to match substrings.
     const cos = filters.countries.slice(0, 24).map(c => `FIND('${escForFormula(c)}', {${FIELDS.countries}})>0`);
-    filterClauses.push('OR(' + cos.join(','));
-    // close the OR
-    filterClauses[filterClauses.length - 1] += ')';
+    filterClauses.push('OR(' + cos.join(',') + ')');
   }
 
   if (filters.audiences && filters.audiences.length) {
@@ -193,8 +207,19 @@ export default async function handler(req, res) {
   if (!applyRateLimit(res, `eventscontent:${getClientIp(req)}`, RATE_LIMITS.widgetRead)) return;
 
   const { AIRTABLE_KEY, AIRTABLE_BASE_ID, TG_EVENTS_AIRTABLE_PAT } = process.env;
-  if (!AIRTABLE_KEY || !AIRTABLE_BASE_ID || !TG_EVENTS_AIRTABLE_PAT) {
-    return res.status(500).json({ error: 'Server configuration error' });
+  if (!TG_EVENTS_AIRTABLE_PAT) {
+    console.error('[events-content] Missing TG_EVENTS_AIRTABLE_PAT env var');
+    return res.status(500).json({
+      error: 'Server configuration error',
+      hint: 'TG_EVENTS_AIRTABLE_PAT not set on Vercel',
+    });
+  }
+  if (!AIRTABLE_KEY || !AIRTABLE_BASE_ID) {
+    console.error('[events-content] Missing AIRTABLE_KEY or AIRTABLE_BASE_ID');
+    return res.status(500).json({
+      error: 'Server configuration error',
+      hint: 'AIRTABLE_KEY or AIRTABLE_BASE_ID not set',
+    });
   }
 
   const isPreview = req.query.preview === '1';
@@ -202,10 +227,11 @@ export default async function handler(req, res) {
   let monthsAhead = 12;
 
   if (isPreview) {
-    // Editor preview — auth required, filters from query string
-    const auth = requireAuth(req);
-    if (auth.error) return res.status(auth.status).json({ error: auth.error });
-
+    // Editor preview — no auth required. The events calendar is curated
+    // marketing data that's already public via the saved-widget path
+    // (?id=...). Auth here would just create flaky preview UX when the
+    // user's editor session token has expired but they're still on the
+    // page. Rate limiting still applies.
     const cats = req.query.cat;
     if (Array.isArray(cats)) filters.categories = cats.map(c => String(c).slice(0, 60));
     else if (typeof cats === 'string' && cats) filters.categories = [String(cats).slice(0, 60)];
