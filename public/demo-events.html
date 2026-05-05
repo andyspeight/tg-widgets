@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Calendar Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+    color: #0F172A;
+    min-height: 100vh;
+  }
+  .demo-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+  .demo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 16px 0 24px;
+    border-bottom: 1px solid #E2E8F0;
+    margin-bottom: 32px;
+  }
+  .demo-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .demo-logo {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #F97316, #EA580C);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+  }
+  .demo-logo svg { width: 18px; height: 18px; }
+  .demo-name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .demo-tag {
+    font-size: 12px;
+    color: #64748B;
+    margin-top: 1px;
+  }
+
+  .demo-switcher {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+  }
+  .demo-switcher button {
+    all: unset;
+    cursor: pointer;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748B;
+    border-radius: 8px;
+    transition: all 160ms ease;
+  }
+  .demo-switcher button:hover { color: #0F172A; }
+  .demo-switcher button[aria-pressed="true"] {
+    background: #F97316;
+    color: #FFFFFF;
+  }
+
+  .demo-intro {
+    max-width: 720px;
+    margin: 0 auto 28px;
+    text-align: center;
+  }
+  .demo-intro h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    line-height: 1.15;
+  }
+  .demo-intro p {
+    font-size: 15px;
+    color: #475569;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .demo-stage {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 24px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, .06), 0 24px 64px rgba(15, 23, 42, .08);
+    padding: 24px;
+  }
+  .demo-stage--dark {
+    background: #0F172A;
+    border-color: #1E293B;
+  }
+
+  .demo-foot {
+    text-align: center;
+    margin-top: 28px;
+    color: #94A3B8;
+    font-size: 12px;
+  }
+  .demo-foot a { color: #475569; text-decoration: none; font-weight: 500; }
+  .demo-foot a:hover { color: #0F172A; }
+</style>
+</head>
+<body>
+
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </span>
+      <div>
+        <div class="demo-name">Sunshine Travel Co.</div>
+        <div class="demo-tag">Event Calendar widget demo</div>
+      </div>
+    </div>
+
+    <div class="demo-switcher" role="group" aria-label="Sample">
+      <button data-sample="curated"  aria-pressed="true"  type="button">Curated + custom</button>
+      <button data-sample="custom"   aria-pressed="false" type="button">Custom only</button>
+      <button data-sample="branded"  aria-pressed="false" type="button">Branded</button>
+      <button data-sample="dark"     aria-pressed="false" type="button">Dark</button>
+    </div>
+  </header>
+
+  <div class="demo-intro">
+    <h1>What's coming up?</h1>
+    <p>Festivals, holidays, sporting events and travel-driving moments — pulled live from the Travelgenix events catalogue, plus your own events on top. Switch between list, month and card views.</p>
+  </div>
+
+  <div class="demo-stage" id="stage">
+    <div data-tg-widget="events" id="widget-host"></div>
+  </div>
+
+  <div class="demo-foot">
+    Built by <a href="https://www.travelgenix.io" target="_blank" rel="noopener noreferrer">Travelgenix</a> • <a href="/" >Back to dashboard</a>
+  </div>
+
+</div>
+
+<script src="/widget-events.js"></script>
+<script>
+(function () {
+  // Sample configurations to flick between
+  const today = new Date();
+  function addDays(n) {
+    const d = new Date(today.getTime() + n * 86400000);
+    return d.toISOString().slice(0, 10);
+  }
+
+  const SAMPLES = {
+    curated: {
+      title: 'Upcoming events',
+      subtitle: 'Festivals, holidays and travel highlights',
+      layout: 'list',
+      useCuratedEvents: true,
+      // No filters — show all curated, blend with custom below
+      curatedCountries: [],
+      curatedCategories: [],
+      monthsAhead: 6,
+      brand: '#F97316',
+      accent: '#0891B2',
+      theme: 'light',
+      customEvents: [
+        { id: 'c1', name: 'Customer appreciation drinks', startDate: addDays(14), category: 'Event', location: 'Sunshine Travel HQ, Bournemouth', description: 'A relaxed evening to thank our regulars. Wine, canapés and a few prize draws.', url: 'https://example.com/event' },
+        { id: 'c2', name: 'Maldives showcase webinar', startDate: addDays(30), category: 'Travel', location: 'Online', description: 'Hosted with our Maldives DMC partner. Live Q&A and a £200 voucher draw for attendees.' },
+      ]
+    },
+
+    custom: {
+      title: "Sunshine Travel — what's on",
+      subtitle: 'Our events, dates for your diary, and a few must-see local moments',
+      layout: 'card',
+      useCuratedEvents: false,
+      brand: '#F97316',
+      accent: '#0891B2',
+      theme: 'light',
+      cardCount: 6,
+      customEvents: [
+        { id: 'c1', name: 'Greek Island showcase', startDate: addDays(7), category: 'Travel', location: 'Bournemouth Town Hall', description: 'Meet our Greek island specialists. Talk to villa owners. Taste mezze. Walk away with exclusive booking offers.', image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=900&q=80' },
+        { id: 'c2', name: 'Family holiday clinic', startDate: addDays(14), endDate: addDays(15), category: 'Travel', location: 'Sunshine Travel HQ', description: 'Half-term planning made easy. One-to-one consultations. Activities for the kids while you talk.', image: 'https://images.unsplash.com/photo-1542640244-7e672d6cef4e?auto=format&fit=crop&w=900&q=80' },
+        { id: 'c3', name: 'Cruise day-out at Southampton', startDate: addDays(28), category: 'Travel', location: 'Southampton port', description: 'Exclusive ship tour with our cruise partners. Lunch on board. £100 deposit credit for anyone who books.', image: 'https://images.unsplash.com/photo-1559599101-f09722fb4948?auto=format&fit=crop&w=900&q=80' },
+        { id: 'c4', name: 'Late summer sale launch', startDate: addDays(42), category: 'Sale', description: 'Our biggest event of the year. Early access for newsletter subscribers from Friday morning.', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80' },
+        { id: 'c5', name: 'Customer appreciation drinks', startDate: addDays(56), category: 'Event', location: 'Sunshine Travel HQ', description: 'A relaxed evening to thank our regulars. Wine, canapés and a few prize draws.' },
+      ]
+    },
+
+    branded: {
+      title: 'Travel calendar',
+      subtitle: 'Time it right — never miss the moments worth booking around',
+      layout: 'month',
+      useCuratedEvents: true,
+      brand: '#1B2B5B',
+      accent: '#D4AF37',
+      bg: '#FAF8F2',
+      text: '#1B2B5B',
+      sub: '#5A4F3D',
+      border: '#E8DFCB',
+      theme: 'light',
+      monthsAhead: 6,
+      customEvents: [
+        { id: 'b1', name: 'Bespoke Italy launch', startDate: addDays(10), endDate: addDays(11), category: 'Travel', location: 'London office', description: 'Our new Italy collection. By invitation only.' },
+      ]
+    },
+
+    dark: {
+      title: 'Upcoming events',
+      subtitle: 'Festivals, holidays and travel highlights',
+      layout: 'list',
+      useCuratedEvents: true,
+      monthsAhead: 6,
+      brand: '#FB923C',
+      accent: '#22D3EE',
+      theme: 'dark',
+      customEvents: [
+        { id: 'd1', name: 'Late-night booking event', startDate: addDays(20), category: 'Sale', location: 'Online', description: 'Flash discounts from 7pm — first-come, first-served.' },
+      ]
+    },
+  };
+
+  const stage = document.getElementById('stage');
+  const host = document.getElementById('widget-host');
+  let currentInst = null;
+
+  function load(sample) {
+    if (currentInst) { try { currentInst.destroy(); } catch {} currentInst = null; }
+    host.innerHTML = '';
+    host.removeAttribute('data-tg-rendered');
+    if (sample === 'dark' || (SAMPLES[sample] && SAMPLES[sample].theme === 'dark')) {
+      stage.classList.add('demo-stage--dark');
+    } else {
+      stage.classList.remove('demo-stage--dark');
+    }
+    currentInst = new window.TGEventsWidget(host, SAMPLES[sample] || SAMPLES.curated);
+  }
+
+  document.querySelectorAll('.demo-switcher button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.demo-switcher button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      btn.setAttribute('aria-pressed', 'true');
+      load(btn.getAttribute('data-sample'));
+    });
+  });
+
+  // Initial load
+  load('curated');
+})();
+</script>
+
+</body>
+</html>
