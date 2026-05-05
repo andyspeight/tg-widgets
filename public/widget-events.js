@@ -1447,14 +1447,13 @@
   async function init() {
     const containers = document.querySelectorAll('[data-tg-widget="events"]:not([data-tg-rendered])');
     for (const el of containers) {
-      el.setAttribute('data-tg-rendered', '1');
-
       // Inline config
       const inline = el.getAttribute('data-tg-config');
       if (inline) {
         try {
           const c = JSON.parse(inline);
           new TGEventsWidget(el, c);
+          el.setAttribute('data-tg-rendered', '1');
           continue;
         } catch (e) {
           console.error('[tg-events] Invalid inline config', e);
@@ -1464,6 +1463,9 @@
 
       // Remote config
       const id = el.getAttribute('data-tg-id');
+      // No id and no inline config: skip silently — likely an editor mount
+      // that will be hydrated by editor JS. Do NOT mark as rendered so the
+      // editor can still pick it up on its own render pass.
       if (!id) continue;
       try {
         const r = await fetch(API_BASE + '?id=' + encodeURIComponent(id));
@@ -1472,6 +1474,7 @@
         const cfg = (j && j.config) ? j.config : {};
         cfg.widgetId = id;
         new TGEventsWidget(el, cfg);
+        el.setAttribute('data-tg-rendered', '1');
       } catch (err) {
         console.error('[tg-events] Failed to load widget config', err);
       }
