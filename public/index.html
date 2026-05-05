@@ -1642,7 +1642,21 @@ try {
   const usrRaw = localStorage.getItem('tg_user');
   if (tok && usrRaw) {
     const usr = JSON.parse(usrRaw);
-    userData = usr; signedIn = true; userEmail = usr?.email || '';
+    // The new endpoint puts plan/clientName on a separate `tg_client` blob — merge it in
+    // so downstream code reading userData.plan / userData.clientName keeps working.
+    // Plan may arrive as either a string ("Bespoke") or a singleSelect object ({name:"Bespoke"}) —
+    // normalise to a plain string here.
+    let cli = null;
+    try { cli = JSON.parse(localStorage.getItem('tg_client') || 'null'); } catch {}
+    const rawPlan = cli?.plan ?? usr?.plan;
+    const planStr = (rawPlan && typeof rawPlan === 'object') ? (rawPlan.name || '') : (rawPlan || '');
+    userData = {
+      ...usr,
+      plan: planStr,
+      clientName: cli?.clientName || usr?.clientName || '',
+      clientRecordId: cli?.recordId || null
+    };
+    signedIn = true; userEmail = userData.email || '';
   } else {
     // Legacy fallback: tgw_session blob from the old /api/widget-auth flow
     const sess = JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'));
