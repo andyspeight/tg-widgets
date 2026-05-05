@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Calendar Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* ───────────────────────────────────────────────────────────
+     Per-editor styles for Event Calendar.
+     All shell tokens (--tgse-*) come from editor-shell.css.
+     ─────────────────────────────────────────────────────────── */
+
+  .sb-body { padding: 0; }
+  .tab-panel { display: none; padding: 12px 14px 24px; }
+  .tab-panel.is-active { display: block; }
+
+  /* Sections (collapsible) */
+  .sec {
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    background: var(--tgse-panel);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .sec-head {
+    width: 100%; display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px;
+    background: var(--tgse-panel-2);
+    border: 0; border-bottom: 1px solid var(--tgse-border);
+    text-align: left; cursor: pointer;
+    font: 600 12px/1 'Inter', sans-serif;
+    color: var(--tgse-ink);
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .sec-title { flex: 1; }
+  .sec-chev {
+    width: 14px; height: 14px;
+    color: var(--tgse-ink-3);
+    transition: transform .18s ease;
+  }
+  .sec.is-open .sec-chev { transform: rotate(180deg); }
+  .sec-body { display: none; padding: 14px 12px 16px; }
+  .sec.is-open .sec-body { display: block; }
+
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: block;
+    font: 500 12px/1.3 'Inter', sans-serif;
+    color: var(--tgse-ink);
+    margin-bottom: 5px;
+  }
+  .field-hint {
+    font: 400 11px/1.4 'Inter', sans-serif;
+    color: var(--tgse-ink-3);
+    margin-top: 4px;
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .input, .textarea, .select {
+    width: 100%;
+    border: 1px solid var(--tgse-border);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    border-radius: var(--tgse-radius-sm);
+    padding: 8px 10px;
+    font: 400 13px/1.4 'Inter', sans-serif;
+    transition: border-color .14s ease, box-shadow .14s ease;
+  }
+  .input:focus, .textarea:focus, .select:focus {
+    outline: none;
+    border-color: var(--tgse-brand);
+    box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+
+  /* Switch toggle */
+  .switch {
+    all: unset; cursor: pointer;
+    width: 36px; height: 20px;
+    border-radius: 20px;
+    background: var(--tgse-border);
+    position: relative;
+    transition: background .14s ease;
+    flex-shrink: 0;
+  }
+  .switch::before {
+    content: ''; position: absolute;
+    width: 14px; height: 14px; border-radius: 99px;
+    background: #FFFFFF; top: 3px; left: 3px;
+    transition: transform .18s cubic-bezier(.16,1,.3,1);
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  }
+  .switch.is-on { background: var(--tgse-brand); }
+  .switch.is-on::before { transform: translateX(16px); }
+
+  .switch-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0;
+  }
+  .switch-row .label {
+    flex: 1;
+    font: 500 13px/1.3 'Inter', sans-serif;
+    color: var(--tgse-ink);
+  }
+  .switch-row .hint {
+    font: 400 11px/1.4 'Inter', sans-serif;
+    color: var(--tgse-ink-3);
+    margin-top: 2px;
+  }
+
+  /* Colour picker row */
+  .colour-row {
+    display: grid;
+    grid-template-columns: 1fr auto 88px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .colour-row .label {
+    font: 500 12px/1.3 'Inter', sans-serif;
+    color: var(--tgse-ink);
+  }
+  .colour-swatch-wrap {
+    width: 32px; height: 32px;
+    border: 1px solid var(--tgse-border);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+  .colour-swatch-wrap input[type="color"] {
+    position: absolute; inset: -8px;
+    width: calc(100% + 16px); height: calc(100% + 16px);
+    border: 0; padding: 0; cursor: pointer; background: transparent;
+  }
+  .colour-hex {
+    width: 88px;
+    border: 1px solid var(--tgse-border);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    border-radius: var(--tgse-radius-sm);
+    padding: 6px 8px;
+    font: 500 12px/1.3 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  /* Slider */
+  .slider-row {
+    display: grid; grid-template-columns: 1fr 60px; gap: 10px;
+    align-items: center;
+  }
+  .slider-row input[type="range"] { width: 100%; accent-color: var(--tgse-brand); }
+  .slider-val {
+    font: 500 12px/1 'JetBrains Mono', monospace;
+    color: var(--tgse-ink);
+    text-align: right;
+  }
+
+  /* Layout pickers (cards) */
+  .pickers {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .picker {
+    all: unset;
+    cursor: pointer;
+    padding: 10px 8px;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    background: var(--tgse-panel);
+    transition: border-color .14s ease, background .14s ease;
+    text-align: center;
+  }
+  .picker:hover { border-color: var(--tgse-border-strong); }
+  .picker.is-active {
+    border-color: var(--tgse-brand);
+    background: var(--tgse-brand-tint);
+  }
+  .picker-thumb {
+    height: 44px;
+    background: var(--tgse-panel-2);
+    border: 1px solid var(--tgse-border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .picker.is-active .picker-thumb { border-color: var(--tgse-brand); }
+  .picker-name {
+    font: 600 11px/1.2 'Inter', sans-serif;
+    color: var(--tgse-ink);
+  }
+
+  /* Layout thumbnails — small CSS mockups */
+  .lt { position: absolute; inset: 4px; display: grid; gap: 2px; }
+  .lt-list { grid-template-rows: repeat(4, 1fr); }
+  .lt-list span { background: var(--tgse-border-strong); border-radius: 2px; height: 100%; }
+  .lt-list span:nth-child(odd) { background: var(--tgse-ink-3); }
+  .lt-month {
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 4px repeat(3, 1fr);
+    gap: 1px;
+  }
+  .lt-month span { background: var(--tgse-border-strong); border-radius: 1px; }
+  .lt-month span:nth-child(-n+7) { background: var(--tgse-ink-3); }
+  .lt-card {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .lt-card span { background: var(--tgse-border-strong); border-radius: 3px; }
+
+  /* Multi-select chips */
+  .chip-input-wrap {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm);
+    background: var(--tgse-panel);
+    min-height: 38px;
+    align-items: center;
+  }
+  .chip-input-wrap:focus-within {
+    border-color: var(--tgse-brand);
+    box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 6px 3px 10px;
+    background: var(--tgse-brand-tint);
+    color: var(--tgse-brand);
+    border-radius: 99px;
+    font: 600 11px/1.2 'Inter', sans-serif;
+  }
+  .chip .x {
+    cursor: pointer;
+    width: 16px; height: 16px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 99px;
+    color: var(--tgse-brand);
+    transition: background .14s ease;
+  }
+  .chip .x:hover { background: rgba(8, 145, 178, 0.18); }
+  .chip-input {
+    flex: 1; min-width: 100px;
+    border: 0; outline: 0; background: transparent;
+    padding: 4px;
+    font: 400 13px/1.4 'Inter', sans-serif;
+    color: var(--tgse-ink);
+  }
+  .chip-suggestions {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin-top: 6px;
+  }
+  .chip-suggest {
+    all: unset; cursor: pointer;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: var(--tgse-panel-2);
+    border: 1px solid var(--tgse-border);
+    color: var(--tgse-ink-2);
+    font: 500 11px/1.3 'Inter', sans-serif;
+    transition: all .14s ease;
+  }
+  .chip-suggest:hover {
+    background: var(--tgse-brand-tint);
+    border-color: var(--tgse-brand);
+    color: var(--tgse-brand);
+  }
+
+  /* Custom event card list */
+  .ev-list { display: flex; flex-direction: column; gap: 8px; }
+  .ev-card {
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    background: var(--tgse-panel);
+    overflow: hidden;
+  }
+  .ev-card-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px;
+    background: var(--tgse-panel-2);
+    border-bottom: 1px solid var(--tgse-border);
+  }
+  .ev-card-head .ev-handle {
+    color: var(--tgse-ink-3);
+    cursor: grab;
+    display: inline-flex; align-items: center;
+  }
+  .ev-card-head .ev-handle svg { width: 14px; height: 14px; }
+  .ev-card-title {
+    flex: 1;
+    font: 600 12px/1.2 'Inter', sans-serif;
+    color: var(--tgse-ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .ev-card-actions { display: inline-flex; gap: 4px; }
+  .ev-icon-btn {
+    all: unset; cursor: pointer;
+    width: 24px; height: 24px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    color: var(--tgse-ink-3);
+    transition: background .14s ease, color .14s ease;
+  }
+  .ev-icon-btn:hover { background: var(--tgse-hover); color: var(--tgse-ink); }
+  .ev-icon-btn--danger:hover { color: var(--tgse-danger); }
+  .ev-icon-btn svg { width: 14px; height: 14px; }
+  .ev-card-body {
+    display: none;
+    padding: 14px 12px 14px;
+  }
+  .ev-card.is-open .ev-card-body { display: block; }
+  .ev-card.is-open .ev-card-head { border-bottom-color: var(--tgse-border); }
+
+  .add-event-btn {
+    all: unset; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px dashed var(--tgse-border-strong);
+    border-radius: var(--tgse-radius-md);
+    color: var(--tgse-brand);
+    font: 600 12px/1 'Inter', sans-serif;
+    transition: background .14s ease, border-color .14s ease;
+  }
+  .add-event-btn:hover {
+    background: var(--tgse-brand-tint);
+    border-color: var(--tgse-brand);
+  }
+  .add-event-btn svg { width: 14px; height: 14px; }
+
+  /* Source toggles */
+  .source-card {
+    padding: 12px;
+    background: var(--tgse-panel-2);
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    margin-bottom: 12px;
+  }
+  .source-card .source-head {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 6px;
+  }
+  .source-card .source-icon {
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    background: var(--tgse-panel);
+    border: 1px solid var(--tgse-border);
+    color: var(--tgse-brand);
+    flex-shrink: 0;
+  }
+  .source-card .source-icon svg { width: 16px; height: 16px; }
+  .source-card .source-meta { flex: 1; }
+  .source-card .source-title {
+    font: 600 13px/1.3 'Inter', sans-serif;
+    color: var(--tgse-ink);
+  }
+  .source-card .source-desc {
+    font: 400 11px/1.4 'Inter', sans-serif;
+    color: var(--tgse-ink-3);
+    margin-top: 2px;
+  }
+
+  /* Modal — generic */
+  .ed-modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    display: none;
+  }
+  .ed-modal-bg.is-open { display: block; }
+  .ed-modal {
+    position: fixed; inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    pointer-events: none;
+  }
+  .ed-modal.is-open { display: flex; }
+  .ed-modal-card {
+    pointer-events: auto;
+    background: var(--tgse-panel);
+    border-radius: var(--tgse-radius-lg);
+    box-shadow: var(--tgse-shadow-lg);
+    max-width: 540px; width: 100%;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .ed-modal-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--tgse-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ed-modal-title {
+    font: 700 15px/1.3 'Inter', sans-serif;
+    color: var(--tgse-ink);
+  }
+  .ed-modal-close {
+    all: unset; cursor: pointer;
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    color: var(--tgse-ink-3);
+    transition: background .14s ease;
+  }
+  .ed-modal-close:hover { background: var(--tgse-hover); color: var(--tgse-ink); }
+  .ed-modal-body {
+    padding: 18px 20px 20px;
+    overflow-y: auto;
+  }
+
+  /* Template grid (in modal) */
+  .tmpl-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tmpl-card {
+    all: unset; cursor: pointer;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    overflow: hidden;
+    background: var(--tgse-panel);
+    transition: border-color .14s ease, transform .14s ease;
+  }
+  .tmpl-card:hover {
+    border-color: var(--tgse-brand);
+    transform: translateY(-2px);
+  }
+  .tmpl-thumb {
+    height: 96px;
+    background: linear-gradient(135deg, var(--tgse-brand-tint), rgba(99, 102, 241, 0.08));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+  }
+  .tmpl-meta {
+    padding: 10px 12px;
+  }
+  .tmpl-name {
+    font: 700 13px/1.3 'Inter', sans-serif;
+    color: var(--tgse-ink);
+  }
+  .tmpl-desc {
+    font: 400 11px/1.4 'Inter', sans-serif;
+    color: var(--tgse-ink-3);
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Event Calendar</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true" class="is-active">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+      <div class="sb-body">
+
+        <!-- ===== DESIGN TAB ===== -->
+        <div class="tab-panel is-active" data-panel="design">
+
+          <!-- Layout -->
+          <div class="sec is-open">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Layout</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body" id="sb-layout"></div>
+          </div>
+
+          <!-- Header -->
+          <div class="sec is-open">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Header</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body" id="sb-header"></div>
+          </div>
+
+          <!-- Colours -->
+          <div class="sec">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Colours</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body" id="sb-colours"></div>
+          </div>
+
+          <!-- Typography -->
+          <div class="sec">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Typography</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body">
+              <div class="field">
+                <label class="field-label">Font family</label>
+                <div id="fontPickerMount"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shape & spacing -->
+          <div class="sec">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Shape &amp; spacing</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body" id="sb-shape"></div>
+          </div>
+
+        </div>
+
+        <!-- ===== CONTENT TAB ===== -->
+        <div class="tab-panel" data-panel="content">
+
+          <!-- Travelgenix curated -->
+          <div class="sec is-open">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Travelgenix events</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body" id="sb-curated"></div>
+          </div>
+
+          <!-- Custom events -->
+          <div class="sec is-open">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Your events</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body" id="sb-custom"></div>
+          </div>
+
+        </div>
+
+        <!-- ===== SETTINGS TAB ===== -->
+        <div class="tab-panel" data-panel="settings">
+
+          <div class="sec is-open">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Display options</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body" id="sb-display"></div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-head" data-toggle>
+              <span class="sec-title">Behaviour</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="sec-body" id="sb-behaviour"></div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       PREVIEW
+       ============================================================ -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div data-tg-widget="events" id="widget-mount"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Templates modal -->
+<div class="ed-modal-bg" id="tmpl-bg"></div>
+<div class="ed-modal" id="tmpl-modal" role="dialog" aria-modal="true" aria-labelledby="tmpl-title">
+  <div class="ed-modal-card">
+    <div class="ed-modal-head">
+      <div class="ed-modal-title" id="tmpl-title">Pick a template</div>
+      <button class="ed-modal-close" id="tmpl-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="ed-modal-body" id="tmpl-body"></div>
+  </div>
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-events.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Config defaults — must mirror widget-events.js DEFAULTS ── */
+  let C = {
+    name: 'Event Calendar',
+
+    // Layout
+    layout: 'list',
+    monthsAhead: 6,
+    cardCount: 6,
+
+    // Header
+    showHeader: true,
+    title: 'Upcoming events',
+    subtitle: 'Festivals, holidays and travel highlights',
+    showLayoutSwitcher: true,
+
+    // Filters
+    showFilters: true,
+    showCategoryFilter: true,
+    showCountryFilter: false,
+    defaultCategory: 'all',
+
+    // Curated
+    useCuratedEvents: true,
+    curatedCountries: [],
+    curatedCategories: [],
+    curatedAudience: [],
+
+    // Custom
+    customEvents: [],
+
+    // Behaviour
+    onClick: 'modal',
+    showLocations: true,
+    showDescriptions: true,
+    showImages: true,
+
+    // Theme
+    theme: 'light',
+    brand: '#F97316',
+    accent: '#0891B2',
+    bg: '#FFFFFF',
+    text: '#0F172A',
+    sub: '#64748B',
+    border: '#E2E8F0',
+    radius: 16,
+    fontFamily: 'Inter',
+  };
+
+  let widgetInst = null;
+  let renderTimer = null;
+
+  /* ── Layout meta ────────────────────────────────────────── */
+  const LAYOUTS = [
+    { id: 'list',  name: 'List',  desc: 'Chronological list with month dividers' },
+    { id: 'month', name: 'Month', desc: 'Calendar grid with events on dates' },
+    { id: 'card',  name: 'Cards', desc: 'Featured cards for upcoming events' },
+  ];
+
+  /* ── Curated filter suggestions ─────────────────────────── */
+  // These are the most common selectable values from the Events Calendar table.
+  // The user can also type freely.
+  const SUGGESTED_COUNTRIES = [
+    'United Kingdom', 'Spain', 'France', 'Italy', 'Greece', 'Portugal', 'Turkey', 'Cyprus',
+    'United States', 'Mexico', 'Thailand', 'India', 'Japan', 'Australia', 'United Arab Emirates',
+    'South Africa', 'Brazil', 'Egypt', 'Morocco', 'Ireland'
+  ];
+  const SUGGESTED_CATEGORIES = [
+    'Festival', 'Holiday', 'Public Holiday', 'Sporting Event', 'Music', 'Food',
+    'Religious', 'Awareness Day', 'Travel Event', 'Cultural'
+  ];
+  const SUGGESTED_AUDIENCES = [
+    'Families', 'Couples', 'Solo', 'Adventure', 'Luxury', 'Budget', 'Foodies',
+    'Culture', 'Beach', 'Wellness'
+  ];
+
+  /* ── Templates ──────────────────────────────────────────── */
+  const TEMPLATES = [
+    {
+      id: 'tg-curated-list', name: 'Travelgenix mix', icon: '✨',
+      desc: 'Curated travel events alongside your own — chronological list',
+      patch: { layout: 'list', useCuratedEvents: true, curatedCategories: [], curatedCountries: [], title: 'Upcoming events', subtitle: 'Festivals, holidays and travel highlights' }
+    },
+    {
+      id: 'tg-month-uk', name: 'UK month view', icon: '🇬🇧',
+      desc: 'Month grid focused on UK festivals, holidays and sporting events',
+      patch: { layout: 'month', useCuratedEvents: true, curatedCountries: ['United Kingdom'], curatedCategories: [], title: 'What\'s on this month', subtitle: 'Across the UK' }
+    },
+    {
+      id: 'global-festivals', name: 'World festivals', icon: '🎉',
+      desc: 'A card showcase of the world\'s biggest festivals and cultural events',
+      patch: { layout: 'card', useCuratedEvents: true, curatedCategories: ['Festival', 'Cultural'], curatedCountries: [], title: 'Festivals around the world', subtitle: 'Time it right — celebrate where it matters' }
+    },
+    {
+      id: 'agency-only', name: 'In-house events', icon: '🏢',
+      desc: 'Just your own events — webinars, showcases, sales',
+      patch: { layout: 'card', useCuratedEvents: false, customEvents: defaultCustomEvents(), title: 'Our events', subtitle: 'What\'s coming up at our agency' }
+    },
+    {
+      id: 'sporting', name: 'Sporting calendar', icon: '🏆',
+      desc: 'Major sporting events with destinations to plan around',
+      patch: { layout: 'list', useCuratedEvents: true, curatedCategories: ['Sporting Event'], curatedCountries: [], title: 'Sporting calendar', subtitle: 'The events worth booking around' }
+    },
+    {
+      id: 'minimal', name: 'Minimal & clean', icon: '⚪',
+      desc: 'Stripped-back design — list view, no images, neutral palette',
+      patch: { layout: 'list', showImages: false, brand: '#0F172A', accent: '#64748B', radius: 8 }
+    },
+  ];
+
+  function defaultCustomEvents() {
+    const today = new Date();
+    function addDays(n) {
+      const d = new Date(today.getTime() + n * 86400000);
+      return d.toISOString().slice(0, 10);
+    }
+    return [
+      { id: 'c1', name: 'Showcase event', startDate: addDays(14), category: 'Travel', location: 'Our office', description: 'Introduce the new collection over drinks and canapés.' },
+      { id: 'c2', name: 'Late summer sale launch', startDate: addDays(35), category: 'Sale', description: 'First access for newsletter subscribers.' },
+    ];
+  }
+
+  /* ── Wire up the unified shell ──────────────────────────── */
+  const shell = tgse.init({
+    widgetType: 'Event Calendar',
+    widgetTag: 'events',
+    scriptFile: 'widget-events.js',
+
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); render(); },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => {
+      C.fontFamily = f;
+      shell.markDirty();
+      render();
+    },
+
+    onAIBuild: () => {
+      tgse.toast('AI builder coming soon', 'ok');
+    },
+    onTemplates: () => {
+      openTemplates();
+    },
+    onThemeToggle: (isDark) => {
+      C.theme = isDark ? 'dark' : 'light';
+      shell.markDirty();
+      render();
+    },
+    onTabChange: (tabName) => {
+      document.querySelectorAll('.tgse-tabs button').forEach(b => {
+        b.classList.toggle('is-active', b.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.tab-panel').forEach(p => {
+        p.classList.toggle('is-active', p.dataset.panel === tabName);
+      });
+    },
+    onAfterSave: () => { /* shell handles URL sync */ },
+    onLoginSuccess: () => loadFromUrl(),
+  });
+
+  // Expose the shell's auth headers so the widget can call /api/events-content
+  // in editor-preview mode (auth required for the preview path).
+  window.__TG_EDITOR_AUTH_HEADERS__ = function () {
+    try { return tgse.authHeaders(); } catch { return {}; }
+  };
+
+  /* ── Helpers ────────────────────────────────────────────── */
+  function $(s, p) { return (p || document).querySelector(s); }
+  function $$(s, p) { return (p || document).querySelectorAll(s); }
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function debounceRender() {
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(render, 220);
+  }
+  function uid() { return 'c' + Math.random().toString(36).slice(2, 9); }
+  function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+  /* ── Render: preview ────────────────────────────────────── */
+  function render() {
+    if (widgetInst) {
+      try { widgetInst.destroy(); } catch {}
+      widgetInst = null;
+    }
+    const host = $('#widget-mount');
+    if (!host) return;
+    host.innerHTML = '';
+    host.removeAttribute('data-tg-rendered');
+
+    // In editor mode the widget needs to know to use the preview-mode API path
+    // when there is no saved widget ID yet. We pass the preview filters via the config.
+    const previewCfg = Object.assign({}, C);
+    previewCfg.widgetId = previewCfg.widgetId || '';
+
+    widgetInst = new window.TGEventsWidget(host, previewCfg);
+  }
+
+  /* ── Section: Layout picker ─────────────────────────────── */
+  function renderLayout() {
+    const host = $('#sb-layout');
+    let html = '<div class="pickers">';
+    LAYOUTS.forEach(l => {
+      const active = C.layout === l.id;
+      const thumb = '<div class="lt lt-' + l.id + '">'
+        + (l.id === 'list'  ? '<span></span><span></span><span></span><span></span>' : '')
+        + (l.id === 'month' ? '<span></span><span></span><span></span><span></span><span></span><span></span><span></span>'
+                              + '<span></span><span></span><span></span><span></span><span></span><span></span><span></span>'
+                              + '<span></span><span></span><span></span><span></span><span></span><span></span><span></span>'
+                              + '<span></span><span></span><span></span><span></span><span></span><span></span><span></span>' : '')
+        + (l.id === 'card'  ? '<span></span><span></span><span></span><span></span>' : '')
+        + '</div>';
+      html += '<button class="picker ' + (active ? 'is-active' : '') + '" data-layout="' + l.id + '" type="button">'
+        + '<div class="picker-thumb">' + thumb + '</div>'
+        + '<div class="picker-name">' + escHtml(l.name) + '</div>'
+        + '</button>';
+    });
+    html += '</div>';
+
+    // Layout-specific controls
+    if (C.layout === 'list' || C.layout === 'card') {
+      html += '<div class="field" style="margin-top:12px"><label class="field-label">How far ahead to look</label>'
+        + '<div class="slider-row">'
+          + '<input type="range" min="1" max="24" value="' + (C.monthsAhead || 6) + '" id="months-range">'
+          + '<span class="slider-val">' + (C.monthsAhead || 6) + ' mo</span>'
+        + '</div></div>';
+    }
+    if (C.layout === 'card') {
+      html += '<div class="field"><label class="field-label">Number of cards</label>'
+        + '<div class="slider-row">'
+          + '<input type="range" min="3" max="24" value="' + (C.cardCount || 6) + '" id="cards-range">'
+          + '<span class="slider-val">' + (C.cardCount || 6) + '</span>'
+        + '</div></div>';
+    }
+
+    host.innerHTML = html;
+
+    $$('[data-layout]', host).forEach(b => b.addEventListener('click', () => {
+      C.layout = b.getAttribute('data-layout');
+      shell.markDirty();
+      renderLayout();
+      render();
+    }));
+
+    const mr = $('#months-range');
+    if (mr) mr.addEventListener('input', () => {
+      C.monthsAhead = parseInt(mr.value, 10);
+      mr.nextElementSibling.textContent = C.monthsAhead + ' mo';
+      shell.markDirty();
+      debounceRender();
+    });
+    const cr = $('#cards-range');
+    if (cr) cr.addEventListener('input', () => {
+      C.cardCount = parseInt(cr.value, 10);
+      cr.nextElementSibling.textContent = C.cardCount;
+      shell.markDirty();
+      debounceRender();
+    });
+  }
+
+  /* ── Section: Header ────────────────────────────────────── */
+  function renderHeader() {
+    const host = $('#sb-header');
+    host.innerHTML = ''
+      + switchRow('Show header', 'showHeader', 'Display the title and subtitle bar above the calendar')
+      + (C.showHeader ? ''
+        + '<div class="field"><label class="field-label">Title</label><input class="input" data-key="title" value="' + escHtml(C.title) + '" maxlength="80"></div>'
+        + '<div class="field"><label class="field-label">Subtitle</label><input class="input" data-key="subtitle" value="' + escHtml(C.subtitle) + '" maxlength="160"></div>'
+        + switchRow('Show layout switcher', 'showLayoutSwitcher', 'Visitors can flick between list, month and card views')
+        : '');
+
+    bindSwitches(host);
+    bindInputs(host);
+  }
+
+  /* ── Section: Colours ───────────────────────────────────── */
+  function renderColours() {
+    const host = $('#sb-colours');
+    host.innerHTML = ''
+      + colourRow('Brand',     'brand')
+      + colourRow('Accent',    'accent')
+      + colourRow('Background','bg')
+      + colourRow('Text',      'text')
+      + colourRow('Subtle text','sub')
+      + colourRow('Border',    'border');
+    bindColours(host);
+  }
+
+  /* ── Section: Shape & spacing ───────────────────────────── */
+  function renderShape() {
+    const host = $('#sb-shape');
+    host.innerHTML = ''
+      + '<div class="field"><label class="field-label">Corner radius</label>'
+        + '<div class="slider-row">'
+          + '<input type="range" min="0" max="32" value="' + (C.radius || 16) + '" id="radius-range">'
+          + '<span class="slider-val">' + (C.radius || 16) + 'px</span>'
+        + '</div></div>';
+
+    const rr = $('#radius-range', host);
+    rr.addEventListener('input', () => {
+      C.radius = parseInt(rr.value, 10);
+      rr.nextElementSibling.textContent = C.radius + 'px';
+      shell.markDirty();
+      debounceRender();
+    });
+  }
+
+  /* ── Section: Curated source ────────────────────────────── */
+  function renderCurated() {
+    const host = $('#sb-curated');
+    host.innerHTML = ''
+      + '<div class="source-card">'
+        + '<div class="source-head">'
+          + '<span class="source-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg></span>'
+          + '<div class="source-meta">'
+            + '<div class="source-title">Travelgenix curated events</div>'
+            + '<div class="source-desc">Festivals, holidays and travel-driving moments — kept up to date for you.</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+      + switchRow('Show Travelgenix events', 'useCuratedEvents', 'Mix our curated events into your calendar')
+      + (C.useCuratedEvents ? ''
+        + '<div class="field"><label class="field-label">Filter by country</label>'
+          + chipInput('curatedCountries', SUGGESTED_COUNTRIES, 'Type a country and press Enter')
+          + '<div class="field-hint">Leave empty to show events from any country.</div>'
+        + '</div>'
+        + '<div class="field"><label class="field-label">Filter by category</label>'
+          + chipInput('curatedCategories', SUGGESTED_CATEGORIES, 'Type a category and press Enter')
+          + '<div class="field-hint">Leave empty to show all categories.</div>'
+        + '</div>'
+        + '<div class="field"><label class="field-label">Filter by audience</label>'
+          + chipInput('curatedAudience', SUGGESTED_AUDIENCES, 'Type an audience and press Enter')
+          + '<div class="field-hint">Useful for honeymoon, family or adventure-focused calendars.</div>'
+        + '</div>'
+      : '');
+
+    bindSwitches(host);
+    bindChipInputs(host);
+  }
+
+  /* ── Section: Custom events ─────────────────────────────── */
+  function renderCustom() {
+    const host = $('#sb-custom');
+    const list = Array.isArray(C.customEvents) ? C.customEvents : [];
+    let html = '<div class="ev-list">';
+    list.forEach((e, i) => {
+      const open = e._open === true;
+      const dateRange = e.endDate && e.endDate !== e.startDate
+        ? (e.startDate || '?') + ' → ' + e.endDate
+        : (e.startDate || 'No date');
+      html += '<div class="ev-card ' + (open ? 'is-open' : '') + '" data-idx="' + i + '">'
+        + '<button class="ev-card-head" type="button" data-toggle-event>'
+          + '<span class="ev-handle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>'
+          + '<span class="ev-card-title">' + escHtml(e.name || 'Untitled event') + ' · ' + escHtml(dateRange) + '</span>'
+          + '<span class="ev-card-actions">'
+            + '<span class="ev-icon-btn" data-move-up title="Move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></span>'
+            + '<span class="ev-icon-btn" data-move-down title="Move down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>'
+            + '<span class="ev-icon-btn ev-icon-btn--danger" data-delete title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></span>'
+          + '</span>'
+        + '</button>'
+        + '<div class="ev-card-body">'
+          + '<div class="field"><label class="field-label">Event name</label><input class="input" data-event-key="name" value="' + escHtml(e.name) + '" maxlength="200"></div>'
+          + '<div class="field-row">'
+            + '<div class="field"><label class="field-label">Start date</label><input class="input" type="date" data-event-key="startDate" value="' + escHtml(e.startDate) + '"></div>'
+            + '<div class="field"><label class="field-label">End date</label><input class="input" type="date" data-event-key="endDate" value="' + escHtml(e.endDate) + '"></div>'
+          + '</div>'
+          + '<div class="field-row">'
+            + '<div class="field"><label class="field-label">Category</label><input class="input" data-event-key="category" value="' + escHtml(e.category) + '" placeholder="e.g. Sale, Travel, Webinar"></div>'
+            + '<div class="field"><label class="field-label">Colour (optional)</label><input class="input" data-event-key="color" value="' + escHtml(e.color || '') + '" placeholder="#F97316" pattern="^#[0-9a-fA-F]{6}$"></div>'
+          + '</div>'
+          + '<div class="field"><label class="field-label">Location</label><input class="input" data-event-key="location" value="' + escHtml(e.location) + '" maxlength="200" placeholder="e.g. Bournemouth Town Hall"></div>'
+          + '<div class="field"><label class="field-label">Description</label><textarea class="textarea" data-event-key="description" maxlength="800" rows="3">' + escHtml(e.description) + '</textarea></div>'
+          + '<div class="field"><label class="field-label">Link URL</label><input class="input" data-event-key="url" value="' + escHtml(e.url) + '" placeholder="https://..." maxlength="500"></div>'
+          + '<div class="field"><label class="field-label">Image URL</label><input class="input" data-event-key="image" value="' + escHtml(e.image) + '" placeholder="https://..." maxlength="500">'
+            + '<div class="field-hint">Square or landscape works well in card view.</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>';
+    });
+    html += '</div>';
+    html += '<button class="add-event-btn" id="add-event" type="button" style="margin-top:10px">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>'
+      + 'Add an event'
+      + '</button>';
+    if (!list.length) {
+      html += '<div class="field-hint" style="margin-top:8px;text-align:center">'
+        + 'You haven\'t added any of your own events yet. Add one to get started.'
+        + '</div>';
+    }
+    host.innerHTML = html;
+
+    bindCustomEvents(host);
+  }
+
+  /* ── Section: Display options ───────────────────────────── */
+  function renderDisplay() {
+    const host = $('#sb-display');
+    host.innerHTML = ''
+      + switchRow('Show event images',       'showImages',       'Hero photo on cards and modal')
+      + switchRow('Show locations',          'showLocations',    'Where the event takes place')
+      + switchRow('Show descriptions',       'showDescriptions', 'Body text on cards and modal')
+      + switchRow('Show category filter',    'showFilters',      'Lets visitors filter by category at the top');
+    bindSwitches(host);
+  }
+
+  /* ── Section: Behaviour ─────────────────────────────────── */
+  function renderBehaviour() {
+    const host = $('#sb-behaviour');
+    host.innerHTML = ''
+      + '<div class="field"><label class="field-label">When an event is clicked</label>'
+        + '<select class="select" data-key="onClick">'
+          + '<option value="modal" '  + (C.onClick === 'modal'  ? 'selected' : '') + '>Open details modal</option>'
+          + '<option value="link" '   + (C.onClick === 'link'   ? 'selected' : '') + '>Open the event link in a new tab</option>'
+          + '<option value="none" '   + (C.onClick === 'none'   ? 'selected' : '') + '>Do nothing</option>'
+        + '</select>'
+        + '<div class="field-hint">"Open the event link" only works for events that have a URL — events without one will still open the modal.</div>'
+      + '</div>';
+    bindInputs(host);
+  }
+
+  /* ── Switch builder ─────────────────────────────────────── */
+  function switchRow(label, key, hint) {
+    const on = !!C[key];
+    return '<div class="switch-row">'
+      + '<div class="label">' + escHtml(label) + (hint ? '<div class="hint">' + escHtml(hint) + '</div>' : '') + '</div>'
+      + '<button class="switch ' + (on ? 'is-on' : '') + '" data-switch="' + key + '" type="button" aria-pressed="' + on + '"></button>'
+      + '</div>';
+  }
+  function bindSwitches(host) {
+    $$('[data-switch]', host).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-switch');
+        C[key] = !C[key];
+        btn.classList.toggle('is-on', C[key]);
+        btn.setAttribute('aria-pressed', C[key]);
+        shell.markDirty();
+        // Re-render the current section in case the toggle reveals new fields
+        if (key === 'showHeader')        renderHeader();
+        if (key === 'useCuratedEvents')  renderCurated();
+        render();
+      });
+    });
+  }
+
+  /* ── Input builder ──────────────────────────────────────── */
+  function bindInputs(host) {
+    $$('[data-key]', host).forEach(el => {
+      const key = el.getAttribute('data-key');
+      el.addEventListener('input', () => {
+        C[key] = el.value;
+        shell.markDirty();
+        debounceRender();
+      });
+      if (el.tagName === 'SELECT') {
+        el.addEventListener('change', () => {
+          C[key] = el.value;
+          shell.markDirty();
+          render();
+        });
+      }
+    });
+  }
+
+  /* ── Colour row builder ─────────────────────────────────── */
+  function colourRow(label, key) {
+    const v = C[key] || '#000000';
+    return '<div class="colour-row">'
+      + '<div class="label">' + escHtml(label) + '</div>'
+      + '<div class="colour-swatch-wrap" style="background:' + escHtml(v) + '">'
+        + '<input type="color" data-colour="' + key + '" value="' + escHtml(v) + '">'
+      + '</div>'
+      + '<input type="text" class="colour-hex" data-colour-text="' + key + '" value="' + escHtml(v) + '" maxlength="7" pattern="^#[0-9a-fA-F]{6}$">'
+      + '</div>';
+  }
+  function bindColours(host) {
+    $$('[data-colour]', host).forEach(picker => {
+      const key = picker.getAttribute('data-colour');
+      const text = host.querySelector('[data-colour-text="' + key + '"]');
+      const swatch = picker.parentElement;
+      picker.addEventListener('input', () => {
+        const v = picker.value;
+        C[key] = v;
+        if (text) text.value = v.toUpperCase();
+        if (swatch) swatch.style.background = v;
+        shell.markDirty();
+        debounceRender();
+      });
+      if (text) {
+        text.addEventListener('input', () => {
+          const v = text.value.trim();
+          if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+            C[key] = v;
+            picker.value = v;
+            if (swatch) swatch.style.background = v;
+            shell.markDirty();
+            debounceRender();
+          }
+        });
+      }
+    });
+  }
+
+  /* ── Chip input builder (for curated filter lists) ──────── */
+  function chipInput(key, suggestions, placeholder) {
+    const list = Array.isArray(C[key]) ? C[key] : [];
+    let html = '<div class="chip-input-wrap" data-chip-host="' + key + '">';
+    list.forEach((v, i) => {
+      html += '<span class="chip">' + escHtml(v) + '<span class="x" data-remove="' + i + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px"><path d="M6 18L18 6M6 6l12 12"/></svg></span></span>';
+    });
+    html += '<input class="chip-input" data-chip-input placeholder="' + escHtml(placeholder || '') + '" maxlength="60">';
+    html += '</div>';
+    if (suggestions && suggestions.length) {
+      html += '<div class="chip-suggestions">';
+      suggestions.forEach(s => {
+        if (list.indexOf(s) === -1) {
+          html += '<button class="chip-suggest" type="button" data-suggest="' + escHtml(s) + '">' + escHtml(s) + '</button>';
+        }
+      });
+      html += '</div>';
+    }
+    return html;
+  }
+  function bindChipInputs(host) {
+    $$('[data-chip-host]', host).forEach(wrap => {
+      const key = wrap.getAttribute('data-chip-host');
+      const input = wrap.querySelector('[data-chip-input]');
+
+      function add(val) {
+        const v = String(val || '').trim();
+        if (!v) return;
+        if (!Array.isArray(C[key])) C[key] = [];
+        if (C[key].indexOf(v) !== -1) return;
+        if (C[key].length >= 24) return;
+        C[key] = C[key].concat([v]);
+        shell.markDirty();
+        renderCurated();
+        render();
+      }
+
+      input.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ',') {
+          ev.preventDefault();
+          add(input.value);
+          input.value = '';
+        } else if (ev.key === 'Backspace' && !input.value) {
+          if (Array.isArray(C[key]) && C[key].length) {
+            C[key] = C[key].slice(0, -1);
+            shell.markDirty();
+            renderCurated();
+            render();
+          }
+        }
+      });
+      input.addEventListener('blur', () => { if (input.value.trim()) { add(input.value); input.value = ''; } });
+
+      wrap.querySelectorAll('[data-remove]').forEach(x => {
+        x.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const i = parseInt(x.getAttribute('data-remove'), 10);
+          if (!Array.isArray(C[key])) return;
+          C[key] = C[key].filter((_, idx) => idx !== i);
+          shell.markDirty();
+          renderCurated();
+          render();
+        });
+      });
+    });
+
+    $$('[data-suggest]', host).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.getAttribute('data-suggest');
+        // Determine which chip-input host this suggestion belongs to (the previous sibling)
+        let wrap = btn.closest('.field')?.querySelector('[data-chip-host]');
+        if (!wrap) return;
+        const key = wrap.getAttribute('data-chip-host');
+        if (!Array.isArray(C[key])) C[key] = [];
+        if (C[key].indexOf(v) === -1) {
+          C[key] = C[key].concat([v]);
+          shell.markDirty();
+          renderCurated();
+          render();
+        }
+      });
+    });
+  }
+
+  /* ── Custom events binders ──────────────────────────────── */
+  function bindCustomEvents(host) {
+    // Toggle open/close
+    host.querySelectorAll('[data-toggle-event]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        // Don't toggle when clicking action icons
+        if (ev.target.closest('[data-move-up]') || ev.target.closest('[data-move-down]') || ev.target.closest('[data-delete]')) return;
+        const card = btn.closest('.ev-card');
+        const i = parseInt(card.getAttribute('data-idx'), 10);
+        C.customEvents[i]._open = !C.customEvents[i]._open;
+        renderCustom();
+      });
+    });
+
+    // Field bindings
+    host.querySelectorAll('.ev-card').forEach(card => {
+      const i = parseInt(card.getAttribute('data-idx'), 10);
+      card.querySelectorAll('[data-event-key]').forEach(input => {
+        const k = input.getAttribute('data-event-key');
+        input.addEventListener('input', () => {
+          C.customEvents[i][k] = input.value;
+          shell.markDirty();
+          // For name/date, update the head label; defer the full re-render
+          if (k === 'name' || k === 'startDate' || k === 'endDate') {
+            const head = card.querySelector('.ev-card-title');
+            const e = C.customEvents[i];
+            const dateRange = e.endDate && e.endDate !== e.startDate
+              ? (e.startDate || '?') + ' → ' + e.endDate
+              : (e.startDate || 'No date');
+            if (head) head.textContent = (e.name || 'Untitled event') + ' · ' + dateRange;
+          }
+          debounceRender();
+        });
+      });
+      // Move/delete actions
+      card.querySelector('[data-move-up]').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (i === 0) return;
+        const arr = C.customEvents.slice();
+        [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
+        C.customEvents = arr;
+        shell.markDirty();
+        renderCustom();
+        render();
+      });
+      card.querySelector('[data-move-down]').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (i === C.customEvents.length - 1) return;
+        const arr = C.customEvents.slice();
+        [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]];
+        C.customEvents = arr;
+        shell.markDirty();
+        renderCustom();
+        render();
+      });
+      card.querySelector('[data-delete]').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (!confirm('Remove this event?')) return;
+        C.customEvents = C.customEvents.filter((_, idx) => idx !== i);
+        shell.markDirty();
+        renderCustom();
+        render();
+      });
+    });
+
+    // Add new
+    const addBtn = host.querySelector('#add-event');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        const newEvent = {
+          id: uid(),
+          name: 'New event',
+          startDate: todayStr(),
+          endDate: '',
+          category: 'Event',
+          location: '',
+          description: '',
+          url: '',
+          image: '',
+          color: '',
+          _open: true,
+        };
+        C.customEvents = [].concat(C.customEvents || [], [newEvent]);
+        shell.markDirty();
+        renderCustom();
+        render();
+      });
+    }
+  }
+
+  /* ── Sections — collapse/expand ─────────────────────────── */
+  document.querySelectorAll('[data-toggle]').forEach(head => {
+    head.addEventListener('click', () => {
+      head.parentElement.classList.toggle('is-open');
+    });
+  });
+
+  /* ── Templates modal ────────────────────────────────────── */
+  function openTemplates() {
+    const body = $('#tmpl-body');
+    let html = '<div class="tmpl-grid">';
+    TEMPLATES.forEach(t => {
+      html += '<button class="tmpl-card" data-tmpl="' + t.id + '" type="button">'
+        + '<div class="tmpl-thumb">' + t.icon + '</div>'
+        + '<div class="tmpl-meta">'
+          + '<div class="tmpl-name">' + escHtml(t.name) + '</div>'
+          + '<div class="tmpl-desc">' + escHtml(t.desc) + '</div>'
+        + '</div>'
+      + '</button>';
+    });
+    html += '</div>';
+    body.innerHTML = html;
+    body.querySelectorAll('[data-tmpl]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-tmpl');
+        const t = TEMPLATES.find(x => x.id === id);
+        if (!t) return;
+        Object.assign(C, t.patch);
+        // Clean up _open flags on customEvents
+        if (Array.isArray(C.customEvents)) {
+          C.customEvents = C.customEvents.map(e => Object.assign({}, e, { _open: false }));
+        }
+        shell.markDirty();
+        renderAllSections();
+        render();
+        closeTemplates();
+        tgse.toast('Template applied: ' + t.name, 'ok');
+      });
+    });
+    $('#tmpl-bg').classList.add('is-open');
+    $('#tmpl-modal').classList.add('is-open');
+  }
+  function closeTemplates() {
+    $('#tmpl-bg').classList.remove('is-open');
+    $('#tmpl-modal').classList.remove('is-open');
+  }
+  $('#tmpl-bg').addEventListener('click', closeTemplates);
+  $('#tmpl-close').addEventListener('click', closeTemplates);
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && $('#tmpl-modal').classList.contains('is-open')) closeTemplates();
+  });
+
+  /* ── Render all sections ────────────────────────────────── */
+  function renderAllSections() {
+    renderLayout();
+    renderHeader();
+    renderColours();
+    renderShape();
+    renderCurated();
+    renderCustom();
+    renderDisplay();
+    renderBehaviour();
+  }
+
+  /* ── Load existing widget by URL id ─────────────────────── */
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) {
+      renderAllSections();
+      render();
+      return;
+    }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) {
+          Object.assign(C, d.config);
+          // Backfill any missing keys from defaults
+          if (!Array.isArray(C.customEvents)) C.customEvents = [];
+          if (!Array.isArray(C.curatedCountries)) C.curatedCountries = [];
+          if (!Array.isArray(C.curatedCategories)) C.curatedCategories = [];
+          if (!Array.isArray(C.curatedAudience)) C.curatedAudience = [];
+        }
+        if (d.name) document.getElementById('name-input').value = d.name;
+        renderAllSections();
+        render();
+      })
+      .catch(() => {
+        tgse.toast('Failed to load widget', 'err');
+        renderAllSections();
+        render();
+      });
+  }
+
+  /* ── Boot ───────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    if (tgse.isLoggedIn()) {
+      loadFromUrl();
+    } else {
+      // Shell will show the login overlay; render the sidebar with defaults so it's not blank
+      renderAllSections();
+      render();
+    }
+  });
+
+  // Mark dirty on name input
+  document.getElementById('name-input')?.addEventListener('input', () => shell.markDirty());
+
+})();
+</script>
+
+</body>
+</html>
