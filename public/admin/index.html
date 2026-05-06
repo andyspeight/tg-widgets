@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* ─── Travelgenix design tokens ──────────────────────────────────── */
     :root {
       --tg-primary: #1B2B5B;
       --tg-primary-light: #2A3F7A;
@@ -48,7 +47,6 @@
       --tg-text-tertiary: #64748B;
     }
 
-    /* ─── Reset ──────────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; height: 100%; }
     body {
@@ -59,10 +57,14 @@
       background: var(--tg-bg-secondary);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      overflow: hidden; /* The iframe handles its own scrolling */
     }
 
-    /* ─── App shell ──────────────────────────────────────────────────── */
-    .app { min-height: 100vh; display: flex; flex-direction: column; }
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
     .topbar {
       background: var(--tg-bg-primary);
@@ -73,9 +75,6 @@
       justify-content: space-between;
       height: 64px;
       flex-shrink: 0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
     }
     .topbar-left { display: flex; align-items: center; gap: var(--space-4); }
     .logo {
@@ -114,7 +113,6 @@
     }
     .theme-toggle:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
 
-    /* ─── Tab navigation ─────────────────────────────────────────────── */
     .tabs {
       background: var(--tg-bg-primary);
       border-bottom: 1px solid var(--tg-border);
@@ -156,19 +154,27 @@
       margin-left: var(--space-2);
     }
 
-    /* ─── Main content ───────────────────────────────────────────────── */
+    /* Main fills the rest of the viewport so the iframe can be 100% height */
     main {
-      flex: 1; padding: var(--space-8) var(--space-6);
-      max-width: 1440px; margin: 0 auto; width: 100%;
+      flex: 1;
+      min-height: 0; /* critical for flex children with overflow */
+      position: relative;
+      background: var(--tg-bg-secondary);
     }
 
-    /* ─── Loading state ──────────────────────────────────────────────── */
-    .center-state {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      min-height: 50vh; padding: var(--space-12);
-      text-align: center; color: var(--tg-text-secondary);
+    .state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-12);
+      text-align: center;
+      color: var(--tg-text-secondary);
+      background: var(--tg-bg-secondary);
     }
+    .state[hidden] { display: none !important; }
     .spinner {
       width: 36px; height: 36px;
       border: 3px solid var(--tg-border);
@@ -181,11 +187,12 @@
     @media (prefers-reduced-motion: reduce) {
       .spinner { animation: none; border-top-color: var(--tg-accent); }
     }
-    .center-state h2 {
+    .state h2 {
       font-size: 18px; font-weight: 600; color: var(--tg-text-primary);
       margin: 0 0 var(--space-2);
     }
-    .center-state p { margin: 0; font-size: 14px; max-width: 400px; }
+    .state p { margin: 0 0 var(--space-4); font-size: 14px; max-width: 400px; }
+
     .btn {
       display: inline-flex; align-items: center; gap: var(--space-2);
       padding: var(--space-3) var(--space-5);
@@ -213,13 +220,16 @@
     }
     .btn-secondary:hover { background: var(--tg-bg-tertiary); }
 
-    /* ─── iframe holder ──────────────────────────────────────────────── */
     .tab-frame {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      min-height: calc(100vh - 64px - 49px - 64px);
+      height: 100%;
       border: none;
-      background: transparent;
+      background: var(--tg-bg-secondary);
+      display: block;
     }
+    .tab-frame[hidden] { display: none !important; }
   </style>
 </head>
 <body>
@@ -265,20 +275,20 @@
       </button>
     </nav>
 
-    <main id="main">
-      <div class="center-state" id="loading-state">
+    <main>
+      <div class="state" id="loading-state">
         <div class="spinner" role="status" aria-label="Loading"></div>
         <h2>Loading Control</h2>
         <p>Checking your access&hellip;</p>
       </div>
 
-      <div class="center-state" id="signin-state" hidden>
+      <div class="state" id="signin-state" hidden>
         <h2>Sign in required</h2>
         <p>You need to sign in to your Travelgenix account to access Control.</p>
         <a class="btn btn-primary" href="/signin.html?redirect=/admin/" id="signin-btn">Sign in</a>
       </div>
 
-      <div class="center-state" id="forbidden-state" hidden>
+      <div class="state" id="forbidden-state" hidden>
         <h2>Admin access only</h2>
         <p>This area is for Travelgenix staff. If you think you should have access, contact Andy.</p>
         <a class="btn btn-secondary" href="/" id="home-btn">Back to Travelgenix</a>
@@ -289,9 +299,6 @@
   </div>
 
   <script>
-    // ─── Auth gate ────────────────────────────────────────────────────
-    // Hits the existing /api/auth/me endpoint that already handles the
-    // SSO cookie. Shows the appropriate state based on response.
     async function checkAuth() {
       try {
         const r = await fetch('/api/auth/me', { credentials: 'include' });
@@ -325,7 +332,6 @@
       document.getElementById('tabs').hidden = name !== 'app';
     }
 
-    // ─── Tab switching ───────────────────────────────────────────────
     const TAB_URLS = {
       packages: '/admin/packages.html',
       catalogue: '/admin/catalogue.html',
@@ -339,7 +345,6 @@
       document.querySelectorAll('.tab').forEach(t => {
         t.setAttribute('aria-selected', String(t.dataset.tab === name));
       });
-      // Update URL hash so refresh keeps the same tab
       history.replaceState(null, '', '#' + name);
     }
 
@@ -350,13 +355,11 @@
       });
     }
 
-    // ─── Theme toggle ────────────────────────────────────────────────
     function applyTheme(t) {
       document.documentElement.setAttribute('data-theme', t);
       document.getElementById('icon-sun').hidden = t === 'dark';
       document.getElementById('icon-moon').hidden = t !== 'dark';
       localStorage.setItem('tg-theme', t);
-      // Pass to iframe so it can match
       const frame = document.getElementById('tab-frame');
       if (frame.contentWindow) {
         try { frame.contentWindow.postMessage({ type: 'theme', value: t }, '*'); } catch {}
@@ -372,18 +375,15 @@
       });
     }
 
-    // ─── Boot ────────────────────────────────────────────────────────
     (async function init() {
       bindTheme();
       const auth = await checkAuth();
       if (!auth) return;
-      // Show user chip
       document.getElementById('user-email').textContent = auth.user.email || '';
       document.getElementById('user-role').textContent = auth.role;
       document.getElementById('user-chip').hidden = false;
       bindTabs();
       showState('app');
-      // Open tab from hash, or default to packages
       const initial = (location.hash || '').replace('#', '') || 'packages';
       openTab(TAB_URLS[initial] ? initial : 'packages');
     })();
