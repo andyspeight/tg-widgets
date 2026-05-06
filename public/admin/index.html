@@ -57,7 +57,7 @@
       background: var(--tg-bg-secondary);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      overflow: hidden; /* The iframe handles its own scrolling */
+      overflow: hidden;
     }
 
     .app {
@@ -81,6 +81,7 @@
       display: flex; align-items: center; gap: var(--space-2);
       font-weight: 700; font-size: 18px; color: var(--tg-primary);
     }
+    [data-theme="dark"] .logo { color: var(--tg-accent-light); }
     .logo-mark {
       width: 28px; height: 28px; border-radius: var(--radius-sm);
       background: linear-gradient(135deg, var(--tg-primary), var(--tg-accent));
@@ -136,12 +137,13 @@
       font-family: inherit;
       margin-bottom: -1px;
     }
-    .tab:hover { color: var(--tg-text-primary); }
+    .tab:hover:not([disabled]) { color: var(--tg-text-primary); }
     .tab[aria-selected="true"] {
       color: var(--tg-primary);
       border-bottom-color: var(--tg-accent);
       font-weight: 600;
     }
+    [data-theme="dark"] .tab[aria-selected="true"] { color: var(--tg-text-primary); }
     .tab[disabled] {
       color: var(--tg-text-tertiary);
       cursor: not-allowed;
@@ -154,10 +156,9 @@
       margin-left: var(--space-2);
     }
 
-    /* Main fills the rest of the viewport so the iframe can be 100% height */
     main {
       flex: 1;
-      min-height: 0; /* critical for flex children with overflow */
+      min-height: 0;
       position: relative;
       background: var(--tg-bg-secondary);
     }
@@ -208,9 +209,7 @@
       outline: none;
       box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
     }
-    .btn-primary {
-      background: var(--tg-primary); color: white;
-    }
+    .btn-primary { background: var(--tg-primary); color: white; }
     .btn-primary:hover { background: var(--tg-primary-light); }
     .btn-primary:active { background: var(--tg-primary-dark); }
     .btn-secondary {
@@ -258,13 +257,13 @@
     </header>
 
     <nav class="tabs" role="tablist" aria-label="Travelgenix Control sections" id="tabs" hidden>
-      <button class="tab" role="tab" data-tab="clients" disabled aria-selected="false" type="button">
-        Clients <span class="tab-badge">soon</span>
+      <button class="tab" role="tab" data-tab="clients" aria-selected="true" type="button">
+        Clients
       </button>
       <button class="tab" role="tab" data-tab="new-client" disabled aria-selected="false" type="button">
         New Client <span class="tab-badge">soon</span>
       </button>
-      <button class="tab" role="tab" data-tab="packages" aria-selected="true" type="button">
+      <button class="tab" role="tab" data-tab="packages" aria-selected="false" type="button">
         Packages
       </button>
       <button class="tab" role="tab" data-tab="catalogue" aria-selected="false" type="button">
@@ -333,6 +332,7 @@
     }
 
     const TAB_URLS = {
+      clients: '/admin/clients.html',
       packages: '/admin/packages.html',
       catalogue: '/admin/catalogue.html',
     };
@@ -354,6 +354,14 @@
         t.addEventListener('click', () => openTab(t.dataset.tab));
       });
     }
+
+    // Listen for messages from child iframes (e.g. clicking "New client"
+    // inside the clients list tells us to switch tabs)
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'switch-tab' && TAB_URLS[e.data.tab]) {
+        openTab(e.data.tab);
+      }
+    });
 
     function applyTheme(t) {
       document.documentElement.setAttribute('data-theme', t);
@@ -384,8 +392,8 @@
       document.getElementById('user-chip').hidden = false;
       bindTabs();
       showState('app');
-      const initial = (location.hash || '').replace('#', '') || 'packages';
-      openTab(TAB_URLS[initial] ? initial : 'packages');
+      const initial = (location.hash || '').replace('#', '') || 'clients';
+      openTab(TAB_URLS[initial] ? initial : 'clients');
     })();
   </script>
 </body>
