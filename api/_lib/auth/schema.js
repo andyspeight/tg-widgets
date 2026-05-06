@@ -151,6 +151,75 @@ export const AUTH_EVENTS = {
     MAGIC_LINK_SENT:         'magic_link_sent',
     MAGIC_LINK_USED:         'magic_link_used',
     ACCOUNT_LOCKED:          'account_locked',
-    ACCOUNT_UNLOCKED:        'account_unlocked'
+    ACCOUNT_UNLOCKED:        'account_unlocked',
+    PERMISSION_GRANTED:      'permission_granted',
+    PERMISSION_REVOKED:      'permission_revoked',
+    PERMISSION_UPDATED:      'permission_updated'
+  }
+};
+
+// ----------------------------------------------------------------------------
+// Products table — reference list of Travelgenix products that grant access
+// ----------------------------------------------------------------------------
+export const PRODUCTS = {
+  tableId: 'tbl8gafdldQyps4JN',
+  fields: {
+    productId:      'fld0L1auU7q8ep0kX', // primary — slug like 'widget_suite'
+    displayName:    'fldGSdyhaOZJ6OnwJ',
+    description:    'fldhruACLHECYknxG',
+    availableRoles: 'fldaczn0DWeoDui8D', // multiSelect
+    status:         'fldo7iE9GYRXRXY1c', // active | coming_soon | deprecated
+    created:        'fldWl7dKanrCvi12w',
+    permissions:    'fld0IitvokkAZoon9'  // reverse link → Permissions
+  },
+  // The set of valid product slugs Claude code should recognise.
+  slugs: {
+    WIDGET_SUITE:   'widget_suite',
+    LUNA_CHAT:      'luna_chat',
+    LUNA_MARKETING: 'luna_marketing',
+    LUNA_BRAIN:     'luna_brain',
+    LUNA_TRENDS:    'luna_trends',
+    LUNA_QA:        'luna_qa',
+    TOOL_HUB:       'tool_hub'
+  },
+  statuses: {
+    ACTIVE:      'active',
+    COMING_SOON: 'coming_soon',
+    DEPRECATED:  'deprecated'
+  }
+};
+
+// ----------------------------------------------------------------------------
+// Permissions table — links a User to a Product with a Role
+// ----------------------------------------------------------------------------
+export const PERMISSIONS = {
+  tableId: 'tblfuVxtQyaNRYBrB',
+  fields: {
+    permissionId: 'fldfL36VMxQufq6BF', // primary — autonumber
+    user:         'fldWMPFEH6MiEHq2z', // linked → Users
+    product:      'fldxrWehb2IaydcCE', // linked → Products
+    role:         'fldtpWkG2gv1Kbu1G', // singleSelect — varies per product
+    status:       'fldUq2esKf0gOkxhs', // active | suspended | expired
+    granted:      'fldy8TADPRqxagHMK',
+    grantedBy:    'fldRhA0BQVmgz5RC5', // linked → Users
+    expiresAt:    'fldLteKvMhHPUG4wF',
+    notes:        'fldWGqynzsVAKRjPI'
+  },
+  statuses: {
+    ACTIVE:    'active',
+    SUSPENDED: 'suspended',
+    EXPIRED:   'expired'
+  },
+  // Role values used across all products. Not every role is valid for every
+  // product — see PRODUCTS table availableRoles for which roles each
+  // product accepts.
+  roles: {
+    OWNER:        'owner',
+    ADMIN:        'admin',
+    CLIENT_OWNER: 'client_owner',
+    CLIENT_USER:  'client_user',
+    AGENT:        'agent',
+    SUPERVISOR:   'supervisor',
+    VIEWER:       'viewer'
   }
 };
