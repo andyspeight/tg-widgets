@@ -1,8 +1,13 @@
 /**
  * GET /api/auth/me
  *
- * Returns the current user and their client. Used by the dashboard on load
- * to verify the token and hydrate UI state.
+ * Returns the current user, their client, and their resolved permissions.
+ * Used by:
+ *   - Product front-ends on load to confirm the session and gate UI
+ *   - Identity Console to refresh after a permission change
+ *
+ * Accepts auth via either Authorization: Bearer header OR the
+ * tg_session cookie (set on .travelify.io for cross-subdomain SSO).
  */
 
 import { setCors, requireMethod, jsonOk } from '../_lib/auth/http.js';
@@ -23,6 +28,11 @@ export default async function handler(req, res) {
       fullName: ctx.fullName,
       role: ctx.role
     },
-    client
+    client,
+    permissions: (ctx.permissions || []).map(p => ({
+      product: p.product,
+      role: p.role,
+      expiresAt: p.expiresAt || null
+    }))
   });
 }
