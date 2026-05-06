@@ -23,6 +23,8 @@ import { findOneByField, getRecord, updateRecord, createRecord } from '../_lib/a
 import { USERS, CLIENTS, SESSIONS, AUTH_EVENTS } from '../_lib/auth/schema.js';
 import { verifyPassword, signSessionToken, uuid } from '../_lib/auth/crypto.js';
 import { logAuthEvent } from '../_lib/auth/audit.js';
+import { resolveUserPermissions } from '../_lib/auth/permissions.js';
+import { setSessionCookie } from '../_lib/auth/cookie.js';
 
 const DUMMY_HASH = '$2a$12$abcdefghijklmnopqrstuv0123456789ABCDEFGHIJKLMNOPQRSTUV01234';
 
@@ -90,12 +92,19 @@ export default async function handler(req, res) {
   const fullName = userFields[USERS.fields.fullName] || '';
   const mustResetPassword = !!userFields[USERS.fields.forcePasswordReset];
 
+  // Resolve every active permission this user holds, joined to product slug.
+  // We embed these in the JWT so any product API can validate access without
+  // hitting Airtable on every call. Permissions table is queried server-side
+  // here only.
+  const permissions = await resolveUserPermissions(userRec.id, { bypassCache: true });
+
   const sessionId = uuid();
   const { token, jti, expiresAt } = signSessionToken({
     userId: userRec.id,
     clientId: clientRecordId,
     role,
-    sessionId
+    sessionId,
+    permissions: permissions.map(p => ({ product: p.product, role: p.role }))
   });
 
   const nowIso = new Date().toISOString();
@@ -136,9 +145,19 @@ export default async function handler(req, res) {
     ip, userAgent: ua
   });
 
+  // Set the cross-subdomain session cookie so any *.travelify.io product
+  // can read the token without copying it through localStorage. This
+  // turns multi-product sign-in into single sign-on.
+  setSessionCookie(res, token, expiresAt, { req });
+
   return jsonOk(res, {
     token,
     user: { email, fullName, role, mustResetPassword },
-    client: clientPayload
+    client: clientPayload,
+    permissions: permissions.map(p => ({
+      product: p.product,
+      role: p.role,
+      expiresAt: p.expiresAt
+    }))
   });
 }
