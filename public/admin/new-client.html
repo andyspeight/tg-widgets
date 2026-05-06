@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>New Client · Travelgenix Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-primary: #1B2B5B; --tg-primary-light: #2A3F7A; --tg-primary-dark: #111D3E;
+      --tg-accent: #00B4D8; --tg-accent-light: #48CAE4; --tg-accent-dark: #0096B7;
+      --tg-success: #10B981; --tg-warning: #F59E0B; --tg-error: #EF4444; --tg-info: #3B82F6;
+      --tg-bg-primary: #FFFFFF; --tg-bg-secondary: #F8FAFC; --tg-bg-tertiary: #F1F5F9;
+      --tg-border: #E2E8F0; --tg-border-light: #F1F5F9;
+      --tg-text-primary: #0F172A; --tg-text-secondary: #475569; --tg-text-tertiary: #94A3B8;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
+      --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+    }
+    [data-theme="dark"] {
+      --tg-bg-primary: #0F172A; --tg-bg-secondary: #1E293B; --tg-bg-tertiary: #334155;
+      --tg-border: #334155; --tg-border-light: #1E293B;
+      --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1; --tg-text-tertiary: #64748B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px; line-height: 1.6;
+      color: var(--tg-text-primary);
+      background: var(--tg-bg-secondary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 var(--space-6) var(--space-12); }
+
+    .page-header {
+      padding-top: var(--space-6);
+      margin-bottom: var(--space-6);
+    }
+    .page-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 var(--space-1); letter-spacing: -0.02em; }
+    .page-header p { margin: 0; color: var(--tg-text-secondary); font-size: 14px; max-width: 620px; }
+
+    /* Step indicator */
+    .stepper {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      overflow-x: auto;
+    }
+    .step {
+      display: flex; align-items: center; gap: var(--space-3);
+      flex: 1;
+      min-width: 0;
+    }
+    .step-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--tg-bg-tertiary);
+      color: var(--tg-text-tertiary);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 14px;
+      flex-shrink: 0;
+      transition: all 200ms ease;
+    }
+    .step.active .step-num {
+      background: var(--tg-accent);
+      color: white;
+      box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.15);
+    }
+    .step.done .step-num {
+      background: var(--tg-success);
+      color: white;
+    }
+    .step-label {
+      display: flex; flex-direction: column; gap: 2px;
+      min-width: 0;
+    }
+    .step-name {
+      font-size: 13px; font-weight: 600; color: var(--tg-text-tertiary);
+      white-space: nowrap;
+    }
+    .step.active .step-name, .step.done .step-name { color: var(--tg-text-primary); }
+    .step-status { font-size: 11px; color: var(--tg-text-tertiary); }
+    .step-divider {
+      flex: 1; height: 2px;
+      background: var(--tg-border);
+      margin: 0 var(--space-1);
+      max-width: 40px;
+    }
+    .step.done + .step-divider { background: var(--tg-success); }
+
+    @media (max-width: 700px) {
+      .step-label { display: none; }
+      .stepper { padding: var(--space-3) var(--space-4); }
+    }
+
+    .panel {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--space-4);
+    }
+    .panel-header {
+      padding: var(--space-5);
+      border-bottom: 1px solid var(--tg-border);
+    }
+    .panel-header h2 {
+      font-size: 18px; font-weight: 700; margin: 0 0 var(--space-1);
+      letter-spacing: -0.01em;
+    }
+    .panel-header p { margin: 0; color: var(--tg-text-secondary); font-size: 14px; }
+    .panel-body { padding: var(--space-5); }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+    @media (max-width: 600px) {
+      .field-row { grid-template-columns: 1fr; }
+    }
+    .field {
+      display: flex; flex-direction: column; gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      font-size: 13px; font-weight: 500;
+      color: var(--tg-text-primary);
+    }
+    .field label .required { color: var(--tg-error); margin-left: 2px; }
+    .field input, .field textarea, .field select {
+      font-family: inherit; font-size: 15px;
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--tg-border);
+      background: var(--tg-bg-primary);
+      color: var(--tg-text-primary);
+      width: 100%;
+      min-height: 44px;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      outline: none;
+      border-color: var(--tg-accent);
+      box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
+    }
+    .field input[aria-invalid="true"], .field input.error {
+      border-color: var(--tg-error);
+    }
+    .field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+    .field-help { font-size: 12px; color: var(--tg-text-tertiary); }
+    .field-error { font-size: 12px; color: var(--tg-error); display: flex; align-items: center; gap: var(--space-1); }
+    .field-warn { font-size: 12px; color: var(--tg-warning); display: flex; align-items: center; gap: var(--space-1); }
+    .field-ok { font-size: 12px; color: var(--tg-success); display: flex; align-items: center; gap: var(--space-1); }
+
+    .field-prefix-input { position: relative; }
+    .field-prefix-input::before {
+      content: attr(data-prefix);
+      position: absolute;
+      left: var(--space-3);
+      top: 50%; transform: translateY(-50%);
+      color: var(--tg-text-tertiary);
+      font-weight: 500;
+      pointer-events: none;
+    }
+    .field-prefix-input input { padding-left: 28px; }
+
+    .section-divider {
+      margin: var(--space-5) 0;
+      padding-top: var(--space-5);
+      border-top: 1px solid var(--tg-border);
+    }
+    .section-divider h3 {
+      margin: 0 0 var(--space-1);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--tg-text-secondary);
+    }
+    .section-divider p { margin: 0 0 var(--space-4); font-size: 13px; color: var(--tg-text-tertiary); }
+
+    /* Package picker */
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-3);
+    }
+    .package-card {
+      border: 2px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      cursor: pointer;
+      transition: all 150ms ease;
+      background: var(--tg-bg-primary);
+      text-align: left;
+      font-family: inherit;
+    }
+    .package-card:hover { border-color: var(--tg-accent-light); }
+    .package-card[aria-pressed="true"] {
+      border-color: var(--tg-accent);
+      box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.12);
+    }
+    .package-card-name {
+      font-size: 16px; font-weight: 700; margin: 0 0 var(--space-2);
+      color: var(--tg-text-primary);
+    }
+    .package-card-price {
+      font-size: 18px; font-weight: 700; margin-bottom: 2px;
+      color: var(--tg-text-primary);
+    }
+    .package-card-period {
+      font-size: 12px; color: var(--tg-text-secondary);
+      margin-bottom: var(--space-2);
+    }
+    .package-card-meta {
+      font-size: 12px; color: var(--tg-text-tertiary);
+    }
+
+    /* Entitlements grid */
+    .cat-section { border-bottom: 1px solid var(--tg-border); }
+    .cat-section:last-child { border-bottom: none; }
+    .cat-section-header {
+      padding: var(--space-3) var(--space-5);
+      background: var(--tg-bg-secondary);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .cat-section-header h3 {
+      margin: 0; font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--tg-text-secondary);
+    }
+    .ent-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-5);
+      border-bottom: 1px solid var(--tg-border-light);
+    }
+    .ent-row:last-child { border-bottom: none; }
+    .ent-row-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .ent-row-name { font-weight: 500; font-size: 14px; color: var(--tg-text-primary); }
+    .ent-row-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--tg-text-tertiary); }
+    .ent-source-pill {
+      font-size: 10px; font-weight: 600;
+      padding: 2px 6px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      align-self: flex-start;
+      margin-top: 2px;
+    }
+    .ent-source-pill[data-src="default"] { background: rgba(0, 180, 216, 0.12); color: var(--tg-accent-dark); }
+    .ent-source-pill[data-src="addon"] { background: rgba(16, 185, 129, 0.12); color: var(--tg-success); }
+    .ent-source-pill[data-src="override"] { background: rgba(245, 158, 11, 0.12); color: var(--tg-warning); }
+
+    .toggle-cell {
+      display: flex; align-items: center; justify-content: center;
+      width: 80px;
+    }
+    .toggle-cell input {
+      width: 18px; height: 18px;
+      accent-color: var(--tg-accent);
+      cursor: pointer;
+    }
+    .grid-headers {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: var(--space-4);
+      padding: var(--space-2) var(--space-5);
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--tg-text-tertiary);
+      background: var(--tg-bg-tertiary);
+    }
+    .grid-headers .col-toggle { width: 80px; text-align: center; }
+
+    .checkbox-row {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-3); border-radius: var(--radius-md);
+      background: var(--tg-bg-secondary);
+      cursor: pointer;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 18px; height: 18px; min-height: 18px; padding: 0;
+      accent-color: var(--tg-accent);
+      cursor: pointer;
+      margin-top: 2px;
+    }
+    .checkbox-row label { cursor: pointer; flex: 1; font-size: 14px; }
+    .checkbox-row label .desc { display: block; font-size: 12px; color: var(--tg-text-tertiary); margin-top: 2px; }
+
+    .color-input-row {
+      display: flex; gap: var(--space-2); align-items: center;
+    }
+    .color-input-row input[type="color"] {
+      width: 44px; height: 44px;
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-md);
+      padding: 2px;
+      cursor: pointer;
+      background: var(--tg-bg-primary);
+    }
+    .color-input-row input[type="text"] {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+
+    /* Review screen */
+    .review-section {
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--tg-border);
+    }
+    .review-section:last-child { border-bottom: none; }
+    .review-section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: var(--space-3);
+    }
+    .review-section-header h4 {
+      margin: 0; font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--tg-text-secondary);
+    }
+    .review-edit-btn {
+      background: transparent;
+      border: 1px solid var(--tg-border);
+      color: var(--tg-text-secondary);
+      font-size: 12px; font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .review-edit-btn:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .review-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-3) var(--space-5);
+    }
+    .review-field { display: flex; flex-direction: column; gap: 2px; }
+    .review-field .label {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--tg-text-tertiary);
+    }
+    .review-field .value {
+      color: var(--tg-text-primary);
+      font-size: 14px;
+      word-break: break-word;
+    }
+    .review-field .value.empty { color: var(--tg-text-tertiary); font-style: italic; }
+    .review-field .value.mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+    .what-happens {
+      background: rgba(0, 180, 216, 0.06);
+      border: 1px solid rgba(0, 180, 216, 0.2);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+    .what-happens h4 {
+      margin: 0 0 var(--space-2);
+      font-size: 13px;
+      color: var(--tg-accent-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    [data-theme="dark"] .what-happens h4 { color: var(--tg-accent-light); }
+    .what-happens ul {
+      margin: 0; padding-left: var(--space-5);
+      font-size: 14px;
+      color: var(--tg-text-primary);
+      line-height: 1.7;
+    }
+
+    /* Buttons & footer */
+    .btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer; transition: all 150ms ease;
+      min-height: 44px;
+      text-decoration: none;
+    }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--tg-primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--tg-primary-light); }
+    .btn-secondary {
+      background: var(--tg-bg-primary);
+      color: var(--tg-text-primary);
+      border-color: var(--tg-border);
+    }
+    .btn-secondary:hover:not(:disabled) { background: var(--tg-bg-tertiary); }
+    .btn-success { background: var(--tg-success); color: white; }
+    .btn-success:hover:not(:disabled) { background: #0e9d6c; }
+
+    .footer-bar {
+      position: sticky; bottom: 0;
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-5);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: var(--space-3);
+      box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.04);
+      z-index: 5;
+      margin-top: var(--space-4);
+    }
+    .footer-info { font-size: 13px; color: var(--tg-text-secondary); }
+
+    /* Spinner */
+    .spinner-sm {
+      width: 14px; height: 14px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    .spinner-lg {
+      width: 36px; height: 36px;
+      border: 3px solid var(--tg-border);
+      border-top-color: var(--tg-accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner-sm, .spinner-lg { animation: none; } }
+
+    .loading-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: var(--space-12);
+      text-align: center;
+      color: var(--tg-text-secondary);
+    }
+    .loading-state .spinner-lg { margin-bottom: var(--space-4); }
+
+    /* Success state */
+    .success-card {
+      text-align: center;
+      padding: var(--space-12) var(--space-6);
+    }
+    .success-card .icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--tg-success);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--space-5);
+    }
+    .success-card h2 {
+      margin: 0 0 var(--space-2);
+      font-size: 24px; font-weight: 700;
+      color: var(--tg-text-primary);
+    }
+    .success-card p {
+      max-width: 480px;
+      margin: 0 auto var(--space-5);
+      color: var(--tg-text-secondary);
+    }
+    .success-actions {
+      display: flex; gap: var(--space-3); justify-content: center;
+      flex-wrap: wrap;
+    }
+    .invite-status-list {
+      margin: var(--space-5) auto;
+      max-width: 480px;
+      text-align: left;
+    }
+    .invite-status-row {
+      padding: var(--space-3);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-2);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: var(--space-3);
+    }
+    .invite-status-row.success { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.04); }
+    .invite-status-row.error { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.04); }
+    .invite-status-row .info { font-size: 13px; min-width: 0; flex: 1; }
+    .invite-status-row .info .role { font-size: 11px; color: var(--tg-text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
+    .invite-status-row .info .email { color: var(--tg-text-primary); font-weight: 500; }
+    .invite-status-row .status-icon { flex-shrink: 0; }
+
+    .alert {
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      margin-bottom: var(--space-4);
+    }
+    .alert-error { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--tg-error); }
+    .alert-warn { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--tg-warning); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="root">
+      <div class="loading-state">
+        <div class="spinner-lg" role="status" aria-label="Loading"></div>
+        <p>Loading wizard&hellip;</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Theme inheritance ────────────────────────────────────────
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'theme') {
+        document.documentElement.setAttribute('data-theme', e.data.value);
+      }
+    });
+    try {
+      const parentTheme = parent.document.documentElement.getAttribute('data-theme');
+      if (parentTheme) document.documentElement.setAttribute('data-theme', parentTheme);
+    } catch {}
+
+    // ─── State ────────────────────────────────────────────────────
+    const STEPS = [
+      { id: 'company',   name: 'Company',   title: 'Company details' },
+      { id: 'package',   name: 'Package',   title: 'Package & pricing' },
+      { id: 'products',  name: 'Products',  title: 'Products & access' },
+      { id: 'lunachat',  name: 'Luna Chat', title: 'Luna Chat setup' },
+      { id: 'review',    name: 'Review',    title: 'Review & create' },
+    ];
+
+    const state = {
+      currentStep: 0,
+      packages: [],
+
+      // Step 1
+      companyName: '',
+      tradingName: '',
+      websiteUrl: '',
+      travelifyAppId: '',
+      travelifySiteId: '',
+      primaryContactName: '',
+      primaryContactEmail: '',
+      primaryContactPhone: '',
+
+      // Step 2
+      packageId: '',
+      packageData: null, // populated on selection
+      mrr: '',
+      setupFee: '',
+      setupDate: new Date().toISOString().slice(0, 10),
+      goLiveDate: '',
+
+      // Step 3
+      grid: [],            // populated when package selected
+      gridByCategory: {},
+      categoryOrder: [],
+
+      // Step 4
+      lunaChatEnabled: false,
+      knowledgeBaseName: '',
+      brandColor: '#1B2B5B',
+      accentColor: '#00B4D8',
+      welcomeMessage: '',
+      useContactForAgent: true,
+      agentName: '',
+      agentEmail: '',
+
+      // Availability check results
+      availability: {},
+
+      // Submit state
+      submitting: false,
+      submitError: '',
+      submitResult: null,
+    };
+
+    // ─── Helpers ──────────────────────────────────────────────────
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      })[c]);
+    }
+    function fmtMoney(n) {
+      if (n == null || n === '') return '—';
+      return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+    function fmtDate(s) {
+      if (!s) return '—';
+      try {
+        return new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      } catch { return s; }
+    }
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+
+    // ─── Availability check (debounced) ───────────────────────────
+    let availTimer = null;
+    function scheduleAvailabilityCheck() {
+      clearTimeout(availTimer);
+      availTimer = setTimeout(runAvailabilityCheck, 500);
+    }
+    async function runAvailabilityCheck() {
+      const payload = {};
+      if (state.primaryContactEmail && EMAIL_RE.test(state.primaryContactEmail)) {
+        payload.primaryEmail = state.primaryContactEmail;
+      }
+      if (state.lunaChatEnabled && !state.useContactForAgent && state.agentEmail && EMAIL_RE.test(state.agentEmail)) {
+        payload.agentEmail = state.agentEmail;
+      }
+      if (state.websiteUrl) payload.websiteUrl = state.websiteUrl;
+      if (state.travelifyAppId) payload.travelifyAppId = state.travelifyAppId;
+
+      if (Object.keys(payload).length === 0) {
+        state.availability = {};
+        renderCurrentStep();
+        return;
+      }
+
+      try {
+        const r = await fetch('/api/admin/onboarding/check-availability', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!r.ok) return;
+        state.availability = await r.json();
+        renderCurrentStep();
+      } catch (err) {
+        console.warn('[wizard] availability check failed', err);
+      }
+    }
+
+    // ─── Boot ─────────────────────────────────────────────────────
+    async function boot() {
+      try {
+        const r = await fetch('/api/admin/packages/list', { credentials: 'include' });
+        if (!r.ok) throw new Error('packages list ' + r.status);
+        const data = await r.json();
+        state.packages = (data.packages || []).filter(p => p.active);
+        if (state.packages.length === 0) {
+          document.getElementById('root').innerHTML = `
+            <div class="page-header"><h1>New Client</h1></div>
+            <div class="panel"><div class="panel-body">
+              <div class="alert alert-error">No active packages found. Please configure at least one package in the Packages tab before onboarding clients.</div>
+            </div></div>`;
+          return;
+        }
+        render();
+      } catch (err) {
+        console.error('[wizard] boot failed', err);
+        document.getElementById('root').innerHTML = `
+          <div class="page-header"><h1>New Client</h1></div>
+          <div class="panel"><div class="panel-body">
+            <div class="alert alert-error">Could not load packages. Reload the page to try again.</div>
+          </div></div>`;
+      }
+    }
+
+    function render() {
+      const root = document.getElementById('root');
+
+      if (state.submitResult) {
+        root.innerHTML = renderSuccess();
+        attachSuccessHandlers();
+        return;
+      }
+
+      root.innerHTML = `
+        <div class="page-header">
+          <h1>New Client</h1>
+          <p>Onboard a travel agency or client end-to-end. Five steps. Takes about 3 minutes.</p>
+        </div>
+        ${renderStepper()}
+        <div id="step-content"></div>
+        ${renderFooter()}
+      `;
+      renderCurrentStep();
+      attachFooterHandlers();
+    }
+
+    function renderStepper() {
+      return `
+        <div class="stepper">
+          ${STEPS.map((s, i) => {
+            const cls = i < state.currentStep ? 'done' : (i === state.currentStep ? 'active' : '');
+            const num = i < state.currentStep
+              ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+              : (i + 1);
+            return `
+              <div class="step ${cls}">
+                <div class="step-num">${num}</div>
+                <div class="step-label">
+                  <span class="step-name">${escapeHtml(s.name)}</span>
+                </div>
+              </div>
+              ${i < STEPS.length - 1 ? '<div class="step-divider"></div>' : ''}
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderCurrentStep() {
+      const sc = document.getElementById('step-content');
+      if (!sc) return;
+      const stepId = STEPS[state.currentStep].id;
+      const renderer = {
+        company: renderCompany,
+        package: renderPackage,
+        products: renderProducts,
+        lunachat: renderLunaChat,
+        review: renderReview,
+      }[stepId];
+      sc.innerHTML = renderer();
+      const attacher = {
+        company: attachCompanyHandlers,
+        package: attachPackageHandlers,
+        products: attachProductsHandlers,
+        lunachat: attachLunaChatHandlers,
+        review: attachReviewHandlers,
+      }[stepId];
+      attacher && attacher();
+    }
+
+    // ─── Step 1: Company ──────────────────────────────────────────
+    function renderCompany() {
+      const av = state.availability;
+      const websiteWarn = av.websiteUrl?.conflict ? `<div class="field-warn">⚠ ${escapeHtml(av.websiteUrl.conflict.label)}</div>` : '';
+      const appIdWarn = av.travelifyAppId?.conflict ? `<div class="field-warn">⚠ ${escapeHtml(av.travelifyAppId.conflict.label)}</div>` : '';
+      const emailWarn = av.primaryEmail?.conflict ? `<div class="field-error">✕ ${escapeHtml(av.primaryEmail.conflict.label)}</div>` : '';
+
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>${STEPS[0].title}</h2>
+            <p>Tell us about the company. Trading name, integrations, and the person we'll be talking to.</p>
+          </header>
+          <div class="panel-body">
+            <div class="field-row">
+              <div class="field">
+                <label for="f-company-name">Company name <span class="required">*</span></label>
+                <input type="text" id="f-company-name" maxlength="120" value="${escapeHtml(state.companyName)}" placeholder="Acme Travel Ltd" />
+                <div class="field-help">The legal name on their invoices.</div>
+              </div>
+              <div class="field">
+                <label for="f-trading-name">Trading name</label>
+                <input type="text" id="f-trading-name" maxlength="120" value="${escapeHtml(state.tradingName)}" placeholder="Acme Holidays" />
+                <div class="field-help">If different from the legal name.</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="f-website">Website URL <span class="required">*</span></label>
+              <input type="url" id="f-website" value="${escapeHtml(state.websiteUrl)}" placeholder="https://acme-travel.co.uk" />
+              ${websiteWarn}
+            </div>
+
+            <div class="section-divider">
+              <h3>Travelify integration</h3>
+              <p>The mid-office and bookable site IDs. Leave blank if you don't have them yet.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="f-app-id">App ID</label>
+                <input type="text" id="f-app-id" inputmode="numeric" pattern="\\d*" maxlength="10" value="${escapeHtml(state.travelifyAppId)}" placeholder="251" />
+                ${appIdWarn}
+              </div>
+              <div class="field">
+                <label for="f-site-id">Site ID</label>
+                <input type="text" id="f-site-id" inputmode="numeric" pattern="\\d*" maxlength="10" value="${escapeHtml(state.travelifySiteId)}" placeholder="251" />
+                <div class="field-help">Used for deep links.</div>
+              </div>
+            </div>
+
+            <div class="section-divider">
+              <h3>Primary contact</h3>
+              <p>This person becomes the workspace admin and gets the first invite.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="f-contact-name">Full name <span class="required">*</span></label>
+                <input type="text" id="f-contact-name" maxlength="120" value="${escapeHtml(state.primaryContactName)}" placeholder="Sarah Jones" />
+              </div>
+              <div class="field">
+                <label for="f-contact-email">Email address <span class="required">*</span></label>
+                <input type="email" id="f-contact-email" autocomplete="off" value="${escapeHtml(state.primaryContactEmail)}" placeholder="sarah@acme-travel.co.uk" />
+                ${emailWarn}
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="f-contact-phone">Phone</label>
+              <input type="tel" id="f-contact-phone" maxlength="40" value="${escapeHtml(state.primaryContactPhone)}" placeholder="+44 20 7946 0000" />
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function attachCompanyHandlers() {
+      const bind = (id, key, after) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => {
+          state[key] = el.value;
+          if (after) after();
+        });
+      };
+      bind('f-company-name', 'companyName');
+      bind('f-trading-name', 'tradingName');
+      bind('f-website', 'websiteUrl', scheduleAvailabilityCheck);
+      bind('f-app-id', 'travelifyAppId', scheduleAvailabilityCheck);
+      bind('f-site-id', 'travelifySiteId');
+      bind('f-contact-name', 'primaryContactName');
+      bind('f-contact-email', 'primaryContactEmail', scheduleAvailabilityCheck);
+      bind('f-contact-phone', 'primaryContactPhone');
+    }
+
+    function validateCompany() {
+      const errs = [];
+      if (state.companyName.trim().length < 2) errs.push('Company name is required');
+      if (!state.websiteUrl.trim()) errs.push('Website URL is required');
+      else {
+        try { new URL(state.websiteUrl.startsWith('http') ? state.websiteUrl : 'https://' + state.websiteUrl); }
+        catch { errs.push('Website URL is not valid'); }
+      }
+      if (state.primaryContactName.trim().length < 2) errs.push('Primary contact name is required');
+      if (!EMAIL_RE.test(state.primaryContactEmail.trim())) errs.push('Primary contact email is not valid');
+      if (state.availability.primaryEmail?.conflict) errs.push('Primary email conflict — use a different email');
+      if (state.availability.websiteUrl?.conflict) errs.push('Website URL conflict — already in use');
+      if (state.availability.travelifyAppId?.conflict) errs.push('Travelify App ID conflict');
+      if (state.travelifyAppId && !/^\d{1,10}$/.test(state.travelifyAppId)) errs.push('Travelify App ID must be numeric');
+      if (state.travelifySiteId && !/^\d{1,10}$/.test(state.travelifySiteId)) errs.push('Travelify Site ID must be numeric');
+      return errs;
+    }
+
+    // ─── Step 2: Package ──────────────────────────────────────────
+    function renderPackage() {
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>${STEPS[1].title}</h2>
+            <p>Pick a starting package. You can override the price if you've negotiated something custom.</p>
+          </header>
+          <div class="panel-body">
+            <div class="field">
+              <label>Package <span class="required">*</span></label>
+              <div class="package-grid">
+                ${state.packages.map(p => `
+                  <button type="button" class="package-card" data-pkg-id="${escapeHtml(p.id)}" aria-pressed="${state.packageId === p.id}">
+                    <div class="package-card-name">${escapeHtml(p.packageName)}</div>
+                    <div class="package-card-price">${p.monthlyPrice == null ? 'custom' : '£' + p.monthlyPrice}</div>
+                    <div class="package-card-period">${p.monthlyPrice == null ? 'pricing' : 'per month'}</div>
+                    <div class="package-card-meta">
+                      ${p.setupFee == null ? 'custom setup' : '£' + p.setupFee + ' setup'} · ${p.includedCount} included
+                    </div>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="section-divider">
+              <h3>Pricing for this client</h3>
+              <p>Defaults pulled from the package. Override if needed.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="f-mrr">Monthly recurring revenue</label>
+                <div class="field-prefix-input" data-prefix="£">
+                  <input type="number" id="f-mrr" min="0" max="100000" step="0.01" value="${escapeHtml(state.mrr)}" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="f-setup-fee">Setup fee charged</label>
+                <div class="field-prefix-input" data-prefix="£">
+                  <input type="number" id="f-setup-fee" min="0" max="100000" step="0.01" value="${escapeHtml(state.setupFee)}" />
+                </div>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="f-setup-date">Setup date <span class="required">*</span></label>
+                <input type="date" id="f-setup-date" value="${escapeHtml(state.setupDate)}" />
+              </div>
+              <div class="field">
+                <label for="f-go-live-date">Target go-live date</label>
+                <input type="date" id="f-go-live-date" value="${escapeHtml(state.goLiveDate)}" />
+                <div class="field-help">When they should be live and selling.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function attachPackageHandlers() {
+      document.querySelectorAll('.package-card').forEach(btn => {
+        btn.addEventListener('click', () => selectPackage(btn.dataset.pkgId));
+      });
+      const bind = (id, key) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => { state[key] = el.value; });
+      };
+      bind('f-mrr', 'mrr');
+      bind('f-setup-fee', 'setupFee');
+      bind('f-setup-date', 'setupDate');
+      bind('f-go-live-date', 'goLiveDate');
+    }
+    async function selectPackage(packageId) {
+      state.packageId = packageId;
+      const pkg = state.packages.find(p => p.id === packageId);
+      if (pkg) {
+        state.packageData = pkg;
+        // Auto-fill price defaults if user hasn't typed
+        if (state.mrr === '' && pkg.monthlyPrice != null) state.mrr = pkg.monthlyPrice;
+        if (state.setupFee === '' && pkg.setupFee != null) state.setupFee = pkg.setupFee;
+      }
+
+      // Reset entitlement grid since package changed
+      state.grid = [];
+      state.gridByCategory = {};
+
+      // Pre-fetch entitlement grid for Step 3
+      try {
+        const r = await fetch('/api/admin/onboarding/preview-entitlements?packageId=' + encodeURIComponent(packageId), { credentials: 'include' });
+        if (!r.ok) throw new Error('preview ' + r.status);
+        const data = await r.json();
+        state.grid = data.grid.map(row => ({
+          ...row,
+          enabled: row.includedByDefault, // start with package defaults
+        }));
+        state.gridByCategory = data.byCategory;
+        state.categoryOrder = data.categoryOrder;
+        // Determine if Luna Chat is in the grid
+        recalcLunaChatEnabled();
+      } catch (err) {
+        console.error('[wizard] preview-entitlements failed', err);
+      }
+      renderCurrentStep();
+    }
+    function validatePackage() {
+      const errs = [];
+      if (!state.packageId) errs.push('Pick a package');
+      if (!state.setupDate) errs.push('Setup date is required');
+      if (state.mrr !== '' && (Number(state.mrr) < 0 || Number(state.mrr) > 100000)) errs.push('MRR out of range');
+      if (state.setupFee !== '' && (Number(state.setupFee) < 0 || Number(state.setupFee) > 100000)) errs.push('Setup fee out of range');
+      return errs;
+    }
+
+    // ─── Step 3: Products ─────────────────────────────────────────
+    function renderProducts() {
+      if (!state.grid.length) {
+        return `
+          <div class="panel">
+            <div class="loading-state">
+              <div class="spinner-lg"></div>
+              <p>Loading entitlements&hellip;</p>
+            </div>
+          </div>`;
+      }
+
+      const enabledCount = state.grid.filter(r => r.enabled).length;
+      const sectionsHtml = state.categoryOrder.map(cat => {
+        const items = state.gridByCategory[cat] || [];
+        if (!items.length) return '';
+        return `
+          <section class="cat-section">
+            <header class="cat-section-header">
+              <h3>${escapeHtml(cat)}</h3>
+              <span style="font-size: 11px; color: var(--tg-text-tertiary);">
+                ${items.filter(i => state.grid.find(g => g.catalogueItemId === i.catalogueItemId)?.enabled).length} of ${items.length} enabled
+              </span>
+            </header>
+            ${items.map(item => {
+              const row = state.grid.find(g => g.catalogueItemId === item.catalogueItemId);
+              if (!row) return '';
+              const sourceLabel = row.includedByDefault
+                ? '<span class="ent-source-pill" data-src="default">Default</span>'
+                : (row.availableAsAddOn
+                  ? '<span class="ent-source-pill" data-src="addon">Add-on</span>'
+                  : '<span class="ent-source-pill" data-src="override">Override</span>');
+              return `
+                <div class="ent-row">
+                  <div class="ent-row-meta">
+                    <div class="ent-row-name">${escapeHtml(item.productName)}</div>
+                    <div class="ent-row-code">${escapeHtml(item.productCode)}</div>
+                    ${sourceLabel}
+                  </div>
+                  <div class="toggle-cell">
+                    <input type="checkbox" data-cat-id="${escapeHtml(item.catalogueItemId)}" ${row.enabled ? 'checked' : ''} aria-label="Enable ${escapeHtml(item.productName)}" />
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </section>
+        `;
+      }).join('');
+
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>${STEPS[2].title}</h2>
+            <p>Defaults from <strong>${escapeHtml(state.packageData?.packageName || '')}</strong> are pre-ticked. Toggle individual products to customise. <strong>${enabledCount}</strong> currently enabled.</p>
+          </header>
+          <div class="grid-headers">
+            <div>Product</div>
+            <div class="col-toggle">Enabled</div>
+          </div>
+          ${sectionsHtml}
+        </div>
+      `;
+    }
+    function attachProductsHandlers() {
+      document.querySelectorAll('input[data-cat-id]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const id = cb.dataset.catId;
+          const row = state.grid.find(g => g.catalogueItemId === id);
+          if (row) {
+            row.enabled = cb.checked;
+            recalcLunaChatEnabled();
+            renderCurrentStep();
+          }
+        });
+      });
+    }
+    function recalcLunaChatEnabled() {
+      const lunaRow = state.grid.find(g => g.productCode === 'luna-chat');
+      const wasEnabled = state.lunaChatEnabled;
+      state.lunaChatEnabled = !!(lunaRow && lunaRow.enabled);
+      // First time Luna Chat gets enabled, seed the form with sensible defaults
+      if (state.lunaChatEnabled && !wasEnabled && !state.knowledgeBaseName) {
+        const base = state.tradingName || state.companyName || '';
+        if (base) state.knowledgeBaseName = base + ' Knowledge Base';
+        if (!state.welcomeMessage) {
+          const display = state.tradingName || state.companyName || 'us';
+          state.welcomeMessage = `Hi! I'm ${display}'s AI assistant. How can I help you today?`;
+        }
+      }
+    }
+    function validateProducts() {
+      const errs = [];
+      if (!state.grid.some(r => r.enabled)) {
+        errs.push('Enable at least one product');
+      }
+      return errs;
+    }
+
+    // ─── Step 4: Luna Chat ────────────────────────────────────────
+    function renderLunaChat() {
+      if (!state.lunaChatEnabled) {
+        return `
+          <div class="panel">
+            <header class="panel-header">
+              <h2>${STEPS[3].title}</h2>
+              <p>Luna Chat isn't enabled for this client. Skip ahead to review.</p>
+            </header>
+            <div class="panel-body">
+              <div class="alert alert-warn">
+                <strong>Luna Chat is not in this client's entitlements.</strong><br>
+                If you'd like to set it up, go back to <strong>Products</strong> and enable Luna Chat.
+              </div>
+              <button class="btn btn-secondary" type="button" id="back-to-products">← Back to products</button>
+            </div>
+          </div>
+        `;
+      }
+
+      const av = state.availability.agentEmail;
+      const agentEmailFeedback = av?.conflict
+        ? `<div class="field-error">✕ ${escapeHtml(av.conflict.label)}</div>`
+        : '';
+
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>${STEPS[3].title}</h2>
+            <p>Configure their AI chat assistant. They can refine everything later from their dashboard.</p>
+          </header>
+          <div class="panel-body">
+            <div class="field">
+              <label for="f-kb-name">Knowledge base name <span class="required">*</span></label>
+              <input type="text" id="f-kb-name" maxlength="120" value="${escapeHtml(state.knowledgeBaseName)}" placeholder="Acme Travel Knowledge Base" />
+              <div class="field-help">Internal name for their AI's knowledge base.</div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="f-brand-color">Brand colour</label>
+                <div class="color-input-row">
+                  <input type="color" id="f-brand-color-picker" value="${escapeHtml(state.brandColor)}" aria-label="Brand colour picker" />
+                  <input type="text" id="f-brand-color" maxlength="7" pattern="^#[0-9a-fA-F]{6}$" value="${escapeHtml(state.brandColor)}" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="f-accent-color">Accent colour</label>
+                <div class="color-input-row">
+                  <input type="color" id="f-accent-color-picker" value="${escapeHtml(state.accentColor)}" aria-label="Accent colour picker" />
+                  <input type="text" id="f-accent-color" maxlength="7" pattern="^#[0-9a-fA-F]{6}$" value="${escapeHtml(state.accentColor)}" />
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="f-welcome">Welcome message</label>
+              <textarea id="f-welcome" maxlength="500" placeholder="Hi! I'm your AI assistant.">${escapeHtml(state.welcomeMessage)}</textarea>
+              <div class="field-help">Shown when the chat opens for the first time.</div>
+            </div>
+
+            <div class="section-divider">
+              <h3>Initial agent</h3>
+              <p>Who will handle live chat takeovers when the AI hands off?</p>
+            </div>
+
+            <label class="checkbox-row" for="f-use-contact">
+              <input type="checkbox" id="f-use-contact" ${state.useContactForAgent ? 'checked' : ''} />
+              <span>
+                Use the primary contact as the initial agent
+                <span class="desc">${escapeHtml(state.primaryContactName || 'Primary contact')} will get one invite that grants both widget admin and Luna Chat agent access.</span>
+              </span>
+            </label>
+
+            ${!state.useContactForAgent ? `
+              <div style="margin-top: var(--space-4);">
+                <div class="field-row">
+                  <div class="field">
+                    <label for="f-agent-name">Agent name <span class="required">*</span></label>
+                    <input type="text" id="f-agent-name" maxlength="120" value="${escapeHtml(state.agentName)}" />
+                  </div>
+                  <div class="field">
+                    <label for="f-agent-email">Agent email <span class="required">*</span></label>
+                    <input type="email" id="f-agent-email" autocomplete="off" value="${escapeHtml(state.agentEmail)}" />
+                    ${agentEmailFeedback}
+                  </div>
+                </div>
+                <div class="alert alert-warn" style="margin-bottom: 0;">A second invite email will be sent to this person.</div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+    function attachLunaChatHandlers() {
+      const back = document.getElementById('back-to-products');
+      if (back) {
+        back.addEventListener('click', () => { state.currentStep = 2; render(); });
+        return;
+      }
+      const bind = (id, key, after) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => {
+          state[key] = el.value;
+          if (after) after();
+        });
+      };
+      bind('f-kb-name', 'knowledgeBaseName');
+      bind('f-welcome', 'welcomeMessage');
+      bind('f-agent-name', 'agentName');
+      bind('f-agent-email', 'agentEmail', scheduleAvailabilityCheck);
+
+      // Color picker sync
+      const brandPicker = document.getElementById('f-brand-color-picker');
+      const brandText = document.getElementById('f-brand-color');
+      const syncBrand = (v) => {
+        if (HEX_COLOR_RE.test(v)) state.brandColor = v.toLowerCase();
+        if (brandPicker) brandPicker.value = state.brandColor;
+        if (brandText) brandText.value = state.brandColor;
+      };
+      if (brandPicker) brandPicker.addEventListener('input', () => syncBrand(brandPicker.value));
+      if (brandText) brandText.addEventListener('input', () => {
+        if (HEX_COLOR_RE.test(brandText.value)) syncBrand(brandText.value);
+        else state.brandColor = brandText.value;
+      });
+
+      const accentPicker = document.getElementById('f-accent-color-picker');
+      const accentText = document.getElementById('f-accent-color');
+      const syncAccent = (v) => {
+        if (HEX_COLOR_RE.test(v)) state.accentColor = v.toLowerCase();
+        if (accentPicker) accentPicker.value = state.accentColor;
+        if (accentText) accentText.value = state.accentColor;
+      };
+      if (accentPicker) accentPicker.addEventListener('input', () => syncAccent(accentPicker.value));
+      if (accentText) accentText.addEventListener('input', () => {
+        if (HEX_COLOR_RE.test(accentText.value)) syncAccent(accentText.value);
+        else state.accentColor = accentText.value;
+      });
+
+      const useContactCb = document.getElementById('f-use-contact');
+      if (useContactCb) useContactCb.addEventListener('change', () => {
+        state.useContactForAgent = useContactCb.checked;
+        renderCurrentStep();
+      });
+    }
+    function validateLunaChat() {
+      if (!state.lunaChatEnabled) return [];
+      const errs = [];
+      if (state.knowledgeBaseName.trim().length < 2) errs.push('Knowledge base name is required');
+      if (state.brandColor && !HEX_COLOR_RE.test(state.brandColor)) errs.push('Brand colour must be a hex like #1B2B5B');
+      if (state.accentColor && !HEX_COLOR_RE.test(state.accentColor)) errs.push('Accent colour must be a hex like #00B4D8');
+      if (!state.useContactForAgent) {
+        if (state.agentName.trim().length < 2) errs.push('Agent name is required');
+        if (!EMAIL_RE.test(state.agentEmail.trim())) errs.push('Agent email is not valid');
+        if (state.availability.agentEmail?.conflict) errs.push('Agent email already in use');
+      }
+      return errs;
+    }
+
+    // ─── Step 5: Review ───────────────────────────────────────────
+    function renderReview() {
+      const enabledItems = state.grid.filter(r => r.enabled);
+      const enabledNames = enabledItems.map(r => r.productName);
+      const agentBlurb = !state.lunaChatEnabled
+        ? null
+        : (state.useContactForAgent
+          ? `${state.primaryContactName} (combined invite)`
+          : `${state.agentName} (separate invite)`);
+
+      const fld = (label, value, opts = {}) => `
+        <div class="review-field">
+          <span class="label">${escapeHtml(label)}</span>
+          <span class="value ${value ? (opts.mono ? 'mono' : '') : 'empty'}">${value ? escapeHtml(value) : '—'}</span>
+        </div>`;
+
+      const errorBox = state.submitError
+        ? `<div class="alert alert-error" style="margin-bottom:0;"><strong>Submit failed:</strong> ${escapeHtml(state.submitError)}</div>`
+        : '';
+
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>${STEPS[4].title}</h2>
+            <p>Final check. Click <strong>Create client</strong> when you're happy.</p>
+          </header>
+
+          <div class="review-section">
+            <div class="review-section-header">
+              <h4>Company</h4>
+              <button type="button" class="review-edit-btn" data-jump="0">Edit</button>
+            </div>
+            <div class="review-grid">
+              ${fld('Legal name', state.companyName)}
+              ${fld('Trading name', state.tradingName)}
+              ${fld('Website', state.websiteUrl)}
+              ${fld('Travelify App ID', state.travelifyAppId, { mono: true })}
+              ${fld('Travelify Site ID', state.travelifySiteId, { mono: true })}
+            </div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-header">
+              <h4>Primary contact</h4>
+              <button type="button" class="review-edit-btn" data-jump="0">Edit</button>
+            </div>
+            <div class="review-grid">
+              ${fld('Name', state.primaryContactName)}
+              ${fld('Email', state.primaryContactEmail, { mono: true })}
+              ${fld('Phone', state.primaryContactPhone)}
+            </div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-header">
+              <h4>Package &amp; pricing</h4>
+              <button type="button" class="review-edit-btn" data-jump="1">Edit</button>
+            </div>
+            <div class="review-grid">
+              ${fld('Package', state.packageData?.packageName)}
+              ${fld('MRR', state.mrr === '' ? null : fmtMoney(state.mrr))}
+              ${fld('Setup fee', state.setupFee === '' ? null : fmtMoney(state.setupFee))}
+              ${fld('Setup date', fmtDate(state.setupDate))}
+              ${fld('Go-live date', fmtDate(state.goLiveDate))}
+            </div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-header">
+              <h4>Products (${enabledItems.length} enabled)</h4>
+              <button type="button" class="review-edit-btn" data-jump="2">Edit</button>
+            </div>
+            <div class="review-field">
+              <span class="value">${enabledNames.length ? escapeHtml(enabledNames.join(', ')) : '<em style="color:var(--tg-text-tertiary)">None</em>'}</span>
+            </div>
+          </div>
+
+          ${state.lunaChatEnabled ? `
+          <div class="review-section">
+            <div class="review-section-header">
+              <h4>Luna Chat setup</h4>
+              <button type="button" class="review-edit-btn" data-jump="3">Edit</button>
+            </div>
+            <div class="review-grid">
+              ${fld('Knowledge base', state.knowledgeBaseName)}
+              ${fld('Brand colour', state.brandColor, { mono: true })}
+              ${fld('Accent colour', state.accentColor, { mono: true })}
+              ${fld('Initial agent', agentBlurb)}
+            </div>
+          </div>` : ''}
+
+          <div class="panel-body">
+            <div class="what-happens">
+              <h4>What happens when you click Create</h4>
+              <ul>
+                <li>Client record created in Travelgenix Control</li>
+                <li>${enabledItems.length} entitlement row${enabledItems.length === 1 ? '' : 's'} created</li>
+                ${state.lunaChatEnabled ? '<li>Luna Chat config captured (applied to Knowledge Bot in a later phase)</li>' : ''}
+                <li>Invite email sent to ${escapeHtml(state.primaryContactEmail)}</li>
+                ${state.lunaChatEnabled && !state.useContactForAgent ? `<li>Second invite email sent to ${escapeHtml(state.agentEmail)} for Luna Chat agent</li>` : ''}
+                <li>Status set to <strong>Active</strong> immediately</li>
+              </ul>
+            </div>
+            ${errorBox}
+          </div>
+        </div>
+      `;
+    }
+    function attachReviewHandlers() {
+      document.querySelectorAll('[data-jump]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.currentStep = Number(btn.dataset.jump);
+          render();
+        });
+      });
+    }
+
+    // ─── Footer / navigation ──────────────────────────────────────
+    function renderFooter() {
+      const isLast = state.currentStep === STEPS.length - 1;
+      const isFirst = state.currentStep === 0;
+      const errs = currentStepErrors();
+      const blocked = errs.length > 0;
+
+      const status = state.submitting
+        ? '<span class="spinner-sm"></span> Creating client&hellip;'
+        : (blocked
+          ? `<span style="color:var(--tg-text-tertiary)">${escapeHtml(errs[0])}</span>`
+          : `Step ${state.currentStep + 1} of ${STEPS.length}`);
+
+      return `
+        <div class="footer-bar">
+          <div class="footer-info">${status}</div>
+          <div style="display: flex; gap: var(--space-3);">
+            <button type="button" class="btn btn-secondary" id="cancel-btn" ${state.submitting ? 'disabled' : ''}>Cancel</button>
+            ${!isFirst ? `<button type="button" class="btn btn-secondary" id="back-btn" ${state.submitting ? 'disabled' : ''}>← Back</button>` : ''}
+            ${isLast
+              ? `<button type="button" class="btn btn-success" id="submit-btn" ${blocked || state.submitting ? 'disabled' : ''}>Create client</button>`
+              : `<button type="button" class="btn btn-primary" id="next-btn" ${blocked ? 'disabled' : ''}>Next →</button>`}
+          </div>
+        </div>
+      `;
+    }
+    function attachFooterHandlers() {
+      document.getElementById('cancel-btn')?.addEventListener('click', () => {
+        if (confirm('Cancel and lose all the data you entered?')) {
+          try { parent.postMessage({ type: 'switch-tab', tab: 'clients' }, '*'); }
+          catch { window.location.href = '/admin/clients.html'; }
+        }
+      });
+      document.getElementById('back-btn')?.addEventListener('click', () => {
+        if (state.currentStep > 0) { state.currentStep--; render(); }
+      });
+      document.getElementById('next-btn')?.addEventListener('click', () => {
+        if (currentStepErrors().length > 0) return;
+        if (state.currentStep < STEPS.length - 1) { state.currentStep++; render(); }
+      });
+      document.getElementById('submit-btn')?.addEventListener('click', submit);
+    }
+    function currentStepErrors() {
+      const stepId = STEPS[state.currentStep].id;
+      const v = {
+        company: validateCompany,
+        package: validatePackage,
+        products: validateProducts,
+        lunachat: validateLunaChat,
+        review: () => [],
+      }[stepId];
+      return v ? v() : [];
+    }
+
+    // ─── Submit ───────────────────────────────────────────────────
+    async function submit() {
+      // Final cross-step validation
+      const allErrs = [
+        ...validateCompany(),
+        ...validatePackage(),
+        ...validateProducts(),
+        ...validateLunaChat(),
+      ];
+      if (allErrs.length) {
+        state.submitError = allErrs[0];
+        render();
+        return;
+      }
+
+      state.submitting = true;
+      state.submitError = '';
+      render();
+
+      const enabledItems = state.grid.filter(r => r.enabled);
+      const entitlements = enabledItems.map(item => ({
+        catalogueItemId: item.catalogueItemId,
+        source: item.includedByDefault
+          ? 'Package Default'
+          : (item.availableAsAddOn ? 'Add-On' : 'Manual Override'),
+      }));
+
+      const payload = {
+        companyName: state.companyName.trim(),
+        tradingName: state.tradingName.trim(),
+        websiteUrl: state.websiteUrl.trim(),
+        travelifyAppId: state.travelifyAppId.trim(),
+        travelifySiteId: state.travelifySiteId.trim(),
+        primaryContactName: state.primaryContactName.trim(),
+        primaryContactEmail: state.primaryContactEmail.trim().toLowerCase(),
+        primaryContactPhone: state.primaryContactPhone.trim(),
+        packageId: state.packageId,
+        mrr: state.mrr === '' ? null : Number(state.mrr),
+        setupFee: state.setupFee === '' ? null : Number(state.setupFee),
+        setupDate: state.setupDate,
+        goLiveDate: state.goLiveDate || null,
+        entitlements,
+      };
+
+      if (state.lunaChatEnabled) {
+        payload.lunaChat = {
+          knowledgeBaseName: state.knowledgeBaseName.trim(),
+          brandColor: state.brandColor,
+          accentColor: state.accentColor,
+          welcomeMessage: state.welcomeMessage.trim(),
+          useContactForAgent: state.useContactForAgent,
+        };
+        if (!state.useContactForAgent) {
+          payload.lunaChat.agentName = state.agentName.trim();
+          payload.lunaChat.agentEmail = state.agentEmail.trim().toLowerCase();
+        }
+      }
+
+      try {
+        const r = await fetch('/api/admin/clients/create', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          state.submitError = data.detail || data.error || ('Server error ' + r.status);
+          state.submitting = false;
+          render();
+          return;
+        }
+        state.submitResult = data;
+        state.submitting = false;
+        render();
+      } catch (err) {
+        console.error('[wizard] submit failed', err);
+        state.submitError = 'Network error — try again';
+        state.submitting = false;
+        render();
+      }
+    }
+
+    function renderSuccess() {
+      const r = state.submitResult;
+      const inviteRows = (r.invites || []).map(i => {
+        const success = i.ok;
+        const cls = success ? 'success' : 'error';
+        const icon = success
+          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tg-success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tg-error)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+        const status = i.alreadyMember
+          ? 'Already a member'
+          : (success ? 'Invite sent' : `Failed: ${i.error || 'unknown'}`);
+        return `
+          <div class="invite-status-row ${cls}">
+            <div class="info">
+              <div class="role">${escapeHtml(i.kind === 'primary' ? 'Workspace admin' : 'Luna Chat agent')}</div>
+              <div class="email">${escapeHtml(i.email)}</div>
+              <div style="font-size: 12px; color: var(--tg-text-secondary);">${escapeHtml(status)}</div>
+            </div>
+            <div class="status-icon">${icon}</div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="page-header">
+          <h1>Client created</h1>
+        </div>
+        <div class="panel">
+          <div class="success-card">
+            <div class="icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h2>${escapeHtml(state.companyName)} is live</h2>
+            <p>${r.entitlementsCreated} product${r.entitlementsCreated === 1 ? '' : 's'} enabled. ${r.invites?.length === 1 ? '1 invite' : r.invites?.length + ' invites'} processed.</p>
+
+            <div class="invite-status-list">${inviteRows}</div>
+
+            <div class="success-actions">
+              <button type="button" class="btn btn-secondary" id="success-new-another">Create another</button>
+              <button type="button" class="btn btn-primary" id="success-view-client">View ${escapeHtml(state.companyName)}</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function attachSuccessHandlers() {
+      document.getElementById('success-new-another')?.addEventListener('click', () => {
+        // Reset state for a fresh wizard
+        Object.assign(state, {
+          currentStep: 0, companyName: '', tradingName: '', websiteUrl: '',
+          travelifyAppId: '', travelifySiteId: '',
+          primaryContactName: '', primaryContactEmail: '', primaryContactPhone: '',
+          packageId: '', packageData: null,
+          mrr: '', setupFee: '',
+          setupDate: new Date().toISOString().slice(0, 10), goLiveDate: '',
+          grid: [], gridByCategory: {}, categoryOrder: [],
+          lunaChatEnabled: false, knowledgeBaseName: '',
+          brandColor: '#1B2B5B', accentColor: '#00B4D8', welcomeMessage: '',
+          useContactForAgent: true, agentName: '', agentEmail: '',
+          availability: {},
+          submitting: false, submitError: '', submitResult: null,
+        });
+        render();
+      });
+      document.getElementById('success-view-client')?.addEventListener('click', () => {
+        window.location.href = '/admin/client-detail.html?id=' + encodeURIComponent(state.submitResult.clientId);
+      });
+    }
+
+    boot();
+  </script>
+</body>
+</html>
