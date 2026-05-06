@@ -67,14 +67,32 @@ export async function resolveUserPermissions(userRecordId, { bypassCache = false
   // Filter on the linked-record field. Airtable formulas treat linked
   // record fields as arrays of record IDs — FIND() the user ID in the
   // array stringified form. Status must be 'active' AND not expired.
+  //
+  // Note on BLANK handling: an empty dateTime field in Airtable doesn't
+  // reliably equal the empty string ''. Use the BLANK() function for
+  // a portable check.
   const formula =
     `AND(` +
-      `FIND('${userRecordId}', ARRAYJOIN({${PERMISSIONS.fields.user}})),` +
+      `FIND('${userRecordId}', ARRAYJOIN({${PERMISSIONS.fields.user}}))>0,` +
       `{${PERMISSIONS.fields.status}}='${PERMISSIONS.statuses.ACTIVE}',` +
-      `OR({${PERMISSIONS.fields.expiresAt}}='', IS_AFTER({${PERMISSIONS.fields.expiresAt}}, NOW()))` +
+      `OR(BLANK()={${PERMISSIONS.fields.expiresAt}}, IS_AFTER({${PERMISSIONS.fields.expiresAt}}, NOW()))` +
     `)`;
 
-  const records = await listRecords(PERMISSIONS.tableId, { formula, maxRecords: 100 });
+  let records;
+  try {
+    records = await listRecords(PERMISSIONS.tableId, { formula, maxRecords: 100 });
+  } catch (err) {
+    console.error('[permissions] resolveUserPermissions query failed', {
+      userRecordId,
+      formula,
+      error: err.message
+    });
+    // Cache an empty result for a short window so we don't hammer a broken
+    // dependency, but make it shorter than the success TTL so we recover
+    // quickly when Airtable is back.
+    cache.set(userRecordId, { perms: [], fetchedAt: Date.now() - (TTL_MS - 5_000) });
+    return [];
+  }
   const slugMap = await getProductSlugByRecordId();
 
   const perms = [];
