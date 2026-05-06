@@ -152,6 +152,20 @@ export async function bulkUpdateRecords(tableId, updates, { typecast = true } = 
 }
 
 /**
+ * Bulk delete — up to 10 records per call (Airtable limit).
+ * `recordIds` is an array of 'recXXX' strings.
+ * Returns array of { id, deleted } for each requested record.
+ */
+export async function bulkDeleteRecords(tableId, recordIds) {
+  if (!Array.isArray(recordIds) || recordIds.length === 0) return [];
+  if (recordIds.length > 10) throw new Error('bulkDeleteRecords: max 10 per call');
+  const params = new URLSearchParams();
+  recordIds.forEach(id => params.append('records[]', id));
+  const data = await airtableFetch(`/${tableId}?${params}`, { method: 'DELETE' });
+  return data.records;
+}
+
+/**
  * Read all records from a table, paginating through every page.
  * Use sparingly — only for the migration script and admin operations.
  */
