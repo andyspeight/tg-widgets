@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Catalogue · Travelgenix Control</title>
+  <title>Packages · Travelgenix Control</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -40,7 +40,6 @@
 
     .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-6) var(--space-12); }
 
-    /* Page header */
     .page-header {
       display: flex; align-items: flex-end; justify-content: space-between;
       gap: var(--space-4);
@@ -48,9 +47,8 @@
       padding-top: var(--space-6);
     }
     .page-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 var(--space-1); letter-spacing: -0.02em; }
-    .page-header p { margin: 0; color: var(--tg-text-secondary); font-size: 14px; max-width: 560px; }
+    .page-header p { margin: 0; color: var(--tg-text-secondary); font-size: 14px; max-width: 620px; }
 
-    /* Buttons */
     .btn {
       display: inline-flex; align-items: center; gap: var(--space-2);
       padding: var(--space-3) var(--space-5);
@@ -61,118 +59,106 @@
       min-height: 44px;
     }
     .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: var(--tg-primary); color: white; }
-    .btn-primary:hover { background: var(--tg-primary-light); }
-    .btn-primary:active { background: var(--tg-primary-dark); }
+    .btn-primary:hover:not(:disabled) { background: var(--tg-primary-light); }
+    .btn-primary:active:not(:disabled) { background: var(--tg-primary-dark); }
     .btn-secondary { background: var(--tg-bg-primary); color: var(--tg-text-primary); border-color: var(--tg-border); }
     .btn-secondary:hover { background: var(--tg-bg-tertiary); }
-    .btn-ghost {
-      background: transparent; color: var(--tg-text-secondary);
-      padding: var(--space-2) var(--space-3); min-height: 36px;
-      font-size: 13px;
-    }
-    .btn-ghost:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
 
-    /* Category card */
-    .category {
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+    }
+    .package-card {
       background: var(--tg-bg-primary);
       border: 1px solid var(--tg-border);
       border-radius: var(--radius-lg);
-      margin-bottom: var(--space-5);
+      padding: var(--space-5);
+      cursor: pointer;
+      transition: all 200ms ease;
+      text-align: left;
+      font-family: inherit;
+      width: 100%;
+    }
+    .package-card:hover {
+      border-color: var(--tg-accent);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .package-card:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
+      border-color: var(--tg-accent);
+    }
+    .package-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--space-3); }
+    .package-name { font-size: 20px; font-weight: 700; margin: 0; color: var(--tg-text-primary); }
+    .package-status { font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.04em; }
+    .package-status-active { background: rgba(16, 185, 129, 0.12); color: var(--tg-success); }
+    .package-status-inactive { background: var(--tg-bg-tertiary); color: var(--tg-text-secondary); }
+    .package-price { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); }
+    .package-price .amount { font-size: 24px; font-weight: 700; color: var(--tg-text-primary); }
+    .package-price .period { font-size: 13px; color: var(--tg-text-secondary); }
+    .package-meta { display: flex; gap: var(--space-4); font-size: 13px; color: var(--tg-text-secondary); margin-bottom: var(--space-4); }
+    .package-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .package-meta-item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--tg-text-tertiary); font-weight: 600; }
+    .package-counts { display: flex; gap: var(--space-2); }
+    .count-pill {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      font-size: 12px; font-weight: 500;
+      padding: var(--space-1) var(--space-2);
+      border-radius: 4px;
+      background: var(--tg-bg-secondary);
+      color: var(--tg-text-secondary);
+    }
+    .count-pill .num { font-weight: 700; color: var(--tg-text-primary); }
+    .count-pill-included .num { color: var(--tg-success); }
+    .count-pill-addon .num { color: var(--tg-info); }
+
+    .edit-header {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+    .back-btn {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      width: 40px; height: 40px;
+      border-radius: var(--radius-md);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--tg-text-secondary);
+    }
+    .back-btn:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .edit-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
       overflow: hidden;
     }
-    .category-header {
+    .panel-header {
       padding: var(--space-4) var(--space-5);
       border-bottom: 1px solid var(--tg-border);
-      display: flex; align-items: center; justify-content: space-between;
       background: var(--tg-bg-secondary);
     }
-    .category-header h2 {
-      margin: 0; font-size: 13px; font-weight: 600;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--tg-text-secondary);
-    }
-    .category-count {
-      font-size: 12px; color: var(--tg-text-tertiary); font-weight: 500;
-    }
-    .product-list { display: flex; flex-direction: column; }
-    .product-row {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      align-items: center;
-      gap: var(--space-4);
-      padding: var(--space-4) var(--space-5);
-      border-bottom: 1px solid var(--tg-border-light);
-    }
-    .product-row:last-child { border-bottom: none; }
-    .product-row:hover { background: var(--tg-bg-secondary); }
-    .product-meta {
-      display: flex; flex-direction: column; gap: 2px; min-width: 0;
-    }
-    .product-name {
-      font-weight: 600; font-size: 15px; color: var(--tg-text-primary);
-      display: flex; align-items: center; gap: var(--space-2);
-    }
-    .product-code {
-      font-family: 'JetBrains Mono', 'SF Mono', monospace;
-      font-size: 12px; color: var(--tg-text-tertiary);
-    }
-    .badge-inactive {
-      font-size: 10px; font-weight: 600; text-transform: uppercase;
-      padding: 2px 6px; border-radius: 3px;
-      background: var(--tg-bg-tertiary); color: var(--tg-text-secondary);
-      letter-spacing: 0.04em;
-    }
+    .panel-header h2 { font-size: 14px; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
+    .panel-header p { font-size: 12px; color: var(--tg-text-secondary); margin: 2px 0 0; }
+    .panel-body { padding: var(--space-5); }
 
-    /* Drawer */
-    .drawer-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(15, 23, 42, 0.5);
-      backdrop-filter: blur(4px);
-      opacity: 0; pointer-events: none;
-      transition: opacity 200ms ease;
-      z-index: 50;
-    }
-    .drawer-backdrop[data-open="true"] { opacity: 1; pointer-events: auto; }
-    .drawer {
-      position: fixed; top: 0; right: 0; bottom: 0;
-      width: min(480px, 100vw);
-      background: var(--tg-bg-primary);
-      box-shadow: var(--shadow-lg);
-      transform: translateX(100%);
-      transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 51;
-      display: flex; flex-direction: column;
-    }
-    .drawer[data-open="true"] { transform: translateX(0); }
-    .drawer-header {
-      padding: var(--space-5) var(--space-6);
-      border-bottom: 1px solid var(--tg-border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .drawer-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
-    .drawer-close {
-      background: none; border: none; cursor: pointer;
-      width: 36px; height: 36px; border-radius: var(--radius-md);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--tg-text-secondary);
-    }
-    .drawer-close:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
-    .drawer-body {
-      flex: 1; overflow-y: auto; padding: var(--space-6);
-      display: flex; flex-direction: column; gap: var(--space-5);
-    }
-    .drawer-footer {
-      padding: var(--space-4) var(--space-6);
-      border-top: 1px solid var(--tg-border);
-      display: flex; justify-content: flex-end; gap: var(--space-3);
-      background: var(--tg-bg-secondary);
-    }
-
-    /* Form fields */
+    .form-stack { display: flex; flex-direction: column; gap: var(--space-4); }
     .field { display: flex; flex-direction: column; gap: var(--space-2); }
     .field label { font-size: 13px; font-weight: 500; color: var(--tg-text-secondary); }
-    .field input, .field select, .field textarea {
+    .field input, .field textarea {
       font-family: inherit; font-size: 15px;
       padding: var(--space-3);
       border-radius: var(--radius-md);
@@ -183,14 +169,28 @@
       min-height: 44px;
       transition: border-color 150ms ease, box-shadow 150ms ease;
     }
-    .field textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
-    .field input:focus, .field select:focus, .field textarea:focus {
+    .field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+    .field input:focus, .field textarea:focus {
       outline: none;
       border-color: var(--tg-accent);
       box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
     }
-    .field-help { font-size: 12px; color: var(--tg-text-tertiary); margin-top: 2px; }
-    .field-error { font-size: 12px; color: var(--tg-error); margin-top: 2px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .field-help { font-size: 12px; color: var(--tg-text-tertiary); }
+    .field-prefix-input {
+      position: relative;
+    }
+    .field-prefix-input::before {
+      content: '£';
+      position: absolute;
+      left: var(--space-3);
+      top: 50%; transform: translateY(-50%);
+      color: var(--tg-text-tertiary);
+      font-weight: 500;
+      pointer-events: none;
+    }
+    .field-prefix-input input { padding-left: 28px; }
+
     .checkbox-row {
       display: flex; align-items: center; gap: var(--space-3);
       padding: var(--space-3); border-radius: var(--radius-md);
@@ -202,24 +202,75 @@
       accent-color: var(--tg-accent);
       cursor: pointer;
     }
-    .checkbox-row label { cursor: pointer; flex: 1; font-size: 14px; color: var(--tg-text-primary); }
+    .checkbox-row label { cursor: pointer; flex: 1; font-size: 14px; }
 
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--tg-text-primary); color: var(--tg-bg-primary);
+    .cat-section { border-bottom: 1px solid var(--tg-border); }
+    .cat-section:last-child { border-bottom: none; }
+    .cat-section-header {
       padding: var(--space-3) var(--space-5);
-      border-radius: var(--radius-md);
-      font-size: 14px; font-weight: 500;
-      box-shadow: var(--shadow-lg);
-      opacity: 0; transition: all 200ms ease;
-      z-index: 100;
+      background: var(--tg-bg-secondary);
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .toast[data-visible="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast-error { background: var(--tg-error); color: white; }
-    .toast-success { background: var(--tg-success); color: white; }
+    .cat-section-header h3 {
+      margin: 0; font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--tg-text-secondary);
+    }
+    .grid-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-5);
+      border-bottom: 1px solid var(--tg-border-light);
+    }
+    .grid-row:last-child { border-bottom: none; }
+    .grid-row:hover { background: var(--tg-bg-secondary); }
+    .grid-row-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .grid-row-name { font-weight: 500; font-size: 14px; color: var(--tg-text-primary); }
+    .grid-row-code { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 11px; color: var(--tg-text-tertiary); }
+    .grid-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 80px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grid-toggle input {
+      width: 18px; height: 18px;
+      accent-color: var(--tg-accent);
+      cursor: pointer;
+    }
+    .grid-toggle.included input { accent-color: var(--tg-success); }
+    .grid-toggle.addon input { accent-color: var(--tg-info); }
 
-    /* Loading */
+    .grid-headers {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: var(--space-4);
+      padding: var(--space-2) var(--space-5);
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--tg-text-tertiary);
+      background: var(--tg-bg-tertiary);
+    }
+    .grid-headers .col-toggle { width: 80px; text-align: center; }
+
+    .save-bar {
+      position: sticky; bottom: 0;
+      background: var(--tg-bg-primary);
+      border-top: 1px solid var(--tg-border);
+      padding: var(--space-3) var(--space-5);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: var(--space-3);
+      box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.04);
+      z-index: 5;
+    }
+    .save-bar-status {
+      font-size: 13px; color: var(--tg-text-secondary);
+    }
+    .save-bar-status[data-dirty="true"] { color: var(--tg-warning); font-weight: 500; }
+    .save-bar-actions { display: flex; gap: var(--space-3); }
+
     .center-state {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
@@ -235,116 +286,155 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
 
-    /* Responsive */
-    @media (max-width: 640px) {
-      .page-header { flex-direction: column; align-items: stretch; }
-      .product-row { grid-template-columns: 1fr; gap: var(--space-2); }
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--tg-text-primary); color: var(--tg-bg-primary);
+      padding: var(--space-3) var(--space-5);
+      border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0; transition: all 200ms ease;
+      z-index: 100;
     }
+    .toast[data-visible="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast-error { background: var(--tg-error); color: white; }
+    .toast-success { background: var(--tg-success); color: white; }
   </style>
 </head>
 <body>
   <div class="container">
-    <header class="page-header">
-      <div>
-        <h1>Catalogue</h1>
-        <p>Every product Travelgenix sells. Add new widgets here when they are built. Mark old ones inactive when retired. Used by Packages and client onboarding.</p>
-      </div>
-      <button class="btn btn-primary" id="add-btn" type="button">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        New product
-      </button>
-    </header>
+    <div id="list-view">
+      <header class="page-header">
+        <div>
+          <h1>Packages</h1>
+          <p>What each package includes by default. Set the entitlements once here, every new client onboarded onto a package gets these by default. Override per client during onboarding or any time after.</p>
+        </div>
+      </header>
 
-    <div id="content">
-      <div class="center-state">
-        <div class="spinner" role="status" aria-label="Loading catalogue"></div>
-        <p>Loading catalogue&hellip;</p>
+      <div id="list-content">
+        <div class="center-state">
+          <div class="spinner" role="status" aria-label="Loading packages"></div>
+          <p>Loading packages&hellip;</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="edit-view" hidden>
+      <div class="edit-header">
+        <button class="back-btn" id="back-btn" type="button" aria-label="Back to packages list">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </button>
+        <div>
+          <div style="font-size: 12px; color: var(--tg-text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Editing package</div>
+          <h1 style="font-size: 24px; font-weight: 700; margin: 0;" id="edit-name">&nbsp;</h1>
+        </div>
+      </div>
+
+      <div class="edit-grid">
+        <section class="panel">
+          <header class="panel-header">
+            <h2>Package details</h2>
+            <p>Pricing and description shown to staff during onboarding.</p>
+          </header>
+          <div class="panel-body">
+            <form class="form-stack" id="pkg-form" autocomplete="off" onsubmit="return false;">
+              <div class="field">
+                <label for="pkg-name">Package name</label>
+                <input type="text" id="pkg-name" maxlength="60" required />
+              </div>
+              <div class="field">
+                <label for="pkg-code">Package code</label>
+                <input type="text" id="pkg-code" maxlength="40" required pattern="[a-z][a-z0-9-]+" />
+                <div class="field-help">Lowercase slug used in code. Don't change once live.</div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="pkg-monthly">Monthly price</label>
+                  <div class="field-prefix-input">
+                    <input type="number" id="pkg-monthly" min="0" max="100000" step="0.01" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="pkg-setup">Setup fee</label>
+                  <div class="field-prefix-input">
+                    <input type="number" id="pkg-setup" min="0" max="100000" step="0.01" />
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="pkg-desc">Description</label>
+                <textarea id="pkg-desc" maxlength="2000"></textarea>
+                <div class="field-help">Internal description, shown when picking a package during onboarding.</div>
+              </div>
+              <div class="field">
+                <label for="pkg-sort">Sort order</label>
+                <input type="number" id="pkg-sort" min="0" max="9999" step="1" value="999" />
+                <div class="field-help">Lower numbers appear first in the package picker.</div>
+              </div>
+              <label class="checkbox-row" for="pkg-active">
+                <input type="checkbox" id="pkg-active" checked />
+                <span>Active and assignable to new clients</span>
+              </label>
+            </form>
+          </div>
+        </section>
+
+        <section class="panel">
+          <header class="panel-header">
+            <h2>Included products</h2>
+            <p>Tick <strong>Included</strong> to auto-enable for new clients. Tick <strong>Add-on</strong> to offer as a paid extra during onboarding.</p>
+          </header>
+          <div class="grid-headers">
+            <div>Product</div>
+            <div class="col-toggle">Included</div>
+            <div class="col-toggle">Add-on</div>
+          </div>
+          <div id="grid-body">
+            <div class="center-state">
+              <div class="spinner" role="status" aria-label="Loading"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="save-bar">
+        <div class="save-bar-status" id="save-status">All changes saved</div>
+        <div class="save-bar-actions">
+          <button class="btn btn-secondary" type="button" id="discard-btn">Discard</button>
+          <button class="btn btn-primary" type="button" id="save-btn">Save package</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Drawer -->
-  <div class="drawer-backdrop" id="drawer-backdrop"></div>
-  <aside class="drawer" id="drawer" role="dialog" aria-labelledby="drawer-title" aria-hidden="true">
-    <header class="drawer-header">
-      <h3 id="drawer-title">New product</h3>
-      <button class="drawer-close" id="drawer-close" type="button" aria-label="Close">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </header>
-    <form class="drawer-body" id="drawer-form" autocomplete="off">
-      <input type="hidden" id="f-id" />
-      <div class="field">
-        <label for="f-name">Product name</label>
-        <input type="text" id="f-name" required maxlength="80" />
-        <div class="field-help">Shown in admin UI and onboarding flow.</div>
-      </div>
-      <div class="field">
-        <label for="f-code">Product code</label>
-        <input type="text" id="f-code" required maxlength="60" pattern="[a-z][a-z0-9-]+" />
-        <div class="field-help">Stable slug used in code. Lowercase, hyphens only e.g. widget-pricing.</div>
-        <div class="field-error" id="f-code-err" hidden></div>
-      </div>
-      <div class="field">
-        <label for="f-category">Category</label>
-        <select id="f-category" required>
-          <option value="Widget">Widget</option>
-          <option value="Luna Suite">Luna Suite</option>
-          <option value="Marketing">Marketing</option>
-          <option value="CRM">CRM</option>
-          <option value="Quick Quote">Quick Quote</option>
-          <option value="University">University</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="f-desc">Description</label>
-        <textarea id="f-desc" maxlength="2000"></textarea>
-        <div class="field-help">Short summary of what this product does. Internal use.</div>
-      </div>
-      <div class="field">
-        <label for="f-sort">Sort order</label>
-        <input type="number" id="f-sort" min="0" max="9999" step="1" value="999" />
-        <div class="field-help">Lower numbers appear first within their category.</div>
-      </div>
-      <label class="checkbox-row" for="f-active">
-        <input type="checkbox" id="f-active" checked />
-        <span>Active and available for new packages</span>
-      </label>
-    </form>
-    <footer class="drawer-footer">
-      <button type="button" class="btn btn-secondary" id="drawer-cancel">Cancel</button>
-      <button type="button" class="btn btn-primary" id="drawer-save">Save product</button>
-    </footer>
-  </aside>
-
-  <!-- Toast -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    // ─── Theme sync ───────────────────────────────────────────────────
     window.addEventListener('message', (e) => {
       if (e.data?.type === 'theme') {
         document.documentElement.setAttribute('data-theme', e.data.value);
       }
     });
-    // Inherit theme from parent on load
     try {
       const parentTheme = parent.document.documentElement.getAttribute('data-theme');
       if (parentTheme) document.documentElement.setAttribute('data-theme', parentTheme);
     } catch {}
 
-    // ─── State ────────────────────────────────────────────────────────
-    let catalogueData = null;
+    let listData = null;
+    let editData = null;
+    let initialSnapshot = null;
+    let isDirty = false;
 
-    // ─── Helpers ──────────────────────────────────────────────────────
     function escapeHtml(str) {
       return String(str || '').replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
       })[c]);
+    }
+    function fmtPrice(n) {
+      if (n == null) return '—';
+      return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     }
     function showToast(message, kind = 'success') {
       const el = document.getElementById('toast');
@@ -353,143 +443,236 @@
       el.dataset.visible = 'true';
       setTimeout(() => { el.dataset.visible = 'false'; }, 3000);
     }
+    function setDirty(d) {
+      isDirty = d;
+      const status = document.getElementById('save-status');
+      status.textContent = d ? 'Unsaved changes' : 'All changes saved';
+      status.dataset.dirty = String(d);
+    }
 
-    // ─── Render ───────────────────────────────────────────────────────
-    function render() {
-      const container = document.getElementById('content');
-      if (!catalogueData || !catalogueData.byCategory) {
-        container.innerHTML = '<div class="center-state"><p>No products yet. Click <strong>New product</strong> to add one.</p></div>';
+    async function loadList() {
+      try {
+        const r = await fetch('/api/admin/packages/list', { credentials: 'include' });
+        if (!r.ok) throw new Error('list failed: ' + r.status);
+        listData = await r.json();
+        renderList();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('list-content').innerHTML =
+          '<div class="center-state"><p>Could not load packages. Check your connection and reload.</p></div>';
+      }
+    }
+
+    function renderList() {
+      const c = document.getElementById('list-content');
+      const packages = listData?.packages || [];
+      if (!packages.length) {
+        c.innerHTML = '<div class="center-state"><p>No packages configured yet.</p></div>';
         return;
       }
-      const html = catalogueData.categoryOrder.map((cat) => {
-        const items = catalogueData.byCategory[cat] || [];
-        if (!items.length) return '';
-        return `
-          <section class="category" aria-labelledby="cat-${escapeHtml(cat)}">
-            <header class="category-header">
-              <h2 id="cat-${escapeHtml(cat)}">${escapeHtml(cat)}</h2>
-              <span class="category-count">${items.length} product${items.length === 1 ? '' : 's'}</span>
-            </header>
-            <div class="product-list">
-              ${items.map((item) => `
-                <div class="product-row">
-                  <div class="product-meta">
-                    <div class="product-name">
-                      ${escapeHtml(item.productName)}
-                      ${item.active ? '' : '<span class="badge-inactive">Inactive</span>'}
-                    </div>
-                    <div class="product-code">${escapeHtml(item.productCode)}</div>
-                  </div>
-                  <div></div>
-                  <button class="btn btn-ghost" type="button" data-edit-id="${escapeHtml(item.id)}">Edit</button>
+      c.innerHTML = `
+        <div class="package-grid">
+          ${packages.map((p) => `
+            <button class="package-card" data-pkg-id="${escapeHtml(p.id)}" type="button">
+              <div class="package-card-header">
+                <h2 class="package-name">${escapeHtml(p.packageName)}</h2>
+                <span class="package-status ${p.active ? 'package-status-active' : 'package-status-inactive'}">
+                  ${p.active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <div class="package-price">
+                <span class="amount">${fmtPrice(p.monthlyPrice)}</span>
+                <span class="period">${p.monthlyPrice == null ? 'custom' : '/ month'}</span>
+              </div>
+              <div class="package-meta">
+                <div class="package-meta-item">
+                  <span class="label">Setup</span>
+                  <span>${fmtPrice(p.setupFee)}</span>
                 </div>
-              `).join('')}
-            </div>
-          </section>
-        `;
-      }).join('');
-      container.innerHTML = html || '<div class="center-state"><p>No products yet.</p></div>';
-
-      // Wire edit buttons
-      container.querySelectorAll('[data-edit-id]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const item = catalogueData.items.find((i) => i.id === btn.dataset.editId);
-          if (item) openDrawer(item);
-        });
+                <div class="package-meta-item">
+                  <span class="label">Code</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">${escapeHtml(p.packageCode)}</span>
+                </div>
+              </div>
+              <div class="package-counts">
+                <span class="count-pill count-pill-included"><span class="num">${p.includedCount}</span> included</span>
+                <span class="count-pill count-pill-addon"><span class="num">${p.addOnCount}</span> add-on</span>
+              </div>
+            </button>
+          `).join('')}
+        </div>
+      `;
+      c.querySelectorAll('[data-pkg-id]').forEach((btn) => {
+        btn.addEventListener('click', () => openEdit(btn.dataset.pkgId));
       });
     }
 
-    async function loadCatalogue() {
+    async function openEdit(pkgId) {
+      document.getElementById('list-view').hidden = true;
+      document.getElementById('edit-view').hidden = false;
+      document.getElementById('edit-name').textContent = '\u00a0';
+      document.getElementById('grid-body').innerHTML =
+        '<div class="center-state"><div class="spinner" role="status" aria-label="Loading"></div></div>';
+
       try {
-        const r = await fetch('/api/admin/catalogue/list', { credentials: 'include' });
-        if (!r.ok) throw new Error('list failed: ' + r.status);
-        catalogueData = await r.json();
-        render();
+        const r = await fetch('/api/admin/packages/get?id=' + encodeURIComponent(pkgId), { credentials: 'include' });
+        if (!r.ok) throw new Error('get failed: ' + r.status);
+        editData = await r.json();
+        renderEdit();
       } catch (err) {
         console.error(err);
-        document.getElementById('content').innerHTML =
-          '<div class="center-state"><p>Could not load catalogue. Check your connection and reload.</p></div>';
+        showToast('Could not load package', 'error');
+        backToList();
       }
     }
 
-    // ─── Drawer ───────────────────────────────────────────────────────
-    function openDrawer(item) {
-      document.getElementById('drawer-title').textContent = item ? 'Edit product' : 'New product';
-      document.getElementById('f-id').value = item?.id || '';
-      document.getElementById('f-name').value = item?.productName || '';
-      document.getElementById('f-code').value = item?.productCode || '';
-      document.getElementById('f-category').value = item?.category || 'Widget';
-      document.getElementById('f-desc').value = item?.description || '';
-      document.getElementById('f-sort').value = item?.sortOrder ?? 999;
-      document.getElementById('f-active').checked = item ? item.active : true;
-      document.getElementById('f-code-err').hidden = true;
+    function renderEdit() {
+      const p = editData.package;
+      document.getElementById('edit-name').textContent = p.packageName || '';
+      document.getElementById('pkg-name').value = p.packageName || '';
+      document.getElementById('pkg-code').value = p.packageCode || '';
+      document.getElementById('pkg-monthly').value = p.monthlyPrice == null ? '' : p.monthlyPrice;
+      document.getElementById('pkg-setup').value = p.setupFee == null ? '' : p.setupFee;
+      document.getElementById('pkg-desc').value = p.description || '';
+      document.getElementById('pkg-sort').value = p.sortOrder ?? 999;
+      document.getElementById('pkg-active').checked = !!p.active;
 
-      document.getElementById('drawer').dataset.open = 'true';
-      document.getElementById('drawer').setAttribute('aria-hidden', 'false');
-      document.getElementById('drawer-backdrop').dataset.open = 'true';
-      setTimeout(() => document.getElementById('f-name').focus(), 250);
+      const body = document.getElementById('grid-body');
+      const html = editData.categoryOrder.map((cat) => {
+        const items = editData.byCategory[cat] || [];
+        if (!items.length) return '';
+        return `
+          <section class="cat-section">
+            <header class="cat-section-header">
+              <h3>${escapeHtml(cat)}</h3>
+              <span style="font-size: 11px; color: var(--tg-text-tertiary);">${items.length} product${items.length === 1 ? '' : 's'}</span>
+            </header>
+            ${items.map((item) => `
+              <div class="grid-row">
+                <div class="grid-row-meta">
+                  <div class="grid-row-name">${escapeHtml(item.productName)}</div>
+                  <div class="grid-row-code">${escapeHtml(item.productCode)}</div>
+                </div>
+                <label class="grid-toggle included" title="Included by default for new clients on this package">
+                  <input type="checkbox" data-included="${escapeHtml(item.catalogueItemId)}" ${item.includedByDefault ? 'checked' : ''} aria-label="Include ${escapeHtml(item.productName)} by default" />
+                </label>
+                <label class="grid-toggle addon" title="Available as paid add-on">
+                  <input type="checkbox" data-addon="${escapeHtml(item.catalogueItemId)}" ${item.availableAsAddOn ? 'checked' : ''} aria-label="Offer ${escapeHtml(item.productName)} as add-on" />
+                </label>
+              </div>
+            `).join('')}
+          </section>
+        `;
+      }).join('');
+      body.innerHTML = html;
+
+      initialSnapshot = JSON.stringify(captureForm());
+      setDirty(false);
+
+      document.querySelectorAll('#pkg-form input, #pkg-form textarea').forEach((el) => {
+        el.addEventListener('input', checkDirty);
+      });
+      body.querySelectorAll('input[type="checkbox"]').forEach((el) => {
+        el.addEventListener('change', checkDirty);
+      });
     }
-    function closeDrawer() {
-      document.getElementById('drawer').dataset.open = 'false';
-      document.getElementById('drawer').setAttribute('aria-hidden', 'true');
-      document.getElementById('drawer-backdrop').dataset.open = 'false';
+
+    function captureForm() {
+      const grid = (editData?.grid || []).map((row) => {
+        const includedEl = document.querySelector(`input[data-included="${row.catalogueItemId}"]`);
+        const addonEl = document.querySelector(`input[data-addon="${row.catalogueItemId}"]`);
+        return {
+          catalogueItemId: row.catalogueItemId,
+          joinId: row.joinId,
+          includedByDefault: !!includedEl?.checked,
+          availableAsAddOn: !!addonEl?.checked,
+          addOnMonthlyPrice: row.addOnMonthlyPrice,
+        };
+      });
+      return {
+        id: editData.package.id,
+        packageName: document.getElementById('pkg-name').value.trim(),
+        packageCode: document.getElementById('pkg-code').value.trim().toLowerCase(),
+        monthlyPrice: document.getElementById('pkg-monthly').value === '' ? null : Number(document.getElementById('pkg-monthly').value),
+        setupFee: document.getElementById('pkg-setup').value === '' ? null : Number(document.getElementById('pkg-setup').value),
+        description: document.getElementById('pkg-desc').value.trim(),
+        sortOrder: parseInt(document.getElementById('pkg-sort').value, 10) || 999,
+        active: document.getElementById('pkg-active').checked,
+        grid,
+      };
     }
-    document.getElementById('drawer-close').addEventListener('click', closeDrawer);
-    document.getElementById('drawer-cancel').addEventListener('click', closeDrawer);
-    document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.getElementById('drawer').dataset.open === 'true') closeDrawer();
-    });
-    document.getElementById('add-btn').addEventListener('click', () => openDrawer(null));
 
-    // ─── Save ─────────────────────────────────────────────────────────
-    async function save() {
-      const id = document.getElementById('f-id').value.trim() || undefined;
-      const productName = document.getElementById('f-name').value.trim();
-      const productCode = document.getElementById('f-code').value.trim().toLowerCase();
-      const category = document.getElementById('f-category').value;
-      const description = document.getElementById('f-desc').value.trim();
-      const sortOrder = parseInt(document.getElementById('f-sort').value, 10);
-      const active = document.getElementById('f-active').checked;
+    function checkDirty() {
+      const current = JSON.stringify(captureForm());
+      setDirty(current !== initialSnapshot);
+    }
 
-      // Client-side check on code shape
-      if (!/^[a-z][a-z0-9-]{2,59}$/.test(productCode)) {
-        const err = document.getElementById('f-code-err');
-        err.textContent = 'Code must be lowercase letters, numbers, and hyphens, starting with a letter.';
-        err.hidden = false;
+    function backToList() {
+      if (isDirty && !confirm('You have unsaved changes. Discard them?')) return;
+      document.getElementById('edit-view').hidden = true;
+      document.getElementById('list-view').hidden = false;
+      editData = null;
+      initialSnapshot = null;
+      setDirty(false);
+      loadList();
+    }
+
+    async function savePackage() {
+      const payload = captureForm();
+
+      if (!/^[a-z][a-z0-9-]{2,40}$/.test(payload.packageCode)) {
+        showToast('Package code must be lowercase, 3–40 chars', 'error');
+        return;
+      }
+      if (payload.packageName.length < 2) {
+        showToast('Package name required', 'error');
         return;
       }
 
-      const btn = document.getElementById('drawer-save');
+      const btn = document.getElementById('save-btn');
       btn.disabled = true; btn.textContent = 'Saving…';
 
       try {
-        const r = await fetch('/api/admin/catalogue/upsert', {
+        const r = await fetch('/api/admin/packages/save', {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, productName, productCode, category, description, sortOrder, active }),
+          body: JSON.stringify(payload),
         });
         const data = await r.json();
         if (!r.ok) {
-          const errMsg = data.errors?.join(' · ') || data.error || 'Save failed';
-          showToast(errMsg, 'error');
+          const msg = data.errors?.join(' · ') || data.detail || data.error || 'Save failed';
+          showToast(msg, 'error');
           return;
         }
-        showToast(id ? 'Product updated' : 'Product created', 'success');
-        closeDrawer();
-        await loadCatalogue();
+        showToast(`Saved · ${data.summary.created} added, ${data.summary.updated} updated, ${data.summary.deleted} removed`, 'success');
+        await openEdit(payload.id);
       } catch (err) {
         console.error(err);
         showToast('Network error. Try again.', 'error');
       } finally {
-        btn.disabled = false; btn.textContent = 'Save product';
+        btn.disabled = false; btn.textContent = 'Save package';
       }
     }
-    document.getElementById('drawer-save').addEventListener('click', save);
 
-    // ─── Boot ─────────────────────────────────────────────────────────
-    loadCatalogue();
+    function discardChanges() {
+      if (!isDirty) return;
+      if (!confirm('Discard all unsaved changes to this package?')) return;
+      renderEdit();
+    }
+
+    document.getElementById('back-btn').addEventListener('click', backToList);
+    document.getElementById('save-btn').addEventListener('click', savePackage);
+    document.getElementById('discard-btn').addEventListener('click', discardChanges);
+
+    window.addEventListener('beforeunload', (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    loadList();
   </script>
 </body>
 </html>
