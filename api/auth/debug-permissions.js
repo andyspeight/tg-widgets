@@ -27,6 +27,7 @@ export default async function handler(req, res) {
   }
 
   const userRecordId = ctx.userRecordId;
+  const userEmail = ctx.email;
   const checks = [];
 
   // 1. Can we read the Products table at all?
@@ -61,27 +62,48 @@ export default async function handler(req, res) {
     checks.push({ name: 'permissions_read_unfiltered', ok: false, error: e.message, status: e.status });
   }
 
-  // 3. Can we read with the FIND filter on this user?
-  const findFormula = `FIND('${userRecordId}', ARRAYJOIN({${PERMISSIONS.fields.user}}))>0`;
+  // 3. Filter on the user record ID inside ARRAYJOIN — KNOWN-BAD reference.
+  // Airtable formula ARRAYJOIN renders linked-record PRIMARY field values,
+  // not record IDs. Kept as a regression test: count should be 0.
+  const findByIdFormula = `FIND('${userRecordId}', ARRAYJOIN({${PERMISSIONS.fields.user}}))>0`;
   try {
     const filtered = await listRecords(PERMISSIONS.tableId, {
-      formula: findFormula,
+      formula: findByIdFormula,
       maxRecords: 50
     });
     checks.push({
-      name: 'permissions_read_find_only',
+      name: 'permissions_read_find_by_record_id_BAD',
       ok: true,
-      formula: findFormula,
+      formula: findByIdFormula,
+      count: filtered.length,
+      expected: 0
+    });
+  } catch (e) {
+    checks.push({ name: 'permissions_read_find_by_record_id_BAD', ok: false, formula: findByIdFormula, error: e.message, status: e.status });
+  }
+
+  // 4. Filter on the user EMAIL — what the resolver actually uses.
+  const escapedEmail = String(userEmail).replace(/'/g, "\\'");
+  const findByEmailFormula = `FIND('${escapedEmail}', ARRAYJOIN({${PERMISSIONS.fields.user}}))>0`;
+  try {
+    const filtered = await listRecords(PERMISSIONS.tableId, {
+      formula: findByEmailFormula,
+      maxRecords: 50
+    });
+    checks.push({
+      name: 'permissions_read_find_by_email',
+      ok: true,
+      formula: findByEmailFormula,
       count: filtered.length
     });
   } catch (e) {
-    checks.push({ name: 'permissions_read_find_only', ok: false, formula: findFormula, error: e.message, status: e.status });
+    checks.push({ name: 'permissions_read_find_by_email', ok: false, formula: findByEmailFormula, error: e.message, status: e.status });
   }
 
-  // 4. Full formula as the resolver uses it.
+  // 5. Full formula as the resolver uses it (email + status + expiry).
   const fullFormula =
     `AND(` +
-      `FIND('${userRecordId}', ARRAYJOIN({${PERMISSIONS.fields.user}}))>0,` +
+      `FIND('${escapedEmail}', ARRAYJOIN({${PERMISSIONS.fields.user}}))>0,` +
       `{${PERMISSIONS.fields.status}}='${PERMISSIONS.statuses.ACTIVE}',` +
       `OR(BLANK()={${PERMISSIONS.fields.expiresAt}}, IS_AFTER({${PERMISSIONS.fields.expiresAt}}, NOW()))` +
     `)`;
@@ -103,6 +125,7 @@ export default async function handler(req, res) {
 
   return jsonOk(res, {
     userRecordId,
+    userEmail,
     schema: {
       permissionsTable: PERMISSIONS.tableId,
       productsTable: PRODUCTS.tableId,
