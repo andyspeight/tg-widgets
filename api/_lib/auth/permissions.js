@@ -46,7 +46,11 @@ async function getProductSlugByRecordId() {
 /**
  * Resolve every active permission a user holds, joined to product slugs.
  *
- * @param {string} userRecordId
+ * @param {string} userRecordId — required for cache key + log clarity
+ * @param {string} userEmail    — the linked record's primary field value;
+ *                                used by the Airtable formula because
+ *                                ARRAYJOIN on a linked-record field renders
+ *                                the primary field value, not the record ID
  * @param {object} [opts]
  * @param {boolean} [opts.bypassCache=false]
  * @returns {Promise<Array<{product: string, productRecordId: string, role: string, expiresAt: string|null}>>}
@@ -54,8 +58,8 @@ async function getProductSlugByRecordId() {
  * NB: `product` is the slug like 'widget_suite'. Consumers should never
  * see the Airtable record ID — the slug is the stable contract.
  */
-export async function resolveUserPermissions(userRecordId, { bypassCache = false } = {}) {
-  if (!userRecordId) return [];
+export async function resolveUserPermissions(userRecordId, userEmail, { bypassCache = false } = {}) {
+  if (!userRecordId || !userEmail) return [];
 
   if (!bypassCache) {
     const cached = cache.get(userRecordId);
@@ -64,16 +68,18 @@ export async function resolveUserPermissions(userRecordId, { bypassCache = false
     }
   }
 
-  // Filter on the linked-record field. Airtable formulas treat linked
-  // record fields as arrays of record IDs — FIND() the user ID in the
-  // array stringified form. Status must be 'active' AND not expired.
+  // Filter on the linked-record field. Subtlety: ARRAYJOIN of a linked
+  // record field returns the joined PRIMARY field values of the linked
+  // records (display strings), NOT the record IDs. The Users table's
+  // primary field is Email, so we search for the user's email — escaped
+  // for formula safety. Status must be 'active' AND not expired.
   //
-  // Note on BLANK handling: an empty dateTime field in Airtable doesn't
-  // reliably equal the empty string ''. Use the BLANK() function for
-  // a portable check.
+  // Email is also normalised to lowercase by /api/auth/signin so a direct
+  // case-sensitive match is correct here.
+  const escapedEmail = String(userEmail).replace(/'/g, "\\'");
   const formula =
     `AND(` +
-      `FIND('${userRecordId}', ARRAYJOIN({${PERMISSIONS.fields.user}}))>0,` +
+      `FIND('${escapedEmail}', ARRAYJOIN({${PERMISSIONS.fields.user}}))>0,` +
       `{${PERMISSIONS.fields.status}}='${PERMISSIONS.statuses.ACTIVE}',` +
       `OR(BLANK()={${PERMISSIONS.fields.expiresAt}}, IS_AFTER({${PERMISSIONS.fields.expiresAt}}, NOW()))` +
     `)`;
@@ -97,6 +103,12 @@ export async function resolveUserPermissions(userRecordId, { bypassCache = false
 
   const perms = [];
   for (const r of records) {
+    // Belt and braces: also confirm the linked user record ID matches the
+    // session user. Should always be true given the email filter above
+    // (emails are unique in the Users table) but cheap to verify.
+    const userLink = r.fields[PERMISSIONS.fields.user] || [];
+    if (!userLink.includes(userRecordId)) continue;
+
     const productLink = r.fields[PERMISSIONS.fields.product] || [];
     const productRecordId = productLink[0];
     if (!productRecordId) continue;
@@ -126,8 +138,8 @@ export function invalidateUserPermissions(userRecordId) {
  * Quick boolean check: does this user have ANY active permission for
  * the given product slug?
  */
-export async function userCanAccessProduct(userRecordId, productSlug) {
-  const perms = await resolveUserPermissions(userRecordId);
+export async function userCanAccessProduct(userRecordId, userEmail, productSlug) {
+  const perms = await resolveUserPermissions(userRecordId, userEmail);
   return perms.some(p => p.product === productSlug);
 }
 
@@ -136,8 +148,8 @@ export async function userCanAccessProduct(userRecordId, productSlug) {
  * if no active permission. Useful for finer-grained checks like
  * "can this user grant other permissions" (admin/owner only).
  */
-export async function getUserRoleForProduct(userRecordId, productSlug) {
-  const perms = await resolveUserPermissions(userRecordId);
+export async function getUserRoleForProduct(userRecordId, userEmail, productSlug) {
+  const perms = await resolveUserPermissions(userRecordId, userEmail);
   const match = perms.find(p => p.product === productSlug);
   return match ? match.role : null;
 }
