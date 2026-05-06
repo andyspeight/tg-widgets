@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Catalogue · Travelgenix Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-primary: #1B2B5B; --tg-primary-light: #2A3F7A; --tg-primary-dark: #111D3E;
+      --tg-accent: #00B4D8; --tg-accent-light: #48CAE4; --tg-accent-dark: #0096B7;
+      --tg-success: #10B981; --tg-warning: #F59E0B; --tg-error: #EF4444; --tg-info: #3B82F6;
+      --tg-bg-primary: #FFFFFF; --tg-bg-secondary: #F8FAFC; --tg-bg-tertiary: #F1F5F9;
+      --tg-border: #E2E8F0; --tg-border-light: #F1F5F9;
+      --tg-text-primary: #0F172A; --tg-text-secondary: #475569; --tg-text-tertiary: #94A3B8;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
+      --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10);
+    }
+    [data-theme="dark"] {
+      --tg-bg-primary: #0F172A; --tg-bg-secondary: #1E293B; --tg-bg-tertiary: #334155;
+      --tg-border: #334155; --tg-border-light: #1E293B;
+      --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1; --tg-text-tertiary: #64748B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px; line-height: 1.6;
+      color: var(--tg-text-primary);
+      background: var(--tg-bg-secondary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-6) var(--space-12); }
+
+    /* Page header */
+    .page-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+      padding-top: var(--space-6);
+    }
+    .page-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 var(--space-1); letter-spacing: -0.02em; }
+    .page-header p { margin: 0; color: var(--tg-text-secondary); font-size: 14px; max-width: 560px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer; transition: all 150ms ease;
+      min-height: 44px;
+    }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2); }
+    .btn-primary { background: var(--tg-primary); color: white; }
+    .btn-primary:hover { background: var(--tg-primary-light); }
+    .btn-primary:active { background: var(--tg-primary-dark); }
+    .btn-secondary { background: var(--tg-bg-primary); color: var(--tg-text-primary); border-color: var(--tg-border); }
+    .btn-secondary:hover { background: var(--tg-bg-tertiary); }
+    .btn-ghost {
+      background: transparent; color: var(--tg-text-secondary);
+      padding: var(--space-2) var(--space-3); min-height: 36px;
+      font-size: 13px;
+    }
+    .btn-ghost:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+
+    /* Category card */
+    .category {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-5);
+      overflow: hidden;
+    }
+    .category-header {
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--tg-border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--tg-bg-secondary);
+    }
+    .category-header h2 {
+      margin: 0; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--tg-text-secondary);
+    }
+    .category-count {
+      font-size: 12px; color: var(--tg-text-tertiary); font-weight: 500;
+    }
+    .product-list { display: flex; flex-direction: column; }
+    .product-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--tg-border-light);
+    }
+    .product-row:last-child { border-bottom: none; }
+    .product-row:hover { background: var(--tg-bg-secondary); }
+    .product-meta {
+      display: flex; flex-direction: column; gap: 2px; min-width: 0;
+    }
+    .product-name {
+      font-weight: 600; font-size: 15px; color: var(--tg-text-primary);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .product-code {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 12px; color: var(--tg-text-tertiary);
+    }
+    .badge-inactive {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 3px;
+      background: var(--tg-bg-tertiary); color: var(--tg-text-secondary);
+      letter-spacing: 0.04em;
+    }
+
+    /* Drawer */
+    .drawer-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 50;
+    }
+    .drawer-backdrop[data-open="true"] { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(480px, 100vw);
+      background: var(--tg-bg-primary);
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 51;
+      display: flex; flex-direction: column;
+    }
+    .drawer[data-open="true"] { transform: translateX(0); }
+    .drawer-header {
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--tg-border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .drawer-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+    .drawer-close {
+      background: none; border: none; cursor: pointer;
+      width: 36px; height: 36px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--tg-text-secondary);
+    }
+    .drawer-close:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .drawer-body {
+      flex: 1; overflow-y: auto; padding: var(--space-6);
+      display: flex; flex-direction: column; gap: var(--space-5);
+    }
+    .drawer-footer {
+      padding: var(--space-4) var(--space-6);
+      border-top: 1px solid var(--tg-border);
+      display: flex; justify-content: flex-end; gap: var(--space-3);
+      background: var(--tg-bg-secondary);
+    }
+
+    /* Form fields */
+    .field { display: flex; flex-direction: column; gap: var(--space-2); }
+    .field label { font-size: 13px; font-weight: 500; color: var(--tg-text-secondary); }
+    .field input, .field select, .field textarea {
+      font-family: inherit; font-size: 15px;
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--tg-border);
+      background: var(--tg-bg-primary);
+      color: var(--tg-text-primary);
+      width: 100%;
+      min-height: 44px;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+    .field textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--tg-accent);
+      box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
+    }
+    .field-help { font-size: 12px; color: var(--tg-text-tertiary); margin-top: 2px; }
+    .field-error { font-size: 12px; color: var(--tg-error); margin-top: 2px; }
+    .checkbox-row {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3); border-radius: var(--radius-md);
+      background: var(--tg-bg-secondary);
+      cursor: pointer;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 18px; height: 18px; min-height: 18px; padding: 0;
+      accent-color: var(--tg-accent);
+      cursor: pointer;
+    }
+    .checkbox-row label { cursor: pointer; flex: 1; font-size: 14px; color: var(--tg-text-primary); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--tg-text-primary); color: var(--tg-bg-primary);
+      padding: var(--space-3) var(--space-5);
+      border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0; transition: all 200ms ease;
+      z-index: 100;
+    }
+    .toast[data-visible="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast-error { background: var(--tg-error); color: white; }
+    .toast-success { background: var(--tg-success); color: white; }
+
+    /* Loading */
+    .center-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: var(--space-12) var(--space-6);
+      text-align: center; color: var(--tg-text-secondary);
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--tg-border); border-top-color: var(--tg-accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin-bottom: var(--space-3);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .page-header { flex-direction: column; align-items: stretch; }
+      .product-row { grid-template-columns: 1fr; gap: var(--space-2); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <div>
+        <h1>Catalogue</h1>
+        <p>Every product Travelgenix sells. Add new widgets here when they are built. Mark old ones inactive when retired. Used by Packages and client onboarding.</p>
+      </div>
+      <button class="btn btn-primary" id="add-btn" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New product
+      </button>
+    </header>
+
+    <div id="content">
+      <div class="center-state">
+        <div class="spinner" role="status" aria-label="Loading catalogue"></div>
+        <p>Loading catalogue&hellip;</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer -->
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-labelledby="drawer-title" aria-hidden="true">
+    <header class="drawer-header">
+      <h3 id="drawer-title">New product</h3>
+      <button class="drawer-close" id="drawer-close" type="button" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </header>
+    <form class="drawer-body" id="drawer-form" autocomplete="off">
+      <input type="hidden" id="f-id" />
+      <div class="field">
+        <label for="f-name">Product name</label>
+        <input type="text" id="f-name" required maxlength="80" />
+        <div class="field-help">Shown in admin UI and onboarding flow.</div>
+      </div>
+      <div class="field">
+        <label for="f-code">Product code</label>
+        <input type="text" id="f-code" required maxlength="60" pattern="[a-z][a-z0-9-]+" />
+        <div class="field-help">Stable slug used in code. Lowercase, hyphens only e.g. widget-pricing.</div>
+        <div class="field-error" id="f-code-err" hidden></div>
+      </div>
+      <div class="field">
+        <label for="f-category">Category</label>
+        <select id="f-category" required>
+          <option value="Widget">Widget</option>
+          <option value="Luna Suite">Luna Suite</option>
+          <option value="Marketing">Marketing</option>
+          <option value="CRM">CRM</option>
+          <option value="Quick Quote">Quick Quote</option>
+          <option value="University">University</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-desc">Description</label>
+        <textarea id="f-desc" maxlength="2000"></textarea>
+        <div class="field-help">Short summary of what this product does. Internal use.</div>
+      </div>
+      <div class="field">
+        <label for="f-sort">Sort order</label>
+        <input type="number" id="f-sort" min="0" max="9999" step="1" value="999" />
+        <div class="field-help">Lower numbers appear first within their category.</div>
+      </div>
+      <label class="checkbox-row" for="f-active">
+        <input type="checkbox" id="f-active" checked />
+        <span>Active and available for new packages</span>
+      </label>
+    </form>
+    <footer class="drawer-footer">
+      <button type="button" class="btn btn-secondary" id="drawer-cancel">Cancel</button>
+      <button type="button" class="btn btn-primary" id="drawer-save">Save product</button>
+    </footer>
+  </aside>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ─── Theme sync ───────────────────────────────────────────────────
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'theme') {
+        document.documentElement.setAttribute('data-theme', e.data.value);
+      }
+    });
+    // Inherit theme from parent on load
+    try {
+      const parentTheme = parent.document.documentElement.getAttribute('data-theme');
+      if (parentTheme) document.documentElement.setAttribute('data-theme', parentTheme);
+    } catch {}
+
+    // ─── State ────────────────────────────────────────────────────────
+    let catalogueData = null;
+
+    // ─── Helpers ──────────────────────────────────────────────────────
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      })[c]);
+    }
+    function showToast(message, kind = 'success') {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.className = 'toast toast-' + kind;
+      el.dataset.visible = 'true';
+      setTimeout(() => { el.dataset.visible = 'false'; }, 3000);
+    }
+
+    // ─── Render ───────────────────────────────────────────────────────
+    function render() {
+      const container = document.getElementById('content');
+      if (!catalogueData || !catalogueData.byCategory) {
+        container.innerHTML = '<div class="center-state"><p>No products yet. Click <strong>New product</strong> to add one.</p></div>';
+        return;
+      }
+      const html = catalogueData.categoryOrder.map((cat) => {
+        const items = catalogueData.byCategory[cat] || [];
+        if (!items.length) return '';
+        return `
+          <section class="category" aria-labelledby="cat-${escapeHtml(cat)}">
+            <header class="category-header">
+              <h2 id="cat-${escapeHtml(cat)}">${escapeHtml(cat)}</h2>
+              <span class="category-count">${items.length} product${items.length === 1 ? '' : 's'}</span>
+            </header>
+            <div class="product-list">
+              ${items.map((item) => `
+                <div class="product-row">
+                  <div class="product-meta">
+                    <div class="product-name">
+                      ${escapeHtml(item.productName)}
+                      ${item.active ? '' : '<span class="badge-inactive">Inactive</span>'}
+                    </div>
+                    <div class="product-code">${escapeHtml(item.productCode)}</div>
+                  </div>
+                  <div></div>
+                  <button class="btn btn-ghost" type="button" data-edit-id="${escapeHtml(item.id)}">Edit</button>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        `;
+      }).join('');
+      container.innerHTML = html || '<div class="center-state"><p>No products yet.</p></div>';
+
+      // Wire edit buttons
+      container.querySelectorAll('[data-edit-id]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const item = catalogueData.items.find((i) => i.id === btn.dataset.editId);
+          if (item) openDrawer(item);
+        });
+      });
+    }
+
+    async function loadCatalogue() {
+      try {
+        const r = await fetch('/api/admin/catalogue/list', { credentials: 'include' });
+        if (!r.ok) throw new Error('list failed: ' + r.status);
+        catalogueData = await r.json();
+        render();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('content').innerHTML =
+          '<div class="center-state"><p>Could not load catalogue. Check your connection and reload.</p></div>';
+      }
+    }
+
+    // ─── Drawer ───────────────────────────────────────────────────────
+    function openDrawer(item) {
+      document.getElementById('drawer-title').textContent = item ? 'Edit product' : 'New product';
+      document.getElementById('f-id').value = item?.id || '';
+      document.getElementById('f-name').value = item?.productName || '';
+      document.getElementById('f-code').value = item?.productCode || '';
+      document.getElementById('f-category').value = item?.category || 'Widget';
+      document.getElementById('f-desc').value = item?.description || '';
+      document.getElementById('f-sort').value = item?.sortOrder ?? 999;
+      document.getElementById('f-active').checked = item ? item.active : true;
+      document.getElementById('f-code-err').hidden = true;
+
+      document.getElementById('drawer').dataset.open = 'true';
+      document.getElementById('drawer').setAttribute('aria-hidden', 'false');
+      document.getElementById('drawer-backdrop').dataset.open = 'true';
+      setTimeout(() => document.getElementById('f-name').focus(), 250);
+    }
+    function closeDrawer() {
+      document.getElementById('drawer').dataset.open = 'false';
+      document.getElementById('drawer').setAttribute('aria-hidden', 'true');
+      document.getElementById('drawer-backdrop').dataset.open = 'false';
+    }
+    document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+    document.getElementById('drawer-cancel').addEventListener('click', closeDrawer);
+    document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('drawer').dataset.open === 'true') closeDrawer();
+    });
+    document.getElementById('add-btn').addEventListener('click', () => openDrawer(null));
+
+    // ─── Save ─────────────────────────────────────────────────────────
+    async function save() {
+      const id = document.getElementById('f-id').value.trim() || undefined;
+      const productName = document.getElementById('f-name').value.trim();
+      const productCode = document.getElementById('f-code').value.trim().toLowerCase();
+      const category = document.getElementById('f-category').value;
+      const description = document.getElementById('f-desc').value.trim();
+      const sortOrder = parseInt(document.getElementById('f-sort').value, 10);
+      const active = document.getElementById('f-active').checked;
+
+      // Client-side check on code shape
+      if (!/^[a-z][a-z0-9-]{2,59}$/.test(productCode)) {
+        const err = document.getElementById('f-code-err');
+        err.textContent = 'Code must be lowercase letters, numbers, and hyphens, starting with a letter.';
+        err.hidden = false;
+        return;
+      }
+
+      const btn = document.getElementById('drawer-save');
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      try {
+        const r = await fetch('/api/admin/catalogue/upsert', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, productName, productCode, category, description, sortOrder, active }),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          const errMsg = data.errors?.join(' · ') || data.error || 'Save failed';
+          showToast(errMsg, 'error');
+          return;
+        }
+        showToast(id ? 'Product updated' : 'Product created', 'success');
+        closeDrawer();
+        await loadCatalogue();
+      } catch (err) {
+        console.error(err);
+        showToast('Network error. Try again.', 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Save product';
+      }
+    }
+    document.getElementById('drawer-save').addEventListener('click', save);
+
+    // ─── Boot ─────────────────────────────────────────────────────────
+    loadCatalogue();
+  </script>
+</body>
+</html>
