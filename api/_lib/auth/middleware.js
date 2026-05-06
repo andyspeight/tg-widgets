@@ -20,15 +20,24 @@ import { getActiveSession, touchSession } from './sessions.js';
 import { USERS, CLIENTS } from './schema.js';
 import { getRecord } from './airtable.js';
 import { jsonError } from './http.js';
+import { readSessionCookie } from './cookie.js';
+import { resolveUserPermissions } from './permissions.js';
 
 /**
- * Extract a Bearer token from the Authorization header.
+ * Extract a session token from either the Authorization header (Bearer)
+ * or the cross-subdomain session cookie. The cookie path enables SSO
+ * across *.travelify.io products without each one having to manage the
+ * token in localStorage.
  */
-function extractBearer(req) {
+function extractToken(req) {
+  // 1. Authorization: Bearer <token>
   const auth = req.headers.authorization || req.headers.Authorization;
-  if (!auth || typeof auth !== 'string') return null;
-  const m = auth.match(/^Bearer\s+(.+)$/i);
-  return m ? m[1].trim() : null;
+  if (auth && typeof auth === 'string') {
+    const m = auth.match(/^Bearer\s+(.+)$/i);
+    if (m) return m[1].trim();
+  }
+  // 2. Cookie: tg_session=...
+  return readSessionCookie(req);
 }
 
 /**
@@ -44,7 +53,7 @@ function extractBearer(req) {
  *   }
  */
 export async function requireAuth(req, res) {
-  const token = extractBearer(req);
+  const token = extractToken(req);
   if (!token) {
     jsonError(res, 401, 'no_token', 'Authentication required');
     return null;
@@ -94,6 +103,11 @@ export async function requireAuth(req, res) {
   // Touch the session asynchronously; don't await
   touchSession(session.recordId).catch(() => {});
 
+  // Resolve current permissions. These come from the cache (30s TTL) so
+  // hot paths don't all hit Airtable, but a freshly-granted permission
+  // takes effect within seconds.
+  const permissions = await resolveUserPermissions(userRec.id);
+
   return {
     userRecordId: userRec.id,
     clientRecordId,
@@ -101,8 +115,42 @@ export async function requireAuth(req, res) {
     email: f[USERS.fields.email] || '',
     fullName: f[USERS.fields.fullName] || '',
     sessionRecordId: session.recordId,
-    sessionId: session.sessionId
+    sessionId: session.sessionId,
+    permissions
   };
+}
+
+/**
+ * Helper for product API endpoints: return the user's role for a specific
+ * Travelgenix product, or null if they have no active permission.
+ *
+ * Usage:
+ *   const role = getProductRole(ctx, 'luna_marketing');
+ *   if (!role) return jsonError(res, 403, 'no_access', 'Not granted access');
+ *   if (role !== 'admin' && role !== 'owner') return jsonError(res, 403, ...);
+ */
+export function getProductRole(ctx, productSlug) {
+  if (!ctx || !Array.isArray(ctx.permissions)) return null;
+  const match = ctx.permissions.find(p => p.product === productSlug);
+  return match ? match.role : null;
+}
+
+/**
+ * Stricter helper: require the user to have access to a product, optionally
+ * with one of the specified roles. Responds with 403 and returns null
+ * if the check fails.
+ */
+export function requireProductAccess(ctx, productSlug, allowedRoles, res) {
+  const role = getProductRole(ctx, productSlug);
+  if (!role) {
+    jsonError(res, 403, 'no_product_access', 'You do not have access to this product');
+    return null;
+  }
+  if (allowedRoles && allowedRoles.length && !allowedRoles.includes(role)) {
+    jsonError(res, 403, 'insufficient_role', 'Your role does not permit this action');
+    return null;
+  }
+  return role;
 }
 
 /**
