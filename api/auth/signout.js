@@ -1,33 +1,38 @@
 /**
- * POST /api/auth/signout
+ * GET /api/auth/me
  *
- * Revokes the current session. JWT will still validate cryptographically
- * but session lookup will fail → 401 on next request.
+ * Returns the current user, their client, and their resolved permissions.
+ * Used by:
+ *   - Product front-ends on load to confirm the session and gate UI
+ *   - Identity Console to refresh after a permission change
+ *
+ * Accepts auth via either Authorization: Bearer header OR the
+ * tg_session cookie (set on .travelify.io for cross-subdomain SSO).
  */
 
-import { setCors, requireMethod, jsonOk, getRequestIp, getUserAgent } from '../_lib/auth/http.js';
-import { requireAuth } from '../_lib/auth/middleware.js';
-import { revokeSession } from '../_lib/auth/sessions.js';
-import { logAuthEvent } from '../_lib/auth/audit.js';
-import { AUTH_EVENTS, SESSIONS } from '../_lib/auth/schema.js';
+import { setCors, requireMethod, jsonOk } from '../_lib/auth/http.js';
+import { requireAuth, loadClientForCtx } from '../_lib/auth/middleware.js';
 
 export default async function handler(req, res) {
   if (setCors(req, res)) return;
-  if (!requireMethod(req, res, 'POST')) return;
+  if (!requireMethod(req, res, 'GET')) return;
 
   const ctx = await requireAuth(req, res);
   if (!ctx) return;
 
-  await revokeSession(ctx.sessionRecordId, SESSIONS.revokeReasons.SIGNOUT);
+  const client = await loadClientForCtx(ctx);
 
-  await logAuthEvent({
-    type: AUTH_EVENTS.types.SIGNOUT,
-    success: true,
-    userRecordId: ctx.userRecordId,
-    clientRecordId: ctx.clientRecordId,
-    ip: getRequestIp(req),
-    userAgent: getUserAgent(req)
+  return jsonOk(res, {
+    user: {
+      email: ctx.email,
+      fullName: ctx.fullName,
+      role: ctx.role
+    },
+    client,
+    permissions: (ctx.permissions || []).map(p => ({
+      product: p.product,
+      role: p.role,
+      expiresAt: p.expiresAt || null
+    }))
   });
-
-  return jsonOk(res);
 }
