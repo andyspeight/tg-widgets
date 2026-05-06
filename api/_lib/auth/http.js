@@ -25,10 +25,12 @@ const ALLOWED_ORIGINS = new Set([
   'https://marketing.travelify.io',
   'https://chat.travelify.io',
   'https://trends.travelify.io',
+  'https://tools.travelify.io',
   'https://tg-widgets.vercel.app',
   'https://luna-marketing.vercel.app',
   'https://luna-chat-endpoint.vercel.app',
   'https://luna-trends.vercel.app',
+  'https://tool-hub-black.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173'
 ]);
@@ -36,6 +38,9 @@ const ALLOWED_ORIGINS = new Set([
 function isAllowedOrigin(origin) {
   if (!origin) return false;
   if (ALLOWED_ORIGINS.has(origin)) return true;
+  // Allow any *.travelify.io subdomain. New products spinning up under
+  // the platform domain shouldn't need a code change to be authorised.
+  if (/^https:\/\/[a-z0-9-]+\.travelify\.io$/i.test(origin)) return true;
   // Allow any Vercel preview deploy on this org
   if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return true;
   return false;
