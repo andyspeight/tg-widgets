@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Packages · Travelgenix Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-primary: #1B2B5B; --tg-primary-light: #2A3F7A; --tg-primary-dark: #111D3E;
+      --tg-accent: #00B4D8; --tg-accent-light: #48CAE4; --tg-accent-dark: #0096B7;
+      --tg-success: #10B981; --tg-warning: #F59E0B; --tg-error: #EF4444; --tg-info: #3B82F6;
+      --tg-bg-primary: #FFFFFF; --tg-bg-secondary: #F8FAFC; --tg-bg-tertiary: #F1F5F9;
+      --tg-border: #E2E8F0; --tg-border-light: #F1F5F9;
+      --tg-text-primary: #0F172A; --tg-text-secondary: #475569; --tg-text-tertiary: #94A3B8;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
+      --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10);
+    }
+    [data-theme="dark"] {
+      --tg-bg-primary: #0F172A; --tg-bg-secondary: #1E293B; --tg-bg-tertiary: #334155;
+      --tg-border: #334155; --tg-border-light: #1E293B;
+      --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1; --tg-text-tertiary: #64748B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px; line-height: 1.6;
+      color: var(--tg-text-primary);
+      background: var(--tg-bg-secondary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-6) var(--space-12); }
+
+    /* Page header */
+    .page-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+      padding-top: var(--space-6);
+    }
+    .page-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 var(--space-1); letter-spacing: -0.02em; }
+    .page-header p { margin: 0; color: var(--tg-text-secondary); font-size: 14px; max-width: 620px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer; transition: all 150ms ease;
+      min-height: 44px;
+    }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--tg-primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--tg-primary-light); }
+    .btn-primary:active:not(:disabled) { background: var(--tg-primary-dark); }
+    .btn-secondary { background: var(--tg-bg-primary); color: var(--tg-text-primary); border-color: var(--tg-border); }
+    .btn-secondary:hover { background: var(--tg-bg-tertiary); }
+    .btn-ghost {
+      background: transparent; color: var(--tg-text-secondary);
+      padding: var(--space-2) var(--space-3); min-height: 36px;
+      font-size: 13px;
+    }
+    .btn-ghost:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+
+    /* Package cards (list view) */
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+    }
+    .package-card {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      cursor: pointer;
+      transition: all 200ms ease;
+      text-align: left;
+      font-family: inherit;
+      width: 100%;
+    }
+    .package-card:hover {
+      border-color: var(--tg-accent);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .package-card:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
+      border-color: var(--tg-accent);
+    }
+    .package-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--space-3); }
+    .package-name { font-size: 20px; font-weight: 700; margin: 0; color: var(--tg-text-primary); }
+    .package-status { font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.04em; }
+    .package-status-active { background: rgba(16, 185, 129, 0.12); color: var(--tg-success); }
+    .package-status-inactive { background: var(--tg-bg-tertiary); color: var(--tg-text-secondary); }
+    .package-price { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); }
+    .package-price .amount { font-size: 24px; font-weight: 700; color: var(--tg-text-primary); }
+    .package-price .period { font-size: 13px; color: var(--tg-text-secondary); }
+    .package-meta { display: flex; gap: var(--space-4); font-size: 13px; color: var(--tg-text-secondary); margin-bottom: var(--space-4); }
+    .package-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .package-meta-item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--tg-text-tertiary); font-weight: 600; }
+    .package-counts { display: flex; gap: var(--space-2); }
+    .count-pill {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      font-size: 12px; font-weight: 500;
+      padding: var(--space-1) var(--space-2);
+      border-radius: 4px;
+      background: var(--tg-bg-secondary);
+      color: var(--tg-text-secondary);
+    }
+    .count-pill .num { font-weight: 700; color: var(--tg-text-primary); }
+    .count-pill-included .num { color: var(--tg-success); }
+    .count-pill-addon .num { color: var(--tg-info); }
+
+    /* Edit view */
+    .edit-header {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+    .back-btn {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      width: 40px; height: 40px;
+      border-radius: var(--radius-md);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--tg-text-secondary);
+    }
+    .back-btn:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .edit-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--tg-border);
+      background: var(--tg-bg-secondary);
+    }
+    .panel-header h2 { font-size: 14px; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
+    .panel-header p { font-size: 12px; color: var(--tg-text-secondary); margin: 2px 0 0; }
+    .panel-body { padding: var(--space-5); }
+
+    .form-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+    .field { display: flex; flex-direction: column; gap: var(--space-2); }
+    .field label { font-size: 13px; font-weight: 500; color: var(--tg-text-secondary); }
+    .field input, .field textarea {
+      font-family: inherit; font-size: 15px;
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--tg-border);
+      background: var(--tg-bg-primary);
+      color: var(--tg-text-primary);
+      width: 100%;
+      min-height: 44px;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+    .field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+    .field input:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--tg-accent);
+      box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
+    }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .field-help { font-size: 12px; color: var(--tg-text-tertiary); }
+    .field-prefix-input {
+      position: relative;
+    }
+    .field-prefix-input::before {
+      content: '£';
+      position: absolute;
+      left: var(--space-3);
+      top: 50%; transform: translateY(-50%);
+      color: var(--tg-text-tertiary);
+      font-weight: 500;
+      pointer-events: none;
+    }
+    .field-prefix-input input { padding-left: 28px; }
+
+    .checkbox-row {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3); border-radius: var(--radius-md);
+      background: var(--tg-bg-secondary);
+      cursor: pointer;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 18px; height: 18px; min-height: 18px; padding: 0;
+      accent-color: var(--tg-accent);
+      cursor: pointer;
+    }
+    .checkbox-row label { cursor: pointer; flex: 1; font-size: 14px; }
+
+    /* Catalogue grid */
+    .cat-section { border-bottom: 1px solid var(--tg-border); }
+    .cat-section:last-child { border-bottom: none; }
+    .cat-section-header {
+      padding: var(--space-3) var(--space-5);
+      background: var(--tg-bg-secondary);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .cat-section-header h3 {
+      margin: 0; font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--tg-text-secondary);
+    }
+    .grid-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-5);
+      border-bottom: 1px solid var(--tg-border-light);
+    }
+    .grid-row:last-child { border-bottom: none; }
+    .grid-row:hover { background: var(--tg-bg-secondary); }
+    .grid-row-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .grid-row-name { font-weight: 500; font-size: 14px; color: var(--tg-text-primary); }
+    .grid-row-code { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 11px; color: var(--tg-text-tertiary); }
+    .grid-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 80px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grid-toggle input {
+      width: 18px; height: 18px;
+      accent-color: var(--tg-accent);
+      cursor: pointer;
+    }
+    .grid-toggle.included input { accent-color: var(--tg-success); }
+    .grid-toggle.addon input { accent-color: var(--tg-info); }
+
+    .grid-headers {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: var(--space-4);
+      padding: var(--space-2) var(--space-5);
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--tg-text-tertiary);
+      background: var(--tg-bg-tertiary);
+    }
+    .grid-headers .col-toggle { width: 80px; text-align: center; }
+
+    /* Sticky save bar */
+    .save-bar {
+      position: sticky; bottom: 0;
+      background: var(--tg-bg-primary);
+      border-top: 1px solid var(--tg-border);
+      padding: var(--space-3) var(--space-5);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: var(--space-3);
+      box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.04);
+      z-index: 5;
+    }
+    .save-bar-status {
+      font-size: 13px; color: var(--tg-text-secondary);
+    }
+    .save-bar-status[data-dirty="true"] { color: var(--tg-warning); font-weight: 500; }
+    .save-bar-actions { display: flex; gap: var(--space-3); }
+
+    /* Loading + toast (same as catalogue page) */
+    .center-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: var(--space-12) var(--space-6);
+      text-align: center; color: var(--tg-text-secondary);
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--tg-border); border-top-color: var(--tg-accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin-bottom: var(--space-3);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--tg-text-primary); color: var(--tg-bg-primary);
+      padding: var(--space-3) var(--space-5);
+      border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0; transition: all 200ms ease;
+      z-index: 100;
+    }
+    .toast[data-visible="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast-error { background: var(--tg-error); color: white; }
+    .toast-success { background: var(--tg-success); color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- LIST VIEW -->
+    <div id="list-view">
+      <header class="page-header">
+        <div>
+          <h1>Packages</h1>
+          <p>What each package includes by default. Set the entitlements once here, every new client onboarded onto a package gets these by default. Override per client during onboarding or any time after.</p>
+        </div>
+      </header>
+
+      <div id="list-content">
+        <div class="center-state">
+          <div class="spinner" role="status" aria-label="Loading packages"></div>
+          <p>Loading packages&hellip;</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT VIEW -->
+    <div id="edit-view" hidden>
+      <div class="edit-header">
+        <button class="back-btn" id="back-btn" type="button" aria-label="Back to packages list">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </button>
+        <div>
+          <div style="font-size: 12px; color: var(--tg-text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Editing package</div>
+          <h1 style="font-size: 24px; font-weight: 700; margin: 0;" id="edit-name">&nbsp;</h1>
+        </div>
+      </div>
+
+      <div class="edit-grid">
+        <!-- Left: package details -->
+        <section class="panel">
+          <header class="panel-header">
+            <h2>Package details</h2>
+            <p>Pricing and description shown to staff during onboarding.</p>
+          </header>
+          <div class="panel-body">
+            <form class="form-stack" id="pkg-form" autocomplete="off" onsubmit="return false;">
+              <div class="field">
+                <label for="pkg-name">Package name</label>
+                <input type="text" id="pkg-name" maxlength="60" required />
+              </div>
+              <div class="field">
+                <label for="pkg-code">Package code</label>
+                <input type="text" id="pkg-code" maxlength="40" required pattern="[a-z][a-z0-9-]+" />
+                <div class="field-help">Lowercase slug used in code. Don't change once live.</div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="pkg-monthly">Monthly price</label>
+                  <div class="field-prefix-input">
+                    <input type="number" id="pkg-monthly" min="0" max="100000" step="0.01" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="pkg-setup">Setup fee</label>
+                  <div class="field-prefix-input">
+                    <input type="number" id="pkg-setup" min="0" max="100000" step="0.01" />
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="pkg-desc">Description</label>
+                <textarea id="pkg-desc" maxlength="2000"></textarea>
+                <div class="field-help">Internal description, shown when picking a package during onboarding.</div>
+              </div>
+              <div class="field">
+                <label for="pkg-sort">Sort order</label>
+                <input type="number" id="pkg-sort" min="0" max="9999" step="1" value="999" />
+                <div class="field-help">Lower numbers appear first in the package picker.</div>
+              </div>
+              <label class="checkbox-row" for="pkg-active">
+                <input type="checkbox" id="pkg-active" checked />
+                <span>Active and assignable to new clients</span>
+              </label>
+            </form>
+          </div>
+        </section>
+
+        <!-- Right: products grid -->
+        <section class="panel">
+          <header class="panel-header">
+            <h2>Included products</h2>
+            <p>Tick <strong>Included</strong> to auto-enable for new clients. Tick <strong>Add-on</strong> to offer as a paid extra during onboarding.</p>
+          </header>
+          <div class="grid-headers">
+            <div>Product</div>
+            <div class="col-toggle">Included</div>
+            <div class="col-toggle">Add-on</div>
+          </div>
+          <div id="grid-body">
+            <div class="center-state">
+              <div class="spinner" role="status" aria-label="Loading"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Save bar -->
+      <div class="save-bar">
+        <div class="save-bar-status" id="save-status">All changes saved</div>
+        <div class="save-bar-actions">
+          <button class="btn btn-secondary" type="button" id="discard-btn">Discard</button>
+          <button class="btn btn-primary" type="button" id="save-btn">Save package</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ─── Theme sync ───────────────────────────────────────────────────
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'theme') {
+        document.documentElement.setAttribute('data-theme', e.data.value);
+      }
+    });
+    try {
+      const parentTheme = parent.document.documentElement.getAttribute('data-theme');
+      if (parentTheme) document.documentElement.setAttribute('data-theme', parentTheme);
+    } catch {}
+
+    // ─── State ────────────────────────────────────────────────────────
+    let listData = null;
+    let editData = null;        // { package, grid, byCategory, categoryOrder }
+    let initialSnapshot = null; // for dirty detection
+    let isDirty = false;
+
+    // ─── Helpers ──────────────────────────────────────────────────────
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      })[c]);
+    }
+    function fmtPrice(n) {
+      if (n == null) return '—';
+      return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+    function showToast(message, kind = 'success') {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.className = 'toast toast-' + kind;
+      el.dataset.visible = 'true';
+      setTimeout(() => { el.dataset.visible = 'false'; }, 3000);
+    }
+    function setDirty(d) {
+      isDirty = d;
+      const status = document.getElementById('save-status');
+      status.textContent = d ? 'Unsaved changes' : 'All changes saved';
+      status.dataset.dirty = String(d);
+    }
+
+    // ─── List view ────────────────────────────────────────────────────
+    async function loadList() {
+      try {
+        const r = await fetch('/api/admin/packages/list', { credentials: 'include' });
+        if (!r.ok) throw new Error('list failed: ' + r.status);
+        listData = await r.json();
+        renderList();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('list-content').innerHTML =
+          '<div class="center-state"><p>Could not load packages. Check your connection and reload.</p></div>';
+      }
+    }
+
+    function renderList() {
+      const c = document.getElementById('list-content');
+      const packages = listData?.packages || [];
+      if (!packages.length) {
+        c.innerHTML = '<div class="center-state"><p>No packages configured yet.</p></div>';
+        return;
+      }
+      c.innerHTML = `
+        <div class="package-grid">
+          ${packages.map((p) => `
+            <button class="package-card" data-pkg-id="${escapeHtml(p.id)}" type="button">
+              <div class="package-card-header">
+                <h2 class="package-name">${escapeHtml(p.packageName)}</h2>
+                <span class="package-status ${p.active ? 'package-status-active' : 'package-status-inactive'}">
+                  ${p.active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <div class="package-price">
+                <span class="amount">${fmtPrice(p.monthlyPrice)}</span>
+                <span class="period">${p.monthlyPrice == null ? 'custom' : '/ month'}</span>
+              </div>
+              <div class="package-meta">
+                <div class="package-meta-item">
+                  <span class="label">Setup</span>
+                  <span>${fmtPrice(p.setupFee)}</span>
+                </div>
+                <div class="package-meta-item">
+                  <span class="label">Code</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">${escapeHtml(p.packageCode)}</span>
+                </div>
+              </div>
+              <div class="package-counts">
+                <span class="count-pill count-pill-included"><span class="num">${p.includedCount}</span> included</span>
+                <span class="count-pill count-pill-addon"><span class="num">${p.addOnCount}</span> add-on</span>
+              </div>
+            </button>
+          `).join('')}
+        </div>
+      `;
+      c.querySelectorAll('[data-pkg-id]').forEach((btn) => {
+        btn.addEventListener('click', () => openEdit(btn.dataset.pkgId));
+      });
+    }
+
+    // ─── Edit view ────────────────────────────────────────────────────
+    async function openEdit(pkgId) {
+      document.getElementById('list-view').hidden = true;
+      document.getElementById('edit-view').hidden = false;
+      document.getElementById('edit-name').textContent = '\u00a0';
+      document.getElementById('grid-body').innerHTML =
+        '<div class="center-state"><div class="spinner" role="status" aria-label="Loading"></div></div>';
+
+      try {
+        const r = await fetch('/api/admin/packages/get?id=' + encodeURIComponent(pkgId), { credentials: 'include' });
+        if (!r.ok) throw new Error('get failed: ' + r.status);
+        editData = await r.json();
+        renderEdit();
+      } catch (err) {
+        console.error(err);
+        showToast('Could not load package', 'error');
+        backToList();
+      }
+    }
+
+    function renderEdit() {
+      const p = editData.package;
+      document.getElementById('edit-name').textContent = p.packageName || '';
+      document.getElementById('pkg-name').value = p.packageName || '';
+      document.getElementById('pkg-code').value = p.packageCode || '';
+      document.getElementById('pkg-monthly').value = p.monthlyPrice == null ? '' : p.monthlyPrice;
+      document.getElementById('pkg-setup').value = p.setupFee == null ? '' : p.setupFee;
+      document.getElementById('pkg-desc').value = p.description || '';
+      document.getElementById('pkg-sort').value = p.sortOrder ?? 999;
+      document.getElementById('pkg-active').checked = !!p.active;
+
+      // Render the catalogue grid grouped by category
+      const body = document.getElementById('grid-body');
+      const html = editData.categoryOrder.map((cat) => {
+        const items = editData.byCategory[cat] || [];
+        if (!items.length) return '';
+        return `
+          <section class="cat-section">
+            <header class="cat-section-header">
+              <h3>${escapeHtml(cat)}</h3>
+              <span style="font-size: 11px; color: var(--tg-text-tertiary);">${items.length} product${items.length === 1 ? '' : 's'}</span>
+            </header>
+            ${items.map((item) => `
+              <div class="grid-row">
+                <div class="grid-row-meta">
+                  <div class="grid-row-name">${escapeHtml(item.productName)}</div>
+                  <div class="grid-row-code">${escapeHtml(item.productCode)}</div>
+                </div>
+                <label class="grid-toggle included" title="Included by default for new clients on this package">
+                  <input type="checkbox" data-included="${escapeHtml(item.catalogueItemId)}" ${item.includedByDefault ? 'checked' : ''} aria-label="Include ${escapeHtml(item.productName)} by default" />
+                </label>
+                <label class="grid-toggle addon" title="Available as paid add-on">
+                  <input type="checkbox" data-addon="${escapeHtml(item.catalogueItemId)}" ${item.availableAsAddOn ? 'checked' : ''} aria-label="Offer ${escapeHtml(item.productName)} as add-on" />
+                </label>
+              </div>
+            `).join('')}
+          </section>
+        `;
+      }).join('');
+      body.innerHTML = html;
+
+      // Snapshot for dirty detection
+      initialSnapshot = JSON.stringify(captureForm());
+      setDirty(false);
+
+      // Bind change events
+      document.querySelectorAll('#pkg-form input, #pkg-form textarea').forEach((el) => {
+        el.addEventListener('input', checkDirty);
+      });
+      body.querySelectorAll('input[type="checkbox"]').forEach((el) => {
+        el.addEventListener('change', checkDirty);
+      });
+    }
+
+    function captureForm() {
+      const grid = (editData?.grid || []).map((row) => {
+        const includedEl = document.querySelector(`input[data-included="${row.catalogueItemId}"]`);
+        const addonEl = document.querySelector(`input[data-addon="${row.catalogueItemId}"]`);
+        return {
+          catalogueItemId: row.catalogueItemId,
+          joinId: row.joinId,
+          includedByDefault: !!includedEl?.checked,
+          availableAsAddOn: !!addonEl?.checked,
+          addOnMonthlyPrice: row.addOnMonthlyPrice,
+        };
+      });
+      return {
+        id: editData.package.id,
+        packageName: document.getElementById('pkg-name').value.trim(),
+        packageCode: document.getElementById('pkg-code').value.trim().toLowerCase(),
+        monthlyPrice: document.getElementById('pkg-monthly').value === '' ? null : Number(document.getElementById('pkg-monthly').value),
+        setupFee: document.getElementById('pkg-setup').value === '' ? null : Number(document.getElementById('pkg-setup').value),
+        description: document.getElementById('pkg-desc').value.trim(),
+        sortOrder: parseInt(document.getElementById('pkg-sort').value, 10) || 999,
+        active: document.getElementById('pkg-active').checked,
+        grid,
+      };
+    }
+
+    function checkDirty() {
+      const current = JSON.stringify(captureForm());
+      setDirty(current !== initialSnapshot);
+    }
+
+    function backToList() {
+      if (isDirty && !confirm('You have unsaved changes. Discard them?')) return;
+      document.getElementById('edit-view').hidden = true;
+      document.getElementById('list-view').hidden = false;
+      editData = null;
+      initialSnapshot = null;
+      setDirty(false);
+      loadList();
+    }
+
+    async function savePackage() {
+      const payload = captureForm();
+
+      // Client-side validation
+      if (!/^[a-z][a-z0-9-]{2,40}$/.test(payload.packageCode)) {
+        showToast('Package code must be lowercase, 3–40 chars', 'error');
+        return;
+      }
+      if (payload.packageName.length < 2) {
+        showToast('Package name required', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      try {
+        const r = await fetch('/api/admin/packages/save', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          const msg = data.errors?.join(' · ') || data.detail || data.error || 'Save failed';
+          showToast(msg, 'error');
+          return;
+        }
+        showToast(`Saved · ${data.summary.created} added, ${data.summary.updated} updated, ${data.summary.deleted} removed`, 'success');
+        // Re-fetch to get fresh joinIds for newly created rows
+        await openEdit(payload.id);
+      } catch (err) {
+        console.error(err);
+        showToast('Network error. Try again.', 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Save package';
+      }
+    }
+
+    function discardChanges() {
+      if (!isDirty) return;
+      if (!confirm('Discard all unsaved changes to this package?')) return;
+      renderEdit();
+    }
+
+    // ─── Bind ─────────────────────────────────────────────────────────
+    document.getElementById('back-btn').addEventListener('click', backToList);
+    document.getElementById('save-btn').addEventListener('click', savePackage);
+    document.getElementById('discard-btn').addEventListener('click', discardChanges);
+
+    // Warn before leaving if dirty
+    window.addEventListener('beforeunload', (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // ─── Boot ─────────────────────────────────────────────────────────
+    loadList();
+  </script>
+</body>
+</html>
