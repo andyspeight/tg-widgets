@@ -106,7 +106,8 @@ export async function requireAuth(req, res) {
   // Resolve current permissions. These come from the cache (30s TTL) so
   // hot paths don't all hit Airtable, but a freshly-granted permission
   // takes effect within seconds.
-  const permissions = await resolveUserPermissions(userRec.id);
+  const userEmail = f[USERS.fields.email] || '';
+  const permissions = await resolveUserPermissions(userRec.id, userEmail);
 
   return {
     userRecordId: userRec.id,
