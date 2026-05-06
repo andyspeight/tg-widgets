@@ -10,18 +10,40 @@
  *   6. Return jsonOk / jsonError
  */
 
-// CORS — auth routes are called from the dashboard / sign-in page only.
+// CORS — auth routes are called from sign-in pages and product front-ends.
 // Allowlist explicitly. We never use '*' here.
-const ALLOWED_ORIGINS = [
-  'https://tg-widgets.vercel.app',
+//
+// Trusted production hosts: any *.travelify.io subdomain. Each product gets
+// its own subdomain (id, widgets, marketing, chat, trends) so the cookie
+// can be scoped to the parent domain.
+//
+// Vercel preview URLs are accepted for testing.
+const ALLOWED_ORIGINS = new Set([
+  'https://travelify.io',
   'https://widgets.travelify.io',
+  'https://id.travelify.io',
+  'https://marketing.travelify.io',
+  'https://chat.travelify.io',
+  'https://trends.travelify.io',
+  'https://tg-widgets.vercel.app',
+  'https://luna-marketing.vercel.app',
+  'https://luna-chat-endpoint.vercel.app',
+  'https://luna-trends.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173'
-];
+]);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  // Allow any Vercel preview deploy on this org
+  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return true;
+  return false;
+}
 
 export function setCors(req, res) {
   const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+  if (origin && isAllowedOrigin(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }
