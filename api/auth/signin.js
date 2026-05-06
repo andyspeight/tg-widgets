@@ -96,7 +96,7 @@ export default async function handler(req, res) {
   // We embed these in the JWT so any product API can validate access without
   // hitting Airtable on every call. Permissions table is queried server-side
   // here only.
-  const permissions = await resolveUserPermissions(userRec.id, { bypassCache: true });
+  const permissions = await resolveUserPermissions(userRec.id, email, { bypassCache: true });
 
   const sessionId = uuid();
   const { token, jti, expiresAt } = signSessionToken({
