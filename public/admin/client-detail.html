@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Client · Travelgenix Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-primary: #1B2B5B; --tg-primary-light: #2A3F7A; --tg-primary-dark: #111D3E;
+      --tg-accent: #00B4D8; --tg-accent-light: #48CAE4; --tg-accent-dark: #0096B7;
+      --tg-success: #10B981; --tg-warning: #F59E0B; --tg-error: #EF4444; --tg-info: #3B82F6;
+      --tg-bg-primary: #FFFFFF; --tg-bg-secondary: #F8FAFC; --tg-bg-tertiary: #F1F5F9;
+      --tg-border: #E2E8F0; --tg-border-light: #F1F5F9;
+      --tg-text-primary: #0F172A; --tg-text-secondary: #475569; --tg-text-tertiary: #94A3B8;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
+      --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+    }
+    [data-theme="dark"] {
+      --tg-bg-primary: #0F172A; --tg-bg-secondary: #1E293B; --tg-bg-tertiary: #334155;
+      --tg-border: #334155; --tg-border-light: #1E293B;
+      --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1; --tg-text-tertiary: #64748B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px; line-height: 1.6;
+      color: var(--tg-text-primary);
+      background: var(--tg-bg-secondary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-6) var(--space-12); }
+
+    .breadcrumb {
+      padding-top: var(--space-6);
+      margin-bottom: var(--space-3);
+    }
+    .breadcrumb a {
+      color: var(--tg-text-secondary);
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: var(--space-2);
+    }
+    .breadcrumb a:hover { color: var(--tg-text-primary); }
+
+    .detail-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+    .detail-header h1 {
+      font-size: 28px; font-weight: 700; margin: 0 0 var(--space-1);
+      letter-spacing: -0.02em;
+    }
+    .detail-header .meta {
+      display: flex; gap: var(--space-3); align-items: center;
+      flex-wrap: wrap;
+      color: var(--tg-text-secondary);
+      font-size: 14px;
+    }
+    .meta a { color: var(--tg-accent-dark); text-decoration: none; }
+    .meta a:hover { text-decoration: underline; }
+    [data-theme="dark"] .meta a { color: var(--tg-accent-light); }
+
+    .pkg-pill {
+      display: inline-block; font-size: 12px; font-weight: 500;
+      padding: 4px 10px; border-radius: 4px;
+      background: var(--tg-bg-tertiary); color: var(--tg-text-secondary);
+    }
+    .pkg-pill[data-pkg="Spark"] { background: rgba(245, 158, 11, 0.12); color: var(--tg-warning); }
+    .pkg-pill[data-pkg="Boost"] { background: rgba(0, 180, 216, 0.12); color: var(--tg-accent-dark); }
+    .pkg-pill[data-pkg="Ignite"] { background: rgba(239, 68, 68, 0.12); color: var(--tg-error); }
+    .pkg-pill[data-pkg="Bespoke"] { background: rgba(27, 43, 91, 0.12); color: var(--tg-primary); }
+
+    .status-pill {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .status-pill::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      display: inline-block;
+    }
+    .status-active { background: rgba(16, 185, 129, 0.12); color: var(--tg-success); }
+    .status-active::before { background: var(--tg-success); }
+    .status-trial { background: rgba(59, 130, 246, 0.12); color: var(--tg-info); }
+    .status-trial::before { background: var(--tg-info); }
+
+    .sub-tabs {
+      display: flex; gap: var(--space-1);
+      border-bottom: 1px solid var(--tg-border);
+      margin-bottom: var(--space-6);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .sub-tabs::-webkit-scrollbar { display: none; }
+    .sub-tab {
+      padding: var(--space-3) var(--space-4);
+      font-size: 14px; font-weight: 500;
+      color: var(--tg-text-secondary);
+      cursor: pointer; border: none; background: transparent;
+      border-bottom: 2px solid transparent;
+      font-family: inherit;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .sub-tab:hover { color: var(--tg-text-primary); }
+    .sub-tab[aria-selected="true"] {
+      color: var(--tg-primary);
+      border-bottom-color: var(--tg-accent);
+      font-weight: 600;
+    }
+    [data-theme="dark"] .sub-tab[aria-selected="true"] { color: var(--tg-text-primary); }
+
+    .panel {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--space-4);
+    }
+    .panel-header {
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--tg-border);
+      background: var(--tg-bg-secondary);
+    }
+    .panel-header h2 { font-size: 14px; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
+    .panel-header p { font-size: 12px; color: var(--tg-text-secondary); margin: 2px 0 0; }
+    .panel-body { padding: var(--space-5); }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-5) var(--space-6);
+    }
+    .field-display {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .field-display .label {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--tg-text-tertiary);
+    }
+    .field-display .value {
+      color: var(--tg-text-primary);
+      font-size: 15px;
+      word-break: break-word;
+    }
+    .field-display .value.empty {
+      color: var(--tg-text-tertiary);
+      font-style: italic;
+    }
+    .field-display .value.mono {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 14px;
+    }
+
+    .cat-section { border-bottom: 1px solid var(--tg-border); }
+    .cat-section:last-child { border-bottom: none; }
+    .cat-section-header {
+      padding: var(--space-3) var(--space-5);
+      background: var(--tg-bg-secondary);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .cat-section-header h3 {
+      margin: 0; font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--tg-text-secondary);
+    }
+    .ent-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-5);
+      border-bottom: 1px solid var(--tg-border-light);
+    }
+    .ent-row:last-child { border-bottom: none; }
+    .ent-row-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .ent-row-name { font-weight: 500; font-size: 14px; color: var(--tg-text-primary); }
+    .ent-row-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--tg-text-tertiary); }
+
+    .ent-source {
+      font-size: 11px; font-weight: 500;
+      padding: 2px 8px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--tg-text-tertiary);
+      background: var(--tg-bg-tertiary);
+    }
+    .ent-source[data-src="Package Default"] { background: rgba(0, 180, 216, 0.12); color: var(--tg-accent-dark); }
+    .ent-source[data-src="Manual Override"] { background: rgba(245, 158, 11, 0.12); color: var(--tg-warning); }
+    .ent-source[data-src="Add-On"] { background: rgba(16, 185, 129, 0.12); color: var(--tg-success); }
+
+    .ent-state {
+      font-weight: 600; font-size: 13px;
+      min-width: 80px; text-align: right;
+    }
+    .ent-on { color: var(--tg-success); }
+    .ent-off { color: var(--tg-text-tertiary); }
+
+    .users-table { width: 100%; border-collapse: collapse; }
+    .users-table th {
+      text-align: left;
+      padding: var(--space-3) var(--space-5);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--tg-text-tertiary);
+      background: var(--tg-bg-secondary);
+      border-bottom: 1px solid var(--tg-border);
+    }
+    .users-table td {
+      padding: var(--space-3) var(--space-5);
+      border-bottom: 1px solid var(--tg-border-light);
+      vertical-align: middle;
+      font-size: 14px;
+    }
+    .users-table tr:last-child td { border-bottom: none; }
+    .role-pill {
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      background: var(--tg-bg-tertiary);
+      color: var(--tg-text-secondary);
+    }
+    .role-pill[data-role="owner"] { background: rgba(27, 43, 91, 0.12); color: var(--tg-primary); }
+    .role-pill[data-role="admin"] { background: rgba(0, 180, 216, 0.12); color: var(--tg-accent-dark); }
+    [data-theme="dark"] .role-pill[data-role="owner"] { color: var(--tg-text-primary); }
+
+    .center-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: var(--space-12) var(--space-6);
+      text-align: center; color: var(--tg-text-secondary);
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--tg-border); border-top-color: var(--tg-accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin-bottom: var(--space-3);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+    .placeholder-banner {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px dashed var(--tg-warning);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      font-size: 13px;
+      color: var(--tg-warning);
+      margin-bottom: var(--space-4);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/admin/clients.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Back to all clients
+      </a>
+    </div>
+
+    <div id="content">
+      <div class="center-state">
+        <div class="spinner" role="status" aria-label="Loading client"></div>
+        <p>Loading client&hellip;</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'theme') {
+        document.documentElement.setAttribute('data-theme', e.data.value);
+      }
+    });
+    try {
+      const parentTheme = parent.document.documentElement.getAttribute('data-theme');
+      if (parentTheme) document.documentElement.setAttribute('data-theme', parentTheme);
+    } catch {}
+
+    let clientData = null;
+    let currentTab = 'overview';
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      })[c]);
+    }
+    function fmtMoney(n) {
+      if (n == null) return '—';
+      return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      } catch { return '—'; }
+    }
+    function fmtDateTime(iso) {
+      if (!iso) return '—';
+      try {
+        const d = new Date(iso);
+        return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } catch { return '—'; }
+    }
+    function statusClass(status) {
+      const s = String(status).toLowerCase();
+      if (s === 'active') return 'status-active';
+      if (s === 'trial') return 'status-trial';
+      return 'status-active';
+    }
+
+    async function loadClient() {
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) {
+        document.getElementById('content').innerHTML = `
+          <div class="panel"><div class="panel-body">
+            <p>No client id provided. <a href="/admin/clients.html">Back to clients list</a></p>
+          </div></div>`;
+        return;
+      }
+
+      try {
+        const r = await fetch('/api/admin/clients/get?id=' + encodeURIComponent(id), { credentials: 'include' });
+        if (r.status === 404) {
+          document.getElementById('content').innerHTML = `
+            <div class="panel"><div class="panel-body">
+              <h2 style="margin:0 0 8px;">Client not found</h2>
+              <p>That client may have been deleted. <a href="/admin/clients.html">Back to clients list</a></p>
+            </div></div>`;
+          return;
+        }
+        if (!r.ok) throw new Error('get failed: ' + r.status);
+        clientData = await r.json();
+        renderHeader();
+        renderTab(currentTab);
+      } catch (err) {
+        console.error('[client-detail] load failed', err);
+        document.getElementById('content').innerHTML = `
+          <div class="panel"><div class="panel-body">
+            <h2 style="margin:0 0 8px;">Could not load client</h2>
+            <p>Try reloading the page. If this keeps happening, check the API logs.</p>
+          </div></div>`;
+      }
+    }
+
+    function renderHeader() {
+      const c = clientData.client;
+      const pkg = clientData.package;
+      const display = c.tradingName || c.clientName || '(unnamed client)';
+
+      document.getElementById('content').innerHTML = `
+        <div class="detail-header">
+          <div>
+            <h1>${escapeHtml(display)}</h1>
+            <div class="meta">
+              ${c.tradingName && c.clientName !== c.tradingName
+                ? `<span>Legal name: ${escapeHtml(c.clientName)}</span> ·` : ''}
+              ${c.websiteUrl ? `<a href="${escapeHtml(c.websiteUrl)}" target="_blank" rel="noopener">${escapeHtml(c.websiteUrl.replace(/^https?:\/\//, ''))}</a>` : ''}
+              ${c.status ? `<span class="status-pill ${statusClass(c.status)}">${escapeHtml(c.status)}</span>` : ''}
+              ${pkg ? `<span class="pkg-pill" data-pkg="${escapeHtml(pkg.name)}">${escapeHtml(pkg.name)}</span>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="placeholder-banner">
+          <strong>Read-only view.</strong> Edit support arrives in Phase 3 — for now this shows everything captured at onboarding. Use the Packages tab if you need to update package defaults.
+        </div>
+
+        <div class="sub-tabs" role="tablist">
+          <button class="sub-tab" role="tab" data-tab="overview" aria-selected="true" type="button">Overview</button>
+          <button class="sub-tab" role="tab" data-tab="entitlements" aria-selected="false" type="button">
+            Entitlements <span style="opacity:0.6;font-weight:400;">(${clientData.entitlements.filter(e => e.enabled).length})</span>
+          </button>
+          <button class="sub-tab" role="tab" data-tab="users" aria-selected="false" type="button">
+            Users <span style="opacity:0.6;font-weight:400;">(${clientData.users.length})</span>
+          </button>
+        </div>
+
+        <div id="tab-content"></div>
+      `;
+
+      document.querySelectorAll('.sub-tab').forEach(t => {
+        t.addEventListener('click', () => {
+          currentTab = t.dataset.tab;
+          document.querySelectorAll('.sub-tab').forEach(x =>
+            x.setAttribute('aria-selected', String(x.dataset.tab === currentTab)));
+          renderTab(currentTab);
+        });
+      });
+    }
+
+    function renderTab(tab) {
+      const tc = document.getElementById('tab-content');
+      if (tab === 'overview') tc.innerHTML = renderOverview();
+      else if (tab === 'entitlements') tc.innerHTML = renderEntitlements();
+      else if (tab === 'users') tc.innerHTML = renderUsers();
+    }
+
+    function renderOverview() {
+      const c = clientData.client;
+      const pkg = clientData.package;
+
+      const fld = (label, value, opts = {}) => `
+        <div class="field-display">
+          <span class="label">${escapeHtml(label)}</span>
+          <span class="value ${value ? (opts.mono ? 'mono' : '') : 'empty'}">${value ? escapeHtml(value) : '—'}</span>
+        </div>`;
+
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>Company</h2>
+          </header>
+          <div class="panel-body">
+            <div class="field-grid">
+              ${fld('Legal name', c.clientName)}
+              ${fld('Trading name', c.tradingName)}
+              ${fld('Website', c.websiteUrl)}
+              ${fld('Status', c.status)}
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <header class="panel-header">
+            <h2>Primary contact</h2>
+          </header>
+          <div class="panel-body">
+            <div class="field-grid">
+              ${fld('Name', c.primaryContactName)}
+              ${fld('Email', c.primaryEmail, { mono: true })}
+              ${fld('Phone', c.primaryContactPhone)}
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <header class="panel-header">
+            <h2>Package &amp; pricing</h2>
+          </header>
+          <div class="panel-body">
+            <div class="field-grid">
+              ${fld('Package', pkg?.name)}
+              ${fld('MRR', c.mrr != null ? fmtMoney(c.mrr) : null)}
+              ${fld('Setup fee charged', c.setupFeeCharged != null ? fmtMoney(c.setupFeeCharged) : null)}
+              ${fld('Setup date', fmtDate(c.setupDate))}
+              ${fld('Go-live date', fmtDate(c.goLiveDate))}
+              ${fld('Created', fmtDateTime(c.createdAt))}
+              ${fld('Last login', fmtDateTime(c.lastLogin))}
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <header class="panel-header">
+            <h2>Travelify integration</h2>
+            <p>IDs used for deep links and mid-office handoff.</p>
+          </header>
+          <div class="panel-body">
+            <div class="field-grid">
+              ${fld('App ID', c.travelifyAppId, { mono: true })}
+              ${fld('Site ID', c.travelifySiteId, { mono: true })}
+            </div>
+          </div>
+        </div>
+
+        ${c.notes ? `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>Notes</h2>
+          </header>
+          <div class="panel-body">
+            <div style="white-space: pre-wrap; line-height: 1.6;">${escapeHtml(c.notes)}</div>
+          </div>
+        </div>` : ''}
+      `;
+    }
+
+    function renderEntitlements() {
+      const enabledTotal = clientData.entitlements.filter(e => e.enabled).length;
+      if (enabledTotal === 0) {
+        return `
+          <div class="panel">
+            <div class="center-state">
+              <h3 style="margin:0 0 8px;color:var(--tg-text-primary);">No entitlements yet</h3>
+              <p>This client has no enabled products. Once they're onboarded with a package, their entitlements appear here.</p>
+            </div>
+          </div>`;
+      }
+
+      const sectionsHtml = clientData.categoryOrder.map(cat => {
+        const items = clientData.entitlementsByCategory[cat] || [];
+        const enabled = items.filter(i => i.enabled);
+        if (enabled.length === 0) return '';
+
+        return `
+          <section class="cat-section">
+            <header class="cat-section-header">
+              <h3>${escapeHtml(cat)}</h3>
+              <span style="font-size: 11px; color: var(--tg-text-tertiary);">${enabled.length} of ${items.length} enabled</span>
+            </header>
+            ${items.map(item => `
+              <div class="ent-row">
+                <div class="ent-row-meta">
+                  <div class="ent-row-name">${escapeHtml(item.productName)}</div>
+                  <div class="ent-row-code">${escapeHtml(item.productCode)}</div>
+                </div>
+                <span class="ent-source" data-src="${escapeHtml(item.source)}">${escapeHtml(item.source || '—')}</span>
+                <span class="ent-state ${item.enabled ? 'ent-on' : 'ent-off'}">${item.enabled ? 'On' : 'Off'}</span>
+              </div>
+            `).join('')}
+          </section>
+        `;
+      }).join('');
+
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>Product access</h2>
+            <p>Every catalogue item, with this client's current state. Source shows whether each entitlement came from the package default or a manual override.</p>
+          </header>
+          ${sectionsHtml}
+        </div>
+      `;
+    }
+
+    function renderUsers() {
+      const users = clientData.users;
+      if (users.length === 0) {
+        return `
+          <div class="panel">
+            <div class="center-state">
+              <h3 style="margin:0 0 8px;color:var(--tg-text-primary);">No users yet</h3>
+              <p>No-one has been invited to this client's account yet. Invites can be sent from the New Client wizard or the Users tab once it's enabled in Phase 3.</p>
+            </div>
+          </div>`;
+      }
+
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <h2>Users</h2>
+            <p>People with access to this client's workspace.</p>
+          </header>
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last login</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${users.map(u => `
+                <tr>
+                  <td>${escapeHtml(u.fullName || '(no name set)')}</td>
+                  <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">${escapeHtml(u.email)}</td>
+                  <td><span class="role-pill" data-role="${escapeHtml(u.role)}">${escapeHtml(u.role || 'unknown')}</span></td>
+                  <td>${escapeHtml(u.status || '—')}</td>
+                  <td>${fmtDateTime(u.lastLogin)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    loadClient();
+  </script>
+</body>
+</html>
