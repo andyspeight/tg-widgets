@@ -1,57 +1,21 @@
 /**
  * POST /api/admin/clients/create
  *
- * The New Client wizard's submit endpoint. Creates the full client record set
- * in this order, transactionally-ish (best-effort rollback on early failure):
+ * The New Client wizard's submit endpoint. Creates the full client record set:
  *
  *   1. Validate every field
- *   2. Re-check uniqueness (defence in depth — pre-flight could be stale)
- *   3. Create the Client record in the Clients table
+ *   2. Re-check uniqueness (defence in depth)
+ *   3. Create the Client record
  *   4. Create Client Entitlement rows (one per enabled product)
- *   5. Send invite email 1: primary contact → widget_suite admin role
- *   6. (If applicable) Send invite email 2: agent → luna_chat agent role
+ *   5. Grant Permissions: one row per unique Product slug that the client's
+ *      enabled entitlements map to. The primary contact User gets these.
+ *      This is what makes them able to actually access each product.
+ *   6. Send invite email to primary contact (widget_suite admin role)
+ *   7. (If applicable) Send invite email to separate Luna Chat agent
  *
  * Note: Luna Chat client record creation in the Knowledge Bot base is
  * deferred to a later phase. This endpoint stores the lunaChat config object
  * on the Client's notes field for now so it's not lost.
- *
- * Body:
- *   {
- *     // Step 1 — company
- *     companyName, tradingName?, websiteUrl,
- *     travelifyAppId?, travelifySiteId?,
- *
- *     // Primary contact
- *     primaryContactName, primaryContactEmail, primaryContactPhone?,
- *
- *     // Step 2 — package & pricing
- *     packageId, mrr, setupFee, setupDate, goLiveDate?,
- *
- *     // Step 3 — entitlements (only enabled ones, with sources)
- *     entitlements: [
- *       { catalogueItemId, source: 'Package Default' | 'Manual Override' | 'Add-On' }
- *     ],
- *
- *     // Step 4 — Luna Chat (optional, only present if Luna Chat is enabled)
- *     lunaChat?: {
- *       knowledgeBaseName,
- *       brandColor, accentColor,
- *       welcomeMessage,
- *       useContactForAgent: boolean,    // if true, agent invite uses primary contact
- *       agentName?: string,              // only if useContactForAgent is false
- *       agentEmail?: string,             // only if useContactForAgent is false
- *     }
- *   }
- *
- * Response:
- *   {
- *     ok: true,
- *     clientId: 'recXXX',
- *     entitlementsCreated: number,
- *     invites: [
- *       { kind: 'primary' | 'agent', email, ok: boolean, alreadyMember?, error? }
- *     ]
- *   }
  *
  * Auth: widget_suite owner or admin.
  */
@@ -78,6 +42,22 @@ const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 const VALID_SOURCES = new Set(['Package Default', 'Manual Override', 'Add-On']);
 
+// Map a product slug → the role we grant the primary contact User on that
+// product. This codifies the meaning of each role:
+//   - widget_suite → client_owner (they own their workspace)
+//   - luna_chat    → agent (they're an agent on their Luna Chat dashboard)
+//   - luna_marketing → client_user (they use the marketing tool)
+// Other slugs default to client_user.
+const PRODUCT_ROLE_FOR_PRIMARY = {
+  [PRODUCTS.slugs.WIDGET_SUITE]: PERMISSIONS.roles.CLIENT_OWNER,
+  [PRODUCTS.slugs.LUNA_CHAT]: PERMISSIONS.roles.AGENT,
+  [PRODUCTS.slugs.LUNA_MARKETING]: PERMISSIONS.roles.CLIENT_USER,
+  [PRODUCTS.slugs.LUNA_BRAIN]: PERMISSIONS.roles.CLIENT_USER,
+  [PRODUCTS.slugs.LUNA_TRENDS]: PERMISSIONS.roles.CLIENT_USER,
+  [PRODUCTS.slugs.LUNA_QA]: PERMISSIONS.roles.CLIENT_USER,
+  [PRODUCTS.slugs.TOOL_HUB]: PERMISSIONS.roles.CLIENT_USER,
+};
+
 function normaliseEmail(s) {
   return String(s || '').trim().toLowerCase();
 }
@@ -101,11 +81,6 @@ function isValidIsoDate(s) {
   if (!s) return false;
   const d = new Date(s);
   return !isNaN(d.getTime());
-}
-function chunk(arr, n) {
-  const out = [];
-  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
-  return out;
 }
 
 export default async function handler(req, res) {
@@ -138,61 +113,38 @@ export default async function handler(req, res) {
   if (companyName.length < 2 || companyName.length > 120) {
     errors.push('companyName must be 2–120 characters');
   }
-
   const tradingName = body.tradingName == null ? '' : String(body.tradingName).trim();
   if (tradingName.length > 120) errors.push('tradingName max 120 chars');
 
   const websiteUrlRaw = String(body.websiteUrl || '').trim();
-  if (!isValidUrl(websiteUrlRaw)) {
-    errors.push('websiteUrl must be a valid URL');
-  }
+  if (!isValidUrl(websiteUrlRaw)) errors.push('websiteUrl must be a valid URL');
   const websiteUrl = websiteUrlRaw.startsWith('http')
     ? websiteUrlRaw
     : 'https://' + websiteUrlRaw;
 
   const travelifyAppId = String(body.travelifyAppId || '').trim();
   const travelifySiteId = String(body.travelifySiteId || '').trim();
-  if (travelifyAppId && !/^\d{1,10}$/.test(travelifyAppId)) {
-    errors.push('travelifyAppId must be numeric, up to 10 digits');
-  }
-  if (travelifySiteId && !/^\d{1,10}$/.test(travelifySiteId)) {
-    errors.push('travelifySiteId must be numeric, up to 10 digits');
-  }
+  if (travelifyAppId && !/^\d{1,10}$/.test(travelifyAppId)) errors.push('travelifyAppId must be numeric, up to 10 digits');
+  if (travelifySiteId && !/^\d{1,10}$/.test(travelifySiteId)) errors.push('travelifySiteId must be numeric, up to 10 digits');
 
   const primaryContactName = String(body.primaryContactName || '').trim();
-  if (primaryContactName.length < 2 || primaryContactName.length > 120) {
-    errors.push('primaryContactName must be 2–120 characters');
-  }
+  if (primaryContactName.length < 2 || primaryContactName.length > 120) errors.push('primaryContactName must be 2–120 characters');
 
   const primaryContactEmail = normaliseEmail(body.primaryContactEmail);
-  if (!isValidEmail(primaryContactEmail)) {
-    errors.push('primaryContactEmail must be a valid email');
-  }
+  if (!isValidEmail(primaryContactEmail)) errors.push('primaryContactEmail must be a valid email');
 
   const primaryContactPhone = String(body.primaryContactPhone || '').trim();
   if (primaryContactPhone.length > 40) errors.push('primaryContactPhone max 40 chars');
 
-  // Step 2
-  if (!REC_ID_RE.test(body.packageId || '')) {
-    errors.push('packageId must be a valid record id');
-  }
+  if (!REC_ID_RE.test(body.packageId || '')) errors.push('packageId must be a valid record id');
   const mrr = body.mrr == null || body.mrr === '' ? null : Number(body.mrr);
-  if (mrr !== null && (!Number.isFinite(mrr) || mrr < 0 || mrr > 100000)) {
-    errors.push('mrr must be 0–100000');
-  }
+  if (mrr !== null && (!Number.isFinite(mrr) || mrr < 0 || mrr > 100000)) errors.push('mrr must be 0–100000');
   const setupFee = body.setupFee == null || body.setupFee === '' ? null : Number(body.setupFee);
-  if (setupFee !== null && (!Number.isFinite(setupFee) || setupFee < 0 || setupFee > 100000)) {
-    errors.push('setupFee must be 0–100000');
-  }
+  if (setupFee !== null && (!Number.isFinite(setupFee) || setupFee < 0 || setupFee > 100000)) errors.push('setupFee must be 0–100000');
   if (!isValidIsoDate(body.setupDate)) errors.push('setupDate must be a valid date');
-  if (body.goLiveDate && !isValidIsoDate(body.goLiveDate)) {
-    errors.push('goLiveDate must be a valid date if provided');
-  }
+  if (body.goLiveDate && !isValidIsoDate(body.goLiveDate)) errors.push('goLiveDate must be a valid date if provided');
 
-  // Step 3 — entitlements
-  if (!Array.isArray(body.entitlements)) {
-    errors.push('entitlements must be an array');
-  }
+  if (!Array.isArray(body.entitlements)) errors.push('entitlements must be an array');
   const entitlements = Array.isArray(body.entitlements) ? body.entitlements : [];
   for (const e of entitlements) {
     if (!REC_ID_RE.test(e?.catalogueItemId || '')) {
@@ -205,7 +157,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // Step 4 — Luna Chat (optional but validated if present)
   let lunaChatPayload = null;
   if (body.lunaChat) {
     const lc = body.lunaChat;
@@ -231,52 +182,39 @@ export default async function handler(req, res) {
     }
   }
 
-  if (errors.length) {
-    return jsonError(res, 400, 'validation_failed', errors.join(' · '));
-  }
+  if (errors.length) return jsonError(res, 400, 'validation_failed', errors.join(' · '));
 
   // ─── Server-side uniqueness re-check ─────────────────────────────
   let pkgRecord;
+  let allCatalogue;
+  let allProducts;
   try {
     pkgRecord = await getRecord(PACKAGES.tableId, body.packageId).catch((err) => {
       if (err?.status === 404) return null;
       throw err;
     });
-    if (!pkgRecord) {
-      return jsonError(res, 400, 'package_not_found', 'Selected package does not exist');
-    }
+    if (!pkgRecord) return jsonError(res, 400, 'package_not_found', 'Selected package does not exist');
 
-    const [clients, users] = await Promise.all([
+    const [clients, users, catalogue, products] = await Promise.all([
       listAllRecords(CLIENTS.tableId),
       listAllRecords(USERS.tableId),
+      listAllRecords(CATALOGUE.tableId),
+      listAllRecords(PRODUCTS.tableId),
     ]);
+    allCatalogue = catalogue;
+    allProducts = products;
 
     const websiteNorm = normaliseUrl(websiteUrl);
     const conflicts = [];
-
-    if (clients.find((c) => normaliseEmail(c.fields[CLIENTS.fields.email]) === primaryContactEmail)) {
-      conflicts.push('A client already uses this primary email');
-    }
-    if (users.find((u) => normaliseEmail(u.fields[USERS.fields.email]) === primaryContactEmail)) {
-      conflicts.push('A user with the primary contact email already exists');
-    }
-    if (websiteNorm && clients.find((c) => normaliseUrl(c.fields[CLIENTS.fields.websiteUrl]) === websiteNorm)) {
-      conflicts.push('A client with this website already exists');
-    }
-    if (travelifyAppId && clients.find((c) =>
-      String(c.fields[CLIENTS.fields.travelifyAppId] || '').trim() === travelifyAppId)) {
-      conflicts.push('A client with this Travelify App ID already exists');
-    }
+    if (clients.find((c) => normaliseEmail(c.fields[CLIENTS.fields.email]) === primaryContactEmail)) conflicts.push('A client already uses this primary email');
+    if (users.find((u) => normaliseEmail(u.fields[USERS.fields.email]) === primaryContactEmail)) conflicts.push('A user with the primary contact email already exists');
+    if (websiteNorm && clients.find((c) => normaliseUrl(c.fields[CLIENTS.fields.websiteUrl]) === websiteNorm)) conflicts.push('A client with this website already exists');
+    if (travelifyAppId && clients.find((c) => String(c.fields[CLIENTS.fields.travelifyAppId] || '').trim() === travelifyAppId)) conflicts.push('A client with this Travelify App ID already exists');
     if (lunaChatPayload && !lunaChatPayload.useContact) {
       const ae = lunaChatPayload.agentEmail;
-      if (users.find((u) => normaliseEmail(u.fields[USERS.fields.email]) === ae)) {
-        conflicts.push('A user with the Luna Chat agent email already exists');
-      }
+      if (users.find((u) => normaliseEmail(u.fields[USERS.fields.email]) === ae)) conflicts.push('A user with the Luna Chat agent email already exists');
     }
-
-    if (conflicts.length) {
-      return jsonError(res, 409, 'conflict', conflicts.join(' · '));
-    }
+    if (conflicts.length) return jsonError(res, 409, 'conflict', conflicts.join(' · '));
   } catch (err) {
     console.error('[admin/clients/create] uniqueness check failed:', err);
     return jsonError(res, 500, 'internal_error', 'Could not verify uniqueness');
@@ -303,9 +241,6 @@ export default async function handler(req, res) {
       [CLIENTS.fields.createdAt]:           new Date().toISOString(),
     };
 
-    // Stash Luna Chat config in notes for now — we'll move it to a proper
-    // table/fields when we implement the Knowledge Bot integration in a
-    // later phase.
     if (lunaChatPayload) {
       clientFields[CLIENTS.fields.notes] =
         '[Luna Chat config captured at onboarding]\n' +
@@ -322,10 +257,6 @@ export default async function handler(req, res) {
   const nowIso = new Date().toISOString();
 
   // ─── 2. Create entitlement rows ──────────────────────────────────
-  // Each entitlement row stores: client link, catalogue link, enabled=true,
-  // source, activatedDate. We use createRecord one at a time because the
-  // existing airtable helper doesn't have a bulkCreate yet. Volume is
-  // bounded (~15-20 per client) so this is fine.
   let entitlementsCreated = 0;
   try {
     for (const e of entitlements) {
@@ -342,8 +273,6 @@ export default async function handler(req, res) {
     }
   } catch (err) {
     console.error('[admin/clients/create] entitlement creation partial-failed:', err);
-    // Don't roll back — the Client and any entitlements created are valid.
-    // The admin can fix from the detail view later.
     return res.status(207).json({
       ok: false,
       clientId,
@@ -353,10 +282,11 @@ export default async function handler(req, res) {
     });
   }
 
-  // ─── 3. Send invites ─────────────────────────────────────────────
+  // ─── 3. Send the primary invite first (creates the User row) ─────
+  // We need the User's record id to create Permission rows.
   const inviteResults = [];
+  let primaryUserRecordId = null;
 
-  // Invite 1: primary contact → widget_suite admin
   try {
     const r = await sendAdminInvite({
       email: primaryContactEmail,
@@ -366,6 +296,7 @@ export default async function handler(req, res) {
       fullName: primaryContactName,
       inviterName: ctx.fullName || ctx.email,
     });
+    primaryUserRecordId = r.userRecordId;
     inviteResults.push({
       kind: 'primary',
       email: primaryContactEmail,
@@ -383,21 +314,75 @@ export default async function handler(req, res) {
     });
   }
 
-  // Invite 2 (conditional): separate Luna Chat agent
-  // Only sent if Luna Chat is enabled AND useContactForAgent is false AND
-  // the agent email is different from the primary contact.
+  // ─── 4. Grant Permissions for unique product slugs ───────────────
+  // Build map: productSlug → product record id (from the products we loaded)
+  const productIdBySlug = new Map();
+  for (const p of allProducts) {
+    const slug = p.fields[PRODUCTS.fields.productId];
+    if (slug) productIdBySlug.set(slug, p.id);
+  }
+
+  // Build map: catalogueItemId → productSlug
+  const slugByCatalogueId = new Map();
+  for (const c of allCatalogue) {
+    const slug = c.fields[CATALOGUE.fields.productSlug];
+    if (slug) slugByCatalogueId.set(c.id, slug);
+  }
+
+  // Walk the enabled entitlements and figure out which product slugs are needed
+  const neededSlugs = new Set();
+  for (const e of entitlements) {
+    const slug = slugByCatalogueId.get(e.catalogueItemId);
+    if (slug) neededSlugs.add(slug);
+  }
+
+  // Create one Permission row per unique slug (only if we got the primary user)
+  const permissionsCreated = [];
+  if (primaryUserRecordId) {
+    for (const slug of neededSlugs) {
+      const productRecordId = productIdBySlug.get(slug);
+      if (!productRecordId) {
+        console.warn('[admin/clients/create] no Product record for slug:', slug);
+        continue;
+      }
+      const grantRole = PRODUCT_ROLE_FOR_PRIMARY[slug] || PERMISSIONS.roles.CLIENT_USER;
+      try {
+        const permRec = await createRecord(PERMISSIONS.tableId, {
+          [PERMISSIONS.fields.user]:      [primaryUserRecordId],
+          [PERMISSIONS.fields.product]:   [productRecordId],
+          [PERMISSIONS.fields.role]:      grantRole,
+          [PERMISSIONS.fields.status]:    PERMISSIONS.statuses.ACTIVE,
+          [PERMISSIONS.fields.granted]:   nowIso,
+          [PERMISSIONS.fields.grantedBy]: [ctx.userRecordId],
+          [PERMISSIONS.fields.notes]:     'Granted automatically during onboarding from package entitlements',
+        });
+        permissionsCreated.push({
+          slug,
+          role: grantRole,
+          permissionRecordId: permRec.id,
+        });
+      } catch (err) {
+        console.error('[admin/clients/create] failed creating permission for slug:', slug, err);
+        permissionsCreated.push({ slug, role: grantRole, ok: false, error: err.message });
+      }
+    }
+  }
+
+  // ─── 5. Optional: separate Luna Chat agent invite ────────────────
+  let agentUserRecordId = null;
   if (lunaChatPayload && !lunaChatPayload.useContact &&
       lunaChatPayload.agentEmail &&
       lunaChatPayload.agentEmail !== primaryContactEmail) {
     try {
       const r = await sendAdminInvite({
         email: lunaChatPayload.agentEmail,
-        role: USERS.roles.MEMBER, // Luna Chat agents are 'member' role on the user side
+        role: USERS.roles.MEMBER,
         targetClientRecordId: clientId,
         invitedByUserRecordId: ctx.userRecordId,
         fullName: lunaChatPayload.agentName,
         inviterName: ctx.fullName || ctx.email,
       });
+      agentUserRecordId = r.userRecordId;
       inviteResults.push({
         kind: 'agent',
         email: lunaChatPayload.agentEmail,
@@ -405,6 +390,29 @@ export default async function handler(req, res) {
         alreadyMember: !!r.alreadyMember,
         userRecordId: r.userRecordId,
       });
+
+      // Grant the agent the luna_chat permission only
+      const lunaChatProductId = productIdBySlug.get(PRODUCTS.slugs.LUNA_CHAT);
+      if (lunaChatProductId && agentUserRecordId) {
+        try {
+          await createRecord(PERMISSIONS.tableId, {
+            [PERMISSIONS.fields.user]:      [agentUserRecordId],
+            [PERMISSIONS.fields.product]:   [lunaChatProductId],
+            [PERMISSIONS.fields.role]:      PERMISSIONS.roles.AGENT,
+            [PERMISSIONS.fields.status]:    PERMISSIONS.statuses.ACTIVE,
+            [PERMISSIONS.fields.granted]:   nowIso,
+            [PERMISSIONS.fields.grantedBy]: [ctx.userRecordId],
+            [PERMISSIONS.fields.notes]:     'Luna Chat agent permission granted at onboarding',
+          });
+          permissionsCreated.push({
+            slug: PRODUCTS.slugs.LUNA_CHAT,
+            role: PERMISSIONS.roles.AGENT,
+            forUser: 'agent',
+          });
+        } catch (err) {
+          console.error('[admin/clients/create] failed granting agent permission:', err);
+        }
+      }
     } catch (err) {
       console.error('[admin/clients/create] agent invite failed:', err);
       inviteResults.push({
@@ -416,10 +424,9 @@ export default async function handler(req, res) {
     }
   }
 
-  // Note about Luna Chat record creation (deferred):
   if (lunaChatPayload) {
     console.log('[admin/clients/create] Luna Chat config captured for client',
-      clientId, 'but Luna Chat record creation deferred to Phase 4');
+      clientId, 'but Luna Chat record creation deferred to a later phase');
   }
 
   return res.status(200).json({
@@ -427,7 +434,8 @@ export default async function handler(req, res) {
     clientId,
     entitlementsCreated,
     invites: inviteResults,
+    permissionsCreated,
     lunaChatConfigured: !!lunaChatPayload,
-    lunaChatRecordCreated: false, // deferred
+    lunaChatRecordCreated: false,
   });
 }
