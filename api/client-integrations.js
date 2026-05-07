@@ -20,7 +20,10 @@
  *   Table: tblpzQpwmcTvUeHcF (ClientIntegrations)
  */
 
-import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
+// requireAuth now comes from the new SSO auth library (handles JWTs from id.travelify.io).
+// The other helpers still live in the legacy _auth.js until the wider migration finishes.
+import { requireAuth } from './_lib/auth/middleware.js';
+import { sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { encrypt } from './_crypto.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
@@ -173,12 +176,11 @@ export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  // Auth — same pattern as widget-list.js, widget-config.js, widget-ai.js
-  const auth = requireAuth(req);
-  if (auth.error) return res.status(auth.status).json({ error: auth.error });
-  const user = auth.user;
+  // Auth — new SSO middleware writes its own 401 response and returns null on failure.
+  const ctx = await requireAuth(req, res);
+  if (!ctx) return;
 
-  const clientEmail = (user.email || '').toLowerCase().trim();
+  const clientEmail = (ctx.email || '').toLowerCase().trim();
   if (!clientEmail) return res.status(401).json({ error: 'Authentication required' });
 
   // Rate limit per user. Reads are generous (dashboard refreshes), writes moderate.
