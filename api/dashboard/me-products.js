@@ -32,10 +32,13 @@ import {
 } from '../_lib/auth/schema.js';
 
 // Where each product lives. When the user clicks a tile, we send them here.
-// Currently most products live behind paths on widgets.travelify.io. As
-// products get split out to their own subdomains, update these.
+//
+// widget_suite → / (the existing widgets dashboard at the root URL)
+// luna_chat, luna_marketing, etc → placeholder paths that 404 until those
+//   apps get migrated onto the unified auth (Priorities 4 and 5)
+// tool_hub → /admin/ (the TG Control admin console for Travelgenix staff)
 const PRODUCT_URLS = {
-  [PRODUCTS.slugs.WIDGET_SUITE]:   '/dashboard/widgets',
+  [PRODUCTS.slugs.WIDGET_SUITE]:   '/',
   [PRODUCTS.slugs.LUNA_CHAT]:      '/dashboard/luna-chat',
   [PRODUCTS.slugs.LUNA_MARKETING]: '/dashboard/luna-marketing',
   [PRODUCTS.slugs.LUNA_BRAIN]:     '/dashboard/luna-brain',
