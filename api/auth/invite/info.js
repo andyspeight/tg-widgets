@@ -9,7 +9,6 @@
  * NOTE: this endpoint serves both real invites and migration password-reset
  * tokens. The UI uses the `mode` field to pick the right screen.
  */
-
 import {
   setCors, requireMethod, jsonOk, jsonError
 } from '../../_lib/auth/http.js';
@@ -28,7 +27,6 @@ export default async function handler(req, res) {
 
   const tokenHash = hashToken(rawToken);
   const inviteRec = await findOneByField(INVITES.tableId, INVITES.fields.tokenHash, tokenHash);
-
   if (!inviteRec) {
     return jsonError(res, 404, 'invalid_token', 'Invitation not found');
   }
@@ -37,6 +35,7 @@ export default async function handler(req, res) {
   if (inv[INVITES.fields.status] !== INVITES.statuses.PENDING) {
     return jsonError(res, 410, 'used_token', 'Invitation has already been used or revoked');
   }
+
   const expiresAt = inv[INVITES.fields.expiresAt];
   if (!expiresAt || new Date(expiresAt) < new Date()) {
     return jsonError(res, 410, 'expired_token', 'Invitation has expired');
@@ -45,7 +44,7 @@ export default async function handler(req, res) {
   const email = String(inv[INVITES.fields.email] || '').toLowerCase();
   const role = inv[INVITES.fields.role] || USERS.roles.MEMBER;
 
-  // Determine mode: existing user with hash → 'reset', existing user without → 'reset' too,
+  // Determine mode: existing user with hash → 'reset', existing user without → 'set_password',
   // no user yet → 'invite'
   const userRec = await findOneByField(USERS.tableId, USERS.fields.email, email);
   const mode = userRec && userRec.fields[USERS.fields.passwordHash] ? 'reset'
@@ -67,4 +66,6 @@ export default async function handler(req, res) {
     email,
     role,
     clientName,
-    fullName: userRec?.fields[U
+    fullName: userRec?.fields[USERS.fields.fullName] || ''
+  });
+}
