@@ -635,9 +635,36 @@
         });
         if (!r.ok) return;
         state.availability = await r.json();
-        renderCurrentStep();
+        // Update conflict warnings in-place (don't re-render the form,
+        // that wipes the user's mid-edit cursor and any unsaved fields)
+        updateAvailabilityFeedback();
+        updateFooter();
       } catch (err) {
         console.warn('[wizard] availability check failed', err);
+      }
+    }
+
+    // Update the conflict messages under inputs without rebuilding the form.
+    // Looks for elements with data-avail-key attributes and replaces their content.
+    function updateAvailabilityFeedback() {
+      const av = state.availability;
+      const updates = [
+        { id: 'avail-website', val: av.websiteUrl, prefix: '⚠ ', cls: 'field-warn' },
+        { id: 'avail-app-id', val: av.travelifyAppId, prefix: '⚠ ', cls: 'field-warn' },
+        { id: 'avail-primary-email', val: av.primaryEmail, prefix: '✕ ', cls: 'field-error' },
+        { id: 'avail-agent-email', val: av.agentEmail, prefix: '✕ ', cls: 'field-error' },
+      ];
+      for (const u of updates) {
+        const el = document.getElementById(u.id);
+        if (!el) continue;
+        if (u.val?.conflict) {
+          el.className = u.cls;
+          el.textContent = u.prefix + u.val.conflict.label;
+          el.hidden = false;
+        } else {
+          el.textContent = '';
+          el.hidden = true;
+        }
       }
     }
 
@@ -736,9 +763,9 @@
     // ─── Step 1: Company ──────────────────────────────────────────
     function renderCompany() {
       const av = state.availability;
-      const websiteWarn = av.websiteUrl?.conflict ? `<div class="field-warn">⚠ ${escapeHtml(av.websiteUrl.conflict.label)}</div>` : '';
-      const appIdWarn = av.travelifyAppId?.conflict ? `<div class="field-warn">⚠ ${escapeHtml(av.travelifyAppId.conflict.label)}</div>` : '';
-      const emailWarn = av.primaryEmail?.conflict ? `<div class="field-error">✕ ${escapeHtml(av.primaryEmail.conflict.label)}</div>` : '';
+      const websiteWarnContent = av.websiteUrl?.conflict ? `⚠ ${escapeHtml(av.websiteUrl.conflict.label)}` : '';
+      const appIdWarnContent = av.travelifyAppId?.conflict ? `⚠ ${escapeHtml(av.travelifyAppId.conflict.label)}` : '';
+      const emailErrContent = av.primaryEmail?.conflict ? `✕ ${escapeHtml(av.primaryEmail.conflict.label)}` : '';
 
       return `
         <div class="panel">
@@ -763,7 +790,7 @@
             <div class="field">
               <label for="f-website">Website URL <span class="required">*</span></label>
               <input type="url" id="f-website" value="${escapeHtml(state.websiteUrl)}" placeholder="https://acme-travel.co.uk" />
-              ${websiteWarn}
+              <div id="avail-website" class="field-warn" ${websiteWarnContent ? '' : 'hidden'}>${websiteWarnContent}</div>
             </div>
 
             <div class="section-divider">
@@ -775,7 +802,7 @@
               <div class="field">
                 <label for="f-app-id">App ID</label>
                 <input type="text" id="f-app-id" inputmode="numeric" pattern="\\d*" maxlength="10" value="${escapeHtml(state.travelifyAppId)}" placeholder="251" />
-                ${appIdWarn}
+                <div id="avail-app-id" class="field-warn" ${appIdWarnContent ? '' : 'hidden'}>${appIdWarnContent}</div>
               </div>
               <div class="field">
                 <label for="f-site-id">Site ID</label>
@@ -797,7 +824,7 @@
               <div class="field">
                 <label for="f-contact-email">Email address <span class="required">*</span></label>
                 <input type="email" id="f-contact-email" autocomplete="off" value="${escapeHtml(state.primaryContactEmail)}" placeholder="sarah@acme-travel.co.uk" />
-                ${emailWarn}
+                <div id="avail-primary-email" class="field-error" ${emailErrContent ? '' : 'hidden'}>${emailErrContent}</div>
               </div>
             </div>
 
@@ -815,6 +842,7 @@
         if (!el) return;
         el.addEventListener('input', () => {
           state[key] = el.value;
+          updateFooter();
           if (after) after();
         });
       };
@@ -913,7 +941,7 @@
       const bind = (id, key) => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.addEventListener('input', () => { state[key] = el.value; });
+        el.addEventListener('input', () => { state[key] = el.value; updateFooter(); });
       };
       bind('f-mrr', 'mrr');
       bind('f-setup-fee', 'setupFee');
@@ -1080,8 +1108,8 @@
       }
 
       const av = state.availability.agentEmail;
-      const agentEmailFeedback = av?.conflict
-        ? `<div class="field-error">✕ ${escapeHtml(av.conflict.label)}</div>`
+      const agentEmailErrContent = av?.conflict
+        ? `✕ ${escapeHtml(av.conflict.label)}`
         : '';
 
       return `
@@ -1143,7 +1171,7 @@
                   <div class="field">
                     <label for="f-agent-email">Agent email <span class="required">*</span></label>
                     <input type="email" id="f-agent-email" autocomplete="off" value="${escapeHtml(state.agentEmail)}" />
-                    ${agentEmailFeedback}
+                    <div id="avail-agent-email" class="field-error" ${agentEmailErrContent ? '' : 'hidden'}>${agentEmailErrContent}</div>
                   </div>
                 </div>
                 <div class="alert alert-warn" style="margin-bottom: 0;">A second invite email will be sent to this person.</div>
@@ -1164,6 +1192,7 @@
         if (!el) return;
         el.addEventListener('input', () => {
           state[key] = el.value;
+          updateFooter();
           if (after) after();
         });
       };
@@ -1362,6 +1391,19 @@
         </div>
       `;
     }
+    // Re-render JUST the footer without rebuilding the form fields. This
+    // updates the Next button's enabled state and the error message in the
+    // footer info area as the user types, without wiping inputs mid-edit.
+    function updateFooter() {
+      const oldFooter = document.querySelector('.footer-bar');
+      if (!oldFooter) return;
+      const wrap = document.createElement('div');
+      wrap.innerHTML = renderFooter();
+      const newFooter = wrap.querySelector('.footer-bar');
+      oldFooter.replaceWith(newFooter);
+      attachFooterHandlers();
+    }
+
     function attachFooterHandlers() {
       document.getElementById('cancel-btn')?.addEventListener('click', () => {
         if (confirm('Cancel and lose all the data you entered?')) {
