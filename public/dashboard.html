@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard · Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-primary: #1B2B5B; --tg-primary-light: #2A3F7A; --tg-primary-dark: #111D3E;
+      --tg-accent: #00B4D8; --tg-accent-light: #48CAE4; --tg-accent-dark: #0096B7;
+      --tg-success: #10B981; --tg-warning: #F59E0B; --tg-error: #EF4444; --tg-info: #3B82F6;
+      --tg-bg-primary: #FFFFFF; --tg-bg-secondary: #F8FAFC; --tg-bg-tertiary: #F1F5F9;
+      --tg-border: #E2E8F0; --tg-border-light: #F1F5F9;
+      --tg-text-primary: #0F172A; --tg-text-secondary: #475569; --tg-text-tertiary: #94A3B8;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
+      --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10);
+    }
+    [data-theme="dark"] {
+      --tg-bg-primary: #0F172A; --tg-bg-secondary: #1E293B; --tg-bg-tertiary: #334155;
+      --tg-border: #334155; --tg-border-light: #1E293B;
+      --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1; --tg-text-tertiary: #64748B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px; line-height: 1.6;
+      color: var(--tg-text-primary);
+      background: var(--tg-bg-secondary);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: var(--tg-bg-primary);
+      border-bottom: 1px solid var(--tg-border);
+      padding: 0 var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-weight: 700; font-size: 18px; color: var(--tg-primary);
+    }
+    [data-theme="dark"] .logo { color: var(--tg-accent-light); }
+    .logo-mark {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--tg-primary), var(--tg-accent));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 15px;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: var(--space-3); }
+    .user-chip {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--tg-bg-tertiary);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      color: var(--tg-text-secondary);
+    }
+    .signout-btn {
+      background: transparent;
+      border: 1px solid var(--tg-border);
+      color: var(--tg-text-secondary);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+    }
+    .signout-btn:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-12) var(--space-6) var(--space-12);
+    }
+
+    .greeting {
+      margin-bottom: var(--space-8);
+    }
+    .greeting h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 0 var(--space-2);
+      letter-spacing: -0.02em;
+    }
+    .greeting p {
+      margin: 0;
+      color: var(--tg-text-secondary);
+      font-size: 15px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .product-tile {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+      cursor: pointer;
+      transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: left;
+      font-family: inherit;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-tile::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--tg-primary), var(--tg-accent));
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
+    .product-tile:hover {
+      border-color: var(--tg-accent);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+    .product-tile:hover::after { opacity: 1; }
+    .product-tile:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2), var(--shadow-md);
+    }
+
+    .product-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .product-icon[data-slug="widget_suite"]   { background: rgba(0, 180, 216, 0.12); color: var(--tg-accent-dark); }
+    .product-icon[data-slug="luna_chat"]      { background: rgba(99, 102, 241, 0.12); color: #6366f1; }
+    .product-icon[data-slug="luna_marketing"] { background: rgba(16, 185, 129, 0.12); color: var(--tg-success); }
+    .product-icon[data-slug="luna_brain"]     { background: rgba(168, 85, 247, 0.12); color: #a855f7; }
+    .product-icon[data-slug="luna_trends"]    { background: rgba(245, 158, 11, 0.12); color: var(--tg-warning); }
+    .product-icon[data-slug="luna_qa"]        { background: rgba(244, 63, 94, 0.12); color: #f43f5e; }
+    .product-icon[data-slug="tool_hub"]       { background: var(--tg-bg-tertiary); color: var(--tg-text-secondary); }
+
+    .product-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--tg-text-primary);
+      margin: 0;
+    }
+    .product-description {
+      font-size: 13px;
+      color: var(--tg-text-secondary);
+      margin: 0;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--tg-border-light);
+    }
+    .role-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--tg-bg-tertiary);
+      color: var(--tg-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .open-arrow {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--tg-accent-dark);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    [data-theme="dark"] .open-arrow { color: var(--tg-accent-light); }
+    .product-tile:hover .open-arrow { transform: translateX(4px); transition: transform 150ms ease; }
+
+    .center-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: var(--space-12) var(--space-6);
+      text-align: center; color: var(--tg-text-secondary);
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--tg-border); border-top-color: var(--tg-accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin-bottom: var(--space-4);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+    .empty-state {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-12);
+      text-align: center;
+    }
+    .empty-state h2 {
+      margin: 0 0 var(--space-2);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--tg-text-primary);
+    }
+    .empty-state p {
+      margin: 0;
+      color: var(--tg-text-secondary);
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .footer-note {
+      margin-top: var(--space-12);
+      text-align: center;
+      font-size: 12px;
+      color: var(--tg-text-tertiary);
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-mark">TG</div>
+      <span>Travelgenix</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip" id="user-chip" hidden>
+        <span id="user-email"></span>
+      </div>
+      <button class="signout-btn" id="signout-btn" type="button">Sign out</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="content">
+      <div class="center-state">
+        <div class="spinner" role="status" aria-label="Loading your dashboard"></div>
+        <p>Loading your apps&hellip;</p>
+      </div>
+    </div>
+    <div class="footer-note">Travelgenix · Bournemouth, UK · part of Agendas Group</div>
+  </div>
+
+  <script>
+    // SVG icons for each product (Lucide-style outline icons, no library needed)
+    const ICONS = {
+      widget_suite: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+      luna_chat: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+      luna_marketing: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>',
+      luna_brain: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v14a3 3 0 1 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M9 5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3"/><path d="M15 5a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3"/></svg>',
+      luna_trends: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+      luna_qa: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.31 0 4.42.87 6.02 2.31"/></svg>',
+      tool_hub: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+    };
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      })[c]);
+    }
+
+    // Theme: respect saved preference, default to system
+    const savedTheme = localStorage.getItem('tg-theme');
+    const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', savedTheme || (sysDark ? 'dark' : 'light'));
+
+    function getGreeting() {
+      const h = new Date().getHours();
+      if (h < 12) return 'Good morning';
+      if (h < 18) return 'Good afternoon';
+      return 'Good evening';
+    }
+
+    function firstName(fullName, email) {
+      if (fullName && fullName.trim().length > 0) return fullName.trim().split(/\s+/)[0];
+      if (email) return email.split('@')[0];
+      return 'there';
+    }
+
+    async function load() {
+      try {
+        const r = await fetch('/api/dashboard/me-products', { credentials: 'include' });
+        if (r.status === 401) {
+          window.location.href = '/signin.html?redirect=/dashboard.html';
+          return;
+        }
+        if (!r.ok) throw new Error('me-products failed: ' + r.status);
+        const data = await r.json();
+        render(data);
+      } catch (err) {
+        console.error('[dashboard] load failed', err);
+        document.getElementById('content').innerHTML = `
+          <div class="empty-state">
+            <h2>Could not load your apps</h2>
+            <p>Try reloading the page. If this keeps happening, contact Travelgenix support.</p>
+          </div>`;
+      }
+    }
+
+    function render(data) {
+      const u = data.user || {};
+      document.getElementById('user-email').textContent = u.email || '';
+      document.getElementById('user-chip').hidden = !u.email;
+
+      const greetingHtml = `
+        <div class="greeting">
+          <h1>${escapeHtml(getGreeting())}, ${escapeHtml(firstName(u.fullName, u.email))}</h1>
+          <p>${u.clientName ? escapeHtml(u.clientName) + ' · ' : ''}${data.products.length} app${data.products.length === 1 ? '' : 's'} available</p>
+        </div>
+      `;
+
+      if (!data.products || data.products.length === 0) {
+        document.getElementById('content').innerHTML = greetingHtml + `
+          <div class="empty-state">
+            <h2>No apps yet</h2>
+            <p>You don't have access to any Travelgenix apps. If this looks wrong, contact your account owner or Travelgenix support.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tilesHtml = data.products.map(p => `
+        <a class="product-tile" href="${escapeHtml(p.url)}" data-slug="${escapeHtml(p.slug)}">
+          <div style="display: flex; align-items: flex-start; gap: var(--space-3); margin-bottom: 0;">
+            <div class="product-icon" data-slug="${escapeHtml(p.slug)}">${ICONS[p.slug] || ICONS.tool_hub}</div>
+            <div style="flex: 1; min-width: 0;">
+              <h3 class="product-title">${escapeHtml(p.name)}</h3>
+            </div>
+          </div>
+          <p class="product-description">${escapeHtml(p.description)}</p>
+          <div class="product-footer">
+            <span class="role-pill">${escapeHtml(p.roleLabel)}</span>
+            <span class="open-arrow">Open
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </div>
+        </a>
+      `).join('');
+
+      document.getElementById('content').innerHTML = greetingHtml + `
+        <div class="product-grid">${tilesHtml}</div>
+      `;
+    }
+
+    document.getElementById('signout-btn').addEventListener('click', async () => {
+      try {
+        await fetch('/api/auth/signout', { method: 'POST', credentials: 'include' });
+      } catch {}
+      window.location.href = '/signin.html';
+    });
+
+    load();
+  </script>
+</body>
+</html>
