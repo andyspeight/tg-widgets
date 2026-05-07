@@ -44,7 +44,7 @@ import {
 const PRODUCT_URLS = {
   [PRODUCTS.slugs.WIDGET_SUITE]:   '/',
   [PRODUCTS.slugs.LUNA_CHAT]:      'https://chat.travelify.io/dashboard.html',
-  [PRODUCTS.slugs.LUNA_MARKETING]: 'https://marketing.travelify.io/',
+  [PRODUCTS.slugs.LUNA_MARKETING]: 'https://marketing.travelify.io/client.html',
   [PRODUCTS.slugs.LUNA_BRAIN]:     'https://brain.travelify.io/',
   [PRODUCTS.slugs.LUNA_TRENDS]:    'https://trends.travelify.io/',
   [PRODUCTS.slugs.LUNA_QA]:        'https://qa.travelify.io/',
