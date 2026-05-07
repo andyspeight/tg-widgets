@@ -2568,15 +2568,54 @@
     /* =============================== AUTH =============================== */
     function getSession() {
       try {
-        const raw = sessionStorage.getItem(STORAGE_KEY);
-        if (!raw) return null;
-        const s = JSON.parse(raw);
-        if (!s || !s.token) return null;
-        return s;
+        // 1. Primary: new SSO keys written by id.travelify.io / signin.html
+        const tok = localStorage.getItem('tg_token');
+        const usrRaw = localStorage.getItem('tg_user');
+        if (tok && usrRaw) {
+          const usr = JSON.parse(usrRaw);
+          let cli = null;
+          try { cli = JSON.parse(localStorage.getItem('tg_client') || 'null'); } catch {}
+          const rawPlan = cli?.plan ?? usr?.plan;
+          const planStr = (rawPlan && typeof rawPlan === 'object') ? (rawPlan.name || '') : (rawPlan || '');
+          return {
+            token: tok,
+            user: {
+              ...usr,
+              plan: planStr,
+              clientName: cli?.clientName || usr?.clientName || '',
+              clientRecordId: cli?.recordId || null
+            },
+            timestamp: Date.now()
+          };
+        }
+        // 2. Legacy localStorage blob
+        let raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+        // 3. Legacy sessionStorage blob
+        raw = sessionStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const s = JSON.parse(raw);
+          if (s && s.token) localStorage.setItem(STORAGE_KEY, raw);
+          return s;
+        }
+        return null;
       } catch (e) { return null; }
     }
-    function setSession(s) { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
-    function clearSession() { try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {} }
+    function setSession(s) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+    }
+    function clearSession() {
+      try {
+        localStorage.removeItem('tg_token');
+        localStorage.removeItem('tg_user');
+        localStorage.removeItem('tg_client');
+        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+    }
     function authHeaders(extra) {
       const s = getSession();
       const h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
@@ -5089,12 +5128,7 @@
       ui.status.textContent = '';
 
       try {
-        const session = (function(){
-          try { return JSON.parse(sessionStorage.getItem('tgw_session') || 'null'); }
-          catch(e){ return null; }
-        })();
-        const headers = { 'Content-Type': 'application/json' };
-        if (session && session.token) headers['Authorization'] = 'Bearer ' + session.token;
+        const headers = authHeaders();
 
         const response = await fetch('/api/enquiry/airtable-pat', {
           method: 'POST',
@@ -5148,12 +5182,7 @@
       if (!confirm('Remove the stored Airtable token? Submissions will stop routing to your base.')) return;
 
       try {
-        const session = (function(){
-          try { return JSON.parse(sessionStorage.getItem('tgw_session') || 'null'); }
-          catch(e){ return null; }
-        })();
-        const headers = {};
-        if (session && session.token) headers['Authorization'] = 'Bearer ' + session.token;
+        const headers = authHeaders();
 
         const response = await fetch('/api/enquiry/airtable-pat?widgetId=' + encodeURIComponent(widgetId), {
           method: 'DELETE',
