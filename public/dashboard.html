@@ -146,6 +146,13 @@
       box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2), var(--shadow-md);
     }
 
+    /* Staff-only tile gets a subtle warm tint on the top accent bar to differentiate
+       from client-facing products. The Staff pill in the header is the loud signal;
+       this is the quiet one. */
+    .product-tile[data-staff="true"]::after {
+      background: linear-gradient(90deg, #F59E0B, #EF4444);
+    }
+
     .product-icon {
       width: 48px; height: 48px;
       border-radius: var(--radius-md);
@@ -158,14 +165,55 @@
     .product-icon[data-slug="luna_brain"]     { background: rgba(168, 85, 247, 0.12); color: #a855f7; }
     .product-icon[data-slug="luna_trends"]    { background: rgba(245, 158, 11, 0.12); color: var(--tg-warning); }
     .product-icon[data-slug="luna_qa"]        { background: rgba(244, 63, 94, 0.12); color: #f43f5e; }
-    .product-icon[data-slug="tool_hub"]       { background: var(--tg-bg-tertiary); color: var(--tg-text-secondary); }
+    .product-icon[data-slug="tool_hub"]       { background: rgba(245, 158, 11, 0.12); color: var(--tg-warning); }
 
+    .tile-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+    .tile-header-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
     .product-title {
       font-size: 16px;
       font-weight: 700;
       color: var(--tg-text-primary);
       margin: 0;
+      line-height: 1.3;
     }
+
+    /* Staff pill — small, warm-tinted, sits next to the title.
+       Subtle enough not to dominate, clear enough to read at a glance. */
+    .staff-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(245, 158, 11, 0.15);
+      color: #B45309;
+      width: fit-content;
+      margin-top: 2px;
+    }
+    [data-theme="dark"] .staff-pill {
+      background: rgba(245, 158, 11, 0.18);
+      color: #FCD34D;
+    }
+    .staff-pill svg {
+      width: 10px;
+      height: 10px;
+      stroke-width: 2.5;
+    }
+
     .product-description {
       font-size: 13px;
       color: var(--tg-text-secondary);
@@ -279,8 +327,11 @@
       luna_brain: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v14a3 3 0 1 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M9 5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3"/><path d="M15 5a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3"/></svg>',
       luna_trends: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
       luna_qa: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.31 0 4.42.87 6.02 2.31"/></svg>',
-      tool_hub: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+      tool_hub: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
     };
+
+    // Staff pill SVG (shield icon — denotes elevated access)
+    const STAFF_PILL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
 
     function escapeHtml(str) {
       return String(str || '').replace(/[&<>"']/g, (c) => ({
@@ -348,23 +399,29 @@
         return;
       }
 
-      const tilesHtml = data.products.map(p => `
-        <a class="product-tile" href="${escapeHtml(p.url)}" data-slug="${escapeHtml(p.slug)}">
-          <div style="display: flex; align-items: flex-start; gap: var(--space-3); margin-bottom: 0;">
-            <div class="product-icon" data-slug="${escapeHtml(p.slug)}">${ICONS[p.slug] || ICONS.tool_hub}</div>
-            <div style="flex: 1; min-width: 0;">
-              <h3 class="product-title">${escapeHtml(p.name)}</h3>
+      const tilesHtml = data.products.map(p => {
+        const staffPill = p.staff
+          ? `<span class="staff-pill" title="Travelgenix staff only">${STAFF_PILL_ICON}Staff</span>`
+          : '';
+        return `
+          <a class="product-tile" href="${escapeHtml(p.url)}" data-slug="${escapeHtml(p.slug)}" data-staff="${p.staff ? 'true' : 'false'}">
+            <div class="tile-header">
+              <div class="product-icon" data-slug="${escapeHtml(p.slug)}">${ICONS[p.slug] || ICONS.tool_hub}</div>
+              <div class="tile-header-body">
+                <h3 class="product-title">${escapeHtml(p.name)}</h3>
+                ${staffPill}
+              </div>
             </div>
-          </div>
-          <p class="product-description">${escapeHtml(p.description)}</p>
-          <div class="product-footer">
-            <span class="role-pill">${escapeHtml(p.roleLabel)}</span>
-            <span class="open-arrow">Open
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </span>
-          </div>
-        </a>
-      `).join('');
+            <p class="product-description">${escapeHtml(p.description)}</p>
+            <div class="product-footer">
+              <span class="role-pill">${escapeHtml(p.roleLabel)}</span>
+              <span class="open-arrow">Open
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </a>
+        `;
+      }).join('');
 
       document.getElementById('content').innerHTML = greetingHtml + `
         <div class="product-grid">${tilesHtml}</div>
@@ -374,6 +431,12 @@
     document.getElementById('signout-btn').addEventListener('click', async () => {
       try {
         await fetch('/api/auth/signout', { method: 'POST', credentials: 'include' });
+      } catch {}
+      // Also clear localStorage (set by signin.html for the widgets dashboard)
+      try {
+        localStorage.removeItem('tg_token');
+        localStorage.removeItem('tg_user');
+        localStorage.removeItem('tg_client');
       } catch {}
       window.location.href = '/signin.html';
     });
