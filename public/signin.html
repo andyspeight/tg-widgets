@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign in · Travelgenix Widget Suite</title>
+<title>Sign in · Travelgenix</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/editor-shell.css">
 <style>
@@ -121,7 +121,7 @@
 
   <div class="auth-card">
     <h1>Sign in</h1>
-    <p class="lede">Welcome back. Sign in to manage your widgets.</p>
+    <p class="lede">Welcome back. Sign in to access your Travelgenix apps.</p>
 
     <div id="msg" class="auth-msg" role="status" aria-live="polite"></div>
 
@@ -233,8 +233,10 @@
         return;
       }
 
-      // Otherwise to dashboard
-      const next = new URLSearchParams(location.search).get('next') || '/';
+      // After successful sign-in, where do we send them?
+      // Priority: ?next=... (legacy) → ?redirect=... (dashboard convention) → /dashboard.html (the launchpad)
+      const params = new URLSearchParams(location.search);
+      const next = params.get('next') || params.get('redirect') || '/dashboard.html';
       location.href = next;
     } catch (err) {
       showMsg('Network error. Please try again.', 'error');
