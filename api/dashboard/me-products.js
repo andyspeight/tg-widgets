@@ -29,16 +29,25 @@ import {
 } from '../_lib/auth/schema.js';
 
 // Where each product lives. When the user clicks a tile, we send them here.
-//   - widget_suite → / (the existing widgets dashboard at the root)
-//   - tool_hub → /admin/ (the TG Control admin console)
-//   - everything else → placeholder routes for now, wired up in later phases
+//
+// Same-domain products (widgets.travelify.io) use relative paths.
+// Other Travelgenix products live on their own subdomains and need
+// absolute URLs so the browser jumps to the right place.
+//
+//   - widget_suite  → / (the existing widgets dashboard at the root)
+//   - tool_hub      → /admin/ (the TG Control admin console)
+//   - luna_chat     → https://chat.travelify.io/dashboard.html
+//   - luna_marketing → https://marketing.travelify.io/ (placeholder until built)
+//   - luna_brain    → placeholder
+//   - luna_trends   → placeholder
+//   - luna_qa       → placeholder
 const PRODUCT_URLS = {
   [PRODUCTS.slugs.WIDGET_SUITE]:   '/',
-  [PRODUCTS.slugs.LUNA_CHAT]:      '/dashboard/luna-chat',
-  [PRODUCTS.slugs.LUNA_MARKETING]: '/dashboard/luna-marketing',
-  [PRODUCTS.slugs.LUNA_BRAIN]:     '/dashboard/luna-brain',
-  [PRODUCTS.slugs.LUNA_TRENDS]:    '/dashboard/luna-trends',
-  [PRODUCTS.slugs.LUNA_QA]:        '/dashboard/luna-qa',
+  [PRODUCTS.slugs.LUNA_CHAT]:      'https://chat.travelify.io/dashboard.html',
+  [PRODUCTS.slugs.LUNA_MARKETING]: 'https://marketing.travelify.io/',
+  [PRODUCTS.slugs.LUNA_BRAIN]:     'https://brain.travelify.io/',
+  [PRODUCTS.slugs.LUNA_TRENDS]:    'https://trends.travelify.io/',
+  [PRODUCTS.slugs.LUNA_QA]:        'https://qa.travelify.io/',
   [PRODUCTS.slugs.TOOL_HUB]:       '/admin/',
 };
 
