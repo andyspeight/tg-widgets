@@ -54,12 +54,12 @@ export const USERS = {
     email:               'fldSQLKBfsAcVS2s3', // primary
     client:              'fldyXVZjZKUjlYCm6', // linked → Clients
     fullName:            'fldz1zYCcVCpTMTDl',
-    passwordHash:        'fldnBEg0qOLrVnIfc', // bcrypt cost 12
-    role:                'fld3qxb08LWvd6NHQ', // owner | admin | member
-    status:              'fldal007hv7mS2IDB', // active | invited | suspended
-    authMethods:         'fldhPZwiNh21Ylxb4', // password, google, microsoft, magic
-    googleSub:           'fldmrMGbvFQA71neu', // Phase 2
-    microsoftSub:        'fldf994uw2zsCCWf5', // Phase 2
+    passwordHash:        'fldnBEg0qOLrVnIfc',
+    role:                'fld3qxb08LWvd6NHQ',
+    status:              'fldal007hv7mS2IDB',
+    authMethods:         'fldhPZwiNh21Ylxb4',
+    googleSub:           'fldmrMGbvFQA71neu',
+    microsoftSub:        'fldf994uw2zsCCWf5',
     lastLogin:           'flddCbek2OXpTQFHc',
     lastLoginIp:         'fldJHEb9uyw3lMrtj',
     created:             'fldwq1aBBwu2QFfuG',
@@ -69,7 +69,6 @@ export const USERS = {
     sessions:            'fldpXybYT64wnSBJX',
     authEvents:          'fld7YmcftMa0SRfQE'
   },
-  // Allowed values for select fields — keep in sync with Airtable
   roles: { OWNER: 'owner', ADMIN: 'admin', MEMBER: 'member' },
   statuses: { ACTIVE: 'active', INVITED: 'invited', SUSPENDED: 'suspended' },
   authMethodValues: {
@@ -81,17 +80,17 @@ export const USERS = {
 };
 
 // ----------------------------------------------------------------------------
-// Invites table (NEW)
+// Invites table
 // ----------------------------------------------------------------------------
 export const INVITES = {
   tableId: 'tblbM4VvIIbcfvYRU',
   fields: {
-    tokenHash:  'fldMEXBUY3pR4yYZu', // primary — SHA-256 of raw token
+    tokenHash:  'fldMEXBUY3pR4yYZu',
     email:      'flduo5aNtkLkzL4cl',
-    client:     'fldsDFR46bqtc7hm0', // linked → Clients
-    invitedBy:  'fldnTX28eRJ68XHul', // linked → Users
+    client:     'fldsDFR46bqtc7hm0',
+    invitedBy:  'fldnTX28eRJ68XHul',
     role:       'fld7XtOv34LCtslKe',
-    status:     'fldvPQUTMjip99rwn', // pending | accepted | revoked | expired
+    status:     'fldvPQUTMjip99rwn',
     expiresAt:  'fldOmk0pAwcKshqzU',
     acceptedAt: 'fldHLDPst0VYJMwfF',
     created:    'fld1lliuMM6P38ast'
@@ -105,13 +104,13 @@ export const INVITES = {
 };
 
 // ----------------------------------------------------------------------------
-// Sessions table (NEW)
+// Sessions table
 // ----------------------------------------------------------------------------
 export const SESSIONS = {
   tableId: 'tblEMrS83LrQsyu7V',
   fields: {
-    sessionId:    'fldCqie3rqvGoXrs2', // primary — UUID v4
-    user:         'fldXSmgwtFVn6wRuQ', // linked → Users
+    sessionId:    'fldCqie3rqvGoXrs2',
+    user:         'fldXSmgwtFVn6wRuQ',
     jwtJti:       'fldEFcDen79tj5nPc',
     userAgent:    'fldu8l3urD05suOAx',
     ipAddress:    'fldFYvAyKf0UvLgjj',
@@ -131,16 +130,16 @@ export const SESSIONS = {
 };
 
 // ----------------------------------------------------------------------------
-// Auth Events table (NEW — append-only audit log)
+// Auth Events table
 // ----------------------------------------------------------------------------
 export const AUTH_EVENTS = {
   tableId: 'tblPTBZNMn6nudzhY',
   fields: {
-    eventId:        'fld1reiQp7tn7EnL3', // primary — UUID v4
+    eventId:        'fld1reiQp7tn7EnL3',
     type:           'fldjYX2PorMddbXuc',
-    user:           'fldQK7ccySQxApb9Y', // linked → Users (optional)
+    user:           'fldQK7ccySQxApb9Y',
     emailAttempted: 'fldPypuMDSpecseSF',
-    client:         'fldQAxfW9BtklWiqA', // linked → Clients (optional)
+    client:         'fldQAxfW9BtklWiqA',
     ip:             'fldunEvYkBgw2lHfY',
     userAgent:      'fldsQdrQkrw9UZSmZ',
     success:        'fldhOs2utZJQeuDXI',
@@ -171,20 +170,19 @@ export const AUTH_EVENTS = {
 };
 
 // ----------------------------------------------------------------------------
-// Products table — reference list of Travelgenix products that grant access
+// Products table
 // ----------------------------------------------------------------------------
 export const PRODUCTS = {
   tableId: 'tbl8gafdldQyps4JN',
   fields: {
-    productId:      'fld0L1auU7q8ep0kX', // primary — slug like 'widget_suite'
+    productId:      'fld0L1auU7q8ep0kX',
     displayName:    'fldGSdyhaOZJ6OnwJ',
     description:    'fldhruACLHECYknxG',
-    availableRoles: 'fldaczn0DWeoDui8D', // multiSelect
-    status:         'fldo7iE9GYRXRXY1c', // active | coming_soon | deprecated
+    availableRoles: 'fldaczn0DWeoDui8D',
+    status:         'fldo7iE9GYRXRXY1c',
     created:        'fldWl7dKanrCvi12w',
-    permissions:    'fld0IitvokkAZoon9'  // reverse link → Permissions
+    permissions:    'fld0IitvokkAZoon9'
   },
-  // The set of valid product slugs Claude code should recognise.
   slugs: {
     WIDGET_SUITE:   'widget_suite',
     LUNA_CHAT:      'luna_chat',
@@ -207,13 +205,13 @@ export const PRODUCTS = {
 export const PERMISSIONS = {
   tableId: 'tblfuVxtQyaNRYBrB',
   fields: {
-    permissionId: 'fldfL36VMxQufq6BF', // primary — autonumber
-    user:         'fldWMPFEH6MiEHq2z', // linked → Users
-    product:      'fldxrWehb2IaydcCE', // linked → Products
-    role:         'fldtpWkG2gv1Kbu1G', // singleSelect — varies per product
-    status:       'fldUq2esKf0gOkxhs', // active | suspended | expired
+    permissionId: 'fldfL36VMxQufq6BF',
+    user:         'fldWMPFEH6MiEHq2z',
+    product:      'fldxrWehb2IaydcCE',
+    role:         'fldtpWkG2gv1Kbu1G',
+    status:       'fldUq2esKf0gOkxhs',
     granted:      'fldy8TADPRqxagHMK',
-    grantedBy:    'fldRhA0BQVmgz5RC5', // linked → Users
+    grantedBy:    'fldRhA0BQVmgz5RC5',
     expiresAt:    'fldLteKvMhHPUG4wF',
     notes:        'fldWGqynzsVAKRjPI'
   },
@@ -222,9 +220,6 @@ export const PERMISSIONS = {
     SUSPENDED: 'suspended',
     EXPIRED:   'expired'
   },
-  // Role values used across all products. Not every role is valid for every
-  // product — see PRODUCTS table availableRoles for which roles each
-  // product accepts.
   roles: {
     OWNER:        'owner',
     ADMIN:        'admin',
@@ -237,23 +232,24 @@ export const PERMISSIONS = {
 };
 
 // ============================================================================
-// Added 6 May 2026 — admin console tables
+// Admin console tables (added 6 May 2026)
 // ============================================================================
 
 // ----------------------------------------------------------------------------
 // Catalogue table — granular product list for entitlements
-// Distinct from PRODUCTS above (which controls auth at the suite level).
 // ----------------------------------------------------------------------------
 export const CATALOGUE = {
   tableId: 'tblhT8lhDWVieFxsT',
   fields: {
-    productCode: 'fldhEaFhoKYtlGFvH', // primary - slug like 'widget-pricing'
-    productName: 'fldNWSmQwp6tUHSJS',
-    category:    'fldNGD0r092e7C2sy', // singleSelect
-    description: 'fldy5uHYALZIVTx2k',
-    active:      'fldoUzVwIXHnSZY2u', // checkbox
-    sortOrder:   'fldRmUhaS5iT2RT1X', // number
-    created:     'fldnFs2TPhnnHYKwV'  // dateTime
+    productCode:  'fldhEaFhoKYtlGFvH', // primary
+    productName:  'fldNWSmQwp6tUHSJS',
+    category:     'fldNGD0r092e7C2sy',
+    description:  'fldy5uHYALZIVTx2k',
+    active:       'fldoUzVwIXHnSZY2u',
+    sortOrder:    'fldRmUhaS5iT2RT1X',
+    created:      'fldnFs2TPhnnHYKwV',
+    // Added 7 May 2026 - which Product slug this catalogue item grants access to
+    productSlug:  'fld0PdnTl4cBwi1cR'
   },
   categories: {
     LUNA_SUITE:  'Luna Suite',
@@ -263,23 +259,22 @@ export const CATALOGUE = {
     UNIVERSITY:  'University',
     WIDGET:      'Widget'
   },
-  // Display order for grouped views in the admin UI
   categoryOrder: ['Luna Suite', 'Marketing', 'CRM', 'Quick Quote', 'University', 'Widget']
 };
 
 // ----------------------------------------------------------------------------
-// Packages table — Spark / Boost / Ignite / Bespoke
+// Packages table
 // ----------------------------------------------------------------------------
 export const PACKAGES = {
   tableId: 'tbltYc7w49Ye43NI1',
   fields: {
-    packageName:  'fldTZTR6u1zFbGBDT', // primary
+    packageName:  'fldTZTR6u1zFbGBDT',
     packageCode:  'fldrI4APvgzsf2gaZ',
-    monthlyPrice: 'fldUfFfsTXvuhXl88', // currency £
-    setupFee:     'fldsR9T6aHL4FYBCK', // currency £
+    monthlyPrice: 'fldUfFfsTXvuhXl88',
+    setupFee:     'fldsR9T6aHL4FYBCK',
     description:  'fldtGqYo63sN233nn',
-    active:       'fld9aJ541f1Coi5PN', // checkbox
-    sortOrder:    'fldrL8LegkG0BfQMh', // number
+    active:       'fld9aJ541f1Coi5PN',
+    sortOrder:    'fldrL8LegkG0BfQMh',
     created:      'fld1ndbxRg9nrtEYV'
   }
 };
@@ -290,29 +285,27 @@ export const PACKAGES = {
 export const PACKAGE_CATALOGUE = {
   tableId: 'tblMmYmZDqJ5L0SHW',
   fields: {
-    linkId:             'fld6Sr1DF813SSR95', // primary - autogenerated
-    package:            'fld0GyqEWjoPrbDE5', // linked → Packages
-    catalogueItem:      'fldTrUKZ1t4ecimmz', // linked → Catalogue
-    includedByDefault:  'fldZijw4yTlCIWBa1', // checkbox
-    availableAsAddOn:   'fld5nbZXzB5pb3ZkR', // checkbox
-    addOnMonthlyPrice:  'fldn4kVWKGKmI2Vvj', // currency £ (optional)
+    linkId:             'fld6Sr1DF813SSR95',
+    package:            'fld0GyqEWjoPrbDE5',
+    catalogueItem:      'fldTrUKZ1t4ecimmz',
+    includedByDefault:  'fldZijw4yTlCIWBa1',
+    availableAsAddOn:   'fld5nbZXzB5pb3ZkR',
+    addOnMonthlyPrice:  'fldn4kVWKGKmI2Vvj',
     notes:              'fld1ggJGl70B40C7U'
   }
 };
 
 // ----------------------------------------------------------------------------
 // Client Entitlements — join: Clients × Catalogue with actual yes/no
-// One row per client per product. Created during onboarding from the package
-// defaults, then editable per row to override individual products.
 // ----------------------------------------------------------------------------
 export const CLIENT_ENTITLEMENTS = {
   tableId: 'tbldtwpQl3ZcK5uzl',
   fields: {
-    entitlementId:    'fldzZSKA9ZXnvFlc5', // primary
-    client:           'fldYTtPnhDDMgS1qs', // linked → Clients
-    catalogueItem:    'fld8djS73AXQuRLzs', // linked → Catalogue
-    enabled:          'fldwxESsbDw445LFv', // checkbox - the actual yes/no
-    source:           'fldx6qZb5PlZXRYAt', // singleSelect
+    entitlementId:    'fldzZSKA9ZXnvFlc5',
+    client:           'fldYTtPnhDDMgS1qs',
+    catalogueItem:    'fld8djS73AXQuRLzs',
+    enabled:          'fldwxESsbDw445LFv',
+    source:           'fldx6qZb5PlZXRYAt',
     activatedDate:    'fldtvsJ9kKchR2C8A',
     deactivatedDate:  'fldYG5k1x4NqKc6DF',
     notes:            'fldAVqPDnhq54MqGm',
