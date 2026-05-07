@@ -5,16 +5,14 @@
  * the dashboard launchpad page. Reads from the unified Permissions table.
  *
  * Each product comes with its display name, description, the user's role
- * on that product, and the URL to open it. Inactive products and inactive
- * permissions are filtered out.
+ * on that product, the URL to open it, and a staff flag indicating whether
+ * the product is for Travelgenix staff only (renders a "Staff" pill in the UI).
  *
  * Response:
  *   {
  *     user: { email, fullName, clientName },
  *     products: [
- *       {
- *         slug, name, description, role, url, statusBadge?
- *       }
+ *       { slug, name, description, role, roleLabel, url, staff }
  *     ]
  *   }
  *
@@ -28,15 +26,12 @@ import {
   PRODUCTS,
   PERMISSIONS,
   CLIENTS,
-  USERS,
 } from '../_lib/auth/schema.js';
 
 // Where each product lives. When the user clicks a tile, we send them here.
-//
-// widget_suite → / (the existing widgets dashboard at the root URL)
-// luna_chat, luna_marketing, etc → placeholder paths that 404 until those
-//   apps get migrated onto the unified auth (Priorities 4 and 5)
-// tool_hub → /admin/ (the TG Control admin console for Travelgenix staff)
+//   - widget_suite → / (the existing widgets dashboard at the root)
+//   - tool_hub → /admin/ (the TG Control admin console)
+//   - everything else → placeholder routes for now, wired up in later phases
 const PRODUCT_URLS = {
   [PRODUCTS.slugs.WIDGET_SUITE]:   '/',
   [PRODUCTS.slugs.LUNA_CHAT]:      '/dashboard/luna-chat',
@@ -46,6 +41,15 @@ const PRODUCT_URLS = {
   [PRODUCTS.slugs.LUNA_QA]:        '/dashboard/luna-qa',
   [PRODUCTS.slugs.TOOL_HUB]:       '/admin/',
 };
+
+// Products that are Travelgenix staff only. The launchpad renders a small
+// "Staff" pill on these tiles so it's clear they're internal tools, not
+// client-facing apps. Staff slugs gate visual treatment, not access — the
+// Permissions table is still the source of truth for who sees the tile at all.
+const STAFF_SLUGS = new Set([
+  PRODUCTS.slugs.TOOL_HUB,   // TG Control — admin console for Travelgenix staff
+  PRODUCTS.slugs.LUNA_QA,    // Luna QA test suite — internal QA tooling
+]);
 
 // Friendly labels for each role, shown on the tile
 const ROLE_LABELS = {
@@ -67,9 +71,6 @@ export default async function handler(req, res) {
   if (!ctx) return;
 
   try {
-    // ctx already has a list of permissions but we need the full Product
-    // records for each. Fetch products + permissions for this user in
-    // parallel so we get current data.
     const [allProducts, allPermissions] = await Promise.all([
       listAllRecords(PRODUCTS.tableId),
       listAllRecords(PERMISSIONS.tableId),
@@ -94,9 +95,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Build the response list — one entry per permission, filtered for active
-    // products only. Deduplicate on product slug (in case the same user has
-    // multiple permission rows for the same product, take the highest role).
+    // One entry per accessible product, deduped by slug
     const seenSlugs = new Map();
     for (const perm of myPermissions) {
       const productIds = perm.fields[PERMISSIONS.fields.product] || [];
@@ -108,8 +107,6 @@ export default async function handler(req, res) {
         const role = perm.fields[PERMISSIONS.fields.role] || '';
         const existing = seenSlugs.get(product.slug);
 
-        // If we already have a permission for this slug, keep the existing
-        // entry — first-seen wins for now, can be enhanced later.
         if (!existing) {
           seenSlugs.set(product.slug, {
             slug: product.slug,
@@ -118,12 +115,13 @@ export default async function handler(req, res) {
             role,
             roleLabel: ROLE_LABELS[role] || role,
             url: PRODUCT_URLS[product.slug] || '/',
+            staff: STAFF_SLUGS.has(product.slug),
           });
         }
       }
     }
 
-    // Sort: widget_suite first (most common entry point), then alphabetically
+    // Widget Suite first, then alphabetical
     const products = Array.from(seenSlugs.values()).sort((a, b) => {
       if (a.slug === PRODUCTS.slugs.WIDGET_SUITE) return -1;
       if (b.slug === PRODUCTS.slugs.WIDGET_SUITE) return 1;
