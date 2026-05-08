@@ -527,7 +527,7 @@
     <div class="tgse-body">
 
       <!-- ====== DESIGN TAB ====== -->
-      <div class="tgse-panel" data-panel="design">
+      <div class="tgse-panel is-active" data-tab="design">
         <div class="section-h">Layout</div>
         <div class="layout-picker" id="layout-picker">
           <label class="layout-card" data-layout="card">
@@ -606,7 +606,7 @@
       </div>
 
       <!-- ====== CONTENT TAB ====== -->
-      <div class="tgse-panel" data-panel="content" hidden>
+      <div class="tgse-panel" data-tab="content">
 
         <div class="when-layout" data-show-on="card,popup,footer,vertical">
           <div class="section-h">Headline</div>
@@ -666,7 +666,7 @@
       </div>
 
       <!-- ====== SETTINGS TAB ====== -->
-      <div class="tgse-panel" data-panel="settings" hidden>
+      <div class="tgse-panel" data-tab="settings">
         <div class="when-layout" data-show-on="card,popup">
           <div class="section-h">Card layout options</div>
           <div class="toggle-row">
@@ -759,7 +759,7 @@
       </div>
 
       <!-- ====== ROUTING TAB ====== -->
-      <div class="tgse-panel" data-panel="routing" hidden>
+      <div class="tgse-panel" data-tab="routing">
         <p style="font-size:13px;color:var(--tgse-text-2);margin:0 0 16px;line-height:1.5">
           When someone signs up, send their details to one or more places. Mix and match —
           for example, push to Mailchimp and also drop a row in Google Sheets.
@@ -1781,7 +1781,7 @@
       b.setAttribute('aria-selected', b.dataset.tab === name ? 'true' : 'false');
     });
     document.querySelectorAll('.tgse-panel').forEach(p => {
-      p.hidden = p.dataset.panel !== name;
+      p.classList.toggle('is-active', p.dataset.tab === name);
     });
     if (name === 'routing' && state.widgetId) loadRoutingConfigs();
   }
