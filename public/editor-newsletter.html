@@ -451,20 +451,6 @@
   .test-result.is-ok { background: color-mix(in srgb, var(--tgse-success, #10B981) 10%, transparent); color: var(--tgse-success, #047857); }
   .test-result.is-error { background: color-mix(in srgb, var(--tgse-error, #DC2626) 10%, transparent); color: var(--tgse-error, #B91C1C); }
   .test-result svg { flex-shrink: 0; margin-top: 2px; }
-
-  /* Preview iframe wrap */
-  .preview-iframe-wrap {
-    height: 100%;
-    width: 100%;
-    background: var(--tgse-bg-2);
-    overflow: auto;
-  }
-  .preview-iframe-wrap iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    background: white;
-  }
 </style>
 </head>
 <body>
@@ -783,26 +769,48 @@
   <!-- ============================================================
        PREVIEW
        ============================================================ -->
-  <main class="tgse-preview">
-    <div class="tgse-preview-chrome">
-      <div class="tgse-preview-tabs">
-        <button class="tgse-vp-tab is-active" data-vp="desktop">Desktop</button>
-        <button class="tgse-vp-tab" data-vp="tablet">Tablet</button>
-        <button class="tgse-vp-tab" data-vp="mobile">Mobile</button>
-      </div>
-      <div class="tgse-preview-tools">
-        <button class="tgse-vp-tab" id="btn-theme-toggle">Toggle dark</button>
-        <button class="tgse-vp-tab" id="btn-embed">Embed</button>
-      </div>
-    </div>
-    <div class="tgse-preview-stage">
-      <div class="preview-iframe-wrap">
-        <iframe id="preview-iframe" title="Newsletter widget preview"></iframe>
-      </div>
-    </div>
-  </main>
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
 
-</div>
+        <div class="tgse-vp" role="group" aria-label="Viewport">
+          <button class="is-on" data-vp="desktop" data-viewport="desktop" title="Desktop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+          </button>
+          <button data-vp="tablet" data-viewport="tablet" title="Tablet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          </button>
+          <button data-vp="mobile" data-viewport="mobile" title="Mobile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          </button>
+        </div>
+
+        <div class="tgse-divider"></div>
+
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+          Design mode
+          <span class="tgse-kbd">D</span>
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
+        </button>
+      </div>
+
+      <div class="tgse-canvas">
+        <div class="tgse-frame" data-vp="desktop" id="preview-frame" data-viewport="desktop">
+          <div id="newsletter-mount" data-tg-widget="newsletter"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
 
 <!-- ============================================================
      DESTINATION PICKER MODAL
@@ -857,6 +865,7 @@
   // ============================================================
   const state = {
     widgetId: null,
+    widget: null,         // live preview widget instance (reused across updates)
     config: makeDefaultConfig(),
     dirty: false,
     routingConfigs: [],   // loaded from /api/routing-configs once widgetId known
@@ -1014,30 +1023,31 @@
         loadRoutingConfigs();
       }
     },
-    onThemeToggle: () => {
-      state.config.theme.mode = state.config.theme.mode === 'dark' ? 'light' : 'dark';
+    onThemeToggle: (isDark) => {
+      state.config.theme.mode = isDark ? 'dark' : 'light';
       markDirty();
       renderTheme();
       updatePreview();
     },
-  });
 
-  // Mount font picker if available
-  setTimeout(() => {
-    if (window.tgse && typeof window.tgse.mountFontPicker === 'function') {
-      try {
-        window.tgse.mountFontPicker(
-          document.getElementById('font-picker-mount'),
-          () => state.config.fontFamily,
-          (val) => {
-            state.config.fontFamily = val;
-            markDirty();
-            updatePreview();
-          }
-        );
-      } catch(e) { /* shell may not have it yet */ }
-    }
-  }, 50);
+    onDesignMode: (isOn) => {
+      // Newsletter widget doesn't yet support design mode (would require
+      // hotspot mapping). Toast and instantly toggle the button back off.
+      if (isOn && window.tgse && typeof window.tgse.toast === 'function') {
+        window.tgse.toast('Design mode is coming soon for the Newsletter widget.', 'info');
+        const btn = document.getElementById('btn-design-mode');
+        if (btn) btn.classList.remove('is-on');
+      }
+    },
+
+    // Shell mounts the font picker into this element and calls onFontChange
+    // when the user picks a font. The shell handles the dropdown UI itself.
+    fontPickerEl: '#font-picker-mount',
+    onFontChange: (font) => {
+      state.config.fontFamily = font;
+      updatePreview();
+    },
+  });
 
   // ============================================================
   // INITIAL DATA LOAD
@@ -1682,45 +1692,27 @@
   }
 
   function _updatePreview() {
-    const iframe = document.getElementById('preview-iframe');
-    if (!iframe) return;
-    const cfg = state.config;
-    const cfgJSON = JSON.stringify(cfg);
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-      html, body { margin: 0; padding: 0; min-height: 100%; background: #F8FAFC; }
-      body {
-        font-family: 'Inter', system-ui, sans-serif;
-        padding: 80px 40px 120px;
-        display: flex;
-        align-items: ${cfg.layout === 'inline' ? 'flex-start' : 'center'};
-        justify-content: center;
+    const mount = document.getElementById('newsletter-mount');
+    if (!mount) return;
+    try {
+      const cfg = JSON.parse(JSON.stringify(state.config));
+      // Always disable footer auto-show delay in the editor preview, and turn
+      // off footer dismissal persistence so the bar reappears after every
+      // config change.
+      cfg.footerDelay = 0;
+      cfg.footerRememberDismiss = false;
+
+      if (state.widget && typeof state.widget.update === 'function') {
+        state.widget.update(cfg);
+      } else if (window.TGNewsletterWidget) {
+        // Fresh mount — clear any prior shadow root by replacing the element
+        try { mount.innerHTML = ''; } catch(e) {}
+        mount.__tgInited = false;
+        state.widget = new window.TGNewsletterWidget(mount, cfg);
       }
-      ${cfg.layout === 'inline' ? '.preview-host { width: 100%; max-width: 600px; }' : ''}
-      ${cfg.layout === 'footer' ? 'body { padding-bottom: 200px; }' : ''}
-      ${cfg.layout === 'vertical' ? 'body { padding-right: 100px; padding-left: 100px; }' : ''}
-      .preview-info {
-        position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
-        background: rgba(15, 23, 42, 0.85); color: white; padding: 6px 14px;
-        border-radius: 999px; font-size: 11px; font-weight: 500;
-        font-family: 'Inter', sans-serif;
-      }
-    </style></head><body>
-      <div class="preview-info">Live preview — ${cfg.layout}</div>
-      <div class="preview-host">
-        <div data-tg-widget="newsletter" id="mount"></div>
-      </div>
-      <script src="/widget-newsletter.js"><\/script>
-      <script>
-        // Manually init with the config (skip the API fetch)
-        document.addEventListener('DOMContentLoaded', () => {
-          const mount = document.getElementById('mount');
-          if (window.TGNewsletterWidget) {
-            new window.TGNewsletterWidget(mount, ${cfgJSON});
-          }
-        });
-      <\/script>
-    </body></html>`;
-    iframe.srcdoc = html;
+    } catch (e) {
+      console.warn('[editor-newsletter] preview update failed:', e);
+    }
   }
 
   // ============================================================
