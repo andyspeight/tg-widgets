@@ -154,6 +154,67 @@
                             'July','August','September','October','November','December'];
 
   /* ------------------------------------------------------------------
+   * Slug extraction helpers — used by auto-detect mode.
+   * The widget reads a destination slug from the host page (URL path,
+   * query param, or DOM attribute) and asks the API to resolve it
+   * against the destination database.
+   * ------------------------------------------------------------------ */
+
+  // Match the server's normaliseSlug exactly: lowercase, non-alphanumeric → '-',
+  // strip leading/trailing hyphens, cap to 100 chars. The widget normalises
+  // before sending so the cache key stays stable across slug variants on the
+  // host page. The server normalises again as defence in depth.
+  function normaliseSlugClient(s) {
+    if (typeof s !== 'string') return '';
+    return s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 100);
+  }
+
+  // Extract the slug from the host page based on the configured source.
+  // Returns a normalised slug string, or '' if extraction failed.
+  function extractSlug(autoDetect) {
+    if (!autoDetect || !autoDetect.enabled) return '';
+    const source = autoDetect.slugSource || 'last-path-segment';
+
+    try {
+      if (source === 'last-path-segment') {
+        const path = (window.location && window.location.pathname) || '';
+        const parts = path.split('/').filter(Boolean);
+        const last = parts.length ? parts[parts.length - 1] : '';
+        return normaliseSlugClient(last);
+      }
+
+      if (source === 'query-param') {
+        const param = String(autoDetect.slugExtra || '').trim();
+        if (!param) return '';
+        const params = new URLSearchParams(window.location.search || '');
+        return normaliseSlugClient(params.get(param) || '');
+      }
+
+      if (source === 'custom-selector') {
+        const sel = String(autoDetect.slugExtra || '').trim();
+        if (!sel) return '';
+        // Defensive: only use if the selector is well-formed and matches an
+        // element. We read either textContent or a data-* attribute named
+        // by the selector form (e.g. selector "[data-destination]" reads the
+        // data-destination attribute of the first match).
+        let el;
+        try { el = document.querySelector(sel); } catch { return ''; }
+        if (!el) return '';
+        // If selector is an attribute selector like [data-x] or [data-x="..."],
+        // extract that attribute's value.
+        const attrMatch = sel.match(/\[([a-z0-9_-]+)(?:[~^$*|]?=.*)?\]/i);
+        const raw = attrMatch ? (el.getAttribute(attrMatch[1]) || '') : (el.textContent || '');
+        return normaliseSlugClient(raw);
+      }
+    } catch { /* swallow and fall through */ }
+    return '';
+  }
+
+  /* ------------------------------------------------------------------
    * CSS — scoped inside Shadow DOM.
    * Uses CSS custom properties for theming. Everything a client would want
    * to brand (brand colour, accent, radius, fonts) is a CSS var.
@@ -849,17 +910,28 @@
         },
         destination: null,       // {level, recordId}
         destinationData: null,   // optional inline preview payload
+        autoDetect: {
+          enabled: false,
+          slugSource: 'last-path-segment', // 'last-path-segment' | 'query-param' | 'custom-selector'
+          slugExtra: '',                   // param name or CSS selector, depending on source
+          lookupOrder: ['resort', 'city', 'country'],
+        },
       };
       if (!c || typeof c !== 'object') return base;
       const merged = Object.assign({}, base, c);
       merged.sections = Object.assign({}, base.sections, c.sections || {});
       merged.cta = Object.assign({}, base.cta, c.cta || {});
+      merged.autoDetect = Object.assign({}, base.autoDetect, c.autoDetect || {});
       return merged;
     }
 
     _renderShell() {
       // Clear any previous content
       while (this.shadow.firstChild) this.shadow.removeChild(this.shadow.firstChild);
+
+      // If a previous render hid the host element (auto-detect no-match),
+      // un-hide it now so the new render is visible.
+      try { if (this.el.style && this.el.style.display === 'none') this.el.style.display = ''; } catch { /* noop */ }
 
       const style = document.createElement('style');
       style.textContent = STYLES;
@@ -902,6 +974,40 @@
 
     async _loadDestination() {
       try {
+        // Auto-detect mode: extract a slug from the host page and ask the
+        // API to resolve it. The server returns { found: false } when no
+        // record matches, which we honour by silently hiding the widget.
+        if (this.c.autoDetect && this.c.autoDetect.enabled) {
+          const slug = extractSlug(this.c.autoDetect);
+          if (!slug) {
+            // No slug extractable from this page — hide.
+            return this._renderHidden();
+          }
+          const order = (this.c.autoDetect.lookupOrder || []).filter(
+            v => v === 'country' || v === 'city' || v === 'resort'
+          );
+          const orderQs = order.length ? '&order=' + encodeURIComponent(order.join(',')) : '';
+          const slugUrl = CONTENT_API +
+            '?id=' + encodeURIComponent(this.c.widgetId) +
+            '&slug=' + encodeURIComponent(slug) +
+            orderQs;
+
+          const slugRes = await fetch(slugUrl, { credentials: 'omit' });
+          if (!slugRes.ok) {
+            // Hard upstream error — show error state, NOT silent hide,
+            // so we don't mask infra problems.
+            throw new Error('Slug lookup failed (' + slugRes.status + ')');
+          }
+          const slugData = await slugRes.json();
+          if (!slugData || slugData.found === false) {
+            return this._renderHidden();
+          }
+          this._destination = slugData;
+          this._renderContent();
+          return;
+        }
+
+        // Fixed-destination mode: resolve via the saved widget config.
         const url = CONTENT_API + '?id=' + encodeURIComponent(this.c.widgetId);
         const res = await fetch(url, { credentials: 'omit' });
         if (!res.ok) {
@@ -1204,6 +1310,16 @@
           '<h2 class="tgs-notice-title">Unable to load destination</h2>' +
           '<p class="tgs-notice-body">The destination content is temporarily unavailable. Please try again in a moment.</p>' +
         '</div>';
+    }
+
+    // Silent hide: used in auto-detect mode when no slug match is found on
+    // the host page. We empty the shadow root and mark the host element
+    // collapsed so it occupies no space in the page layout. This is the
+    // explicit design choice for auto-detect: a missing destination should
+    // not show a broken-looking widget on a real customer-facing page.
+    _renderHidden() {
+      this.root.innerHTML = '';
+      try { this.el.style.display = 'none'; } catch { /* noop */ }
     }
 
     // Wire up interactive controls inside the Shadow DOM. Called after every
