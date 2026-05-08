@@ -242,14 +242,15 @@
   }
   .routing-card-icon {
     width: 32px; height: 32px;
-    border-radius: 6px;
+    border-radius: 8px;
     background: var(--tgse-bg-2);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 16px;
+    color: var(--tgse-text-1);
   }
+  .routing-card-icon svg { width: 18px; height: 18px; }
   .routing-card-name {
     flex: 1;
     min-width: 0;
@@ -433,11 +434,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 10px;
-    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--tgse-text-1);
   }
-  .dest-card-name { font-size: 13.5px; font-weight: 700; color: var(--tgse-text-1); margin-bottom: 2px; }
-  .dest-card-desc { font-size: 11.5px; color: var(--tgse-text-3); line-height: 1.4; }
+  .dest-card-icon svg { width: 20px; height: 20px; }
+  .dest-card-name { font-size: 13px; font-weight: 700; color: var(--tgse-text-1); margin-bottom: 4px; }
+  .dest-card-desc { font-size: 12px; color: var(--tgse-text-3); line-height: 1.4; }
 
   .test-result {
     padding: 10px 12px;
@@ -451,6 +453,167 @@
   .test-result.is-ok { background: color-mix(in srgb, var(--tgse-success, #10B981) 10%, transparent); color: var(--tgse-success, #047857); }
   .test-result.is-error { background: color-mix(in srgb, var(--tgse-error, #DC2626) 10%, transparent); color: var(--tgse-error, #B91C1C); }
   .test-result svg { flex-shrink: 0; margin-top: 2px; }
+
+  /* ============ Defensive: [hidden] beats class display rules ============ */
+  [hidden] { display: none !important; }
+
+  /* ============ Faux preview page ============
+     The .preview-stage gives a `transform: translateZ(0)` containing block so
+     the newsletter widget's `position: fixed` layouts (footer, vertical tab,
+     popup overlay) are pinned to the stage, not the browser viewport. */
+  .preview-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 600px;
+    background: #FFFFFF;
+    overflow: hidden;
+    transform: translateZ(0);
+    isolation: isolate;
+  }
+  .preview-stage[data-theme="dark"] { background: #0F172A; }
+
+  .preview-page {
+    padding: 32px 48px 80px;
+    height: 100%;
+    overflow-y: auto;
+    color: #0F172A;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .preview-stage[data-theme="dark"] .preview-page { color: #F1F5F9; }
+
+  .preview-faux-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #E2E8F0;
+    margin-bottom: 32px;
+  }
+  .preview-stage[data-theme="dark"] .preview-faux-nav { border-bottom-color: #334155; }
+  .preview-faux-brand {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1B2B5B;
+    letter-spacing: -0.01em;
+  }
+  .preview-stage[data-theme="dark"] .preview-faux-brand { color: #F1F5F9; }
+  .preview-faux-links {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: #475569;
+  }
+  .preview-stage[data-theme="dark"] .preview-faux-links { color: #94A3B8; }
+
+  .preview-faux-h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    max-width: 640px;
+  }
+  .preview-faux-lede {
+    font-size: 16px;
+    line-height: 1.55;
+    color: #475569;
+    margin: 0 0 32px;
+    max-width: 580px;
+  }
+  .preview-stage[data-theme="dark"] .preview-faux-lede { color: #94A3B8; }
+  .preview-faux-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #475569;
+    margin: 24px 0;
+    max-width: 640px;
+  }
+  .preview-stage[data-theme="dark"] .preview-faux-body { color: #94A3B8; }
+
+  .preview-card-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 32px 0;
+    align-items: start;
+  }
+  .preview-faux-card {
+    aspect-ratio: 4 / 5;
+    background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+    border-radius: 12px;
+    opacity: 0.4;
+  }
+  .preview-stage[data-theme="dark"] .preview-faux-card { opacity: 0.25; }
+
+  /* Host containers — only the active one shows */
+  .preview-host { display: none; }
+  .preview-host.is-active { display: block; }
+  .preview-host--fixed.is-active { display: block; }
+
+  /* Layout-specific host positioning */
+  #host-inline.is-active {
+    margin: 24px 0;
+    display: flex;
+    justify-content: flex-start;
+  }
+  #host-card.is-active {
+    /* Card host sits in the middle of the 3-column row */
+    display: block;
+  }
+  /* When card layout active, hide the placeholder cards on either side */
+  .preview-stage[data-active-layout="card"] .preview-faux-card { display: none; }
+  .preview-stage[data-active-layout="card"] .preview-card-row { grid-template-columns: 1fr; max-width: 440px; margin-left: auto; margin-right: auto; }
+
+  /* Popup host — overlay backdrop visible when popup is open. The widget
+     itself handles the modal; we just give the trigger button a sensible spot. */
+  #host-popup.is-active {
+    position: absolute;
+    top: 32px;
+    right: 48px;
+    z-index: 5;
+  }
+
+  /* Footer / vertical: hosts sit in the stage but the widget's own
+     `position: fixed` styling does the placement. */
+  #host-footer.is-active, #host-vertical.is-active {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+  }
+  #host-footer.is-active > *, #host-vertical.is-active > * { pointer-events: auto; }
+
+  /* ============ Design Mode hotspots ============ */
+  .preview-stage.is-dm-active::after {
+    content: 'Design mode — click any element to edit it';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.9);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  .preview-stage.is-dm-active .preview-host {
+    cursor: pointer;
+  }
+  .preview-stage.is-dm-active .preview-host.is-active {
+    outline: 2px dashed var(--tgse-accent);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+  .tgse-btn--sm.is-on {
+    background: var(--tgse-accent);
+    color: white;
+    border-color: var(--tgse-accent);
+  }
 </style>
 </head>
 <body>
@@ -805,7 +968,36 @@
 
       <div class="tgse-canvas">
         <div class="tgse-frame" data-vp="desktop" id="preview-frame" data-viewport="desktop">
-          <div id="newsletter-mount"></div>
+          <div class="preview-stage" id="preview-stage" data-theme="light">
+            <div class="preview-page">
+              <div class="preview-faux-nav">
+                <div class="preview-faux-brand">Atlas Travel Co.</div>
+                <div class="preview-faux-links">
+                  <span>Destinations</span><span>Holidays</span><span>About</span>
+                </div>
+              </div>
+              <h1 class="preview-faux-h1">Holidays that don't feel like everyone else's</h1>
+              <p class="preview-faux-lede">We design quiet, considered trips for travellers who'd rather avoid the crowds. From the cliffs of Cyprus to the islands off the coast of Croatia.</p>
+
+              <div class="preview-host" id="host-inline" data-host="inline"></div>
+
+              <p class="preview-faux-body">Our team curates every itinerary by hand. No group tours. No all-inclusive resorts. Just thoughtful, beautifully-paced trips built around the kind of places we'd want to visit ourselves.</p>
+
+              <div class="preview-card-row">
+                <div class="preview-faux-card"></div>
+                <div class="preview-host" id="host-card" data-host="card"></div>
+                <div class="preview-faux-card"></div>
+              </div>
+
+              <p class="preview-faux-body">If you want a holiday no-one else on your street has had this year, we'd love to help you find it.</p>
+            </div>
+            <!-- Hosts for fixed-position layouts. The translateZ on .preview-stage
+                 makes "position: fixed" inside the widget pin to this stage rather
+                 than to the viewport. -->
+            <div class="preview-host preview-host--fixed" id="host-popup" data-host="popup"></div>
+            <div class="preview-host preview-host--fixed" id="host-footer" data-host="footer"></div>
+            <div class="preview-host preview-host--fixed" id="host-vertical" data-host="vertical"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -902,12 +1094,26 @@
   }
 
   // ============================================================
+  // ============================================================
   // DESTINATION CATALOG
   // ============================================================
+  // SVG icon strings — sized to fit a 32x32 container. We use semantic glyphs
+  // for each ESP rather than brand logos to avoid trademark issues. The parent
+  // card uses the brand colour as a tint so users still see brand association.
+  const ICON_MAILCHIMP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 8l8 5 8-5"/></svg>';
+  const ICON_BREVO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2c4.5 0 8 3 9 7"/><path d="M9 12l2 2 4-4"/></svg>';
+  const ICON_MAILERLITE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>';
+  const ICON_KLAVIYO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>';
+  const ICON_CONSTANT_CONTACT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+  const ICON_WEBHOOK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+  const ICON_SHEETS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="12" y1="11" x2="12" y2="19"/></svg>';
+  const ICON_EMAIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+  const ICON_FALLBACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
   const DESTINATIONS = {
     'mailchimp': {
       name: 'Mailchimp',
-      icon: '🐵',
+      icon: ICON_MAILCHIMP,
       colour: '#FFE01B',
       description: 'Add to a Mailchimp audience',
       fields: [
@@ -919,7 +1125,7 @@
     },
     'brevo': {
       name: 'Brevo',
-      icon: '✉️',
+      icon: ICON_BREVO,
       colour: '#0F8C50',
       description: 'Add to a Brevo (Sendinblue) list',
       fields: [
@@ -929,7 +1135,7 @@
     },
     'mailerlite': {
       name: 'MailerLite',
-      icon: '📨',
+      icon: ICON_MAILERLITE,
       colour: '#19D690',
       description: 'Add to a MailerLite group',
       fields: [
@@ -939,7 +1145,7 @@
     },
     'klaviyo': {
       name: 'Klaviyo',
-      icon: '⚡',
+      icon: ICON_KLAVIYO,
       colour: '#FFD800',
       description: 'Subscribe to a Klaviyo list with marketing consent',
       fields: [
@@ -949,7 +1155,7 @@
     },
     'constant-contact': {
       name: 'Constant Contact',
-      icon: '📮',
+      icon: ICON_CONSTANT_CONTACT,
       colour: '#1856ED',
       description: 'Add to one or more Constant Contact lists',
       fields: [
@@ -962,7 +1168,7 @@
     },
     'webhook': {
       name: 'Webhook',
-      icon: '🔗',
+      icon: ICON_WEBHOOK,
       colour: '#475569',
       description: 'POST a JSON payload to your endpoint',
       fields: [
@@ -972,7 +1178,7 @@
     },
     'google-sheets': {
       name: 'Google Sheets',
-      icon: '📊',
+      icon: ICON_SHEETS,
       colour: '#0F9D58',
       description: 'Append a row to a Google Sheet',
       setupNote: 'Before saving, share your sheet with the Travelgenix service account email as Editor. Click "Test connection" and it will tell you the exact email address to share with.',
@@ -983,7 +1189,7 @@
     },
     'email': {
       name: 'Email notification',
-      icon: '✉️',
+      icon: ICON_EMAIL,
       colour: '#94A3B8',
       description: 'Send a notification email to your team',
       fields: [
@@ -992,6 +1198,7 @@
       ],
     },
   };
+
 
   // ============================================================
   // INIT
@@ -1032,12 +1239,18 @@
     },
 
     onDesignMode: (isOn) => {
-      // Newsletter widget doesn't yet support design mode (would require
-      // hotspot mapping). Toast and instantly toggle the button back off.
-      if (isOn && window.tgse && typeof window.tgse.toast === 'function') {
-        window.tgse.toast('Design mode is coming soon for the Newsletter widget.', 'info');
-        const btn = document.getElementById('btn-design-mode');
-        if (btn) btn.classList.remove('is-on');
+      const stage = document.getElementById('preview-stage');
+      const btn = document.getElementById('btn-design-mode');
+      if (!stage) return;
+      stage.classList.toggle('is-dm-active', isOn);
+      if (btn) btn.classList.toggle('is-on', isOn);
+      if (isOn) {
+        wireDesignModeHotspots();
+        if (window.tgse && typeof window.tgse.toast === 'function') {
+          window.tgse.toast('Design mode on — click the widget to jump to its controls', 'ok');
+        }
+      } else {
+        unwireDesignModeHotspots();
       }
     },
 
@@ -1177,7 +1390,7 @@
       return;
     }
     $list.innerHTML = state.routingConfigs.map(rc => {
-      const dest = DESTINATIONS[rc.destination] || { name: rc.destination, icon: '•', colour: '#94A3B8' };
+      const dest = DESTINATIONS[rc.destination] || { name: rc.destination, icon: ICON_FALLBACK, colour: '#94A3B8' };
       const status = rc.enabled ? `<span class="badge-status is-on">On</span>` : `<span class="badge-status is-off">Off</span>`;
       const verifyBadge = rc.lastVerifiedStatus === 'success' ? `<span class="badge-status is-on" style="margin-left:6px">Verified</span>`
                        : rc.lastVerifiedStatus === 'failed' ? `<span class="badge-status is-error" style="margin-left:6px">Verify failed</span>`
@@ -1693,27 +1906,102 @@
   }
 
   function _updatePreview() {
-    const mount = document.getElementById('newsletter-mount');
-    if (!mount) return;
+    const stage = document.getElementById('preview-stage');
+    if (!stage) return;
     try {
       const cfg = JSON.parse(JSON.stringify(state.config));
-      // Always disable footer auto-show delay in the editor preview, and turn
-      // off footer dismissal persistence so the bar reappears after every
-      // config change.
+      // In editor preview: skip footer auto-show delay and dismissal persistence
       cfg.footerDelay = 0;
       cfg.footerRememberDismiss = false;
 
-      if (state.widget && typeof state.widget.update === 'function') {
-        state.widget.update(cfg);
-      } else if (window.TGNewsletterWidget) {
-        // Fresh mount — clear any prior shadow root by replacing the element
-        try { mount.innerHTML = ''; } catch(e) {}
-        mount.__tgInited = false;
-        state.widget = new window.TGNewsletterWidget(mount, cfg);
+      // Pick host by layout — different mount points for different layouts so
+      // the widget appears in a sensible spot in the faux page.
+      const hostMap = {
+        inline:   'host-inline',
+        card:     'host-card',
+        popup:    'host-popup',
+        footer:   'host-footer',
+        vertical: 'host-vertical',
+      };
+      const targetHostId = hostMap[cfg.layout] || 'host-card';
+
+      // Theme stage tracks current widget theme so faux page colours adapt
+      stage.setAttribute('data-theme', cfg.theme.mode === 'dark' ? 'dark' : 'light');
+      stage.setAttribute('data-active-layout', cfg.layout);
+
+      // Reveal only the active host
+      stage.querySelectorAll('.preview-host').forEach(h => {
+        h.classList.toggle('is-active', h.id === targetHostId);
+      });
+
+      const host = document.getElementById(targetHostId);
+      if (!host) return;
+
+      // Tear down previous instance — destroy first to clean up event listeners,
+      // then clear the host completely (kills shadow root attachment too).
+      if (state.widget && typeof state.widget.destroy === 'function') {
+        try { state.widget.destroy(); } catch(e) {}
+      }
+      // Replace the host element in place to drop any prior shadow DOM
+      const fresh = host.cloneNode(false);
+      host.parentNode.replaceChild(fresh, host);
+
+      if (window.TGNewsletterWidget) {
+        state.widget = new window.TGNewsletterWidget(fresh, cfg);
+      }
+
+      // For popup layout, auto-open the modal so the user can see it in the editor
+      if (cfg.layout === 'popup' && state.widget && typeof state.widget.open === 'function') {
+        setTimeout(() => { try { state.widget.open(); } catch(e) {} }, 60);
+      }
+      // For vertical layout, auto-open the panel
+      if (cfg.layout === 'vertical' && state.widget && typeof state.widget.open === 'function') {
+        setTimeout(() => { try { state.widget.open(); } catch(e) {} }, 60);
       }
     } catch (e) {
       console.warn('[editor-newsletter] preview update failed:', e);
     }
+  }
+
+  // ============================================================
+  // DESIGN MODE — clickable hotspot on the active widget host
+  // jumps to the relevant editor control
+  // ============================================================
+  let designModeClickHandler = null;
+  function wireDesignModeHotspots() {
+    const stage = document.getElementById('preview-stage');
+    if (!stage) return;
+    unwireDesignModeHotspots(); // safety
+    designModeClickHandler = (ev) => {
+      // Find which host was clicked (or the active one)
+      const activeHost = stage.querySelector('.preview-host.is-active');
+      if (!activeHost) return;
+      // Switch to Content tab and flash the title input as the most likely thing to edit
+      if (window.tgse && typeof window.tgse.setTab === 'function') {
+        window.tgse.setTab('content');
+      } else {
+        // Fallback: click the Content tab button
+        const contentTab = document.querySelector('.tgse-tabs [data-tab="content"]');
+        if (contentTab) contentTab.click();
+      }
+      // Flash the title input
+      setTimeout(() => {
+        const titleInput = document.getElementById('title-input') || document.querySelector('[data-field="title"]');
+        if (titleInput) {
+          titleInput.focus();
+          titleInput.style.transition = 'box-shadow 200ms';
+          titleInput.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.4)';
+          setTimeout(() => { titleInput.style.boxShadow = ''; }, 1200);
+        }
+      }, 100);
+    };
+    stage.addEventListener('click', designModeClickHandler);
+  }
+  function unwireDesignModeHotspots() {
+    const stage = document.getElementById('preview-stage');
+    if (!stage || !designModeClickHandler) return;
+    stage.removeEventListener('click', designModeClickHandler);
+    designModeClickHandler = null;
   }
 
   // ============================================================
