@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Social Share — Travelgenix Widget Demo</title>
+<meta property="og:title" content="The Hidden Greek Islands Worth Booking This Summer" />
+<meta property="og:description" content="Skip Mykonos. We round up the seven islands every travel agent should be quietly recommending instead." />
+<meta property="og:url" content="https://tg-widgets.vercel.app/demo-share" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC;
+    color: #0F172A;
+    min-height: 100vh;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .demo-bar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #E2E8F0;
+    padding: 14px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .demo-bar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .demo-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 15px;
+  }
+  .demo-brand-mark {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: linear-gradient(135deg, #0891B2, #6366F1);
+    color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+  .demo-controls {
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap; margin-left: auto;
+  }
+  .demo-controls label {
+    font-size: 12px; font-weight: 600; color: #64748B;
+    margin-right: 4px;
+  }
+  .demo-controls select, .demo-controls button {
+    appearance: none;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #0F172A;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .demo-controls select:hover, .demo-controls button:hover {
+    border-color: #CBD5E1;
+  }
+
+  .article {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+  .article h1 {
+    font-size: 44px;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .article .lede {
+    font-size: 19px;
+    color: #475569;
+    margin-bottom: 32px;
+    line-height: 1.55;
+  }
+  .article .meta {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px; color: #94A3B8;
+    margin-bottom: 40px;
+  }
+  .article .meta-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #0891B2;
+    color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+  .article .hero {
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, #0891B2 0%, #6366F1 50%, #EC4899 100%);
+    border-radius: 16px;
+    margin-bottom: 32px;
+  }
+  .article h2 {
+    font-size: 28px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin: 40px 0 16px;
+  }
+  .article p {
+    font-size: 17px;
+    color: #1E293B;
+    margin-bottom: 20px;
+  }
+  .inline-share-block {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 40px 0;
+    text-align: center;
+  }
+  .inline-share-block h3 {
+    font-size: 18px; font-weight: 700; margin-bottom: 14px;
+  }
+  .compact-block {
+    display: flex; align-items: center; justify-content: center;
+    margin: 32px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <div class="demo-bar-inner">
+    <div class="demo-brand">
+      <div class="demo-brand-mark">A</div>
+      Atlas Travel Co. <span style="font-weight:500;color:#94A3B8;font-size:13px">— demo client site</span>
+    </div>
+    <div class="demo-controls">
+      <label for="layoutPicker">Layout:</label>
+      <select id="layoutPicker">
+        <option value="rail">Floating rail</option>
+        <option value="dock">Floating dock</option>
+        <option value="inline">Inline strip</option>
+        <option value="compact">Compact button</option>
+      </select>
+
+      <label for="colourPicker" style="margin-left:8px">Colour:</label>
+      <select id="colourPicker">
+        <option value="brand">Brand</option>
+        <option value="filled">Filled</option>
+        <option value="mono">Mono</option>
+        <option value="accent">Accent</option>
+      </select>
+
+      <label for="sidePicker" style="margin-left:8px">Side:</label>
+      <select id="sidePicker">
+        <option value="right">Right</option>
+        <option value="left">Left</option>
+      </select>
+
+      <button id="themeBtn" style="margin-left:8px">Toggle theme</button>
+    </div>
+  </div>
+</div>
+
+<article class="article">
+  <h1>The Hidden Greek Islands Worth Booking This Summer</h1>
+  <p class="lede">Skip Mykonos. We round up the seven islands every travel agent should be quietly recommending instead.</p>
+  <div class="meta">
+    <div class="meta-avatar">SR</div>
+    <span>Sophie Rhodes &middot; 8 min read &middot; May 2026</span>
+  </div>
+  <div class="hero"></div>
+
+  <p>Greece has 227 inhabited islands. Most of your clients can name three. That's a problem if you're trying to win against the OTAs on commodity destinations. The fix isn't to fight harder for Santorini bookings — it's to offer them somewhere they haven't seen on Instagram yet.</p>
+
+  <p>This guide rounds up the seven islands we think are worth a serious look this summer. Each one has direct flights from a UK airport, hotels at every price point, and enough local character that your client will come home thanking you for the recommendation rather than the discount.</p>
+
+  <h2>1. Folegandros</h2>
+  <p>Cycladic, whitewashed, dramatically clifftop and almost entirely unspoilt. Two hours by ferry from Santorini, but it might as well be two decades earlier. The main town, Chora, is car-free and built on the edge of a 200-metre drop. Nightlife is a glass of wine and a quiet conversation. Suits couples and people who want their photos to look like they made an effort.</p>
+
+  <div class="inline-share-block">
+    <h3>Share this guide</h3>
+    <div data-tg-widget="share" id="inline-mount-1"
+         data-tg-config='{"layout":"inline","colourMode":"brand","platforms":["whatsapp","facebook","twitter","linkedin","email","copy"],"showTooltips":true}'></div>
+  </div>
+
+  <h2>2. Karpathos</h2>
+  <p>The bridge between Crete and Rhodes, with empty beaches that go for miles and a remote village called Olympos where the older women still wear traditional dress because that's how they dress, not because tourists are watching. Strong winds make the south coast a kitesurfing destination. The north stays gentle.</p>
+
+  <p>This is the one to recommend to active retirees who think the Med is overdone. They'll come back convinced they discovered it.</p>
+
+  <h2>3. Symi</h2>
+  <p>Twenty minutes from Rhodes by hydrofoil, Symi is what people imagine when they say "Greek island" — a horseshoe harbour ringed with neoclassical mansions in pastel pinks and ochres. Day-trippers leave by 5pm and the island settles into something quietly perfect. Three days here is enough. Pair it with Rhodes for a two-centre week.</p>
+
+  <h2>4. Tinos</h2>
+  <p>The Greeks' favourite Greek island. Cycladic but with mountains, marble villages and food that punches well above the standard taverna fare. Mount Pteleos pottery, the artists' village of Pyrgos, and a beach called Kolympithra that locals fight to keep off Instagram. Suits foodies, second-time visitors to Greece, and anyone who has done Mykonos and is ready to grow up.</p>
+
+  <div class="compact-block">
+    <div data-tg-widget="share" id="compact-mount-1"
+         data-tg-config='{"layout":"compact","triggerLabel":"Share with a friend","colourMode":"brand","platforms":["whatsapp","facebook","twitter","linkedin","email","copy"]}'></div>
+  </div>
+
+  <h2>5. Kythera</h2>
+  <p>Officially Ionian, geographically more like a stray Cycladic island that drifted south. Empty beaches, Venetian fortresses, waterfalls inland and almost no one around. Direct flights from Athens are short. Direct flights from the UK are seasonal. Worth the connection if you want somewhere genuinely off the radar.</p>
+
+  <h2>6. Ikaria</h2>
+  <p>One of the world's five Blue Zones — the places where people routinely live past 100. The locals have no clocks and a relaxed attitude to weekday hours. Hot springs, hiking, decent wine and beaches you'll have to yourself. The sort of place that makes a client write you a thank-you email a month after they're back.</p>
+
+  <h2>7. Sifnos</h2>
+  <p>The food island. Greece has a strong national cuisine but Sifnos quietly makes the case for being the best of it — chickpea stew baked in clay pots, capers, locally pressed olive oil that makes the supermarket version look watery. Pair it with a yoga retreat and you've got a high-margin booking your clients will tell their friends about.</p>
+
+  <h2>The agent angle</h2>
+  <p>Each of these islands books at higher margins than the obvious choices because clients aren't price-comparing them on the OTAs. They're trusting you to recommend somewhere good. That's the relationship worth building. Send them to Mykonos and they'll book themselves next year. Send them to Folegandros and they'll send you their friends.</p>
+
+  <p style="margin-top:32px;color:#94A3B8;font-style:italic">Photos credited to the Greek National Tourism Organisation. Itineraries and indicative pricing available on request.</p>
+</article>
+
+<!-- Floating widget mount points -->
+<div data-tg-widget="share" id="floating-mount"></div>
+
+<script src="/widget-share.js"></script>
+<script>
+  // Demo controls — re-mount the widget with new config when toggles change
+  const layoutPicker = document.getElementById('layoutPicker');
+  const colourPicker = document.getElementById('colourPicker');
+  const sidePicker = document.getElementById('sidePicker');
+  const themeBtn = document.getElementById('themeBtn');
+  let isDark = false;
+
+  function mountFloating() {
+    const layout = layoutPicker.value;
+    const colour = colourPicker.value;
+    const side = sidePicker.value;
+
+    const inlineMount = document.getElementById('floating-mount');
+    // Tear down the old shadow root by replacing the host
+    const fresh = document.createElement('div');
+    fresh.setAttribute('data-tg-widget', 'share');
+    fresh.id = 'floating-mount';
+    inlineMount.replaceWith(fresh);
+
+    // Only build a floating widget when the layout calls for one
+    if (layout === 'rail' || layout === 'dock') {
+      new window.TGShareWidget(fresh, {
+        layout: layout,
+        side: side,
+        colourMode: colour,
+        platforms: ['whatsapp', 'facebook', 'twitter', 'linkedin', 'email', 'copy'],
+        showTooltips: true,
+        smartHide: false,
+        showAfterScroll: 0,
+        theme: { mode: isDark ? 'dark' : 'light', brand: '#0891B2' },
+      });
+    } else if (layout === 'inline') {
+      // Keep the floating mount empty; the inline ones in the article are already there
+      fresh.style.display = 'none';
+    } else if (layout === 'compact') {
+      fresh.style.display = 'none';
+    }
+  }
+
+  layoutPicker.addEventListener('change', mountFloating);
+  colourPicker.addEventListener('change', mountFloating);
+  sidePicker.addEventListener('change', mountFloating);
+  themeBtn.addEventListener('click', () => {
+    isDark = !isDark;
+    document.body.style.background = isDark ? '#0F172A' : '#F8FAFC';
+    document.body.style.color = isDark ? '#F1F5F9' : '#0F172A';
+    mountFloating();
+  });
+
+  // Mount on first load — wait one tick so widget JS has executed
+  setTimeout(mountFloating, 50);
+</script>
+</body>
+</html>
