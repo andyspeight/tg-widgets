@@ -231,10 +231,10 @@
 
     <div class="demo-block">
       <h2>Compact pill</h2>
-      <p>Single-line status indicator. Great for site headers, sticky bars, sidebars. Updates every minute.</p>
+      <p>Single-line status indicator. Great for site headers, sticky bars, sidebars. <strong>Click the pill to pop out the full schedule</strong> underneath. Click outside or press Escape to close. Updates every minute.</p>
       <div data-tg-widget="hours" id="compact-mount" style="margin-bottom:20px"></div>
 
-      <p style="margin-top:18px">Inline variant (text-only, no pill chrome):</p>
+      <p style="margin-top:18px">Inline variant (text-only, no pill chrome and no expand):</p>
       <div data-tg-widget="hours" id="compact-inline-mount"></div>
     </div>
 
@@ -352,6 +352,10 @@
     new window.TGHoursWidget(document.getElementById('compact-mount'), {
       layout: 'compact', compactStyle: 'pill',
       hours: STANDARD_HOURS, timeFormat: fmt,
+      phone: '+44 1202 555 0123',
+      phoneLabel: 'Call us: 01202 555 0123',
+      showTimezoneNote: true,
+      timezoneLabel: 'Times shown in UK time',
     });
 
     new window.TGHoursWidget(document.getElementById('compact-inline-mount'), {
