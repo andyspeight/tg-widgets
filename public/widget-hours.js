@@ -409,16 +409,105 @@
       letter-spacing: -0.005em;
     }
 
+    /* ============== Expandable compact pill ============== */
+    .tgho-compact-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    .tgho-compact-pill-trigger {
+      appearance: none;
+      cursor: pointer;
+      font-family: inherit;
+      color: inherit;
+      transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+    }
+    .tgho-compact-pill-trigger:hover {
+      background: var(--tgho-row-bg);
+      border-color: var(--tgho-muted);
+    }
+    .tgho-compact-pill-trigger:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--tgho-accent) 40%, transparent);
+      outline-offset: 2px;
+    }
+    .tgho-compact-pill-trigger:active {
+      transform: scale(0.98);
+    }
+    .tgho-compact-chev {
+      color: var(--tgho-sub);
+      transition: transform 200ms cubic-bezier(.2,.8,.2,1);
+      margin-left: 2px;
+      flex-shrink: 0;
+    }
+    .tgho-compact-wrap[data-panel-open="true"] .tgho-compact-chev {
+      transform: rotate(180deg);
+    }
+
+    .tgho-compact-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 320px;
+      max-width: calc(100vw - 32px);
+      background: var(--tgho-card);
+      border: 1px solid var(--tgho-border);
+      border-radius: var(--tgho-radius);
+      box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.18), 0 4px 12px -4px rgba(15, 23, 42, 0.08);
+      padding: 16px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 200ms ease, transform 220ms cubic-bezier(.2,.8,.2,1), visibility 0ms linear 220ms;
+      z-index: 100;
+    }
+    .tgho-compact-panel[data-open="true"] {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+      transition: opacity 200ms ease, transform 220ms cubic-bezier(.2,.8,.2,1), visibility 0ms linear 0ms;
+    }
+    .tgho-compact-panel-next {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--tgho-border);
+      font-size: 12px;
+      color: var(--tgho-sub);
+      font-weight: 500;
+      letter-spacing: -0.005em;
+    }
+    /* If the foot is rendered, the next-open line shouldn't have the bottom-border-of-rows look */
+    .tgho-compact-panel .tgho-foot {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--tgho-border);
+    }
+    .tgho-compact-panel-next + .tgho-foot {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: none;
+    }
+
+    /* On the right edge of the viewport, flip the panel to the right side */
+    .tgho-compact-wrap[data-align="right"] .tgho-compact-panel {
+      left: auto;
+      right: 0;
+    }
+
     /* ============== Responsive ============== */
     @media (max-width: 480px) {
       .tgho-card, .tgho-list { max-width: 100%; }
       .tgho-card { padding: 16px; }
+      .tgho-compact-panel { width: calc(100vw - 32px); max-width: 320px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .tgho-status[data-open="true"] .tgho-status-dot::after {
         animation: none;
         opacity: 0;
+      }
+      .tgho-compact-pill-trigger, .tgho-compact-chev, .tgho-compact-panel {
+        transition: none !important;
       }
     }
   `;
@@ -430,6 +519,9 @@
       this.c = this._defaults(config);
       this.shadow = container.attachShadow({ mode: 'open' });
       this._tickTimer = null;
+      this._compactOpen = false;
+      this._docClickHandler = null;
+      this._docKeyHandler = null;
       this._render();
       this._scheduleTick();
     }
@@ -441,6 +533,7 @@
       const def = {
         layout: (layoutVal === 'list' || layoutVal === 'compact' || layoutVal === 'card') ? layoutVal : 'card',
         compactStyle: compactStyleVal === 'inline' ? 'inline' : 'pill',
+        compactExpandable: cfg.compactExpandable !== false, // default ON
         title: typeof cfg.title === 'string' ? cfg.title : 'Opening hours',
         showStatus: cfg.showStatus !== false,
         highlightToday: cfg.highlightToday !== false,
@@ -510,6 +603,89 @@
           ${inner}
         </div>
       `;
+      this._bind();
+    }
+
+    _bind() {
+      const cfg = this.c;
+
+      // Only the expandable compact pill needs binding
+      if (cfg.layout !== 'compact' || cfg.compactStyle !== 'pill' || !cfg.compactExpandable) {
+        // Make sure no stale document listeners persist if we switched away
+        this._unbindDoc();
+        return;
+      }
+
+      const trigger = this.shadow.querySelector('#compactTrigger');
+      const panel = this.shadow.querySelector('#compactPanel');
+      const wrap = this.shadow.querySelector('.tgho-compact-wrap');
+      if (!trigger || !panel || !wrap) return;
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this._compactOpen = !this._compactOpen;
+        wrap.setAttribute('data-panel-open', String(this._compactOpen));
+        panel.setAttribute('data-open', String(this._compactOpen));
+        trigger.setAttribute('aria-expanded', String(this._compactOpen));
+        this._syncDocListeners();
+      });
+
+      // Stop clicks inside the panel from being treated as outside-clicks
+      panel.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      // Make sure listeners reflect current state after re-render (minute tick, theme change, etc)
+      this._syncDocListeners();
+    }
+
+    _syncDocListeners() {
+      if (this._compactOpen) {
+        if (!this._docClickHandler) {
+          this._docClickHandler = (e) => {
+            // Composed event from inside Shadow DOM stops at the host element.
+            // If the click landed on our host, the panel.click handler already stopped it.
+            // Anything else is genuine outside-click.
+            if (e.composedPath && e.composedPath().includes(this.el)) return;
+            if (this.el.contains(e.target)) return;
+            this._closeCompact();
+          };
+          document.addEventListener('click', this._docClickHandler, true);
+        }
+        if (!this._docKeyHandler) {
+          this._docKeyHandler = (e) => {
+            if (e.key === 'Escape' || e.key === 'Esc') {
+              this._closeCompact();
+            }
+          };
+          document.addEventListener('keydown', this._docKeyHandler);
+        }
+      } else {
+        this._unbindDoc();
+      }
+    }
+
+    _unbindDoc() {
+      if (this._docClickHandler) {
+        document.removeEventListener('click', this._docClickHandler, true);
+        this._docClickHandler = null;
+      }
+      if (this._docKeyHandler) {
+        document.removeEventListener('keydown', this._docKeyHandler);
+        this._docKeyHandler = null;
+      }
+    }
+
+    _closeCompact() {
+      if (!this._compactOpen) return;
+      this._compactOpen = false;
+      const wrap = this.shadow.querySelector('.tgho-compact-wrap');
+      const panel = this.shadow.querySelector('#compactPanel');
+      const trigger = this.shadow.querySelector('#compactTrigger');
+      if (wrap) wrap.setAttribute('data-panel-open', 'false');
+      if (panel) panel.setAttribute('data-open', 'false');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      this._unbindDoc();
     }
 
     _renderStatus(status) {
@@ -625,6 +801,7 @@
       const label = status ? status.label : '';
       const open = status ? status.open : false;
       if (cfg.compactStyle === 'inline') {
+        // Inline style is text-only — never expandable, no obvious affordance for it
         return `
           <div class="tgho-compact">
             <span class="tgho-compact-label">${esc(cfg.title || 'Hours')}:</span>
@@ -632,6 +809,32 @@
           </div>
         `;
       }
+      // Pill style — expandable when compactExpandable is on
+      if (cfg.compactExpandable) {
+        const panelOpen = this._compactOpen;
+        return `
+          <div class="tgho-compact-wrap" data-panel-open="${panelOpen}">
+            <button
+              class="tgho-compact-pill tgho-compact-pill-trigger"
+              type="button"
+              id="compactTrigger"
+              aria-expanded="${panelOpen}"
+              aria-haspopup="true"
+              aria-controls="compactPanel"
+            >
+              <span class="tgho-status" data-open="${open}" style="padding:0;background:transparent;">
+                <span class="tgho-status-dot"></span>
+              </span>
+              <span class="tgho-compact-status" data-open="${open}">${esc(label)}</span>
+              <svg class="tgho-compact-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="tgho-compact-panel" id="compactPanel" role="region" aria-label="${esc(cfg.title || 'Opening hours')}" data-open="${panelOpen}">
+              ${this._renderCompactPanel(status)}
+            </div>
+          </div>
+        `;
+      }
+      // Non-expandable pill — original render
       return `
         <div class="tgho-compact-pill">
           <span class="tgho-status" data-open="${open}" style="padding:0;background:transparent;">
@@ -639,6 +842,20 @@
           </span>
           <span class="tgho-compact-status" data-open="${open}">${esc(label)}</span>
         </div>
+      `;
+    }
+
+    _renderCompactPanel(status) {
+      // Content of the popped-out card: schedule rows + next-open line if closed + phone/timezone foot.
+      // Deliberately no title (the pill IS the title) and no status pill (already in the trigger).
+      const cfg = this.c;
+      const showNextOpen = cfg.showStatus && status && status.label && status.label !== 'Closed' && status.label !== 'Open';
+      return `
+        ${this._renderRows()}
+        ${showNextOpen ? `
+          <div class="tgho-compact-panel-next">${esc(status.label)}</div>
+        ` : ''}
+        ${this._renderFoot()}
       `;
     }
 
@@ -662,6 +879,7 @@
     destroy() {
       if (this._tickTimer) clearTimeout(this._tickTimer);
       this._tickTimer = null;
+      this._unbindDoc();
       this.shadow.innerHTML = '';
     }
   }
