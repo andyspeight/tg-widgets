@@ -36,6 +36,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Social Share',
   'WhatsApp Chat',
   'Opening Hours',
+  'Newsletter Signup',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -62,6 +63,7 @@ const PLAN_WIDGET_LIMITS = {
   'Social Share':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'WhatsApp Chat':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Opening Hours':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Newsletter Signup':     { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
 };
 
 // Count existing widgets owned by this user, of a specific type.
