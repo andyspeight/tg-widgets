@@ -17,8 +17,10 @@ import { randomBytes } from 'crypto';
 // ── Constants ───────────────────────────────────────────────────────────
 
 export const KNOWN_WIDGETS = [
+  'newsletter',
   'popup',
   'enquiry-form',
+  'brochure',
   'quiz',
   'calculator',
   'booking-confirmation',
