@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newsletter Signup Widget — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #0F172A;
+    line-height: 1.6;
+    background: white;
+  }
+
+  /* ============= Demo controls ============= */
+  .demo-bar {
+    position: sticky;
+    top: 0;
+    z-index: 9500;
+    background: white;
+    border-bottom: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .demo-bar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+  }
+  .demo-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1B2B5B;
+    letter-spacing: -0.01em;
+    margin-right: auto;
+  }
+  .demo-title small { font-weight: 500; color: #64748B; margin-left: 8px; }
+
+  .demo-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px;
+    background: #F1F5F9;
+    border-radius: 8px;
+  }
+  .demo-group button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #475569;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 11px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .demo-group button.is-active {
+    background: white;
+    color: #0F172A;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    font-weight: 600;
+  }
+
+  .demo-link {
+    font-size: 12px;
+    color: #475569;
+    text-decoration: none;
+  }
+  .demo-link:hover { color: #1B2B5B; text-decoration: underline; }
+
+  /* ============= Sample page chrome ============= */
+  .nav {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1B2B5B;
+    letter-spacing: -0.01em;
+  }
+  .nav-links {
+    display: flex;
+    gap: 30px;
+    font-size: 14px;
+  }
+  .nav-links a {
+    color: #475569;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .nav-links a:hover { color: #1B2B5B; }
+
+  /* Hero */
+  .hero {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+    text-align: center;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: #ECFDF5;
+    color: #047857;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 56px;
+    font-weight: 700;
+    margin: 0 0 18px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero p {
+    font-size: 18px;
+    color: #475569;
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.55;
+  }
+
+  /* Body sections */
+  .section {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 24px;
+  }
+  .section.is-grey { background: #F8FAFC; max-width: none; padding-left: max(24px, calc(50% - 640px + 24px)); padding-right: max(24px, calc(50% - 640px + 24px)); }
+  .section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 14px;
+    letter-spacing: -0.015em;
+  }
+  .section p { color: #475569; max-width: 720px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 30px;
+  }
+  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+  .destination-card {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .destination-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -8px rgba(15,23,42,0.12); }
+  .destination-card-img {
+    aspect-ratio: 16 / 10;
+    background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+  }
+  .destination-card-img.is-1 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  .destination-card-img.is-2 { background: linear-gradient(135deg, #06b6d4, #3b82f6); }
+  .destination-card-img.is-3 { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+  .destination-card-body { padding: 18px 20px; }
+  .destination-card-loc {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94A3B8;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .destination-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .destination-card p { font-size: 14px; color: #64748B; margin: 0; line-height: 1.5; }
+
+  /* Inline mount placeholder section */
+  .inline-mount-section {
+    text-align: center;
+    padding: 48px 24px;
+    background: #F8FAFC;
+    border-top: 1px solid #E2E8F0;
+    border-bottom: 1px solid #E2E8F0;
+    margin: 60px 0;
+  }
+  .inline-mount-section h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: -0.015em;
+  }
+  .inline-mount-section p {
+    color: #475569;
+    max-width: 480px;
+    margin: 0 auto 20px;
+  }
+  .inline-mount-section #mount-inline { display: flex; justify-content: center; }
+
+  /* Card mount sidebar layout */
+  .card-mount-section {
+    display: grid;
+    grid-template-columns: 1fr 440px;
+    gap: 60px;
+    align-items: start;
+  }
+  @media (max-width: 980px) { .card-mount-section { grid-template-columns: 1fr; } }
+
+  /* Footer */
+  .site-footer {
+    background: #0F172A;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 60px 24px 40px;
+    text-align: center;
+    font-size: 13px;
+    margin-top: 80px;
+  }
+  .site-footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 16px;
+  }
+
+  /* Hide all mounts initially; demo bar reveals one at a time */
+  [data-tg-widget="newsletter"] { display: none; }
+  [data-tg-widget="newsletter"].is-active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ============ DEMO BAR ============ -->
+<div class="demo-bar">
+  <div class="demo-bar-inner">
+    <div class="demo-title">Newsletter Widget Demo <small>tg-widgets.vercel.app</small></div>
+
+    <div class="demo-group" id="layout-picker">
+      <button data-layout="card" class="is-active">Card</button>
+      <button data-layout="inline">Inline</button>
+      <button data-layout="popup">Popup</button>
+      <button data-layout="footer">Footer</button>
+      <button data-layout="vertical">Vertical tab</button>
+    </div>
+
+    <div class="demo-group" id="mode-picker">
+      <button data-mode="light" class="is-active">Light</button>
+      <button data-mode="dark">Dark</button>
+    </div>
+
+    <div class="demo-group" id="brand-picker">
+      <button data-brand="#1B2B5B" class="is-active" title="Travelgenix navy" style="background:#1B2B5B;color:white">Navy</button>
+      <button data-brand="#0F766E" title="Teal" style="background:#0F766E;color:white">Teal</button>
+      <button data-brand="#DC2626" title="Red" style="background:#DC2626;color:white">Red</button>
+      <button data-brand="#7C3AED" title="Purple" style="background:#7C3AED;color:white">Purple</button>
+    </div>
+
+    <a href="/editor-newsletter" class="demo-link">Open editor →</a>
+  </div>
+</div>
+
+<!-- ============ SAMPLE SITE ============ -->
+<nav class="nav">
+  <div class="nav-brand">Atlas Travel Co.</div>
+  <div class="nav-links">
+    <a href="#">Destinations</a>
+    <a href="#">Holidays</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <span class="hero-tag">Trusted by 12,000 travellers since 2018</span>
+  <h1>Holidays that don't feel like everyone else's</h1>
+  <p>We design quiet, considered trips for travellers who'd rather avoid the crowds. From the cliffs of Cyprus to the islands off the coast of Croatia — places worth going.</p>
+</section>
+
+<section class="section">
+  <h2>This month's escapes</h2>
+  <p>Hand-picked destinations our team is travelling to right now. Click through for the full guide.</p>
+  <div class="grid">
+    <div class="destination-card">
+      <div class="destination-card-img is-1"></div>
+      <div class="destination-card-body">
+        <div class="destination-card-loc">Greece · Aegean</div>
+        <h3>The quiet side of Santorini</h3>
+        <p>Skip Oia. Stay in Imerovigli for the same caldera views and a fraction of the people.</p>
+      </div>
+    </div>
+    <div class="destination-card">
+      <div class="destination-card-img is-2"></div>
+      <div class="destination-card-body">
+        <div class="destination-card-loc">Cyprus · West coast</div>
+        <h3>Polis &amp; the Akamas peninsula</h3>
+        <p>Wild beaches, blue lagoons and the kind of quiet you forgot was possible.</p>
+      </div>
+    </div>
+    <div class="destination-card">
+      <div class="destination-card-img is-3"></div>
+      <div class="destination-card-body">
+        <div class="destination-card-loc">Italy · Puglia</div>
+        <h3>Trulli houses &amp; sea breeze</h3>
+        <p>The heel of Italy moves at a different pace — slow, sun-baked, and stubbornly itself.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INLINE-LAYOUT MOUNT — appears mid-page when selected -->
+<section class="inline-mount-section">
+  <h3>Stay in the loop</h3>
+  <p>One thoughtful email a month. Quiet recommendations, never a hard sell.</p>
+  <div data-tg-widget="newsletter" id="mount-inline"></div>
+</section>
+
+<section class="section is-grey">
+  <div class="card-mount-section">
+    <div>
+      <h2>Why we do this</h2>
+      <p>Atlas Travel started with a single, stubborn idea: that the best holidays are quiet ones. We don't book group tours or all-inclusive resorts. We curate small, sometimes surprising itineraries built around the kind of places we'd want to go ourselves.</p>
+      <p>Every trip is hand-built by the team — no algorithms, no generic recommendations. If you want a holiday no-one else on your street has had, you're in the right place.</p>
+    </div>
+    <!-- CARD-LAYOUT MOUNT — appears in sidebar when selected -->
+    <div data-tg-widget="newsletter" id="mount-card"></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Travellers' stories</h2>
+  <p>The trips that stuck with people most aren't the ones with the longest itineraries.</p>
+  <div class="grid" style="margin-top:30px">
+    <div class="destination-card">
+      <div class="destination-card-img is-2"></div>
+      <div class="destination-card-body">
+        <h3 style="font-style:italic;font-family:'Playfair Display',serif;font-weight:500">"The villa overlooked the bay…"</h3>
+        <p>— Sarah & Mark, Cyprus 2024</p>
+      </div>
+    </div>
+    <div class="destination-card">
+      <div class="destination-card-img is-1"></div>
+      <div class="destination-card-body">
+        <h3 style="font-style:italic;font-family:'Playfair Display',serif;font-weight:500">"Felt like ours alone…"</h3>
+        <p>— The Nakamuras, Greece 2024</p>
+      </div>
+    </div>
+    <div class="destination-card">
+      <div class="destination-card-img is-3"></div>
+      <div class="destination-card-body">
+        <h3 style="font-style:italic;font-family:'Playfair Display',serif;font-weight:500">"Every detail was thought through…"</h3>
+        <p>— Alex, Puglia 2024</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POPUP / FOOTER / VERTICAL mounts — body-level for those layouts -->
+<div data-tg-widget="newsletter" id="mount-popup"></div>
+<div data-tg-widget="newsletter" id="mount-footer"></div>
+<div data-tg-widget="newsletter" id="mount-vertical"></div>
+
+<footer class="site-footer">
+  <div class="site-footer-brand">Atlas Travel Co.</div>
+  <p>© Atlas Travel Co. — established 2018<br>This is a demo page for the Travelgenix Newsletter Widget</p>
+</footer>
+
+<script src="/widget-newsletter.js"></script>
+<script>
+(function() {
+  const state = {
+    layout: 'card',
+    mode: 'light',
+    brand: '#1B2B5B',
+  };
+  const widgets = {};
+
+  function getConfig() {
+    const cfg = {
+      layout: state.layout,
+      title: 'Get travel inspiration in your inbox',
+      subtitle: 'Hand-picked destinations and exclusive offers from Atlas Travel. One thoughtful email a month, never more.',
+      buttonLabel: state.layout === 'inline' ? 'Subscribe' : 'Subscribe to our newsletter',
+      successTitle: "You're in!",
+      successMessage: 'Check your inbox for your welcome guide.',
+      consentLabel: 'I agree to receive travel inspiration emails from Atlas Travel.',
+      privacyUrl: '/privacy',
+      showFirstName: state.layout === 'card',
+      showConsent: true,
+      consentRequired: true,
+      showIcon: true,
+      triggerLabel: 'Get travel inspiration',
+      triggerStyle: 'button',
+      footerDelay: 0,  // immediate for demo
+      footerRememberDismiss: false, // don't persist dismissal in demo
+      tabLabel: 'Newsletter',
+      verticalSide: 'right',
+      theme: { mode: state.mode, brand: state.brand, accent: '#00B4D8', radius: 14 },
+      tags: ['atlas-travel-demo'],
+    };
+    // Inline shouldn't have a heading (the section already provides one)
+    if (state.layout === 'inline') {
+      cfg.title = '';
+      cfg.subtitle = '';
+    }
+    return cfg;
+  }
+
+  function showLayout(layout) {
+    state.layout = layout;
+    document.querySelectorAll('[data-tg-widget="newsletter"]').forEach(el => {
+      el.classList.remove('is-active');
+    });
+    const idMap = {
+      card:     'mount-card',
+      inline:   'mount-inline',
+      popup:    'mount-popup',
+      footer:   'mount-footer',
+      vertical: 'mount-vertical',
+    };
+    const target = document.getElementById(idMap[layout]);
+    if (!target) return;
+    target.classList.add('is-active');
+    rebuildWidget(target);
+  }
+
+  function rebuildWidget(target) {
+    // Wipe any prior shadow root by replacing the element in place
+    const fresh = target.cloneNode(false);
+    fresh.id = target.id;
+    fresh.className = target.className;
+    target.parentNode.replaceChild(fresh, target);
+    if (window.TGNewsletterWidget) {
+      widgets[fresh.id] = new window.TGNewsletterWidget(fresh, getConfig());
+    }
+  }
+
+  function rebuildActive() {
+    const active = document.querySelector('[data-tg-widget="newsletter"].is-active');
+    if (active) rebuildWidget(active);
+  }
+
+  // Bind picker
+  document.querySelectorAll('#layout-picker button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#layout-picker button').forEach(x => x.classList.remove('is-active'));
+      b.classList.add('is-active');
+      showLayout(b.dataset.layout);
+    });
+  });
+  document.querySelectorAll('#mode-picker button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#mode-picker button').forEach(x => x.classList.remove('is-active'));
+      b.classList.add('is-active');
+      state.mode = b.dataset.mode;
+      rebuildActive();
+    });
+  });
+  document.querySelectorAll('#brand-picker button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#brand-picker button').forEach(x => x.classList.remove('is-active'));
+      b.classList.add('is-active');
+      state.brand = b.dataset.brand;
+      rebuildActive();
+    });
+  });
+
+  // Boot — show card layout (default)
+  document.addEventListener('DOMContentLoaded', () => {
+    showLayout('card');
+  });
+  if (document.readyState !== 'loading') {
+    showLayout('card');
+  }
+})();
+</script>
+
+</body>
+</html>
