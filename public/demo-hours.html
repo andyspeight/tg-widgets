@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Opening Hours — Travelgenix Widget Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC;
+    color: #0F172A;
+    min-height: 100vh;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .demo-bar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #E2E8F0;
+    padding: 14px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .demo-bar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .demo-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 15px;
+  }
+  .demo-brand-mark {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+    color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+  .demo-controls {
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap; margin-left: auto;
+  }
+  .demo-controls label {
+    font-size: 12px; font-weight: 600; color: #64748B;
+    margin-right: 4px;
+  }
+  .demo-controls select, .demo-controls button {
+    appearance: none;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #0F172A;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+  .hero {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-size: 44px;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    font-weight: 800;
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 18px;
+    color: #64748B;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 32px;
+    align-items: start;
+  }
+  .demo-block {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .demo-block h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .demo-block p {
+    font-size: 13px;
+    color: #64748B;
+    margin-bottom: 20px;
+  }
+
+  .footer-mock {
+    margin-top: 80px;
+    background: #1B2B5B;
+    color: #FFFFFF;
+    padding: 48px 24px;
+    border-radius: 24px;
+  }
+  .footer-mock-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .footer-mock h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .footer-mock-brand {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .footer-mock-tagline {
+    font-size: 14px;
+    color: #CBD5E1;
+    line-height: 1.6;
+  }
+  .footer-mock ul { list-style: none; padding: 0; }
+  .footer-mock li {
+    font-size: 13px;
+    color: #CBD5E1;
+    padding: 4px 0;
+  }
+  @media (max-width: 720px) {
+    .footer-mock-inner { grid-template-columns: 1fr; }
+  }
+
+  .header-mock {
+    margin-bottom: 56px;
+    padding: 18px 24px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-mock-brand {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <div class="demo-bar-inner">
+    <div class="demo-brand">
+      <div class="demo-brand-mark">A</div>
+      Atlas Travel Co. <span style="font-weight:500;color:#94A3B8;font-size:13px">— demo client site</span>
+    </div>
+    <div class="demo-controls">
+      <label for="formatPicker">Format:</label>
+      <select id="formatPicker">
+        <option value="12">12-hour (5pm)</option>
+        <option value="24">24-hour (17:00)</option>
+      </select>
+
+      <label for="weekStart" style="margin-left:8px">Week starts:</label>
+      <select id="weekStart">
+        <option value="mon">Monday</option>
+        <option value="sun">Sunday</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="hero">
+    <h1>Opening Hours Widget</h1>
+    <p>Live status pill, today highlighting, holiday overrides, split shifts, click-to-call. Three layouts to fit any spot on a client site.</p>
+  </div>
+
+  <!-- Header demo: compact pill in a header bar -->
+  <div class="header-mock">
+    <div class="header-mock-brand">Atlas Travel Co.</div>
+    <div data-tg-widget="hours" id="header-pill"></div>
+  </div>
+
+  <!-- Three-layout grid -->
+  <div class="grid">
+
+    <div class="demo-block">
+      <h2>Card layout</h2>
+      <p>Best for "Contact us" sections, sidebars, dedicated hours pages. Shows full week with live status pill and next-open message.</p>
+      <div data-tg-widget="hours" id="card-mount"></div>
+    </div>
+
+    <div class="demo-block">
+      <h2>List layout</h2>
+      <p>Cleaner take for footers and About pages where the card chrome would be too heavy. Shows the full week without the box.</p>
+      <div data-tg-widget="hours" id="list-mount"></div>
+    </div>
+
+    <div class="demo-block">
+      <h2>Compact pill</h2>
+      <p>Single-line status indicator. Great for site headers, sticky bars, sidebars. Updates every minute.</p>
+      <div data-tg-widget="hours" id="compact-mount" style="margin-bottom:20px"></div>
+
+      <p style="margin-top:18px">Inline variant (text-only, no pill chrome):</p>
+      <div data-tg-widget="hours" id="compact-inline-mount"></div>
+    </div>
+
+    <div class="demo-block">
+      <h2>Holiday override</h2>
+      <p>Configured with a holiday on the next Bank Holiday Monday. Today's row shows the override label automatically when the date matches.</p>
+      <div data-tg-widget="hours" id="holiday-mount"></div>
+    </div>
+
+    <div class="demo-block">
+      <h2>Split shift (closed for lunch)</h2>
+      <p>Mon-Fri 9-12 and 14-17:30 with a lunchtime gap. Status logic correctly handles "closed now but opens at 2pm".</p>
+      <div data-tg-widget="hours" id="split-mount"></div>
+    </div>
+
+    <div class="demo-block">
+      <h2>With phone number</h2>
+      <p>Click-to-call phone link below the schedule. Optional timezone label for international clients.</p>
+      <div data-tg-widget="hours" id="phone-mount"></div>
+    </div>
+
+  </div>
+
+  <!-- Footer demo: list inside a footer -->
+  <div class="footer-mock">
+    <div class="footer-mock-inner">
+      <div>
+        <div class="footer-mock-brand">Atlas Travel Co.</div>
+        <p class="footer-mock-tagline">ABTA-bonded travel agents based in Bournemouth. Tailored holidays since 2009.</p>
+      </div>
+      <div>
+        <h3>Visit us</h3>
+        <ul>
+          <li>14 The Square</li>
+          <li>Bournemouth BH1 2AB</li>
+          <li>info@atlastravel.co.uk</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Hours</h3>
+        <div data-tg-widget="hours" id="footer-mount"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/widget-hours.js"></script>
+<script>
+  const formatPicker = document.getElementById('formatPicker');
+  const weekStart = document.getElementById('weekStart');
+
+  const STANDARD_HOURS = {
+    mon: [['09:00', '17:30']],
+    tue: [['09:00', '17:30']],
+    wed: [['09:00', '17:30']],
+    thu: [['09:00', '17:30']],
+    fri: [['09:00', '17:30']],
+    sat: [['10:00', '14:00']],
+    sun: [],
+  };
+
+  const SPLIT_HOURS = {
+    mon: [['09:00', '12:00'], ['14:00', '17:30']],
+    tue: [['09:00', '12:00'], ['14:00', '17:30']],
+    wed: [['09:00', '12:00'], ['14:00', '17:30']],
+    thu: [['09:00', '12:00'], ['14:00', '17:30']],
+    fri: [['09:00', '12:00'], ['14:00', '17:30']],
+    sat: [['10:00', '14:00']],
+    sun: [],
+  };
+
+  // Find the upcoming Bank Holiday Monday from this year
+  function nextBankHolidayMonday() {
+    const today = new Date();
+    let d = new Date(today);
+    while (d.getDay() !== 1) d.setDate(d.getDate() + 1);
+    if (d <= today) d.setDate(d.getDate() + 7);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function mount() {
+    const fmt = formatPicker.value;
+    const start = weekStart.value;
+
+    const all = ['header-pill', 'card-mount', 'list-mount', 'compact-mount', 'compact-inline-mount', 'holiday-mount', 'split-mount', 'phone-mount', 'footer-mount'];
+    all.forEach(id => {
+      const old = document.getElementById(id);
+      if (!old) return;
+      const fresh = document.createElement('div');
+      fresh.setAttribute('data-tg-widget', 'hours');
+      fresh.id = id;
+      fresh.style.cssText = old.style.cssText;
+      old.replaceWith(fresh);
+    });
+
+    new window.TGHoursWidget(document.getElementById('header-pill'), {
+      layout: 'compact', compactStyle: 'pill',
+      hours: STANDARD_HOURS, timeFormat: fmt, startWeekOn: start,
+    });
+
+    new window.TGHoursWidget(document.getElementById('card-mount'), {
+      layout: 'card', title: 'Opening hours',
+      hours: STANDARD_HOURS, timeFormat: fmt, startWeekOn: start,
+    });
+
+    new window.TGHoursWidget(document.getElementById('list-mount'), {
+      layout: 'list', title: 'When we are open',
+      hours: STANDARD_HOURS, timeFormat: fmt, startWeekOn: start,
+    });
+
+    new window.TGHoursWidget(document.getElementById('compact-mount'), {
+      layout: 'compact', compactStyle: 'pill',
+      hours: STANDARD_HOURS, timeFormat: fmt,
+    });
+
+    new window.TGHoursWidget(document.getElementById('compact-inline-mount'), {
+      layout: 'compact', compactStyle: 'inline', title: 'Today',
+      hours: STANDARD_HOURS, timeFormat: fmt,
+    });
+
+    new window.TGHoursWidget(document.getElementById('holiday-mount'), {
+      layout: 'card', title: 'Opening hours',
+      hours: STANDARD_HOURS, timeFormat: fmt, startWeekOn: start,
+      holidays: [
+        { date: nextBankHolidayMonday(), label: 'Bank Holiday', closed: true },
+        { date: '2026-12-25', label: 'Christmas Day', closed: true },
+        { date: '2026-12-26', label: 'Boxing Day', closed: true },
+      ],
+    });
+
+    new window.TGHoursWidget(document.getElementById('split-mount'), {
+      layout: 'card', title: 'Office hours',
+      hours: SPLIT_HOURS, timeFormat: fmt, startWeekOn: start,
+    });
+
+    new window.TGHoursWidget(document.getElementById('phone-mount'), {
+      layout: 'card', title: 'Get in touch',
+      hours: STANDARD_HOURS, timeFormat: fmt, startWeekOn: start,
+      phone: '+44 1202 555 0123',
+      phoneLabel: 'Call us: 01202 555 0123',
+      showTimezoneNote: true,
+      timezoneLabel: 'All times shown in UK time',
+    });
+
+    new window.TGHoursWidget(document.getElementById('footer-mount'), {
+      layout: 'list', title: '',
+      hours: STANDARD_HOURS, timeFormat: fmt, startWeekOn: start,
+      dayLabels: 'short',
+      theme: { mode: 'dark', accent: '#FFFFFF' },
+    });
+  }
+
+  formatPicker.addEventListener('change', mount);
+  weekStart.addEventListener('change', mount);
+  setTimeout(mount, 50);
+</script>
+</body>
+</html>
