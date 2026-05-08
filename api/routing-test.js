@@ -163,8 +163,22 @@ async function verifyWebhook(credentials, config) {
   return { url, statusCode: resp.status };
 }
 
-// Google Sheets and email destinations: skip for now, return "manual config OK"
-async function verifyGoogleSheets() { return { note: 'Google Sheets test not yet implemented' }; }
+// Google Sheets — real verifier delegated to the dispatcher module
+async function verifyGoogleSheets(credentials, config) {
+  const { verifyGoogleSheets: realVerify } = await import('./_lib/destinations/google-sheets.js');
+  const result = await realVerify(
+    config?.spreadsheetId || config?.sheetId,
+    config?.sheetName || 'Sheet1'
+  );
+  if (!result.ok) throw new Error(result.error || 'Verification failed');
+  // Re-shape the success result so it matches what the editor's "Test
+  // connection" code expects (it looks for `list`, `audience`, `group`)
+  return {
+    list: result.sheetTitle,           // shows as "Connected — found {sheetTitle}"
+    serviceAccount: result.serviceAccount,
+    availableTabs: result.availableTabs,
+  };
+}
 async function verifyEmail() { return { note: 'Email destination test not yet implemented' }; }
 
 const VERIFIERS = {
