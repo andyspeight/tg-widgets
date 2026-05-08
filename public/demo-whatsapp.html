@@ -149,6 +149,7 @@
       <label for="layoutPicker">Layout:</label>
       <select id="layoutPicker">
         <option value="floating">Floating button</option>
+        <option value="vertical">Vertical tab</option>
         <option value="inline">Inline pill</option>
         <option value="card">Inline card</option>
       </select>
@@ -159,10 +160,14 @@
         <option value="multi">Multi-agent</option>
       </select>
 
-      <label for="cornerPicker" style="margin-left:8px">Corner:</label>
-      <select id="cornerPicker">
+      <label for="positionPicker" style="margin-left:8px">Position:</label>
+      <select id="positionPicker">
         <option value="bottom-right">Bottom right</option>
         <option value="bottom-left">Bottom left</option>
+        <option value="middle-right">Middle right</option>
+        <option value="middle-left">Middle left</option>
+        <option value="top-right">Top right</option>
+        <option value="top-left">Top left</option>
       </select>
 
       <label for="hoursPicker" style="margin-left:8px">Hours:</label>
@@ -234,7 +239,7 @@
 <script>
   const layoutPicker = document.getElementById('layoutPicker');
   const modePicker = document.getElementById('modePicker');
-  const cornerPicker = document.getElementById('cornerPicker');
+  const positionPicker = document.getElementById('positionPicker');
   const hoursPicker = document.getElementById('hoursPicker');
   const themeBtn = document.getElementById('themeBtn');
   let isDark = false;
@@ -259,8 +264,18 @@
   function mountFloating() {
     const layout = layoutPicker.value;
     const mode = modePicker.value;
-    const corner = cornerPicker.value;
+    let position = positionPicker.value;
     const hoursOn = hoursPicker.value === 'on';
+
+    // Vertical only allows middle-left/middle-right — coerce
+    if (layout === 'vertical' && position !== 'middle-left' && position !== 'middle-right') {
+      position = 'middle-right';
+    }
+
+    // Disable invalid options in the picker for vertical
+    Array.from(positionPicker.options).forEach(opt => {
+      opt.disabled = (layout === 'vertical' && opt.value !== 'middle-left' && opt.value !== 'middle-right');
+    });
 
     const oldMount = document.getElementById('floating-mount');
     const fresh = document.createElement('div');
@@ -268,19 +283,20 @@
     fresh.id = 'floating-mount';
     oldMount.replaceWith(fresh);
 
-    if (layout === 'floating') {
+    if (layout === 'floating' || layout === 'vertical') {
       const cfg = {
-        layout: 'floating',
-        corner: corner,
+        layout: layout,
+        position: position,
         mode: mode,
         phone: '+447900900900',
         name: 'Atlas Travel',
         role: 'Travel specialists',
         message: 'Hi! I have a question about your travel services.',
         appendPageUrl: true,
-        greetingEnabled: true,
+        greetingEnabled: layout === 'floating',
         greetingDelay: 3,
         greetingText: 'Need help finding your perfect trip?',
+        tabLabel: 'Chat with us',
         pulse: true,
         hoursEnabled: hoursOn,
         hours: SAMPLE_HOURS,
@@ -296,7 +312,7 @@
 
   layoutPicker.addEventListener('change', mountFloating);
   modePicker.addEventListener('change', mountFloating);
-  cornerPicker.addEventListener('change', mountFloating);
+  positionPicker.addEventListener('change', mountFloating);
   hoursPicker.addEventListener('change', mountFloating);
   themeBtn.addEventListener('click', () => {
     isDark = !isDark;
