@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newsletter Signup Widget Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Newsletter editor-specific styles. Use --tgse-* tokens from the shell. */
+
+  .field-group { margin-bottom: 18px; }
+  .field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tgse-text-2);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+  .field-help {
+    font-size: 11.5px;
+    color: var(--tgse-text-3);
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+  .field-help.is-warning { color: var(--tgse-warning, #B45309); }
+
+  .text-input,
+  .textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm, 6px);
+    background: var(--tgse-bg);
+    color: var(--tgse-text-1);
+    font-family: inherit;
+    font-size: 13px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .text-input:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--tgse-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgse-accent) 22%, transparent);
+  }
+  .textarea { min-height: 64px; resize: vertical; line-height: 1.5; }
+
+  /* Layout picker — radio cards */
+  .layout-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .layout-card {
+    position: relative;
+    padding: 12px;
+    background: var(--tgse-bg);
+    border: 1.5px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm, 6px);
+    cursor: pointer;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .layout-card:hover { border-color: var(--tgse-text-3); }
+  .layout-card.is-selected {
+    border-color: var(--tgse-accent);
+    background: color-mix(in srgb, var(--tgse-accent) 6%, transparent);
+  }
+  .layout-card input { position: absolute; opacity: 0; pointer-events: none; }
+  .layout-card-icon {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--tgse-bg-2);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    color: var(--tgse-text-2);
+  }
+  .layout-card-icon svg { width: 22px; height: 22px; }
+  .layout-card-name { font-size: 12px; font-weight: 600; color: var(--tgse-text-1); }
+
+  /* Inline-style mini preview shapes */
+  .preview-shape {
+    border: 1px solid currentColor;
+    background: currentColor;
+    opacity: 0.2;
+  }
+
+  /* Toggle (checkbox-styled) row */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    gap: 12px;
+  }
+  .toggle-row + .toggle-row { border-top: 1px solid var(--tgse-border-light, var(--tgse-border)); }
+  .toggle-row-label {
+    flex: 1;
+    font-size: 13px;
+    color: var(--tgse-text-1);
+    line-height: 1.4;
+  }
+  .toggle-row-sub {
+    font-size: 11.5px;
+    color: var(--tgse-text-3);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* Switch */
+  .switch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: var(--tgse-border);
+    border-radius: 999px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 150ms ease;
+  }
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: left 150ms ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .switch input { display: none; }
+  .switch.is-on { background: var(--tgse-accent); }
+  .switch.is-on::after { left: 18px; }
+
+  /* Pill picker (e.g. light/dark toggle) */
+  .pill-picker {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    background: var(--tgse-bg-2);
+    border-radius: var(--tgse-radius-sm, 6px);
+    border: 1px solid var(--tgse-border);
+  }
+  .pill-picker button {
+    flex: 1;
+    padding: 7px 10px;
+    border: 0;
+    background: transparent;
+    color: var(--tgse-text-2);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .pill-picker button.is-active {
+    background: var(--tgse-bg);
+    color: var(--tgse-text-1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    font-weight: 600;
+  }
+
+  /* Colour picker — circle swatch + hex input */
+  .colour-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .colour-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--tgse-border);
+    cursor: pointer;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .colour-swatch input[type="color"] {
+    position: absolute;
+    inset: -2px;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    border: 0;
+    cursor: pointer;
+  }
+
+  /* Number + slider row */
+  .slider-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .slider-row input[type="range"] { flex: 1; }
+  .slider-row .slider-value {
+    width: 50px;
+    font-size: 13px;
+    color: var(--tgse-text-1);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Section header inside sidebar body */
+  .section-h {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tgse-text-3);
+    font-weight: 700;
+    margin: 22px 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--tgse-border-light, var(--tgse-border));
+  }
+  .section-h:first-child { margin-top: 0; }
+
+  /* Layout-specific reveal */
+  .when-layout { display: none; }
+
+  /* ============ Routing tab ============ */
+  .routing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .routing-card {
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm, 6px);
+    padding: 12px;
+    background: var(--tgse-bg);
+  }
+  .routing-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .routing-card-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    background: var(--tgse-bg-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+  .routing-card-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tgse-text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .routing-card-sub {
+    font-size: 11.5px;
+    color: var(--tgse-text-3);
+    margin-top: 2px;
+  }
+  .routing-card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .btn-small {
+    appearance: none;
+    border: 1px solid var(--tgse-border);
+    background: var(--tgse-bg);
+    color: var(--tgse-text-1);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .btn-small:hover { background: var(--tgse-bg-2); }
+  .btn-small.is-danger { color: var(--tgse-error, #DC2626); border-color: color-mix(in srgb, var(--tgse-error, #DC2626) 30%, var(--tgse-border)); }
+  .btn-small.is-danger:hover { background: color-mix(in srgb, var(--tgse-error, #DC2626) 10%, transparent); }
+
+  .add-destination-btn {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px dashed var(--tgse-border);
+    background: transparent;
+    color: var(--tgse-text-2);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--tgse-radius-sm, 6px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .add-destination-btn:hover {
+    border-color: var(--tgse-accent);
+    color: var(--tgse-accent);
+  }
+
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-status.is-on  { background: color-mix(in srgb, var(--tgse-success, #10B981) 12%, transparent); color: var(--tgse-success, #047857); }
+  .badge-status.is-off { background: color-mix(in srgb, var(--tgse-text-3) 12%, transparent); color: var(--tgse-text-3); }
+  .badge-status.is-error { background: color-mix(in srgb, var(--tgse-error, #DC2626) 12%, transparent); color: var(--tgse-error, #DC2626); }
+
+  /* Modal for adding/editing destinations */
+  .tg-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    background: rgba(15, 23, 42, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .tg-modal-overlay.is-open { display: flex; animation: fade-in 180ms ease; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .tg-modal {
+    background: var(--tgse-bg);
+    border: 1px solid var(--tgse-border);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.4);
+    overflow: hidden;
+  }
+  .tg-modal-head {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--tgse-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tg-modal-title { font-size: 15px; font-weight: 700; color: var(--tgse-text-1); margin: 0; }
+  .tg-modal-close {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--tgse-text-3);
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 120ms ease;
+  }
+  .tg-modal-close:hover { background: var(--tgse-bg-2); color: var(--tgse-text-1); }
+  .tg-modal-body { padding: 22px; overflow-y: auto; flex: 1; }
+  .tg-modal-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--tgse-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: var(--tgse-bg-2);
+  }
+  .btn-prim {
+    appearance: none;
+    border: 0;
+    background: var(--tgse-accent);
+    color: white;
+    padding: 9px 18px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms ease, transform 100ms ease;
+  }
+  .btn-prim:hover { background: color-mix(in srgb, var(--tgse-accent) 85%, black); }
+  .btn-prim:active { transform: scale(0.98); }
+  .btn-prim[disabled] { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary {
+    appearance: none;
+    background: var(--tgse-bg);
+    color: var(--tgse-text-1);
+    border: 1px solid var(--tgse-border);
+    padding: 9px 16px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-secondary:hover { background: var(--tgse-bg-2); }
+
+  /* Destination picker grid */
+  .dest-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .dest-card {
+    padding: 16px;
+    border: 1.5px solid var(--tgse-border);
+    border-radius: 10px;
+    background: var(--tgse-bg);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 120ms ease, transform 100ms ease;
+  }
+  .dest-card:hover { border-color: var(--tgse-accent); }
+  .dest-card-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+  .dest-card-name { font-size: 13.5px; font-weight: 700; color: var(--tgse-text-1); margin-bottom: 2px; }
+  .dest-card-desc { font-size: 11.5px; color: var(--tgse-text-3); line-height: 1.4; }
+
+  .test-result {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .test-result.is-ok { background: color-mix(in srgb, var(--tgse-success, #10B981) 10%, transparent); color: var(--tgse-success, #047857); }
+  .test-result.is-error { background: color-mix(in srgb, var(--tgse-error, #DC2626) 10%, transparent); color: var(--tgse-error, #B91C1C); }
+  .test-result svg { flex-shrink: 0; margin-top: 2px; }
+
+  /* Preview iframe wrap */
+  .preview-iframe-wrap {
+    height: 100%;
+    width: 100%;
+    background: var(--tgse-bg-2);
+    overflow: auto;
+  }
+  .preview-iframe-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Newsletter Signup</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      <button data-tab="routing" role="tab" aria-selected="false">Routing</button>
+    </nav>
+
+    <!-- ============================================================
+         SIDEBAR BODY — TAB PANELS
+         ============================================================ -->
+    <div class="tgse-body">
+
+      <!-- ====== DESIGN TAB ====== -->
+      <div class="tgse-panel" data-panel="design">
+        <div class="section-h">Layout</div>
+        <div class="layout-picker" id="layout-picker">
+          <label class="layout-card" data-layout="card">
+            <input type="radio" name="layout" value="card">
+            <div class="layout-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/><rect x="9" y="16" width="6" height="2.5" rx="1"/></svg>
+            </div>
+            <div class="layout-card-name">Card</div>
+          </label>
+          <label class="layout-card" data-layout="inline">
+            <input type="radio" name="layout" value="inline">
+            <div class="layout-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="14" height="6" rx="1"/><rect x="17" y="9" width="5" height="6" rx="1"/></svg>
+            </div>
+            <div class="layout-card-name">Inline</div>
+          </label>
+          <label class="layout-card" data-layout="popup">
+            <input type="radio" name="layout" value="popup">
+            <div class="layout-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="1" stroke-dasharray="2,2"/><rect x="6" y="7" width="12" height="10" rx="1.5"/></svg>
+            </div>
+            <div class="layout-card-name">Popup</div>
+          </label>
+          <label class="layout-card" data-layout="footer">
+            <input type="radio" name="layout" value="footer">
+            <div class="layout-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="1" stroke-dasharray="2,2"/><rect x="3" y="17" width="18" height="4" rx="1" fill="currentColor" fill-opacity="0.2"/></svg>
+            </div>
+            <div class="layout-card-name">Footer bar</div>
+          </label>
+          <label class="layout-card" data-layout="vertical">
+            <input type="radio" name="layout" value="vertical">
+            <div class="layout-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="1" stroke-dasharray="2,2"/><rect x="19" y="9" width="3" height="8" rx="1" fill="currentColor" fill-opacity="0.2"/></svg>
+            </div>
+            <div class="layout-card-name">Vertical tab</div>
+          </label>
+        </div>
+
+        <div class="section-h">Theme</div>
+        <div class="field-group">
+          <label class="field-label">Mode</label>
+          <div class="pill-picker" id="pill-mode">
+            <button data-mode="light">Light</button>
+            <button data-mode="dark">Dark</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="brand-colour">Brand colour</label>
+          <div class="colour-row">
+            <span class="colour-swatch" id="brand-swatch">
+              <input type="color" id="brand-colour-picker" value="#1B2B5B">
+            </span>
+            <input class="text-input" type="text" id="brand-colour" value="#1B2B5B" maxlength="9" style="font-family:'JetBrains Mono',monospace">
+          </div>
+          <div class="field-help">Used for the button, panel header, and accents on the brand surface</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="accent-colour">Accent colour</label>
+          <div class="colour-row">
+            <span class="colour-swatch" id="accent-swatch">
+              <input type="color" id="accent-colour-picker" value="#00B4D8">
+            </span>
+            <input class="text-input" type="text" id="accent-colour" value="#00B4D8" maxlength="9" style="font-family:'JetBrains Mono',monospace">
+          </div>
+          <div class="field-help">Used for focus rings and the footer-bar action button</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Corner radius</label>
+          <div class="slider-row">
+            <input type="range" id="radius-slider" min="0" max="40" value="14" step="1">
+            <div class="slider-value"><span id="radius-value">14</span>px</div>
+          </div>
+        </div>
+        <div class="field-group" id="font-picker-mount"></div>
+      </div>
+
+      <!-- ====== CONTENT TAB ====== -->
+      <div class="tgse-panel" data-panel="content" hidden>
+
+        <div class="when-layout" data-show-on="card,popup,footer,vertical">
+          <div class="section-h">Headline</div>
+          <div class="field-group">
+            <label class="field-label" for="title-input">Title</label>
+            <input class="text-input" id="title-input" type="text" maxlength="120">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="subtitle-input">Subtitle</label>
+            <textarea class="textarea" id="subtitle-input" maxlength="240"></textarea>
+          </div>
+        </div>
+
+        <div class="section-h">Form</div>
+        <div class="field-group">
+          <label class="field-label" for="email-placeholder">Email placeholder</label>
+          <input class="text-input" id="email-placeholder" type="text" maxlength="80">
+        </div>
+        <div class="when-layout" data-show-on="card,popup">
+          <div class="field-group">
+            <label class="field-label" for="firstname-placeholder">First name placeholder</label>
+            <input class="text-input" id="firstname-placeholder" type="text" maxlength="80">
+            <div class="field-help">Only shown if you've enabled the first-name field in Settings</div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="button-label">Button text</label>
+          <input class="text-input" id="button-label" type="text" maxlength="40">
+        </div>
+
+        <div class="section-h">Success message</div>
+        <div class="field-group">
+          <label class="field-label" for="success-title">Success title</label>
+          <input class="text-input" id="success-title" type="text" maxlength="80">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="success-message">Success message</label>
+          <textarea class="textarea" id="success-message" maxlength="240"></textarea>
+        </div>
+
+        <div class="when-layout" data-show-on="popup">
+          <div class="section-h">Popup trigger</div>
+          <div class="field-group">
+            <label class="field-label" for="trigger-label">Trigger label</label>
+            <input class="text-input" id="trigger-label" type="text" maxlength="60">
+          </div>
+        </div>
+
+        <div class="when-layout" data-show-on="vertical">
+          <div class="section-h">Vertical tab</div>
+          <div class="field-group">
+            <label class="field-label" for="tab-label">Tab text</label>
+            <input class="text-input" id="tab-label" type="text" maxlength="40">
+            <div class="field-help" id="tab-label-help">Default: Newsletter</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SETTINGS TAB ====== -->
+      <div class="tgse-panel" data-panel="settings" hidden>
+        <div class="when-layout" data-show-on="card,popup">
+          <div class="section-h">Card layout options</div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-row-label">Show first name field</div>
+              <div class="toggle-row-sub">Add an optional name input above the email field</div>
+            </div>
+            <label class="switch" id="sw-firstname"><input type="checkbox"></label>
+          </div>
+          <div class="toggle-row when-layout" data-show-on="card">
+            <div>
+              <div class="toggle-row-label">Show envelope icon</div>
+              <div class="toggle-row-sub">A small mail icon at the top of the card</div>
+            </div>
+            <label class="switch is-on" id="sw-icon"><input type="checkbox" checked></label>
+          </div>
+        </div>
+
+        <div class="section-h">Consent</div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-row-label">Show consent checkbox</div>
+            <div class="toggle-row-sub">GDPR-friendly explicit opt-in checkbox</div>
+          </div>
+          <label class="switch is-on" id="sw-consent"><input type="checkbox" checked></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-row-label">Make consent required</div>
+            <div class="toggle-row-sub">User must tick the box to submit</div>
+          </div>
+          <label class="switch is-on" id="sw-consent-required"><input type="checkbox" checked></label>
+        </div>
+        <div class="field-group" style="margin-top:14px">
+          <label class="field-label" for="consent-label">Consent label</label>
+          <textarea class="textarea" id="consent-label" maxlength="200"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="privacy-url">Privacy policy URL (optional)</label>
+          <input class="text-input" id="privacy-url" type="url" placeholder="https://example.com/privacy" maxlength="300">
+          <div class="field-help">If provided, a "Privacy policy" link is shown next to the consent label</div>
+        </div>
+
+        <div class="when-layout" data-show-on="popup">
+          <div class="section-h">Popup options</div>
+          <div class="field-group">
+            <label class="field-label">Trigger style</label>
+            <div class="pill-picker" id="pill-trigger-style">
+              <button data-style="button">Button</button>
+              <button data-style="link">Text link</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-layout" data-show-on="footer">
+          <div class="section-h">Footer bar options</div>
+          <div class="field-group">
+            <label class="field-label">Show after delay (seconds)</label>
+            <div class="slider-row">
+              <input type="range" id="footer-delay" min="0" max="30" value="1.5" step="0.5">
+              <div class="slider-value"><span id="footer-delay-value">1.5</span>s</div>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-row-label">Remember dismissal</div>
+              <div class="toggle-row-sub">Don't re-show after a visitor closes it (uses localStorage)</div>
+            </div>
+            <label class="switch is-on" id="sw-footer-remember"><input type="checkbox" checked></label>
+          </div>
+        </div>
+
+        <div class="when-layout" data-show-on="vertical">
+          <div class="section-h">Vertical tab options</div>
+          <div class="field-group">
+            <label class="field-label">Side</label>
+            <div class="pill-picker" id="pill-vertical-side">
+              <button data-side="left">Left edge</button>
+              <button data-side="right">Right edge</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-h">Tags</div>
+        <div class="field-group">
+          <label class="field-label" for="tags-input">Tags applied to every signup</label>
+          <input class="text-input" id="tags-input" type="text" placeholder="cyprus-fans, monthly-newsletter" maxlength="200">
+          <div class="field-help">Comma-separated. Forwarded to Mailchimp/Brevo/etc as subscriber tags.</div>
+        </div>
+      </div>
+
+      <!-- ====== ROUTING TAB ====== -->
+      <div class="tgse-panel" data-panel="routing" hidden>
+        <p style="font-size:13px;color:var(--tgse-text-2);margin:0 0 16px;line-height:1.5">
+          When someone signs up, send their details to one or more places. Mix and match —
+          for example, push to Mailchimp and also drop a row in Google Sheets.
+        </p>
+        <div class="routing-list" id="routing-list">
+          <!-- routing cards rendered here -->
+        </div>
+        <button class="add-destination-btn" id="btn-add-destination" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add destination
+        </button>
+
+        <div style="margin-top:18px;padding:12px;background:var(--tgse-bg-2);border-radius:6px;font-size:12px;color:var(--tgse-text-2);line-height:1.5">
+          <strong style="color:var(--tgse-text-1)">Tip:</strong> Save the widget first if you haven't yet. Routing destinations are linked to the saved widget record.
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       PREVIEW
+       ============================================================ -->
+  <main class="tgse-preview">
+    <div class="tgse-preview-chrome">
+      <div class="tgse-preview-tabs">
+        <button class="tgse-vp-tab is-active" data-vp="desktop">Desktop</button>
+        <button class="tgse-vp-tab" data-vp="tablet">Tablet</button>
+        <button class="tgse-vp-tab" data-vp="mobile">Mobile</button>
+      </div>
+      <div class="tgse-preview-tools">
+        <button class="tgse-vp-tab" id="btn-theme-toggle">Toggle dark</button>
+        <button class="tgse-vp-tab" id="btn-embed">Embed</button>
+      </div>
+    </div>
+    <div class="tgse-preview-stage">
+      <div class="preview-iframe-wrap">
+        <iframe id="preview-iframe" title="Newsletter widget preview"></iframe>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- ============================================================
+     DESTINATION PICKER MODAL
+     ============================================================ -->
+<div class="tg-modal-overlay" id="dest-picker-overlay">
+  <div class="tg-modal" id="dest-picker">
+    <div class="tg-modal-head">
+      <h3 class="tg-modal-title">Choose a destination</h3>
+      <button class="tg-modal-close" data-close="dest-picker">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="tg-modal-body">
+      <div class="dest-grid" id="dest-grid">
+        <!-- destination cards rendered here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DESTINATION CONFIG MODAL
+     ============================================================ -->
+<div class="tg-modal-overlay" id="dest-config-overlay">
+  <div class="tg-modal" id="dest-config">
+    <div class="tg-modal-head">
+      <h3 class="tg-modal-title" id="dest-config-title">Configure destination</h3>
+      <button class="tg-modal-close" data-close="dest-config">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="tg-modal-body" id="dest-config-body">
+      <!-- form fields rendered per destination here -->
+    </div>
+    <div class="tg-modal-foot">
+      <button class="btn-secondary" id="dest-test-btn" type="button">Test connection</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" data-close="dest-config" type="button">Cancel</button>
+        <button class="btn-prim" id="dest-save-btn" type="button">Save destination</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/editor-shell.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  const state = {
+    widgetId: null,
+    config: makeDefaultConfig(),
+    dirty: false,
+    routingConfigs: [],   // loaded from /api/routing-configs once widgetId known
+    pendingDest: null,    // currently being edited in the modal
+  };
+
+  function makeDefaultConfig() {
+    return {
+      layout: 'card',
+      title: 'Get travel inspiration in your inbox',
+      subtitle: 'Hand-picked destinations and exclusive offers. One thoughtful email a month.',
+      emailPlaceholder: 'your@email.com',
+      firstNamePlaceholder: 'First name',
+      buttonLabel: 'Subscribe',
+      successTitle: "You're in!",
+      successMessage: 'Check your inbox for a welcome email.',
+      consentLabel: 'I agree to receive travel inspiration emails.',
+      privacyUrl: '',
+      showFirstName: false,
+      showConsent: true,
+      consentRequired: true,
+      showIcon: true,
+      triggerLabel: 'Subscribe to our newsletter',
+      triggerStyle: 'button',
+      footerDelay: 1.5,
+      footerRememberDismiss: true,
+      tabLabel: 'Newsletter',
+      verticalSide: 'right',
+      fontFamily: 'Inter',
+      theme: { mode: 'light', brand: '#1B2B5B', accent: '#00B4D8', radius: 14 },
+      tags: [],
+    };
+  }
+
+  // ============================================================
+  // DESTINATION CATALOG
+  // ============================================================
+  const DESTINATIONS = {
+    'mailchimp': {
+      name: 'Mailchimp',
+      icon: '🐵',
+      colour: '#FFE01B',
+      description: 'Add to a Mailchimp audience',
+      fields: [
+        { type: 'creds', key: 'apiKey', label: 'API key', placeholder: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-us21', help: 'Find this in Mailchimp → Account → Extras → API keys. Must include the data center suffix (e.g. -us21).' },
+        { type: 'config', key: 'audienceId', label: 'Audience ID', placeholder: 'a1b2c3d4e5', help: 'Find this in Audience → Settings → Audience name and defaults' },
+        { type: 'config', key: 'tags', label: 'Subscriber tags (optional)', placeholder: 'newsletter, atlas-travel', help: 'Comma-separated. Applied to every new subscriber.' },
+        { type: 'config-bool', key: 'doubleOptIn', label: 'Double opt-in', help: "Sends a confirmation email before subscribing. Off by default." },
+      ],
+    },
+    'brevo': {
+      name: 'Brevo',
+      icon: '✉️',
+      colour: '#0F8C50',
+      description: 'Add to a Brevo (Sendinblue) list',
+      fields: [
+        { type: 'creds', key: 'apiKey', label: 'API key', placeholder: 'xkeysib-...', help: 'Find this in Brevo → SMTP & API → API keys' },
+        { type: 'config', key: 'listIds', label: 'List ID(s)', placeholder: '4, 7', help: 'Comma-separated integers. Find list IDs in Contacts → Lists.' },
+      ],
+    },
+    'mailerlite': {
+      name: 'MailerLite',
+      icon: '📨',
+      colour: '#19D690',
+      description: 'Add to a MailerLite group',
+      fields: [
+        { type: 'creds', key: 'apiKey', label: 'API key', placeholder: 'eyJ0eXAiOiJK...', help: 'Find this in MailerLite → Integrations → API → Use' },
+        { type: 'config', key: 'groups', label: 'Group ID(s)', placeholder: '123456789012345678', help: 'Comma-separated. Group IDs are listed in MailerLite → Subscribers → Groups.' },
+      ],
+    },
+    'klaviyo': {
+      name: 'Klaviyo',
+      icon: '⚡',
+      colour: '#FFD800',
+      description: 'Subscribe to a Klaviyo list with marketing consent',
+      fields: [
+        { type: 'creds', key: 'apiKey', label: 'Private API key', placeholder: 'pk_...', help: 'Generate in Klaviyo → Settings → API Keys. Needs lists:write and profiles:write scopes.' },
+        { type: 'config', key: 'listId', label: 'List ID', placeholder: 'Y6nRLr', help: 'Find this in Klaviyo → Lists & Segments → click your list → URL contains the ID' },
+      ],
+    },
+    'constant-contact': {
+      name: 'Constant Contact',
+      icon: '📮',
+      colour: '#1856ED',
+      description: 'Add to one or more Constant Contact lists',
+      fields: [
+        { type: 'creds', key: 'accessToken', label: 'Access token', placeholder: 'eyJraWQ...', help: 'Constant Contact uses OAuth2. Paste the current access token here.' },
+        { type: 'creds', key: 'refreshToken', label: 'Refresh token', placeholder: 'rkid_...', help: 'Required for auto-refresh when the access token expires (every 24h).' },
+        { type: 'creds', key: 'clientId', label: 'OAuth client ID', placeholder: 'abc-123-def', help: 'Your Constant Contact app client ID' },
+        { type: 'creds', key: 'clientSecret', label: 'OAuth client secret', placeholder: '...', help: 'Your Constant Contact app client secret' },
+        { type: 'config', key: 'listIds', label: 'List ID(s)', placeholder: 'd13d60d0-f256-11e8-...', help: 'Comma-separated UUIDs. Find list IDs in the Constant Contact dashboard.' },
+      ],
+    },
+    'webhook': {
+      name: 'Webhook',
+      icon: '🔗',
+      colour: '#475569',
+      description: 'POST a JSON payload to your endpoint',
+      fields: [
+        { type: 'config', key: 'url', label: 'Endpoint URL', placeholder: 'https://example.com/webhooks/newsletter', help: 'Your endpoint receives a POST with the lead JSON' },
+        { type: 'creds', key: 'secret', label: 'Shared secret (optional)', placeholder: '...', help: "If set, sent in the X-Travelgenix-Signature header for HMAC verification" },
+      ],
+    },
+    'google-sheets': {
+      name: 'Google Sheets',
+      icon: '📊',
+      colour: '#0F9D58',
+      description: 'Append a row to a Google Sheet (coming soon)',
+      fields: [
+        { type: 'config', key: 'sheetId', label: 'Spreadsheet ID', placeholder: '1A2B3C...', help: 'From the sheet URL: /spreadsheets/d/[ID]/edit' },
+        { type: 'config', key: 'sheetName', label: 'Sheet/tab name', placeholder: 'Newsletter Signups', help: 'The tab to append rows to' },
+      ],
+    },
+    'email': {
+      name: 'Email notification',
+      icon: '✉️',
+      colour: '#94A3B8',
+      description: 'Send a notification email to your team',
+      fields: [
+        { type: 'config', key: 'to', label: 'Recipient', placeholder: 'team@yourcompany.com', help: 'Sent from notifications@travelgenix.io' },
+        { type: 'config', key: 'subject', label: 'Subject (optional)', placeholder: 'New newsletter signup', help: 'Defaults to "New newsletter signup from {firstName}"' },
+      ],
+    },
+  };
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  console.log('[boot] editor-newsletter.html running | shell:', !!window.tgse);
+
+  window.tgse.init({
+    widgetType: 'Newsletter Signup',
+    widgetTag: 'newsletter',
+    scriptFile: 'widget-newsletter.js',
+
+    getConfig: () => state.config,
+    setConfig: (c) => {
+      if (c && typeof c === 'object') {
+        // Deep-ish merge so we don't lose nested theme values when partially loaded
+        state.config = Object.assign(makeDefaultConfig(), c, {
+          theme: Object.assign({}, makeDefaultConfig().theme, (c && c.theme) || {}),
+        });
+      }
+      renderAll();
+      updatePreview();
+    },
+
+    onTabChange: (tab) => setTab(tab),
+    onLoginSuccess: () => init(),
+    onAfterSave: (d) => {
+      state.dirty = false;
+      if (d && d.widgetId) {
+        state.widgetId = d.widgetId;
+        loadRoutingConfigs();
+      }
+    },
+    onThemeToggle: () => {
+      state.config.theme.mode = state.config.theme.mode === 'dark' ? 'light' : 'dark';
+      markDirty();
+      renderTheme();
+      updatePreview();
+    },
+  });
+
+  // Mount font picker if available
+  setTimeout(() => {
+    if (window.tgse && typeof window.tgse.mountFontPicker === 'function') {
+      try {
+        window.tgse.mountFontPicker(
+          document.getElementById('font-picker-mount'),
+          () => state.config.fontFamily,
+          (val) => {
+            state.config.fontFamily = val;
+            markDirty();
+            updatePreview();
+          }
+        );
+      } catch(e) { /* shell may not have it yet */ }
+    }
+  }, 50);
+
+  // ============================================================
+  // INITIAL DATA LOAD
+  // ============================================================
+  function init() {
+    // Read widgetId from query string (?id=recXXX) — same convention as other editors
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id && /^rec[A-Za-z0-9]{14}$/.test(id)) {
+      state.widgetId = id;
+      loadRoutingConfigs();
+    }
+    renderAll();
+    updatePreview();
+  }
+
+  // ============================================================
+  // RENDER ALL TABS
+  // ============================================================
+  function renderAll() {
+    renderLayoutPicker();
+    renderTheme();
+    renderContentTab();
+    renderSettingsTab();
+    renderLayoutSpecificFields();
+    renderRoutingList();
+  }
+
+  function renderLayoutPicker() {
+    const cards = document.querySelectorAll('#layout-picker .layout-card');
+    cards.forEach(c => {
+      const layout = c.dataset.layout;
+      const input = c.querySelector('input');
+      const isSelected = state.config.layout === layout;
+      c.classList.toggle('is-selected', isSelected);
+      input.checked = isSelected;
+    });
+  }
+
+  function renderTheme() {
+    // Mode pills
+    document.querySelectorAll('#pill-mode button').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.mode === state.config.theme.mode);
+    });
+    // Colour inputs
+    const $brand = document.getElementById('brand-colour');
+    const $brandPicker = document.getElementById('brand-colour-picker');
+    if ($brand) $brand.value = state.config.theme.brand;
+    if ($brandPicker) $brandPicker.value = state.config.theme.brand;
+    const $accent = document.getElementById('accent-colour');
+    const $accentPicker = document.getElementById('accent-colour-picker');
+    if ($accent) $accent.value = state.config.theme.accent;
+    if ($accentPicker) $accentPicker.value = state.config.theme.accent;
+    // Radius
+    document.getElementById('radius-slider').value = state.config.theme.radius;
+    document.getElementById('radius-value').textContent = state.config.theme.radius;
+  }
+
+  function renderContentTab() {
+    setVal('#title-input', state.config.title);
+    setVal('#subtitle-input', state.config.subtitle);
+    setVal('#email-placeholder', state.config.emailPlaceholder);
+    setVal('#firstname-placeholder', state.config.firstNamePlaceholder);
+    setVal('#button-label', state.config.buttonLabel);
+    setVal('#success-title', state.config.successTitle);
+    setVal('#success-message', state.config.successMessage);
+    setVal('#trigger-label', state.config.triggerLabel);
+    setVal('#tab-label', state.config.tabLabel);
+    updateTabLabelHelp();
+  }
+
+  function renderSettingsTab() {
+    setSwitch('#sw-firstname', state.config.showFirstName);
+    setSwitch('#sw-icon', state.config.showIcon);
+    setSwitch('#sw-consent', state.config.showConsent);
+    setSwitch('#sw-consent-required', state.config.consentRequired);
+    setVal('#consent-label', state.config.consentLabel);
+    setVal('#privacy-url', state.config.privacyUrl);
+    document.querySelectorAll('#pill-trigger-style button').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.style === state.config.triggerStyle);
+    });
+    document.getElementById('footer-delay').value = state.config.footerDelay;
+    document.getElementById('footer-delay-value').textContent = state.config.footerDelay;
+    setSwitch('#sw-footer-remember', state.config.footerRememberDismiss);
+    document.querySelectorAll('#pill-vertical-side button').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.side === state.config.verticalSide);
+    });
+    setVal('#tags-input', (state.config.tags || []).join(', '));
+  }
+
+  function renderLayoutSpecificFields() {
+    const layout = state.config.layout;
+    document.querySelectorAll('.when-layout').forEach(el => {
+      const showOn = (el.dataset.showOn || '').split(',').map(s => s.trim());
+      el.style.display = showOn.includes(layout) ? '' : 'none';
+    });
+  }
+
+  function updateTabLabelHelp() {
+    const help = document.getElementById('tab-label-help');
+    if (!help) return;
+    const len = (state.config.tabLabel || '').length;
+    if (len > 14) {
+      help.textContent = `${len} characters — looks best at 14 or fewer (text is rotated)`;
+      help.classList.add('is-warning');
+    } else {
+      help.textContent = 'Default: Newsletter';
+      help.classList.remove('is-warning');
+    }
+  }
+
+  // ============================================================
+  // ROUTING TAB
+  // ============================================================
+  function renderRoutingList() {
+    const $list = document.getElementById('routing-list');
+    if (!$list) return;
+    if (!state.widgetId) {
+      $list.innerHTML = `<div style="padding:14px;background:var(--tgse-bg-2);border-radius:6px;font-size:12.5px;color:var(--tgse-text-2);text-align:center">Save the widget first to add destinations.</div>`;
+      document.getElementById('btn-add-destination').disabled = true;
+      return;
+    }
+    document.getElementById('btn-add-destination').disabled = false;
+    if (state.routingConfigs.length === 0) {
+      $list.innerHTML = `<div style="padding:18px;background:var(--tgse-bg-2);border-radius:6px;font-size:12.5px;color:var(--tgse-text-3);text-align:center;line-height:1.5">No destinations yet.<br>Add one below to start collecting signups.</div>`;
+      return;
+    }
+    $list.innerHTML = state.routingConfigs.map(rc => {
+      const dest = DESTINATIONS[rc.destination] || { name: rc.destination, icon: '•', colour: '#94A3B8' };
+      const status = rc.enabled ? `<span class="badge-status is-on">On</span>` : `<span class="badge-status is-off">Off</span>`;
+      const verifyBadge = rc.lastVerifiedStatus === 'success' ? `<span class="badge-status is-on" style="margin-left:6px">Verified</span>`
+                       : rc.lastVerifiedStatus === 'failed' ? `<span class="badge-status is-error" style="margin-left:6px">Verify failed</span>`
+                       : '';
+      return `
+        <div class="routing-card" data-id="${escAttr(rc.id)}">
+          <div class="routing-card-head">
+            <div class="routing-card-icon" style="background:${escAttr(dest.colour)}1a">${dest.icon}</div>
+            <div style="flex:1;min-width:0">
+              <div class="routing-card-name">${escHtml(rc.name || dest.name)}</div>
+              <div class="routing-card-sub">${escHtml(dest.name)} ${status} ${verifyBadge}</div>
+            </div>
+          </div>
+          <div class="routing-card-actions">
+            <button class="btn-small" data-act="edit">Edit</button>
+            <button class="btn-small" data-act="toggle">${rc.enabled ? 'Disable' : 'Enable'}</button>
+            <button class="btn-small is-danger" data-act="delete">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Wire up actions
+    $list.querySelectorAll('.routing-card').forEach(card => {
+      const id = card.dataset.id;
+      const rc = state.routingConfigs.find(r => r.id === id);
+      if (!rc) return;
+      card.querySelector('[data-act="edit"]').addEventListener('click', () => openConfigModal(rc));
+      card.querySelector('[data-act="toggle"]').addEventListener('click', () => toggleRoutingConfig(rc));
+      card.querySelector('[data-act="delete"]').addEventListener('click', () => deleteRoutingConfig(rc));
+    });
+  }
+
+  async function loadRoutingConfigs() {
+    if (!state.widgetId) return;
+    try {
+      const headers = (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {};
+      const resp = await fetch(`/api/routing-configs?widgetId=${encodeURIComponent(state.widgetId)}`, { headers });
+      if (!resp.ok) {
+        console.warn('[routing] load failed', resp.status);
+        return;
+      }
+      const data = await resp.json();
+      state.routingConfigs = data.configs || [];
+      renderRoutingList();
+    } catch (err) {
+      console.warn('[routing] load error', err);
+    }
+  }
+
+  async function toggleRoutingConfig(rc) {
+    try {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+      const resp = await fetch('/api/routing-configs', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ op: 'update', id: rc.id, enabled: !rc.enabled }),
+      });
+      if (!resp.ok) {
+        if (window.tgse && window.tgse.toast) window.tgse.toast('Failed to update destination', 'error');
+        return;
+      }
+      const data = await resp.json();
+      const idx = state.routingConfigs.findIndex(r => r.id === rc.id);
+      if (idx !== -1 && data.config) state.routingConfigs[idx] = data.config;
+      renderRoutingList();
+    } catch (err) {
+      console.warn('[routing] toggle error', err);
+    }
+  }
+
+  async function deleteRoutingConfig(rc) {
+    if (!confirm(`Delete routing to ${(DESTINATIONS[rc.destination] || {}).name || rc.destination}? This can't be undone.`)) return;
+    try {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+      const resp = await fetch('/api/routing-configs', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ op: 'delete', id: rc.id }),
+      });
+      if (!resp.ok) {
+        if (window.tgse && window.tgse.toast) window.tgse.toast('Failed to delete', 'error');
+        return;
+      }
+      state.routingConfigs = state.routingConfigs.filter(r => r.id !== rc.id);
+      renderRoutingList();
+      if (window.tgse && window.tgse.toast) window.tgse.toast('Destination removed');
+    } catch (err) {
+      console.warn('[routing] delete error', err);
+    }
+  }
+
+  // ============================================================
+  // DESTINATION PICKER MODAL
+  // ============================================================
+  function openDestPicker() {
+    if (!state.widgetId) {
+      alert('Save the widget first before adding destinations.');
+      return;
+    }
+    const $grid = document.getElementById('dest-grid');
+    $grid.innerHTML = Object.entries(DESTINATIONS).map(([key, dest]) => `
+      <button class="dest-card" type="button" data-dest="${key}">
+        <div class="dest-card-icon" style="background:${escAttr(dest.colour)}1a">${dest.icon}</div>
+        <div class="dest-card-name">${escHtml(dest.name)}</div>
+        <div class="dest-card-desc">${escHtml(dest.description)}</div>
+      </button>
+    `).join('');
+    $grid.querySelectorAll('[data-dest]').forEach(b => {
+      b.addEventListener('click', () => {
+        document.getElementById('dest-picker-overlay').classList.remove('is-open');
+        openConfigModal({ destination: b.dataset.dest, config: {}, enabled: true });
+      });
+    });
+    document.getElementById('dest-picker-overlay').classList.add('is-open');
+  }
+
+  // ============================================================
+  // DESTINATION CONFIG MODAL
+  // ============================================================
+  function openConfigModal(rc) {
+    state.pendingDest = JSON.parse(JSON.stringify(rc));
+    const dest = DESTINATIONS[rc.destination];
+    if (!dest) return;
+    document.getElementById('dest-config-title').textContent = `Configure ${dest.name}`;
+    const $body = document.getElementById('dest-config-body');
+    $body.innerHTML = renderConfigFields(rc, dest);
+    bindConfigFields(rc, dest);
+    document.getElementById('dest-config-overlay').classList.add('is-open');
+    document.getElementById('dest-test-btn').disabled = false;
+    document.getElementById('dest-save-btn').disabled = false;
+  }
+
+  function renderConfigFields(rc, dest) {
+    const config = rc.config || {};
+    const parts = [];
+
+    parts.push(`
+      <div class="field-group">
+        <label class="field-label" for="dc-name">Name (for your reference)</label>
+        <input class="text-input" id="dc-name" type="text" value="${escAttr(rc.name || dest.name)}" maxlength="200">
+      </div>
+    `);
+
+    if (rc.id && rc.hasCredentials) {
+      parts.push(`
+        <div style="padding:10px 12px;background:color-mix(in srgb,var(--tgse-success,#10B981) 8%,transparent);border-radius:6px;font-size:12px;color:var(--tgse-success,#047857);margin-bottom:14px;line-height:1.5">
+          <strong>Credentials saved.</strong> Leave the credential fields below blank to keep them. Fill them in to replace.
+        </div>
+      `);
+    }
+
+    for (const f of dest.fields) {
+      const isCreds = f.type === 'creds';
+      const isBool = f.type === 'config-bool';
+      let v = '';
+      if (isBool) {
+        v = !!config[f.key];
+      } else if (isCreds) {
+        v = ''; // never pre-fill creds
+      } else {
+        v = config[f.key];
+        if (Array.isArray(v)) v = v.join(', ');
+        v = v == null ? '' : String(v);
+      }
+
+      if (isBool) {
+        parts.push(`
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-row-label">${escHtml(f.label)}</div>
+              <div class="toggle-row-sub">${escHtml(f.help || '')}</div>
+            </div>
+            <label class="switch ${v ? 'is-on' : ''}" data-bool-key="${escAttr(f.key)}"><input type="checkbox" ${v ? 'checked' : ''}></label>
+          </div>
+        `);
+      } else {
+        const inputType = isCreds ? 'password' : 'text';
+        parts.push(`
+          <div class="field-group">
+            <label class="field-label" for="dc-${escAttr(f.key)}">${escHtml(f.label)}</label>
+            <input class="text-input" id="dc-${escAttr(f.key)}" type="${inputType}" value="${escAttr(v)}" placeholder="${escAttr(f.placeholder || '')}" data-${isCreds ? 'creds' : 'config'}-key="${escAttr(f.key)}">
+            ${f.help ? `<div class="field-help">${escHtml(f.help)}</div>` : ''}
+          </div>
+        `);
+      }
+    }
+
+    parts.push(`
+      <div class="toggle-row" style="margin-top:14px">
+        <div>
+          <div class="toggle-row-label">Enabled</div>
+          <div class="toggle-row-sub">When off, leads aren't sent to this destination</div>
+        </div>
+        <label class="switch ${rc.enabled !== false ? 'is-on' : ''}" id="dc-enabled-switch"><input type="checkbox" ${rc.enabled !== false ? 'checked' : ''}></label>
+      </div>
+      <div id="dc-test-result"></div>
+    `);
+
+    return parts.join('');
+  }
+
+  function bindConfigFields(rc, dest) {
+    document.querySelectorAll('#dest-config-body [data-bool-key]').forEach(sw => {
+      sw.addEventListener('click', () => {
+        const key = sw.dataset.boolKey;
+        sw.classList.toggle('is-on');
+        const on = sw.classList.contains('is-on');
+        sw.querySelector('input').checked = on;
+        if (!state.pendingDest.config) state.pendingDest.config = {};
+        state.pendingDest.config[key] = on;
+      });
+    });
+    const enabledSw = document.getElementById('dc-enabled-switch');
+    enabledSw.addEventListener('click', () => {
+      enabledSw.classList.toggle('is-on');
+      enabledSw.querySelector('input').checked = enabledSw.classList.contains('is-on');
+    });
+  }
+
+  function collectConfigModal() {
+    const out = JSON.parse(JSON.stringify(state.pendingDest));
+    out.name = document.getElementById('dc-name').value.trim();
+    out.enabled = document.getElementById('dc-enabled-switch').classList.contains('is-on');
+    const dest = DESTINATIONS[out.destination];
+    if (!dest) return out;
+
+    out.config = out.config || {};
+    out.credentials = {};
+
+    for (const f of dest.fields) {
+      if (f.type === 'config-bool') continue; // already in state.pendingDest.config from binds
+      const sel = `[data-${f.type === 'creds' ? 'creds' : 'config'}-key="${f.key}"]`;
+      const el = document.querySelector(`#dest-config-body ${sel}`);
+      if (!el) continue;
+      const v = el.value.trim();
+      if (f.type === 'creds') {
+        if (v) out.credentials[f.key] = v;
+        // empty = leave existing creds alone (handled server-side)
+      } else {
+        // Lists: split comma → array
+        if (f.key === 'listIds' || f.key === 'groups' || f.key === 'tags') {
+          out.config[f.key] = v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
+          // For Brevo, listIds must be integers
+          if (out.destination === 'brevo' && f.key === 'listIds') {
+            out.config[f.key] = out.config[f.key].map(n => Number(n)).filter(Number.isInteger);
+          }
+        } else {
+          out.config[f.key] = v;
+        }
+      }
+    }
+
+    if (Object.keys(out.credentials).length === 0) delete out.credentials;
+    return out;
+  }
+
+  async function testDestination() {
+    const data = collectConfigModal();
+    if (!data.credentials && !data.id) {
+      // First-time creation needs creds
+      showTestResult(false, 'Fill in the credentials first');
+      return;
+    }
+    const $btn = document.getElementById('dest-test-btn');
+    const orig = $btn.textContent;
+    $btn.textContent = 'Testing…';
+    $btn.disabled = true;
+    try {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+      const resp = await fetch('/api/routing-test', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          destination: data.destination,
+          credentials: data.credentials || {},
+          config: data.config || {},
+        }),
+      });
+      const result = await resp.json();
+      if (result.ok) {
+        const detail = [result.list, result.audience, result.group].find(Boolean) || '';
+        showTestResult(true, detail ? `Connected — found "${detail}"` : 'Connection successful');
+      } else {
+        showTestResult(false, result.error || 'Connection test failed');
+      }
+    } catch (err) {
+      showTestResult(false, err.message || 'Connection test failed');
+    } finally {
+      $btn.textContent = orig;
+      $btn.disabled = false;
+    }
+  }
+
+  function showTestResult(ok, msg) {
+    const $r = document.getElementById('dc-test-result');
+    if (!$r) return;
+    const icon = ok
+      ? `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+      : `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    $r.innerHTML = `<div class="test-result is-${ok ? 'ok' : 'error'}">${icon}<span>${escHtml(msg)}</span></div>`;
+  }
+
+  async function saveDestination() {
+    const data = collectConfigModal();
+
+    if (!data.id && !data.credentials) {
+      showTestResult(false, 'Credentials required to create a new destination');
+      return;
+    }
+
+    const $btn = document.getElementById('dest-save-btn');
+    const orig = $btn.textContent;
+    $btn.textContent = 'Saving…';
+    $btn.disabled = true;
+
+    try {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+      const body = data.id
+        ? { op: 'update', id: data.id, name: data.name, enabled: data.enabled, config: data.config, credentials: data.credentials }
+        : {
+            op: 'create',
+            widgetType: 'newsletter',
+            widgetRecordId: state.widgetId,
+            name: data.name,
+            destination: data.destination,
+            enabled: data.enabled,
+            config: data.config,
+            credentials: data.credentials,
+          };
+      const resp = await fetch('/api/routing-configs', { method: 'POST', headers, body: JSON.stringify(body) });
+      const result = await resp.json();
+      if (!resp.ok) {
+        showTestResult(false, result.error || 'Save failed');
+        return;
+      }
+      // Insert or update in local list
+      if (data.id) {
+        const idx = state.routingConfigs.findIndex(r => r.id === data.id);
+        if (idx !== -1) state.routingConfigs[idx] = result.config;
+      } else {
+        state.routingConfigs.push(result.config);
+      }
+      renderRoutingList();
+      document.getElementById('dest-config-overlay').classList.remove('is-open');
+      if (window.tgse && window.tgse.toast) window.tgse.toast('Destination saved');
+    } catch (err) {
+      showTestResult(false, err.message || 'Save failed');
+    } finally {
+      $btn.textContent = orig;
+      $btn.disabled = false;
+    }
+  }
+
+  // ============================================================
+  // BINDINGS
+  // ============================================================
+  function bindAll() {
+    // Layout picker
+    document.querySelectorAll('#layout-picker .layout-card').forEach(c => {
+      c.addEventListener('click', () => {
+        state.config.layout = c.dataset.layout;
+        markDirty();
+        renderLayoutPicker();
+        renderLayoutSpecificFields();
+        updatePreview();
+      });
+    });
+
+    // Theme — mode pills
+    document.querySelectorAll('#pill-mode button').forEach(b => {
+      b.addEventListener('click', () => {
+        state.config.theme.mode = b.dataset.mode;
+        markDirty();
+        renderTheme();
+        updatePreview();
+      });
+    });
+
+    // Brand colour
+    bindColour('#brand-colour', '#brand-colour-picker', (val) => {
+      state.config.theme.brand = val;
+      markDirty();
+      updatePreview();
+    });
+    bindColour('#accent-colour', '#accent-colour-picker', (val) => {
+      state.config.theme.accent = val;
+      markDirty();
+      updatePreview();
+    });
+
+    // Radius
+    document.getElementById('radius-slider').addEventListener('input', (e) => {
+      state.config.theme.radius = parseInt(e.target.value, 10);
+      document.getElementById('radius-value').textContent = state.config.theme.radius;
+      markDirty();
+      updatePreview();
+    });
+
+    // Content tab — text inputs
+    bindText('#title-input', v => state.config.title = v);
+    bindText('#subtitle-input', v => state.config.subtitle = v);
+    bindText('#email-placeholder', v => state.config.emailPlaceholder = v);
+    bindText('#firstname-placeholder', v => state.config.firstNamePlaceholder = v);
+    bindText('#button-label', v => state.config.buttonLabel = v);
+    bindText('#success-title', v => state.config.successTitle = v);
+    bindText('#success-message', v => state.config.successMessage = v);
+    bindText('#trigger-label', v => state.config.triggerLabel = v);
+    bindText('#tab-label', v => { state.config.tabLabel = v; updateTabLabelHelp(); });
+    bindText('#consent-label', v => state.config.consentLabel = v);
+    bindText('#privacy-url', v => state.config.privacyUrl = v);
+
+    // Settings — switches
+    bindSwitch('#sw-firstname', v => state.config.showFirstName = v);
+    bindSwitch('#sw-icon', v => state.config.showIcon = v);
+    bindSwitch('#sw-consent', v => state.config.showConsent = v);
+    bindSwitch('#sw-consent-required', v => state.config.consentRequired = v);
+    bindSwitch('#sw-footer-remember', v => state.config.footerRememberDismiss = v);
+
+    // Settings — pill pickers
+    document.querySelectorAll('#pill-trigger-style button').forEach(b => {
+      b.addEventListener('click', () => {
+        state.config.triggerStyle = b.dataset.style;
+        markDirty();
+        renderSettingsTab();
+        updatePreview();
+      });
+    });
+    document.querySelectorAll('#pill-vertical-side button').forEach(b => {
+      b.addEventListener('click', () => {
+        state.config.verticalSide = b.dataset.side;
+        markDirty();
+        renderSettingsTab();
+        updatePreview();
+      });
+    });
+
+    // Footer delay slider
+    document.getElementById('footer-delay').addEventListener('input', (e) => {
+      state.config.footerDelay = parseFloat(e.target.value);
+      document.getElementById('footer-delay-value').textContent = state.config.footerDelay;
+      markDirty();
+      updatePreview();
+    });
+
+    // Tags input — comma-separated → array
+    document.getElementById('tags-input').addEventListener('input', (e) => {
+      state.config.tags = e.target.value.split(',').map(s => s.trim()).filter(Boolean).slice(0, 20);
+      markDirty();
+      updatePreview();
+    });
+
+    // Routing — add destination button
+    document.getElementById('btn-add-destination').addEventListener('click', openDestPicker);
+
+    // Modal close buttons
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const which = btn.dataset.close;
+        document.getElementById(`${which}-overlay`).classList.remove('is-open');
+      });
+    });
+
+    // Modal click-outside-to-close
+    document.querySelectorAll('.tg-modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('is-open');
+      });
+    });
+
+    // Test + Save buttons
+    document.getElementById('dest-test-btn').addEventListener('click', testDestination);
+    document.getElementById('dest-save-btn').addEventListener('click', saveDestination);
+
+    // Escape closes any open modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.tg-modal-overlay.is-open').forEach(o => o.classList.remove('is-open'));
+      }
+    });
+  }
+
+  // ============================================================
+  // PREVIEW (iframe)
+  // ============================================================
+  let previewDebounce = null;
+  function updatePreview() {
+    if (previewDebounce) clearTimeout(previewDebounce);
+    previewDebounce = setTimeout(_updatePreview, 80);
+  }
+
+  function _updatePreview() {
+    const iframe = document.getElementById('preview-iframe');
+    if (!iframe) return;
+    const cfg = state.config;
+    const cfgJSON = JSON.stringify(cfg);
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+      html, body { margin: 0; padding: 0; min-height: 100%; background: #F8FAFC; }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        padding: 80px 40px 120px;
+        display: flex;
+        align-items: ${cfg.layout === 'inline' ? 'flex-start' : 'center'};
+        justify-content: center;
+      }
+      ${cfg.layout === 'inline' ? '.preview-host { width: 100%; max-width: 600px; }' : ''}
+      ${cfg.layout === 'footer' ? 'body { padding-bottom: 200px; }' : ''}
+      ${cfg.layout === 'vertical' ? 'body { padding-right: 100px; padding-left: 100px; }' : ''}
+      .preview-info {
+        position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.85); color: white; padding: 6px 14px;
+        border-radius: 999px; font-size: 11px; font-weight: 500;
+        font-family: 'Inter', sans-serif;
+      }
+    </style></head><body>
+      <div class="preview-info">Live preview — ${cfg.layout}</div>
+      <div class="preview-host">
+        <div data-tg-widget="newsletter" id="mount"></div>
+      </div>
+      <script src="/widget-newsletter.js"><\/script>
+      <script>
+        // Manually init with the config (skip the API fetch)
+        document.addEventListener('DOMContentLoaded', () => {
+          const mount = document.getElementById('mount');
+          if (window.TGNewsletterWidget) {
+            new window.TGNewsletterWidget(mount, ${cfgJSON});
+          }
+        });
+      <\/script>
+    </body></html>`;
+    iframe.srcdoc = html;
+  }
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function setVal(sel, v) {
+    const el = document.querySelector(sel);
+    if (el && el.value !== String(v == null ? '' : v)) el.value = v == null ? '' : v;
+  }
+  function bindText(sel, fn) {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    el.addEventListener('input', (e) => {
+      fn(e.target.value);
+      markDirty();
+      updatePreview();
+    });
+  }
+  function setSwitch(sel, on) {
+    const sw = document.querySelector(sel);
+    if (!sw) return;
+    sw.classList.toggle('is-on', !!on);
+    const input = sw.querySelector('input');
+    if (input) input.checked = !!on;
+  }
+  function bindSwitch(sel, fn) {
+    const sw = document.querySelector(sel);
+    if (!sw) return;
+    sw.addEventListener('click', (e) => {
+      e.preventDefault();
+      sw.classList.toggle('is-on');
+      const on = sw.classList.contains('is-on');
+      const input = sw.querySelector('input');
+      if (input) input.checked = on;
+      fn(on);
+      markDirty();
+      updatePreview();
+    });
+  }
+  function bindColour(textSel, pickerSel, fn) {
+    const txt = document.querySelector(textSel);
+    const picker = document.querySelector(pickerSel);
+    if (!txt || !picker) return;
+    txt.addEventListener('input', (e) => {
+      const v = e.target.value;
+      if (/^#[0-9a-fA-F]{3,8}$/.test(v)) {
+        picker.value = v;
+        fn(v);
+      }
+    });
+    picker.addEventListener('input', (e) => {
+      txt.value = e.target.value;
+      fn(e.target.value);
+    });
+  }
+  function setTab(name) {
+    document.querySelectorAll('.tgse-tabs button').forEach(b => {
+      b.setAttribute('aria-selected', b.dataset.tab === name ? 'true' : 'false');
+    });
+    document.querySelectorAll('.tgse-panel').forEach(p => {
+      p.hidden = p.dataset.panel !== name;
+    });
+    if (name === 'routing' && state.widgetId) loadRoutingConfigs();
+  }
+  function markDirty() {
+    state.dirty = true;
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+  }
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function escAttr(s) { return escHtml(s).replace(/'/g, '&#039;'); }
+
+  // ============================================================
+  // GO
+  // ============================================================
+  bindAll();
+
+  // If we're already signed in when the page loads, init now;
+  // otherwise the shell shows its login overlay and we'll init on success.
+  if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
