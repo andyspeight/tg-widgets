@@ -148,10 +148,15 @@ const ICON_VOCAB = new Set([
 ]);
 
 const TAG_VOCAB = new Set([
+  // Original 20
   'Couples','Honeymoons','Families','Food and Wine','Photography','Beach',
   'Adventure','Luxury','Budget','City Break','Culture','Nightlife','Wellness',
   'Wildlife','Winter Sun','Summer Sun','Skiing','Multi Generation','Solo Travel',
   'Romance',
+  // P1 expansion (12) -- travel-trade specific, activity, audience, values
+  'All-Inclusive','Cruise','Short Break','Long-Haul','School Holidays',
+  'Diving','Hiking','Golf','Spa Retreat','Wedding Destination',
+  'Eco / Sustainable','LGBTQ+ Friendly',
 ]);
 
 const URL_RE = /^https?:\/\/[^\s<>"']+$/i;
