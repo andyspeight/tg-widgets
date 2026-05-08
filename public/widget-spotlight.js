@@ -96,29 +96,44 @@
     }
   }
 
-  // Icon for Best For tags — maps each of the 20 tag vocabulary options to an
-  // icon from IC. Undefined tags fall back to 'star'.
+  // Icon for Best For tags — maps each tag vocabulary option to an icon from IC.
+  // Undefined tags fall back to 'star'. Original 20 use the 17-icon vocab; the 12
+  // P1 expansion tags reuse what fits and accept 'star' where no good match exists.
   const TAG_ICONS = {
-    'Couples':          'heart',
-    'Honeymoons':       'heart',
-    'Families':         'sun',
-    'Food and Wine':    'wine',
-    'Photography':      'camera',
-    'Beach':            'beach',
-    'Adventure':        'compass',
-    'Luxury':           'star',
-    'Budget':           'coin',
-    'City Break':       'city',
-    'Culture':          'temple',
-    'Nightlife':        'zap',
-    'Wellness':         'heart',
-    'Wildlife':         'compass',
-    'Winter Sun':       'sun',
-    'Summer Sun':       'sun',
-    'Skiing':           'snowflake',
-    'Multi Generation': 'sun',
-    'Solo Travel':      'map',
-    'Romance':          'heart',
+    // Original 20
+    'Couples':            'heart',
+    'Honeymoons':         'heart',
+    'Families':           'sun',
+    'Food and Wine':      'wine',
+    'Photography':        'camera',
+    'Beach':              'beach',
+    'Adventure':          'compass',
+    'Luxury':             'star',
+    'Budget':             'coin',
+    'City Break':         'city',
+    'Culture':            'temple',
+    'Nightlife':          'zap',
+    'Wellness':           'heart',
+    'Wildlife':           'compass',
+    'Winter Sun':         'sun',
+    'Summer Sun':         'sun',
+    'Skiing':             'snowflake',
+    'Multi Generation':   'sun',
+    'Solo Travel':        'map',
+    'Romance':            'heart',
+    // P1 expansion (12)
+    'All-Inclusive':      'star',
+    'Cruise':             'water',
+    'Short Break':        'compass',
+    'Long-Haul':          'map',
+    'School Holidays':    'sun',
+    'Diving':             'water',
+    'Hiking':             'mountain',
+    'Golf':               'star',
+    'Spa Retreat':        'heart',
+    'Wedding Destination':'heart',
+    'Eco / Sustainable':  'mountain',
+    'LGBTQ+ Friendly':    'heart',
   };
 
   /* ------------------------------------------------------------------
@@ -146,6 +161,26 @@
     if (/^https?:\/\//i.test(trimmed)) return trimmed;
     if (allowMailtoTel && /^(mailto|tel):/i.test(trimmed)) return trimmed;
     return '';
+  }
+
+  // Tiny template helper for CTA copy. Replaces {{variable}} tokens with values
+  // from the supplied vars object. Unknown tokens are removed (we don't show
+  // raw {{...}} to end-users — looks broken). Whitespace inside the braces is
+  // tolerated. Output is plain text — escaping happens at render time.
+  //
+  // Supported in CTA: {{destinationName}}, {{destinationLevel}}, {{region}}.
+  //
+  // Example: renderTemplate('Plan your trip to {{destinationName}}', {destinationName: 'Greece'})
+  //          => 'Plan your trip to Greece'
+  function renderTemplate(str, vars) {
+    if (typeof str !== 'string' || !str) return '';
+    if (!vars || typeof vars !== 'object') return str;
+    return str.replace(/\{\{\s*([a-zA-Z][a-zA-Z0-9_]*)\s*\}\}/g, (_, key) => {
+      const val = vars[key];
+      return (val == null) ? '' : String(val);
+    }).replace(/\s{2,}/g, ' ').trim();
+    // The double-space collapse handles cases like "Visit {{region}} today"
+    // when region is blank — would otherwise leave an awkward "Visit  today".
   }
 
   // Month labels used throughout
@@ -1037,7 +1072,7 @@
       if (s.facts) html.push(this._renderFacts(d));
       if (s.highlights) html.push(this._renderHighlights(d));
       if (s.events) html.push(this._renderEvents(d));
-      if (s.cta) html.push(this._renderCta());
+      if (s.cta) html.push(this._renderCta(d));
 
       this.root.innerHTML = html.filter(Boolean).join('');
       this._bind();
@@ -1271,22 +1306,35 @@
       );
     }
 
-    _renderCta() {
+    _renderCta(d) {
       const cta = this.c.cta || {};
       const url = safeUrl(cta.url, true);
+
+      // Build template variables from the loaded destination. {{destinationName}}
+      // and friends get substituted into title, subtitle and buttonLabel so a
+      // single CTA config can read contextually on every page.
+      const tplVars = {
+        destinationName: (d && d.name) ? d.name : '',
+        destinationLevel: (d && d.level) ? d.level : '',
+        region: (d && d.region) ? d.region : '',
+      };
+      const title       = renderTemplate(cta.title || '',       tplVars);
+      const subtitle    = renderTemplate(cta.subtitle || '',    tplVars);
+      const buttonLabel = renderTemplate(cta.buttonLabel || 'Enquire', tplVars) || 'Enquire';
+
       // Even without a URL, we still render the CTA panel — but as a no-op
       // visually-complete block. An editor preview with no URL yet is still
       // useful.
       const buttonHtml = url
-        ? '<a class="tgs-cta-btn" href="' + esc(url) + '" rel="noopener">' + esc(cta.buttonLabel || 'Enquire') + icon('arrow', 16) + '</a>'
-        : '<button class="tgs-cta-btn" type="button" disabled aria-disabled="true" style="opacity:0.8;cursor:not-allowed;">' + esc(cta.buttonLabel || 'Enquire') + icon('arrow', 16) + '</button>';
+        ? '<a class="tgs-cta-btn" href="' + esc(url) + '" rel="noopener">' + esc(buttonLabel) + icon('arrow', 16) + '</a>'
+        : '<button class="tgs-cta-btn" type="button" disabled aria-disabled="true" style="opacity:0.8;cursor:not-allowed;">' + esc(buttonLabel) + icon('arrow', 16) + '</button>';
 
       return (
         '<section class="tgs-section" aria-labelledby="tgs-cta-heading">' +
           '<div class="tgs-cta">' +
             '<div class="tgs-cta-body">' +
-              '<h2 class="tgs-cta-title" id="tgs-cta-heading">' + esc(cta.title || '') + '</h2>' +
-              (cta.subtitle ? '<p class="tgs-cta-subtitle">' + esc(cta.subtitle) + '</p>' : '') +
+              '<h2 class="tgs-cta-title" id="tgs-cta-heading">' + esc(title) + '</h2>' +
+              (subtitle ? '<p class="tgs-cta-subtitle">' + esc(subtitle) + '</p>' : '') +
             '</div>' +
             buttonHtml +
           '</div>' +
