@@ -964,10 +964,11 @@
       name: 'Google Sheets',
       icon: '📊',
       colour: '#0F9D58',
-      description: 'Append a row to a Google Sheet (coming soon)',
+      description: 'Append a row to a Google Sheet',
+      setupNote: 'Before saving, share your sheet with the Travelgenix service account email as Editor. Click "Test connection" and it will tell you the exact email address to share with.',
       fields: [
-        { type: 'config', key: 'sheetId', label: 'Spreadsheet ID', placeholder: '1A2B3C...', help: 'From the sheet URL: /spreadsheets/d/[ID]/edit' },
-        { type: 'config', key: 'sheetName', label: 'Sheet/tab name', placeholder: 'Newsletter Signups', help: 'The tab to append rows to' },
+        { type: 'config', key: 'spreadsheetId', label: 'Spreadsheet ID', placeholder: '1A2B3C...', help: 'From the sheet URL — the long string between /d/ and /edit. Example: docs.google.com/spreadsheets/d/[THIS PART]/edit' },
+        { type: 'config', key: 'sheetName', label: 'Tab name', placeholder: 'Sheet1', help: 'The tab inside the spreadsheet to append rows to. Defaults to "Sheet1". Header row is added automatically on first signup if the tab is empty.' },
       ],
     },
     'email': {
@@ -1310,6 +1311,14 @@
       </div>
     `);
 
+    if (dest.setupNote) {
+      parts.push(`
+        <div style="padding:12px 14px;background:color-mix(in srgb,var(--tgse-accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--tgse-accent) 25%,transparent);border-radius:6px;font-size:12px;color:var(--tgse-text-2);margin-bottom:14px;line-height:1.55">
+          <strong style="color:var(--tgse-text-1)">Setup note.</strong> ${escHtml(dest.setupNote)}
+        </div>
+      `);
+    }
+
     if (rc.id && rc.hasCredentials) {
       parts.push(`
         <div style="padding:10px 12px;background:color-mix(in srgb,var(--tgse-success,#10B981) 8%,transparent);border-radius:6px;font-size:12px;color:var(--tgse-success,#047857);margin-bottom:14px;line-height:1.5">
@@ -1425,8 +1434,12 @@
 
   async function testDestination() {
     const data = collectConfigModal();
-    if (!data.credentials && !data.id) {
-      // First-time creation needs creds
+    const NO_CREDS_DESTINATIONS = ['google-sheets', 'email'];
+    const needsCreds = !NO_CREDS_DESTINATIONS.includes(data.destination);
+
+    if (needsCreds && !data.credentials && !data.id) {
+      // First-time creation needs creds (except for destinations that use
+      // a shared server-side service account)
       showTestResult(false, 'Fill in the credentials first');
       return;
     }
@@ -1448,7 +1461,12 @@
       const result = await resp.json();
       if (result.ok) {
         const detail = [result.list, result.audience, result.group].find(Boolean) || '';
-        showTestResult(true, detail ? `Connected — found "${detail}"` : 'Connection successful');
+        let msg = detail ? `Connected — found "${detail}"` : 'Connection successful';
+        // Google Sheets: also show the available tabs so the user knows what to type
+        if (data.destination === 'google-sheets' && Array.isArray(result.availableTabs) && result.availableTabs.length) {
+          msg += ` · Tabs: ${result.availableTabs.join(', ')}`;
+        }
+        showTestResult(true, msg);
       } else {
         showTestResult(false, result.error || 'Connection test failed');
       }
@@ -1472,7 +1490,13 @@
   async function saveDestination() {
     const data = collectConfigModal();
 
-    if (!data.id && !data.credentials) {
+    // Some destinations (e.g. google-sheets, email) don't need per-client
+    // credentials — they use server-side shared infrastructure. For
+    // everything else, require credentials when creating a new config.
+    const NO_CREDS_DESTINATIONS = ['google-sheets', 'email'];
+    const needsCreds = !NO_CREDS_DESTINATIONS.includes(data.destination);
+
+    if (!data.id && needsCreds && !data.credentials) {
       showTestResult(false, 'Credentials required to create a new destination');
       return;
     }
