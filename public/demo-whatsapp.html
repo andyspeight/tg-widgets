@@ -177,11 +177,35 @@
       </select>
 
       <button id="themeBtn" style="margin-left:8px">Toggle theme</button>
+      <button id="openPanelBtn" style="margin-left:8px;background:#25D366;color:#FFFFFF;border-color:#25D366;font-weight:600">Open panel</button>
+      <label style="margin-left:8px;font-size:12px;color:#475569;display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="autoOpenChk" />
+        Auto-open on load
+      </label>
+    </div>
+    <div id="stateBadge" style="display:flex;align-items:center;gap:8px;padding:6px 14px;background:#F8FAFC;border-top:1px solid #E2E8F0;font-size:12px;color:#64748B;font-family:'JetBrains Mono', monospace;">
+      <span style="font-weight:600;color:#0F172A;">Widget state:</span>
+      <span id="stateLayout">layout=floating</span>
+      <span style="opacity:.5">·</span>
+      <span id="statePosition">position=bottom-right</span>
+      <span style="opacity:.5">·</span>
+      <span id="statePanelOpen" style="color:#DC2626;">panel=closed</span>
     </div>
   </div>
 </div>
 
 <article class="article">
+  <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:16px 20px;margin-bottom:32px;font-size:13px;line-height:1.55;">
+    <div style="font-weight:700;color:#78350F;font-size:14px;margin-bottom:4px;">Testing tools (this banner doesn't ship to clients)</div>
+    <div style="color:#92400E;">
+      Use the toolbar at the top of this page to switch layout, position, and mode. Click the green <strong>Open panel</strong> button to programmatically open the WhatsApp panel without needing to click the FAB. Tick <strong>Auto-open on load</strong> to have the panel pop open every time the widget remounts. The status bar below the toolbar shows the widget's current state.
+      <br><br>
+      You can also load this page with URL params for quick links — try
+      <a href="?open=1" style="color:#78350F;text-decoration:underline">?open=1</a>,
+      <a href="?layout=vertical&amp;position=middle-right&amp;open=1" style="color:#78350F;text-decoration:underline">?layout=vertical&amp;position=middle-right&amp;open=1</a>, or
+      <a href="?layout=floating&amp;position=top-left&amp;open=1" style="color:#78350F;text-decoration:underline">?layout=floating&amp;position=top-left&amp;open=1</a>.
+    </div>
+  </div>
   <h1>The Hidden Greek Islands Worth Booking This Summer</h1>
   <p class="lede">Skip Mykonos. We round up the seven islands every travel agent should be quietly recommending instead.</p>
   <div class="meta">
@@ -242,7 +266,13 @@
   const positionPicker = document.getElementById('positionPicker');
   const hoursPicker = document.getElementById('hoursPicker');
   const themeBtn = document.getElementById('themeBtn');
+  const openPanelBtn = document.getElementById('openPanelBtn');
+  const autoOpenChk = document.getElementById('autoOpenChk');
+  const stateLayout = document.getElementById('stateLayout');
+  const statePosition = document.getElementById('statePosition');
+  const statePanelOpen = document.getElementById('statePanelOpen');
   let isDark = false;
+  let currentWidget = null;
 
   // Sample office hours: Mon-Fri 9-5:30, Sat 10-2, closed Sun
   const SAMPLE_HOURS = {
@@ -260,6 +290,19 @@
     { name: 'Tom Castellanos', role: 'Italy & Spain', phone: '+447900222222', online: true },
     { name: 'Priya Anand', role: 'Asia & long-haul', phone: '+447900333333', online: false },
   ];
+
+  function updateStateBadge() {
+    const layout = layoutPicker.value;
+    const position = positionPicker.value;
+    stateLayout.textContent = 'layout=' + layout;
+    statePosition.textContent = 'position=' + position;
+    const isOpen = currentWidget && currentWidget.isOpen && currentWidget.isOpen();
+    statePanelOpen.textContent = 'panel=' + (isOpen ? 'open' : 'closed');
+    statePanelOpen.style.color = isOpen ? '#16A34A' : '#DC2626';
+  }
+
+  // Re-check open state every 200ms (the widget can open via FAB click outside our control)
+  setInterval(updateStateBadge, 200);
 
   function mountFloating() {
     const layout = layoutPicker.value;
@@ -283,6 +326,11 @@
     fresh.id = 'floating-mount';
     oldMount.replaceWith(fresh);
 
+    // Disable the Open panel button for inline/card layouts
+    openPanelBtn.disabled = (layout === 'inline' || layout === 'card');
+    openPanelBtn.style.opacity = openPanelBtn.disabled ? '0.4' : '1';
+    openPanelBtn.style.cursor = openPanelBtn.disabled ? 'not-allowed' : 'pointer';
+
     if (layout === 'floating' || layout === 'vertical') {
       const cfg = {
         layout: layout,
@@ -303,23 +351,58 @@
         theme: { mode: isDark ? 'dark' : 'light', brand: '#25D366', brandDark: '#128C7E' },
       };
       if (mode === 'multi') cfg.agents = SAMPLE_AGENTS;
-      new window.TGWhatsAppWidget(fresh, cfg);
+      currentWidget = new window.TGWhatsAppWidget(fresh, cfg);
+      // Auto-open if checkbox is ticked
+      if (autoOpenChk.checked) {
+        // Small delay so the entry transition is visible
+        setTimeout(() => { if (currentWidget) currentWidget.open(); updateStateBadge(); }, 200);
+      }
     } else {
       // Hide floating mount when using inline/card layouts
       fresh.style.display = 'none';
+      currentWidget = null;
     }
+    updateStateBadge();
   }
+
+  // Open panel button — toggles the panel programmatically
+  openPanelBtn.addEventListener('click', () => {
+    if (!currentWidget || openPanelBtn.disabled) return;
+    currentWidget.toggle();
+    openPanelBtn.textContent = currentWidget.isOpen() ? 'Close panel' : 'Open panel';
+    updateStateBadge();
+  });
+
+  // Update button label when state changes via FAB click
+  setInterval(() => {
+    if (!currentWidget || openPanelBtn.disabled) return;
+    openPanelBtn.textContent = currentWidget.isOpen() ? 'Close panel' : 'Open panel';
+  }, 250);
 
   layoutPicker.addEventListener('change', mountFloating);
   modePicker.addEventListener('change', mountFloating);
   positionPicker.addEventListener('change', mountFloating);
   hoursPicker.addEventListener('change', mountFloating);
+  autoOpenChk.addEventListener('change', () => {
+    if (autoOpenChk.checked && currentWidget) currentWidget.open();
+    else if (currentWidget) currentWidget.close();
+    updateStateBadge();
+  });
   themeBtn.addEventListener('click', () => {
     isDark = !isDark;
     document.body.style.background = isDark ? '#0F172A' : '#F8FAFC';
     document.body.style.color = isDark ? '#F1F5F9' : '#0F172A';
     mountFloating();
   });
+
+  // Read URL params: ?open=1 to start with the panel open, ?layout=, ?position=
+  const params = new URLSearchParams(location.search);
+  if (params.get('layout')) layoutPicker.value = params.get('layout');
+  if (params.get('position')) positionPicker.value = params.get('position');
+  if (params.get('mode')) modePicker.value = params.get('mode');
+  if (params.get('open') === '1' || params.get('open') === 'true') {
+    autoOpenChk.checked = true;
+  }
 
   setTimeout(mountFloating, 50);
 </script>
