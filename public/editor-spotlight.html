@@ -651,17 +651,26 @@
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="section-body">
+              <div class="field-help" style="margin-bottom:10px;padding:10px 12px;background:var(--hover);border-radius:8px;border-left:3px solid var(--accent);">
+                <strong style="color:var(--ink);">Variables you can use</strong>
+                <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;">
+                  <code style="font-size:11px;background:var(--panel);padding:2px 6px;border-radius:4px;border:1px solid var(--border);">{{destinationName}}</code>
+                  <code style="font-size:11px;background:var(--panel);padding:2px 6px;border-radius:4px;border:1px solid var(--border);">{{destinationLevel}}</code>
+                  <code style="font-size:11px;background:var(--panel);padding:2px 6px;border-radius:4px;border:1px solid var(--border);">{{region}}</code>
+                </div>
+                <div style="margin-top:6px;font-size:11px;">Example: <em>Plan your trip to {{destinationName}}</em> becomes <em>Plan your trip to Albufeira</em> on the Albufeira page.</div>
+              </div>
               <div class="field">
                 <label class="field-label">Title</label>
-                <input class="input" id="ctaTitle" maxlength="120" placeholder="Speak to our destination specialist" />
+                <input class="input" id="ctaTitle" maxlength="160" placeholder="Plan your trip to {{destinationName}}" />
               </div>
               <div class="field">
                 <label class="field-label">Subtitle (optional)</label>
-                <textarea class="textarea" id="ctaSubtitle" maxlength="200" rows="2" placeholder="Warm one-line invitation"></textarea>
+                <textarea class="textarea" id="ctaSubtitle" maxlength="240" rows="2" placeholder="Our specialists know {{destinationName}} inside out"></textarea>
               </div>
               <div class="field">
                 <label class="field-label">Button label</label>
-                <input class="input" id="ctaButton" maxlength="40" placeholder="Start your enquiry" />
+                <input class="input" id="ctaButton" maxlength="60" placeholder="Enquire about {{destinationName}}" />
               </div>
               <div class="field">
                 <label class="field-label">Button URL</label>
