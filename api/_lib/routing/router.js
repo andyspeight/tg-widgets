@@ -25,12 +25,17 @@
 // =============================================================================
 
 import { buildCanonicalLead, ValidationError } from './schema.js';
-import { loadRoutingJobs, recordDispatchOutcome } from './config-loader.js';
+import { loadRoutingJobs, recordDispatchOutcome, updateCredentials } from './config-loader.js';
 import { writeSubmission, writeLog } from './log.js';
 
 import { dispatchGoogleSheets } from '../destinations/google-sheets.js';
 import { dispatchWebhook } from '../destinations/webhook.js';
 import { dispatchEmail } from '../destinations/email.js';
+import { dispatchMailchimp } from '../destinations/mailchimp.js';
+import { dispatchBrevo } from '../destinations/brevo.js';
+import { dispatchMailerlite } from '../destinations/mailerlite.js';
+import { dispatchKlaviyo } from '../destinations/klaviyo.js';
+import { dispatchConstantContact } from '../destinations/constant-contact.js';
 
 // ── Destination registry ────────────────────────────────────────────────
 // Add new destinations here. Each handler signature:
@@ -38,12 +43,16 @@ import { dispatchEmail } from '../destinations/email.js';
 // Throws on failure; returns the above on success.
 
 const DISPATCHERS = {
-  'google-sheets': dispatchGoogleSheets,
-  'webhook': dispatchWebhook,
-  'email': dispatchEmail,
-  // Session 2 will add:
-  // 'mailchimp', 'brevo', 'klaviyo', 'activecampaign', 'hubspot',
-  // 'airtable', 'auto-reply', 'luna-marketing'
+  'google-sheets':    dispatchGoogleSheets,
+  'webhook':          dispatchWebhook,
+  'email':            dispatchEmail,
+  'mailchimp':        dispatchMailchimp,
+  'brevo':            dispatchBrevo,
+  'mailerlite':       dispatchMailerlite,
+  'klaviyo':          dispatchKlaviyo,
+  'constant-contact': dispatchConstantContact,
+  // Still to add:
+  // 'activecampaign', 'hubspot', 'airtable', 'auto-reply', 'luna-marketing'
 };
 
 const DISPATCH_TIMEOUT_MS = 15_000;
@@ -214,6 +223,11 @@ async function dispatchOne(lead, job) {
 
     // Update RoutingConfig last-used (fire-and-forget)
     recordDispatchOutcome(job.configRecordId, { status: 'success' }).catch(() => {});
+
+    // If a dispatcher refreshed OAuth tokens (e.g. Constant Contact), persist them
+    if (result?.refreshedCredentials) {
+      updateCredentials(job.configRecordId, lead.source.widgetId, result.refreshedCredentials).catch(() => {});
+    }
 
     return { success: true };
   } catch (err) {
