@@ -26,6 +26,9 @@
     { "source": "/demo-textfx",       "destination": "/demo-textfx.html" },
     { "source": "/demo-popup",        "destination": "/demo-popup.html" },
     { "source": "/demo-events",       "destination": "/demo-events.html" },
+    { "source": "/demo-share",        "destination": "/demo-share.html" },
+    { "source": "/demo-whatsapp",     "destination": "/demo-whatsapp.html" },
+    { "source": "/demo-hours",        "destination": "/demo-hours.html" },
     { "source": "/wow-showcase",      "destination": "/wow-showcase.html" },
     { "source": "/editor",              "destination": "/editor.html" },
     { "source": "/editor-reviews",      "destination": "/editor-reviews.html" },
@@ -41,6 +44,9 @@
     { "source": "/editor-textfx",       "destination": "/editor-textfx.html" },
     { "source": "/editor-popup",        "destination": "/editor-popup.html" },
     { "source": "/editor-events",       "destination": "/editor-events.html" },
+    { "source": "/editor-share",        "destination": "/editor-share.html" },
+    { "source": "/editor-whatsapp",     "destination": "/editor-whatsapp.html" },
+    { "source": "/editor-hours",        "destination": "/editor-hours.html" },
     { "source": "/editor-test",         "destination": "/editor-test.html" },
     { "source": "/inbox-enquiry",       "destination": "/inbox-enquiry.html" },
     { "source": "/signin",              "destination": "/signin.html" },
@@ -155,6 +161,30 @@
     },
     {
       "source": "/widget-events.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-share.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-whatsapp.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-hours.js",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
