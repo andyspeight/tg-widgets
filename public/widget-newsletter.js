@@ -240,7 +240,7 @@
       align-items: stretch;
       gap: 8px;
       width: 100%;
-      max-width: 520px;
+      max-width: 640px;
     }
     .tgnl-inline-form .tgnl-input { flex: 1; min-width: 0; }
     .tgnl-inline-form .tgnl-btn { flex-shrink: 0; }
@@ -256,7 +256,7 @@
       color: var(--tgnl-success-text);
       font-size: 14px;
       font-weight: 500;
-      max-width: 520px;
+      max-width: 640px;
       animation: tgnl-fade-in 220ms ease;
     }
     .tgnl-inline-success svg { flex-shrink: 0; color: var(--tgnl-success); }
@@ -505,6 +505,38 @@
       gap: 10px;
       font-size: 14px;
       font-weight: 500;
+    }
+
+    /* ----- Footer in dark mode: swap brand bar for near-black card colour
+       so the mode pill actually does something visible. Light mode keeps
+       the brand-coloured bar (which already adapts to brand text contrast). */
+    .tgnl-root[data-theme="dark"] .tgnl-footer {
+      background: #0F172A;
+      color: #F1F5F9;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 -4px 24px -4px rgba(0, 0, 0, 0.6);
+    }
+    .tgnl-root[data-theme="dark"] .tgnl-footer-input {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.14);
+      color: #F1F5F9;
+    }
+    .tgnl-root[data-theme="dark"] .tgnl-footer-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .tgnl-root[data-theme="dark"] .tgnl-footer-btn {
+      background: var(--tgnl-brand);
+      color: var(--tgnl-brand-text);
+    }
+    .tgnl-root[data-theme="dark"] .tgnl-footer-btn:hover {
+      background: var(--tgnl-brand-hover);
+    }
+    .tgnl-root[data-theme="dark"] .tgnl-footer-close {
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .tgnl-root[data-theme="dark"] .tgnl-footer-close:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #F1F5F9;
     }
 
     @media (max-width: 700px) {
