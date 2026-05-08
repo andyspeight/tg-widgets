@@ -242,6 +242,7 @@
     .picker-result:last-child { border-bottom: 0; }
     .picker-result:hover { background: var(--hover); }
     .picker-result-name { font-weight: 500; color: var(--ink); }
+    .picker-result-meta { display: inline-flex; align-items: center; gap: 6px; }
     .picker-result-level {
       font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
       padding: 2px 8px; border-radius: 999px;
@@ -250,6 +251,53 @@
     .picker-result-level[data-level="city"] { background: rgba(6,182,212,.12); color: #0891B2; }
     .picker-result-level[data-level="resort"] { background: rgba(99,102,241,.12); color: #4F46E5; }
     .picker-status { padding: 12px; text-align: center; font-size: 12px; color: var(--muted); }
+
+    /* completeness badges (in picker rows) */
+    .completeness-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 50%;
+      font-size: 9px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .completeness-badge[data-tier="complete"] { background: rgba(16,185,129,.18); color: #047857; }
+    .completeness-badge[data-tier="partial"]  { background: rgba(245,158,11,.18); color: #B45309; }
+    .completeness-badge[data-tier="empty"]    { background: rgba(239,68,68,.18);  color: #B91C1C; }
+    .completeness-badge[data-tier="unknown"]  { background: rgba(148,163,184,.2); color: #64748B; }
+    .completeness-badge[data-tier="loading"]  { background: rgba(148,163,184,.15); color: #94A3B8; animation: comp-pulse 1.4s ease-in-out infinite; }
+    @keyframes comp-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* per-section breakdown shown after a destination is picked */
+    .completeness-breakdown {
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: var(--hover);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .completeness-breakdown-head {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600; color: var(--sub);
+      text-transform: uppercase; letter-spacing: .05em;
+      margin-bottom: 8px;
+    }
+    .completeness-breakdown-pills {
+      display: flex; flex-wrap: wrap; gap: 5px;
+    }
+    .completeness-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 500;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--sub);
+    }
+    .completeness-pill[data-ok="true"] { background: rgba(16,185,129,.10); color: #047857; border-color: rgba(16,185,129,.3); }
+    .completeness-pill[data-ok="false"] { background: rgba(239,68,68,.08); color: #B91C1C; border-color: rgba(239,68,68,.25); }
+    .completeness-pill svg { flex-shrink: 0; }
+    .completeness-inherited {
+      margin-top: 6px;
+      font-size: 11px; color: var(--sub); font-style: italic;
+    }
 
     .selected-dest {
       padding: 10px 12px;
@@ -560,27 +608,39 @@
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="section-body">
-              <div class="field">
-                <label class="field-label">Slug source</label>
-                <select class="select" id="slugSource">
-                  <option value="last-path-segment">Last URL path segment (e.g. /destinations/greece → "greece")</option>
-                  <option value="query-param">URL query parameter</option>
-                  <option value="custom-selector">Custom CSS selector</option>
-                </select>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Enable auto-detect</div>
+                  <div class="toggle-help">When on, the widget reads a destination slug from the page (URL or DOM) and shows that destination. Embed once on a template page and it adapts per URL. The fixed destination above is only used for the editor preview.</div>
+                </div>
+                <button type="button" class="toggle" id="togAutoDetect" role="switch" aria-checked="false"></button>
               </div>
-              <div class="field" id="slugExtraWrap" hidden>
-                <label class="field-label" id="slugExtraLabel">Parameter name</label>
-                <input class="input" id="slugExtra" placeholder="e.g. dest" />
-              </div>
-              <div class="field">
-                <label class="field-label">Lookup order</label>
-                <div class="field-help">Searches each level in this order until a match is found. Most specific first matches best.</div>
-                <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
-                  <span style="font-size:12px;color:var(--sub);font-weight:600;">Resort</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                  <span style="font-size:12px;color:var(--sub);font-weight:600;">City</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                  <span style="font-size:12px;color:var(--sub);font-weight:600;">Country</span>
+              <div id="autoDetectFields" hidden>
+                <div class="field">
+                  <label class="field-label">Slug source</label>
+                  <select class="select" id="slugSource">
+                    <option value="last-path-segment">Last URL path segment (e.g. /destinations/greece → "greece")</option>
+                    <option value="query-param">URL query parameter</option>
+                    <option value="custom-selector">Custom CSS selector</option>
+                  </select>
+                </div>
+                <div class="field" id="slugExtraWrap" hidden>
+                  <label class="field-label" id="slugExtraLabel">Parameter name</label>
+                  <input class="input" id="slugExtra" placeholder="e.g. dest" />
+                </div>
+                <div class="field">
+                  <label class="field-label">Lookup order</label>
+                  <div class="field-help">Searches each level in this order until a match is found. Most specific first matches best.</div>
+                  <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
+                    <span style="font-size:12px;color:var(--sub);font-weight:600;">Resort</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    <span style="font-size:12px;color:var(--sub);font-weight:600;">City</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    <span style="font-size:12px;color:var(--sub);font-weight:600;">Country</span>
+                  </div>
+                </div>
+                <div class="field-help" style="margin-top:8px;padding:10px 12px;background:var(--hover);border-radius:8px;border-left:3px solid var(--accent);">
+                  <strong style="color:var(--ink);">If no match is found</strong> the widget hides itself silently. The page will look intentional rather than showing a "destination not found" error.
                 </div>
               </div>
             </div>
@@ -1054,28 +1114,123 @@
           return;
         }
         results.innerHTML = '';
-        list.forEach(r => {
+        list.forEach((r, idx) => {
           const row = document.createElement('div');
           row.className = 'picker-result';
+          row.setAttribute('data-row-idx', String(idx));
           row.innerHTML = `
             <span class="picker-result-name">${escHtml(r.name)}</span>
-            <span class="picker-result-level" data-level="${r.level}">${r.level}</span>
+            <span class="picker-result-meta">
+              <span class="completeness-badge" data-tier="loading" title="Checking content completeness…" data-comp-badge="${r.level}:${r.recordId}">·</span>
+              <span class="picker-result-level" data-level="${r.level}">${r.level}</span>
+            </span>
           `;
           row.addEventListener('click', () => pickDestination(r));
           results.appendChild(row);
         });
+        // Fire-and-forget batch completeness check; updates badges in place.
+        fetchCompletenessBatch(list.slice(0, 20));
       } catch (err) {
         if (err.name === 'AbortError') return;
         results.innerHTML = '<div class="picker-status">Search failed. Try again.</div>';
+      }
+    }
+
+    // Cache completeness results across searches so we don't re-fetch the same
+    // destinations as the agent types more characters. Keyed by `${level}:${recordId}`.
+    const completenessCache = {};
+    const COMPLETENESS_TIER_LABELS = {
+      complete: 'All sections populated',
+      partial:  'Some sections missing',
+      empty:    'No Spotlight content yet',
+      unknown:  'Could not check',
+    };
+    const COMPLETENESS_TIER_GLYPH = {
+      complete: '✓',
+      partial:  '!',
+      empty:    '✕',
+      unknown:  '?',
+    };
+
+    function applyBadge(level, recordId, tier) {
+      const sel = `[data-comp-badge="${level}:${recordId}"]`;
+      document.querySelectorAll(sel).forEach(el => {
+        el.setAttribute('data-tier', tier);
+        el.title = COMPLETENESS_TIER_LABELS[tier] || tier;
+        el.textContent = COMPLETENESS_TIER_GLYPH[tier] || '·';
+      });
+    }
+
+    async function fetchCompletenessBatch(items) {
+      if (!Array.isArray(items) || items.length === 0) return;
+      // Filter out cached items; apply cached badges immediately
+      const need = [];
+      items.forEach(it => {
+        const key = `${it.level}:${it.recordId}`;
+        if (completenessCache[key]) {
+          applyBadge(it.level, it.recordId, completenessCache[key].tier);
+        } else {
+          need.push({ level: it.level, recordId: it.recordId });
+        }
+      });
+      if (need.length === 0) return;
+      try {
+        const res = await fetch('/api/destination-completeness', {
+          method: 'POST',
+          headers: Object.assign({ 'Content-Type': 'application/json' }, authH()),
+          body: JSON.stringify({ items: need }),
+        });
+        if (!res.ok) {
+          // Mark all needed items as 'unknown' rather than leave them spinning
+          need.forEach(it => applyBadge(it.level, it.recordId, 'unknown'));
+          return;
+        }
+        const data = await res.json();
+        const results = Array.isArray(data.results) ? data.results : [];
+        results.forEach(r => {
+          const key = `${r.level}:${r.recordId}`;
+          completenessCache[key] = { tier: r.tier };
+          applyBadge(r.level, r.recordId, r.tier);
+        });
+      } catch (err) {
+        need.forEach(it => applyBadge(it.level, it.recordId, 'unknown'));
       }
     }
     function pickDestination(r) {
       state.config.destination = { level: r.level, recordId: r.recordId, name: r.name };
       document.getElementById('pickerResults').hidden = true;
       document.getElementById('destSearch').value = '';
+      // Reset the breakdown state so we render a loading shell while we fetch
+      selectedCompleteness = { state: 'loading' };
       renderSelectedDestination();
       onConfigChange();
       fetchDestinationData(r.level, r.recordId); // preload for preview
+      fetchSelectedCompleteness(r.level, r.recordId);
+    }
+
+    // Per-section completeness for the currently-selected destination. Drives the
+    // breakdown card shown beneath the selectedDest pill.
+    let selectedCompleteness = null; // { state: 'loading' | 'ok' | 'error', data?: {...} }
+
+    async function fetchSelectedCompleteness(level, recordId) {
+      try {
+        const res = await fetch(
+          '/api/destination-completeness?level=' + encodeURIComponent(level)
+            + '&recordId=' + encodeURIComponent(recordId),
+          { headers: authH() }
+        );
+        if (!res.ok) {
+          selectedCompleteness = { state: 'error' };
+          renderSelectedDestination();
+          return;
+        }
+        const data = await res.json();
+        selectedCompleteness = { state: 'ok', data };
+        renderSelectedDestination();
+      } catch {
+        selectedCompleteness = { state: 'error' };
+        renderSelectedDestination();
+      }
     }
 
     // Cached destination payloads so we don't re-fetch on every preview render.
@@ -1118,7 +1273,9 @@
       const wrap = document.getElementById('selectedDest');
       const d = state.config.destination;
       if (!d) { wrap.innerHTML = ''; return; }
-      wrap.innerHTML = `
+
+      // Top card: the selected destination, with clear button
+      const topCard = `
         <div class="selected-dest">
           <div>
             <div class="selected-dest-name">${escHtml(d.name || '(unnamed)')}</div>
@@ -1128,9 +1285,67 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
         </div>`;
+
+      // Breakdown card: shows which sections are populated for this record
+      let breakdown = '';
+      if (selectedCompleteness && selectedCompleteness.state === 'loading') {
+        breakdown = `
+          <div class="completeness-breakdown">
+            <div class="completeness-breakdown-head">
+              <span class="completeness-badge" data-tier="loading">·</span>
+              Checking content…
+            </div>
+          </div>`;
+      } else if (selectedCompleteness && selectedCompleteness.state === 'ok') {
+        const cb = selectedCompleteness.data || {};
+        const sections = cb.sections || {};
+        const tier = cb.tier || 'unknown';
+        const labels = [
+          ['hero',       'Hero'],
+          ['climate',    'Climate'],
+          ['facts',      'Facts'],
+          ['highlights', 'Highlights'],
+          ['tags',       'Tags'],
+          ['events',     'Events'],
+        ];
+        const pillsHtml = labels.map(([k, label]) => {
+          const ok = !!sections[k];
+          const glyph = ok
+            ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+            : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+          return `<span class="completeness-pill" data-ok="${ok ? 'true' : 'false'}">${glyph}${escHtml(label)}</span>`;
+        }).join('');
+
+        const inheritedKeys = cb.factsInherited && typeof cb.factsInherited === 'object'
+          ? Object.keys(cb.factsInherited) : [];
+        const inheritedLine = inheritedKeys.length
+          ? `<div class="completeness-inherited">Some facts inherited from ${escHtml([...new Set(Object.values(cb.factsInherited))].join(' and '))} (this is fine).</div>`
+          : '';
+
+        breakdown = `
+          <div class="completeness-breakdown">
+            <div class="completeness-breakdown-head">
+              <span class="completeness-badge" data-tier="${tier}">${COMPLETENESS_TIER_GLYPH[tier] || '·'}</span>
+              ${escHtml(COMPLETENESS_TIER_LABELS[tier] || tier)}
+            </div>
+            <div class="completeness-breakdown-pills">${pillsHtml}</div>
+            ${inheritedLine}
+          </div>`;
+      } else if (selectedCompleteness && selectedCompleteness.state === 'error') {
+        breakdown = `
+          <div class="completeness-breakdown">
+            <div class="completeness-breakdown-head">
+              <span class="completeness-badge" data-tier="unknown">?</span>
+              Could not check content completeness
+            </div>
+          </div>`;
+      }
+
+      wrap.innerHTML = topCard + breakdown;
       document.getElementById('clearDest').addEventListener('click', () => {
         state.config.destination = null;
         destCache = {};
+        selectedCompleteness = null;
         renderSelectedDestination();
         onConfigChange();
       });
@@ -1182,6 +1397,9 @@
       document.getElementById('hEvents').value = c.eventsHeading || '';
       // Auto-detect
       const ad = c.autoDetect || {};
+      const adEnabled = !!ad.enabled;
+      document.getElementById('togAutoDetect').setAttribute('aria-checked', adEnabled ? 'true' : 'false');
+      document.getElementById('autoDetectFields').hidden = !adEnabled;
       document.getElementById('slugSource').value = ad.slugSource || 'last-path-segment';
       document.getElementById('slugExtra').value = ad.slugExtra || '';
       updateSlugExtraVisibility();
@@ -1285,6 +1503,12 @@
     document.getElementById('hEvents').addEventListener('input', e => { state.config.eventsHeading = e.target.value; onConfigChange(); });
 
     // Auto-detect
+    document.getElementById('togAutoDetect').addEventListener('click', e => {
+      state.config.autoDetect.enabled = !state.config.autoDetect.enabled;
+      e.currentTarget.setAttribute('aria-checked', state.config.autoDetect.enabled ? 'true' : 'false');
+      document.getElementById('autoDetectFields').hidden = !state.config.autoDetect.enabled;
+      onConfigChange();
+    });
     document.getElementById('slugSource').addEventListener('change', e => {
       state.config.autoDetect.slugSource = e.target.value;
       updateSlugExtraVisibility();
@@ -1382,6 +1606,10 @@ ${escHtml(code)}
         // Preload destination for preview
         if (state.config.destination && state.config.destination.recordId) {
           fetchDestinationData(state.config.destination.level, state.config.destination.recordId);
+          // Also fetch completeness breakdown so the picker shows the per-section pills
+          selectedCompleteness = { state: 'loading' };
+          renderSelectedDestination();
+          fetchSelectedCompleteness(state.config.destination.level, state.config.destination.recordId);
         }
       } catch (ex) {
         toast('Could not load the widget. Starting fresh.', 'error');
