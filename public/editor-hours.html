@@ -410,6 +410,14 @@
                 </div>
               </div>
 
+              <div class="toggle-row" id="compactExpandableField" style="display:none;margin-top:10px;border-top:1px solid var(--tgse-border-light, #F1F5F9);padding-top:14px">
+                <div>
+                  <div class="toggle-label">Allow click to expand</div>
+                  <div class="toggle-help">Clicking the pill pops out the full schedule underneath. Click outside or press Escape to close.</div>
+                </div>
+                <button class="toggle is-on" id="toggleCompactExpandable" type="button" aria-pressed="true"></button>
+              </div>
+
               <div class="field">
                 <span class="field-label">Title</span>
                 <input class="input" id="titleInput" maxlength="60" placeholder="Opening hours" />
@@ -629,6 +637,7 @@
     return {
       layout: 'card',
       compactStyle: 'pill',
+      compactExpandable: true,
       title: 'Opening hours',
       showStatus: true,
       highlightToday: true,
@@ -708,6 +717,13 @@
       .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // Show/hide the "Allow click to expand" toggle.
+  // Only meaningful when layout=compact AND compactStyle=pill (inline text doesn't expand).
+  function syncCompactExpandableVisibility() {
+    const show = (C.layout === 'compact') && (C.compactStyle === 'pill');
+    document.getElementById('compactExpandableField').style.display = show ? '' : 'none';
+  }
+
   // Layout
   document.getElementById('layoutGrid').addEventListener('click', (e) => {
     const card = e.target.closest('[data-layout]');
@@ -715,6 +731,7 @@
     document.querySelectorAll('#layoutGrid .layout-card').forEach(c => c.classList.toggle('is-active', c === card));
     C.layout = card.getAttribute('data-layout');
     document.getElementById('compactStyleField').style.display = (C.layout === 'compact') ? '' : 'none';
+    syncCompactExpandableVisibility();
     dirty(); render();
   });
 
@@ -723,6 +740,7 @@
     if (!b) return;
     document.querySelectorAll('#compactStyleSeg button').forEach(x => x.classList.toggle('is-active', x === b));
     C.compactStyle = b.getAttribute('data-cstyle');
+    syncCompactExpandableVisibility();
     dirty(); render();
   });
 
@@ -774,6 +792,7 @@
   }
   bindToggle('toggleStatus', (on) => { C.showStatus = on; });
   bindToggle('toggleHighlight', (on) => { C.highlightToday = on; });
+  bindToggle('toggleCompactExpandable', (on) => { C.compactExpandable = on; });
   bindToggle('toggleTz', (on) => {
     C.showTimezoneNote = on;
     document.getElementById('tzLabelField').style.display = on ? '' : 'none';
@@ -944,6 +963,9 @@
       b.classList.toggle('is-active', b.getAttribute('data-cstyle') === C.compactStyle);
     });
 
+    // Compact expandable toggle visibility
+    syncCompactExpandableVisibility();
+
     // Day labels / time fmt / week start
     document.querySelectorAll('#dayLabelsSeg button').forEach(b => {
       b.classList.toggle('is-active', b.getAttribute('data-dlabel') === C.dayLabels);
@@ -962,6 +984,7 @@
     [
       ['toggleStatus', C.showStatus],
       ['toggleHighlight', C.highlightToday],
+      ['toggleCompactExpandable', C.compactExpandable !== false],
       ['toggleTz', C.showTimezoneNote],
     ].forEach(([id, on]) => {
       const t = document.getElementById(id);
