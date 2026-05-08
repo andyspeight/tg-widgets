@@ -191,12 +191,21 @@
       z-index: 9000;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
       gap: 12px;
       pointer-events: none;
     }
-    .tgwa-floating[data-corner="bottom-right"] { right: 20px; bottom: 20px; align-items: flex-end; }
-    .tgwa-floating[data-corner="bottom-left"]  { left: 20px;  bottom: 20px; align-items: flex-start; }
+
+    /* Bottom corners — stack flows upward (greeting above FAB) */
+    .tgwa-floating[data-position="bottom-right"]  { right: 20px; bottom: 20px; align-items: flex-end; flex-direction: column; }
+    .tgwa-floating[data-position="bottom-left"]   { left: 20px;  bottom: 20px; align-items: flex-start; flex-direction: column; }
+
+    /* Top corners — stack flows downward (greeting below FAB) */
+    .tgwa-floating[data-position="top-right"]     { right: 20px; top: 20px; align-items: flex-end; flex-direction: column-reverse; }
+    .tgwa-floating[data-position="top-left"]      { left: 20px;  top: 20px; align-items: flex-start; flex-direction: column-reverse; }
+
+    /* Middle — vertically centred, greeting beside FAB on the inside */
+    .tgwa-floating[data-position="middle-right"]  { right: 20px; top: 50%; transform: translateY(-50%); align-items: flex-end; flex-direction: column; }
+    .tgwa-floating[data-position="middle-left"]   { left: 20px;  top: 50%; transform: translateY(-50%); align-items: flex-start; flex-direction: column; }
 
     .tgwa-floating > * { pointer-events: auto; }
 
@@ -225,17 +234,21 @@
     .tgwa-greeting::after {
       content: '';
       position: absolute;
-      bottom: -6px;
       width: 12px;
       height: 12px;
       background: var(--tgwa-card);
       border: 1px solid var(--tgwa-border);
-      border-top: none;
-      border-left: none;
       transform: rotate(45deg);
     }
-    .tgwa-floating[data-corner="bottom-right"] .tgwa-greeting::after { right: 28px; }
-    .tgwa-floating[data-corner="bottom-left"] .tgwa-greeting::after { left: 28px; }
+    /* Bottom positions — tail on bottom edge of bubble */
+    .tgwa-floating[data-position="bottom-right"] .tgwa-greeting::after { bottom: -6px; right: 28px; border-top: none; border-left: none; }
+    .tgwa-floating[data-position="bottom-left"]  .tgwa-greeting::after { bottom: -6px; left: 28px;  border-top: none; border-left: none; }
+    /* Top positions — tail on top edge of bubble */
+    .tgwa-floating[data-position="top-right"] .tgwa-greeting::after { top: -6px; right: 28px; border-bottom: none; border-right: none; }
+    .tgwa-floating[data-position="top-left"]  .tgwa-greeting::after { top: -6px; left: 28px;  border-bottom: none; border-right: none; }
+    /* Middle positions — tail on the inside edge (pointing toward FAB) */
+    .tgwa-floating[data-position="middle-right"] .tgwa-greeting::after { bottom: -6px; right: 28px; border-top: none; border-left: none; }
+    .tgwa-floating[data-position="middle-left"]  .tgwa-greeting::after { bottom: -6px; left: 28px;  border-top: none; border-left: none; }
 
     .tgwa-greeting-close {
       position: absolute;
@@ -322,7 +335,12 @@
       flex-direction: column;
       max-height: min(560px, calc(100vh - 120px));
     }
-    .tgwa-floating[data-corner="bottom-left"] .tgwa-panel { transform-origin: bottom left; }
+    .tgwa-floating[data-position="bottom-right"]  .tgwa-panel { transform-origin: bottom right; }
+    .tgwa-floating[data-position="bottom-left"]   .tgwa-panel { transform-origin: bottom left; }
+    .tgwa-floating[data-position="top-right"]     .tgwa-panel { transform-origin: top right; }
+    .tgwa-floating[data-position="top-left"]      .tgwa-panel { transform-origin: top left; }
+    .tgwa-floating[data-position="middle-right"]  .tgwa-panel { transform-origin: center right; }
+    .tgwa-floating[data-position="middle-left"]   .tgwa-panel { transform-origin: center left; }
     .tgwa-panel[data-open="true"] {
       opacity: 1;
       transform: translateY(0) scale(1);
@@ -621,21 +639,128 @@
     .tgwa-inline-card-cta:hover { background: var(--tgwa-brand-dark); }
     .tgwa-inline-card-cta svg { width: 14px; height: 14px; fill: #FFFFFF; }
 
+    /* ========== VERTICAL TAB LAYOUT ========== */
+    /* A slim tall pill stuck to the side of the viewport, vertically centred.
+       The tab itself is a fixed element; the panel pops out from the inside edge.
+       Best paired with middle-left or middle-right positions. */
+    .tgwa-vertical {
+      position: fixed;
+      z-index: 9000;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+    .tgwa-vertical[data-side="right"] { right: 0; flex-direction: row-reverse; }
+    .tgwa-vertical[data-side="left"]  { left: 0;  flex-direction: row; }
+
+    .tgwa-vertical > * { pointer-events: auto; }
+
+    .tgwa-tab {
+      background: var(--tgwa-brand);
+      color: #FFFFFF;
+      border: none;
+      cursor: pointer;
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: -4px 0 14px rgba(15, 23, 42, 0.12);
+      transition: padding 220ms cubic-bezier(.2,.8,.2,1), background 150ms ease;
+      font-family: inherit;
+      position: relative;
+    }
+    .tgwa-vertical[data-side="right"] .tgwa-tab {
+      border-radius: 14px 0 0 14px;
+      box-shadow: -4px 0 14px rgba(15, 23, 42, 0.12);
+    }
+    .tgwa-vertical[data-side="left"] .tgwa-tab {
+      border-radius: 0 14px 14px 0;
+      box-shadow: 4px 0 14px rgba(15, 23, 42, 0.12);
+    }
+    .tgwa-tab:hover { padding-left: 16px; padding-right: 16px; background: var(--tgwa-brand-dark); }
+    .tgwa-tab:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--tgwa-brand) 50%, transparent);
+      outline-offset: -3px;
+    }
+    .tgwa-tab svg { width: 22px; height: 22px; fill: currentColor; }
+
+    .tgwa-tab-label {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    /* On the left side, flip the text so it reads bottom-to-top (more natural) */
+    .tgwa-vertical[data-side="left"] .tgwa-tab-label {
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
+    }
+
+    .tgwa-tab .tgwa-dot {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #22C55E;
+      border: 2px solid var(--tgwa-brand);
+    }
+    .tgwa-tab .tgwa-dot[data-state="offline"] { background: #94A3B8; }
+
+    /* Pulse on the tab — softer than the FAB */
+    .tgwa-tab[data-pulse="true"]::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--tgwa-brand);
+      opacity: 0.35;
+      animation: tgwa-pulse-tab 2.4s ease-out infinite;
+      z-index: -1;
+    }
+    .tgwa-vertical[data-side="right"] .tgwa-tab[data-pulse="true"]::before { border-radius: 14px 0 0 14px; }
+    .tgwa-vertical[data-side="left"]  .tgwa-tab[data-pulse="true"]::before { border-radius: 0 14px 14px 0; }
+    @keyframes tgwa-pulse-tab {
+      0%   { transform: translateX(0);    opacity: 0.35; }
+      80%  { transform: translateX(0);    opacity: 0; }
+      100% { transform: translateX(0);    opacity: 0; }
+    }
+
+    /* Panel: pops out from the inside edge of the tab */
+    .tgwa-vertical .tgwa-panel {
+      position: relative;
+      margin: 0 8px;
+      transform-origin: center;
+    }
+    .tgwa-vertical[data-side="right"] .tgwa-panel { transform-origin: center right; }
+    .tgwa-vertical[data-side="left"]  .tgwa-panel { transform-origin: center left; }
+
     /* ========== Responsive ========== */
     @media (max-width: 480px) {
-      .tgwa-floating[data-corner="bottom-right"] { right: 14px; bottom: 14px; }
-      .tgwa-floating[data-corner="bottom-left"] { left: 14px; bottom: 14px; }
+      .tgwa-floating[data-position="bottom-right"]  { right: 14px; bottom: 14px; }
+      .tgwa-floating[data-position="bottom-left"]   { left: 14px;  bottom: 14px; }
+      .tgwa-floating[data-position="top-right"]     { right: 14px; top: 14px; }
+      .tgwa-floating[data-position="top-left"]      { left: 14px;  top: 14px; }
+      .tgwa-floating[data-position="middle-right"]  { right: 14px; }
+      .tgwa-floating[data-position="middle-left"]   { left: 14px; }
       .tgwa-panel { width: calc(100vw - 28px); max-width: 360px; }
       .tgwa-greeting { max-width: 220px; }
+      /* Vertical tab: shrink padding on mobile */
+      .tgwa-tab { padding: 14px 10px; }
+      .tgwa-tab-label { font-size: 12px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .tgwa-fab, .tgwa-cta, .tgwa-inline, .tgwa-inline-card-cta, .tgwa-greeting, .tgwa-panel, .tgwa-bubble, .tgwa-agent {
+      .tgwa-fab, .tgwa-cta, .tgwa-inline, .tgwa-inline-card-cta, .tgwa-greeting, .tgwa-panel, .tgwa-bubble, .tgwa-agent, .tgwa-tab {
         transition: none !important;
         animation: none !important;
       }
-      .tgwa-fab[data-pulse="true"]::before { animation: none !important; opacity: 0; }
-      .tgwa-fab:hover, .tgwa-cta:hover, .tgwa-inline:hover, .tgwa-agent:hover { transform: none; }
+      .tgwa-fab[data-pulse="true"]::before, .tgwa-tab[data-pulse="true"]::before { animation: none !important; opacity: 0; }
+      .tgwa-fab:hover, .tgwa-cta:hover, .tgwa-inline:hover, .tgwa-agent:hover, .tgwa-tab:hover { transform: none; padding: 18px 12px; }
     }
   `;
 
@@ -674,9 +799,17 @@
         });
       }
 
+      const validLayouts = ['floating', 'inline', 'card', 'vertical'];
+      const validPositions = ['bottom-right', 'bottom-left', 'top-right', 'top-left', 'middle-right', 'middle-left'];
+      // Backwards compat: cfg.corner is the old name for cfg.position
+      const requestedPosition = cfg.position || cfg.corner || 'bottom-right';
+
       return {
-        layout: cfg.layout || 'floating',                         // floating | inline | card
-        corner: cfg.corner || 'bottom-right',                     // bottom-right | bottom-left
+        layout: validLayouts.includes(cfg.layout) ? cfg.layout : 'floating',
+        // For vertical layout we only allow middle-left or middle-right; default middle-right
+        position: cfg.layout === 'vertical'
+          ? (requestedPosition === 'middle-left' ? 'middle-left' : 'middle-right')
+          : (validPositions.includes(requestedPosition) ? requestedPosition : 'bottom-right'),
         mode: cfg.mode === 'multi' ? 'multi' : 'single',          // single | multi
         agents: agents,
 
@@ -700,6 +833,9 @@
 
         // CTA label
         ctaLabel: cfg.ctaLabel || 'Start chat',
+
+        // Vertical tab label (used when layout='vertical')
+        tabLabel: cfg.tabLabel || 'Chat with us',
 
         // Inline label
         inlineLabel: cfg.inlineLabel || 'Chat on WhatsApp',
@@ -808,8 +944,9 @@
       const status = this._hoursStatus();
       const themeStyle = this._themeStyle();
 
-      // Hide floating widget entirely when closed and hideWhenClosed is on
-      if (cfg.layout === 'floating' && cfg.hoursEnabled && !status.open && cfg.hideWhenClosed) {
+      // Hide floating/vertical widget entirely when closed and hideWhenClosed is on
+      const isFloatingType = cfg.layout === 'floating' || cfg.layout === 'vertical';
+      if (isFloatingType && cfg.hoursEnabled && !status.open && cfg.hideWhenClosed) {
         this.shadow.innerHTML = `<style>${STYLES}</style><div class="tgwa-root" data-theme="${cfg.theme.mode}" style="${themeStyle}"></div>`;
         return;
       }
@@ -817,6 +954,7 @@
       let inner = '';
       if (cfg.layout === 'inline') inner = this._renderInline(status);
       else if (cfg.layout === 'card') inner = this._renderInlineCard(status);
+      else if (cfg.layout === 'vertical') inner = this._renderVertical(status);
       else inner = this._renderFloating(status);
 
       this.shadow.innerHTML = `
@@ -847,7 +985,7 @@
         : '';
 
       return `
-        <div class="tgwa-floating" data-corner="${esc(cfg.corner)}">
+        <div class="tgwa-floating" data-position="${esc(cfg.position)}">
           ${greeting}
           <div class="tgwa-panel" data-open="${isOpen}" id="panel" role="dialog" aria-label="WhatsApp chat">
             ${this._renderPanelHead(status)}
@@ -858,6 +996,34 @@
           </div>
           <button class="tgwa-fab" type="button" id="fab" data-pulse="${cfg.pulse}" aria-label="${esc(cfg.headerTitle)}" aria-expanded="${isOpen}">
             ${svg('whatsapp', 30)}
+            <span class="tgwa-dot" data-state="${status.open ? 'online' : 'offline'}"></span>
+          </button>
+        </div>
+      `;
+    }
+
+    _renderVertical(status) {
+      const cfg = this.c;
+      const isOpen = this._open;
+      const isMulti = cfg.mode === 'multi' && cfg.agents.length > 1;
+      // Vertical only supports middle-left or middle-right; map position → side
+      const side = cfg.position === 'middle-left' ? 'left' : 'right';
+      const tabLabel = cfg.tabLabel || 'Chat with us';
+
+      return `
+        <div class="tgwa-vertical" data-side="${side}">
+          ${isOpen ? `
+            <div class="tgwa-panel" data-open="true" id="panel" role="dialog" aria-label="WhatsApp chat">
+              ${this._renderPanelHead(status)}
+              <div class="tgwa-panel-body">
+                ${this._renderPanelBody(status, isMulti)}
+              </div>
+              ${this._renderPanelFoot(status, isMulti)}
+            </div>
+          ` : ''}
+          <button class="tgwa-tab" type="button" id="fab" data-pulse="${cfg.pulse && !isOpen}" aria-label="${esc(cfg.headerTitle)}" aria-expanded="${isOpen}">
+            ${svg('whatsapp', 22)}
+            <span class="tgwa-tab-label">${esc(tabLabel)}</span>
             <span class="tgwa-dot" data-state="${status.open ? 'online' : 'offline'}"></span>
           </button>
         </div>
