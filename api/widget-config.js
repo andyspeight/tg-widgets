@@ -33,6 +33,9 @@ const ALLOWED_WIDGET_TYPES = [
   'Popup',
   'Countdown Timer',
   'Event Calendar',
+  'Social Share',
+  'WhatsApp Chat',
+  'Opening Hours',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -56,6 +59,9 @@ const PLAN_WIDGET_LIMITS = {
   'Popup':                 { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Countdown Timer':       { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Event Calendar':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Social Share':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'WhatsApp Chat':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Opening Hours':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
 };
 
 // Count existing widgets owned by this user, of a specific type.
