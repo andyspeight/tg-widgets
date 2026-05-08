@@ -105,7 +105,8 @@
   }
 
   // Build the live status: {open, label, nextOpen}
-  function evalStatus(hours, holidays, now) {
+  function evalStatus(hours, holidays, now, fmt) {
+    const tf = (fmt === '24') ? '24' : '12';
     const d = now || new Date();
     const today = scheduleForDate(d, hours, holidays);
     const minutesNow = d.getHours() * 60 + d.getMinutes();
@@ -118,7 +119,7 @@
           return {
             open: true,
             closingAt: b,
-            label: 'Open until ' + formatTime(b, '12'),
+            label: 'Open until ' + formatTime(b, tf),
           };
         }
       }
@@ -131,7 +132,7 @@
         return {
           open: false,
           openingAt: todayLater,
-          label: 'Opens today at ' + formatTime(todayLater, '12'),
+          label: 'Opens today at ' + formatTime(todayLater, tf),
         };
       }
     }
@@ -152,7 +153,7 @@
         open: false,
         openingAt: opens,
         nextDayOffset: i,
-        label: 'Opens ' + dayLabel + ' at ' + formatTime(opens, '12'),
+        label: 'Opens ' + dayLabel + ' at ' + formatTime(opens, tf),
       };
     }
 
@@ -589,7 +590,7 @@
 
     _render() {
       const cfg = this.c;
-      const status = cfg.showStatus ? evalStatus(cfg.hours, cfg.holidays, new Date()) : null;
+      const status = cfg.showStatus ? evalStatus(cfg.hours, cfg.holidays, new Date(), cfg.timeFormat) : null;
       const themeStyle = this._themeStyle();
 
       let inner = '';
