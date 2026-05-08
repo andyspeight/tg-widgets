@@ -1223,6 +1223,50 @@
       this._render();
     }
 
+    /**
+     * Programmatically open the chat panel.
+     * Works for floating and vertical layouts. No-op for inline/card.
+     */
+    open() {
+      if (this.c.layout !== 'floating' && this.c.layout !== 'vertical') return;
+      if (this._open) return;
+      this._open = true;
+      this._greetingDismissed = true;
+      // Vertical layout renders the panel conditionally so a full re-render is needed.
+      // Floating keeps the panel in DOM and just toggles data-open.
+      if (this.c.layout === 'vertical') {
+        this._render();
+      } else {
+        const panel = this.shadow.querySelector('#panel');
+        const fab = this.shadow.querySelector('#fab');
+        const greeting = this.shadow.querySelector('#greeting');
+        if (panel) panel.setAttribute('data-open', 'true');
+        if (fab) fab.setAttribute('aria-expanded', 'true');
+        if (greeting) greeting.setAttribute('data-show', 'false');
+      }
+    }
+
+    close() {
+      if (this.c.layout !== 'floating' && this.c.layout !== 'vertical') return;
+      if (!this._open) return;
+      this._open = false;
+      if (this.c.layout === 'vertical') {
+        this._render();
+      } else {
+        const panel = this.shadow.querySelector('#panel');
+        const fab = this.shadow.querySelector('#fab');
+        if (panel) panel.setAttribute('data-open', 'false');
+        if (fab) fab.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    toggle() {
+      this._open ? this.close() : this.open();
+    }
+
+    /** Inspect current open state — handy for tests/demos. */
+    isOpen() { return !!this._open; }
+
     destroy() {
       if (this._greetingTimer) clearTimeout(this._greetingTimer);
       this.shadow.innerHTML = '';
