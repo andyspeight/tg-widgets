@@ -203,7 +203,7 @@
     .tgwa-floating[data-position="top-right"]     { right: 20px; top: 20px; align-items: flex-end; flex-direction: column-reverse; }
     .tgwa-floating[data-position="top-left"]      { left: 20px;  top: 20px; align-items: flex-start; flex-direction: column-reverse; }
 
-    /* Middle — vertically centred, greeting beside FAB on the inside */
+    /* Middle — vertically centred */
     .tgwa-floating[data-position="middle-right"]  { right: 20px; top: 50%; transform: translateY(-50%); align-items: flex-end; flex-direction: column; }
     .tgwa-floating[data-position="middle-left"]   { left: 20px;  top: 50%; transform: translateY(-50%); align-items: flex-start; flex-direction: column; }
 
@@ -320,6 +320,7 @@
 
     /* ----- Popover panel (opened from FAB) ----- */
     .tgwa-panel {
+      position: absolute;
       width: 340px;
       max-width: calc(100vw - 32px);
       background: var(--tgwa-card);
@@ -327,24 +328,35 @@
       box-shadow: var(--tgwa-shadow-hover);
       overflow: hidden;
       opacity: 0;
+      visibility: hidden;
       transform: translateY(8px) scale(0.96);
       transform-origin: bottom right;
       pointer-events: none;
-      transition: opacity 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1);
+      transition: opacity 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1), visibility 0ms linear 220ms;
       display: flex;
       flex-direction: column;
       max-height: min(560px, calc(100vh - 120px));
     }
-    .tgwa-floating[data-position="bottom-right"]  .tgwa-panel { transform-origin: bottom right; }
-    .tgwa-floating[data-position="bottom-left"]   .tgwa-panel { transform-origin: bottom left; }
-    .tgwa-floating[data-position="top-right"]     .tgwa-panel { transform-origin: top right; }
-    .tgwa-floating[data-position="top-left"]      .tgwa-panel { transform-origin: top left; }
-    .tgwa-floating[data-position="middle-right"]  .tgwa-panel { transform-origin: center right; }
-    .tgwa-floating[data-position="middle-left"]   .tgwa-panel { transform-origin: center left; }
+    /* Bottom positions: panel sits ABOVE the FAB */
+    .tgwa-floating[data-position="bottom-right"]  .tgwa-panel { transform-origin: bottom right; bottom: 76px; right: 0; }
+    .tgwa-floating[data-position="bottom-left"]   .tgwa-panel { transform-origin: bottom left;  bottom: 76px; left: 0; }
+    /* Top positions: panel sits BELOW the FAB */
+    .tgwa-floating[data-position="top-right"]     .tgwa-panel { transform-origin: top right;    top: 76px;    right: 0; }
+    .tgwa-floating[data-position="top-left"]      .tgwa-panel { transform-origin: top left;     top: 76px;    left: 0; }
+    /* Middle positions: panel sits BESIDE the FAB on the inside */
+    .tgwa-floating[data-position="middle-right"]  .tgwa-panel { transform-origin: center right; right: 76px;  top: 50%; transform: translateY(-50%) translateX(8px) scale(0.96); }
+    .tgwa-floating[data-position="middle-left"]   .tgwa-panel { transform-origin: center left;  left: 76px;   top: 50%; transform: translateY(-50%) translateX(-8px) scale(0.96); }
+
     .tgwa-panel[data-open="true"] {
       opacity: 1;
+      visibility: visible;
       transform: translateY(0) scale(1);
       pointer-events: auto;
+      transition: opacity 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1), visibility 0ms linear 0ms;
+    }
+    .tgwa-floating[data-position="middle-right"] .tgwa-panel[data-open="true"],
+    .tgwa-floating[data-position="middle-left"]  .tgwa-panel[data-open="true"] {
+      transform: translateY(-50%) translateX(0) scale(1);
     }
 
     .tgwa-panel-head {
@@ -1144,16 +1156,32 @@
       const greetingClose = this.shadow.querySelector('#greetingClose');
       const greeting = this.shadow.querySelector('#greeting');
 
-      if (fab && panel) {
-        fab.addEventListener('click', (e) => {
+      // Debug: log binding state to help diagnose click issues
+      if (window.__TG_WHATSAPP_DEBUG__) {
+        console.log('[TG WhatsApp] bind:', {
+          fab: !!fab,
+          panel: !!panel,
+          layout: this.c.layout,
+          position: this.c.position,
+        });
+      }
+
+      if (fab) {
+        const handler = (e) => {
           e.stopPropagation();
           this._open = !this._open;
-          panel.setAttribute('data-open', String(this._open));
+          if (window.__TG_WHATSAPP_DEBUG__) {
+            console.log('[TG WhatsApp] FAB clicked, _open =', this._open);
+          }
+          if (panel) panel.setAttribute('data-open', String(this._open));
           fab.setAttribute('aria-expanded', String(this._open));
           if (this._open && greeting) {
             greeting.setAttribute('data-show', 'false');
           }
-        });
+          // Vertical layout needs a re-render because the panel renders conditionally
+          if (this.c.layout === 'vertical') this._render();
+        };
+        fab.addEventListener('click', handler);
       }
       if (closeBtn && panel) {
         closeBtn.addEventListener('click', (e) => {
