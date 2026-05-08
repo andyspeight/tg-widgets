@@ -1,1415 +1,474 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Popup Editor — Travelgenix</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/editor-shell.css">
-<style>
-  /* ───────────────────────────────────────────────────────────
-     Per-editor styles — ONLY popup-specific bits.
-     All shell tokens come from editor-shell.css (--tgse-*).
-     ─────────────────────────────────────────────────────────── */
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Popup · Travelgenix Widget Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-bg: #F8FAFC;
+      --tg-card: #FFFFFF;
+      --tg-text: #0F172A;
+      --tg-sub: #475569;
+      --tg-muted: #94A3B8;
+      --tg-border: #E2E8F0;
+      --tg-brand: #1B2B5B;
+      --tg-accent: #00B4D8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--tg-text);
+      background: var(--tg-bg);
+      line-height: 1.5;
+    }
+    a { color: var(--tg-accent); }
 
-  /* Sidebar body — matches the inner pattern used by countdown */
-  .sb-body { padding: 0; }
-  .tab-panel { display: none; padding: 12px 14px 24px; }
-  .tab-panel.is-active { display: block; }
+    /* Top bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: saturate(180%) blur(10px);
+      border-bottom: 1px solid var(--tg-border);
+    }
+    .topbar-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 15px; color: var(--tg-text);
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+    }
+    .topbar-spacer { flex: 1; }
+    .pill {
+      font-size: 12px; font-weight: 600;
+      padding: 4px 10px; border-radius: 999px;
+      background: #ECFEFF; color: #0E7490; border: 1px solid #A5F3FC;
+    }
+    .topbar-link {
+      font-size: 13px; font-weight: 500; color: var(--tg-sub);
+      text-decoration: none;
+    }
+    .topbar-link:hover { color: var(--tg-text); }
 
-  /* Sections (collapsible) */
-  .sec {
-    border: 1px solid var(--tgse-border);
-    border-radius: var(--tgse-radius-md);
-    background: var(--tgse-panel);
-    margin-bottom: 10px;
-    overflow: hidden;
-  }
-  .sec-head {
-    width: 100%; display: flex; align-items: center; gap: 8px;
-    padding: 10px 12px;
-    background: var(--tgse-panel-2);
-    border: 0; border-bottom: 1px solid var(--tgse-border);
-    text-align: left; cursor: pointer;
-    font: 600 12px/1 'Inter', sans-serif;
-    color: var(--tgse-ink);
-    text-transform: uppercase; letter-spacing: .04em;
-  }
-  .sec-title { flex: 1; }
-  .sec-chev {
-    width: 14px; height: 14px;
-    color: var(--tgse-ink-3);
-    transition: transform .18s ease;
-  }
-  .sec.is-open .sec-chev { transform: rotate(180deg); }
-  .sec.is-open .sec-head { border-bottom-color: var(--tgse-border); }
-  .sec-body { display: none; padding: 14px 12px 16px; }
-  .sec.is-open .sec-body { display: block; }
+    /* Container */
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 80px; }
+    h1 {
+      font-size: 32px; font-weight: 700; letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+    .lede {
+      font-size: 16px; color: var(--tg-sub);
+      margin: 0 0 28px; max-width: 720px;
+    }
 
-  /* Field — label + control */
-  .field { margin-bottom: 12px; }
-  .field:last-child { margin-bottom: 0; }
-  .field-label {
-    display: block;
-    font: 500 12px/1.3 'Inter', sans-serif;
-    color: var(--tgse-ink);
-    margin-bottom: 5px;
-  }
-  .field-hint {
-    font: 400 11px/1.4 'Inter', sans-serif;
-    color: var(--tgse-ink-3);
-    margin-top: 5px;
-  }
-  .input, .textarea, .select {
-    width: 100%; padding: 7px 10px; height: 32px;
-    background: var(--tgse-panel); color: var(--tgse-ink);
-    border: 1px solid var(--tgse-border);
-    border-radius: var(--tgse-radius-sm);
-    font: 400 13px/1 'Inter', sans-serif;
-    transition: border-color .12s, box-shadow .12s;
-  }
-  .textarea {
-    height: auto; min-height: 64px; padding: 8px 10px;
-    line-height: 1.5; resize: vertical;
-    font-family: 'Inter', sans-serif;
-  }
-  .select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 10px center;
-    padding-right: 28px;
-  }
-  .input:focus, .textarea:focus, .select:focus {
-    outline: 0;
-    border-color: var(--tgse-brand);
-    box-shadow: 0 0 0 3px var(--tgse-brand-tint);
-  }
-  .field-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-  }
+    /* Controls panel */
+    .controls {
+      background: var(--tg-card);
+      border: 1px solid var(--tg-border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+    }
+    .ctrl-label {
+      display: block;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--tg-muted); margin-bottom: 6px;
+    }
+    .ctrl-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ctrl-btn {
+      appearance: none; border: 1px solid var(--tg-border);
+      background: var(--tg-card); color: var(--tg-text);
+      padding: 8px 12px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; font-family: inherit;
+      transition: all .15s ease;
+    }
+    .ctrl-btn:hover { border-color: var(--tg-accent); color: var(--tg-accent); }
+    .ctrl-btn.is-active {
+      background: var(--tg-brand); border-color: var(--tg-brand); color: #fff;
+    }
+    .ctrl-btn.is-active:hover { color: #fff; }
 
-  /* Layout / Content / Trigger picker grids */
-  .pickers {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-  }
-  .pickers--list { grid-template-columns: 1fr; }
-  .picker {
-    display: flex; flex-direction: column; gap: 5px;
-    background: var(--tgse-panel);
-    border: 1.5px solid var(--tgse-border);
-    border-radius: var(--tgse-radius-md);
-    padding: 8px; cursor: pointer; text-align: left;
-    transition: all .12s ease;
-  }
-  .picker:hover { border-color: var(--tgse-border-strong); background: var(--tgse-hover); }
-  .picker.is-active {
-    border-color: var(--tgse-brand);
-    background: var(--tgse-brand-tint);
-  }
-  .picker-thumb {
-    height: 46px;
-    background: var(--tgse-panel-3);
-    border-radius: var(--tgse-radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    position: relative; overflow: hidden;
-  }
-  .picker.is-active .picker-thumb { background: rgba(255,255,255,.6); }
-  .picker-name { font: 600 11.5px/1.3 'Inter', sans-serif; color: var(--tgse-ink); }
-  .picker-desc { font: 400 10.5px/1.3 'Inter', sans-serif; color: var(--tgse-ink-3); }
-  .picker--row {
-    flex-direction: row; align-items: center; gap: 10px; padding: 8px 10px;
-  }
-  .picker--row .picker-thumb { width: 32px; height: 32px; flex-shrink: 0; }
-  .picker--row > div:last-child { flex: 1; min-width: 0; }
-  .picker-icon { width: 18px; height: 18px; color: var(--tgse-brand); }
+    /* Open button */
+    .fire-row {
+      display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #EFF6FF, #ECFEFF);
+      border: 1px solid #A5F3FC;
+      border-radius: 16px;
+      margin-bottom: 28px;
+    }
+    .fire-btn {
+      appearance: none; border: 0;
+      background: var(--tg-brand); color: #fff;
+      padding: 12px 22px; border-radius: 12px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 4px 12px rgba(27,43,91,.18);
+      transition: transform .12s ease, box-shadow .15s ease;
+    }
+    .fire-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(15,23,42,.08), 0 8px 20px rgba(27,43,91,.22); }
+    .fire-hint {
+      font-size: 13px; color: var(--tg-sub); flex: 1; min-width: 220px;
+    }
 
-  /* CSS-art layout thumbnails */
-  .lt { width: 36px; height: 26px; background: #fff; border: 1px solid var(--tgse-border-strong); border-radius: 2px; position: relative; overflow: hidden; }
-  .lt-centered::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 18px; height: 12px; background: var(--tgse-brand); border-radius: 1px; }
-  .lt-slide-in::after { content: ''; position: absolute; bottom: 3px; right: 3px; width: 14px; height: 10px; background: var(--tgse-brand); border-radius: 1px; }
-  .lt-top-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--tgse-brand); }
-  .lt-bottom-bar::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: var(--tgse-brand); }
-  .lt-fullscreen::after { content: ''; position: absolute; inset: 3px; background: var(--tgse-brand); border-radius: 1px; }
-  .lt-side-drawer::after { content: ''; position: absolute; top: 0; bottom: 0; right: 0; width: 12px; background: var(--tgse-brand); }
-  .lt-floating-card::after { content: ''; position: absolute; bottom: 3px; right: 3px; width: 12px; height: 8px; background: var(--tgse-brand); border-radius: 1px; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
-  .lt-inline { display: flex; align-items: center; justify-content: center; }
-  .lt-inline::after { content: ''; width: 24px; height: 6px; background: var(--tgse-brand); border-radius: 1px; }
+    /* Stage = simulated client site */
+    .stage-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--tg-muted);
+      margin-bottom: 12px;
+    }
+    .stage {
+      background: var(--tg-card);
+      border: 1px solid var(--tg-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+      position: relative;
+    }
+    .site-nav {
+      display: flex; align-items: center; gap: 18px;
+      padding: 16px 22px;
+      background: #1B2B5B; color: #FFFFFF;
+      font-size: 13px; flex-wrap: wrap;
+    }
+    .site-nav-brand { font-weight: 700; letter-spacing: -0.01em; font-size: 15px; }
+    .site-nav-spacer { flex: 1; }
+    .site-nav-link { opacity: .85; cursor: default; }
+    .site-hero {
+      padding: 36px 28px 28px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+    }
+    .site-hero h2 {
+      margin: 0 0 8px;
+      font-size: 26px; font-weight: 700; color: #0F172A;
+      letter-spacing: -0.02em;
+    }
+    .site-hero p {
+      margin: 0 0 16px; max-width: 560px;
+      font-size: 14px; color: #475569; line-height: 1.6;
+    }
+    .site-tiles {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 600px;
+    }
+    .site-tile {
+      height: 84px; border-radius: 10px; opacity: .9;
+    }
+    .site-tile.t1 { background: linear-gradient(135deg, #0096B7, #48CAE4); }
+    .site-tile.t2 { background: linear-gradient(135deg, #F59E0B, #EF4444); }
+    .site-tile.t3 { background: linear-gradient(135deg, #10B981, #06B6D4); }
+    .site-body {
+      padding: 24px 28px 28px;
+      font-size: 14px; color: #475569; line-height: 1.7;
+      max-width: 720px;
+    }
+    .site-body p { margin: 0 0 12px; }
+    .site-body strong { color: #0F172A; }
 
-  /* Switch */
-  .switch-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 6px 0;
-  }
-  .switch-text { flex: 1; }
-  .switch-text-title { font: 500 12px/1.3 'Inter', sans-serif; color: var(--tgse-ink); }
-  .switch-text-sub { font: 400 11px/1.3 'Inter', sans-serif; color: var(--tgse-ink-3); margin-top: 2px; }
-  .switch {
-    position: relative; width: 34px; height: 20px;
-    background: var(--tgse-border-strong);
-    border-radius: 999px; cursor: pointer;
-    transition: background .15s; flex-shrink: 0;
-    border: 0; padding: 0;
-  }
-  .switch::after {
-    content: ''; position: absolute; left: 2px; top: 2px;
-    width: 16px; height: 16px; border-radius: 50%;
-    background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2);
-    transition: transform .15s;
-  }
-  .switch.is-on { background: var(--tgse-brand); }
-  .switch.is-on::after { transform: translateX(14px); }
+    .info-strip {
+      margin-top: 28px;
+      padding: 16px 20px;
+      background: #F1F5F9; border-radius: 12px;
+      font-size: 13px; color: var(--tg-sub);
+    }
+    .info-strip strong { color: var(--tg-text); }
+    .info-strip code {
+      background: #E2E8F0; padding: 2px 6px; border-radius: 4px;
+      font-size: 12px; font-family: ui-monospace, SFMono-Regular, monospace;
+    }
 
-  /* Color row */
-  .colour-row { display: flex; align-items: center; gap: 8px; }
-  .colour-swatch-wrap {
-    width: 32px; height: 32px; padding: 0;
-    border: 1px solid var(--tgse-border);
-    border-radius: var(--tgse-radius-sm);
-    overflow: hidden; flex-shrink: 0;
-    cursor: pointer;
-  }
-  .colour-swatch-wrap input[type="color"] {
-    width: 200%; height: 200%; margin: -25%;
-    border: 0; padding: 0; cursor: pointer;
-  }
-  .colour-hex {
-    flex: 1;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    text-transform: uppercase;
-  }
+    /* Footer */
+    .foot {
+      max-width: 1200px; margin: 0 auto; padding: 20px;
+      text-align: center; font-size: 13px; color: var(--tg-muted);
+    }
 
-  /* Trigger config sub-block (highlighted background) */
-  .trigger-config {
-    background: var(--tgse-panel-2);
-    border-radius: var(--tgse-radius-md);
-    padding: 12px; margin-top: 10px;
-    border: 1px solid var(--tgse-border);
-  }
-
-  /* Preview canvas — faux travel agency page backdrop */
-  .pv-faux {
-    position: relative;
-    width: 100%; max-width: 720px;
-    background: #fff; border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.04);
-    overflow: hidden;
-    min-height: 480px;
-    isolation: isolate;
-    transform: translateZ(0); /* containing block for fixed-position popup */
-  }
-  .pv-faux-header {
-    background: #1B2B5B; color: #fff;
-    padding: 14px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 13px;
-  }
-  .pv-faux-header .logo { font-weight: 600; }
-  .pv-faux-header .nav { display: flex; gap: 16px; opacity: .8; font-size: 12px; }
-  .pv-faux-content { padding: 28px 24px; }
-  .pv-faux-content h1 { margin: 0 0 8px; font-size: 22px; color: #0F172A; font-weight: 700; }
-  .pv-faux-content p { margin: 0 0 14px; color: #64748B; font-size: 13px; line-height: 1.6; }
-  .pv-faux-blocks {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px;
-  }
-  .pv-faux-block { border-radius: 8px; height: 90px; opacity: .9; }
-  .pv-faux-block:nth-child(1) { background: linear-gradient(135deg, #0096B7, #48CAE4); }
-  .pv-faux-block:nth-child(2) { background: linear-gradient(135deg, #F59E0B, #EF4444); }
-  .pv-faux-block:nth-child(3) { background: linear-gradient(135deg, #10B981, #06B6D4); }
-  .pv-mount-overlay { position: absolute; inset: 0; pointer-events: auto; }
-  .pv-mount-inline { margin: 18px 0 6px; }
-
-  /* Embed snippet box */
-  .embed-box {
-    background: var(--tgse-panel-3);
-    border: 1px solid var(--tgse-border);
-    border-radius: var(--tgse-radius-md);
-    padding: 10px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px; line-height: 1.55;
-    color: var(--tgse-ink-2);
-    white-space: pre-wrap; word-break: break-all;
-  }
-
-  /* Helper text */
-  .empty-state {
-    padding: 18px 14px;
-    text-align: center;
-    color: var(--tgse-ink-3);
-    font-size: 12px; line-height: 1.5;
-  }
-</style>
+    @media (max-width: 600px) {
+      h1 { font-size: 24px; }
+      .controls { padding: 14px; }
+      .site-hero { padding: 24px 18px; }
+      .site-tiles { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-
-<div class="tgse-app">
-
-  <!-- ============================================================
-       SIDEBAR
-       ============================================================ -->
-  <aside class="tgse-sidebar">
-
-    <!-- Row 1: Crumb -->
-    <div class="tgse-crumb">
-      <a href="/" id="btn-back">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        Back to dashboard
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark"></span>
+        <span>Travelgenix</span>
       </a>
+      <span class="pill">Popup · Demo</span>
+      <div class="topbar-spacer"></div>
+      <a class="topbar-link" href="/editor-popup">Open editor →</a>
     </div>
+  </header>
 
-    <!-- Row 2: Widget identity -->
-    <div class="tgse-id">
-      <span class="tgse-id-tile" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/><circle cx="7" cy="7" r=".6" fill="currentColor"/><circle cx="9.5" cy="7" r=".6" fill="currentColor"/></svg>
-      </span>
-      <div class="tgse-id-meta">
-        <div class="tgse-id-name">Popup</div>
-        <div class="tgse-id-type">Widget editor</div>
-      </div>
-    </div>
+  <main class="wrap">
+    <h1>Popup</h1>
+    <p class="lede">
+      Capture leads, announce offers and convert browsers with eight layouts and six content types. Pick a combination, then click Open popup to see it on top of the simulated client site below.
+    </p>
 
-    <!-- Row 3: Primary actions — Templates + AI builder -->
-    <div class="tgse-actions">
-      <button class="tgse-btn" id="btn-templates" title="Templates" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        Templates
-        <span class="tgse-kbd">T</span>
-      </button>
-      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
-        AI builder
-        <span class="tgse-kbd">A</span>
-      </button>
-    </div>
-
-    <!-- Row 4: Name + Save -->
-    <div class="tgse-name">
-      <input type="text" id="name-input" placeholder="Untitled popup" maxlength="80">
-      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        <span id="save-label">Save</span>
-      </button>
-    </div>
-
-    <!-- Row 5: Tabs -->
-    <nav class="tgse-tabs" role="tablist">
-      <button class="tab is-active" data-tab="design" role="tab" aria-selected="true">Design</button>
-      <button class="tab" data-tab="content" role="tab" aria-selected="false">Content</button>
-      <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
-    </nav>
-
-    <!-- Row 6: Scrollable body -->
-    <div class="tgse-body" id="sb-body">
-      <div class="sb-body">
-
-        <!-- ===== DESIGN TAB ===== -->
-        <div class="tab-panel is-active" data-panel="design">
-
-          <!-- Layout picker -->
-          <div class="sec is-open">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Layout</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body" id="sb-layout"></div>
-          </div>
-
-          <!-- Trigger picker -->
-          <div class="sec is-open">
-            <button class="sec-head" type="button">
-              <span class="sec-title">When to show</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body" id="sb-trigger"></div>
-          </div>
-
-          <!-- Colours -->
-          <div class="sec is-open">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Colours</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body" id="sb-colours"></div>
-          </div>
-
-          <!-- Shape -->
-          <div class="sec">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Shape</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body">
-              <div class="field">
-                <label class="field-label">Corner radius</label>
-                <div style="display:flex;align-items:center;gap:10px">
-                  <input type="range" min="0" max="32" step="1" id="rad-slider" style="flex:1" value="16">
-                  <input type="number" class="input" id="rad-input" min="0" max="32" value="16" style="width:64px">
-                </div>
-                <div class="field-hint">0 = sharp corners, 32 = very rounded.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Typography (font picker — shell mounts it) -->
-          <div class="sec">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Typography</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body">
-              <div class="field">
-                <label class="field-label">Font family</label>
-                <div id="fontPickerMount"></div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- ===== CONTENT TAB ===== -->
-        <div class="tab-panel" data-panel="content">
-
-          <!-- Content type picker -->
-          <div class="sec is-open">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Content type</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body" id="sb-content-type"></div>
-          </div>
-
-          <!-- Content fields — re-rendered per content type -->
-          <div id="sb-content-fields"></div>
-
-        </div>
-
-        <!-- ===== SETTINGS TAB ===== -->
-        <div class="tab-panel" data-panel="settings">
-
-          <div class="sec is-open">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Behaviour</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body">
-              <div class="switch-row">
-                <div class="switch-text">
-                  <div class="switch-text-title">Show close button</div>
-                  <div class="switch-text-sub">Adds an X in the top-right corner.</div>
-                </div>
-                <button class="switch" type="button" data-bind-switch="showCloseButton" aria-label="Toggle close button"></button>
-              </div>
-              <div class="switch-row">
-                <div class="switch-text">
-                  <div class="switch-text-title">Close on Escape</div>
-                  <div class="switch-text-sub">Pressing Esc dismisses the popup.</div>
-                </div>
-                <button class="switch" type="button" data-bind-switch="closeOnEscape" aria-label="Toggle Escape to close"></button>
-              </div>
-              <div class="switch-row">
-                <div class="switch-text">
-                  <div class="switch-text-title">Close on backdrop click</div>
-                  <div class="switch-text-sub">Click outside the popup to close.</div>
-                </div>
-                <button class="switch" type="button" data-bind-switch="closeOnBackdropClick" aria-label="Toggle backdrop close"></button>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Frequency</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body" id="sb-frequency"></div>
-          </div>
-
-          <div class="sec">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Page targeting</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body" id="sb-pages"></div>
-          </div>
-
-          <div class="sec">
-            <button class="sec-head" type="button">
-              <span class="sec-title">Devices</span>
-              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="sec-body" id="sb-devices"></div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  </aside>
-
-  <!-- ============================================================
-       PREVIEW
-       ============================================================ -->
-  <section class="tgse-preview">
-    <div class="tgse-toolbar">
-      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
-      <span class="tgse-spacer"></span>
-
-      <div class="tgse-vp" role="group" aria-label="Viewport">
-        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
-        </button>
-        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
-        </button>
-        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
-        </button>
-      </div>
-
-      <div class="tgse-divider"></div>
-
-      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        Theme
-      </button>
-      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        Get embed code
-      </button>
-    </div>
-
-    <div class="tgse-canvas">
-      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
-        <!-- Faux page + popup mount injected here -->
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<!-- Shell behaviour first -->
-<script src="/editor-shell.js"></script>
-
-<!-- The popup widget — used to render the live preview -->
-<script src="/widget-popup.js"></script>
-
-<script>
-  /* ============================================================
-     POPUP EDITOR — per-editor script
-     Built on the unified shell (tgse).
-     ============================================================ */
-
-  /* ── Defaults ────────────────────────────────────────────── */
-  const DEFAULTS = {
-    name: 'Untitled popup',
-    layout: 'centered',
-    position: 'bottom-right',
-    sideDrawerSide: 'right',
-    contentType: 'announcement',
-    title: 'Welcome aboard!',
-    body: 'Sign up to get exclusive travel deals straight to your inbox.',
-    image: '', imageAlt: '',
-    ctaText: 'Find out more', ctaUrl: '#',
-    secondaryCtaText: '', secondaryCtaUrl: '',
-    emailNameLabel: 'Your name',
-    emailNamePlaceholder: 'Sarah Smith',
-    emailEmailLabel: 'Email address',
-    emailEmailPlaceholder: 'you@example.com',
-    emailSubmitLabel: 'Subscribe',
-    emailRequireName: true,
-    emailSuccessTitle: "You're on the list",
-    emailSuccessMessage: "Thanks for signing up — we'll be in touch.",
-    emailConsentText: '',
-    discountCode: 'TRAVEL10',
-    discountCopyLabel: 'Copy code',
-    discountCopiedLabel: 'Copied!',
-    discountTerms: '',
-    twoStepQuestion: 'Want £100 off your next holiday?',
-    twoStepYesLabel: 'Yes please',
-    twoStepNoLabel: 'No thanks',
-    videoUrl: '',
-    videoAutoplay: true,
-    trigger: 'load',
-    triggerDelay: 0,
-    triggerScrollPercent: 50,
-    triggerInactivitySeconds: 30,
-    triggerPageviews: 2,
-    triggerSelector: '',
-    frequency: 'session',
-    frequencyDays: 7,
-    suppressAfterDismissDays: 0,
-    suppressAfterConversionDays: 30,
-    pageInclude: [],
-    pageExclude: [],
-    devices: { desktop: true, tablet: true, mobile: true },
-    closeOnEscape: true,
-    closeOnBackdropClick: true,
-    showCloseButton: true,
-    overlay: true,
-    overlayOpacity: 60,
-    theme: 'light',
-    brand: '#1B2B5B',
-    accent: '#00B4D8',
-    bg: '#FFFFFF',
-    text: '#0F172A',
-    textOnBrand: '#FFFFFF',
-    radius: 16,
-    fontFamily: 'Inter',
-    animation: 'fade-up',
-  };
-
-  const LAYOUTS = [
-    { id: 'centered',      name: 'Centered',      desc: 'Backdrop modal' },
-    { id: 'slide-in',      name: 'Slide-in',      desc: 'Corner toast' },
-    { id: 'top-bar',       name: 'Top bar',       desc: 'Announcement strip' },
-    { id: 'bottom-bar',    name: 'Bottom bar',    desc: 'Sticky footer' },
-    { id: 'fullscreen',    name: 'Fullscreen',    desc: 'Full takeover' },
-    { id: 'side-drawer',   name: 'Side drawer',   desc: 'Slides from side' },
-    { id: 'floating-card', name: 'Floating card', desc: 'Corner, no backdrop' },
-    { id: 'inline',        name: 'Inline',        desc: 'Inside page content' },
-  ];
-
-  const CONTENT_TYPES = [
-    { id: 'announcement',  name: 'Announcement',  desc: 'Title + body + CTAs' },
-    { id: 'email-capture', name: 'Email capture', desc: 'Lead-magnet form' },
-    { id: 'discount',      name: 'Discount code', desc: 'Copyable code' },
-    { id: 'image',         name: 'Image',         desc: 'Banner with link' },
-    { id: 'two-step',      name: 'Two-step',      desc: 'Yes/No → form' },
-    { id: 'video',         name: 'Video',         desc: 'YouTube/Vimeo' },
-  ];
-
-  const TRIGGERS = [
-    { id: 'load',        name: 'Page load',     desc: 'After a delay' },
-    { id: 'time',        name: 'Time on page',  desc: 'After N seconds' },
-    { id: 'scroll',      name: 'Scroll depth',  desc: 'At N% of page' },
-    { id: 'exit-intent', name: 'Exit intent',   desc: 'Before they leave' },
-    { id: 'click',       name: 'Click',         desc: 'On a CSS selector' },
-    { id: 'inactivity',  name: 'Inactivity',    desc: 'After idle time' },
-    { id: 'pageviews',   name: 'Pageviews',     desc: 'After N pages' },
-  ];
-
-  /* ── State ──────────────────────────────────────────────── */
-  let C = JSON.parse(JSON.stringify(DEFAULTS));
-  let widgetInst = null;
-  let renderTimer = null;
-
-  /* ── Initialise the shell ──────────────────────────────── */
-  const shell = tgse.init({
-    widgetType: 'Popup',
-    widgetTag: 'popup',
-    scriptFile: 'widget-popup.js',
-
-    getConfig: () => C,
-    setConfig: (c) => { C = Object.assign({}, C, c); render(); },
-
-    fontPickerEl: '#fontPickerMount',
-    onFontChange: (f) => {
-      C.fontFamily = f;
-      shell.markDirty();
-      render();
-    },
-
-    onAIBuild: () => {
-      tgse.toast('AI builder coming soon', 'ok');
-    },
-    onTemplates: () => {
-      tgse.toast('Templates coming soon', 'ok');
-    },
-    onThemeToggle: (isDark) => {
-      C.theme = isDark ? 'dark' : 'light';
-      shell.markDirty();
-      render();
-    },
-    onAfterSave: (d) => {
-      // shell handles the URL sync; nothing extra needed here
-    },
-    onLoginSuccess: () => loadFromUrl(),
-  });
-
-  /* ── Helpers ────────────────────────────────────────────── */
-  function $(s, p) { return (p || document).querySelector(s); }
-  function $$(s, p) { return (p || document).querySelectorAll(s); }
-  function escHtml(s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-  function debounceRender() {
-    clearTimeout(renderTimer);
-    renderTimer = setTimeout(render, 220);
-  }
-
-  /* ── Layout picker ──────────────────────────────────────── */
-  function renderLayoutPicker() {
-    const host = $('#sb-layout');
-    let html = '<div class="pickers">';
-    LAYOUTS.forEach(l => {
-      const active = C.layout === l.id;
-      html += `<button class="picker ${active ? 'is-active' : ''}" data-layout="${l.id}" type="button">
-        <div class="picker-thumb"><div class="lt lt-${l.id}"></div></div>
-        <div class="picker-name">${escHtml(l.name)}</div>
-        <div class="picker-desc">${escHtml(l.desc)}</div>
-      </button>`;
-    });
-    html += '</div>';
-
-    // Position controls when relevant
-    if (C.layout === 'slide-in' || C.layout === 'floating-card') {
-      html += `<div class="field" style="margin-top:12px">
-        <label class="field-label">Position</label>
-        <select class="select" id="pos-select">
-          ${['top-left','top-right','bottom-left','bottom-right'].map(p =>
-            `<option value="${p}" ${C.position === p ? 'selected' : ''}>${p.replace('-',' ')}</option>`
-          ).join('')}
-        </select>
-      </div>`;
-    }
-    if (C.layout === 'side-drawer') {
-      html += `<div class="field" style="margin-top:12px">
-        <label class="field-label">Drawer side</label>
-        <select class="select" id="drawer-select">
-          ${['left','right'].map(s =>
-            `<option value="${s}" ${C.sideDrawerSide === s ? 'selected' : ''}>${s}</option>`
-          ).join('')}
-        </select>
-      </div>`;
-    }
-    host.innerHTML = html;
-
-    $$('[data-layout]', host).forEach(b => {
-      b.addEventListener('click', () => {
-        C.layout = b.getAttribute('data-layout');
-        shell.markDirty();
-        renderLayoutPicker();
-        renderColoursSection();  // backdrop-opacity field depends on layout
-        render();
-      });
-    });
-    const ps = $('#pos-select');
-    if (ps) ps.addEventListener('change', () => { C.position = ps.value; shell.markDirty(); render(); });
-    const ds = $('#drawer-select');
-    if (ds) ds.addEventListener('change', () => { C.sideDrawerSide = ds.value; shell.markDirty(); render(); });
-  }
-
-  /* ── Trigger picker ─────────────────────────────────────── */
-  const TRIGGER_ICONS = {
-    'load': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',
-    'time': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-    'scroll': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>',
-    'exit-intent': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
-    'click': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/></svg>',
-    'inactivity': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
-    'pageviews': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-  };
-
-  const CONTENT_ICONS = {
-    'announcement': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>',
-    'email-capture': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
-    'discount': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="9" x2="15" y2="15"/><circle cx="9.5" cy="9.5" r=".7" fill="currentColor"/><circle cx="14.5" cy="14.5" r=".7" fill="currentColor"/><path d="M2 9h7l3-7 3 7h7l-5 5 2 7-7-4-7 4 2-7-5-5z"/></svg>',
-    'image': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
-    'two-step': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>',
-    'video': '<svg class="picker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
-  };
-
-  function renderTriggerPicker() {
-    const host = $('#sb-trigger');
-    let html = '<div class="pickers pickers--list">';
-    TRIGGERS.forEach(t => {
-      const active = C.trigger === t.id;
-      html += `<button class="picker picker--row ${active ? 'is-active' : ''}" data-tr="${t.id}" type="button">
-        <div class="picker-thumb">${TRIGGER_ICONS[t.id] || ''}</div>
-        <div>
-          <div class="picker-name">${escHtml(t.name)}</div>
-          <div class="picker-desc">${escHtml(t.desc)}</div>
-        </div>
-      </button>`;
-    });
-    html += '</div>';
-
-    // Trigger-specific config
-    html += '<div class="trigger-config">';
-    if (C.trigger === 'load') {
-      html += `<div class="field">
-        <label class="field-label">Delay before showing (seconds)</label>
-        <input type="number" min="0" max="60" step="0.5" class="input" id="t-delay" value="${(C.triggerDelay || 0) / 1000}">
-        <div class="field-hint">0 means show immediately on page load.</div>
-      </div>`;
-    } else if (C.trigger === 'time') {
-      html += `<div class="field">
-        <label class="field-label">Show after (seconds)</label>
-        <input type="number" min="1" max="600" class="input" id="t-time" value="${(C.triggerDelay || 5000) / 1000}">
-      </div>`;
-    } else if (C.trigger === 'scroll') {
-      html += `<div class="field">
-        <label class="field-label">Show after scrolling (% of page)</label>
-        <input type="number" min="1" max="100" class="input" id="t-scroll" value="${C.triggerScrollPercent || 50}">
-      </div>`;
-    } else if (C.trigger === 'exit-intent') {
-      html += `<div class="field-hint" style="margin:0">Fires when the visitor's mouse leaves the viewport on desktop, or scrolls back up sharply on mobile. No extra config needed.</div>`;
-    } else if (C.trigger === 'click') {
-      html += `<div class="field">
-        <label class="field-label">CSS selector to listen on</label>
-        <input type="text" class="input" id="t-selector" value="${escHtml(C.triggerSelector || '')}" placeholder=".cta-button, #subscribe-btn">
-        <div class="field-hint">When any matching element is clicked, the popup opens.</div>
-      </div>`;
-    } else if (C.trigger === 'inactivity') {
-      html += `<div class="field">
-        <label class="field-label">Idle for (seconds)</label>
-        <input type="number" min="5" max="600" class="input" id="t-inactive" value="${C.triggerInactivitySeconds || 30}">
-      </div>`;
-    } else if (C.trigger === 'pageviews') {
-      html += `<div class="field">
-        <label class="field-label">Show after this many pageviews in one session</label>
-        <input type="number" min="1" max="20" class="input" id="t-pv" value="${C.triggerPageviews || 2}">
-      </div>`;
-    }
-    html += '</div>';
-
-    host.innerHTML = html;
-
-    $$('[data-tr]', host).forEach(b => {
-      b.addEventListener('click', () => {
-        C.trigger = b.getAttribute('data-tr');
-        shell.markDirty();
-        renderTriggerPicker();
-      });
-    });
-    const dly = $('#t-delay'); if (dly) dly.addEventListener('change', () => { C.triggerDelay = Math.max(0, Number(dly.value) * 1000); shell.markDirty(); });
-    const t   = $('#t-time');  if (t)   t.addEventListener('change',   () => { C.triggerDelay = Math.max(1000, Number(t.value) * 1000); shell.markDirty(); });
-    const sc  = $('#t-scroll');if (sc)  sc.addEventListener('change',  () => { C.triggerScrollPercent = Math.max(1, Math.min(100, Number(sc.value) || 50)); shell.markDirty(); });
-    const sel = $('#t-selector');if (sel) sel.addEventListener('input', () => { C.triggerSelector = sel.value; shell.markDirty(); });
-    const ina = $('#t-inactive');if (ina) ina.addEventListener('change', () => { C.triggerInactivitySeconds = Math.max(5, Number(ina.value) || 30); shell.markDirty(); });
-    const pv  = $('#t-pv');    if (pv)  pv.addEventListener('change',  () => { C.triggerPageviews = Math.max(1, Number(pv.value) || 2); shell.markDirty(); });
-  }
-
-  /* ── Content type picker ─────────────────────────────── */
-  function renderContentTypePicker() {
-    const host = $('#sb-content-type');
-    let html = '<div class="pickers pickers--list">';
-    CONTENT_TYPES.forEach(c => {
-      const active = C.contentType === c.id;
-      html += `<button class="picker picker--row ${active ? 'is-active' : ''}" data-ct="${c.id}" type="button">
-        <div class="picker-thumb">${CONTENT_ICONS[c.id] || ''}</div>
-        <div>
-          <div class="picker-name">${escHtml(c.name)}</div>
-          <div class="picker-desc">${escHtml(c.desc)}</div>
-        </div>
-      </button>`;
-    });
-    html += '</div>';
-    host.innerHTML = html;
-
-    $$('[data-ct]', host).forEach(b => {
-      b.addEventListener('click', () => {
-        C.contentType = b.getAttribute('data-ct');
-        shell.markDirty();
-        renderContentTypePicker();
-        renderContentFields();
-        render();
-      });
-    });
-  }
-
-  /* ── Content fields per content type ───────────────────── */
-  function fieldText(label, key, opts) {
-    opts = opts || {};
-    return `<div class="field">
-      <label class="field-label">${escHtml(label)}</label>
-      <input type="text" class="input" data-bind="${key}" value="${escHtml(C[key] || '')}" ${opts.placeholder ? `placeholder="${escHtml(opts.placeholder)}"` : ''}>
-      ${opts.hint ? `<div class="field-hint">${escHtml(opts.hint)}</div>` : ''}
-    </div>`;
-  }
-  function fieldTextarea(label, key, opts) {
-    opts = opts || {};
-    return `<div class="field">
-      <label class="field-label">${escHtml(label)}</label>
-      <textarea class="textarea" data-bind="${key}" rows="3" ${opts.placeholder ? `placeholder="${escHtml(opts.placeholder)}"` : ''}>${escHtml(C[key] || '')}</textarea>
-      ${opts.hint ? `<div class="field-hint">${escHtml(opts.hint)}</div>` : ''}
-    </div>`;
-  }
-  function fieldUrl(label, key, opts) {
-    opts = opts || {};
-    return `<div class="field">
-      <label class="field-label">${escHtml(label)}</label>
-      <input type="url" class="input" data-bind="${key}" value="${escHtml(C[key] || '')}" placeholder="${escHtml(opts.placeholder || 'https://example.com')}">
-      ${opts.hint ? `<div class="field-hint">${escHtml(opts.hint)}</div>` : ''}
-    </div>`;
-  }
-  function fieldSwitch(label, sub, key) {
-    const checked = !!C[key];
-    return `<div class="switch-row">
-      <div class="switch-text">
-        <div class="switch-text-title">${escHtml(label)}</div>
-        ${sub ? `<div class="switch-text-sub">${escHtml(sub)}</div>` : ''}
-      </div>
-      <button class="switch ${checked ? 'is-on' : ''}" type="button" data-bind-switch="${key}" aria-label="${escHtml(label)}"></button>
-    </div>`;
-  }
-
-  function renderContentFields() {
-    const host = $('#sb-content-fields');
-    const ct = C.contentType;
-    let html = '';
-
-    // Hero image — relevant for several content types
-    if (ct !== 'video' && ct !== 'image' && ct !== 'two-step') {
-      html += `<div class="sec is-open">
-        <button class="sec-head" type="button">
-          <span class="sec-title">Hero image (optional)</span>
-          <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="sec-body">
-          ${fieldUrl('Image URL', 'image', { placeholder: 'https://…' })}
-          ${fieldText('Alt text', 'imageAlt', { hint: 'Describe the image for accessibility.' })}
-        </div>
-      </div>`;
-    }
-
-    if (ct === 'announcement') {
-      html += sec('Headline', `${fieldText('Title', 'title')}${fieldTextarea('Body text', 'body')}`);
-      html += sec('Primary call-to-action', `${fieldText('Button text', 'ctaText')}${fieldUrl('Button URL', 'ctaUrl')}`);
-      html += sec('Secondary CTA (optional)', `${fieldText('Button text', 'secondaryCtaText', { placeholder: 'Maybe later' })}${fieldUrl('Button URL', 'secondaryCtaUrl')}`);
-    }
-    else if (ct === 'email-capture') {
-      html += sec('Headline', `${fieldText('Title', 'title')}${fieldTextarea('Body text', 'body')}`);
-      const formFields = `
-        ${fieldSwitch('Collect name as well as email', 'Adds a Name field above email', 'emailRequireName')}
-        ${C.emailRequireName ? fieldText('Name field label', 'emailNameLabel') + fieldText('Name placeholder', 'emailNamePlaceholder') : ''}
-        ${fieldText('Email field label', 'emailEmailLabel')}
-        ${fieldText('Email placeholder', 'emailEmailPlaceholder')}
-        ${fieldText('Submit button text', 'emailSubmitLabel')}
-        ${fieldTextarea('Consent text (below button)', 'emailConsentText', { placeholder: 'By signing up you agree to…' })}
-      `;
-      html += sec('Form fields', formFields);
-      html += sec('After submission', `${fieldText('Success title', 'emailSuccessTitle')}${fieldTextarea('Success message', 'emailSuccessMessage')}`);
-    }
-    else if (ct === 'discount') {
-      html += sec('Headline', `${fieldText('Title', 'title')}${fieldTextarea('Body text', 'body')}`);
-      html += sec('The code', `
-        ${fieldText('Discount code', 'discountCode', { hint: 'Shown in large bold text. Visitors can copy with one click.' })}
-        ${fieldText('Copy button label', 'discountCopyLabel')}
-        ${fieldText('Copied label (after click)', 'discountCopiedLabel')}
-        ${fieldTextarea('Terms (small print)', 'discountTerms')}
-      `);
-      html += sec('Optional CTA below code', `${fieldText('Button text', 'ctaText', { placeholder: 'Browse holidays' })}${fieldUrl('Button URL', 'ctaUrl')}`);
-    }
-    else if (ct === 'image') {
-      html += sec('Image', `
-        ${fieldUrl('Image URL', 'image', { placeholder: 'https://…' })}
-        ${fieldText('Alt text', 'imageAlt')}
-        ${fieldUrl('Click destination (optional)', 'ctaUrl', { hint: 'Where visitors go when they click the image.' })}
-      `);
-    }
-    else if (ct === 'two-step') {
-      html += sec('Step 1: the question', `${fieldText('Question', 'twoStepQuestion')}${fieldText('Yes button text', 'twoStepYesLabel')}${fieldText('No button text', 'twoStepNoLabel')}`);
-      html += sec('Step 2: the form (after Yes)', `
-        ${fieldText('Form title', 'title')}
-        ${fieldTextarea('Form body', 'body')}
-        ${fieldSwitch('Collect name as well as email', '', 'emailRequireName')}
-        ${fieldText('Email field label', 'emailEmailLabel')}
-        ${fieldText('Submit button text', 'emailSubmitLabel')}
-      `);
-      html += sec('After submission', `${fieldText('Success title', 'emailSuccessTitle')}${fieldTextarea('Success message', 'emailSuccessMessage')}`);
-    }
-    else if (ct === 'video') {
-      html += sec('Video', `
-        ${fieldUrl('Video URL', 'videoUrl', { placeholder: 'https://www.youtube.com/watch?v=…', hint: 'YouTube or Vimeo URL. The widget embeds automatically.' })}
-        ${fieldSwitch('Try to autoplay', 'Most browsers block autoplay with sound — video may start muted.', 'videoAutoplay')}
-      `);
-      html += sec('Caption (optional)', `${fieldText('Title shown below video', 'title')}${fieldTextarea('Body text', 'body')}`);
-    }
-
-    host.innerHTML = html;
-    bindContentInputs();
-  }
-
-  function sec(title, body, open) {
-    const isOpen = open !== false;
-    return `<div class="sec ${isOpen ? 'is-open' : ''}">
-      <button class="sec-head" type="button">
-        <span class="sec-title">${escHtml(title)}</span>
-        <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div class="sec-body">${body}</div>
-    </div>`;
-  }
-
-  function bindContentInputs() {
-    // Section toggles handled by global delegated click handler at the bottom of script.
-    // Text inputs / textareas / urls
-    $$('[data-bind]').forEach(el => {
-      const key = el.getAttribute('data-bind');
-      el.addEventListener('input', () => {
-        C[key] = el.value;
-        shell.markDirty();
-        debounceRender();
-      });
-    });
-    // Switches
-    $$('[data-bind-switch]').forEach(el => {
-      const key = el.getAttribute('data-bind-switch');
-      el.addEventListener('click', () => {
-        C[key] = !C[key];
-        el.classList.toggle('is-on', !!C[key]);
-        shell.markDirty();
-        // Re-render the content fields if this switch reveals/hides fields
-        if (key === 'emailRequireName') renderContentFields();
-        render();
-      });
-    });
-  }
-
-  /* ── Settings tab switches ─────────────────────────────── */
-  function bindSettingsSwitches() {
-    $$('.tab-panel[data-panel="settings"] [data-bind-switch]').forEach(el => {
-      const key = el.getAttribute('data-bind-switch');
-      // Initial state
-      el.classList.toggle('is-on', !!C[key]);
-      el.addEventListener('click', () => {
-        C[key] = !C[key];
-        el.classList.toggle('is-on', !!C[key]);
-        shell.markDirty();
-        render();
-      });
-    });
-  }
-
-  /* ── Live preview ──────────────────────────────────────── */
-  function buildFauxPage(layout) {
-    return `<div class="pv-faux" id="pv-faux">
-      <div class="pv-faux-header">
-        <span class="logo">Sunshine Holidays</span>
-        <span class="nav"><span>Destinations</span><span>Cruises</span><span>Late Deals</span></span>
-      </div>
-      <div class="pv-faux-content">
-        <h1>Find your next holiday</h1>
-        <p>This sample page provides context for the popup preview. The popup overlays this content the same way it would on a real client site.</p>
-        ${layout === 'inline' ? '<div class="pv-mount-inline" id="pv-host-inline"></div>' : ''}
-        <div class="pv-faux-blocks">
-          <div class="pv-faux-block"></div>
-          <div class="pv-faux-block"></div>
-          <div class="pv-faux-block"></div>
+    <div class="controls" role="region" aria-label="Demo controls">
+      <div>
+        <span class="ctrl-label">Layout</span>
+        <div class="ctrl-row" id="layoutSwitch">
+          <button class="ctrl-btn is-active" data-layout="centered">Modal</button>
+          <button class="ctrl-btn" data-layout="slide-in">Slide-in</button>
+          <button class="ctrl-btn" data-layout="top-bar">Top bar</button>
+          <button class="ctrl-btn" data-layout="bottom-bar">Bottom bar</button>
+          <button class="ctrl-btn" data-layout="fullscreen">Fullscreen</button>
+          <button class="ctrl-btn" data-layout="side-drawer">Side drawer</button>
+          <button class="ctrl-btn" data-layout="floating-card">Floating card</button>
         </div>
       </div>
-      ${layout !== 'inline' ? '<div class="pv-mount-overlay" id="pv-host-overlay"></div>' : ''}
-    </div>`;
-  }
 
-  function render() {
-    const frame = $('#pv-frame');
-    if (!frame) return;
+      <div>
+        <span class="ctrl-label">Content</span>
+        <div class="ctrl-row" id="contentSwitch">
+          <button class="ctrl-btn is-active" data-content="announcement">Announcement</button>
+          <button class="ctrl-btn" data-content="email-capture">Email capture</button>
+          <button class="ctrl-btn" data-content="discount">Discount code</button>
+          <button class="ctrl-btn" data-content="image">Image</button>
+          <button class="ctrl-btn" data-content="two-step">Two-step</button>
+          <button class="ctrl-btn" data-content="video">Video</button>
+        </div>
+      </div>
 
-    // Tear down previous instance
-    if (widgetInst) { try { widgetInst.destroy(); } catch {} widgetInst = null; }
+      <div>
+        <span class="ctrl-label">Theme</span>
+        <div class="ctrl-row" id="themeSwitch">
+          <button class="ctrl-btn is-active" data-theme="light">Light</button>
+          <button class="ctrl-btn" data-theme="dark">Dark</button>
+        </div>
+      </div>
 
-    frame.innerHTML = buildFauxPage(C.layout);
+      <div>
+        <span class="ctrl-label">Position (slide-in / floating)</span>
+        <div class="ctrl-row" id="positionSwitch">
+          <button class="ctrl-btn" data-position="top-left">Top left</button>
+          <button class="ctrl-btn" data-position="top-right">Top right</button>
+          <button class="ctrl-btn" data-position="bottom-left">Bottom left</button>
+          <button class="ctrl-btn is-active" data-position="bottom-right">Bottom right</button>
+        </div>
+      </div>
+    </div>
 
-    // Build a preview-time config that bypasses storage/triggers
-    const previewConfig = Object.assign({}, C, {
-      frequency: 'every-visit',
-      trigger: 'load',
-      triggerDelay: 0,
-      widgetId: '__preview__',
-    });
+    <div class="fire-row">
+      <button class="fire-btn" id="firePopup">Open popup</button>
+      <span class="fire-hint">In production, popups fire on triggers like page load, scroll, exit-intent or inactivity. For the demo, click to open manually.</span>
+    </div>
 
-    const hostId = C.layout === 'inline' ? 'pv-host-inline' : 'pv-host-overlay';
-    const host = document.getElementById(hostId);
-    if (!host) return;
+    <p class="stage-label">SIMULATED CLIENT SITE</p>
+    <div class="stage" id="stage">
+      <div class="site-nav">
+        <span class="site-nav-brand">Sunshine Holidays</span>
+        <span class="site-nav-link">Destinations</span>
+        <span class="site-nav-link">Cruises</span>
+        <span class="site-nav-link">Late Deals</span>
+        <span class="site-nav-link">About</span>
+        <span class="site-nav-spacer"></span>
+        <span class="site-nav-link">Contact</span>
+      </div>
+      <div class="site-hero">
+        <h2>Find your next holiday</h2>
+        <p>Browse handpicked breaks across Europe, the Caribbean and beyond. All ABTA and ATOL protected.</p>
+        <div class="site-tiles">
+          <div class="site-tile t1"></div>
+          <div class="site-tile t2"></div>
+          <div class="site-tile t3"></div>
+        </div>
+      </div>
+      <div class="site-body">
+        <p><strong>Why book with us?</strong> Twenty years of trusted travel expertise, hand-picked properties, and a UK-based team that's available seven days a week.</p>
+        <p>Whether you're after a long-haul escape, a weekend city break or a multi-generational family adventure, our specialists will tailor every detail to your taste, budget and travel style.</p>
+        <p>Looking for inspiration? Browse our late deals, sign up for our newsletter, or speak to one of our experts. There's no booking fee, ever.</p>
+      </div>
+      <!-- Popup widget mounts here -->
+      <div id="popupHost"></div>
+    </div>
 
-    if (C.layout !== 'inline') {
-      host.style.position = 'absolute';
-      host.style.inset = '0';
-    }
+    <div class="info-strip">
+      <strong>Heads-up:</strong> the demo uses <code>frequency: 'every-visit'</code> so the popup re-opens every time you click. In production, frequency rules (session, visitor, every N days) and suppression after dismiss or conversion stop the popup nagging the same visitor.
+    </div>
+  </main>
 
-    requestAnimationFrame(() => {
-      try {
-        widgetInst = new window.TGPopupWidget(host, previewConfig);
-      } catch (err) {
-        console.error('Preview render failed:', err);
-        frame.innerHTML += `<div style="padding:24px;color:#EF4444;font-size:13px">Preview failed: ${escHtml(err.message || String(err))}</div>`;
+  <footer class="foot">
+    Travelgenix Widget Suite ·
+    <a href="/" style="color: inherit;">All widgets</a>
+  </footer>
+
+  <script src="/widget-popup.js"></script>
+  <script>
+    (function () {
+      const fireBtn = document.getElementById('firePopup');
+
+      const cfg = {
+        layout: 'centered',
+        position: 'bottom-right',
+        sideDrawerSide: 'right',
+        contentType: 'announcement',
+        theme: 'light',
+
+        title: 'Late summer deals',
+        body: 'Save up to 35% on Mediterranean cruises departing in September and October. Early bird offer ends Friday.',
+        ctaText: 'See the deals',
+        ctaUrl: 'https://example.com/late-summer',
+
+        // Email capture
+        emailNameLabel: 'Your name',
+        emailNamePlaceholder: 'Sarah Smith',
+        emailEmailLabel: 'Email address',
+        emailEmailPlaceholder: 'you@example.com',
+        emailSubmitLabel: 'Get exclusive offers',
+        emailRequireName: true,
+        emailSuccessTitle: "You're on the list",
+        emailSuccessMessage: "Thanks. We'll be in touch with the best deals first.",
+        emailConsentText: 'We email occasionally and never share your address.',
+
+        // Discount
+        discountCode: 'SUNSHINE10',
+        discountCopyLabel: 'Copy code',
+        discountCopiedLabel: 'Copied — paste at checkout',
+        discountTerms: 'Minimum spend £500. Excludes flight-only bookings.',
+
+        // Image
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+        imageAlt: 'Sun-drenched beach scene',
+
+        // Two-step
+        twoStepQuestion: 'Want £100 off your next holiday?',
+        twoStepYesLabel: 'Yes please',
+        twoStepNoLabel: 'No thanks',
+
+        // Video
+        videoUrl: 'https://www.youtube.com/watch?v=WgQOsYXKjbY',
+        videoAutoplay: false,
+
+        // Triggers — long delay so it never auto-fires; demo opens manually.
+        trigger: 'load',
+        triggerDelay: 86400000,
+
+        // Bypass all frequency suppression for the demo
+        frequency: 'every-visit',
+        suppressAfterDismissDays: 0,
+        suppressAfterConversionDays: 0,
+
+        // Behaviour
+        closeOnEscape: true,
+        closeOnBackdropClick: true,
+        showCloseButton: true,
+        overlay: true,
+        overlayOpacity: 60,
+
+        // Theme
+        brand: '#1B2B5B',
+        accent: '#00B4D8',
+        bg: '#FFFFFF',
+        text: '#0F172A',
+        textOnBrand: '#FFFFFF',
+        radius: 16,
+        animation: 'fade-up'
+      };
+
+      let widget = null;
+
+      function applyTheme() {
+        if (cfg.theme === 'dark') {
+          cfg.bg = '#1E293B';
+          cfg.text = '#F8FAFC';
+        } else {
+          cfg.bg = '#FFFFFF';
+          cfg.text = '#0F172A';
+        }
       }
-    });
-  }
 
-  /* ── Load / save ────────────────────────────────────────── */
-  function loadFromUrl() {
-    const params = new URLSearchParams(location.search);
-    const wId = params.get('id');
-    if (!wId) {
-      $('#name-input').value = '';
-      renderAll();
-      return;
-    }
-    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if (!d) {
-          tgse.toast('Could not load popup', 'err');
-          renderAll();
+      function buildAndOpen() {
+        applyTheme();
+
+        // Tear down previous instance
+        if (widget) {
+          try { widget.close(); } catch (e) {}
+          widget = null;
+        }
+
+        // attachShadow can only be called once per element, so we replace the
+        // host div with a fresh one each time we rebuild.
+        const oldHost = document.getElementById('popupHost');
+        const fresh = document.createElement('div');
+        fresh.id = 'popupHost';
+        oldHost.parentNode.replaceChild(fresh, oldHost);
+
+        if (typeof window.TGPopupWidget !== 'function') {
+          alert('widget-popup.js failed to load. Open DevTools, check Network tab for a 404 on /widget-popup.js.');
           return;
         }
-        if (d.config) C = Object.assign({}, DEFAULTS, d.config);
-        if (d.name) $('#name-input').value = d.name;
-        renderAll();
-      })
-      .catch(() => {
-        tgse.toast('Failed to load widget', 'err');
-        renderAll();
+
+        widget = new window.TGPopupWidget(fresh, cfg);
+
+        // The widget's _init waits for the configured trigger. We want to open
+        // immediately, so call .open() directly on the next frame.
+        requestAnimationFrame(() => {
+          if (widget && typeof widget.open === 'function') widget.open();
+        });
+      }
+
+      // Layout switch
+      document.getElementById('layoutSwitch').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-layout]');
+        if (!btn) return;
+        document.querySelectorAll('#layoutSwitch .ctrl-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        cfg.layout = btn.dataset.layout;
       });
-  }
 
-  function renderAll() {
-    renderLayoutPicker();
-    renderTriggerPicker();
-    renderColoursSection();
-    renderRadiusSection();
-    renderContentTypePicker();
-    renderContentFields();
-    bindSettingsSwitches();
-    renderFrequencySection();
-    renderPagesSection();
-    renderDevicesSection();
-    render();
-  }
-
-  /* ── Colours section ──────────────────────────────────── */
-  function colourField(label, key, hint) {
-    const val = C[key] || '#000000';
-    return `<div class="field">
-      <label class="field-label">${escHtml(label)}</label>
-      <div class="colour-row">
-        <label class="colour-swatch-wrap" style="background:${escHtml(val)}">
-          <input type="color" data-bind-colour="${key}" value="${escHtml(val)}">
-        </label>
-        <input type="text" class="input colour-hex" data-bind-colour-text="${key}" value="${escHtml(val)}" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
-      </div>
-      ${hint ? `<div class="field-hint">${escHtml(hint)}</div>` : ''}
-    </div>`;
-  }
-
-  function renderColoursSection() {
-    const host = $('#sb-colours');
-    if (!host) return;
-
-    let html = '';
-    // Theme picker
-    html += `<div class="field">
-      <label class="field-label">Theme</label>
-      <select class="select" id="theme-select">
-        <option value="light" ${C.theme === 'light' ? 'selected' : ''}>Light</option>
-        <option value="dark" ${C.theme === 'dark' ? 'selected' : ''}>Dark</option>
-        <option value="auto" ${C.theme === 'auto' ? 'selected' : ''}>Auto (match visitor's device)</option>
-      </select>
-    </div>`;
-
-    // Brand & accent (always shown)
-    html += colourField('Brand colour', 'brand', 'Used for primary buttons and highlights.');
-    html += colourField('Accent colour', 'accent', 'Used for focus rings and secondary highlights.');
-
-    // Background & text — only relevant for non-image popups
-    html += colourField('Background', 'bg');
-    html += colourField('Text colour', 'text');
-    html += colourField('Text on brand', 'textOnBrand', 'Text colour used on primary buttons.');
-
-    // Backdrop opacity (only for overlay layouts)
-    if (['centered', 'fullscreen', 'side-drawer'].includes(C.layout)) {
-      html += `<div class="field">
-        <label class="field-label">Backdrop opacity</label>
-        <div style="display:flex;align-items:center;gap:10px">
-          <input type="range" min="0" max="100" step="5" id="overlay-slider" style="flex:1" value="${C.overlayOpacity || 60}">
-          <input type="number" class="input" id="overlay-input" min="0" max="100" value="${C.overlayOpacity || 60}" style="width:64px">
-        </div>
-        <div class="field-hint">0 = no backdrop, 100 = solid.</div>
-      </div>`;
-    }
-
-    host.innerHTML = html;
-
-    // Wire up
-    $('#theme-select')?.addEventListener('change', e => {
-      C.theme = e.target.value;
-      shell.markDirty();
-      render();
-    });
-
-    $$('[data-bind-colour]', host).forEach(el => {
-      const key = el.getAttribute('data-bind-colour');
-      el.addEventListener('input', () => {
-        const v = el.value;
-        C[key] = v;
-        // Sync the swatch background and hex input
-        const swatch = el.parentElement;
-        if (swatch) swatch.style.background = v;
-        const text = host.querySelector(`[data-bind-colour-text="${key}"]`);
-        if (text) text.value = v.toUpperCase();
-        shell.markDirty();
-        debounceRender();
+      // Content switch
+      document.getElementById('contentSwitch').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-content]');
+        if (!btn) return;
+        document.querySelectorAll('#contentSwitch .ctrl-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        cfg.contentType = btn.dataset.content;
       });
-    });
 
-    $$('[data-bind-colour-text]', host).forEach(el => {
-      const key = el.getAttribute('data-bind-colour-text');
-      el.addEventListener('input', () => {
-        const v = el.value.trim();
-        if (!/^#[0-9A-Fa-f]{6}$/.test(v)) return;
-        C[key] = v;
-        const colour = host.querySelector(`[data-bind-colour="${key}"]`);
-        if (colour) {
-          colour.value = v;
-          colour.parentElement.style.background = v;
-        }
-        shell.markDirty();
-        debounceRender();
+      // Theme switch
+      document.getElementById('themeSwitch').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-theme]');
+        if (!btn) return;
+        document.querySelectorAll('#themeSwitch .ctrl-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        cfg.theme = btn.dataset.theme;
       });
-    });
 
-    const ovSlider = $('#overlay-slider');
-    const ovInput = $('#overlay-input');
-    if (ovSlider) ovSlider.addEventListener('input', () => {
-      C.overlayOpacity = Number(ovSlider.value);
-      ovInput.value = ovSlider.value;
-      shell.markDirty();
-      debounceRender();
-    });
-    if (ovInput) ovInput.addEventListener('change', () => {
-      const v = Math.max(0, Math.min(100, Number(ovInput.value) || 0));
-      C.overlayOpacity = v;
-      ovInput.value = v;
-      ovSlider.value = v;
-      shell.markDirty();
-      render();
-    });
-  }
-
-  /* ── Radius (shape) section ──────────────────────────── */
-  function renderRadiusSection() {
-    const slider = $('#rad-slider');
-    const input = $('#rad-input');
-    if (!slider || !input) return;
-    slider.value = C.radius != null ? C.radius : 16;
-    input.value = C.radius != null ? C.radius : 16;
-    slider.addEventListener('input', () => {
-      C.radius = Number(slider.value);
-      input.value = slider.value;
-      shell.markDirty();
-      debounceRender();
-    });
-    input.addEventListener('change', () => {
-      const v = Math.max(0, Math.min(32, Number(input.value) || 0));
-      C.radius = v;
-      input.value = v;
-      slider.value = v;
-      shell.markDirty();
-      render();
-    });
-  }
-
-  /* ── Frequency section ───────────────────────────────── */
-  function renderFrequencySection() {
-    const host = $('#sb-frequency');
-    if (!host) return;
-
-    const freq = C.frequency || 'session';
-    let html = `<div class="field">
-      <label class="field-label">How often should the same visitor see this popup?</label>
-      <select class="select" id="freq-select">
-        <option value="session"      ${freq === 'session' ? 'selected' : ''}>Once per session</option>
-        <option value="visitor"      ${freq === 'visitor' ? 'selected' : ''}>Once per visitor (forever)</option>
-        <option value="every-n-days" ${freq === 'every-n-days' ? 'selected' : ''}>Once every N days</option>
-        <option value="every-visit"  ${freq === 'every-visit' ? 'selected' : ''}>Every visit</option>
-      </select>
-      <div class="field-hint">"Session" is the most common — shows once until they close the browser tab.</div>
-    </div>`;
-
-    if (freq === 'every-n-days') {
-      html += `<div class="field">
-        <label class="field-label">N (days between showings)</label>
-        <input type="number" min="1" max="365" class="input" id="freq-days" value="${C.frequencyDays || 7}">
-      </div>`;
-    }
-
-    html += `<div class="field">
-      <label class="field-label">After visitor dismisses, suppress for (days)</label>
-      <input type="number" min="0" max="365" class="input" id="freq-dismiss" value="${C.suppressAfterDismissDays || 0}">
-      <div class="field-hint">Extra cool-down once they've actively closed the popup. 0 means use the frequency rule above.</div>
-    </div>`;
-
-    html += `<div class="field">
-      <label class="field-label">After visitor converts, suppress for (days)</label>
-      <input type="number" min="0" max="365" class="input" id="freq-convert" value="${C.suppressAfterConversionDays || 30}">
-      <div class="field-hint">Stop showing once they've signed up, copied a code, or submitted a form.</div>
-    </div>`;
-
-    host.innerHTML = html;
-
-    $('#freq-select').addEventListener('change', e => {
-      C.frequency = e.target.value;
-      shell.markDirty();
-      renderFrequencySection();
-    });
-    $('#freq-days')?.addEventListener('change', e => {
-      C.frequencyDays = Math.max(1, Math.min(365, Number(e.target.value) || 7));
-      e.target.value = C.frequencyDays;
-      shell.markDirty();
-    });
-    $('#freq-dismiss').addEventListener('change', e => {
-      C.suppressAfterDismissDays = Math.max(0, Math.min(365, Number(e.target.value) || 0));
-      e.target.value = C.suppressAfterDismissDays;
-      shell.markDirty();
-    });
-    $('#freq-convert').addEventListener('change', e => {
-      C.suppressAfterConversionDays = Math.max(0, Math.min(365, Number(e.target.value) || 0));
-      e.target.value = C.suppressAfterConversionDays;
-      shell.markDirty();
-    });
-  }
-
-  /* ── Page targeting section ──────────────────────────── */
-  function renderPagesSection() {
-    const host = $('#sb-pages');
-    if (!host) return;
-
-    const include = Array.isArray(C.pageInclude) ? C.pageInclude : [];
-    const exclude = Array.isArray(C.pageExclude) ? C.pageExclude : [];
-
-    const hint = `Use URL paths or wildcards. <code style="background:var(--tgse-panel-3);padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px">/blog/*</code> matches any page under /blog. <code style="background:var(--tgse-panel-3);padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px">*</code> matches everything. One pattern per line.`;
-
-    host.innerHTML = `<div class="field">
-      <label class="field-label">Show only on these pages (Include)</label>
-      <textarea class="textarea" id="pages-include" rows="3" placeholder="Leave empty to show on all pages&#10;e.g. /book/*&#10;/late-deals">${escHtml(include.join('\n'))}</textarea>
-      <div class="field-hint">${hint}<br>Empty = show on all pages.</div>
-    </div>
-    <div class="field">
-      <label class="field-label">Never show on these pages (Exclude)</label>
-      <textarea class="textarea" id="pages-exclude" rows="3" placeholder="e.g. /thank-you&#10;/checkout/*">${escHtml(exclude.join('\n'))}</textarea>
-      <div class="field-hint">Excludes always win — even if a page matches Include, it won't show if it matches Exclude.</div>
-    </div>`;
-
-    function parseLines(s) {
-      return String(s || '')
-        .split('\n')
-        .map(l => l.trim())
-        .filter(Boolean)
-        .slice(0, 50); // sanity cap — 50 patterns is plenty
-    }
-
-    $('#pages-include').addEventListener('input', e => {
-      C.pageInclude = parseLines(e.target.value);
-      shell.markDirty();
-    });
-    $('#pages-exclude').addEventListener('input', e => {
-      C.pageExclude = parseLines(e.target.value);
-      shell.markDirty();
-    });
-  }
-
-  /* ── Device targeting section ────────────────────────── */
-  function renderDevicesSection() {
-    const host = $('#sb-devices');
-    if (!host) return;
-
-    const dev = C.devices || { desktop: true, tablet: true, mobile: true };
-    // Normalise so missing keys default to true
-    if (typeof dev.desktop !== 'boolean') dev.desktop = true;
-    if (typeof dev.tablet !== 'boolean')  dev.tablet  = true;
-    if (typeof dev.mobile !== 'boolean')  dev.mobile  = true;
-    C.devices = dev;
-
-    host.innerHTML = `
-      <div class="switch-row">
-        <div class="switch-text">
-          <div class="switch-text-title">Desktop</div>
-          <div class="switch-text-sub">Show to visitors on laptops and desktops.</div>
-        </div>
-        <button class="switch ${dev.desktop ? 'is-on' : ''}" type="button" data-device="desktop" aria-label="Toggle desktop"></button>
-      </div>
-      <div class="switch-row">
-        <div class="switch-text">
-          <div class="switch-text-title">Tablet</div>
-          <div class="switch-text-sub">Show to visitors on tablets.</div>
-        </div>
-        <button class="switch ${dev.tablet ? 'is-on' : ''}" type="button" data-device="tablet" aria-label="Toggle tablet"></button>
-      </div>
-      <div class="switch-row">
-        <div class="switch-text">
-          <div class="switch-text-title">Mobile</div>
-          <div class="switch-text-sub">Show to visitors on phones.</div>
-        </div>
-        <button class="switch ${dev.mobile ? 'is-on' : ''}" type="button" data-device="mobile" aria-label="Toggle mobile"></button>
-      </div>
-      <div class="field-hint" style="margin-top:8px">If you turn all three off, the popup will never show.</div>
-    `;
-
-    $$('[data-device]', host).forEach(b => {
-      b.addEventListener('click', () => {
-        const k = b.getAttribute('data-device');
-        C.devices[k] = !C.devices[k];
-        b.classList.toggle('is-on', C.devices[k]);
-        shell.markDirty();
+      // Position switch (also drives sideDrawerSide for side-drawer layout)
+      document.getElementById('positionSwitch').addEventListener('click', function (e) {
+        const btn = e.target.closest('button[data-position]');
+        if (!btn) return;
+        document.querySelectorAll('#positionSwitch .ctrl-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        cfg.position = btn.dataset.position;
+        cfg.sideDrawerSide = btn.dataset.position.indexOf('left') !== -1 ? 'left' : 'right';
       });
-    });
-  }
 
-  /* ── Embed code modal ──────────────────────────────────── */
-  $('#btn-embed').addEventListener('click', () => {
-    const params = new URLSearchParams(location.search);
-    const wId = params.get('id');
-    if (!wId) {
-      tgse.toast('Save first to get an embed code', 'err');
-      return;
-    }
-    const origin = location.origin;
-    const snippet = `<div data-tg-widget="popup" data-tg-id="${wId}"></div>\n<script src="${origin}/widget-popup.js" defer><\/script>`;
-    // Open a quick modal — keep it lightweight
-    const ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Inter,sans-serif';
-    ov.innerHTML = `<div style="background:#fff;padding:24px;border-radius:12px;width:540px;max-width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.18)">
-      <h3 style="margin:0 0 6px;font-size:16px;font-weight:600;color:#0F172A">Embed code</h3>
-      <p style="margin:0 0 14px;font-size:13px;color:#64748B;line-height:1.5">Paste this just before the closing &lt;/body&gt; tag on the pages where you want the popup to appear.</p>
-      <div class="embed-box" id="emb-text">${escHtml(snippet)}</div>
-      <div style="display:flex;gap:8px;margin-top:14px">
-        <button id="emb-copy" style="flex:1;height:36px;background:#0891B2;color:#fff;border:0;border-radius:8px;font:600 13px Inter;cursor:pointer">Copy to clipboard</button>
-        <button id="emb-close" style="height:36px;padding:0 14px;background:#fff;color:#475569;border:1px solid #E2E8F0;border-radius:8px;font:500 13px Inter;cursor:pointer">Close</button>
-      </div>
-    </div>`;
-    document.body.appendChild(ov);
-    ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
-    ov.querySelector('#emb-close').addEventListener('click', () => ov.remove());
-    ov.querySelector('#emb-copy').addEventListener('click', () => {
-      try {
-        const ta = document.createElement('textarea');
-        ta.value = snippet; document.body.appendChild(ta); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta);
-        tgse.toast('Copied', 'ok');
-      } catch { tgse.toast('Copy failed — select manually', 'err'); }
-    });
-  });
-
-  /* ── Name input → mark dirty ───────────────────────────── */
-  document.getElementById('name-input')?.addEventListener('input', () => shell.markDirty());
-
-  /* ── Global section-toggle wiring ──────────────────────
-     Delegated click handler so it works for both static
-     sections (Layout, When to show, Colours, Shape, Typography
-     in the Design tab; Behaviour, Frequency in the Settings tab)
-     AND dynamically-rendered sections (in renderContentFields).
-     The unified shell does this only for .tgse-section-head;
-     we use .sec-head so we wire our own. */
-  document.addEventListener('click', (e) => {
-    const head = e.target.closest('.sec-head');
-    if (!head) return;
-    const sec = head.parentElement;
-    if (sec && sec.classList.contains('sec')) {
-      sec.classList.toggle('is-open');
-    }
-  });
-
-  /* ── Boot ──────────────────────────────────────────────── */
-  document.addEventListener('DOMContentLoaded', () => {
-    if (tgse.isLoggedIn()) loadFromUrl();
-    // Otherwise the shell shows the login overlay; onLoginSuccess calls loadFromUrl.
-  });
-</script>
-
+      // Fire button
+      fireBtn.addEventListener('click', buildAndOpen);
+    })();
+  </script>
 </body>
 </html>
