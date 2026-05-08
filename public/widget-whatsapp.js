@@ -1183,12 +1183,20 @@
         };
         fab.addEventListener('click', handler);
       }
-      if (closeBtn && panel) {
+      if (closeBtn) {
         closeBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           this._open = false;
-          panel.setAttribute('data-open', 'false');
-          if (fab) fab.setAttribute('aria-expanded', 'false');
+          if (window.__TG_WHATSAPP_DEBUG__) {
+            console.log('[TG WhatsApp] close button clicked');
+          }
+          // Vertical layout renders the panel conditionally — full re-render so the tab returns
+          if (this.c.layout === 'vertical') {
+            this._render();
+          } else {
+            if (panel) panel.setAttribute('data-open', 'false');
+            if (fab) fab.setAttribute('aria-expanded', 'false');
+          }
         });
       }
       if (greetingClose && greeting) {
