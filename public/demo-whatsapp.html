@@ -183,13 +183,17 @@
         Auto-open on load
       </label>
     </div>
-    <div id="stateBadge" style="display:flex;align-items:center;gap:8px;padding:6px 14px;background:#F8FAFC;border-top:1px solid #E2E8F0;font-size:12px;color:#64748B;font-family:'JetBrains Mono', monospace;">
+    <div id="stateBadge" style="display:flex;align-items:center;gap:8px;padding:6px 14px;background:#F8FAFC;border-top:1px solid #E2E8F0;font-size:12px;color:#64748B;font-family:'JetBrains Mono', monospace;flex-wrap:wrap;">
       <span style="font-weight:600;color:#0F172A;">Widget state:</span>
       <span id="stateLayout">layout=floating</span>
       <span style="opacity:.5">·</span>
       <span id="statePosition">position=bottom-right</span>
       <span style="opacity:.5">·</span>
       <span id="statePanelOpen" style="color:#DC2626;">panel=closed</span>
+      <span style="opacity:.5">·</span>
+      <span id="stateFabClicks" style="color:#0891B2;">fab-clicks=0</span>
+      <span style="opacity:.5">·</span>
+      <button id="enableDebugBtn" style="appearance:none;border:1px solid #E2E8F0;background:#FFFFFF;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;color:#475569">Enable console debug</button>
     </div>
   </div>
 </div>
@@ -271,8 +275,23 @@
   const stateLayout = document.getElementById('stateLayout');
   const statePosition = document.getElementById('statePosition');
   const statePanelOpen = document.getElementById('statePanelOpen');
+  const stateFabClicks = document.getElementById('stateFabClicks');
+  const enableDebugBtn = document.getElementById('enableDebugBtn');
   let isDark = false;
   let currentWidget = null;
+  let fabClickCount = 0;
+
+  // Enable debug logging button
+  enableDebugBtn.addEventListener('click', () => {
+    window.__TG_WHATSAPP_DEBUG__ = !window.__TG_WHATSAPP_DEBUG__;
+    enableDebugBtn.textContent = window.__TG_WHATSAPP_DEBUG__
+      ? 'Debug ON (check console)'
+      : 'Enable console debug';
+    enableDebugBtn.style.background = window.__TG_WHATSAPP_DEBUG__ ? '#FEF3C7' : '#FFFFFF';
+    if (window.__TG_WHATSAPP_DEBUG__) {
+      console.log('[TG WhatsApp DEBUG] Enabled. Reload widget to see bind logs, or click the FAB to see click logs.');
+    }
+  });
 
   // Sample office hours: Mon-Fri 9-5:30, Sat 10-2, closed Sun
   const SAMPLE_HOURS = {
@@ -299,6 +318,7 @@
     const isOpen = currentWidget && currentWidget.isOpen && currentWidget.isOpen();
     statePanelOpen.textContent = 'panel=' + (isOpen ? 'open' : 'closed');
     statePanelOpen.style.color = isOpen ? '#16A34A' : '#DC2626';
+    stateFabClicks.textContent = 'fab-clicks=' + fabClickCount;
   }
 
   // Re-check open state every 200ms (the widget can open via FAB click outside our control)
@@ -352,6 +372,13 @@
       };
       if (mode === 'multi') cfg.agents = SAMPLE_AGENTS;
       currentWidget = new window.TGWhatsAppWidget(fresh, cfg);
+
+      // Listen for clicks on the host to count FAB clicks (composed events bubble out of shadow DOM)
+      fresh.addEventListener('click', () => {
+        fabClickCount++;
+        updateStateBadge();
+      });
+
       // Auto-open if checkbox is ticked
       if (autoOpenChk.checked) {
         // Small delay so the entry transition is visible
