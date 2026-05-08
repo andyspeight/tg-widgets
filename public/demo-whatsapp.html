@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WhatsApp Chat — Travelgenix Widget Demo</title>
+<meta property="og:title" content="The Hidden Greek Islands Worth Booking This Summer" />
+<meta property="og:site_name" content="Atlas Travel Co." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC;
+    color: #0F172A;
+    min-height: 100vh;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .demo-bar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #E2E8F0;
+    padding: 14px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .demo-bar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .demo-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 15px;
+  }
+  .demo-brand-mark {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+  .demo-controls {
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap; margin-left: auto;
+  }
+  .demo-controls label {
+    font-size: 12px; font-weight: 600; color: #64748B;
+    margin-right: 4px;
+  }
+  .demo-controls select, .demo-controls button {
+    appearance: none;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #0F172A;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .demo-controls select:hover, .demo-controls button:hover {
+    border-color: #CBD5E1;
+  }
+
+  .article {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+  .article h1 {
+    font-size: 44px;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .article .lede {
+    font-size: 19px;
+    color: #475569;
+    margin-bottom: 32px;
+    line-height: 1.55;
+  }
+  .article .meta {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px; color: #94A3B8;
+    margin-bottom: 40px;
+  }
+  .article .meta-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #25D366;
+    color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+  .article .hero {
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, #25D366 0%, #0EA5E9 50%, #6366F1 100%);
+    border-radius: 16px;
+    margin-bottom: 32px;
+  }
+  .article h2 {
+    font-size: 28px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin: 40px 0 16px;
+  }
+  .article p {
+    font-size: 17px;
+    color: #1E293B;
+    margin-bottom: 20px;
+  }
+  .inline-block {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 40px 0;
+    text-align: center;
+  }
+  .inline-block h3 {
+    font-size: 18px; font-weight: 700; margin-bottom: 14px;
+  }
+  .card-block {
+    margin: 32px 0;
+    display: flex; justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <div class="demo-bar-inner">
+    <div class="demo-brand">
+      <div class="demo-brand-mark">A</div>
+      Atlas Travel Co. <span style="font-weight:500;color:#94A3B8;font-size:13px">— demo client site</span>
+    </div>
+    <div class="demo-controls">
+      <label for="layoutPicker">Layout:</label>
+      <select id="layoutPicker">
+        <option value="floating">Floating button</option>
+        <option value="inline">Inline pill</option>
+        <option value="card">Inline card</option>
+      </select>
+
+      <label for="modePicker" style="margin-left:8px">Mode:</label>
+      <select id="modePicker">
+        <option value="single">Single agent</option>
+        <option value="multi">Multi-agent</option>
+      </select>
+
+      <label for="cornerPicker" style="margin-left:8px">Corner:</label>
+      <select id="cornerPicker">
+        <option value="bottom-right">Bottom right</option>
+        <option value="bottom-left">Bottom left</option>
+      </select>
+
+      <label for="hoursPicker" style="margin-left:8px">Hours:</label>
+      <select id="hoursPicker">
+        <option value="off">Always open</option>
+        <option value="on">Office hours</option>
+      </select>
+
+      <button id="themeBtn" style="margin-left:8px">Toggle theme</button>
+    </div>
+  </div>
+</div>
+
+<article class="article">
+  <h1>The Hidden Greek Islands Worth Booking This Summer</h1>
+  <p class="lede">Skip Mykonos. We round up the seven islands every travel agent should be quietly recommending instead.</p>
+  <div class="meta">
+    <div class="meta-avatar">SR</div>
+    <span>Sophie Rhodes &middot; 8 min read &middot; May 2026</span>
+  </div>
+  <div class="hero"></div>
+
+  <p>Greece has 227 inhabited islands. Most of your clients can name three. That's a problem if you're trying to win against the OTAs on commodity destinations. The fix isn't to fight harder for Santorini bookings. It's to offer them somewhere they haven't seen on Instagram yet.</p>
+
+  <p>This guide rounds up the seven islands worth a serious look this summer. Each has direct flights from a UK airport, hotels at every price point, and enough local character that your client will come home thanking you for the recommendation rather than the discount.</p>
+
+  <h2>1. Folegandros</h2>
+  <p>Cycladic, whitewashed, dramatically clifftop and almost entirely unspoilt. Two hours by ferry from Santorini, but it might as well be two decades earlier. The main town, Chora, is car-free and built on the edge of a 200-metre drop.</p>
+
+  <div class="inline-block">
+    <h3>Got a question? Chat with our team.</h3>
+    <div data-tg-widget="whatsapp" id="inline-mount"
+         data-tg-config='{"layout":"inline","phone":"+447900900900","inlineLabel":"Chat on WhatsApp","inlineSubLabel":"Typically replies in a few minutes","appendPageUrl":true,"message":"Hi! I have a question about your Greek islands feature."}'></div>
+  </div>
+
+  <h2>2. Karpathos</h2>
+  <p>The bridge between Crete and Rhodes, with empty beaches that go for miles and a remote village called Olympos where the older women still wear traditional dress because that's how they dress, not because tourists are watching.</p>
+
+  <div class="card-block">
+    <div data-tg-widget="whatsapp" id="card-mount"
+         data-tg-config='{"layout":"card","phone":"+447900900900","name":"Sophie Rhodes","role":"Greek islands specialist","message":"Hi Sophie, I read your guide on hidden Greek islands and want to chat."}'></div>
+  </div>
+
+  <h2>3. Symi</h2>
+  <p>Twenty minutes from Rhodes by hydrofoil, Symi is what people imagine when they say Greek island. A horseshoe harbour ringed with neoclassical mansions in pastel pinks and ochres. Day-trippers leave by 5pm and the island settles into something quietly perfect.</p>
+
+  <h2>4. Tinos</h2>
+  <p>The Greeks' favourite Greek island. Cycladic but with mountains, marble villages and food that punches well above the standard taverna fare. Mount Pteleos pottery, the artists' village of Pyrgos, and a beach called Kolympithra that locals fight to keep off Instagram.</p>
+
+  <h2>5. Kythera</h2>
+  <p>Officially Ionian, geographically more like a stray Cycladic island that drifted south. Empty beaches, Venetian fortresses, waterfalls inland and almost no one around.</p>
+
+  <h2>6. Ikaria</h2>
+  <p>One of the world's five Blue Zones, the places where people routinely live past 100. The locals have no clocks and a relaxed attitude to weekday hours. Hot springs, hiking, decent wine and beaches you'll have to yourself.</p>
+
+  <h2>7. Sifnos</h2>
+  <p>The food island. Greece has a strong national cuisine but Sifnos quietly makes the case for being the best of it. Chickpea stew baked in clay pots, capers, locally pressed olive oil that makes the supermarket version look watery.</p>
+
+  <h2>The agent angle</h2>
+  <p>Each of these islands books at higher margins than the obvious choices because clients aren't price-comparing them on the OTAs. They're trusting you to recommend somewhere good. That's the relationship worth building.</p>
+
+  <p style="margin-top:32px;color:#94A3B8;font-style:italic">Got questions? The team are on WhatsApp.</p>
+</article>
+
+<!-- Floating widget mount -->
+<div data-tg-widget="whatsapp" id="floating-mount"></div>
+
+<script src="/widget-whatsapp.js"></script>
+<script>
+  const layoutPicker = document.getElementById('layoutPicker');
+  const modePicker = document.getElementById('modePicker');
+  const cornerPicker = document.getElementById('cornerPicker');
+  const hoursPicker = document.getElementById('hoursPicker');
+  const themeBtn = document.getElementById('themeBtn');
+  let isDark = false;
+
+  // Sample office hours: Mon-Fri 9-5:30, Sat 10-2, closed Sun
+  const SAMPLE_HOURS = {
+    sun: [],
+    mon: [['09:00', '17:30']],
+    tue: [['09:00', '17:30']],
+    wed: [['09:00', '17:30']],
+    thu: [['09:00', '17:30']],
+    fri: [['09:00', '17:30']],
+    sat: [['10:00', '14:00']],
+  };
+
+  const SAMPLE_AGENTS = [
+    { name: 'Sophie Rhodes', role: 'Greek islands & Cyprus', phone: '+447900111111', online: true },
+    { name: 'Tom Castellanos', role: 'Italy & Spain', phone: '+447900222222', online: true },
+    { name: 'Priya Anand', role: 'Asia & long-haul', phone: '+447900333333', online: false },
+  ];
+
+  function mountFloating() {
+    const layout = layoutPicker.value;
+    const mode = modePicker.value;
+    const corner = cornerPicker.value;
+    const hoursOn = hoursPicker.value === 'on';
+
+    const oldMount = document.getElementById('floating-mount');
+    const fresh = document.createElement('div');
+    fresh.setAttribute('data-tg-widget', 'whatsapp');
+    fresh.id = 'floating-mount';
+    oldMount.replaceWith(fresh);
+
+    if (layout === 'floating') {
+      const cfg = {
+        layout: 'floating',
+        corner: corner,
+        mode: mode,
+        phone: '+447900900900',
+        name: 'Atlas Travel',
+        role: 'Travel specialists',
+        message: 'Hi! I have a question about your travel services.',
+        appendPageUrl: true,
+        greetingEnabled: true,
+        greetingDelay: 3,
+        greetingText: 'Need help finding your perfect trip?',
+        pulse: true,
+        hoursEnabled: hoursOn,
+        hours: SAMPLE_HOURS,
+        theme: { mode: isDark ? 'dark' : 'light', brand: '#25D366', brandDark: '#128C7E' },
+      };
+      if (mode === 'multi') cfg.agents = SAMPLE_AGENTS;
+      new window.TGWhatsAppWidget(fresh, cfg);
+    } else {
+      // Hide floating mount when using inline/card layouts
+      fresh.style.display = 'none';
+    }
+  }
+
+  layoutPicker.addEventListener('change', mountFloating);
+  modePicker.addEventListener('change', mountFloating);
+  cornerPicker.addEventListener('change', mountFloating);
+  hoursPicker.addEventListener('change', mountFloating);
+  themeBtn.addEventListener('click', () => {
+    isDark = !isDark;
+    document.body.style.background = isDark ? '#0F172A' : '#F8FAFC';
+    document.body.style.color = isDark ? '#F1F5F9' : '#0F172A';
+    mountFloating();
+  });
+
+  setTimeout(mountFloating, 50);
+</script>
+</body>
+</html>
