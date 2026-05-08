@@ -57,7 +57,7 @@
 
   /* Layout cards */
   .layout-grid {
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   }
   .layout-card {
     appearance: none;
@@ -103,8 +103,58 @@
     content: ''; position: absolute; right: 3px; top: 50%; transform: translateY(-50%);
     width: 14px; height: 8px; background: #25D366; border-radius: 999px;
   }
+  .layout-thumb .thumb-vertical {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 24px; background: #25D366; border-radius: 4px 0 0 4px;
+  }
   .layout-name { font-size: 12px; font-weight: 600; }
   .layout-desc { font-size: 10px; color: var(--tgse-text-3, #94A3B8); margin-top: 2px; }
+
+  /* Position picker — 3x2 grid mirroring viewport corners and middles */
+  .pos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 4px;
+    padding: 8px;
+    background: var(--tgse-bg-2, #F8FAFC);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    aspect-ratio: 16 / 10;
+  }
+  .pos-grid button {
+    appearance: none;
+    border: 1px solid transparent;
+    background: var(--tgse-bg, #FFFFFF);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+    padding: 0;
+    font-family: inherit;
+  }
+  .pos-grid button:hover { border-color: var(--tgse-text-3, #94A3B8); }
+  .pos-grid button.is-active {
+    border-color: var(--tgse-accent, #0891B2);
+    background: color-mix(in srgb, var(--tgse-accent, #0891B2) 8%, var(--tgse-bg, #FFFFFF));
+  }
+  .pos-grid button.is-active::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    background: #25D366;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #25D366 30%, transparent);
+  }
+  /* Place the dot in each cell to indicate position */
+  .pos-grid button[data-pos="top-left"].is-active::after     { top: 6px; left: 6px; }
+  .pos-grid button[data-pos="top-right"].is-active::after    { top: 6px; right: 6px; }
+  .pos-grid button[data-pos="middle-left"].is-active::after  { top: 50%; left: 6px;  transform: translateY(-50%); }
+  .pos-grid button[data-pos="middle-right"].is-active::after { top: 50%; right: 6px; transform: translateY(-50%); }
+  .pos-grid button[data-pos="bottom-left"].is-active::after  { bottom: 6px; left: 6px; }
+  .pos-grid button[data-pos="bottom-right"].is-active::after { bottom: 6px; right: 6px; }
+  .pos-grid button[disabled] { opacity: 0.35; cursor: not-allowed; }
+  .pos-grid button[disabled]:hover { border-color: transparent; }
 
   /* Segmented control */
   .seg {
@@ -382,6 +432,11 @@
                   <div class="layout-name">Floating</div>
                   <div class="layout-desc">Corner button</div>
                 </button>
+                <button class="layout-card" data-layout="vertical" type="button">
+                  <div class="layout-thumb"><div class="thumb-vertical"></div></div>
+                  <div class="layout-name">Vertical tab</div>
+                  <div class="layout-desc">Side tab pill</div>
+                </button>
                 <button class="layout-card" data-layout="inline" type="button">
                   <div class="layout-thumb"><div class="thumb-pill"></div></div>
                   <div class="layout-name">Inline pill</div>
@@ -394,12 +449,23 @@
                 </button>
               </div>
 
-              <div class="field" id="cornerField" style="margin-top:14px">
-                <span class="field-label">Corner (floating only)</span>
-                <div class="seg seg-2" id="cornerSeg">
-                  <button data-corner="bottom-left" type="button">Bottom left</button>
-                  <button data-corner="bottom-right" type="button" class="is-active">Bottom right</button>
+              <div class="field" id="positionField" style="margin-top:14px">
+                <span class="field-label">Position</span>
+                <div class="pos-grid" id="posGrid">
+                  <button data-pos="top-left" type="button" style="grid-column: 1; grid-row: 1" aria-label="Top left"></button>
+                  <button data-pos="top-right" type="button" style="grid-column: 3; grid-row: 1" aria-label="Top right"></button>
+                  <button data-pos="middle-left" type="button" style="grid-column: 1; grid-row: 2" aria-label="Middle left"></button>
+                  <button data-pos="middle-right" type="button" style="grid-column: 3; grid-row: 2" aria-label="Middle right"></button>
+                  <button data-pos="bottom-left" type="button" style="grid-column: 1; grid-row: 3" aria-label="Bottom left"></button>
+                  <button data-pos="bottom-right" type="button" class="is-active" style="grid-column: 3; grid-row: 3" aria-label="Bottom right"></button>
                 </div>
+                <div class="field-help" id="positionHelp">Pick a corner or edge of the viewport for the floating button.</div>
+              </div>
+
+              <div class="field" id="tabLabelField" style="margin-top:14px;display:none">
+                <span class="field-label">Tab label (vertical only)</span>
+                <input class="input" id="tabLabelInput" maxlength="40" placeholder="Chat with us" />
+                <div class="field-help">Text shown rotated down the side tab. Keep short — 2 to 4 words works best.</div>
               </div>
             </div>
           </div>
@@ -699,7 +765,7 @@
   function defaultsCfg() {
     return {
       layout: 'floating',
-      corner: 'bottom-right',
+      position: 'bottom-right',
       mode: 'single',
       agents: [
         { name: 'Travel Team', role: 'Online now', phone: '+447900900900', photo: '', online: true }
@@ -710,6 +776,7 @@
       headerSubtitle: 'Typically replies in a few minutes',
       chatIntro: 'Hi there! 👋 How can we help with your next trip?',
       ctaLabel: 'Start chat',
+      tabLabel: 'Chat with us',
       inlineLabel: 'Chat on WhatsApp',
       inlineSubLabel: 'Typically replies in a few minutes',
       greetingEnabled: false,
@@ -801,20 +868,59 @@
   /* =========================================================
      Wiring: layout / corner / mode / colour / sliders / toggles / inputs
      ========================================================= */
+  /* Layout/position rules:
+     - floating supports all 6 positions
+     - vertical only supports middle-left and middle-right
+     - inline + card don't show the position picker at all */
+  function applyLayoutVisibility() {
+    const isFloating = C.layout === 'floating';
+    const isVertical = C.layout === 'vertical';
+    const showPos = isFloating || isVertical;
+    document.getElementById('positionField').style.display = showPos ? '' : 'none';
+    document.getElementById('tabLabelField').style.display = isVertical ? '' : 'none';
+
+    // For vertical, disable all positions except middle-left and middle-right
+    document.querySelectorAll('#posGrid button').forEach(btn => {
+      const p = btn.getAttribute('data-pos');
+      const allowed = !isVertical || p === 'middle-left' || p === 'middle-right';
+      btn.disabled = !allowed;
+    });
+
+    // Update help text
+    const help = document.getElementById('positionHelp');
+    if (help) {
+      help.textContent = isVertical
+        ? 'Vertical tab can only be on the middle-left or middle-right edge.'
+        : 'Pick a corner or edge of the viewport for the floating button.';
+    }
+
+    // If switching to vertical with an invalid position, snap to middle-right
+    if (isVertical && C.position !== 'middle-left' && C.position !== 'middle-right') {
+      C.position = 'middle-right';
+      syncPositionUI();
+    }
+  }
+
+  function syncPositionUI() {
+    document.querySelectorAll('#posGrid button').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-pos') === C.position);
+    });
+  }
+
   document.getElementById('layoutGrid').addEventListener('click', (e) => {
     const card = e.target.closest('[data-layout]');
     if (!card) return;
     document.querySelectorAll('#layoutGrid .layout-card').forEach(c => c.classList.toggle('is-active', c === card));
     C.layout = card.getAttribute('data-layout');
-    document.getElementById('cornerField').style.display = (C.layout === 'floating') ? '' : 'none';
+    applyLayoutVisibility();
     dirty(); render();
   });
 
-  document.getElementById('cornerSeg').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-corner]');
-    if (!b) return;
-    document.querySelectorAll('#cornerSeg button').forEach(x => x.classList.toggle('is-active', x === b));
-    C.corner = b.getAttribute('data-corner');
+  document.getElementById('posGrid').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pos]');
+    if (!b || b.disabled) return;
+    C.position = b.getAttribute('data-pos');
+    syncPositionUI();
     dirty(); render();
   });
 
@@ -904,6 +1010,7 @@
   bindInput('headerSubtitleInput', 'headerSubtitle');
   bindInput('chatIntroInput', 'chatIntro');
   bindInput('ctaLabelInput', 'ctaLabel');
+  bindInput('tabLabelInput', 'tabLabel');
   bindInput('inlineLabelInput', 'inlineLabel');
   bindInput('inlineSubLabelInput', 'inlineSubLabel');
   bindInput('greetingTextInput', 'greetingText');
@@ -1058,11 +1165,14 @@
     document.querySelectorAll('#layoutGrid .layout-card').forEach(c => {
       c.classList.toggle('is-active', c.getAttribute('data-layout') === C.layout);
     });
-    document.getElementById('cornerField').style.display = (C.layout === 'floating') ? '' : 'none';
 
-    document.querySelectorAll('#cornerSeg button').forEach(b => {
-      b.classList.toggle('is-active', b.getAttribute('data-corner') === C.corner);
-    });
+    // Backwards compat: if loaded config has cfg.corner but not cfg.position, migrate
+    if (!C.position && C.corner) C.position = C.corner;
+    if (!C.position) C.position = 'bottom-right';
+
+    syncPositionUI();
+    applyLayoutVisibility();
+
     document.querySelectorAll('#modeSeg button').forEach(b => {
       b.classList.toggle('is-active', b.getAttribute('data-mode') === C.mode);
     });
@@ -1096,6 +1206,7 @@
     document.getElementById('headerSubtitleInput').value = C.headerSubtitle || '';
     document.getElementById('chatIntroInput').value = C.chatIntro || '';
     document.getElementById('ctaLabelInput').value = C.ctaLabel || '';
+    document.getElementById('tabLabelInput').value = C.tabLabel || '';
     document.getElementById('inlineLabelInput').value = C.inlineLabel || '';
     document.getElementById('inlineSubLabelInput').value = C.inlineSubLabel || '';
     document.getElementById('greetingTextInput').value = C.greetingText || '';
