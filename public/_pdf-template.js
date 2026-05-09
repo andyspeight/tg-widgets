@@ -180,7 +180,7 @@ const renderPdfFlightItem = (item) => {
     }).join('') : '';
 
     return `
-      <div style="padding:14px 0; border-top:1px solid #E2E8F0;">
+      <div class="pdf-flight-route" style="padding:14px 0; border-top:1px solid #E2E8F0;">
         <div style="display:inline-block; padding:2px 10px; background:#F1F5F9; border-radius:9999px; font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#475569; margin-bottom:10px;">
           ${escapeHtml(route.direction || 'Flight')}
         </div>
@@ -263,7 +263,7 @@ const renderPdfExtraItem = (item) => {
   const dressCode = descByType('DressCode')?.text || '';
 
   return `
-    <div style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
+    <div class="pdf-extra-card" style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
       <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">${escapeHtml(kindLabel)}</div>
       <div style="font-size:14px; font-weight:600; color:#0F172A; margin-bottom:4px;">${escapeHtml(e.name || 'Airport extra')}</div>
       ${e.subTitle ? `<div style="font-size:11px; color:#475569; margin-bottom:8px;">${escapeHtml(e.subTitle)}</div>` : ''}
@@ -474,6 +474,45 @@ export function renderPdfHtml(order, opts = {}) {
     page-break-after: always;
   }
   .page:last-child { page-break-after: auto; }
+
+  /* PAGE BREAKS — keep visual blocks intact across page boundaries.
+     Without these rules, Chromium will happily split a card or section in
+     half at the bottom of A4. break-inside is the modern property; the
+     -webkit- and page-break-inside variants are kept for older Chromium
+     builds that ship inside Puppeteer. */
+  .pdf-section,
+  .pdf-ref-bar,
+  .pdf-pay-box,
+  .pdf-banner,
+  .pdf-policy,
+  .pdf-flight-route,
+  .pdf-extra-card,
+  .pdf-contact-card,
+  .pdf-amenity,
+  .pdf-instalment {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Don't strand a section title at the bottom of a page — push to next
+     page with the content that follows. */
+  .pdf-section-title,
+  .pdf-pay-box-title {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Long sections that exceed an A4 page (e.g. flights with many segments,
+     or the payment block when an instalment plan is present) are allowed
+     to break, but only between their child blocks — never mid-block. */
+  .pdf-pay,
+  .pdf-policies,
+  .pdf-amenities,
+  .pdf-contact {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
 
   /* HEADER BAND */
   .pdf-header {
