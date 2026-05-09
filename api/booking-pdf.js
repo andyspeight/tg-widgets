@@ -551,6 +551,12 @@ export default async function handler(req, res) {
 
     browser = await getBrowser();
     const page = await browser.newPage();
+    // Emulate print media so @media print rules fire and break-inside / 
+    // page-break-inside CSS is honoured. Without this, Chromium treats 
+    // the document as on-screen and ignores print-only break rules — which 
+    // causes sections to flow across page boundaries instead of moving 
+    // cleanly to the next page.
+    await page.emulateMediaType('print');
     await page.setContent(html, { waitUntil: 'networkidle0' });
     const pdfRaw = await page.pdf({
       format: 'A4', printBackground: true,
