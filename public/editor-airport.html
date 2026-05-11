@@ -9,6 +9,41 @@
 <style>
   /* Per-editor styles — airport-specific UI inside the sidebar */
 
+  /* ── Form controls — match the rest of the widget suite ─── */
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--tgse-ink-2);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .field-hint { font-size: 11px; color: var(--tgse-muted); font-weight: 400; }
+  .input, .textarea, .select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm, 6px);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input { height: 34px; }
+  .select { height: 34px; cursor: pointer; appearance: none; padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+  .textarea { min-height: 72px; resize: vertical; font-family: inherit; }
+  .input:focus, .textarea:focus, .select:focus {
+    border-color: var(--tgse-brand);
+    box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .input::placeholder, .textarea::placeholder { color: var(--tgse-muted); }
+
   .ap-picker {
     position: relative;
     margin-bottom: 12px;
@@ -334,19 +369,19 @@
               <div class="ap-cta-mode">For UK Origin airports</div>
               <div class="tgse-field">
                 <label class="tgse-field-label">Title</label>
-                <input type="text" id="cta-orig-title" class="tgse-input" maxlength="100">
+                <input type="text" id="cta-orig-title" class="input" maxlength="100">
               </div>
               <div class="tgse-field">
                 <label class="tgse-field-label">Subtitle</label>
-                <input type="text" id="cta-orig-sub" class="tgse-input" maxlength="160">
+                <input type="text" id="cta-orig-sub" class="input" maxlength="160">
               </div>
               <div class="tgse-field">
                 <label class="tgse-field-label">Button label</label>
-                <input type="text" id="cta-orig-label" class="tgse-input" maxlength="40">
+                <input type="text" id="cta-orig-label" class="input" maxlength="40">
               </div>
               <div class="tgse-field">
                 <label class="tgse-field-label">Button URL</label>
-                <input type="url" id="cta-orig-url" class="tgse-input" placeholder="https://...">
+                <input type="url" id="cta-orig-url" class="input" placeholder="https://...">
               </div>
             </div>
 
@@ -354,19 +389,19 @@
               <div class="ap-cta-mode">For Destination airports</div>
               <div class="tgse-field">
                 <label class="tgse-field-label">Title</label>
-                <input type="text" id="cta-dest-title" class="tgse-input" maxlength="100">
+                <input type="text" id="cta-dest-title" class="input" maxlength="100">
               </div>
               <div class="tgse-field">
                 <label class="tgse-field-label">Subtitle</label>
-                <input type="text" id="cta-dest-sub" class="tgse-input" maxlength="160">
+                <input type="text" id="cta-dest-sub" class="input" maxlength="160">
               </div>
               <div class="tgse-field">
                 <label class="tgse-field-label">Button label</label>
-                <input type="text" id="cta-dest-label" class="tgse-input" maxlength="40">
+                <input type="text" id="cta-dest-label" class="input" maxlength="40">
               </div>
               <div class="tgse-field">
                 <label class="tgse-field-label">Button URL</label>
-                <input type="url" id="cta-dest-url" class="tgse-input" placeholder="https://...">
+                <input type="url" id="cta-dest-url" class="input" placeholder="https://...">
               </div>
             </div>
           </div>
@@ -418,7 +453,7 @@
           <div class="tgse-section-body">
             <div class="tgse-field">
               <label class="tgse-field-label">Image URL (optional)</label>
-              <input type="url" id="hero-url" class="tgse-input" placeholder="https://images.unsplash.com/...">
+              <input type="url" id="hero-url" class="input" placeholder="https://images.unsplash.com/...">
               <div class="ap-cta-help" style="margin-top:6px;">Leave blank to use a brand-coloured fallback. Use Unsplash, your own CDN, or a Duda asset URL.</div>
             </div>
           </div>
