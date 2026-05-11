@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Card Widget — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F8FAFC;
+    --bg-2: #FFFFFF;
+    --ink: #0F172A;
+    --ink-2: #475569;
+    --ink-3: #94A3B8;
+    --border: #E2E8F0;
+    --brand: #1B2B5B;
+    --accent: #00B4D8;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+
+  /* Mock travel-agency host site so the widget looks in-context */
+  .site-header {
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .site-brand {
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+  }
+  .site-nav {
+    display: flex;
+    gap: 24px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .site-nav a { color: inherit; text-decoration: none; }
+
+  .site-hero {
+    background:
+      linear-gradient(135deg, rgba(27,43,91,.92), rgba(0,180,216,.55)),
+      url('https://picsum.photos/seed/sundtravel/1600/600') center/cover;
+    color: #fff;
+    padding: 64px 24px 88px;
+    text-align: center;
+  }
+  .site-hero h1 {
+    font-size: 38px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
+  }
+  .site-hero p {
+    font-size: 16px;
+    margin: 0;
+    opacity: .9;
+  }
+
+  /* Demo controls */
+  .controls {
+    max-width: 1080px;
+    margin: 32px auto 0;
+    padding: 16px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(15,23,42,.04);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .controls-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-3);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+  .controls-group {
+    display: inline-flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .controls-btn {
+    padding: 6px 12px;
+    border: 0;
+    background: transparent;
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all .14s ease;
+  }
+  .controls-btn:hover { color: var(--ink); }
+  .controls-btn.is-on {
+    background: var(--bg-2);
+    color: var(--brand);
+    box-shadow: 0 1px 2px rgba(15,23,42,.08);
+  }
+
+  .demo-stage {
+    max-width: 1080px;
+    margin: 24px auto 64px;
+    padding: 0 16px;
+    display: grid;
+    gap: 32px;
+  }
+  .demo-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(15,23,42,.04);
+  }
+  .demo-card[data-theme="dark"] {
+    background: #0F172A;
+    border-color: #334155;
+  }
+  .demo-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .demo-stage h2 {
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+  .demo-stage p.demo-meta {
+    font-size: 14px;
+    color: var(--ink-2);
+    margin: 0 0 20px;
+  }
+  .demo-card[data-theme="dark"] h2 { color: #F8FAFC; }
+  .demo-card[data-theme="dark"] p.demo-meta { color: #CBD5E1; }
+
+  .site-footer {
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    padding: 24px;
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+
+  @media (max-width: 600px) {
+    .site-hero { padding: 48px 16px 64px; }
+    .site-hero h1 { font-size: 28px; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .controls-group { width: 100%; justify-content: stretch; }
+    .controls-group .controls-btn { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-brand">Sunward Travel</div>
+  <nav class="site-nav">
+    <a href="#">Holidays</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
+
+<section class="site-hero">
+  <h1>Get in touch with the team</h1>
+  <p>We are here six days a week, and yes, the kettle is always on.</p>
+</section>
+
+<div class="controls" role="toolbar" aria-label="Demo controls">
+  <span class="controls-label">Layout</span>
+  <div class="controls-group" id="layout-group">
+    <button class="controls-btn is-on" data-layout="panel" type="button">Panel</button>
+    <button class="controls-btn" data-layout="card" type="button">Card</button>
+    <button class="controls-btn" data-layout="strip" type="button">Strip</button>
+  </div>
+
+  <span class="controls-label" style="margin-left:auto">Theme</span>
+  <div class="controls-group" id="theme-group">
+    <button class="controls-btn is-on" data-theme="light" type="button">Light</button>
+    <button class="controls-btn" data-theme="dark" type="button">Dark</button>
+  </div>
+</div>
+
+<main class="demo-stage">
+  <div class="demo-card" id="demo-card">
+    <span class="demo-tag">Live preview</span>
+    <h2 id="demo-title">Panel layout · Light</h2>
+    <p class="demo-meta">A vertical contact panel suitable for a sidebar or footer column.</p>
+    <div id="widget-mount"></div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  Sunward Travel · ABTA Y1234 · A demo page for the Travelgenix Contact Card widget.
+</footer>
+
+<script src="/widget-contact.js"></script>
+<script>
+  (function () {
+    // Demo config — realistic travel agency contact card
+    var demoConfig = {
+      layout: 'panel',
+      theme: 'light',
+      brandColor: '#1B2B5B',
+      accentColor: '#00B4D8',
+      radius: 16,
+      businessName: 'Sunward Travel',
+      contactName: 'Sarah Whitfield',
+      jobTitle: 'Travel Consultant',
+      intro: 'Award-winning holiday planning for Mediterranean specialists. ABTA Y1234.',
+      phone: '+44 1202 555 124',
+      email: 'hello@sunwardtravel.example',
+      whatsapp: '+44 7700 900 124',
+      whatsappMessage: 'Hi Sunward Travel, I would like to book a holiday.',
+      address: '14 Old Christchurch Road, Bournemouth BH1 1LE',
+      website: 'https://sunwardtravel.example',
+      socials: [
+        { platform: 'facebook',  url: 'https://facebook.com/sunwardtravel' },
+        { platform: 'instagram', url: 'https://instagram.com/sunwardtravel' },
+        { platform: 'linkedin',  url: 'https://linkedin.com/company/sunwardtravel' },
+        { platform: 'youtube',   url: 'https://youtube.com/@sunwardtravel' }
+      ],
+      showVCard: true,
+      showLabels: true,
+      stripCompact: false,
+      headings: {
+        contact: 'Get in touch',
+        vcard: 'Save to phone'
+      }
+    };
+
+    var mount = document.getElementById('widget-mount');
+    var widget = new window.TGContactWidget(mount, demoConfig);
+
+    var demoCard = document.getElementById('demo-card');
+    var demoTitle = document.getElementById('demo-title');
+
+    function titleFor(layout, theme) {
+      var labels = { panel: 'Panel layout', card: 'Card layout', strip: 'Strip layout' };
+      return labels[layout] + ' · ' + (theme === 'dark' ? 'Dark' : 'Light');
+    }
+
+    // Layout switcher
+    var layoutGroup = document.getElementById('layout-group');
+    layoutGroup.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-layout]');
+      if (!btn) return;
+      layoutGroup.querySelectorAll('button').forEach(function (b) { b.classList.remove('is-on'); });
+      btn.classList.add('is-on');
+      demoConfig.layout = btn.dataset.layout;
+      widget.update(demoConfig);
+      demoTitle.textContent = titleFor(demoConfig.layout, demoConfig.theme);
+    });
+
+    // Theme switcher
+    var themeGroup = document.getElementById('theme-group');
+    themeGroup.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-theme]');
+      if (!btn) return;
+      themeGroup.querySelectorAll('button').forEach(function (b) { b.classList.remove('is-on'); });
+      btn.classList.add('is-on');
+      demoConfig.theme = btn.dataset.theme;
+      demoCard.setAttribute('data-theme', demoConfig.theme);
+      widget.update(demoConfig);
+      demoTitle.textContent = titleFor(demoConfig.layout, demoConfig.theme);
+    });
+  })();
+</script>
+
+</body>
+</html>
