@@ -60,7 +60,21 @@ function selName(v) {
 
 async function airtableGet(path, params) {
   if (!AIRTABLE_KEY) throw new Error('AIRTABLE_KEY env missing');
-  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  // Build query string manually so array values become repeated keys
+  // (Airtable expects fields[]=fldA&fields[]=fldB, not fields[]=fldA,fldB).
+  let qs = '';
+  if (params) {
+    const parts = [];
+    for (const k of Object.keys(params)) {
+      const v = params[k];
+      if (Array.isArray(v)) {
+        for (const item of v) parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(String(item)));
+      } else {
+        parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(String(v)));
+      }
+    }
+    qs = parts.length ? '?' + parts.join('&') : '';
+  }
   const res = await fetch(AIRTABLE_API + '/' + DESTINATION_BASE_ID + '/' + path + qs, {
     headers: { 'Authorization': 'Bearer ' + AIRTABLE_KEY },
   });
@@ -124,9 +138,13 @@ module.exports = async function handler(req, res) {
 
   try {
     const safe = sanitiseForFormula(q);
-    // Match on airport name OR IATA OR city served
+    // Match on airport name OR IATA OR city served.
+    // Field names must match Airtable exactly — 'Airport Name', 'IATA Code',
+    // 'City Served'. Earlier draft used {Name} which doesn't exist on this
+    // table and poisoned the whole OR, causing every search to fail with
+    // INVALID_FILTER_BY_FORMULA.
     const formula = "OR(" +
-      "SEARCH(LOWER('" + safe + "'),LOWER({Name}))," +
+      "SEARCH(LOWER('" + safe + "'),LOWER({Airport Name}))," +
       "SEARCH(UPPER('" + safe + "'),UPPER({IATA Code}))," +
       "SEARCH(LOWER('" + safe + "'),LOWER({City Served}))" +
     ")";
