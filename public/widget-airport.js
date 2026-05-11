@@ -618,7 +618,18 @@
       if (!container) throw new Error('TGAirportWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
-      this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
+      // Reuse an existing shadow root if one is already attached — this happens
+      // when the editor re-instantiates the widget after the user picks an
+      // airport (the auto-init below has already attached a shadow root on
+      // page load). Calling attachShadow() twice on the same element throws.
+      if (container.shadowRoot) {
+        this.shadow = container.shadowRoot;
+        while (this.shadow.firstChild) this.shadow.removeChild(this.shadow.firstChild);
+      } else if (container.attachShadow) {
+        this.shadow = container.attachShadow({ mode: 'open' });
+      } else {
+        this.shadow = container;
+      }
       this._mapInst = null;
       this._renderShell();
 
@@ -1123,6 +1134,11 @@
   function init() {
     const containers = document.querySelectorAll('[data-tg-widget="airport"]:not([data-tg-initialised])');
     containers.forEach(el => {
+      // Skip elements that opt out of auto-init. The editor uses this so it
+      // can control widget instantiation itself — auto-init with empty config
+      // would otherwise render "Airport not found" and lock the mount before
+      // the editor has a chance to provide the picked airport's data.
+      if (el.hasAttribute('data-tg-no-autoinit')) return;
       let cfg = {};
       const inline = el.getAttribute('data-tg-config');
       if (inline) { try { cfg = JSON.parse(inline); } catch (e) { /* */ } }
