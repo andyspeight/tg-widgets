@@ -62,7 +62,13 @@ function isIata(s)     { return typeof s === 'string' && /^[A-Z]{3}$/.test(s.tri
 // --- Airtable HTTP helper ------------------------------------------
 async function airtableGet(baseId, path, params) {
   if (!AIRTABLE_KEY) throw new Error('AIRTABLE_KEY env missing');
-  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  // Always request field-ID-keyed payloads. Default Airtable REST response
+  // keys rec.fields by field NAME, but the rest of this file looks up values
+  // by field ID via the AF/CF/RF catalogues. Without this flag every fld()
+  // lookup returns undefined, and the response comes back with every field
+  // empty even though the record exists.
+  const allParams = Object.assign({ returnFieldsByFieldId: 'true' }, params || {});
+  const qs = '?' + new URLSearchParams(allParams).toString();
   const url = AIRTABLE_API + '/' + baseId + '/' + path + qs;
   const res = await fetch(url, {
     headers: { 'Authorization': 'Bearer ' + AIRTABLE_KEY },
