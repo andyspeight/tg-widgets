@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airport Spotlight — Demo · Travelgenix Widget Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #1B2B5B;
+    --accent: #00B4D8;
+    --bg: #F1F5F9;
+    --bg-card: #FFFFFF;
+    --text: #0F172A;
+    --sub: #475569;
+    --border: #E2E8F0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  /* Simulated client site chrome */
+  .site-nav {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .site-logo {
+    font-size: 18px; font-weight: 700;
+    color: var(--brand);
+    letter-spacing: -0.01em;
+  }
+  .site-logo span { color: var(--accent); }
+  .site-nav nav {
+    display: flex; gap: 24px;
+    font-size: 14px; font-weight: 500;
+    margin-left: auto;
+  }
+  .site-nav a {
+    color: var(--sub);
+    text-decoration: none;
+    transition: color .15s ease-out;
+  }
+  .site-nav a:hover { color: var(--brand); }
+  .site-nav a.active { color: var(--brand); }
+
+  .hero-strip {
+    background: linear-gradient(135deg, #FBFCFE 0%, #EEF2F7 100%);
+    padding: 32px 32px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-strip h1 {
+    margin: 0 0 4px;
+    font-size: 26px; font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .hero-strip p {
+    margin: 0;
+    color: var(--sub);
+    font-size: 14px;
+  }
+
+  /* Demo toolbar — pinned, lets you swap airports without reloading */
+  .demo-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--brand);
+    color: #FFFFFF;
+    padding: 12px 32px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.12);
+  }
+  .demo-bar-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .demo-segment {
+    display: inline-flex;
+    background: rgba(255,255,255,0.08);
+    border-radius: 9999px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .demo-segment button {
+    appearance: none; border: none; background: transparent;
+    color: #FFFFFF;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 13px; font-weight: 500;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background .15s ease-out;
+    min-height: 32px;
+  }
+  .demo-segment button:hover { background: rgba(255,255,255,0.12); }
+  .demo-segment button.is-active {
+    background: var(--accent);
+    font-weight: 600;
+  }
+  .demo-spacer { flex: 1; }
+  .demo-bar a {
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .demo-bar a:hover { color: #FFFFFF; }
+
+  /* Page content */
+  .page {
+    max-width: 1180px;
+    margin: 32px auto;
+    padding: 0 32px;
+  }
+  .crumb {
+    font-size: 13px; color: var(--sub);
+    margin-bottom: 16px;
+  }
+  .crumb a { color: var(--sub); text-decoration: none; }
+  .crumb a:hover { color: var(--brand); }
+  .crumb .sep { margin: 0 6px; opacity: 0.5; }
+
+  .widget-mount {
+    margin: 0 0 48px;
+  }
+
+  /* Footer */
+  .site-foot {
+    background: var(--brand);
+    color: #CBD5E1;
+    padding: 32px;
+    text-align: center;
+    font-size: 13px;
+  }
+  .site-foot strong { color: #FFFFFF; }
+
+  @media (max-width: 720px) {
+    .site-nav { padding: 0 20px; gap: 12px; }
+    .site-nav nav { display: none; }
+    .hero-strip { padding: 24px 20px 20px; }
+    .hero-strip h1 { font-size: 22px; }
+    .page { padding: 0 16px; margin: 24px auto; }
+    .demo-bar { padding: 12px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Simulated client site nav -->
+<header class="site-nav">
+  <div class="site-logo">Sunshine<span>Travel</span></div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Destinations</a>
+    <a href="#" class="active">Airports</a>
+    <a href="#">Cruises</a>
+    <a href="#">Offers</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
+
+<!-- Demo controls -->
+<div class="demo-bar">
+  <span class="demo-bar-label">Demo</span>
+  <div class="demo-segment" role="tablist">
+    <button data-airport="lcy" class="is-active">London City (Origin)</button>
+    <button data-airport="dlm">Dalaman (Destination)</button>
+    <button data-airport="man">Manchester (Both)</button>
+  </div>
+  <span class="demo-spacer"></span>
+  <a href="/editor-airport">Open editor →</a>
+</div>
+
+<div class="hero-strip">
+  <h1 id="page-title">London City Airport</h1>
+  <p>A demo of the Travelgenix Airport Spotlight widget — embedded on a client travel-agent site.</p>
+</div>
+
+<main class="page">
+  <div class="crumb">
+    <a href="#">Home</a><span class="sep">/</span>
+    <a href="#">Airports</a><span class="sep">/</span>
+    <span id="crumb-current">London City Airport</span>
+  </div>
+
+  <!-- Widget mount point — content is swapped by the demo controls -->
+  <div class="widget-mount">
+    <div data-tg-widget="airport" id="widget-mount"></div>
+  </div>
+</main>
+
+<footer class="site-foot">
+  <strong>Sunshine Travel</strong> · ABTA Y0000 · ATOL 0000 · A demo site for the Travelgenix Widget Suite
+</footer>
+
+<!-- Widget JS -->
+<script src="/widget-airport.js"></script>
+
+<!-- Demo data + controls (this script is NOT part of the widget — it's the demo harness) -->
+<script>
+(function () {
+  'use strict';
+
+  // Demo data — three airports, one for each role.
+  // In production this lives in Airtable and is fetched via /api/airport-content.
+  const DEMOS = {
+    lcy: {
+      name: 'London City Airport',
+      iata: 'LCY',
+      role: 'origin',
+      type: 'International',
+      cityServed: 'London',
+      country: 'United Kingdom',
+      tagline: "London's most central airport — DLR from check-in to The City in under 25 minutes.",
+      overview:
+        "London City sits in the Royal Docks, just six miles from Canary Wharf and seven from The City. It's the only London airport you can reach by London Underground (via the DLR), and the closest to central London by some margin.\n\n" +
+        "Despite its compact size — one runway, one terminal — LCY handles around five million passengers a year across roughly 35 European destinations plus a handful of leisure routes. The terminal is famously efficient: check-in to gate in under 15 minutes is normal, and most carriers operate a 20-minute check-in cut-off.",
+      overviewHeading: 'The business airport that earns its name',
+      lat: 51.5048,
+      lng: 0.0495,
+      cityLat: 51.5074,
+      cityLng: -0.1278,
+      distanceToCity: '7 miles from The City',
+      driveTimeSummary: '25 min by DLR · 15-30 min by taxi',
+      terminalsCount: 1,
+      terminalsAndAirlines: "One compact terminal serving British Airways, KLM, Lufthansa, Swiss, TAP, Alitalia and Loganair. BA operates the BA CityFlyer base here — short-haul European business routes plus one premium-only daily to JFK.",
+      keyAirlines: 'British Airways, KLM, Lufthansa, Swiss, TAP',
+      keyAirlinesNote: 'BA CityFlyer is the dominant carrier',
+      checkInSummary: '20 min cut-off',
+      checkInDetail: 'Fastest in London — terminal is one floor',
+      recommendedArrival: "Most airlines close check-in 20 minutes before departure — earlier than anywhere else in London. Aim to arrive 75 minutes before for hand-baggage only, 90 minutes if you're checking a bag.",
+      hasLounges: true,
+      hasFastTrack: true,
+      gettingThereByTrain:
+        "The DLR connects London City directly to Bank station in 22 minutes — that's London City to The City in under half an hour, with no changes. From Bank, you're on the Central, Northern, Waterloo & City and DLR lines.\n\n" +
+        "For Canary Wharf, change at Poplar (one stop) or West India Quay. London City Airport DLR station is at the terminal — under the arrivals canopy.",
+      gettingThereByCar:
+        "From The City, take the A13 east and pick up the A1020 at Beckton. Allow 25-35 minutes, longer in peak. From the M25, exit at junction 30 and follow the A13 west.\n\n" +
+        "Short-stay parking is right beneath the terminal — premium pricing, but you can be at check-in 90 seconds after parking.",
+      gettingThereByCoach:
+        "There's no scheduled coach service to LCY — the DLR makes it redundant. National Express runs to other London airports if you're connecting.",
+      taxiAndRideshare:
+        "Black cabs and Uber both serve LCY — there's a designated drop-off zone outside Arrivals. A Black Cab to The City is roughly £35-45 and takes 25-40 minutes depending on traffic; to the West End allow £55-70 and an hour.",
+      parking:
+        "Short-stay parking is directly under the terminal — convenient but expensive. Long-stay is across the road, with a covered walkway. Both are operated by APCOA.",
+      loungesInfo: "The City Lounge, post-security, is the main premium space — pay-on-the-day access from around £40, complimentary for Priority Pass, business-class and certain credit card holders.",
+      familyInfo: "Quiet area near gate 24, baby-change facilities in every washroom block, free pushchair storage at check-in. Pre-security WHSmith stocks formula and basic baby supplies.",
+      assistInfo: "Special assistance via OCS — book at least 48 hours in advance through your airline. Dedicated assistance reception just inside Departures.",
+      hotelsInfo: "Travelodge London City Airport is a 4-minute walk from the terminal — the closest hotel by far. For more choice, the ExCeL hotels (Aloft, Crowne Plaza, Sunborn) are 2 DLR stops away.",
+      tips: "The DLR runs from 05:30 to about 00:30 — if you're on an early-bird departure, check the first train carefully. The airport opens its doors at 04:30 most days, which is earlier than the first train.",
+      officialWebsite: 'https://www.londoncityairport.com',
+    },
+
+    dlm: {
+      name: 'Dalaman Airport',
+      iata: 'DLM',
+      role: 'destination',
+      type: 'International',
+      cityServed: 'Dalaman',
+      country: 'Turkey',
+      tagline: "Turkey's south-west coast — gateway to Ölüdeniz, Fethiye, Dalyan and the Turquoise Coast.",
+      overview:
+        "Dalaman serves the Turquoise Coast — the stretch of south-western Turkey running from Marmaris to Kalkan. It's the main UK arrival point for Ölüdeniz, Hisarönü, Fethiye, Dalyan, Sarıgerme and the Göcek peninsula.\n\n" +
+        "Two terminals — international and domestic — sit side by side. International (Terminal 1) handles all UK arrivals. It's a single-storey modern building with a calm, beach-town pace: customs takes minutes rather than hours, baggage halls are wide, and you're outside in the sunshine within 20 minutes of stepping off the plane.",
+      overviewHeading: 'Your gateway to the Turquoise Coast',
+      lat: 36.7131,
+      lng: 28.7925,
+      distanceToCity: '6 km to Dalaman town',
+      flightTimeFromUK: '~4h 5m',
+      flightTimeNote: 'From Manchester or London Gatwick',
+      terminalsCount: 2,
+      terminalsAndAirlines: "Two terminals: International (T1) for all UK and European arrivals, Domestic (T2) for Turkish Airlines and Pegasus internal flights. Main UK carriers: TUI, Jet2, easyJet, Ryanair (seasonal), Corendon.",
+      keyAirlines: 'TUI, Jet2, easyJet, Ryanair',
+      keyAirlinesNote: 'Plus Corendon and seasonal charters',
+      checkInSummary: 'Arrive 2.5 hours early',
+      checkInDetail: 'Charter flights especially — queues build quickly in peak season',
+      recommendedArrival: "Arrive 2.5 hours before your flight, particularly Saturday changeover days when the airport handles peak charter traffic. For early-morning UK departures, check coach transfer times the night before — most resort coaches leave 3-3.5 hours before departure.",
+      hasLounges: true,
+      hasFastTrack: false,
+      transferInfo:
+        "Almost all UK package holidays include a resort transfer by coach — your TUI, Jet2 or operator rep meets you in arrivals and walks you to a marked coach. Coaches run direct to the major resorts: Ölüdeniz (60 min), Fethiye (45 min), Sarıgerme (30 min), Dalyan (35 min), Marmaris (90 min).\n\n" +
+        "If you're not on a package, pre-book a private transfer through the operator's website — works out cheaper than airport taxis for groups of three or more.",
+      carHireInfo:
+        "Hertz, Avis, Sixt, Europcar and several Turkish operators have desks in arrivals — book online in advance for the best rates. Pick-up is a 2-minute walk from the terminal to the car-hire compound.\n\n" +
+        "Driving in Turkey requires a UK licence plus IDP (recommended). Roads to Ölüdeniz and Kalkan are well surfaced but mountainous — allow more time than the map suggests.",
+      taxiInfo:
+        "Yellow taxis wait outside Arrivals. Fixed-price posters are displayed inside the terminal — typical rates: Ölüdeniz €60-70, Fethiye €45-55, Marmaris €100-120. Confirm the fare before getting in.",
+      coachInfo:
+        "HAVAŞ runs a scheduled bus service from Dalaman to Fethiye, Marmaris and Bodrum — useful if you're independent travel rather than package. Tickets buy on board, departures roughly hourly.",
+      loungesInfo: "DHMI Primeclass Lounge in International Departures — pay-on-the-day around €30, complimentary for Priority Pass and most business-class fares. Decent food spread, quiet workspace.",
+      familyInfo: "Baby-change in all washroom blocks, designated family seating in arrivals. WHSmith equivalent stocks basic baby supplies. Pushchairs delivered to plane-side on most carriers.",
+      assistInfo: "Special assistance via the airport's own service — book through your airline 48 hours in advance. Dedicated assistance desks at check-in and arrivals.",
+      hotelsInfo: "The Hilton Dalaman Sarıgerme Resort is a 25-minute drive — the most popular airport-area hotel for layovers. For closer options, several small hotels in Dalaman town are 10 minutes by taxi.",
+      tips: "If you're flying with TUI or Jet2, your coach transfer might leave well before your flight check-in time — they batch passengers heading to the same resort. Don't panic when the rep tells you to be at the meeting point 3.5 hours before departure: that's the coach time, not the check-in time.",
+      officialWebsite: 'https://www.dalamanairport.aero',
+      resorts: [
+        { name: 'Ölüdeniz',  url: '#', transferMinutes: 60, lat: 36.5500, lng: 29.1175 },
+        { name: 'Fethiye',   url: '#', transferMinutes: 45, lat: 36.6519, lng: 29.1238 },
+        { name: 'Dalyan',    url: '#', transferMinutes: 35, lat: 36.8268, lng: 28.6448 },
+        { name: 'Marmaris',  url: '#', transferMinutes: 90, lat: 36.8550, lng: 28.2745 },
+        { name: 'Sarıgerme', url: '#', transferMinutes: 30, lat: 36.6907, lng: 28.6700 },
+      ],
+    },
+
+    man: {
+      name: 'Manchester Airport',
+      iata: 'MAN',
+      role: 'both',
+      type: 'International Hub',
+      cityServed: 'Manchester',
+      country: 'United Kingdom',
+      tagline: "The North's gateway — both a UK origin for 200+ destinations and a key arrival hub for international visitors.",
+      overview:
+        "Manchester is the UK's third-busiest airport and the largest outside London, handling 30+ million passengers a year. It's a true dual-role airport: huge UK-origin traffic flying out to Europe, the Middle East and long-haul, plus inbound visitors arriving from across the world to explore the North and beyond.\n\n" +
+        "Three terminals (T1 closing in stages as the £1bn transformation completes), excellent rail and road links, and the only UK airport outside London with two parallel runways.",
+      overviewHeading: 'The UK\'s third airport — and a true dual-role hub',
+      lat: 53.3537,
+      lng: -2.2750,
+      cityLat: 53.4808,
+      cityLng: -2.2426,
+      distanceToCity: '10 miles south of Manchester city centre',
+      driveTimeSummary: '20-30 min by train · 25-40 min by car',
+      flightTimeFromUK: 'Domestic & origin',
+      terminalsCount: 3,
+      terminalsAndAirlines: "Three terminals serving 70+ airlines. T1: long-haul (Emirates, Singapore Airlines, Qatar, Etihad, Cathay Pacific). T2: newly renovated, Jet2, TUI and several European flag carriers. T3: easyJet, Ryanair, Loganair, KLM, Aer Lingus.",
+      keyAirlines: 'Emirates, Jet2, TUI, easyJet, Ryanair',
+      checkInSummary: 'Arrive 3 hours early',
+      checkInDetail: 'Peak times (Sat AM, Fri PM) — security can take an hour',
+      recommendedArrival: "Three hours before international departures, two hours for European. Manchester security has been notably busy in peak season — check the live wait-time on the airport's website before leaving home.",
+      hasLounges: true,
+      hasFastTrack: true,
+      gettingThereByTrain:
+        "Direct trains from Manchester Piccadilly (20 min), Liverpool (1h 20), Birmingham (1h 30), and most major Northern cities. The station is at the airport — covered walkway to all three terminals.",
+      gettingThereByCar:
+        "M56 junction 5 directly into the airport. The M60 ring road connects to all motorway routes. Drop-off and parking are well-signposted from junction 5.",
+      taxiAndRideshare: "All major rideshares plus the airport's own taxi service. To central Manchester: £25-35 by Uber, £35-45 by black cab.",
+      parking: "Short-stay (under terminals), Multi-Storey, JetParks (long-stay with shuttle), and Meet & Greet. Pre-book online — gate prices are double.",
+      transferInfo: "TransPennine Express runs direct from the airport to Manchester city centre, then onward connections to the Lakes, Yorkshire, Leeds, and Scotland.",
+      carHireInfo: "All major rental brands at the on-site car-hire village — covered walkway from arrivals, no shuttle needed.",
+      taxiInfo: "Official rank outside each terminal. To Manchester city centre allow £30; Liverpool £80; Leeds £100.",
+      loungesInfo: "Escape Lounge (all terminals), 1903 Lounge in T1, Aspire in T3. Priority Pass and pay-on-the-day options across the board.",
+      familyInfo: "Family lanes through security, baby-change in every washroom block, kids' play areas in T2 and T3. Reserved family seating at most gates.",
+      assistInfo: "Special assistance is operated in-house — book via your airline. Manchester is well-regarded for accessibility, with quiet rooms in each terminal.",
+      hotelsInfo: "Radisson Blu, Crowne Plaza, Hilton Garden Inn and the Bewley's all sit on the airport campus — most are a covered walkway from a terminal.",
+      tips: "Don't underestimate how long T1 security can take in summer — it's by some margin the slowest of the three. If you have a choice, fly from T2 or T3 in peak season.",
+      officialWebsite: 'https://www.manchesterairport.co.uk',
+      resorts: [
+        { name: 'Manchester city centre', url: '#', transferMinutes: 25, lat: 53.4808, lng: -2.2426 },
+        { name: 'Liverpool',              url: '#', transferMinutes: 80, lat: 53.4084, lng: -2.9916 },
+      ],
+    },
+  };
+
+  const TITLES = {
+    lcy: { page: 'London City Airport', crumb: 'London City Airport' },
+    dlm: { page: 'Dalaman Airport',     crumb: 'Dalaman Airport' },
+    man: { page: 'Manchester Airport',  crumb: 'Manchester Airport' },
+  };
+
+  function loadAirport(key) {
+    const data = DEMOS[key];
+    if (!data) return;
+
+    // Update page chrome
+    document.getElementById('page-title').textContent = TITLES[key].page;
+    document.getElementById('crumb-current').textContent = TITLES[key].crumb;
+
+    // Update segment active state
+    document.querySelectorAll('.demo-segment button').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-airport') === key);
+    });
+
+    // Re-mount widget with new data. We destroy the existing instance
+    // first so the Shadow DOM is fully reset.
+    const mount = document.getElementById('widget-mount');
+    if (mount.__tgInstance && typeof mount.__tgInstance.destroy === 'function') {
+      mount.__tgInstance.destroy();
+    }
+    mount.removeAttribute('data-tg-initialised');
+    while (mount.firstChild) mount.removeChild(mount.firstChild);
+
+    // Fresh element — keep the data-tg-widget attribute, drop the inline
+    // config attribute (we'll pass airportData via the constructor instead)
+    const fresh = mount.cloneNode(false);
+    fresh.removeAttribute('data-tg-initialised');
+    mount.parentNode.replaceChild(fresh, mount);
+    fresh.id = 'widget-mount';
+
+    if (window.TGAirportWidget) {
+      fresh.__tgInstance = new window.TGAirportWidget(fresh, {
+        airportData: data,
+        theme: 'light',
+        showMap: true,
+      });
+    }
+  }
+
+  // Wire up segment buttons
+  document.querySelectorAll('.demo-segment button').forEach(btn => {
+    btn.addEventListener('click', () => loadAirport(btn.getAttribute('data-airport')));
+  });
+
+  // Initial load — wait for widget JS to finish parsing if needed
+  function init() {
+    if (window.TGAirportWidget) loadAirport('lcy');
+    else setTimeout(init, 40);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+</body>
+</html>
