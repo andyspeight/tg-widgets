@@ -364,6 +364,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'airport',
+    name: 'Airport Spotlight',
+    airtableType: 'Airport Spotlight',
+    description: 'Showcase a UK origin airport or an overseas destination airport. Role-aware single widget with hero, terminals, transfer info, map and CTA. Driven by the Destination Content database — updates automatically as content is refreshed.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M17.8 19.2 16 11l3.5-3.5c.5-.5 1-2.5.5-3-1-.5-3 0-3.5.5L13 8.5 4.8 6.5c-.5-.1-.9.2-.9.7v.4c0 .3.2.6.5.8L8 10.5 6 14H3l-.5 1.5L5 17l1.5 2.5L8 19v-3l3.5-2 2.8 3.5c.2.3.5.5.8.5h.4c.5 0 .8-.4.7-.9z"/>'},
+    color: '#00B4D8',
+    editorUrl: '/editor-airport',
+    demoUrl: '/demo-airport',
+    widgetTag: 'airport',
+    scriptFile: 'widget-airport.js',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'weather',
     name: 'Weather',
     airtableType: 'Weather',
@@ -1080,6 +1095,69 @@ function loadMiniPreview(w) {
         highlights:[],bestForTags:[],events:[],
       },
     });
+  }
+
+  if (w.id === 'airport') {
+    container.innerHTML = `
+      <div style="
+        width: 700px;
+        height: 340px;
+        background: #FFFFFF;
+        border-radius: 16px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+        box-sizing: border-box;
+      ">
+        <div style="
+          height: 150px;
+          padding: 16px 22px;
+          background:
+            linear-gradient(135deg, rgba(27,43,91,0.88) 0%, rgba(0,180,216,0.55) 100%),
+            url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900&q=80') center/cover;
+          color: #FFFFFF;
+          display: flex; flex-direction: column; justify-content: flex-end;
+        ">
+          <div style="font-size: 11px; letter-spacing: 0.12em; opacity: 0.85; margin-bottom: 6px; text-transform: uppercase; font-weight: 600;">DALAMAN · TURKEY</div>
+          <div style="display: flex; align-items: flex-end; gap: 14px;">
+            <div style="font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1;">Dalaman Airport</div>
+            <div style="background: #FFFFFF; color: #1B2B5B; padding: 4px 10px; border-radius: 7px; font-size: 14px; font-weight: 800; font-family: ui-monospace, monospace; letter-spacing: 0.05em;">DLM</div>
+          </div>
+          <div style="font-size: 13px; opacity: 0.92; margin-top: 6px; font-style: italic;">Your gateway to the Turquoise Coast</div>
+        </div>
+
+        <div style="background: #1B2B5B; color: #FFFFFF; padding: 10px 22px; display: flex; gap: 8px; align-items: center; font-size: 11px;">
+          <span style="opacity: 0.65; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">Serves</span>
+          <span style="background: rgba(255,255,255,0.14); padding: 3px 10px; border-radius: 999px; font-weight: 500;">Ölüdeniz</span>
+          <span style="background: rgba(255,255,255,0.14); padding: 3px 10px; border-radius: 999px; font-weight: 500;">Fethiye</span>
+          <span style="background: ${w.color}; padding: 3px 10px; border-radius: 999px; font-weight: 600;">Dalyan</span>
+          <span style="background: rgba(255,255,255,0.14); padding: 3px 10px; border-radius: 999px; font-weight: 500;">Marmaris</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); background: #F8FAFC; flex: 1;">
+          <div style="padding: 14px 16px; border-right: 1px solid #E2E8F0;">
+            <div style="font-size: 9px; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px;">Terminals</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">2</div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px;">Domestic + Intl</div>
+          </div>
+          <div style="padding: 14px 16px; border-right: 1px solid #E2E8F0;">
+            <div style="font-size: 9px; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px;">Flight from UK</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">~4h 5m</div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px;">Direct from MAN/LGW</div>
+          </div>
+          <div style="padding: 14px 16px; border-right: 1px solid #E2E8F0;">
+            <div style="font-size: 9px; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px;">Check-in</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">2.5 hrs</div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px;">Before departure</div>
+          </div>
+          <div style="padding: 14px 16px;">
+            <div style="font-size: 9px; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px;">Key Airlines</div>
+            <div style="font-size: 13px; font-weight: 700; color: #0F172A; letter-spacing: -0.01em;">Jet2 · TUI · easyJet</div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px;">+ Corendon, Ryanair</div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   if (w.id === 'weather' && window.TGWeatherWidget) {
@@ -1908,6 +1986,7 @@ render();
 <script src="/widget-faq.js"></script>
 <script src="/widget-testimonials.js"></script>
 <script src="/widget-spotlight.js"></script>
+<script src="/widget-airport.js"></script>
 <script src="/widget-weather.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
