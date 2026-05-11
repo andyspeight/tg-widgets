@@ -348,6 +348,9 @@
   background: var(--tga-card);
   border-bottom: 1px solid var(--tga-border);
 }
+.tga-facts[data-count="1"] { grid-template-columns: 1fr; }
+.tga-facts[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+.tga-facts[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
 .tga-fact {
   padding: 24px 28px;
   border-right: 1px solid var(--tga-border);
@@ -847,7 +850,7 @@
       }
       const sliced = tiles.slice(0, 4);
       if (!sliced.length) return '';
-      return '<div class="tga-facts">' + sliced.join('') + '</div>';
+      return '<div class="tga-facts" data-count="' + sliced.length + '">' + sliced.join('') + '</div>';
     }
 
     _fact(ico, label, value, sub) {
