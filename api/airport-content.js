@@ -19,9 +19,11 @@
  *   ?recordId=recXXXXX         → direct fetch by Airport record id (editor preview)
  *
  * Response shape: see Airport interface emitted by buildAirportPayload below.
+ *
+ * Module system: ESM. Originally drafted as CommonJS; Vercel's ESM-default
+ * Node runtime silently dropped the function from the manifest, returning
+ * 404 NOT_FOUND for every call. Same fix as airport-search.js.
  */
-
-'use strict';
 
 // --- Environment ---------------------------------------------------
 const AIRTABLE_KEY = process.env.AIRTABLE_KEY;
@@ -397,7 +399,7 @@ async function findAirportFromWidget(widgetId) {
 }
 
 // --- Main handler ----------------------------------------------------
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Method check
   if (req.method !== 'GET' && req.method !== 'OPTIONS') {
     res.setHeader('Allow', 'GET, OPTIONS');
@@ -454,4 +456,4 @@ module.exports = async function handler(req, res) {
     console.error('[api/airport-content] Error:', err && err.stack ? err.stack : err);
     return res.status(500).json({ error: 'Internal server error' });
   }
-};
+}
