@@ -4,7 +4,9 @@
  * Editor-only search endpoint for the Airport Spotlight picker.
  * Returns shallow summaries of airports matching a free-text query.
  *
- * Authenticated — uses the shared session-token utility from _auth.js.
+ * Public — no auth required. The search hits the same Airports table that
+ * /api/airport-content reads publicly; gating only this endpoint would
+ * achieve nothing. IP-based rate limit handles abuse.
  *
  * Query: GET /api/airport-search?q=dalaman
  * Response 200:
@@ -17,7 +19,7 @@
  * is ESM-by-default and require() of an ESM sibling threw on first call.
  */
 
-import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
+import { sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 
 const AIRTABLE_KEY = process.env.AIRTABLE_KEY;
 const DESTINATION_BASE_ID = process.env.DESTINATION_CONTENT_BASE_ID || 'appuZdlMJ7HKUt6qS';
@@ -87,13 +89,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Auth — use the same helper widget-config.js uses
-  const auth = requireAuth(req);
-  if (auth.error) return res.status(auth.status).json({ error: auth.error });
-  const user = auth.user;
-
-  // Rate limit (per-user, same preset as widget writes)
-  if (!applyRateLimit(res, `airport-search:${user.email}`, RATE_LIMITS.widgetWrite)) return;
+  // No auth required — this endpoint reads from the public Airports table
+  // and returns content that already gets baked into a public widget on a
+  // public site. Matches the openness of /api/airport-content.
+  //
+  // Earlier draft required auth, which broke the editor (it calls this
+  // without a bearer token), and added no real protection — the same data
+  // is reachable via the content endpoint by IATA enumeration anyway.
+  // The IP-based rate limit below is the actual abuse control.
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+             req.headers['x-real-ip'] || 'unknown';
+  if (!applyRateLimit(res, `airport-search:${ip}`, RATE_LIMITS.widgetWrite)) return;
 
   const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
   if (!q || q.length < 2) return res.status(200).json({ results: [] });
