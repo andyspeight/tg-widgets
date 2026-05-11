@@ -1,20 +1,23 @@
 /**
- * /api/airport-search.js
+ * /api/airport-search.js  (ESM)
  * ----------------------------------------------------------------
  * Editor-only search endpoint for the Airport Spotlight picker.
  * Returns shallow summaries of airports matching a free-text query.
  *
  * Authenticated — uses the shared session-token utility from _auth.js.
- * (Mirrors the destination-completeness endpoint pattern.)
  *
  * Query: GET /api/airport-search?q=dalaman
  * Response 200:
  *   { results: [
  *     { recordId, iata, name, cityServed, country, role, status }
  *   ] }
+ *
+ * Module system: ESM. Matches widget-config.js. Earlier CommonJS draft
+ * crashed with FUNCTION_INVOCATION_FAILED on Vercel because the runtime
+ * is ESM-by-default and require() of an ESM sibling threw on first call.
  */
 
-'use strict';
+import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 
 const AIRTABLE_KEY = process.env.AIRTABLE_KEY;
 const DESTINATION_BASE_ID = process.env.DESTINATION_CONTENT_BASE_ID || 'appuZdlMJ7HKUt6qS';
@@ -31,37 +34,12 @@ const F = {
   role:       'fldUSTC6kdgXNgKfI',
 };
 
-// In-memory rate limiter — 30/min per IP
-const RATE = { window: 60_000, max: 30 };
-const _buckets = new Map();
-function rateLimited(ip) {
-  const now = Date.now();
-  const arr = (_buckets.get(ip) || []).filter(t => now - t < RATE.window);
-  arr.push(now);
-  _buckets.set(ip, arr);
-  return arr.length > RATE.max;
-}
-
-function sanitiseForFormula(s) {
-  return String(s == null ? '' : s).replace(/'/g, "\\'");
-}
-
-function txt(v) {
-  if (v == null) return '';
-  return String(v).replace(/<[^>]*>/g, '').trim();
-}
-
-function selName(v) {
-  if (!v) return '';
-  if (typeof v === 'string') return v;
-  if (typeof v === 'object' && v.name) return String(v.name);
-  return '';
-}
-
+// --- Airtable HTTP helper ------------------------------------------
+// Build the query string manually so array values become repeated keys.
+// Airtable expects fields[]=fldA&fields[]=fldB, not fields[]=fldA,fldB
+// (which is what URLSearchParams produces for arrays).
 async function airtableGet(path, params) {
   if (!AIRTABLE_KEY) throw new Error('AIRTABLE_KEY env missing');
-  // Build query string manually so array values become repeated keys
-  // (Airtable expects fields[]=fldA&fields[]=fldB, not fields[]=fldA,fldB).
   let qs = '';
   if (params) {
     const parts = [];
@@ -85,49 +63,35 @@ async function airtableGet(path, params) {
   return res.json();
 }
 
-/**
- * Verify session token via the shared auth helper.
- * Falls back to a tolerant check if _auth.js isn't present (dev environment).
- */
-function verifySession(req) {
-  // Try the shared helper first
-  try {
-    const auth = require('./_auth.js');
-    if (auth && typeof auth.verifyRequest === 'function') {
-      return auth.verifyRequest(req);
-    }
-  } catch (e) { /* helper not present; fall through */ }
-
-  // Minimal fallback — require any cookie or Authorization header so this
-  // endpoint isn't completely open. Real verification happens in widget-list.
-  const cookie = req.headers.cookie || '';
-  const hasSession = /tg_session=/.test(cookie) || !!req.headers.authorization;
-  return hasSession ? { ok: true } : null;
+function txt(v) {
+  if (v == null) return '';
+  return String(v).replace(/<[^>]*>/g, '').trim();
 }
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'GET' && req.method !== 'OPTIONS') {
+function selName(v) {
+  if (!v) return '';
+  if (typeof v === 'string') return v;
+  if (typeof v === 'object' && v.name) return String(v.name);
+  return '';
+}
+
+export default async function handler(req, res) {
+  // CORS (delegated to the shared helper used by every other API in the project)
+  setCors(res);
+  if (req.method === 'OPTIONS') return res.status(204).end();
+
+  if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET, OPTIONS');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const origin = req.headers.origin || '*';
-  res.setHeader('Access-Control-Allow-Origin', origin === '*' ? '*' : origin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // Auth — use the same helper widget-config.js uses
+  const auth = requireAuth(req);
+  if (auth.error) return res.status(auth.status).json({ error: auth.error });
+  const user = auth.user;
 
-  if (req.method === 'OPTIONS') return res.status(204).end();
-
-  // Auth
-  const session = verifySession(req);
-  if (!session) return res.status(401).json({ error: 'Authentication required' });
-
-  // Rate limit
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
-             req.headers['x-real-ip'] || 'unknown';
-  if (rateLimited(ip)) return res.status(429).json({ error: 'Rate limit exceeded' });
+  // Rate limit (per-user, same preset as widget writes)
+  if (!applyRateLimit(res, `airport-search:${user.email}`, RATE_LIMITS.widgetWrite)) return;
 
   const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
   if (!q || q.length < 2) return res.status(200).json({ results: [] });
@@ -174,4 +138,4 @@ module.exports = async function handler(req, res) {
     console.error('[api/airport-search] Error:', err && err.stack ? err.stack : err);
     return res.status(500).json({ error: 'Internal server error' });
   }
-};
+}
