@@ -997,6 +997,20 @@
     _initMap(d, isDest) {
       const host = this.shadow.querySelector('[data-tga-map]');
       if (!host) return;
+      // Leaflet's stylesheet is loaded into document.head by loadLeaflet(),
+      // but Shadow DOM is style-encapsulated so head styles don't apply to
+      // elements inside this.shadow. Without this, the tile layer renders
+      // as a stack of broken <img> tags and zoom controls are unstyled.
+      // Add the same link inside the shadow root (idempotent).
+      if (!this.shadow.querySelector('link[data-tga-leaflet-shadow]')) {
+        const shadowLink = document.createElement('link');
+        shadowLink.rel = 'stylesheet';
+        shadowLink.href = LEAFLET_CSS;
+        shadowLink.integrity = LEAFLET_CSS_SRI;
+        shadowLink.crossOrigin = '';
+        shadowLink.setAttribute('data-tga-leaflet-shadow', '1');
+        this.shadow.appendChild(shadowLink);
+      }
       loadLeaflet().then(L => {
         const airportLL = safeLatLng(d.lat, d.lng);
         if (!airportLL) return;
