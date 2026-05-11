@@ -38,21 +38,23 @@ const F = {
 // Build the query string manually so array values become repeated keys.
 // Airtable expects fields[]=fldA&fields[]=fldB, not fields[]=fldA,fldB
 // (which is what URLSearchParams produces for arrays).
+// Also force returnFieldsByFieldId=true so the response is keyed by field
+// ID — the lookups below use the F.* catalogue (field IDs), but the default
+// REST response keys by field NAME, which would silently return undefined
+// for every value.
 async function airtableGet(path, params) {
   if (!AIRTABLE_KEY) throw new Error('AIRTABLE_KEY env missing');
-  let qs = '';
-  if (params) {
-    const parts = [];
-    for (const k of Object.keys(params)) {
-      const v = params[k];
-      if (Array.isArray(v)) {
-        for (const item of v) parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(String(item)));
-      } else {
-        parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(String(v)));
-      }
+  const allParams = Object.assign({ returnFieldsByFieldId: 'true' }, params || {});
+  const parts = [];
+  for (const k of Object.keys(allParams)) {
+    const v = allParams[k];
+    if (Array.isArray(v)) {
+      for (const item of v) parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(String(item)));
+    } else {
+      parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(String(v)));
     }
-    qs = parts.length ? '?' + parts.join('&') : '';
   }
+  const qs = parts.length ? '?' + parts.join('&') : '';
   const res = await fetch(AIRTABLE_API + '/' + DESTINATION_BASE_ID + '/' + path + qs, {
     headers: { 'Authorization': 'Bearer ' + AIRTABLE_KEY },
   });
