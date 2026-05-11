@@ -107,8 +107,13 @@
   }
 
   function safeLatLng(lat, lng) {
+    // Reject null/undefined/empty explicitly — Number(null) is 0, which is
+    // finite and in-range, so without this check we'd silently render a pin
+    // at (0, 0) in the Gulf of Guinea whenever cityLat/cityLng are missing.
+    if (lat == null || lng == null || lat === '' || lng === '') return null;
     const a = Number(lat), b = Number(lng);
     if (!isFinite(a) || !isFinite(b)) return null;
+    if (a === 0 && b === 0) return null;
     if (a < -90 || a > 90 || b < -180 || b > 180) return null;
     return [a, b];
   }
@@ -119,6 +124,18 @@
     if (n < 60) return n + ' min';
     const h = Math.floor(n / 60), m = n % 60;
     return m ? h + 'h ' + m + 'm' : h + 'h';
+  }
+
+  // Pull a tile-sized headline out of multilineText: first sentence if short
+  // enough, otherwise hard-truncate to the char limit + ellipsis. Used for
+  // facts grid where each cell only has ~25% width.
+  function firstSentence(text, max) {
+    const s = String(text || '').trim();
+    if (!s) return '';
+    const dot = s.search(/[.!?](\s|$)/);
+    const candidate = (dot > 0 && dot < (max || 80)) ? s.slice(0, dot + 1) : s;
+    if (candidate.length <= (max || 80)) return candidate;
+    return s.slice(0, (max || 80) - 1).trimEnd() + '…';
   }
 
   function fmtCoords(lat, lng) {
@@ -821,7 +838,12 @@
       if ((role === 'destination' || role === 'both') && d.flightTimeFromUK) {
         tiles.push(this._fact('speed', 'Flight from UK', d.flightTimeFromUK, d.flightTimeNote));
       } else if (d.distanceToCity) {
-        tiles.push(this._fact('pin', 'From ' + (d.cityServed || 'city'), d.distanceToCity, d.driveTimeSummary));
+        // distanceToCity is multilineText in Airtable so editors sometimes
+        // paste a paragraph in there. Tiles only have ~25% width in the 4-up
+        // grid — take the first sentence (or first ~60 chars) for the value,
+        // leave the rest available to the longer "Getting there" tabs.
+        const short = firstSentence(d.distanceToCity, 60);
+        tiles.push(this._fact('pin', 'From ' + (d.cityServed || 'city'), short, d.driveTimeSummary));
       }
       const sliced = tiles.slice(0, 4);
       if (!sliced.length) return '';
