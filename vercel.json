@@ -9,10 +9,19 @@
     "api/booking-email.js": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "api/airport-content.js": {
+      "memory": 256,
+      "maxDuration": 10
+    },
+    "api/airport-search.js": {
+      "memory": 256,
+      "maxDuration": 10
     }
   },
   "rewrites": [
     { "source": "/demo",              "destination": "/demo.html" },
+    { "source": "/demo-airport",      "destination": "/demo-airport.html" },
     { "source": "/demo-reviews",      "destination": "/demo-reviews.html" },
     { "source": "/demo-faq",          "destination": "/demo-faq.html" },
     { "source": "/demo-testimonials", "destination": "/demo-testimonials.html" },
@@ -29,9 +38,10 @@
     { "source": "/demo-share",        "destination": "/demo-share.html" },
     { "source": "/demo-whatsapp",     "destination": "/demo-whatsapp.html" },
     { "source": "/demo-hours",        "destination": "/demo-hours.html" },
-    { "source": "/demo-newsletter",    "destination": "/demo-newsletter.html" },
+    { "source": "/demo-newsletter",   "destination": "/demo-newsletter.html" },
     { "source": "/wow-showcase",      "destination": "/wow-showcase.html" },
     { "source": "/editor",              "destination": "/editor.html" },
+    { "source": "/editor-airport",      "destination": "/editor-airport.html" },
     { "source": "/editor-reviews",      "destination": "/editor-reviews.html" },
     { "source": "/editor-faq",          "destination": "/editor-faq.html" },
     { "source": "/editor-testimonials", "destination": "/editor-testimonials.html" },
@@ -48,7 +58,7 @@
     { "source": "/editor-share",        "destination": "/editor-share.html" },
     { "source": "/editor-whatsapp",     "destination": "/editor-whatsapp.html" },
     { "source": "/editor-hours",        "destination": "/editor-hours.html" },
-    { "source": "/editor-newsletter",    "destination": "/editor-newsletter.html" },
+    { "source": "/editor-newsletter",   "destination": "/editor-newsletter.html" },
     { "source": "/editor-test",         "destination": "/editor-test.html" },
     { "source": "/inbox-enquiry",       "destination": "/inbox-enquiry.html" },
     { "source": "/signin",              "destination": "/signin.html" },
@@ -59,6 +69,14 @@
   "headers": [
     {
       "source": "/widget.js",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/widget-airport.js",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
