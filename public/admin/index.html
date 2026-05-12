@@ -113,6 +113,19 @@
       transition: all 150ms ease;
     }
     .theme-toggle:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .signout-btn {
+      height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-md);
+      border: 1px solid var(--tg-border);
+      background: var(--tg-bg-primary);
+      cursor: pointer;
+      display: flex; align-items: center; gap: var(--space-2);
+      color: var(--tg-text-secondary); font-size: 13px; font-weight: 500;
+      font-family: inherit;
+      transition: all 150ms ease;
+    }
+    .signout-btn:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); border-color: var(--tg-text-tertiary); }
+    .signout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .signout-btn svg { flex-shrink: 0; }
 
     .tabs {
       background: var(--tg-bg-primary);
@@ -253,6 +266,12 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
           </svg>
         </button>
+        <button class="signout-btn" id="signout-btn" type="button" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign out
+        </button>
       </div>
     </header>
 
@@ -385,6 +404,29 @@
       });
     }
 
+    function wireSignout() {
+      const btn = document.getElementById('signout-btn');
+      if (!btn || btn.dataset.wired === '1') return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', async () => {
+        if (!confirm('Sign out of Travelgenix Control?')) return;
+        btn.disabled = true;
+        try {
+          await fetch('/api/auth/signout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          });
+        } catch (err) {
+          // Best effort — even if the endpoint fails, the cookie is cleared client-side
+          // by the server response, OR the cookie expires server-side eventually. Redirect anyway.
+          console.error('Sign out request failed:', err);
+        }
+        // Redirect to sign-in regardless of API response
+        location.href = '/signin.html?next=' + encodeURIComponent('/admin/');
+      });
+    }
+
     (async function init() {
       bindTheme();
       const auth = await checkAuth();
@@ -392,6 +434,8 @@
       document.getElementById('user-email').textContent = auth.user.email || '';
       document.getElementById('user-role').textContent = auth.role;
       document.getElementById('user-chip').hidden = false;
+      document.getElementById('signout-btn').hidden = false;
+      wireSignout();
       bindTabs();
       showState('app');
       const initial = (location.hash || '').replace('#', '') || 'clients';
