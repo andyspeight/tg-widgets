@@ -222,7 +222,7 @@
     </header>
 
     <div class="toolbar">
-      <input type="search" class="search" id="search" placeholder="Search by name, email, or code…" autocomplete="off">
+      <input type="search" class="search" id="search" placeholder="Search by name or email…" autocomplete="off">
       <span class="stat" id="stat-total">Loading…</span>
     </div>
 
@@ -270,7 +270,7 @@
                 <button class="cred-copy" data-copy="succ-email">Copy</button>
               </div>
               <div class="cred-row">
-                <span class="cred-label">Code</span>
+                <span class="cred-label">Password</span>
                 <span class="cred-value" id="succ-code"></span>
                 <button class="cred-copy" data-copy="succ-code">Copy</button>
               </div>
@@ -297,25 +297,15 @@
             </div>
           </div>
 
-          <div class="field-row">
-            <div class="field">
-              <label class="field-label" for="f-role">Role on Widget Suite</label>
-              <select class="select" id="f-role">
-                <option value="owner">Owner (full admin, same as you)</option>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
-              </select>
-              <span class="field-hint">This role applies across all granted products.</span>
-            </div>
-            <div class="field">
-              <label class="field-label" for="f-plan">Plan</label>
-              <select class="select" id="f-plan">
-                <option value="Bespoke" selected>Bespoke (full access)</option>
-                <option value="Ignite">Ignite</option>
-                <option value="Boost">Boost</option>
-                <option value="Spark">Spark</option>
-              </select>
-            </div>
+          <div class="field">
+            <label class="field-label" for="f-role">Role across granted products</label>
+            <select class="select" id="f-role">
+              <option value="owner">Owner (full admin, same as you)</option>
+              <option value="admin">Admin</option>
+              <option value="agent">Agent</option>
+              <option value="viewer">Viewer</option>
+            </select>
+            <span class="field-hint">This role applies to every product you grant access to.</span>
           </div>
 
           <div class="field">
@@ -404,7 +394,7 @@
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
   function roleClass(role) { return ({ owner: 'pill--owner', admin: 'pill--admin' }[role]) || 'pill--user'; }
-  function statusClass(s) { return s === 'Suspended' ? 'pill--suspended' : 'pill--active'; }
+  function statusClass(s) { return s === 'suspended' ? 'pill--suspended' : 'pill--active'; }
 
   async function api(url, opts = {}) {
     const res = await fetch(url, {
@@ -443,8 +433,7 @@
     const q = (searchEl.value || '').trim().toLowerCase();
     filtered = !q ? users.slice() : users.filter((u) =>
       (u.fullName || '').toLowerCase().includes(q) ||
-      (u.email || '').toLowerCase().includes(q) ||
-      (u.clientCode || '').toLowerCase().includes(q)
+      (u.email || '').toLowerCase().includes(q)
     );
     renderRows();
   }
@@ -474,16 +463,16 @@
 
       return `<tr data-id="${esc(u.recordId)}">
         <td>
-          <div class="cell-name">${esc(u.fullName)}</div>
-          <div class="cell-meta">${esc(u.clientCode || '—')}</div>
+          <div class="cell-name">${esc(u.fullName)}${u.isMe ? ' <span class="pill pill--owner" style="font-size:10px;margin-left:6px;">You</span>' : ''}</div>
+          <div class="cell-meta">${esc(u.role || 'member')}</div>
         </td>
         <td><div class="cell-meta" style="color: var(--tg-text-primary); font-size: 14px;">${esc(u.email)}</div></td>
         <td><div class="pill-row">${products}${more || '<span class="pill pill--user">None</span>'}</div></td>
         <td><span class="pill ${statusClass(u.status)}">${esc(u.status)}</span></td>
         <td class="cell-actions">
-          ${u.status === 'Active'
+          ${u.isMe ? '' : (u.status === 'active'
             ? `<button class="btn btn--sm" data-act="suspend" data-id="${esc(u.recordId)}">Suspend</button>`
-            : `<button class="btn btn--sm" data-act="reactivate" data-id="${esc(u.recordId)}">Reactivate</button>`}
+            : `<button class="btn btn--sm" data-act="reactivate" data-id="${esc(u.recordId)}">Reactivate</button>`)}
         </td>
       </tr>`;
     }).join('');
@@ -500,10 +489,10 @@
     btn.disabled = true;
     try {
       if (act === 'suspend') {
-        await api(API.user(id), { method: 'PATCH', body: JSON.stringify({ status: 'Suspended' }) });
+        await api(API.user(id), { method: 'PATCH', body: JSON.stringify({ status: 'suspended' }) });
         toast('User suspended', 'ok');
       } else if (act === 'reactivate') {
-        await api(API.user(id), { method: 'PATCH', body: JSON.stringify({ status: 'Active' }) });
+        await api(API.user(id), { method: 'PATCH', body: JSON.stringify({ status: 'active' }) });
         toast('User reactivated', 'ok');
       }
       await loadUsers();
@@ -527,7 +516,6 @@
     $('#f-name').value = '';
     $('#f-email').value = '';
     $('#f-role').value = 'owner';
-    $('#f-plan').value = 'Bespoke';
     $('#f-send-email').checked = true;
     renderProductChecklist();
     modal.classList.add('is-open');
@@ -562,7 +550,6 @@
     const fullName = $('#f-name').value.trim();
     const email = $('#f-email').value.trim().toLowerCase();
     const role = $('#f-role').value;
-    const plan = $('#f-plan').value;
     const sendEmail = $('#f-send-email').checked;
     const productSlugs = Array.from($('#products').querySelectorAll('input:checked')).map((i) => i.value);
 
@@ -576,11 +563,11 @@
     try {
       const res = await api(API.users, {
         method: 'POST',
-        body: JSON.stringify({ fullName, email, role, plan, productSlugs, sendEmail }),
+        body: JSON.stringify({ fullName, email, role, productSlugs, sendEmail }),
       });
       // Show success pane
       $('#succ-email').textContent = res.user.email;
-      $('#succ-code').textContent = res.user.clientCode;
+      $('#succ-code').textContent = res.user.tempPassword;
       const statusEl = $('#email-status');
       if (res.email && res.email.sent) {
         statusEl.className = 'email-status email-status--sent';
@@ -588,7 +575,7 @@
       } else {
         statusEl.className = 'email-status email-status--manual';
         const reason = res.email && res.email.reason ? res.email.reason : 'Auto-send unavailable.';
-        statusEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <strong>Send manually:</strong> ${esc(reason)} Copy the code and email it to ${esc(res.user.email)}.`;
+        statusEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <strong>Send manually:</strong> ${esc(reason)} Copy the password and email it to ${esc(res.user.email)}.`;
       }
       $('#form-pane').style.display = 'none';
       $('#success-pane').style.display = 'block';
