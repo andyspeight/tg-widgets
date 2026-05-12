@@ -50,7 +50,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const [client, packages, users, catalogue, entitlements] = await Promise.all([
+    const [client, packages, users, catalogue, entitlements, permissions, products] = await Promise.all([
       getRecord(CLIENTS.tableId, id).catch((err) => {
         if (err?.status === 404) return null;
         throw err;
@@ -59,6 +59,8 @@ export default async function handler(req, res) {
       listAllRecords(USERS.tableId),
       listAllRecords(CATALOGUE.tableId),
       listAllRecords(CLIENT_ENTITLEMENTS.tableId),
+      listAllRecords(PERMISSIONS.tableId),
+      listAllRecords(PRODUCTS.tableId),
     ]);
 
     if (!client) {
@@ -78,6 +80,34 @@ export default async function handler(req, res) {
         }
       : null;
 
+    // Build productRecordId -> { slug, name } map for resolving permissions
+    const productByRecordId = new Map();
+    for (const p of products) {
+      productByRecordId.set(p.id, {
+        slug: p.fields[PRODUCTS.fields.productId] || '',
+        name: p.fields[PRODUCTS.fields.displayName] || p.fields[PRODUCTS.fields.productId] || '',
+      });
+    }
+
+    // Build userRecordId -> array of permission summaries
+    const permsByUserId = new Map();
+    for (const perm of permissions) {
+      const userLinks = perm.fields[PERMISSIONS.fields.user] || [];
+      const productLinks = perm.fields[PERMISSIONS.fields.product] || [];
+      const product = productLinks[0] ? productByRecordId.get(productLinks[0]) : null;
+      if (!product) continue;
+      for (const uid of userLinks) {
+        if (!permsByUserId.has(uid)) permsByUserId.set(uid, []);
+        permsByUserId.get(uid).push({
+          permissionId: perm.id,
+          productSlug: product.slug,
+          productName: product.name,
+          role: perm.fields[PERMISSIONS.fields.role] || 'member',
+          status: perm.fields[PERMISSIONS.fields.status] || PERMISSIONS.statuses.ACTIVE,
+        });
+      }
+    }
+
     // Filter users to those linked to this client
     const clientUsers = users
       .filter((u) => (u.fields[USERS.fields.client] || []).includes(id))
@@ -88,6 +118,7 @@ export default async function handler(req, res) {
         role: u.fields[USERS.fields.role] || '',
         status: u.fields[USERS.fields.status] || '',
         lastLogin: u.fields[USERS.fields.lastLogin] || null,
+        permissions: permsByUserId.get(u.id) || [],
       }))
       .sort((a, b) => {
         // Owners first, then admins, then members. Within group, by name.
