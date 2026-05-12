@@ -334,7 +334,13 @@
             <option value="admin">Admin</option>
             <option value="member">Member</option>
           </select>
-          <span class="field-hint">Owner role is reserved for the primary account holder.</span>
+          <span class="field-hint">Role applies to every product they have access to.</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Product access</label>
+          <div class="checklist" id="e-products"></div>
+          <span class="field-hint">Tick products they should have access to. Changes apply on Save.</span>
         </div>
       </div>
       <div class="modal-foot">
@@ -402,6 +408,7 @@
   const API = {
     users:          '/api/identity/users',
     user:           (id) => `/api/identity/users/${id}`,
+    permissions:    '/api/identity/permissions',
     sendReset:      '/api/identity/send-reset',
     resendInvite:   '/api/identity/resend-invite',
     changePassword: '/api/auth/password/change',
@@ -709,6 +716,17 @@
     $('#e-name').value = u.fullName || '';
     $('#e-role').value = u.role || 'member';
     $('#btn-delete-staff').style.display = u.isMe ? 'none' : '';
+
+    // Render product checklist, pre-checking products the user has
+    const checkedSlugs = new Set((u.permissions || []).map((p) => p.productSlug));
+    $('#e-products').innerHTML = ALL_PRODUCTS.map((p) => `
+      <label class="check-row">
+        <input type="checkbox" value="${esc(p.slug)}"${checkedSlugs.has(p.slug) ? ' checked' : ''}>
+        <span class="name">${esc(p.name)}</span>
+        <span class="slug">${esc(p.slug)}</span>
+      </label>
+    `).join('');
+
     openModal('modal-edit');
     setTimeout(() => $('#e-name').focus(), 50);
   }
@@ -717,26 +735,85 @@
     const errEl = $('#edit-error');
     errEl.classList.remove('is-on');
 
+    const u = users.find((x) => x.recordId === editingUserId);
+    if (!u) { closeModal('modal-edit'); return; }
+
     const fullName = $('#e-name').value.trim();
-    const role = $('#e-role').value;
+    const newRole = $('#e-role').value;
+    const newSlugs = new Set(Array.from($('#e-products').querySelectorAll('input:checked')).map((i) => i.value));
 
     if (fullName && fullName.length < 2) {
       errEl.textContent = 'Full name must be at least 2 characters.';
       errEl.classList.add('is-on'); return;
     }
+    if (newSlugs.size === 0) {
+      errEl.textContent = 'A user must have access to at least one product. Delete them instead if they should have none.';
+      errEl.classList.add('is-on'); return;
+    }
+
+    // Compute the permission diff
+    const currentPerms = u.permissions || [];
+    const currentSlugMap = new Map(currentPerms.map((p) => [p.productSlug, p]));
+    const currentSlugs = new Set(currentSlugMap.keys());
+
+    const toAdd = [...newSlugs].filter((s) => !currentSlugs.has(s));
+    const toRemove = currentPerms.filter((p) => !newSlugs.has(p.productSlug));
+    // Existing permissions whose role differs from the new role (or where role changed at all)
+    const toUpdateRole = currentPerms
+      .filter((p) => newSlugs.has(p.productSlug) && p.role !== newRole);
 
     const btn = $('#btn-save-edit');
     btn.disabled = true;
     btn.textContent = 'Saving…';
 
     try {
-      const body = { role };
-      if (fullName) body.fullName = fullName;
-      await api(API.user(editingUserId), {
-        method: 'PATCH',
-        body: JSON.stringify(body),
-      });
-      toast('Changes saved', 'ok');
+      // 1. Update user record (name + top-level role) if anything changed
+      const userPatch = {};
+      if (fullName && fullName !== u.fullName) userPatch.fullName = fullName;
+      if (newRole !== u.role) userPatch.role = newRole;
+      if (Object.keys(userPatch).length > 0) {
+        await api(API.user(editingUserId), {
+          method: 'PATCH',
+          body: JSON.stringify(userPatch),
+        });
+      }
+
+      // 2. Grant new permissions
+      for (const slug of toAdd) {
+        await api(API.permissions, {
+          method: 'POST',
+          body: JSON.stringify({
+            userId: editingUserId,
+            productSlug: slug,
+            role: newRole,
+          }),
+        });
+      }
+
+      // 3. Revoke removed permissions
+      for (const perm of toRemove) {
+        await api(`${API.permissions}?id=${encodeURIComponent(perm.permissionId)}`, {
+          method: 'DELETE',
+        });
+      }
+
+      // 4. Update role on existing permissions where it changed
+      for (const perm of toUpdateRole) {
+        await api(API.permissions, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            permissionId: perm.permissionId,
+            role: newRole,
+          }),
+        });
+      }
+
+      const summary = [];
+      if (toAdd.length) summary.push(`granted ${toAdd.length}`);
+      if (toRemove.length) summary.push(`revoked ${toRemove.length}`);
+      if (toUpdateRole.length) summary.push(`updated role on ${toUpdateRole.length}`);
+      toast(summary.length ? `Saved (${summary.join(', ')})` : 'Saved', 'ok');
+
       closeModal('modal-edit');
       loadUsers();
     } catch (err) {
