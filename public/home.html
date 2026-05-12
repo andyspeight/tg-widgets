@@ -533,7 +533,11 @@
   const PRODUCT_DISPLAY = {
     widget_suite: {
       tagline: 'Embeddable widgets for your travel website',
-      url: 'https://widgets.travelify.io/editor.html',
+      // The widget suite landing page (index.html) — lists all widget
+      // types and lets the user pick which one to build. The legacy
+      // editor.html is the pricing-table-specific editor, NOT the suite
+      // landing; we don't want to drop users straight into one widget type.
+      url: 'https://widgets.travelify.io/',
       icon: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
     },
     luna_chat: {
