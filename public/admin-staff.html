@@ -329,7 +329,7 @@
               <input type="checkbox" id="f-send-email" checked style="width: 18px; height: 18px; accent-color: var(--tg-primary);">
               Send welcome email automatically
             </label>
-            <span class="field-hint">If Resend isn't configured yet, you'll get the sign-in details on screen instead.</span>
+            <span class="field-hint">If SendGrid isn't reachable, you'll get the sign-in details on screen to send manually.</span>
           </div>
         </div>
       </div>
@@ -633,13 +633,20 @@
     }
   }
 
-  // Theme: respect parent's data-theme attribute if iframed
+  // Theme: respect parent's data-theme attribute if iframed, AND listen for live updates
   try {
     if (window.parent && window.parent !== window && window.parent.document) {
       const theme = window.parent.document.documentElement.getAttribute('data-theme');
       if (theme) document.documentElement.setAttribute('data-theme', theme);
     }
   } catch { /* cross-origin parent — ignore */ }
+
+  // The Travelgenix Control shell posts { type: 'theme', value: 'light'|'dark' } when toggled
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'theme' && (e.data.value === 'light' || e.data.value === 'dark')) {
+      document.documentElement.setAttribute('data-theme', e.data.value);
+    }
+  });
 
   loadUsers();
 </script>
