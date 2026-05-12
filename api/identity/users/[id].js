@@ -1,142 +1,166 @@
 /**
  * /api/identity/users/[id]
  *
- * GET    → single user with full permission list
- * PATCH  → update status (suspend/reactivate), fullName, plan, or notes
- * DELETE → delete user + all their permissions
+ * GET    → fetch one user (must be in same Client as requester) + permissions
+ * PATCH  → suspend/reactivate, edit name/role, etc.
+ * DELETE → delete the user (also cascades their permissions)
  *
- * Auth: owner role on widget_suite
- *
- * NOTE: this file lives at api/identity/users/[id].js — Vercel's dynamic
- * route syntax. The folder structure matters: api/identity/users.js (the list
- * endpoint) and api/identity/users/[id].js (this file) coexist by design.
+ * Auth: widget_suite owner or admin.
  */
 
 import {
-  T_USERS,
-  T_PERMISSIONS,
-  applyCors,
-  requireOwner,
-  airtableFetch,
-} from '../../../lib/identity-helpers.js';
+  requireAuth,
+  requireProductAccess,
+} from '../../_lib/auth/middleware.js';
+import { setCors, jsonError, parseJson } from '../../_lib/auth/http.js';
+import {
+  getRecord,
+  updateRecord,
+  listAllRecords,
+  bulkDeleteRecords,
+} from '../../_lib/auth/airtable.js';
+import {
+  USERS,
+  PERMISSIONS,
+  PRODUCTS,
+} from '../../_lib/auth/schema.js';
+import { invalidateUserPermissions } from '../../_lib/auth/permissions.js';
 
 export default async function handler(req, res) {
-  applyCors(req, res);
-  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (setCors(req, res)) return;
 
-  const id = req.query.id;
-  if (!id || !/^rec[A-Za-z0-9]{14}$/.test(id)) {
-    return res.status(400).json({ ok: false, error: 'Invalid user id' });
+  const id = String(req.query?.id || '');
+  if (!/^rec[A-Za-z0-9]{14}$/.test(id)) {
+    return jsonError(res, 400, 'bad_id', 'Invalid user id');
   }
 
-  const me = await requireOwner(req, res);
-  if (!me) return;
+  const ctx = await requireAuth(req, res);
+  if (!ctx) return;
 
-  if (req.method === 'GET') return handleGet(req, res, id);
-  if (req.method === 'PATCH') return handlePatch(req, res, id, me);
-  if (req.method === 'DELETE') return handleDelete(req, res, id, me);
+  const role = requireProductAccess(
+    ctx,
+    PRODUCTS.slugs.WIDGET_SUITE,
+    [PERMISSIONS.roles.OWNER, PERMISSIONS.roles.ADMIN],
+    res
+  );
+  if (!role) return;
 
-  return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  // Load the target user and verify they belong to the same Client as the requester
+  let user;
+  try {
+    user = await getRecord(USERS.tableId, id);
+  } catch (err) {
+    if (err.status === 404) return jsonError(res, 404, 'not_found', 'User not found');
+    throw err;
+  }
+  const userClientLinks = user.fields[USERS.fields.client] || [];
+  if (!userClientLinks.includes(ctx.clientRecordId)) {
+    return jsonError(res, 403, 'wrong_client', 'You can only manage users in your own client');
+  }
+
+  if (req.method === 'GET')    return handleGet(req, res, ctx, user);
+  if (req.method === 'PATCH')  return handlePatch(req, res, ctx, user);
+  if (req.method === 'DELETE') return handleDelete(req, res, ctx, user);
+
+  return jsonError(res, 405, 'method_not_allowed', 'GET, PATCH or DELETE');
 }
 
-async function handleGet(req, res, id) {
+async function handleGet(req, res, ctx, user) {
   try {
-    const user = await airtableFetch(`${T_USERS}/${id}`);
-    const permsRes = await airtableFetch(
-      `${T_PERMISSIONS}?filterByFormula=${encodeURIComponent(`FIND('${id}', ARRAYJOIN({User}))`)}&maxRecords=100`
-    );
+    const perms = await listAllRecords(PERMISSIONS.tableId);
+    const userPerms = perms.filter((p) => (p.fields[PERMISSIONS.fields.user] || []).includes(user.id));
+    const allProducts = await listAllRecords(PRODUCTS.tableId);
+    const productById = new Map(allProducts.map((p) => [p.id, p.fields]));
+
     return res.status(200).json({
       ok: true,
       user: {
         recordId: user.id,
-        email: user.fields.Email || '',
-        fullName: user.fields.ClientName || '',
-        clientCode: user.fields.ClientCode || '',
-        plan: user.fields.Plan || '',
-        status: user.fields.Status || 'Active',
-        notes: user.fields.Notes || '',
+        email: user.fields[USERS.fields.email] || '',
+        fullName: user.fields[USERS.fields.fullName] || '',
+        role: user.fields[USERS.fields.role] || 'member',
+        status: user.fields[USERS.fields.status] || USERS.statuses.ACTIVE,
+        lastLogin: user.fields[USERS.fields.lastLogin] || null,
       },
-      permissions: (permsRes.records || []).map((p) => ({
-        permissionId: p.id,
-        productSlug: (p.fields['Product Slug'] || [])[0] || null,
-        productName: (p.fields['Product Name'] || [])[0] || null,
-        role: p.fields.Role || 'user',
-        status: p.fields.Status || 'Active',
-        expiresAt: p.fields['Expires At'] || null,
-      })),
+      permissions: userPerms.map((p) => {
+        const productLinks = p.fields[PERMISSIONS.fields.product] || [];
+        const productFields = productLinks[0] ? productById.get(productLinks[0]) : null;
+        return {
+          permissionId: p.id,
+          productSlug: productFields ? productFields[PRODUCTS.fields.productId] : null,
+          productName: productFields ? productFields[PRODUCTS.fields.displayName] : null,
+          role: p.fields[PERMISSIONS.fields.role] || 'member',
+          status: p.fields[PERMISSIONS.fields.status] || PERMISSIONS.statuses.ACTIVE,
+          expiresAt: p.fields[PERMISSIONS.fields.expiresAt] || null,
+        };
+      }),
     });
   } catch (err) {
-    if (err.status === 404) return res.status(404).json({ ok: false, error: 'User not found' });
     console.error('[identity/users/:id GET]', err);
-    return res.status(500).json({ ok: false, error: 'Failed to load user' });
+    return jsonError(res, 500, 'load_failed', 'Failed to load user');
   }
 }
 
-async function handlePatch(req, res, id, me) {
-  let body;
-  try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-  } catch {
-    return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
-  }
-  if (!body || typeof body !== 'object') {
-    return res.status(400).json({ ok: false, error: 'Body required' });
-  }
+async function handlePatch(req, res, ctx, user) {
+  const body = await parseJson(req);
+  if (!body) return jsonError(res, 400, 'bad_json', 'Invalid JSON body');
 
-  if (body.status === 'Suspended' && id === me.recordId) {
-    return res.status(400).json({ ok: false, error: "You can't suspend your own account" });
+  if (body.status === USERS.statuses.SUSPENDED && user.id === ctx.userRecordId) {
+    return jsonError(res, 400, 'self_suspend', "You can't suspend your own account");
   }
 
   const fields = {};
-  if (typeof body.status === 'string' && ['Active', 'Suspended'].includes(body.status)) {
-    fields.Status = body.status;
+  if (body.status && Object.values(USERS.statuses).includes(body.status)) {
+    fields[USERS.fields.status] = body.status;
   }
   if (typeof body.fullName === 'string' && body.fullName.trim().length >= 2) {
-    fields.ClientName = body.fullName.trim();
+    fields[USERS.fields.fullName] = body.fullName.trim();
   }
-  if (typeof body.plan === 'string') {
-    fields.Plan = body.plan.trim();
+  if (body.role && Object.values(USERS.roles).includes(body.role)) {
+    fields[USERS.fields.role] = body.role;
   }
   if (typeof body.notes === 'string') {
-    fields.Notes = body.notes;
+    fields[USERS.fields.notes] = body.notes;
   }
 
   if (Object.keys(fields).length === 0) {
-    return res.status(400).json({ ok: false, error: 'No valid fields to update' });
+    return jsonError(res, 400, 'no_changes', 'No valid fields to update');
   }
 
   try {
-    const updated = await airtableFetch(T_USERS, {
-      method: 'PATCH',
-      body: JSON.stringify({
-        typecast: true,
-        records: [{ id, fields }],
-      }),
-    });
-    return res.status(200).json({ ok: true, user: { recordId: updated.records[0].id, ...updated.records[0].fields } });
+    await updateRecord(USERS.tableId, user.id, fields);
+    invalidateUserPermissions(user.id);
+    return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('[identity/users/:id PATCH]', err);
-    return res.status(500).json({ ok: false, error: 'Failed to update user' });
+    return jsonError(res, 500, 'update_failed', 'Failed to update user');
   }
 }
 
-async function handleDelete(req, res, id, me) {
-  if (id === me.recordId) {
-    return res.status(400).json({ ok: false, error: "You can't delete your own account" });
+async function handleDelete(req, res, ctx, user) {
+  if (user.id === ctx.userRecordId) {
+    return jsonError(res, 400, 'self_delete', "You can't delete your own account");
   }
+
   try {
-    const perms = await airtableFetch(
-      `${T_PERMISSIONS}?filterByFormula=${encodeURIComponent(`FIND('${id}', ARRAYJOIN({User}))`)}&maxRecords=100`
-    );
-    const permIds = (perms.records || []).map((p) => p.id);
-    if (permIds.length > 0) {
-      const params = permIds.map((p) => `records[]=${encodeURIComponent(p)}`).join('&');
-      await airtableFetch(`${T_PERMISSIONS}?${params}`, { method: 'DELETE' });
+    // First, find and delete all permission rows for this user
+    const allPerms = await listAllRecords(PERMISSIONS.tableId);
+    const myPermIds = allPerms
+      .filter((p) => (p.fields[PERMISSIONS.fields.user] || []).includes(user.id))
+      .map((p) => p.id);
+
+    // Delete in batches of 10 (Airtable limit)
+    for (let i = 0; i < myPermIds.length; i += 10) {
+      const batch = myPermIds.slice(i, i + 10);
+      await bulkDeleteRecords(PERMISSIONS.tableId, batch);
     }
-    await airtableFetch(`${T_USERS}/${id}`, { method: 'DELETE' });
+
+    // Then delete the user
+    await bulkDeleteRecords(USERS.tableId, [user.id]);
+    invalidateUserPermissions(user.id);
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('[identity/users/:id DELETE]', err);
-    return res.status(500).json({ ok: false, error: 'Failed to delete user' });
+    return jsonError(res, 500, 'delete_failed', 'Failed to delete user');
   }
 }
