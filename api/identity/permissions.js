@@ -1,160 +1,205 @@
 /**
  * /api/identity/permissions
  *
- * POST    → grant a permission: { userId, productSlug, role, expiresAt? }
- * PATCH   → change a permission: { permissionId, role?, status?, expiresAt? }
- * DELETE  → revoke a permission: ?id=recXXX
+ * POST    → grant a permission     { userId, productSlug, role, expiresAt? }
+ * PATCH   → modify a permission    { permissionId, role?, status?, expiresAt? }
+ * DELETE  → revoke a permission    ?id=recXXX
  *
- * Auth: owner role on widget_suite
+ * Auth: widget_suite owner or admin.
  */
 
 import {
-  T_PRODUCTS,
-  T_PERMISSIONS,
-  applyCors,
-  requireOwner,
-  airtableFetch,
-} from '../../lib/identity-helpers.js';
-
-const ALLOWED_ROLES = ['owner', 'admin', 'user', 'agent'];
-const ALLOWED_STATUSES = ['Active', 'Suspended'];
+  requireAuth,
+  requireProductAccess,
+} from '../_lib/auth/middleware.js';
+import { setCors, jsonError, parseJson } from '../_lib/auth/http.js';
+import {
+  listAllRecords,
+  createRecord,
+  updateRecord,
+  bulkDeleteRecords,
+  getRecord,
+} from '../_lib/auth/airtable.js';
+import {
+  PERMISSIONS,
+  PRODUCTS,
+  USERS,
+} from '../_lib/auth/schema.js';
+import { invalidateUserPermissions } from '../_lib/auth/permissions.js';
 
 export default async function handler(req, res) {
-  applyCors(req, res);
-  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (setCors(req, res)) return;
 
-  const me = await requireOwner(req, res);
-  if (!me) return;
+  const ctx = await requireAuth(req, res);
+  if (!ctx) return;
 
-  if (req.method === 'POST') return handleGrant(req, res);
-  if (req.method === 'PATCH') return handleUpdate(req, res);
-  if (req.method === 'DELETE') return handleRevoke(req, res);
+  const role = requireProductAccess(
+    ctx,
+    PRODUCTS.slugs.WIDGET_SUITE,
+    [PERMISSIONS.roles.OWNER, PERMISSIONS.roles.ADMIN],
+    res
+  );
+  if (!role) return;
 
-  return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  if (req.method === 'POST')   return handleGrant(req, res, ctx);
+  if (req.method === 'PATCH')  return handleUpdate(req, res, ctx);
+  if (req.method === 'DELETE') return handleRevoke(req, res, ctx);
+
+  return jsonError(res, 405, 'method_not_allowed', 'POST, PATCH or DELETE');
 }
 
-async function handleGrant(req, res) {
-  let body;
-  try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-  } catch {
-    return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
-  }
-  if (!body || typeof body !== 'object') {
-    return res.status(400).json({ ok: false, error: 'Body required' });
-  }
+async function handleGrant(req, res, ctx) {
+  const body = await parseJson(req);
+  if (!body) return jsonError(res, 400, 'bad_json', 'Invalid JSON body');
 
   const userId = String(body.userId || '');
   const productSlug = String(body.productSlug || '');
-  const role = String(body.role || 'user').toLowerCase();
+  const desiredRole = String(body.role || 'member').toLowerCase();
   const expiresAt = body.expiresAt ? String(body.expiresAt) : null;
 
   if (!/^rec[A-Za-z0-9]{14}$/.test(userId)) {
-    return res.status(400).json({ ok: false, error: 'Invalid userId' });
+    return jsonError(res, 400, 'bad_user_id', 'Invalid userId');
   }
-  if (!productSlug) {
-    return res.status(400).json({ ok: false, error: 'productSlug required' });
+  if (!productSlug) return jsonError(res, 400, 'no_product', 'productSlug required');
+  if (!Object.values(PERMISSIONS.roles).includes(desiredRole)) {
+    return jsonError(res, 400, 'bad_role', 'Invalid role');
   }
-  if (!ALLOWED_ROLES.includes(role)) {
-    return res.status(400).json({ ok: false, error: 'Invalid role' });
+
+  // Verify target user is in the same Client
+  let user;
+  try {
+    user = await getRecord(USERS.tableId, userId);
+  } catch {
+    return jsonError(res, 404, 'user_not_found', 'User not found');
+  }
+  const userClients = user.fields[USERS.fields.client] || [];
+  if (!userClients.includes(ctx.clientRecordId)) {
+    return jsonError(res, 403, 'wrong_client', 'User is not in your client');
   }
 
   try {
-    const productsRes = await airtableFetch(
-      `${T_PRODUCTS}?filterByFormula=${encodeURIComponent(`OR({Slug}='${productSlug}',{Product Slug}='${productSlug}')`)}&maxRecords=1`
-    );
-    const product = (productsRes.records || [])[0];
-    if (!product) {
-      return res.status(400).json({ ok: false, error: `Unknown product: ${productSlug}` });
-    }
+    // Find the product record
+    const products = await listAllRecords(PRODUCTS.tableId);
+    const product = products.find((p) => p.fields[PRODUCTS.fields.productId] === productSlug);
+    if (!product) return jsonError(res, 400, 'unknown_product', `Unknown product: ${productSlug}`);
 
-    const existing = await airtableFetch(
-      `${T_PERMISSIONS}?filterByFormula=${encodeURIComponent(
-        `AND(FIND('${userId}', ARRAYJOIN({User})), FIND('${product.id}', ARRAYJOIN({Product})))`
-      )}&maxRecords=1`
+    // Check for duplicate
+    const allPerms = await listAllRecords(PERMISSIONS.tableId);
+    const dup = allPerms.find(
+      (p) =>
+        (p.fields[PERMISSIONS.fields.user] || []).includes(userId) &&
+        (p.fields[PERMISSIONS.fields.product] || []).includes(product.id)
     );
-    if (existing.records && existing.records.length > 0) {
-      return res.status(409).json({
-        ok: false,
-        error: 'User already has a permission for this product',
-        permissionId: existing.records[0].id,
-      });
+    if (dup) {
+      return jsonError(res, 409, 'already_granted', 'User already has a permission for this product');
     }
 
     const fields = {
-      User: [userId],
-      Product: [product.id],
-      Role: role,
-      Status: 'Active',
+      [PERMISSIONS.fields.user]:      [userId],
+      [PERMISSIONS.fields.product]:   [product.id],
+      [PERMISSIONS.fields.role]:      desiredRole,
+      [PERMISSIONS.fields.status]:    PERMISSIONS.statuses.ACTIVE,
+      [PERMISSIONS.fields.grantedBy]: [ctx.userRecordId],
+      [PERMISSIONS.fields.granted]:   new Date().toISOString(),
     };
-    if (expiresAt) fields['Expires At'] = expiresAt;
+    if (expiresAt) fields[PERMISSIONS.fields.expiresAt] = expiresAt;
 
-    const created = await airtableFetch(T_PERMISSIONS, {
-      method: 'POST',
-      body: JSON.stringify({ typecast: true, records: [{ fields }] }),
-    });
-    return res.status(201).json({ ok: true, permissionId: created.records[0].id });
+    const created = await createRecord(PERMISSIONS.tableId, fields);
+    invalidateUserPermissions(userId);
+    return res.status(201).json({ ok: true, permissionId: created.id });
   } catch (err) {
     console.error('[identity/permissions POST]', err);
-    return res.status(500).json({ ok: false, error: 'Failed to grant permission' });
+    return jsonError(res, 500, 'grant_failed', 'Failed to grant permission');
   }
 }
 
-async function handleUpdate(req, res) {
-  let body;
-  try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-  } catch {
-    return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
-  }
-  if (!body || typeof body !== 'object') {
-    return res.status(400).json({ ok: false, error: 'Body required' });
-  }
+async function handleUpdate(req, res, ctx) {
+  const body = await parseJson(req);
+  if (!body) return jsonError(res, 400, 'bad_json', 'Invalid JSON body');
 
   const id = String(body.permissionId || '');
   if (!/^rec[A-Za-z0-9]{14}$/.test(id)) {
-    return res.status(400).json({ ok: false, error: 'Invalid permissionId' });
+    return jsonError(res, 400, 'bad_id', 'Invalid permissionId');
+  }
+
+  // Confirm the permission row's user is in the same Client
+  let perm;
+  try {
+    perm = await getRecord(PERMISSIONS.tableId, id);
+  } catch {
+    return jsonError(res, 404, 'not_found', 'Permission not found');
+  }
+  const userLinks = perm.fields[PERMISSIONS.fields.user] || [];
+  if (userLinks.length > 0) {
+    try {
+      const user = await getRecord(USERS.tableId, userLinks[0]);
+      const userClients = user.fields[USERS.fields.client] || [];
+      if (!userClients.includes(ctx.clientRecordId)) {
+        return jsonError(res, 403, 'wrong_client', 'Permission belongs to a different client');
+      }
+    } catch {
+      // User missing — let the update proceed; admin can clean up
+    }
   }
 
   const fields = {};
-  if (body.role && ALLOWED_ROLES.includes(String(body.role).toLowerCase())) {
-    fields.Role = String(body.role).toLowerCase();
+  if (body.role && Object.values(PERMISSIONS.roles).includes(String(body.role).toLowerCase())) {
+    fields[PERMISSIONS.fields.role] = String(body.role).toLowerCase();
   }
-  if (body.status && ALLOWED_STATUSES.includes(body.status)) {
-    fields.Status = body.status;
+  if (body.status && Object.values(PERMISSIONS.statuses).includes(body.status)) {
+    fields[PERMISSIONS.fields.status] = body.status;
   }
   if (body.expiresAt === null) {
-    fields['Expires At'] = null;
+    fields[PERMISSIONS.fields.expiresAt] = null;
   } else if (typeof body.expiresAt === 'string') {
-    fields['Expires At'] = body.expiresAt;
+    fields[PERMISSIONS.fields.expiresAt] = body.expiresAt;
   }
 
   if (Object.keys(fields).length === 0) {
-    return res.status(400).json({ ok: false, error: 'No valid fields to update' });
+    return jsonError(res, 400, 'no_changes', 'No valid fields to update');
   }
 
   try {
-    const updated = await airtableFetch(T_PERMISSIONS, {
-      method: 'PATCH',
-      body: JSON.stringify({ typecast: true, records: [{ id, fields }] }),
-    });
-    return res.status(200).json({ ok: true, permissionId: updated.records[0].id });
+    await updateRecord(PERMISSIONS.tableId, id, fields);
+    if (userLinks[0]) invalidateUserPermissions(userLinks[0]);
+    return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('[identity/permissions PATCH]', err);
-    return res.status(500).json({ ok: false, error: 'Failed to update permission' });
+    return jsonError(res, 500, 'update_failed', 'Failed to update permission');
   }
 }
 
-async function handleRevoke(req, res) {
-  const id = String(req.query.id || '');
+async function handleRevoke(req, res, ctx) {
+  const id = String(req.query?.id || '');
   if (!/^rec[A-Za-z0-9]{14}$/.test(id)) {
-    return res.status(400).json({ ok: false, error: 'Invalid permission id' });
+    return jsonError(res, 400, 'bad_id', 'Invalid permission id');
   }
+
+  let perm;
   try {
-    await airtableFetch(`${T_PERMISSIONS}/${id}`, { method: 'DELETE' });
+    perm = await getRecord(PERMISSIONS.tableId, id);
+  } catch {
+    return jsonError(res, 404, 'not_found', 'Permission not found');
+  }
+  const userLinks = perm.fields[PERMISSIONS.fields.user] || [];
+  if (userLinks.length > 0) {
+    try {
+      const user = await getRecord(USERS.tableId, userLinks[0]);
+      const userClients = user.fields[USERS.fields.client] || [];
+      if (!userClients.includes(ctx.clientRecordId)) {
+        return jsonError(res, 403, 'wrong_client', 'Permission belongs to a different client');
+      }
+    } catch {
+      // permit cleanup
+    }
+  }
+
+  try {
+    await bulkDeleteRecords(PERMISSIONS.tableId, [id]);
+    if (userLinks[0]) invalidateUserPermissions(userLinks[0]);
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('[identity/permissions DELETE]', err);
-    return res.status(500).json({ ok: false, error: 'Failed to revoke permission' });
+    return jsonError(res, 500, 'revoke_failed', 'Failed to revoke permission');
   }
 }
