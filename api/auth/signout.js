@@ -1,38 +1,45 @@
 /**
- * GET /api/auth/me
+ * POST /api/auth/signout
  *
- * Returns the current user, their client, and their resolved permissions.
- * Used by:
- *   - Product front-ends on load to confirm the session and gate UI
- *   - Identity Console to refresh after a permission change
+ * Revokes the current session and clears the tg_session cookie.
  *
- * Accepts auth via either Authorization: Bearer header OR the
- * tg_session cookie (set on .travelify.io for cross-subdomain SSO).
+ * Note: this file was previously a duplicate of me.js (copy-paste bug);
+ * sign out would silently fail. This is the proper implementation.
+ *
+ * For "sign out everywhere", use /api/auth/signout-all.
  */
 
-import { setCors, requireMethod, jsonOk } from '../_lib/auth/http.js';
-import { requireAuth, loadClientForCtx } from '../_lib/auth/middleware.js';
+import {
+  setCors, requireMethod, jsonOk,
+  getRequestIp, getUserAgent,
+} from '../_lib/auth/http.js';
+import { requireAuth } from '../_lib/auth/middleware.js';
+import { revokeSession } from '../_lib/auth/sessions.js';
+import { clearSessionCookie } from '../_lib/auth/cookie.js';
+import { logAuthEvent } from '../_lib/auth/audit.js';
+import { AUTH_EVENTS } from '../_lib/auth/schema.js';
 
 export default async function handler(req, res) {
   if (setCors(req, res)) return;
-  if (!requireMethod(req, res, 'GET')) return;
+  if (!requireMethod(req, res, 'POST')) return;
 
   const ctx = await requireAuth(req, res);
-  if (!ctx) return;
+  if (!ctx) return; // requireAuth already wrote a 401
 
-  const client = await loadClientForCtx(ctx);
+  if (ctx.sessionRecordId) {
+    revokeSession(ctx.sessionRecordId, 'signout')
+      .catch((err) => console.error('[auth/signout] revoke failed:', err.message));
+  }
 
-  return jsonOk(res, {
-    user: {
-      email: ctx.email,
-      fullName: ctx.fullName,
-      role: ctx.role
-    },
-    client,
-    permissions: (ctx.permissions || []).map(p => ({
-      product: p.product,
-      role: p.role,
-      expiresAt: p.expiresAt || null
-    }))
-  });
+  logAuthEvent({
+    type: AUTH_EVENTS.types.SIGNOUT, success: true,
+    userRecordId: ctx.userRecordId,
+    clientRecordId: ctx.clientRecordId,
+    ip: getRequestIp(req),
+    userAgent: getUserAgent(req),
+  }).catch(() => {});
+
+  clearSessionCookie(res, { req });
+
+  return jsonOk(res, { ok: true });
 }
