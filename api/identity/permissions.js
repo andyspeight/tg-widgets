@@ -8,18 +8,18 @@
  * Auth: owner role on widget_suite
  */
 
-const {
+import {
   T_PRODUCTS,
   T_PERMISSIONS,
   applyCors,
   requireOwner,
   airtableFetch,
-} = require('../../lib/identity-helpers');
+} from '../../lib/identity-helpers.js';
 
 const ALLOWED_ROLES = ['owner', 'admin', 'user', 'agent'];
 const ALLOWED_STATUSES = ['Active', 'Suspended'];
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'DELETE') return handleRevoke(req, res);
 
   return res.status(405).json({ ok: false, error: 'Method not allowed' });
-};
+}
 
 async function handleGrant(req, res) {
   let body;
@@ -39,6 +39,9 @@ async function handleGrant(req, res) {
     body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   } catch {
     return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
+  }
+  if (!body || typeof body !== 'object') {
+    return res.status(400).json({ ok: false, error: 'Body required' });
   }
 
   const userId = String(body.userId || '');
@@ -57,7 +60,6 @@ async function handleGrant(req, res) {
   }
 
   try {
-    // Resolve product slug
     const productsRes = await airtableFetch(
       `${T_PRODUCTS}?filterByFormula=${encodeURIComponent(`OR({Slug}='${productSlug}',{Product Slug}='${productSlug}')`)}&maxRecords=1`
     );
@@ -66,7 +68,6 @@ async function handleGrant(req, res) {
       return res.status(400).json({ ok: false, error: `Unknown product: ${productSlug}` });
     }
 
-    // Check for an existing active permission (avoid duplicates)
     const existing = await airtableFetch(
       `${T_PERMISSIONS}?filterByFormula=${encodeURIComponent(
         `AND(FIND('${userId}', ARRAYJOIN({User})), FIND('${product.id}', ARRAYJOIN({Product})))`
@@ -105,6 +106,9 @@ async function handleUpdate(req, res) {
     body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   } catch {
     return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
+  }
+  if (!body || typeof body !== 'object') {
+    return res.status(400).json({ ok: false, error: 'Body required' });
   }
 
   const id = String(body.permissionId || '');
