@@ -107,6 +107,23 @@
   }
   .auth-msg.error { background: #fff0ef; color: #b3261e; border: 1px solid #f5d6d2; display: block; }
   .auth-msg.info  { background: #ebf3ff; color: #1f4d99; border: 1px solid #d3e3ff; display: block; }
+  .auth-msg .auth-msg-detail-toggle {
+    display: inline-block; margin-top: 6px; font-size: 12px;
+    background: none; border: 0; padding: 0;
+    color: inherit; text-decoration: underline;
+    cursor: pointer; font-family: inherit;
+  }
+  .auth-msg .auth-msg-detail-toggle:hover { opacity: 0.75; }
+  .auth-msg .auth-msg-detail {
+    display: none;
+    margin-top: 8px; padding: 8px 10px;
+    background: rgba(179, 38, 30, 0.06);
+    border-radius: 6px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px; line-height: 1.5;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .auth-msg .auth-msg-detail.is-open { display: block; }
   .auth-foot {
     text-align: center; margin-top: 20px; font-size: 12px; color: var(--text-muted, #888);
   }
@@ -178,6 +195,118 @@
     msg.className = 'auth-msg ' + (kind || 'info');
   }
   function clearMsg() { msg.className = 'auth-msg'; msg.textContent = ''; }
+
+  // ─── SSO error surfacing ──────────────────────────────────────────
+  // If we arrived here via /api/auth/sso?ssotoken=... and that flow failed,
+  // the URL will carry ?error=<code>&detail=<...>. Translate the code to a
+  // friendly message and expose the detail behind a "Show technical detail"
+  // toggle so we can debug the JWT/SSO integration without confusing real
+  // end users with cryptic strings.
+  const SSO_ERRORS = {
+    sso_not_configured: {
+      title: 'Sign-in is temporarily unavailable',
+      body: 'The platform isn\'t fully configured for single sign-on right now. Please contact support.',
+    },
+    sso_missing_token: {
+      title: 'Sign-in link was incomplete',
+      body: 'No sign-in token was provided. Try clicking the link again from your main platform.',
+    },
+    sso_bad_signature: {
+      title: 'Sign-in link is invalid',
+      body: 'This sign-in link couldn\'t be verified. It may have been corrupted or tampered with. Please try again from your main platform.',
+    },
+    sso_expired: {
+      title: 'Sign-in link has expired',
+      body: 'This sign-in link is past its expiry. Sign-in links are valid for a few minutes — please request a fresh one from your main platform.',
+    },
+    sso_not_yet_valid: {
+      title: 'Sign-in link isn\'t active yet',
+      body: 'This sign-in link is dated in the future. Check the clock on the system that generated it.',
+    },
+    sso_payload_invalid: {
+      title: 'Sign-in link is missing details',
+      body: 'The link reached us but didn\'t carry all the information we need. Please contact support so we can investigate.',
+    },
+    sso_replay: {
+      title: 'Sign-in link has already been used',
+      body: 'Each sign-in link can only be used once. Please request a new one from your main platform.',
+    },
+    sso_package_unknown: {
+      title: 'We don\'t recognise that package',
+      body: 'Your account is set up with a package that isn\'t configured on Travelgenix yet. Please contact support to get it added.',
+    },
+    sso_client_create_failed: {
+      title: 'Couldn\'t set up your workspace',
+      body: 'We hit a problem creating your account on first sign-in. Please try again in a minute, or contact support if it keeps happening.',
+    },
+    sso_link_failed: {
+      title: 'Couldn\'t link your account',
+      body: 'We hit a problem linking your account to this company. Please contact support.',
+    },
+    sso_account_suspended: {
+      title: 'Account suspended',
+      body: 'This account has been suspended. Please contact support to reactivate it.',
+    },
+    sso_unexpected: {
+      title: 'Something went wrong signing you in',
+      body: 'An unexpected error stopped sign-in. Please try again, and contact support if it keeps happening.',
+    },
+  };
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+  }
+
+  function showSsoError() {
+    let params;
+    try { params = new URLSearchParams(location.search); }
+    catch { return; }
+    const code = params.get('error');
+    if (!code) return;
+
+    const info = SSO_ERRORS[code] || {
+      title: 'Couldn\'t sign you in',
+      body: 'Please try again, and contact support if the problem persists.',
+    };
+    const detail = params.get('detail') || '';
+
+    // Show the technical detail toggle if we have any detail string OR if
+    // the code itself is unrecognised (knowing the code helps debugging).
+    const hasDetail = !!detail || !SSO_ERRORS[code];
+    const detailHtml = hasDetail
+      ? `
+        <button type="button" class="auth-msg-detail-toggle"
+          aria-expanded="false" aria-controls="auth-msg-detail">
+          Show technical detail
+        </button>
+        <div id="auth-msg-detail" class="auth-msg-detail" role="region" aria-label="Technical detail">code: ${escapeHtml(code)}${detail ? '\ndetail: ' + escapeHtml(detail) : ''}</div>`
+      : '';
+
+    msg.innerHTML = `<strong>${escapeHtml(info.title)}</strong><br>${escapeHtml(info.body)}${detailHtml}`;
+    msg.className = 'auth-msg error';
+
+    const toggle = msg.querySelector('.auth-msg-detail-toggle');
+    const panel = msg.querySelector('.auth-msg-detail');
+    if (toggle && panel) {
+      toggle.addEventListener('click', () => {
+        const open = panel.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.textContent = open ? 'Hide technical detail' : 'Show technical detail';
+      });
+    }
+
+    // Strip the ?error param from the URL bar so a refresh doesn't re-show
+    // the same banner forever. Keep ?next= and ?redirect= intact if present.
+    try {
+      const url = new URL(location.href);
+      url.searchParams.delete('error');
+      url.searchParams.delete('detail');
+      history.replaceState(null, '', url.toString());
+    } catch {}
+  }
+  showSsoError();
 
   // Restore email if remembered
   try {
