@@ -38,15 +38,13 @@
       -webkit-font-smoothing: antialiased;
       font-size: 15px; line-height: 1.6;
     }
-
     .wrap { max-width: 1280px; margin: 0 auto; padding: var(--space-8); }
 
-    /* Header */
     .head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap; }
     .head h1 { margin: 0 0 var(--space-1) 0; font-size: 28px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; color: var(--tg-text-primary); }
     .head p { margin: 0; color: var(--tg-text-secondary); font-size: 15px; }
+    .head-actions { display: flex; gap: var(--space-3); }
 
-    /* Toolbar */
     .toolbar { display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-5); flex-wrap: wrap; }
     .search {
       flex: 1; min-width: 240px; height: 44px; padding: 0 var(--space-4);
@@ -62,7 +60,6 @@
     }
     .stat strong { color: var(--tg-text-primary); font-weight: 600; }
 
-    /* Buttons */
     .btn {
       display: inline-flex; align-items: center; gap: var(--space-2);
       height: 44px; padding: 0 var(--space-4);
@@ -79,7 +76,6 @@
     .btn--danger:hover { background: rgba(239,68,68,0.08); border-color: var(--tg-error); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Table */
     .table-card { background: var(--tg-bg-primary); border: 1px solid var(--tg-border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
     .table { width: 100%; border-collapse: collapse; }
     .table th, .table td { padding: var(--space-4); text-align: left; vertical-align: middle; }
@@ -94,22 +90,46 @@
     .table td { font-size: 14px; color: var(--tg-text-primary); }
     .cell-name { font-weight: 600; }
     .cell-meta { color: var(--tg-text-secondary); font-size: 13px; }
-    .cell-actions { text-align: right; white-space: nowrap; }
+    .cell-actions { text-align: right; white-space: nowrap; position: relative; }
     .cell-actions .btn { margin-left: var(--space-2); }
+    .menu-wrap { position: relative; display: inline-block; }
+    .menu-trigger {
+      width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+      background: var(--tg-bg-primary); border: 1px solid var(--tg-border); border-radius: var(--radius-md);
+      cursor: pointer; color: var(--tg-text-secondary); margin-left: var(--space-2);
+    }
+    .menu-trigger:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .menu {
+      position: absolute; right: 0; top: calc(100% + 4px);
+      min-width: 220px; padding: var(--space-1);
+      background: var(--tg-bg-primary); border: 1px solid var(--tg-border); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg); z-index: 50;
+      display: none;
+    }
+    .menu.is-open { display: block; }
+    .menu-item {
+      display: flex; align-items: center; gap: var(--space-2);
+      width: 100%; padding: var(--space-2) var(--space-3); border: 0;
+      background: transparent; cursor: pointer; text-align: left;
+      font-family: inherit; font-size: 13px; color: var(--tg-text-primary);
+      border-radius: var(--radius-sm);
+    }
+    .menu-item:hover { background: var(--tg-bg-tertiary); }
+    .menu-item--danger { color: var(--tg-error); }
+    .menu-divider { height: 1px; background: var(--tg-border-light); margin: var(--space-1) 0; }
 
-    /* Status pills */
     .pill {
       display: inline-flex; align-items: center; gap: var(--space-1);
       padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 500;
     }
     .pill--active { background: rgba(16,185,129,0.10); color: var(--tg-success); }
+    .pill--invited { background: rgba(245,158,11,0.10); color: var(--tg-warning); }
     .pill--suspended { background: rgba(148,163,184,0.15); color: var(--tg-text-tertiary); }
     .pill--owner { background: rgba(27,43,91,0.08); color: var(--tg-primary); }
     .pill--admin { background: rgba(0,180,216,0.10); color: var(--tg-accent-dark); }
     .pill--user { background: var(--tg-bg-tertiary); color: var(--tg-text-secondary); }
     .pill-row { display: flex; flex-wrap: wrap; gap: 4px; }
 
-    /* Empty / loading */
     .empty { padding: var(--space-12); text-align: center; color: var(--tg-text-secondary); }
     .empty svg { color: var(--tg-text-tertiary); margin-bottom: var(--space-3); }
     .empty h3 { margin: 0 0 var(--space-1) 0; color: var(--tg-text-primary); font-size: 18px; font-weight: 600; }
@@ -118,7 +138,6 @@
     .skeleton { display: inline-block; height: 14px; border-radius: 4px; background: linear-gradient(90deg, var(--tg-bg-tertiary) 0%, var(--tg-border) 50%, var(--tg-bg-tertiary) 100%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-    /* Modal */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(4px);
       display: none; align-items: center; justify-content: center; z-index: 100;
@@ -138,7 +157,6 @@
     .modal-body { padding: var(--space-6); }
     .modal-foot { padding: var(--space-4) var(--space-6); border-top: 1px solid var(--tg-border-light); background: var(--tg-bg-secondary); display: flex; justify-content: flex-end; gap: var(--space-3); }
 
-    /* Form */
     .field { margin-bottom: var(--space-4); }
     .field:last-child { margin-bottom: 0; }
     .field-label { display: block; font-size: 13px; font-weight: 500; color: var(--tg-text-primary); margin-bottom: var(--space-1); }
@@ -150,9 +168,8 @@
       transition: border-color 0.15s, box-shadow 0.15s;
     }
     .input:focus, .select:focus { outline: none; border-color: var(--tg-accent); box-shadow: 0 0 0 3px rgba(0,180,216,0.15); }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .input[readonly] { background: var(--tg-bg-secondary); color: var(--tg-text-secondary); }
 
-    /* Product checklist */
     .checklist { display: flex; flex-direction: column; gap: var(--space-2); border: 1px solid var(--tg-border); border-radius: var(--radius-md); padding: var(--space-3); background: var(--tg-bg-secondary); }
     .check-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); cursor: pointer; }
     .check-row:hover { background: var(--tg-bg-primary); }
@@ -160,35 +177,19 @@
     .check-row .name { font-size: 14px; font-weight: 500; color: var(--tg-text-primary); }
     .check-row .slug { font-size: 12px; color: var(--tg-text-tertiary); font-family: 'SF Mono', Menlo, Consolas, monospace; margin-left: auto; }
 
-    /* Inline form error */
     .form-error { padding: var(--space-3) var(--space-4); background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-md); color: var(--tg-error); font-size: 13px; margin-bottom: var(--space-4); display: none; }
     .form-error.is-on { display: block; }
 
-    /* Success panel (post-create) */
     .success-block {
       padding: var(--space-5); background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(0,180,216,0.04));
-      border: 1px solid rgba(16,185,129,0.25); border-radius: var(--radius-md); margin-bottom: var(--space-4);
+      border: 1px solid rgba(16,185,129,0.25); border-radius: var(--radius-md);
     }
     .success-block h3 { margin: 0 0 var(--space-1) 0; font-size: 16px; font-weight: 600; color: var(--tg-success); }
-    .success-block p { margin: 0 0 var(--space-3) 0; font-size: 13px; color: var(--tg-text-secondary); }
-    .cred-card { background: var(--tg-bg-primary); border: 1px solid var(--tg-border); border-radius: var(--radius-md); overflow: hidden; }
-    .cred-row { display: flex; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--tg-border-light); align-items: center; gap: var(--space-3); }
-    .cred-row:last-child { border-bottom: 0; }
-    .cred-label { font-size: 11px; color: var(--tg-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; width: 100px; flex-shrink: 0; font-weight: 600; }
-    .cred-value { flex: 1; font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 14px; color: var(--tg-text-primary); font-weight: 600; word-break: break-all; }
-    .cred-copy { background: none; border: 0; cursor: pointer; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); color: var(--tg-text-secondary); font-size: 12px; font-weight: 500; font-family: inherit; }
-    .cred-copy:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .success-block p { margin: 0 0 var(--space-3) 0; font-size: 14px; color: var(--tg-text-secondary); }
+    .success-block p:last-child { margin-bottom: 0; }
+    .success-block ul { margin: var(--space-2) 0 var(--space-3) 0; padding-left: 20px; color: var(--tg-text-secondary); font-size: 14px; }
+    .success-block ul li { margin-bottom: 4px; }
 
-    .email-status {
-      display: flex; gap: var(--space-2); align-items: flex-start;
-      padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
-      font-size: 13px; line-height: 1.5;
-    }
-    .email-status--sent { background: rgba(16,185,129,0.08); color: var(--tg-success); }
-    .email-status--manual { background: rgba(245,158,11,0.08); color: #92400E; }
-    [data-theme="dark"] .email-status--manual { color: #F59E0B; }
-
-    /* Toast */
     .toast {
       position: fixed; bottom: var(--space-6); right: var(--space-6); z-index: 200;
       padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
@@ -199,11 +200,9 @@
     .toast--err { background: var(--tg-error); }
     .toast--ok { background: var(--tg-success); }
 
-    /* Responsive */
     @media (max-width: 720px) {
       .wrap { padding: var(--space-4); }
-      .field-row { grid-template-columns: 1fr; }
-      .table th:nth-child(3), .table td:nth-child(3) { display: none; } /* hide products column on mobile */
+      .table th:nth-child(3), .table td:nth-child(3) { display: none; }
       .table th, .table td { padding: var(--space-3); }
     }
   </style>
@@ -215,10 +214,16 @@
         <h1>Staff</h1>
         <p>Users with access to Travelgenix products under your account.</p>
       </div>
-      <button class="btn btn--primary" id="btn-add">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Staff
-      </button>
+      <div class="head-actions">
+        <button class="btn" id="btn-account" title="Change your password">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          My Account
+        </button>
+        <button class="btn btn--primary" id="btn-add">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Staff
+        </button>
+      </div>
     </header>
 
     <div class="toolbar">
@@ -230,9 +235,9 @@
       <table class="table">
         <thead>
           <tr>
-            <th style="width: 30%;">Name</th>
+            <th style="width: 28%;">Name</th>
             <th style="width: 25%;">Email</th>
-            <th style="width: 25%;">Products</th>
+            <th style="width: 27%;">Products</th>
             <th style="width: 10%;">Status</th>
             <th style="width: 10%;"></th>
           </tr>
@@ -246,66 +251,40 @@
     </div>
   </div>
 
-  <!-- Add Staff modal -->
-  <div class="modal-overlay" id="modal-add" role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
+  <!-- ADD STAFF MODAL -->
+  <div class="modal-overlay" id="modal-add" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modal-head">
-        <h2 id="modal-add-title">Add staff member</h2>
-        <button class="modal-close" id="modal-add-close" aria-label="Close">
+        <h2>Add staff member</h2>
+        <button class="modal-close" data-close="modal-add" aria-label="Close">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="modal-body">
-        <div class="form-error" id="form-error"></div>
+        <div class="form-error" id="add-error"></div>
 
-        <!-- Success state (replaces form after successful create) -->
-        <div id="success-pane" style="display:none;">
+        <div id="add-success" style="display:none;">
           <div class="success-block">
-            <h3>Account created</h3>
-            <p>Sign-in details below — keep this window open until they're captured.</p>
-            <div class="cred-card">
-              <div class="cred-row">
-                <span class="cred-label">Email</span>
-                <span class="cred-value" id="succ-email"></span>
-                <button class="cred-copy" data-copy="succ-email">Copy</button>
-              </div>
-              <div class="cred-row">
-                <span class="cred-label">Password</span>
-                <span class="cred-value" id="succ-code"></span>
-                <button class="cred-copy" data-copy="succ-code">Copy</button>
-              </div>
-              <div class="cred-row">
-                <span class="cred-label">Sign in</span>
-                <span class="cred-value" id="succ-url">https://id.travelify.io/signin.html</span>
-                <button class="cred-copy" data-copy="succ-url">Copy</button>
-              </div>
-            </div>
+            <h3>Invitation sent</h3>
+            <p id="add-success-msg"></p>
+            <div id="add-success-products"></div>
+            <p>The link works for 7 days. They'll set their own password when they accept.</p>
           </div>
-          <div class="email-status" id="email-status"></div>
         </div>
 
-        <!-- The form -->
-        <div id="form-pane">
-          <div class="field-row">
-            <div class="field">
-              <label class="field-label" for="f-name">Full name</label>
-              <input class="input" id="f-name" type="text" placeholder="Jane Smith" autocomplete="off">
-            </div>
-            <div class="field">
-              <label class="field-label" for="f-email">Email</label>
-              <input class="input" id="f-email" type="email" placeholder="jane@travelgenix.io" autocomplete="off">
-            </div>
+        <div id="add-form">
+          <div class="field">
+            <label class="field-label" for="f-email">Email address</label>
+            <input class="input" id="f-email" type="email" placeholder="jane@travelgenix.io" autocomplete="off">
+            <span class="field-hint">We'll send them an invitation link to set up their account.</span>
           </div>
 
           <div class="field">
-            <label class="field-label" for="f-role">Role across granted products</label>
+            <label class="field-label" for="f-role">Role</label>
             <select class="select" id="f-role">
-              <option value="owner">Owner (full admin, same as you)</option>
-              <option value="admin">Admin</option>
-              <option value="agent">Agent</option>
-              <option value="viewer">Viewer</option>
+              <option value="admin">Admin — can manage staff and use all granted products</option>
+              <option value="member">Member — can use granted products, can't manage staff</option>
             </select>
-            <span class="field-hint">This role applies to every product you grant access to.</span>
           </div>
 
           <div class="field">
@@ -313,22 +292,106 @@
             <div class="checklist" id="products"></div>
             <span class="field-hint">All products are selected by default. Uncheck any you don't want them to have.</span>
           </div>
+        </div>
+      </div>
+      <div class="modal-foot" id="add-foot-form">
+        <button class="btn" data-close="modal-add">Cancel</button>
+        <button class="btn btn--primary" id="btn-send-invite">Send invitation</button>
+      </div>
+      <div class="modal-foot" id="add-foot-success" style="display:none;">
+        <button class="btn btn--primary" data-close="modal-add">Done</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- EDIT STAFF MODAL -->
+  <div class="modal-overlay" id="modal-edit" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Edit staff member</h2>
+        <button class="modal-close" data-close="modal-edit" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-error" id="edit-error"></div>
+
+        <div class="field">
+          <label class="field-label" for="e-email">Email</label>
+          <input class="input" id="e-email" type="email" readonly>
+          <span class="field-hint">Email can't be changed. Delete and re-invite if needed.</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="e-name">Full name</label>
+          <input class="input" id="e-name" type="text" placeholder="Jane Smith">
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="e-role">Role</label>
+          <select class="select" id="e-role">
+            <option value="owner">Owner</option>
+            <option value="admin">Admin</option>
+            <option value="member">Member</option>
+          </select>
+          <span class="field-hint">Owner role is reserved for the primary account holder.</span>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn--danger" id="btn-delete-staff" style="margin-right:auto;">Delete user</button>
+        <button class="btn" data-close="modal-edit">Cancel</button>
+        <button class="btn btn--primary" id="btn-save-edit">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY ACCOUNT MODAL -->
+  <div class="modal-overlay" id="modal-account" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>My Account</h2>
+        <button class="modal-close" data-close="modal-account" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-error" id="account-error"></div>
+
+        <div id="account-success" style="display:none;">
+          <div class="success-block">
+            <h3>Password changed</h3>
+            <p id="account-success-msg">Your password has been updated.</p>
+          </div>
+        </div>
+
+        <div id="account-form">
           <div class="field">
-            <label class="field-label" style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
-              <input type="checkbox" id="f-send-email" checked style="width: 18px; height: 18px; accent-color: var(--tg-primary);">
-              Send welcome email automatically
+            <label class="field-label" for="a-current">Current password</label>
+            <input class="input" id="a-current" type="password" autocomplete="current-password">
+          </div>
+          <div class="field">
+            <label class="field-label" for="a-new">New password</label>
+            <input class="input" id="a-new" type="password" autocomplete="new-password">
+            <span class="field-hint">At least 10 characters. Length matters more than special characters.</span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="a-new2">Confirm new password</label>
+            <input class="input" id="a-new2" type="password" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label class="field-label" style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; font-weight: 400;">
+              <input type="checkbox" id="a-signout-others" checked style="width: 18px; height: 18px; accent-color: var(--tg-primary);">
+              Sign out all my other devices
             </label>
-            <span class="field-hint">If SendGrid isn't reachable, you'll get the sign-in details on screen to send manually.</span>
           </div>
         </div>
       </div>
-      <div class="modal-foot" id="modal-foot-form">
-        <button class="btn" id="btn-cancel">Cancel</button>
-        <button class="btn btn--primary" id="btn-create">Create staff account</button>
+      <div class="modal-foot" id="account-foot-form">
+        <button class="btn" data-close="modal-account">Cancel</button>
+        <button class="btn btn--primary" id="btn-change-password">Change password</button>
       </div>
-      <div class="modal-foot" id="modal-foot-success" style="display:none;">
-        <button class="btn btn--primary" id="btn-done">Done</button>
+      <div class="modal-foot" id="account-foot-success" style="display:none;">
+        <button class="btn btn--primary" data-close="modal-account">Done</button>
       </div>
     </div>
   </div>
@@ -336,19 +399,14 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-  // ============================================================================
-  // Config
-  // ============================================================================
-  // When iframed inside id.travelify.io/admin both share the same origin,
-  // so a relative URL works AND the tg_session cookie travels automatically.
   const API = {
-    users: '/api/identity/users',
-    user: (id) => `/api/identity/users/${id}`,
-    perms: '/api/identity/permissions',
+    users:          '/api/identity/users',
+    user:           (id) => `/api/identity/users/${id}`,
+    sendReset:      '/api/identity/send-reset',
+    resendInvite:   '/api/identity/resend-invite',
+    changePassword: '/api/auth/password/change',
   };
 
-  // Hardcoded for now — should ideally come from a /api/products endpoint.
-  // Matches the seven products you've registered (per memory).
   const ALL_PRODUCTS = [
     { slug: 'widget_suite',    name: 'TG Widget Suite' },
     { slug: 'luna_chat',       name: 'Luna Chat' },
@@ -359,25 +417,16 @@
     { slug: 'tool_hub',        name: 'Tool Hub' },
   ];
 
-  // ============================================================================
-  // State
-  // ============================================================================
   let users = [];
   let filtered = [];
+  let editingUserId = null;
 
-  // ============================================================================
-  // DOM
-  // ============================================================================
   const $ = (s) => document.querySelector(s);
   const rowsEl = $('#rows');
   const searchEl = $('#search');
   const statEl = $('#stat-total');
-  const modal = $('#modal-add');
   const toastEl = $('#toast');
 
-  // ============================================================================
-  // Toast
-  // ============================================================================
   let toastTimer;
   function toast(msg, kind = '') {
     toastEl.textContent = msg;
@@ -385,16 +434,21 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove('is-on'), 3000);
   }
-
-  // ============================================================================
-  // Helpers
-  // ============================================================================
   function esc(s) {
     return (s == null ? '' : String(s)).replace(/[&<>"']/g, (c) =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
   function roleClass(role) { return ({ owner: 'pill--owner', admin: 'pill--admin' }[role]) || 'pill--user'; }
-  function statusClass(s) { return s === 'suspended' ? 'pill--suspended' : 'pill--active'; }
+  function statusClass(s) {
+    if (s === 'suspended') return 'pill--suspended';
+    if (s === 'invited') return 'pill--invited';
+    return 'pill--active';
+  }
+  function statusLabel(s) {
+    if (s === 'invited') return 'Invited';
+    if (s === 'suspended') return 'Suspended';
+    return 'Active';
+  }
 
   async function api(url, opts = {}) {
     const res = await fetch(url, {
@@ -402,33 +456,52 @@
       headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
       ...opts,
     });
-    // Try to parse JSON, but if the response isn't JSON (e.g. Vercel returns
-    // a text/plain 500 page for FUNCTION_INVOCATION_FAILED), surface a real
-    // error rather than the unhelpful "Bad response".
     let data;
-    const contentType = (res.headers.get('content-type') || '').toLowerCase();
-    if (contentType.includes('application/json')) {
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    if (ct.includes('application/json')) {
       data = await res.json().catch(() => ({ ok: false, error: 'Malformed JSON response' }));
     } else {
       const text = await res.text().catch(() => '');
-      data = {
-        ok: false,
-        error: `HTTP ${res.status}${text ? `: ${text.slice(0, 200)}` : ''}`,
-      };
+      data = { ok: false, error: `HTTP ${res.status}${text ? `: ${text.slice(0, 200)}` : ''}` };
     }
     if (!res.ok || data.ok === false) {
       const err = new Error(data.error || `Request failed (${res.status})`);
       err.code = data.code;
       err.status = res.status;
-      err.debug = data.debug || null;   // surface diagnostic detail
+      err.debug = data.debug || null;
       throw err;
     }
     return data;
   }
 
-  // ============================================================================
-  // Render
-  // ============================================================================
+  function openModal(id) {
+    document.body.style.overflow = 'hidden';
+    document.getElementById(id).classList.add('is-open');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('click', (e) => {
+    const closer = e.target.closest('[data-close]');
+    if (closer) { closeModal(closer.dataset.close); return; }
+    if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+      e.target.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+    // Close any open row menus when clicking outside one
+    if (!e.target.closest('.menu-wrap')) {
+      document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.is-open').forEach((m) => m.classList.remove('is-open'));
+      document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
+      document.body.style.overflow = '';
+    }
+  });
+
   function applyFilter() {
     const q = (searchEl.value || '').trim().toLowerCase();
     filtered = !q ? users.slice() : users.filter((u) =>
@@ -460,32 +533,69 @@
         `<span class="pill ${roleClass(p.role)}" title="${esc(p.productName)} (${esc(p.role)})">${esc(p.productName || p.productSlug)}</span>`
       ).join('');
       const more = u.permissions.length > 3 ? `<span class="pill pill--user">+${u.permissions.length - 3}</span>` : '';
+      const meTag = u.isMe ? ' <span class="pill pill--owner" style="font-size:10px;margin-left:6px;">You</span>' : '';
 
       return `<tr data-id="${esc(u.recordId)}">
         <td>
-          <div class="cell-name">${esc(u.fullName)}${u.isMe ? ' <span class="pill pill--owner" style="font-size:10px;margin-left:6px;">You</span>' : ''}</div>
+          <div class="cell-name">${esc(u.fullName || '—')}${meTag}</div>
           <div class="cell-meta">${esc(u.role || 'member')}</div>
         </td>
         <td><div class="cell-meta" style="color: var(--tg-text-primary); font-size: 14px;">${esc(u.email)}</div></td>
-        <td><div class="pill-row">${products}${more || '<span class="pill pill--user">None</span>'}</div></td>
-        <td><span class="pill ${statusClass(u.status)}">${esc(u.status)}</span></td>
-        <td class="cell-actions">
-          ${u.isMe ? '' : (u.status === 'active'
-            ? `<button class="btn btn--sm" data-act="suspend" data-id="${esc(u.recordId)}">Suspend</button>`
-            : `<button class="btn btn--sm" data-act="reactivate" data-id="${esc(u.recordId)}">Reactivate</button>`)}
-        </td>
+        <td><div class="pill-row">${products}${more || (u.permissions.length === 0 ? '<span class="pill pill--user">None</span>' : '')}</div></td>
+        <td><span class="pill ${statusClass(u.status)}">${esc(statusLabel(u.status))}</span></td>
+        <td class="cell-actions">${rowActions(u)}</td>
       </tr>`;
     }).join('');
   }
 
-  // ============================================================================
-  // Actions
-  // ============================================================================
+  function rowActions(u) {
+    if (u.isMe) {
+      return `<button class="btn btn--sm" data-act="edit" data-id="${esc(u.recordId)}">Edit</button>`;
+    }
+    let primary;
+    if (u.status === 'invited') {
+      primary = `<button class="btn btn--sm" data-act="resend" data-id="${esc(u.recordId)}">Resend invite</button>`;
+    } else if (u.status === 'suspended') {
+      primary = `<button class="btn btn--sm" data-act="reactivate" data-id="${esc(u.recordId)}">Reactivate</button>`;
+    } else {
+      primary = `<button class="btn btn--sm" data-act="edit" data-id="${esc(u.recordId)}">Edit</button>`;
+    }
+    return primary +
+      `<div class="menu-wrap">
+        <button class="menu-trigger" data-act="menu" data-id="${esc(u.recordId)}" aria-label="More actions">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+        </button>
+        <div class="menu" data-menu="${esc(u.recordId)}">
+          ${u.status !== 'invited' ? `<button class="menu-item" data-act="edit" data-id="${esc(u.recordId)}">Edit details</button>` : ''}
+          ${u.status === 'invited' ? `<button class="menu-item" data-act="resend" data-id="${esc(u.recordId)}">Resend invite</button>` : ''}
+          ${u.status === 'active' ? `<button class="menu-item" data-act="reset" data-id="${esc(u.recordId)}">Send password reset</button>` : ''}
+          <div class="menu-divider"></div>
+          ${u.status === 'active' ? `<button class="menu-item menu-item--danger" data-act="suspend" data-id="${esc(u.recordId)}">Suspend</button>` : ''}
+          ${u.status === 'suspended' ? `<button class="menu-item" data-act="reactivate" data-id="${esc(u.recordId)}">Reactivate</button>` : ''}
+          <button class="menu-item menu-item--danger" data-act="delete" data-id="${esc(u.recordId)}">Delete user</button>
+        </div>
+      </div>`;
+  }
+
   rowsEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
     const id = btn.dataset.id;
     const act = btn.dataset.act;
+
+    if (act === 'menu') {
+      e.stopPropagation();
+      const menu = document.querySelector(`[data-menu="${CSS.escape(id)}"]`);
+      const wasOpen = menu.classList.contains('is-open');
+      document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
+      if (!wasOpen) menu.classList.add('is-open');
+      return;
+    }
+
+    document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
+
+    if (act === 'edit') { openEditModal(id); return; }
+
     btn.disabled = true;
     try {
       if (act === 'suspend') {
@@ -494,6 +604,23 @@
       } else if (act === 'reactivate') {
         await api(API.user(id), { method: 'PATCH', body: JSON.stringify({ status: 'active' }) });
         toast('User reactivated', 'ok');
+      } else if (act === 'reset') {
+        const u = users.find((x) => x.recordId === id);
+        if (!confirm(`Send a password-reset link to ${u ? u.email : 'this user'}? They'll get an email with a link that works for 1 hour.`)) {
+          btn.disabled = false; return;
+        }
+        await api(API.sendReset, { method: 'POST', body: JSON.stringify({ userId: id }) });
+        toast('Password-reset email sent', 'ok');
+      } else if (act === 'resend') {
+        await api(API.resendInvite, { method: 'POST', body: JSON.stringify({ userId: id }) });
+        toast('Invitation re-sent', 'ok');
+      } else if (act === 'delete') {
+        const u = users.find((x) => x.recordId === id);
+        if (!confirm(`Delete ${u ? (u.fullName || u.email) : 'this user'}? This removes their account and all permissions. Can't be undone.`)) {
+          btn.disabled = false; return;
+        }
+        await api(API.user(id), { method: 'DELETE' });
+        toast('User deleted', 'ok');
       }
       await loadUsers();
     } catch (err) {
@@ -503,29 +630,7 @@
     }
   });
 
-  // ============================================================================
-  // Modal — Add Staff
-  // ============================================================================
-  function openModal() {
-    document.body.style.overflow = 'hidden';
-    $('#form-pane').style.display = 'block';
-    $('#success-pane').style.display = 'none';
-    $('#modal-foot-form').style.display = 'flex';
-    $('#modal-foot-success').style.display = 'none';
-    $('#form-error').classList.remove('is-on');
-    $('#f-name').value = '';
-    $('#f-email').value = '';
-    $('#f-role').value = 'owner';
-    $('#f-send-email').checked = true;
-    renderProductChecklist();
-    modal.classList.add('is-open');
-    setTimeout(() => $('#f-name').focus(), 50);
-  }
-  function closeModal() {
-    modal.classList.remove('is-open');
-    document.body.style.overflow = '';
-  }
-
+  // ----- Add Staff -----
   function renderProductChecklist() {
     $('#products').innerHTML = ALL_PRODUCTS.map((p) => `
       <label class="check-row">
@@ -536,86 +641,202 @@
     `).join('');
   }
 
-  $('#btn-add').addEventListener('click', openModal);
-  $('#modal-add-close').addEventListener('click', closeModal);
-  $('#btn-cancel').addEventListener('click', closeModal);
-  $('#btn-done').addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal(); });
+  $('#btn-add').addEventListener('click', () => {
+    $('#add-error').classList.remove('is-on');
+    $('#add-form').style.display = 'block';
+    $('#add-success').style.display = 'none';
+    $('#add-foot-form').style.display = 'flex';
+    $('#add-foot-success').style.display = 'none';
+    $('#f-email').value = '';
+    $('#f-role').value = 'admin';
+    renderProductChecklist();
+    openModal('modal-add');
+    setTimeout(() => $('#f-email').focus(), 50);
+  });
 
-  $('#btn-create').addEventListener('click', async () => {
-    const errEl = $('#form-error');
+  $('#btn-send-invite').addEventListener('click', async () => {
+    const errEl = $('#add-error');
     errEl.classList.remove('is-on');
 
-    const fullName = $('#f-name').value.trim();
     const email = $('#f-email').value.trim().toLowerCase();
     const role = $('#f-role').value;
-    const sendEmail = $('#f-send-email').checked;
     const productSlugs = Array.from($('#products').querySelectorAll('input:checked')).map((i) => i.value);
 
-    if (fullName.length < 2) { errEl.textContent = 'Enter a full name (at least 2 characters).'; errEl.classList.add('is-on'); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Enter a valid email address.'; errEl.classList.add('is-on'); return; }
-    if (productSlugs.length === 0) { errEl.textContent = 'Select at least one product.'; errEl.classList.add('is-on'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errEl.textContent = 'Enter a valid email address.';
+      errEl.classList.add('is-on'); return;
+    }
+    if (productSlugs.length === 0) {
+      errEl.textContent = 'Select at least one product.';
+      errEl.classList.add('is-on'); return;
+    }
 
-    const btn = $('#btn-create');
-    btn.disabled = true; btn.textContent = 'Creating…';
+    const btn = $('#btn-send-invite');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
 
     try {
       const res = await api(API.users, {
         method: 'POST',
-        body: JSON.stringify({ fullName, email, role, productSlugs, sendEmail }),
+        body: JSON.stringify({ email, role, productSlugs }),
       });
-      // Show success pane
-      $('#succ-email').textContent = res.user.email;
-      $('#succ-code').textContent = res.user.tempPassword;
-      const statusEl = $('#email-status');
-      if (res.email && res.email.sent) {
-        statusEl.className = 'email-status email-status--sent';
-        statusEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><polyline points="20 6 9 17 4 12"/></svg> Welcome email sent to ${esc(res.user.email)}.`;
-      } else {
-        statusEl.className = 'email-status email-status--manual';
-        const reason = res.email && res.email.reason ? res.email.reason : 'Auto-send unavailable.';
-        statusEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <strong>Send manually:</strong> ${esc(reason)} Copy the password and email it to ${esc(res.user.email)}.`;
-      }
-      $('#form-pane').style.display = 'none';
-      $('#success-pane').style.display = 'block';
-      $('#modal-foot-form').style.display = 'none';
-      $('#modal-foot-success').style.display = 'flex';
-      // Refresh the table in the background
+      const productNames = res.productNames || [];
+      $('#add-success-msg').textContent = `An email has been sent to ${res.user.email} with a link to set up their account.`;
+      $('#add-success-products').innerHTML = productNames.length
+        ? `<p style="margin-top:var(--space-2);"><strong style="color:var(--tg-text-primary);font-weight:500;">They'll have access to:</strong></p><ul>${productNames.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>`
+        : '';
+      $('#add-form').style.display = 'none';
+      $('#add-success').style.display = 'block';
+      $('#add-foot-form').style.display = 'none';
+      $('#add-foot-success').style.display = 'flex';
       loadUsers();
     } catch (err) {
       errEl.textContent = err.message;
       errEl.classList.add('is-on');
     } finally {
-      btn.disabled = false; btn.textContent = 'Create staff account';
+      btn.disabled = false;
+      btn.textContent = 'Send invitation';
     }
   });
 
-  // Copy buttons in success pane
-  document.addEventListener('click', (e) => {
-    const c = e.target.closest('.cred-copy');
-    if (!c) return;
-    const el = document.getElementById(c.dataset.copy);
-    if (!el) return;
-    navigator.clipboard.writeText(el.textContent).then(() => {
-      const orig = c.textContent;
-      c.textContent = 'Copied';
-      setTimeout(() => { c.textContent = orig; }, 1200);
-    });
+  // ----- Edit Staff -----
+  function openEditModal(userId) {
+    const u = users.find((x) => x.recordId === userId);
+    if (!u) return;
+    editingUserId = userId;
+    $('#edit-error').classList.remove('is-on');
+    $('#e-email').value = u.email;
+    $('#e-name').value = u.fullName || '';
+    $('#e-role').value = u.role || 'member';
+    $('#btn-delete-staff').style.display = u.isMe ? 'none' : '';
+    openModal('modal-edit');
+    setTimeout(() => $('#e-name').focus(), 50);
+  }
+
+  $('#btn-save-edit').addEventListener('click', async () => {
+    const errEl = $('#edit-error');
+    errEl.classList.remove('is-on');
+
+    const fullName = $('#e-name').value.trim();
+    const role = $('#e-role').value;
+
+    if (fullName && fullName.length < 2) {
+      errEl.textContent = 'Full name must be at least 2 characters.';
+      errEl.classList.add('is-on'); return;
+    }
+
+    const btn = $('#btn-save-edit');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      const body = { role };
+      if (fullName) body.fullName = fullName;
+      await api(API.user(editingUserId), {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      });
+      toast('Changes saved', 'ok');
+      closeModal('modal-edit');
+      loadUsers();
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add('is-on');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save changes';
+    }
   });
 
-  // ============================================================================
-  // Search (debounced)
-  // ============================================================================
+  $('#btn-delete-staff').addEventListener('click', async () => {
+    const u = users.find((x) => x.recordId === editingUserId);
+    if (!u) return;
+    if (!confirm(`Delete ${u.fullName || u.email}? This removes their account and all permissions. Can't be undone.`)) return;
+
+    const btn = $('#btn-delete-staff');
+    btn.disabled = true;
+    try {
+      await api(API.user(editingUserId), { method: 'DELETE' });
+      toast('User deleted', 'ok');
+      closeModal('modal-edit');
+      loadUsers();
+    } catch (err) {
+      toast(err.message, 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ----- My Account / Change Password -----
+  $('#btn-account').addEventListener('click', () => {
+    $('#account-error').classList.remove('is-on');
+    $('#account-form').style.display = 'block';
+    $('#account-success').style.display = 'none';
+    $('#account-foot-form').style.display = 'flex';
+    $('#account-foot-success').style.display = 'none';
+    $('#a-current').value = '';
+    $('#a-new').value = '';
+    $('#a-new2').value = '';
+    $('#a-signout-others').checked = true;
+    openModal('modal-account');
+    setTimeout(() => $('#a-current').focus(), 50);
+  });
+
+  $('#btn-change-password').addEventListener('click', async () => {
+    const errEl = $('#account-error');
+    errEl.classList.remove('is-on');
+
+    const currentPassword = $('#a-current').value;
+    const newPassword = $('#a-new').value;
+    const confirm2 = $('#a-new2').value;
+    const signOutOthers = $('#a-signout-others').checked;
+
+    if (!currentPassword) {
+      errEl.textContent = 'Enter your current password.';
+      errEl.classList.add('is-on'); return;
+    }
+    if (newPassword.length < 10) {
+      errEl.textContent = 'New password must be at least 10 characters.';
+      errEl.classList.add('is-on'); return;
+    }
+    if (newPassword !== confirm2) {
+      errEl.textContent = "New password and confirmation don't match.";
+      errEl.classList.add('is-on'); return;
+    }
+
+    const btn = $('#btn-change-password');
+    btn.disabled = true;
+    btn.textContent = 'Changing…';
+
+    try {
+      await api(API.changePassword, {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword, signOutOthers }),
+      });
+      $('#account-success-msg').textContent = signOutOthers
+        ? 'Your password has been updated. Other devices have been signed out.'
+        : 'Your password has been updated.';
+      $('#account-form').style.display = 'none';
+      $('#account-success').style.display = 'block';
+      $('#account-foot-form').style.display = 'none';
+      $('#account-foot-success').style.display = 'flex';
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add('is-on');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Change password';
+    }
+  });
+
+  // ----- Search -----
   let searchTimer;
   searchEl.addEventListener('input', () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(applyFilter, 120);
   });
 
-  // ============================================================================
-  // Load
-  // ============================================================================
+  // ----- Load -----
   async function loadUsers() {
     try {
       const res = await api(API.users);
@@ -638,15 +859,13 @@
     }
   }
 
-  // Theme: respect parent's data-theme attribute if iframed, AND listen for live updates
+  // Theme sync with parent /admin shell
   try {
     if (window.parent && window.parent !== window && window.parent.document) {
       const theme = window.parent.document.documentElement.getAttribute('data-theme');
       if (theme) document.documentElement.setAttribute('data-theme', theme);
     }
-  } catch { /* cross-origin parent — ignore */ }
-
-  // The Travelgenix Control shell posts { type: 'theme', value: 'light'|'dark' } when toggled
+  } catch {}
   window.addEventListener('message', (e) => {
     if (e.data && e.data.type === 'theme' && (e.data.value === 'light' || e.data.value === 'dark')) {
       document.documentElement.setAttribute('data-theme', e.data.value);
