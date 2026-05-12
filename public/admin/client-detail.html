@@ -906,35 +906,45 @@
       }
     });
 
-    // Row action delegation — attached once to #tab-content
-    document.getElementById('tab-content').addEventListener('click', async (e) => {
-      // Add User button (lives in the panel header, not inside the table)
-      if (e.target.closest('#btn-add-user')) {
-        openAddUserModal();
-        return;
-      }
+    // ─── Event delegation: one listener on document, dispatch by id ───
+    // We attach to document (which always exists at script-parse time) and
+    // dispatch on element id or data-act. This avoids the "DOM not built yet"
+    // problem — the spinner/loadClient sequence hasn't injected #tab-content
+    // when this script runs, and the modal buttons live below the <script>
+    // tag in source order so they don't exist yet either. Document delegation
+    // handles all of it.
+    document.addEventListener('click', async (e) => {
+      // ── Buttons identified by id ──
+      if (e.target.closest('#btn-add-user'))     return openAddUserModal();
+      if (e.target.closest('#btn-send-invite'))  return handleSendInvite();
+      if (e.target.closest('#btn-save-edit'))    return handleSaveEdit();
+      if (e.target.closest('#btn-delete-user'))  return handleDeleteUser();
 
+      // ── Row-action buttons (data-act inside the users table) ──
       const btn = e.target.closest('[data-act]');
       if (!btn) return;
+      // Ignore data-act buttons that aren't inside the Users tab
+      if (!btn.closest('#tab-content')) return;
+
       const id = btn.dataset.id;
       const act = btn.dataset.act;
 
       if (act === 'menu') {
         e.stopPropagation();
         const menu = document.querySelector(`[data-menu="${cssEscape(id)}"]`);
-        const wasOpen = menu.classList.contains('is-open');
+        const wasOpen = menu && menu.classList.contains('is-open');
         document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
-        if (!wasOpen) menu.classList.add('is-open');
+        if (menu && !wasOpen) menu.classList.add('is-open');
         return;
       }
       document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
 
-      if (act === 'edit')      return openEditUserModal(id);
-      if (act === 'suspend')   return updateUserStatus(id, 'suspended', btn);
-      if (act === 'reactivate')return updateUserStatus(id, 'active', btn);
-      if (act === 'reset')     return triggerSendReset(id, btn);
-      if (act === 'resend')    return triggerResendInvite(id, btn);
-      if (act === 'delete')    return deleteUserConfirm(id, btn);
+      if (act === 'edit')       return openEditUserModal(id);
+      if (act === 'suspend')    return updateUserStatus(id, 'suspended', btn);
+      if (act === 'reactivate') return updateUserStatus(id, 'active', btn);
+      if (act === 'reset')      return triggerSendReset(id, btn);
+      if (act === 'resend')     return triggerResendInvite(id, btn);
+      if (act === 'delete')     return deleteUserConfirm(id, btn);
     });
 
     function cssEscape(s) {
@@ -970,7 +980,7 @@
       setTimeout(() => document.getElementById('add-email').focus(), 50);
     }
 
-    document.getElementById('btn-send-invite').addEventListener('click', async () => {
+    async function handleSendInvite() {
       const errEl = document.getElementById('add-error');
       errEl.classList.remove('is-on');
 
@@ -1025,7 +1035,7 @@
       } finally {
         btn.disabled = false; btn.textContent = 'Send invitation';
       }
-    });
+    }
 
     // ── Edit User modal ──
     function openEditUserModal(userId) {
@@ -1058,7 +1068,7 @@
       setTimeout(() => document.getElementById('edit-name').focus(), 50);
     }
 
-    document.getElementById('btn-save-edit').addEventListener('click', async () => {
+    async function handleSaveEdit() {
       const errEl = document.getElementById('edit-error');
       errEl.classList.remove('is-on');
 
@@ -1115,9 +1125,9 @@
       } finally {
         btn.disabled = false; btn.textContent = 'Save changes';
       }
-    });
+    }
 
-    document.getElementById('btn-delete-user').addEventListener('click', async () => {
+    async function handleDeleteUser() {
       const u = clientData.users.find((x) => x.id === editingUserId);
       if (!u) return;
       if (!confirm(`Delete ${u.fullName || u.email}? This removes their account and all permissions. Can't be undone.`)) return;
@@ -1136,7 +1146,7 @@
       } finally {
         btn.disabled = false;
       }
-    });
+    }
 
     // ── Row helpers ──
     async function updateUserStatus(userId, status, btn) {
