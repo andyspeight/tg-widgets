@@ -52,10 +52,11 @@ import {
 import {
   hashPassword, signSessionToken, uuid,
 } from '../_lib/auth/crypto.js';
-import { setSessionCookie } from '../_lib/auth/cookie.js';
+import { setSessionCookie, clearSessionCookie } from '../_lib/auth/cookie.js';
 import { getRequestIp, getUserAgent } from '../_lib/auth/http.js';
 import { resolveUserPermissions } from '../_lib/auth/permissions.js';
 import { logAuthEvent } from '../_lib/auth/audit.js';
+import { revokeAllUserSessions } from '../_lib/auth/sessions.js';
 
 // ─── Config ─────────────────────────────────────────────────────────
 const SIGNIN_PATH = '/signin.html';
@@ -756,6 +757,26 @@ export default async function handler(req, res) {
     const fullName = userFields[USERS.fields.fullName] || `${givenName} ${familyName}`.trim();
     const permissions = await resolveUserPermissions(userRec.id, email, { bypassCache: true });
 
+    // Revoke any existing active sessions for this user. SSO is a hard
+    // reset on session state — if the user signs in via SSO from app A
+    // then again from app B, the A session should be killed. Without this
+    // we accumulate stale session rows AND, worse, a stale cookie can
+    // continue to resolve a prior session if the new cookie isn't picked
+    // up cleanly by the browser (the bug Darren hit on 2026-05-12).
+    let revokedCount = 0;
+    try {
+      revokedCount = await revokeAllUserSessions(userRec.id, 'sso_new_session');
+    } catch (err) {
+      // Non-fatal — log and continue. Better to have a duplicate session
+      // than to block sign-in.
+      console.error('[sso] revoke previous sessions failed:', err.message);
+    }
+
+    console.log('[sso] resolved client', clientId, 'for user', userRec.id,
+      `(email=${email} appId=${travelifyAppId} package=${packageCode}` +
+      ` clientCreated=${clientCreated} userCreated=${userCreated}` +
+      ` previousSessionsRevoked=${revokedCount})`);
+
     const sessionId = uuid();
     const { token, jti, expiresAt } = signSessionToken({
       userId: userRec.id,
@@ -777,12 +798,19 @@ export default async function handler(req, res) {
       [SESSIONS.fields.lastUsed]:  nowIso,
     });
 
+    console.log('[sso] minted new session', sessionId, 'for user', userRec.id, 'client', clientId);
+
     // Update last-login timestamp (best-effort)
     updateRecord(USERS.tableId, userRec.id, {
       [USERS.fields.lastLogin]:   nowIso,
       [USERS.fields.lastLoginIp]: ip,
     }).catch(() => {});
 
+    // Clear the cookie first, then set the new one. This is defensive against
+    // a stale cookie from a previous deploy that might have a slightly
+    // different path or domain attribute and would otherwise sit alongside
+    // the new cookie in the browser, ambiguously.
+    clearSessionCookie(res, { req });
     setSessionCookie(res, token, expiresAt, { req });
 
     logAuthEvent({
