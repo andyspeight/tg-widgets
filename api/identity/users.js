@@ -7,7 +7,7 @@
  * Auth: owner role on widget_suite (enforced by requireOwner)
  */
 
-const {
+import {
   T_USERS,
   T_PRODUCTS,
   T_PERMISSIONS,
@@ -16,9 +16,9 @@ const {
   airtableFetch,
   generateClientCode,
   sendWelcomeEmail,
-} = require('../../lib/identity-helpers');
+} from '../../lib/identity-helpers.js';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
@@ -26,7 +26,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'POST') return handleCreate(req, res);
 
   return res.status(405).json({ ok: false, error: 'Method not allowed' });
-};
+}
 
 // ---------- GET /api/identity/users ----------
 async function handleList(req, res) {
@@ -34,11 +34,9 @@ async function handleList(req, res) {
   if (!me) return;
 
   try {
-    // Pull all users (we have <50 — single page fine; paginate when we cross 100)
     const usersRes = await airtableFetch(`${T_USERS}?pageSize=100`);
     const permsRes = await airtableFetch(`${T_PERMISSIONS}?pageSize=100`);
 
-    // Build a userId → [permissions] map
     const permsByUser = {};
     for (const p of permsRes.records || []) {
       const userIds = p.fields.User || [];
@@ -65,12 +63,11 @@ async function handleList(req, res) {
       plan: u.fields.Plan || '',
       status: u.fields.Status || 'Active',
       lastLogin: u.fields.LastLogin || null,
-      createdAt: u.fields.CreatedAt || u._createdTime || null,
+      createdAt: u.fields.CreatedAt || u.createdTime || null,
       notes: u.fields.Notes || '',
       permissions: permsByUser[u.id] || [],
     }));
 
-    // Sort: active first, then alphabetically
     users.sort((a, b) => {
       if (a.status !== b.status) return a.status === 'Active' ? -1 : 1;
       return (a.fullName || '').localeCompare(b.fullName || '');
@@ -84,7 +81,6 @@ async function handleList(req, res) {
 }
 
 // ---------- POST /api/identity/users ----------
-// Body: { email, fullName, plan?, productSlugs: [string], role: 'owner'|'admin'|'user', sendEmail: boolean }
 async function handleCreate(req, res) {
   const me = await requireOwner(req, res);
   if (!me) return;
@@ -95,8 +91,10 @@ async function handleCreate(req, res) {
   } catch {
     return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
   }
+  if (!body || typeof body !== 'object') {
+    return res.status(400).json({ ok: false, error: 'Body required' });
+  }
 
-  // Validate
   const email = String(body.email || '').trim().toLowerCase();
   const fullName = String(body.fullName || '').trim();
   const plan = String(body.plan || 'Bespoke').trim();
@@ -118,7 +116,6 @@ async function handleCreate(req, res) {
   }
 
   try {
-    // Check for existing user with same email
     const existing = await airtableFetch(
       `${T_USERS}?filterByFormula=${encodeURIComponent(`LOWER({Email})='${email}'`)}&maxRecords=1`
     );
@@ -126,7 +123,6 @@ async function handleCreate(req, res) {
       return res.status(409).json({ ok: false, error: 'A user with this email already exists' });
     }
 
-    // Resolve product slugs → recordIds AND friendly names (for the email + permission row)
     const productsRes = await airtableFetch(`${T_PRODUCTS}?pageSize=100`);
     const productsBySlug = {};
     for (const p of productsRes.records || []) {
@@ -142,10 +138,8 @@ async function handleCreate(req, res) {
       resolvedProducts.push({ slug, ...match });
     }
 
-    // Generate ClientCode
     const clientCode = generateClientCode('STAFF');
 
-    // Create the User
     const userCreate = await airtableFetch(T_USERS, {
       method: 'POST',
       body: JSON.stringify({
@@ -164,7 +158,6 @@ async function handleCreate(req, res) {
     });
     const newUserId = userCreate.records[0].id;
 
-    // Create permission rows (batch of up to 10)
     const permRecords = resolvedProducts.map((p) => ({
       fields: {
         User: [newUserId],
@@ -178,7 +171,6 @@ async function handleCreate(req, res) {
       body: JSON.stringify({ typecast: true, records: permRecords }),
     });
 
-    // Send welcome email (no-op if RESEND_API_KEY unset)
     let emailResult = { sent: false, reason: 'Skipped by request' };
     if (sendEmail) {
       try {
@@ -200,13 +192,11 @@ async function handleCreate(req, res) {
         recordId: newUserId,
         email,
         fullName,
-        clientCode,        // returned ONCE — owner copies to email if auto-send unavailable
+        clientCode,
         plan,
         status: 'Active',
       },
-      permissions: permCreate.records.map((r) => ({
-        permissionId: r.id,
-      })),
+      permissions: permCreate.records.map((r) => ({ permissionId: r.id })),
       productNames: resolvedProducts.map((p) => p.name),
       email: emailResult,
     });
