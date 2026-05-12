@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home · Travelgenix</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231B2B5B'/><path d='M16 6L6 11l10 5 10-5-10-5z' fill='none' stroke='%2300B4D8' stroke-width='1.5'/><path d='M6 21l10 5 10-5M6 16l10 5 10-5' fill='none' stroke='%2300B4D8' stroke-width='1.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tg-primary: #1B2B5B;
+    --tg-primary-dark: #111D3E;
+    --tg-accent: #00B4D8;
+    --tg-accent-dark: #0096B7;
+    --tg-accent-light: #48CAE4;
+    --tg-accent-bg: rgba(0, 180, 216, 0.08);
+    --tg-success: #10B981;
+    --tg-warning: #F59E0B;
+    --tg-error: #EF4444;
+    --tg-bg-primary: #FFFFFF;
+    --tg-bg-secondary: #F8FAFC;
+    --tg-bg-tertiary: #F1F5F9;
+    --tg-border: #E2E8F0;
+    --tg-border-light: #F1F5F9;
+    --tg-text-primary: #0F172A;
+    --tg-text-secondary: #475569;
+    --tg-text-tertiary: #94A3B8;
+    --tg-text-inverse: #FFFFFF;
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.04);
+  }
+  [data-theme="dark"] {
+    --tg-bg-primary: #0F172A;
+    --tg-bg-secondary: #0B1222;
+    --tg-bg-tertiary: #1E293B;
+    --tg-border: #334155;
+    --tg-border-light: #1E293B;
+    --tg-text-primary: #F8FAFC;
+    --tg-text-secondary: #CBD5E1;
+    --tg-text-tertiary: #64748B;
+    --tg-accent-bg: rgba(0, 180, 216, 0.12);
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--tg-bg-secondary);
+    color: var(--tg-text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  /* Boot screen */
+  #boot {
+    position: fixed; inset: 0;
+    background: var(--tg-primary);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  #boot.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .boot-inner { text-align: center; animation: fadeIn 0.4s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .boot-logo {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-dark));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 32px rgba(0, 180, 216, 0.3);
+  }
+  .boot-logo svg { width: 30px; height: 30px; stroke: white; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .boot-title { color: white; font-size: 18px; font-weight: 600; margin-bottom: 4px; letter-spacing: -0.01em; }
+  .boot-sub { color: rgba(255,255,255,0.55); font-size: 13px; }
+
+  /* App shell */
+  #app { display: none; min-height: 100vh; flex-direction: column; }
+  #app.visible { display: flex; }
+
+  /* Top bar */
+  .topbar {
+    background: var(--tg-bg-primary);
+    border-bottom: 1px solid var(--tg-border);
+    padding: 12px 0;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .topbar-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .brand-mark {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-dark));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-mark svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .brand-name { font-size: 15px; font-weight: 600; color: var(--tg-text-primary); letter-spacing: -0.01em; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  /* Company switcher */
+  .switcher { position: relative; }
+  .switcher[hidden] { display: none; }
+  .switcher-trigger {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 36px; padding: 0 12px;
+    background: var(--tg-bg-tertiary);
+    border: 1px solid var(--tg-border);
+    border-radius: 8px;
+    color: var(--tg-text-primary);
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    max-width: 220px;
+  }
+  .switcher-trigger:hover { background: var(--tg-bg-primary); border-color: var(--tg-accent); }
+  .switcher-trigger:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }
+  .switcher-icon {
+    width: 16px; height: 16px;
+    color: var(--tg-text-secondary);
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .switcher-icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .switcher-label {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 140px;
+    flex: 1; text-align: left;
+  }
+  .switcher-caret {
+    width: 14px; height: 14px;
+    color: var(--tg-text-tertiary);
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+  .switcher-caret svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .switcher-trigger[aria-expanded="true"] .switcher-caret { transform: rotate(180deg); }
+
+  .switcher-menu {
+    position: absolute;
+    top: calc(100% + 6px); right: 0;
+    min-width: 280px;
+    background: var(--tg-bg-primary);
+    border: 1px solid var(--tg-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    padding: 6px;
+    z-index: 50;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .switcher-menu[hidden] { display: none; }
+  .switcher-menu-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--tg-text-tertiary);
+    padding: 8px 12px 4px;
+  }
+  .switcher-option {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 10px 12px;
+    background: transparent; border: 0;
+    text-align: left; cursor: pointer;
+    border-radius: 8px;
+    font-family: inherit;
+    color: var(--tg-text-primary);
+    transition: background 0.1s;
+  }
+  .switcher-option:hover:not(:disabled) { background: var(--tg-bg-tertiary); }
+  .switcher-option:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: -2px; }
+  .switcher-option:disabled { cursor: default; }
+  .switcher-option-info { flex: 1; min-width: 0; }
+  .switcher-option-name {
+    font-size: 14px; font-weight: 500;
+    color: var(--tg-text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .switcher-option-sub {
+    font-size: 12px; color: var(--tg-text-tertiary);
+    margin-top: 2px;
+  }
+  .switcher-option-check {
+    width: 18px; height: 18px;
+    color: var(--tg-accent);
+    flex-shrink: 0;
+    display: none;
+  }
+  .switcher-option[aria-selected="true"] .switcher-option-check { display: inline-flex; }
+  .switcher-option-check svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .switcher-option-suspended { color: var(--tg-text-tertiary); }
+  .switcher-option-suspended .switcher-option-name { color: var(--tg-text-tertiary); }
+  .switcher-empty {
+    padding: 16px 12px;
+    font-size: 13px; color: var(--tg-text-tertiary);
+    text-align: center;
+  }
+
+  .user-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    background: var(--tg-bg-tertiary);
+    border-radius: 999px;
+    font-size: 13px; color: var(--tg-text-secondary);
+    font-weight: 500;
+  }
+  .user-chip-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--tg-success);
+  }
+  .icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--tg-border);
+    color: var(--tg-text-secondary);
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .icon-btn:hover { background: var(--tg-bg-tertiary); border-color: var(--tg-text-tertiary); color: var(--tg-text-primary); }
+  .icon-btn:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }
+  .icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .theme-toggle .icon-sun { display: none; }
+  .theme-toggle .icon-moon { display: block; }
+  [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+  .signout-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 36px; padding: 0 14px;
+    background: transparent; border: 1px solid var(--tg-border);
+    border-radius: 8px;
+    color: var(--tg-text-secondary);
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .signout-btn:hover { background: rgba(239,68,68,0.06); border-color: var(--tg-error); color: var(--tg-error); }
+  .signout-btn:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }
+  .signout-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Main */
+  .main {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 48px 32px 64px;
+  }
+
+  /* Hero / company header */
+  .hero {
+    background: var(--tg-bg-primary);
+    border: 1px solid var(--tg-border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(0, 180, 216, 0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--tg-text-tertiary);
+    margin-bottom: 8px;
+  }
+  .hero-title {
+    font-size: 32px; font-weight: 700; letter-spacing: -0.025em;
+    color: var(--tg-text-primary);
+    margin-bottom: 8px; line-height: 1.15;
+    position: relative;
+  }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px; font-weight: 500;
+  }
+  .pill-status-active { background: rgba(16,185,129,0.10); color: var(--tg-success); }
+  .pill-status-suspended { background: rgba(148,163,184,0.18); color: var(--tg-text-tertiary); }
+  .pill-status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .pill-pkg {
+    background: rgba(0, 180, 216, 0.10);
+    color: var(--tg-accent-dark);
+    font-weight: 600;
+  }
+  [data-theme="dark"] .pill-pkg { color: var(--tg-accent-light); }
+  .hero-greeting {
+    font-size: 15px; color: var(--tg-text-secondary);
+    position: relative;
+    max-width: 640px;
+  }
+
+  /* Stats strip */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat {
+    background: var(--tg-bg-primary);
+    border: 1px solid var(--tg-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-xs);
+  }
+  .stat-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--tg-text-tertiary);
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-size: 18px; font-weight: 600;
+    color: var(--tg-text-primary);
+    letter-spacing: -0.01em;
+  }
+  .stat-sub {
+    font-size: 12px; color: var(--tg-text-tertiary);
+    margin-top: 2px;
+  }
+
+  /* Products section */
+  .section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 18px; font-weight: 600;
+    color: var(--tg-text-primary);
+    letter-spacing: -0.01em;
+  }
+  .section-meta {
+    font-size: 13px; color: var(--tg-text-tertiary);
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .product-card {
+    background: var(--tg-bg-primary);
+    border: 1px solid var(--tg-border);
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    display: flex; flex-direction: column;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    box-shadow: var(--shadow-xs);
+  }
+  .product-card:hover {
+    border-color: var(--tg-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .product-card:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }
+  .product-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--tg-accent), var(--tg-accent-dark));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .product-icon svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .product-name {
+    font-size: 16px; font-weight: 600;
+    color: var(--tg-text-primary);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .product-tagline {
+    font-size: 13px; color: var(--tg-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+    flex: 1;
+  }
+  .product-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500;
+    color: var(--tg-accent-dark);
+  }
+  [data-theme="dark"] .product-cta { color: var(--tg-accent-light); }
+  .product-cta svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.15s; }
+  .product-card:hover .product-cta svg { transform: translateX(2px); }
+
+  /* Empty state */
+  .empty {
+    background: var(--tg-bg-primary);
+    border: 1px dashed var(--tg-border);
+    border-radius: 12px;
+    padding: 48px 32px;
+    text-align: center;
+    color: var(--tg-text-secondary);
+  }
+  .empty-title { font-size: 16px; font-weight: 600; color: var(--tg-text-primary); margin-bottom: 4px; }
+  .empty-body { font-size: 14px; max-width: 420px; margin: 0 auto; }
+
+  /* Error state */
+  .error-card {
+    background: var(--tg-bg-primary);
+    border: 1px solid var(--tg-border);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    max-width: 480px;
+    margin: 80px auto;
+    box-shadow: var(--shadow-sm);
+  }
+  .error-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--tg-text-primary); }
+  .error-card p { font-size: 14px; color: var(--tg-text-secondary); margin-bottom: 20px; }
+  .error-card a {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 40px; padding: 0 16px;
+    background: var(--tg-accent); color: white;
+    border-radius: 8px; text-decoration: none;
+    font-size: 14px; font-weight: 500;
+  }
+  .error-card a:hover { background: var(--tg-accent-dark); }
+
+  @media (max-width: 640px) {
+    .topbar-inner, .main { padding-left: 20px; padding-right: 20px; }
+    .hero { padding: 24px 20px; }
+    .hero-title { font-size: 26px; }
+    .user-chip { display: none; }
+    .main { padding-top: 32px; padding-bottom: 48px; }
+    /* Compact switcher: just icon + caret, no label */
+    .switcher-trigger { padding: 0 8px; max-width: 80px; }
+    .switcher-label { display: none; }
+    .switcher-menu { right: -60px; min-width: 260px; }
+    .signout-btn span { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="boot">
+  <div class="boot-inner">
+    <div class="boot-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="boot-title">Travelgenix</div>
+    <div class="boot-sub">Signing you in...</div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/home.html">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </span>
+        <span class="brand-name">Travelgenix</span>
+      </a>
+      <div class="topbar-right">
+        <div class="switcher" id="switcher" hidden>
+          <button class="switcher-trigger" id="switcher-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="switcher-icon">
+              <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><rect x="9" y="9" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/><rect x="9" y="13" width="2" height="2"/><rect x="13" y="13" width="2" height="2"/></svg>
+            </span>
+            <span class="switcher-label" id="switcher-current-name">Loading...</span>
+            <span class="switcher-caret">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+          <div class="switcher-menu" id="switcher-menu" role="listbox" hidden></div>
+        </div>
+        <span class="user-chip" id="user-chip">
+          <span class="user-chip-dot"></span>
+          <span id="user-chip-text">—</span>
+        </span>
+        <button class="icon-btn theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <button class="signout-btn" onclick="signOut()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // Apply persisted theme before paint
+  try {
+    if (localStorage.getItem('tg-theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  } catch {}
+
+  // ─── Product display data ────────────────────────────────────────
+  // Maps product slugs to display info. Kept in the client because
+  // these descriptions are user-facing copy that we'd typically tweak
+  // without redeploying Airtable schema.
+  const PRODUCT_DISPLAY = {
+    widget_suite: {
+      tagline: 'Embeddable widgets for your travel website',
+      url: 'https://widgets.travelify.io/editor.html',
+      icon: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    },
+    luna_chat: {
+      tagline: 'AI-powered live chat with human agent escalation',
+      url: 'https://chat.travelify.io/dashboard.html',
+      icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    },
+    luna_marketing: {
+      tagline: 'Zero-touch automated social media and email',
+      url: 'https://marketing.travelify.io/client.html',
+      icon: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+    },
+    luna_brain: {
+      tagline: 'AI travel knowledge for your website',
+      url: 'https://chat.travelify.io/dashboard.html',
+      icon: '<path d="M12 2a8 8 0 0 0-8 8c0 3.4 2.1 6.3 5 7.4V20a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2.6c2.9-1.1 5-4 5-7.4a8 8 0 0 0-8-8z"/><line x1="9" y1="22" x2="15" y2="22"/>',
+    },
+    luna_trends: {
+      tagline: 'Real-time travel industry intelligence',
+      url: 'https://trends.travelify.io',
+      icon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    },
+    luna_qa: {
+      tagline: 'Automated test suite for your Luna Chat',
+      url: 'https://chat.travelify.io/dashboard.html',
+      icon: '<path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>',
+    },
+    tool_hub: {
+      tagline: 'Internal tools and dashboards',
+      url: 'https://tool-hub-black.vercel.app',
+      icon: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    },
+  };
+
+  // ─── DOM helpers ─────────────────────────────────────────────────
+  function escHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch { return '—'; }
+  }
+
+  function fmtRelative(iso) {
+    if (!iso) return 'Never';
+    try {
+      const d = new Date(iso);
+      const diffMs = Date.now() - d.getTime();
+      if (isNaN(diffMs)) return 'Never';
+      const mins = Math.round(diffMs / 60000);
+      if (mins < 1) return 'Just now';
+      if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+      const hours = Math.round(mins / 60);
+      if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+      const days = Math.round(hours / 24);
+      if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+      return fmtDate(iso);
+    } catch { return 'Never'; }
+  }
+
+  function greet(fullName) {
+    const hour = new Date().getHours();
+    const slot = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+    const firstName = (fullName || '').split(' ')[0] || '';
+    return firstName ? `${slot}, ${firstName}` : slot;
+  }
+
+  // ─── Render ──────────────────────────────────────────────────────
+  function renderError(message) {
+    document.getElementById('main').innerHTML = `
+      <div class="error-card">
+        <h2>Couldn't load your home page</h2>
+        <p>${escHtml(message || 'Something went wrong. Please sign in again.')}</p>
+        <a href="/signin.html">Go to sign-in</a>
+      </div>
+    `;
+    document.getElementById('boot').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+  }
+
+  function renderHome(data) {
+    const user = data.user || {};
+    const client = data.client || {};
+    const products = (data.accessibleProducts || []);
+
+    // Update top-bar user chip
+    document.getElementById('user-chip-text').textContent = user.email || '—';
+
+    const statusKey = (client.status || '').toLowerCase();
+    const statusClass = statusKey === 'suspended' ? 'pill-status-suspended' : 'pill-status-active';
+    const statusLabel = client.status ? client.status.charAt(0).toUpperCase() + client.status.slice(1).toLowerCase() : 'Active';
+
+    const productCardsHtml = products.length > 0
+      ? products.map((p) => {
+          const display = PRODUCT_DISPLAY[p.slug] || { tagline: '', url: '#', icon: '<circle cx="12" cy="12" r="9"/>' };
+          return `
+            <a class="product-card" href="${escHtml(display.url)}" target="_blank" rel="noopener">
+              <span class="product-icon"><svg viewBox="0 0 24 24">${display.icon}</svg></span>
+              <div class="product-name">${escHtml(p.name)}</div>
+              <p class="product-tagline">${escHtml(display.tagline)}</p>
+              <span class="product-cta">
+                Launch
+                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </a>`;
+        }).join('')
+      : `<div class="empty">
+           <div class="empty-title">No products yet</div>
+           <p class="empty-body">Your account doesn't have any products enabled yet. Contact your account manager to get started.</p>
+         </div>`;
+
+    document.getElementById('main').innerHTML = `
+      <section class="hero">
+        <div class="hero-eyebrow">${escHtml(greet(user.fullName))}</div>
+        <h1 class="hero-title">${escHtml(client.clientName || 'Your workspace')}</h1>
+        <div class="hero-meta">
+          <span class="pill ${statusClass}">
+            <span class="pill-status-dot"></span>${escHtml(statusLabel)}
+          </span>
+          ${client.packageName ? `<span class="pill pill-pkg">${escHtml(client.packageName)} plan</span>` : ''}
+        </div>
+        <p class="hero-greeting">Welcome back. Launch any of your tools below — your session is shared across them, so you won't need to sign in again.</p>
+      </section>
+
+      <section class="stats">
+        <div class="stat">
+          <div class="stat-label">Signed in as</div>
+          <div class="stat-value">${escHtml(user.fullName || user.email || '—')}</div>
+          ${user.fullName ? `<div class="stat-sub">${escHtml(user.email || '')}</div>` : ''}
+        </div>
+        <div class="stat">
+          <div class="stat-label">Last login</div>
+          <div class="stat-value">${escHtml(fmtRelative(user.lastLogin))}</div>
+          ${user.lastLogin ? `<div class="stat-sub">${escHtml(fmtDate(user.lastLogin))}</div>` : ''}
+        </div>
+        <div class="stat">
+          <div class="stat-label">Member since</div>
+          <div class="stat-value">${escHtml(fmtDate(client.createdAt))}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Products</div>
+          <div class="stat-value">${products.length}</div>
+          <div class="stat-sub">${products.length === 1 ? 'tool available' : 'tools available'}</div>
+        </div>
+      </section>
+
+      <div class="section-head">
+        <h2 class="section-title">Your tools</h2>
+        <span class="section-meta">${products.length} ${products.length === 1 ? 'item' : 'items'}</span>
+      </div>
+      <div class="product-grid">${productCardsHtml}</div>
+    `;
+
+    document.getElementById('boot').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+  }
+
+  // ─── Load ────────────────────────────────────────────────────────
+  fetch('/api/auth/me', {
+    credentials: 'include',
+    headers: { 'Accept': 'application/json' },
+  })
+    .then((r) => {
+      if (r.status === 401) {
+        // Not signed in — bounce to sign-in
+        location.href = '/signin.html?next=' + encodeURIComponent('/home.html');
+        return null;
+      }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then((data) => {
+      if (!data) return;
+      if (data.ok === false) {
+        renderError(data.error || 'Could not load your session');
+        return;
+      }
+      renderHome(data);
+      loadCompanies();
+    })
+    .catch((err) => {
+      console.error('[home] load failed:', err);
+      renderError('Network error. Please try again.');
+    });
+
+  // ─── Company switcher ────────────────────────────────────────────
+  let companyList = [];
+  let currentClientId = null;
+  let menuOpen = false;
+  let switching = false;
+
+  function loadCompanies() {
+    fetch('/api/auth/companies', {
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' },
+    })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data || data.ok === false) return;
+        companyList = data.companies || [];
+        currentClientId = data.currentClientId || null;
+        renderSwitcher();
+      })
+      .catch((err) => {
+        console.warn('[home] companies load failed:', err.message);
+      });
+  }
+
+  function renderSwitcher() {
+    const wrap = document.getElementById('switcher');
+    const currentLabel = document.getElementById('switcher-current-name');
+    const menu = document.getElementById('switcher-menu');
+
+    // Only show the switcher if the user has more than one linked company
+    if (!Array.isArray(companyList) || companyList.length < 2) {
+      wrap.hidden = true;
+      return;
+    }
+    wrap.hidden = false;
+
+    const current = companyList.find((c) => c.current) || companyList[0];
+    currentLabel.textContent = current.name || 'Workspace';
+    currentLabel.title = current.name || '';
+
+    menu.innerHTML = `
+      <div class="switcher-menu-label">Your companies</div>
+      ${companyList.map((c) => {
+        const isCurrent = c.id === currentClientId;
+        const isSuspended = (c.status || '').toLowerCase() === 'suspended';
+        const sub = [c.packageName ? `${c.packageName} plan` : '', isSuspended ? 'Suspended' : '']
+          .filter(Boolean).join(' · ');
+        return `
+          <button
+            class="switcher-option ${isSuspended ? 'switcher-option-suspended' : ''}"
+            role="option"
+            aria-selected="${isCurrent}"
+            data-client-id="${escHtml(c.id)}"
+            ${isCurrent || isSuspended ? 'disabled' : ''}
+            type="button"
+          >
+            <span class="switcher-option-info">
+              <div class="switcher-option-name">${escHtml(c.name || '(unnamed)')}</div>
+              ${sub ? `<div class="switcher-option-sub">${escHtml(sub)}</div>` : ''}
+            </span>
+            <span class="switcher-option-check">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          </button>`;
+      }).join('')}
+    `;
+  }
+
+  function setMenuOpen(open) {
+    menuOpen = open;
+    const trigger = document.getElementById('switcher-trigger');
+    const menu = document.getElementById('switcher-menu');
+    if (!trigger || !menu) return;
+    trigger.setAttribute('aria-expanded', String(open));
+    menu.hidden = !open;
+  }
+
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('#switcher-trigger');
+    const option = e.target.closest('.switcher-option');
+    const insideMenu = e.target.closest('#switcher-menu');
+    const insideSwitcher = e.target.closest('#switcher');
+
+    if (trigger) {
+      e.preventDefault();
+      setMenuOpen(!menuOpen);
+      return;
+    }
+
+    if (option && !option.disabled && !switching) {
+      e.preventDefault();
+      const targetId = option.dataset.clientId;
+      if (targetId && targetId !== currentClientId) {
+        switchToCompany(targetId, option);
+      }
+      return;
+    }
+
+    // Click outside the switcher closes the menu
+    if (menuOpen && !insideSwitcher) {
+      setMenuOpen(false);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuOpen) {
+      setMenuOpen(false);
+      const trigger = document.getElementById('switcher-trigger');
+      if (trigger) trigger.focus();
+    }
+  });
+
+  function switchToCompany(clientId, optionEl) {
+    switching = true;
+    const trigger = document.getElementById('switcher-trigger');
+    const currentLabel = document.getElementById('switcher-current-name');
+    const previousLabel = currentLabel.textContent;
+    currentLabel.textContent = 'Switching...';
+    if (trigger) trigger.disabled = true;
+
+    fetch('/api/auth/switch-client', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ clientId }),
+    })
+      .then((r) => r.json().then((d) => ({ status: r.status, body: d })))
+      .then(({ status, body }) => {
+        if (status >= 200 && status < 300 && body.ok !== false) {
+          // New cookie set server-side. Reload the page with the new session.
+          location.reload();
+        } else {
+          // Show the error inline and restore the previous label
+          const msg = (body && body.error) || `Could not switch (${status})`;
+          alert(msg);
+          currentLabel.textContent = previousLabel;
+          if (trigger) trigger.disabled = false;
+          switching = false;
+        }
+      })
+      .catch((err) => {
+        console.error('[home] switch failed:', err);
+        alert('Network error. Please try again.');
+        currentLabel.textContent = previousLabel;
+        if (trigger) trigger.disabled = false;
+        switching = false;
+      });
+  }
+
+  // ─── Sign out ────────────────────────────────────────────────────
+  window.signOut = function() {
+    fetch('/api/auth/signout', { method: 'POST', credentials: 'include' })
+      .catch(() => {})
+      .finally(() => { location.href = '/signin.html'; });
+  };
+
+  // ─── Theme ───────────────────────────────────────────────────────
+  window.toggleTheme = function() {
+    const root = document.documentElement;
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    root.setAttribute('data-theme', isDark ? '' : 'dark');
+    try { localStorage.setItem('tg-theme', isDark ? 'light' : 'dark'); } catch {}
+  };
+})();
+</script>
+</body>
+</html>
