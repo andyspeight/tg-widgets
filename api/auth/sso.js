@@ -60,11 +60,41 @@ import { logAuthEvent } from '../_lib/auth/audit.js';
 // ─── Config ─────────────────────────────────────────────────────────
 const SIGNIN_PATH = '/signin.html';
 const DEFAULT_REDIRECT = '/home.html';
-const GENERIC_ERROR_MSG = 'Sorry, invalid/expired SSO token';
 
 // Allowlist of safe redirect paths for the ?next= param. Anything outside
 // these prefixes is ignored and the default is used. Prevents open-redirect.
 const SAFE_NEXT_PREFIXES = ['/home.html', '/admin', '/dashboard.html'];
+
+// SSO failure codes. These end up in the URL as ?error=<code>, and
+// /public/signin.html maps each code to a friendly user-facing message.
+//
+// Adding a new code? Add it here AND in the SSO_ERRORS map in signin.html
+// (otherwise the user falls back to the generic "Couldn't sign you in" copy).
+//
+// The codes are short, stable, lowercase_snake. They're safe to expose
+// because this is a B2B integration between two systems we control; "leaking"
+// whether a token was expired vs malformed is not a meaningful attack surface
+// here, and the debugging value is huge.
+const SSO_ERRORS = {
+  NOT_CONFIGURED:        'sso_not_configured',
+  MISSING_TOKEN:         'sso_missing_token',
+  BAD_SIGNATURE:         'sso_bad_signature',          // JWT verification failed
+  EXPIRED:               'sso_expired',                // exp claim in the past
+  NOT_YET_VALID:         'sso_not_yet_valid',          // nbf claim in the future
+  PAYLOAD_INVALID:       'sso_payload_invalid',        // required claim missing/malformed
+  REPLAY:                'sso_replay',                 // token already used
+  PACKAGE_UNKNOWN:       'sso_package_unknown',        // groupsid doesn't map to a Package
+  CLIENT_CREATE_FAILED:  'sso_client_create_failed',   // Airtable create failed
+  LINK_FAILED:           'sso_link_failed',            // multi-company link write failed
+  ACCOUNT_SUSPENDED:     'sso_account_suspended',
+  UNEXPECTED:            'sso_unexpected',
+};
+
+// Token replay protection. Upstash Redis with key TTL = token's remaining
+// lifetime. Fail-closed if Redis is unavailable: better to reject some valid
+// tokens than to allow replay during a Redis outage.
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 // Map JWT package code → Airtable package code (case-insensitive). The list
 // of valid codes is duplicated here as a defence in depth — the runtime
@@ -75,16 +105,22 @@ const VALID_PACKAGE_CODES = new Set([
   'jet2pkg', 'option1', 'option2', 'option3',
 ]);
 
-// Token replay protection. Upstash Redis with key TTL = token's remaining
-// lifetime. Fail-closed if Redis is unavailable: better to reject some valid
-// tokens than to allow replay during a Redis outage.
-const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
-const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
-
 // ─── Helpers ────────────────────────────────────────────────────────
 
-function redirectToSignin(res, message) {
-  const target = `${SIGNIN_PATH}?error=${encodeURIComponent(message)}`;
+/**
+ * Redirect to /signin.html with a structured error code (+ optional debug detail).
+ *
+ * @param {object} res            — Vercel response
+ * @param {string} code           — one of SSO_ERRORS.*
+ * @param {string} [detail]       — short debug info (e.g. "exp 2026-05-12T10:00Z").
+ *                                  Surfaced behind a "Show technical detail" toggle
+ *                                  in signin.html. Don't put PII or secrets here.
+ */
+function redirectToSignin(res, code, detail) {
+  const params = new URLSearchParams();
+  params.set('error', code || SSO_ERRORS.UNEXPECTED);
+  if (detail) params.set('detail', String(detail).slice(0, 200));
+  const target = `${SIGNIN_PATH}?${params.toString()}`;
   res.statusCode = 302;
   res.setHeader('Location', target);
   res.setHeader('Cache-Control', 'no-store');
@@ -163,7 +199,7 @@ export default async function handler(req, res) {
 
   if (!secret) {
     console.error('[sso] JWT_SECURITYKEY env var missing');
-    return redirectToSignin(res, 'SSO is not configured. Contact support.');
+    return redirectToSignin(res, SSO_ERRORS.NOT_CONFIGURED);
   }
 
   // 1. Extract and validate the JWT signature + expiry
@@ -174,7 +210,7 @@ export default async function handler(req, res) {
       ip, userAgent: ua,
       detail: { source: 'sso', reason: 'missing_token' },
     }).catch(() => {});
-    return redirectToSignin(res, GENERIC_ERROR_MSG);
+    return redirectToSignin(res, SSO_ERRORS.MISSING_TOKEN, 'no ssotoken query param');
   }
 
   let payload;
@@ -189,7 +225,23 @@ export default async function handler(req, res) {
       ip, userAgent: ua,
       detail: { source: 'sso', reason: 'jwt_verify_failed', error: err.name || err.message },
     }).catch(() => {});
-    return redirectToSignin(res, GENERIC_ERROR_MSG);
+
+    // Map the specific verify error to a structured code so the sign-in
+    // page can show a useful message and we can debug from the URL alone.
+    const errName = err.name || '';
+    if (errName === 'TokenExpiredError') {
+      const expiredAt = err.expiredAt ? new Date(err.expiredAt).toISOString() : '';
+      return redirectToSignin(res, SSO_ERRORS.EXPIRED,
+        expiredAt ? `expired at ${expiredAt}` : '');
+    }
+    if (errName === 'NotBeforeError') {
+      const validFrom = err.date ? new Date(err.date).toISOString() : '';
+      return redirectToSignin(res, SSO_ERRORS.NOT_YET_VALID,
+        validFrom ? `valid from ${validFrom}` : '');
+    }
+    // JsonWebTokenError, SyntaxError, etc. — treat as bad signature / malformed
+    return redirectToSignin(res, SSO_ERRORS.BAD_SIGNATURE,
+      (err.message || errName || 'verify failed').slice(0, 100));
   }
 
   // 2. Validate payload shape
@@ -231,7 +283,8 @@ export default async function handler(req, res) {
       ip, userAgent: ua,
       detail: { source: 'sso', reason: 'payload_invalid', errors: validationErrors },
     }).catch(() => {});
-    return redirectToSignin(res, GENERIC_ERROR_MSG);
+    return redirectToSignin(res, SSO_ERRORS.PAYLOAD_INVALID,
+      validationErrors.slice(0, 3).join('; '));
   }
 
   // 3. Single-use enforcement via Redis (uses SHA-256 of the raw token as key)
@@ -245,7 +298,8 @@ export default async function handler(req, res) {
       ip, userAgent: ua,
       detail: { source: 'sso', reason: 'replay_or_redis_unavailable', appId: travelifyAppId },
     }).catch(() => {});
-    return redirectToSignin(res, GENERIC_ERROR_MSG);
+    return redirectToSignin(res, SSO_ERRORS.REPLAY,
+      `appId=${travelifyAppId}`);
   }
 
   // ─── From here on, the token is verified and single-use claimed.
@@ -273,7 +327,8 @@ export default async function handler(req, res) {
           ip, userAgent: ua,
           detail: { source: 'sso', reason: 'package_not_found', packageCode, appId: travelifyAppId },
         }).catch(() => {});
-        return redirectToSignin(res, GENERIC_ERROR_MSG);
+        return redirectToSignin(res, SSO_ERRORS.PACKAGE_UNKNOWN,
+          `package code "${packageCode}"`);
       }
 
       // NOTE: previously refused if email already belonged to a different
@@ -292,8 +347,7 @@ export default async function handler(req, res) {
           [CLIENTS.fields.travelifyAppId]:   travelifyAppId,
           [CLIENTS.fields.travelifySiteId]: '', // not in JWT — left blank
           [CLIENTS.fields.package]:          [packageRec.id],
-          [CLIENTS.fields.apiKey]:           publicApiKey,
-          [CLIENTS.fields.notes]:            `Auto-created via SSO from Travelify on ${nowIso}`,
+          [CLIENTS.fields.notes]:            `Auto-created via SSO from Travelify on ${nowIso}\nPublic API key: ${publicApiKey}`,
           [CLIENTS.fields.createdAt]:        nowIso,
         });
       } catch (err) {
@@ -304,7 +358,8 @@ export default async function handler(req, res) {
           ip, userAgent: ua,
           detail: { source: 'sso', reason: 'client_create_failed', error: err.message?.slice(0, 200) },
         }).catch(() => {});
-        return redirectToSignin(res, 'Could not set up your account. Please contact support.');
+        return redirectToSignin(res, SSO_ERRORS.CLIENT_CREATE_FAILED,
+          (err.message || 'airtable create failed').slice(0, 100));
       }
 
       // Create entitlements: every Package Catalogue row marked includedByDefault=true
@@ -356,7 +411,8 @@ export default async function handler(req, res) {
           ip, userAgent: ua,
           detail: { source: 'sso', reason: 'package_not_found_on_existing_client', packageCode, appId: travelifyAppId },
         }).catch(() => {});
-        return redirectToSignin(res, GENERIC_ERROR_MSG);
+        return redirectToSignin(res, SSO_ERRORS.PACKAGE_UNKNOWN,
+          `package code "${packageCode}" for existing client ${travelifyAppId}`);
       }
 
       // Name / website divergence: leave existing record alone, just log
@@ -369,23 +425,6 @@ export default async function handler(req, res) {
       }
       if (divergences.length > 0) {
         console.warn('[sso] divergent JWT vs client record for appId', travelifyAppId, divergences.join('; '));
-      }
-
-      // API key sync — backfill if empty, or update if the main platform
-      // rotated it. Same source-of-truth principle as the package sync.
-      const existingApiKey = String(clientRec.fields[CLIENTS.fields.apiKey] || '').trim();
-      if (publicApiKey && publicApiKey !== existingApiKey) {
-        try {
-          await updateRecord(CLIENTS.tableId, clientRec.id, {
-            [CLIENTS.fields.apiKey]: publicApiKey,
-          });
-          if (existingApiKey) {
-            console.log('[sso] api key updated for client', clientRec.id, '(was different)');
-          }
-        } catch (err) {
-          console.error('[sso] failed to sync api key:', err.message);
-          // Non-fatal — sign-in continues
-        }
       }
 
       // Package sync — if the JWT package differs from the current package, update
@@ -529,7 +568,8 @@ export default async function handler(req, res) {
             ip, userAgent: ua,
             detail: { source: 'sso', reason: 'multi_company_link_failed', error: err.message?.slice(0, 200) },
           }).catch(() => {});
-          return redirectToSignin(res, 'Could not link your account. Please contact support.');
+          return redirectToSignin(res, SSO_ERRORS.LINK_FAILED,
+            (err.message || 'multi-company link write failed').slice(0, 100));
         }
 
         // Grant per-product permissions for this new client based on its
@@ -609,7 +649,7 @@ export default async function handler(req, res) {
           ip, userAgent: ua,
           detail: { source: 'sso', reason: 'suspended' },
         }).catch(() => {});
-        return redirectToSignin(res, 'Account suspended. Contact support.');
+        return redirectToSignin(res, SSO_ERRORS.ACCOUNT_SUSPENDED, `user ${userRec.id}`);
       }
     } else {
       // Create the user with a random password they'll never need
@@ -748,6 +788,7 @@ export default async function handler(req, res) {
       ip, userAgent: ua,
       detail: { source: 'sso', reason: 'unexpected_error', error: String(err?.message || err).slice(0, 200) },
     }).catch(() => {});
-    return redirectToSignin(res, 'Something went wrong. Please try again.');
+    return redirectToSignin(res, SSO_ERRORS.UNEXPECTED,
+      String(err?.message || err).slice(0, 100));
   }
 }
