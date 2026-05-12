@@ -412,7 +412,20 @@
       headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
       ...opts,
     });
-    const data = await res.json().catch(() => ({ ok: false, error: 'Bad response' }));
+    // Try to parse JSON, but if the response isn't JSON (e.g. Vercel returns
+    // a text/plain 500 page for FUNCTION_INVOCATION_FAILED), surface a real
+    // error rather than the unhelpful "Bad response".
+    let data;
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+    if (contentType.includes('application/json')) {
+      data = await res.json().catch(() => ({ ok: false, error: 'Malformed JSON response' }));
+    } else {
+      const text = await res.text().catch(() => '');
+      data = {
+        ok: false,
+        error: `HTTP ${res.status}${text ? `: ${text.slice(0, 200)}` : ''}`,
+      };
+    }
     if (!res.ok || data.ok === false) {
       const err = new Error(data.error || `Request failed (${res.status})`);
       err.code = data.code;
