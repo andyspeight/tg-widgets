@@ -292,7 +292,8 @@ export default async function handler(req, res) {
           [CLIENTS.fields.travelifyAppId]:   travelifyAppId,
           [CLIENTS.fields.travelifySiteId]: '', // not in JWT — left blank
           [CLIENTS.fields.package]:          [packageRec.id],
-          [CLIENTS.fields.notes]:            `Auto-created via SSO from Travelify on ${nowIso}\nPublic API key: ${publicApiKey}`,
+          [CLIENTS.fields.apiKey]:           publicApiKey,
+          [CLIENTS.fields.notes]:            `Auto-created via SSO from Travelify on ${nowIso}`,
           [CLIENTS.fields.createdAt]:        nowIso,
         });
       } catch (err) {
@@ -368,6 +369,23 @@ export default async function handler(req, res) {
       }
       if (divergences.length > 0) {
         console.warn('[sso] divergent JWT vs client record for appId', travelifyAppId, divergences.join('; '));
+      }
+
+      // API key sync — backfill if empty, or update if the main platform
+      // rotated it. Same source-of-truth principle as the package sync.
+      const existingApiKey = String(clientRec.fields[CLIENTS.fields.apiKey] || '').trim();
+      if (publicApiKey && publicApiKey !== existingApiKey) {
+        try {
+          await updateRecord(CLIENTS.tableId, clientRec.id, {
+            [CLIENTS.fields.apiKey]: publicApiKey,
+          });
+          if (existingApiKey) {
+            console.log('[sso] api key updated for client', clientRec.id, '(was different)');
+          }
+        } catch (err) {
+          console.error('[sso] failed to sync api key:', err.message);
+          // Non-fatal — sign-in continues
+        }
       }
 
       // Package sync — if the JWT package differs from the current package, update
