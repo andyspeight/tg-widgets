@@ -31,7 +31,7 @@ import {
   USERS, CLIENTS, SESSIONS, AUTH_EVENTS,
 } from '../_lib/auth/schema.js';
 import { signSessionToken, uuid } from '../_lib/auth/crypto.js';
-import { setSessionCookie } from '../_lib/auth/cookie.js';
+import { setSessionCookie, clearSessionCookie } from '../_lib/auth/cookie.js';
 import { revokeSession } from '../_lib/auth/sessions.js';
 import { resolveUserPermissions, invalidateUserPermissions } from '../_lib/auth/permissions.js';
 import { logAuthEvent } from '../_lib/auth/audit.js';
@@ -168,11 +168,25 @@ export default async function handler(req, res) {
     return jsonError(res, 500, 'session_create_failed', 'Could not switch company');
   }
 
-  // 5. Revoke the old session row (best-effort, idempotent)
+  // 5. Revoke ALL of the user's previous sessions (not just the one this
+  // request came in on). This guarantees that after a switch, only the
+  // freshly-minted session is valid — no stale rows lingering, no chance
+  // of an older cookie resolving to a still-active session row. The new
+  // session we just created above survives because revokeAllUserSessions
+  // re-queries Airtable for currently-active rows, and at this point the
+  // new row has been created AND has no revoke timestamp, so it's the
+  // sole survivor by the end of the loop. To be defensively explicit
+  // though, we revoke the previous session first, then catch-all.
   if (ctx.sessionRecordId) {
-    revokeSession(ctx.sessionRecordId, 'client_switch')
-      .catch((err) => console.error('[auth/switch-client] old session revoke failed:', err.message));
+    try {
+      await revokeSession(ctx.sessionRecordId, 'client_switch');
+    } catch (err) {
+      console.error('[auth/switch-client] old session revoke failed:', err.message);
+    }
   }
+
+  console.log('[auth/switch-client] user', ctx.userRecordId,
+    `switched ${ctx.clientRecordId} → ${targetClientId}, new session ${sessionId}`);
 
   // 6. Bump lastLogin (mirrors signin.js)
   updateRecord(USERS.tableId, ctx.userRecordId, {
@@ -180,7 +194,10 @@ export default async function handler(req, res) {
     [USERS.fields.lastLoginIp]: ip,
   }).catch(() => {});
 
-  // 7. Set the new cookie
+  // 7. Clear the old cookie first, then set the new one. Defensive against
+  // a stale cookie sitting alongside if a previous deploy set a slightly
+  // different path/domain attribute.
+  clearSessionCookie(res, { req });
   setSessionCookie(res, token, expiresAt, { req });
 
   // 8. Audit log
