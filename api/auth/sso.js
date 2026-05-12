@@ -96,6 +96,19 @@ const SSO_ERRORS = {
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
+// Escape hatch for integration testing — when reusing the same JWT across
+// rapid sign-in attempts during dev work, the replay check correctly fires
+// and blocks every attempt after the first. Setting DISABLE_SSO_REPLAY_CHECK
+// in Vercel env vars to any truthy value ('true', '1', 'yes') skips the
+// claim step and logs a warning, without redeploying.
+//
+// SECURITY NOTE: with this flag set, SSO tokens are replayable for their
+// full lifetime (up to 10 minutes). Only use it in testing environments.
+// Flip the env var off again before production traffic resumes.
+const SSO_REPLAY_CHECK_DISABLED = ['true', '1', 'yes', 'on'].includes(
+  String(process.env.DISABLE_SSO_REPLAY_CHECK || '').toLowerCase()
+);
+
 // Map JWT package code → Airtable package code (case-insensitive). The list
 // of valid codes is duplicated here as a defence in depth — the runtime
 // lookup happens against the live PACKAGES table, this just narrows what
@@ -288,18 +301,25 @@ export default async function handler(req, res) {
   }
 
   // 3. Single-use enforcement via Redis (uses SHA-256 of the raw token as key)
-  const tokenHash = createHash('sha256').update(ssotoken).digest('hex');
-  const remainingSeconds = Math.max(60, Math.min(600, payload.exp - Math.floor(Date.now() / 1000) + 60));
-  const claimed = await claimTokenJti(tokenHash, remainingSeconds);
-  if (!claimed) {
-    logAuthEvent({
-      type: AUTH_EVENTS.types.SIGNIN_FAIL, success: false,
-      emailAttempted: email,
-      ip, userAgent: ua,
-      detail: { source: 'sso', reason: 'replay_or_redis_unavailable', appId: travelifyAppId },
-    }).catch(() => {});
-    return redirectToSignin(res, SSO_ERRORS.REPLAY,
-      `appId=${travelifyAppId}`);
+  if (SSO_REPLAY_CHECK_DISABLED) {
+    // Loud breadcrumb so this never silently stays on in production.
+    // Logs on every SSO attempt — verbose but deliberate.
+    console.warn('[sso] ⚠️  REPLAY CHECK DISABLED via DISABLE_SSO_REPLAY_CHECK env var. ' +
+      'Tokens are replayable for their full lifetime. Do not leave this on in production.');
+  } else {
+    const tokenHash = createHash('sha256').update(ssotoken).digest('hex');
+    const remainingSeconds = Math.max(60, Math.min(600, payload.exp - Math.floor(Date.now() / 1000) + 60));
+    const claimed = await claimTokenJti(tokenHash, remainingSeconds);
+    if (!claimed) {
+      logAuthEvent({
+        type: AUTH_EVENTS.types.SIGNIN_FAIL, success: false,
+        emailAttempted: email,
+        ip, userAgent: ua,
+        detail: { source: 'sso', reason: 'replay_or_redis_unavailable', appId: travelifyAppId },
+      }).catch(() => {});
+      return redirectToSignin(res, SSO_ERRORS.REPLAY,
+        `appId=${travelifyAppId}`);
+    }
   }
 
   // ─── From here on, the token is verified and single-use claimed.
