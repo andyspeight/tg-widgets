@@ -35,6 +35,7 @@ export const CLIENTS = {
     websiteUrl:           'fld9zVc9PHgu18RVW',
     travelifyAppId:       'fldE9dL05t0x0S88w',
     travelifySiteId:      'fldXQF2zadTtqmsfY',
+    apiKey:               'fld9X1nvAgy0sHQ4B', // Travelify public API key (primarygroupsid from SSO JWT)
     setupDate:            'fldFZQXs893F740Rb',
     goLiveDate:           'fldrtf2dwPj71GEX8',
     mrr:                  'fldRWul7uUaA8LtZj',
