@@ -6,8 +6,17 @@
  *   TG_SESSION_SECRET — HMAC signing key for session tokens (min 32 chars)
  */
 import { createHmac, timingSafeEqual } from 'crypto';
+import jwt from 'jsonwebtoken';
 
 const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// JWT settings — must match _lib/auth/crypto.js for the cookie session to
+// validate here. We accept the cookie as an alternative to the legacy
+// Bearer token so the unified Travelgenix sign-in flow (id.travelify.io)
+// gives access to the widget editor without re-authenticating.
+const JWT_ALGORITHM = 'HS256';
+const JWT_ISSUER = 'tg-widget-suite';
+const COOKIE_NAME = 'tg_session';
 
 // ── Rate Limiter (in-memory, per-instance) ──────────────────────
 // KNOWN LIMITATION: Vercel serverless functions have per-instance memory.
@@ -147,15 +156,112 @@ export function getTokenFromRequest(req) {
   return req.query?.token || null;
 }
 
-// Middleware: verify auth and attach user to context
+/**
+ * Extract the tg_session cookie value from a request. Returns the raw JWT
+ * string or null. Used by requireAuth to accept users signed in via the
+ * unified Travelgenix flow (id.travelify.io).
+ */
+function getCookieToken(req) {
+  const header = req.headers.cookie || '';
+  if (!header) return null;
+  // Cookie header is like "a=1; tg_session=<jwt>; b=2". Parse it.
+  const parts = header.split(';');
+  for (const part of parts) {
+    const eq = part.indexOf('=');
+    if (eq < 0) continue;
+    const name = part.slice(0, eq).trim();
+    if (name === COOKIE_NAME) {
+      const value = part.slice(eq + 1).trim();
+      // Cookie values can be URL-encoded by setSessionCookie (which we do).
+      try { return decodeURIComponent(value); } catch { return value; }
+    }
+  }
+  return null;
+}
+
+/**
+ * Verify a tg_session cookie JWT. Returns the decoded payload (or null).
+ * This is the new auth flow — issued by /api/auth/signin and /api/auth/sso.
+ *
+ * Trade-off vs the new _lib/auth middleware: we only check the JWT
+ * signature + expiry. We do NOT verify the session row in Airtable.
+ * That's a deliberate choice to keep this function synchronous (so the
+ * existing requireAuth(req) call sites don't need to become async).
+ * Cost: a session revoked via "sign me out" still works on widget
+ * endpoints until the JWT naturally expires. Acceptable for widget
+ * editing; never weaken this for admin/identity endpoints.
+ */
+function verifyCookieJwt(token) {
+  if (!token) return null;
+  const secret = process.env.TG_SESSION_SECRET;
+  if (!secret) return null;
+  try {
+    const payload = jwt.verify(token, secret, {
+      algorithms: [JWT_ALGORITHM],
+      issuer: JWT_ISSUER,
+    });
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// Middleware: verify auth and attach user to context.
+//
+// Tries two auth mechanisms in order:
+//   1. Legacy Bearer token (Authorization header / ?token= query param)
+//   2. New tg_session cookie (issued by id.travelify.io)
+//
+// First one to validate wins. Returns the same shape regardless of which
+// path matched, so downstream code doesn't care.
 export function requireAuth(req) {
-  const token = getTokenFromRequest(req);
-  if (!token) return { error: 'Authentication required', status: 401 };
+  // 1. Legacy Bearer token
+  const bearer = getTokenFromRequest(req);
+  if (bearer) {
+    const user = verifyToken(bearer);
+    if (user) return { user };
+  }
 
-  const user = verifyToken(token);
-  if (!user) return { error: 'Invalid or expired session. Please sign in again.', status: 401 };
+  // 2. New tg_session cookie
+  const cookieJwt = getCookieToken(req);
+  if (cookieJwt) {
+    const payload = verifyCookieJwt(cookieJwt);
+    if (payload) {
+      // Map the new payload shape to the legacy user shape expected by
+      // downstream code. The legacy token had { email, recordId, clientId,
+      // clientName, plan, role, exp }. The new JWT has { userId, clientId,
+      // role, sessionId, permissions, iat, exp }.
+      //
+      // Fields not present in the new payload (email, clientName, plan)
+      // are left undefined; widget endpoints that need them should fall
+      // back to looking them up by recordId. In practice they look up
+      // by clientId or just need the recordId for ownership checks, so
+      // this works.
+      return {
+        user: {
+          recordId: payload.userId,
+          clientId: payload.clientId,
+          role: payload.role,
+          // Legacy compatibility fields (may be undefined; that's OK):
+          email: payload.email,
+          clientName: payload.clientName,
+          plan: payload.plan,
+          // Carry through new fields so endpoints can use them if they want:
+          sessionId: payload.sessionId,
+          permissions: payload.permissions,
+          // Mark which auth path validated this, for diagnostics
+          _authSource: 'cookie',
+        }
+      };
+    }
+  }
 
-  return { user };
+  return {
+    error: bearer || cookieJwt
+      ? 'Invalid or expired session. Please sign in again.'
+      : 'Authentication required',
+    status: 401
+  };
 }
 
 
