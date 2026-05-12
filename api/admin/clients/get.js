@@ -179,6 +179,7 @@ export default async function handler(req, res) {
         websiteUrl: client.fields[CLIENTS.fields.websiteUrl] || '',
         travelifyAppId: client.fields[CLIENTS.fields.travelifyAppId] || '',
         travelifySiteId: client.fields[CLIENTS.fields.travelifySiteId] || '',
+        apiKey: client.fields[CLIENTS.fields.apiKey] || '',
         status: client.fields[CLIENTS.fields.status] || '',
         plan: client.fields[CLIENTS.fields.plan] || '',
         mrr: client.fields[CLIENTS.fields.mrr] ?? null,
