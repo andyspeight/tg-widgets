@@ -260,6 +260,182 @@
       color: var(--tg-warning);
       margin-bottom: var(--space-4);
     }
+
+    /* ─── User management: buttons, menus, modals, forms ─── */
+    .btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      height: 40px; padding: 0 var(--space-4);
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-md);
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      color: var(--tg-text-primary);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+    }
+    .btn:hover { background: var(--tg-bg-tertiary); border-color: var(--tg-text-tertiary); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn--primary {
+      background: var(--tg-accent); border-color: var(--tg-accent);
+      color: var(--tg-text-inverse);
+    }
+    .btn--primary:hover { background: var(--tg-accent-dark); border-color: var(--tg-accent-dark); }
+    .btn--sm { height: 30px; padding: 0 var(--space-3); font-size: 13px; }
+    .btn--danger { color: var(--tg-error); }
+    .btn--danger:hover { background: rgba(239,68,68,0.08); border-color: var(--tg-error); }
+    .btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .panel-header-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .panel-header-actions > div:first-child { flex: 1; }
+
+    .users-table th.col-actions, .users-table td.col-actions { text-align: right; white-space: nowrap; }
+
+    .menu-wrap { position: relative; display: inline-block; }
+    .menu-trigger {
+      width: 30px; height: 30px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--tg-bg-primary); border: 1px solid var(--tg-border);
+      border-radius: var(--radius-md);
+      cursor: pointer; color: var(--tg-text-secondary);
+      margin-left: var(--space-2);
+    }
+    .menu-trigger:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .menu-trigger svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .menu {
+      position: absolute; right: 0; top: calc(100% + 4px);
+      min-width: 220px; padding: 4px;
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+      z-index: 60;
+      display: none;
+    }
+    .menu.is-open { display: block; }
+    .menu-item {
+      display: flex; align-items: center; gap: var(--space-2);
+      width: 100%; padding: var(--space-2) var(--space-3); border: 0;
+      background: transparent; cursor: pointer; text-align: left;
+      font-family: inherit; font-size: 13px;
+      color: var(--tg-text-primary);
+      border-radius: var(--radius-sm);
+    }
+    .menu-item:hover { background: var(--tg-bg-tertiary); }
+    .menu-item--danger { color: var(--tg-error); }
+    .menu-divider { height: 1px; background: var(--tg-border); margin: 4px 0; }
+
+    .status-pill-active { background: rgba(16,185,129,0.10); color: var(--tg-success); }
+    .status-pill-invited { background: rgba(245,158,11,0.10); color: var(--tg-warning); }
+    .status-pill-suspended { background: rgba(148,163,184,0.15); color: var(--tg-text-tertiary); }
+    .status-cell-pill {
+      display: inline-flex; align-items: center;
+      padding: 2px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 500;
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+      z-index: 100; padding: var(--space-4);
+    }
+    .modal-overlay.is-open { display: flex; }
+    .modal {
+      background: var(--tg-bg-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.2);
+      width: 100%; max-width: 560px; max-height: 90vh;
+      overflow-y: auto;
+      animation: modalIn 0.15s ease-out;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-head {
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--tg-border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-head h2 { margin: 0; font-size: 18px; font-weight: 600; color: var(--tg-text-primary); letter-spacing: -0.01em; }
+    .modal-close {
+      background: none; border: 0; cursor: pointer;
+      padding: var(--space-2); border-radius: var(--radius-sm);
+      color: var(--tg-text-tertiary);
+    }
+    .modal-close:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .modal-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+    .modal-body { padding: var(--space-6); }
+    .modal-foot {
+      padding: var(--space-4) var(--space-6);
+      border-top: 1px solid var(--tg-border);
+      background: var(--tg-bg-secondary);
+      display: flex; justify-content: flex-end; gap: var(--space-3);
+    }
+
+    .field { margin-bottom: var(--space-4); }
+    .field:last-child { margin-bottom: 0; }
+    .field-label { display: block; font-size: 13px; font-weight: 500; color: var(--tg-text-primary); margin-bottom: 4px; }
+    .field-hint { display: block; font-size: 12px; color: var(--tg-text-tertiary); margin-top: 4px; }
+    .input, .select {
+      width: 100%; height: 44px; padding: 0 var(--space-3);
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-md);
+      font-family: inherit; font-size: 15px;
+      color: var(--tg-text-primary);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .input:focus, .select:focus {
+      outline: none;
+      border-color: var(--tg-accent);
+      box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
+    }
+    .input[readonly] { background: var(--tg-bg-secondary); color: var(--tg-text-secondary); }
+
+    .checklist {
+      display: flex; flex-direction: column; gap: 4px;
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+      background: var(--tg-bg-secondary);
+    }
+    .check-row {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+    .check-row:hover { background: var(--tg-bg-primary); }
+    .check-row input { width: 16px; height: 16px; accent-color: var(--tg-accent); cursor: pointer; flex-shrink: 0; }
+    .check-row .name { font-size: 14px; font-weight: 500; color: var(--tg-text-primary); }
+    .check-row .slug { font-size: 12px; color: var(--tg-text-tertiary); font-family: 'JetBrains Mono', monospace; margin-left: auto; }
+
+    .form-error {
+      padding: var(--space-3) var(--space-4);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius-md);
+      color: var(--tg-error); font-size: 13px;
+      margin-bottom: var(--space-4);
+      display: none;
+    }
+    .form-error.is-on { display: block; }
+
+    .toast-mini {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--tg-text-primary); color: var(--tg-text-inverse);
+      padding: 12px 16px; border-radius: var(--radius-md);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+      font-size: 14px; font-weight: 500;
+      transform: translateY(8px); opacity: 0;
+      transition: transform 0.2s, opacity 0.2s;
+      pointer-events: none; z-index: 200;
+    }
+    .toast-mini.is-on { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .toast-mini--ok { background: var(--tg-success); }
+    .toast-mini--err { background: var(--tg-error); }
   </style>
 </head>
 <body>
@@ -379,7 +555,7 @@
         </div>
 
         <div class="placeholder-banner">
-          <strong>Read-only view.</strong> Edit support arrives in Phase 3 — for now this shows everything captured at onboarding. Use the Packages tab if you need to update package defaults.
+          <strong>Read-only view.</strong> Overview and Entitlements are read-only — edit support arrives in Phase 3. Use the Users tab to manage who has access to this client's workspace.
         </div>
 
         <div class="sub-tabs" role="tablist">
@@ -542,12 +718,27 @@
 
     function renderUsers() {
       const users = clientData.users;
+      const addBtn = `
+        <button class="btn btn--primary" id="btn-add-user">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add User
+        </button>`;
+
       if (users.length === 0) {
         return `
           <div class="panel">
+            <header class="panel-header">
+              <div class="panel-header-actions">
+                <div>
+                  <h2>Users</h2>
+                  <p>People with access to this client's workspace.</p>
+                </div>
+                ${addBtn}
+              </div>
+            </header>
             <div class="center-state">
               <h3 style="margin:0 0 8px;color:var(--tg-text-primary);">No users yet</h3>
-              <p>No-one has been invited to this client's account yet. Invites can be sent from the New Client wizard or the Users tab once it's enabled in Phase 3.</p>
+              <p style="margin:0 0 16px;max-width:420px;">No-one has been invited to this client's account yet. Click Add User above to send an invitation.</p>
             </div>
           </div>`;
       }
@@ -555,8 +746,13 @@
       return `
         <div class="panel">
           <header class="panel-header">
-            <h2>Users</h2>
-            <p>People with access to this client's workspace.</p>
+            <div class="panel-header-actions">
+              <div>
+                <h2>Users</h2>
+                <p>People with access to this client's workspace.</p>
+              </div>
+              ${addBtn}
+            </div>
           </header>
           <table class="users-table">
             <thead>
@@ -566,25 +762,568 @@
                 <th>Role</th>
                 <th>Status</th>
                 <th>Last login</th>
+                <th class="col-actions"></th>
               </tr>
             </thead>
             <tbody>
-              ${users.map(u => `
-                <tr>
-                  <td>${escapeHtml(u.fullName || '(no name set)')}</td>
-                  <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">${escapeHtml(u.email)}</td>
-                  <td><span class="role-pill" data-role="${escapeHtml(u.role)}">${escapeHtml(u.role || 'unknown')}</span></td>
-                  <td>${escapeHtml(u.status || '—')}</td>
-                  <td>${fmtDateTime(u.lastLogin)}</td>
-                </tr>
-              `).join('')}
+              ${users.map(u => userRowHtml(u)).join('')}
             </tbody>
           </table>
         </div>
       `;
     }
 
+    function userRowHtml(u) {
+      const isMe = u.id === (window.__authMe && window.__authMe.userRecordId);
+      const status = u.status || 'active';
+      const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+      const statusPillClass = status === 'invited' ? 'status-pill-invited'
+                            : status === 'suspended' ? 'status-pill-suspended'
+                            : 'status-pill-active';
+
+      let primary;
+      if (isMe) {
+        primary = `<button class="btn btn--sm" data-act="edit" data-id="${escapeHtml(u.id)}">Edit</button>`;
+      } else if (status === 'invited') {
+        primary = `<button class="btn btn--sm" data-act="resend" data-id="${escapeHtml(u.id)}">Resend invite</button>`;
+      } else if (status === 'suspended') {
+        primary = `<button class="btn btn--sm" data-act="reactivate" data-id="${escapeHtml(u.id)}">Reactivate</button>`;
+      } else {
+        primary = `<button class="btn btn--sm" data-act="edit" data-id="${escapeHtml(u.id)}">Edit</button>`;
+      }
+
+      const menu = isMe ? '' : `
+        <div class="menu-wrap">
+          <button class="menu-trigger" data-act="menu" data-id="${escapeHtml(u.id)}" aria-label="More actions">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+          </button>
+          <div class="menu" data-menu="${escapeHtml(u.id)}">
+            ${status !== 'invited' ? `<button class="menu-item" data-act="edit" data-id="${escapeHtml(u.id)}">Edit details</button>` : ''}
+            ${status === 'invited' ? `<button class="menu-item" data-act="resend" data-id="${escapeHtml(u.id)}">Resend invite</button>` : ''}
+            ${status === 'active' ? `<button class="menu-item" data-act="reset" data-id="${escapeHtml(u.id)}">Send password reset</button>` : ''}
+            <div class="menu-divider"></div>
+            ${status === 'active' && u.role !== 'owner' ? `<button class="menu-item menu-item--danger" data-act="suspend" data-id="${escapeHtml(u.id)}">Suspend</button>` : ''}
+            ${status === 'suspended' ? `<button class="menu-item" data-act="reactivate" data-id="${escapeHtml(u.id)}">Reactivate</button>` : ''}
+            <button class="menu-item menu-item--danger" data-act="delete" data-id="${escapeHtml(u.id)}">Delete user</button>
+          </div>
+        </div>`;
+
+      return `
+        <tr data-id="${escapeHtml(u.id)}">
+          <td>${escapeHtml(u.fullName || '(no name set)')}${isMe ? ' <span class="status-cell-pill status-pill-active" style="margin-left:6px;font-size:10px;">You</span>' : ''}</td>
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">${escapeHtml(u.email)}</td>
+          <td><span class="role-pill" data-role="${escapeHtml(u.role)}">${escapeHtml(u.role || 'unknown')}</span></td>
+          <td><span class="status-cell-pill ${statusPillClass}">${escapeHtml(statusLabel)}</span></td>
+          <td>${fmtDateTime(u.lastLogin)}</td>
+          <td class="col-actions">${primary}${menu}</td>
+        </tr>
+      `;
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // USER MANAGEMENT — modals, API calls, row actions
+    // ─────────────────────────────────────────────────────────
+
+    const API = {
+      inviteUser:   '/api/admin/clients/invite-user',
+      manageUser:   '/api/admin/clients/manage-user',
+      sendReset:    '/api/admin/clients/send-reset',
+      resendInvite: '/api/admin/clients/resend-invite',
+      me:           '/api/auth/me',
+    };
+
+    const ALL_PRODUCTS = [
+      { slug: 'widget_suite',   name: 'TG Widget Suite' },
+      { slug: 'luna_chat',      name: 'Luna Chat' },
+      { slug: 'luna_marketing', name: 'Luna Marketing' },
+      { slug: 'luna_brain',     name: 'Luna Brain' },
+      { slug: 'luna_trends',    name: 'Luna Trends' },
+      { slug: 'luna_qa',        name: 'Luna QA' },
+      { slug: 'tool_hub',       name: 'Tool Hub' },
+    ];
+
+    let editingUserId = null;
+
+    async function apiCall(url, opts = {}) {
+      const r = await fetch(url, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+        ...opts,
+      });
+      let data;
+      const ct = (r.headers.get('content-type') || '').toLowerCase();
+      if (ct.includes('application/json')) {
+        data = await r.json().catch(() => ({ ok: false, error: 'Malformed response' }));
+      } else {
+        const text = await r.text().catch(() => '');
+        data = { ok: false, error: `HTTP ${r.status}${text ? `: ${text.slice(0, 200)}` : ''}` };
+      }
+      if (!r.ok || data.ok === false) {
+        const err = new Error(data.error || `Request failed (${r.status})`);
+        err.code = data.code;
+        err.status = r.status;
+        throw err;
+      }
+      return data;
+    }
+
+    function toast(msg, kind) {
+      const t = document.getElementById('mini-toast');
+      t.textContent = msg;
+      t.className = 'toast-mini is-on' + (kind ? ' toast-mini--' + kind : '');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('is-on'), 3000);
+    }
+
+    function openModal(id) {
+      document.body.style.overflow = 'hidden';
+      document.getElementById(id).classList.add('is-open');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+
+    // Global click handlers (modals + menus)
+    document.addEventListener('click', (e) => {
+      const closer = e.target.closest('[data-close]');
+      if (closer) { closeModal(closer.dataset.close); return; }
+      if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('is-open');
+        document.body.style.overflow = '';
+        return;
+      }
+      // Close any open menus when clicking outside
+      if (!e.target.closest('.menu-wrap')) {
+        document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.is-open').forEach((m) => m.classList.remove('is-open'));
+        document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
+        document.body.style.overflow = '';
+      }
+    });
+
+    // Row action delegation — attached once to #tab-content
+    document.getElementById('tab-content').addEventListener('click', async (e) => {
+      // Add User button (lives in the panel header, not inside the table)
+      if (e.target.closest('#btn-add-user')) {
+        openAddUserModal();
+        return;
+      }
+
+      const btn = e.target.closest('[data-act]');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      const act = btn.dataset.act;
+
+      if (act === 'menu') {
+        e.stopPropagation();
+        const menu = document.querySelector(`[data-menu="${cssEscape(id)}"]`);
+        const wasOpen = menu.classList.contains('is-open');
+        document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
+        if (!wasOpen) menu.classList.add('is-open');
+        return;
+      }
+      document.querySelectorAll('.menu.is-open').forEach((m) => m.classList.remove('is-open'));
+
+      if (act === 'edit')      return openEditUserModal(id);
+      if (act === 'suspend')   return updateUserStatus(id, 'suspended', btn);
+      if (act === 'reactivate')return updateUserStatus(id, 'active', btn);
+      if (act === 'reset')     return triggerSendReset(id, btn);
+      if (act === 'resend')    return triggerResendInvite(id, btn);
+      if (act === 'delete')    return deleteUserConfirm(id, btn);
+    });
+
+    function cssEscape(s) {
+      if (window.CSS && CSS.escape) return CSS.escape(s);
+      return String(s).replace(/[^a-zA-Z0-9_-]/g, (c) => '\\' + c);
+    }
+
+    function refreshUsersTab() {
+      // Reload client data and re-render Users tab
+      return loadClient();
+    }
+
+    // ── Add User modal ──
+    function openAddUserModal() {
+      document.getElementById('add-error').classList.remove('is-on');
+      document.getElementById('add-form').style.display = 'block';
+      document.getElementById('add-success').style.display = 'none';
+      document.getElementById('add-foot-form').style.display = 'flex';
+      document.getElementById('add-foot-success').style.display = 'none';
+      document.getElementById('add-email').value = '';
+      document.getElementById('add-name').value = '';
+      document.getElementById('add-role').value = 'admin';
+
+      const checklist = document.getElementById('add-products');
+      checklist.innerHTML = ALL_PRODUCTS.map((p) => `
+        <label class="check-row">
+          <input type="checkbox" value="${escapeHtml(p.slug)}" checked>
+          <span class="name">${escapeHtml(p.name)}</span>
+          <span class="slug">${escapeHtml(p.slug)}</span>
+        </label>
+      `).join('');
+      openModal('modal-add-user');
+      setTimeout(() => document.getElementById('add-email').focus(), 50);
+    }
+
+    document.getElementById('btn-send-invite').addEventListener('click', async () => {
+      const errEl = document.getElementById('add-error');
+      errEl.classList.remove('is-on');
+
+      const email = document.getElementById('add-email').value.trim().toLowerCase();
+      const fullName = document.getElementById('add-name').value.trim();
+      const role = document.getElementById('add-role').value;
+      const productSlugs = Array.from(
+        document.querySelectorAll('#add-products input:checked')
+      ).map((i) => i.value);
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errEl.textContent = 'Enter a valid email address.';
+        errEl.classList.add('is-on'); return;
+      }
+      if (productSlugs.length === 0) {
+        errEl.textContent = 'Select at least one product.';
+        errEl.classList.add('is-on'); return;
+      }
+
+      const btn = document.getElementById('btn-send-invite');
+      btn.disabled = true; btn.textContent = 'Sending…';
+
+      try {
+        const res = await apiCall(API.inviteUser, {
+          method: 'POST',
+          body: JSON.stringify({
+            clientId: clientData.client.id,
+            email, fullName, role, productSlugs,
+          }),
+        });
+
+        if (res.alreadyMember) {
+          errEl.textContent = 'That user is already a member of this client.';
+          errEl.classList.add('is-on');
+          return;
+        }
+
+        const productNames = res.productNames || [];
+        document.getElementById('add-success-msg').textContent =
+          `An invitation email has been sent to ${email}. The link works for 7 days; they'll set their own password when they accept.`;
+        document.getElementById('add-success-products').innerHTML = productNames.length
+          ? `<p style="margin-top:12px;font-weight:500;color:var(--tg-text-primary);">They'll have access to:</p><ul style="margin:8px 0 0 18px;color:var(--tg-text-secondary);font-size:14px;line-height:1.7;">${productNames.map((n) => `<li>${escapeHtml(n)}</li>`).join('')}</ul>`
+          : '';
+        document.getElementById('add-form').style.display = 'none';
+        document.getElementById('add-success').style.display = 'block';
+        document.getElementById('add-foot-form').style.display = 'none';
+        document.getElementById('add-foot-success').style.display = 'flex';
+        refreshUsersTab();
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.add('is-on');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Send invitation';
+      }
+    });
+
+    // ── Edit User modal ──
+    function openEditUserModal(userId) {
+      const u = clientData.users.find((x) => x.id === userId);
+      if (!u) return;
+      editingUserId = userId;
+
+      document.getElementById('edit-error').classList.remove('is-on');
+      document.getElementById('edit-email').value = u.email || '';
+      document.getElementById('edit-name').value = u.fullName || '';
+      document.getElementById('edit-role').value = u.role || 'member';
+
+      // Show/hide delete button (hide if this user is the current admin)
+      const isMe = userId === (window.__authMe && window.__authMe.userRecordId);
+      document.getElementById('btn-delete-user').style.display = isMe ? 'none' : '';
+
+      // Render product checklist with current permissions ticked
+      const currentSlugs = new Set((u.permissions || []).map((p) => p.productSlug));
+      document.getElementById('edit-products').innerHTML = ALL_PRODUCTS.map((p) => `
+        <label class="check-row">
+          <input type="checkbox" value="${escapeHtml(p.slug)}"${currentSlugs.has(p.slug) ? ' checked' : ''}>
+          <span class="name">${escapeHtml(p.name)}</span>
+          <span class="slug">${escapeHtml(p.slug)}</span>
+        </label>
+      `).join('');
+      document.getElementById('edit-products-hint').textContent =
+        'Tick products this user should have access to. Changes apply on Save.';
+
+      openModal('modal-edit-user');
+      setTimeout(() => document.getElementById('edit-name').focus(), 50);
+    }
+
+    document.getElementById('btn-save-edit').addEventListener('click', async () => {
+      const errEl = document.getElementById('edit-error');
+      errEl.classList.remove('is-on');
+
+      const u = clientData.users.find((x) => x.id === editingUserId);
+      if (!u) { closeModal('modal-edit-user'); return; }
+
+      const fullName = document.getElementById('edit-name').value.trim();
+      const role = document.getElementById('edit-role').value;
+      const productSlugs = Array.from(
+        document.querySelectorAll('#edit-products input:checked')
+      ).map((i) => i.value);
+
+      if (fullName && fullName.length < 2) {
+        errEl.textContent = 'Full name must be at least 2 characters.';
+        errEl.classList.add('is-on'); return;
+      }
+      if (productSlugs.length === 0) {
+        errEl.textContent = 'A user must have access to at least one product. Delete them instead if they should have none.';
+        errEl.classList.add('is-on'); return;
+      }
+
+      const btn = document.getElementById('btn-save-edit');
+      btn.disabled = true; btn.textContent = 'Saving…';
+
+      try {
+        const body = {
+          userId: editingUserId,
+          clientId: clientData.client.id,
+          role,
+          productSlugs,
+        };
+        if (fullName) body.fullName = fullName;
+
+        const res = await apiCall(API.manageUser, {
+          method: 'PATCH',
+          body: JSON.stringify(body),
+        });
+
+        const s = res.permSummary;
+        let summary = 'Saved';
+        if (s) {
+          const parts = [];
+          if (s.granted) parts.push(`granted ${s.granted}`);
+          if (s.revoked) parts.push(`revoked ${s.revoked}`);
+          if (s.updated) parts.push(`updated role on ${s.updated}`);
+          if (parts.length) summary = `Saved (${parts.join(', ')})`;
+        }
+        toast(summary, 'ok');
+        closeModal('modal-edit-user');
+        refreshUsersTab();
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.add('is-on');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Save changes';
+      }
+    });
+
+    document.getElementById('btn-delete-user').addEventListener('click', async () => {
+      const u = clientData.users.find((x) => x.id === editingUserId);
+      if (!u) return;
+      if (!confirm(`Delete ${u.fullName || u.email}? This removes their account and all permissions. Can't be undone.`)) return;
+
+      const btn = document.getElementById('btn-delete-user');
+      btn.disabled = true;
+      try {
+        await apiCall(`${API.manageUser}?userId=${encodeURIComponent(editingUserId)}&clientId=${encodeURIComponent(clientData.client.id)}`, {
+          method: 'DELETE',
+        });
+        toast('User deleted', 'ok');
+        closeModal('modal-edit-user');
+        refreshUsersTab();
+      } catch (err) {
+        toast(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // ── Row helpers ──
+    async function updateUserStatus(userId, status, btn) {
+      btn.disabled = true;
+      try {
+        await apiCall(API.manageUser, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            userId,
+            clientId: clientData.client.id,
+            status,
+          }),
+        });
+        toast(status === 'suspended' ? 'User suspended' : 'User reactivated', 'ok');
+        refreshUsersTab();
+      } catch (err) {
+        toast(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function triggerSendReset(userId, btn) {
+      const u = clientData.users.find((x) => x.id === userId);
+      if (!confirm(`Send a password-reset link to ${u ? u.email : 'this user'}? They'll get an email with a link that works for 1 hour.`)) return;
+      btn.disabled = true;
+      try {
+        await apiCall(API.sendReset, {
+          method: 'POST',
+          body: JSON.stringify({ userId, clientId: clientData.client.id }),
+        });
+        toast('Password-reset email sent', 'ok');
+      } catch (err) {
+        toast(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function triggerResendInvite(userId, btn) {
+      btn.disabled = true;
+      try {
+        await apiCall(API.resendInvite, {
+          method: 'POST',
+          body: JSON.stringify({ userId, clientId: clientData.client.id }),
+        });
+        toast('Invitation re-sent', 'ok');
+        refreshUsersTab();
+      } catch (err) {
+        toast(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function deleteUserConfirm(userId, btn) {
+      const u = clientData.users.find((x) => x.id === userId);
+      if (!confirm(`Delete ${u ? (u.fullName || u.email) : 'this user'}? This removes their account and all permissions. Can't be undone.`)) return;
+      btn.disabled = true;
+      try {
+        await apiCall(`${API.manageUser}?userId=${encodeURIComponent(userId)}&clientId=${encodeURIComponent(clientData.client.id)}`, {
+          method: 'DELETE',
+        });
+        toast('User deleted', 'ok');
+        refreshUsersTab();
+      } catch (err) {
+        toast(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Capture who I am, once, so the "Edit" button can hide Delete for self
+    fetch(API.me, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((d) => { if (d && d.user) window.__authMe = d.user; })
+      .catch(() => {});
+
     loadClient();
   </script>
+
+  <!-- ── Add User modal ── -->
+  <div class="modal-overlay" id="modal-add-user" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Add user to this client</h2>
+        <button class="modal-close" data-close="modal-add-user" aria-label="Close">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-error" id="add-error"></div>
+
+        <div id="add-success" style="display:none;">
+          <div style="padding:20px;background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(0,180,216,0.04));border:1px solid rgba(16,185,129,0.25);border-radius:8px;">
+            <h3 style="margin:0 0 4px;font-size:16px;font-weight:600;color:var(--tg-success);">Invitation sent</h3>
+            <p style="margin:0;font-size:14px;color:var(--tg-text-secondary);line-height:1.5;" id="add-success-msg"></p>
+            <div id="add-success-products"></div>
+          </div>
+        </div>
+
+        <div id="add-form">
+          <div class="field">
+            <label class="field-label" for="add-email">Email address</label>
+            <input class="input" id="add-email" type="email" placeholder="jane@sunshine-holidays.com" autocomplete="off">
+            <span class="field-hint">An invitation link will be emailed to this address.</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="add-name">Full name (optional)</label>
+            <input class="input" id="add-name" type="text" placeholder="Jane Smith">
+            <span class="field-hint">Helps you identify the user before they accept. They can update it after sign-in.</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="add-role">Role</label>
+            <select class="select" id="add-role">
+              <option value="owner">Owner — primary account holder</option>
+              <option value="admin">Admin — full access, can manage staff</option>
+              <option value="member">Member — can use granted products, can't manage staff</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Product access</label>
+            <div class="checklist" id="add-products"></div>
+            <span class="field-hint">All products selected by default. Uncheck any you don't want them to have.</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot" id="add-foot-form">
+        <button class="btn" data-close="modal-add-user">Cancel</button>
+        <button class="btn btn--primary" id="btn-send-invite">Send invitation</button>
+      </div>
+      <div class="modal-foot" id="add-foot-success" style="display:none;">
+        <button class="btn btn--primary" data-close="modal-add-user">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Edit User modal ── -->
+  <div class="modal-overlay" id="modal-edit-user" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Edit user</h2>
+        <button class="modal-close" data-close="modal-edit-user" aria-label="Close">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-error" id="edit-error"></div>
+
+        <div class="field">
+          <label class="field-label" for="edit-email">Email</label>
+          <input class="input" id="edit-email" type="email" readonly>
+          <span class="field-hint">Email can't be changed. Delete and re-invite if needed.</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="edit-name">Full name</label>
+          <input class="input" id="edit-name" type="text" placeholder="Jane Smith">
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="edit-role">Role</label>
+          <select class="select" id="edit-role">
+            <option value="owner">Owner</option>
+            <option value="admin">Admin</option>
+            <option value="member">Member</option>
+          </select>
+          <span class="field-hint">Role applies to every product they have access to.</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Product access</label>
+          <div class="checklist" id="edit-products"></div>
+          <span class="field-hint" id="edit-products-hint">Tick products this user should have access to. Changes apply on Save.</span>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn--danger" id="btn-delete-user" style="margin-right:auto;">Delete user</button>
+        <button class="btn" data-close="modal-edit-user">Cancel</button>
+        <button class="btn btn--primary" id="btn-save-edit">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-mini" id="mini-toast" role="status" aria-live="polite"></div>
 </body>
 </html>
