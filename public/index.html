@@ -2405,6 +2405,53 @@ function loadMiniPreview(w) {
 
 /* ═══ AUTH ═══ */
 let userData = null;
+
+// ── Cookie-first auth bootstrap ──────────────────────────────────
+//
+// Travelgenix now uses an HttpOnly cookie (tg_session) on .travelify.io,
+// set by id.travelify.io when the user signs in. To check whether we're
+// signed in, we ask /api/auth/me on the id host and see what comes back.
+//
+// This runs in parallel with the legacy localStorage check below — if
+// either path succeeds, the user is treated as signed in.
+//
+// Why both: existing test users may still have a legacy tg_token in
+// localStorage from before the cookie flow existed. We don't want to
+// log them out just because they haven't touched the new sign-in page.
+async function bootstrapCookieAuth() {
+  try {
+    const r = await fetch('https://id.travelify.io/api/auth/me', {
+      method: 'GET', credentials: 'include', cache: 'no-store',
+    });
+    if (r.status === 401) return false;
+    if (!r.ok) return false;
+    const data = await r.json();
+    if (!data || !data.ok || !data.user) return false;
+
+    // Cookie session is authoritative — overwrite anything we picked up
+    // from localStorage. The cookie reflects current state; localStorage
+    // can be stale.
+    userData = {
+      email: data.user.email,
+      fullName: data.user.fullName,
+      role: data.user.role,
+      clientName: data.client && data.client.clientName,
+      clientRecordId: data.client && data.client.recordId,
+      plan: data.client && data.client.packageName,
+      permissions: data.permissions || [],
+    };
+    signedIn = true;
+    userEmail = userData.email || '';
+    return true;
+  } catch (e) {
+    console.warn('[index] cookie auth check failed:', e && e.message);
+    return false;
+  }
+}
+
+// Legacy localStorage check — runs synchronously so the first render
+// shows something immediately, even if it shows a sign-in prompt that
+// the cookie-resolve later replaces.
 try {
   // Primary: read keys written by /signin.html (new auth flow)
   const tok = localStorage.getItem('tg_token');
@@ -2438,7 +2485,14 @@ function getAuthToken() {
   if (t) return t;
   try { return JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; }
 }
-function authHeaders() { const t = getAuthToken(); return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }; }
+function authHeaders() {
+  // If we have a legacy Bearer token, send it. If we're on the cookie
+  // flow, no Authorization header is needed — the cookie is sent
+  // automatically with same-origin fetches (and the backend's _auth.js
+  // accepts both Bearer and cookie).
+  const t = getAuthToken();
+  return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
 
 function openSignIn(){location.href='/signin.html?next='+encodeURIComponent(location.pathname+location.search+location.hash)}
 function closeSignIn(){const m=document.getElementById('signInModal');if(m)m.classList.remove('open');const e=document.getElementById('signErr');if(e)e.style.display='none'}
@@ -2471,7 +2525,28 @@ async function doSignIn(){
   }
 }
 
-function signOut(){localStorage.removeItem('tg_token');localStorage.removeItem('tg_user');localStorage.removeItem('tg_client');localStorage.removeItem('tgw_session');sessionStorage.removeItem('tgw_session');signedIn=false;userEmail='';userData=null;myWidgetData=[];render()}
+function signOut(){
+  // Clear all local credential stores
+  localStorage.removeItem('tg_token');
+  localStorage.removeItem('tg_user');
+  localStorage.removeItem('tg_client');
+  localStorage.removeItem('tgw_session');
+  sessionStorage.removeItem('tgw_session');
+  signedIn = false;
+  userEmail = '';
+  userData = null;
+  myWidgetData = [];
+  // Best-effort: clear the central cookie too. We don't await — even
+  // if the network call fails, the user is already locally signed out
+  // and any subsequent /api/auth/me call from this tab will be sent
+  // without a cookie (because we redirect away below).
+  try {
+    fetch('https://id.travelify.io/api/auth/signout', {
+      method: 'POST', credentials: 'include', cache: 'no-store',
+    }).catch(()=>{});
+  } catch(e){}
+  render();
+}
 
 /* ═══ UTILS ═══ */
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
@@ -2479,6 +2554,17 @@ function esc(s){const d=document.createElement('div');d.textContent=s||'';return
 
 /* ═══ INIT ═══ */
 render();
+
+// Cookie auth check runs in parallel. If it resolves to "signed in" and
+// we weren't already, re-render to show the user's widgets / dashboard
+// instead of the sign-in prompt. If localStorage already had us signed
+// in, the cookie result simply confirms / refreshes that.
+bootstrapCookieAuth().then((ok) => {
+  if (ok) {
+    // bootstrap already mutated signedIn / userData / userEmail
+    render();
+  }
+});
 </script>
 
 <!-- Load widget engines for mini previews -->
