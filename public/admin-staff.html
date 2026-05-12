@@ -430,6 +430,7 @@
       const err = new Error(data.error || `Request failed (${res.status})`);
       err.code = data.code;
       err.status = res.status;
+      err.debug = data.debug || null;   // surface diagnostic detail
       throw err;
     }
     return data;
@@ -634,10 +635,14 @@
       users = res.users || [];
       applyFilter();
     } catch (err) {
-      if (err.status === 401 || err.status === 403) {
+      if (err.status === 401 || err.status === 403 || err.status === 500) {
+        const debugBlock = err.debug
+          ? `<pre style="margin-top:16px;padding:12px;background:var(--tg-bg-tertiary);border-radius:8px;text-align:left;font-size:11px;line-height:1.5;color:var(--tg-text-secondary);overflow-x:auto;white-space:pre-wrap;word-break:break-all;">${esc(JSON.stringify(err.debug, null, 2))}</pre>`
+          : '';
         rowsEl.innerHTML = `<tr><td colspan="5"><div class="empty">
-          <h3>Admin access only</h3>
+          <h3>${err.status === 500 ? 'Server error' : 'Admin access only'}</h3>
           <p>${esc(err.message)}</p>
+          ${debugBlock}
         </div></td></tr>`;
         statEl.textContent = '—';
       } else {
