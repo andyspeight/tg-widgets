@@ -15,7 +15,7 @@
  */
 
 import { SESSIONS } from './schema.js';
-import { findOneByField, createRecord, updateRecord, listRecords } from './airtable.js';
+import { findOneByField, createRecord, updateRecord, listRecords, listAllRecords } from './airtable.js';
 import { uuid } from './crypto.js';
 
 /**
@@ -79,25 +79,43 @@ export async function revokeSession(sessionRecordId, reason = 'signout') {
 
 /**
  * Revoke every active session for a user.
- * Used on "sign out everywhere" and after password reset.
+ * Used on "sign out everywhere", after password reset, and on every SSO
+ * sign-in (one-active-session policy).
+ *
+ * Implementation note: Airtable formulas can't reliably compare a linked-
+ * record array field against a record id — `{user}` in a formula resolves
+ * to the array of primary-field values (in our case, emails), not record
+ * IDs. The previous version of this function used `{user}='recXXX'` which
+ * silently always returned 0 rows. Fix: pull all sessions and filter
+ * client-side. Session counts are small (per-user typically 1–5, total
+ * across the org currently in the hundreds), so the read is cheap.
  */
 export async function revokeAllUserSessions(userRecordId, reason = 'signout_all') {
-  // List active sessions for this user (no revoked-at, not expired)
-  const formula = `AND(
-    {${SESSIONS.fields.user}}='${userRecordId}',
-    {${SESSIONS.fields.revokedAt}}=BLANK(),
-    OR({${SESSIONS.fields.expiresAt}}=BLANK(), IS_AFTER({${SESSIONS.fields.expiresAt}}, NOW()))
-  )`.replace(/\s+/g, ' ');
+  if (!userRecordId) return 0;
 
-  const records = await listRecords(SESSIONS.tableId, { formula, maxRecords: 100 });
-  if (records.length === 0) return 0;
+  const all = await listAllRecords(SESSIONS.tableId);
+  const nowMs = Date.now();
 
-  // Update one at a time. Bulk PATCH would be faster but session counts per
-  // user are small (~1-3 typically).
-  for (const r of records) {
+  const active = all.filter((rec) => {
+    const userLinks = rec.fields[SESSIONS.fields.user] || [];
+    if (!userLinks.includes(userRecordId)) return false;
+
+    // Already revoked? skip
+    if (rec.fields[SESSIONS.fields.revokedAt]) return false;
+
+    // Expired? skip (it's effectively dead anyway)
+    const exp = rec.fields[SESSIONS.fields.expiresAt];
+    if (exp && new Date(exp).getTime() < nowMs) return false;
+
+    return true;
+  });
+
+  if (active.length === 0) return 0;
+
+  for (const r of active) {
     await revokeSession(r.id, reason);
   }
-  return records.length;
+  return active.length;
 }
 
 /**
