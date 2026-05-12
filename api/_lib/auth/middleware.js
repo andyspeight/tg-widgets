@@ -98,7 +98,38 @@ export async function requireAuth(req, res) {
     return null;
   }
 
-  const clientRecordId = (f[USERS.fields.client] || [])[0] || null;
+  // Resolve the current client for this session.
+  //
+  // CRITICAL: read the clientId from the session JWT payload, not from
+  // the user's linked-client array. A single user can be linked to multiple
+  // clients (multi-company access), and the session is scoped to ONE of
+  // them at sign-in time. The session's clientId is THE source of truth
+  // for "which client am I currently working in".
+  //
+  // Previously this read `f[USERS.fields.client][0]` — the FIRST linked
+  // client — which meant multi-company users were stuck on whichever client
+  // happened to be first in their array, regardless of what they SSO'd in
+  // as or switched to. That was the wrong-default-company bug.
+  //
+  // Defensive: validate the JWT's clientId is still in the user's linked
+  // clients (in case access was revoked since the JWT was signed). If not,
+  // fall back to the user's first linked client (or null if they have
+  // none). For legacy tokens without a clientId claim, also fall back.
+  const userClientIds = f[USERS.fields.client] || [];
+  let clientRecordId = null;
+  if (payload.clientId && userClientIds.includes(payload.clientId)) {
+    clientRecordId = payload.clientId;
+  } else if (payload.clientId) {
+    // JWT had a clientId but the user is no longer linked to that client.
+    // Could happen if an admin removed them between sign-in and now.
+    console.warn('[auth/middleware] JWT clientId', payload.clientId,
+      'no longer in user.client[] for', userRec.id,
+      '— falling back to first linked client');
+    clientRecordId = userClientIds[0] || null;
+  } else {
+    // Legacy token with no clientId claim — fall back to first linked.
+    clientRecordId = userClientIds[0] || null;
+  }
 
   // Touch the session asynchronously; don't await
   touchSession(session.recordId).catch(() => {});
