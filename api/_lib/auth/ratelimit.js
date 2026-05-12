@@ -99,5 +99,6 @@ export const limiters = {
   resetPassword: ({ key }) => checkRateLimit({ bucket: 'reset',        key, max: 10, windowSeconds: 3600 }),
   inviteSend:    ({ key }) => checkRateLimit({ bucket: 'inviteSend',   key, max: 30, windowSeconds: 3600 }),
   inviteAccept:  ({ key }) => checkRateLimit({ bucket: 'inviteAccept', key, max: 5,  windowSeconds: 3600 }),
-  me:            ({ key }) => checkRateLimit({ bucket: 'me',           key, max: 60, windowSeconds: 60 })
+  me:            ({ key }) => checkRateLimit({ bucket: 'me',           key, max: 60, windowSeconds: 60 }),
+  clientSwitch:  ({ key }) => checkRateLimit({ bucket: 'clientSwitch', key, max: 20, windowSeconds: 60 })
 };
