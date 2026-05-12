@@ -48,6 +48,76 @@
   let activeTab = 'design';
 
   // ============================================================
+  // COOKIE-BASED SESSION (NEW UNIFIED AUTH)
+  //
+  // Travelgenix moved auth onto a cookie set by id.travelify.io. Any
+  // *.travelify.io page (including widgets.travelify.io) gets the cookie
+  // sent automatically. To stay compatible with the existing legacy
+  // localStorage-token flow, we check both: cookie first (preferred),
+  // localStorage as fallback.
+  //
+  // The cookie itself is HttpOnly, so JS can't read it directly. Instead,
+  // we ask the server via /api/auth/me whether it's valid. Result is
+  // cached in module state so we don't re-fetch on every isLoggedIn() call.
+  // ============================================================
+
+  // States: 'pending' (in flight), 'authenticated', 'unauthenticated'
+  let cookieAuthState = 'pending';
+  let cookieAuthUser = null;
+  const cookieAuthListeners = [];
+
+  function notifyCookieAuthResolved() {
+    while (cookieAuthListeners.length) {
+      const cb = cookieAuthListeners.shift();
+      try { cb(); } catch (e) { console.error('[tgse] auth listener error', e); }
+    }
+    try {
+      window.dispatchEvent(new CustomEvent('tgse-auth-resolved', {
+        detail: { state: cookieAuthState, user: cookieAuthUser },
+      }));
+    } catch {}
+  }
+
+  // Kick off the cookie check immediately at module load (before init()).
+  // On widgets.travelify.io this typically resolves before the user can
+  // notice — it's a single GET, no preflight, cookie sent automatically.
+  (function bootstrapCookieAuth() {
+    fetch('https://id.travelify.io/api/auth/me', {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store',
+    })
+      .then(function (r) {
+        if (r.status === 401) return null;
+        if (!r.ok) throw new Error('me_' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        if (data && data.ok && data.user) {
+          cookieAuthUser = {
+            email: data.user.email,
+            fullName: data.user.fullName,
+            role: data.user.role,
+            // From client info (the session is scoped to a client)
+            clientName: data.client && data.client.clientName,
+            clientRecordId: data.client && data.client.recordId,
+            plan: data.client && data.client.packageName,
+            // Permissions array — products this user can use
+            permissions: data.permissions || [],
+          };
+          cookieAuthState = 'authenticated';
+        } else {
+          cookieAuthState = 'unauthenticated';
+        }
+      })
+      .catch(function (err) {
+        console.warn('[tgse] cookie auth check failed:', err && err.message);
+        cookieAuthState = 'unauthenticated';
+      })
+      .finally(notifyCookieAuthResolved);
+  })();
+
+  // ============================================================
   // SESSION MANAGEMENT
   // Soft cutover: read both localStorage + sessionStorage,
   // write only to localStorage going forward.
@@ -117,19 +187,48 @@
   }
 
   function isLoggedIn() {
+    // Cookie session is the primary source of truth — set after the
+    // bootstrap fetch resolves. Until then, fall back to legacy localStorage.
+    if (cookieAuthState === 'authenticated') return true;
     const s = getSession();
     return !!(s && s.token);
   }
 
   function getAuthToken() {
+    // For backwards-compatible Bearer-header use. Cookie sessions don't
+    // have a JS-accessible token (the cookie is HttpOnly), so this returns
+    // empty when the cookie is the auth source — callers should not set
+    // a Bearer header in that case, and the cookie will be sent
+    // automatically on same-origin fetches.
     return getSession()?.token || '';
   }
 
   function authHeaders() {
     const h = { 'Content-Type': 'application/json' };
     const t = getAuthToken();
-    if (t) h['Authorization'] = 'Bearer ' + t;
+    if (t) {
+      h['Authorization'] = 'Bearer ' + t;
+    }
+    // If we're running off the cookie session, no Authorization header is
+    // needed — the browser sends the cookie automatically. Callers must
+    // ensure their fetch() calls use credentials:'include' for same-site
+    // cross-subdomain calls if any.
     return h;
+  }
+
+  /**
+   * Returns user info for the current session, regardless of auth source.
+   * Prefers cookie session; falls back to legacy localStorage session.
+   *
+   * Use this to render the editor's user chip, gating, etc, instead of
+   * reading getSession() directly.
+   */
+  function getCurrentUser() {
+    if (cookieAuthState === 'authenticated' && cookieAuthUser) {
+      return cookieAuthUser;
+    }
+    const s = getSession();
+    return s ? s.user : null;
   }
 
   // Cross-tab logout: when one tab clears the session, the others should too.
@@ -692,9 +791,24 @@
   function init(initOpts) {
     opts = initOpts || {};
 
-    // 1. Auth gate — if not logged in, show overlay (page still loads beneath)
-    if (!isLoggedIn()) {
-      showLogin();
+    // 1. Auth gate — show login overlay only if BOTH cookie session check
+    // has resolved AND we're not authenticated by any means. While the
+    // cookie check is in flight (typically <200ms), defer the decision to
+    // avoid flashing the overlay for users who are signed in via the
+    // unified flow.
+    function applyAuthGate() {
+      if (!isLoggedIn()) {
+        showLogin();
+      } else {
+        // We're authenticated — make sure any overlay is hidden (in case
+        // the user signed in mid-page, e.g. via storage event)
+        hideLogin();
+      }
+    }
+    if (cookieAuthState === 'pending') {
+      cookieAuthListeners.push(applyAuthGate);
+    } else {
+      applyAuthGate();
     }
 
     // 2. Load Google Fonts so the picker previews properly
@@ -728,6 +842,7 @@
       isLoggedIn,
       authHeaders,
       getAuthToken,
+      getCurrentUser,
       mountFontPicker,
       FONTS,
     };
@@ -745,6 +860,7 @@
     isLoggedIn,
     authHeaders,
     getAuthToken,
+    getCurrentUser,
     mountFontPicker,
     FONTS,
     version: '1.0.0',
