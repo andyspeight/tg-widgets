@@ -547,6 +547,11 @@ export default async function handler(req, res) {
       supportPhone: widgetSettings?.support?.phone || null,
       colors: widgetSettings?.colors || {},
       radius: typeof widgetSettings?.radius === 'number' ? widgetSettings.radius : 12,
+      // The customer-typed orderRef is the final fallback when no supplier
+      // bookingReference exists on any item. Without it, the template
+      // displays the internal numeric order.id, which the customer has
+      // never seen and doesn't match their confirmation paperwork.
+      orderRef,
     });
 
     browser = await getBrowser();
