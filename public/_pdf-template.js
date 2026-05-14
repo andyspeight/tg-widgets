@@ -357,7 +357,23 @@ export function renderPdfHtml(order, opts = {}) {
   const extraItems = (order.items || []).filter((it) => it?.product === 'AirportExtras');
   const summary = order.summary || {};
 
-  const orderRef = accomItem?.bookingReference || flightItems[0]?.bookingReference || order.id || '';
+  // Booking reference policy (must match the widget and email template):
+  //   1. Real supplier bookingReference on Accommodation/Flights/AirportExtras
+  //   2. Customer-typed orderRef (uppercase) — passed in from booking-pdf.js
+  //   3. Empty string — never fall back to the numeric order.id. That's an
+  //      internal identifier the customer has never seen; rendering it as
+  //      "Booking 84497" mismatches their confirmation email and triggers
+  //      support tickets ("That's not my booking reference").
+  // Variable name kept as orderRef because it appears in many downstream
+  // template strings; meaning is unchanged from the customer's perspective.
+  const customerTypedRef = (opts.orderRef && String(opts.orderRef).trim())
+    ? String(opts.orderRef).trim().toUpperCase()
+    : '';
+  const orderRef = accomItem?.bookingReference
+    || flightItems[0]?.bookingReference
+    || extraItems[0]?.bookingReference
+    || customerTypedRef
+    || '';
   const heroImg = accom ? pickHeroImage(accom.media) : null;
   const stars = accom ? renderStars(accom.rating) : '';
   const propertyName = accom?.name || '—';
@@ -425,13 +441,55 @@ export function renderPdfHtml(order, opts = {}) {
     accom?.location?.state,
   ].filter(Boolean).join(', ');
 
+  // ---------- Documents ----------
+  // Safe document list for the PDF. We never inline supplier-provided HTML
+  // here — only the name (escaped) and the URL (https-vetted). Clicking the
+  // doc in any modern PDF viewer opens the link in the user's browser.
+  // URL safety: only HTTPS, and we reject private/loopback/link-local hosts
+  // as defence-in-depth. Same logic as booking-email.js and the email
+  // template — kept inline rather than imported because _pdf-template.js
+  // is loaded both server-side (booking-pdf.js) and could be rendered in
+  // other contexts in future.
+  const isSafeDocUrl = (raw) => {
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== 'https:') return false;
+      const host = u.hostname.toLowerCase();
+      if (host === 'localhost' || host === '0.0.0.0') return false;
+      if (host.endsWith('.local') || host.endsWith('.internal')) return false;
+      if (/^127\./.test(host)) return false;
+      if (/^10\./.test(host)) return false;
+      if (/^192\.168\./.test(host)) return false;
+      if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)) return false;
+      if (/^169\.254\./.test(host)) return false;
+      if (host === '::1' || host === '[::1]') return false;
+      if (/^\[?fc[0-9a-f]{2}:/i.test(host) || /^\[?fd[0-9a-f]{2}:/i.test(host)) return false;
+      if (/^\[?fe80:/i.test(host)) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const docList = Array.isArray(order.documents) ? order.documents : [];
+  const safeDocs = docList
+    .filter(d => d && typeof d.url === 'string' && isSafeDocUrl(d.url))
+    .slice(0, 20); // hard cap — protect against pathological payloads
+
+  const fmtBytes = (n) => {
+    if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) return '';
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   // ---------- HTML ----------
 
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Booking ${escapeHtml(orderRef)}${hasBrand ? ' — ' + escapeHtml(brandName) : ''}</title>
+<title>Booking ${escapeHtml(orderRef || 'Confirmation')}${hasBrand ? ' — ' + escapeHtml(brandName) : ''}</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -489,7 +547,8 @@ export function renderPdfHtml(order, opts = {}) {
   .pdf-extra-card,
   .pdf-contact-card,
   .pdf-amenity,
-  .pdf-instalment {
+  .pdf-instalment,
+  .pdf-doc {
     break-inside: avoid;
     -webkit-column-break-inside: avoid;
     page-break-inside: avoid;
@@ -504,12 +563,14 @@ export function renderPdfHtml(order, opts = {}) {
   }
 
   /* Long sections that exceed an A4 page (e.g. flights with many segments,
-     or the payment block when an instalment plan is present) are allowed
-     to break, but only between their child blocks — never mid-block. */
+     or the payment block when an instalment plan is present, or a long
+     documents list) are allowed to break, but only between their child
+     blocks — never mid-block. */
   .pdf-pay,
   .pdf-policies,
   .pdf-amenities,
-  .pdf-contact {
+  .pdf-contact,
+  .pdf-docs {
     break-inside: auto;
     page-break-inside: auto;
   }
@@ -730,6 +791,45 @@ export function renderPdfHtml(order, opts = {}) {
   .pdf-policy-body .good { color: var(--success); font-weight: 600; }
   .pdf-policy-body strong { color: var(--text); }
 
+  /* DOCUMENTS */
+  /* Linked list of supplier-provided documents (vouchers, tickets, etc).
+     Each row is a clickable link in the rendered PDF — Chromium honours
+     <a href> in printed PDFs, so clicking the file name in any modern PDF
+     viewer opens the document in a browser. */
+  .pdf-docs { display: flex; flex-direction: column; gap: 8px; }
+  .pdf-doc {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .pdf-doc-icon {
+    width: 32px; height: 32px;
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--accent);
+    flex-shrink: 0;
+    letter-spacing: .02em;
+  }
+  .pdf-doc-info { flex: 1; min-width: 0; }
+  .pdf-doc-name {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    line-height: 1.3; margin-bottom: 2px;
+  }
+  .pdf-doc-meta {
+    font-size: 11px; color: var(--text-3);
+    word-break: break-all;
+  }
+  .pdf-doc-action {
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    letter-spacing: .04em; text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
   /* FOOTER */
   .pdf-footer {
     position: absolute;
@@ -854,7 +954,7 @@ export function renderPdfHtml(order, opts = {}) {
     <div class="pdf-ref-bar">
       <div class="pdf-ref-cell">
         <div class="pdf-ref-label">Booking reference</div>
-        <div class="pdf-ref-value num">${escapeHtml(orderRef)}</div>
+        <div class="pdf-ref-value num">${escapeHtml(orderRef || '—')}</div>
       </div>
       <div class="pdf-ref-cell">
         <div class="pdf-ref-label">Booked</div>
@@ -955,6 +1055,31 @@ export function renderPdfHtml(order, opts = {}) {
       <div class="pdf-banner">
         <strong>Payable at the hotel:</strong> additional in-resort fees of <span class="num">${escapeHtml(formatMoney(accom.pricing.inResortFees, currency))}</span> may apply on arrival.
       </div>` : ''}
+    </div>` : ''}
+
+    ${safeDocs.length > 0 ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">Your Documents</div>
+      <div class="pdf-docs">
+        ${safeDocs.map((d, i) => {
+          const name = escapeHtml(((d.name || `Document ${i + 1}`).toString()).slice(0, 100));
+          const extLabel = (d.ext || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4) || 'FILE';
+          const sizeLabel = fmtBytes(typeof d.size === 'number' ? d.size : 0);
+          const url = d.url; // already https-vetted above
+          const displayUrl = url.length > 80 ? url.slice(0, 77) + '...' : url;
+          const metaBits = [sizeLabel].filter(Boolean).join(' · ');
+          return `
+            <a class="pdf-doc" href="${escapeHtml(url)}">
+              <div class="pdf-doc-icon">${escapeHtml(extLabel)}</div>
+              <div class="pdf-doc-info">
+                <div class="pdf-doc-name">${name}</div>
+                <div class="pdf-doc-meta">${escapeHtml(displayUrl)}${metaBits ? ` · ${escapeHtml(metaBits)}` : ''}</div>
+              </div>
+              <div class="pdf-doc-action">View</div>
+            </a>
+          `;
+        }).join('')}
+      </div>
     </div>` : ''}
 
     <div class="pdf-section">
