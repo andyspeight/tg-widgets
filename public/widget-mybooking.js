@@ -1,7 +1,37 @@
 /**
- * Travelgenix My Booking Widget v1.4.0
+ * Travelgenix My Booking Widget v1.4.1
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.4.1 changes (CRITICAL DATA-INTEGRITY FIX):
+ *   - Removed all fabricated fallbacks on supplier (Travelify) data. Booking
+ *     data is now a strict passthrough: if a field is missing, the UI hides
+ *     that line rather than inventing a value. This was producing wrong
+ *     information to customers (e.g. fabricated "TG" prefix on booking refs,
+ *     fabricated room type "Deluxe" when Travelify returned roomType:
+ *     "Unknown" — masking the real room name in units[].name).
+ *   - Booking reference now falls back to the customer-typed orderRef (which
+ *     by definition matched the booking) instead of 'TG' + internal order.id.
+ *   - Room cell now reads units[].name (the actual supplier room name like
+ *     "8 BED MIXED DORM (for 1 people)") and only uses roomType when it is a
+ *     real value (not "Unknown").
+ *   - Board basis (Travelify enum like "BedAndBreakfast") now mapped through
+ *     a strict whitelist to readable labels ("Bed & breakfast"); unknown
+ *     enums fall back to the raw string rather than a fabricated default.
+ *   - Pay-at-location fees with no name/description are skipped entirely
+ *     rather than labelled "Local fee".
+ *   - PDF filename mirrors the on-screen ref resolution (no 'TG' prefix).
+ *   - Countdown copy is now context-aware: "until you fly" only when the
+ *     booking contains flights; "until you check in" for accommodation-only;
+ *     "until you travel" for airport-extras-only. Three new optional config
+ *     labels (countdownFly / countdownCheckIn / countdownTravel) plus the
+ *     legacy `countdown` label remains an explicit override.
+ *   - Luna context summary (getSafeContextSummary): new neutral field
+ *     `daysUntilTripStart` so Luna doesn't write "you fly in N days" on a
+ *     hotel-only booking; `daysUntilDeparture` kept as a back-compat alias.
+ *     New `tripStartEvent` field tells Luna whether the first event is a
+ *     flight, check-in or other. `boardBasis` now returns the readable label
+ *     via fmtBoard() rather than the raw Travelify enum.
  *
  * v1.4.0 changes:
  *   - New public method getSafeContextSummary() returns a privacy-redacted
@@ -83,7 +113,7 @@
   const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || (API_BASE + '/api/retrieve-order');
   const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || (API_BASE + '/api/booking-pdf');
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
-  const VERSION = '1.4.0';
+  const VERSION = '1.4.1';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -168,6 +198,30 @@
     if (Number.isNaN(d.getTime())) return null;
     const ms = d.getTime() - Date.now();
     return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+  }
+  // Travelify returns board basis as a machine enum (e.g. "BedAndBreakfast",
+  // "AllInclusive"). Strict whitelist of known values mapped to readable
+  // labels — anything not in the list falls back to the raw string so we
+  // never silently lose information. Never invent a value when the supplier
+  // returned nothing or returned "Unknown".
+  const BOARD_LABELS = {
+    'RoomOnly':        'Room only',
+    'SelfCatering':    'Self catering',
+    'BedAndBreakfast': 'Bed & breakfast',
+    'HalfBoard':       'Half board',
+    'HalfBoardPlus':   'Half board plus',
+    'FullBoard':       'Full board',
+    'FullBoardPlus':   'Full board plus',
+    'AllInclusive':    'All inclusive',
+    'AllInclusivePlus':'All inclusive plus',
+    'UltraAllInclusive':'Ultra all inclusive',
+  };
+  function fmtBoard(raw) {
+    if (typeof raw !== 'string') return null;
+    const v = raw.trim();
+    if (!v || v.toLowerCase() === 'unknown') return null;
+    if (Object.prototype.hasOwnProperty.call(BOARD_LABELS, v)) return BOARD_LABELS[v];
+    return v; // fall back to raw rather than invent a value
   }
   function fmtTime(iso) {
     if (!iso) return '';
@@ -1059,7 +1113,7 @@
     `;
   }
 
-  function renderFound(order, c) {
+  function renderFound(order, c, lookup) {
     const items = order.items || [];
     const summary = order.summary || {};
 
@@ -1079,7 +1133,18 @@
     const heroUrl = acc?.media?.[0]?.url || extraItems[0]?.airportExtras?.media?.[0]?.url || '';
     const thumbs = (acc?.media || []).slice(0, 4);
 
-    const refValue = accItem?.bookingReference || flightItems[0]?.bookingReference || ('TG' + order.id);
+    // Booking reference policy: display verbatim from Travelify, falling back to
+    // the reference the customer typed to find this booking. NEVER concatenate a
+    // 'TG' prefix or substitute the internal numeric order.id — those are
+    // fabrications that mismatch what the agent/customer sees in their
+    // confirmation email and in Travelify, and cause real-world support and
+    // reputational damage. If no reference is available anywhere, hide the chip
+    // entirely rather than invent one.
+    const refValue =
+      accItem?.bookingReference
+      || flightItems[0]?.bookingReference
+      || extraItems[0]?.bookingReference
+      || (lookup?.ref ? String(lookup.ref).toUpperCase() : null);
 
     const starHtml = acc?.rating ? Array.from({ length: Math.round(acc.rating) }, () => star()).join('') : '';
 
@@ -1169,7 +1234,7 @@
           <div class="tgm-hero-content">
             <div class="tgm-hero-top">
               <span class="tgm-confirmed">${svg(IC.check, 3)}${esc(c.labels?.confirmed || 'Confirmed')}</span>
-              <span class="tgm-ref">${esc(c.labels?.ref || 'Ref')}<strong>${esc(refValue)}</strong></span>
+              ${refValue ? `<span class="tgm-ref">${esc(c.labels?.ref || 'Ref')}<strong>${esc(refValue)}</strong></span>` : ''}
             </div>
             <div>
               ${(starHtml || acc?.review?.rating) ? `
@@ -1188,7 +1253,29 @@
 
         <div class="tgm-greeting">
           <div class="tgm-greeting-text">${esc((c.labels?.greetingPrefix || 'Welcome back'))}, <strong>${esc(firstName)}</strong>${destCity ? ` — your ${esc(destCity)} escape is almost here.` : '.'}</div>
-          ${days != null && days > 0 ? `<div class="tgm-countdown">${svg(IC.clock)}<span><strong class="tgm-num">${days} ${days === 1 ? 'day' : 'days'}</strong> ${esc(c.labels?.countdown || 'until you fly')}</span></div>` : ''}
+          ${(() => {
+            // Countdown copy must match what the customer is actually doing.
+            // "until you fly" is wrong on an accommodation-only or extras-only
+            // booking — and "wrong" here means "lies to a paying customer
+            // about their own trip". Pick the verb based on what the booking
+            // contains. Honour the legacy `countdown` config label if a
+            // client has explicitly customised it; otherwise pick a sensible
+            // default per booking shape.
+            if (days == null || days <= 0) return '';
+            let countdownLabel;
+            if (c.labels?.countdown) {
+              // Legacy / explicit override — don't overrule a client config.
+              countdownLabel = c.labels.countdown;
+            } else if (summary.hasFlights) {
+              countdownLabel = c.labels?.countdownFly || 'until you fly';
+            } else if (summary.hasAccommodation) {
+              countdownLabel = c.labels?.countdownCheckIn || 'until you check in';
+            } else {
+              // AirportExtras-only or other future product mix — generic verb.
+              countdownLabel = c.labels?.countdownTravel || 'until you travel';
+            }
+            return `<div class="tgm-countdown">${svg(IC.clock)}<span><strong class="tgm-num">${days} ${days === 1 ? 'day' : 'days'}</strong> ${esc(countdownLabel)}</span></div>`;
+          })()}
         </div>
 
         ${(c.display?.showActions !== false) ? `
@@ -1249,12 +1336,32 @@
               <div class="tgm-stay-value">${nights}</div>
               <div class="tgm-stay-sub">${nights === 1 ? '1 night' : (nights === 7 ? '1 week' : nights + ' nights')}</div>
             </div>` : ''}
-            ${acc?.units?.[0] ? `
-            <div class="tgm-stay-cell">
-              <div class="tgm-stay-label">${svg(IC.user)}${esc(c.labels?.room || 'Room')}</div>
-              <div class="tgm-stay-value">${esc((acc.units[0].roomType !== 'Unknown' && acc.units[0].roomType) || 'Deluxe')}</div>
-              <div class="tgm-stay-sub">${esc(rate?.board || 'Room only')}${(acc.units[0].sleepsAdults != null) ? ` · ${acc.units[0].sleepsAdults} guest${acc.units[0].sleepsAdults === 1 ? '' : 's'}` : ''}</div>
-            </div>` : ''}
+            ${acc?.units?.[0] ? (() => {
+              // Room display policy: prefer the supplier's full room name
+              // (e.g. "8 BED MIXED DORM (for 1 people)") which Travelify
+              // returns in units[].name. Fall back to roomType ONLY if it is
+              // a real value — Travelify returns the literal string "Unknown"
+              // when the supplier hasn't categorised the room. NEVER invent a
+              // default (no "Deluxe", no "Standard"). If we have nothing real
+              // to show, hide the cell entirely.
+              const u = acc.units[0];
+              const roomLabel =
+                u?.name
+                || (u?.roomType && u.roomType.toLowerCase() !== 'unknown' ? u.roomType : null);
+              if (!roomLabel) return '';
+              const boardLabel = fmtBoard(rate?.board);
+              const guestsBit = (u?.sleepsAdults != null)
+                ? `${u.sleepsAdults} guest${u.sleepsAdults === 1 ? '' : 's'}`
+                : '';
+              const subParts = [boardLabel, guestsBit].filter(Boolean);
+              return `
+                <div class="tgm-stay-cell">
+                  <div class="tgm-stay-label">${svg(IC.user)}${esc(c.labels?.room || 'Room')}</div>
+                  <div class="tgm-stay-value">${esc(roomLabel)}</div>
+                  ${subParts.length ? `<div class="tgm-stay-sub">${esc(subParts.join(' · '))}</div>` : ''}
+                </div>
+              `;
+            })() : ''}
           </div>
         </div>
         ` : ''}
@@ -1444,16 +1551,24 @@
 
             ${(payAtLocation.length || inResort) ? `
               <div class="tgm-subhead">${esc(c.labels?.payAtHotel || 'Payable at the hotel')}</div>
-              ${payAtLocation.map(line => `
+              ${payAtLocation.map(line => {
+                // Never fabricate a fee description ("Local fee" etc).
+                // If the supplier returned no name AND no description, skip
+                // the line entirely — we won't tell a customer they owe
+                // money for a charge we can't identify.
+                if (!line.name && !line.description) return '';
+                const label = line.name || line.description;
+                return `
                 <div class="tgm-fee-line">
                   <span class="name">
-                    ${esc(line.name || 'Local fee')}
+                    ${esc(label)}
                     ${line.description && line.description !== line.name ? `<small>${esc(line.description)}</small>` : ''}
                     ${(typeof line.qty === 'number' && line.qty > 1) ? `<small>× ${esc(String(line.qty))}</small>` : ''}
                   </span>
                   <span class="val">${typeof line.unitPrice === 'number' ? esc(fmtMoney((line.unitPrice || 0) * (line.qty || 1), currency)) : '—'}</span>
                 </div>
-              `).join('')}
+              `;
+              }).join('')}
               ${(inResort && !payAtLocation.length) ? `
                 <div class="tgm-fee-line">
                   <span class="name">${esc(c.labels?.resortFee || 'Resort fee')}</span>
@@ -1640,7 +1755,7 @@
       const overrides = this._buildOverrides();
       let inner;
       if (this.state.stage === 'loading') inner = renderLoading(this.c);
-      else if (this.state.stage === 'found') inner = renderFound(this.state.order, this.c);
+      else if (this.state.stage === 'found') inner = renderFound(this.state.order, this.c, this.lookup);
       else if (this.state.stage === 'notfound') inner = renderNotFound(this.c);
       else inner = renderForm(this.c, this.state);
 
@@ -1782,9 +1897,19 @@
     }
 
     // Filename derived from the booking ref, shared between preview + download.
+    // Mirrors the on-screen ref resolution: real Travelify bookingReference,
+    // then the reference the customer typed to look up the booking. Never
+    // fabricate a 'TG' prefix on the internal numeric order.id.
     _pdfFilename() {
-      const item = this.state.order?.items?.[0];
-      const refValue = item?.bookingReference || ('TG' + (this.state.order?.id || ''));
+      const items = this.state.order?.items || [];
+      const accItem = items.find(i => i.product === 'Accommodation');
+      const flightItem = items.find(i => i.product === 'Flights');
+      const extraItem = items.find(i => i.product === 'AirportExtras');
+      const refValue =
+        accItem?.bookingReference
+        || flightItem?.bookingReference
+        || extraItem?.bookingReference
+        || (this.lookup?.ref ? String(this.lookup.ref).toUpperCase() : 'booking');
       return 'booking-' + String(refValue).replace(/[^A-Z0-9_\-]/gi, '') + '.pdf';
     }
 
@@ -2383,6 +2508,14 @@
           adults = acc?.units?.[0]?.sleepsAdults || 0;
         }
 
+        // Compute the trip-start countdown once. Field is named neutrally
+        // ('daysUntilTripStart') so Luna's prompt doesn't see 'departure' on
+        // an accommodation-only booking and start writing "you fly in 188
+        // days" — same class of bug as the on-screen countdown. Legacy
+        // 'daysUntilDeparture' kept as an alias so any existing Luna prompt
+        // referencing it still resolves.
+        const daysUntilStart = daysUntil(startDate);
+
         const summary = {
           destinationCity: acc?.location?.city || null,
           destinationCountry: acc?.location?.country || null,
@@ -2390,8 +2523,15 @@
           startDate,            // ISO yyyy-mm-dd
           endDate,              // ISO yyyy-mm-dd
           nights: nights || null,
-          daysUntilDeparture: daysUntil(startDate),
-          boardBasis: acc?.units?.[0]?.rates?.[0]?.board || null,
+          daysUntilTripStart: daysUntilStart,
+          daysUntilDeparture: daysUntilStart, // legacy alias — do not remove
+          tripStartEvent: flightItems.length > 0
+            ? 'flight'
+            : (acc ? 'check-in' : 'travel'),
+          // Translate Travelify's machine enum (e.g. 'BedAndBreakfast') to a
+          // readable label so Luna can use it directly in conversation.
+          // fmtBoard returns null for unknown / "Unknown" values.
+          boardBasis: fmtBoard(acc?.units?.[0]?.rates?.[0]?.board),
           outboundFlight: legSummary(outboundRoute),
           inboundFlight: legSummary(inboundRoute),
           adults,
