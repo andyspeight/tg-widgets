@@ -413,7 +413,7 @@
     .tgm-hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
     .tgm-confirmed { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(16,185,129,.95); backdrop-filter: blur(8px); border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.3); }
     .tgm-confirmed svg { width: 13px; height: 13px; stroke-width: 3; }
-    .tgm-ref { padding: 4px 12px; background: rgba(255,255,255,.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.18); border-radius: var(--tgm-radius-md); font-size: 11px; font-weight: 500; color: rgba(255,255,255,.92); letter-spacing: .04em; }
+    .tgm-ref { padding: 6px 12px; background: rgba(15,23,42,.65); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.18); border-radius: var(--tgm-radius-md); font-size: 11px; font-weight: 500; color: rgba(255,255,255,.92); letter-spacing: .04em; box-shadow: 0 2px 8px rgba(15,23,42,.25); }
     .tgm-ref strong { color: #fff; margin-left: 8px; font-weight: 700; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
     .tgm-hero-rating { display: inline-flex; gap: 2px; align-items: center; margin-bottom: 12px; }
     .tgm-hero-rating svg { width: 14px; height: 14px; fill: #FFD166; color: #FFD166; }
@@ -452,6 +452,18 @@
     .tgm-action-loader { width: 18px; height: 18px; border: 2px solid var(--tgm-bg-3); border-top-color: var(--tgm-accent); border-radius: 50%; animation: tgm-spin .7s linear infinite; flex-shrink: 0; display: none; }
     .tgm-action.is-loading .tgm-action-loader { display: block; }
 
+    /* Issue 4: subtle "Look up another booking" text link that lets the
+       customer return to the lookup form without refreshing the page. Sits
+       above the action row, right-aligned so it doesn't compete with the
+       greeting copy on the left. */
+    .tgm-newlookup-row { display: flex; justify-content: flex-end; margin: -4px 0 12px; }
+    .tgm-newlookup { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; margin: 0; background: transparent; border: 0; border-radius: var(--tgm-radius-sm); font-family: inherit; font-size: 13px; font-weight: 500; color: var(--tgm-text-2); cursor: pointer; transition: color .15s, background .15s; }
+    .tgm-newlookup:hover { color: var(--tgm-accent); background: var(--tgm-bg-2); }
+    .tgm-newlookup svg { width: 14px; height: 14px; }
+    @media (max-width: 480px) {
+      .tgm-newlookup-row { justify-content: flex-start; }
+    }
+
     /* When the action row is at 3 columns, the action title can get tight.
        Hide the arrow on narrow desktop sizes between 760-1100px so titles
        and sub-copy have room to breathe. */
@@ -482,7 +494,11 @@
     /* Modal lives inside the widget shadow root so it inherits all our tokens
        and doesn't conflict with the host page. We use position: fixed so it
        overlays the host viewport, not the widget container. */
-    .tgm-modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, .55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 999998; display: flex; align-items: center; justify-content: center; padding: 16px; animation: tgm-fade .2s ease; }
+    /* backdrop-filter removed: caused per-keystroke re-blur of the entire
+       viewport which made the email modal feel laggy (especially inside the
+       editor preview iframe). The flat rgba dim reads as a modal scrim
+       without the cost. */
+    .tgm-modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, .55); z-index: 999998; display: flex; align-items: center; justify-content: center; padding: 16px; animation: tgm-fade .2s ease; }
     @keyframes tgm-fade { from { opacity: 0; } to { opacity: 1; } }
     .tgm-modal { background: var(--tgm-bg); border-radius: var(--tgm-radius-2xl); width: 100%; max-width: 520px; max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 25px 50px rgba(0,0,0,.25), 0 12px 24px rgba(0,0,0,.15); animation: tgm-modal-in .3s cubic-bezier(.2,.7,.2,1); position: relative; }
     @keyframes tgm-modal-in { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
@@ -644,13 +660,13 @@
     .tgm-leg-iata { font-size: 13px; font-weight: 600; color: var(--tgm-text-2); margin-top: 2px; letter-spacing: .04em; }
     .tgm-leg-airport { font-size: 13px; color: var(--tgm-text-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .tgm-leg-line { display: flex; flex-direction: column; align-items: center; min-width: 100px; }
-    .tgm-leg-line-dur { font-size: 11px; color: var(--tgm-text-3); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+    .tgm-leg-line-dur { font-size: 11px; color: var(--tgm-text-3); margin-bottom: 10px; font-variant-numeric: tabular-nums; }
     .tgm-leg-line-bar { width: 100%; height: 2px; background: var(--tgm-border); position: relative; display: flex; align-items: center; justify-content: center; }
     .tgm-leg-line-bar::before, .tgm-leg-line-bar::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--tgm-accent); position: absolute; top: 50%; transform: translateY(-50%); }
     .tgm-leg-line-bar::before { left: 0; }
     .tgm-leg-line-bar::after { right: 0; }
     .tgm-leg-line-icon { background: var(--tgm-bg); padding: 0 6px; color: var(--tgm-accent); position: relative; z-index: 1; }
-    .tgm-leg-stops { font-size: 11px; color: var(--tgm-text-3); margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .tgm-leg-stops { font-size: 11px; color: var(--tgm-text-3); margin-top: 10px; font-variant-numeric: tabular-nums; }
     .tgm-leg-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--tgm-border-light); font-size: 13px; color: var(--tgm-text-2); }
     .tgm-leg-meta-item { display: inline-flex; align-items: center; gap: 6px; }
     .tgm-leg-meta-item svg { color: var(--tgm-text-3); }
@@ -772,18 +788,24 @@
 
   // ----- Templates -----
 
-  function renderForm(c, state) {
+  function renderForm(c, state, prefill) {
     const layout = c.layout || 'vertical';
     if (layout === 'horizontal' || layout === 'compact') {
-      return renderFormHorizontal(c, state, layout === 'compact');
+      return renderFormHorizontal(c, state, layout === 'compact', prefill);
     }
-    return renderFormVertical(c, state);
+    return renderFormVertical(c, state, prefill);
   }
 
-  function renderFormVertical(c, state) {
+  function renderFormVertical(c, state, prefill) {
     const errMsg = state && state.error
       ? '<div class="tgm-error-msg" role="alert">' + svg(IC.info) + esc(state.error) + '</div>'
       : '';
+    // Pre-fill values come either from a prior failed attempt (so the customer
+    // can correct one typo instead of retyping everything) or are blank on
+    // first render. Always run through esc() before injection.
+    const valEmail = prefill?.email ? esc(prefill.email) : '';
+    const valDate  = prefill?.date  ? esc(prefill.date)  : '';
+    const valRef   = prefill?.ref   ? esc(prefill.ref)   : '';
     return `
       <div class="tgm-form">
         <div class="tgm-hero-form">
@@ -796,21 +818,21 @@
             <label class="tgm-label" for="tgm-email">${esc(c.labels?.email || 'Email address')}</label>
             <div class="tgm-input-wrap">
               ${svg(IC.mail)}
-              <input type="email" class="tgm-input" id="tgm-email" name="email" placeholder="you@example.com" autocomplete="email" required>
+              <input type="email" class="tgm-input" id="tgm-email" name="email" placeholder="you@example.com" autocomplete="email" value="${valEmail}" required>
             </div>
           </div>
           <div class="tgm-field">
             <label class="tgm-label" for="tgm-date">${esc(c.labels?.date || 'Departure date')}</label>
             <div class="tgm-input-wrap">
               ${svg(IC.cal)}
-              <input type="date" class="tgm-input" id="tgm-date" name="date" required>
+              <input type="date" class="tgm-input" id="tgm-date" name="date" value="${valDate}" required>
             </div>
           </div>
           <div class="tgm-field">
             <label class="tgm-label" for="tgm-ref">${esc(c.labels?.ref || 'Booking reference')}</label>
             <div class="tgm-input-wrap">
               ${svg(IC.ref)}
-              <input type="text" class="tgm-input code" id="tgm-ref" name="ref" placeholder="${esc(c.labels?.refPlaceholder || 'e.g. ABC12345')}" autocomplete="off" required>
+              <input type="text" class="tgm-input code" id="tgm-ref" name="ref" placeholder="${esc(c.labels?.refPlaceholder || 'e.g. ABC12345')}" autocomplete="off" value="${valRef}" required>
             </div>
           </div>
           <button type="submit" class="tgm-cta" data-tgm-submit>${esc(c.labels?.submit || 'Find my booking')}${svg(IC.arrow)}</button>
@@ -821,10 +843,13 @@
     `;
   }
 
-  function renderFormHorizontal(c, state, isCompact) {
+  function renderFormHorizontal(c, state, isCompact, prefill) {
     const errMsg = state && state.error
       ? '<div class="tgm-error-msg" role="alert" style="margin-top:16px; background:rgba(255,255,255,.08); border-color:rgba(239,68,68,.4); color:#fca5a5;">' + svg(IC.info) + esc(state.error) + '</div>'
       : '';
+    const valEmail = prefill?.email ? esc(prefill.email) : '';
+    const valDate  = prefill?.date  ? esc(prefill.date)  : '';
+    const valRef   = prefill?.ref   ? esc(prefill.ref)   : '';
     return `
       <div class="tgm-hform${isCompact ? ' compact' : ''}">
         <div class="tgm-hform-top">
@@ -841,19 +866,19 @@
           <div class="tgm-hform-field">
             <label>${esc(c.labels?.email || 'Email address')}</label>
             <div class="tgm-hform-iw">${svg(IC.mail)}
-              <input type="email" class="tgm-hform-input" name="email" placeholder="you@example.com" autocomplete="email" required>
+              <input type="email" class="tgm-hform-input" name="email" placeholder="you@example.com" autocomplete="email" value="${valEmail}" required>
             </div>
           </div>
           <div class="tgm-hform-field">
             <label>${esc(c.labels?.date || 'Departure date')}</label>
             <div class="tgm-hform-iw">${svg(IC.cal)}
-              <input type="date" class="tgm-hform-input" name="date" required>
+              <input type="date" class="tgm-hform-input" name="date" value="${valDate}" required>
             </div>
           </div>
           <div class="tgm-hform-field">
             <label>${esc(c.labels?.refShort || 'Reference')}</label>
             <div class="tgm-hform-iw">${svg(IC.ref)}
-              <input type="text" class="tgm-hform-input" name="ref" placeholder="${esc(c.labels?.refPlaceholder || 'e.g. ABC12345')}" style="letter-spacing:.04em; font-variant-numeric:tabular-nums;" autocomplete="off" required>
+              <input type="text" class="tgm-hform-input" name="ref" placeholder="${esc(c.labels?.refPlaceholder || 'e.g. ABC12345')}" style="letter-spacing:.04em; font-variant-numeric:tabular-nums;" autocomplete="off" value="${valRef}" required>
             </div>
           </div>
           <button type="submit" class="tgm-hform-cta" data-tgm-submit>${esc(c.labels?.submitShort || 'Find booking')}${svg(IC.arrow, 2.5)}</button>
@@ -1020,13 +1045,25 @@
     const e = item.airportExtras;
     if (!e) return '';
 
-    const kindLabel = e.type === 'Lounge' ? 'Airport lounge'
-      : e.type === 'Transfer' ? 'Airport transfer'
-      : e.type === 'Parking' ? 'Airport parking'
+    // Travelify exposes a finite set of airport-extra types. The label here
+    // is the visible "kind" pill above the extra's name. A hotel sold as an
+    // airport extra (e.g. pre-flight overnight) must NOT just say "Hotel" —
+    // that's visually identical to a main Accommodation card and confuses
+    // customers about which booking they're looking at.
+    const kindLabel = e.type === 'Lounge'    ? 'Airport lounge'
+      : e.type === 'Transfer'                ? 'Airport transfer'
+      : e.type === 'Parking'                 ? 'Airport parking'
+      : e.type === 'Hotel'                   ? 'Airport hotel'
+      : e.type === 'FastTrack'               ? 'Fast track'
+      : e.type === 'Wifi'                    ? 'Airport Wi-Fi'
+      : e.type === 'CarHire'                 ? 'Car hire'
       : (e.type || 'Airport extra');
 
-    const icon = e.type === 'Lounge' ? IC.lounge
-      : e.type === 'Transfer' ? IC.plane
+    // Icon also keys off the type — bag is the catch-all but hotel deserves
+    // a bed icon and car hire its own glyph if we ever add one.
+    const icon = e.type === 'Lounge'   ? IC.lounge
+      : e.type === 'Transfer'          ? IC.plane
+      : e.type === 'Hotel'             ? IC.bed
       : IC.bag;
 
     const airport = e.location?.iataCode || '';
@@ -1044,7 +1081,11 @@
     const food = (e.descriptions || []).find(d => /food|dining|cuisine/i.test(d.title || ''))?.text || '';
     const announcements = (e.descriptions || []).find(d => /announcement/i.test(d.title || ''))?.text || '';
 
+    // Map known Travelify feature codes to friendly labels. The dictionary
+    // grows as we encounter new codes — anything unmapped falls through to
+    // splitPascalCase() below so we never display 'ParkAndRide' raw.
     const featureLabels = {
+      // Lounges
       FreeDrinks: 'Drinks included',
       FreeFood: 'Food included',
       WiFi: 'Wi-fi',
@@ -1054,8 +1095,38 @@
       Showers: 'Showers',
       QuietZone: 'Quiet zone',
       Workspace: 'Workspace',
+      // Parking
+      ParkAndRide: 'Park and ride',
+      ValetParking: 'Valet parking',
+      MeetAndGreet: 'Meet and greet',
+      OnAirport: 'On-airport',
+      OffAirport: 'Off-airport',
+      Shuttle: 'Shuttle included',
+      DisabledAccess: 'Disabled access',
+      ElectricCharging: 'Electric charging',
+      CCTV: 'CCTV',
+      Secured: 'Secured',
+      // Transfer / hotel / shared
+      CovidSecure: 'Covid-secure',
+      AirConditioning: 'Air conditioning',
+      Breakfast: 'Breakfast included',
+      FreeCancellation: 'Free cancellation',
+      FastTrack: 'Fast track',
+      PriorityBoarding: 'Priority boarding',
+      LuggageStorage: 'Luggage storage',
     };
-    const features = (e.features || []).map(f => featureLabels[f] || f);
+    // Fallback for unmapped codes: split PascalCase / camelCase into words.
+    // 'ParkAndRide' -> 'Park And Ride', 'fastTrack' -> 'Fast Track'. Final
+    // 'And'/'Or' get lowercased to read naturally.
+    const splitPascalCase = (s) => {
+      if (!s || typeof s !== 'string') return s;
+      const words = s.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/_+/g, ' ').trim().split(/\s+/);
+      return words.map((w, i) => {
+        if (i > 0 && /^(and|or|of|the|to|in|on|at|by|for)$/i.test(w)) return w.toLowerCase();
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+    };
+    const features = (e.features || []).map(f => featureLabels[f] || splitPascalCase(f));
 
     const hasDetails = fullDesc || openingTimes || dressCode || drinks || food || announcements || features.length;
 
@@ -1279,6 +1350,11 @@
         </div>
 
         ${(c.display?.showActions !== false) ? `
+        <div class="tgm-newlookup-row">
+          <button type="button" class="tgm-newlookup" data-tgm-newlookup>
+            ${svg(IC.refresh)}<span>${esc(c.labels?.newLookup || 'Look up another booking')}</span>
+          </button>
+        </div>
         <div class="tgm-action-row">
           <button type="button" class="tgm-action" data-tgm-pdf-preview>
             <div class="tgm-action-icon">${svg(IC.eye)}</div>
@@ -1620,6 +1696,7 @@
       this.shadow = container.attachShadow({ mode: 'open' });
       this.state = { stage: 'form', order: null, error: null };
       this.lookup = null;
+      this._lastAttempt = null;            // pre-fills form on retry / try-again
       this._toastTimers = new Map();
       this._pdfBlob = null;          // cached blob, shared by preview & download
       this._pdfPreviewUrl = null;    // object URL for the inline iframe
@@ -1757,7 +1834,7 @@
       if (this.state.stage === 'loading') inner = renderLoading(this.c);
       else if (this.state.stage === 'found') inner = renderFound(this.state.order, this.c, this.lookup);
       else if (this.state.stage === 'notfound') inner = renderNotFound(this.c);
-      else inner = renderForm(this.c, this.state);
+      else inner = renderForm(this.c, this.state, this._lastAttempt);
 
       // When we re-render the found view, the previously injected iframe
       // is gone. Reset the open flag so the next Preview click rebuilds it.
@@ -1825,6 +1902,20 @@
       if (downloadBtn) downloadBtn.addEventListener('click', () => this._handlePdfDownload(downloadBtn));
       const emailBtn = root.querySelector('[data-tgm-pdf-email]');
       if (emailBtn) emailBtn.addEventListener('click', () => this._handleEmailOpen(emailBtn));
+
+      // Issue 4: "Look up another booking" returns to the lookup form. We
+      // clear the cached booking, PDF blob and lookup details so the next
+      // search starts clean. _lastAttempt is also nulled so the form renders
+      // blank — having a different customer's details pre-filled would be
+      // both unhelpful and a privacy footgun on shared devices.
+      const newLookupBtn = root.querySelector('[data-tgm-newlookup]');
+      if (newLookupBtn) newLookupBtn.addEventListener('click', () => {
+        this._discardPdfCache();
+        this.lookup = null;
+        this._lastAttempt = null;
+        this.state = { stage: 'form', order: null, error: null };
+        this._render();
+      });
     }
 
     async _submit(form) {
@@ -1843,6 +1934,15 @@
         this._render();
         return;
       }
+
+      // Cache the attempted values so that:
+      //   - A failed lookup can pre-fill the form on retry (so the customer
+      //     doesn't have to retype everything to fix one typo).
+      //   - The not-found screen's "Try again" returns the customer to a
+      //     pre-filled form, not a blank one.
+      // Cleared on successful lookup since this.lookup then holds the
+      // canonical values.
+      this._lastAttempt = { email, date, ref };
 
       this.state = { stage: 'loading', order: null, error: null };
       this._render();
@@ -1883,6 +1983,7 @@
         }
 
         this.lookup = { email, date, ref };
+        this._lastAttempt = null;
 
         // New booking → previously cached PDF is now stale. Discard.
         this._discardPdfCache();
