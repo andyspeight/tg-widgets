@@ -198,6 +198,7 @@ function buildPaymentInfo(order) {
  * @param {string} [opts.colors.accent]
  * @param {string} [opts.supportEmail]
  * @param {string} [opts.supportPhone]
+ * @param {string} [opts.orderRef]      - Customer-typed booking ref used as final fallback
  *
  * @returns {{subject: string, html: string, text: string}}
  */
@@ -209,6 +210,7 @@ export function renderBookingEmail(opts) {
     colors = {},
     supportEmail,
     supportPhone,
+    orderRef,
   } = opts;
 
   const primary = colors.primary || '#1B2B5B';
@@ -219,6 +221,7 @@ export function renderBookingEmail(opts) {
 
   const accItem = order?.items?.find(i => i.product === 'Accommodation');
   const flightItem = order?.items?.find(i => i.product === 'Flights');
+  const extraItem = order?.items?.find(i => i.product === 'AirportExtras');
   const acc = accItem?.accommodation;
 
   const customerFirstName = (order?.customerFirstname || '').trim();
@@ -226,9 +229,16 @@ export function renderBookingEmail(opts) {
     ? `Hi ${escapeHtml(customerFirstName)},`
     : 'Hi,';
 
+  // Booking reference policy (must match the widget and PDF):
+  //   1. Real supplier bookingReference on Accommodation/Flights/AirportExtras
+  //   2. Customer-typed orderRef (uppercase) — what they used to find the booking
+  //   3. Nothing — never fabricate "TG{numeric-id}". The internal order.id is
+  //      not a customer-facing reference and showing it confuses customers
+  //      and damages trust ("That's not my booking reference").
   const bookingReference = accItem?.bookingReference
     || flightItem?.bookingReference
-    || `TG${order?.id || ''}`;
+    || extraItem?.bookingReference
+    || (orderRef ? String(orderRef).toUpperCase() : '');
 
   const destinationCity = acc?.location?.city || '';
   const destinationCountry = acc?.location?.country || '';
@@ -415,6 +425,85 @@ export function renderBookingEmail(opts) {
     </tr>
   ` : '';
 
+  // Documents section. Built from order.documents (set by the source order)
+  // and rendered as a list of links inside the email body. Documents are
+  // ALSO attached as files to the email where size allows (booking-email.js
+  // handles that), but every document always appears here as a link so a
+  // customer can grab it even if their mail client stripped attachments.
+  // URL safety: only HTTPS, and we reject private/loopback/link-local hosts
+  // as defence-in-depth (the URLs come from Travelify so a malicious URL
+  // would already require upstream compromise, but the cost of checking
+  // is zero).
+  const isSafeDocUrl = (raw) => {
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== 'https:') return false;
+      const host = u.hostname.toLowerCase();
+      if (host === 'localhost' || host === '0.0.0.0') return false;
+      if (host.endsWith('.local') || host.endsWith('.internal')) return false;
+      if (/^127\./.test(host)) return false;
+      if (/^10\./.test(host)) return false;
+      if (/^192\.168\./.test(host)) return false;
+      if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)) return false;
+      if (/^169\.254\./.test(host)) return false;
+      if (host === '::1' || host === '[::1]') return false;
+      if (/^\[?fc[0-9a-f]{2}:/i.test(host) || /^\[?fd[0-9a-f]{2}:/i.test(host)) return false;
+      if (/^\[?fe80:/i.test(host)) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const docList = Array.isArray(order?.documents) ? order.documents : [];
+  const safeDocs = docList
+    .filter(d => d && typeof d.url === 'string' && isSafeDocUrl(d.url));
+
+  const fmtBytes = (n) => {
+    if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) return '';
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const documentsHtml = safeDocs.length ? `
+    <tr>
+      <td style="padding:0 32px 24px 32px;">
+        <div style="font:500 12px/1.4 ${FONT};color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px;">Your documents</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+          <tr>
+            <td style="padding:8px 16px;">
+              ${safeDocs.map((d, i) => {
+                const name = escapeHtml(((d.name || `Document ${i + 1}`).toString()).slice(0, 100));
+                const extLabel = (d.ext || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+                const sizeLabel = fmtBytes(typeof d.size === 'number' ? d.size : 0);
+                const metaBits = [extLabel || 'FILE', sizeLabel].filter(Boolean).join(' · ');
+                const url = d.url; // already https-vetted above
+                const isLast = i === safeDocs.length - 1;
+                return `
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
+                    <tr>
+                      <td style="padding:10px 0;">
+                        <a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">📄 ${name}</a>
+                        ${metaBits ? `<div style="font:400 12px/1.4 ${FONT};color:#64748b;margin-top:2px;">${escapeHtml(metaBits)}</div>` : ''}
+                      </td>
+                      <td style="padding:10px 0;text-align:right;white-space:nowrap;">
+                        <a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="font:500 13px/1.4 ${FONT};color:${escapeHtml(accent)};text-decoration:none;">View →</a>
+                      </td>
+                    </tr>
+                  </table>
+                `;
+              }).join('')}
+            </td>
+          </tr>
+        </table>
+        <div style="font:400 12px/1.6 ${FONT};color:#94a3b8;margin-top:8px;">
+          Documents are attached to this email where size allows. Use the links above to view or download them at any time.
+        </div>
+      </td>
+    </tr>
+  ` : '';
+
   // Plain-text fallback
   const textParts = [
     greeting,
@@ -437,6 +526,14 @@ export function renderBookingEmail(opts) {
         ? `Balance due by ${formatShortDate(payment.balanceDueDate)}`
         : 'Balance due';
       textParts.push(`${dueLabel}: ${formatMoney(payment.balanceDue, payment.currency)}`);
+    }
+  }
+
+  if (safeDocs.length) {
+    textParts.push('', '─── Your documents ───', '');
+    for (const d of safeDocs) {
+      const name = (d.name || 'Document').toString();
+      textParts.push(`${name}: ${d.url}`);
     }
   }
 
@@ -468,7 +565,7 @@ export function renderBookingEmail(opts) {
 <title>${escapeHtml(subject)}</title>
 </head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:${FONT};-webkit-font-smoothing:antialiased;">
-<div style="display:none;font-size:1px;color:#f1f5f9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">Your booking ${escapeHtml(bookingReference)} is confirmed${destinationCity ? ` for ${escapeHtml(destinationCity)}` : ''}${checkin ? ` on ${escapeHtml(formatShortDate(checkin))}` : ''}.</div>
+<div style="display:none;font-size:1px;color:#f1f5f9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${bookingReference ? `Your booking ${escapeHtml(bookingReference)} is confirmed` : 'Your booking is confirmed'}${destinationCity ? ` for ${escapeHtml(destinationCity)}` : ''}${checkin ? ` on ${escapeHtml(formatShortDate(checkin))}` : ''}.</div>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f1f5f9;">
   <tr>
     <td align="center" style="padding:24px 16px;">
@@ -516,6 +613,8 @@ export function renderBookingEmail(opts) {
         </tr>
         ` : ''}
 
+        ${documentsHtml}
+
         ${paymentHtml}
 
         <!-- PDF callout -->
@@ -524,8 +623,8 @@ export function renderBookingEmail(opts) {
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
                 <td style="background:${escapeHtml(accent)}1a;border-left:4px solid ${escapeHtml(accent)};border-radius:8px;padding:16px 20px;">
-                  <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">📎 Full booking pack attached</div>
-                  <div style="font:400 15px/1.6 ${FONT};color:#475569;">Your A4 confirmation includes the room details, full flight breakdown, payment schedule, and important booking conditions.</div>
+                  <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">📎 ${safeDocs.length ? 'Booking pack and documents attached' : 'Full booking pack attached'}</div>
+                  <div style="font:400 15px/1.6 ${FONT};color:#475569;">Your A4 confirmation includes the room details, full flight breakdown, payment schedule, and important booking conditions.${safeDocs.length ? ' Supplier documents are attached where size allows — and always available via the links above.' : ''}</div>
                 </td>
               </tr>
             </table>
