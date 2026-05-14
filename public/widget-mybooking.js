@@ -2404,8 +2404,15 @@
 
       // Server enforces this too — but giving the user the message client-side
       // means we don't fire a request we know will fail.
+      //
+      // Bypass: the demo widget (widgetId === 'DEMO_WIDGET_ID') skips this
+      // check so Andy can test arbitrary recipients from /demo-mybooking.
+      // Must match the server-side DEMO_WIDGET_SENTINEL bypass in
+      // api/booking-email.js or the user gets a confusing experience:
+      // server would accept it but client refuses to fire the request.
+      const isDemoWidget = this.c.widgetId === 'DEMO_WIDGET_ID';
       const customerEmail = (this.state.order?.customerEmail || this.lookup?.email || '').trim().toLowerCase();
-      if (customerEmail) {
+      if (!isDemoWidget && customerEmail) {
         const allRecipients = new Set([toEmail, ...ccEmails]);
         if (!allRecipients.has(customerEmail)) {
           showError(`The booking holder's email (${customerEmail}) must be included as a recipient.`);
