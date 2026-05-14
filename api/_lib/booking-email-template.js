@@ -484,11 +484,11 @@ export function renderBookingEmail(opts) {
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
                     <tr>
                       <td style="padding:10px 0;">
-                        <a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">📄 ${name}</a>
+                        <a href="${escapeHtml(url)}" target="_blank" referrerpolicy="no-referrer-when-downgrade" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">📄 ${name}</a>
                         ${metaBits ? `<div style="font:400 12px/1.4 ${FONT};color:#64748b;margin-top:2px;">${escapeHtml(metaBits)}</div>` : ''}
                       </td>
                       <td style="padding:10px 0;text-align:right;white-space:nowrap;">
-                        <a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="font:500 13px/1.4 ${FONT};color:${escapeHtml(accent)};text-decoration:none;">View →</a>
+                        <a href="${escapeHtml(url)}" target="_blank" referrerpolicy="no-referrer-when-downgrade" style="font:500 13px/1.4 ${FONT};color:${escapeHtml(accent)};text-decoration:none;">View →</a>
                       </td>
                     </tr>
                   </table>
