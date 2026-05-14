@@ -227,9 +227,22 @@ export default async function handler(req, res) {
     if (!order || !order.id) return notFound(res);
 
     // ----- 2. Anti-abuse: customer email must be in recipients -----
+    // This rule stops the widget being weaponised as a phishing pipeline:
+    // without it, an attacker who knew one valid booking's lookup details
+    // could send branded, signed emails containing a real PDF to ANY victim,
+    // with a custom 'message' body of their choice. Forcing the booking
+    // holder to be a recipient means an attacker can only send to the
+    // legitimate customer, who would recognise their own booking.
+    //
+    // Exception: the demo widget (DEMO_WIDGET_SENTINEL) bypasses this check
+    // so Andy can test arbitrary send flows from /demo-mybooking. The demo
+    // widget is on a Travelgenix-owned page only — it is never embedded on
+    // real client sites — so there's no client-reputation exposure. Rate
+    // limits still apply to prevent abuse from anyone who finds the demo.
     const customerEmail = (order.customerEmail || emailAddress || '').toLowerCase().trim();
     const allRecipients = new Set([toEmail, ...ccEmails]);
-    if (customerEmail && !allRecipients.has(customerEmail)) {
+    const bypassRecipientCheck = widgetId === DEMO_WIDGET_SENTINEL;
+    if (!bypassRecipientCheck && customerEmail && !allRecipients.has(customerEmail)) {
       return badRequest(res, 'recipient_mismatch');
     }
 
@@ -308,7 +321,114 @@ export default async function handler(req, res) {
     const pdfBase64 = pdfBuffer.toString('base64');
     const pdfFilename = `booking-${orderRef.replace(/[^A-Z0-9_-]/gi, '')}.pdf`;
 
+    // ----- 4b. Fetch supplier documents to attach -----
+    // Supplier documents (vouchers, tickets, etc.) come from the order JSON
+    // as URLs pointing at Travelify-hosted files. We fetch each in parallel
+    // with a 5s timeout, base64-encode and attach to the email up to
+    // SendGrid's 30MB total attachment ceiling. Any document that's too
+    // large, times out or fails to fetch is still listed as a link in the
+    // email body (the template handles that), so nothing is ever lost.
+    //
+    // Budget figures:
+    //   - SendGrid hard limit: 30MB total attachment size (base64 expanded)
+    //   - PDF size is variable but typically 200-800KB → call it 1MB headroom
+    //   - We allow up to 25MB of supplier documents (base64-expanded)
+    //     to leave room for the booking PDF and the email body itself.
+    const MAX_DOC_ATTACH_BYTES_B64 = 25 * 1024 * 1024;
+    const DOC_FETCH_TIMEOUT_MS = 5000;
+    const MAX_DOCS_TO_ATTACH = 10;
+
+    const docList = Array.isArray(order.documents) ? order.documents : [];
+
+    // SSRF defence-in-depth. The URL list comes from Travelify via our
+    // retrieve-order endpoint, so a malicious URL would already require
+    // upstream compromise — but reject anything pointing at private,
+    // loopback or link-local hosts before we fetch it. Belt-and-braces.
+    const isSafeUrl = (raw) => {
+      try {
+        const u = new URL(raw);
+        if (u.protocol !== 'https:') return false;
+        const host = u.hostname.toLowerCase();
+        if (host === 'localhost' || host === '0.0.0.0') return false;
+        if (host.endsWith('.local') || host.endsWith('.internal')) return false;
+        // Block IPv4 private ranges and loopback. Doesn't fire on hostnames.
+        if (/^127\./.test(host)) return false;
+        if (/^10\./.test(host)) return false;
+        if (/^192\.168\./.test(host)) return false;
+        if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)) return false;
+        if (/^169\.254\./.test(host)) return false; // link-local / metadata
+        // IPv6 loopback / link-local / unique-local
+        if (host === '::1' || host === '[::1]') return false;
+        if (/^\[?fc[0-9a-f]{2}:/i.test(host) || /^\[?fd[0-9a-f]{2}:/i.test(host)) return false;
+        if (/^\[?fe80:/i.test(host)) return false;
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const safeDocs = docList
+      .filter(d => d && typeof d.url === 'string' && isSafeUrl(d.url))
+      .slice(0, MAX_DOCS_TO_ATTACH);
+
+    const docAttachments = [];
+    let cumulativeBase64Bytes = 0;
+
+    // Fetch all documents in parallel. Each fetch has its own timeout so a
+    // slow supplier doesn't block the whole email. We collect results then
+    // decide which to attach based on the cumulative size budget (in
+    // document-list order, so the customer-visible ordering is preserved).
+    const docResults = await Promise.allSettled(
+      safeDocs.map(async (d) => {
+        const r = await fetch(d.url, { signal: AbortSignal.timeout(DOC_FETCH_TIMEOUT_MS) });
+        if (!r.ok) throw new Error(`http_${r.status}`);
+        const buf = Buffer.from(await r.arrayBuffer());
+        return { doc: d, buffer: buf };
+      })
+    );
+
+    for (let i = 0; i < docResults.length; i++) {
+      const result = docResults[i];
+      const d = safeDocs[i];
+      if (result.status !== 'fulfilled') {
+        console.warn(`Email: doc fetch failed for ${widgetId}/${orderRef}: ${d.name || d.url} (${result.reason?.message || 'unknown'})`);
+        continue;
+      }
+      const { buffer } = result.value;
+      const b64 = buffer.toString('base64');
+      if (cumulativeBase64Bytes + b64.length > MAX_DOC_ATTACH_BYTES_B64) {
+        console.warn(`Email: doc skipped (budget) for ${widgetId}/${orderRef}: ${d.name || d.url}`);
+        continue;
+      }
+      cumulativeBase64Bytes += b64.length;
+      // Build a safe filename. Prefer the supplier-provided name with an
+      // extension hint; otherwise fall back to doc-N.<ext>. Strip anything
+      // weird so SendGrid doesn't reject the attachment.
+      const rawName = (d.name || `document-${i + 1}`).toString();
+      const ext = (d.ext || '').toString().replace(/[^a-z0-9]/gi, '').toLowerCase();
+      const baseName = rawName.replace(/[^A-Za-z0-9._\- ]/g, '_').slice(0, 80);
+      const hasExt = /\.[a-z0-9]{2,5}$/i.test(baseName);
+      const filename = hasExt ? baseName : (ext ? `${baseName}.${ext}` : baseName);
+      // Best-effort MIME type. SendGrid is permissive — application/octet-stream
+      // works for anything it doesn't recognise.
+      const mime = (d.mime || d.contentType || '').toString().toLowerCase()
+        || (ext === 'pdf' ? 'application/pdf'
+          : ext === 'png' ? 'image/png'
+          : ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg'
+          : 'application/octet-stream');
+      docAttachments.push({
+        filename,
+        content: b64,
+        type: mime,
+        disposition: 'attachment',
+      });
+    }
+
     // ----- 5. Render the email body -----
+    // orderRef is passed through so the template can fall back to the
+    // customer-typed reference when no Accommodation/Flights/AirportExtras
+    // bookingReference exists. Without this, the template fabricates a
+    // "TG{numeric-id}" string that the customer has never seen.
     const { subject, html, text } = renderBookingEmail({
       order,
       message,
@@ -316,6 +436,7 @@ export default async function handler(req, res) {
       colors: widgetSettings?.colors || {},
       supportEmail,
       supportPhone,
+      orderRef,
     });
 
     // ----- 6. Send via SendGrid -----
@@ -332,12 +453,15 @@ export default async function handler(req, res) {
         'X-TG-Order-Ref': orderRef,
       },
       categoryTag: 'booking-confirmation',
-      attachments: [{
-        filename: pdfFilename,
-        content: pdfBase64,
-        type: 'application/pdf',
-        disposition: 'attachment',
-      }],
+      attachments: [
+        {
+          filename: pdfFilename,
+          content: pdfBase64,
+          type: 'application/pdf',
+          disposition: 'attachment',
+        },
+        ...docAttachments,
+      ],
     });
 
     if (sendResult.status !== 'sent') {
