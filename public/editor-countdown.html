@@ -2167,10 +2167,25 @@
       });
     }
 
-    if (isLoggedIn()) {
-      boot();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      // v1.1 shell — wait for cookie auth to resolve before deciding
+      // whether to boot or stay hidden. Prevents the blank-page race
+      // where a signed-in user lands on the editor before /api/auth/me
+      // has settled, isLoggedIn() returns false, and the editor never
+      // boots (#app starts hidden and only boot()→showApp() unhides it).
+      window.tgse.onReady(() => {
+        if (isLoggedIn()) {
+          boot();
+        }
+        // else: shell shows login overlay; we'll boot via onLoginSuccess
+      });
+    } else {
+      // Defensive fallback: older shell without onReady support.
+      if (isLoggedIn()) {
+        boot();
+      }
+      // else shell shows login overlay; we'll boot via onLoginSuccess
     }
-    // else shell shows login overlay; we'll boot via onLoginSuccess
   </script>
 </body>
 </html>
