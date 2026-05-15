@@ -271,10 +271,27 @@
       .catch(() => tgse.toast('Failed to load widget', 'err'));
   }
 
-  // Boot
+  // Boot — wait for shell auth to resolve before deciding whether to load.
+  //
+  // IMPORTANT: do NOT call tgse.isLoggedIn() synchronously here. The shell
+  // performs an async cookie auth check on module load; until that resolves,
+  // isLoggedIn() returns false for users who are signed in via the cookie
+  // session. Calling load logic at that moment causes a blank-page race for
+  // first-time users coming from Travelify SSO. Always wait for onReady.
+  //
+  // (Shell v1.1+ provides tgse.onReady; the fallback keeps older shells
+  // working but should never be hit in production.)
   document.addEventListener('DOMContentLoaded', () => {
-    if (tgse.isLoggedIn()) loadFromUrl();
-    // If not logged in, the shell shows the login overlay; onLoginSuccess will call loadFromUrl()
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) loadFromUrl();
+        // If not logged in, the shell has already shown its login overlay;
+        // onLoginSuccess will call loadFromUrl() after a successful login.
+      });
+    } else {
+      // Defensive fallback for older shells.
+      if (tgse.isLoggedIn()) loadFromUrl();
+    }
   });
 
   // Mark dirty on any name input change
