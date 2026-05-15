@@ -485,6 +485,282 @@ function trimAirportExtras(d) {
   };
 }
 
+// Trim a pickup/dropoff location point. Shared between Transfers and
+// CarRental, both of which use the same shape (dateTime, name, address,
+// lat/long, optional iataCode/onAirport for airport locations).
+function trimLocationPoint(p) {
+  if (!p || typeof p !== 'object') return null;
+  return {
+    dateTime: safeStr(p.dateTime, 30),
+    name: safeStr(p.name, 200),
+    address1: safeStr(p.address1, 200),
+    iataCode: safeStr(p.iataCode, 10),
+    onAirport: !!p.onAirport,
+    country: safeStr(p.country, 10),
+    latitude: safeNum(p.latitude),
+    longitude: safeNum(p.longitude),
+  };
+}
+
+// Transfers — airport/private transfer products (Hoppa, Holiday Taxis, etc).
+// Travelify's "Transfers" product is distinct from AirportExtras with
+// type=Transfer; the dataObject shape is different.
+function trimTransfers(d) {
+  return {
+    type: safeStr(d.type, 40),                    // 'Private', 'Shared', etc
+    vehicle: safeStr(d.vehicle, 100),             // 'Private Car', 'Minibus', etc
+    company: safeStr(d.company, 120),             // Operator (e.g. 'Elife (EUR)')
+    journeyDistance: safeStr(d.journeyDistance, 30),
+    journeyDuration: safeStr(d.journeyDuration, 30),
+    numberUnits: safeNum(d.numberUnits),
+    minOccupancy: safeNum(d.minOccupancy),
+    maxOccupancy: safeNum(d.maxOccupancy),
+    smallBagAllowance: safeNum(d.smallBagAllowance),
+    bigBagAllowance: safeNum(d.bigBagAllowance),
+    // outPickup/outDropoff are mandatory. returnPickup/returnDropoff exist
+    // only on return-journey bookings — leave null otherwise.
+    outPickup: trimLocationPoint(d.outPickup),
+    outDropoff: trimLocationPoint(d.outDropoff),
+    returnPickup: trimLocationPoint(d.returnPickup),
+    returnDropoff: trimLocationPoint(d.returnDropoff),
+    information: Array.isArray(d.information)
+      ? d.information.slice(0, 8).map(i => ({
+          type: safeStr(i.type, 40),
+          title: safeStr(i.title, 100),
+          text: sanitiseHotelDescription(i.text),
+        })).filter(x => x.text)
+      : [],
+    media: Array.isArray(d.media)
+      ? d.media.slice(0, 4).map(m => ({
+          type: safeStr(m.type, 40),
+          url: sanitiseImageUrl(m.url),
+          caption: safeStr(m.caption, 200),
+        })).filter(m => m.url)
+      : [],
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10),
+      price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice),
+      refundability: safeStr(d.pricing.refundability, 30),
+    } : null,
+    travellers: Array.isArray(d.travellers)
+      ? d.travellers.slice(0, 12).map(t => ({
+          type: safeStr(t.type, 30),
+          title: safeStr(t.title, 30),
+          firstname: safeStr(t.firstname, 80),
+          surname: safeStr(t.surname, 80),
+        }))
+      : [],
+  };
+}
+
+// Car Rental (Travelify product = "CarRental"). Surfaces vehicle specs,
+// pickup/dropoff, inclusions from the booked package, and important info
+// like fuel/mileage/insurance policies.
+function trimCarRental(d) {
+  // The selected package's pricing carries pay-at-location extras the
+  // customer should be warned about. Take from package[0] (the booked
+  // package) rather than scanning all packages. Falls back to top-level
+  // pricing.payAtLocation if the supplier put it there instead.
+  const pkg = Array.isArray(d.packages) && d.packages[0] ? d.packages[0] : null;
+  const pkgPricing = pkg?.pricing || null;
+  const payAtLocation = Array.isArray(pkgPricing?.payAtLocation)
+    ? pkgPricing.payAtLocation
+    : (Array.isArray(d.pricing?.payAtLocation) ? d.pricing.payAtLocation : []);
+  return {
+    name: safeStr(d.name, 200),                     // 'Seat Ibiza'
+    classCode: safeStr(d.classCode, 60),            // 'Economy'
+    className: safeStr(d.className, 60),
+    transmission: safeStr(d.transmission, 30),      // 'Manual', 'Automatic'
+    fuelType: safeStr(d.fuelType, 30),
+    doors: safeNum(d.doors),
+    seats: safeNum(d.seats),
+    luggageLarge: safeNum(d.luggageLarge),
+    luggageSmall: safeNum(d.luggageSmall),
+    oneWay: !!d.oneWay,
+    rentalOperator: d.rentalOperator ? {
+      code: safeStr(d.rentalOperator.code, 30),
+      name: safeStr(d.rentalOperator.name, 120),    // 'KEDDY', 'Europcar' etc
+    } : null,
+    pickup: trimLocationPoint(d.pickup),
+    dropoff: trimLocationPoint(d.dropoff),
+    // Inclusions from the booked package — short codes like 'FreeCancellation',
+    // 'UnlimitedMileage' that the widget can render as ticks.
+    inclusions: Array.isArray(pkg?.inclusions)
+      ? pkg.inclusions.slice(0, 20).map(i => safeStr(i, 60)).filter(Boolean)
+      : [],
+    // Free-text policies (fuel, mileage, deposit, driver req, etc).
+    // information[] is the broadest source — keep all of it (capped).
+    information: Array.isArray(d.information)
+      ? d.information.slice(0, 12).map(i => ({
+          type: safeStr(i.type, 40),
+          title: safeStr(i.title, 120),
+          text: sanitiseHotelDescription(i.text),
+        })).filter(x => x.text)
+      : [],
+    // Cancellation/included-text from the package descriptions array.
+    descriptions: Array.isArray(pkg?.descriptions)
+      ? pkg.descriptions.slice(0, 6).map(desc => ({
+          type: safeStr(desc.type, 40),
+          title: safeStr(desc.title, 100),
+          text: sanitiseHotelDescription(desc.text),
+        })).filter(x => x.text)
+      : [],
+    media: Array.isArray(d.media)
+      ? d.media.slice(0, 4).map(m => ({
+          type: safeStr(m.type, 40),
+          url: sanitiseImageUrl(m.url),
+          caption: safeStr(m.caption, 200),
+        })).filter(m => m.url)
+      : [],
+    // Pay-at-location fees (booster seats, child seats, etc) — same shape
+    // as accommodation's payAtLocation. The widget already has rendering
+    // for this so we map to the existing field names.
+    payAtLocation: payAtLocation.slice(0, 12).map(line => ({
+      name: safeStr(line.name, 120),
+      description: safeStr(line.description, 500),
+      unitPrice: safeNum(line.unitPrice),
+      qty: safeNum(line.qty),
+    })).filter(l => l.name || l.description),
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10),
+      price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice),
+      refundability: safeStr(d.pricing.refundability, 30),
+    } : null,
+    // CarRental has a single driver, not a travellers array. Normalise
+    // to a one-element travellers array so the widget's traveller
+    // aggregation logic doesn't need a special case.
+    travellers: d.driver ? [{
+      type: safeStr(d.driver.type, 30),
+      title: safeStr(d.driver.title, 30),
+      firstname: safeStr(d.driver.firstname, 80),
+      surname: safeStr(d.driver.surname, 80),
+      isDriver: true,
+    }] : [],
+  };
+}
+
+// Tickets & Attractions (Travelify product = "TicketsAttractions").
+// Covers museum entries, tours, attraction tickets, event tickets etc.
+function trimTicketsAttractions(d) {
+  // Select the booked option/date if obvious. Travelify usually returns
+  // a single option with a single dateOption for confirmed bookings —
+  // multiple imply un-booked inventory that shouldn't really reach the
+  // customer-facing widget. Take [0] in both cases.
+  const opt = Array.isArray(d.options) && d.options[0] ? d.options[0] : null;
+  const dateOpt = Array.isArray(opt?.dateOptions) && opt.dateOptions[0] ? opt.dateOptions[0] : null;
+  const subOpt = Array.isArray(opt?.subOptions) && opt.subOptions[0] ? opt.subOptions[0] : null;
+  return {
+    name: safeStr(d.name, 200),                     // 'Classic Desert Safari with...'
+    ticketType: safeStr(d.ticketType, 60),          // 'Tours', 'Attraction Ticket', etc
+    minDuration: safeNum(d.minDuration),            // Minutes
+    maxDuration: safeNum(d.maxDuration),
+    reviewCount: safeNum(d.reviewCount),
+    reviewAvg: safeNum(d.reviewAvg),
+    location: d.location ? {
+      city: safeStr(d.location.city, 100),
+      country: safeStr(d.location.country, 10),
+      address1: safeStr(d.location.address1, 200),
+      latitude: safeNum(d.location.latitude),
+      longitude: safeNum(d.location.longitude),
+    } : null,
+    categories: Array.isArray(d.categories)
+      ? d.categories.slice(0, 8).map(c => safeStr(c, 60)).filter(Boolean)
+      : [],
+    features: Array.isArray(d.features)
+      ? d.features.slice(0, 20).map(f => safeStr(f, 60)).filter(Boolean)
+      : [],
+    // Selected experience option (e.g. 'Shared tour on Tuesday, October 13')
+    selectedOption: opt ? {
+      name: safeStr(opt.name, 200),
+      type: safeStr(opt.type, 60),
+      // Bookable date+time from the chosen dateOption. Customer-facing.
+      scheduledDateTime: safeStr(dateOpt?.date, 30),
+      scheduledLabel: safeStr(dateOpt?.label, 200),
+      // Sub-option = ticket type (Adult/Child/Family/etc). One per booking.
+      subOption: subOpt ? {
+        name: safeStr(subOpt.name, 120),
+        type: safeStr(subOpt.type, 60),
+        travellerType: safeStr(subOpt.travellerType, 30),
+      } : null,
+    } : null,
+    descriptions: Array.isArray(d.descriptions)
+      ? d.descriptions.slice(0, 10).map(desc => ({
+          type: safeStr(desc.type, 40),
+          title: safeStr(desc.title, 100),
+          text: sanitiseHotelDescription(desc.text),
+        })).filter(x => x.text)
+      : [],
+    media: Array.isArray(d.media)
+      ? d.media.slice(0, 6).map(m => ({
+          type: safeStr(m.type, 40),
+          url: sanitiseImageUrl(m.url),
+          caption: safeStr(m.caption, 200),
+        })).filter(m => m.url)
+      : [],
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10),
+      price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice),
+      refundability: safeStr(d.pricing.refundability, 30),
+    } : null,
+    guests: Array.isArray(d.guests)
+      ? d.guests.slice(0, 20).map(g => ({
+          type: safeStr(g.type, 30),
+          title: safeStr(g.title, 30),
+          firstname: safeStr(g.firstname, 80),
+          surname: safeStr(g.surname, 80),
+        }))
+      : [],
+  };
+}
+
+// Packages (Travelify product = "Packages") = ATOL-protected holiday packages
+// (Jet2 Holidays, EveryHoliday, TUI, etc).
+//
+// A Packages dataObject is the union of an Accommodation dataObject and a
+// Flights dataObject — same field names for the hotel parts (name, rating,
+// propertyType, amenities, location, descriptions, units, pricing) and same
+// 'routes' array as Flights. Plus a top-level 'operator' field naming the
+// tour operator whose ATOL the package is sold under (this is required
+// disclosure for ATOL packages — Jet2 Holidays, TUI, etc. must be named).
+//
+// Strategy: split the package into two virtual sub-objects on the trimmed
+// item — item.accommodation and item.flights — produced by calling the
+// existing trim functions. That way the widget/email/PDF rendering code
+// already in place for separate Accommodation + Flights items just works:
+// the customer sees the hotel hero, room details, then flight cards
+// underneath, exactly as they would for an unbundled hotel+flights booking.
+//
+// The 'operator' field is exposed separately on the trimmed item so the
+// front-end can render the ATOL operator badge ("Holiday operated by
+// EveryHoliday — ATOL Protected").
+function trimPackages(d) {
+  return {
+    accommodation: trimAccommodation(d),
+    flights: trimFlights(d),
+    // Tour operator who holds the ATOL licence for this package. Customer-
+    // facing — required disclosure on any ATOL-protected sale.
+    operator: d.operator ? {
+      code: safeStr(d.operator.code, 30),
+      name: safeStr(d.operator.name, 120),
+      message: safeStr(d.operator.message, 300),
+    } : null,
+    // ATOL protection is the headline trust signal. Boolean here for
+    // straightforward use on the front-end; logic: protected if the
+    // package's inclusions list contains 'ATOLProtection'.
+    atolProtected: Array.isArray(d.inclusions)
+      ? d.inclusions.some(i => /^ATOLProtection$/i.test(i))
+      : false,
+    // Package-level inclusions ('ATOLProtection', 'Baggage', 'Transfers' if
+    // bundled). The widget renders these as tick chips.
+    inclusions: Array.isArray(d.inclusions)
+      ? d.inclusions.slice(0, 15).map(i => safeStr(i, 60)).filter(Boolean)
+      : [],
+  };
+}
+
 function trimItem(item) {
   if (!item || typeof item !== 'object') return null;
   const out = {
@@ -506,9 +782,29 @@ function trimItem(item) {
     out.flights = trimFlights(item.dataObject);
   } else if (item.product === 'AirportExtras' && item.dataObject) {
     out.airportExtras = trimAirportExtras(item.dataObject);
+  } else if (item.product === 'Transfers' && item.dataObject) {
+    out.transfers = trimTransfers(item.dataObject);
+  } else if (item.product === 'CarRental' && item.dataObject) {
+    out.carRental = trimCarRental(item.dataObject);
+  } else if (item.product === 'TicketsAttractions' && item.dataObject) {
+    out.ticketsAttractions = trimTicketsAttractions(item.dataObject);
+  } else if (item.product === 'Packages' && item.dataObject) {
+    // Packages are composite: expose accommodation + flights directly on
+    // the item so all existing consumers (widget, email, PDF) Just Work
+    // without needing to know about the Packages product type. Operator
+    // info and ATOL flag travel alongside on item.package for the badge.
+    const pkg = trimPackages(item.dataObject);
+    out.accommodation = pkg.accommodation;
+    out.flights = pkg.flights;
+    out.package = {
+      operator: pkg.operator,
+      atolProtected: pkg.atolProtected,
+      inclusions: pkg.inclusions,
+    };
   }
-  // Other product types (Insurance, CarRental, etc) fall through with the
-  // common envelope only — widget will skip rendering them gracefully.
+  // Other product types (Insurance, etc) fall through with the
+  // common envelope only. Widget renders a generic "Booked" card for those
+  // so the price isn't orphaned.
 
   return out;
 }
@@ -559,9 +855,17 @@ function computeSummary(items) {
     hasAccommodation: false,
     hasFlights: false,
     hasAirportExtras: false,
+    hasTransfers: false,
+    hasCarRental: false,
+    hasTicketsAttractions: false,
+    hasPackages: false,
     accommodationItems: 0,
     flightItems: 0,
     airportExtrasItems: 0,
+    transfersItems: 0,
+    carRentalItems: 0,
+    ticketsAttractionsItems: 0,
+    packagesItems: 0,
     earliestStart: null,
     latestEnd: null,
     travellers: [],
@@ -580,6 +884,24 @@ function computeSummary(items) {
     } else if (item.product === 'AirportExtras') {
       summary.hasAirportExtras = true;
       summary.airportExtrasItems++;
+    } else if (item.product === 'Transfers') {
+      summary.hasTransfers = true;
+      summary.transfersItems++;
+    } else if (item.product === 'CarRental') {
+      summary.hasCarRental = true;
+      summary.carRentalItems++;
+    } else if (item.product === 'TicketsAttractions') {
+      summary.hasTicketsAttractions = true;
+      summary.ticketsAttractionsItems++;
+    } else if (item.product === 'Packages') {
+      // Packages bundle hotel + flights. Track them as Packages for the
+      // badge/total-label logic, but also mark hasAccommodation/hasFlights
+      // so the rest of the rendering pipeline picks up the bundled hotel
+      // and flight detail without needing special-case awareness.
+      summary.hasPackages = true;
+      summary.packagesItems++;
+      summary.hasAccommodation = true;
+      summary.hasFlights = true;
     }
 
     // Track earliest start across ALL items. For trips with flights, the
@@ -601,15 +923,18 @@ function computeSummary(items) {
   if (summary.totalPrice === 0) summary.totalPrice = null;
 
   // Aggregate unique travellers across all items. People appear in the
-  // accommodation 'guests' array AND the flights 'travellers' AND the
-  // extras 'travellers' — usually overlapping but not always (e.g. only
-  // the lead guest is on a single-guest lounge booking).
+  // accommodation 'guests' array, flights/extras 'travellers', tickets
+  // 'guests', transfers 'travellers', and car rental's normalised
+  // driver-as-traveller. Usually overlapping but not always.
   const seen = new Set();
   for (const item of items) {
     const list =
       item.accommodation?.guests ||
       item.flights?.travellers ||
       item.airportExtras?.travellers ||
+      item.transfers?.travellers ||
+      item.carRental?.travellers ||
+      item.ticketsAttractions?.guests ||
       [];
     for (const t of list) {
       const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
