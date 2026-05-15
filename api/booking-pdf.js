@@ -297,6 +297,190 @@ function trimAirportExtras(d) {
   };
 }
 
+// Shared between Transfers and CarRental. Same shape: a pickup or dropoff
+// point with optional airport metadata.
+function trimLocationPoint(p) {
+  if (!p || typeof p !== 'object') return null;
+  return {
+    dateTime: safeStr(p.dateTime, 30),
+    name: safeStr(p.name, 200),
+    address1: safeStr(p.address1, 200),
+    iataCode: safeStr(p.iataCode, 10),
+    onAirport: !!p.onAirport,
+    country: safeStr(p.country, 10),
+    latitude: safeNum(p.latitude),
+    longitude: safeNum(p.longitude),
+  };
+}
+
+// Transfers (Travelify product = "Transfers") — distinct from AirportExtras
+// with type=Transfer; different dataObject shape (Hoppa, Holiday Taxis etc).
+function trimTransfers(d) {
+  return {
+    type: safeStr(d.type, 40),
+    vehicle: safeStr(d.vehicle, 100),
+    company: safeStr(d.company, 120),
+    journeyDistance: safeStr(d.journeyDistance, 30),
+    journeyDuration: safeStr(d.journeyDuration, 30),
+    numberUnits: safeNum(d.numberUnits),
+    minOccupancy: safeNum(d.minOccupancy),
+    maxOccupancy: safeNum(d.maxOccupancy),
+    smallBagAllowance: safeNum(d.smallBagAllowance),
+    bigBagAllowance: safeNum(d.bigBagAllowance),
+    outPickup: trimLocationPoint(d.outPickup),
+    outDropoff: trimLocationPoint(d.outDropoff),
+    returnPickup: trimLocationPoint(d.returnPickup),
+    returnDropoff: trimLocationPoint(d.returnDropoff),
+    information: Array.isArray(d.information)
+      ? d.information.slice(0, 8).map(i => ({
+          type: safeStr(i.type, 40), title: safeStr(i.title, 100), text: sanitiseDesc(i.text),
+        })).filter(x => x.text) : [],
+    media: Array.isArray(d.media)
+      ? d.media.slice(0, 4).map(m => ({
+          type: safeStr(m.type, 40), url: sanitiseUrl(m.url), caption: safeStr(m.caption, 200),
+        })).filter(m => m.url) : [],
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice), refundability: safeStr(d.pricing.refundability, 30),
+    } : null,
+    travellers: Array.isArray(d.travellers)
+      ? d.travellers.slice(0, 12).map(t => ({
+          type: safeStr(t.type, 30), title: safeStr(t.title, 30),
+          firstname: safeStr(t.firstname, 80), surname: safeStr(t.surname, 80),
+        })) : [],
+  };
+}
+
+// Car Rental (Travelify product = "CarRental"). Vehicle specs + pickup/dropoff
+// + inclusions from the booked package + free-text policies.
+function trimCarRental(d) {
+  const pkg = Array.isArray(d.packages) && d.packages[0] ? d.packages[0] : null;
+  const pkgPricing = pkg?.pricing || null;
+  const payAtLocation = Array.isArray(pkgPricing?.payAtLocation)
+    ? pkgPricing.payAtLocation
+    : (Array.isArray(d.pricing?.payAtLocation) ? d.pricing.payAtLocation : []);
+  return {
+    name: safeStr(d.name, 200),
+    classCode: safeStr(d.classCode, 60),
+    className: safeStr(d.className, 60),
+    transmission: safeStr(d.transmission, 30),
+    fuelType: safeStr(d.fuelType, 30),
+    doors: safeNum(d.doors),
+    seats: safeNum(d.seats),
+    luggageLarge: safeNum(d.luggageLarge),
+    luggageSmall: safeNum(d.luggageSmall),
+    oneWay: !!d.oneWay,
+    rentalOperator: d.rentalOperator ? {
+      code: safeStr(d.rentalOperator.code, 30),
+      name: safeStr(d.rentalOperator.name, 120),
+    } : null,
+    pickup: trimLocationPoint(d.pickup),
+    dropoff: trimLocationPoint(d.dropoff),
+    inclusions: Array.isArray(pkg?.inclusions)
+      ? pkg.inclusions.slice(0, 20).map(i => safeStr(i, 60)).filter(Boolean) : [],
+    information: Array.isArray(d.information)
+      ? d.information.slice(0, 12).map(i => ({
+          type: safeStr(i.type, 40), title: safeStr(i.title, 120), text: sanitiseDesc(i.text),
+        })).filter(x => x.text) : [],
+    descriptions: Array.isArray(pkg?.descriptions)
+      ? pkg.descriptions.slice(0, 6).map(desc => ({
+          type: safeStr(desc.type, 40), title: safeStr(desc.title, 100), text: sanitiseDesc(desc.text),
+        })).filter(x => x.text) : [],
+    media: Array.isArray(d.media)
+      ? d.media.slice(0, 4).map(m => ({
+          type: safeStr(m.type, 40), url: sanitiseUrl(m.url), caption: safeStr(m.caption, 200),
+        })).filter(m => m.url) : [],
+    payAtLocation: payAtLocation.slice(0, 12).map(line => ({
+      name: safeStr(line.name, 120), description: safeStr(line.description, 500),
+      unitPrice: safeNum(line.unitPrice), qty: safeNum(line.qty),
+    })).filter(l => l.name || l.description),
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice), refundability: safeStr(d.pricing.refundability, 30),
+    } : null,
+    travellers: d.driver ? [{
+      type: safeStr(d.driver.type, 30), title: safeStr(d.driver.title, 30),
+      firstname: safeStr(d.driver.firstname, 80), surname: safeStr(d.driver.surname, 80),
+      isDriver: true,
+    }] : [],
+  };
+}
+
+// Tickets & Attractions (Travelify product = "TicketsAttractions").
+function trimTicketsAttractions(d) {
+  const opt = Array.isArray(d.options) && d.options[0] ? d.options[0] : null;
+  const dateOpt = Array.isArray(opt?.dateOptions) && opt.dateOptions[0] ? opt.dateOptions[0] : null;
+  const subOpt = Array.isArray(opt?.subOptions) && opt.subOptions[0] ? opt.subOptions[0] : null;
+  return {
+    name: safeStr(d.name, 200),
+    ticketType: safeStr(d.ticketType, 60),
+    minDuration: safeNum(d.minDuration),
+    maxDuration: safeNum(d.maxDuration),
+    reviewCount: safeNum(d.reviewCount),
+    reviewAvg: safeNum(d.reviewAvg),
+    location: d.location ? {
+      city: safeStr(d.location.city, 100),
+      country: safeStr(d.location.country, 10),
+      address1: safeStr(d.location.address1, 200),
+      latitude: safeNum(d.location.latitude),
+      longitude: safeNum(d.location.longitude),
+    } : null,
+    categories: Array.isArray(d.categories)
+      ? d.categories.slice(0, 8).map(c => safeStr(c, 60)).filter(Boolean) : [],
+    features: Array.isArray(d.features)
+      ? d.features.slice(0, 20).map(f => safeStr(f, 60)).filter(Boolean) : [],
+    selectedOption: opt ? {
+      name: safeStr(opt.name, 200),
+      type: safeStr(opt.type, 60),
+      scheduledDateTime: safeStr(dateOpt?.date, 30),
+      scheduledLabel: safeStr(dateOpt?.label, 200),
+      subOption: subOpt ? {
+        name: safeStr(subOpt.name, 120),
+        type: safeStr(subOpt.type, 60),
+        travellerType: safeStr(subOpt.travellerType, 30),
+      } : null,
+    } : null,
+    descriptions: Array.isArray(d.descriptions)
+      ? d.descriptions.slice(0, 10).map(desc => ({
+          type: safeStr(desc.type, 40), title: safeStr(desc.title, 100), text: sanitiseDesc(desc.text),
+        })).filter(x => x.text) : [],
+    media: Array.isArray(d.media)
+      ? d.media.slice(0, 6).map(m => ({
+          type: safeStr(m.type, 40), url: sanitiseUrl(m.url), caption: safeStr(m.caption, 200),
+        })).filter(m => m.url) : [],
+    pricing: d.pricing ? {
+      currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price),
+      memberPrice: safeNum(d.pricing.memberPrice), refundability: safeStr(d.pricing.refundability, 30),
+    } : null,
+    guests: Array.isArray(d.guests)
+      ? d.guests.slice(0, 20).map(g => ({
+          type: safeStr(g.type, 30), title: safeStr(g.title, 30),
+          firstname: safeStr(g.firstname, 80), surname: safeStr(g.surname, 80),
+        })) : [],
+  };
+}
+
+// Packages (Travelify product = "Packages") = ATOL-protected holiday
+// packages (Jet2 Holidays, EveryHoliday, TUI, etc). Composite of hotel +
+// flights with an ATOL operator. Splits the package's dataObject into
+// virtual accommodation + flights so existing render paths just work.
+function trimPackages(d) {
+  return {
+    accommodation: trimAccommodation(d),
+    flights: trimFlights(d),
+    operator: d.operator ? {
+      code: safeStr(d.operator.code, 30),
+      name: safeStr(d.operator.name, 120),
+      message: safeStr(d.operator.message, 300),
+    } : null,
+    atolProtected: Array.isArray(d.inclusions)
+      ? d.inclusions.some(i => /^ATOLProtection$/i.test(i))
+      : false,
+    inclusions: Array.isArray(d.inclusions)
+      ? d.inclusions.slice(0, 15).map(i => safeStr(i, 60)).filter(Boolean) : [],
+  };
+}
+
 function trimItem(item) {
   if (!item || typeof item !== 'object') return null;
   const out = {
@@ -305,15 +489,39 @@ function trimItem(item) {
     currency: safeStr(item.originalCurrency, 10), startDate: safeStr(item.startDate, 30),
     duration: safeNum(item.duration),
   };
-  if (item.product === 'Accommodation' && item.dataObject) out.accommodation = trimAccommodation(item.dataObject);
-  else if (item.product === 'Flights' && item.dataObject) out.flights = trimFlights(item.dataObject);
-  else if (item.product === 'AirportExtras' && item.dataObject) out.airportExtras = trimAirportExtras(item.dataObject);
+  if (item.product === 'Accommodation' && item.dataObject) {
+    out.accommodation = trimAccommodation(item.dataObject);
+  } else if (item.product === 'Flights' && item.dataObject) {
+    out.flights = trimFlights(item.dataObject);
+  } else if (item.product === 'AirportExtras' && item.dataObject) {
+    out.airportExtras = trimAirportExtras(item.dataObject);
+  } else if (item.product === 'Transfers' && item.dataObject) {
+    out.transfers = trimTransfers(item.dataObject);
+  } else if (item.product === 'CarRental' && item.dataObject) {
+    out.carRental = trimCarRental(item.dataObject);
+  } else if (item.product === 'TicketsAttractions' && item.dataObject) {
+    out.ticketsAttractions = trimTicketsAttractions(item.dataObject);
+  } else if (item.product === 'Packages' && item.dataObject) {
+    // Packages are composite: expose accommodation + flights directly on
+    // the item so all existing rendering Just Works. Operator info and
+    // ATOL flag travel alongside on item.package for the hero badge.
+    const pkg = trimPackages(item.dataObject);
+    out.accommodation = pkg.accommodation;
+    out.flights = pkg.flights;
+    out.package = {
+      operator: pkg.operator,
+      atolProtected: pkg.atolProtected,
+      inclusions: pkg.inclusions,
+    };
+  }
   return out;
 }
 
 function computeSummary(items) {
   const summary = {
-    totalPrice: 0, hasAccommodation: false, hasFlights: false, hasAirportExtras: false,
+    totalPrice: 0,
+    hasAccommodation: false, hasFlights: false, hasAirportExtras: false,
+    hasTransfers: false, hasCarRental: false, hasTicketsAttractions: false, hasPackages: false,
     earliestStart: null, travellers: [],
   };
   for (const item of items) {
@@ -321,6 +529,16 @@ function computeSummary(items) {
     if (item.product === 'Accommodation') summary.hasAccommodation = true;
     else if (item.product === 'Flights') summary.hasFlights = true;
     else if (item.product === 'AirportExtras') summary.hasAirportExtras = true;
+    else if (item.product === 'Transfers') summary.hasTransfers = true;
+    else if (item.product === 'CarRental') summary.hasCarRental = true;
+    else if (item.product === 'TicketsAttractions') summary.hasTicketsAttractions = true;
+    else if (item.product === 'Packages') {
+      // Packages bundle hotel + flights — set both flags so downstream
+      // consumers treat the booking as a holiday with flights.
+      summary.hasPackages = true;
+      summary.hasAccommodation = true;
+      summary.hasFlights = true;
+    }
     if (item.startDate) {
       const ts = Date.parse(item.startDate);
       if (Number.isFinite(ts) && (!summary.earliestStart || ts < Date.parse(summary.earliestStart))) {
@@ -332,7 +550,15 @@ function computeSummary(items) {
   if (summary.totalPrice === 0) summary.totalPrice = null;
   const seen = new Set();
   for (const item of items) {
-    const list = item.accommodation?.guests || item.flights?.travellers || item.airportExtras?.travellers || [];
+    // Pull travellers from all product types. Order matters: prefer the
+    // explicit travellers/guests array on the most-specific sub-object.
+    const list = item.accommodation?.guests
+      || item.flights?.travellers
+      || item.airportExtras?.travellers
+      || item.transfers?.travellers
+      || item.carRental?.travellers
+      || item.ticketsAttractions?.guests
+      || [];
     for (const t of list) {
       const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
       if (!seen.has(key) && (t.firstname || t.surname)) {
