@@ -6,6 +6,25 @@
  */
 import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 
+// Hydration fallback for cookie-issued JWTs that lack the legacy `email`
+// field. The list query is scoped to user.email, so we MUST resolve it
+// before running the query. See widget-config.js for the same pattern.
+import { getRecord } from './_lib/auth/airtable.js';
+import { USERS } from './_lib/auth/schema.js';
+
+async function hydrateUserEmail(user) {
+  if (!user || user.email || !user.recordId) return;
+  try {
+    const u = await getRecord(USERS.tableId, user.recordId);
+    const email = u?.fields?.[USERS.fields.email];
+    if (typeof email === 'string' && email.trim()) {
+      user.email = email.trim();
+    }
+  } catch (err) {
+    console.warn('[widget-list] hydrate email failed:', err.message);
+  }
+}
+
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
@@ -21,6 +40,16 @@ export default async function handler(req, res) {
   const auth = requireAuth(req);
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
   const user = auth.user;
+
+  // Cookie-issued JWTs don't carry email in the payload — hydrate it
+  // before the scope query below uses it.
+  await hydrateUserEmail(user);
+
+  if (!user.email) {
+    // Should never happen on a valid session; fail closed.
+    console.error('[widget-list] No email available for user', user.recordId);
+    return res.status(401).json({ error: 'Could not resolve account email' });
+  }
 
   // ── Rate limit (per-user, in-memory) ──────────────────────
   // Catches buggy clients and opportunistic abuse. Not a strong control on
