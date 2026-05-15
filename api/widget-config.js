@@ -8,6 +8,53 @@
  */
 import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 
+// Hydration fallback for cookie-issued JWTs that lack the legacy fields
+// (email, plan) the rest of this endpoint depends on. Once every active
+// session has been re-issued under the new auth/signin + auth/sso flow
+// (which now embed email + plan natively), this fallback becomes a no-op.
+import { getRecord } from './_lib/auth/airtable.js';
+import { USERS, CLIENTS } from './_lib/auth/schema.js';
+import { normalisePlanValue } from './_lib/auth/plan.js';
+
+/**
+ * If the JWT carries userId but not email/plan (true for cookies issued
+ * before this fix), look the missing fields up by record ID and patch
+ * them onto the user object in place. Failures are logged and swallowed
+ * so the request can still proceed with whatever the JWT did carry.
+ *
+ * Only runs when something is actually missing — no perf hit on
+ * freshly-issued JWTs that already include both fields.
+ */
+async function hydrateLegacyUserFields(user) {
+  if (!user) return;
+  const needsEmail = !user.email && user.recordId;
+  const needsPlan  = !user.plan  && user.clientId;
+  if (!needsEmail && !needsPlan) return;
+
+  if (needsEmail) {
+    try {
+      const u = await getRecord(USERS.tableId, user.recordId);
+      const email = u?.fields?.[USERS.fields.email];
+      if (typeof email === 'string' && email.trim()) {
+        user.email = email.trim();
+      }
+    } catch (err) {
+      console.warn('[widget-config] hydrate email failed:', err.message);
+    }
+  }
+
+  if (needsPlan) {
+    try {
+      const c = await getRecord(CLIENTS.tableId, user.clientId);
+      const raw = c?.fields?.[CLIENTS.fields.plan];
+      const plan = await normalisePlanValue(raw);
+      if (plan) user.plan = plan;
+    } catch (err) {
+      console.warn('[widget-config] hydrate plan failed:', err.message);
+    }
+  }
+}
+
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
@@ -141,6 +188,11 @@ export default async function handler(req, res) {
       const auth = requireAuth(req);
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
       const user = auth.user;
+
+      // Cookie-issued JWTs don't carry email or plan in the payload.
+      // Fill them in from Airtable before we use them for rate limiting,
+      // ownership checks, plan limits, or persistence.
+      await hydrateLegacyUserFields(user);
 
       // ── Rate limit (per-user, in-memory) ──────────────────
       // Catches buggy clients and opportunistic abuse. See _auth.js for
@@ -312,6 +364,11 @@ export default async function handler(req, res) {
       const auth = requireAuth(req);
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
       const user = auth.user;
+
+      // Cookie-issued JWTs don't carry email in the payload. DELETE only
+      // needs email (for rate limit + ownership check), not plan, so this
+      // is cheap on the legacy-cookie path and a no-op on new ones.
+      await hydrateLegacyUserFields(user);
 
       // Rate limit (per-user, same preset as POST writes)
       if (!applyRateLimit(res, `delete:${user.email}`, RATE_LIMITS.widgetWrite)) return;
