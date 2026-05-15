@@ -1444,14 +1444,21 @@
       });
   }
 
-  /* ── Boot ───────────────────────────────────────────────── */
+  /* ── Boot — wait for shell auth resolution (v1.1 shell) ── */
   document.addEventListener('DOMContentLoaded', () => {
-    if (tgse.isLoggedIn()) {
-      loadFromUrl();
+    const boot = () => {
+      if (tgse.isLoggedIn()) {
+        loadFromUrl();
+      } else {
+        // Shell will show the login overlay; render the sidebar with defaults so it's not blank
+        renderAllSections();
+        render();
+      }
+    };
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(boot);
     } else {
-      // Shell will show the login overlay; render the sidebar with defaults so it's not blank
-      renderAllSections();
-      render();
+      boot();
     }
   });
 
