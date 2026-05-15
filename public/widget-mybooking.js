@@ -1887,18 +1887,37 @@
               <span class="tgm-pay-total-amt">${esc(fmtMoney(totalPrice, currency))}</span>
             </div>
             ${(() => {
-              const productCount = (summary.hasAccommodation ? 1 : 0)
-                + (summary.hasFlights ? 1 : 0)
+              // Breakdown lines. Packages must be a single "Holiday package"
+              // line — listing it under Hotel AND Flights doubles its price
+              // visually (both rows would show the full bundled amount).
+              // Filter to "pure" types for the breakdown.
+              const packagesItems = items.filter(i => i.product === 'Packages');
+              const pureFlightItems = flightItems.filter(i => i.product === 'Flights');
+              const isPackage = accItem?.product === 'Packages';
+              // Count distinct lines for the "show breakdown only if 2+ lines"
+              // rule. Packages count as one line regardless of the hasAccom/
+              // hasFlights flags we set elsewhere to drive other rendering.
+              const productCount =
+                  (packagesItems.length > 0 ? 1 : 0)
+                + ((accItem && !isPackage) ? 1 : 0)
+                + (pureFlightItems.length > 0 ? 1 : 0)
                 + (summary.hasAirportExtras ? 1 : 0)
                 + (summary.hasTransfers ? 1 : 0)
                 + (summary.hasCarRental ? 1 : 0)
                 + (summary.hasTicketsAttractions ? 1 : 0);
               if (productCount < 2) return '';
               const lines = [];
-              if (accItem && typeof accItem.price === 'number') {
+              // Hotel line — only when accommodation is a separate product,
+              // NOT when it came from a Packages split.
+              if (accItem && !isPackage && typeof accItem.price === 'number') {
                 lines.push({ label: c.labels?.hotelLine || 'Hotel', val: accItem.price });
               }
-              const flightTotal = flightItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
+              // Holiday package — single combined line.
+              const packagesTotal = packagesItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
+              if (packagesTotal > 0) {
+                lines.push({ label: c.labels?.packageLine || 'Holiday package', val: packagesTotal });
+              }
+              const flightTotal = pureFlightItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
               if (flightTotal > 0) lines.push({ label: c.labels?.flightsLine || 'Flights', val: flightTotal });
               const extrasTotal = extraItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
               if (extrasTotal > 0) lines.push({ label: c.labels?.extrasLine || 'Airport extras', val: extrasTotal });
