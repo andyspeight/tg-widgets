@@ -2082,7 +2082,12 @@
 
   // If we're already signed in when the page loads, init now;
   // otherwise the shell shows its login overlay and we'll init on success.
-  if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+  // (v1.1 shell — wait for cookie auth resolution before deciding.)
+  if (window.tgse && typeof window.tgse.onReady === 'function') {
+    window.tgse.onReady(() => {
+      if (window.tgse.isLoggedIn()) init();
+    });
+  } else if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
     init();
   }
 })();
