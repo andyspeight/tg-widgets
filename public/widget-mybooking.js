@@ -177,6 +177,61 @@
       return '£' + amount.toFixed(2);
     }
   }
+
+  /**
+   * Decide what the Total line should be called based on what's in the order.
+   *
+   * Tiered logic, in order of precedence:
+   *   1. Accommodation present       → "Total holiday cost"
+   *      (Anything with a hotel is a holiday, regardless of what else is bundled.
+   *      Package Holidays from Travelify also fall here when they include an
+   *      Accommodation item.)
+   *   2. Flights present (no hotel)  → "Total flight cost"
+   *      (Flights anchor the booking even when bundled with extras.)
+   *   3. Single dominant product     → product-specific label
+   *      (One product type only — call it what it is.)
+   *   4. Mixed extras / unknown      → "Total cost"
+   *      (Generic fallback. Always correct even if Travelify adds new
+   *      product types we haven't seen yet.)
+   *
+   * Labels are also exposed through c.labels so an agency can override
+   * any of them in their widget config.
+   */
+  function resolveTotalLabel(items, c) {
+    const labels = c?.labels || {};
+    if (!Array.isArray(items) || items.length === 0) {
+      return labels.totalCost || 'Total cost';
+    }
+
+    const products = new Set(items.map(i => i?.product).filter(Boolean));
+
+    if (products.has('Accommodation')) {
+      return labels.totalHoliday || labels.totalCost || 'Total holiday cost';
+    }
+    if (products.has('Flights')) {
+      return labels.totalFlights || 'Total flight cost';
+    }
+    // No hotel, no flights — single-product case.
+    if (products.size === 1) {
+      const only = products.values().next().value;
+      // Map of known single-product labels. Anything not listed falls
+      // through to the generic "Total cost".
+      const singleProductMap = {
+        AirportExtras:   labels.totalExtras   || 'Total cost',
+        Tickets:         labels.totalTickets  || 'Total ticket cost',
+        Ticket:          labels.totalTickets  || 'Total ticket cost',
+        CarHire:         labels.totalCarHire  || 'Total car hire cost',
+        CarRental:       labels.totalCarHire  || 'Total car hire cost',
+        Transfer:        labels.totalTransfer || 'Total transfer cost',
+        Transfers:       labels.totalTransfer || 'Total transfer cost',
+        Package:         labels.totalPackage  || 'Total package cost',
+        PackageHoliday:  labels.totalPackage  || 'Total package cost',
+        Insurance:       labels.totalInsurance|| 'Total insurance cost',
+      };
+      return singleProductMap[only] || labels.totalCost || 'Total cost';
+    }
+    return labels.totalCost || 'Total cost';
+  }
   function fmtDate(iso, opts) {
     if (!iso) return '';
     const d = new Date(iso);
@@ -593,6 +648,20 @@
     .tgm-inst:hover { background: var(--tgm-bg-2); }
     .tgm-inst .date { color: var(--tgm-text-2); font-variant-numeric: tabular-nums; }
     .tgm-inst .amt { font-weight: 600; color: var(--tgm-text); font-variant-numeric: tabular-nums; }
+
+    /* "Also payable on arrival" — surfaces in-resort fees inside the Payment
+       card so they sit next to total/deposit/balance instead of buried
+       inside the collapsed "At the hotel" accordion. Amber treatment marks
+       this as an obligation the customer must plan for, separately from
+       the holiday cost they've already paid towards. */
+    .tgm-pay-onarrival { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--tgm-border-light); }
+    .tgm-pay-onarrival-title { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--tgm-warning); margin-bottom: 10px; }
+    .tgm-pay-onarrival-title svg { width: 13px; height: 13px; }
+    .tgm-pay-onarrival-line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 6px 0; font-size: 14px; }
+    .tgm-pay-onarrival-line .name { color: var(--tgm-text-2); }
+    .tgm-pay-onarrival-line .name small { display: block; font-size: 11px; color: var(--tgm-text-3); margin-top: 1px; }
+    .tgm-pay-onarrival-line .val { font-weight: 600; color: var(--tgm-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .tgm-pay-onarrival-note { font-size: 11px; color: var(--tgm-text-3); margin-top: 6px; line-height: 1.5; }
 
     .tgm-guest { display: flex; align-items: center; gap: 12px; }
     .tgm-guest-av { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--tgm-accent), var(--tgm-accent-dark)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 13px; letter-spacing: .04em; flex-shrink: 0; }
@@ -1450,7 +1519,7 @@
           <div class="tgm-section">
             <h3>${svg(IC.card)}${esc(c.labels?.payment || 'Payment')}</h3>
             <div class="tgm-pay-total">
-              <span class="tgm-pay-label">${esc(c.labels?.totalCost || 'Total holiday cost')}</span>
+              <span class="tgm-pay-label">${esc(resolveTotalLabel(items, c))}</span>
               <span class="tgm-pay-total-amt">${esc(fmtMoney(totalPrice, currency))}</span>
             </div>
             ${(() => {
@@ -1503,6 +1572,57 @@
                 `).join('')}
               </div>
             ` : ''}
+
+            ${(() => {
+              // "Also payable on arrival" — surfaces in-resort fees here
+              // (next to total/deposit/balance) so customers can't miss
+              // them. Mirrors the data in the "At the hotel" accordion,
+              // which still exists for the times/important-info content.
+              //
+              // We render either:
+              //   - The itemised payAtLocation list when available, OR
+              //   - A single inResort total as fallback
+              //
+              // Same filter rule as the accordion: never fabricate a fee
+              // description. Skip lines with no name AND no description —
+              // we won't tell a customer they owe money for a charge we
+              // can't identify.
+              const validLines = (payAtLocation || []).filter(line => line.name || line.description);
+              if (validLines.length === 0 && !inResort) return '';
+              if (validLines.length > 0) {
+                return `
+                  <div class="tgm-pay-onarrival">
+                    <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payOnArrival || 'Also payable on arrival')}</div>
+                    ${validLines.map(line => {
+                      const label = line.name || line.description;
+                      const hasPrice = typeof line.unitPrice === 'number';
+                      const amount = hasPrice ? (line.unitPrice || 0) * (line.qty || 1) : null;
+                      return `
+                        <div class="tgm-pay-onarrival-line">
+                          <span class="name">
+                            ${esc(label)}
+                            ${line.description && line.description !== line.name ? `<small>${esc(line.description)}</small>` : ''}
+                          </span>
+                          <span class="val">${amount != null ? esc(fmtMoney(amount, currency)) : '—'}</span>
+                        </div>
+                      `;
+                    }).join('')}
+                    <div class="tgm-pay-onarrival-note">${esc(c.labels?.payOnArrivalNote || 'Paid directly to the hotel at check-in. Not included in your holiday cost above.')}</div>
+                  </div>
+                `;
+              }
+              // Fallback: single inResort total with no itemised breakdown
+              return `
+                <div class="tgm-pay-onarrival">
+                  <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payOnArrival || 'Also payable on arrival')}</div>
+                  <div class="tgm-pay-onarrival-line">
+                    <span class="name">${esc(c.labels?.resortFee || 'Resort fees')}</span>
+                    <span class="val">${esc(fmtMoney(inResort, currency))}</span>
+                  </div>
+                  <div class="tgm-pay-onarrival-note">${esc(c.labels?.payOnArrivalNote || 'Paid directly to the hotel at check-in. Not included in your holiday cost above.')}</div>
+                </div>
+              `;
+            })()}
           </div>
 
           <div class="tgm-section">
@@ -1610,7 +1730,7 @@
           </div></div>
         </div>` : ''}
 
-        ${(importantInfo.length || inResort || payAtLocation.length || checkinTime || checkoutTime) ? `
+        ${(importantInfo.length || checkinTime || checkoutTime) ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
             <div class="tgm-collapse-left">${svg(IC.coin)}${esc(c.labels?.localFees || 'At the hotel')}</div>
@@ -1625,33 +1745,10 @@
               </dl>
             ` : ''}
 
-            ${(payAtLocation.length || inResort) ? `
-              <div class="tgm-subhead">${esc(c.labels?.payAtHotel || 'Payable at the hotel')}</div>
-              ${payAtLocation.map(line => {
-                // Never fabricate a fee description ("Local fee" etc).
-                // If the supplier returned no name AND no description, skip
-                // the line entirely — we won't tell a customer they owe
-                // money for a charge we can't identify.
-                if (!line.name && !line.description) return '';
-                const label = line.name || line.description;
-                return `
-                <div class="tgm-fee-line">
-                  <span class="name">
-                    ${esc(label)}
-                    ${line.description && line.description !== line.name ? `<small>${esc(line.description)}</small>` : ''}
-                    ${(typeof line.qty === 'number' && line.qty > 1) ? `<small>× ${esc(String(line.qty))}</small>` : ''}
-                  </span>
-                  <span class="val">${typeof line.unitPrice === 'number' ? esc(fmtMoney((line.unitPrice || 0) * (line.qty || 1), currency)) : '—'}</span>
-                </div>
-              `;
-              }).join('')}
-              ${(inResort && !payAtLocation.length) ? `
-                <div class="tgm-fee-line">
-                  <span class="name">${esc(c.labels?.resortFee || 'Resort fee')}</span>
-                  <span class="val">${esc(fmtMoney(inResort, currency))}</span>
-                </div>
-              ` : ''}
-            ` : ''}
+            ${/* Payable-at-hotel fees moved to the Payment section so customers
+                see them next to total/deposit/balance. The accordion keeps
+                check-in/out times and Good-to-know notes since those are
+                informational, not financial. */ ''}
 
             ${importantInfo.length ? `
               <div class="tgm-subhead">${esc(c.labels?.goodToKnow || 'Good to know')}</div>
