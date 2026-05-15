@@ -1,5 +1,5 @@
 /* ============================================================
-   Travelgenix Widget Editor — Unified Shell JS v1.1.1
+   Travelgenix Widget Editor — Unified Shell JS v1.2.0
    Source of truth: /editor-shell-spec.md
 
    Loaded by every editor via:
@@ -39,7 +39,15 @@
    ── v1.1.1 (May 2026) ──
    Fix: doSave() now sends credentials:'include' so cookie-authed users
    (unified Travelgenix SSO) can save without being asked to log in again.
-   Editor-side fetches still need the same fix in a separate sweep.
+
+   ── v1.2.0 (May 2026) ──
+   Fix: Global fetch interceptor auto-attaches credentials:'include' to
+   any same-origin /api/* request, unless the caller already specified a
+   credentials value. Fixes the ~30 fetch sites across editors that
+   pre-date the cookie auth migration and would otherwise 401. Scope is
+   narrow by design — see the comment block at the top of the IIFE for
+   the rules. Future cleanup: when every fetch site is updated with
+   explicit credentials, this interceptor can be removed safely.
    ============================================================ */
 
 (function () {
@@ -65,6 +73,67 @@
   let saveDirty = false;
   let saveTimer = null;
   let activeTab = 'design';
+
+  // ============================================================
+  // GLOBAL FETCH INTERCEPTOR — auto-attach cookie credentials
+  // ============================================================
+  //
+  // Why this exists:
+  //
+  // The widget suite was migrated from Bearer-token auth (localStorage) to
+  // cookie auth (HttpOnly cookie set by /api/auth/sso on .travelify.io).
+  // Cookies are NOT sent on fetch() requests by default — the caller must
+  // opt in via { credentials: 'include' }. The codebase has ~30 fetch sites
+  // across editors and helper code that pre-date the migration and call
+  // fetch() without that option. Each one is a silent 401 for cookie users.
+  //
+  // Rather than edit 30 files, this wrapper intercepts every fetch() call
+  // made from any editor and, if the URL points at a same-origin /api/...
+  // endpoint, adds credentials:'include' unless the caller already specified
+  // a value for credentials.
+  //
+  // Scope rules (DELIBERATELY NARROW):
+  //   - Only same-origin requests (skip cross-origin like fonts.googleapis.com,
+  //     cdnjs.cloudflare.com, id.travelify.io — they have their own policies)
+  //   - Only URLs whose path starts with /api/
+  //   - Never override an explicit credentials value
+  //   - Idempotent — won't double-wrap if the shell loads twice
+  //
+  // Future cleanup: when every fetch site is updated to explicit
+  // credentials:'include', delete this block. Editors will still work.
+  // Look for window.fetch.__tgseWrapped to identify the wrapped state.
+  //
+  if (typeof window !== 'undefined' && window.fetch && !window.fetch.__tgseWrapped) {
+    const originalFetch = window.fetch.bind(window);
+
+    function shouldAttachCredentials(input) {
+      try {
+        // Resolve to an absolute URL so origin compare is reliable. Accepts
+        // string URLs, Request objects, or relative paths.
+        const urlStr = (input && typeof input === 'object' && 'url' in input)
+          ? input.url
+          : String(input);
+        const url = new URL(urlStr, window.location.href);
+        if (url.origin !== window.location.origin) return false;
+        return url.pathname.startsWith('/api/');
+      } catch {
+        return false;
+      }
+    }
+
+    const wrapped = function tgseFetch(input, init) {
+      if (shouldAttachCredentials(input)) {
+        // Respect a caller-specified credentials value (including 'omit'
+        // if someone deliberately opts out).
+        if (!init || init.credentials === undefined) {
+          init = Object.assign({}, init || {}, { credentials: 'include' });
+        }
+      }
+      return originalFetch(input, init);
+    };
+    wrapped.__tgseWrapped = true;
+    window.fetch = wrapped;
+  }
 
   // ============================================================
   // COOKIE-BASED SESSION (NEW UNIFIED AUTH)
@@ -921,7 +990,7 @@
     getCurrentUser,
     mountFontPicker,
     FONTS,
-    version: '1.1.1',
+    version: '1.2.0',
   };
 
 })();
