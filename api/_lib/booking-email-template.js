@@ -33,6 +33,8 @@
 //  truth; the email is the friendly summary.
 // =============================================================================
 
+import { encrypt } from '../_crypto.js';
+
 // One font stack used everywhere. -apple-system maps to SF Pro on macOS/iOS,
 // BlinkMacSystemFont keeps Chrome on Mac happy, Segoe UI is Windows, Roboto
 // is Android. Each is a clean professional UI font on its native platform.
@@ -88,6 +90,40 @@ function formatMoney(amount, currency) {
   } catch {
     return `£${amount.toFixed(2)}`;
   }
+}
+
+/**
+ * Mirror of widget-mybooking.js resolveTotalLabel. Kept in sync so the
+ * email Total line reads the same as the widget the customer just used.
+ *
+ * Tiered logic (in order of precedence):
+ *   1. Accommodation present  → "Total holiday cost"
+ *   2. Flights only / mixed   → "Total flight cost"
+ *   3. Single product type    → product-specific label
+ *   4. Mixed / unknown        → "Total cost"
+ */
+function resolveTotalLabel(items) {
+  if (!Array.isArray(items) || items.length === 0) return 'Total cost';
+  const products = new Set(items.map(i => i?.product).filter(Boolean));
+  if (products.has('Accommodation')) return 'Total holiday cost';
+  if (products.has('Flights')) return 'Total flight cost';
+  if (products.size === 1) {
+    const only = products.values().next().value;
+    const map = {
+      AirportExtras:   'Total cost',
+      Tickets:         'Total ticket cost',
+      Ticket:          'Total ticket cost',
+      CarHire:         'Total car hire cost',
+      CarRental:       'Total car hire cost',
+      Transfer:        'Total transfer cost',
+      Transfers:       'Total transfer cost',
+      Package:         'Total package cost',
+      PackageHoliday:  'Total package cost',
+      Insurance:       'Total insurance cost',
+    };
+    return map[only] || 'Total cost';
+  }
+  return 'Total cost';
 }
 
 function addDays(iso, days) {
@@ -199,6 +235,7 @@ function buildPaymentInfo(order) {
  * @param {string} [opts.supportEmail]
  * @param {string} [opts.supportPhone]
  * @param {string} [opts.orderRef]      - Customer-typed booking ref used as final fallback
+ * @param {string} [opts.baseUrl]       - Origin for building /api/doc-redirect links (e.g. "https://tg-widgets.vercel.app")
  *
  * @returns {{subject: string, html: string, text: string}}
  */
@@ -211,6 +248,7 @@ export function renderBookingEmail(opts) {
     supportEmail,
     supportPhone,
     orderRef,
+    baseUrl,
   } = opts;
 
   const primary = colors.primary || '#1B2B5B';
@@ -338,11 +376,12 @@ export function renderBookingEmail(opts) {
   let paymentHtml = '';
   if (payment) {
     const rows = [];
+    const totalLabel = resolveTotalLabel(order?.items);
 
     rows.push(`
       <tr>
         <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;font:600 15px/1.6 ${FONT};color:#0f172a;">
-          Total holiday cost
+          ${escapeHtml(totalLabel)}
         </td>
         <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;font:700 18px/1.4 ${FONT};color:#0f172a;">
           ${escapeHtml(formatMoney(payment.total, payment.currency))}
@@ -379,6 +418,72 @@ export function renderBookingEmail(opts) {
           </td>
         </tr>
       `);
+    }
+
+    // On-arrival fees — surfaces in-resort fees (city tax, resort fees,
+    // tourist tax, etc) inside the payment block instead of leaving them
+    // hidden in the booking detail. A customer should never arrive at a
+    // hotel and be hit with a charge they hadn't been warned about.
+    //
+    // Data shape mirrors the widget: prefer itemised payAtLocation if
+    // available, otherwise fall back to a single inResortFees total. Same
+    // safety rule as the widget — skip any line with no name AND no
+    // description, never fabricate a fee description.
+    const accPricing = acc?.pricing;
+    const inResortFees = accPricing?.inResortFees;
+    const payAtLocationLines = (accPricing?.payAtLocation || [])
+      .filter(line => line.name || line.description);
+
+    if (payAtLocationLines.length > 0 || inResortFees) {
+      // Visual separator before the on-arrival block — distinct treatment
+      // (amber accent, dashed top border) so a customer's eye catches it
+      // even when scanning the email quickly.
+      const onArrivalRows = [];
+      onArrivalRows.push(`
+        <tr>
+          <td colspan="2" style="padding:16px 0 8px 0;border-top:1px dashed #cbd5e1;font:600 11px/1.4 ${FONT};color:#b45309;letter-spacing:.04em;text-transform:uppercase;">
+            Also payable on arrival
+          </td>
+        </tr>
+      `);
+      if (payAtLocationLines.length > 0) {
+        payAtLocationLines.forEach(line => {
+          const label = line.name || line.description;
+          const subLabel = (line.description && line.description !== line.name) ? line.description : '';
+          const hasPrice = typeof line.unitPrice === 'number';
+          const amount = hasPrice ? (line.unitPrice || 0) * (line.qty || 1) : null;
+          onArrivalRows.push(`
+            <tr>
+              <td style="padding:8px 0;font:400 15px/1.6 ${FONT};color:#64748b;">
+                ${escapeHtml(label)}
+                ${subLabel ? `<div style="font:400 12px/1.4 ${FONT};color:#94a3b8;margin-top:2px;">${escapeHtml(subLabel)}</div>` : ''}
+              </td>
+              <td style="padding:8px 0;text-align:right;font:600 15px/1.6 ${FONT};color:#0f172a;vertical-align:top;">
+                ${amount != null ? escapeHtml(formatMoney(amount, accPricing.currency || payment.currency)) : '—'}
+              </td>
+            </tr>
+          `);
+        });
+      } else if (inResortFees) {
+        onArrivalRows.push(`
+          <tr>
+            <td style="padding:8px 0;font:400 15px/1.6 ${FONT};color:#64748b;">
+              Resort fees
+            </td>
+            <td style="padding:8px 0;text-align:right;font:600 15px/1.6 ${FONT};color:#0f172a;">
+              ${escapeHtml(formatMoney(inResortFees, accPricing.currency || payment.currency))}
+            </td>
+          </tr>
+        `);
+      }
+      onArrivalRows.push(`
+        <tr>
+          <td colspan="2" style="padding:4px 0 4px 0;font:400 12px/1.5 ${FONT};color:#94a3b8;">
+            Paid directly to the hotel at check-in. Not included in your holiday cost above.
+          </td>
+        </tr>
+      `);
+      rows.push(...onArrivalRows);
     }
 
     paymentHtml = `
@@ -459,6 +564,39 @@ export function renderBookingEmail(opts) {
   const safeDocs = docList
     .filter(d => d && typeof d.url === 'string' && isSafeDocUrl(d.url));
 
+  // Wrap each document URL through our /api/doc-redirect endpoint.
+  //
+  // Why: clicking a Travelify document URL directly from an email fails
+  // for DOC/DOCX (Travelify's host rejects the request when the referrer
+  // chain comes from a mail provider). Going via our redirect means the
+  // user's browser navigates from their mail client to tg-widgets.vercel.app
+  // first, then 302s to Travelify with our origin as referrer — which
+  // Travelify accepts (it's the same path the widget itself uses).
+  //
+  // The redirect token is AES-256-GCM encrypted so it can't be tampered
+  // with or used as an open-redirector vector. We embed an expiry (90
+  // days from send) inside the encrypted payload — even if the token
+  // leaks, it dies on its own.
+  //
+  // Fallback: if encryption fails (e.g. TG_ENCRYPTION_KEY missing in a
+  // non-prod environment) OR no baseUrl was passed, we fall back to the
+  // raw Travelify URL. The DOC/DOCX issue returns but at least the email
+  // sends — better than a broken render.
+  const buildDocLink = (url) => {
+    if (!baseUrl) return url;
+    try {
+      const expiresAt = Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60); // 90 days
+      const token = encrypt(JSON.stringify({ url, exp: expiresAt }));
+      // Use encodeURIComponent on the token because base64 contains
+      // characters (+, /, =) that have special meaning in URL query strings.
+      return `${baseUrl}/api/doc-redirect?t=${encodeURIComponent(token)}`;
+    } catch (err) {
+      // Soft fail — see comment above.
+      console.warn('Email template: doc redirect token encryption failed, falling back to direct URL:', err.message);
+      return url;
+    }
+  };
+
   const fmtBytes = (n) => {
     if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) return '';
     if (n < 1024) return `${n} B`;
@@ -478,17 +616,17 @@ export function renderBookingEmail(opts) {
                 const extLabel = (d.ext || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
                 const sizeLabel = fmtBytes(typeof d.size === 'number' ? d.size : 0);
                 const metaBits = [extLabel || 'FILE', sizeLabel].filter(Boolean).join(' · ');
-                const url = d.url; // already https-vetted above
+                const url = buildDocLink(d.url); // wraps through /api/doc-redirect
                 const isLast = i === safeDocs.length - 1;
                 return `
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
                     <tr>
                       <td style="padding:10px 0;">
-                        <a href="${escapeHtml(url)}" target="_blank" referrerpolicy="no-referrer-when-downgrade" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">📄 ${name}</a>
+                        <a href="${escapeHtml(url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">📄 ${name}</a>
                         ${metaBits ? `<div style="font:400 12px/1.4 ${FONT};color:#64748b;margin-top:2px;">${escapeHtml(metaBits)}</div>` : ''}
                       </td>
                       <td style="padding:10px 0;text-align:right;white-space:nowrap;">
-                        <a href="${escapeHtml(url)}" target="_blank" referrerpolicy="no-referrer-when-downgrade" style="font:500 13px/1.4 ${FONT};color:${escapeHtml(accent)};text-decoration:none;">View →</a>
+                        <a href="${escapeHtml(url)}" target="_blank" style="font:500 13px/1.4 ${FONT};color:${escapeHtml(accent)};text-decoration:none;">View →</a>
                       </td>
                     </tr>
                   </table>
@@ -517,7 +655,7 @@ export function renderBookingEmail(opts) {
 
   if (payment) {
     textParts.push('', '─── Payment ───', '');
-    textParts.push(`Total holiday cost: ${formatMoney(payment.total, payment.currency)}`);
+    textParts.push(`${resolveTotalLabel(order?.items)}: ${formatMoney(payment.total, payment.currency)}`);
     if (payment.depositPaid != null) {
       textParts.push(`Deposit paid: ${formatMoney(payment.depositPaid, payment.currency)}`);
     }
@@ -527,13 +665,34 @@ export function renderBookingEmail(opts) {
         : 'Balance due';
       textParts.push(`${dueLabel}: ${formatMoney(payment.balanceDue, payment.currency)}`);
     }
+
+    // On-arrival fees in plain-text fallback. Same rules as HTML: prefer
+    // itemised payAtLocation, fall back to inResortFees total.
+    const accPricingForText = acc?.pricing;
+    const inResortFeesForText = accPricingForText?.inResortFees;
+    const payAtLocationForText = (accPricingForText?.payAtLocation || [])
+      .filter(line => line.name || line.description);
+    const onArrivalCurrency = accPricingForText?.currency || payment.currency;
+    if (payAtLocationForText.length > 0 || inResortFeesForText) {
+      textParts.push('', 'Also payable on arrival (paid at the hotel):');
+      if (payAtLocationForText.length > 0) {
+        payAtLocationForText.forEach(line => {
+          const label = line.name || line.description;
+          const hasPrice = typeof line.unitPrice === 'number';
+          const amount = hasPrice ? (line.unitPrice || 0) * (line.qty || 1) : null;
+          textParts.push(`  - ${label}: ${amount != null ? formatMoney(amount, onArrivalCurrency) : '—'}`);
+        });
+      } else if (inResortFeesForText) {
+        textParts.push(`  - Resort fees: ${formatMoney(inResortFeesForText, onArrivalCurrency)}`);
+      }
+    }
   }
 
   if (safeDocs.length) {
     textParts.push('', '─── Your documents ───', '');
     for (const d of safeDocs) {
       const name = (d.name || 'Document').toString();
-      textParts.push(`${name}: ${d.url}`);
+      textParts.push(`${name}: ${buildDocLink(d.url)}`);
     }
   }
 
