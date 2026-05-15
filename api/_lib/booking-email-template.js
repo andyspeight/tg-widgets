@@ -105,21 +105,22 @@ function formatMoney(amount, currency) {
 function resolveTotalLabel(items) {
   if (!Array.isArray(items) || items.length === 0) return 'Total cost';
   const products = new Set(items.map(i => i?.product).filter(Boolean));
-  if (products.has('Accommodation')) return 'Total holiday cost';
+  // Packages bundle hotel + flights and read as a holiday from the
+  // customer's POV — same tier as Accommodation.
+  if (products.has('Accommodation') || products.has('Packages')) return 'Total holiday cost';
   if (products.has('Flights')) return 'Total flight cost';
   if (products.size === 1) {
     const only = products.values().next().value;
     const map = {
-      AirportExtras:   'Total cost',
-      Tickets:         'Total ticket cost',
-      Ticket:          'Total ticket cost',
-      CarHire:         'Total car hire cost',
-      CarRental:       'Total car hire cost',
-      Transfer:        'Total transfer cost',
-      Transfers:       'Total transfer cost',
-      Package:         'Total package cost',
-      PackageHoliday:  'Total package cost',
-      Insurance:       'Total insurance cost',
+      AirportExtras:       'Total cost',
+      TicketsAttractions:  'Total ticket cost',
+      Tickets:             'Total ticket cost',
+      Ticket:              'Total ticket cost',
+      CarRental:           'Total car hire cost',
+      CarHire:             'Total car hire cost',
+      Transfers:           'Total transfer cost',
+      Transfer:            'Total transfer cost',
+      Insurance:           'Total insurance cost',
     };
     return map[only] || 'Total cost';
   }
@@ -139,7 +140,7 @@ function addDays(iso, days) {
  * Returns ["Mr Andy Speight", "Mrs Lisa Speight"] etc.
  */
 function buildTravellerList(order) {
-  const accItem = order.items?.find(i => i.product === 'Accommodation');
+  const accItem = order.items?.find(i => i.product === 'Accommodation' || i.product === 'Packages');
   const candidates = order.summary?.travellers?.length
     ? order.summary.travellers
     : (accItem?.accommodation?.guests || []);
@@ -185,7 +186,7 @@ function buildFlightLine(route) {
 }
 
 function buildPaymentInfo(order) {
-  const accItem = order.items?.find(i => i.product === 'Accommodation');
+  const accItem = order.items?.find(i => i.product === 'Accommodation' || i.product === 'Packages');
   const summary = order.summary || {};
   const pricing = accItem?.accommodation?.pricing;
   const currency = pricing?.currency || order.currency || 'GBP';
@@ -257,9 +258,17 @@ export function renderBookingEmail(opts) {
   const logoUrl = brand?.logoUrl;
   const footerLine = brand?.footerLine;
 
-  const accItem = order?.items?.find(i => i.product === 'Accommodation');
-  const flightItem = order?.items?.find(i => i.product === 'Flights');
+  const accItem = order?.items?.find(i => i.product === 'Accommodation' || i.product === 'Packages');
+  const flightItem = order?.items?.find(i => i.product === 'Flights' || i.product === 'Packages');
   const extraItem = order?.items?.find(i => i.product === 'AirportExtras');
+  const transferItem = order?.items?.find(i => i.product === 'Transfers');
+  const carRentalItem = order?.items?.find(i => i.product === 'CarRental');
+  const ticketsItem = order?.items?.find(i => i.product === 'TicketsAttractions');
+  // ATOL operator metadata for Package bookings (Jet2 Holidays, EveryHoliday,
+  // TUI etc). Required disclosure: the operator's name must be visible on
+  // the customer-facing confirmation.
+  const packageItem = order?.items?.find(i => i.product === 'Packages');
+  const packageInfo = packageItem?.package || null;
   const acc = accItem?.accommodation;
 
   const customerFirstName = (order?.customerFirstname || '').trim();
@@ -276,10 +285,26 @@ export function renderBookingEmail(opts) {
   const bookingReference = accItem?.bookingReference
     || flightItem?.bookingReference
     || extraItem?.bookingReference
+    || transferItem?.bookingReference
+    || carRentalItem?.bookingReference
+    || ticketsItem?.bookingReference
+    || packageItem?.bookingReference
     || (orderRef ? String(orderRef).toUpperCase() : '');
 
-  const destinationCity = acc?.location?.city || '';
-  const destinationCountry = acc?.location?.country || '';
+  // Destination city for subject line and preheader. Falls back through
+  // product types so non-hotel bookings still get a meaningful destination:
+  //   1. Hotel city
+  //   2. Tickets location city (e.g. 'Dubai')
+  //   3. Transfer dropoff city (last word of the location name)
+  //   4. Car rental city (typically from pickup location's address)
+  const destinationCity = acc?.location?.city
+    || ticketsItem?.ticketsAttractions?.location?.city
+    || (transferItem?.transfers?.outDropoff?.name || '').split(',')[0].trim()
+    || (carRentalItem?.carRental?.pickup?.address1 || carRentalItem?.carRental?.pickup?.name || '').split(',')[0].trim()
+    || '';
+  const destinationCountry = acc?.location?.country
+    || ticketsItem?.ticketsAttractions?.location?.country
+    || '';
   const hotelName = acc?.name || '';
 
   const checkin = accItem?.startDate || order?.summary?.earliestStart || '';
@@ -300,6 +325,16 @@ export function renderBookingEmail(opts) {
 
   if (bookingReference) {
     summaryRows.push({ label: 'Booking reference', value: bookingReference });
+  }
+
+  // ATOL operator disclosure — required on any ATOL-protected package sale.
+  // Shows next to the booking reference so it's prominent. Format:
+  //   ATOL protected · Operated by EveryHoliday
+  if (packageInfo && (packageInfo.atolProtected || packageInfo.operator?.name)) {
+    const parts = [];
+    if (packageInfo.atolProtected) parts.push('ATOL Protected');
+    if (packageInfo.operator?.name) parts.push(`Operated by ${packageInfo.operator.name}`);
+    if (parts.length) summaryRows.push({ label: 'Holiday protection', value: parts.join(' · ') });
   }
 
   if (travellers.length > 0) {
@@ -354,6 +389,60 @@ export function renderBookingEmail(opts) {
         summaryRows.push({ label: 'Return flight', value: `${retDate}${returnLine}` });
       }
     }
+  }
+
+  // Transfers — short summary line. Multiple transfers (rare) each get
+  // their own row. Renders as "From → To · Outbound 15 Sep · 09:00".
+  const allTransferItems = (order?.items || []).filter(i => i.product === 'Transfers');
+  for (const tItem of allTransferItems) {
+    const tf = tItem.transfers;
+    if (!tf) continue;
+    const fromName = tf.outPickup?.name || tf.outPickup?.address1 || '';
+    const toName = tf.outDropoff?.name || tf.outDropoff?.address1 || '';
+    const route = [fromName, toName].filter(Boolean).join(' → ');
+    if (!route) continue;
+    const outDate = tf.outPickup?.dateTime ? formatShortDate(tf.outPickup.dateTime) : '';
+    const outTime = tf.outPickup?.dateTime ? formatTime(tf.outPickup.dateTime) : '';
+    const dateBit = [outDate, outTime].filter(Boolean).join(' · ');
+    summaryRows.push({
+      label: tf.returnPickup?.dateTime ? 'Transfer (return)' : 'Transfer',
+      value: dateBit ? `${dateBit} · ${route}` : route,
+    });
+  }
+
+  // Car Hire — vehicle name, pickup date/time and location.
+  const allCarRentalItems = (order?.items || []).filter(i => i.product === 'CarRental');
+  for (const crItem of allCarRentalItems) {
+    const cr = crItem.carRental;
+    if (!cr) continue;
+    const vehicle = cr.name || cr.className || 'Hire car';
+    const pickupDate = cr.pickup?.dateTime ? formatShortDate(cr.pickup.dateTime) : '';
+    const pickupTime = cr.pickup?.dateTime ? formatTime(cr.pickup.dateTime) : '';
+    const dropoffDate = cr.dropoff?.dateTime ? formatShortDate(cr.dropoff.dateTime) : '';
+    const where = cr.pickup?.name || '';
+    const bits = [pickupDate, pickupTime].filter(Boolean).join(' · ');
+    const dur = (pickupDate && dropoffDate && pickupDate !== dropoffDate) ? ` → ${dropoffDate}` : '';
+    summaryRows.push({
+      label: 'Car hire',
+      value: `${vehicle}${bits ? ` · ${bits}${dur}` : ''}${where ? ` · ${where}` : ''}`,
+    });
+  }
+
+  // Tickets & Attractions — name + scheduled date/time + city.
+  const allTicketsItems = (order?.items || []).filter(i => i.product === 'TicketsAttractions');
+  for (const tkItem of allTicketsItems) {
+    const tk = tkItem.ticketsAttractions;
+    if (!tk) continue;
+    const name = tk.name || tk.selectedOption?.name || 'Ticket';
+    const sched = tk.selectedOption?.scheduledDateTime || tkItem.startDate;
+    const schedDate = sched ? formatShortDate(sched) : '';
+    const schedTime = sched ? formatTime(sched) : '';
+    const city = tk.location?.city || '';
+    const bits = [schedDate, schedTime].filter(Boolean).join(' · ');
+    summaryRows.push({
+      label: tk.ticketType || 'Tickets',
+      value: `${name}${bits ? ` · ${bits}` : ''}${city ? ` · ${city}` : ''}`,
+    });
   }
 
   // Summary row HTML — every row uses the same body + caption sizes. No mono.
@@ -747,7 +836,7 @@ export function renderBookingEmail(opts) {
               ${greeting}
             </h1>
             <p style="margin:8px 0 0 0;font:400 15px/1.6 ${FONT};color:#475569;">
-              Your booking is confirmed${destinationCity ? ` and your ${escapeHtml(destinationCity)} trip is locked in` : ''}. The essentials are below — and the full A4 confirmation pack is attached as a PDF for your records.
+              Your booking is confirmed${destinationCity && acc ? ` and your ${escapeHtml(destinationCity)} trip is locked in` : ''}. The essentials are below — and the full A4 confirmation pack is attached as a PDF for your records.
             </p>
           </td>
         </tr>
