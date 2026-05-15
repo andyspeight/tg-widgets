@@ -2495,11 +2495,29 @@
 
     // If we're already signed in when the page loads, init() now;
     // otherwise the shell shows its login overlay and we'll init() on success.
-    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
-      init();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      // v1.1 shell — wait for cookie auth to resolve before deciding
+      // whether to init or stay hidden. Prevents the blank-page race
+      // where a signed-in user lands on the editor before /api/auth/me
+      // has settled, isLoggedIn() returns false, and the editor hides
+      // itself forever.
+      window.tgse.onReady(() => {
+        if (window.tgse.isLoggedIn()) {
+          init();
+        } else {
+          // Hide the editor surface until login succeeds
+          $('#editor').hidden = true;
+        }
+      });
     } else {
-      // Hide the editor surface until login succeeds
-      $('#editor').hidden = true;
+      // Defensive fallback: if an older shell is somehow loaded, keep
+      // the legacy synchronous behaviour so we don't blow up entirely.
+      if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+        init();
+      } else {
+        // Hide the editor surface until login succeeds
+        $('#editor').hidden = true;
+      }
     }
   })();
   </script>
