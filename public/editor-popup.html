@@ -1415,10 +1415,16 @@
     }
   });
 
-  /* ── Boot ──────────────────────────────────────────────── */
+  /* ── Boot — wait for shell auth resolution (v1.1 shell) ── */
   document.addEventListener('DOMContentLoaded', () => {
-    if (tgse.isLoggedIn()) loadFromUrl();
-    // Otherwise the shell shows the login overlay; onLoginSuccess calls loadFromUrl.
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) loadFromUrl();
+        // Otherwise the shell shows the login overlay; onLoginSuccess calls loadFromUrl.
+      });
+    } else {
+      if (tgse.isLoggedIn()) loadFromUrl();
+    }
   });
 </script>
 
