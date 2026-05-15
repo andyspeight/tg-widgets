@@ -2544,10 +2544,29 @@
       },
     });
 
-    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
-      init();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      // v1.1 shell — wait for cookie auth to resolve before deciding
+      // whether to init or stay hidden. Prevents the blank-page race
+      // where a signed-in user lands on the editor before /api/auth/me
+      // has settled, isLoggedIn() returns false, and the editor hides
+      // itself forever.
+      window.tgse.onReady(() => {
+        if (window.tgse.isLoggedIn()) {
+          init();
+        } else {
+          $('#editor').hidden = true;
+          // Shell has already shown its login overlay (or redirected
+          // to /signin.html). Nothing else to do.
+        }
+      });
     } else {
-      $('#editor').hidden = true;
+      // Defensive fallback: if an older shell is somehow loaded, keep
+      // the legacy synchronous behaviour so we don't blow up entirely.
+      if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+        init();
+      } else {
+        $('#editor').hidden = true;
+      }
     }
   })();
   </script>
