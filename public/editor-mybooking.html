@@ -1389,9 +1389,14 @@ import { renderEmailHtml } from '/_email-template.js';
   }
 
   // Boot only if logged in. If not, the shell's overlay is up — boot will fire
-  // via onLoginSuccess after sign-in. If the shell isn't loaded, ensureAuth()
-  // bounces to dashboard.
-  if (window.tgse && typeof window.tgse.isLoggedIn === 'function') {
+  // via onLoginSuccess after sign-in. If the shell isn't loaded, fall through
+  // to bootstrap() directly. (v1.1 shell — wait for cookie auth resolution.)
+  if (window.tgse && typeof window.tgse.onReady === 'function') {
+    window.tgse.onReady(() => {
+      if (window.tgse.isLoggedIn()) bootstrap();
+      // else shell shows login overlay; we'll boot via onLoginSuccess
+    });
+  } else if (window.tgse && typeof window.tgse.isLoggedIn === 'function') {
     if (window.tgse.isLoggedIn()) bootstrap();
     // else shell shows login overlay; we'll boot via onLoginSuccess
   } else {
