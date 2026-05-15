@@ -1047,14 +1047,23 @@
      Boot
      ========================================================= */
   document.addEventListener('DOMContentLoaded', () => {
-    if (tgse.isLoggedIn()) {
-      loadFromUrl();
+    // v1.1 shell — wait for cookie auth to resolve before deciding whether
+    // to load the saved widget or show the default state.
+    const boot = () => {
+      if (tgse.isLoggedIn()) {
+        loadFromUrl();
+      } else {
+        // Shell shows login overlay; onLoginSuccess fires loadFromUrl()
+        // Render the empty default once so something shows.
+        document.getElementById('app').removeAttribute('hidden');
+        syncUI();
+        render();
+      }
+    };
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(boot);
     } else {
-      // Shell shows login overlay; onLoginSuccess fires loadFromUrl()
-      // Render the empty default once so something shows.
-      document.getElementById('app').removeAttribute('hidden');
-      syncUI();
-      render();
+      boot();
     }
   });
 </script>
