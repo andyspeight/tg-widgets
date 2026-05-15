@@ -148,6 +148,9 @@
     leaf:    'M11 20A7 7 0 0 1 4 13c0-2 1-4 3-6 1-1 2-3 4-5l1 4c2-1 4 1 5 3 1 3 0 5-1 6-2 2-4 5-5 5z',
     eye:     'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
     x:       'M18 6L6 18M6 6l12 12',
+    car:     'M3 17h2l1 4h12l1-4h2v-7l-2-5H5L3 10zM7 17v2M17 17v2M5 14h14',
+    van:     'M3 17h18M3 17V8a1 1 0 0 1 1-1h11l4 5h1a1 1 0 0 1 1 1v4M7 17v2M17 17v2M15 7v5h5',
+    ticket:  'M3 7v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2zM13 5v14',
   };
   function svg(p, sw, size) {
     sw = sw || 2;
@@ -205,7 +208,11 @@
 
     const products = new Set(items.map(i => i?.product).filter(Boolean));
 
-    if (products.has('Accommodation')) {
+    // Holiday tier: anything with accommodation OR a package counts as a
+    // holiday. ATOL package bookings (Jet2 Holidays, EveryHoliday, TUI etc)
+    // are sold as a single 'Packages' item that bundles hotel + flights;
+    // from the customer's POV that's just a holiday.
+    if (products.has('Accommodation') || products.has('Packages')) {
       return labels.totalHoliday || labels.totalCost || 'Total holiday cost';
     }
     if (products.has('Flights')) {
@@ -217,16 +224,15 @@
       // Map of known single-product labels. Anything not listed falls
       // through to the generic "Total cost".
       const singleProductMap = {
-        AirportExtras:   labels.totalExtras   || 'Total cost',
-        Tickets:         labels.totalTickets  || 'Total ticket cost',
-        Ticket:          labels.totalTickets  || 'Total ticket cost',
-        CarHire:         labels.totalCarHire  || 'Total car hire cost',
-        CarRental:       labels.totalCarHire  || 'Total car hire cost',
-        Transfer:        labels.totalTransfer || 'Total transfer cost',
-        Transfers:       labels.totalTransfer || 'Total transfer cost',
-        Package:         labels.totalPackage  || 'Total package cost',
-        PackageHoliday:  labels.totalPackage  || 'Total package cost',
-        Insurance:       labels.totalInsurance|| 'Total insurance cost',
+        AirportExtras:       labels.totalExtras   || 'Total cost',
+        TicketsAttractions:  labels.totalTickets  || 'Total ticket cost',
+        Tickets:             labels.totalTickets  || 'Total ticket cost',
+        Ticket:              labels.totalTickets  || 'Total ticket cost',
+        CarRental:           labels.totalCarHire  || 'Total car hire cost',
+        CarHire:             labels.totalCarHire  || 'Total car hire cost',
+        Transfers:           labels.totalTransfer || 'Total transfer cost',
+        Transfer:            labels.totalTransfer || 'Total transfer cost',
+        Insurance:           labels.totalInsurance|| 'Total insurance cost',
       };
       return singleProductMap[only] || labels.totalCost || 'Total cost';
     }
@@ -465,11 +471,22 @@
     @keyframes tgm-zoom { to { transform: scale(1.1); } }
     .tgm-hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,23,42,.10) 0%, rgba(15,23,42,.20) 40%, rgba(15,23,42,.85) 100%); }
     .tgm-hero-content { position: absolute; inset: 0; padding: 32px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; }
-    .tgm-hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .tgm-hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .tgm-hero-top > * { flex-shrink: 0; }
     .tgm-confirmed { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(16,185,129,.95); backdrop-filter: blur(8px); border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.3); }
     .tgm-confirmed svg { width: 13px; height: 13px; stroke-width: 3; }
     .tgm-ref { padding: 6px 12px; background: rgba(15,23,42,.65); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.18); border-radius: var(--tgm-radius-md); font-size: 11px; font-weight: 500; color: rgba(255,255,255,.92); letter-spacing: .04em; box-shadow: 0 2px 8px rgba(15,23,42,.25); }
     .tgm-ref strong { color: #fff; margin-left: 8px; font-weight: 700; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+
+    /* ATOL / operator badge — surfaced on the hero for Packages bookings.
+       Required trust signal: when an agency sells an ATOL-protected package
+       (Jet2 Holidays, EveryHoliday, TUI etc) the operator's name must be
+       visible to the customer. Indigo/gold treatment reads as a regulatory
+       badge rather than a generic chip. */
+    .tgm-atol { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: linear-gradient(135deg, rgba(67,56,202,.95), rgba(91,33,182,.95)); border: 1px solid rgba(255,255,255,.18); border-radius: var(--tgm-radius-md); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #fff; box-shadow: 0 2px 8px rgba(67,56,202,.3); }
+    .tgm-atol svg { width: 13px; height: 13px; stroke-width: 2.5; color: #FCD34D; }
+    .tgm-atol .tgm-atol-op { color: rgba(255,255,255,.92); font-weight: 500; text-transform: none; letter-spacing: .02em; margin-left: 4px; }
+    .tgm-atol .tgm-atol-op::before { content: "·"; margin-right: 6px; color: rgba(255,255,255,.5); }
     .tgm-hero-rating { display: inline-flex; gap: 2px; align-items: center; margin-bottom: 12px; }
     .tgm-hero-rating svg { width: 14px; height: 14px; fill: #FFD166; color: #FFD166; }
     .tgm-review-chip { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 3px 10px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25); border-radius: 9999px; font-size: 12px; font-weight: 500; color: #fff; backdrop-filter: blur(4px); }
@@ -816,6 +833,8 @@
     .tgm-root.tgm-narrow .tgm-hero-thumbs { display: none; }
     .tgm-root.tgm-narrow .tgm-hero-rating { gap: 6px; }
     .tgm-root.tgm-narrow .tgm-review-chip { font-size: 11px; padding: 3px 8px; }
+    .tgm-root.tgm-narrow .tgm-atol { font-size: 10px; padding: 4px 10px; }
+    .tgm-root.tgm-narrow .tgm-atol .tgm-atol-op { display: none; }
 
     .tgm-root.tgm-narrow .tgm-greeting { flex-direction: column; align-items: flex-start; padding: 14px 16px; gap: 8px; }
     .tgm-root.tgm-narrow .tgm-greeting-text { font-size: 14px; line-height: 1.4; }
@@ -1253,13 +1272,341 @@
     `;
   }
 
+  // Format a duration in minutes ("360" → "6h", "90" → "1h 30m", "45" → "45m")
+  function fmtDurationMinutes(mins) {
+    if (typeof mins !== 'number' || !Number.isFinite(mins) || mins <= 0) return '';
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
+  }
+
+  // Format a location point's name (with airport IATA code in brackets if relevant)
+  // — used for transfers and car hire pickup/dropoff labels.
+  function fmtLocationLabel(p) {
+    if (!p) return '';
+    if (p.iataCode && p.onAirport) {
+      // 'Paris, France (ORY-Orly)' already contains the code; don't double it.
+      return p.name && p.name.toUpperCase().includes(p.iataCode.toUpperCase())
+        ? p.name
+        : `${p.name || ''} (${p.iataCode})`.trim();
+    }
+    return p.name || p.address1 || '';
+  }
+
+  // -------- Transfers --------
+  // Renders a transfer product card (Hoppa, Holiday Taxis, etc).
+  // Shows route, vehicle, journey time, and an expandable details section
+  // for important info / cancellation policy.
+  function renderTransferCard(item, c) {
+    const t = item.transfers;
+    if (!t) return '';
+
+    const outDate = fmtDate(t.outPickup?.dateTime, { day: 'numeric', month: 'short', year: 'numeric' });
+    const outTime = fmtTime(t.outPickup?.dateTime);
+    const returnDate = t.returnPickup?.dateTime
+      ? fmtDate(t.returnPickup.dateTime, { day: 'numeric', month: 'short', year: 'numeric' })
+      : '';
+    const returnTime = t.returnPickup?.dateTime ? fmtTime(t.returnPickup.dateTime) : '';
+
+    const fromLabel = fmtLocationLabel(t.outPickup);
+    const toLabel = fmtLocationLabel(t.outDropoff);
+
+    const importantInfo = (t.information || []).find(i => i.type === 'Generic' || /important/i.test(i.title || ''));
+    const cancelInfo = (t.information || []).find(i => i.type === 'CancelAndAmendments' || /cancel/i.test(i.title || ''));
+    const hasDetails = !!(importantInfo?.text || cancelInfo?.text);
+
+    // Occupancy / bag summary chips
+    const chips = [];
+    if (t.maxOccupancy) chips.push(`${t.maxOccupancy} ${t.maxOccupancy === 1 ? 'passenger' : 'passengers'}`);
+    if (t.bigBagAllowance) chips.push(`${t.bigBagAllowance} large ${t.bigBagAllowance === 1 ? 'bag' : 'bags'}`);
+    if (t.smallBagAllowance) chips.push(`${t.smallBagAllowance} small ${t.smallBagAllowance === 1 ? 'bag' : 'bags'}`);
+
+    return `
+      <div class="tgm-extra-card">
+        <div class="tgm-extra-head">
+          <div class="tgm-extra-icon">${svg(IC.van, 2, 22)}</div>
+          <div class="tgm-extra-info">
+            <div class="tgm-extra-kind">${esc(c.labels?.transfer || 'Transfer')}${t.type ? ' · ' + esc(t.type) : ''}</div>
+            <div class="tgm-extra-name">${esc([fromLabel, toLabel].filter(Boolean).join(' → ') || t.vehicle || 'Transfer')}</div>
+            ${t.vehicle ? `<div class="tgm-extra-sub">${esc(t.vehicle)}${t.company ? ' · ' + esc(t.company) : ''}</div>` : ''}
+          </div>
+        </div>
+        <div class="tgm-extra-meta">
+          ${outDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.outbound || 'Outbound')}:</strong> ${esc(outDate)}${outTime ? ` · ${esc(outTime)}` : ''}</span></span>` : ''}
+          ${returnDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.return || 'Return')}:</strong> ${esc(returnDate)}${returnTime ? ` · ${esc(returnTime)}` : ''}</span></span>` : ''}
+          ${t.journeyDuration ? `<span class="tgm-extra-meta-item">${svg(IC.clock, 2, 14)}<span>${esc(t.journeyDuration)}${t.journeyDistance ? ` · ${esc(t.journeyDistance)}` : ''}</span></span>` : ''}
+        </div>
+        ${chips.length ? `<div class="tgm-chips" style="margin-top:8px;">${chips.map(c => `<span class="tgm-chip">${svg(IC.check)}${esc(c)}</span>`).join('')}</div>` : ''}
+        ${hasDetails ? `
+          <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
+            <button class="tgm-collapse-trig" type="button" aria-expanded="false">
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.transferInfo || 'Important information')}</div>
+              ${svg(IC.chev)}
+            </button>
+            <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
+              ${importantInfo?.text ? `<p>${esc(importantInfo.text)}</p>` : ''}
+              ${cancelInfo?.text ? `
+                <div class="tgm-subhead">${esc(c.labels?.cancellation || 'Cancellation policy')}</div>
+                <p>${esc(cancelInfo.text)}</p>
+              ` : ''}
+            </div></div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // -------- Car Rental --------
+  // Renders a car rental card. Shows vehicle, pickup/dropoff, spec chips
+  // (transmission/seats/doors/luggage), inclusions and a collapsible info
+  // section for fuel/mileage/deposit/driver policies.
+  function renderCarRentalCard(item, c) {
+    const cr = item.carRental;
+    if (!cr) return '';
+
+    const pickupDate = fmtDate(cr.pickup?.dateTime, { day: 'numeric', month: 'short', year: 'numeric' });
+    const pickupTime = fmtTime(cr.pickup?.dateTime);
+    const dropoffDate = fmtDate(cr.dropoff?.dateTime, { day: 'numeric', month: 'short', year: 'numeric' });
+    const dropoffTime = fmtTime(cr.dropoff?.dateTime);
+    const pickupLabel = fmtLocationLabel(cr.pickup);
+    const dropoffLabel = fmtLocationLabel(cr.dropoff);
+    const sameLocation = cr.pickup?.name && cr.dropoff?.name && cr.pickup.name === cr.dropoff.name;
+
+    // Spec chips — transmission / seats / doors / luggage etc.
+    const specs = [];
+    if (cr.transmission) specs.push(cr.transmission);
+    if (cr.seats) specs.push(`${cr.seats} seats`);
+    if (cr.doors) specs.push(`${cr.doors} doors`);
+    if (cr.luggageLarge) specs.push(`${cr.luggageLarge} large ${cr.luggageLarge === 1 ? 'bag' : 'bags'}`);
+    if (cr.fuelType && cr.fuelType !== 'Unknown') specs.push(cr.fuelType);
+
+    // Inclusion codes — split PascalCase for human display. Same fallback
+    // logic as renderExtraCard. Kept inline to avoid hoisting issues.
+    const inclusionLabels = {
+      FreeCancellation: 'Free cancellation',
+      RoadsideAssistance: 'Roadside assistance',
+      LiabilityInsurance: 'Liability insurance',
+      TheftProtection: 'Theft protection',
+      UnlimitedMileage: 'Unlimited mileage',
+      CollisionDamageWaiver: 'Collision damage waiver',
+      AdditionalDriver: 'Additional driver',
+      WinterTyres: 'Winter tyres',
+      AirConditioning: 'Air conditioning',
+    };
+    const splitPascal = (s) => {
+      if (!s || typeof s !== 'string') return s;
+      const words = s.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/_+/g, ' ').trim().split(/\s+/);
+      return words.map((w, i) => {
+        if (i > 0 && /^(and|or|of|the|to|in|on|at|by|for)$/i.test(w)) return w.toLowerCase();
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+    };
+    const inclusions = (cr.inclusions || []).map(i => inclusionLabels[i] || splitPascal(i));
+
+    // Group info entries by title — Travelify sometimes duplicates entries
+    // (the sample had two 'Pickup Information' blocks). De-dupe before render.
+    const seenInfoTitles = new Set();
+    const infoEntries = (cr.information || []).filter(info => {
+      const k = (info.title || '').toLowerCase();
+      if (seenInfoTitles.has(k)) return false;
+      seenInfoTitles.add(k);
+      return true;
+    });
+
+    const cancelDesc = (cr.descriptions || []).find(d => /cancel/i.test(d.title || '') || d.type === 'CancelAndAmendments');
+    const hasDetails = infoEntries.length > 0 || !!cancelDesc?.text;
+
+    // Pay-at-location lines (booster seats etc) — shown using the same
+    // "Also payable on arrival" treatment as accommodation in-resort fees.
+    const validPayAt = (cr.payAtLocation || []).filter(p => p.name || p.description);
+
+    return `
+      <div class="tgm-extra-card">
+        <div class="tgm-extra-head">
+          <div class="tgm-extra-icon">${svg(IC.car, 2, 22)}</div>
+          <div class="tgm-extra-info">
+            <div class="tgm-extra-kind">${esc(c.labels?.carHire || 'Car hire')}${cr.className ? ' · ' + esc(cr.className) : ''}</div>
+            <div class="tgm-extra-name">${esc(cr.name || 'Hire car')}</div>
+            ${cr.rentalOperator?.name ? `<div class="tgm-extra-sub">${esc(c.labels?.suppliedBy || 'Supplied by')} ${esc(cr.rentalOperator.name)}</div>` : ''}
+          </div>
+        </div>
+        <div class="tgm-extra-meta">
+          ${pickupDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.pickup || 'Pickup')}:</strong> ${esc(pickupDate)}${pickupTime ? ` · ${esc(pickupTime)}` : ''}</span></span>` : ''}
+          ${dropoffDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.dropoff || 'Dropoff')}:</strong> ${esc(dropoffDate)}${dropoffTime ? ` · ${esc(dropoffTime)}` : ''}</span></span>` : ''}
+          ${pickupLabel ? `<span class="tgm-extra-meta-item">${svg(IC.pin, 2, 14)}<span>${esc(pickupLabel)}${(!sameLocation && dropoffLabel) ? ` → ${esc(dropoffLabel)}` : ''}</span></span>` : ''}
+        </div>
+        ${specs.length ? `<div class="tgm-chips" style="margin-top:8px;">${specs.map(s => `<span class="tgm-chip">${svg(IC.check)}${esc(s)}</span>`).join('')}</div>` : ''}
+        ${inclusions.length ? `
+          <div class="tgm-subhead" style="margin-top:12px;">${esc(c.labels?.included || 'Included')}</div>
+          <div class="tgm-chips">${inclusions.map(i => `<span class="tgm-chip">${svg(IC.check)}${esc(i)}</span>`).join('')}</div>
+        ` : ''}
+        ${validPayAt.length ? `
+          <div class="tgm-pay-onarrival" style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--tgm-border-light);">
+            <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payAtPickup || 'Also payable at pickup')}</div>
+            ${validPayAt.map(line => {
+              const label = line.name || line.description;
+              const hasPrice = typeof line.unitPrice === 'number';
+              const amount = hasPrice ? (line.unitPrice || 0) * (line.qty || 1) : null;
+              const currency = cr.pricing?.currency || item.currency || 'GBP';
+              return `
+                <div class="tgm-pay-onarrival-line">
+                  <span class="name">
+                    ${esc(label)}
+                    ${line.description && line.description !== line.name ? `<small>${esc(line.description)}</small>` : ''}
+                  </span>
+                  <span class="val">${amount != null ? esc(fmtMoney(amount, currency)) : '—'}</span>
+                </div>
+              `;
+            }).join('')}
+            <div class="tgm-pay-onarrival-note">${esc(c.labels?.payAtPickupNote || 'Paid directly to the rental desk on pickup. Not included in your booking cost above.')}</div>
+          </div>
+        ` : ''}
+        ${hasDetails ? `
+          <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
+            <button class="tgm-collapse-trig" type="button" aria-expanded="false">
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.carHireInfo || 'Important information')}</div>
+              ${svg(IC.chev)}
+            </button>
+            <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
+              ${infoEntries.map(info => `
+                ${info.title ? `<div class="tgm-subhead">${esc(info.title)}</div>` : ''}
+                <p>${esc(info.text)}</p>
+              `).join('')}
+              ${cancelDesc?.text ? `
+                <div class="tgm-subhead">${esc(c.labels?.cancellation || 'Cancellation policy')}</div>
+                <p>${esc(cancelDesc.text)}</p>
+              ` : ''}
+            </div></div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // -------- Tickets & Attractions --------
+  // Renders a ticket / attraction / tour card. Shows event name, scheduled
+  // date+time, location, duration, and collapsible details (description,
+  // highlights, meeting point, etc).
+  function renderTicketsCard(item, c) {
+    const t = item.ticketsAttractions;
+    if (!t) return '';
+
+    const opt = t.selectedOption;
+    const scheduledDate = opt?.scheduledDateTime
+      ? fmtDate(opt.scheduledDateTime, { day: 'numeric', month: 'short', year: 'numeric' })
+      : (item.startDate ? fmtDate(item.startDate, { day: 'numeric', month: 'short', year: 'numeric' }) : '');
+    const scheduledTime = opt?.scheduledDateTime ? fmtTime(opt.scheduledDateTime) : '';
+    const durationLabel = fmtDurationMinutes(t.minDuration === t.maxDuration ? t.minDuration : (t.maxDuration || t.minDuration));
+
+    const locationLabel = t.location?.city
+      ? [t.location.city, t.location.country].filter(Boolean).join(', ')
+      : '';
+
+    // Pick the most useful descriptions to show. Travelify sends many — we
+    // prioritise short useful ones over the long marketing blurb.
+    const descByTitle = (title) => (t.descriptions || []).find(d => (d.title || '').toLowerCase() === title.toLowerCase());
+    const descByPattern = (re) => (t.descriptions || []).find(d => re.test(d.title || ''));
+    const overview = descByTitle('Description')?.text || descByTitle('About')?.text || '';
+    const highlights = descByTitle('Highlights')?.text || '';
+    const included = descByTitle('Included')?.text || '';
+    const notIncluded = descByTitle('Not Included')?.text || descByTitle('Not included')?.text || '';
+    const meetingPoint = descByPattern(/meeting\s*point/i)?.text || '';
+    const cancelPolicy = descByPattern(/cancel/i)?.text || '';
+    const languages = descByPattern(/language/i)?.text || '';
+
+    const hasDetails = overview || highlights || included || notIncluded || meetingPoint || cancelPolicy || languages;
+
+    // Feature labels — same dictionary pattern as accommodation extras.
+    const featureLabels = {
+      SmartphoneTickets: 'Smartphone ticket',
+      InstantTicket: 'Instant confirmation',
+      CovidSecure: 'Covid-secure',
+      SkipTheLine: 'Skip the line',
+      MobileVoucher: 'Mobile voucher',
+      InstantConfirmation: 'Instant confirmation',
+      PrintAtHome: 'Print at home',
+    };
+    const splitPascal = (s) => {
+      if (!s || typeof s !== 'string') return s;
+      const words = s.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/_+/g, ' ').trim().split(/\s+/);
+      return words.map((w, i) => {
+        if (i > 0 && /^(and|or|of|the|to|in|on|at|by|for)$/i.test(w)) return w.toLowerCase();
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+    };
+    const features = (t.features || []).map(f => featureLabels[f] || splitPascal(f));
+
+    return `
+      <div class="tgm-extra-card">
+        <div class="tgm-extra-head">
+          <div class="tgm-extra-icon">${svg(IC.ticket, 2, 22)}</div>
+          <div class="tgm-extra-info">
+            <div class="tgm-extra-kind">${esc(t.ticketType || c.labels?.ticket || 'Ticket')}${opt?.subOption?.name ? ' · ' + esc(opt.subOption.name) : ''}</div>
+            <div class="tgm-extra-name">${esc(t.name || 'Booking')}</div>
+            ${locationLabel ? `<div class="tgm-extra-sub">${esc(locationLabel)}</div>` : ''}
+          </div>
+        </div>
+        <div class="tgm-extra-meta">
+          ${scheduledDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span>${esc(scheduledDate)}${scheduledTime ? ` · ${esc(scheduledTime)}` : ''}</span></span>` : ''}
+          ${durationLabel ? `<span class="tgm-extra-meta-item">${svg(IC.clock, 2, 14)}<span>${esc(durationLabel)}</span></span>` : ''}
+          ${(t.guests && t.guests.length) ? `<span class="tgm-extra-meta-item">${svg(IC.users, 2, 14)}<span>${esc(t.guests.length)} ${t.guests.length === 1 ? 'guest' : 'guests'}</span></span>` : ''}
+        </div>
+        ${features.length ? `<div class="tgm-chips" style="margin-top:8px;">${features.map(f => `<span class="tgm-chip">${svg(IC.check)}${esc(f)}</span>`).join('')}</div>` : ''}
+        ${hasDetails ? `
+          <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
+            <button class="tgm-collapse-trig" type="button" aria-expanded="false">
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.ticketDetails || 'Details')}</div>
+              ${svg(IC.chev)}
+            </button>
+            <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
+              ${overview ? `<p>${esc(overview.slice(0, 800))}${overview.length > 800 ? '…' : ''}</p>` : ''}
+              ${highlights ? `
+                <div class="tgm-subhead">${esc(c.labels?.highlights || 'Highlights')}</div>
+                <p>${esc(highlights.replace(/<br\s*\/?>/gi, '\n').slice(0, 600))}</p>
+              ` : ''}
+              ${included ? `
+                <div class="tgm-subhead">${esc(c.labels?.included || 'Included')}</div>
+                <p>${esc(included.replace(/<br\s*\/?>/gi, '\n').slice(0, 600))}</p>
+              ` : ''}
+              ${notIncluded ? `
+                <div class="tgm-subhead">${esc(c.labels?.notIncluded || 'Not included')}</div>
+                <p>${esc(notIncluded.replace(/<br\s*\/?>/gi, '\n').slice(0, 600))}</p>
+              ` : ''}
+              ${meetingPoint ? `
+                <div class="tgm-subhead">${esc(c.labels?.meetingPoint || 'Meeting point')}</div>
+                <p>${esc(meetingPoint.slice(0, 600))}</p>
+              ` : ''}
+              ${languages ? `
+                <div class="tgm-subhead">${esc(c.labels?.languages || 'Languages')}</div>
+                <p>${esc(languages.slice(0, 300))}</p>
+              ` : ''}
+              ${cancelPolicy ? `
+                <div class="tgm-subhead">${esc(c.labels?.cancellation || 'Cancellation policy')}</div>
+                <p>${esc(cancelPolicy.slice(0, 600))}</p>
+              ` : ''}
+            </div></div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
   function renderFound(order, c, lookup) {
     const items = order.items || [];
     const summary = order.summary || {};
 
-    const accItem = items.find(i => i.product === 'Accommodation') || null;
-    const flightItems = items.filter(i => i.product === 'Flights');
+    const accItem = items.find(i => i.product === 'Accommodation' || i.product === 'Packages') || null;
+    const flightItems = items.filter(i => i.product === 'Flights' || i.product === 'Packages');
     const extraItems = items.filter(i => i.product === 'AirportExtras');
+    const transferItems = items.filter(i => i.product === 'Transfers');
+    const carRentalItems = items.filter(i => i.product === 'CarRental');
+    const ticketsItems = items.filter(i => i.product === 'TicketsAttractions');
+    // Package metadata (ATOL flag, operator name) for the badge render.
+    // Null when this isn't a package booking.
+    const packageItem = items.find(i => i.product === 'Packages') || null;
+    const packageInfo = packageItem?.package || null;
 
     const acc = accItem?.accommodation;
     const checkin = accItem?.startDate;
@@ -1270,7 +1617,12 @@
     const tripStart = summary.earliestStart || checkin;
     const days = daysUntil(tripStart);
 
-    const heroUrl = acc?.media?.[0]?.url || extraItems[0]?.airportExtras?.media?.[0]?.url || '';
+    const heroUrl = acc?.media?.[0]?.url
+      || extraItems[0]?.airportExtras?.media?.[0]?.url
+      || ticketsItems[0]?.ticketsAttractions?.media?.find(m => m.type === 'GenericImage')?.url
+      || transferItems[0]?.transfers?.media?.find(m => m.type === 'GenericImage')?.url
+      || carRentalItems[0]?.carRental?.media?.find(m => m.type === 'GenericImage')?.url
+      || '';
     const thumbs = (acc?.media || []).slice(0, 4);
 
     // Booking reference policy: display verbatim from Travelify, falling back to
@@ -1284,6 +1636,9 @@
       accItem?.bookingReference
       || flightItems[0]?.bookingReference
       || extraItems[0]?.bookingReference
+      || transferItems[0]?.bookingReference
+      || carRentalItems[0]?.bookingReference
+      || ticketsItems[0]?.bookingReference
       || (lookup?.ref ? String(lookup.ref).toUpperCase() : null);
 
     const starHtml = acc?.rating ? Array.from({ length: Math.round(acc.rating) }, () => star()).join('') : '';
@@ -1374,6 +1729,12 @@
           <div class="tgm-hero-content">
             <div class="tgm-hero-top">
               <span class="tgm-confirmed">${svg(IC.check, 3)}${esc(c.labels?.confirmed || 'Confirmed')}</span>
+              ${(packageInfo?.atolProtected || packageInfo?.operator?.name) ? `
+                <span class="tgm-atol">
+                  ${packageInfo?.atolProtected ? `${svg(IC.shield, 2.5)}<span>${esc(c.labels?.atolProtected || 'ATOL Protected')}</span>` : `${svg(IC.shield, 2.5)}<span>${esc(c.labels?.packagedHoliday || 'Package Holiday')}</span>`}
+                  ${packageInfo?.operator?.name ? `<span class="tgm-atol-op">${esc(c.labels?.operatedBy || 'operated by')} ${esc(packageInfo.operator.name)}</span>` : ''}
+                </span>
+              ` : ''}
               ${refValue ? `<span class="tgm-ref">${esc(c.labels?.ref || 'Ref')}<strong>${esc(refValue)}</strong></span>` : ''}
             </div>
             <div>
@@ -1514,6 +1875,9 @@
         ${flightItems.map(fItem => renderFlightCard(fItem, c)).join('')}
 
         ${extraItems.map(eItem => renderExtraCard(eItem, c)).join('')}
+        ${transferItems.map(tItem => renderTransferCard(tItem, c)).join('')}
+        ${carRentalItems.map(crItem => renderCarRentalCard(crItem, c)).join('')}
+        ${ticketsItems.map(tkItem => renderTicketsCard(tkItem, c)).join('')}
 
         <div class="tgm-two">
           <div class="tgm-section">
@@ -1523,7 +1887,12 @@
               <span class="tgm-pay-total-amt">${esc(fmtMoney(totalPrice, currency))}</span>
             </div>
             ${(() => {
-              const productCount = (summary.hasAccommodation ? 1 : 0) + (summary.hasFlights ? 1 : 0) + (summary.hasAirportExtras ? 1 : 0);
+              const productCount = (summary.hasAccommodation ? 1 : 0)
+                + (summary.hasFlights ? 1 : 0)
+                + (summary.hasAirportExtras ? 1 : 0)
+                + (summary.hasTransfers ? 1 : 0)
+                + (summary.hasCarRental ? 1 : 0)
+                + (summary.hasTicketsAttractions ? 1 : 0);
               if (productCount < 2) return '';
               const lines = [];
               if (accItem && typeof accItem.price === 'number') {
@@ -1533,6 +1902,12 @@
               if (flightTotal > 0) lines.push({ label: c.labels?.flightsLine || 'Flights', val: flightTotal });
               const extrasTotal = extraItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
               if (extrasTotal > 0) lines.push({ label: c.labels?.extrasLine || 'Airport extras', val: extrasTotal });
+              const transferTotal = transferItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
+              if (transferTotal > 0) lines.push({ label: c.labels?.transfersLine || 'Transfers', val: transferTotal });
+              const carRentalTotal = carRentalItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
+              if (carRentalTotal > 0) lines.push({ label: c.labels?.carHireLine || 'Car hire', val: carRentalTotal });
+              const ticketsTotal = ticketsItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
+              if (ticketsTotal > 0) lines.push({ label: c.labels?.ticketsLine || 'Tickets', val: ticketsTotal });
               if (lines.length < 2) return '';
               return `
                 <div class="tgm-pay-breakdown">
@@ -2100,13 +2475,19 @@
     // fabricate a 'TG' prefix on the internal numeric order.id.
     _pdfFilename() {
       const items = this.state.order?.items || [];
-      const accItem = items.find(i => i.product === 'Accommodation');
+      const accItem = items.find(i => i.product === 'Accommodation' || i.product === 'Packages');
       const flightItem = items.find(i => i.product === 'Flights');
       const extraItem = items.find(i => i.product === 'AirportExtras');
+      const transferItem = items.find(i => i.product === 'Transfers');
+      const carRentalItem = items.find(i => i.product === 'CarRental');
+      const ticketsItem = items.find(i => i.product === 'TicketsAttractions');
       const refValue =
         accItem?.bookingReference
         || flightItem?.bookingReference
         || extraItem?.bookingReference
+        || transferItem?.bookingReference
+        || carRentalItem?.bookingReference
+        || ticketsItem?.bookingReference
         || (this.lookup?.ref ? String(this.lookup.ref).toUpperCase() : 'booking');
       return 'booking-' + String(refValue).replace(/[^A-Z0-9_\-]/gi, '') + '.pdf';
     }
@@ -2663,8 +3044,8 @@
         if (!order) return null;
 
         const items = Array.isArray(order.items) ? order.items : [];
-        const accItem = items.find(i => i.product === 'Accommodation') || null;
-        const flightItems = items.filter(i => i.product === 'Flights');
+        const accItem = items.find(i => i.product === 'Accommodation' || i.product === 'Packages') || null;
+        const flightItems = items.filter(i => i.product === 'Flights' || i.product === 'Packages');
         const acc = accItem?.accommodation;
 
         const startDate = accItem?.startDate || order.summary?.earliestStart || null;
