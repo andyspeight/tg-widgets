@@ -1005,17 +1005,24 @@
   $('#name-input').addEventListener('input', () => shell.markDirty());
 
   // ────────────────────────────────────────────────────────────
-  // Boot
+  // Boot — wait for shell auth resolution (v1.1 shell)
   // ────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
-    if (tgse.isLoggedIn()) {
-      loadFromUrl();
+    const boot = () => {
+      if (tgse.isLoggedIn()) {
+        loadFromUrl();
+      } else {
+        // Render an empty preview behind the login overlay
+        renderLayoutPicker();
+        paintForm();
+        renderSocials();
+        render();
+      }
+    };
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(boot);
     } else {
-      // Render an empty preview behind the login overlay
-      renderLayoutPicker();
-      paintForm();
-      renderSocials();
-      render();
+      boot();
     }
   });
 })();
