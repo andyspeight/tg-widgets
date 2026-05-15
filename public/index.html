@@ -654,7 +654,12 @@ async function renderMyWidgets() {
 
   // Fetch from Airtable, scoped to this user via auth token
   try {
-    const r = await fetch('/api/widget-list', { headers: authHeaders() });
+    // credentials:'include' ships the tg_session cookie so the new
+    // unified Travelgenix SSO flow can authenticate this request.
+    const r = await fetch('/api/widget-list', {
+      headers: authHeaders(),
+      credentials: 'include',
+    });
     if (r.ok) { myWidgetData = await r.json(); }
   } catch(e) { myWidgetData = []; }
 
