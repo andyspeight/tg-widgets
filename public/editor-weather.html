@@ -1730,10 +1730,26 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
       },
     });
 
-    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
-      boot();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      // v1.1 shell — wait for cookie auth to resolve before deciding
+      // whether to boot or stay hidden. Prevents the blank-page race
+      // where a signed-in user lands on the editor before /api/auth/me
+      // has settled, isLoggedIn() returns false, and the editor never
+      // boots (the #editor surface starts hidden and only boot() unhides it).
+      window.tgse.onReady(() => {
+        if (window.tgse.isLoggedIn()) {
+          boot();
+        }
+        // else: shell shows login overlay, we'll boot via onLoginSuccess
+      });
+    } else {
+      // Defensive fallback: if an older shell is somehow loaded, keep
+      // the legacy synchronous behaviour so we don't blow up entirely.
+      if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+        boot();
+      }
+      // else shell shows login overlay, we'll boot via onLoginSuccess
     }
-    // else shell shows login overlay, we'll boot via onLoginSuccess
   </script>
 
 </body>
