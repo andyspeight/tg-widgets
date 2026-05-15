@@ -1034,11 +1034,23 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    if (tgse.isLoggedIn()) {
-      loadFromUrl();
+    // v1.1 shell — wait for cookie auth to resolve before deciding whether
+    // to load the saved widget or show the default state. Without this,
+    // a signed-in user lands during the cookie-check window, isLoggedIn()
+    // returns false, and the default state is rendered instead of their
+    // saved widget.
+    const boot = () => {
+      if (tgse.isLoggedIn()) {
+        loadFromUrl();
+      } else {
+        document.getElementById('app').removeAttribute('hidden');
+        syncUI(); render();
+      }
+    };
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(boot);
     } else {
-      document.getElementById('app').removeAttribute('hidden');
-      syncUI(); render();
+      boot();
     }
   });
 </script>
