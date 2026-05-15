@@ -1,5 +1,5 @@
 /* ============================================================
-   Travelgenix Widget Editor — Unified Shell JS v1.0
+   Travelgenix Widget Editor — Unified Shell JS v1.1
    Source of truth: /editor-shell-spec.md
 
    Loaded by every editor via:
@@ -21,6 +21,20 @@
        onDesignMode:   (isOn) => {...},      // optional, when DM toggles
        fontPickerEl:   '#fontPickerMount',   // optional, where to mount font picker
      });
+
+   ── v1.1 (May 2026) ──
+   New: tgse.onReady(cb)
+     Runs `cb` once auth state has resolved (cookie check complete OR
+     legacy localStorage session detected). Fires immediately if auth
+     is already resolved. Use this in every editor's boot block instead
+     of a synchronous isLoggedIn() check, to avoid the blank-page race
+     where the editor hides itself before the cookie check completes.
+
+     Canonical editor boot pattern:
+       window.tgse.onReady(() => {
+         if (window.tgse.isLoggedIn()) init();
+         // else: shell has already shown its login overlay
+       });
    ============================================================ */
 
 (function () {
@@ -76,6 +90,39 @@
         detail: { state: cookieAuthState, user: cookieAuthUser },
       }));
     } catch {}
+  }
+
+  /**
+   * Public API: tgse.onReady(cb)
+   *
+   * Runs `cb` once the shell's auth state has resolved. Fires immediately
+   * (synchronously) if auth has already resolved by the time it's called.
+   * Otherwise queues `cb` until the cookie check completes.
+   *
+   * This is the canonical pattern every editor MUST use in its boot block.
+   * Do NOT call isLoggedIn() synchronously at the bottom of the editor —
+   * the cookie check may still be in flight, returning false, which would
+   * cause a signed-in user to see a blank page.
+   *
+   * Example:
+   *   window.tgse.onReady(() => {
+   *     if (window.tgse.isLoggedIn()) init();
+   *     // else: the shell has already shown its login overlay
+   *   });
+   */
+  function onReady(cb) {
+    if (typeof cb !== 'function') return;
+    // Already-resolved fast path: run on next microtask so callers can
+    // always treat this as async (no surprise re-entrancy during boot).
+    if (cookieAuthState !== 'pending') {
+      Promise.resolve().then(() => {
+        try { cb(); } catch (e) { console.error('[tgse] onReady cb error', e); }
+      });
+      return;
+    }
+    // Still pending — queue it. notifyCookieAuthResolved() will drain
+    // this queue exactly once when the /api/auth/me fetch settles.
+    cookieAuthListeners.push(cb);
   }
 
   // Kick off the cookie check immediately at module load (before init()).
@@ -844,6 +891,7 @@
       getAuthToken,
       getCurrentUser,
       mountFontPicker,
+      onReady,
       FONTS,
     };
   }
@@ -851,6 +899,7 @@
   // ── Expose ─────────────────────────────────────────────────
   window.tgse = {
     init,
+    onReady,
     markDirty,
     setSaveState,
     toast,
@@ -863,7 +912,7 @@
     getCurrentUser,
     mountFontPicker,
     FONTS,
-    version: '1.0.0',
+    version: '1.1.0',
   };
 
 })();
