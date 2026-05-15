@@ -1742,13 +1742,22 @@ if (window.tgse && typeof window.tgse.init === 'function') {
   });
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+// Boot — wait for shell auth resolution (v1.1 shell)
+function bootIfReady() {
+  if (window.tgse && typeof window.tgse.onReady === 'function') {
+    window.tgse.onReady(() => {
+      if (isLoggedIn()) boot();
+      // else shell shows login overlay; we'll boot via onLoginSuccess
+    });
+  } else {
     if (isLoggedIn()) boot();
-    // else shell shows login overlay; we'll boot via onLoginSuccess
-  });
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootIfReady);
 } else {
-  if (isLoggedIn()) boot();
+  bootIfReady();
 }
 </script>
 
