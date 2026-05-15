@@ -1,918 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Reviews — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  /* ============================================================
+     Reviews-specific sidebar styles only.
+     All shell tokens come from /editor-shell.css.
+     ============================================================ */
+
+  /* Review card editor */
+  .rc { background: var(--tgse-panel-2); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); margin-bottom: 8px; overflow: hidden; }
+  .rch { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; }
+  .rch:hover { background: var(--tgse-hover); }
+  .rcav { width: 28px; height: 28px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #FFF; font-weight: 700; font-size: 10px; flex-shrink: 0; }
+  .rcn { flex: 1; font-size: 12px; font-weight: 600; color: var(--tgse-ink); }
+  .rcs { display: flex; gap: 1px; align-items: center; }
+  .rcs svg { width: 10px; height: 10px; }
+  .rcb { padding: 12px; border-top: 1px solid var(--tgse-border); display: none; background: var(--tgse-panel); }
+  .rc.open .rcb { display: block; }
+  .rc .chv { width: 12px; height: 12px; color: var(--tgse-muted); transition: transform .15s; stroke: currentColor; fill: none; stroke-width: 2; }
+  .rc.open .chv { transform: rotate(180deg); }
+
+  /* Field grid */
+  .pg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+
+  /* Star picker */
+  .star-pick { display: flex; gap: 2px; margin-bottom: 8px; }
+  .star-pick button { background: none; border: none; cursor: pointer; padding: 2px; }
+  .star-pick svg { width: 20px; height: 20px; transition: all .15s; }
+  .star-pick button:hover svg { transform: scale(1.2); }
+
+  /* Sidebar inputs/selects */
+  .tgse-body input[type="text"],
+  .tgse-body input[type="number"],
+  .tgse-body input[type="url"],
+  .tgse-body select,
+  .tgse-body textarea {
+    width: 100%; padding: 7px 10px; font-size: 12px;
+    border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm);
+    background: var(--tgse-panel); color: var(--tgse-ink);
+    font-family: inherit; outline: none; transition: border .15s;
+  }
+  .tgse-body textarea { resize: vertical; min-height: 56px; }
+  .tgse-body input:focus, .tgse-body select:focus, .tgse-body textarea:focus {
+    border-color: var(--tgse-brand); box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .tgse-body label.fl {
+    display: block; font-size: 11px; font-weight: 600;
+    color: var(--tgse-ink-3); margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .tgse-body .fld { margin-bottom: 10px; }
+
+  /* Inline action buttons */
+  .ab { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--tgse-brand); background: none; border: none; cursor: pointer; padding: 4px 0; font-family: inherit; }
+  .ab:hover { color: var(--tgse-brand-dark); }
+  .ab svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ab.db { color: var(--tgse-danger); }
+  .ab.db:hover { color: #DC2626; }
+
+  /* Colour rows */
+  .cr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .cr label { font-size: 12px; font-weight: 500; color: var(--tgse-ink-2); }
+  .crr { display: flex; align-items: center; gap: 8px; }
+  .crr span { font-size: 10px; color: var(--tgse-ink-3); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+  .sw { width: 28px; height: 28px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); overflow: hidden; position: relative; cursor: pointer; }
+  .sw input { position: absolute; inset: -4px; width: 140%; height: 140%; opacity: 0; cursor: pointer; }
+
+  /* Preset gradients */
+  .presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+  .preset { height: 32px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); cursor: pointer; transition: all .15s; }
+  .preset:hover { border-color: var(--tgse-brand); transform: scale(1.05); }
+
+  /* Toggle switch */
+  .tr { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+  .tr label { font-size: 12px; font-weight: 500; color: var(--tgse-ink-2); }
+  .tgl { width: 36px; height: 20px; border-radius: 10px; background: #D1D5DB; border: none; cursor: pointer; position: relative; transition: background .2s; padding: 0; }
+  .tgl.on { background: var(--tgse-brand); }
+  .tgl .dot { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #FFF; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.15); transition: transform .2s; }
+  .tgl.on .dot { transform: translateX(16px); }
+
+  /* Slider */
+  .sr { margin-bottom: 10px; }
+  .sr .st { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .sr input[type="range"] { width: 100%; height: 4px; -webkit-appearance: none; background: var(--tgse-border); border-radius: 2px; outline: none; border: none; padding: 0; }
+  .sr input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--tgse-brand); border-radius: 50%; cursor: pointer; border: 2px solid var(--tgse-panel); }
+
+  /* Spreadsheet upload */
+  .up { border: 2px dashed var(--tgse-border); border-radius: var(--tgse-radius-md); padding: 16px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 12px; }
+  .up:hover, .up.dragover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .up svg { width: 20px; height: 20px; stroke: var(--tgse-ink-3); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin: 0 auto 6px; display: block; }
+  .up p { font-size: 12px; color: var(--tgse-ink-2); font-weight: 600; margin: 0 0 2px; }
+  .up small { font-size: 11px; color: var(--tgse-ink-3); }
+  .up .dl { color: var(--tgse-brand); text-decoration: underline; cursor: pointer; font-weight: 600; }
+
+  /* Embed snippet preview */
+  .emb { background: #1E293B; border-radius: var(--tgse-radius-md); padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #CBD5E1; line-height: 1.7; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin-bottom: 8px; }
+  .emb .t { color: #67E8F9; }
+  .emb .a { color: #6EE7B7; }
+  .emb .v { color: #FCD34D; }
+
+  /* Layout picker */
+  .lp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .lp button {
+    padding: 8px 4px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border);
+    background: var(--tgse-panel); cursor: pointer; font-size: 10px; font-weight: 600;
+    font-family: inherit; color: var(--tgse-ink-3); transition: all .15s; text-align: center;
+  }
+  .lp button:hover { border-color: var(--tgse-brand); }
+  .lp button.is-active { background: var(--tgse-brand-tint); border-color: var(--tgse-brand); color: var(--tgse-brand); }
+
+  /* AI highlight editor */
+  .aih { background: var(--tgse-panel-2); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); padding: 8px; margin-bottom: 6px; }
+  .aih-row { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
+  .aih-dot { width: 12px; height: 12px; border-radius: 6px; flex-shrink: 0; position: relative; overflow: hidden; cursor: pointer; }
+  .aih-dot input { position: absolute; inset: -4px; width: 140%; height: 140%; opacity: 0; cursor: pointer; }
+
+  /* Section header */
+  .sec { border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); margin-bottom: 10px; background: var(--tgse-panel); overflow: visible; }
+  .sec-hd { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; user-select: none; }
+  .sec-hd:hover { background: var(--tgse-panel-2); }
+  .sec-tt { font-size: 13px; font-weight: 600; color: var(--tgse-ink); flex: 1; display: flex; align-items: center; gap: 8px; }
+  .sec-tt svg { width: 14px; height: 14px; color: var(--tgse-ink-3); stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .chv { width: 14px; height: 14px; color: var(--tgse-muted); transition: transform .15s; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .sec.open .sec-hd .chv { transform: rotate(180deg); }
+  .sec-bd { padding: 0 14px 14px; display: none; border-top: 1px solid var(--tgse-border); background: var(--tgse-panel-2); }
+  .sec.open .sec-bd { display: block; padding-top: 14px; }
+
+  /* Reviews list header */
+  .reviews-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .reviews-header .ttl { font-size: 13px; font-weight: 600; color: var(--tgse-ink); }
+  .reviews-header .acts { display: flex; gap: 12px; }
+
+  /* Tag input */
+  .tag-input { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); background: var(--tgse-panel); min-height: 32px; align-items: center; }
+  .tag-chip { display: flex; align-items: center; gap: 2px; padding: 2px 8px; border-radius: var(--tgse-radius-sm); background: var(--tgse-brand-tint); color: var(--tgse-brand); font-size: 10px; font-weight: 600; }
+
+  /* AI builder modal extras */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chip { padding: 6px 12px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); background: var(--tgse-panel-2); font-size: 11px; color: var(--tgse-ink-2); cursor: pointer; font-family: inherit; transition: all .15s; }
+  .chip:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); color: var(--tgse-brand); }
+
+  /* Templates picker */
+  .tpc { padding: 12px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; transition: all .15s; }
+  .tpc:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .tpi { width: 36px; height: 36px; border-radius: var(--tgse-radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--tgse-panel-2); }
+  .tpi svg { width: 16px; height: 16px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke: var(--tgse-ink-3); }
+  .tpn { flex: 1; }
+  .tpn strong { font-size: 13px; display: block; color: var(--tgse-ink); }
+  .tpn small { font-size: 11px; color: var(--tgse-ink-3); }
+
+  /* Spinner */
+  .ai-spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #FFF; border-radius: 50%; animation: ai-spin .6s linear infinite; display: inline-block; }
+  @keyframes ai-spin { to { transform: rotate(360deg); } }
+  .erm { color: var(--tgse-danger); font-size: 12px; margin-bottom: 10px; padding: 8px 12px; background: rgba(239,68,68,.08); border-radius: var(--tgse-radius-sm); border: 1px solid rgba(239,68,68,.25); }
+
+  /* Design Mode overlay */
+  .ov-wrap { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+  .ov-wrap.active { pointer-events: auto; }
+  .ov-spot { position: absolute; border: 2px solid transparent; border-radius: 6px; cursor: pointer; transition: all .15s; z-index: 11; }
+  .ov-spot:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .ov-spot:hover .ov-label { opacity: 1; transform: translateY(0); }
+  .ov-label { position: absolute; top: -22px; left: 4px; font-size: 10px; font-weight: 700; color: #FFF; background: var(--tgse-brand); padding: 2px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; transform: translateY(4px); transition: all .15s; pointer-events: none; }
+
+  /* Popover */
+  .pop { position: fixed; z-index: 9999; background: var(--tgse-panel); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); box-shadow: var(--tgse-shadow-lg); padding: 14px; min-width: 260px; max-width: 320px; opacity: 0; transform: translateY(6px); transition: all .15s; pointer-events: none; }
+  .pop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .pop-title { font-size: 11px; font-weight: 700; color: var(--tgse-ink-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .pop-close { width: 20px; height: 20px; border: none; background: transparent; cursor: pointer; color: var(--tgse-ink-3); display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .pop-close:hover { background: var(--tgse-hover); color: var(--tgse-ink); }
+  .pop-close svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  /* Frame override — Reviews has a single hosted widget */
+  .tgse-frame { padding: 32px; }
+  .tgse-frame[data-vp="mobile"] { padding: 16px; }
+
+  /* Inline header buttons in the reviews list */
+  .reviews-header .ab { padding: 4px 8px; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Google Reviews</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled reviews widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+      <div class="tgse-panel is-active" data-tab="design" id="panel-design"></div>
+      <div class="tgse-panel" data-tab="content" id="panel-content"></div>
+      <div class="tgse-panel" data-tab="settings" id="panel-settings"></div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       PREVIEW
+       ============================================================ -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+        Design mode
+        <span class="tgse-kbd">D</span>
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div id="widget-mount"></div>
+        <div class="ov-wrap" id="ovWrap"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Popover for Design Mode click-to-edit -->
+<div class="pop" id="popover"></div>
+
+<!-- ============================================================
+     MODALS — AI builder & Templates (shell-styled)
+     ============================================================ -->
+<div class="tgse-modal" id="aiModal">
+  <div class="tgse-modal-card">
+    <div class="tgse-modal-head">
+      <span class="tgse-id-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+      </span>
+      <div>
+        <h2>AI review generator</h2>
+        <p class="tgse-modal-sub">Generate realistic demo reviews for your widget.</p>
+      </div>
+    </div>
+    <div class="tgse-modal-body">
+      <textarea id="aiPrompt" rows="3" placeholder="e.g. Generate 8 reviews for a travel agency in Bournemouth, mix of family and couples holidays" style="width:100%;padding:10px 12px;font-size:13px;border:1px solid var(--tgse-border);border-radius:var(--tgse-radius-md);background:var(--tgse-panel-2);color:var(--tgse-ink);font-family:inherit;outline:none;resize:vertical;min-height:72px;margin-bottom:12px"></textarea>
+      <div class="chips">
+        <button class="chip" type="button">8 reviews for a UK travel agency</button>
+        <button class="chip" type="button">6 reviews for a luxury tour operator</button>
+        <button class="chip" type="button">10 reviews for a holiday company, mostly 5-star</button>
+      </div>
+      <div id="aiErr" class="erm" style="display:none"></div>
+    </div>
+    <div class="tgse-modal-foot">
+      <button class="tgse-btn" type="button" data-close-modal="aiModal">Cancel</button>
+      <button class="tgse-btn tgse-btn--ai" type="button" id="aiGenerate">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>
+        Generate
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="tgse-modal" id="tplModal">
+  <div class="tgse-modal-card">
+    <div class="tgse-modal-head">
+      <span class="tgse-id-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </span>
+      <div>
+        <h2>Choose a starting template</h2>
+        <p class="tgse-modal-sub">Or build from AI, or start from scratch.</p>
+      </div>
+    </div>
+    <div class="tgse-modal-body" id="tplList"></div>
+    <div class="tgse-modal-foot">
+      <button class="tgse-btn" type="button" data-close-modal="tplModal">Start from scratch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shell behaviour first -->
+<script src="/editor-shell.js"></script>
+<!-- Then the widget (so window.TGReviewsWidget is available for preview) -->
+<script src="/widget-reviews.js"></script>
+
+<script>
 /* ============================================================
-   Travelgenix Widget Editor — Unified Shell JS v1.1
-   Source of truth: /editor-shell-spec.md
-
-   Loaded by every editor via:
-     <script src="/editor-shell.js" defer></script>
-
-   Exposes one global: window.tgse
-
-   Public API (per editor init):
-     tgse.init({
-       widgetType: 'Pricing Table',          // string, must match Airtable WidgetType
-       widgetTag:  'pricing',                // string, used in embed code
-       scriptFile: 'widget.js',              // string, used in embed code
-       getConfig:  () => ({...}),            // function returning current config to save
-       setConfig:  (c) => {...},             // function to apply a loaded config
-       onTabChange:    (tabName) => {...},   // optional, after tab switch
-       onAIBuild:      () => {...},          // optional, opens custom AI modal
-       onTemplates:    () => {...},          // optional, opens custom templates modal
-       onThemeToggle:  (isDark) => {...},    // optional, when widget theme toggles
-       onDesignMode:   (isOn) => {...},      // optional, when DM toggles
-       fontPickerEl:   '#fontPickerMount',   // optional, where to mount font picker
-     });
-
-   ── v1.1 (May 2026) ──
-   New: tgse.onReady(cb)
-     Runs `cb` once auth state has resolved (cookie check complete OR
-     legacy localStorage session detected). Fires immediately if auth
-     is already resolved. Use this in every editor's boot block instead
-     of a synchronous isLoggedIn() check, to avoid the blank-page race
-     where the editor hides itself before the cookie check completes.
-
-     Canonical editor boot pattern:
-       window.tgse.onReady(() => {
-         if (window.tgse.isLoggedIn()) init();
-         // else: shell has already shown its login overlay
-       });
+   GOOGLE REVIEWS EDITOR — refactored onto unified shell
    ============================================================ */
 
-(function () {
-  'use strict';
+/* ── Demo reviews (used by default + Travel Agency template) ─── */
+const DEMO_REVIEWS = [
+  { id:'1', author:'Sarah Mitchell', rating:5, date:'2 weeks ago', text:'Absolutely incredible service from start to finish. The team helped us plan a last-minute family holiday to Crete and everything was seamless — flights, hotel, transfers, even restaurant recommendations. The kids loved it!', tags:['Family','Service','Crete'], helpful:24, hasPhoto:true, photoUrl:'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=300&fit=crop', reply:{ author:'Sunshine Holidays', text:'Thank you Sarah! So glad the family had a wonderful time in Crete.' } },
+  { id:'2', author:'James Robertson', rating:5, date:'1 month ago', text:'Third year booking through them and they never disappoint. Found us a stunning adults-only hotel in Tenerife at a price that beat everything online.', tags:['Couples','Value','Tenerife'], helpful:18 },
+  { id:'3', author:'Emma Thompson', rating:4, date:'3 weeks ago', text:'Really good experience overall. Booking was straightforward and the website made it easy to compare options. Small delay with transfer but sorted quickly.', tags:['Service','Booking'], helpful:12, reply:{ author:'Sunshine Holidays', text:'Thanks Emma! Sorry about the transfer — we have fed that back to our supplier.' } },
+  { id:'4', author:'David Chen', rating:5, date:'1 week ago', text:'Booked a honeymoon to the Maldives and it was absolutely perfect. Every detail thought of — room upgrade, sunset dinner, champagne waiting. Felt like VIPs.', tags:['Couples','Luxury','Maldives'], helpful:31, hasPhoto:true, photoUrl:'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&h=300&fit=crop' },
+  { id:'5', author:'Lisa Patel', rating:5, date:'2 months ago', text:'First time using a travel agent and I am a convert! Saved us £400 on our Turkey trip plus free airport lounge access. Personal service is on another level.', tags:['Value','Turkey','First-timer'], helpful:22 },
+  { id:'6', author:'Mark Williams', rating:5, date:'3 days ago', text:'Amazing week in Majorca. Hotel was perfect for kids — splash park, kids club, right on the beach. Agent really listened to what we needed.', tags:['Family','Beach','Majorca'], helpful:8, hasPhoto:true, photoUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop' },
+];
 
-  // ── Constants ──────────────────────────────────────────────
-  const SESSION_KEY = 'tgw_session';
-  const TOKEN_GRACE_MS = 30 * 60 * 1000; // refresh-redirect 30 min before server expiry
+/* ── Templates ──────────────────────────────────────────────── */
+const TPL = [
+  { n:'Travel Agency', d:'6 reviews, families & couples', place:{ name:'Sunshine Holidays', rating:4.9, total:247 }, reviews: DEMO_REVIEWS },
+  { n:'Hotel',         d:'5 reviews, accommodation focus', place:{ name:'The Grand Hotel', rating:4.7, total:189 }, reviews: [
+    { id:'h1', author:'Anna White',    rating:5, date:'1 week ago',   text:'Beautiful hotel with stunning sea views. The room was spotless and the breakfast buffet was incredible. Staff went above and beyond.', tags:['Rooms','Breakfast','Views'], helpful:15 },
+    { id:'h2', author:'Peter Jones',   rating:4, date:'2 weeks ago',  text:'Great location and lovely rooms. Pool area was a bit crowded at peak times but otherwise excellent stay.', tags:['Location','Pool'], helpful:8 },
+    { id:'h3', author:'Maria Garcia',  rating:5, date:'3 days ago',   text:'Absolutely loved our stay. The spa was world class and the restaurant served the best seafood we have ever tasted.', tags:['Spa','Food','Luxury'], helpful:21 },
+    { id:'h4', author:'Robert Taylor', rating:5, date:'1 month ago',  text:'Perfect for a romantic getaway. The suite was gorgeous and the balcony views over the harbour were breathtaking.', tags:['Couples','Views','Suite'], helpful:12 },
+    { id:'h5', author:'Sophie Brown',  rating:4, date:'6 weeks ago',  text:'Lovely hotel, clean rooms, friendly staff. WiFi could be a bit better but everything else was spot on.', tags:['Clean','Staff','WiFi'], helpful:6 },
+  ]},
+];
 
-  // 29 Google Fonts — same list as the original Pricing editor.
-  // Order: DM Sans first (default), then alphabetical-ish by popularity.
-  const FONTS = [
-    'DM Sans', 'Inter', 'Poppins', 'Raleway', 'Open Sans', 'Lato',
-    'Montserrat', 'Nunito', 'Source Sans 3', 'Work Sans', 'Outfit',
-    'Plus Jakarta Sans', 'Rubik', 'Manrope', 'Sora', 'Space Grotesk',
-    'Figtree', 'Onest', 'Albert Sans', 'Urbanist', 'Karla', 'Cabin',
-    'Mulish', 'Josefin Sans', 'Quicksand', 'Barlow', 'Archivo',
-    'Red Hat Display', 'Overpass'
-  ];
+/* ── Config ──────────────────────────────────────────────────── */
+let C = {
+  place: { name: 'My Business', rating: 4.8, total: 50 },
+  brandColor: '#0891B2', accentColor: '#6366F1',
+  pageBg: '#F8FAFC', cardBg: '#FFFFFF', textColor: '#0F172A', subtextColor: '#64748B',
+  borderRadius: 16, layout: 'cards', theme: 'light', fontFamily: 'Inter',
+  showHeader: true, showAI: true, showTags: true, showPhotos: true, showReplies: true, showHelpful: true, showTrust: true, showCTA: true,
+  trustText: 'Verified reviews powered by Google',
+  ctaText: 'Write a Review', ctaUrl: '#',
+  aiHighlights: [
+    { label:'Most praised',   value:'Personal service',          color:'#EC4899', icon:'heart' },
+    { label:'98% recommend',  value:'for friends and family',    color:'#8B5CF6', icon:'users' },
+    { label:'Trending up',    value:'Rating improved this year', color:'#10B981', icon:'trending' },
+    { label:'Top strength',   value:'Great value for money',     color:'#F59E0B', icon:'award' },
+  ],
+  reviews: []
+};
+let wId = null, dark = false, tab = 'design', dm = false;
+let hist = [], histIdx = -1;
+let openSecs = {}, openRevs = {};
+let shell = null;
 
-  // ── Internal state ────────────────────────────────────────
-  let opts = null;       // editor's init options
-  let saveDirty = false;
-  let saveTimer = null;
-  let activeTab = 'design';
+/* ── Helpers ─────────────────────────────────────────────────── */
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML.replace(/"/g, '&quot;'); }
+function snap() { const s = JSON.stringify(C); if (hist.length && hist[histIdx] === s) return; hist = hist.slice(0, histIdx+1); hist.push(s); histIdx = hist.length-1; if (hist.length > 40) { hist.shift(); histIdx--; } shell?.markDirty(); }
+function undo() { if (histIdx > 0) { histIdx--; C = JSON.parse(hist[histIdx]); ren(); renP(); showHint('Undone'); } }
+function redo() { if (histIdx < hist.length-1) { histIdx++; C = JSON.parse(hist[histIdx]); ren(); renP(); showHint('Redone'); } }
+function showHint(m) { tgse.toast(m, 'ok'); }
+function starSvg(fill) { return `<svg viewBox="0 0 24 24" style="width:10px;height:10px;fill:${fill?'#F59E0B':'none'};stroke:${fill?'#F59E0B':'#D1D5DB'};stroke-width:1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`; }
 
-  // ============================================================
-  // COOKIE-BASED SESSION (NEW UNIFIED AUTH)
-  //
-  // Travelgenix moved auth onto a cookie set by id.travelify.io. Any
-  // *.travelify.io page (including widgets.travelify.io) gets the cookie
-  // sent automatically. To stay compatible with the existing legacy
-  // localStorage-token flow, we check both: cookie first (preferred),
-  // localStorage as fallback.
-  //
-  // The cookie itself is HttpOnly, so JS can't read it directly. Instead,
-  // we ask the server via /api/auth/me whether it's valid. Result is
-  // cached in module state so we don't re-fetch on every isLoggedIn() call.
-  // ============================================================
-
-  // States: 'pending' (in flight), 'authenticated', 'unauthenticated'
-  let cookieAuthState = 'pending';
-  let cookieAuthUser = null;
-  const cookieAuthListeners = [];
-
-  function notifyCookieAuthResolved() {
-    while (cookieAuthListeners.length) {
-      const cb = cookieAuthListeners.shift();
-      try { cb(); } catch (e) { console.error('[tgse] auth listener error', e); }
-    }
-    try {
-      window.dispatchEvent(new CustomEvent('tgse-auth-resolved', {
-        detail: { state: cookieAuthState, user: cookieAuthUser },
-      }));
-    } catch {}
-  }
-
-  /**
-   * Public API: tgse.onReady(cb)
-   *
-   * Runs `cb` once the shell's auth state has resolved. Fires immediately
-   * (synchronously) if auth has already resolved by the time it's called.
-   * Otherwise queues `cb` until the cookie check completes.
-   *
-   * This is the canonical pattern every editor MUST use in its boot block.
-   * Do NOT call isLoggedIn() synchronously at the bottom of the editor —
-   * the cookie check may still be in flight, returning false, which would
-   * cause a signed-in user to see a blank page.
-   *
-   * Example:
-   *   window.tgse.onReady(() => {
-   *     if (window.tgse.isLoggedIn()) init();
-   *     // else: the shell has already shown its login overlay
-   *   });
-   */
-  function onReady(cb) {
-    if (typeof cb !== 'function') return;
-    // Already-resolved fast path: run on next microtask so callers can
-    // always treat this as async (no surprise re-entrancy during boot).
-    if (cookieAuthState !== 'pending') {
-      Promise.resolve().then(() => {
-        try { cb(); } catch (e) { console.error('[tgse] onReady cb error', e); }
+/* ── Render sidebar ──────────────────────────────────────────── */
+function ren() {
+  saveSecState();
+  document.getElementById('panel-design').innerHTML = dTab();
+  document.getElementById('panel-content').innerHTML = cTab();
+  document.getElementById('panel-settings').innerHTML = sTab();
+  restoreSecState();
+  bind();
+  // Re-mount the font picker — its mount element is rebuilt by dTab()
+  if (window.tgse && typeof window.tgse.mountFontPicker === 'function') {
+    const mount = document.getElementById('fontPickerMount');
+    if (mount) {
+      window.tgse.mountFontPicker(mount, C.fontFamily || 'Inter', (f) => {
+        snap(); C.fontFamily = f; renP();
       });
-      return;
-    }
-    // Still pending — queue it. notifyCookieAuthResolved() will drain
-    // this queue exactly once when the /api/auth/me fetch settles.
-    cookieAuthListeners.push(cb);
-  }
-
-  // Kick off the cookie check immediately at module load (before init()).
-  // On widgets.travelify.io this typically resolves before the user can
-  // notice — it's a single GET, no preflight, cookie sent automatically.
-  (function bootstrapCookieAuth() {
-    fetch('https://id.travelify.io/api/auth/me', {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-    })
-      .then(function (r) {
-        if (r.status === 401) return null;
-        if (!r.ok) throw new Error('me_' + r.status);
-        return r.json();
-      })
-      .then(function (data) {
-        if (data && data.ok && data.user) {
-          cookieAuthUser = {
-            email: data.user.email,
-            fullName: data.user.fullName,
-            role: data.user.role,
-            // From client info (the session is scoped to a client)
-            clientName: data.client && data.client.clientName,
-            clientRecordId: data.client && data.client.recordId,
-            plan: data.client && data.client.packageName,
-            // Permissions array — products this user can use
-            permissions: data.permissions || [],
-          };
-          cookieAuthState = 'authenticated';
-        } else {
-          cookieAuthState = 'unauthenticated';
-        }
-      })
-      .catch(function (err) {
-        console.warn('[tgse] cookie auth check failed:', err && err.message);
-        cookieAuthState = 'unauthenticated';
-      })
-      .finally(notifyCookieAuthResolved);
-  })();
-
-  // ============================================================
-  // SESSION MANAGEMENT
-  // Soft cutover: read both localStorage + sessionStorage,
-  // write only to localStorage going forward.
-  // ============================================================
-
-  function getSession() {
-    try {
-      // 1. Primary: new auth flow keys written by /signin.html
-      const tok = localStorage.getItem('tg_token');
-      const usrRaw = localStorage.getItem('tg_user');
-      if (tok && usrRaw) {
-        const usr = JSON.parse(usrRaw);
-        let cli = null;
-        try { cli = JSON.parse(localStorage.getItem('tg_client') || 'null'); } catch {}
-        // plan may be a string ("Bespoke") or a singleSelect object ({name:"Bespoke"})
-        const rawPlan = cli?.plan ?? usr?.plan;
-        const planStr = (rawPlan && typeof rawPlan === 'object') ? (rawPlan.name || '') : (rawPlan || '');
-        return {
-          token: tok,
-          user: {
-            ...usr,
-            plan: planStr,
-            clientName: cli?.clientName || usr?.clientName || '',
-            clientRecordId: cli?.recordId || null
-          },
-          timestamp: Date.now()
-        };
-      }
-      // 2. Legacy fallback: tgw_session blob
-      let raw = localStorage.getItem(SESSION_KEY);
-      if (raw) return JSON.parse(raw);
-      // 3. Even older fallback: sessionStorage
-      raw = sessionStorage.getItem(SESSION_KEY);
-      if (raw) {
-        const s = JSON.parse(raw);
-        if (s && s.token) {
-          localStorage.setItem(SESSION_KEY, raw);
-        }
-        return s;
-      }
-      return null;
-    } catch {
-      return null;
     }
   }
+}
 
-  function saveSession(s) {
-    try {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(s));
-      // Clean up any legacy entry
-      sessionStorage.removeItem(SESSION_KEY);
-    } catch (e) {
-      console.error('[tgse] saveSession failed', e);
-    }
-  }
+function sec(t, ico, open, body) {
+  return `<div class="sec${open?' open':''}"><div class="sec-hd" onclick="this.parentElement.classList.toggle('open')"><span class="sec-tt"><svg viewBox="0 0 24 24">${ico}</svg>${t}</span><svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div><div class="sec-bd">${body}</div></div>`;
+}
+function colF(label, key, val) {
+  return `<div class="cr"><label>${label}</label><div class="crr"><span>${val}</span><div class="sw"><div style="width:100%;height:100%;background:${val}"></div><input type="color" value="${val}" data-bind="${key}"></div></div></div>`;
+}
+function togF(label, key, on) {
+  return `<div class="tr"><label>${label}</label><button class="tgl${on?' on':''}" type="button" onclick="snap();C.${key}=!C.${key};ren();renP()"><span class="dot"></span></button></div>`;
+}
 
-  function clearSession() {
-    try {
-      // Clear new auth keys
-      localStorage.removeItem('tg_token');
-      localStorage.removeItem('tg_user');
-      localStorage.removeItem('tg_client');
-      // Clear legacy keys
-      localStorage.removeItem(SESSION_KEY);
-      sessionStorage.removeItem(SESSION_KEY);
-    } catch {}
-  }
+function dTab() {
+  const layouts = ['cards','masonry','carousel','spotlight','badge','ticker'];
+  return sec('Business Info', '<circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>', true, `
+    <div class="fld"><label class="fl">Business name</label><input type="text" value="${esc(C.place.name)}" data-bind="place.name"></div>
+    <div class="pg">
+      <div class="fld"><label class="fl">Rating</label><input type="number" step="0.1" min="1" max="5" value="${C.place.rating}" data-bind="place.rating"></div>
+      <div class="fld"><label class="fl">Total reviews</label><input type="number" value="${C.place.total}" data-bind="place.total"></div>
+    </div>
+  `) + sec('Layout', '<rect x="3" y="3" width="7" height="7" stroke="currentColor" fill="none" stroke-width="2"/><rect x="14" y="3" width="7" height="7" stroke="currentColor" fill="none" stroke-width="2"/><rect x="3" y="14" width="7" height="7" stroke="currentColor" fill="none" stroke-width="2"/><rect x="14" y="14" width="7" height="7" stroke="currentColor" fill="none" stroke-width="2"/>', true, `
+    <div class="lp">${layouts.map(l => `<button type="button" class="${C.layout===l?'is-active':''}" onclick="snap();C.layout='${l}';ren();renP()">${l.charAt(0).toUpperCase()+l.slice(1)}</button>`).join('')}</div>
+  `) + sec('Colours', '<circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" stroke-width="2"/><path d="M2 12h20" stroke="currentColor" fill="none" stroke-width="2"/>', true, `
+    ${colF('Brand', 'brandColor', C.brandColor)}
+    ${colF('Accent', 'accentColor', C.accentColor)}
+    ${colF('Page background', 'pageBg', C.pageBg)}
+    ${colF('Card background', 'cardBg', C.cardBg)}
+    ${colF('Text', 'textColor', C.textColor)}
+    <div style="margin-top:10px"><label class="fl">Presets</label>
+    <div class="presets">
+      ${[{b:'#0891B2',a:'#6366F1'},{b:'#7C3AED',a:'#EC4899'},{b:'#059669',a:'#0D9488'},{b:'#DC2626',a:'#F97316'},{b:'#1E293B',a:'#3B82F6'}].map(p=>`<div class="preset" onclick="snap();C.brandColor='${p.b}';C.accentColor='${p.a}';ren();renP()" style="background:linear-gradient(135deg,${p.b},${p.a})"></div>`).join('')}
+    </div></div>
+  `) + sec('Shape', '<rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" fill="none" stroke-width="2"/>', false, `
+    <div class="sr"><div class="st"><span class="fl" style="margin:0">Border radius</span><span style="font-size:11px;color:var(--tgse-ink-3);font-family:'JetBrains Mono',monospace">${C.borderRadius}px</span></div>
+    <input type="range" min="0" max="28" value="${C.borderRadius}" data-bind="borderRadius"></div>
+  `) + sec('Typography', '<polyline points="4 7 4 4 20 4 20 7" stroke="currentColor" fill="none" stroke-width="2"/><line x1="9" y1="20" x2="15" y2="20" stroke="currentColor" stroke-width="2"/><line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="2"/>', false, `
+    <div class="fld"><label class="fl">Font family</label><div id="fontPickerMount"></div></div>
+  `);
+}
 
-  function isLoggedIn() {
-    // Cookie session is the primary source of truth — set after the
-    // bootstrap fetch resolves. Until then, fall back to legacy localStorage.
-    if (cookieAuthState === 'authenticated') return true;
-    const s = getSession();
-    return !!(s && s.token);
-  }
+function cTab() {
+  const AVCOLS = ['#3B82F6','#10B981','#8B5CF6','#F59E0B','#EC4899','#0891B2','#6366F1','#14B8A6'];
+  let h = `<div class="reviews-header">
+    <span class="ttl">Reviews (${C.reviews.length})</span>
+    <div class="acts">
+      <button class="ab" type="button" onclick="document.getElementById('btn-ai').click()"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>AI</button>
+      <button class="ab" type="button" onclick="addRev()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add review</button>
+    </div>
+  </div>
+  <div class="up" id="upZ" onclick="document.getElementById('fIn').click()">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <p>Upload reviews spreadsheet</p>
+    <small>CSV or Excel — <span class="dl" onclick="event.stopPropagation();dlTpl()">Download template</span></small>
+    <input type="file" id="fIn" accept=".csv,.xlsx,.xls" style="display:none" onchange="hFile(this)">
+  </div>`;
 
-  function getAuthToken() {
-    // For backwards-compatible Bearer-header use. Cookie sessions don't
-    // have a JS-accessible token (the cookie is HttpOnly), so this returns
-    // empty when the cookie is the auth source — callers should not set
-    // a Bearer header in that case, and the cookie will be sent
-    // automatically on same-origin fetches.
-    return getSession()?.token || '';
-  }
-
-  function authHeaders() {
-    const h = { 'Content-Type': 'application/json' };
-    const t = getAuthToken();
-    if (t) {
-      h['Authorization'] = 'Bearer ' + t;
-    }
-    // If we're running off the cookie session, no Authorization header is
-    // needed — the browser sends the cookie automatically. Callers must
-    // ensure their fetch() calls use credentials:'include' for same-site
-    // cross-subdomain calls if any.
-    return h;
-  }
-
-  /**
-   * Returns user info for the current session, regardless of auth source.
-   * Prefers cookie session; falls back to legacy localStorage session.
-   *
-   * Use this to render the editor's user chip, gating, etc, instead of
-   * reading getSession() directly.
-   */
-  function getCurrentUser() {
-    if (cookieAuthState === 'authenticated' && cookieAuthUser) {
-      return cookieAuthUser;
-    }
-    const s = getSession();
-    return s ? s.user : null;
-  }
-
-  // Cross-tab logout: when one tab clears the session, the others should too.
-  // The 'storage' event fires on OTHER tabs when localStorage changes here.
-  window.addEventListener('storage', (e) => {
-    if (e.key !== SESSION_KEY) return;
-    if (e.newValue === null) {
-      // Session was cleared in another tab — reflect that here
-      showLogin('Signed out in another tab');
-    } else if (e.oldValue && !getAuthToken()) {
-      // Session changed and we no longer have a valid token
-      showLogin('Session changed — please sign in again');
-    }
+  C.reviews.forEach((r, i) => {
+    const col = AVCOLS[((r.author||'').charCodeAt(0)) % AVCOLS.length];
+    const ini = (r.author || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    h += `<div class="rc" id="rv${i}">
+      <div class="rch" onclick="document.getElementById('rv${i}').classList.toggle('open')">
+        <div class="rcav" style="background:${col}">${ini}</div>
+        <span class="rcn">${esc(r.author) || 'Anonymous'}</span>
+        <span class="rcs">${[1,2,3,4,5].map(s => starSvg(s <= r.rating)).join('')}</span>
+        <svg class="chv" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="rcb">
+        <div class="pg">
+          <div class="fld"><label class="fl">Author</label><input type="text" value="${esc(r.author)}" onchange="snap();C.reviews[${i}].author=this.value;ren();renP()"></div>
+          <div class="fld"><label class="fl">Date</label><input type="text" value="${esc(r.date)}" onchange="snap();C.reviews[${i}].date=this.value;renP()"></div>
+        </div>
+        <div class="fld"><label class="fl">Rating</label>
+          <div class="star-pick">${[1,2,3,4,5].map(s => `<button type="button" onclick="snap();C.reviews[${i}].rating=${s};ren();renP()"><svg viewBox="0 0 24 24" style="fill:${s <= r.rating ? '#F59E0B' : 'none'};stroke:${s <= r.rating ? '#F59E0B' : '#D1D5DB'};stroke-width:1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`).join('')}</div>
+        </div>
+        <div class="fld"><label class="fl">Review text</label><textarea onchange="snap();C.reviews[${i}].text=this.value;renP()">${esc(r.text)}</textarea></div>
+        <div class="fld"><label class="fl">Photo URL</label><input type="url" value="${esc(r.photoUrl||'')}" onchange="snap();C.reviews[${i}].photoUrl=this.value;C.reviews[${i}].hasPhoto=!!this.value;renP()" placeholder="https://..."></div>
+        <div class="fld"><label class="fl">Tags (comma separated)</label><input type="text" value="${esc((r.tags||[]).join(', '))}" onchange="snap();C.reviews[${i}].tags=this.value.split(',').map(t=>t.trim()).filter(Boolean);renP()"></div>
+        <div class="fld"><label class="fl">Helpful count</label><input type="number" value="${r.helpful||0}" onchange="snap();C.reviews[${i}].helpful=+this.value;renP()"></div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--tgse-border)">
+          <label class="fl">Owner reply</label>
+          <div class="fld"><input type="text" value="${esc(r.reply?.author || C.place.name)}" placeholder="Reply author" onchange="snap();if(!C.reviews[${i}].reply)C.reviews[${i}].reply={author:'',text:''};C.reviews[${i}].reply.author=this.value;renP()"></div>
+          <div class="fld"><textarea placeholder="Reply text (leave blank to remove)" onchange="snap();const t=this.value.trim();C.reviews[${i}].reply=t?{author:C.reviews[${i}].reply?.author||C.place.name,text:t}:null;renP()">${esc(r.reply?.text||'')}</textarea></div>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--tgse-border)">
+          <button class="ab db" type="button" onclick="snap();C.reviews.splice(${i},1);ren();renP()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Remove review</button>
+        </div>
+      </div>
+    </div>`;
   });
 
-  // ============================================================
-  // LOGIN OVERLAY
-  // ============================================================
+  return h;
+}
 
-  function buildLoginOverlay() {
-    const existing = document.getElementById('tgse-login-overlay');
-    if (existing) return existing;
-
-    const root = document.createElement('div');
-    root.id = 'tgse-login-overlay';
-    root.className = 'tgse-login';
-    root.setAttribute('hidden', '');
-    root.style.display = 'none';
-    root.innerHTML = `
-      <div class="tgse-login-card" role="dialog" aria-labelledby="tgse-login-title">
-        <div class="tgse-login-head">
-          <span class="tgse-id-tile" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          </span>
-          <div>
-            <h2 id="tgse-login-title">Sign in to continue</h2>
-            <p class="tgse-login-sub" id="tgse-login-sub">Use your Travelgenix client account.</p>
-          </div>
-        </div>
-        <label for="tgse-login-email">Email address</label>
-        <input id="tgse-login-email" type="email" autocomplete="email" placeholder="you@example.com">
-        <label for="tgse-login-code">Client code</label>
-        <input id="tgse-login-code" type="password" autocomplete="current-password" placeholder="Enter your client code">
-        <div class="tgse-login-err" id="tgse-login-err" hidden></div>
-        <button class="tgse-btn tgse-btn--primary" id="tgse-login-submit">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Sign in
-        </button>
+function sTab() {
+  const wid = wId || 'YOUR_WIDGET_ID';
+  return sec('Display', '<circle cx="12" cy="12" r="3" stroke="currentColor" fill="none" stroke-width="2"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" fill="none" stroke-width="2"/>', true, `
+    ${togF('Header', 'showHeader', C.showHeader)}
+    ${togF('AI Insights', 'showAI', C.showAI)}
+    ${togF('Tag filters', 'showTags', C.showTags)}
+    ${togF('Photos', 'showPhotos', C.showPhotos)}
+    ${togF('Owner replies', 'showReplies', C.showReplies)}
+    ${togF('Helpful counts', 'showHelpful', C.showHelpful)}
+    ${togF('Trust strip', 'showTrust', C.showTrust)}
+    ${togF('Write a review CTA', 'showCTA', C.showCTA)}
+    ${C.showTrust ? `<div class="fld" style="margin-top:8px"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" data-bind="trustText"></div>` : ''}
+    ${C.showCTA ? `<div class="fld"><label class="fl">CTA text</label><input type="text" value="${esc(C.ctaText)}" data-bind="ctaText"></div>
+                   <div class="fld"><label class="fl">CTA URL</label><input type="url" value="${esc(C.ctaUrl)}" data-bind="ctaUrl"></div>` : ''}
+  `) + sec('AI Highlights', '<path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', false, `
+    ${(C.aiHighlights || []).map((h, i) => `<div class="aih">
+      <div class="aih-row">
+        <div class="aih-dot" style="background:${h.color}"><input type="color" value="${h.color}" onchange="snap();C.aiHighlights[${i}].color=this.value;ren();renP()"></div>
+        <input type="text" value="${esc(h.label)}" placeholder="Label" onchange="snap();C.aiHighlights[${i}].label=this.value;renP()" style="flex:1">
+        <button class="ab db" type="button" onclick="snap();C.aiHighlights.splice(${i},1);ren();renP()" style="padding:0"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-    `;
-    document.body.appendChild(root);
-
-    // Submit handler
-    const submit = root.querySelector('#tgse-login-submit');
-    const emailEl = root.querySelector('#tgse-login-email');
-    const codeEl = root.querySelector('#tgse-login-code');
-    const errEl = root.querySelector('#tgse-login-err');
-
-    async function doLogin() {
-      const email = emailEl.value.trim();
-      const code = codeEl.value;
-      if (!email || !code) {
-        errEl.textContent = 'Both fields are required.';
-        errEl.hidden = false;
-        return;
-      }
-      submit.disabled = true;
-      errEl.hidden = true;
-      try {
-        const r = await fetch('/api/widget-auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, code }),
-        });
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok || !d.token) {
-          errEl.textContent = d.error || 'Sign-in failed. Please check your details and try again.';
-          errEl.hidden = false;
-          submit.disabled = false;
-          return;
-        }
-        // Success — write session, hide overlay
-        saveSession({ user: d.user, token: d.token, timestamp: Date.now() });
-        hideLogin();
-        // If the editor was waiting for auth to load config, re-trigger
-        if (typeof opts?.onLoginSuccess === 'function') opts.onLoginSuccess();
-      } catch (e) {
-        errEl.textContent = 'Network error. Please try again.';
-        errEl.hidden = false;
-        submit.disabled = false;
-      }
-    }
-
-    submit.addEventListener('click', doLogin);
-    [emailEl, codeEl].forEach(el => {
-      el.addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); doLogin(); }
-      });
-    });
-
-    return root;
-  }
-
-  function showLogin(message) {
-    // Redirect to the canonical sign-in page (the legacy inline modal is
-    // wired to /api/widget-auth which is now disconnected from the new
-    // bcrypt-based Users table).
-    const here = location.pathname + location.search + location.hash;
-    location.href = '/signin.html?next=' + encodeURIComponent(here);
-  }
-
-  function hideLogin() {
-    const root = document.getElementById('tgse-login-overlay');
-    if (!root) return;
-    root.setAttribute('hidden', '');
-    root.style.display = 'none';
-  }
-
-  // Gate: ensure we're logged in before doing anything else
-  function ensureAuth() {
-    if (isLoggedIn()) return true;
-    showLogin();
-    return false;
-  }
-
-  // ============================================================
-  // GOOGLE FONTS LOADER
-  // Loads all 29 fonts as one stylesheet at startup.
-  // ============================================================
-
-  function loadGoogleFonts() {
-    if (document.getElementById('tgse-fonts-link')) return;
-    const fams = FONTS.map(f => f.replace(/ /g, '+') + ':wght@400;500;600;700').join('&family=');
-    const link = document.createElement('link');
-    link.id = 'tgse-fonts-link';
-    link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=' + fams + '&display=swap';
-    document.head.appendChild(link);
-  }
-
-  // ============================================================
-  // FONT PICKER COMPONENT
-  // Mounted into a container by tgse.mountFontPicker().
-  // ============================================================
-
-  function mountFontPicker(containerEl, currentFont, onChange) {
-    const el = (typeof containerEl === 'string') ? document.querySelector(containerEl) : containerEl;
-    if (!el) {
-      console.warn('[tgse] mountFontPicker: container not found:', containerEl);
-      return null;
-    }
-
-    let current = currentFont || FONTS[0];
-    el.innerHTML = `
-      <div class="tgse-fp" data-tgse-fp>
-        <button type="button" class="tgse-fp-current" aria-haspopup="listbox" aria-expanded="false">
-          <span class="tgse-fp-name" style="font-family:'${escapeAttr(current)}',sans-serif">${escapeHtml(current)}</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="tgse-fp-dropdown" role="listbox">
-          <input type="text" class="tgse-fp-search" placeholder="Search fonts..." aria-label="Search fonts">
-          <div class="tgse-fp-list"></div>
-        </div>
-      </div>
-    `;
-
-    const wrap = el.querySelector('[data-tgse-fp]');
-    const trigger = wrap.querySelector('.tgse-fp-current');
-    const nameEl = wrap.querySelector('.tgse-fp-name');
-    const search = wrap.querySelector('.tgse-fp-search');
-    const list = wrap.querySelector('.tgse-fp-list');
-
-    function renderList(filter) {
-      const q = (filter || '').trim().toLowerCase();
-      const items = q ? FONTS.filter(f => f.toLowerCase().includes(q)) : FONTS;
-      list.innerHTML = items.map(f =>
-        `<div class="tgse-fp-option${f === current ? ' is-active' : ''}" role="option" data-font="${escapeAttr(f)}" style="font-family:'${escapeAttr(f)}',sans-serif">${escapeHtml(f)}</div>`
-      ).join('');
-    }
-    renderList();
-
-    trigger.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const open = wrap.classList.toggle('is-open');
-      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) { search.value = ''; renderList(); setTimeout(() => search.focus(), 0); }
-    });
-
-    search.addEventListener('input', () => renderList(search.value));
-    search.addEventListener('click', (e) => e.stopPropagation());
-
-    list.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const opt = e.target.closest('.tgse-fp-option');
-      if (!opt) return;
-      const font = opt.dataset.font;
-      current = font;
-      nameEl.textContent = font;
-      nameEl.style.fontFamily = `'${font}',sans-serif`;
-      wrap.classList.remove('is-open');
-      trigger.setAttribute('aria-expanded', 'false');
-      if (typeof onChange === 'function') onChange(font);
-    });
-
-    // Close on outside click (ignore clicks inside the picker itself)
-    document.addEventListener('click', (e) => {
-      if (!wrap.contains(e.target) && wrap.classList.contains('is-open')) {
-        wrap.classList.remove('is-open');
-        trigger.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    return {
-      get value() { return current; },
-      set value(v) {
-        current = v;
-        nameEl.textContent = v;
-        nameEl.style.fontFamily = `'${v}',sans-serif`;
-        renderList();
-      },
-    };
-  }
-
-  // ============================================================
-  // SAVE BUTTON STATE MACHINE
-  // ============================================================
-
-  function setSaveState(state) {
-    const btn = document.getElementById('btn-save');
-    if (!btn) return;
-    const lbl = document.getElementById('save-label');
-    btn.classList.remove('is-dirty', 'is-saving', 'is-saved');
-    if (state === 'dirty') {
-      btn.classList.add('is-dirty');
-      if (lbl) lbl.textContent = 'Save changes';
-    } else if (state === 'saving') {
-      btn.classList.add('is-saving');
-      if (lbl) lbl.textContent = 'Saving…';
-    } else if (state === 'saved') {
-      btn.classList.add('is-saved');
-      if (lbl) lbl.textContent = 'Saved';
-      // Auto-revert after 1.2s
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => {
-        if (!saveDirty) setSaveState('clean');
-      }, 1200);
-    } else {
-      if (lbl) lbl.textContent = 'Save';
-    }
-  }
-
-  function markDirty() {
-    saveDirty = true;
-    setSaveState('dirty');
-  }
-
-  async function doSave() {
-    if (!ensureAuth()) return;
-    if (typeof opts.getConfig !== 'function') {
-      console.error('[tgse] getConfig() not provided in init()');
-      return;
-    }
-    const config = opts.getConfig();
-    const nameEl = document.getElementById('name-input');
-    const name = (nameEl?.value || '').trim() || 'Untitled';
-
-    setSaveState('saving');
-
-    const body = {
-      config,
-      name,
-      widgetType: opts.widgetType,
-    };
-    // Reuse existing widgetId from URL if present
-    const params = new URLSearchParams(location.search);
-    const wId = params.get('id');
-    if (wId) body.widgetId = wId;
-
-    try {
-      const r = await fetch('/api/widget-config', {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(body),
-      });
-
-      if (r.status === 401) {
-        clearSession();
-        toast('Session expired — please sign in again', 'err');
-        showLogin('Your session expired. Please sign in again.');
-        setSaveState('dirty');
-        return;
-      }
-
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        toast(d.error || 'Save failed', 'err');
-        setSaveState('dirty');
-        return;
-      }
-
-      // Success — toast first so the user sees it even if a downstream step
-      // (URL sync, save state UI) throws unexpectedly.
-      saveDirty = false;
-      try { setSaveState('saved'); } catch (e) { console.error('[tgse] setSaveState threw', e); }
-      toast('Saved', 'ok');
-
-      // Sync URL with the widgetId the API returned. The API mints a fresh
-      // widgetId on the CREATE path even if the client sent one (anti-squatting),
-      // so we must always trust the response — not just on first save.
-      try {
-        if (d.widgetId && d.widgetId !== wId) {
-          const u = new URL(location);
-          u.searchParams.set('id', d.widgetId);
-          history.replaceState(null, '', u);
-        }
-      } catch (e) { console.error('[tgse] URL sync threw', e); }
-
-      // Let the editor react (e.g. clear its own dirty flag, refresh embed code)
-      if (typeof opts.onAfterSave === 'function') {
-        try { opts.onAfterSave(d); } catch (e) { console.error('[tgse] onAfterSave threw:', e); }
-      }
-    } catch (e) {
-      console.error('[tgse] Save failed in catch block:', e);
-      toast('Save failed — network error', 'err');
-      setSaveState('dirty');
-    }
-  }
-
-  // ============================================================
-  // TOAST
-  // ============================================================
-
-  function toast(msg, kind) {
-    const existing = document.querySelector('.tgse-toast');
-    if (existing) existing.remove();
-    const t = document.createElement('div');
-    t.className = 'tgse-toast tgse-toast--' + (kind || 'ok');
-    t.textContent = msg;
-    document.body.appendChild(t);
-    requestAnimationFrame(() => t.classList.add('is-show'));
-    setTimeout(() => {
-      t.classList.remove('is-show');
-      setTimeout(() => t.remove(), 300);
-    }, 2400);
-  }
-
-  // ============================================================
-  // VIEWPORT SWITCHER
-  // ============================================================
-
-  function wireViewport() {
-    const buttons = document.querySelectorAll('.tgse-vp button[data-vp]');
-    const frame = document.getElementById('pv-frame');
-    if (!buttons.length || !frame) return;
-
-    buttons.forEach(b => {
-      b.addEventListener('click', () => {
-        buttons.forEach(x => x.classList.remove('is-on'));
-        b.classList.add('is-on');
-        frame.dataset.vp = b.dataset.vp;
-      });
-    });
-  }
-
-  // ============================================================
-  // TABS
-  // ============================================================
-
-  function wireTabs() {
-    const buttons = document.querySelectorAll('.tgse-tabs button[data-tab]');
-    const panels = document.querySelectorAll('.tgse-panel[data-tab]');
-    if (!buttons.length) return;
-
-    function activate(tab) {
-      activeTab = tab;
-      buttons.forEach(b => {
-        const on = b.dataset.tab === tab;
-        b.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      panels.forEach(p => {
-        p.classList.toggle('is-active', p.dataset.tab === tab);
-      });
-      if (typeof opts.onTabChange === 'function') opts.onTabChange(tab);
-    }
-
-    buttons.forEach(b => {
-      b.addEventListener('click', () => activate(b.dataset.tab));
-    });
-
-    // Activate initial tab (the one with aria-selected="true" or the first)
-    const initial = document.querySelector('.tgse-tabs button[aria-selected="true"]')?.dataset.tab
-      || buttons[0]?.dataset.tab;
-    if (initial) activate(initial);
-  }
-
-  // ============================================================
-  // ACTION BUTTONS — Templates, AI, Theme, Design Mode, Embed
-  // ============================================================
-
-  function wireActions() {
-    document.getElementById('btn-templates')?.addEventListener('click', () => {
-      if (typeof opts.onTemplates === 'function') opts.onTemplates();
-    });
-
-    document.getElementById('btn-ai')?.addEventListener('click', () => {
-      if (typeof opts.onAIBuild === 'function') opts.onAIBuild();
-    });
-
-    const themeBtn = document.getElementById('btn-theme');
-    themeBtn?.addEventListener('click', () => {
-      const isOn = themeBtn.classList.toggle('is-on');
-      if (typeof opts.onThemeToggle === 'function') opts.onThemeToggle(isOn);
-    });
-
-    const dmBtn = document.getElementById('btn-design-mode');
-    dmBtn?.addEventListener('click', () => {
-      const isOn = dmBtn.classList.toggle('is-on');
-      if (typeof opts.onDesignMode === 'function') opts.onDesignMode(isOn);
-    });
-
-    document.getElementById('btn-embed')?.addEventListener('click', openEmbedModal);
-
-    document.getElementById('btn-save')?.addEventListener('click', doSave);
-  }
-
-  // ============================================================
-  // EMBED CODE MODAL
-  // ============================================================
-
-  function openEmbedModal() {
-    if (!ensureAuth()) return;
-    const params = new URLSearchParams(location.search);
-    const wId = params.get('id');
-    if (!wId) {
-      toast('Save the widget first to get an embed code', 'err');
-      return;
-    }
-    const widgetTag = opts.widgetTag || 'pricing';
-    const scriptFile = opts.scriptFile || ('widget-' + widgetTag + '.js');
-    const baseUrl = location.origin;
-    const embed = `<div data-tg-widget="${widgetTag}" data-tg-id="${wId}"></div>\n<script src="${baseUrl}/${scriptFile}"></` + `script>`;
-
-    let modal = document.getElementById('tgse-embed-modal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'tgse-embed-modal';
-      modal.className = 'tgse-modal';
-      modal.innerHTML = `
-        <div class="tgse-modal-card" role="dialog" aria-labelledby="tgse-embed-title">
-          <div class="tgse-modal-head">
-            <span class="tgse-id-tile" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            </span>
-            <div>
-              <h2 id="tgse-embed-title">Embed code</h2>
-              <p class="tgse-modal-sub">Paste this anywhere on your website.</p>
-            </div>
-          </div>
-          <div class="tgse-modal-body">
-            <pre style="background:var(--tgse-panel-3);border:1px solid var(--tgse-border);border-radius:var(--tgse-radius-md);padding:14px;font:500 12px 'JetBrains Mono',monospace;color:var(--tgse-ink);overflow-x:auto;margin:0;white-space:pre-wrap;word-break:break-all" id="tgse-embed-code"></pre>
-          </div>
-          <div class="tgse-modal-foot">
-            <button type="button" class="tgse-btn" id="tgse-embed-close">Close</button>
-            <button type="button" class="tgse-btn tgse-btn--primary" id="tgse-embed-copy">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              Copy code
-            </button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      modal.addEventListener('click', e => { if (e.target === modal) closeModal(modal); });
-      modal.querySelector('#tgse-embed-close').addEventListener('click', () => closeModal(modal));
-      modal.querySelector('#tgse-embed-copy').addEventListener('click', () => {
-        const code = modal.querySelector('#tgse-embed-code').textContent;
-        navigator.clipboard.writeText(code).then(
-          () => toast('Embed code copied', 'ok'),
-          () => toast('Copy failed — please copy manually', 'err')
-        );
-      });
-    }
-    modal.querySelector('#tgse-embed-code').textContent = embed;
-    openModal(modal);
-  }
-
-  function openModal(modal) {
-    modal.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal(modal) {
-    modal.classList.remove('is-open');
-    document.body.style.overflow = '';
-  }
-  function closeAllModals() {
-    document.querySelectorAll('.tgse-modal.is-open').forEach(closeModal);
-  }
-
-  // ============================================================
-  // SECTION ACCORDION (auto-wired for any .tgse-section-head)
-  // ============================================================
-
-  function wireSections() {
-    document.addEventListener('click', (e) => {
-      const head = e.target.closest('.tgse-section-head');
-      if (!head) return;
-      head.parentElement.classList.toggle('is-open');
-    });
-  }
-
-  // ============================================================
-  // KEYBOARD SHORTCUTS
-  // ============================================================
-
-  function wireKeyboard() {
-    document.addEventListener('keydown', (e) => {
-      const mod = e.metaKey || e.ctrlKey;
-      const inField = !!e.target.closest('input,textarea,select,[contenteditable="true"]');
-
-      // Save: Cmd/Ctrl + S — works everywhere
-      if (mod && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-        doSave();
-        return;
-      }
-
-      // Escape — close any open modal
-      if (e.key === 'Escape') {
-        closeAllModals();
-        return;
-      }
-
-      // Single-letter shortcuts only when not typing
-      if (!mod && !inField) {
-        if (e.key === 'a' || e.key === 'A') { e.preventDefault(); document.getElementById('btn-ai')?.click(); }
-        else if (e.key === 't' || e.key === 'T') { e.preventDefault(); document.getElementById('btn-templates')?.click(); }
-        else if (e.key === 'd' || e.key === 'D') { e.preventDefault(); document.getElementById('btn-design-mode')?.click(); }
-        else if (e.key === '1') { e.preventDefault(); document.querySelector('.tgse-tabs button[data-tab="design"]')?.click(); }
-        else if (e.key === '2') { e.preventDefault(); document.querySelector('.tgse-tabs button[data-tab="content"]')?.click(); }
-        else if (e.key === '3') { e.preventDefault(); document.querySelector('.tgse-tabs button[data-tab="settings"]')?.click(); }
-      }
-    });
-  }
-
-  // ============================================================
-  // UTILITIES
-  // ============================================================
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    })[c]);
-  }
-  function escapeAttr(s) { return escapeHtml(s); }
-
-  // ============================================================
-  // PUBLIC API
-  // ============================================================
-
-  function init(initOpts) {
-    opts = initOpts || {};
-
-    // 1. Auth gate — show login overlay only if BOTH cookie session check
-    // has resolved AND we're not authenticated by any means. While the
-    // cookie check is in flight (typically <200ms), defer the decision to
-    // avoid flashing the overlay for users who are signed in via the
-    // unified flow.
-    function applyAuthGate() {
-      if (!isLoggedIn()) {
-        showLogin();
+      <input type="text" value="${esc(h.value)}" placeholder="Value" onchange="snap();C.aiHighlights[${i}].value=this.value;renP()">
+    </div>`).join('')}
+    <button class="ab" type="button" onclick="snap();C.aiHighlights.push({label:'New insight',value:'Description',color:'#6366F1',icon:'heart'});ren();renP()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add highlight</button>
+  `) + sec('Embed code', '<polyline points="16 18 22 12 16 6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8 6 2 12 8 18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', true, `
+    <div class="emb"><span class="t">&lt;div</span> <span class="a">data-tg-widget</span>=<span class="v">"reviews"</span>
+  <span class="a">data-tg-id</span>=<span class="v">"${wid}"</span><span class="t">&gt;&lt;/div&gt;</span>
+<span class="t">&lt;script</span> <span class="a">src</span>=<span class="v">"https://tg-widgets.vercel.app/widget-reviews.js"</span><span class="t">&gt;&lt;/script&gt;</span></div>
+    <button class="tgse-btn" type="button" onclick="document.getElementById('btn-embed').click()" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Open embed code modal</button>
+    ${wId ? `<div style="margin-top:10px;font-size:11px;color:var(--tgse-ink-3)">Widget ID: <code style="background:var(--tgse-panel-3);padding:2px 6px;border-radius:4px;font-size:10px">${wId}</code></div>` : '<div style="margin-top:10px;font-size:11px;color:var(--tgse-ink-3)">Save to get your widget ID</div>'}
+  `);
+}
+
+/* ── Section state preservation ──────────────────────────────── */
+function saveSecState() {
+  document.querySelectorAll('.tgse-panel.is-active .sec').forEach((s, i) => { openSecs[tab + '_' + i] = s.classList.contains('open'); });
+  document.querySelectorAll('.rc').forEach((r, i) => { openRevs[i] = r.classList.contains('open'); });
+}
+function restoreSecState() {
+  document.querySelectorAll('.tgse-panel.is-active .sec').forEach((s, i) => { if (openSecs[tab + '_' + i]) s.classList.add('open'); });
+  document.querySelectorAll('.rc').forEach((r, i) => { if (openRevs[i]) r.classList.add('open'); });
+}
+
+/* ── Bind data-bind inputs ───────────────────────────────────── */
+function bind() {
+  document.querySelectorAll('[data-bind]').forEach(el => {
+    const ev = el.type === 'range' ? 'input' : 'change';
+    el.addEventListener(ev, () => {
+      snap();
+      const k = el.dataset.bind;
+      if (k.includes('.')) {
+        const [a, b] = k.split('.');
+        if (typeof C[a] === 'object') C[a][b] = el.type === 'number' ? +el.value : el.value;
+        else C[k] = el.value;
       } else {
-        // We're authenticated — make sure any overlay is hidden (in case
-        // the user signed in mid-page, e.g. via storage event)
-        hideLogin();
+        C[k] = el.type === 'range' ? +el.value : el.value;
       }
-    }
-    if (cookieAuthState === 'pending') {
-      cookieAuthListeners.push(applyAuthGate);
-    } else {
-      applyAuthGate();
-    }
+      if (el.type === 'range') {
+        const disp = el.closest('.sr')?.querySelector('.st span:last-child');
+        if (disp) disp.textContent = el.value + 'px';
+        renP();
+      } else if (el.type === 'color') {
+        const sw = el.closest('.sw'); if (sw) sw.querySelector('div').style.background = el.value;
+        const sp = el.closest('.cr')?.querySelector('.crr span'); if (sp) sp.textContent = el.value;
+        renP();
+      } else {
+        saveSecState(); ren(); renP(); restoreSecState();
+      }
+    });
+  });
 
-    // 2. Load Google Fonts so the picker previews properly
-    loadGoogleFonts();
+  // Spreadsheet drop zone
+  const z = document.getElementById('upZ');
+  if (z) {
+    z.ondragover = e => { e.preventDefault(); z.classList.add('dragover'); };
+    z.ondragleave = () => z.classList.remove('dragover');
+    z.ondrop = e => { e.preventDefault(); z.classList.remove('dragover'); if (e.dataTransfer.files.length) procF(e.dataTransfer.files[0]); };
+  }
+}
 
-    // 3. Wire shell behaviour
-    wireTabs();
-    wireViewport();
-    wireActions();
-    wireSections();
-    wireKeyboard();
+/* ── Preview render ──────────────────────────────────────────── */
+function renP() {
+  const m = document.getElementById('widget-mount');
+  const cfg = { ...C, theme: dark ? 'dark' : 'light' };
+  m.innerHTML = '';
+  const el = document.createElement('div');
+  el.setAttribute('data-tg-widget', 'reviews');
+  m.appendChild(el);
+  if (window.TGReviewsWidget) new window.TGReviewsWidget(el, cfg);
+  if (dm) setTimeout(buildOv, 50);
+}
 
-    // 4. Mount font picker if requested
-    if (opts.fontPickerEl) {
-      const initialFont = opts.getConfig?.()?.fontFamily || FONTS[0];
-      const picker = mountFontPicker(opts.fontPickerEl, initialFont, (font) => {
-        markDirty();
-        if (typeof opts.onFontChange === 'function') opts.onFontChange(font);
-      });
-      // Expose picker on the public API so the editor can update it later
-      tgse._fontPicker = picker;
-    }
+/* ============================================================
+   DESIGN MODE — click-to-edit overlay system
+   ============================================================ */
+function clearOv() { document.getElementById('ovWrap').innerHTML = ''; closePop(); }
 
-    return {
-      markDirty,
-      setSaveState,
-      toast,
-      doSave,
-      showLogin,
-      hideLogin,
-      isLoggedIn,
-      authHeaders,
-      getAuthToken,
-      getCurrentUser,
-      mountFontPicker,
-      onReady,
-      FONTS,
-    };
+function buildOv() {
+  const wrap = document.getElementById('ovWrap');
+  wrap.innerHTML = '';
+  const container = document.getElementById('pv-frame');
+  const mountEl = document.getElementById('widget-mount').firstElementChild;
+  if (!mountEl || !mountEl.shadowRoot) return;
+  const shadow = mountEl.shadowRoot;
+  const cRect = container.getBoundingClientRect();
+
+  function spot(el, label, type, data) {
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const div = document.createElement('div');
+    div.className = 'ov-spot';
+    div.style.cssText = `left:${r.left-cRect.left-2}px;top:${r.top-cRect.top-2}px;width:${r.width+4}px;height:${r.height+4}px`;
+    div.innerHTML = `<span class="ov-label">${label}</span>`;
+    div.onclick = (e) => { e.stopPropagation(); openPop(type, data, r.left-cRect.left, r.top-cRect.top + r.height + 8); };
+    wrap.appendChild(div);
   }
 
-  // ── Expose ─────────────────────────────────────────────────
-  window.tgse = {
-    init,
-    onReady,
-    markDirty,
-    setSaveState,
-    toast,
-    doSave,
-    showLogin,
-    hideLogin,
-    isLoggedIn,
-    authHeaders,
-    getAuthToken,
-    getCurrentUser,
-    mountFontPicker,
-    FONTS,
-    version: '1.1.0',
-  };
+  spot(shadow.querySelector('.tgr-header'), 'Header', 'header', {});
+  spot(shadow.querySelector('.tgr-ai'), 'AI Insights', 'ai', {});
+  spot(shadow.querySelector('.tgr-tags'), 'Tag Filters', 'tags', {});
+  spot(shadow.querySelector('.tgr-trust'), 'Trust Strip', 'trust', {});
+  spot(shadow.querySelector('.tgr-cta'), 'Write a Review', 'cta', {});
 
-})();
+  shadow.querySelectorAll('.tgr-card').forEach((card, i) => {
+    if (C.reviews[i]) spot(card, `Review: ${(C.reviews[i].author || '').split(' ')[0]}`, 'review', { idx: i });
+  });
+}
+
+function openPop(type, data, x, y) {
+  const pop = document.getElementById('popover');
+  let html = `<div class="pop-title"><span>${type.toUpperCase()}</span><button class="pop-close" type="button" onclick="closePop()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
+
+  if (type === 'header') {
+    html += `<div class="fld"><label class="fl">Business name</label><input type="text" value="${esc(C.place.name)}" oninput="snap();C.place.name=this.value;renP()"></div>
+      <div class="pg">
+        <div class="fld"><label class="fl">Rating</label><input type="number" step="0.1" value="${C.place.rating}" oninput="snap();C.place.rating=+this.value;renP()"></div>
+        <div class="fld"><label class="fl">Total</label><input type="number" value="${C.place.total}" oninput="snap();C.place.total=+this.value;renP()"></div>
+      </div>`;
+  } else if (type === 'review') {
+    const r = C.reviews[data.idx];
+    html += `<div class="fld"><label class="fl">Author</label><input type="text" value="${esc(r.author)}" oninput="snap();C.reviews[${data.idx}].author=this.value;renP()"></div>
+      <div class="fld"><label class="fl">Review</label><textarea oninput="snap();C.reviews[${data.idx}].text=this.value;renP()" style="min-height:60px">${esc(r.text)}</textarea></div>
+      <div class="pg">
+        <div class="fld"><label class="fl">Rating</label><select onchange="snap();C.reviews[${data.idx}].rating=+this.value;renP()">${[5,4,3,2,1].map(s => `<option${r.rating === s ? ' selected' : ''}>${s} star${s > 1 ? 's' : ''}</option>`).join('')}</select></div>
+        <div class="fld"><label class="fl">Date</label><input type="text" value="${esc(r.date)}" oninput="snap();C.reviews[${data.idx}].date=this.value;renP()"></div>
+      </div>`;
+  } else if (type === 'trust') {
+    html += `<div class="fld"><label class="fl">Trust text</label><input type="text" value="${esc(C.trustText)}" oninput="snap();C.trustText=this.value;renP()"></div>${togF('Show', 'showTrust', C.showTrust)}`;
+  } else if (type === 'cta') {
+    html += `<div class="fld"><label class="fl">Button text</label><input type="text" value="${esc(C.ctaText)}" oninput="snap();C.ctaText=this.value;renP()"></div>
+      <div class="fld"><label class="fl">URL</label><input type="url" value="${esc(C.ctaUrl)}" oninput="snap();C.ctaUrl=this.value;renP()"></div>`;
+  } else if (type === 'ai') {
+    html += `${togF('Show AI Insights', 'showAI', C.showAI)}`;
+  } else if (type === 'tags') {
+    html += `${togF('Show tag filters', 'showTags', C.showTags)}`;
+  }
+
+  pop.innerHTML = html;
+  const pvxRect = document.getElementById('pv-frame').getBoundingClientRect();
+  const popX = pvxRect.left + x;
+  const popY = pvxRect.top + y;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  pop.style.left = Math.min(Math.max(popX, 8), vw - 330) + 'px';
+  pop.style.top = Math.min(Math.max(popY, 8), vh - 300) + 'px';
+  pop.classList.add('show');
+}
+
+function closePop() { document.getElementById('popover').classList.remove('show'); }
+
+document.addEventListener('click', e => {
+  const pop = document.getElementById('popover');
+  if (pop.classList.contains('show') && !e.target.closest('.pop') && !e.target.closest('.ov-spot')) closePop();
+});
+document.querySelector('.tgse-canvas').addEventListener('scroll', () => { if (dm) buildOv(); });
+window.addEventListener('resize', () => { if (dm) setTimeout(buildOv, 100); });
+
+/* ── Add review ─────────────────────────────────────────────── */
+function addRev() {
+  snap();
+  C.reviews.push({ id: String(Date.now()), author: 'New Reviewer', rating: 5, date: 'Just now', text: 'Great experience!', tags: [], helpful: 0, hasPhoto: false, photoUrl: '', reply: null });
+  ren(); renP();
+}
+
+/* ── Spreadsheet ─────────────────────────────────────────────── */
+function hFile(inp) { if (inp.files.length) procF(inp.files[0]); inp.value = ''; }
+function procF(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+      if (!rows.length) { tgse.toast('No data found in spreadsheet', 'err'); return; }
+      snap();
+      C.reviews = rows.map((row, i) => ({
+        id: String(Date.now() + i),
+        author: row.Author || row.Name || row['Reviewer'] || 'Anonymous',
+        rating: parseInt(row.Rating || row.Stars || 5),
+        date: row.Date || row['Review Date'] || 'Recently',
+        text: row.Text || row.Review || row['Review Text'] || '',
+        tags: (row.Tags || '').split(',').map(t => t.trim()).filter(Boolean),
+        helpful: parseInt(row.Helpful || 0),
+        hasPhoto: !!(row['Photo URL'] || row.Photo),
+        photoUrl: row['Photo URL'] || row.Photo || '',
+        reply: row['Reply Text'] ? { author: row['Reply Author'] || C.place.name, text: row['Reply Text'] } : null
+      }));
+      ren(); renP();
+      tgse.toast(`Imported ${C.reviews.length} reviews`, 'ok');
+    } catch (e) {
+      tgse.toast('Error reading file', 'err');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+function dlTpl() {
+  const h = ['Author','Rating','Date','Review Text','Tags','Helpful','Photo URL','Reply Author','Reply Text'];
+  const ex = [
+    ['Sarah M', 5, '2 weeks ago', 'Amazing service, booked our family holiday and everything was perfect!', 'Family,Service', 24, '', 'Sunshine Holidays', 'Thank you Sarah!'],
+    ['James R', 5, '1 month ago', 'Third year booking and they never disappoint. Great prices.', 'Value,Couples', 18, '', '', ''],
+    ['Emma T', 4, '3 weeks ago', 'Good experience overall. Booking was easy.', 'Service,Booking', 12, '', 'Sunshine Holidays', 'Thanks Emma!']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([h, ...ex]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Reviews');
+  XLSX.writeFile(wb, 'reviews-template.xlsx');
+}
+
+/* ── AI builder ──────────────────────────────────────────────── */
+async function generateAI() {
+  const prompt = document.getElementById('aiPrompt').value.trim();
+  if (!prompt) return;
+  const btn = document.getElementById('aiGenerate');
+  const err = document.getElementById('aiErr');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spin"></span> Generating…';
+  err.style.display = 'none';
+  try {
+    const r = await fetch('/api/widget-ai', {
+      method: 'POST',
+      headers: tgse.authHeaders(),
+      body: JSON.stringify({
+        prompt: `Generate Google Reviews widget data. Return ONLY JSON, no markdown. ${prompt}. Return: {"place":{"name":"Business Name","rating":4.8,"total":NUMBER},"reviews":[{"id":"unique","author":"Full Name","rating":5,"date":"relative date","text":"review text 50-150 words","tags":["Tag1","Tag2"],"helpful":NUMBER,"hasPhoto":false,"photoUrl":"","reply":{"author":"Business Name","text":"reply"} or null}],"aiHighlights":[{"label":"label","value":"value","color":"#hex","icon":"heart|users|trending|award"}]}`
+      })
+    });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || 'Failed'); }
+    const d = await r.json();
+    snap();
+    if (d.reviews) C.reviews = d.reviews;
+    if (d.place) C.place = d.place;
+    if (d.aiHighlights) C.aiHighlights = d.aiHighlights;
+    closeModal('aiModal');
+    ren(); renP();
+    tgse.toast('AI generated reviews', 'ok');
+  } catch (e) {
+    err.textContent = e.message || 'Generation failed';
+    err.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>Generate';
+}
+
+/* ── Templates ───────────────────────────────────────────────── */
+function showTplModal() {
+  const list = document.getElementById('tplList');
+  list.innerHTML = `<div class="tpc" onclick="closeModal('tplModal');setTimeout(()=>document.getElementById('btn-ai').click(),100)" style="border-style:dashed;border-color:var(--tgse-accent);background:var(--tgse-brand-tint)">
+    <div class="tpi" style="background:linear-gradient(135deg,var(--tgse-brand),var(--tgse-accent))">
+      <svg viewBox="0 0 24 24" style="stroke:#fff"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>
+    </div>
+    <div class="tpn"><strong>Build with AI</strong><small>Generate realistic reviews</small></div>
+  </div>` + TPL.map((t, i) => `<div class="tpc" onclick="applyTemplate(${i})">
+    <div class="tpi"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+    <div class="tpn"><strong>${t.n}</strong><small>${t.d}</small></div>
+  </div>`).join('');
+  openModal('tplModal');
+}
+function applyTemplate(i) {
+  snap();
+  C.reviews = JSON.parse(JSON.stringify(TPL[i].reviews));
+  C.place = { ...TPL[i].place };
+  closeModal('tplModal');
+  ren(); renP();
+  tgse.toast('Template applied', 'ok');
+}
+
+/* ── Modal helpers ───────────────────────────────────────────── */
+function openModal(id) { document.getElementById(id).classList.add('is-open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('is-open'); document.body.style.overflow = ''; }
+document.querySelectorAll('[data-close-modal]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+});
+document.querySelectorAll('.tgse-modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+});
+// Chips inside the AI modal — fill prompt
+document.querySelectorAll('#aiModal .chip').forEach(chip => {
+  chip.addEventListener('click', () => { document.getElementById('aiPrompt').value = chip.textContent; });
+});
+document.getElementById('aiGenerate').addEventListener('click', generateAI);
+
+/* ── Theme toggle button ─────────────────────────────────────── */
+function updateThemeButtonLabel() {
+  const btn = document.getElementById('btn-theme');
+  if (!btn) return;
+  const labelText = dark ? 'Dark' : 'Theme';
+  const svg = btn.querySelector('svg');
+  btn.innerHTML = '';
+  btn.appendChild(svg);
+  btn.appendChild(document.createTextNode(' ' + labelText));
+}
+
+/* ── Keyboard shortcuts (widget-specific) ────────────────────── */
+document.addEventListener('keydown', e => {
+  const mod = e.metaKey || e.ctrlKey;
+  if (mod && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  if (mod && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+  if (!mod && !e.target.closest('input,textarea,select')) {
+    if (e.key === 'Escape') closePop();
+  }
+});
+
+/* ── Load existing widget if URL has ?id ─────────────────────── */
+async function loadWidget(id) {
+  try {
+    const r = await fetch('/api/widget-config?id=' + encodeURIComponent(id));
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    Object.assign(C, d);
+    document.getElementById('name-input').value = C.place?.name || '';
+    snap(); ren(); renP();
+    tgse.toast('Loaded', 'ok');
+  } catch (e) {
+    C.reviews = JSON.parse(JSON.stringify(TPL[0].reviews));
+    C.place = { ...TPL[0].place };
+    snap(); ren(); renP();
+  }
+}
+
+/* ── Boot ────────────────────────────────────────────────────── */
+function boot() {
+  if (!tgse.isLoggedIn()) return;  // Shell will show overlay; we'll boot again via onLoginSuccess
+  const params = new URLSearchParams(location.search);
+  wId = params.get('id');
+  if (wId) {
+    loadWidget(wId);
+  } else {
+    C.reviews = JSON.parse(JSON.stringify(TPL[0].reviews));
+    C.place = { ...TPL[0].place };
+    snap(); ren(); renP();
+  }
+}
+
+/* ── Initialise the shell ────────────────────────────────────── */
+shell = tgse.init({
+  widgetType: 'Google Reviews',
+  widgetTag: 'reviews',
+  scriptFile: 'widget-reviews.js',
+
+  getConfig: () => C,
+  setConfig: (c) => { Object.assign(C, c); ren(); renP(); },
+
+  fontPickerEl: '#fontPickerMount',
+  onFontChange: (f) => { snap(); C.fontFamily = f; renP(); },
+
+  onAIBuild: () => openModal('aiModal'),
+  onTemplates: () => showTplModal(),
+
+  onThemeToggle: () => {
+    dark = !dark;
+    updateThemeButtonLabel();
+    renP();
+  },
+  onDesignMode: (isOn) => {
+    dm = isOn;
+    const wrap = document.getElementById('ovWrap');
+    wrap.classList.toggle('active', dm);
+    if (dm) { buildOv(); tgse.toast('Design mode on — click any element', 'ok'); }
+    else { clearOv(); closePop(); }
+  },
+  onTabChange: (newTab) => { tab = newTab; },
+  onLoginSuccess: () => boot(),
+  onAfterSave: (d) => { if (d?.widgetId) wId = d.widgetId; },
+});
+
+document.getElementById('name-input').addEventListener('input', () => snap());
+document.addEventListener('DOMContentLoaded', () => {
+  // v1.1 shell — wait for cookie auth resolution before deciding whether to boot.
+  if (window.tgse && typeof window.tgse.onReady === 'function') {
+    window.tgse.onReady(boot);
+  } else {
+    boot();
+  }
+});
+</script>
+</body>
+</html>
