@@ -895,7 +895,14 @@ shell = tgse.init({
 });
 
 document.getElementById('name-input').addEventListener('input', () => snap());
-document.addEventListener('DOMContentLoaded', boot);
+document.addEventListener('DOMContentLoaded', () => {
+  // v1.1 shell — wait for cookie auth resolution before deciding whether to boot.
+  if (window.tgse && typeof window.tgse.onReady === 'function') {
+    window.tgse.onReady(boot);
+  } else {
+    boot();
+  }
+});
 </script>
 </body>
 </html>
