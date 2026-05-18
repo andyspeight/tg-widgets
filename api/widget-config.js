@@ -115,6 +115,93 @@ const PLAN_WIDGET_LIMITS = {
   'Newsletter Signup':     { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
 };
 
+// Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
+// PLAN_WIDGET_LIMITS keys use Title Case (Spark / Boost / Ignite / Bespoke);
+// the JWT or hydrated user record might supply a casing variant or a
+// suffix like "Ignite Plan". This map collapses all known variants down
+// to the canonical Title-Case form. Anything that doesn't map returns
+// null, which the caller treats as "unknown plan, deny".
+const PLAN_ALIASES = {
+  spark: 'Spark',
+  boost: 'Boost',
+  ignite: 'Ignite',
+  bespoke: 'Bespoke',
+};
+
+function canonicalisePlan(raw) {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim().toLowerCase();
+  if (!trimmed) return null;
+  // Direct match first (covers "Spark", "spark", "SPARK", "  spark  ")
+  if (PLAN_ALIASES[trimmed]) return PLAN_ALIASES[trimmed];
+  // Token match for noisy values like "Ignite Plan", "plan: boost", "boost-tier"
+  // Split on non-letter characters so "ignite_plan" and "ignite plan" both work.
+  const tokens = trimmed.split(/[^a-z]+/).filter(Boolean);
+  for (const tok of tokens) {
+    if (PLAN_ALIASES[tok]) return PLAN_ALIASES[tok];
+  }
+  return null;
+}
+
+// Widget-type alias map. Editors should send the canonical type names
+// (matching ALLOWED_WIDGET_TYPES and the Airtable singleSelect options
+// exactly), but accept common shorthand so a slug or short-form doesn't
+// break a save. The match in ALLOWED_WIDGET_TYPES is already case-
+// insensitive; this map adds aliases on top of that.
+//
+// Keys are lowercase, values are the canonical Title-Case form.
+const WIDGET_TYPE_ALIASES = {
+  // slug → canonical
+  'pricing':           'Pricing Table',
+  'pricing-table':     'Pricing Table',
+  'reviews':           'Google Reviews',
+  'google-reviews':    'Google Reviews',
+  'faq':               'FAQ',
+  'testimonials':      'Testimonials',
+  'spotlight':         'Destination Spotlight',
+  'destination':       'Destination Spotlight',
+  'destination-spotlight': 'Destination Spotlight',
+  'airport':           'Airport Spotlight',
+  'airport-spotlight': 'Airport Spotlight',
+  'weather':           'Weather',
+  'enquiry':           'Enquiry Form',
+  'enquiry-form':      'Enquiry Form',
+  'mybooking':         'My Booking',
+  'my-booking':        'My Booking',
+  'textfx':            'Text FX',
+  'text-fx':           'Text FX',
+  'logos':             'Logo Showcase',
+  'logo-showcase':     'Logo Showcase',
+  'offers':            'Travel Offers',
+  'travel-offers':     'Travel Offers',
+  'popup':             'Popup',
+  'countdown':         'Countdown Timer',
+  'countdown-timer':   'Countdown Timer',
+  'events':            'Event Calendar',
+  'event-calendar':    'Event Calendar',
+  'share':             'Social Share',
+  'social-share':      'Social Share',
+  'whatsapp':          'WhatsApp Chat',
+  'whatsapp-chat':     'WhatsApp Chat',
+  'hours':             'Opening Hours',
+  'opening-hours':     'Opening Hours',
+  'newsletter':        'Newsletter Signup',
+  'newsletter-signup': 'Newsletter Signup',
+};
+
+function canonicaliseWidgetType(raw) {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  // Exact case-insensitive match against the canonical list first
+  const direct = ALLOWED_WIDGET_TYPES.find(
+    t => t.toLowerCase() === trimmed.toLowerCase()
+  );
+  if (direct) return direct;
+  // Fall back to the alias map (slugs, short forms, kebab-case)
+  return WIDGET_TYPE_ALIASES[trimmed.toLowerCase()] || null;
+}
+
 // Count existing widgets owned by this user, of a specific type.
 // Used by the CREATE path to enforce plan limits.
 //
@@ -216,19 +303,20 @@ export default async function handler(req, res) {
 
       const safeName = (typeof name === 'string' ? name : 'Untitled').slice(0, 200);
 
-      // Validate widgetType against the enum if provided. Case-insensitive
-      // match — we store the canonical form to match the Airtable singleSelect
-      // option names exactly. If not provided here, the CREATE path below
-      // will reject the request (required for new widgets).
+      // Validate widgetType against the enum if provided. The canonicaliser
+      // accepts the canonical Title-Case names, any casing variant of them,
+      // and the alias map (slugs and short forms). Anything outside that
+      // returns null and we 400. Editors should be sending the canonical
+      // form passed to tgse.init({ widgetType: ... }) — the alias map is
+      // a safety net for editors that drift.
       let safeType = null;
       if (widgetType !== undefined && widgetType !== null) {
         if (typeof widgetType !== 'string' || widgetType.length === 0 || widgetType.length > 50) {
           return res.status(400).json({ error: 'Invalid widgetType' });
         }
-        const canonical = ALLOWED_WIDGET_TYPES.find(
-          t => t.toLowerCase() === widgetType.toLowerCase()
-        );
+        const canonical = canonicaliseWidgetType(widgetType);
         if (!canonical) {
+          console.error('[widget-config] Unknown widgetType from editor:', widgetType);
           return res.status(400).json({
             error: `Unsupported widget type. Allowed: ${ALLOWED_WIDGET_TYPES.join(', ')}`
           });
@@ -294,9 +382,21 @@ export default async function handler(req, res) {
         console.error('[widget-config] Widget type missing from PLAN_WIDGET_LIMITS:', safeType);
         return res.status(500).json({ error: 'Widget configuration error. Contact support.' });
       }
-      const planLimit = planLimits[user.plan];
+      // Canonicalise plan before the lookup. JWTs and Airtable rows can both
+      // carry casing variants ("ignite", "Ignite Plan") that don't match the
+      // Title-Case keys in PLAN_WIDGET_LIMITS. Without this normalisation an
+      // Ignite user with a lowercase plan claim gets a hard 403.
+      const canonicalPlan = canonicalisePlan(user.plan);
+      if (!canonicalPlan) {
+        console.error('[widget-config] Unrecognised plan value:', user.plan, 'for user:', user.email);
+        return res.status(403).json({ error: 'Your plan does not support widget creation. Contact support.' });
+      }
+      const planLimit = planLimits[canonicalPlan];
       if (planLimit === undefined) {
-        console.error('[widget-config] Unknown plan for limit check:', user.plan);
+        // Plan canonicalised to a known name but PLAN_WIDGET_LIMITS doesn't
+        // have an entry for it on this widget. Means PLAN_WIDGET_LIMITS is
+        // missing a key — fix the constant, don't blame the user.
+        console.error('[widget-config] Plan', canonicalPlan, 'missing from limits for', safeType);
         return res.status(403).json({ error: 'Your plan does not support widget creation. Contact support.' });
       }
       if (planLimit === 0) {
