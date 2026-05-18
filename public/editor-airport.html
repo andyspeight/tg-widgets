@@ -792,15 +792,84 @@
       setConfig:   setConfig,
       onFontChange: () => renderPreview(),
       onThemeChange: () => renderPreview(),
-      onAfterSave: () => { /* noop */ },
+      // After a successful save, re-read the URL so subsequent reload-edit
+      // cycles work. The shell already updates location.search with the new
+      // widgetId on create; we just need to render the embed-able state.
+      onAfterSave: () => { renderPreview(); },
+      // Called after the user signs in via the shell's login overlay.
+      // Re-runs boot() so a fresh ?id= load happens with the new session.
+      onLoginSuccess: () => boot(),
     });
   } else {
     // Shell not loaded — render preview with defaults anyway
     setConfig({});
   }
 
+  // ---- Load an existing saved widget by ?id= ----
+  // The shell handles save (using getConfig + onAfterSave) but doesn't
+  // auto-load saved configs — that's each editor's responsibility. This
+  // function fetches the saved record and feeds it back through setConfig
+  // so the editor populates with the saved values.
+  async function loadExisting(id) {
+    try {
+      // cache: 'no-store' bypasses both browser and CDN cache. The GET endpoint
+      // returns s-maxage=300 (5min) for public embeds; the editor needs fresh
+      // data after every save round-trip.
+      const bust = '&_=' + Date.now();
+      const r = await fetch('/api/widget-config?id=' + encodeURIComponent(id) + bust, {
+        cache: 'no-store',
+      });
+      if (!r.ok) {
+        // 404 here means the URL has an ID for a widget that doesn't exist
+        // (or was deleted). Start fresh rather than showing an error — the
+        // user can save and a new ID will be minted.
+        return;
+      }
+      const data = await r.json();
+      // API returns { config, name, ...config } — config is the canonical
+      // shape. Fall back to root for legacy responses just in case.
+      const cfg = (data && data.config && typeof data.config === 'object') ? data.config : data;
+      setConfig(cfg);
+      // If the API returned a name, sync it to the topbar name input so the
+      // shell's save flow uses the existing name on update.
+      if (data && typeof data.name === 'string') {
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) nameInput.value = data.name;
+      }
+    } catch (err) {
+      // Silent — first-load failure means the user starts with defaults,
+      // which is the same UX as visiting /editor-airport with no ?id=.
+      console.warn('[airport-editor] load existing failed:', err && err.message);
+    }
+  }
+
+  // ---- Boot: read ?id= and load if present ----
+  function boot() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (wId) {
+      loadExisting(wId);
+    }
+    // No ?id= → editor renders with its default DOM values (already set
+    // in the HTML), which is the desired "new widget" UX.
+  }
+
   // Initial preview
   setTimeout(renderPreview, 100);
+
+  // ---- Wait for auth to resolve before loading saved configs ----
+  // The shell performs an async cookie auth check on module load. The
+  // /api/widget-config GET endpoint is public (no auth required to read
+  // a widget by ID), so technically we could fetch immediately. But other
+  // editors all use this pattern, and it future-proofs against the GET
+  // endpoint requiring auth for owner-only fields. Also matches the
+  // canonical onReady boot pattern used across the rest of the suite.
+  if (window.tgse && typeof window.tgse.onReady === 'function') {
+    window.tgse.onReady(boot);
+  } else {
+    // Defensive fallback for older shells lacking onReady
+    boot();
+  }
 
 })();
 </script>
