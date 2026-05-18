@@ -80,11 +80,39 @@ async function hydrateLegacyUserFields(user) {
 
   // Step 2: hydrate plan from the client record. Runs AFTER clientId
   // hydration so a legacy JWT missing both can still resolve.
+  //
+  // Two fields can carry plan information:
+  //   - CLIENTS.fields.plan    — singleSelect (legacy, manually populated)
+  //   - CLIENTS.fields.package — linked record to Packages (SSO writes here)
+  //
+  // Try Plan first (older clients have this), fall back to Package
+  // (SSO-created clients have this). Mirrors resolveClientPlan() in
+  // _lib/auth/plan.js so the JWT-mint path and the hydration path agree.
   if (needsPlan && user.clientId) {
     try {
       const c = await getRecord(CLIENTS.tableId, user.clientId);
-      const raw = c?.fields?.[CLIENTS.fields.plan];
-      const plan = await normalisePlanValue(raw);
+      const fields = c?.fields || {};
+
+      // First try the legacy Plan singleSelect
+      let raw = fields[CLIENTS.fields.plan];
+      let plan = await normalisePlanValue(raw);
+      let resolvedFrom = plan ? 'plan' : null;
+
+      // Fall back to the Package linked record (SSO-managed clients)
+      if (!plan) {
+        raw = fields[CLIENTS.fields.package];
+        plan = await normalisePlanValue(raw);
+        if (plan) resolvedFrom = 'package';
+      }
+
+      // Diagnostic: which field gave us the answer, so log spelunking
+      // tells us instantly whether the fallback fired or not.
+      console.log('[widget-config] hydrate plan resolution:', {
+        clientId: user.clientId,
+        resolvedFrom: resolvedFrom || 'none',
+        resolvedPlan: plan || null,
+      });
+
       if (plan) user.plan = plan;
     } catch (err) {
       console.warn('[widget-config] hydrate plan failed:', err.message);
