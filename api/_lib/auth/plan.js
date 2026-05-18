@@ -41,8 +41,24 @@ export async function resolveClientPlan(clientRecordId) {
     return '';
   }
 
-  const raw = client?.fields?.[CLIENTS.fields.plan];
-  return await normalisePlanValue(raw);
+  // Two fields can carry plan information:
+  //   - CLIENTS.fields.plan    — singleSelect (legacy, manually populated for
+  //                              clients created before SSO existed)
+  //   - CLIENTS.fields.package — linked record to Packages (SSO writes here)
+  //
+  // Try Plan first (older clients), fall back to Package (SSO-created clients).
+  // Without this fallback, every SSO-provisioned client gets an empty plan
+  // because the SSO handler only writes to .package, not .plan.
+  const fields = client?.fields || {};
+  let raw = fields[CLIENTS.fields.plan];
+  let resolved = await normalisePlanValue(raw);
+
+  if (!resolved) {
+    raw = fields[CLIENTS.fields.package];
+    resolved = await normalisePlanValue(raw);
+  }
+
+  return resolved;
 }
 
 /**
