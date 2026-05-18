@@ -17,33 +17,70 @@ import { USERS, CLIENTS } from './_lib/auth/schema.js';
 import { normalisePlanValue } from './_lib/auth/plan.js';
 
 /**
- * If the JWT carries userId but not email/plan (true for cookies issued
- * before this fix), look the missing fields up by record ID and patch
- * them onto the user object in place. Failures are logged and swallowed
- * so the request can still proceed with whatever the JWT did carry.
+ * If the JWT carries userId but not email/plan/clientId (true for cookies
+ * issued before the auth migration that started embedding those fields),
+ * look the missing fields up by record ID and patch them onto the user
+ * object in place. Failures are logged and swallowed so the request can
+ * still proceed with whatever the JWT did carry.
  *
- * Only runs when something is actually missing — no perf hit on
- * freshly-issued JWTs that already include both fields.
+ * Hydration chain:
+ *   - email: from USERS.email by user.recordId
+ *   - clientId: from USERS.client[0] by user.recordId (linked-record array)
+ *   - plan: from CLIENTS.plan by user.clientId (after clientId hydration)
+ *
+ * This is critical for legacy JWTs that lack BOTH clientId and plan —
+ * without the clientId hop, plan hydration is skipped and the user
+ * gets a hard 403 on widget save. Only runs when something is missing —
+ * no perf hit on freshly-issued JWTs.
  */
 async function hydrateLegacyUserFields(user) {
   if (!user) return;
-  const needsEmail = !user.email && user.recordId;
-  const needsPlan  = !user.plan  && user.clientId;
-  if (!needsEmail && !needsPlan) return;
+  const needsEmail    = !user.email    && user.recordId;
+  const needsClientId = !user.clientId && user.recordId;
+  const needsPlan     = !user.plan;
+  if (!needsEmail && !needsClientId && !needsPlan) return;
 
-  if (needsEmail) {
+  // Diagnostic snapshot: what did the JWT carry before hydration? This is
+  // what we'll have to work with if any of the lookups below fail.
+  console.log('[widget-config] hydrate start:', {
+    hasEmail:    !!user.email,
+    hasRecordId: !!user.recordId,
+    hasClientId: !!user.clientId,
+    hasPlan:     !!user.plan,
+    needsEmail, needsClientId, needsPlan,
+  });
+
+  // Step 1: hydrate email AND clientId from the user record in one fetch.
+  // Both come from the same USERS table row, so we do a single getRecord
+  // even when only one is needed.
+  if (needsEmail || needsClientId) {
     try {
       const u = await getRecord(USERS.tableId, user.recordId);
-      const email = u?.fields?.[USERS.fields.email];
-      if (typeof email === 'string' && email.trim()) {
-        user.email = email.trim();
+      const f = u?.fields || {};
+      if (needsEmail) {
+        const email = f[USERS.fields.email];
+        if (typeof email === 'string' && email.trim()) {
+          user.email = email.trim();
+        }
+      }
+      if (needsClientId) {
+        // USERS.client is a linked-record array — take the first ID.
+        // For multi-client users this picks an arbitrary one, but the
+        // JWT should have carried the correct clientId. Falling back to
+        // the first is consistent with the new middleware's behaviour.
+        const clientIds = f[USERS.fields.client];
+        if (Array.isArray(clientIds) && clientIds.length > 0 && typeof clientIds[0] === 'string') {
+          user.clientId = clientIds[0];
+        }
       }
     } catch (err) {
-      console.warn('[widget-config] hydrate email failed:', err.message);
+      console.warn('[widget-config] hydrate user fields failed:', err.message);
     }
   }
 
-  if (needsPlan) {
+  // Step 2: hydrate plan from the client record. Runs AFTER clientId
+  // hydration so a legacy JWT missing both can still resolve.
+  if (needsPlan && user.clientId) {
     try {
       const c = await getRecord(CLIENTS.tableId, user.clientId);
       const raw = c?.fields?.[CLIENTS.fields.plan];
@@ -53,6 +90,15 @@ async function hydrateLegacyUserFields(user) {
       console.warn('[widget-config] hydrate plan failed:', err.message);
     }
   }
+
+  // Diagnostic exit: what did we end up with? If user.plan is still empty
+  // here despite needsPlan being true, the chain broke somewhere — look
+  // at the warn lines above and the start log to figure out where.
+  console.log('[widget-config] hydrate end:', {
+    resolvedEmail:    !!user.email,
+    resolvedClientId: !!user.clientId,
+    resolvedPlan:     user.plan || null,
+  });
 }
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
