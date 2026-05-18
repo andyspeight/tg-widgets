@@ -2847,9 +2847,29 @@
       });
     }
 
+    // Boot — wait for shell auth to resolve before deciding whether to load.
+    //
+    // IMPORTANT: do NOT call boot() synchronously on DOMContentLoaded. The shell
+    // performs an async cookie auth check on module load; until that resolves,
+    // isLoggedIn() returns false for users signed in via the cookie session
+    // (the standard path for users coming from Travelify SSO). Calling boot at
+    // that moment causes a blank-page race — the editor sees "not logged in",
+    // bails, and the cookie check resolves a few hundred ms later with no one
+    // listening. Always wait for onReady before checking isLoggedIn().
+    //
+    // Shell v1.1+ provides tgse.onReady; the fallback keeps older shells
+    // working but should never be hit in production.
     document.addEventListener('DOMContentLoaded', () => {
-      if (isLoggedIn()) boot();
-      // else shell shows login overlay; we'll boot via onLoginSuccess
+      if (window.tgse && typeof window.tgse.onReady === 'function') {
+        window.tgse.onReady(() => {
+          if (isLoggedIn()) boot();
+          // If not logged in, the shell has already shown its login overlay;
+          // onLoginSuccess will call boot() after a successful login.
+        });
+      } else {
+        // Defensive fallback for older shells lacking onReady
+        if (isLoggedIn()) boot();
+      }
     });
   </script>
 </body>
