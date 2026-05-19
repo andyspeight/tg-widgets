@@ -25,6 +25,44 @@ import {
   applyRateLimit,
   RATE_LIMITS,
 } from './_auth.js';
+import { getRecord } from './_lib/auth/airtable.js';
+import { USERS } from './_lib/auth/schema.js';
+
+/**
+ * Hydrate the user's email from the Users table when the JWT didn't carry it.
+ *
+ * BACKGROUND: SSO-issued JWTs (Travelify cookie auth) sometimes lack
+ * `email` even though they carry `recordId`. The legacy `signin.html`
+ * flow puts email in the JWT; the cookie SSO flow doesn't always.
+ *
+ * Without this, the create path writes `undefined` to `OwnerEmail` on
+ * the Enquiry Form record, and the update path compares `undefined ===
+ * undefined` — but since the check rejects when `!ownerEmail`, the user
+ * is locked out of their own form with a 403.
+ *
+ * Mirrors the hydrateLegacyUserFields helper in api/widget-config.js.
+ * Email-only here because the only auth check in this file is by email
+ * (ownership). If this file ever needs clientId or plan, copy the
+ * larger helper across — or, better, lift both into a shared module
+ * once a third endpoint needs the same trick.
+ *
+ * @param {object} user — auth.user from requireAuth(). Mutated in place.
+ */
+async function hydrateUserEmail(user) {
+  if (!user || user.email || !user.recordId) return;
+  try {
+    const u = await getRecord(USERS.tableId, user.recordId);
+    const email = u?.fields?.[USERS.fields.email];
+    if (typeof email === 'string' && email.trim()) {
+      user.email = email.trim();
+      console.log('[enquiry-form-config] hydrated email from record:', user.recordId);
+    } else {
+      console.warn('[enquiry-form-config] hydrate failed: no email on user record', user.recordId);
+    }
+  } catch (err) {
+    console.warn('[enquiry-form-config] hydrate user email failed:', err.message);
+  }
+}
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const WIDGETS_TABLE = 'Widgets';
@@ -383,6 +421,8 @@ export default async function handler(req, res) {
       if (editorMode) {
         const auth = requireAuth(req);
         if (auth.error) return res.status(auth.status).json({ error: auth.error });
+        // Hydrate email from user record if JWT didn't carry it (SSO cookie sessions).
+        await hydrateUserEmail(auth.user);
 
         const record = await fetchEnquiryFormByWidgetId(widgetId, headers, AIRTABLE_BASE_ID);
         if (!record) return res.status(404).json({ error: 'Form not found' });
@@ -391,6 +431,7 @@ export default async function handler(req, res) {
         const ownerEmail = (record.fields[EF.ownerEmail] || '').toLowerCase().trim();
         const userEmail  = (auth.user.email || '').toLowerCase().trim();
         if (!ownerEmail || ownerEmail !== userEmail) {
+          console.warn('[enquiry-form-config] GET 403: ownership mismatch', { ownerEmail: ownerEmail || '(empty)', userEmail: userEmail || '(empty)', widgetId });
           return res.status(403).json({ error: 'You do not have permission to view this form' });
         }
 
@@ -467,6 +508,11 @@ export default async function handler(req, res) {
       const auth = requireAuth(req);
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
       const user = auth.user;
+      // Hydrate email from user record if JWT didn't carry it (SSO cookie sessions).
+      // MUST happen before rate-limit-by-email below — otherwise the rate
+      // limit key collapses to 'enquiry-save:undefined' and one user can
+      // exhaust the bucket for everyone.
+      await hydrateUserEmail(user);
 
       if (!applyRateLimit(res, `enquiry-save:${user.email}`, RATE_LIMITS.widgetWrite)) return;
 
@@ -503,6 +549,7 @@ export default async function handler(req, res) {
         const ownerEmail = (efRec.fields[EF.ownerEmail] || '').toLowerCase().trim();
         const userEmail  = (user.email || '').toLowerCase().trim();
         if (!ownerEmail || ownerEmail !== userEmail) {
+          console.warn('[enquiry-form-config] UPDATE 403: ownership mismatch', { ownerEmail: ownerEmail || '(empty)', userEmail: userEmail || '(empty)', widgetId });
           return res.status(403).json({ error: 'You do not have permission to edit this form' });
         }
 
@@ -667,6 +714,9 @@ export default async function handler(req, res) {
       const auth = requireAuth(req);
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
       const user = auth.user;
+      // Hydrate email from user record if JWT didn't carry it (SSO cookie sessions).
+      // Must happen before rate-limit-by-email below — see POST path for why.
+      await hydrateUserEmail(user);
 
       if (!applyRateLimit(res, `enquiry-delete:${user.email}`, RATE_LIMITS.widgetWrite)) return;
 
@@ -686,6 +736,7 @@ export default async function handler(req, res) {
       const ownerEmail = (efRec.fields[EF.ownerEmail] || '').toLowerCase().trim();
       const userEmail  = (user.email || '').toLowerCase().trim();
       if (!ownerEmail || ownerEmail !== userEmail) {
+        console.warn('[enquiry-form-config] DELETE 403: ownership mismatch', { ownerEmail: ownerEmail || '(empty)', userEmail: userEmail || '(empty)', widgetId });
         return res.status(403).json({ error: 'You do not have permission to delete this form' });
       }
 
