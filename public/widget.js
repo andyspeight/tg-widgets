@@ -13,7 +13,51 @@
 (function () {
   'use strict';
 
-  const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
+  /**
+   * Resolve the API base URL.
+   *
+   * BACKGROUND: This widget script is hosted on widgets.travelify.io and
+   * embedded on customer sites (e.g. www.traveldemo.site). The widget needs
+   * to call back to widgets.travelify.io/api/widget-config to fetch its
+   * config — NOT to the customer's site. Using a relative URL ('/api/...')
+   * resolves to the customer's site and 404s.
+   *
+   * Resolution order:
+   *   1. window.__TG_WIDGET_API__ — explicit opt-in for advanced embeds
+   *   2. The origin of the script tag that loaded this file — derived from
+   *      document.currentScript at module-init time, captured into a
+   *      variable because document.currentScript is null after init
+   *   3. Last resort: relative '/api/widget-config' — only works when the
+   *      widget runs on the same origin as the API (i.e. inside the editor)
+   */
+  function resolveApiBase() {
+    if (typeof window === 'undefined') return '/api/widget-config';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      // document.currentScript is non-null only during initial script execution.
+      // Capture it the moment this IIFE runs.
+      const me = document.currentScript;
+      if (me && me.src) {
+        const u = new URL(me.src);
+        return u.origin + '/api/widget-config';
+      }
+      // Fallback: scan all <script> tags for one whose src ends with widget.js
+      // (or any of the known pricing widget filenames). This handles cases
+      // where the script was loaded async / dynamically and currentScript is null.
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/widget-config';
+        }
+      }
+    } catch (e) {
+      // Bad URL parsing, hostile environment, etc — fall through to default
+    }
+    return '/api/widget-config';
+  }
+
+  const API_BASE = resolveApiBase();
   const VERSION = '1.0.0';
 
   /* ━━━ CSS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
