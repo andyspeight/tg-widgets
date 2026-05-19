@@ -1602,28 +1602,79 @@ function loadMiniPreview(w) {
     });
   }
 
-  if (w.id === 'team' && window.TGTeamWidget) {
-    container.innerHTML = '<div data-tg-widget="team"></div>';
-    const inner = container.querySelector('[data-tg-widget="team"]');
-    const mkAvatar = (initials, bg) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250"><rect width="200" height="250" fill="${bg}"/><text x="100" y="148" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="80" font-weight="700" fill="#FFFFFF">${initials}</text></svg>`
-    );
-    new window.TGTeamWidget(inner, {
-      layout: 'grid',
-      columns: 3,
-      showHeading: false,
-      showDepartmentFilter: false,
-      showContactIcons: false,
-      theme: 'light',
-      brand: w.color || '#3B82F6',
-      accent: '#6366F1',
-      radius: 14,
-      members: [
-        { name: 'Sarah Mitchell', role: 'Senior Consultant', photo: mkAvatar('SM', '#0891B2'), specialisms: ['Honeymoons', 'Italy'] },
-        { name: 'James Thornton', role: 'Cruise Specialist', photo: mkAvatar('JT', '#6366F1'), specialisms: ['Cruise', 'Caribbean'] },
-        { name: 'Priya Patel',    role: 'Long-Haul Expert', photo: mkAvatar('PP', '#8B5CF6'), specialisms: ['Safari', 'India'] },
-      ],
-    });
+  if (w.id === 'team') {
+    container.innerHTML = `
+      <div style="
+        width: 700px;
+        height: 340px;
+        background: #FFFFFF;
+        border-radius: 16px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        padding: 22px 24px;
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 18px;
+      ">
+
+        <!-- LEFT: Spotlight-style featured member -->
+        <div style="
+          background: #F8FAFC;
+          border: 1px solid #E2E8F0;
+          border-radius: 14px;
+          overflow: hidden;
+          display: grid;
+          grid-template-columns: 1fr 1.2fr;
+          box-shadow: 0 1px 2px rgba(15,23,42,.04);
+        ">
+          <div style="
+            aspect-ratio: 4 / 5;
+            background-image: linear-gradient(135deg, rgba(8,145,178,.0) 0%, rgba(8,145,178,.18) 100%), url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&q=80');
+            background-size: cover;
+            background-position: center;
+          "></div>
+          <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 9px; font-weight: 600; color: ${w.color || '#3B82F6'}; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px;">Senior Consultant</div>
+            <div style="font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.2; letter-spacing: -.01em;">Sarah Mitchell</div>
+            <div style="font-size: 11px; color: #64748B; line-height: 1.45; margin-top: 6px;">Twenty years arranging unforgettable trips across Europe and Asia.</div>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: auto; padding-top: 8px;">
+              <span style="display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,.12);color:#B45309;font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;line-height:1.4;">★ 20+ yrs</span>
+              <span style="background:rgba(8,145,178,.08);color:#0891B2;font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px;line-height:1.4;">Honeymoons</span>
+              <span style="background:rgba(8,145,178,.08);color:#0891B2;font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px;line-height:1.4;">Italy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Stack of three compact-style chips -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size:9px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.06em;">More of the team</div>
+
+          <div style="display:flex;align-items:center;gap:11px;padding:11px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;">
+            <div style="width:42px;height:42px;border-radius:999px;flex-shrink:0;background-image:url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&q=80');background-size:cover;background-position:center;"></div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:13px;font-weight:600;color:#0F172A;line-height:1.2;">James Thornton</div>
+              <div style="font-size:11px;color:#64748B;line-height:1.3;margin-top:2px;">Cruise Specialist</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:11px;padding:11px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;">
+            <div style="width:42px;height:42px;border-radius:999px;flex-shrink:0;background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop&q=80');background-size:cover;background-position:center;"></div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:13px;font-weight:600;color:#0F172A;line-height:1.2;">Priya Patel</div>
+              <div style="font-size:11px;color:#64748B;line-height:1.3;margin-top:2px;">Long-Haul Expert</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:11px;padding:11px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;">
+            <div style="width:42px;height:42px;border-radius:999px;flex-shrink:0;background-image:url('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop&q=80');background-size:cover;background-position:center;"></div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:13px;font-weight:600;color:#0F172A;line-height:1.2;">Oliver Hayes</div>
+              <div style="font-size:11px;color:#64748B;line-height:1.3;margin-top:2px;">Ski &amp; Winter Sun</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   if (w.id === 'textfx' && window.TGTextFxWidget) {
