@@ -159,6 +159,7 @@ const ALLOWED_WIDGET_TYPES = [
   'WhatsApp Chat',
   'Opening Hours',
   'Newsletter Signup',
+  'Contact Card',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -187,6 +188,7 @@ const PLAN_WIDGET_LIMITS = {
   'WhatsApp Chat':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Opening Hours':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Newsletter Signup':     { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Contact Card':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -261,6 +263,8 @@ const WIDGET_TYPE_ALIASES = {
   'opening-hours':     'Opening Hours',
   'newsletter':        'Newsletter Signup',
   'newsletter-signup': 'Newsletter Signup',
+  'contact':           'Contact Card',
+  'contact-card':      'Contact Card',
 };
 
 function canonicaliseWidgetType(raw) {
