@@ -93,6 +93,20 @@
       padding: 48px 24px;
       background: var(--tgp-bg);
       transition: background-color 0.3s ease;
+
+      /* Container query context — child rules can respond to THIS element's
+         width rather than the viewport. Critical for two reasons:
+           1. Editor preview pane: when the user clicks tablet/mobile in the
+              toolbar, the preview frame is resized but the browser viewport
+              isn't. Without this, the widget renders desktop layout no
+              matter what the toggle says.
+           2. Customer sites: agencies frequently embed widgets in narrow
+              page columns or sidebars. Container queries let the widget
+              respond to that column's width instead of the page viewport.
+         Browser support: Chrome 105+, Safari 16+, Firefox 110+ — i.e. any
+         browser from late 2022 onwards. */
+      container-type: inline-size;
+      container-name: tgp;
     }
 
     .tgp-root[data-theme="dark"] {
@@ -212,14 +226,17 @@
     .tgp-grid[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
     .tgp-grid[data-cols="4"] { grid-template-columns: repeat(4, 1fr); }
 
-    @media (max-width: 900px) {
+    /* Responsive grid — driven by CONTAINER width (.tgp-root), not viewport.
+       At 900px wide container, 3- and 4-column grids collapse to 2 columns.
+       At 600px wide container, everything collapses to a single column. */
+    @container tgp (max-width: 900px) {
       .tgp-grid[data-cols="3"],
       .tgp-grid[data-cols="4"] {
         grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    @media (max-width: 600px) {
+    @container tgp (max-width: 600px) {
       .tgp-grid[data-cols="2"],
       .tgp-grid[data-cols="3"],
       .tgp-grid[data-cols="4"] {
