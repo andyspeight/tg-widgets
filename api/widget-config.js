@@ -298,9 +298,34 @@ async function countUserWidgetsOfType(email, widgetType, headers, baseId) {
   const url = `${AIRTABLE_API}/${baseId}/${TABLE_NAME}`
     + `?filterByFormula=${formula}&maxRecords=100&fields%5B%5D=WidgetID`;
   const resp = await fetch(url, { headers });
-  if (!resp.ok) throw new Error('Count query failed');
+  if (!resp.ok) await throwAirtableError('Count query failed', resp);
   const data = await resp.json();
   return (data.records || []).length;
+}
+
+/**
+ * When an Airtable request fails, the response body contains structured
+ * error info (e.g. {"error": {"type": "INVALID_MULTIPLE_CHOICE_OPTIONS",
+ * "message": "..."}}). The default catch-and-throw pattern in this file
+ * loses that detail — operators end up staring at "Create failed" in
+ * Vercel logs with no clue what Airtable actually objected to.
+ *
+ * This helper reads the body (best-effort) and embeds it in the thrown
+ * Error so the top-level catch can log it. The outer response to the
+ * client stays the generic "Service temporarily unavailable" — we leak
+ * nothing user-facing — but our logs now contain the actual cause.
+ *
+ * Call with: throwAirtableError('Create failed', createResp);
+ */
+async function throwAirtableError(opName, resp) {
+  let body = '';
+  try {
+    body = await resp.text();
+  } catch { /* response already consumed or network died */ }
+  // Trim very long bodies to keep log lines manageable
+  if (body.length > 800) body = body.slice(0, 800) + '…[truncated]';
+  const detail = body ? ` — ${resp.status} ${body}` : ` — ${resp.status}`;
+  throw new Error(opName + detail);
 }
 
 export default async function handler(req, res) {
@@ -326,7 +351,7 @@ export default async function handler(req, res) {
       const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
 
       const resp = await fetch(url, { headers });
-      if (!resp.ok) throw new Error(`Upstream error`);
+      if (!resp.ok) await throwAirtableError('GET upstream failed', resp);
 
       const data = await resp.json();
       if (!data.records || data.records.length === 0) {
@@ -435,7 +460,7 @@ export default async function handler(req, res) {
               },
             }),
           });
-          if (!updateResp.ok) throw new Error('Update failed');
+          if (!updateResp.ok) await throwAirtableError('Update failed', updateResp);
 
           return res.status(200).json({ success: true, recordId: record.id, widgetId });
         }
@@ -526,7 +551,7 @@ export default async function handler(req, res) {
           }],
         }),
       });
-      if (!createResp.ok) throw new Error('Create failed');
+      if (!createResp.ok) await throwAirtableError('Create failed', createResp);
       const created = await createResp.json();
 
       return res.status(201).json({
@@ -562,7 +587,7 @@ export default async function handler(req, res) {
       const formula = encodeURIComponent(`{WidgetID} = '${safeWid}'`);
       const searchUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
       const searchResp = await fetch(searchUrl, { headers });
-      if (!searchResp.ok) throw new Error('Lookup failed');
+      if (!searchResp.ok) await throwAirtableError('Lookup failed', searchResp);
       const searchData = await searchResp.json();
 
       if (!searchData.records || searchData.records.length === 0) {
@@ -583,7 +608,7 @@ export default async function handler(req, res) {
       // Delete from Airtable
       const deleteUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}/${record.id}`;
       const deleteResp = await fetch(deleteUrl, { method: 'DELETE', headers });
-      if (!deleteResp.ok) throw new Error('Delete failed');
+      if (!deleteResp.ok) await throwAirtableError('Delete failed', deleteResp);
 
       return res.status(200).json({ success: true, widgetId, recordId: record.id });
     }
