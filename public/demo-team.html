@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Team Showcase — Travelgenix Widget Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC;
+    color: #0F172A;
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body[data-bg="dark"] { background: #020617; color: #F1F5F9; }
+
+  /* Demo bar */
+  .demo-bar {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid #E2E8F0;
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  body[data-bg="dark"] .demo-bar {
+    background: rgba(15, 23, 42, 0.85);
+    border-bottom-color: #1E293B;
+  }
+  .demo-bar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .demo-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    color: inherit;
+  }
+  .demo-brand-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #0891B2 0%, #6366F1 100%);
+  }
+  .demo-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .demo-pill {
+    appearance: none; border: 1px solid #E2E8F0; background: #fff;
+    color: #475569; font: inherit; font-size: 13px; font-weight: 500;
+    padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  body[data-bg="dark"] .demo-pill {
+    background: #1E293B; color: #94A3B8; border-color: #334155;
+  }
+  .demo-pill:hover { background: #F1F5F9; color: #0F172A; }
+  body[data-bg="dark"] .demo-pill:hover { background: #334155; color: #F1F5F9; }
+  .demo-pill[aria-pressed="true"] {
+    background: #0F172A; color: #fff; border-color: #0F172A;
+  }
+  body[data-bg="dark"] .demo-pill[aria-pressed="true"] {
+    background: #F8FAFC; color: #0F172A; border-color: #F8FAFC;
+  }
+  .demo-divider { width: 1px; height: 20px; background: #E2E8F0; margin: 0 4px; }
+  body[data-bg="dark"] .demo-divider { background: #334155; }
+
+  .mock-site { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+  .mock-hero { text-align: center; padding: 32px 24px 48px; }
+  .mock-hero h1 {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .mock-hero p {
+    font-size: 17px;
+    color: #64748B;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  body[data-bg="dark"] .mock-hero p { color: #94A3B8; }
+
+  .widget-frame {
+    background: transparent;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body data-bg="light">
+  <div class="demo-bar">
+    <div class="demo-bar-inner">
+      <div class="demo-brand">
+        <div class="demo-brand-mark"></div>
+        <span>Travelgenix Widgets — Team Showcase</span>
+      </div>
+      <div class="demo-controls">
+        <button class="demo-pill" data-layout="grid" aria-pressed="true">Grid</button>
+        <button class="demo-pill" data-layout="compact" aria-pressed="false">Compact</button>
+        <button class="demo-pill" data-layout="carousel" aria-pressed="false">Carousel</button>
+        <button class="demo-pill" data-layout="spotlight" aria-pressed="false">Spotlight</button>
+        <div class="demo-divider"></div>
+        <button class="demo-pill" data-theme="light" aria-pressed="true">Light</button>
+        <button class="demo-pill" data-theme="dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="mock-site">
+    <section class="mock-hero">
+      <h1>Meet our travel experts</h1>
+      <p>The team behind every itinerary — pick a layout above to preview the widget in each variant.</p>
+    </section>
+
+    <section class="widget-frame">
+      <div data-tg-widget="team" id="team-widget"></div>
+    </section>
+  </main>
+
+  <script>
+    const DEMO_MEMBERS = [
+      {
+        name: 'Sarah Mitchell',
+        role: 'Senior Travel Consultant',
+        department: 'Tailor-made',
+        bio: 'Twenty years arranging unforgettable trips across Europe and Asia. Sarah specialises in multi-generation family travel and luxury honeymoons.',
+        photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=750&fit=crop',
+        specialisms: ['Honeymoons', 'Family', 'Italy', 'Greece'],
+        years: 20,
+        languages: ['English', 'Italian', 'French'],
+        linkedin: 'https://linkedin.com/in/example',
+        email: 'sarah@example.com',
+        phone: '+441202000001',
+        whatsapp: '+441202000001',
+        featured: true,
+      },
+      {
+        name: 'James Thornton',
+        role: 'Cruise Specialist',
+        department: 'Cruise',
+        bio: 'James has personally sailed with every major cruise line. Expert at matching guests to the right ship and itinerary.',
+        photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=750&fit=crop',
+        specialisms: ['River Cruise', 'Luxury Cruise', 'Caribbean'],
+        years: 12,
+        languages: ['English', 'Spanish'],
+        linkedin: 'https://linkedin.com/in/example',
+        email: 'james@example.com',
+      },
+      {
+        name: 'Priya Patel',
+        role: 'Long-Haul Expert',
+        department: 'Tailor-made',
+        bio: 'Specialist in tailor-made adventures across Asia, Africa and Latin America. Personally visited 60+ countries.',
+        photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=750&fit=crop',
+        specialisms: ['Safari', 'India', 'Adventure', 'Wildlife'],
+        years: 15,
+        languages: ['English', 'Hindi', 'Gujarati'],
+        linkedin: 'https://linkedin.com/in/example',
+        email: 'priya@example.com',
+        instagram: 'https://instagram.com/example',
+      },
+      {
+        name: 'Marcus Chen',
+        role: 'City Breaks Manager',
+        department: 'City Breaks',
+        bio: 'Marcus curates short-break experiences in Europe\'s greatest cities. Knows the best neighbourhood for every kind of traveller.',
+        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=750&fit=crop',
+        specialisms: ['City Breaks', 'Europe', 'Food & Wine'],
+        years: 8,
+        languages: ['English', 'Mandarin'],
+        linkedin: 'https://linkedin.com/in/example',
+        email: 'marcus@example.com',
+      },
+      {
+        name: 'Emma Whitfield',
+        role: 'Operations Lead',
+        department: 'Operations',
+        bio: 'Behind-the-scenes expert keeping every booking on track. Available for any pre-departure question you can throw at her.',
+        photo: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=750&fit=crop',
+        specialisms: ['Bookings', 'Aftercare'],
+        years: 10,
+        languages: ['English'],
+        email: 'emma@example.com',
+        phone: '+441202000005',
+      },
+      {
+        name: 'Oliver Hayes',
+        role: 'Ski & Winter Sun',
+        department: 'Specialist',
+        bio: 'Avid skier with 18 seasons in the Alps. Books winter holidays from Verbier to Val d\'Isère and chases the sun in between.',
+        photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=750&fit=crop',
+        specialisms: ['Skiing', 'Winter Sun', 'Alps'],
+        years: 14,
+        languages: ['English', 'French', 'German'],
+        linkedin: 'https://linkedin.com/in/example',
+        email: 'oliver@example.com',
+      },
+    ];
+
+    const baseConfig = {
+      layout: 'grid',
+      columns: 3,
+      theme: 'light',
+      brand: '#0891B2',
+      accent: '#6366F1',
+      radius: 16,
+      showHeading: true,
+      eyebrow: 'Our Team',
+      title: 'The experts behind your trip',
+      subtitle: 'Decades of travel experience, ready to plan your perfect getaway.',
+      showDepartmentFilter: true,
+      showContactIcons: true,
+      members: DEMO_MEMBERS,
+    };
+
+    let state = Object.assign({}, baseConfig);
+
+    function renderWidget() {
+      const host = document.getElementById('team-widget');
+      // Destroy any existing widget by replacing the host node
+      const fresh = host.cloneNode(false);
+      host.parentNode.replaceChild(fresh, host);
+      fresh.setAttribute('data-tg-config', JSON.stringify(state));
+      if (window.TGTeamWidget) {
+        new window.TGTeamWidget(fresh, state);
+      }
+    }
+
+    // Layout switcher
+    document.querySelectorAll('[data-layout]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const layout = btn.getAttribute('data-layout');
+        document.querySelectorAll('[data-layout]').forEach(b => {
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+        state.layout = layout;
+        renderWidget();
+      });
+    });
+
+    // Theme switcher
+    document.querySelectorAll('[data-theme]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.getAttribute('data-theme');
+        document.querySelectorAll('[data-theme]').forEach(b => {
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+        document.body.setAttribute('data-bg', theme);
+        state.theme = theme;
+        renderWidget();
+      });
+    });
+
+    // First render after widget JS loads
+    if (window.TGTeamWidget) {
+      renderWidget();
+    } else {
+      document.addEventListener('DOMContentLoaded', renderWidget);
+    }
+  </script>
+  <script src="/widget-team.js"></script>
+</body>
+</html>
