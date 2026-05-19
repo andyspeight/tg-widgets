@@ -170,6 +170,16 @@
     .save-btn.is-dirty:hover { background: color-mix(in srgb, var(--warning) 88%, #000); }
     .save-btn.is-saved { background: var(--success); pointer-events: none; }
     .save-btn.is-saving { background: var(--muted); pointer-events: none; }
+    .save-btn.is-error {
+      background: var(--danger);
+      animation: save-btn-shake .3s ease-in-out;
+    }
+    .save-btn.is-error:hover { background: color-mix(in srgb, var(--danger) 88%, #000); }
+    @keyframes save-btn-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
 
     /* ========================= THREE-PANEL BODY ============================ */
     .body {
@@ -2847,12 +2857,26 @@
         }, 1600);
 
       } catch (err) {
+        // Make save failures impossible to miss. Two changes vs. previous behaviour:
+        // 1. The button enters an error state (red, "Save failed") rather than
+        //    reverting silently to "Save" — users were missing the 4s toast and
+        //    assuming success because the button just said "Save" again.
+        // 2. Error toast duration extended and message includes the server's
+        //    actual reason (e.g. "name is required" or whatever validator threw).
         console.error('[save]', err);
         state.saving = false;
         btn.classList.remove('is-saving', 'is-saved');
+        btn.classList.add('is-error');
         if (state.dirty) btn.classList.add('is-dirty');
-        btnText.textContent = 'Save';
-        showToast('Save failed: ' + (err.message || 'unknown'), 'error', 4000);
+        const reasonText = err.message || 'unknown error';
+        btnText.textContent = 'Save failed';
+        showToast('Save failed: ' + reasonText, 'error', 6000);
+        // Clear the error state after a few seconds so the user can retry,
+        // but only after they've had time to read it.
+        setTimeout(() => {
+          btn.classList.remove('is-error');
+          btnText.textContent = 'Save';
+        }, 4500);
       } finally {
         state.saving = false;
       }
