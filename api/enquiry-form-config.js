@@ -371,6 +371,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const widgetId = req.query.id;
       if (!widgetId || typeof widgetId !== 'string' || widgetId.length > 100) {
+        console.warn('[enquiry-form-config] GET 400: invalid widget ID', { received: typeof widgetId, length: widgetId && widgetId.length });
         return res.status(400).json({ error: 'Invalid widget ID' });
       }
 
@@ -473,10 +474,18 @@ export default async function handler(req, res) {
       const payload = sanitiseConfig(body.config || {});
       const widgetId = body.widgetId && typeof body.widgetId === 'string' ? body.widgetId : null;
 
-      // Basic sanity: need at least a name when creating
+      // CREATE path: name is no longer required upfront. Users iterate on
+      // forms — palette, fields, routing — and may not name the form until
+      // late in the session. Forcing a name before any save means autosave
+      // hammers the API with 400s the moment they start dragging fields in.
+      // Default to "Untitled form" when missing; the user can rename via
+      // the name input at any point and the next save will update it.
       if (!widgetId) {
-        if (!payload.name || typeof payload.name !== 'string' || payload.name.trim().length === 0) {
-          return res.status(400).json({ error: 'name is required when creating a new form' });
+        const incomingName = (payload.name && typeof payload.name === 'string') ? payload.name.trim() : '';
+        if (!incomingName) {
+          payload.name = 'Untitled form';
+        } else {
+          payload.name = incomingName;
         }
       }
 
@@ -517,6 +526,7 @@ export default async function handler(req, res) {
         try {
           efFields = buildEnquiryFormFields(payload, user.email, false);
         } catch (err) {
+          console.warn('[enquiry-form-config] UPDATE 400 from validator:', err.message, 'widgetId:', widgetId);
           return res.status(400).json({ error: err.message });
         }
 
@@ -577,6 +587,7 @@ export default async function handler(req, res) {
       try {
         efFields = buildEnquiryFormFields(payload, user.email, true);
       } catch (err) {
+        console.warn('[enquiry-form-config] CREATE 400 from validator:', err.message, 'email:', user.email);
         return res.status(400).json({ error: err.message });
       }
       efFields[EF.widgetId] = newWidgetId;
@@ -661,6 +672,7 @@ export default async function handler(req, res) {
 
       const widgetId = req.query.id;
       if (!widgetId || typeof widgetId !== 'string' || widgetId.length > 100) {
+        console.warn('[enquiry-form-config] DELETE 400: invalid widget ID', { received: typeof widgetId, length: widgetId && widgetId.length });
         return res.status(400).json({ error: 'Invalid or missing widget ID' });
       }
 
