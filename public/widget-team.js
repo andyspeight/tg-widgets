@@ -216,6 +216,12 @@
       background: var(--tgt-bg);
       padding: 32px 24px;
       border-radius: var(--tgt-radius);
+      /* Container queries — respond to widget width, not viewport.
+         Critical for Shadow DOM: viewport-based @media doesn't react to
+         the editor's tablet/mobile preview frames, nor to clients who
+         embed the widget in a narrow column. */
+      container-type: inline-size;
+      container-name: tgt;
     }
     .tgt-root[data-theme="dark"] {
       --tgt-bg: #0F172A;
@@ -257,7 +263,7 @@
       color: var(--tgt-sub);
       margin: 0;
     }
-    @media (min-width: 768px) {
+    @container tgt (min-width: 720px) {
       .tgt-title { font-size: 32px; }
     }
 
@@ -318,6 +324,7 @@
       aspect-ratio: 4 / 5;
       background: var(--tgt-card-hover);
       overflow: hidden;
+      flex-shrink: 0;
     }
     .tgt-photo img {
       width: 100%; height: 100%;
@@ -335,50 +342,61 @@
     }
 
     .tgt-body {
-      padding: 20px;
+      padding: 18px 20px 20px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       flex: 1;
+      min-width: 0;
     }
     .tgt-name {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 600;
       color: var(--tgt-text);
       margin: 0;
       line-height: 1.3;
+      letter-spacing: -0.01em;
     }
     .tgt-role {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       color: var(--tgt-brand);
-      margin: 0;
+      margin: 0 0 8px;
       line-height: 1.4;
     }
     .tgt-bio {
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--tgt-sub);
       line-height: 1.55;
-      margin: 8px 0 0;
+      margin: 0 0 10px;
+      /* Cap at 3 lines so cards stay aligned even with varying bio lengths */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .tgt-badges {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
+      gap: 5px;
+      margin-top: auto;
+      padding-top: 4px;
     }
     .tgt-badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 4px 10px;
+      padding: 3px 9px;
       background: rgba(8, 145, 178, 0.08);
       color: var(--tgt-brand);
       border-radius: 999px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 500;
+      line-height: 1.4;
+      white-space: nowrap;
     }
+    .tgt-badge svg { width: 11px; height: 11px; flex-shrink: 0; }
     .tgt-badge--accent {
       background: rgba(99, 102, 241, 0.08);
       color: var(--tgt-accent);
@@ -395,8 +413,8 @@
     .tgt-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      font-size: 12px;
+      gap: 10px;
+      font-size: 11.5px;
       color: var(--tgt-muted);
       margin-top: 8px;
     }
@@ -404,33 +422,36 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      min-width: 0;
     }
     .tgt-meta-item svg {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
+      flex-shrink: 0;
     }
 
     .tgt-socials {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 14px 20px;
+      gap: 4px;
+      padding: 10px 16px;
       border-top: 1px solid var(--tgt-border);
       background: transparent;
+      min-height: 52px;
     }
     .tgt-social {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border-radius: 8px;
       background: transparent;
       color: var(--tgt-sub);
       text-decoration: none;
       transition: background 160ms ease, color 160ms ease;
     }
-    .tgt-social svg { width: 16px; height: 16px; }
+    .tgt-social svg { width: 15px; height: 15px; }
     .tgt-social:hover {
       background: var(--tgt-card-hover);
       color: var(--tgt-brand);
@@ -444,13 +465,14 @@
     .tgt-grid {
       display: grid;
       grid-template-columns: repeat(var(--tgt-cols, 3), minmax(0, 1fr));
-      gap: 24px;
+      gap: 20px;
     }
-    @media (max-width: 900px) {
+    /* Container queries — respond to widget width, not viewport. */
+    @container tgt (max-width: 880px) {
       .tgt-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
-    @media (max-width: 560px) {
-      .tgt-grid { grid-template-columns: 1fr; gap: 16px; }
+    @container tgt (max-width: 540px) {
+      .tgt-grid { grid-template-columns: 1fr; gap: 14px; }
     }
 
     /* ───── COMPACT layout ───── */
@@ -533,10 +555,10 @@
       scroll-snap-align: start;
       min-width: 260px;
     }
-    @media (max-width: 900px) {
+    @container tgt (max-width: 880px) {
       .tgt-carousel > .tgt-card { flex: 0 0 calc((100% - 20px) / 2); }
     }
-    @media (max-width: 560px) {
+    @container tgt (max-width: 540px) {
       .tgt-carousel > .tgt-card { flex: 0 0 85%; }
     }
     .tgt-arrow {
@@ -562,7 +584,7 @@
     .tgt-arrow:disabled { opacity: 0.4; cursor: not-allowed; }
     .tgt-arrow--prev { left: -8px; }
     .tgt-arrow--next { right: -8px; }
-    @media (max-width: 560px) {
+    @container tgt (max-width: 540px) {
       .tgt-arrow { display: none; }
     }
     .tgt-dots {
@@ -590,7 +612,7 @@
       gap: 32px;
       align-items: start;
     }
-    @media (max-width: 900px) {
+    @container tgt (max-width: 880px) {
       .tgt-spotlight { grid-template-columns: 1fr; }
     }
     .tgt-spotlight-feature {
@@ -603,7 +625,7 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
       transition: opacity 220ms ease;
     }
-    @media (max-width: 700px) {
+    @container tgt (max-width: 680px) {
       .tgt-spotlight-feature { grid-template-columns: 1fr; }
     }
     .tgt-spotlight-photo {
