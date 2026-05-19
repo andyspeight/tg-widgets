@@ -43,7 +43,39 @@
 (function () {
   'use strict';
 
-  const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
+    /**
+   * Resolve the API base URL.
+   *
+   * BACKGROUND: This widget script is hosted on widgets.travelify.io and
+   * embedded on customer sites. The widget must call back to its host
+   * (widgets.travelify.io/api/widget-config) — NOT to the customer's
+   * site. A relative '/api/...' URL resolves to the customer's origin
+   * and 404s.
+   *
+   * Resolution order:
+   *   1. window.__TG_WIDGET_API__ — explicit opt-in for advanced embeds
+   *   2. Origin of document.currentScript at module-init time
+   *   3. Scan script tags for the widget filename (handles async/defer)
+   *   4. Relative URL — last resort, only works on same-origin pages
+   */
+  function resolveApiBase() {
+    if (typeof window === 'undefined') return '/api/widget-config';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      const me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/widget-config';
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget\-offers\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/widget-config';
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/widget-config';
+  }
+
+  const API_BASE = resolveApiBase();
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
   const VERSION = '1.6.0';
   const CACHE_PREFIX = 'tgo_cache_';

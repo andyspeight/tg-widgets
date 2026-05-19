@@ -32,9 +32,41 @@
   // Constants
   // ═══════════════════════════════════════════════════════════
 
-  const API_BASE =
-    (typeof window !== 'undefined' && window.TG_WIDGETS_API_BASE) ||
-    'https://tg-widgets.vercel.app';
+    /**
+   * Resolve the widget host origin.
+   *
+   * BACKGROUND: this script is hosted on widgets.travelify.io and embedded
+   * on customer sites. Call sites build URLs as `${API_BASE}/api/widget-config`
+   * so API_BASE must be the ORIGIN only (e.g. https://widgets.travelify.io),
+   * not a path. A relative path would resolve to the customer's domain and 404.
+   *
+   * Resolution order:
+   *   1. window.TG_WIDGETS_API_BASE — explicit opt-in
+   *   2. Origin of document.currentScript at module-init
+   *   3. Scan script tags for the widget filename
+   *   4. Empty string — call sites then build relative URLs, only works
+   *      same-origin (i.e. inside the editor)
+   */
+  function resolveApiOrigin() {
+    if (typeof window === 'undefined') return '';
+    if (typeof window.TG_WIDGETS_API_BASE === 'string' && window.TG_WIDGETS_API_BASE) {
+      return window.TG_WIDGETS_API_BASE.replace(/\/$/, '');
+    }
+    try {
+      const me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin;
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget\-testimonials\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin;
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '';
+  }
+
+  const API_BASE = resolveApiOrigin();
 
   const VERSION = '1.0.0';
 
