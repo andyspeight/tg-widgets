@@ -12,13 +12,14 @@
 
   <!-- ============================================================
        PHASE 1 OF UNIFIED SHELL MIGRATION (auth only)
-       Loaded for tgse.isLoggedIn() / tgse.onReady() / cookie auth
-       fetch interceptor. The rest of this editor's custom chrome
-       (topbar, save button, Templates, etc) is migrated in Phase 2.
+       Shell stylesheet loaded here in head; shell SCRIPT loaded
+       immediately before the editor IIFE at the bottom of body
+       (matches canonical pattern in peer editors — must be
+       blocking and must come BEFORE the inline editor script
+       or window.tgse won't exist when the IIFE runs).
        See MIGRATION-PLAN.md for full scope.
        ============================================================ -->
   <link rel="stylesheet" href="/editor-shell.css">
-  <script src="/editor-shell.js" defer></script>
 
   <style>
     /* ============================ Editor chrome ============================ */
@@ -2456,6 +2457,14 @@
   <!-- Loaded once. The class window.TGEnquiryWidget is used to mount the live preview. -->
   <script src="/widget-enquiry.js"></script>
 
+  <!-- ======================== Shell behaviour (must come BEFORE editor script) ========================
+       PHASE 1 OF UNIFIED SHELL MIGRATION:
+       Loaded blocking (no defer) here so window.tgse is guaranteed to exist
+       before the editor IIFE below runs. Peer editors (FAQ, Logos, Popup, etc)
+       use this same pattern.
+       ============================================================== -->
+  <script src="/editor-shell.js"></script>
+
   <script>
   (function () {
     'use strict';
@@ -2592,13 +2601,15 @@
       // Authorization header — credentials: 'include' carries auth via cookie.
       try {
         if (window.tgse && typeof window.tgse.isLoggedIn === 'function' && window.tgse.isLoggedIn()) {
-          const u = (typeof window.tgse.getUser === 'function') ? (window.tgse.getUser() || {}) : {};
+          // Shell exposes getCurrentUser (not getUser — caught in testing).
+          const getUserFn = window.tgse.getCurrentUser || window.tgse.getUser;
+          const u = (typeof getUserFn === 'function') ? (getUserFn() || {}) : {};
           return {
             token: '', // cookie-borne; not exposed to JS
             user: {
               email:          u.email || '',
               clientName:     u.clientName || '',
-              clientRecordId: u.clientId || u.clientRecordId || null,
+              clientRecordId: u.clientRecordId || u.clientId || null,
               plan:           u.plan || '',
               recordId:       u.recordId || null,
             },
@@ -7135,15 +7146,16 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
     function showLogin() {
       // PHASE 1 SHELL MIGRATION:
       // Prefer the shell's own login overlay if available — that's what
-      // cookie-authed SSO users expect to see. Fall back to the custom
-      // modal only if the shell isn't loaded (e.g. dev environment with
-      // no /editor-shell.js, or legacy localStorage users without an SSO
-      // session). The custom modal stays in the file for now and will be
-      // deleted in Phase 2.
-      if (window.tgse && typeof window.tgse.requireLogin === 'function') {
+      // cookie-authed SSO users expect to see. Shell method is showLogin()
+      // (caught in testing — was previously calling non-existent requireLogin).
+      // Fall back to the custom modal only if the shell isn't loaded (e.g. dev
+      // environment with no /editor-shell.js, or legacy localStorage users
+      // without an SSO session). The custom modal stays in the file for now
+      // and will be deleted in Phase 2.
+      if (window.tgse && typeof window.tgse.showLogin === 'function') {
         $('#boot-loading').hidden = true;
         $('#editor').hidden = true;
-        window.tgse.requireLogin();
+        window.tgse.showLogin();
         return;
       }
       // Legacy fallback
@@ -7231,13 +7243,11 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       // back after a successful login.
       const sess = getSession();
       if (!sess) {
-        // No shell session AND no legacy session. The shell's own login overlay
-        // should already be visible; just wait. If the shell can't surface its
-        // overlay for some reason (e.g. very old shell version), fall back to
-        // the custom login modal so the user is not left stranded.
-        if (!window.tgse || typeof window.tgse.onLoginRequired !== 'function') {
-          showLogin();
-        }
+        // No shell session AND no legacy session. Surface a login overlay —
+        // showLogin() inside this file prefers the shell's overlay when
+        // available and falls back to the legacy modal only when the shell
+        // is missing.
+        showLogin();
         return;
       }
       // We have an authenticated session — proceed with the editor.
