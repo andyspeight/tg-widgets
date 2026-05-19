@@ -962,7 +962,12 @@ const TEMPLATES = [
 let state = {
   config: deepClone(DEFAULT_CONFIG),
   widgetId: null,
-  widgetName: 'My Logo Showcase',
+  // Empty by default — the input's placeholder attribute provides the
+  // 'Widget name' hint. Pre-filling 'My Logo Showcase' meant every new
+  // widget got saved with the placeholder name unless the user noticed
+  // to clear it first. On edit of an existing widget, loadExisting
+  // overwrites this with the actual saved name.
+  widgetName: '',
   history: [],
   historyIdx: -1,
   isDirty: false,
@@ -1174,7 +1179,14 @@ function pushHistory() {
 
 function updateSaveButton() {
   const b = $('#btn-save');
-  if (state.isDirty) {
+  // Three states, not two:
+  //   - Never saved (widgetId is null)             → always "Save"
+  //   - Saved before, no pending edits             → "Saved"
+  //   - Saved before, has pending edits (isDirty)  → "Save"
+  // The previous two-state logic treated a fresh editor as "Saved"
+  // because isDirty starts false, which was misleading.
+  const showSaved = !state.isDirty && !!state.widgetId;
+  if (!showSaved) {
     b.classList.remove('is-saved');
     b.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save`;
   } else {
@@ -1271,7 +1283,10 @@ async function loadWidget(id) {
     if (!res.ok) return;
     const data = await res.json();
     state.widgetId = data.widgetId || data.id || id;
-    state.widgetName = data.name || 'Logo Showcase';
+    // Use the saved name as-is (might be blank — that's a legitimate
+    // state, the placeholder will show). Don't fallback to a default
+    // here; that's only done on save body construction.
+    state.widgetName = data.name || '';
     state.config = Object.assign({}, deepClone(DEFAULT_CONFIG), data.config || {});
     state.history = [deepClone(state.config)];
     state.historyIdx = 0;
