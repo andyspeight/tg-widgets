@@ -10,6 +10,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- ============================================================
+       PHASE 1 OF UNIFIED SHELL MIGRATION (auth only)
+       Loaded for tgse.isLoggedIn() / tgse.onReady() / cookie auth
+       fetch interceptor. The rest of this editor's custom chrome
+       (topbar, save button, Templates, etc) is migrated in Phase 2.
+       See MIGRATION-PLAN.md for full scope.
+       ============================================================ -->
+  <link rel="stylesheet" href="/editor-shell.css">
+  <script src="/editor-shell.js" defer></script>
+
   <style>
     /* ============================ Editor chrome ============================ */
     :root {
@@ -2567,8 +2577,36 @@
 
     /* =============================== AUTH =============================== */
     function getSession() {
+      // PHASE 1 SHELL MIGRATION:
+      // This function previously read from localStorage (tg_token / tg_user / tg_client
+      // or the legacy STORAGE_KEY blob). Those keys are only written by the legacy
+      // signin.html flow — users arriving via Travelify SSO have HttpOnly cookies
+      // instead, and never had a Bearer token in localStorage to begin with.
+      //
+      // Now we read from the shell's auth state. The shape returned here is
+      // backward-compatible with every existing caller — { token, user: {...},
+      // timestamp } — so nothing else in this file has to change in Phase 1.
+      //
+      // Note: token is empty because cookie auth doesn't expose the JWT to JS.
+      // authHeaders() below has been updated accordingly to NOT inject an
+      // Authorization header — credentials: 'include' carries auth via cookie.
       try {
-        // 1. Primary: new SSO keys written by id.travelify.io / signin.html
+        if (window.tgse && typeof window.tgse.isLoggedIn === 'function' && window.tgse.isLoggedIn()) {
+          const u = (typeof window.tgse.getUser === 'function') ? (window.tgse.getUser() || {}) : {};
+          return {
+            token: '', // cookie-borne; not exposed to JS
+            user: {
+              email:          u.email || '',
+              clientName:     u.clientName || '',
+              clientRecordId: u.clientId || u.clientRecordId || null,
+              plan:           u.plan || '',
+              recordId:       u.recordId || null,
+            },
+            timestamp: Date.now()
+          };
+        }
+        // Fallback: legacy localStorage paths, in case a user is still on the
+        // old auth flow during transition. Behaviour preserved verbatim.
         const tok = localStorage.getItem('tg_token');
         const usrRaw = localStorage.getItem('tg_user');
         if (tok && usrRaw) {
@@ -2588,10 +2626,8 @@
             timestamp: Date.now()
           };
         }
-        // 2. Legacy localStorage blob
         let raw = localStorage.getItem(STORAGE_KEY);
         if (raw) return JSON.parse(raw);
-        // 3. Legacy sessionStorage blob
         raw = sessionStorage.getItem(STORAGE_KEY);
         if (raw) {
           const s = JSON.parse(raw);
@@ -2617,10 +2653,31 @@
       } catch (e) {}
     }
     function authHeaders(extra) {
+      // PHASE 1 SHELL MIGRATION:
+      // Cookie auth carries identity via HttpOnly cookies. The shell's
+      // fetch interceptor (v1.2.0) automatically attaches credentials:'include'
+      // to all same-origin /api/* requests, so no Authorization header is
+      // needed. We retain the function for callers' convenience and the
+      // fallback path (legacy users still on Bearer tokens), but generally
+      // emit no Authorization header for new SSO sessions.
       const s = getSession();
       const h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
+      // Only attach Authorization if we actually have a token string (i.e. legacy
+      // localStorage user, NOT cookie-borne session). For cookie sessions s.token
+      // is '' and we skip — credentials:'include' is what authenticates.
       if (s && s.token) h['Authorization'] = 'Bearer ' + s.token;
       return h;
+    }
+
+    // PHASE 1 SHELL MIGRATION:
+    // Every fetch in this file needs to include credentials so the cookie
+    // travels with the request. The shell's fetch interceptor in shell v1.2.0
+    // does this automatically for /api/* but we set up this helper to be
+    // explicit at call sites that need it, and to make it easy to find later
+    // if Phase 2 swaps in a different fetch wrapper.
+    function fetchWithAuth(url, opts) {
+      const o = Object.assign({ credentials: 'include' }, opts || {});
+      return fetch(url, o);
     }
 
     /* =========================== DEFAULT CONFIG =========================== */
@@ -2730,6 +2787,7 @@
         };
         const res = await fetch(API_CONFIG, {
           method: 'POST',
+          credentials: 'include', // PHASE 1: cookie auth for SSO users
           headers: authHeaders(),
           body: JSON.stringify(body)
         });
@@ -2794,7 +2852,7 @@
     async function load(widgetId) {
       try {
         const url = `${API_CONFIG}?id=${encodeURIComponent(widgetId)}&editor=1`;
-        const res = await fetch(url, { headers: authHeaders() });
+        const res = await fetch(url, { credentials: 'include', headers: authHeaders() });
         if (res.status === 401) throw new Error('AUTH');
         if (res.status === 404) {
           showToast('Form not found — starting a new one', 'warning');
@@ -5132,6 +5190,7 @@
 
         const response = await fetch('/api/enquiry/airtable-pat', {
           method: 'POST',
+          credentials: 'include', // PHASE 1: cookie auth for SSO users
           headers,
           body: JSON.stringify({
             widgetId,
@@ -5186,6 +5245,7 @@
 
         const response = await fetch('/api/enquiry/airtable-pat?widgetId=' + encodeURIComponent(widgetId), {
           method: 'DELETE',
+          credentials: 'include', // PHASE 1: cookie auth for SSO users
           headers,
         });
         const result = await response.json().catch(() => ({}));
@@ -7073,6 +7133,20 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
 
     /* ============================== LOGIN ============================== */
     function showLogin() {
+      // PHASE 1 SHELL MIGRATION:
+      // Prefer the shell's own login overlay if available — that's what
+      // cookie-authed SSO users expect to see. Fall back to the custom
+      // modal only if the shell isn't loaded (e.g. dev environment with
+      // no /editor-shell.js, or legacy localStorage users without an SSO
+      // session). The custom modal stays in the file for now and will be
+      // deleted in Phase 2.
+      if (window.tgse && typeof window.tgse.requireLogin === 'function') {
+        $('#boot-loading').hidden = true;
+        $('#editor').hidden = true;
+        window.tgse.requireLogin();
+        return;
+      }
+      // Legacy fallback
       $('#boot-loading').hidden = true;
       $('#login').hidden = false;
       $('#editor').hidden = true;
@@ -7136,9 +7210,49 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
     }
 
     /* =============================== BOOT =============================== */
-    console.log('[boot] editor-enquiry.html | session keys:', Object.keys(sessionStorage));
+    // PHASE 1 SHELL MIGRATION:
+    // Previously called init() directly on script load. That race-conditioned
+    // with the shell's async cookie auth check: getSession() returned null
+    // before the cookie resolved, init() called showLogin(), and the user
+    // saw the custom login modal even though they were already authenticated
+    // via SSO.
+    //
+    // Now we wait for the shell's auth state to resolve via tgse.onReady,
+    // then call init(). The shell will surface its own login overlay if the
+    // user isn't logged in — we don't need to do anything special for that case.
+    //
+    // bindLogin() still binds the custom login modal handlers, kept for the
+    // legacy fallback path. The custom modal is no longer shown to SSO users.
+    console.log('[boot] editor-enquiry.html | shell migration phase 1');
     bindLogin();
-    init();
+
+    function startEditor() {
+      // Re-check on each entry — handles the case where the shell calls us
+      // back after a successful login.
+      const sess = getSession();
+      if (!sess) {
+        // No shell session AND no legacy session. The shell's own login overlay
+        // should already be visible; just wait. If the shell can't surface its
+        // overlay for some reason (e.g. very old shell version), fall back to
+        // the custom login modal so the user is not left stranded.
+        if (!window.tgse || typeof window.tgse.onLoginRequired !== 'function') {
+          showLogin();
+        }
+        return;
+      }
+      // We have an authenticated session — proceed with the editor.
+      init();
+    }
+
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        startEditor();
+      });
+    } else {
+      // Defensive fallback for environments where shell didn't load
+      // (e.g. /editor-shell.js 404'd, ad blocker, etc). Original behaviour.
+      startEditor();
+    }
 
   })();
   </script>
