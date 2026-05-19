@@ -1571,7 +1571,11 @@
 
     const state = {
       widgetId: null,
-      widgetName: 'My Text FX',
+      // Empty by default — the input's placeholder attribute provides the
+      // 'Widget name' hint. Pre-filling 'My Text FX' meant every new
+      // widget got saved with the placeholder name unless the user noticed
+      // to clear it first.
+      widgetName: '',
       config: deepClone(DEFAULT_CONFIG),
       isDirty: true,
       activeTab: 'design',
@@ -2625,7 +2629,7 @@
         if (!res.ok) return;
         const data = await res.json();
         state.widgetId = data.widgetId || data.id || id;
-        state.widgetName = data.name || 'Text FX';
+        state.widgetName = data.name || '';
         state.config = Object.assign({}, deepClone(DEFAULT_CONFIG), data.config || {});
         // Ensure mode-specific objects exist after merge
         ['typewriter', 'rotating', 'counter', 'gradient', 'wordreveal', 'marquee', 'outlined', 'splitcolor', 'spotlight', 'stacked', 'splitblock', 'vertical'].forEach(k => {
