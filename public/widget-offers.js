@@ -78,25 +78,20 @@
   const API_BASE = resolveApiBase();
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
 
-  // STOPGAP (May 2026):
-  // The widget originally called TRAVELIFY_ENDPOINT directly with per-widget
-  // credentials. That model expected credentials to come from each widget's
-  // config (injected by the editor), but the credential-storage model has
-  // moved upstream: every Travelgenix client is now meant to inherit
-  // credentials from their Travelify account record at id.travelify.io.
+  // The widget calls the /api/offers proxy on widgets.travelify.io, not
+  // Travelify directly. The proxy:
+  //   1. Reads `appId` from the request body
+  //   2. Looks up the client's full credentials (App ID + private API Key)
+  //      in the Travelgenix Clients table
+  //   3. Adds the Authorization header server-side and forwards to Travelify
   //
-  // Until that upstream config exists, all widgets share Travelgenix's
-  // single Travelify account (App 250). The /api/offers proxy holds those
-  // shared credentials server-side, so the widget just POSTs the payload
-  // and lets the proxy add the Authorization header.
+  // This means the apiKey never ships to the browser, and each customer's
+  // requests are auth'd against their own Travelify account.
   //
-  // When per-client credentials become available, replace this with:
-  //   - server-side injection of appId/apiKey into the widget config (via
-  //     widget-config.js) using a per-client lookup, AND
-  //   - revert to calling TRAVELIFY_ENDPOINT directly with this.cfg.appId
-  //     and this.cfg.apiKey.
-  // The branch of widget-config.js that does the lookup is the bit that's
-  // currently parked.
+  // appId is injected into this.cfg by widget-config.js at GET time from the
+  // ClientIntegrations table, keyed off the widget's ClientEmail. For widgets
+  // on Travelgenix's own demo site (no client setup), the appId is empty or
+  // '250' and the proxy falls through to demo credentials.
   const OFFERS_PROXY = API_BASE.replace('/widget-config', '/offers');
   const VERSION = '1.6.0';
   const CACHE_PREFIX = 'tgo_cache_';
@@ -5395,17 +5390,24 @@
       }
 
       try {
-        // Call the Travelgenix /api/offers proxy. The proxy looks up this
-        // client's Travelify credentials by appId server-side and adds the
-        // Authorization header. Response shape is unchanged — the proxy
-        // passes the upstream Travelify response through verbatim, so
-        // .success and .data still work as before.
+        // Call the Travelgenix offers proxy. The proxy adds the Authorization
+        // header server-side, looking up the client's full credentials by the
+        // appId we pass in the body. The apiKey never travels through here —
+        // it's only on the proxy/Airtable side.
+        //
+        // appId comes from this.cfg.appId, which is injected into the widget
+        // config server-side by widget-config.js (see lookupTravelifyCredentials
+        // there). For Travelgenix's own demo widgets the field will be empty
+        // or '250' and the proxy falls through to demo credentials.
         const res = await fetch(OFFERS_PROXY, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ appId: this.cfg.appId || '', ...payload }),
+          body: JSON.stringify({
+            ...payload,
+            appId: this.cfg.appId || '',
+          }),
         });
         const data = await res.json();
         if (!data.success) {
@@ -8163,13 +8165,17 @@
     async _fetchAndRenderBoard() {
       try {
         const payload = this._buildPayload();
-        // Send appId so /api/offers can resolve the per-client credentials.
+        // See _fetchAndRender for the rationale — appId in the body lets the
+        // proxy resolve the right client's full credentials server-side.
         const res = await fetch(OFFERS_PROXY, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ appId: this.cfg.appId || '', ...payload }),
+          body: JSON.stringify({
+            ...payload,
+            appId: this.cfg.appId || '',
+          }),
         });
         if (!res.ok) throw new Error('API ' + res.status);
         const data = await res.json();
