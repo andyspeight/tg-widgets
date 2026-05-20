@@ -548,6 +548,7 @@
       websiteUrl: '',
       travelifyAppId: '',
       travelifySiteId: '',
+      apiKey: '',
       primaryContactName: '',
       primaryContactEmail: '',
       primaryContactPhone: '',
@@ -811,6 +812,12 @@
               </div>
             </div>
 
+            <div class="field">
+              <label for="f-api-key">API Key</label>
+              <input type="text" id="f-api-key" maxlength="36" autocomplete="off" spellcheck="false" value="${escapeHtml(state.apiKey)}" placeholder="A41D180E-CBFE-4E30-A47D-FAAB424A650D" style="font-family: var(--tg-font-mono, 'JetBrains Mono', monospace);" />
+              <div class="field-help">Usually populated automatically when an agent first signs in via Travelify SSO. Add manually here if you already have it.</div>
+            </div>
+
             <div class="section-divider">
               <h3>Primary contact</h3>
               <p>This person becomes the workspace admin and gets the first invite.</p>
@@ -851,6 +858,7 @@
       bind('f-website', 'websiteUrl', scheduleAvailabilityCheck);
       bind('f-app-id', 'travelifyAppId', scheduleAvailabilityCheck);
       bind('f-site-id', 'travelifySiteId');
+      bind('f-api-key', 'apiKey');
       bind('f-contact-name', 'primaryContactName');
       bind('f-contact-email', 'primaryContactEmail', scheduleAvailabilityCheck);
       bind('f-contact-phone', 'primaryContactPhone');
@@ -871,6 +879,7 @@
       if (state.availability.travelifyAppId?.conflict) errs.push('Travelify App ID conflict');
       if (state.travelifyAppId && !/^\d{1,10}$/.test(state.travelifyAppId)) errs.push('Travelify App ID must be numeric');
       if (state.travelifySiteId && !/^\d{1,10}$/.test(state.travelifySiteId)) errs.push('Travelify Site ID must be numeric');
+      if (state.apiKey && !/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/.test(state.apiKey.trim())) errs.push('API Key must be a UUID like A41D180E-CBFE-4E30-A47D-FAAB424A650D');
       return errs;
     }
 
@@ -1286,6 +1295,7 @@
               ${fld('Website', state.websiteUrl)}
               ${fld('Travelify App ID', state.travelifyAppId, { mono: true })}
               ${fld('Travelify Site ID', state.travelifySiteId, { mono: true })}
+              ${fld('API Key', state.apiKey ? `••••••••-••••-••••-••••-••••••••${state.apiKey.slice(-4)}` : '', { mono: true })}
             </div>
           </div>
 
@@ -1465,6 +1475,7 @@
         websiteUrl: state.websiteUrl.trim(),
         travelifyAppId: state.travelifyAppId.trim(),
         travelifySiteId: state.travelifySiteId.trim(),
+        apiKey: state.apiKey.trim(),
         primaryContactName: state.primaryContactName.trim(),
         primaryContactEmail: state.primaryContactEmail.trim().toLowerCase(),
         primaryContactPhone: state.primaryContactPhone.trim(),
@@ -1565,7 +1576,7 @@
         // Reset state for a fresh wizard
         Object.assign(state, {
           currentStep: 0, companyName: '', tradingName: '', websiteUrl: '',
-          travelifyAppId: '', travelifySiteId: '',
+          travelifyAppId: '', travelifySiteId: '', apiKey: '',
           primaryContactName: '', primaryContactEmail: '', primaryContactPhone: '',
           packageId: '', packageData: null,
           mrr: '', setupFee: '',
