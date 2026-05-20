@@ -1,17 +1,25 @@
-// Vercel serverless function: proxies POST requests to the Travelify offers cache.
-// Keeps the Authorization header server-side so the public key never ships to the browser.
+// Vercel serverless function: proxies POST requests to the Travelify Offers cache.
+//
+// Per-client credentials live in the Airtable Clients table (one record per
+// client, with their Travelify App ID + public API Key). The widget POSTs its
+// own appId in the request body; we look that up to build the auth header
+// server-side. The apiKey never ships to the browser via this endpoint —
+// the offers payload comes back instead.
+//
+// Demo fallback: requests with no appId or with appId='250' use the hardcoded
+// Travelgenix demo credentials so the public marketing demo on tg-widgets.vercel.app
+// keeps working without configuration.
+
+import { setCors, lookupClientCredentialsByAppId } from './_auth.js';
 
 const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
 
-// Test credentials from the Travelify docs. Swap to env vars before any real client.
-const APP_ID = '250';
-const PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
+// Travelgenix demo credentials (App 250) — published in Travelify docs.
+const DEMO_APP_ID = '250';
+const DEMO_PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
 
 export default async function handler(req, res) {
-  // CORS — wide open for the test, tighten when we go to clients
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  setCors(res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
@@ -22,8 +30,44 @@ export default async function handler(req, res) {
   // and recommends sending it via customerUserAgent in the body
   const customerUserAgent = req.headers['user-agent'] || 'Travelgenix-Widget/1.0';
 
-  // Sensible defaults so the widget works with an empty body
   const body = req.body || {};
+
+  // ── Resolve credentials ───────────────────────────────────────────
+  // Strip appId out of the body so it never goes through to Travelify (it
+  // doesn't belong on the request payload — it belongs in the auth header).
+  const { appId: rawAppId, apiKey: _ignoredApiKey, ...travelifyBody } = body;
+  const requestedAppId = rawAppId == null ? '' : String(rawAppId).trim();
+
+  let appId;
+  let apiKey;
+
+  // Demo path: no appId supplied, or appId is the demo account.
+  if (!requestedAppId || requestedAppId === DEMO_APP_ID) {
+    appId = DEMO_APP_ID;
+    apiKey = DEMO_PUBLIC_KEY;
+  } else {
+    // Real client: look up by App ID against the Clients table.
+    try {
+      const creds = await lookupClientCredentialsByAppId(requestedAppId);
+      if (!creds) {
+        return res.status(404).json({
+          success: false,
+          error: 'Unknown client',
+          detail: `No Travelgenix client with Travelify App ID ${requestedAppId}`,
+        });
+      }
+      appId = creds.appId;
+      apiKey = creds.apiKey;
+    } catch (err) {
+      console.error('[offers] credential lookup failed for appId', requestedAppId, '—', err.message);
+      return res.status(500).json({
+        success: false,
+        error: 'Credential lookup failed',
+      });
+    }
+  }
+
+  // Sensible defaults so the widget works with a minimal body
   const payload = {
     type: 'Accommodation',
     deduping: 'Aggressive',
@@ -37,11 +81,11 @@ export default async function handler(req, res) {
     pricingByType: 'Person',
     sort: 'price:asc',
     customerUserAgent,
-    ...body,
+    ...travelifyBody,
   };
 
   // Build auth header — exact format from Travelify docs: "Token AppId:PublicApiKey"
-  const authHeader = `Token ${APP_ID}:${PUBLIC_KEY}`;
+  const authHeader = `Token ${appId}:${apiKey}`;
 
   try {
     const upstream = await fetch(TRAVELIFY_ENDPOINT, {
@@ -60,7 +104,7 @@ export default async function handler(req, res) {
     let data;
     try {
       data = JSON.parse(responseText);
-    } catch (parseErr) {
+    } catch {
       return res.status(502).json({
         success: false,
         error: 'Upstream returned non-JSON response',
@@ -69,18 +113,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // Mirror upstream status when it's not a 2xx so we can see what went wrong
     if (!upstream.ok) {
       return res.status(upstream.status).json({
         success: false,
         error: data?.error || `Upstream returned ${upstream.status}`,
         upstreamStatus: upstream.status,
         upstream: data,
-        // Echo back the auth header shape (masked) so we can verify the format
-        debug: {
-          authHeaderFormat: `Token ${APP_ID}:${PUBLIC_KEY.slice(0, 8)}...`,
-          payloadKeys: Object.keys(payload),
-        },
       });
     }
 
