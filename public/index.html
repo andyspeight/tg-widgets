@@ -165,6 +165,9 @@ a{text-decoration:none;color:inherit}
 .type-modal-item-btn:hover{border-color:var(--br);color:var(--br)}
 .type-modal-item-btn-secondary{color:#EC4899;border-color:#FBCFE8;background:#FDF2F8}
 .type-modal-item-btn-secondary:hover{border-color:#EC4899;color:#BE185D;background:#FCE7F3}
+.type-modal-item-btn-copy{color:#0891B2;border-color:#A5F3FC;background:#ECFEFF}
+.type-modal-item-btn-copy:hover{border-color:#0891B2;color:#0E7490;background:#CFFAFE}
+.type-modal-item-btn-copy:disabled{opacity:.6;cursor:not-allowed}
 .type-modal-item-delete{width:32px;height:32px;padding:0;border-radius:8px;border:1px solid var(--bd);background:#fff;cursor:pointer;color:var(--mt);display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .type-modal-item-delete svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .type-modal-item-delete:hover{border-color:var(--dn);color:var(--dn);background:#FEF2F2}
@@ -486,17 +489,12 @@ const WIDGETS = [
   {
     id: 'team',
     name: 'Team Showcase',
-    airtableType: 'Team Showcase',
-    description: 'Present your team with photos, roles, bios, and social links. Four layouts: grid, compact, carousel and spotlight.',
+    description: 'Present your team with photos, roles, bios, and social links. Multiple layout options including grid, carousel, and cards.',
     category: 'Content',
-    status: 'live',
+    status: 'coming-soon',
     icon: {viewBox:'0 0 24 24', paths:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>'},
     color: '#3B82F6',
-    editorUrl: '/editor-team',
-    demoUrl: '/demo-team',
-    widgetTag: 'team',
-    scriptFile: 'widget-team.js',
-    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'event-calendar',
@@ -735,6 +733,11 @@ function openTypeModal(airtableType) {
       <a class="type-modal-item-btn" href="${reg.editorUrl}?id=${encodeURIComponent(w.widgetId)}">
         Edit
       </a>
+      <button class="type-modal-item-btn type-modal-item-btn-copy" title="Duplicate this widget" aria-label="Copy widget"
+              onclick="copyWidget('${esc(w.widgetId)}', this)">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:middle"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
       <button class="type-modal-item-delete" title="Delete widget" aria-label="Delete widget"
               onclick="confirmDeleteWidget('${esc(w.widgetId)}')">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -888,6 +891,88 @@ async function performDeleteWidget() {
     errEl.classList.add('show');
     deleteBtn.disabled = false;
     deleteBtn.textContent = 'Delete widget';
+  }
+}
+
+/* ═══ COPY WIDGET ═══
+ *
+ * Inline action — no confirm dialog because copying is non-destructive.
+ * Routes to /api/widget-copy for generic widgets or /api/enquiry-form-copy
+ * for Enquiry Forms (different storage shape, different endpoint).
+ *
+ * UI flow:
+ *   1. Disable the button, change label to "Copying…"
+ *   2. POST to the right endpoint with { widgetId }
+ *   3. On success: refresh local widget list, repaint the type modal,
+ *      show a success toast naming the new widget
+ *   4. On failure: re-enable the button, restore label, show error toast
+ */
+async function copyWidget(widgetId, btn) {
+  const w = myWidgetData.find(x => x.widgetId === widgetId);
+  if (!w) {
+    console.warn('[copyWidget] widget not found in local state:', widgetId);
+    return;
+  }
+
+  // Enquiry Forms go to their dedicated endpoint (richer storage shape).
+  const isEnquiry = w.type === 'Enquiry Form';
+  const endpoint = isEnquiry ? '/api/enquiry-form-copy' : '/api/widget-copy';
+  const airtableType = w.type;
+
+  // Disable + visual feedback. Stash original markup so we can restore it.
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.style.pointerEvents = 'none';
+  btn.innerHTML = 'Copying…';
+
+  try {
+    const r = await fetch(endpoint, {
+      method: 'POST',
+      headers: authHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({ widgetId }),
+    });
+    const data = await r.json().catch(() => ({}));
+
+    if (r.status === 401) {
+      showToast('Session expired — please sign in again', 'err');
+      return;
+    }
+    if (r.status === 403) {
+      // Plan limit or ownership error — error message is user-friendly from server.
+      showToast(data.error || 'Could not copy widget', 'err');
+      return;
+    }
+    if (!r.ok) {
+      console.error('[copyWidget] failed:', r.status, data);
+      showToast(data.error || `Copy failed (HTTP ${r.status})`, 'err');
+      return;
+    }
+
+    // Success — refresh local widget list from server (single source of truth)
+    // then re-open the type modal so the new widget appears in the list.
+    await renderMyWidgets();
+    showToast(`Copied as "${data.name || 'new widget'}"`, 'ok');
+
+    // Re-open the type modal for the same widget type (which is closed
+    // visually because renderMyWidgets repainted the page underneath).
+    // If the modal was open before this action it'll have stayed open
+    // (renderMyWidgets only touches #myGrid, not the modal), so we
+    // just repaint its contents.
+    if (document.getElementById('typeModal').classList.contains('open')) {
+      openTypeModal(airtableType);
+    }
+  } catch (err) {
+    console.error('[copyWidget]', err);
+    showToast('Copy failed: ' + (err.message || 'network error'), 'err');
+  } finally {
+    // Restore button — even on success, in case the modal didn't get
+    // repainted (e.g. dashboard view).
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
+    btn.innerHTML = originalHTML;
   }
 }
 
@@ -1600,81 +1685,6 @@ function loadMiniPreview(w) {
       ],
       theme: { mode: 'light', brand: w.color || '#0891B2', radius: 12 }
     });
-  }
-
-  if (w.id === 'team') {
-    container.innerHTML = `
-      <div style="
-        width: 700px;
-        height: 340px;
-        background: #FFFFFF;
-        border-radius: 16px;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        padding: 22px 24px;
-        box-sizing: border-box;
-        display: grid;
-        grid-template-columns: 1.3fr 1fr;
-        gap: 18px;
-      ">
-
-        <!-- LEFT: Spotlight-style featured member -->
-        <div style="
-          background: #F8FAFC;
-          border: 1px solid #E2E8F0;
-          border-radius: 14px;
-          overflow: hidden;
-          display: grid;
-          grid-template-columns: 1fr 1.2fr;
-          box-shadow: 0 1px 2px rgba(15,23,42,.04);
-        ">
-          <div style="
-            aspect-ratio: 4 / 5;
-            background-image: linear-gradient(135deg, rgba(8,145,178,.0) 0%, rgba(8,145,178,.18) 100%), url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&q=80');
-            background-size: cover;
-            background-position: center;
-          "></div>
-          <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 4px;">
-            <div style="font-size: 9px; font-weight: 600; color: ${w.color || '#3B82F6'}; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px;">Senior Consultant</div>
-            <div style="font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.2; letter-spacing: -.01em;">Sarah Mitchell</div>
-            <div style="font-size: 11px; color: #64748B; line-height: 1.45; margin-top: 6px;">Twenty years arranging unforgettable trips across Europe and Asia.</div>
-            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: auto; padding-top: 8px;">
-              <span style="display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,.12);color:#B45309;font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;line-height:1.4;">★ 20+ yrs</span>
-              <span style="background:rgba(8,145,178,.08);color:#0891B2;font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px;line-height:1.4;">Honeymoons</span>
-              <span style="background:rgba(8,145,178,.08);color:#0891B2;font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px;line-height:1.4;">Italy</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT: Stack of three compact-style chips -->
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="font-size:9px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.06em;">More of the team</div>
-
-          <div style="display:flex;align-items:center;gap:11px;padding:11px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;">
-            <div style="width:42px;height:42px;border-radius:999px;flex-shrink:0;background-image:url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&q=80');background-size:cover;background-position:center;"></div>
-            <div style="min-width:0;flex:1;">
-              <div style="font-size:13px;font-weight:600;color:#0F172A;line-height:1.2;">James Thornton</div>
-              <div style="font-size:11px;color:#64748B;line-height:1.3;margin-top:2px;">Cruise Specialist</div>
-            </div>
-          </div>
-
-          <div style="display:flex;align-items:center;gap:11px;padding:11px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;">
-            <div style="width:42px;height:42px;border-radius:999px;flex-shrink:0;background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop&q=80');background-size:cover;background-position:center;"></div>
-            <div style="min-width:0;flex:1;">
-              <div style="font-size:13px;font-weight:600;color:#0F172A;line-height:1.2;">Priya Patel</div>
-              <div style="font-size:11px;color:#64748B;line-height:1.3;margin-top:2px;">Long-Haul Expert</div>
-            </div>
-          </div>
-
-          <div style="display:flex;align-items:center;gap:11px;padding:11px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;">
-            <div style="width:42px;height:42px;border-radius:999px;flex-shrink:0;background-image:url('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop&q=80');background-size:cover;background-position:center;"></div>
-            <div style="min-width:0;flex:1;">
-              <div style="font-size:13px;font-weight:600;color:#0F172A;line-height:1.2;">Oliver Hayes</div>
-              <div style="font-size:11px;color:#64748B;line-height:1.3;margin-top:2px;">Ski &amp; Winter Sun</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
   }
 
   if (w.id === 'textfx' && window.TGTextFxWidget) {
@@ -2662,7 +2672,6 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-weather.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
-<script src="/widget-team.js"></script>
 <script src="/widget-countdown.js"></script>
 <script src="/widget-textfx.js"></script>
 <script src="/widget-events.js"></script>
