@@ -6,7 +6,7 @@
  * Security: GET is public (widgets must load without auth), POST requires valid session token.
  * All inputs sanitised before Airtable queries.
  */
-import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
+import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimit, RATE_LIMITS, lookupClientCredentialsByEmail } from './_auth.js';
 
 // Hydration fallback for cookie-issued JWTs that lack the legacy fields
 // (email, plan) the rest of this endpoint depends on. Once every active
@@ -15,7 +15,6 @@ import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimi
 import { getRecord } from './_lib/auth/airtable.js';
 import { USERS, CLIENTS } from './_lib/auth/schema.js';
 import { normalisePlanValue } from './_lib/auth/plan.js';
-import { decrypt } from './_crypto.js';
 
 /**
  * If the JWT carries userId but not email/plan/clientId (true for cookies
@@ -329,77 +328,6 @@ async function throwAirtableError(opName, resp) {
   throw new Error(opName + detail);
 }
 
-// ClientIntegrations table — same as in api/client-integrations.js.
-// Kept inline (not imported) so this file remains the single source of
-// what widget-config needs to inject. If field IDs ever change, both
-// files need updating.
-const CLIENT_INTEGRATIONS_TABLE = 'tblpzQpwmcTvUeHcF';
-const CI_FIELDS = {
-  ClientEmail:     'flditBgdp6egbk3Fb',
-  Service:         'fld0TP0kypkfOOJF6',
-  AppId:           'fldCXwCixuvqN2HMy',
-  ApiKeyEncrypted: 'fldpb4JQRSuot0Gg2',
-  Status:          'fldEVMrKnEpFaxORk',
-  UpdatedAt:       'fldOlf1fxG2fm5Rl8',
-};
-
-/**
- * Look up the active Travelify Offers credentials for a given client email.
- *
- * Each client (Travelgenix, Company B, Company C, etc.) has their own
- * ClientIntegrations record holding their Travelify creds. This function:
- *   1. Filters for active Travelify integrations matching the email
- *   2. Picks the most recently updated one (defence against duplicates)
- *   3. Decrypts the apiKey using TG_PAT_ENCRYPTION_KEY (same secret used
- *      by client-integrations.js)
- *
- * Returns { appId, apiKey } or null if no active integration exists or
- * decryption fails. Caller logs and degrades gracefully — the widget will
- * show "Missing Travelify credentials" if we return null, which correctly
- * surfaces the underlying config issue to the user.
- */
-async function lookupTravelifyCredentials(clientEmail, headers) {
-  const safeEmail = sanitiseForFormula(clientEmail);
-  const formula = encodeURIComponent(
-    `AND({${CI_FIELDS.ClientEmail}}='${safeEmail}',{${CI_FIELDS.Service}}='Travelify',{${CI_FIELDS.Status}}='Active')`
-  );
-  const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${CLIENT_INTEGRATIONS_TABLE}?filterByFormula=${formula}&maxRecords=5&returnFieldsByFieldId=true`;
-
-  const resp = await fetch(url, { headers });
-  if (!resp.ok) {
-    const body = await resp.text().catch(() => '');
-    throw new Error(`ClientIntegrations lookup failed — ${resp.status} ${body.slice(0, 200)}`);
-  }
-  const data = await resp.json();
-  const records = data.records || [];
-  if (records.length === 0) return null;
-
-  // If multiple active records exist (shouldn't happen — POST endpoint
-  // enforces one-active-at-a-time, but defence in depth), pick the most
-  // recently updated.
-  records.sort((a, b) => {
-    const ua = a.fields?.[CI_FIELDS.UpdatedAt] || '';
-    const ub = b.fields?.[CI_FIELDS.UpdatedAt] || '';
-    return ub.localeCompare(ua);
-  });
-  const rec = records[0];
-  const appId = rec.fields?.[CI_FIELDS.AppId];
-  const encryptedKey = rec.fields?.[CI_FIELDS.ApiKeyEncrypted];
-  if (!appId || !encryptedKey) {
-    console.warn('[widget-config] Travelify record missing appId or encrypted key for', clientEmail);
-    return null;
-  }
-
-  let apiKey;
-  try {
-    apiKey = decrypt(encryptedKey);
-  } catch (err) {
-    console.error('[widget-config] Travelify key decrypt failed for', clientEmail, '—', err.message);
-    return null;
-  }
-  return { appId, apiKey };
-}
-
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -463,12 +391,12 @@ export default async function handler(req, res) {
         // server-side.
         if (widgetType === 'Travel Offers' && clientEmail) {
           try {
-            const creds = await lookupTravelifyCredentials(clientEmail, headers);
+            const creds = await lookupClientCredentialsByEmail(clientEmail);
             if (creds) {
               config.appId = creds.appId;
               config.apiKey = creds.apiKey;
             } else {
-              console.warn('[widget-config] no Travelify integration found for', clientEmail, 'widgetId:', widgetId);
+              console.warn('[widget-config] no Travelify credentials on Clients record for', clientEmail, 'widgetId:', widgetId);
               // Leave config without creds — widget will show "Missing Travelify credentials"
               // which correctly tells the user something is wrong.
             }
