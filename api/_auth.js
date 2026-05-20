@@ -320,3 +320,96 @@ export function setCors(res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
+
+
+// ── Clients-table credential lookup ─────────────────────────────
+//
+// Single source of truth for per-client Travelify credentials.
+//
+// Each client has an Airtable Clients record holding their Travelify App ID
+// and API Key. The API Key is the Travelify "primarygroupsid" UUID — per
+// Travelify, this is the public Offers API key and is safe to expose, but we
+// still keep it server-side and only return decrypted/plaintext to callers
+// inside this module. (It does ship to the browser via /api/widget-config
+// for the Travel Offers widget, which has always been the model for that
+// widget — see widget-offers.js header comment.)
+//
+// Two lookups are exposed:
+//   - lookupClientCredentialsByEmail — used by widget-config, retrieve-order,
+//     booking-pdf which already resolve clientEmail from the widget record.
+//   - lookupClientCredentialsByAppId — used by offers.js which receives the
+//     App ID directly from the widget payload (no widget record lookup).
+//
+// Both return { appId, apiKey, clientName, recordId } or null. Callers log
+// and degrade gracefully. Callers should NEVER log apiKey — only a masked
+// preview (first 4 / last 4) for diagnostics.
+
+const TG_AIRTABLE_API = 'https://api.airtable.com/v0';
+const TG_AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
+const TG_CLIENTS_TABLE = 'tblikekpaTKraMktZ';
+
+// Mirrors api/_lib/auth/schema.js CLIENTS.fields — duplicated here so the
+// public-facing endpoints don't need to reach into the admin auth module.
+const TG_CLIENT_FIELDS = {
+  email:            'fldVRiIAlrTjxnNHP',
+  clientName:       'fldx9CiWtSm5lX7MF',
+  status:           'fldgz6ScqvHQy2jdH',
+  travelifyAppId:   'fldE9dL05t0x0S88w',
+  apiKey:           'fld9X1nvAgy0sHQ4B',
+};
+
+function buildAirtableHeaders() {
+  const key = process.env.AIRTABLE_KEY;
+  if (!key) throw new Error('AIRTABLE_KEY not configured');
+  return { 'Authorization': `Bearer ${key}` };
+}
+
+async function fetchOneClientByFormula(formula) {
+  const headers = buildAirtableHeaders();
+  const url = `${TG_AIRTABLE_API}/${TG_AIRTABLE_BASE}/${TG_CLIENTS_TABLE}`
+    + `?filterByFormula=${encodeURIComponent(formula)}`
+    + `&maxRecords=1`
+    + `&returnFieldsByFieldId=true`;
+
+  const resp = await fetch(url, { headers });
+  if (!resp.ok) {
+    const body = await resp.text().catch(() => '');
+    throw new Error(`Clients lookup failed — ${resp.status} ${body.slice(0, 200)}`);
+  }
+  const data = await resp.json();
+  const records = data.records || [];
+  return records[0] || null;
+}
+
+function packCredentials(rec) {
+  if (!rec) return null;
+  const appId = String(rec.fields?.[TG_CLIENT_FIELDS.travelifyAppId] || '').trim();
+  const apiKey = String(rec.fields?.[TG_CLIENT_FIELDS.apiKey] || '').trim();
+  if (!appId || !apiKey) return null;
+  return {
+    appId,
+    apiKey,
+    clientName: String(rec.fields?.[TG_CLIENT_FIELDS.clientName] || '').trim(),
+    recordId: rec.id,
+  };
+}
+
+export async function lookupClientCredentialsByEmail(clientEmail) {
+  if (!clientEmail || typeof clientEmail !== 'string') return null;
+  const safe = sanitiseForFormula(clientEmail.toLowerCase());
+  // LOWER() so email match is case-insensitive against whatever was stored.
+  const formula = `LOWER({${TG_CLIENT_FIELDS.email}})='${safe}'`;
+  const rec = await fetchOneClientByFormula(formula);
+  return packCredentials(rec);
+}
+
+export async function lookupClientCredentialsByAppId(appId) {
+  if (appId == null) return null;
+  const safe = sanitiseForFormula(String(appId).trim());
+  if (!safe || !/^\d{1,10}$/.test(safe)) return null;
+  // Travelify App ID is stored as a number — Airtable filter compares it as
+  // a string when used inside a formula, but quoting works either way.
+  const formula = `{${TG_CLIENT_FIELDS.travelifyAppId}}='${safe}'`;
+  const rec = await fetchOneClientByFormula(formula);
+  return packCredentials(rec);
+}
