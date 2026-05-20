@@ -69,7 +69,26 @@
   }
 
   const API_BASE = resolveApiBase();
-  const MAP_API        = (typeof window !== 'undefined' && window.__TG_DEST_MAP_API__)     || '/api/destination-map';
+  const MAP_API = (function () {
+    /* Resolve the MAP_API URL. Yesterday's fix patched widget-config but this
+       secondary API was left with a relative default ('/api/destination-map'), which
+       on customer sites resolves to the customer's domain and 404s. Same
+       resolution strategy as the API_BASE resolver above. */
+    if (typeof window === 'undefined') return '/api/destination-map';
+    if (window.__TG_DEST_MAP_API__) return window.__TG_DEST_MAP_API__;
+    try {
+      var me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/destination-map';
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var s = scripts[i].src || '';
+        if (/\/widget\-worldmap\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/destination-map';
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/destination-map';
+  })();
   const VERSION        = '1.0.0';
 
   /* ------------------------------------------------------------------

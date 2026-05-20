@@ -64,7 +64,26 @@
   }
 
   const API_BASE = resolveApiBase();
-  const CONTENT_API = (typeof window !== 'undefined' && window.__TG_AIRPORT_CONTENT_API__) || '/api/airport-content';
+  const CONTENT_API = (function () {
+    /* Resolve the CONTENT_API URL. Yesterday's fix patched widget-config but this
+       secondary API was left with a relative default ('/api/airport-content'), which
+       on customer sites resolves to the customer's domain and 404s. Same
+       resolution strategy as the API_BASE resolver above. */
+    if (typeof window === 'undefined') return '/api/airport-content';
+    if (window.__TG_AIRPORT_CONTENT_API__) return window.__TG_AIRPORT_CONTENT_API__;
+    try {
+      var me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/airport-content';
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var s = scripts[i].src || '';
+        if (/\/widget\-airport\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/airport-content';
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/airport-content';
+  })();
   const VERSION = '1.0.0';
 
   const LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';

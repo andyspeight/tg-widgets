@@ -69,7 +69,26 @@
   }
 
   const API_BASE = resolveApiBase();
-  const CONTENT_API = (typeof window !== 'undefined' && window.__TG_DEST_CONTENT_API__) || '/api/destination-content';
+  const CONTENT_API = (function () {
+    /* Resolve the CONTENT_API URL. Yesterday's fix patched widget-config but this
+       secondary API was left with a relative default ('/api/destination-content'), which
+       on customer sites resolves to the customer's domain and 404s. Same
+       resolution strategy as the API_BASE resolver above. */
+    if (typeof window === 'undefined') return '/api/destination-content';
+    if (window.__TG_DEST_CONTENT_API__) return window.__TG_DEST_CONTENT_API__;
+    try {
+      var me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/destination-content';
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var s = scripts[i].src || '';
+        if (/\/widget\-spotlight\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/destination-content';
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/destination-content';
+  })();
   const VERSION = '1.0.0';
 
   /* ------------------------------------------------------------------

@@ -59,7 +59,26 @@
   }
 
   const API_BASE = resolveApiBase();
-  const SUBMIT_BASE = (typeof window !== 'undefined' && window.__TG_NEWSLETTER_SUBMIT__) || '/api/newsletter-submit';
+  const SUBMIT_BASE = (function () {
+    /* Resolve the SUBMIT_BASE URL. Yesterday's fix patched widget-config but this
+       secondary API was left with a relative default ('/api/newsletter-submit'), which
+       on customer sites resolves to the customer's domain and 404s. Same
+       resolution strategy as the API_BASE resolver above. */
+    if (typeof window === 'undefined') return '/api/newsletter-submit';
+    if (window.__TG_NEWSLETTER_SUBMIT__) return window.__TG_NEWSLETTER_SUBMIT__;
+    try {
+      var me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/newsletter-submit';
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var s = scripts[i].src || '';
+        if (/\/widget\-newsletter\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/newsletter-submit';
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/newsletter-submit';
+  })();
   const VERSION = '1.0.0';
 
   // ---------- Helpers ----------

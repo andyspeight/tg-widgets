@@ -53,7 +53,26 @@
   }
 
   const API_BASE = resolveApiBase();
-  const EVENTS_API = (typeof window !== 'undefined' && window.__TG_EVENTS_API__)   || '/api/events-content';
+  const EVENTS_API = (function () {
+    /* Resolve the EVENTS_API URL. Yesterday's fix patched widget-config but this
+       secondary API was left with a relative default ('/api/events-content'), which
+       on customer sites resolves to the customer's domain and 404s. Same
+       resolution strategy as the API_BASE resolver above. */
+    if (typeof window === 'undefined') return '/api/events-content';
+    if (window.__TG_EVENTS_API__) return window.__TG_EVENTS_API__;
+    try {
+      var me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/events-content';
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var s = scripts[i].src || '';
+        if (/\/widget\-events\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/events-content';
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/events-content';
+  })();
   const VERSION = '1.0.0';
 
   // ---------- Helpers ----------

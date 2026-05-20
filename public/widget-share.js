@@ -43,7 +43,26 @@
   }
 
   const API_BASE = resolveApiBase();
-  const TRACK_BASE = (typeof window !== 'undefined' && window.__TG_SHARE_TRACK_API__) || '/api/share-track';
+  const TRACK_BASE = (function () {
+    /* Resolve the TRACK_BASE URL. Yesterday's fix patched widget-config but this
+       secondary API was left with a relative default ('/api/share-track'), which
+       on customer sites resolves to the customer's domain and 404s. Same
+       resolution strategy as the API_BASE resolver above. */
+    if (typeof window === 'undefined') return '/api/share-track';
+    if (window.__TG_SHARE_TRACK_API__) return window.__TG_SHARE_TRACK_API__;
+    try {
+      var me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/share-track';
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var s = scripts[i].src || '';
+        if (/\/widget\-share\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/share-track';
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/share-track';
+  })();
   const VERSION = '1.0.0';
 
   // ---------- Helpers ----------

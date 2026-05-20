@@ -60,7 +60,26 @@
   }
 
   const API_BASE = resolveApiBase();
-  const LEAD_API = (typeof window !== 'undefined' && window.__TG_POPUP_LEAD_API__) || '/api/popup-lead';
+  const LEAD_API = (function () {
+    /* Resolve the LEAD_API URL. Yesterday's fix patched widget-config but this
+       secondary API was left with a relative default ('/api/popup-lead'), which
+       on customer sites resolves to the customer's domain and 404s. Same
+       resolution strategy as the API_BASE resolver above. */
+    if (typeof window === 'undefined') return '/api/popup-lead';
+    if (window.__TG_POPUP_LEAD_API__) return window.__TG_POPUP_LEAD_API__;
+    try {
+      var me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/popup-lead';
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var s = scripts[i].src || '';
+        if (/\/widget\-popup\.js(\?|$|#)/.test(s)) {
+          return new URL(s).origin + '/api/popup-lead';
+        }
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/popup-lead';
+  })();
   const VERSION = '1.0.0';
   const STORAGE_PREFIX = 'tgp_';
 
