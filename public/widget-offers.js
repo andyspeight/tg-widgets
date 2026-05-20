@@ -5395,16 +5395,17 @@
       }
 
       try {
-        // STOPGAP: call the Travelgenix proxy which adds the Authorization
-        // header server-side. Response shape is unchanged — the proxy passes
-        // the upstream Travelify response through verbatim, so .success and
-        // .data still work as before.
+        // Call the Travelgenix /api/offers proxy. The proxy looks up this
+        // client's Travelify credentials by appId server-side and adds the
+        // Authorization header. Response shape is unchanged — the proxy
+        // passes the upstream Travelify response through verbatim, so
+        // .success and .data still work as before.
         const res = await fetch(OFFERS_PROXY, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ appId: this.cfg.appId || '', ...payload }),
         });
         const data = await res.json();
         if (!data.success) {
@@ -8162,13 +8163,13 @@
     async _fetchAndRenderBoard() {
       try {
         const payload = this._buildPayload();
-        // STOPGAP: see _fetchAndRender for the rationale on the proxy swap.
+        // Send appId so /api/offers can resolve the per-client credentials.
         const res = await fetch(OFFERS_PROXY, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ appId: this.cfg.appId || '', ...payload }),
         });
         if (!res.ok) throw new Error('API ' + res.status);
         const data = await res.json();
