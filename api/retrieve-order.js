@@ -152,6 +152,69 @@ async function findWidgetById(widgetId) {
   return data.records?.[0] || null;
 }
 
+// ----- User → Client resolver -----
+//
+// Widgets store ClientEmail = the email of the USER who created the widget
+// (Luke, Sarah, whoever). But Travelify credentials live on the parent
+// CLIENT record (the agency — "Travel Demo Tes Ltd"), not the user record.
+// One Travelify account is shared across all users in a client workspace.
+//
+// This function takes a user email and walks the user→client link to find
+// the parent client's canonical email. lookupClientCredentialsByEmail can
+// then resolve THAT to the Travelify creds on the Clients table.
+//
+// Returns the client email (lowercased) on success, null if:
+//   - no user matches the email
+//   - user has no linked client (legacy/broken record)
+//   - linked client record can't be fetched
+//
+// This is a single extra Airtable read (~80ms) per booking lookup. The
+// alternative — denormalising the client email onto every widget at save
+// time — would be faster but couples widget-config to admin reorganisations,
+// so we eat the lookup cost here.
+const USERS_TABLE = 'tblIpeQeZmF7CM7OJ'; // matches USERS.tableId in _lib/auth/schema.js
+const CLIENTS_TABLE = 'tblikekpaTKraMktZ'; // matches CLIENTS.tableId
+const UF_email  = 'fldSQLKBfsAcVS2s3'; // USERS.fields.email
+const UF_client = 'fldyXVZjZKUjlYCm6'; // USERS.fields.client — linked to Clients
+const CF_email  = 'fldVRiIAlrTjxnNHP'; // CLIENTS.fields.email — primary
+
+async function resolveUserToClientEmail(userEmail) {
+  if (!userEmail) return null;
+  const safe = sanitiseForFormula(userEmail.toLowerCase());
+
+  // 1. Find the user by email
+  const userUrl = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${USERS_TABLE}`);
+  userUrl.searchParams.set('filterByFormula', `LOWER({${UF_email}})='${safe}'`);
+  userUrl.searchParams.set('maxRecords', '1');
+  // Pull only the client link to keep payload small — and the email so we
+  // can sanity-check our match.
+  userUrl.searchParams.append('fields[]', UF_client);
+  userUrl.searchParams.append('fields[]', UF_email);
+
+  const userRes = await fetch(userUrl.toString(), { headers: airtableHeaders() });
+  if (!userRes.ok) {
+    throw new Error(`User lookup failed: ${userRes.status}`);
+  }
+  const userData = await userRes.json();
+  const user = userData.records?.[0];
+  if (!user) return null;
+
+  const clientLinks = user.fields?.[UF_client];
+  const clientId = Array.isArray(clientLinks) ? clientLinks[0] : null;
+  if (!clientId) return null;
+
+  // 2. Fetch that client record to get its canonical email
+  const clientUrl = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${CLIENTS_TABLE}/${clientId}`);
+  const clientRes = await fetch(clientUrl.toString(), { headers: airtableHeaders() });
+  if (!clientRes.ok) {
+    throw new Error(`Client lookup failed: ${clientRes.status}`);
+  }
+  const clientRec = await clientRes.json();
+  const clientEmail = clientRec.fields?.[CF_email];
+  if (!clientEmail || typeof clientEmail !== 'string') return null;
+  return clientEmail.toLowerCase().trim();
+}
+
 // ----- Travelify response sanitisation -----
 
 function safeStr(v, max = 500) {
@@ -1001,18 +1064,35 @@ export default async function handler(req, res) {
       const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
       if (!clientEmail) return notFound(res);
 
+      // The widget's ClientEmail is actually the USER email (the person who
+      // saved the widget — Luke, Sarah, whoever). Travelify credentials live
+      // on the parent CLIENT record (e.g. "Travel Demo Tes Ltd"), not on
+      // individual user records. Walk user→client first to get the canonical
+      // client email, then look up creds on that.
+      let resolvedClientEmail;
+      try {
+        resolvedClientEmail = await resolveUserToClientEmail(clientEmail);
+      } catch (err) {
+        console.error('[retrieve-order] user→client resolution failed for', clientEmail, '—', err.message);
+        return notFound(res);
+      }
+      if (!resolvedClientEmail) {
+        console.warn(`No parent client found for user ${clientEmail} (widgetId=${widgetId}). User record may be missing the Client link.`);
+        return notFound(res);
+      }
+
       // 2. Look up the client's Travelify credentials from the Clients table.
       //    Single source of truth — same record the admin console reads/writes,
       //    same record SSO auto-populates on first sign-in.
       let creds;
       try {
-        creds = await lookupClientCredentialsByEmail(clientEmail);
+        creds = await lookupClientCredentialsByEmail(resolvedClientEmail);
       } catch (err) {
-        console.error('[retrieve-order] credential lookup failed for', clientEmail, '—', err.message);
+        console.error('[retrieve-order] credential lookup failed for', resolvedClientEmail, '—', err.message);
         return notFound(res);
       }
       if (!creds) {
-        console.warn(`No Travelify credentials on Clients record for ${clientEmail} (widgetId=${widgetId})`);
+        console.warn(`No Travelify credentials on Clients record for ${resolvedClientEmail} (user=${clientEmail}, widgetId=${widgetId})`);
         return notFound(res);
       }
 
