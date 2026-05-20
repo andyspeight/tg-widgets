@@ -127,6 +127,14 @@ export default async function handler(req, res) {
   if (travelifyAppId && !/^\d{1,10}$/.test(travelifyAppId)) errors.push('travelifyAppId must be numeric, up to 10 digits');
   if (travelifySiteId && !/^\d{1,10}$/.test(travelifySiteId)) errors.push('travelifySiteId must be numeric, up to 10 digits');
 
+  // API Key is optional at create time. If supplied manually it must look
+  // like a Travelify primarygroupsid UUID (e.g. A41D180E-CBFE-4E30-A47D-FAAB424A650D).
+  // SSO will overwrite this with the JWT value when the first agent signs in.
+  const apiKey = String(body.apiKey || '').trim();
+  if (apiKey && !/^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$/.test(apiKey)) {
+    errors.push('apiKey must be a UUID like A41D180E-CBFE-4E30-A47D-FAAB424A650D');
+  }
+
   const primaryContactName = String(body.primaryContactName || '').trim();
   if (primaryContactName.length < 2 || primaryContactName.length > 120) errors.push('primaryContactName must be 2–120 characters');
 
@@ -231,6 +239,7 @@ export default async function handler(req, res) {
       [CLIENTS.fields.websiteUrl]:          websiteUrl,
       [CLIENTS.fields.travelifyAppId]:      travelifyAppId || '',
       [CLIENTS.fields.travelifySiteId]:     travelifySiteId || '',
+      [CLIENTS.fields.apiKey]:              apiKey || '',
       [CLIENTS.fields.primaryContactName]:  primaryContactName,
       [CLIENTS.fields.primaryContactPhone]: primaryContactPhone || '',
       [CLIENTS.fields.package]:             [body.packageId],
