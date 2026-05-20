@@ -15,6 +15,7 @@ import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimi
 import { getRecord } from './_lib/auth/airtable.js';
 import { USERS, CLIENTS } from './_lib/auth/schema.js';
 import { normalisePlanValue } from './_lib/auth/plan.js';
+import { decrypt } from './_crypto.js';
 
 /**
  * If the JWT carries userId but not email/plan/clientId (true for cookies
@@ -160,7 +161,6 @@ const ALLOWED_WIDGET_TYPES = [
   'Opening Hours',
   'Newsletter Signup',
   'Contact Card',
-  'Team Showcase',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -190,7 +190,6 @@ const PLAN_WIDGET_LIMITS = {
   'Opening Hours':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Newsletter Signup':     { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Contact Card':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Team Showcase':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -330,6 +329,77 @@ async function throwAirtableError(opName, resp) {
   throw new Error(opName + detail);
 }
 
+// ClientIntegrations table — same as in api/client-integrations.js.
+// Kept inline (not imported) so this file remains the single source of
+// what widget-config needs to inject. If field IDs ever change, both
+// files need updating.
+const CLIENT_INTEGRATIONS_TABLE = 'tblpzQpwmcTvUeHcF';
+const CI_FIELDS = {
+  ClientEmail:     'flditBgdp6egbk3Fb',
+  Service:         'fld0TP0kypkfOOJF6',
+  AppId:           'fldCXwCixuvqN2HMy',
+  ApiKeyEncrypted: 'fldpb4JQRSuot0Gg2',
+  Status:          'fldEVMrKnEpFaxORk',
+  UpdatedAt:       'fldOlf1fxG2fm5Rl8',
+};
+
+/**
+ * Look up the active Travelify Offers credentials for a given client email.
+ *
+ * Each client (Travelgenix, Company B, Company C, etc.) has their own
+ * ClientIntegrations record holding their Travelify creds. This function:
+ *   1. Filters for active Travelify integrations matching the email
+ *   2. Picks the most recently updated one (defence against duplicates)
+ *   3. Decrypts the apiKey using TG_PAT_ENCRYPTION_KEY (same secret used
+ *      by client-integrations.js)
+ *
+ * Returns { appId, apiKey } or null if no active integration exists or
+ * decryption fails. Caller logs and degrades gracefully — the widget will
+ * show "Missing Travelify credentials" if we return null, which correctly
+ * surfaces the underlying config issue to the user.
+ */
+async function lookupTravelifyCredentials(clientEmail, headers) {
+  const safeEmail = sanitiseForFormula(clientEmail);
+  const formula = encodeURIComponent(
+    `AND({${CI_FIELDS.ClientEmail}}='${safeEmail}',{${CI_FIELDS.Service}}='Travelify',{${CI_FIELDS.Status}}='Active')`
+  );
+  const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${CLIENT_INTEGRATIONS_TABLE}?filterByFormula=${formula}&maxRecords=5&returnFieldsByFieldId=true`;
+
+  const resp = await fetch(url, { headers });
+  if (!resp.ok) {
+    const body = await resp.text().catch(() => '');
+    throw new Error(`ClientIntegrations lookup failed — ${resp.status} ${body.slice(0, 200)}`);
+  }
+  const data = await resp.json();
+  const records = data.records || [];
+  if (records.length === 0) return null;
+
+  // If multiple active records exist (shouldn't happen — POST endpoint
+  // enforces one-active-at-a-time, but defence in depth), pick the most
+  // recently updated.
+  records.sort((a, b) => {
+    const ua = a.fields?.[CI_FIELDS.UpdatedAt] || '';
+    const ub = b.fields?.[CI_FIELDS.UpdatedAt] || '';
+    return ub.localeCompare(ua);
+  });
+  const rec = records[0];
+  const appId = rec.fields?.[CI_FIELDS.AppId];
+  const encryptedKey = rec.fields?.[CI_FIELDS.ApiKeyEncrypted];
+  if (!appId || !encryptedKey) {
+    console.warn('[widget-config] Travelify record missing appId or encrypted key for', clientEmail);
+    return null;
+  }
+
+  let apiKey;
+  try {
+    apiKey = decrypt(encryptedKey);
+  } catch (err) {
+    console.error('[widget-config] Travelify key decrypt failed for', clientEmail, '—', err.message);
+    return null;
+  }
+  return { appId, apiKey };
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -360,10 +430,56 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Widget not found' });
       }
 
-      const configStr = data.records[0].fields.Config || '{}';
-      const name = data.records[0].fields.Name || '';
+      const widgetRecord = data.records[0];
+      const configStr = widgetRecord.fields.Config || '{}';
+      const name = widgetRecord.fields.Name || '';
+      const widgetType = widgetRecord.fields.WidgetType || '';
+      const clientEmail = (widgetRecord.fields.ClientEmail || '').toLowerCase().trim();
+
       try {
         const config = JSON.parse(configStr);
+
+        // Per-client integration credential injection.
+        //
+        // BACKGROUND: Travelify Offers credentials are stored centrally per
+        // client in the ClientIntegrations table — not on each widget. The
+        // offers editor strips appId/apiKey before saving (since "stored
+        // centrally" is the design intent), and this is where they get
+        // injected back in for the widget to use.
+        //
+        // Why GET-time injection rather than baked into Config at save time:
+        // - Single source of truth — if a client rotates their Travelify
+        //   key, every Offers widget picks it up on next load. No need to
+        //   walk all widget records and update them.
+        // - Per-client scoping — Travelgenix users get the Travelgenix creds,
+        //   Company B users get Company B's. Whichever client owns the
+        //   widget (via ClientEmail) is who the creds are looked up for.
+        //
+        // Note: the credentials ship in the widget config, so any visitor on
+        // a customer site can read them via DevTools. Travelify devs have
+        // confirmed the Offers API creds are safe to expose publicly (see
+        // widget-offers.js header comment). If that changes in future,
+        // switch this to proxy through /api/offers instead and keep creds
+        // server-side.
+        if (widgetType === 'Travel Offers' && clientEmail) {
+          try {
+            const creds = await lookupTravelifyCredentials(clientEmail, headers);
+            if (creds) {
+              config.appId = creds.appId;
+              config.apiKey = creds.apiKey;
+            } else {
+              console.warn('[widget-config] no Travelify integration found for', clientEmail, 'widgetId:', widgetId);
+              // Leave config without creds — widget will show "Missing Travelify credentials"
+              // which correctly tells the user something is wrong.
+            }
+          } catch (credErr) {
+            // Don't fail the whole config response if cred lookup fails — log
+            // and let the widget show its missing-creds error. Avoids one
+            // misconfigured client breaking the entire endpoint.
+            console.error('[widget-config] Travelify cred lookup failed:', credErr.message, 'widgetId:', widgetId);
+          }
+        }
+
         res.setHeader('Cache-Control', 's-maxage=300, max-age=60, stale-while-revalidate=600');
         // Returns { config, name } so the editor can restore the widget name on
         // load. Pre-existing clients reading the response as the config object
