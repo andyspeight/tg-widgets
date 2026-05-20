@@ -2512,6 +2512,103 @@ function loadMiniPreview(w) {
       </div>
     `;
   }
+
+  if (w.id === 'team') {
+    // Pure-HTML mockup of the Team Showcase widget's "spotlight" layout.
+    // Mirrors the proportions and styling of the live widget so the
+    // catalogue card matches what users will actually build. Sample
+    // members drawn from demo-team.html.
+    container.innerHTML = `
+      <div style="
+        width: 700px;
+        height: 340px;
+        background: #F8FAFC;
+        border-radius: 16px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        position: relative;
+        overflow: hidden;
+        box-sizing: border-box;
+        padding: 24px 28px;
+        display: flex;
+        gap: 20px;
+      ">
+
+        <!-- LEFT: Spotlight (featured member) -->
+        <div style="
+          flex: 1.4;
+          background: #FFFFFF;
+          border-radius: 14px;
+          border: 1px solid #E2E8F0;
+          padding: 14px;
+          display: flex;
+          gap: 14px;
+          align-items: center;
+        ">
+          <div style="
+            width: 130px;
+            height: 170px;
+            border-radius: 12px;
+            background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=520&fit=crop');
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+          "></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:9px;font-weight:700;color:${w.color};letter-spacing:1px;margin-bottom:6px;">SENIOR CONSULTANT</div>
+            <div style="font-size:18px;font-weight:700;color:#0F172A;margin-bottom:8px;line-height:1.15;">Sarah Mitchell</div>
+            <div style="font-size:11px;color:#64748B;line-height:1.5;margin-bottom:12px;">
+              Twenty years arranging unforgettable trips across Europe and Asia.
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+              <span style="font-size:9px;font-weight:600;background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:3px;">
+                <span style="color:#F59E0B;">★</span> 20+ yrs
+              </span>
+            </div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <span style="font-size:9px;background:#EFF6FF;color:#1E40AF;padding:3px 8px;border-radius:6px;">Honeymoons</span>
+              <span style="font-size:9px;background:#EFF6FF;color:#1E40AF;padding:3px 8px;border-radius:6px;">Italy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: More of the team -->
+        <div style="
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        ">
+          <div style="font-size:9px;font-weight:700;color:#94A3B8;letter-spacing:1px;margin-bottom:2px;">MORE OF THE TEAM</div>
+
+          <div style="background:#FFFFFF;border-radius:10px;border:1px solid #E2E8F0;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background-image:url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop');background-size:cover;background-position:center;flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:600;color:#0F172A;line-height:1.2;">James Thornton</div>
+              <div style="font-size:10px;color:#64748B;line-height:1.3;">Cruise Specialist</div>
+            </div>
+          </div>
+
+          <div style="background:#FFFFFF;border-radius:10px;border:1px solid #E2E8F0;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop');background-size:cover;background-position:center;flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:600;color:#0F172A;line-height:1.2;">Priya Patel</div>
+              <div style="font-size:10px;color:#64748B;line-height:1.3;">Long-Haul Expert</div>
+            </div>
+          </div>
+
+          <div style="background:#FFFFFF;border-radius:10px;border:1px solid #E2E8F0;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background-image:url('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop');background-size:cover;background-position:center;flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:600;color:#0F172A;line-height:1.2;">Oliver Hayes</div>
+              <div style="font-size:10px;color:#64748B;line-height:1.3;">Ski &amp; Winter Sun</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:28px;bottom:10px;font-size:11px;color:#94A3B8;">Grid · compact · carousel · spotlight</div>
+      </div>
+    `;
+  }
 }
 
 /* ═══ AUTH ═══ */
@@ -2697,5 +2794,6 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-hours.js"></script>
 <script src="/widget-newsletter.js"></script>
 <script src="/widget-contact.js"></script>
+<script src="/widget-team.js"></script>
 </body>
 </html>
