@@ -87,15 +87,41 @@ export default async function handler(req, res) {
   // Build auth header — exact format from Travelify docs: "Token AppId:PublicApiKey"
   const authHeader = `Token ${appId}:${apiKey}`;
 
+  // ── Forward browser context headers ──────────────────────────────
+  // Travelify's auth layer checks Referer (and sometimes Origin) to validate
+  // requests are coming from a real browser session, not a server-to-server
+  // call. The widget runs in the visitor's browser and produces a Referer
+  // naturally; this proxy hop strips it unless we forward it explicitly.
+  //
+  // We don't fabricate values when they're missing — if a caller hits this
+  // proxy directly with no Referer, we pass nothing through and let Travelify
+  // reject it the way they would have anyway. Honest behaviour.
+  const upstreamHeaders = {
+    'Authorization': authHeader,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'User-Agent': 'Travelgenix-Widget-Proxy/1.0 (+https://tg-widgets.vercel.app)',
+  };
+  const incomingReferer = req.headers['referer'] || req.headers['referrer'] || '';
+  const incomingOrigin = req.headers['origin'] || '';
+  if (incomingReferer) {
+    upstreamHeaders['Referer'] = incomingReferer;
+    // Derive Origin from Referer if the browser didn't send one (rare, but
+    // some embedded contexts strip Origin while preserving Referer).
+    if (!incomingOrigin) {
+      try {
+        upstreamHeaders['Origin'] = new URL(incomingReferer).origin;
+      } catch { /* malformed Referer — leave Origin unset */ }
+    }
+  }
+  if (incomingOrigin) {
+    upstreamHeaders['Origin'] = incomingOrigin;
+  }
+
   try {
     const upstream = await fetch(TRAVELIFY_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Travelgenix-Widget-Proxy/1.0 (+https://tg-widgets.vercel.app)',
-      },
+      headers: upstreamHeaders,
       body: JSON.stringify(payload),
     });
 
