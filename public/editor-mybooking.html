@@ -139,7 +139,7 @@
   .embed-actions button:hover { border-color: var(--accent); }
   .embed-actions button.copied { background: var(--success); color: #fff; border-color: var(--success); }
 
-  /* Travelify credentials block */
+  /* Integration status / form blocks (used by Luna Chat connect panel) */
   .creds-status { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--radius-md); font-size: 12px; margin-bottom: 12px; }
   .creds-status.ok { background: rgba(16,185,129,.08); color: #065F46; border: 1px solid rgba(16,185,129,.25); }
   .creds-status.missing { background: rgba(245,158,11,.08); color: #78350F; border: 1px solid rgba(245,158,11,.25); }
@@ -382,43 +382,7 @@
       <!-- CONTENT TAB -->
       <div class="tab-content" data-tab="content">
 
-        <div class="section open" data-section="creds">
-          <div class="section-header">
-            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Travelify API</h3>
-            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="section-body"><div class="section-body-inner">
-            <div id="creds-status-area">
-              <div class="creds-status missing">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span>Not configured. Add your Travelify credentials below.</span>
-              </div>
-            </div>
-
-            <div id="creds-form">
-              <div class="field">
-                <label>Application ID</label>
-                <input type="text" id="travelify-appid" placeholder="e.g. 250" autocomplete="off">
-                <div class="field-help">Your Travelify Application ID, supplied when your account was set up.</div>
-              </div>
-              <div class="field">
-                <label>API Key</label>
-                <input type="password" id="travelify-apikey" placeholder="••••••••••••••••" autocomplete="off">
-                <div class="field-help">Your secret API key. Encrypted at rest using AES-256-GCM. Never displayed again once saved.</div>
-              </div>
-              <button class="save-creds-btn" id="save-creds-btn" type="button">Save credentials</button>
-            </div>
-
-            <div id="creds-replace" hidden>
-              <div class="creds-actions">
-                <button id="rotate-creds-btn" type="button">Rotate key</button>
-                <button id="revoke-creds-btn" type="button" class="danger">Revoke</button>
-              </div>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="section" data-section="copy">
+        <div class="section open" data-section="copy">
           <div class="section-header">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Copy</h3>
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -645,7 +609,6 @@ import { renderEmailHtml } from '/_email-template.js';
       display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
-    integration: null,
     previewTheme: 'light',
     previewTab: 'widget',  // widget | pdf | email
     rerenderTimer: null,
@@ -1040,121 +1003,6 @@ import { renderEmailHtml } from '/_email-template.js';
     }
   }
 
-  // ===== Travelify credentials =====
-  async function loadIntegration() {
-    if (!ensureAuth()) return;
-    try {
-      const res = await fetch('/api/client-integrations?service=Travelify', {
-        headers: authH(),
-      });
-      if (res.status === 401) {
-        // Session expired — surface login overlay (or fall back to dashboard).
-        if (window.tgse && typeof window.tgse.showLogin === 'function') window.tgse.showLogin();
-        else redirectToDashboard();
-        return;
-      }
-      if (!res.ok) {
-        // Server error or rate-limit — surface a non-fatal message but keep
-        // the rest of the editor working. The user can retry.
-        state.integration = null;
-        renderCredsLoadError();
-        return;
-      }
-      const data = await res.json();
-      state.integration = data.integration || null;
-      renderCredsStatus();
-    } catch (e) {
-      console.error('Load integration failed:', e);
-      renderCredsLoadError();
-    }
-  }
-
-  function renderCredsLoadError() {
-    const area = document.getElementById('creds-status-area');
-    const formEl = document.getElementById('creds-form');
-    const replaceEl = document.getElementById('creds-replace');
-    area.innerHTML = `
-      <div class="creds-status missing">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>Couldn't load credential status. Refresh the page to try again, or contact support if it keeps happening.</span>
-      </div>
-    `;
-    formEl.hidden = true;
-    replaceEl.hidden = true;
-  }
-
-  function renderCredsStatus() {
-    const area = document.getElementById('creds-status-area');
-    const formEl = document.getElementById('creds-form');
-    const replaceEl = document.getElementById('creds-replace');
-
-    if (state.integration && state.integration.status === 'Active') {
-      area.innerHTML = `
-        <div class="creds-status ok">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Travelify credentials are active.</span>
-        </div>
-        <div class="creds-meta">App ID: ${state.integration.appId || '—'}<br>Last used: ${state.integration.lastUsedAt ? new Date(state.integration.lastUsedAt).toLocaleString('en-GB') : 'never'}</div>
-      `;
-      formEl.hidden = true;
-      replaceEl.hidden = false;
-    } else {
-      area.innerHTML = `
-        <div class="creds-status missing">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span>Not configured. Add your Travelify credentials below.</span>
-        </div>
-      `;
-      formEl.hidden = false;
-      replaceEl.hidden = true;
-    }
-  }
-
-  document.getElementById('save-creds-btn').addEventListener('click', saveCredentials);
-
-  async function saveCredentials() {
-    if (!ensureAuth()) return;
-    const appId = document.getElementById('travelify-appid').value.trim();
-    const apiKey = document.getElementById('travelify-apikey').value.trim();
-    if (!appId) { toast('Please enter the Application ID', 'error'); return; }
-    if (!apiKey) { toast('Please enter the API Key', 'error'); return; }
-
-    const btn = document.getElementById('save-creds-btn');
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
-    try {
-      const res = await fetch('/api/client-integrations', {
-        method: 'POST',
-        headers: authH(),
-        body: JSON.stringify({ service: 'Travelify', appId, apiKey }),
-      });
-      if (res.status === 401) {
-        if (window.tgse && typeof window.tgse.showLogin === 'function') window.tgse.showLogin();
-        else redirectToDashboard();
-        return;
-      }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Save failed');
-      state.integration = data.integration;
-      // Clear the input fields
-      document.getElementById('travelify-appid').value = '';
-      document.getElementById('travelify-apikey').value = '';
-      renderCredsStatus();
-      toast('Travelify credentials saved');
-    } catch (e) {
-      toast('Save failed: ' + e.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Save credentials';
-    }
-  }
-
-  document.getElementById('rotate-creds-btn').addEventListener('click', () => {
-    state.integration = null;
-    renderCredsStatus();
-    toast('Enter the new credentials below');
-  });
-
   // ===== Luna Chat Integration =====
   // Extracts the data-clientName attribute from a Luna install snippet.
   // Returns null if the snippet looks invalid.
@@ -1219,24 +1067,6 @@ import { renderEmailHtml } from '/_email-template.js';
       document.getElementById('luna-snippet').value = '';
       renderLunaStatus();
       toast('Luna disconnected. Save the widget to apply.');
-    });
-  });
-
-  document.getElementById('revoke-creds-btn').addEventListener('click', () => {
-    showConfirm('Revoke credentials?', 'Your widget will stop working until you add new credentials. Existing customer lookups will fail with a not-found message.', async () => {
-      try {
-        const res = await fetch('/api/client-integrations?service=Travelify', {
-          method: 'DELETE',
-          headers: authH(),
-        });
-        if (res.status === 401) { if (window.tgse?.showLogin) window.tgse.showLogin(); else redirectToDashboard(); return; }
-        if (!res.ok) throw new Error('Revoke failed');
-        state.integration = null;
-        renderCredsStatus();
-        toast('Credentials revoked');
-      } catch (e) {
-        toast('Revoke failed: ' + e.message, 'error');
-      }
     });
   });
 
@@ -1365,7 +1195,6 @@ import { renderEmailHtml } from '/_email-template.js';
     if (id) {
       await loadWidget(id);
     }
-    await loadIntegration();
     renderLunaStatus();
     mountFontPickerShell();
     renderPreview();
