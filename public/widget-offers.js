@@ -77,6 +77,27 @@
 
   const API_BASE = resolveApiBase();
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
+
+  // STOPGAP (May 2026):
+  // The widget originally called TRAVELIFY_ENDPOINT directly with per-widget
+  // credentials. That model expected credentials to come from each widget's
+  // config (injected by the editor), but the credential-storage model has
+  // moved upstream: every Travelgenix client is now meant to inherit
+  // credentials from their Travelify account record at id.travelify.io.
+  //
+  // Until that upstream config exists, all widgets share Travelgenix's
+  // single Travelify account (App 250). The /api/offers proxy holds those
+  // shared credentials server-side, so the widget just POSTs the payload
+  // and lets the proxy add the Authorization header.
+  //
+  // When per-client credentials become available, replace this with:
+  //   - server-side injection of appId/apiKey into the widget config (via
+  //     widget-config.js) using a per-client lookup, AND
+  //   - revert to calling TRAVELIFY_ENDPOINT directly with this.cfg.appId
+  //     and this.cfg.apiKey.
+  // The branch of widget-config.js that does the lookup is the bit that's
+  // currently parked.
+  const OFFERS_PROXY = API_BASE.replace('/widget-config', '/offers');
   const VERSION = '1.6.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
@@ -5348,10 +5369,9 @@
     }
 
     async _fetchAndRender() {
-      if (!this.cfg.appId || !this.cfg.apiKey) {
-        this._showError('Missing Travelify credentials. Configure in the editor.');
-        return;
-      }
+      // STOPGAP: no longer block on missing this.cfg.appId / apiKey — credentials
+      // live server-side on the /api/offers proxy now. The check returned with
+      // the per-client model once that lands.
 
       // Departure-board template runs its own fetch flow because the request
       // depends on the detected/picked airport. Hand off here.
@@ -5375,10 +5395,13 @@
       }
 
       try {
-        const res = await fetch(TRAVELIFY_ENDPOINT, {
+        // STOPGAP: call the Travelgenix proxy which adds the Authorization
+        // header server-side. Response shape is unchanged — the proxy passes
+        // the upstream Travelify response through verbatim, so .success and
+        // .data still work as before.
+        const res = await fetch(OFFERS_PROXY, {
           method: 'POST',
           headers: {
-            'Authorization': 'Token ' + this.cfg.appId + ':' + this.cfg.apiKey,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(payload),
@@ -8139,10 +8162,10 @@
     async _fetchAndRenderBoard() {
       try {
         const payload = this._buildPayload();
-        const res = await fetch(TRAVELIFY_ENDPOINT, {
+        // STOPGAP: see _fetchAndRender for the rationale on the proxy swap.
+        const res = await fetch(OFFERS_PROXY, {
           method: 'POST',
           headers: {
-            'Authorization': 'Token ' + this.cfg.appId + ':' + this.cfg.apiKey,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(payload),
