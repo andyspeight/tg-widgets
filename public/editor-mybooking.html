@@ -866,7 +866,13 @@ import { renderEmailHtml } from '/_email-template.js';
     const div = document.createElement('div');
     div.setAttribute('data-tg-widget', 'mybooking');
     const cfg = JSON.parse(JSON.stringify(state.config));
-    cfg.widgetId = state.widgetId || 'PREVIEW_ID';
+    // When no widget has been saved yet, the editor preview should use the
+    // demo sentinel so /api/retrieve-order takes the demo path (App 250
+    // hardcoded creds) instead of trying to look up a non-existent widget
+    // record. Once the user saves the widget and we have a real WidgetID,
+    // that real ID flows through normally and the real-client lookup chain
+    // runs.
+    cfg.widgetId = state.widgetId || 'DEMO_WIDGET_ID';
     div.__tgmInitialised = true;
     host.appendChild(div);
     try {
