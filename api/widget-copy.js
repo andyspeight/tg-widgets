@@ -27,8 +27,8 @@
 
 import { requireAuth, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
-import { USERS, CLIENTS } from './_lib/auth/schema.js';
-import { normalisePlanValue } from './_lib/auth/plan.js';
+import { USERS } from './_lib/auth/schema.js';
+import { normalisePlanValue, resolveClientPlan } from './_lib/auth/plan.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
@@ -81,20 +81,11 @@ async function hydrateLegacyUserFields(user) {
   }
   try {
     if (!user.plan && user.clientId) {
-      const c = await getRecord(CLIENTS.tableId, user.clientId);
-      let planRaw = c?.fields?.[CLIENTS.fields.plan];
-      if (!planRaw) {
-        // Fallback: linked Package record name
-        const pkgIds = c?.fields?.[CLIENTS.fields.package];
-        if (Array.isArray(pkgIds) && pkgIds.length) {
-          // Best-effort: read the first package and pull its Name field.
-          // Mirror widget-config's resolveClientPlan behaviour.
-          const { resolveClientPlan } = await import('./_lib/auth/plan.js');
-          planRaw = await resolveClientPlan(user.clientId);
-        }
-      }
+      // Use the same resolver widget-config uses — it handles plan + package
+      // + alias normalisation in one place.
+      const planRaw = await resolveClientPlan(user.clientId);
       if (planRaw) {
-        const normalised = normalisePlanValue(planRaw);
+        const normalised = await normalisePlanValue(planRaw);
         if (normalised) user.plan = normalised;
       }
     }
@@ -130,7 +121,8 @@ async function countWidgetsOfType(headers, baseId, email, widgetType) {
 }
 
 export default async function handler(req, res) {
-  if (setCors(req, res)) return;
+  setCors(res);
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
     if (req.method !== 'POST') {
@@ -161,11 +153,11 @@ export default async function handler(req, res) {
 
     // Look up source widget. Filter ALSO by ownership — defence in depth on
     // top of the field comparison below.
-    const apiKey = process.env.AIRTABLE_API_KEY;
+    const apiKey = process.env.AIRTABLE_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
     if (!apiKey || !baseId) {
       console.error('[widget-copy] missing AIRTABLE env vars');
-      return res.status(500).json({ error: 'Service temporarily unavailable' });
+      return res.status(500).json({ error: 'Server configuration error' });
     }
     const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
 

@@ -135,7 +135,8 @@ async function fetchPointerByWidgetId(widgetId, headers, baseId) {
 }
 
 export default async function handler(req, res) {
-  if (setCors(req, res)) return;
+  setCors(res);
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
     if (req.method !== 'POST') {
@@ -162,11 +163,11 @@ export default async function handler(req, res) {
     }
     const customName = (typeof body.name === 'string' && body.name.trim()) ? body.name.trim().slice(0, 200) : null;
 
-    const apiKey = process.env.AIRTABLE_API_KEY;
+    const apiKey = process.env.AIRTABLE_KEY;
     const baseId = process.env.AIRTABLE_BASE_ID;
     if (!apiKey || !baseId) {
       console.error('[enquiry-form-copy] missing AIRTABLE env vars');
-      return res.status(500).json({ error: 'Service temporarily unavailable' });
+      return res.status(500).json({ error: 'Server configuration error' });
     }
     const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
 
