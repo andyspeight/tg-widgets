@@ -367,8 +367,9 @@ export default async function handler(req, res) {
           [CLIENTS.fields.websiteUrl]:       website || '',
           [CLIENTS.fields.travelifyAppId]:   travelifyAppId,
           [CLIENTS.fields.travelifySiteId]: '', // not in JWT — left blank
+          [CLIENTS.fields.apiKey]:           publicApiKey,
           [CLIENTS.fields.package]:          [packageRec.id],
-          [CLIENTS.fields.notes]:            `Auto-created via SSO from Travelify on ${nowIso}\nPublic API key: ${publicApiKey}`,
+          [CLIENTS.fields.notes]:            `Auto-created via SSO from Travelify on ${nowIso}`,
           [CLIENTS.fields.createdAt]:        nowIso,
         });
       } catch (err) {
@@ -555,6 +556,31 @@ export default async function handler(req, res) {
           // a partial update happened. Log loudly, continue with whatever state
           // is now in Airtable.
           console.error('[sso] package sync failed:', err);
+        }
+      }
+
+      // API Key sync — the JWT is authoritative for the current Travelify
+      // public API key for this App ID. Three cases:
+      //   1. Stored value is blank → backfill from JWT (covers manually-set-up
+      //      clients on their first SSO, and clients created before this field
+      //      existed).
+      //   2. Stored value differs from JWT → update to JWT (handles key
+      //      rotation in Travelify).
+      //   3. Stored value matches JWT → no-op.
+      // Non-fatal: if the write fails, log and carry on so sign-in still works.
+      const storedApiKey = String(clientRec.fields[CLIENTS.fields.apiKey] || '').trim();
+      if (publicApiKey && storedApiKey !== publicApiKey) {
+        try {
+          await updateRecord(CLIENTS.tableId, clientRec.id, {
+            [CLIENTS.fields.apiKey]: publicApiKey,
+          });
+          if (storedApiKey === '') {
+            console.log('[sso] api key backfilled for client', clientRec.id, '(was blank)');
+          } else {
+            console.log('[sso] api key updated for client', clientRec.id, '(rotated)');
+          }
+        } catch (err) {
+          console.error('[sso] api key sync failed for client', clientRec.id, err);
         }
       }
     }
