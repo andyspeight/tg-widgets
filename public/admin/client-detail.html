@@ -194,16 +194,15 @@
     .api-key-input-wrap {
       position: relative;
     }
-    .api-key-input-wrap input {
-      width: 100%;
-      padding-right: 40px;
+    .api-key-input-wrap .input {
+      padding-right: 44px;
       font-family: 'JetBrains Mono', 'SF Mono', monospace;
     }
     .api-key-btn--inline {
       position: absolute;
-      top: 50%; right: 6px;
+      top: 50%; right: 8px;
       transform: translateY(-50%);
-      width: 26px; height: 26px;
+      width: 28px; height: 28px;
       border-color: transparent;
     }
     .travelify-edit {
@@ -218,6 +217,15 @@
       display: flex; justify-content: flex-end; gap: 8px;
       padding-top: var(--space-2);
       border-top: 1px solid var(--tg-border-light);
+    }
+    .travelify-edit-error {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius-md);
+      color: var(--tg-error);
+      font-size: 13px;
     }
     @media (max-width: 640px) {
       .travelify-edit-row { grid-template-columns: 1fr; }
@@ -788,24 +796,24 @@
         <div class="travelify-edit">
           <div class="travelify-edit-row">
             <div class="field">
-              <label for="ti-app-id">App ID</label>
-              <input type="text" id="ti-app-id" inputmode="numeric" pattern="\\d*" maxlength="10" value="${escapeHtml(appId)}" placeholder="251" autocomplete="off" />
+              <label class="field-label" for="ti-app-id">App ID</label>
+              <input class="input" type="text" id="ti-app-id" inputmode="numeric" pattern="\\d*" maxlength="10" value="${escapeHtml(appId)}" placeholder="251" autocomplete="off" />
             </div>
             <div class="field">
-              <label for="ti-site-id">Site ID</label>
-              <input type="text" id="ti-site-id" inputmode="numeric" pattern="\\d*" maxlength="10" value="${escapeHtml(siteId)}" placeholder="251" autocomplete="off" />
+              <label class="field-label" for="ti-site-id">Site ID</label>
+              <input class="input" type="text" id="ti-site-id" inputmode="numeric" pattern="\\d*" maxlength="10" value="${escapeHtml(siteId)}" placeholder="251" autocomplete="off" />
             </div>
           </div>
           <div class="field">
-            <label for="ti-api-key">API Key</label>
+            <label class="field-label" for="ti-api-key">API Key</label>
             <div class="api-key-input-wrap">
-              <input type="password" id="ti-api-key" maxlength="36" value="${escapeHtml(apiKey)}" placeholder="A41D180E-CBFE-4E30-A47D-FAAB424A650D" autocomplete="off" spellcheck="false" />
+              <input class="input" type="password" id="ti-api-key" maxlength="36" value="${escapeHtml(apiKey)}" placeholder="A41D180E-CBFE-4E30-A47D-FAAB424A650D" autocomplete="off" spellcheck="false" />
               <button type="button" class="api-key-btn api-key-btn--inline" id="ti-api-key-toggle" title="Show / hide" aria-label="Show or hide API key">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
             </div>
-            <div class="field-help">Travelify primarygroupsid UUID. Usually populated automatically on SSO. Leave blank to clear.</div>
-            <div class="field-error" id="ti-error" hidden></div>
+            <div class="field-hint">Travelify primarygroupsid UUID. Usually populated automatically on SSO. Leave blank to clear.</div>
+            <div class="travelify-edit-error" id="ti-error" hidden></div>
           </div>
           <div class="travelify-edit-actions">
             <button type="button" class="btn btn--sm" id="ti-cancel">Cancel</button>
@@ -843,9 +851,9 @@
           const full = val.getAttribute('data-full') || '';
           try {
             await navigator.clipboard.writeText(full);
-            toast('API key copied', 'success');
+            toast('API key copied', 'ok');
           } catch {
-            toast('Could not copy — select and copy manually', 'error');
+            toast('Could not copy — select and copy manually', 'err');
           }
         });
       }
@@ -922,7 +930,7 @@
         clientData.client.travelifyAppId = data.client.travelifyAppId;
         clientData.client.travelifySiteId = data.client.travelifySiteId;
         clientData.client.apiKey = data.client.apiKey;
-        toast('Travelify integration saved', 'success');
+        toast('Travelify integration saved', 'ok');
         switchTravelifyMode('display');
       } catch (err) {
         console.error('[travelify save] failed', err);
