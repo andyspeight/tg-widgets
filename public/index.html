@@ -650,7 +650,7 @@ function renderStats() {
     <div class="stat-card"><div class="stat-icon" style="background:#F59E0B15"><svg style="stroke:#F59E0B" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>w.status==='coming-soon').length}</div><div class="stat-label">Coming soon</div></div></div>`;
 }
 
-async function renderMyWidgets() {
+async function renderMyWidgets(opts = {}) {
   const el = document.getElementById('myWidgets');
   if (!signedIn) { el.classList.remove('show'); return; }
   el.classList.add('show');
@@ -659,10 +659,19 @@ async function renderMyWidgets() {
   try {
     // credentials:'include' ships the tg_session cookie so the new
     // unified Travelgenix SSO flow can authenticate this request.
-    const r = await fetch('/api/widget-list', {
+    //
+    // Cache busting: /api/widget-list sets Cache-Control: max-age=10. Normal
+    // page loads benefit from that cache, but after a destructive or
+    // additive action (copy, future: delete recreate, etc.) we must
+    // bypass the cache or the just-changed record won't appear.
+    const fetchOpts = {
       headers: authHeaders(),
       credentials: 'include',
-    });
+    };
+    if (opts.bypassCache) {
+      fetchOpts.cache = 'no-store';
+    }
+    const r = await fetch('/api/widget-list', fetchOpts);
     if (r.ok) { myWidgetData = await r.json(); }
   } catch(e) { myWidgetData = []; }
 
@@ -952,7 +961,9 @@ async function copyWidget(widgetId, btn) {
 
     // Success — refresh local widget list from server (single source of truth)
     // then re-open the type modal so the new widget appears in the list.
-    await renderMyWidgets();
+    // bypassCache:true is essential — /api/widget-list has a 10s browser
+    // cache, and the new record's recency would otherwise be invisible.
+    await renderMyWidgets({ bypassCache: true });
     showToast(`Copied as "${data.name || 'new widget'}"`, 'ok');
 
     // Re-open the type modal for the same widget type (which is closed
