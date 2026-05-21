@@ -13,18 +13,18 @@
  * for 5 minutes with stale-while-revalidate, so even Redis can take a break.
  *
  * CORS: open. This is read-only public data, no secrets.
- *
- * Rate limit: not applied here. The endpoint is read-only and the response
- * is edge-cached. If abuse becomes an issue, add a Cloudflare rate-limit rule
- * rather than serverless-level limiting.
  */
 
-const path = require('path');
-const fs = require('fs');
-const redis = require('../lib/redis.js');
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { getJson } from './_redis.js';
 
 const REDIS_KEY = 'map:offers:v1';
-const SEED_PATH = path.join(process.cwd(), 'public', 'seed-map-offers.json');
+
+// Resolve the seed path relative to this file (avoids cwd surprises on Vercel).
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const SEED_PATH = path.join(__dirname, '..', 'public', 'seed-map-offers.json');
 
 let cachedSeed = null;
 function loadSeed() {
@@ -33,7 +33,8 @@ function loadSeed() {
     const raw = fs.readFileSync(SEED_PATH, 'utf8');
     cachedSeed = JSON.parse(raw);
     return cachedSeed;
-  } catch {
+  } catch (e) {
+    console.error('[map-offers] seed load failed', e.message);
     return null;
   }
 }
@@ -65,7 +66,7 @@ const SKELETON = {
   stats: { source: 'skeleton', destinationsCovered: 8, countriesCovered: 7 },
 };
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // CORS — public read-only data
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -77,7 +78,7 @@ module.exports = async function handler(req, res) {
 
   // Tier 1: Redis
   try {
-    const fromRedis = await redis.getJson(REDIS_KEY);
+    const fromRedis = await getJson(REDIS_KEY);
     if (fromRedis && Array.isArray(fromRedis.destinations) && fromRedis.destinations.length > 0) {
       fromRedis.source = 'redis';
       res.status(200).json(fromRedis);
@@ -97,4 +98,4 @@ module.exports = async function handler(req, res) {
 
   // Tier 3: skeleton — guaranteed non-empty
   res.status(200).json(SKELETON);
-};
+}
