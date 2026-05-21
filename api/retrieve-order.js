@@ -174,9 +174,15 @@ async function findWidgetById(widgetId) {
 // so we eat the lookup cost here.
 const USERS_TABLE = 'tblIpeQeZmF7CM7OJ'; // matches USERS.tableId in _lib/auth/schema.js
 const CLIENTS_TABLE = 'tblikekpaTKraMktZ'; // matches CLIENTS.tableId
-const UF_email  = 'fldSQLKBfsAcVS2s3'; // USERS.fields.email
+const UF_email  = 'fldSQLKBfsAcVS2s3'; // USERS.fields.email — id used for fields[] read
 const UF_client = 'fldyXVZjZKUjlYCm6'; // USERS.fields.client — linked to Clients
-const CF_email  = 'fldVRiIAlrTjxnNHP'; // CLIENTS.fields.email — primary
+const CF_email  = 'fldVRiIAlrTjxnNHP'; // CLIENTS.fields.email — id used for fields[] read
+
+// filterByFormula REQUIRES field names, not field IDs (Airtable API limitation).
+// These names must stay in sync with the field renames in the corresponding
+// table; the field IDs above are immune to renames but only usable in fields[].
+const UF_email_NAME = 'Email';
+const CF_email_NAME = 'Email';
 
 async function resolveUserToClientEmail(userEmail) {
   if (!userEmail) return null;
@@ -184,7 +190,7 @@ async function resolveUserToClientEmail(userEmail) {
 
   // 1. Find the user by email
   const userUrl = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${USERS_TABLE}`);
-  userUrl.searchParams.set('filterByFormula', `LOWER({${UF_email}})='${safe}'`);
+  userUrl.searchParams.set('filterByFormula', `LOWER({${UF_email_NAME}})='${safe}'`);
   userUrl.searchParams.set('maxRecords', '1');
   // Pull only the client link to keep payload small — and the email so we
   // can sanity-check our match.
@@ -232,7 +238,7 @@ async function findClientEmailDirect(possibleClientEmail) {
   const safe = sanitiseForFormula(possibleClientEmail.toLowerCase());
 
   const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${CLIENTS_TABLE}`);
-  url.searchParams.set('filterByFormula', `LOWER({${CF_email}})='${safe}'`);
+  url.searchParams.set('filterByFormula', `LOWER({${CF_email_NAME}})='${safe}'`);
   url.searchParams.set('maxRecords', '1');
   url.searchParams.append('fields[]', CF_email);
 
