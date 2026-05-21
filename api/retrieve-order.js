@@ -242,11 +242,22 @@ async function findClientEmailDirect(possibleClientEmail) {
   url.searchParams.set('maxRecords', '1');
   url.searchParams.append('fields[]', CF_email);
 
+  // TEMP DEBUG: log the exact URL and response so we can diagnose why this
+  // is returning empty for emails we know exist in the Clients table.
+  console.log('[CLIENT-LOOKUP DEBUG] URL:', url.toString());
+
   const res = await fetch(url.toString(), { headers: airtableHeaders() });
   if (!res.ok) {
+    const errBody = await res.text();
+    console.error('[CLIENT-LOOKUP DEBUG] Non-OK response:', res.status, errBody.slice(0, 300));
     throw new Error(`Client direct lookup failed: ${res.status}`);
   }
   const data = await res.json();
+  console.log('[CLIENT-LOOKUP DEBUG] Response records count:', (data.records || []).length, 'offset:', data.offset || 'none');
+  if ((data.records || []).length > 0) {
+    console.log('[CLIENT-LOOKUP DEBUG] First record id:', data.records[0].id, 'fields:', JSON.stringify(data.records[0].fields));
+  }
+
   const rec = data.records?.[0];
   if (!rec) return null;
 
