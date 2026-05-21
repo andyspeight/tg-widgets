@@ -27,7 +27,7 @@
  * data change on the MapSearches row, not a code change here.
  */
 
-const redis = require('../../lib/redis.js');
+import { setJson, setString } from '../_redis.js';
 
 // Airtable base/table for the MapSearches definitions
 const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
@@ -226,7 +226,7 @@ async function sendFailureAlert(summary) {
 
 // ── handler ─────────────────────────────────────────────────────────────
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Authorise: Vercel Cron sets the Authorization header.
   const auth = req.headers.authorization || '';
   const expected = `Bearer ${process.env.CRON_SECRET || ''}`;
@@ -295,8 +295,8 @@ module.exports = async function handler(req, res) {
       stats: { searchesRun: total, searchesSucceeded: successes, destinationsCovered: destinations.length },
     };
 
-    const writeOk = await redis.setJson(REDIS_KEY, payload);
-    if (writeOk) await redis.setString(REDIS_LASTRUN_KEY, payload.generatedAt);
+    const writeOk = await setJson(REDIS_KEY, payload);
+    if (writeOk) await setString(REDIS_LASTRUN_KEY, payload.generatedAt);
 
     return res.status(200).json({
       ok: true,
