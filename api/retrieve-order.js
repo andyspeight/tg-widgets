@@ -192,8 +192,10 @@ async function resolveUserToClientEmail(userEmail) {
   const userUrl = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${USERS_TABLE}`);
   userUrl.searchParams.set('filterByFormula', `LOWER({${UF_email_NAME}})='${safe}'`);
   userUrl.searchParams.set('maxRecords', '1');
-  // Pull only the client link to keep payload small — and the email so we
-  // can sanity-check our match.
+  // Request response keyed by field ID rather than field name — gives us
+  // stability across field renames. Without this, rec.fields would be keyed
+  // by display name and lookups via field ID return undefined.
+  userUrl.searchParams.set('returnFieldsByFieldId', 'true');
   userUrl.searchParams.append('fields[]', UF_client);
   userUrl.searchParams.append('fields[]', UF_email);
 
@@ -211,6 +213,7 @@ async function resolveUserToClientEmail(userEmail) {
 
   // 2. Fetch that client record to get its canonical email
   const clientUrl = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${CLIENTS_TABLE}/${clientId}`);
+  clientUrl.searchParams.set('returnFieldsByFieldId', 'true');
   const clientRes = await fetch(clientUrl.toString(), { headers: airtableHeaders() });
   if (!clientRes.ok) {
     throw new Error(`Client lookup failed: ${clientRes.status}`);
@@ -240,24 +243,16 @@ async function findClientEmailDirect(possibleClientEmail) {
   const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${CLIENTS_TABLE}`);
   url.searchParams.set('filterByFormula', `LOWER({${CF_email_NAME}})='${safe}'`);
   url.searchParams.set('maxRecords', '1');
+  // Request response keyed by field ID — without this, Airtable keys
+  // fields by display name and our field-ID lookups return undefined.
+  url.searchParams.set('returnFieldsByFieldId', 'true');
   url.searchParams.append('fields[]', CF_email);
-
-  // TEMP DEBUG: log the exact URL and response so we can diagnose why this
-  // is returning empty for emails we know exist in the Clients table.
-  console.log('[CLIENT-LOOKUP DEBUG] URL:', url.toString());
 
   const res = await fetch(url.toString(), { headers: airtableHeaders() });
   if (!res.ok) {
-    const errBody = await res.text();
-    console.error('[CLIENT-LOOKUP DEBUG] Non-OK response:', res.status, errBody.slice(0, 300));
     throw new Error(`Client direct lookup failed: ${res.status}`);
   }
   const data = await res.json();
-  console.log('[CLIENT-LOOKUP DEBUG] Response records count:', (data.records || []).length, 'offset:', data.offset || 'none');
-  if ((data.records || []).length > 0) {
-    console.log('[CLIENT-LOOKUP DEBUG] First record id:', data.records[0].id, 'fields:', JSON.stringify(data.records[0].fields));
-  }
-
   const rec = data.records?.[0];
   if (!rec) return null;
 
