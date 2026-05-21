@@ -94,7 +94,9 @@
       --tgwm-text-muted: #64748B;
       --tgwm-text-faint: #94A3B8;
       --tgwm-ocean: #EFF6FF;
-      --tgwm-land: #CBD5E1;
+      --tgwm-ocean-glow-mid: #DBEAFE;
+      --tgwm-land: #94A3B8;
+      --tgwm-land-shadow: rgba(148, 163, 184, 0.15);
       --tgwm-land-border: #94A3B8;
       --tgwm-pin: #1B2B5B;
       --tgwm-pin-hover: #00B4D8;
@@ -129,7 +131,9 @@
       --tgwm-text-muted: #CBD5E1;
       --tgwm-text-faint: #64748B;
       --tgwm-ocean: #0B1220;
-      --tgwm-land: #1E293B;
+      --tgwm-ocean-glow-mid: #15243F;
+      --tgwm-land: #475569;
+      --tgwm-land-shadow: rgba(71, 85, 105, 0.25);
       --tgwm-land-border: #334155;
     }
 
@@ -172,6 +176,46 @@
     }
     .tgwm-meta svg { width: 14px; height: 14px; }
 
+    /* ── Region filter chips ──────────────────────────────────────────── */
+
+    .tgwm-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 24px 12px;
+    }
+    .tgwm-chip {
+      flex: 0 0 auto;
+      padding: 6px 14px;
+      background: var(--tgwm-surface);
+      border: 1px solid var(--tgwm-border);
+      color: var(--tgwm-text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--tgwm-radius-pill);
+      cursor: pointer;
+      transition: all 180ms var(--tgwm-ease);
+      font-family: inherit;
+    }
+    .tgwm-chip:hover {
+      color: var(--tgwm-text);
+      border-color: var(--tgwm-text-faint);
+      transform: translateY(-1px);
+    }
+    .tgwm-chip.is-active {
+      background: var(--tgwm-pin);
+      color: #FFFFFF;
+      border-color: var(--tgwm-pin);
+    }
+    .tgwm-chip:focus-visible {
+      outline: 2px solid var(--tgwm-cta);
+      outline-offset: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tgwm-chip { transition: none; }
+      .tgwm-chip:hover { transform: none; }
+    }
+
     /* ── Map stage ────────────────────────────────────────────────────── */
 
     .tgwm-stage {
@@ -187,6 +231,7 @@
       border-radius: var(--tgwm-radius-sm);
       overflow: hidden;
       background: var(--tgwm-ocean);
+      background: radial-gradient(ellipse at 50% 45%, var(--tgwm-ocean-glow-mid) 0%, var(--tgwm-ocean) 75%);
     }
 
     .tgwm-svg {
@@ -196,41 +241,82 @@
       user-select: none;
     }
 
-    .tgwm-land {
-      fill: var(--tgwm-land);
-      stroke: var(--tgwm-land);
-      stroke-width: 0.3;
-      stroke-linejoin: round;
+    .tgwm-land-shadow {
+      fill: var(--tgwm-land-shadow);
+      stroke: none;
       pointer-events: none;
+      transform: translate(0.6px, 1px);
     }
 
-    /* Pin group: clickable, hover-friendly hit area, scales on hover */
+    .tgwm-land {
+      fill: url(#tgwm-stipple);
+      stroke: var(--tgwm-land);
+      stroke-width: 0.2;
+      stroke-linejoin: round;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+    [data-theme="dark"] .tgwm-land { opacity: 0.95; }
+    .tgwm-stipple-dot { fill: var(--tgwm-land); }
+
+    /* ── Pins ─────────────────────────────────────────────────────────── */
+
     .tgwm-pin {
       cursor: pointer;
-      transition: transform 220ms var(--tgwm-ease);
-      transform-box: fill-box;
-      transform-origin: center;
+      opacity: 0;
+      animation: tgwm-pin-in 480ms var(--tgwm-ease) forwards;
     }
+    @keyframes tgwm-pin-in {
+      0%   { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
     .tgwm-pin:hover, .tgwm-pin:focus-visible { outline: none; }
     .tgwm-pin:hover .tgwm-pin-body,
     .tgwm-pin:focus-visible .tgwm-pin-body { fill: var(--tgwm-pin-hover); }
-    .tgwm-pin:hover .tgwm-pin-ring,
-    .tgwm-pin:focus-visible .tgwm-pin-ring { opacity: 1; transform: scale(1.6); }
+    .tgwm-pin:hover .tgwm-pin-halo,
+    .tgwm-pin:focus-visible .tgwm-pin-halo {
+      opacity: 0.7;
+      transform: scale(2.4);
+    }
     .tgwm-pin:hover .tgwm-pin-badge,
-    .tgwm-pin:focus-visible .tgwm-pin-badge { opacity: 1; transform: translate(0, 0); }
+    .tgwm-pin:focus-visible .tgwm-pin-badge {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
 
+    /* Pin body sits on top, ring is the always-on pulse, halo is the hover lift */
     .tgwm-pin-body {
       fill: var(--tgwm-pin);
-      transition: fill 180ms var(--tgwm-ease);
+      stroke: #FFFFFF;
+      stroke-width: 1.2;
+      transition: fill 200ms var(--tgwm-ease);
     }
+    [data-theme="dark"] .tgwm-pin-body { stroke: #0F172A; }
+
     .tgwm-pin-ring {
-      fill: var(--tgwm-pin-hover);
-      opacity: 0.25;
+      fill: var(--tgwm-pin);
       transform-box: fill-box;
       transform-origin: center;
-      transition: opacity 220ms var(--tgwm-ease), transform 220ms var(--tgwm-ease);
+      opacity: 0.55;
+      animation: tgwm-pulse 2.8s var(--tgwm-ease) infinite;
       pointer-events: none;
     }
+    .tgwm-pin-halo {
+      fill: var(--tgwm-pin-hover);
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      transition: opacity 240ms var(--tgwm-ease), transform 240ms var(--tgwm-ease);
+      pointer-events: none;
+    }
+
+    @keyframes tgwm-pulse {
+      0%   { opacity: 0.5; transform: scale(0.8); }
+      75%  { opacity: 0;   transform: scale(2.4); }
+      100% { opacity: 0;   transform: scale(2.4); }
+    }
+
     .tgwm-pin-count {
       fill: #FFFFFF;
       font-size: 9px;
@@ -241,6 +327,40 @@
       font-family: 'Inter', -apple-system, sans-serif;
     }
 
+    /* Permanent price label — shown for featured destinations */
+    .tgwm-pin-label {
+      pointer-events: none;
+      opacity: 0;
+      animation: tgwm-label-in 480ms var(--tgwm-ease) 200ms forwards;
+    }
+    @keyframes tgwm-label-in {
+      from { opacity: 0; transform: translateY(2px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .tgwm-pin-label rect {
+      fill: #FFFFFF;
+      stroke: var(--tgwm-pin);
+      stroke-width: 1;
+    }
+    [data-theme="dark"] .tgwm-pin-label rect {
+      fill: #1E293B;
+      stroke: var(--tgwm-pin-hover);
+    }
+    .tgwm-pin-label text {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+      font-family: 'Inter', -apple-system, sans-serif;
+      fill: var(--tgwm-text);
+    }
+    .tgwm-pin-label .tgwm-pin-label-country {
+      font-size: 8px;
+      font-weight: 600;
+      fill: var(--tgwm-text-muted);
+    }
+
+    /* Hover badge (shown for ALL pins, not just featured) */
     .tgwm-pin-badge {
       opacity: 0;
       transform: translate(0, 6px);
@@ -259,20 +379,30 @@
       font-family: 'Inter', -apple-system, sans-serif;
     }
 
-    /* Pin pulse animation — subtle, only on the active country */
-    @keyframes tgwm-pulse {
-      0% { opacity: 0.4; transform: scale(0.6); }
-      80% { opacity: 0; transform: scale(2); }
-      100% { opacity: 0; transform: scale(2); }
+    .tgwm-pin.is-active .tgwm-pin-halo {
+      opacity: 0.45;
+      transform: scale(2.4);
     }
     .tgwm-pin.is-active .tgwm-pin-ring {
-      animation: tgwm-pulse 1.8s var(--tgwm-ease) infinite;
-      opacity: 1;
+      animation-duration: 1.6s;
+      opacity: 0.7;
     }
 
+    /* Region filtering — dim non-matching pins hard so the filter feels decisive */
+    .tgwm-pin.is-dimmed {
+      opacity: 0.08;
+      filter: saturate(0.2);
+      transition: opacity 280ms var(--tgwm-ease), filter 280ms var(--tgwm-ease);
+      pointer-events: none;
+    }
+    .tgwm-pin.is-dimmed .tgwm-pin-ring { animation: none; }
+    .tgwm-pin.is-dimmed .tgwm-pin-label { display: none; }
+
     @media (prefers-reduced-motion: reduce) {
-      .tgwm-pin, .tgwm-pin-body, .tgwm-pin-ring, .tgwm-pin-badge { transition: none; }
-      .tgwm-pin.is-active .tgwm-pin-ring { animation: none; }
+      .tgwm-pin { animation: none; opacity: 1; }
+      .tgwm-pin-ring { animation: none; opacity: 0.4; }
+      .tgwm-pin-label { animation: none; opacity: 1; }
+      .tgwm-pin-body, .tgwm-pin-halo, .tgwm-pin-badge { transition: none; }
     }
 
     /* ── Side panel ───────────────────────────────────────────────────── */
@@ -490,6 +620,7 @@
       this.shadow = container.attachShadow({ mode: 'open' });
       this.data = null;
       this.activeCountry = null;
+      this.activeRegion = 'all';
       this._render();
       this._load();
     }
@@ -525,10 +656,26 @@
                 ${IC.globe}<span>From ${esc(c.origin)}</span>
               </span>` : ''}
           </div>
+          <div class="tgwm-filters" data-filters role="tablist" aria-label="Filter by region">
+            <button class="tgwm-chip is-active" data-region="all" role="tab" aria-selected="true">All</button>
+            <button class="tgwm-chip" data-region="Europe" role="tab" aria-selected="false">Europe</button>
+            <button class="tgwm-chip" data-region="Americas" role="tab" aria-selected="false">Americas</button>
+            <button class="tgwm-chip" data-region="Asia" role="tab" aria-selected="false">Asia</button>
+            <button class="tgwm-chip" data-region="Africa" role="tab" aria-selected="false">Africa</button>
+            <button class="tgwm-chip" data-region="Middle East" role="tab" aria-selected="false">Middle East</button>
+            <button class="tgwm-chip" data-region="Oceania" role="tab" aria-selected="false">Oceania</button>
+          </div>
           <div class="tgwm-stage">
             <div class="tgwm-map-wrap">
               <svg class="tgwm-svg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map of destinations">
+                <defs>
+                  <pattern id="tgwm-stipple" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+                    <circle class="tgwm-stipple-dot" cx="1.5" cy="1.5" r="0.7"/>
+                  </pattern>
+                </defs>
+                <path class="tgwm-land-shadow" d="${WORLD_PATH}" fill-rule="nonzero"/>
                 <path class="tgwm-land" d="${WORLD_PATH}" fill-rule="nonzero"/>
+                <g class="tgwm-arcs" data-arcs></g>
                 <g class="tgwm-pins" data-pins></g>
               </svg>
               <div class="tgwm-status" data-status>
@@ -586,32 +733,79 @@
       const layer = this.shadow.querySelector('[data-pins]');
       if (!layer) return;
 
-      // Sort by destinationCount descending so larger pins render first (behind smaller)
-      const countries = [...this.data.countries].sort((a, b) => (b.destinationCount || 0) - (a.destinationCount || 0));
+      const countries = (this.data.countries || []).filter(c => typeof c.lat === 'number' && typeof c.lng === 'number');
+
+      // Compute "attractiveness" — higher offer count + lower price = more featured
+      const minPrice = Math.min(...countries.map(c => c.fromPrice || Infinity));
+      const maxOffers = Math.max(...countries.map(c => c.destinationCount || 0), 1);
+      const scored = countries.map(c => {
+        const priceScore = minPrice && c.fromPrice ? (minPrice / c.fromPrice) : 0;
+        const offerScore = (c.destinationCount || 0) / maxOffers;
+        return { ...c, _score: priceScore * 0.5 + offerScore * 0.5 };
+      }).sort((a, b) => b._score - a._score);
+
+      // STEP 1 — Decide which pins get permanent labels.
+      // Walk in attractiveness order so the most appealing destinations win the label slots.
+      // Reject any candidate whose label would collide with an already-placed one.
+      const FEATURE_COUNT = 8;
+      const MIN_LABEL_DISTANCE = 95;
+      const labelSet = new Set();
+      const placedLabels = [];
+      for (let i = 0; i < scored.length && labelSet.size < FEATURE_COUNT; i++) {
+        const c = scored[i];
+        if (!formatPrice(c.fromPrice, c.currency)) continue;
+        const [x, y] = project(c.lat, c.lng);
+        let collides = false;
+        for (const p of placedLabels) {
+          const dx = x - p.x, dy = y - p.y;
+          if (Math.sqrt(dx*dx + dy*dy) < MIN_LABEL_DISTANCE) { collides = true; break; }
+        }
+        if (collides) continue;
+        labelSet.add(c.country);
+        placedLabels.push({ x, y });
+      }
+
+      // STEP 2 — Render pins. Smallest first so big ones sit on top.
+      const renderOrder = [...scored].sort((a, b) => (a.destinationCount || 0) - (b.destinationCount || 0));
 
       const frag = document.createDocumentFragment();
-      for (const c of countries) {
-        if (typeof c.lat !== 'number' || typeof c.lng !== 'number') continue;
+      renderOrder.forEach((c, idx) => {
         const [x, y] = project(c.lat, c.lng);
         const count = c.destinationCount || 1;
-        const radius = Math.min(12, 6 + Math.log2(count) * 1.5);
+        const radius = 6 + c._score * 6;
         const priceLabel = formatPrice(c.fromPrice, c.currency);
         const labelText = priceLabel ? `${c.country} from ${priceLabel}` : c.country;
         const badgeText = priceLabel ? `${c.country} · from ${priceLabel}` : c.country;
         const badgeWidth = Math.max(80, badgeText.length * 5.8 + 16);
+        const getsLabel = labelSet.has(c.country);
+
+        const countryShort = c.country.length > 12 ? c.country.slice(0, 11) + '…' : c.country;
+        const labelWidth = Math.max(54, countryShort.length * 5 + 20);
 
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         g.setAttribute('class', 'tgwm-pin');
         g.setAttribute('data-country', c.country);
+        g.setAttribute('data-region', c.region || '');
         g.setAttribute('tabindex', '0');
         g.setAttribute('role', 'button');
         g.setAttribute('aria-label', labelText);
         g.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)})`);
+        g.style.animationDelay = (idx * 35) + 'ms';
+
+        const labelSvg = getsLabel ? `
+          <g class="tgwm-pin-label" transform="translate(0 ${(radius + 8).toFixed(1)})">
+            <rect x="${-labelWidth / 2}" y="0" width="${labelWidth}" height="26" rx="4"/>
+            <text class="tgwm-pin-label-country" x="0" y="9">${esc(countryShort)}</text>
+            <text x="0" y="20">${esc(priceLabel)}</text>
+          </g>
+        ` : '';
 
         g.innerHTML = `
+          <circle class="tgwm-pin-halo" cx="0" cy="0" r="${radius}"/>
           <circle class="tgwm-pin-ring" cx="0" cy="0" r="${radius}"/>
           <circle class="tgwm-pin-body" cx="0" cy="0" r="${radius}"/>
           ${count > 1 ? `<text class="tgwm-pin-count" x="0" y="0.5">${count}</text>` : ''}
+          ${labelSvg}
           <g class="tgwm-pin-badge" transform="translate(0 ${-(radius + 4)})">
             <rect x="${-badgeWidth / 2}" y="${-22}" width="${badgeWidth}" height="20" rx="10"/>
             <text x="0" y="${-12}">${esc(badgeText)}</text>
@@ -619,15 +813,41 @@
         `;
 
         frag.appendChild(g);
-      }
+      });
       layer.innerHTML = '';
       layer.appendChild(frag);
+    }
+
+    _applyRegionFilter(region) {
+      this.activeRegion = region;
+      const chips = this.shadow.querySelectorAll('.tgwm-chip');
+      chips.forEach(ch => {
+        const r = ch.getAttribute('data-region');
+        const active = r === region;
+        ch.classList.toggle('is-active', active);
+        ch.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      const pins = this.shadow.querySelectorAll('.tgwm-pin');
+      pins.forEach(p => {
+        const r = p.getAttribute('data-region');
+        const matches = region === 'all' || r === region;
+        p.classList.toggle('is-dimmed', !matches);
+      });
     }
 
     _bind() {
       const root = this.shadow.querySelector('.tgwm-root');
       const panel = this.shadow.querySelector('[data-panel]');
       const closeBtn = this.shadow.querySelector('[data-close]');
+
+      // Region filter chips
+      const chips = this.shadow.querySelectorAll('.tgwm-chip');
+      chips.forEach(ch => {
+        ch.addEventListener('click', () => {
+          const region = ch.getAttribute('data-region');
+          this._applyRegionFilter(region);
+        });
+      });
 
       root.addEventListener('click', (e) => {
         const pin = e.target.closest('.tgwm-pin');
