@@ -215,6 +215,64 @@ async function resolveUserToClientEmail(userEmail) {
   return clientEmail.toLowerCase().trim();
 }
 
+// ----- Legacy fallback: direct Clients table lookup -----
+//
+// Pre-May 2026, widgets were created when the auth model was single-user-per-
+// company — what's now the Clients table was called Users, and a widget's
+// ClientEmail field held the client's primary contact email directly. After
+// the May refactor that split Users and Clients, those widgets still point at
+// what is now a Clients.Email value rather than a Users.Email value.
+//
+// resolveUserToClientEmail() returns null for these legacy widgets (no
+// matching User record). This fallback tries the Clients table directly so
+// the booking flow still works. Returns the lowercased email if found, null
+// if no client matches.
+async function findClientEmailDirect(possibleClientEmail) {
+  if (!possibleClientEmail) return null;
+  const safe = sanitiseForFormula(possibleClientEmail.toLowerCase());
+
+  const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${CLIENTS_TABLE}`);
+  url.searchParams.set('filterByFormula', `LOWER({${CF_email}})='${safe}'`);
+  url.searchParams.set('maxRecords', '1');
+  url.searchParams.append('fields[]', CF_email);
+
+  const res = await fetch(url.toString(), { headers: airtableHeaders() });
+  if (!res.ok) {
+    throw new Error(`Client direct lookup failed: ${res.status}`);
+  }
+  const data = await res.json();
+  const rec = data.records?.[0];
+  if (!rec) return null;
+
+  const email = rec.fields?.[CF_email];
+  if (!email || typeof email !== 'string') return null;
+  return email.toLowerCase().trim();
+}
+
+// ----- Combined resolver -----
+//
+// Maps a widget's stored ClientEmail (which historically meant different
+// things — sometimes a user email, sometimes a client email) onto a canonical
+// client email we can look up Travelify credentials against.
+//
+// Order of attempts:
+//   1. Treat as user email → walk user→client link → return client's email
+//      (the post-May 2026 multi-user-per-company model)
+//   2. Treat as client email directly → match against Clients.Email
+//      (the pre-May 2026 single-user-per-company legacy model)
+//
+// Returns null only if neither path matches anything, in which case the
+// widget's ClientEmail is genuinely orphaned (deleted user, typo, etc.).
+async function resolveWidgetEmailToClientEmail(widgetClientEmail) {
+  // Try the new model first — it's the common case for widgets created
+  // after the May 2026 refactor.
+  const viaUser = await resolveUserToClientEmail(widgetClientEmail);
+  if (viaUser) return viaUser;
+
+  // Fall back to the legacy direct-match path.
+  return await findClientEmailDirect(widgetClientEmail);
+}
+
 // ----- Travelify response sanitisation -----
 
 function safeStr(v, max = 500) {
@@ -1064,20 +1122,20 @@ export default async function handler(req, res) {
       const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
       if (!clientEmail) return notFound(res);
 
-      // The widget's ClientEmail is actually the USER email (the person who
-      // saved the widget — Luke, Sarah, whoever). Travelify credentials live
-      // on the parent CLIENT record (e.g. "Travel Demo Tes Ltd"), not on
-      // individual user records. Walk user→client first to get the canonical
-      // client email, then look up creds on that.
+      // The widget's ClientEmail was historically used inconsistently — for
+      // post-May 2026 widgets it's a user email (the user who saved the
+      // widget), for legacy pre-May widgets it's a client email directly.
+      // The combined resolver tries the user path first, then falls back to
+      // a direct Clients table match.
       let resolvedClientEmail;
       try {
-        resolvedClientEmail = await resolveUserToClientEmail(clientEmail);
+        resolvedClientEmail = await resolveWidgetEmailToClientEmail(clientEmail);
       } catch (err) {
-        console.error('[retrieve-order] user→client resolution failed for', clientEmail, '—', err.message);
+        console.error('[retrieve-order] widget→client resolution failed for', clientEmail, '—', err.message);
         return notFound(res);
       }
       if (!resolvedClientEmail) {
-        console.warn(`No parent client found for user ${clientEmail} (widgetId=${widgetId}). User record may be missing the Client link.`);
+        console.warn(`No parent client found for widget ClientEmail ${clientEmail} (widgetId=${widgetId}). Neither a user nor a client record matched.`);
         return notFound(res);
       }
 
