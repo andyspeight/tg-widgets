@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tile provider comparison</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  body { margin: 0; font-family: 'Inter', -apple-system, sans-serif; background: #F8FAFC; color: #0F172A; padding: 28px 16px; }
+  .wrap { max-width: 1300px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
+  .sub { font-size: 14px; color: #64748B; margin: 0 0 24px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 16px; }
+  .card-title { font-size: 14px; font-weight: 700; margin: 0 0 4px; }
+  .card-sub { font-size: 12px; color: #64748B; margin: 0 0 12px; }
+  .pill { display: inline-block; padding: 2px 8px; background: #F1F5F9; border-radius: 999px; font-size: 10px; color: #475569; font-weight: 600; margin-left: 4px; vertical-align: middle; }
+  .pill-key { background: #FEF3C7; color: #92400E; }
+  .pill-free { background: #DCFCE7; color: #166534; }
+  .map-box { height: 320px; border-radius: 10px; overflow: hidden; border: 1px solid #E2E8F0; }
+  .leaflet-control-attribution a[href*="leafletjs"] { display: none !important; }
+  .leaflet-control-attribution { font-size: 9px !important; }
+
+  .tg-price-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 9px; background: #FFFFFF; color: #0F172A;
+    border: 1px solid #E2E8F0; border-radius: 999px;
+    font-size: 11px; font-weight: 700; line-height: 1;
+    box-shadow: 0 2px 6px rgba(15,23,42,.12);
+    white-space: nowrap; cursor: pointer;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+  .tg-price-tag .tg-tag-country { color: #64748B; font-weight: 500; }
+  .tg-price-tag .tg-tag-price { color: #0F172A; font-weight: 700; }
+  .tg-price-anchor {
+    width: 7px; height: 7px;
+    background: #1B2B5B; border: 2px solid #FFFFFF; border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(15,23,42,.3);
+  }
+  .tg-pin-wrap {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 3px;
+    transform: translate(-50%, -100%);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Tile provider comparison — pick the best</h1>
+  <p class="sub">Same 9 destinations, same pin style, world-fit view. Compare colour, contrast, country borders, "feels like a travel map" energy.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3 class="card-title">1. CartoDB Voyager <span class="pill pill-free">free</span></h3>
+      <p class="card-sub">Current v3 widget. Soft, muted, "data viz" feel.</p>
+      <div id="m1" class="map-box"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">2. OpenStreetMap default <span class="pill pill-free">free</span></h3>
+      <p class="card-sub">Standard OSM look. Saturated greens, blue oceans, road detail.</p>
+      <div id="m2" class="map-box"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">3. Esri World Topographic <span class="pill pill-free">free</span></h3>
+      <p class="card-sub">Closest free option to Google Maps. Terrain shading.</p>
+      <div id="m3" class="map-box"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">4. Esri World Street Map <span class="pill pill-free">free</span></h3>
+      <p class="card-sub">Cleaner cousin of #3. More white space, clearer borders.</p>
+      <div id="m4" class="map-box"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">5. Esri National Geographic <span class="pill pill-free">free</span></h3>
+      <p class="card-sub">Distinctive National-Geographic style. Premium "atlas" feel.</p>
+      <div id="m5" class="map-box"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">6. OpenTopoMap <span class="pill pill-free">free</span></h3>
+      <p class="card-sub">Topographic with strong terrain shading. Could feel adventurous.</p>
+      <div id="m6" class="map-box"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const PRICES = [
+    { country: 'Spain',        lat: 40.0,   lng: -3.7,   price: 320 },
+    { country: 'Turkey',       lat: 39.0,   lng: 35.0,   price: 350 },
+    { country: 'USA',          lat: 39.8,   lng: -98.6,  price: 720 },
+    { country: 'Thailand',     lat: 15.9,   lng: 100.99, price: 780 },
+    { country: 'Mexico',       lat: 23.6,   lng: -102.5, price: 890 },
+    { country: 'Indonesia',    lat: -0.79,  lng: 113.92, price: 910 },
+    { country: 'UAE',          lat: 24.0,   lng: 54.0,   price: 620 },
+    { country: 'South Africa', lat: -30.6,  lng: 22.9,   price: 940 },
+    { country: 'Australia',    lat: -25.3,  lng: 133.8,  price: 1340 },
+  ];
+  const fmt = p => '£' + Math.round(p).toLocaleString('en-GB');
+
+  function makeMap(id, tileUrl, attribution, opts = {}) {
+    const m = L.map(id, {
+      zoomControl: false, scrollWheelZoom: false, doubleClickZoom: false,
+      dragging: false, keyboard: false, touchZoom: false, boxZoom: false,
+      attributionControl: true, minZoom: 1, maxZoom: 5,
+    });
+    L.tileLayer(tileUrl, Object.assign({ attribution, maxZoom: 18 }, opts)).addTo(m);
+    m.setView([25, 10], 2);
+    for (const p of PRICES) {
+      const html = `
+        <div class="tg-pin-wrap">
+          <div class="tg-price-tag">
+            <span class="tg-tag-country">${p.country}</span>
+            <span class="tg-tag-price">${fmt(p.price)}</span>
+          </div>
+          <div class="tg-price-anchor"></div>
+        </div>`;
+      L.marker([p.lat, p.lng], {
+        icon: L.divIcon({ html, className: '', iconSize: [0, 0], iconAnchor: [0, 0] }),
+        keyboard: false,
+      }).addTo(m);
+    }
+    return m;
+  }
+
+  // 1. CartoDB Voyager (current)
+  makeMap('m1',
+    'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
+    '&copy; OSM &copy; CARTO',
+    { subdomains: 'abcd' }
+  );
+
+  // 2. OpenStreetMap default
+  makeMap('m2',
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors'
+  );
+
+  // 3. Esri World Topographic
+  makeMap('m3',
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    'Tiles &copy; Esri'
+  );
+
+  // 4. Esri World Street Map
+  makeMap('m4',
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    'Tiles &copy; Esri'
+  );
+
+  // 5. Esri National Geographic
+  makeMap('m5',
+    'https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',
+    'Tiles &copy; Esri &copy; National Geographic'
+  );
+
+  // 6. OpenTopoMap
+  makeMap('m6',
+    'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    'Map data: &copy; OSM, SRTM | Style: &copy; OpenTopoMap',
+    { subdomains: 'abc' }
+  );
+</script>
+</body>
+</html>
