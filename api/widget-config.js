@@ -408,11 +408,43 @@ export default async function handler(req, res) {
           }
         }
 
-        res.setHeader('Cache-Control', 's-maxage=300, max-age=60, stale-while-revalidate=600');
-        // Returns { config, name } so the editor can restore the widget name on
-        // load. Pre-existing clients reading the response as the config object
-        // directly are still supported via _legacy fields spread on the root.
-        return res.status(200).json({ config, name, ...config });
+        // Build the base response. Returns { config, name } so the editor can
+        // restore the widget name on load. Pre-existing clients reading the
+        // response as the config object directly are still supported via the
+        // _legacy fields spread on the root.
+        const payload = { config, name, ...config };
+
+        // recordId injection — AUTHENTICATED requests only.
+        //
+        // The editor needs the Airtable record ID (rec...) on reopen because
+        // routing (/api/routing-configs) is keyed on the record ID, not the
+        // public WidgetID (tgw_...). We expose it ONLY when the caller is a
+        // signed-in user (editor), never to anonymous public embeds — there is
+        // no reason to leak an internal identifier to every site visitor.
+        //
+        // requireAuth returns { user } when authenticated, { error, status }
+        // otherwise. It never throws, so a public embed simply doesn't get the
+        // field and the response shape is unchanged for them.
+        let isAuthed = false;
+        try {
+          const auth = requireAuth(req);
+          if (auth && auth.user) {
+            payload.recordId = widgetRecord.id;
+            isAuthed = true;
+          }
+        } catch (authErr) {
+          // Soft-fail: if the auth check itself errors, just omit recordId.
+          console.warn('[widget-config] GET soft-auth check failed:', authErr.message);
+        }
+
+        if (isAuthed) {
+          // Never let a shared CDN cache the recordId-bearing response and
+          // then serve it to an anonymous embed. Keep authed responses private.
+          res.setHeader('Cache-Control', 'private, no-store');
+        } else {
+          res.setHeader('Cache-Control', 's-maxage=300, max-age=60, stale-while-revalidate=600');
+        }
+        return res.status(200).json(payload);
       } catch {
         return res.status(500).json({ error: 'Widget data corrupted' });
       }
