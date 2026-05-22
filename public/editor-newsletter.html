@@ -1110,6 +1110,7 @@
   const ICON_SHEETS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="12" y1="11" x2="12" y2="19"/></svg>';
   const ICON_EMAIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
   const ICON_FALLBACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  const ICON_WELCOME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>';
 
   const DESTINATIONS = {
     'mailchimp': {
@@ -1196,6 +1197,20 @@
       fields: [
         { type: 'config', key: 'to', label: 'Recipient', placeholder: 'team@yourcompany.com', help: 'Sent from notifications@travelgenix.io' },
         { type: 'config', key: 'subject', label: 'Subject (optional)', placeholder: 'New newsletter signup', help: 'Defaults to "New newsletter signup from {firstName}"' },
+      ],
+    },
+    'auto-reply': {
+      name: 'Welcome email',
+      icon: ICON_WELCOME,
+      colour: '#00B4D8',
+      description: 'Send a welcome email to the person who signs up',
+      fields: [
+        { type: 'config', key: 'fromName', label: 'From name (optional)', placeholder: 'Travelgenix', help: 'The name the welcome email comes from. Defaults to Travelgenix.' },
+        { type: 'config', key: 'subject', label: 'Subject (optional)', placeholder: 'You are in. Welcome to Travelgenix.', help: 'You can use {firstName} and {fromName}.' },
+        { type: 'config', key: 'headline', label: 'Headline (optional)', placeholder: 'You are on the list', help: 'The big heading inside the email.' },
+        { type: 'config', key: 'body', label: 'Message (optional)', placeholder: 'Leave blank to use the friendly default.', help: 'One line per paragraph. You can use {firstName} and {fromName}. Leave blank for the default welcome.', multiline: true },
+        { type: 'config', key: 'ctaLabel', label: 'Button text (optional)', placeholder: 'Browse destinations', help: 'Add a button. Leave blank for no button.' },
+        { type: 'config', key: 'ctaUrl', label: 'Button link (optional)', placeholder: 'https://yourwebsite.com', help: 'Where the button goes. Must start with https://' },
       ],
     },
   };
@@ -1630,13 +1645,23 @@
         `);
       } else {
         const inputType = isCreds ? 'password' : 'text';
-        parts.push(`
-          <div class="field-group">
-            <label class="field-label" for="dc-${escAttr(f.key)}">${escHtml(f.label)}</label>
-            <input class="text-input" id="dc-${escAttr(f.key)}" type="${inputType}" value="${escAttr(v)}" placeholder="${escAttr(f.placeholder || '')}" data-${isCreds ? 'creds' : 'config'}-key="${escAttr(f.key)}">
-            ${f.help ? `<div class="field-help">${escHtml(f.help)}</div>` : ''}
-          </div>
-        `);
+        if (f.multiline) {
+          parts.push(`
+            <div class="field-group">
+              <label class="field-label" for="dc-${escAttr(f.key)}">${escHtml(f.label)}</label>
+              <textarea class="textarea" id="dc-${escAttr(f.key)}" rows="6" placeholder="${escAttr(f.placeholder || '')}" data-config-key="${escAttr(f.key)}">${escHtml(v)}</textarea>
+              ${f.help ? `<div class="field-help">${escHtml(f.help)}</div>` : ''}
+            </div>
+          `);
+        } else {
+          parts.push(`
+            <div class="field-group">
+              <label class="field-label" for="dc-${escAttr(f.key)}">${escHtml(f.label)}</label>
+              <input class="text-input" id="dc-${escAttr(f.key)}" type="${inputType}" value="${escAttr(v)}" placeholder="${escAttr(f.placeholder || '')}" data-${isCreds ? 'creds' : 'config'}-key="${escAttr(f.key)}">
+              ${f.help ? `<div class="field-help">${escHtml(f.help)}</div>` : ''}
+            </div>
+          `);
+        }
       }
     }
 
