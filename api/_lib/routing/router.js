@@ -36,6 +36,7 @@ import { dispatchBrevo } from '../destinations/brevo.js';
 import { dispatchMailerlite } from '../destinations/mailerlite.js';
 import { dispatchKlaviyo } from '../destinations/klaviyo.js';
 import { dispatchConstantContact } from '../destinations/constant-contact.js';
+import { dispatchAutoReply } from '../destinations/auto-reply.js';
 
 // ── Destination registry ────────────────────────────────────────────────
 // Add new destinations here. Each handler signature:
@@ -51,8 +52,9 @@ const DISPATCHERS = {
   'mailerlite':       dispatchMailerlite,
   'klaviyo':          dispatchKlaviyo,
   'constant-contact': dispatchConstantContact,
+  'auto-reply':       dispatchAutoReply,
   // Still to add:
-  // 'activecampaign', 'hubspot', 'airtable', 'auto-reply', 'luna-marketing'
+  // 'activecampaign', 'hubspot', 'airtable', 'luna-marketing'
 };
 
 const DISPATCH_TIMEOUT_MS = 15_000;
