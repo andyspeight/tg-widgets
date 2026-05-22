@@ -271,24 +271,39 @@ export default async function handler(req, res) {
     }
 
     // ── DIAGNOSTIC MODE ───────────────────────────────────────────────
-    // Call with ?debug=1 to run ONLY the first row and return the complete
-    // raw response from the offers proxy, verbatim. This lets us inspect the
-    // real Travelify response shape (field names, offer IDs, coordinates)
-    // from a request we know authenticates. No Redis write, no full sweep.
-    // TEMPORARY — remove once the response shape is mapped.
+    // ?debug=1                    → run first row, return raw response
+    // ?debug=1&dest=TFS           → override the destination(s), comma-separated
+    // ?debug=1&dest=ES&noOrigin=1 → also drop the origins filter (UK-wide search)
+    // No Redis write, no full sweep. TEMPORARY — remove once shape is mapped.
     if (req.query && (req.query.debug === '1' || req.query.debug === 'true')) {
       const row = rows[0];
       const payload = buildOffersPayload(row);
+      // Optional destination override
+      if (req.query.dest) {
+        payload.destinations = String(req.query.dest).split(',').map(s => s.trim()).filter(Boolean);
+      }
+      // Optional: drop the origins filter to search UK-wide (any departure airport)
+      if (req.query.noOrigin === '1' || req.query.noOrigin === 'true') {
+        delete payload.origins;
+      }
+      // Optional maxOffers override
+      if (req.query.max) {
+        const m = parseInt(req.query.max, 10);
+        if (Number.isFinite(m) && m > 0) payload.maxOffers = m;
+      }
       const raw = await callOffersProxy(payload);
+      const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : null;
       return res.status(200).json({
         ok: true,
         debug: true,
-        sentToCountry: (row.fields || {}).Country || (row.fields || {}).Name,
         sentPayload: payload,
         rawResponseOk: raw.ok,
         rawError: raw.error || null,
-        // The whole thing, untouched — this is what we need to see
-        rawResponse: raw.data || null,
+        offerCount: arr ? arr.length : null,
+        // First offer object only (full), so we can see the shape without a huge dump
+        firstOffer: arr && arr.length ? arr[0] : null,
+        // If empty, echo the whole thing so we can see any message
+        rawResponse: (arr && arr.length) ? undefined : raw.data,
       });
     }
 
