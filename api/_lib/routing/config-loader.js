@@ -9,41 +9,44 @@
 //  only — Vercel cold starts will re-fetch. Acceptable; configs rarely change.
 //  Cache is invalidated on demand via `invalidateConfigCache(widgetId)`.
 //
-//  PLACEHOLDERS — these constants must be patched once the Airtable schema
-//  is created. See /docs/SCHEMA.md.
+//  Table + field IDs are wired to the live RoutingConfig table and mirror the
+//  `F` map in /api/routing-configs.js. If that table's schema changes, update
+//  BOTH files together.
 //
 // =============================================================================
 
-import { decryptPat } from './pat-crypt.js';
+import { decryptPat, encryptPat } from './pat-crypt.js';
 import { KNOWN_DESTINATIONS } from './schema.js';
 
-// ── PLACEHOLDER CONSTANTS — patch after Airtable schema is created ──────
+// ── Airtable connection ─────────────────────────────────────────────────
 
 const ENQUIRIES_BASE_ID = process.env.TG_ENQUIRIES_AIRTABLE_BASE_ID;
 const ENQUIRIES_PAT = process.env.TG_ENQUIRIES_AIRTABLE_PAT;
 
-// ⚠️ Replace once the RoutingConfig table is created
-export const CONFIG_TABLE_ID = process.env.ROUTING_CONFIG_TABLE_ID || 'tblPLACEHOLDER_CONFIG';
+// Live RoutingConfig table — same table routing-configs.js writes to.
+// Hardcoded to match the sibling file (no ROUTING_CONFIG_TABLE_ID env var is
+// set in Vercel); an env override is still honoured if one is added later.
+export const CONFIG_TABLE_ID = process.env.ROUTING_CONFIG_TABLE_ID || 'tblZO9mRFpD1eMcKx';
 
-// Field name → field ID. Used to read the table.
-// ⚠️ Patch field IDs after schema is created. Field names are stable.
+// Field name → field ID, from the live RoutingConfig table. These mirror the
+// `F` map in /api/routing-configs.js exactly — the two files MUST stay in sync.
 export const CONFIG_FIELDS = {
-  name:               'fldPLACEHOLDER_NAME',
-  widgetType:         'fldPLACEHOLDER_WIDGET_TYPE',
-  widgetRecordId:     'fldPLACEHOLDER_WIDGET_RECORD_ID',
-  clientName:         'fldPLACEHOLDER_CLIENT_NAME',
-  clientEmail:        'fldPLACEHOLDER_CLIENT_EMAIL',
-  destination:        'fldPLACEHOLDER_DESTINATION',
-  enabled:            'fldPLACEHOLDER_ENABLED',
-  testMode:           'fldPLACEHOLDER_TEST_MODE',
-  configJson:         'fldPLACEHOLDER_CONFIG_JSON',
-  credentialsEnc:     'fldPLACEHOLDER_CREDS_ENC',
-  lastVerifiedAt:     'fldPLACEHOLDER_VERIFIED_AT',
-  lastVerifiedStatus: 'fldPLACEHOLDER_VERIFIED_STATUS',
-  lastVerifiedError:  'fldPLACEHOLDER_VERIFIED_ERROR',
-  lastUsedAt:         'fldPLACEHOLDER_LAST_USED_AT',
-  lastErrorAt:        'fldPLACEHOLDER_LAST_ERROR_AT',
-  lastErrorMessage:   'fldPLACEHOLDER_LAST_ERROR_MSG',
+  name:               'flddEbJI8dRIjjO9p',
+  widgetType:         'flduxQu6qlFU1GJhI',
+  widgetRecordId:     'fldvhIuUMZ8wfKMN8',
+  clientName:         'fldZxnhYrf6UY89Zg',
+  clientEmail:        'fldqQA8EwGXA4gnIA',
+  destination:        'fld7CL01oCQWcal3U',
+  enabled:            'fldTzl9alTonLX7k4',
+  testMode:           'fldfwrXvimwCFeRXQ',
+  configJson:         'fld9z6pPdhXwm7tun',
+  credentialsEnc:     'fldmbEIDSs9XFPosT',
+  lastVerifiedAt:     'fldB6r6bFUM3EMPYT',
+  lastVerifiedStatus: 'fld8CBagHhBcWDEiI',
+  lastVerifiedError:  'fldnUrF7Gbq9fSbea',
+  lastUsedAt:         'fldZOVXwrLvWe3Sbp',
+  lastErrorAt:        'fldWaYy78qqbBDH2Y',
+  lastErrorMessage:   'fldM93ZFZvwrkHhna',
 };
 
 // ── Cache ───────────────────────────────────────────────────────────────
@@ -150,6 +153,58 @@ export async function recordDispatchOutcome(configRecordId, outcome) {
     });
   } catch (err) {
     console.error(`[config-loader] Failed to record outcome for ${configRecordId}:`, err.message);
+  }
+}
+
+/**
+ * Persist refreshed credentials for a RoutingConfig record.
+ *
+ * Some destination handlers (e.g. Constant Contact OAuth) refresh their access
+ * tokens during dispatch and return them as `result.refreshedCredentials`. The
+ * router calls this to write the new creds back so the next dispatch uses them
+ * instead of re-refreshing every time.
+ *
+ * Signature matches the router call:
+ *   updateCredentials(configRecordId, widgetRecordId, refreshedCredentials)
+ *
+ * Credentials are re-encrypted with the same AES-256-GCM key (TG_PAT_ENCRYPTION_KEY)
+ * that routing-configs.js used to write them, so the round-trip is symmetric.
+ *
+ * Fire-and-forget; errors are logged, never thrown. After a successful write the
+ * widget's config cache is invalidated so the refreshed creds are picked up.
+ */
+export async function updateCredentials(configRecordId, widgetRecordId, refreshedCredentials) {
+  if (!configRecordId || CONFIG_TABLE_ID.startsWith('tblPLACEHOLDER')) return;
+  if (!refreshedCredentials || typeof refreshedCredentials !== 'object') return;
+  if (!ENQUIRIES_BASE_ID || !ENQUIRIES_PAT) return;
+
+  let credentialsEnc;
+  try {
+    credentialsEnc = encryptPat(JSON.stringify(refreshedCredentials));
+  } catch (err) {
+    console.error(`[config-loader] Failed to encrypt refreshed creds for ${configRecordId}:`, err.message);
+    return;
+  }
+
+  try {
+    const url = `https://api.airtable.com/v0/${ENQUIRIES_BASE_ID}/${CONFIG_TABLE_ID}/${configRecordId}`;
+    const resp = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${ENQUIRIES_PAT}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fields: { [CONFIG_FIELDS.credentialsEnc]: credentialsEnc } }),
+    });
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => '');
+      console.error(`[config-loader] updateCredentials PATCH ${resp.status} for ${configRecordId}: ${txt.slice(0, 200)}`);
+      return;
+    }
+    // Next dispatch should read the refreshed creds, not the cached jobs.
+    if (widgetRecordId) invalidateConfigCache(widgetRecordId);
+  } catch (err) {
+    console.error(`[config-loader] Failed to update credentials for ${configRecordId}:`, err.message);
   }
 }
 
