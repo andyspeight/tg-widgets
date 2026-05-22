@@ -11,241 +11,629 @@
       "maxDuration": 30
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/refresh-map-offers",
+      "schedule": "*/45 * * * *"
+    }
+  ],
   "rewrites": [
-    { "source": "/demo",              "destination": "/demo.html" },
-    { "source": "/demo-airport",      "destination": "/demo-airport.html" },
-    { "source": "/demo-reviews",      "destination": "/demo-reviews.html" },
-    { "source": "/demo-faq",          "destination": "/demo-faq.html" },
-    { "source": "/demo-testimonials", "destination": "/demo-testimonials.html" },
-    { "source": "/demo-spotlight",    "destination": "/demo-spotlight.html" },
-    { "source": "/demo-weather",      "destination": "/demo-weather.html" },
-    { "source": "/demo-enquiry",      "destination": "/demo-enquiry.html" },
-    { "source": "/demo-mybooking",    "destination": "/demo-mybooking.html" },
-    { "source": "/demo-countdown",    "destination": "/demo-countdown.html" },
-    { "source": "/demo-offers",       "destination": "/demo-offers.html" },
-    { "source": "/demo-logos",        "destination": "/demo-logos.html" },
-    { "source": "/demo-textfx",       "destination": "/demo-textfx.html" },
-    { "source": "/demo-popup",        "destination": "/demo-popup.html" },
-    { "source": "/demo-events",       "destination": "/demo-events.html" },
-    { "source": "/demo-share",        "destination": "/demo-share.html" },
-    { "source": "/demo-whatsapp",     "destination": "/demo-whatsapp.html" },
-    { "source": "/demo-hours",        "destination": "/demo-hours.html" },
-    { "source": "/demo-newsletter",   "destination": "/demo-newsletter.html" },
-    { "source": "/demo-contact",      "destination": "/demo-contact.html" },
-    { "source": "/demo-team",         "destination": "/demo-team.html" },
-    { "source": "/wow-showcase",      "destination": "/wow-showcase.html" },
-    { "source": "/editor",              "destination": "/editor.html" },
-    { "source": "/editor-airport",      "destination": "/editor-airport.html" },
-    { "source": "/editor-reviews",      "destination": "/editor-reviews.html" },
-    { "source": "/editor-faq",          "destination": "/editor-faq.html" },
-    { "source": "/editor-testimonials", "destination": "/editor-testimonials.html" },
-    { "source": "/editor-spotlight",    "destination": "/editor-spotlight.html" },
-    { "source": "/editor-weather",      "destination": "/editor-weather.html" },
-    { "source": "/editor-enquiry",      "destination": "/editor-enquiry.html" },
-    { "source": "/editor-mybooking",    "destination": "/editor-mybooking.html" },
-    { "source": "/editor-countdown",    "destination": "/editor-countdown.html" },
-    { "source": "/editor-logos",        "destination": "/editor-logos.html" },
-    { "source": "/editor-offers",       "destination": "/editor-offers.html" },
-    { "source": "/editor-textfx",       "destination": "/editor-textfx.html" },
-    { "source": "/editor-popup",        "destination": "/editor-popup.html" },
-    { "source": "/editor-events",       "destination": "/editor-events.html" },
-    { "source": "/editor-share",        "destination": "/editor-share.html" },
-    { "source": "/editor-whatsapp",     "destination": "/editor-whatsapp.html" },
-    { "source": "/editor-hours",        "destination": "/editor-hours.html" },
-    { "source": "/editor-newsletter",   "destination": "/editor-newsletter.html" },
-    { "source": "/editor-contact",      "destination": "/editor-contact.html" },
-    { "source": "/editor-team",         "destination": "/editor-team.html" },
-    { "source": "/editor-test",         "destination": "/editor-test.html" },
-    { "source": "/inbox-enquiry",       "destination": "/inbox-enquiry.html" },
-    { "source": "/signin",              "destination": "/signin.html" },
-    { "source": "/forgot-password",     "destination": "/forgot-password.html" },
-    { "source": "/reset-password",      "destination": "/reset-password.html" },
-    { "source": "/accept-invite",       "destination": "/accept-invite.html" }
+    {
+      "source": "/demo",
+      "destination": "/demo.html"
+    },
+    {
+      "source": "/demo-airport",
+      "destination": "/demo-airport.html"
+    },
+    {
+      "source": "/demo-reviews",
+      "destination": "/demo-reviews.html"
+    },
+    {
+      "source": "/demo-faq",
+      "destination": "/demo-faq.html"
+    },
+    {
+      "source": "/demo-testimonials",
+      "destination": "/demo-testimonials.html"
+    },
+    {
+      "source": "/demo-spotlight",
+      "destination": "/demo-spotlight.html"
+    },
+    {
+      "source": "/demo-weather",
+      "destination": "/demo-weather.html"
+    },
+    {
+      "source": "/demo-enquiry",
+      "destination": "/demo-enquiry.html"
+    },
+    {
+      "source": "/demo-mybooking",
+      "destination": "/demo-mybooking.html"
+    },
+    {
+      "source": "/demo-countdown",
+      "destination": "/demo-countdown.html"
+    },
+    {
+      "source": "/demo-offers",
+      "destination": "/demo-offers.html"
+    },
+    {
+      "source": "/demo-logos",
+      "destination": "/demo-logos.html"
+    },
+    {
+      "source": "/demo-textfx",
+      "destination": "/demo-textfx.html"
+    },
+    {
+      "source": "/demo-popup",
+      "destination": "/demo-popup.html"
+    },
+    {
+      "source": "/demo-events",
+      "destination": "/demo-events.html"
+    },
+    {
+      "source": "/demo-share",
+      "destination": "/demo-share.html"
+    },
+    {
+      "source": "/demo-whatsapp",
+      "destination": "/demo-whatsapp.html"
+    },
+    {
+      "source": "/demo-hours",
+      "destination": "/demo-hours.html"
+    },
+    {
+      "source": "/demo-newsletter",
+      "destination": "/demo-newsletter.html"
+    },
+    {
+      "source": "/demo-contact",
+      "destination": "/demo-contact.html"
+    },
+    {
+      "source": "/demo-team",
+      "destination": "/demo-team.html"
+    },
+    {
+      "source": "/demo-worldmap",
+      "destination": "/demo-worldmap.html"
+    },
+    {
+      "source": "/wow-showcase",
+      "destination": "/wow-showcase.html"
+    },
+    {
+      "source": "/editor",
+      "destination": "/editor.html"
+    },
+    {
+      "source": "/editor-airport",
+      "destination": "/editor-airport.html"
+    },
+    {
+      "source": "/editor-reviews",
+      "destination": "/editor-reviews.html"
+    },
+    {
+      "source": "/editor-faq",
+      "destination": "/editor-faq.html"
+    },
+    {
+      "source": "/editor-testimonials",
+      "destination": "/editor-testimonials.html"
+    },
+    {
+      "source": "/editor-spotlight",
+      "destination": "/editor-spotlight.html"
+    },
+    {
+      "source": "/editor-weather",
+      "destination": "/editor-weather.html"
+    },
+    {
+      "source": "/editor-enquiry",
+      "destination": "/editor-enquiry.html"
+    },
+    {
+      "source": "/editor-mybooking",
+      "destination": "/editor-mybooking.html"
+    },
+    {
+      "source": "/editor-countdown",
+      "destination": "/editor-countdown.html"
+    },
+    {
+      "source": "/editor-logos",
+      "destination": "/editor-logos.html"
+    },
+    {
+      "source": "/editor-offers",
+      "destination": "/editor-offers.html"
+    },
+    {
+      "source": "/editor-textfx",
+      "destination": "/editor-textfx.html"
+    },
+    {
+      "source": "/editor-popup",
+      "destination": "/editor-popup.html"
+    },
+    {
+      "source": "/editor-events",
+      "destination": "/editor-events.html"
+    },
+    {
+      "source": "/editor-share",
+      "destination": "/editor-share.html"
+    },
+    {
+      "source": "/editor-whatsapp",
+      "destination": "/editor-whatsapp.html"
+    },
+    {
+      "source": "/editor-hours",
+      "destination": "/editor-hours.html"
+    },
+    {
+      "source": "/editor-newsletter",
+      "destination": "/editor-newsletter.html"
+    },
+    {
+      "source": "/editor-contact",
+      "destination": "/editor-contact.html"
+    },
+    {
+      "source": "/editor-team",
+      "destination": "/editor-team.html"
+    },
+    {
+      "source": "/editor-worldmap",
+      "destination": "/editor-worldmap.html"
+    },
+    {
+      "source": "/editor-test",
+      "destination": "/editor-test.html"
+    },
+    {
+      "source": "/inbox-enquiry",
+      "destination": "/inbox-enquiry.html"
+    },
+    {
+      "source": "/signin",
+      "destination": "/signin.html"
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "/forgot-password.html"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/reset-password.html"
+    },
+    {
+      "source": "/accept-invite",
+      "destination": "/accept-invite.html"
+    }
   ],
   "headers": [
     {
       "source": "/widget.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-airport.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-reviews.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-faq.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-testimonials.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-spotlight.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-weather.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-enquiry.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-mybooking.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-countdown.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-logos.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-textfx.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-offers.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-popup.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-events.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-share.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-whatsapp.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-hours.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-newsletter.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-contact.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/widget-team.js",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" },
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-worldmap.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
       ]
     },
     {
       "source": "/(signin|forgot-password|reset-password|accept-invite)(\\.html)?",
       "headers": [
-        { "key": "X-Frame-Options",            "value": "DENY" },
-        { "key": "Referrer-Policy",            "value": "no-referrer" },
-        { "key": "Strict-Transport-Security",  "value": "max-age=31536000; includeSubDomains" },
-        { "key": "Content-Security-Policy",    "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'" }
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+        }
       ]
     },
     {
       "source": "/api/auth/(.*)",
       "headers": [
-        { "key": "Cache-Control",          "value": "no-store" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy",        "value": "no-referrer" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
       ]
     }
   ]
