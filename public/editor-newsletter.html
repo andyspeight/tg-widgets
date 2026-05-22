@@ -1057,11 +1057,12 @@
   // STATE
   // ============================================================
   const state = {
-    widgetId: null,
+    widgetId: null,       // public WidgetID (tgw_...) — used in embed code + URL
+    recordId: null,       // Airtable record ID (rec...) — used for routing ownership
     widget: null,         // live preview widget instance (reused across updates)
     config: makeDefaultConfig(),
     dirty: false,
-    routingConfigs: [],   // loaded from /api/routing-configs once widgetId known
+    routingConfigs: [],   // loaded from /api/routing-configs once recordId known
     pendingDest: null,    // currently being edited in the modal
   };
 
@@ -1228,6 +1229,12 @@
       state.dirty = false;
       if (d && d.widgetId) {
         state.widgetId = d.widgetId;
+      }
+      // The save response returns the Airtable record ID. Routing is keyed on
+      // it, so capture it here — this is what unlocks the routing panel right
+      // after the very first save.
+      if (d && d.recordId) {
+        state.recordId = d.recordId;
         loadRoutingConfigs();
       }
     },
@@ -1267,15 +1274,61 @@
   // INITIAL DATA LOAD
   // ============================================================
   function init() {
-    // Read widgetId from query string (?id=recXXX) — same convention as other editors
+    // Read widgetId from query string. IDs are the public WidgetID format
+    // (tgw_<timestamp>_<rand>), NOT Airtable rec... IDs. Accept that format.
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
-    if (id && /^rec[A-Za-z0-9]{14}$/.test(id)) {
+    if (id && /^tgw_[A-Za-z0-9_]+$/.test(id)) {
       state.widgetId = id;
-      loadRoutingConfigs();
+      // Load the saved widget back (name + config + recordId). This also
+      // triggers routing load once we know the record ID.
+      loadWidgetConfig(id);
     }
     renderAll();
     updatePreview();
+  }
+
+  // Load the saved widget config back into the editor on reopen.
+  //
+  // This restores the widget Name and all config, and captures the Airtable
+  // record ID (rec...) that routing is keyed on. Sends auth headers so the
+  // API returns recordId (it only does so for authenticated requests).
+  async function loadWidgetConfig(id) {
+    try {
+      const headers = (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {};
+      const resp = await fetch('/api/widget-config?id=' + encodeURIComponent(id), {
+        headers,
+        credentials: 'include',
+      });
+      if (!resp.ok) {
+        console.warn('[newsletter] config load failed', resp.status);
+        return;
+      }
+      const d = await resp.json();
+
+      // Restore config via the same merge the shell's setConfig uses, so we
+      // don't lose nested theme defaults on a partial load.
+      if (d && d.config && typeof d.config === 'object') {
+        state.config = Object.assign(makeDefaultConfig(), d.config, {
+          theme: Object.assign({}, makeDefaultConfig().theme, (d.config && d.config.theme) || {}),
+        });
+      }
+
+      // Restore the widget name into the shell's name input.
+      const nameEl = document.getElementById('name-input');
+      if (nameEl && d && typeof d.name === 'string') nameEl.value = d.name;
+
+      // Capture the record ID — this unlocks routing.
+      if (d && d.recordId) {
+        state.recordId = d.recordId;
+        loadRoutingConfigs();
+      }
+
+      renderAll();
+      updatePreview();
+    } catch (err) {
+      console.warn('[newsletter] config load error', err);
+    }
   }
 
   // ============================================================
@@ -1379,7 +1432,7 @@
   function renderRoutingList() {
     const $list = document.getElementById('routing-list');
     if (!$list) return;
-    if (!state.widgetId) {
+    if (!state.recordId) {
       $list.innerHTML = `<div style="padding:14px;background:var(--tgse-bg-2);border-radius:6px;font-size:12.5px;color:var(--tgse-text-2);text-align:center">Save the widget first to add destinations.</div>`;
       document.getElementById('btn-add-destination').disabled = true;
       return;
@@ -1425,10 +1478,10 @@
   }
 
   async function loadRoutingConfigs() {
-    if (!state.widgetId) return;
+    if (!state.recordId) return;
     try {
       const headers = (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {};
-      const resp = await fetch(`/api/routing-configs?widgetId=${encodeURIComponent(state.widgetId)}`, { headers });
+      const resp = await fetch(`/api/routing-configs?widgetId=${encodeURIComponent(state.recordId)}`, { headers });
       if (!resp.ok) {
         console.warn('[routing] load failed', resp.status);
         return;
@@ -1487,7 +1540,7 @@
   // DESTINATION PICKER MODAL
   // ============================================================
   function openDestPicker() {
-    if (!state.widgetId) {
+    if (!state.recordId) {
       alert('Save the widget first before adding destinations.');
       return;
     }
@@ -1737,7 +1790,7 @@
         : {
             op: 'create',
             widgetType: 'newsletter',
-            widgetRecordId: state.widgetId,
+            widgetRecordId: state.recordId,
             name: data.name,
             destination: data.destination,
             enabled: data.enabled,
@@ -2064,7 +2117,7 @@
     document.querySelectorAll('.tgse-panel').forEach(p => {
       p.classList.toggle('is-active', p.dataset.tab === name);
     });
-    if (name === 'routing' && state.widgetId) loadRoutingConfigs();
+    if (name === 'routing' && state.recordId) loadRoutingConfigs();
   }
   function markDirty() {
     state.dirty = true;
