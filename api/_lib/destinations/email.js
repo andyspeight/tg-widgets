@@ -78,7 +78,27 @@ function applyTokens(html, tokens) {
 
 // ── Default template ────────────────────────────────────────────────────
 
-function defaultTemplate(tokens) {
+function defaultTemplate(tokens, lead) {
+  const t = (lead && lead.travel) || {};
+
+  // Travel-specific composite fields. These only make sense for enquiry-style
+  // widgets — a newsletter signup has none of this, so build them ONLY when
+  // real data exists. (Previously these were always-present strings like
+  // "— nights" and "— adults · 0 children", which slipped past the empty
+  // filter and showed nonsense on newsletter notifications.)
+  let durationVal = '';
+  if (t.durationNights != null) durationVal = `${t.durationNights} nights`;
+  else if (t.customDuration) durationVal = t.customDuration;
+
+  let travellersVal = '';
+  if (t.adults != null || t.children || t.infants) {
+    const parts = [];
+    if (t.adults != null) parts.push(`${t.adults} adult${t.adults === 1 ? '' : 's'}`);
+    if (t.children) parts.push(`${t.children} child${t.children === 1 ? '' : 'ren'}`);
+    if (t.infants) parts.push(`${t.infants} infant${t.infants === 1 ? '' : 's'}`);
+    travellersVal = parts.join(' · ');
+  }
+
   const rows = [
     ['Source', `${tokens.sourceWidget} — ${tokens.sourceUrl}`],
     ['Received', tokens.receivedAt],
@@ -90,8 +110,8 @@ function defaultTemplate(tokens) {
     ['Departure airport', tokens.departureAirport],
     ['Depart date', tokens.departDate],
     ['Return date', tokens.returnDate],
-    ['Duration', `${tokens.durationNights} nights`],
-    ['Travellers', `${tokens.adults} adults · ${tokens.children} children · ${tokens.infants} infants`],
+    ['Duration', durationVal],
+    ['Travellers', travellersVal],
     ['Budget pp', tokens.budgetPP],
     ['Stars', tokens.starRating],
     ['Board basis', tokens.boardBasis],
@@ -112,12 +132,12 @@ function defaultTemplate(tokens) {
 <tr><td style="padding:24px 28px;background:#1B2B5B;color:#FFFFFF">
 <div style="font-size:13px;opacity:0.7;letter-spacing:0.04em;text-transform:uppercase">New lead · ${esc(tokens.sourceWidget)}</div>
 <div style="font-size:22px;font-weight:700;margin-top:6px">${esc(tokens.fullName)}</div>
-<div style="font-size:14px;opacity:0.85;margin-top:4px">${esc(tokens.email)} · ${esc(tokens.phone)}</div>
+<div style="font-size:14px;opacity:0.85;margin-top:4px">${esc(tokens.email)}${tokens.phone && tokens.phone !== '—' ? ' · ' + esc(tokens.phone) : ''}</div>
 </td></tr>
 <tr><td style="padding:0 28px"><table role="presentation" width="100%" style="border-collapse:collapse;margin:8px 0 16px">${tableRows}</table></td></tr>
 <tr><td style="padding:16px 28px 24px;color:#94A3B8;font-size:12px;border-top:1px solid #E2E8F0">
 Lead ID: ${esc(tokens.leadId)}<br/>
-Sent by Travelgenix on behalf of ${esc(tokens.clientName)}
+${tokens.clientName && tokens.clientName !== '—' ? 'Sent by Travelgenix on behalf of ' + esc(tokens.clientName) : 'Sent by Travelgenix'}
 </td></tr>
 </table>
 </td></tr></table>
@@ -146,7 +166,7 @@ export async function dispatchEmail(lead, job) {
     : `New ${lead.source.widget} lead — ${tokens.fullName}`;
   const html = job.config?.templateHtml
     ? applyTokens(job.config.templateHtml, tokens)
-    : defaultTemplate(tokens);
+    : defaultTemplate(tokens, lead);
 
   const payload = {
     personalizations: [{ to: [{ email: to }] }],
