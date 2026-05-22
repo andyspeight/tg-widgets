@@ -43,8 +43,8 @@ const DESTINATION_TABLE_CITIES = 'tblCitiesAndRegions'; // PLACEHOLDER — confi
 const OFFERS_PROXY = process.env.OFFERS_PROXY_URL || 'https://tg-widgets.vercel.app/api/offers';
 const DEMO_APP_ID = '250';
 const DEFAULT_ORIGIN = 'LGW';
-const BATCH_SIZE = 3;
-const MIN_SUCCESS_RATE = 0.9;
+const BATCH_SIZE = 8;
+const MIN_SUCCESS_RATE = 0.5; // forgiving for now — a few unrecognised IATA codes shouldn't bin the whole run. Tighten once data is proven clean.
 const REDIS_KEY = 'map:offers:v1';
 const REDIS_LASTRUN_KEY = 'map:offers:lastRunAt';
 
@@ -249,11 +249,14 @@ export default async function handler(req, res) {
       firstPass.push(...out);
     }
 
-    // Pass 2: retry only the failures, after 60s.
+    // Pass 2: retry only the failures, after a short pause.
+    // NOTE: must stay short — a long sleep inside a serverless function
+    // blows the max-duration budget and kills the whole run before it can
+    // write to Redis. 2s is enough to let a transient rate-limit settle.
     const failed = firstPass.filter(r => !r.ok).map(r => r.row);
     let retried = [];
     if (failed.length > 0) {
-      await new Promise(r => setTimeout(r, 60_000));
+      await new Promise(r => setTimeout(r, 2_000));
       for (let i = 0; i < failed.length; i += BATCH_SIZE) {
         const batch = failed.slice(i, i + BATCH_SIZE);
         const out = await processBatch(batch);
@@ -275,10 +278,14 @@ export default async function handler(req, res) {
       await sendFailureAlert(
         `Success rate ${(successRate * 100).toFixed(1)}% (${successes}/${total}). Threshold ${MIN_SUCCESS_RATE * 100}%.`
       );
+      const failures = finalResults
+        .filter(r => !r.ok)
+        .map(r => ({ dest: (r.row.fields || {}).DestinationCode || (r.row.fields || {}).Name, error: r.error }));
       return res.status(200).json({
         ok: false,
         aborted: true,
         successes, total, successRate,
+        failures,
         durationMs: Date.now() - startedAt,
       });
     }
@@ -298,12 +305,17 @@ export default async function handler(req, res) {
     const writeOk = await setJson(REDIS_KEY, payload);
     if (writeOk) await setString(REDIS_LASTRUN_KEY, payload.generatedAt);
 
+    const failures = finalResults
+      .filter(r => !r.ok)
+      .map(r => ({ dest: (r.row.fields || {}).DestinationCode || (r.row.fields || {}).Name, error: r.error }));
+
     return res.status(200).json({
       ok: true,
       written: writeOk,
       successes, total, successRate,
       destinationsCovered: destinations.length,
       countriesCovered: countries.length,
+      failures,
       durationMs: Date.now() - startedAt,
     });
   } catch (e) {
