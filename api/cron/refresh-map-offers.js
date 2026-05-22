@@ -95,13 +95,22 @@ function buildOffersPayload(row) {
   };
 }
 
-async function callOffersProxy(payload, timeoutMs = 12000) {
+async function callOffersProxy(payload, timeoutMs = 10000) {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(OFFERS_PROXY, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        // Travelify's auth layer validates Referer/Origin to confirm requests
+        // come from a real Travelgenix browser session. This cron is a
+        // server-to-server call with no browser context, so the proxy would
+        // otherwise forward nothing and Travelify returns 401. We supply a
+        // legitimate Travelgenix origin so the proxy passes it upstream.
+        'Referer': 'https://tg-widgets.vercel.app/',
+        'Origin': 'https://tg-widgets.vercel.app',
+      },
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
