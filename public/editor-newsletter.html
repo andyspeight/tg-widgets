@@ -1966,6 +1966,11 @@
       // In editor preview: skip footer auto-show delay and dismissal persistence
       cfg.footerDelay = 0;
       cfg.footerRememberDismiss = false;
+      // Inject the saved public WidgetID so a test submission from the preview
+      // posts a valid id. state.config has no widgetId (a real embed gets it
+      // from data-tg-id); without this the preview submits an empty id and
+      // newsletter-submit rejects it as "Invalid widget ID".
+      if (state.widgetId) cfg.widgetId = state.widgetId;
 
       // Pick host by layout — different mount points for different layouts so
       // the widget appears in a sensible spot in the faux page.
