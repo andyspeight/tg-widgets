@@ -83,7 +83,7 @@ const F = {
 // Allowlist of destination keys the editor may submit
 const ALLOWED_DESTINATIONS = [
   'mailchimp', 'brevo', 'mailerlite', 'klaviyo', 'constant-contact',
-  'webhook', 'google-sheets', 'email',
+  'webhook', 'google-sheets', 'email', 'auto-reply',
 ];
 
 // Map widget canonical key → Airtable singleSelect display name
