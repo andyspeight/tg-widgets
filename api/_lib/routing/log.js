@@ -1,269 +1,287 @@
 // =============================================================================
-//  /api/_lib/routing/router.js
+//  /api/_lib/routing/log.js
 // =============================================================================
 //
-//  The orchestrator. Public entry point: `dispatchLead(lead)`.
+//  Writes to the RoutingLog table. One record per (lead × destination attempt).
+//  Also writes the master Submissions record and stamps the lead with the
+//  resulting record ID.
 //
-//  Lifecycle:
-//    1. Validate lead (caller has usually already done this via buildCanonicalLead)
-//    2. Write master Submissions record
-//    3. Load active RoutingConfig records for the widget
-//    4. Dispatch to each enabled destination IN PARALLEL, with isolation —
-//       one failure does not cascade
-//    5. Write a RoutingLog entry per dispatch (success or failure)
-//    6. Update the lead's `routing.completed` / `routing.failed` arrays
-//    7. Return the result envelope
+//  Fire-and-forget pattern: log writes never throw upward. A failed log
+//  entry is annoying but must not block lead delivery. Errors are emitted
+//  to console.error for the Vercel logs.
 //
-//  Failure isolation is critical. The promise returned by dispatchLead()
-//  always resolves — never rejects. If a destination handler throws, that
-//  failure is captured in routing.failed[] and logged; the lead still gets
-//  delivered to the other destinations.
-//
-//  Performance: all destinations dispatch concurrently via Promise.allSettled.
-//  Total wall time = max(individual destination time), not sum.
+//  PLACEHOLDERS — patch after Airtable schema is created. See /docs/SCHEMA.md.
 //
 // =============================================================================
 
-import { buildCanonicalLead, ValidationError } from './schema.js';
-import { loadRoutingJobs, recordDispatchOutcome, updateCredentials } from './config-loader.js';
-import { writeSubmission, writeLog } from './log.js';
+import { randomBytes } from 'crypto';
+import { redactLead } from './schema.js';
 
-import { dispatchGoogleSheets } from '../destinations/google-sheets.js';
-import { dispatchWebhook } from '../destinations/webhook.js';
-import { dispatchEmail } from '../destinations/email.js';
-import { dispatchMailchimp } from '../destinations/mailchimp.js';
-import { dispatchBrevo } from '../destinations/brevo.js';
-import { dispatchMailerlite } from '../destinations/mailerlite.js';
-import { dispatchKlaviyo } from '../destinations/klaviyo.js';
-import { dispatchConstantContact } from '../destinations/constant-contact.js';
+const ENQUIRIES_BASE_ID = process.env.TG_ENQUIRIES_AIRTABLE_BASE_ID;
+const ENQUIRIES_PAT = process.env.TG_ENQUIRIES_AIRTABLE_PAT;
 
-// ── Destination registry ────────────────────────────────────────────────
-// Add new destinations here. Each handler signature:
-//   async (lead, job) => { statusCode, requestPayload, responseBody }
-// Throws on failure; returns the above on success.
+// ⚠️ Patch after schema is created
+export const LOG_TABLE_ID = process.env.ROUTING_LOG_TABLE_ID || 'tblPLACEHOLDER_LOG';
+export const SUBMISSIONS_TABLE_ID = 'tblxtRPhALFjeMVA6'; // existing, stable
 
-const DISPATCHERS = {
-  'google-sheets':    dispatchGoogleSheets,
-  'webhook':          dispatchWebhook,
-  'email':            dispatchEmail,
-  'mailchimp':        dispatchMailchimp,
-  'brevo':            dispatchBrevo,
-  'mailerlite':       dispatchMailerlite,
-  'klaviyo':          dispatchKlaviyo,
-  'constant-contact': dispatchConstantContact,
-  // Still to add:
-  // 'activecampaign', 'hubspot', 'airtable', 'auto-reply', 'luna-marketing'
+// ── PLACEHOLDER FIELD IDS — patch after schema is created ──────────────
+
+export const LOG_FIELDS = {
+  logId:          'fldPLACEHOLDER_LOG_ID',
+  leadId:         'fldPLACEHOLDER_LEAD_ID',
+  submission:     'fldPLACEHOLDER_LOG_SUBMISSION',
+  routingConfig:  'fldPLACEHOLDER_LOG_CONFIG',
+  widgetType:     'fldPLACEHOLDER_LOG_WIDGET_TYPE',
+  widgetRecordId: 'fldPLACEHOLDER_LOG_WIDGET_REC_ID',
+  clientEmail:    'fldPLACEHOLDER_LOG_CLIENT_EMAIL',
+  destination:    'fldPLACEHOLDER_LOG_DESTINATION',
+  status:         'fldPLACEHOLDER_LOG_STATUS',
+  statusCode:     'fldPLACEHOLDER_LOG_STATUS_CODE',
+  errorMessage:   'fldPLACEHOLDER_LOG_ERROR',
+  durationMs:     'fldPLACEHOLDER_LOG_DURATION',
+  attempt:        'fldPLACEHOLDER_LOG_ATTEMPT',
+  testMode:       'fldPLACEHOLDER_LOG_TEST_MODE',
+  requestPayload: 'fldPLACEHOLDER_LOG_REQ',
+  responseBody:   'fldPLACEHOLDER_LOG_RESP',
 };
 
-const DISPATCH_TIMEOUT_MS = 15_000;
+// Existing Submissions table — using IDs from the existing enquiry submit endpoint
+export const SUBMISSION_FIELDS = {
+  reference:      'fldNXTIZnLr7EwSf1',
+  formId:         'fldMDhl75atiALwj4',
+  formName:       'fldR4ipGZ4tp6fPrZ',
+  clientName:     'fldJK3dXI664gGO9v',
+  visitorId:      'fldOcQW20Q0L19P9G',
+  ipAddress:      'fldTS4E0HWXc1IbZs',
+  userAgent:      'fldaHLfF6bfNVQCbE',
+  sourceUrl:      'fld6Ko6chs2aerwPg',
+  firstName:      'fldHIsFu8aTma2Udh',
+  lastName:       'fldokNLczzqR1dJkF',
+  email:          'fldNhL2013qhCCU87',
+  phone:          'fldeSiHPPRo983s8f',
+  destinationsJSON:'fldanxHheVASVcVHj',
+  departureAirport:'fldA0JrLek6nvuZfC',
+  departDate:     'fldsuLhoevjubPcBF',
+  returnDate:     'fldgUVAATk4ptvuEQ',
+  flexibleDates:  'fldWTNvplA98gEfNt',
+  durationNights: 'fldukKv5npF3yu7xy',
+  customDuration: 'fldKR402UW3FkmMGv',
+  adults:         'fldsc0GlhRfT7KExm',
+  children:       'fldBcyotWmETyjSOB',
+  childAgesJSON:  'fldg8LtnXntJsVkdn',
+  infants:        'fldF8uRIwmb6aDtsY',
+  budgetPP:       'fldIbsjCV7EThsowD',
+  stars:          'fldysKVijEzqo1wWH',
+  boardBasis:     'fld8FymwGJmeb0PPe',
+  interestsJSON:  'fldl6rVXUjLmSOb7v',
+  notes:          'fldEQAYJmYQlatoWq',
+  contactConsent: 'fld4kh6AfKWuamN0i',
+  marketingConsent:'fldiHCjnbG8EaWj6Z',
+  rawPayloadJSON: 'fld1LrJ05E51ieQaF',
+  routingStatusJSON:'fldwxrWm49MhddhUd',
+  status:         'fld4C1iU7lC3BVmtU',
+  ownerEmail:     'fldPP6tud7N2wwcUG',
+
+  // ⚠️ These fields are NEW — patch IDs after schema additions
+  sourceWidget:    'fldPLACEHOLDER_SUB_SOURCE_WIDGET',
+  sourceWidgetId:  'fldPLACEHOLDER_SUB_SOURCE_WIDGET_ID',
+  leadId:          'fldPLACEHOLDER_SUB_LEAD_ID',
+  tags:            'fldPLACEHOLDER_SUB_TAGS',
+  customFieldsJSON:'fldPLACEHOLDER_SUB_CUSTOM_JSON',
+  visitorIdNew:    'fldPLACEHOLDER_SUB_VISITOR_ID',
+};
+
+// ── Helpers ─────────────────────────────────────────────────────────────
+
+function generateLogId() {
+  const now = new Date();
+  const yyyy = now.getUTCFullYear();
+  const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(now.getUTCDate()).padStart(2, '0');
+  return `LOG-${yyyy}${mm}${dd}-${randomBytes(3).toString('hex').toUpperCase()}`;
+}
+
+function generateReference() {
+  const now = new Date();
+  const yy = String(now.getUTCFullYear()).slice(2);
+  const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(now.getUTCDate()).padStart(2, '0');
+  const rand = randomBytes(2).toString('hex').toUpperCase();
+  return `LEAD-${yy}${mm}${dd}-${rand}`;
+}
+
+function airtableUrl(tableId, recordId) {
+  let u = `https://api.airtable.com/v0/${ENQUIRIES_BASE_ID}/${tableId}`;
+  if (recordId) u += `/${recordId}`;
+  return u;
+}
+
+async function airtableRequest(method, tableId, body, recordId) {
+  if (!ENQUIRIES_BASE_ID || !ENQUIRIES_PAT) {
+    throw new Error('Airtable env vars not configured');
+  }
+  const resp = await fetch(airtableUrl(tableId, recordId), {
+    method,
+    headers: {
+      'Authorization': `Bearer ${ENQUIRIES_PAT}`,
+      'Content-Type': 'application/json',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!resp.ok) {
+    const txt = await resp.text().catch(() => '');
+    throw new Error(`Airtable ${resp.status}: ${txt.slice(0, 200)}`);
+  }
+  return resp.json();
+}
 
 // ── Public API ──────────────────────────────────────────────────────────
 
 /**
- * Dispatch a lead to all configured destinations.
+ * Write the master Submissions record for a lead.
+ * Returns the new record ID, or null if the write failed.
  *
- * @param {object} input — partial lead from a widget, will be canonicalised
- * @param {object} options
- * @param {string[]} [options.onlyDestinations] — filter to specific destination types
- * @returns {Promise<{ leadId, submissionRecordId, completed, failed, skipped, durationMs }>}
+ * If new schema fields haven't been added yet (placeholder field IDs),
+ * we still write to the proven existing fields and skip the new ones.
  */
-export async function dispatchLead(input, options = {}) {
-  const t0 = Date.now();
-  let lead;
+export async function writeSubmission(lead, options = {}) {
+  if (!ENQUIRIES_BASE_ID || !ENQUIRIES_PAT) {
+    console.warn('[log] Cannot write submission — Airtable env not configured');
+    return null;
+  }
+
+  const f = SUBMISSION_FIELDS;
+  const fields = {};
+
+  // Always-on fields (proven, exist today)
+  fields[f.reference] = generateReference();
+  fields[f.email] = lead.contact.email;
+  if (lead.contact.firstName) fields[f.firstName] = lead.contact.firstName;
+  if (lead.contact.lastName) fields[f.lastName] = lead.contact.lastName;
+  if (lead.contact.phone) fields[f.phone] = lead.contact.phone;
+  if (lead.source.sourceUrl) {
+    try {
+      const u = new URL(lead.source.sourceUrl);
+      if (u.protocol === 'http:' || u.protocol === 'https:') {
+        fields[f.sourceUrl] = lead.source.sourceUrl;
+      }
+    } catch {}
+  }
+  if (lead.source.ipAddress) fields[f.ipAddress] = lead.source.ipAddress;
+  if (lead.source.userAgent) fields[f.userAgent] = lead.source.userAgent;
+  if (lead.source.clientName) fields[f.clientName] = lead.source.clientName;
+
+  // Travel canonical → existing fields
+  if (lead.travel.destinations.length) fields[f.destinationsJSON] = JSON.stringify(lead.travel.destinations);
+  if (lead.travel.departureAirport) fields[f.departureAirport] = lead.travel.departureAirport;
+  if (lead.travel.departDate) fields[f.departDate] = lead.travel.departDate;
+  if (lead.travel.returnDate) fields[f.returnDate] = lead.travel.returnDate;
+  if (lead.travel.flexibleDates) fields[f.flexibleDates] = true;
+  if (lead.travel.durationNights != null) fields[f.durationNights] = lead.travel.durationNights;
+  if (lead.travel.customDuration) fields[f.customDuration] = lead.travel.customDuration;
+  if (lead.travel.adults != null) fields[f.adults] = lead.travel.adults;
+  if (lead.travel.children != null) fields[f.children] = lead.travel.children;
+  if (lead.travel.childAges.length) fields[f.childAgesJSON] = JSON.stringify(lead.travel.childAges);
+  if (lead.travel.infants != null) fields[f.infants] = lead.travel.infants;
+  if (lead.travel.budgetPP != null) fields[f.budgetPP] = lead.travel.budgetPP;
+  if (lead.travel.starRating != null) fields[f.stars] = lead.travel.starRating;
+  if (lead.travel.boardBasis) fields[f.boardBasis] = lead.travel.boardBasis;
+  if (lead.travel.interests.length) fields[f.interestsJSON] = JSON.stringify(lead.travel.interests);
+
+  // Notes — keep the [POPUP LEAD] / [WIDGET] prefix for back-compat with
+  // existing inbox views until the SourceWidget field is added
+  const widgetTag = `[${(lead.source.widget || 'WIDGET').toUpperCase()}]`;
+  const noteParts = [
+    widgetTag,
+    `Tags: ${lead.tags.join(', ')}`,
+    `Lead ID: ${lead.leadId}`,
+    lead.source.referrer ? `Referrer: ${lead.source.referrer}` : '',
+  ].filter(Boolean);
+  fields[f.notes] = noteParts.join(' | ').slice(0, 5000);
+
+  // Consent
+  if (lead.consent.contact) fields[f.contactConsent] = true;
+  if (lead.consent.marketing) fields[f.marketingConsent] = true;
+
+  // Raw + routing status
+  fields[f.rawPayloadJSON] = JSON.stringify(redactLead(lead)).slice(0, 100000);
+  fields[f.status] = 'New';
+
+  // ⚠️ NEW FIELDS — only write if the field IDs have been patched away
+  // from placeholders (otherwise Airtable will 422)
+  const NEW_FIELDS = ['sourceWidget', 'sourceWidgetId', 'leadId', 'tags', 'customFieldsJSON', 'visitorIdNew'];
+  for (const key of NEW_FIELDS) {
+    if (f[key] && !f[key].startsWith('fldPLACEHOLDER')) {
+      if (key === 'sourceWidget') fields[f.sourceWidget] = lead.source.widget;
+      if (key === 'sourceWidgetId') fields[f.sourceWidgetId] = lead.source.widgetId;
+      if (key === 'leadId') fields[f.leadId] = lead.leadId;
+      if (key === 'tags' && lead.tags.length) fields[f.tags] = lead.tags;
+      if (key === 'customFieldsJSON' && Object.keys(lead.custom).length) {
+        fields[f.customFieldsJSON] = JSON.stringify(lead.custom);
+      }
+      if (key === 'visitorIdNew' && lead.source.visitorId) {
+        fields[f.visitorIdNew] = lead.source.visitorId;
+      }
+    }
+  }
+
   try {
-    lead = buildCanonicalLead(input);
-  } catch (err) {
-    if (err instanceof ValidationError) {
-      return {
-        ok: false,
-        error: err.message,
-        statusCode: 400,
-        leadId: null,
-        completed: [],
-        failed: [],
-        skipped: [],
-        durationMs: Date.now() - t0,
-      };
-    }
-    throw err;
-  }
-
-  // Step 1: Write master Submissions record (don't block on failure)
-  const submissionRecordId = await writeSubmission(lead);
-  lead.routing.submissionRecordId = submissionRecordId || '';
-
-  // Step 2: Load active routing jobs for this widget
-  const jobs = await loadRoutingJobs(lead.source.widgetId);
-
-  // Filter if caller asked for specific destinations only
-  const filteredJobs = options.onlyDestinations
-    ? jobs.filter(j => options.onlyDestinations.includes(j.destination))
-    : jobs;
-
-  if (filteredJobs.length === 0) {
-    // No destinations configured — that's fine, the Submissions record is
-    // the lead's home. Many simple deployments will use only the Airtable
-    // inbox.
-    return {
-      ok: true,
-      leadId: lead.leadId,
-      submissionRecordId,
-      completed: [],
-      failed: [],
-      skipped: [],
-      durationMs: Date.now() - t0,
-    };
-  }
-
-  // Step 3: Dispatch in parallel with isolation
-  const results = await Promise.allSettled(
-    filteredJobs.map(job => dispatchOne(lead, job))
-  );
-
-  // Step 4: Aggregate
-  const completed = [];
-  const failed = [];
-  const skipped = [];
-  for (let i = 0; i < results.length; i++) {
-    const job = filteredJobs[i];
-    const r = results[i];
-    if (r.status === 'fulfilled') {
-      const out = r.value;
-      if (out.skipped) skipped.push({ destination: job.destination, reason: out.reason });
-      else if (out.success) completed.push(job.destination);
-      else failed.push({ destination: job.destination, error: out.error });
-    } else {
-      // Should not happen — dispatchOne catches everything — but defensive
-      failed.push({ destination: job.destination, error: r.reason?.message || 'unknown' });
-    }
-  }
-
-  return {
-    ok: true,
-    leadId: lead.leadId,
-    submissionRecordId,
-    completed,
-    failed,
-    skipped,
-    durationMs: Date.now() - t0,
-  };
-}
-
-// ── Single dispatch with full isolation + logging ───────────────────────
-
-async function dispatchOne(lead, job) {
-  const t0 = Date.now();
-  const dispatcher = DISPATCHERS[job.destination];
-
-  // Unsupported destination — log and skip (don't fail the lead)
-  if (!dispatcher) {
-    await writeLog({
-      leadId: lead.leadId,
-      submissionRecordId: lead.routing.submissionRecordId,
-      configRecordId: job.configRecordId,
-      widgetType: lead.source.widget,
-      widgetRecordId: lead.source.widgetId,
-      clientEmail: lead.source.clientEmail,
-      destination: job.destination,
-      status: 'skipped',
-      errorMessage: `No dispatcher registered for ${job.destination}`,
-      attempt: 1,
-      testMode: job.testMode,
-      durationMs: Date.now() - t0,
+    const result = await airtableRequest('POST', SUBMISSIONS_TABLE_ID, {
+      records: [{ fields }],
+      typecast: true,
     });
-    return { skipped: true, reason: 'no-dispatcher' };
-  }
-
-  // Test mode — record what we would have sent, don't actually call
-  if (job.testMode) {
-    await writeLog({
-      leadId: lead.leadId,
-      submissionRecordId: lead.routing.submissionRecordId,
-      configRecordId: job.configRecordId,
-      widgetType: lead.source.widget,
-      widgetRecordId: lead.source.widgetId,
-      clientEmail: lead.source.clientEmail,
-      destination: job.destination,
-      status: 'success',
-      attempt: 1,
-      testMode: true,
-      requestPayload: { lead: lead.leadId, dest: job.destination, note: 'test-mode dry-run' },
-      durationMs: Date.now() - t0,
-    });
-    return { success: true };
-  }
-
-  // Real dispatch — wrap in timeout + try/catch
-  try {
-    const result = await withTimeout(
-      dispatcher(lead, job),
-      DISPATCH_TIMEOUT_MS,
-      `${job.destination} timed out after ${DISPATCH_TIMEOUT_MS}ms`
-    );
-
-    const durationMs = Date.now() - t0;
-
-    // Log success (fire-and-forget)
-    writeLog({
-      leadId: lead.leadId,
-      submissionRecordId: lead.routing.submissionRecordId,
-      configRecordId: job.configRecordId,
-      widgetType: lead.source.widget,
-      widgetRecordId: lead.source.widgetId,
-      clientEmail: lead.source.clientEmail,
-      destination: job.destination,
-      status: 'success',
-      statusCode: result?.statusCode,
-      attempt: 1,
-      testMode: false,
-      requestPayload: result?.requestPayload,
-      responseBody: result?.responseBody,
-      durationMs,
-    }).catch(() => {});
-
-    // Update RoutingConfig last-used (fire-and-forget)
-    recordDispatchOutcome(job.configRecordId, { status: 'success' }).catch(() => {});
-
-    // If a dispatcher refreshed OAuth tokens (e.g. Constant Contact), persist them
-    if (result?.refreshedCredentials) {
-      updateCredentials(job.configRecordId, lead.source.widgetId, result.refreshedCredentials).catch(() => {});
-    }
-
-    return { success: true };
+    const rec = result.records?.[0];
+    return rec?.id || null;
   } catch (err) {
-    const durationMs = Date.now() - t0;
-    const errMsg = err?.message || String(err);
-
-    writeLog({
-      leadId: lead.leadId,
-      submissionRecordId: lead.routing.submissionRecordId,
-      configRecordId: job.configRecordId,
-      widgetType: lead.source.widget,
-      widgetRecordId: lead.source.widgetId,
-      clientEmail: lead.source.clientEmail,
-      destination: job.destination,
-      status: 'failed',
-      statusCode: err?.statusCode,
-      errorMessage: errMsg,
-      attempt: 1,
-      testMode: false,
-      durationMs,
-    }).catch(() => {});
-
-    recordDispatchOutcome(job.configRecordId, { status: 'failed', error: errMsg }).catch(() => {});
-
-    return { success: false, error: errMsg };
+    console.error('[log] writeSubmission failed:', err.message);
+    return null;
   }
 }
 
-// ── Timeout wrapper ─────────────────────────────────────────────────────
+/**
+ * Write a single RoutingLog entry for a dispatch attempt.
+ * Fire-and-forget; never throws.
+ */
+export async function writeLog(entry) {
+  if (LOG_TABLE_ID.startsWith('tblPLACEHOLDER')) {
+    // Schema not ready yet — just emit to console so we don't lose the trail
+    console.log('[routing-log]', JSON.stringify(entry));
+    return null;
+  }
 
-function withTimeout(promise, ms, msg) {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(msg)), ms);
-    promise.then(
-      v => { clearTimeout(timer); resolve(v); },
-      e => { clearTimeout(timer); reject(e); }
-    );
-  });
+  const f = LOG_FIELDS;
+  const fields = {};
+  fields[f.logId] = entry.logId || generateLogId();
+  if (entry.leadId) fields[f.leadId] = entry.leadId;
+  if (entry.submissionRecordId) fields[f.submission] = [entry.submissionRecordId];
+  if (entry.configRecordId) fields[f.routingConfig] = [entry.configRecordId];
+  if (entry.widgetType) fields[f.widgetType] = entry.widgetType;
+  if (entry.widgetRecordId) fields[f.widgetRecordId] = entry.widgetRecordId;
+  if (entry.clientEmail) fields[f.clientEmail] = entry.clientEmail;
+  if (entry.destination) fields[f.destination] = entry.destination;
+  if (entry.status) fields[f.status] = entry.status;
+  if (entry.statusCode != null) fields[f.statusCode] = entry.statusCode;
+  if (entry.errorMessage) fields[f.errorMessage] = String(entry.errorMessage).slice(0, 5000);
+  if (entry.durationMs != null) fields[f.durationMs] = entry.durationMs;
+  if (entry.attempt) fields[f.attempt] = entry.attempt;
+  if (entry.testMode) fields[f.testMode] = true;
+  if (entry.requestPayload) {
+    fields[f.requestPayload] = (typeof entry.requestPayload === 'string'
+      ? entry.requestPayload
+      : JSON.stringify(entry.requestPayload)).slice(0, 10000);
+  }
+  if (entry.responseBody) {
+    fields[f.responseBody] = String(entry.responseBody).slice(0, 2000);
+  }
+
+  try {
+    await airtableRequest('POST', LOG_TABLE_ID, {
+      records: [{ fields }],
+      typecast: true,
+    });
+    return fields[f.logId];
+  } catch (err) {
+    console.error('[log] writeLog failed:', err.message);
+    return null;
+  }
 }
