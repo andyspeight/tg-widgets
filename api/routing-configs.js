@@ -107,13 +107,29 @@ function airtableUrl(tableId, recordId, query) {
 }
 
 async function airtableRequest(method, tableId, body, recordId, query) {
-  const resp = await fetch(airtableUrl(tableId, recordId, query), {
+  // CRITICAL: publicShape() reads record.fields by FIELD ID (e.g. fld7CL01...).
+  // By default the Airtable API returns fields keyed by field NAME, which would
+  // make every publicShape read undefined (blank name, blank destination, OFF).
+  // returnFieldsByFieldId=true makes responses keyed by ID for both reads and
+  // the create/update echo. Applied centrally so no call site can forget it.
+  let q = query || '';
+  if (!/returnFieldsByFieldId=/.test(q)) {
+    q += (q ? '&' : '') + 'returnFieldsByFieldId=true';
+  }
+  // For writes, the flag must also be in the body so the echoed record (which
+  // we pass straight to publicShape) is keyed by ID.
+  let outBody = body;
+  if (body && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
+    outBody = { ...body, returnFieldsByFieldId: true };
+  }
+
+  const resp = await fetch(airtableUrl(tableId, recordId, q), {
     method,
     headers: {
       'Authorization': `Bearer ${ENQUIRIES_PAT}`,
       'Content-Type': 'application/json',
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: outBody ? JSON.stringify(outBody) : undefined,
   });
   const txt = await resp.text();
   if (!resp.ok) {
