@@ -14,13 +14,13 @@
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: var(--tgse-text-2);
+    color: var(--tgse-ink-2);
     margin-bottom: 6px;
     letter-spacing: 0.01em;
   }
   .field-help {
     font-size: 11.5px;
-    color: var(--tgse-text-3);
+    color: var(--tgse-ink-3);
     margin-top: 4px;
     line-height: 1.45;
   }
@@ -32,8 +32,8 @@
     padding: 9px 11px;
     border: 1px solid var(--tgse-border);
     border-radius: var(--tgse-radius-sm, 6px);
-    background: var(--tgse-bg);
-    color: var(--tgse-text-1);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
     font-family: inherit;
     font-size: 13px;
     transition: border-color 150ms ease, box-shadow 150ms ease;
@@ -55,13 +55,13 @@
   .layout-card {
     position: relative;
     padding: 12px;
-    background: var(--tgse-bg);
+    background: var(--tgse-panel);
     border: 1.5px solid var(--tgse-border);
     border-radius: var(--tgse-radius-sm, 6px);
     cursor: pointer;
     transition: border-color 120ms ease, background 120ms ease;
   }
-  .layout-card:hover { border-color: var(--tgse-text-3); }
+  .layout-card:hover { border-color: var(--tgse-ink-3); }
   .layout-card.is-selected {
     border-color: var(--tgse-accent);
     background: color-mix(in srgb, var(--tgse-accent) 6%, transparent);
@@ -73,13 +73,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--tgse-bg-2);
+    background: var(--tgse-panel-2);
     border-radius: 4px;
     margin-bottom: 8px;
-    color: var(--tgse-text-2);
+    color: var(--tgse-ink-2);
   }
   .layout-card-icon svg { width: 22px; height: 22px; }
-  .layout-card-name { font-size: 12px; font-weight: 600; color: var(--tgse-text-1); }
+  .layout-card-name { font-size: 12px; font-weight: 600; color: var(--tgse-ink); }
 
   /* Inline-style mini preview shapes */
   .preview-shape {
@@ -100,12 +100,12 @@
   .toggle-row-label {
     flex: 1;
     font-size: 13px;
-    color: var(--tgse-text-1);
+    color: var(--tgse-ink);
     line-height: 1.4;
   }
   .toggle-row-sub {
     font-size: 11.5px;
-    color: var(--tgse-text-3);
+    color: var(--tgse-ink-3);
     margin-top: 2px;
     line-height: 1.4;
   }
@@ -142,7 +142,7 @@
     display: flex;
     gap: 4px;
     padding: 3px;
-    background: var(--tgse-bg-2);
+    background: var(--tgse-panel-2);
     border-radius: var(--tgse-radius-sm, 6px);
     border: 1px solid var(--tgse-border);
   }
@@ -151,7 +151,7 @@
     padding: 7px 10px;
     border: 0;
     background: transparent;
-    color: var(--tgse-text-2);
+    color: var(--tgse-ink-2);
     font-family: inherit;
     font-size: 12.5px;
     font-weight: 500;
@@ -160,8 +160,8 @@
     transition: background 120ms ease, color 120ms ease;
   }
   .pill-picker button.is-active {
-    background: var(--tgse-bg);
-    color: var(--tgse-text-1);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     font-weight: 600;
   }
@@ -201,7 +201,7 @@
   .slider-row .slider-value {
     width: 50px;
     font-size: 13px;
-    color: var(--tgse-text-1);
+    color: var(--tgse-ink);
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
@@ -211,7 +211,7 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--tgse-text-3);
+    color: var(--tgse-ink-3);
     font-weight: 700;
     margin: 22px 0 10px;
     padding-bottom: 8px;
@@ -233,7 +233,7 @@
     border: 1px solid var(--tgse-border);
     border-radius: var(--tgse-radius-sm, 6px);
     padding: 12px;
-    background: var(--tgse-bg);
+    background: var(--tgse-panel);
   }
   .routing-card-head {
     display: flex;
@@ -243,12 +243,12 @@
   .routing-card-icon {
     width: 32px; height: 32px;
     border-radius: 8px;
-    background: var(--tgse-bg-2);
+    background: var(--tgse-panel-2);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--tgse-text-1);
+    color: var(--tgse-ink);
   }
   .routing-card-icon svg { width: 18px; height: 18px; }
   .routing-card-name {
@@ -256,14 +256,14 @@
     min-width: 0;
     font-size: 13px;
     font-weight: 600;
-    color: var(--tgse-text-1);
+    color: var(--tgse-ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .routing-card-sub {
     font-size: 11.5px;
-    color: var(--tgse-text-3);
+    color: var(--tgse-ink-3);
     margin-top: 2px;
   }
   .routing-card-actions {
@@ -274,8 +274,8 @@
   .btn-small {
     appearance: none;
     border: 1px solid var(--tgse-border);
-    background: var(--tgse-bg);
-    color: var(--tgse-text-1);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
     padding: 5px 10px;
     border-radius: 5px;
     font-family: inherit;
@@ -284,7 +284,7 @@
     cursor: pointer;
     transition: background 120ms ease;
   }
-  .btn-small:hover { background: var(--tgse-bg-2); }
+  .btn-small:hover { background: var(--tgse-panel-2); }
   .btn-small.is-danger { color: var(--tgse-error, #DC2626); border-color: color-mix(in srgb, var(--tgse-error, #DC2626) 30%, var(--tgse-border)); }
   .btn-small.is-danger:hover { background: color-mix(in srgb, var(--tgse-error, #DC2626) 10%, transparent); }
 
@@ -293,7 +293,7 @@
     padding: 12px;
     border: 1.5px dashed var(--tgse-border);
     background: transparent;
-    color: var(--tgse-text-2);
+    color: var(--tgse-ink-2);
     font-family: inherit;
     font-size: 13px;
     font-weight: 500;
@@ -322,7 +322,7 @@
     letter-spacing: 0.04em;
   }
   .badge-status.is-on  { background: color-mix(in srgb, var(--tgse-success, #10B981) 12%, transparent); color: var(--tgse-success, #047857); }
-  .badge-status.is-off { background: color-mix(in srgb, var(--tgse-text-3) 12%, transparent); color: var(--tgse-text-3); }
+  .badge-status.is-off { background: color-mix(in srgb, var(--tgse-ink-3) 12%, transparent); color: var(--tgse-ink-3); }
   .badge-status.is-error { background: color-mix(in srgb, var(--tgse-error, #DC2626) 12%, transparent); color: var(--tgse-error, #DC2626); }
 
   /* Modal for adding/editing destinations */
@@ -339,7 +339,7 @@
   .tg-modal-overlay.is-open { display: flex; animation: fade-in 180ms ease; }
   @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
   .tg-modal {
-    background: var(--tgse-bg);
+    background: var(--tgse-panel);
     border: 1px solid var(--tgse-border);
     border-radius: 14px;
     width: 100%;
@@ -357,12 +357,12 @@
     justify-content: space-between;
     align-items: center;
   }
-  .tg-modal-title { font-size: 15px; font-weight: 700; color: var(--tgse-text-1); margin: 0; }
+  .tg-modal-title { font-size: 15px; font-weight: 700; color: var(--tgse-ink); margin: 0; }
   .tg-modal-close {
     appearance: none;
     border: 0;
     background: transparent;
-    color: var(--tgse-text-3);
+    color: var(--tgse-ink-3);
     width: 30px; height: 30px;
     border-radius: 6px;
     cursor: pointer;
@@ -371,7 +371,7 @@
     justify-content: center;
     transition: background 120ms ease;
   }
-  .tg-modal-close:hover { background: var(--tgse-bg-2); color: var(--tgse-text-1); }
+  .tg-modal-close:hover { background: var(--tgse-panel-2); color: var(--tgse-ink); }
   .tg-modal-body { padding: 22px; overflow-y: auto; flex: 1; }
   .tg-modal-foot {
     padding: 14px 22px;
@@ -380,7 +380,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    background: var(--tgse-bg-2);
+    background: var(--tgse-panel-2);
   }
   .btn-prim {
     appearance: none;
@@ -400,8 +400,8 @@
   .btn-prim[disabled] { opacity: 0.6; cursor: not-allowed; }
   .btn-secondary {
     appearance: none;
-    background: var(--tgse-bg);
-    color: var(--tgse-text-1);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
     border: 1px solid var(--tgse-border);
     padding: 9px 16px;
     border-radius: 7px;
@@ -410,7 +410,7 @@
     font-weight: 500;
     cursor: pointer;
   }
-  .btn-secondary:hover { background: var(--tgse-bg-2); }
+  .btn-secondary:hover { background: var(--tgse-panel-2); }
 
   /* Destination picker grid */
   .dest-grid {
@@ -422,7 +422,7 @@
     padding: 16px;
     border: 1.5px solid var(--tgse-border);
     border-radius: 10px;
-    background: var(--tgse-bg);
+    background: var(--tgse-panel);
     cursor: pointer;
     text-align: left;
     transition: border-color 120ms ease, transform 100ms ease;
@@ -435,11 +435,11 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 12px;
-    color: var(--tgse-text-1);
+    color: var(--tgse-ink);
   }
   .dest-card-icon svg { width: 20px; height: 20px; }
-  .dest-card-name { font-size: 13px; font-weight: 700; color: var(--tgse-text-1); margin-bottom: 4px; }
-  .dest-card-desc { font-size: 12px; color: var(--tgse-text-3); line-height: 1.4; }
+  .dest-card-name { font-size: 13px; font-weight: 700; color: var(--tgse-ink); margin-bottom: 4px; }
+  .dest-card-desc { font-size: 12px; color: var(--tgse-ink-3); line-height: 1.4; }
 
   .test-result {
     padding: 10px 12px;
@@ -909,7 +909,7 @@
 
       <!-- ====== ROUTING TAB ====== -->
       <div class="tgse-panel" data-tab="routing">
-        <p style="font-size:13px;color:var(--tgse-text-2);margin:0 0 16px;line-height:1.5">
+        <p style="font-size:13px;color:var(--tgse-ink-2);margin:0 0 16px;line-height:1.5">
           When someone signs up, send their details to one or more places. Mix and match —
           for example, push to Mailchimp and also drop a row in Google Sheets.
         </p>
@@ -921,8 +921,8 @@
           Add destination
         </button>
 
-        <div style="margin-top:18px;padding:12px;background:var(--tgse-bg-2);border-radius:6px;font-size:12px;color:var(--tgse-text-2);line-height:1.5">
-          <strong style="color:var(--tgse-text-1)">Tip:</strong> Save the widget first if you haven't yet. Routing destinations are linked to the saved widget record.
+        <div style="margin-top:18px;padding:12px;background:var(--tgse-panel-2);border-radius:6px;font-size:12px;color:var(--tgse-ink-2);line-height:1.5">
+          <strong style="color:var(--tgse-ink)">Tip:</strong> Save the widget first if you haven't yet. Routing destinations are linked to the saved widget record.
         </div>
       </div>
 
@@ -1433,13 +1433,13 @@
     const $list = document.getElementById('routing-list');
     if (!$list) return;
     if (!state.recordId) {
-      $list.innerHTML = `<div style="padding:14px;background:var(--tgse-bg-2);border-radius:6px;font-size:12.5px;color:var(--tgse-text-2);text-align:center">Save the widget first to add destinations.</div>`;
+      $list.innerHTML = `<div style="padding:14px;background:var(--tgse-panel-2);border-radius:6px;font-size:12.5px;color:var(--tgse-ink-2);text-align:center">Save the widget first to add destinations.</div>`;
       document.getElementById('btn-add-destination').disabled = true;
       return;
     }
     document.getElementById('btn-add-destination').disabled = false;
     if (state.routingConfigs.length === 0) {
-      $list.innerHTML = `<div style="padding:18px;background:var(--tgse-bg-2);border-radius:6px;font-size:12.5px;color:var(--tgse-text-3);text-align:center;line-height:1.5">No destinations yet.<br>Add one below to start collecting signups.</div>`;
+      $list.innerHTML = `<div style="padding:18px;background:var(--tgse-panel-2);border-radius:6px;font-size:12.5px;color:var(--tgse-ink-3);text-align:center;line-height:1.5">No destinations yet.<br>Add one below to start collecting signups.</div>`;
       return;
     }
     $list.innerHTML = state.routingConfigs.map(rc => {
@@ -1590,8 +1590,8 @@
 
     if (dest.setupNote) {
       parts.push(`
-        <div style="padding:12px 14px;background:color-mix(in srgb,var(--tgse-accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--tgse-accent) 25%,transparent);border-radius:6px;font-size:12px;color:var(--tgse-text-2);margin-bottom:14px;line-height:1.55">
-          <strong style="color:var(--tgse-text-1)">Setup note.</strong> ${escHtml(dest.setupNote)}
+        <div style="padding:12px 14px;background:color-mix(in srgb,var(--tgse-accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--tgse-accent) 25%,transparent);border-radius:6px;font-size:12px;color:var(--tgse-ink-2);margin-bottom:14px;line-height:1.55">
+          <strong style="color:var(--tgse-ink)">Setup note.</strong> ${escHtml(dest.setupNote)}
         </div>
       `);
     }
