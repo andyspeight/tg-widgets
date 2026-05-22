@@ -29,6 +29,81 @@
 
 import { setJson, setString } from '../_redis.js';
 
+// ── Offer parser (tested against the real Travelify shape, 22 May 2026) ──
+// Each raw offer carries its own coords, IATA, country code, price, url, id —
+// so the offers drive the grouping, not the search row.
+function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
+function parsePrice(offer) {
+  if (typeof offer.formattedPrice === 'string') {
+    const n = parseFloat(offer.formattedPrice.replace(/[^0-9.]/g, ''));
+    if (Number.isFinite(n) && n > 0) return Math.round(n);
+  }
+  const fp = offer.flight && offer.flight.pricing ? Number(offer.flight.pricing.price) : 0;
+  const ap = offer.accommodation && offer.accommodation.pricing ? Number(offer.accommodation.pricing.price) : 0;
+  const sum = (Number.isFinite(fp) ? fp : 0) + (Number.isFinite(ap) ? ap : 0);
+  return sum > 0 ? Math.round(sum) : null;
+}
+function parsePPPrice(offer) {
+  if (typeof offer.formattedPPPrice === 'string') {
+    const n = parseFloat(offer.formattedPPPrice.replace(/[^0-9.]/g, ''));
+    if (Number.isFinite(n) && n > 0) return Math.round(n);
+  }
+  return null;
+}
+function normaliseOffer(offer) {
+  const flight = offer.flight || {}, acc = offer.accommodation || {};
+  const fdest = flight.destination || {}, adest = acc.destination || {};
+  const price = parsePrice(offer);
+  if (price == null) return null;
+  const iata = fdest.iataCode || null;
+  const countryCode = fdest.countryCode || adest.countryCode || null;
+  const lat = num(fdest.latitude) ?? num(adest.latitude);
+  const lng = num(fdest.longitude) ?? num(adest.longitude);
+  if (!iata && !countryCode) return null;
+  return {
+    id: offer.id, type: offer.type || 'Packages', packageType: offer.packageType || null,
+    price, pricePP: parsePPPrice(offer),
+    currency: (flight.pricing && flight.pricing.currency) || (acc.pricing && acc.pricing.currency) || 'GBP',
+    airport: iata, airportName: fdest.name || null, countryCode,
+    resort: adest.name || null, lat, lng,
+    resortLat: num(adest.latitude), resortLng: num(adest.longitude),
+    hotel: acc.name || null, rating: num(acc.rating), boardBasis: acc.boardBasis || null,
+    nights: num(acc.nights), reviewRating: num(acc.reviewRating), reviewCount: num(acc.reviewCount),
+    carrier: (flight.carrier && flight.carrier.name) || null, direct: !!flight.direct,
+    origin: (flight.origin && flight.origin.iataCode) || null,
+    outboundDate: flight.outboundDate || null,
+    image: (acc.image && acc.image.url) || (flight.image && flight.image.url) || null,
+    url: offer.url || null, updated: offer.updated || null, fetchedAt: new Date().toISOString(),
+  };
+}
+function normaliseOffers(rawArray) {
+  if (!Array.isArray(rawArray)) return [];
+  const out = [];
+  for (const o of rawArray) { const n = normaliseOffer(o); if (n) out.push(n); }
+  return out;
+}
+function summariseByAirport(offers) {
+  const m = new Map();
+  for (const o of offers) {
+    if (!o.airport) continue;
+    const c = m.get(o.airport);
+    if (!c) m.set(o.airport, { airport: o.airport, airportName: o.airportName, countryCode: o.countryCode, lat: o.lat, lng: o.lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, cheapestOfferId: o.id });
+    else { c.offerCount += 1; if (o.price < c.fromPrice) { c.fromPrice = o.price; c.fromPricePP = o.pricePP; c.cheapestOfferId = o.id; } }
+  }
+  return Array.from(m.values()).sort((a, b) => a.fromPrice - b.fromPrice);
+}
+function summariseByCountry(offers) {
+  const m = new Map();
+  for (const o of offers) {
+    if (!o.countryCode) continue;
+    const c = m.get(o.countryCode);
+    if (!c) m.set(o.countryCode, { countryCode: o.countryCode, lat: o.lat, lng: o.lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, _airports: new Set([o.airport]), cheapestOfferId: o.id });
+    else { c.offerCount += 1; c._airports.add(o.airport); if (o.price < c.fromPrice) { c.fromPrice = o.price; c.fromPricePP = o.pricePP; c.lat = o.lat; c.lng = o.lng; c.cheapestOfferId = o.id; } }
+  }
+  return Array.from(m.values()).map(c => { const { _airports, ...rest } = c; return { ...rest, airportCount: _airports.size }; }).sort((a, b) => a.fromPrice - b.fromPrice);
+}
+
+
 // Airtable base/table for the MapSearches definitions
 const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
 const MAP_SEARCHES_TABLE = 'tblrI1BihuDcpoV1A'; // MapSearches in appAYzWZxvK6qlwXK (seeded 22 May 2026, 46 package destinations)
@@ -293,16 +368,20 @@ export default async function handler(req, res) {
       }
       const raw = await callOffersProxy(payload);
       const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : null;
+      const normalised = arr ? normaliseOffers(arr) : [];
+      const byAirport = summariseByAirport(normalised);
+      const byCountry = summariseByCountry(normalised);
       return res.status(200).json({
         ok: true,
         debug: true,
         sentPayload: payload,
         rawResponseOk: raw.ok,
         rawError: raw.error || null,
-        offerCount: arr ? arr.length : null,
-        // First offer object only (full), so we can see the shape without a huge dump
-        firstOffer: arr && arr.length ? arr[0] : null,
-        // If empty, echo the whole thing so we can see any message
+        rawOfferCount: arr ? arr.length : null,
+        normalisedCount: normalised.length,
+        byCountry,                 // envelope pins
+        byAirport,                 // fullscreen pins
+        sampleOffer: normalised[0] || null,
         rawResponse: (arr && arr.length) ? undefined : raw.data,
       });
     }
