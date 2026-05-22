@@ -10,7 +10,8 @@
 //  entry is annoying but must not block lead delivery. Errors are emitted
 //  to console.error for the Vercel logs.
 //
-//  PLACEHOLDERS — patch after Airtable schema is created. See /docs/SCHEMA.md.
+//  Table + field IDs are wired to the live RoutingLog table (Enquiries base).
+//  The Submissions write targets the existing, stable Submissions table.
 //
 // =============================================================================
 
@@ -20,29 +21,29 @@ import { redactLead } from './schema.js';
 const ENQUIRIES_BASE_ID = process.env.TG_ENQUIRIES_AIRTABLE_BASE_ID;
 const ENQUIRIES_PAT = process.env.TG_ENQUIRIES_AIRTABLE_PAT;
 
-// ⚠️ Patch after schema is created
-export const LOG_TABLE_ID = process.env.ROUTING_LOG_TABLE_ID || 'tblPLACEHOLDER_LOG';
+// Live RoutingLog table in the Enquiries base.
+export const LOG_TABLE_ID = process.env.ROUTING_LOG_TABLE_ID || 'tblwJmgRJ73vfwESQ';
 export const SUBMISSIONS_TABLE_ID = 'tblxtRPhALFjeMVA6'; // existing, stable
 
-// ── PLACEHOLDER FIELD IDS — patch after schema is created ──────────────
+// ── Live RoutingLog field IDs ──────────────────────────────────────────
 
 export const LOG_FIELDS = {
-  logId:          'fldPLACEHOLDER_LOG_ID',
-  leadId:         'fldPLACEHOLDER_LEAD_ID',
-  submission:     'fldPLACEHOLDER_LOG_SUBMISSION',
-  routingConfig:  'fldPLACEHOLDER_LOG_CONFIG',
-  widgetType:     'fldPLACEHOLDER_LOG_WIDGET_TYPE',
-  widgetRecordId: 'fldPLACEHOLDER_LOG_WIDGET_REC_ID',
-  clientEmail:    'fldPLACEHOLDER_LOG_CLIENT_EMAIL',
-  destination:    'fldPLACEHOLDER_LOG_DESTINATION',
-  status:         'fldPLACEHOLDER_LOG_STATUS',
-  statusCode:     'fldPLACEHOLDER_LOG_STATUS_CODE',
-  errorMessage:   'fldPLACEHOLDER_LOG_ERROR',
-  durationMs:     'fldPLACEHOLDER_LOG_DURATION',
-  attempt:        'fldPLACEHOLDER_LOG_ATTEMPT',
-  testMode:       'fldPLACEHOLDER_LOG_TEST_MODE',
-  requestPayload: 'fldPLACEHOLDER_LOG_REQ',
-  responseBody:   'fldPLACEHOLDER_LOG_RESP',
+  logId:          'fldIINDdxRNpMa2Kz',
+  leadId:         'fldkGxiUruhg4PqOf',
+  submission:     'fldvcP41qm74tFiVO',
+  routingConfig:  'fldOuDZRtbpuGHVw9',
+  widgetType:     'fldjyldfaU3S3zihx',
+  widgetRecordId: 'fldtLYxw8HHloyKls',
+  clientEmail:    'fld1mScOl06p2jq5d',
+  destination:    'fld4z2bhv6lv6Imet',
+  status:         'fldaKkYbLkgc59KNQ',
+  statusCode:     'fldwbTdjMA62DtTVX',
+  errorMessage:   'fldM6i4PK5Fi15iTO',
+  durationMs:     'fldJ9T7QOYW614eV0',
+  attempt:        'fldH76TIfWra8Kj4I',
+  testMode:       'fldSo8PFpyvgSu0zv',
+  requestPayload: 'fld8L3sOCLT8AgE0J',
+  responseBody:   'fld4ZKZkZP8MMdBw3',
 };
 
 // Existing Submissions table — using IDs from the existing enquiry submit endpoint
