@@ -1736,7 +1736,7 @@
 
   async function testDestination() {
     const data = collectConfigModal();
-    const NO_CREDS_DESTINATIONS = ['google-sheets', 'email'];
+    const NO_CREDS_DESTINATIONS = ['google-sheets', 'email', 'auto-reply'];
     const needsCreds = !NO_CREDS_DESTINATIONS.includes(data.destination);
 
     if (needsCreds && !data.credentials && !data.id) {
@@ -1795,7 +1795,7 @@
     // Some destinations (e.g. google-sheets, email) don't need per-client
     // credentials — they use server-side shared infrastructure. For
     // everything else, require credentials when creating a new config.
-    const NO_CREDS_DESTINATIONS = ['google-sheets', 'email'];
+    const NO_CREDS_DESTINATIONS = ['google-sheets', 'email', 'auto-reply'];
     const needsCreds = !NO_CREDS_DESTINATIONS.includes(data.destination);
 
     if (!data.id && needsCreds && !data.credentials) {
