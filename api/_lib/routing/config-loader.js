@@ -218,6 +218,11 @@ async function fetchByWidgetId(widgetRecordId) {
   const params = new URLSearchParams();
   params.set('filterByFormula', formula);
   params.set('pageSize', '50');
+  // CRITICAL: recordToJob reads fields by FIELD ID (CONFIG_FIELDS.*). Airtable
+  // returns fields keyed by NAME unless we ask for IDs — without this, every
+  // field reads empty, recordToJob finds no destination, and dispatch silently
+  // finds zero jobs (signup succeeds but nothing is delivered or logged).
+  params.set('returnFieldsByFieldId', 'true');
   // Limit to fields we actually use
   const fieldIds = Object.values(CONFIG_FIELDS);
   for (const f of fieldIds) params.append('fields[]', f);
