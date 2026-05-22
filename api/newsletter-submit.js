@@ -23,7 +23,7 @@
 //
 // =============================================================================
 
-import { applyRateLimit, isValidEmail } from './_auth.js';
+import { applyRateLimit, isValidEmail, sanitiseForFormula } from './_auth.js';
 import { dispatchLead } from './_lib/routing/router.js';
 
 const WIDGETS_BASE_ID = process.env.AIRTABLE_BASE_ID;
@@ -53,7 +53,10 @@ function sanitiseString(s, max) {
   return s.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, max || 500);
 }
 
-// Look up the newsletter widget record for client identity.
+// Resolve the newsletter widget record from its public WidgetID (tgw_...).
+// Returns { recordId (rec...), clientName, clientEmail, widgetType } or null.
+// The widget posts its public WidgetID, but routing + the canonical lead are
+// keyed on the Airtable record ID, so we must resolve one to the other here.
 // Cached per cold start.
 const widgetCache = new Map();
 async function resolveWidget(widgetId) {
@@ -61,7 +64,11 @@ async function resolveWidget(widgetId) {
   if (widgetCache.has(widgetId)) return widgetCache.get(widgetId);
 
   try {
-    const url = `https://api.airtable.com/v0/${WIDGETS_BASE_ID}/${WIDGETS_TABLE_ID}/${widgetId}`;
+    // Look up by the WidgetID field (not a direct record GET — widgetId is the
+    // public tgw_... value, not the Airtable record ID).
+    const safeId = sanitiseForFormula(widgetId);
+    const formula = encodeURIComponent(`{WidgetID} = '${safeId}'`);
+    const url = `https://api.airtable.com/v0/${WIDGETS_BASE_ID}/${WIDGETS_TABLE_ID}?filterByFormula=${formula}&maxRecords=1`;
     const resp = await fetch(url, {
       headers: { 'Authorization': `Bearer ${WIDGETS_PAT}` },
     });
@@ -70,12 +77,17 @@ async function resolveWidget(widgetId) {
       return null;
     }
     const data = await resp.json();
-    const fields = data.fields || {};
+    const record = data.records && data.records[0];
+    if (!record) {
+      widgetCache.set(widgetId, null);
+      return null;
+    }
+    const fields = record.fields || {};
     const widget = {
-      recordId: data.id,
-      clientName: fields['Client Name'] || fields['Client'] || '',
-      clientEmail: fields['Client Email'] || fields['Email'] || '',
-      widgetType: fields['Widget Type'] || '',
+      recordId: record.id,
+      clientName: fields['ClientName'] || fields['Client Name'] || fields['Client'] || '',
+      clientEmail: fields['ClientEmail'] || fields['Client Email'] || fields['Email'] || '',
+      widgetType: fields['WidgetType'] || fields['Widget Type'] || '',
     };
     widgetCache.set(widgetId, widget);
     return widget;
@@ -145,21 +157,28 @@ export default async function handler(req, res) {
     res.status(400).json({ error: 'Please enter a valid email address.' });
     return;
   }
-  if (!widgetId || !/^rec[A-Za-z0-9]{14}$/.test(widgetId)) {
+  if (!widgetId || !/^tgw_[A-Za-z0-9_]+$/.test(widgetId)) {
     res.status(400).json({ error: 'Invalid widget ID' });
     return;
   }
 
-  // Resolve the widget for client identity
+  // Resolve the public WidgetID (tgw_...) to the Airtable record ID (rec...).
+  // Everything downstream — the canonical lead's source.widgetId and the
+  // routing-config lookup — is keyed on the record ID, not the public ID.
   const widget = await resolveWidget(widgetId);
-  const clientEmail = widget?.clientEmail || 'unknown@travelgenix.io';
-  const clientName = widget?.clientName || '';
+  if (!widget || !widget.recordId) {
+    res.status(404).json({ error: 'Widget not found' });
+    return;
+  }
+  const widgetRecordId = widget.recordId;
+  const clientEmail = widget.clientEmail || 'unknown@travelgenix.io';
+  const clientName = widget.clientName || '';
 
   // Build the canonical lead
   const partialLead = {
     source: {
       widget: 'newsletter',
-      widgetId,
+      widgetId: widgetRecordId,
       clientName,
       clientEmail,
       sourceUrl,
