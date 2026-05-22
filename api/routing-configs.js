@@ -30,6 +30,8 @@
 
 import { requireAuth, setCors, applyRateLimit, RATE_LIMITS, sanitiseForFormula } from './_auth.js';
 import { encryptPat } from './_lib/routing/pat-crypt.js';
+import { getRecord } from './_lib/auth/airtable.js';
+import { USERS } from './_lib/auth/schema.js';
 
 const ENQUIRIES_BASE_ID = process.env.TG_ENQUIRIES_AIRTABLE_BASE_ID;
 const ENQUIRIES_PAT = process.env.TG_ENQUIRIES_AIRTABLE_PAT;
@@ -38,6 +40,25 @@ const WIDGETS_PAT = process.env.AIRTABLE_KEY;
 
 const ROUTING_CONFIG_TABLE_ID = 'tblZO9mRFpD1eMcKx';
 const WIDGETS_TABLE_ID = 'tblVAThVqAjqtria2';
+
+// Cookie/SSO sessions issue a JWT that carries userId but NOT email.
+// Every ownership check here compares the widget's ClientEmail against
+// user.email, so a missing email makes every check fail with
+// "Widget not found or not yours". This resolves the email from the USERS
+// record when the session didn't carry it — mirroring the hydration that
+// widget-config.js already does. Returns nothing; mutates user in place.
+async function hydrateUserEmail(user) {
+  if (!user || user.email || !user.recordId) return;
+  try {
+    const u = await getRecord(USERS.tableId, user.recordId);
+    const email = u?.fields?.[USERS.fields.email];
+    if (typeof email === 'string' && email.trim()) {
+      user.email = email.trim();
+    }
+  } catch (err) {
+    console.warn('[routing-configs] email hydration failed:', err.message);
+  }
+}
 
 // Field IDs from the live RoutingConfig table
 const F = {
@@ -325,6 +346,14 @@ export default async function handler(req, res) {
   const auth = requireAuth(req);
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
   const user = auth.user;
+
+  // Cookie/SSO sessions don't carry email in the JWT — resolve it now so the
+  // ownership checks (which match on ClientEmail) and the per-user rate limit
+  // work. Without this, every operation fails "Widget not found or not yours".
+  await hydrateUserEmail(user);
+  if (!user.email) {
+    return res.status(401).json({ error: 'Could not resolve your account email. Please sign in again.' });
+  }
 
   // Per-user rate limit
   if (!applyRateLimit(res, `routing-configs:${user.email}`, RATE_LIMITS.widgetWrite || { max: 60, windowMs: 60_000 })) return;
