@@ -31,7 +31,7 @@ import { setJson, setString } from '../_redis.js';
 
 // Airtable base/table for the MapSearches definitions
 const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
-const MAP_SEARCHES_TABLE = 'tblMapSearches'; // PLACEHOLDER — patch after table is created
+const MAP_SEARCHES_TABLE = 'tblrI1BihuDcpoV1A'; // MapSearches in appAYzWZxvK6qlwXK (seeded 22 May 2026, 46 package destinations)
 const DESTINATION_BASE = 'appuZdlMJ7HKUt6qS';
 const DESTINATION_TABLE_CITIES = 'tblCitiesAndRegions'; // PLACEHOLDER — confirm at deploy
 // (We pull lat/lng + region from the Destination Content base to enrich the cache.)
