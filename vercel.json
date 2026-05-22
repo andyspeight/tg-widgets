@@ -9,6 +9,9 @@
     "api/booking-email.js": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "api/cron/refresh-map-offers.js": {
+      "maxDuration": 300
     }
   },
   "crons": [
