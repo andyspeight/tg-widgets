@@ -75,24 +75,44 @@ async function fetchAllMapSearches() {
 
 function buildOffersPayload(row) {
   const f = row.fields || {};
-  // Payload shape matches what /api/offers expects — it forwards this to
-  // Travelify's /widgetsvc/traveloffers endpoint. Field names use Travelify's
-  // PascalCase convention as documented.
-  return {
+  // Field shape copied EXACTLY from the working offers widget (_buildPayload):
+  //  - 'type' (not 'SearchType'); 'Packages' + packageType:'Any' gets both
+  //    dynamic packages AND tour-operator packages.
+  //  - 'destinations' is an ARRAY of codes (two-letter country code, or airport
+  //    codes for big countries).
+  //  - 'origins' is an ARRAY.
+  // Hybrid mode: if AirportCodes is filled, search those (comma-separated);
+  // otherwise fall back to the two-letter country code in CountryCode.
+  const airportCodes = (f.AirportCodes || '').split(',').map(s => s.trim()).filter(Boolean);
+  const countryCode = (f.CountryCode || '').trim();
+  // Fallback chain so this works both now (current table has DestinationCode)
+  // and later (after AirportCodes + CountryCode columns are added):
+  //   AirportCodes (comma list) → CountryCode (two-letter) → DestinationCode (legacy single IATA)
+  let destinations = [];
+  if (airportCodes.length) destinations = airportCodes;
+  else if (countryCode) destinations = [countryCode];
+  else if (f.DestinationCode) destinations = [String(f.DestinationCode).trim()];
+
+  const payload = {
     appId: f.AppId || DEMO_APP_ID,
-    SearchType: f.SearchType || 'Packages',
-    Origin: f.Origin || DEFAULT_ORIGIN,
-    Destination: f.DestinationCode || '',
-    Adults: f.Adults || 2,
-    Children: f.Children || 0,
-    Rooms: f.Rooms || 1,
+    type: 'Packages',
+    packageType: 'Any', // both DynamicPackages + PackageHolidays
+    deduping: 'None',
+    currency: 'GBP',
+    language: 'en',
+    nationality: 'GB',
+    maxOffers: f.MaxOffers || 250,
+    rollingDates: true,
     DatesMin: f.DatesMin || 7,
     DatesMax: f.DatesMax || 14,
-    pricingByType: 'Person',
     sort: 'price:asc',
-    maxOffers: f.MaxOffers || 50,
+    pricingByType: 'Person',
     customerUserAgent: 'Travelgenix-WorldMapCron/1.0',
   };
+  if (destinations.length) payload.destinations = destinations;
+  const origins = (f.Origin || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (origins.length) payload.origins = origins;
+  return payload;
 }
 
 async function callOffersProxy(payload, timeoutMs = 10000) {
@@ -248,6 +268,28 @@ export default async function handler(req, res) {
     const rows = await fetchAllMapSearches();
     if (rows.length === 0) {
       return res.status(200).json({ ok: true, skipped: true, reason: 'no enabled rows' });
+    }
+
+    // ── DIAGNOSTIC MODE ───────────────────────────────────────────────
+    // Call with ?debug=1 to run ONLY the first row and return the complete
+    // raw response from the offers proxy, verbatim. This lets us inspect the
+    // real Travelify response shape (field names, offer IDs, coordinates)
+    // from a request we know authenticates. No Redis write, no full sweep.
+    // TEMPORARY — remove once the response shape is mapped.
+    if (req.query && (req.query.debug === '1' || req.query.debug === 'true')) {
+      const row = rows[0];
+      const payload = buildOffersPayload(row);
+      const raw = await callOffersProxy(payload);
+      return res.status(200).json({
+        ok: true,
+        debug: true,
+        sentToCountry: (row.fields || {}).Country || (row.fields || {}).Name,
+        sentPayload: payload,
+        rawResponseOk: raw.ok,
+        rawError: raw.error || null,
+        // The whole thing, untouched — this is what we need to see
+        rawResponse: raw.data || null,
+      });
     }
 
     // Pass 1: run all rows in batches of BATCH_SIZE.
