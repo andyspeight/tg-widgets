@@ -1,37 +1,65 @@
 /**
- * Vercel Cron — refresh world map offers.
+ * Vercel Cron — refresh world map offers (country-sweep model).
  *
- * Schedule: every 45 minutes (configured in vercel.json).
- * That gives ~32 runs/day. The cron iterates MapSearches rows from Airtable,
- * fires Travelify Packages searches in batches of 3, retries any that fail
- * once after 60 seconds, then aggregates the results into a single payload
- * keyed by destination. The payload is written to Redis at `map:offers:v1`
- * ONLY if the success rate clears 90% — partial failures never overwrite a
- * good payload. This is the "never empty" guarantee.
+ * WHAT IT DOES
+ *   1. Reads enabled rows from the MapSearches table (one row per country).
+ *   2. For each country: if AirportCodes is filled, fires ONE /api/offers request
+ *      per airport (so each airport gets its own 250-offer allowance); otherwise
+ *      fires a single request for the two-letter CountryCode.
+ *   3. Normalises every returned offer (tested parser).
+ *   4. Merges the fresh offers into that country's stored set in Redis
+ *      (dedup on offer.id, newest wins), then purges offers whose travel date
+ *      has passed or whose fetchedAt is older than 4 days (tested sweep logic).
+ *   5. Rebuilds the small map summary (cheapest per country + cheapest per airport)
+ *      from ALL stored country keys and writes it to map:offers:v1.
  *
- * Auth: Vercel Cron sends an Authorization header with the value
- * `Bearer ${CRON_SECRET}`. Any unauthenticated call is rejected.
+ * CADENCE
+ *   - ?full=1  → sweep every enabled country (the nightly run).
+ *   - default  → sweep a rotating ~15% slice (the hourly run).
+ *   The cron schedule in vercel.json fires hourly-ish; trigger the nightly full
+ *   sweep with ?full=1 (e.g. a second cron entry, or the scheduler calling it).
  *
- * Env vars required:
- *  - CRON_SECRET                  Vercel-generated; matches Authorization header
- *  - AIRTABLE_PAT                 Read scope on appAYzWZxvK6qlwXK
- *  - OFFERS_PROXY_URL             (optional) defaults to https://tg-widgets.vercel.app/api/offers
- *  - UPSTASH_REDIS_REST_URL       From shared lib/redis.js
- *  - UPSTASH_REDIS_REST_TOKEN     From shared lib/redis.js
- *  - RESEND_API_KEY               (optional) for failure alerts to Andy
- *  - ALERT_EMAIL_TO               (optional) defaults to andy@travelgenix.io
+ * STORAGE KEYS
+ *   offers:packages:{CC}   per-country raw normalised offers + refreshedAt
+ *   map:offers:v1          derived summary the widget reads (country + airport pins)
+ *   map:offers:lastRunAt   ISO timestamp of the last successful summary write
+ *   map:offers:cursor      rotation cursor for the hourly 15% slice
  *
- * Travelify credentials live on the existing /api/offers proxy and are not
- * needed here. The cron resolves them by sending appId per MapSearches row
- * (default "250" during dev). Switching a client to live creds is purely a
- * data change on the MapSearches row, not a code change here.
+ * AUTH
+ *   Caller must send Authorization: Bearer ${CRON_SECRET}.
+ *   The cron calls /api/offers with Referer + Origin headers so Travelify's
+ *   auth layer accepts the server-to-server request (proven 22 May 2026).
+ *
+ * DEBUG
+ *   ?debug=1[&dest=ES][&noOrigin=1][&max=250] runs a single probe request and
+ *   returns the parsed summaries without writing anything. Kept for diagnosis.
+ *
+ * FAILS SAFE
+ *   A country whose requests all fail keeps its existing Redis key untouched.
+ *   The summary is only rewritten if at least one country has offers, so a bad
+ *   run can never blank the map.
  */
 
-import { setJson, setString } from '../_redis.js';
+import { setJson, getJson, setString, configured } from '../_redis.js';
 
-// ── Offer parser (tested against the real Travelify shape, 22 May 2026) ──
-// Each raw offer carries its own coords, IATA, country code, price, url, id —
-// so the offers drive the grouping, not the search row.
+// ── Config ────────────────────────────────────────────────────────────────
+const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
+const MAP_SEARCHES_TABLE = 'tblrI1BihuDcpoV1A'; // MapSearches (country model, seeded 23 May 2026)
+const OFFERS_PROXY = process.env.OFFERS_PROXY_URL || 'https://tg-widgets.vercel.app/api/offers';
+const SELF_ORIGIN = 'https://tg-widgets.vercel.app';
+const DEMO_APP_ID = '250';
+
+const PER_REQUEST_TIMEOUT_MS = 10000;
+const REQUEST_CONCURRENCY = 4;     // parallel proxy calls within a country
+const HOURLY_FRACTION = 0.15;      // ~15% of countries per hourly run
+const MAX_AGE_DAYS = 4;            // purge offers older than this
+
+const SUMMARY_KEY = 'map:offers:v1';
+const LASTRUN_KEY = 'map:offers:lastRunAt';
+const CURSOR_KEY = 'map:offers:cursor';
+const countryKey = (cc) => `offers:packages:${cc}`;
+
+// ── Tested offer parser (unit-verified 22 May 2026) ─────────────────────────
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
 function parsePrice(offer) {
   if (typeof offer.formattedPrice === 'string') {
@@ -72,6 +100,7 @@ function normaliseOffer(offer) {
     carrier: (flight.carrier && flight.carrier.name) || null, direct: !!flight.direct,
     origin: (flight.origin && flight.origin.iataCode) || null,
     outboundDate: flight.outboundDate || null,
+    checkinDate: acc.checkinDate || null,
     image: (acc.image && acc.image.url) || (flight.image && flight.image.url) || null,
     url: offer.url || null, updated: offer.updated || null, fetchedAt: new Date().toISOString(),
   };
@@ -103,28 +132,29 @@ function summariseByCountry(offers) {
   return Array.from(m.values()).map(c => { const { _airports, ...rest } = c; return { ...rest, airportCount: _airports.size }; }).sort((a, b) => a.fromPrice - b.fromPrice);
 }
 
+// ── Tested sweep / merge / purge logic (unit-verified 22 May 2026) ──────────
+function mergeOffers(existing, fresh) {
+  const byId = new Map();
+  for (const o of existing || []) if (o && o.id != null) byId.set(String(o.id), o);
+  for (const o of fresh || []) if (o && o.id != null) byId.set(String(o.id), o);
+  return Array.from(byId.values());
+}
+function travelDateOf(offer) { return offer.outboundDate || offer.checkinDate || null; }
+function purgeOffers(offers, now = new Date(), maxAgeDays = MAX_AGE_DAYS) {
+  const nowMs = now.getTime();
+  const maxAgeMs = maxAgeDays * 24 * 60 * 60 * 1000;
+  return (offers || []).filter(o => {
+    const td = travelDateOf(o);
+    if (td) { const t = Date.parse(td); if (Number.isFinite(t) && t < nowMs) return false; }
+    if (o.fetchedAt) { const f = Date.parse(o.fetchedAt); if (Number.isFinite(f) && (nowMs - f) > maxAgeMs) return false; }
+    return true;
+  });
+}
+function updateCountryOffers(existingOffers, freshOffers, now = new Date()) {
+  return purgeOffers(mergeOffers(existingOffers, freshOffers), now);
+}
 
-// Airtable base/table for the MapSearches definitions
-const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
-const MAP_SEARCHES_TABLE = 'tblrI1BihuDcpoV1A'; // MapSearches in appAYzWZxvK6qlwXK (seeded 22 May 2026, 46 package destinations)
-const DESTINATION_BASE = 'appuZdlMJ7HKUt6qS';
-const DESTINATION_TABLE_CITIES = 'tblCitiesAndRegions'; // PLACEHOLDER — confirm at deploy
-// (We pull lat/lng + region from the Destination Content base to enrich the cache.)
-
-// The cron calls our own /api/offers proxy rather than Travelify directly.
-// The proxy already handles auth (Token AppId:Key), per-client credential
-// lookup, the right endpoint (widgetsvc/traveloffers), and error reporting.
-// Reusing it means we benefit automatically when issues get fixed there.
-const OFFERS_PROXY = process.env.OFFERS_PROXY_URL || 'https://tg-widgets.vercel.app/api/offers';
-const DEMO_APP_ID = '250';
-const DEFAULT_ORIGIN = 'LGW';
-const BATCH_SIZE = 8;
-const MIN_SUCCESS_RATE = 0.5; // forgiving for now — a few unrecognised IATA codes shouldn't bin the whole run. Tighten once data is proven clean.
-const REDIS_KEY = 'map:offers:v1';
-const REDIS_LASTRUN_KEY = 'map:offers:lastRunAt';
-
-// ── helpers ─────────────────────────────────────────────────────────────
-
+// ── Airtable ────────────────────────────────────────────────────────────────
 async function airtableList(tableId, params = {}) {
   const PAT = process.env.AIRTABLE_PAT;
   if (!PAT) throw new Error('AIRTABLE_PAT not set');
@@ -134,12 +164,11 @@ async function airtableList(tableId, params = {}) {
   if (!res.ok) throw new Error(`Airtable ${tableId} HTTP ${res.status}`);
   return await res.json();
 }
-
-async function fetchAllMapSearches() {
+async function fetchEnabledCountries() {
   const rows = [];
   let offset;
   do {
-    const params = { pageSize: '100', 'filterByFormula': '{Enabled}=TRUE()' };
+    const params = { pageSize: '100', filterByFormula: '{Enabled}=TRUE()' };
     if (offset) params.offset = offset;
     const j = await airtableList(MAP_SEARCHES_TABLE, params);
     rows.push(...(j.records || []));
@@ -148,49 +177,26 @@ async function fetchAllMapSearches() {
   return rows;
 }
 
-function buildOffersPayload(row) {
+// ── Offers proxy ─────────────────────────────────────────────────────────────
+function buildPayload(row, destinationCode) {
   const f = row.fields || {};
-  // Field shape copied EXACTLY from the working offers widget (_buildPayload):
-  //  - 'type' (not 'SearchType'); 'Packages' + packageType:'Any' gets both
-  //    dynamic packages AND tour-operator packages.
-  //  - 'destinations' is an ARRAY of codes (two-letter country code, or airport
-  //    codes for big countries).
-  //  - 'origins' is an ARRAY.
-  // Hybrid mode: if AirportCodes is filled, search those (comma-separated);
-  // otherwise fall back to the two-letter country code in CountryCode.
-  const airportCodes = (f.AirportCodes || '').split(',').map(s => s.trim()).filter(Boolean);
-  const countryCode = (f.CountryCode || '').trim();
-  // Fallback chain so this works both now (current table has DestinationCode)
-  // and later (after AirportCodes + CountryCode columns are added):
-  //   AirportCodes (comma list) → CountryCode (two-letter) → DestinationCode (legacy single IATA)
-  let destinations = [];
-  if (airportCodes.length) destinations = airportCodes;
-  else if (countryCode) destinations = [countryCode];
-  else if (f.DestinationCode) destinations = [String(f.DestinationCode).trim()];
-
-  const payload = {
+  return {
     appId: f.AppId || DEMO_APP_ID,
     type: 'Packages',
-    packageType: 'Any', // both DynamicPackages + PackageHolidays
+    packageType: 'Any',
     deduping: 'None',
-    currency: 'GBP',
-    language: 'en',
-    nationality: 'GB',
+    currency: 'GBP', language: 'en', nationality: 'GB',
     maxOffers: f.MaxOffers || 250,
     rollingDates: true,
     DatesMin: f.DatesMin || 7,
     DatesMax: f.DatesMax || 14,
     sort: 'price:asc',
     pricingByType: 'Person',
+    destinations: [destinationCode],
     customerUserAgent: 'Travelgenix-WorldMapCron/1.0',
   };
-  if (destinations.length) payload.destinations = destinations;
-  const origins = (f.Origin || '').split(',').map(s => s.trim()).filter(Boolean);
-  if (origins.length) payload.origins = origins;
-  return payload;
 }
-
-async function callOffersProxy(payload, timeoutMs = 10000) {
+async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS) {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -198,13 +204,8 @@ async function callOffersProxy(payload, timeoutMs = 10000) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Travelify's auth layer validates Referer/Origin to confirm requests
-        // come from a real Travelgenix browser session. This cron is a
-        // server-to-server call with no browser context, so the proxy would
-        // otherwise forward nothing and Travelify returns 401. We supply a
-        // legitimate Travelgenix origin so the proxy passes it upstream.
-        'Referer': 'https://tg-widgets.vercel.app/',
-        'Origin': 'https://tg-widgets.vercel.app',
+        'Referer': SELF_ORIGIN + '/',
+        'Origin': SELF_ORIGIN,
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -212,7 +213,6 @@ async function callOffersProxy(payload, timeoutMs = 10000) {
     clearTimeout(t);
     if (!res.ok) return { ok: false, status: res.status };
     const data = await res.json();
-    // /api/offers wraps Travelify's response — success field is on the upstream payload
     if (data && data.success === false) return { ok: false, error: data.error || 'upstream failure' };
     return { ok: true, data };
   } catch (e) {
@@ -221,251 +221,179 @@ async function callOffersProxy(payload, timeoutMs = 10000) {
   }
 }
 
-/** Extract the cheapest offer from a Travelify /traveloffers response.
- *  Shape (from the offers widget's working integration): { offers: [...] } where each
- *  offer has at minimum a price field. Defensive against shape drift. */
-function extractCheapest(response) {
-  if (!response || !response.data) return null;
-  const offers = response.data.offers || response.data.results || response.data.items || [];
-  if (!Array.isArray(offers) || offers.length === 0) return null;
-  let minPrice = Infinity;
-  let currency = 'GBP';
-  for (const o of offers) {
-    const p = parseFloat(o.priceFrom || o.totalPrice || o.price || o.gross || o.fromPrice || 0);
-    if (Number.isFinite(p) && p > 0 && p < minPrice) {
-      minPrice = p;
-      currency = o.currency || currency;
+/** Resolve which destination codes to query for a row. */
+function destinationCodesFor(row) {
+  const f = row.fields || {};
+  const airports = (f.AirportCodes || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (airports.length) return airports;
+  const cc = (f.CountryCode || '').trim();
+  return cc ? [cc] : [];
+}
+
+/** Run a list of async thunks with bounded concurrency. */
+async function pooled(items, worker, concurrency = REQUEST_CONCURRENCY) {
+  const results = [];
+  let i = 0;
+  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (i < items.length) {
+      const idx = i++;
+      results[idx] = await worker(items[idx], idx);
     }
+  });
+  await Promise.all(runners);
+  return results;
+}
+
+/** Sweep one country: fire a request per destination code, return fresh normalised offers. */
+async function sweepCountry(row) {
+  const f = row.fields || {};
+  const cc = (f.CountryCode || '').trim();
+  const codes = destinationCodesFor(row);
+  if (!cc || codes.length === 0) {
+    return { cc: cc || '(none)', name: f.Name || '', ok: false, error: 'no country code', codeResults: [], freshOffers: [] };
   }
-  if (!Number.isFinite(minPrice)) return null;
-  return { fromPrice: Math.floor(minPrice / 10) * 10, currency, offerCount: offers.length };
+  const codeResults = await pooled(codes, async (code) => {
+    const raw = await callOffersProxy(buildPayload(row, code));
+    if (!raw.ok) return { code, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, offers: [] };
+    const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
+    const offers = normaliseOffers(arr);
+    return { code, ok: true, count: offers.length, offers };
+  });
+  const freshOffers = codeResults.flatMap(r => r.offers);
+  const anyOk = codeResults.some(r => r.ok);
+  return {
+    cc, name: f.Name || '',
+    ok: anyOk,
+    codeResults: codeResults.map(({ code, ok, error, count }) => ({ code, ok, error, count })),
+    freshOffers,
+  };
 }
 
-async function processBatch(rows) {
-  return Promise.all(rows.map(async (row) => {
-    const payload = buildOffersPayload(row);
-    const result = await callOffersProxy(payload);
-    if (!result.ok) return { row, ok: false, error: result.error || `HTTP ${result.status}` };
-    const cheapest = extractCheapest(result);
-    if (!cheapest) return { row, ok: false, error: 'no offers in response' };
-    return { row, ok: true, ...cheapest };
-  }));
-}
-
-function aggregateResults(results) {
-  const byDestination = new Map();
-  for (const r of results) {
-    if (!r.ok) continue;
-    const f = r.row.fields || {};
-    const key = f.DestinationCode || f.Name;
-    if (!key) continue;
-    const existing = byDestination.get(key);
-    if (!existing || r.fromPrice < existing.fromPrice) {
-      byDestination.set(key, {
-        destination: f.Name || key,
-        destinationCode: f.DestinationCode || null,
-        country: f.Country || null,
-        region: f.Region || null,
-        lat: typeof f.Lat === 'number' ? f.Lat : null,
-        lng: typeof f.Lng === 'number' ? f.Lng : null,
-        fromPrice: r.fromPrice,
-        currency: r.currency,
-        offerCount: r.offerCount,
-        offerType: f.SearchType || 'Packages',
-      });
-    }
+// ── Summary rebuild from all stored country keys ────────────────────────────
+async function rebuildSummary(allCountryCodes) {
+  let all = [];
+  for (const cc of allCountryCodes) {
+    const stored = await getJson(countryKey(cc));
+    if (stored && Array.isArray(stored.offers)) all = all.concat(stored.offers);
   }
-  return Array.from(byDestination.values());
+  const countries = summariseByCountry(all);
+  const airports = summariseByAirport(all);
+  const payload = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    source: 'redis',
+    currency: 'GBP',
+    // ENVELOPE reads `countries`; FULLSCREEN reads `airports`.
+    // Widget displays fromPricePP (per-person), per locked decision.
+    countries,
+    airports,
+    stats: { totalOffers: all.length, countriesCovered: countries.length, airportsCovered: airports.length },
+  };
+  const ok = await setJson(SUMMARY_KEY, payload);
+  if (ok) await setString(LASTRUN_KEY, payload.generatedAt);
+  return { written: ok, ...payload.stats };
 }
 
-function clusterByCountry(destinations) {
-  const byCountry = new Map();
-  for (const d of destinations) {
-    if (!d.country) continue;
-    const existing = byCountry.get(d.country);
-    if (!existing) {
-      byCountry.set(d.country, {
-        country: d.country,
-        region: d.region,
-        lat: d.lat,
-        lng: d.lng,
-        fromPrice: d.fromPrice,
-        currency: d.currency,
-        destinationCount: 1,
-        totalOffers: d.offerCount,
-      });
-    } else {
-      existing.destinationCount += 1;
-      existing.totalOffers += d.offerCount;
-      if (d.fromPrice < existing.fromPrice) {
-        existing.fromPrice = d.fromPrice;
-        existing.lat = d.lat;
-        existing.lng = d.lng;
-      }
-    }
-  }
-  return Array.from(byCountry.values());
+// ── Cursor for hourly rotation ──────────────────────────────────────────────
+async function selectSlice(rows, full) {
+  if (full) return { slice: rows, nextCursor: 0 };
+  const total = rows.length;
+  const sliceSize = Math.max(1, Math.ceil(total * HOURLY_FRACTION));
+  const cur = (await getJson(CURSOR_KEY)) || { i: 0 };
+  const start = (cur.i || 0) % total;
+  const slice = [];
+  for (let k = 0; k < sliceSize; k++) slice.push(rows[(start + k) % total]);
+  return { slice, nextCursor: (start + sliceSize) % total };
 }
 
-async function sendFailureAlert(summary) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return;
-  const to = process.env.ALERT_EMAIL_TO || 'andy@travelgenix.io';
-  try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Travelgenix Monitoring <monitoring@mail.travelgenix.com>',
-        to,
-        subject: '[World Map] Cron refresh aborted',
-        text: `World Map offer refresh aborted at ${new Date().toISOString()}.\n\n${summary}\n\nPrevious payload still serving. Investigate Vercel function logs.`,
-      }),
-    });
-  } catch (e) { console.error('[alert] failed', e.message); }
-}
-
-// ── handler ─────────────────────────────────────────────────────────────
-
+// ── Handler ─────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
-  // Authorise: Vercel Cron sets the Authorization header.
-  const auth = req.headers.authorization || '';
-  const expected = `Bearer ${process.env.CRON_SECRET || ''}`;
-  if (!process.env.CRON_SECRET || auth !== expected) {
+  // Auth
+  const auth = req.headers['authorization'] || '';
+  const secret = process.env.CRON_SECRET || '';
+  if (!secret || auth !== `Bearer ${secret}`) {
     return res.status(401).json({ ok: false, error: 'unauthorised' });
   }
 
   const startedAt = Date.now();
+  const q = req.query || {};
+
   try {
-    const rows = await fetchAllMapSearches();
+    const rows = await fetchEnabledCountries();
     if (rows.length === 0) {
-      return res.status(200).json({ ok: true, skipped: true, reason: 'no enabled rows' });
+      return res.status(200).json({ ok: true, skipped: true, reason: 'no enabled countries' });
     }
 
-    // ── DIAGNOSTIC MODE ───────────────────────────────────────────────
-    // ?debug=1                    → run first row, return raw response
-    // ?debug=1&dest=TFS           → override the destination(s), comma-separated
-    // ?debug=1&dest=ES&noOrigin=1 → also drop the origins filter (UK-wide search)
-    // No Redis write, no full sweep. TEMPORARY — remove once shape is mapped.
-    if (req.query && (req.query.debug === '1' || req.query.debug === 'true')) {
+    // ── DEBUG probe ──────────────────────────────────────────────────────
+    if (q.debug === '1' || q.debug === 'true') {
       const row = rows[0];
-      const payload = buildOffersPayload(row);
-      // Optional destination override
-      if (req.query.dest) {
-        payload.destinations = String(req.query.dest).split(',').map(s => s.trim()).filter(Boolean);
-      }
-      // Optional: drop the origins filter to search UK-wide (any departure airport)
-      if (req.query.noOrigin === '1' || req.query.noOrigin === 'true') {
-        delete payload.origins;
-      }
-      // Optional maxOffers override
-      if (req.query.max) {
-        const m = parseInt(req.query.max, 10);
-        if (Number.isFinite(m) && m > 0) payload.maxOffers = m;
-      }
+      const code = q.dest ? String(q.dest).split(',')[0].trim() : destinationCodesFor(row)[0];
+      const payload = buildPayload(row, code);
+      if (q.max) { const m = parseInt(q.max, 10); if (Number.isFinite(m) && m > 0) payload.maxOffers = m; }
       const raw = await callOffersProxy(payload);
       const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : null;
-      const normalised = arr ? normaliseOffers(arr) : [];
-      const byAirport = summariseByAirport(normalised);
-      const byCountry = summariseByCountry(normalised);
+      const offers = arr ? normaliseOffers(arr) : [];
       return res.status(200).json({
-        ok: true,
-        debug: true,
-        sentPayload: payload,
-        rawResponseOk: raw.ok,
-        rawError: raw.error || null,
+        ok: true, debug: true, sentPayload: payload,
+        rawResponseOk: raw.ok, rawError: raw.error || null,
         rawOfferCount: arr ? arr.length : null,
-        normalisedCount: normalised.length,
-        byCountry,                 // envelope pins
-        byAirport,                 // fullscreen pins
-        sampleOffer: normalised[0] || null,
-        rawResponse: (arr && arr.length) ? undefined : raw.data,
+        normalisedCount: offers.length,
+        byCountry: summariseByCountry(offers),
+        byAirport: summariseByAirport(offers),
+        sampleOffer: offers[0] || null,
       });
     }
 
-    // Pass 1: run all rows in batches of BATCH_SIZE.
-    const firstPass = [];
-    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-      const batch = rows.slice(i, i + BATCH_SIZE);
-      const out = await processBatch(batch);
-      firstPass.push(...out);
+    if (!configured()) {
+      return res.status(500).json({ ok: false, error: 'Redis not configured' });
     }
 
-    // Pass 2: retry only the failures, after a short pause.
-    // NOTE: must stay short — a long sleep inside a serverless function
-    // blows the max-duration budget and kills the whole run before it can
-    // write to Redis. 2s is enough to let a transient rate-limit settle.
-    const failed = firstPass.filter(r => !r.ok).map(r => r.row);
-    let retried = [];
-    if (failed.length > 0) {
-      await new Promise(r => setTimeout(r, 2_000));
-      for (let i = 0; i < failed.length; i += BATCH_SIZE) {
-        const batch = failed.slice(i, i + BATCH_SIZE);
-        const out = await processBatch(batch);
-        retried.push(...out);
+    // ── Select the slice to sweep this run ────────────────────────────────
+    const full = q.full === '1' || q.full === 'true';
+    const { slice, nextCursor } = await selectSlice(rows, full);
+
+    // ── Sweep each country in the slice, store per-country with merge+purge ─
+    const now = new Date();
+    const perCountry = [];
+    for (const row of slice) {
+      const swept = await sweepCountry(row);
+      if (!swept.cc || swept.cc === '(none)') {
+        perCountry.push({ cc: swept.cc, ok: false, error: swept.error, stored: 0 });
+        continue;
       }
-    }
-
-    // Merge: take pass-1 successes, plus pass-2 results (which override their pass-1 failures)
-    const finalById = new Map();
-    for (const r of firstPass) if (r.ok) finalById.set(r.row.id, r);
-    for (const r of retried) finalById.set(r.row.id, r);
-    const finalResults = Array.from(finalById.values());
-
-    const successes = finalResults.filter(r => r.ok).length;
-    const total = rows.length;
-    const successRate = successes / total;
-
-    if (successRate < MIN_SUCCESS_RATE) {
-      await sendFailureAlert(
-        `Success rate ${(successRate * 100).toFixed(1)}% (${successes}/${total}). Threshold ${MIN_SUCCESS_RATE * 100}%.`
-      );
-      const failures = finalResults
-        .filter(r => !r.ok)
-        .map(r => ({ dest: (r.row.fields || {}).DestinationCode || (r.row.fields || {}).Name, error: r.error }));
-      return res.status(200).json({
-        ok: false,
-        aborted: true,
-        successes, total, successRate,
-        failures,
-        durationMs: Date.now() - startedAt,
+      if (!swept.ok) {
+        // All requests failed — leave the existing key untouched (fail safe).
+        perCountry.push({ cc: swept.cc, ok: false, error: 'all requests failed', codeResults: swept.codeResults, stored: 'unchanged' });
+        continue;
+      }
+      const key = countryKey(swept.cc);
+      const existing = (await getJson(key)) || { offers: [] };
+      const surviving = updateCountryOffers(existing.offers || [], swept.freshOffers, now);
+      await setJson(key, { offers: surviving, refreshedAt: now.toISOString() });
+      perCountry.push({
+        cc: swept.cc, ok: true,
+        fetched: swept.freshOffers.length, stored: surviving.length,
+        codeResults: swept.codeResults,
       });
     }
 
-    // Aggregate and write atomically.
-    const destinations = aggregateResults(finalResults);
-    const countries = clusterByCountry(destinations);
-    const payload = {
-      version: 1,
-      generatedAt: new Date().toISOString(),
-      origin: DEFAULT_ORIGIN,
-      destinations,
-      countries,
-      stats: { searchesRun: total, searchesSucceeded: successes, destinationsCovered: destinations.length },
-    };
+    // ── Rebuild the widget summary from ALL country keys (full coverage) ───
+    const allCodes = rows.map(r => (r.fields || {}).CountryCode).filter(Boolean);
+    const summary = await rebuildSummary(allCodes);
 
-    const writeOk = await setJson(REDIS_KEY, payload);
-    if (writeOk) await setString(REDIS_LASTRUN_KEY, payload.generatedAt);
-
-    const failures = finalResults
-      .filter(r => !r.ok)
-      .map(r => ({ dest: (r.row.fields || {}).DestinationCode || (r.row.fields || {}).Name, error: r.error }));
+    // ── Advance the rotation cursor (hourly only) ─────────────────────────
+    if (!full) await setJson(CURSOR_KEY, { i: nextCursor });
 
     return res.status(200).json({
       ok: true,
-      written: writeOk,
-      successes, total, successRate,
-      destinationsCovered: destinations.length,
-      countriesCovered: countries.length,
-      failures,
+      mode: full ? 'full' : 'hourly',
+      sweptCountries: slice.length,
+      totalCountries: rows.length,
+      summary,
+      perCountry,
       durationMs: Date.now() - startedAt,
     });
-  } catch (e) {
-    console.error('[cron] fatal', e);
-    await sendFailureAlert(`Fatal error: ${e.message}`);
-    return res.status(500).json({ ok: false, error: e.message });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message, durationMs: Date.now() - startedAt });
   }
-};
+}
