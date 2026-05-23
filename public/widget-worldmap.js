@@ -1,5 +1,5 @@
 /**
- * Travelgenix World Map Widget v3.1.0
+ * Travelgenix World Map Widget v3.2.0
  * Real-map version using Leaflet + CartoDB Voyager tiles.
  *
  * Usage:
@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.1.0';
+  const VERSION = '3.2.0';
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '';
   const OFFERS_URL = API_BASE + '/api/destination-map-offers';
   const CONFIG_URL = API_BASE + '/api/widget-config';
@@ -69,6 +69,22 @@
     if (!Number.isFinite(p) || p <= 0) return '';
     const sym = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '';
     return sym + Math.round(p).toLocaleString('en-GB');
+  }
+
+  // Two-letter ISO country code → display name. The live offers payload keys
+  // countries by code (e.g. "ES"); seed payloads carry a "country" name instead.
+  // resolveCountryName() prefers an explicit name, then this map, then the raw code.
+  const COUNTRY_NAMES = {
+    ES: 'Spain', PT: 'Portugal', GR: 'Greece', IT: 'Italy', CY: 'Cyprus',
+    MT: 'Malta', TR: 'Turkey', HR: 'Croatia', FR: 'France', AE: 'UAE',
+    EG: 'Egypt', MA: 'Morocco', TN: 'Tunisia', CV: 'Cape Verde', MU: 'Mauritius',
+    TZ: 'Tanzania', ZA: 'South Africa', MV: 'Maldives', TH: 'Thailand',
+    ID: 'Indonesia', LK: 'Sri Lanka', IN: 'India', VN: 'Vietnam', MX: 'Mexico',
+    US: 'USA', DO: 'Dominican Republic', JM: 'Jamaica', BB: 'Barbados',
+    AG: 'Antigua', LC: 'Saint Lucia', CU: 'Cuba', AU: 'Australia',
+  };
+  function resolveCountryName(c) {
+    return c.country || COUNTRY_NAMES[c.countryCode] || c.countryCode || 'Destination';
   }
 
   // ── Leaflet CSS (inlined — needs to live inside Shadow DOM since <link> tags don't penetrate)
@@ -1065,11 +1081,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
      *  Result: ~8 well-spaced, high-value destinations. Crowded regions
      *  like Europe get represented by their cheapest country only. */
     _selectFeatured(countries) {
-      const minPrice = Math.min(...countries.map(c => c.fromPrice || Infinity));
-      const maxOffers = Math.max(...countries.map(c => c.destinationCount || 0), 1);
+      // Display price is per-person (fromPricePP); fall back to fromPrice for
+      // older seed payloads that don't carry a per-person figure.
+      const priceOf = c => c.fromPricePP || c.fromPrice || Infinity;
+      // Breadth score: new payload uses airportCount; seed used destinationCount.
+      const breadthOf = c => c.airportCount || c.destinationCount || c.offerCount || 0;
+      const minPrice = Math.min(...countries.map(priceOf));
+      const maxOffers = Math.max(...countries.map(breadthOf), 1);
       const scored = countries.map(c => {
-        const priceScore = minPrice && c.fromPrice ? (minPrice / c.fromPrice) : 0;
-        const offerScore = (c.destinationCount || 0) / maxOffers;
+        const p = priceOf(c);
+        const priceScore = minPrice && Number.isFinite(p) ? (minPrice / p) : 0;
+        const offerScore = breadthOf(c) / maxOffers;
         return { ...c, _score: priceScore * 0.55 + offerScore * 0.45 };
       }).sort((a, b) => b._score - a._score);
 
@@ -1127,11 +1149,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
       // Drop the pins
       for (const c of featured) {
-        const priceLabel = formatPrice(c.fromPrice, c.currency);
+        const name = resolveCountryName(c);
+        // Per-person price per the locked display rule (£460 total shows as £230).
+        const priceLabel = formatPrice(c.fromPricePP || c.fromPrice, c.currency);
         const html = `
-          <div class="tg-pin-wrap" data-country="${esc(c.country)}">
-            <div class="tg-price-tag" title="${esc(c.country)} — from ${esc(priceLabel)}">
-              <span class="tg-tag-country">${esc(c.country)}</span>
+          <div class="tg-pin-wrap" data-country="${esc(name)}">
+            <div class="tg-price-tag" title="${esc(name)} — from ${esc(priceLabel)} per person">
+              <span class="tg-tag-country">${esc(name)}</span>
               <span class="tg-tag-price">${esc(priceLabel)}</span>
             </div>
             <div class="tg-price-anchor"></div>
@@ -1157,7 +1181,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     _onPinClick(country) {
       // In envelope mode, clicking a pin opens fullscreen (deal cards happen there).
       // For now we just emit a console event — proper hook comes when fullscreen exists.
-      console.info('[tgwm v3] pin clicked:', country.country, '— fullscreen flow will pick this up');
+      console.info('[tgwm v3] pin clicked:', resolveCountryName(country), '— fullscreen flow will pick this up');
       this._openFullscreen();
     }
 
