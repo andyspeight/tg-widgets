@@ -187,9 +187,13 @@ function buildPayload(row, destinationCode) {
     deduping: 'None',
     currency: 'GBP', language: 'en', nationality: 'GB',
     maxOffers: f.MaxOffers || 250,
+    // DatesMin/DatesMax are the DEPARTURE ADVANCE WINDOW in days from today
+    // (NOT trip duration). 1–700 = "anything departing between tomorrow and ~23
+    // months out". The old 7/14 default restricted us to next-week departures,
+    // which is why long-haul came back empty and everything clustered in June.
     rollingDates: true,
-    DatesMin: f.DatesMin || 7,
-    DatesMax: f.DatesMax || 14,
+    DatesMin: f.DatesMin || 1,
+    DatesMax: f.DatesMax || 700,
     sort: 'price:asc',
     pricingByType: 'Person',
     destinations: [destinationCode],
