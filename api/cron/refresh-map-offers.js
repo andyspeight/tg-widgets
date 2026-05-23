@@ -324,6 +324,40 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, skipped: true, reason: 'no enabled countries' });
     }
 
+    // ── READBACK probe ───────────────────────────────────────────────────
+    // ?readback=1 reads map:offers:v1 straight back from Redis via the cron's
+    // OWN connection (same env the cron writes with). Bypasses the read
+    // endpoint and the edge cache entirely, so it tells us definitively
+    // whether the data is in Redis and what shape it has. TEMPORARY.
+    if (q.readback === '1' || q.readback === 'true') {
+      const summary = await getJson(SUMMARY_KEY);
+      const sampleCountryKeys = ['ES', 'GR', 'PT'];
+      const countryProbe = {};
+      for (const cc of sampleCountryKeys) {
+        const s = await getJson(countryKey(cc));
+        countryProbe[cc] = s && Array.isArray(s.offers)
+          ? { offers: s.offers.length, refreshedAt: s.refreshedAt }
+          : (s === null ? 'null' : 'no offers array');
+      }
+      return res.status(200).json({
+        ok: true,
+        readback: true,
+        redisConfigured: configured(),
+        summaryKey: SUMMARY_KEY,
+        summaryExists: !!summary,
+        summaryShape: summary ? {
+          hasCountries: Array.isArray(summary.countries),
+          countriesLen: Array.isArray(summary.countries) ? summary.countries.length : null,
+          hasAirports: Array.isArray(summary.airports),
+          airportsLen: Array.isArray(summary.airports) ? summary.airports.length : null,
+          generatedAt: summary.generatedAt || null,
+          stats: summary.stats || null,
+        } : null,
+        firstCountry: summary && Array.isArray(summary.countries) ? summary.countries[0] : null,
+        countryKeyProbe: countryProbe,
+      });
+    }
+
     // ── DEBUG probe ──────────────────────────────────────────────────────
     if (q.debug === '1' || q.debug === 'true') {
       const row = rows[0];
@@ -333,6 +367,34 @@ export default async function handler(req, res) {
       const raw = await callOffersProxy(payload);
       const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : null;
       const offers = arr ? normaliseOffers(arr) : [];
+
+      // Redis readback folded in — reads what the cron's own connection sees,
+      // so the debug URL (known to work) also reports the stored state.
+      let redisReadback = null;
+      try {
+        const summary = await getJson(SUMMARY_KEY);
+        const probe = {};
+        for (const cc of ['ES', 'GR', 'US']) {
+          const s = await getJson(countryKey(cc));
+          probe[cc] = s && Array.isArray(s.offers)
+            ? { offers: s.offers.length, refreshedAt: s.refreshedAt }
+            : (s === null ? 'null' : 'no offers array');
+        }
+        redisReadback = {
+          redisConfigured: configured(),
+          summaryKey: SUMMARY_KEY,
+          summaryExists: !!summary,
+          summaryCountriesLen: summary && Array.isArray(summary.countries) ? summary.countries.length : null,
+          summaryAirportsLen: summary && Array.isArray(summary.airports) ? summary.airports.length : null,
+          summaryGeneratedAt: summary ? summary.generatedAt : null,
+          summaryStats: summary ? summary.stats : null,
+          firstCountry: summary && Array.isArray(summary.countries) ? summary.countries[0] : null,
+          countryKeyProbe: probe,
+        };
+      } catch (e) {
+        redisReadback = { error: e.message };
+      }
+
       return res.status(200).json({
         ok: true, debug: true, sentPayload: payload,
         rawResponseOk: raw.ok, rawError: raw.error || null,
@@ -341,6 +403,7 @@ export default async function handler(req, res) {
         byCountry: summariseByCountry(offers),
         byAirport: summariseByAirport(offers),
         sampleOffer: offers[0] || null,
+        redisReadback,
       });
     }
 
