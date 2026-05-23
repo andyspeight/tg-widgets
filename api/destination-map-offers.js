@@ -79,7 +79,11 @@ export default async function handler(req, res) {
   // Tier 1: Redis
   try {
     const fromRedis = await getJson(REDIS_KEY);
-    if (fromRedis && Array.isArray(fromRedis.destinations) && fromRedis.destinations.length > 0) {
+    // New country-sweep shape writes `countries` (+ `airports`); the legacy
+    // shape used `destinations`. Accept either so a payload in either form is served.
+    const hasNewShape = fromRedis && Array.isArray(fromRedis.countries) && fromRedis.countries.length > 0;
+    const hasOldShape = fromRedis && Array.isArray(fromRedis.destinations) && fromRedis.destinations.length > 0;
+    if (hasNewShape || hasOldShape) {
       fromRedis.source = 'redis';
       res.status(200).json(fromRedis);
       return;
