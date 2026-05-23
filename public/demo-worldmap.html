@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Map Widget — Travelgenix</title>
+  <meta name="robots" content="noindex" />
+  <style>
+    :root {
+      --tg-teal: #0EA5A8;
+      --tg-ink: #0F172A;
+      --tg-slate: #475569;
+      --tg-line: #E2E8F0;
+      --tg-bg: #F8FAFC;
+      --tg-white: #FFFFFF;
+      --tg-radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--tg-bg);
+      color: var(--tg-ink);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    .demo-wrap { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+    .demo-head { text-align: center; margin-bottom: 40px; }
+    .demo-eyebrow {
+      display: inline-block;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--tg-teal); margin-bottom: 12px;
+    }
+    .demo-head h1 { font-size: 32px; line-height: 1.2; margin: 0 0 10px; font-weight: 700; }
+    .demo-head p { font-size: 17px; color: var(--tg-slate); margin: 0; }
+
+    .demo-stage {
+      background: var(--tg-white);
+      border: 1px solid var(--tg-line);
+      border-radius: var(--tg-radius);
+      padding: 16px;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      margin-bottom: 48px;
+    }
+
+    .demo-section-label {
+      font-size: 13px; font-weight: 600; color: var(--tg-slate);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin: 0 0 14px;
+    }
+
+    .embed-box {
+      background: var(--tg-ink);
+      color: #E2E8F0;
+      border-radius: 12px;
+      padding: 18px 20px;
+      font-family: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+      font-size: 13px; line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .embed-box .tok-tag { color: #7DD3FC; }
+    .embed-box .tok-attr { color: #FCD34D; }
+    .embed-box .tok-str { color: #86EFAC; }
+
+    .demo-foot { text-align: center; margin-top: 56px; color: #94A3B8; font-size: 13px; }
+    .demo-foot a { color: var(--tg-teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+
+    <div class="demo-head">
+      <span class="demo-eyebrow">Travelgenix Widget Suite</span>
+      <h1>World Map</h1>
+      <p>An interactive map of your latest holiday offers — live prices, pinned where they go.</p>
+    </div>
+
+    <!-- ── The widget itself ── -->
+    <div class="demo-stage">
+      <div
+        data-tg-widget="worldmap"
+        data-tg-config='{"theme":"light","title":"Where will you go next?","subtitle":"Browse our latest holiday offers from around the world","maxPins":10,"showFullscreenButton":false}'
+      ></div>
+    </div>
+
+    <!-- ── Embed snippet ── -->
+    <p class="demo-section-label">Embed code</p>
+    <div class="embed-box"><span class="tok-tag">&lt;div</span> <span class="tok-attr">data-tg-widget</span>=<span class="tok-str">"worldmap"</span> <span class="tok-attr">data-tg-id</span>=<span class="tok-str">"YOUR_WIDGET_ID"</span><span class="tok-tag">&gt;&lt;/div&gt;</span>
+<span class="tok-tag">&lt;script</span> <span class="tok-attr">src</span>=<span class="tok-str">"https://tg-widgets.vercel.app/widget-worldmap.js"</span><span class="tok-tag">&gt;&lt;/script&gt;</span></div>
+
+    <div class="demo-foot">
+      Travelgenix Widget Suite &middot; <a href="/">All widgets</a>
+    </div>
+
+  </div>
+
+  <!-- Load the widget last so the container exists when it auto-inits -->
+  <script src="/widget-worldmap.js"></script>
+</body>
+</html>
