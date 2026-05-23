@@ -73,9 +73,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   if (req.method !== 'GET') { res.status(405).json({ error: 'method not allowed' }); return; }
 
-  // Edge cache 5 min, then SWR for an hour
-  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
-
   // Tier 1: Redis
   try {
     const fromRedis = await getJson(REDIS_KEY);
@@ -85,12 +82,21 @@ export default async function handler(req, res) {
     const hasOldShape = fromRedis && Array.isArray(fromRedis.destinations) && fromRedis.destinations.length > 0;
     if (hasNewShape || hasOldShape) {
       fromRedis.source = 'redis';
+      // Cache ONLY real data, and only briefly. Critically, we must NOT set a
+      // long edge cache on fallback responses (seed/skeleton) — doing so caused
+      // a stale empty map to stick in Vercel's edge for up to an hour even after
+      // Redis was populated. So the cache header lives here, on the success path.
+      res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=300');
       res.status(200).json(fromRedis);
       return;
     }
   } catch (e) {
     console.error('[map-offers] redis read failed', e.message);
   }
+
+  // Fallbacks below must NEVER be edge-cached — otherwise an empty map can
+  // stick around after Redis fills. Tell the edge not to store them.
+  res.setHeader('Cache-Control', 'no-store, must-revalidate');
 
   // Tier 2: bundled seed
   const seed = loadSeed();
