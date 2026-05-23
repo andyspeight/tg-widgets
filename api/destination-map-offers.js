@@ -1,105 +1,433 @@
 /**
- * Public widget endpoint — World Map offers.
+ * Vercel Cron — refresh world map offers (country-sweep model).
  *
- * Returns the aggregated offers payload that the cron job writes to Redis.
- * Falls through three tiers to guarantee the widget NEVER receives an empty
- * map under any failure mode:
+ * WHAT IT DOES
+ *   1. Reads enabled rows from the MapSearches table (one row per country).
+ *   2. For each country: if AirportCodes is filled, fires ONE /api/offers request
+ *      per airport (so each airport gets its own 250-offer allowance); otherwise
+ *      fires a single request for the two-letter CountryCode.
+ *   3. Normalises every returned offer (tested parser).
+ *   4. Merges the fresh offers into that country's stored set in Redis
+ *      (dedup on offer.id, newest wins), then purges offers whose travel date
+ *      has passed or whose fetchedAt is older than 4 days (tested sweep logic).
+ *   5. Rebuilds the small map summary (cheapest per country + cheapest per airport)
+ *      from ALL stored country keys and writes it to map:offers:v1.
  *
- *   1. Redis cache (the normal path, sub-50ms)
- *   2. Bundled seed payload committed in /public/seed-map-offers.json
- *   3. Last-resort hardcoded skeleton (a handful of major destinations)
+ * CADENCE
+ *   - ?full=1  → sweep every enabled country (the nightly run).
+ *   - default  → sweep a rotating ~15% slice (the hourly run).
+ *   The cron schedule in vercel.json fires hourly-ish; trigger the nightly full
+ *   sweep with ?full=1 (e.g. a second cron entry, or the scheduler calling it).
  *
- * Caching: Cache-Control headers tell Vercel's edge to cache the response
- * for 5 minutes with stale-while-revalidate, so even Redis can take a break.
+ * STORAGE KEYS
+ *   offers:packages:{CC}   per-country raw normalised offers + refreshedAt
+ *   map:offers:v1          derived summary the widget reads (country + airport pins)
+ *   map:offers:lastRunAt   ISO timestamp of the last successful summary write
+ *   map:offers:cursor      rotation cursor for the hourly 15% slice
  *
- * CORS: open. This is read-only public data, no secrets.
+ * AUTH
+ *   Caller must send Authorization: Bearer ${CRON_SECRET}.
+ *   The cron calls /api/offers with Referer + Origin headers so Travelify's
+ *   auth layer accepts the server-to-server request (proven 22 May 2026).
+ *
+ * DEBUG
+ *   ?debug=1[&dest=ES][&noOrigin=1][&max=250] runs a single probe request and
+ *   returns the parsed summaries without writing anything. Kept for diagnosis.
+ *
+ * FAILS SAFE
+ *   A country whose requests all fail keeps its existing Redis key untouched.
+ *   The summary is only rewritten if at least one country has offers, so a bad
+ *   run can never blank the map.
  */
 
-import path from 'node:path';
-import fs from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { getJson } from './_redis.js';
+import { setJson, getJson, setString, configured } from '../_redis.js';
 
-const REDIS_KEY = 'map:offers:v1';
+// ── Config ────────────────────────────────────────────────────────────────
+const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
+const MAP_SEARCHES_TABLE = 'tblrI1BihuDcpoV1A'; // MapSearches (country model, seeded 23 May 2026)
+const OFFERS_PROXY = process.env.OFFERS_PROXY_URL || 'https://tg-widgets.vercel.app/api/offers';
+const SELF_ORIGIN = 'https://tg-widgets.vercel.app';
+const DEMO_APP_ID = '250';
 
-// Resolve the seed path relative to this file (avoids cwd surprises on Vercel).
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SEED_PATH = path.join(__dirname, '..', 'public', 'seed-map-offers.json');
+const PER_REQUEST_TIMEOUT_MS = 10000;
+const REQUEST_CONCURRENCY = 4;     // parallel proxy calls within a country
+const HOURLY_FRACTION = 0.15;      // ~15% of countries per hourly run
+const MAX_AGE_DAYS = 4;            // purge offers older than this
 
-let cachedSeed = null;
-function loadSeed() {
-  if (cachedSeed) return cachedSeed;
+const SUMMARY_KEY = 'map:offers:v1';
+const LASTRUN_KEY = 'map:offers:lastRunAt';
+const CURSOR_KEY = 'map:offers:cursor';
+const countryKey = (cc) => `offers:packages:${cc}`;
+
+// ── Tested offer parser (unit-verified 22 May 2026) ─────────────────────────
+function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
+function parsePrice(offer) {
+  if (typeof offer.formattedPrice === 'string') {
+    const n = parseFloat(offer.formattedPrice.replace(/[^0-9.]/g, ''));
+    if (Number.isFinite(n) && n > 0) return Math.round(n);
+  }
+  const fp = offer.flight && offer.flight.pricing ? Number(offer.flight.pricing.price) : 0;
+  const ap = offer.accommodation && offer.accommodation.pricing ? Number(offer.accommodation.pricing.price) : 0;
+  const sum = (Number.isFinite(fp) ? fp : 0) + (Number.isFinite(ap) ? ap : 0);
+  return sum > 0 ? Math.round(sum) : null;
+}
+function parsePPPrice(offer) {
+  if (typeof offer.formattedPPPrice === 'string') {
+    const n = parseFloat(offer.formattedPPPrice.replace(/[^0-9.]/g, ''));
+    if (Number.isFinite(n) && n > 0) return Math.round(n);
+  }
+  return null;
+}
+function normaliseOffer(offer) {
+  const flight = offer.flight || {}, acc = offer.accommodation || {};
+  const fdest = flight.destination || {}, adest = acc.destination || {};
+  const price = parsePrice(offer);
+  if (price == null) return null;
+  const iata = fdest.iataCode || null;
+  const countryCode = fdest.countryCode || adest.countryCode || null;
+  const lat = num(fdest.latitude) ?? num(adest.latitude);
+  const lng = num(fdest.longitude) ?? num(adest.longitude);
+  if (!iata && !countryCode) return null;
+  return {
+    id: offer.id, type: offer.type || 'Packages', packageType: offer.packageType || null,
+    price, pricePP: parsePPPrice(offer),
+    currency: (flight.pricing && flight.pricing.currency) || (acc.pricing && acc.pricing.currency) || 'GBP',
+    airport: iata, airportName: fdest.name || null, countryCode,
+    resort: adest.name || null, lat, lng,
+    resortLat: num(adest.latitude), resortLng: num(adest.longitude),
+    hotel: acc.name || null, rating: num(acc.rating), boardBasis: acc.boardBasis || null,
+    nights: num(acc.nights), reviewRating: num(acc.reviewRating), reviewCount: num(acc.reviewCount),
+    carrier: (flight.carrier && flight.carrier.name) || null, direct: !!flight.direct,
+    origin: (flight.origin && flight.origin.iataCode) || null,
+    outboundDate: flight.outboundDate || null,
+    checkinDate: acc.checkinDate || null,
+    image: (acc.image && acc.image.url) || (flight.image && flight.image.url) || null,
+    url: offer.url || null, updated: offer.updated || null, fetchedAt: new Date().toISOString(),
+  };
+}
+function normaliseOffers(rawArray) {
+  if (!Array.isArray(rawArray)) return [];
+  const out = [];
+  for (const o of rawArray) { const n = normaliseOffer(o); if (n) out.push(n); }
+  return out;
+}
+function summariseByAirport(offers) {
+  const m = new Map();
+  for (const o of offers) {
+    if (!o.airport) continue;
+    const c = m.get(o.airport);
+    if (!c) m.set(o.airport, { airport: o.airport, airportName: o.airportName, countryCode: o.countryCode, lat: o.lat, lng: o.lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, cheapestOfferId: o.id });
+    else { c.offerCount += 1; if (o.price < c.fromPrice) { c.fromPrice = o.price; c.fromPricePP = o.pricePP; c.cheapestOfferId = o.id; } }
+  }
+  return Array.from(m.values()).sort((a, b) => a.fromPrice - b.fromPrice);
+}
+function summariseByCountry(offers) {
+  const m = new Map();
+  for (const o of offers) {
+    if (!o.countryCode) continue;
+    const c = m.get(o.countryCode);
+    if (!c) m.set(o.countryCode, { countryCode: o.countryCode, lat: o.lat, lng: o.lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, _airports: new Set([o.airport]), cheapestOfferId: o.id });
+    else { c.offerCount += 1; c._airports.add(o.airport); if (o.price < c.fromPrice) { c.fromPrice = o.price; c.fromPricePP = o.pricePP; c.lat = o.lat; c.lng = o.lng; c.cheapestOfferId = o.id; } }
+  }
+  return Array.from(m.values()).map(c => { const { _airports, ...rest } = c; return { ...rest, airportCount: _airports.size }; }).sort((a, b) => a.fromPrice - b.fromPrice);
+}
+
+// ── Tested sweep / merge / purge logic (unit-verified 22 May 2026) ──────────
+function mergeOffers(existing, fresh) {
+  const byId = new Map();
+  for (const o of existing || []) if (o && o.id != null) byId.set(String(o.id), o);
+  for (const o of fresh || []) if (o && o.id != null) byId.set(String(o.id), o);
+  return Array.from(byId.values());
+}
+function travelDateOf(offer) { return offer.outboundDate || offer.checkinDate || null; }
+function purgeOffers(offers, now = new Date(), maxAgeDays = MAX_AGE_DAYS) {
+  const nowMs = now.getTime();
+  const maxAgeMs = maxAgeDays * 24 * 60 * 60 * 1000;
+  return (offers || []).filter(o => {
+    const td = travelDateOf(o);
+    if (td) { const t = Date.parse(td); if (Number.isFinite(t) && t < nowMs) return false; }
+    if (o.fetchedAt) { const f = Date.parse(o.fetchedAt); if (Number.isFinite(f) && (nowMs - f) > maxAgeMs) return false; }
+    return true;
+  });
+}
+function updateCountryOffers(existingOffers, freshOffers, now = new Date()) {
+  return purgeOffers(mergeOffers(existingOffers, freshOffers), now);
+}
+
+// ── Airtable ────────────────────────────────────────────────────────────────
+async function airtableList(tableId, params = {}) {
+  const PAT = process.env.AIRTABLE_PAT;
+  if (!PAT) throw new Error('AIRTABLE_PAT not set');
+  const qs = new URLSearchParams(params).toString();
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${tableId}${qs ? '?' + qs : ''}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${PAT}` } });
+  if (!res.ok) throw new Error(`Airtable ${tableId} HTTP ${res.status}`);
+  return await res.json();
+}
+async function fetchEnabledCountries() {
+  const rows = [];
+  let offset;
+  do {
+    const params = { pageSize: '100', filterByFormula: '{Enabled}=TRUE()' };
+    if (offset) params.offset = offset;
+    const j = await airtableList(MAP_SEARCHES_TABLE, params);
+    rows.push(...(j.records || []));
+    offset = j.offset;
+  } while (offset);
+  return rows;
+}
+
+// ── Offers proxy ─────────────────────────────────────────────────────────────
+function buildPayload(row, destinationCode) {
+  const f = row.fields || {};
+  return {
+    appId: f.AppId || DEMO_APP_ID,
+    type: 'Packages',
+    packageType: 'Any',
+    deduping: 'None',
+    currency: 'GBP', language: 'en', nationality: 'GB',
+    maxOffers: f.MaxOffers || 250,
+    rollingDates: true,
+    DatesMin: f.DatesMin || 7,
+    DatesMax: f.DatesMax || 14,
+    sort: 'price:asc',
+    pricingByType: 'Person',
+    destinations: [destinationCode],
+    customerUserAgent: 'Travelgenix-WorldMapCron/1.0',
+  };
+}
+async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const raw = fs.readFileSync(SEED_PATH, 'utf8');
-    cachedSeed = JSON.parse(raw);
-    return cachedSeed;
+    const res = await fetch(OFFERS_PROXY, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Referer': SELF_ORIGIN + '/',
+        'Origin': SELF_ORIGIN,
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) return { ok: false, status: res.status };
+    const data = await res.json();
+    if (data && data.success === false) return { ok: false, error: data.error || 'upstream failure' };
+    return { ok: true, data };
   } catch (e) {
-    console.error('[map-offers] seed load failed', e.message);
-    return null;
+    clearTimeout(t);
+    return { ok: false, error: e.message };
   }
 }
 
-const SKELETON = {
-  version: 1,
-  generatedAt: '1970-01-01T00:00:00Z',
-  origin: 'LGW',
-  source: 'skeleton',
-  destinations: [
-    { destination: 'Tenerife', country: 'Spain', region: 'Europe', lat: 28.27, lng: -16.61, fromPrice: 380, currency: 'GBP', offerCount: 0, offerType: 'Packages' },
-    { destination: 'Palma',    country: 'Spain', region: 'Europe', lat: 39.57, lng: 2.65,  fromPrice: 320, currency: 'GBP', offerCount: 0, offerType: 'Packages' },
-    { destination: 'Faro',     country: 'Portugal', region: 'Europe', lat: 37.02, lng: -7.93, fromPrice: 290, currency: 'GBP', offerCount: 0, offerType: 'Packages' },
-    { destination: 'Heraklion', country: 'Greece', region: 'Europe', lat: 35.34, lng: 25.15, fromPrice: 410, currency: 'GBP', offerCount: 0, offerType: 'Packages' },
-    { destination: 'Dalaman',  country: 'Turkey', region: 'Europe', lat: 36.71, lng: 28.79, fromPrice: 350, currency: 'GBP', offerCount: 0, offerType: 'Packages' },
-    { destination: 'Cancun',   country: 'Mexico', region: 'Americas', lat: 21.04, lng: -86.87, fromPrice: 890, currency: 'GBP', offerCount: 0, offerType: 'Packages' },
-    { destination: 'Dubai',    country: 'UAE',    region: 'Middle East', lat: 25.25, lng: 55.36, fromPrice: 620, currency: 'GBP', offerCount: 0, offerType: 'Packages' },
-    { destination: 'Bangkok',  country: 'Thailand', region: 'Asia', lat: 13.69, lng: 100.75, fromPrice: 780, currency: 'GBP', offerCount: 0, offerType: 'Packages' },
-  ],
-  countries: [
-    { country: 'Spain', region: 'Europe', lat: 40.0, lng: -3.7, fromPrice: 320, currency: 'GBP', destinationCount: 2, totalOffers: 0 },
-    { country: 'Portugal', region: 'Europe', lat: 39.4, lng: -8.2, fromPrice: 290, currency: 'GBP', destinationCount: 1, totalOffers: 0 },
-    { country: 'Greece', region: 'Europe', lat: 39.0, lng: 22.0, fromPrice: 410, currency: 'GBP', destinationCount: 1, totalOffers: 0 },
-    { country: 'Turkey', region: 'Europe', lat: 39.0, lng: 35.0, fromPrice: 350, currency: 'GBP', destinationCount: 1, totalOffers: 0 },
-    { country: 'Mexico', region: 'Americas', lat: 23.6, lng: -102.5, fromPrice: 890, currency: 'GBP', destinationCount: 1, totalOffers: 0 },
-    { country: 'UAE', region: 'Middle East', lat: 24.0, lng: 54.0, fromPrice: 620, currency: 'GBP', destinationCount: 1, totalOffers: 0 },
-    { country: 'Thailand', region: 'Asia', lat: 15.9, lng: 100.99, fromPrice: 780, currency: 'GBP', destinationCount: 1, totalOffers: 0 },
-  ],
-  stats: { source: 'skeleton', destinationsCovered: 8, countriesCovered: 7 },
-};
+/** Resolve which destination codes to query for a row. */
+function destinationCodesFor(row) {
+  const f = row.fields || {};
+  const airports = (f.AirportCodes || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (airports.length) return airports;
+  const cc = (f.CountryCode || '').trim();
+  return cc ? [cc] : [];
+}
 
-export default async function handler(req, res) {
-  // CORS — public read-only data
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  if (req.method === 'OPTIONS') { res.status(204).end(); return; }
-  if (req.method !== 'GET') { res.status(405).json({ error: 'method not allowed' }); return; }
-
-  // Edge cache 5 min, then SWR for an hour
-  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
-
-  // Tier 1: Redis
-  try {
-    const fromRedis = await getJson(REDIS_KEY);
-    // New country-sweep shape writes `countries` (+ `airports`); the legacy
-    // shape used `destinations`. Accept either so a payload in either form is served.
-    const hasNewShape = fromRedis && Array.isArray(fromRedis.countries) && fromRedis.countries.length > 0;
-    const hasOldShape = fromRedis && Array.isArray(fromRedis.destinations) && fromRedis.destinations.length > 0;
-    if (hasNewShape || hasOldShape) {
-      fromRedis.source = 'redis';
-      res.status(200).json(fromRedis);
-      return;
+/** Run a list of async thunks with bounded concurrency. */
+async function pooled(items, worker, concurrency = REQUEST_CONCURRENCY) {
+  const results = [];
+  let i = 0;
+  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (i < items.length) {
+      const idx = i++;
+      results[idx] = await worker(items[idx], idx);
     }
-  } catch (e) {
-    console.error('[map-offers] redis read failed', e.message);
+  });
+  await Promise.all(runners);
+  return results;
+}
+
+/** Sweep one country: fire a request per destination code, return fresh normalised offers. */
+async function sweepCountry(row) {
+  const f = row.fields || {};
+  const cc = (f.CountryCode || '').trim();
+  const codes = destinationCodesFor(row);
+  if (!cc || codes.length === 0) {
+    return { cc: cc || '(none)', name: f.Name || '', ok: false, error: 'no country code', codeResults: [], freshOffers: [] };
+  }
+  const codeResults = await pooled(codes, async (code) => {
+    const raw = await callOffersProxy(buildPayload(row, code));
+    if (!raw.ok) return { code, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, offers: [] };
+    const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
+    const offers = normaliseOffers(arr);
+    return { code, ok: true, count: offers.length, offers };
+  });
+  const freshOffers = codeResults.flatMap(r => r.offers);
+  const anyOk = codeResults.some(r => r.ok);
+  return {
+    cc, name: f.Name || '',
+    ok: anyOk,
+    codeResults: codeResults.map(({ code, ok, error, count }) => ({ code, ok, error, count })),
+    freshOffers,
+  };
+}
+
+// ── Summary rebuild from all stored country keys ────────────────────────────
+async function rebuildSummary(allCountryCodes) {
+  let all = [];
+  for (const cc of allCountryCodes) {
+    const stored = await getJson(countryKey(cc));
+    if (stored && Array.isArray(stored.offers)) all = all.concat(stored.offers);
+  }
+  const countries = summariseByCountry(all);
+  const airports = summariseByAirport(all);
+  const payload = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    source: 'redis',
+    currency: 'GBP',
+    // ENVELOPE reads `countries`; FULLSCREEN reads `airports`.
+    // Widget displays fromPricePP (per-person), per locked decision.
+    countries,
+    airports,
+    stats: { totalOffers: all.length, countriesCovered: countries.length, airportsCovered: airports.length },
+  };
+  const ok = await setJson(SUMMARY_KEY, payload);
+  if (ok) await setString(LASTRUN_KEY, payload.generatedAt);
+  return { written: ok, ...payload.stats };
+}
+
+// ── Cursor for hourly rotation ──────────────────────────────────────────────
+async function selectSlice(rows, full) {
+  if (full) return { slice: rows, nextCursor: 0 };
+  const total = rows.length;
+  const sliceSize = Math.max(1, Math.ceil(total * HOURLY_FRACTION));
+  const cur = (await getJson(CURSOR_KEY)) || { i: 0 };
+  const start = (cur.i || 0) % total;
+  const slice = [];
+  for (let k = 0; k < sliceSize; k++) slice.push(rows[(start + k) % total]);
+  return { slice, nextCursor: (start + sliceSize) % total };
+}
+
+// ── Handler ─────────────────────────────────────────────────────────────────
+export default async function handler(req, res) {
+  // Auth
+  const auth = req.headers['authorization'] || '';
+  const secret = process.env.CRON_SECRET || '';
+  if (!secret || auth !== `Bearer ${secret}`) {
+    return res.status(401).json({ ok: false, error: 'unauthorised' });
   }
 
-  // Tier 2: bundled seed
-  const seed = loadSeed();
-  if (seed && Array.isArray(seed.destinations) && seed.destinations.length > 0) {
-    seed.source = 'seed';
-    res.status(200).json(seed);
-    return;
-  }
+  const startedAt = Date.now();
+  const q = req.query || {};
 
-  // Tier 3: skeleton — guaranteed non-empty
-  res.status(200).json(SKELETON);
+  try {
+    const rows = await fetchEnabledCountries();
+    if (rows.length === 0) {
+      return res.status(200).json({ ok: true, skipped: true, reason: 'no enabled countries' });
+    }
+
+    // ── READBACK probe ───────────────────────────────────────────────────
+    // ?readback=1 reads map:offers:v1 straight back from Redis via the cron's
+    // OWN connection (same env the cron writes with). Bypasses the read
+    // endpoint and the edge cache entirely, so it tells us definitively
+    // whether the data is in Redis and what shape it has. TEMPORARY.
+    if (q.readback === '1' || q.readback === 'true') {
+      const summary = await getJson(SUMMARY_KEY);
+      const sampleCountryKeys = ['ES', 'GR', 'PT'];
+      const countryProbe = {};
+      for (const cc of sampleCountryKeys) {
+        const s = await getJson(countryKey(cc));
+        countryProbe[cc] = s && Array.isArray(s.offers)
+          ? { offers: s.offers.length, refreshedAt: s.refreshedAt }
+          : (s === null ? 'null' : 'no offers array');
+      }
+      return res.status(200).json({
+        ok: true,
+        readback: true,
+        redisConfigured: configured(),
+        summaryKey: SUMMARY_KEY,
+        summaryExists: !!summary,
+        summaryShape: summary ? {
+          hasCountries: Array.isArray(summary.countries),
+          countriesLen: Array.isArray(summary.countries) ? summary.countries.length : null,
+          hasAirports: Array.isArray(summary.airports),
+          airportsLen: Array.isArray(summary.airports) ? summary.airports.length : null,
+          generatedAt: summary.generatedAt || null,
+          stats: summary.stats || null,
+        } : null,
+        firstCountry: summary && Array.isArray(summary.countries) ? summary.countries[0] : null,
+        countryKeyProbe: countryProbe,
+      });
+    }
+
+    // ── DEBUG probe ──────────────────────────────────────────────────────
+    if (q.debug === '1' || q.debug === 'true') {
+      const row = rows[0];
+      const code = q.dest ? String(q.dest).split(',')[0].trim() : destinationCodesFor(row)[0];
+      const payload = buildPayload(row, code);
+      if (q.max) { const m = parseInt(q.max, 10); if (Number.isFinite(m) && m > 0) payload.maxOffers = m; }
+      const raw = await callOffersProxy(payload);
+      const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : null;
+      const offers = arr ? normaliseOffers(arr) : [];
+      return res.status(200).json({
+        ok: true, debug: true, sentPayload: payload,
+        rawResponseOk: raw.ok, rawError: raw.error || null,
+        rawOfferCount: arr ? arr.length : null,
+        normalisedCount: offers.length,
+        byCountry: summariseByCountry(offers),
+        byAirport: summariseByAirport(offers),
+        sampleOffer: offers[0] || null,
+      });
+    }
+
+    if (!configured()) {
+      return res.status(500).json({ ok: false, error: 'Redis not configured' });
+    }
+
+    // ── Select the slice to sweep this run ────────────────────────────────
+    const full = q.full === '1' || q.full === 'true';
+    const { slice, nextCursor } = await selectSlice(rows, full);
+
+    // ── Sweep each country in the slice, store per-country with merge+purge ─
+    const now = new Date();
+    const perCountry = [];
+    for (const row of slice) {
+      const swept = await sweepCountry(row);
+      if (!swept.cc || swept.cc === '(none)') {
+        perCountry.push({ cc: swept.cc, ok: false, error: swept.error, stored: 0 });
+        continue;
+      }
+      if (!swept.ok) {
+        // All requests failed — leave the existing key untouched (fail safe).
+        perCountry.push({ cc: swept.cc, ok: false, error: 'all requests failed', codeResults: swept.codeResults, stored: 'unchanged' });
+        continue;
+      }
+      const key = countryKey(swept.cc);
+      const existing = (await getJson(key)) || { offers: [] };
+      const surviving = updateCountryOffers(existing.offers || [], swept.freshOffers, now);
+      await setJson(key, { offers: surviving, refreshedAt: now.toISOString() });
+      perCountry.push({
+        cc: swept.cc, ok: true,
+        fetched: swept.freshOffers.length, stored: surviving.length,
+        codeResults: swept.codeResults,
+      });
+    }
+
+    // ── Rebuild the widget summary from ALL country keys (full coverage) ───
+    const allCodes = rows.map(r => (r.fields || {}).CountryCode).filter(Boolean);
+    const summary = await rebuildSummary(allCodes);
+
+    // ── Advance the rotation cursor (hourly only) ─────────────────────────
+    if (!full) await setJson(CURSOR_KEY, { i: nextCursor });
+
+    return res.status(200).json({
+      ok: true,
+      mode: full ? 'full' : 'hourly',
+      sweptCountries: slice.length,
+      totalCountries: rows.length,
+      summary,
+      perCountry,
+      durationMs: Date.now() - startedAt,
+    });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message, durationMs: Date.now() - startedAt });
+  }
 }
