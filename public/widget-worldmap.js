@@ -1080,8 +1080,67 @@ svg.leaflet-image-layer.leaflet-interactive path {
       text-align: center;
       color: var(--tgwm-text-muted);
     }
+    .tgwm-overlay-empty[hidden] { display: none !important; }
     .tgwm-overlay-empty svg { width: 40px; height: 40px; opacity: .5; }
     .tgwm-overlay-empty p { margin: 0; font-size: 14px; line-height: 1.5; max-width: 40ch; }
+
+    /* ── Big interactive map (Piece 2) ───────────────────────────────── */
+    /* Fills the overlay body. Fully interactive (drag/zoom/controls), unlike
+       the small envelope map. Lives in a relatively-positioned wrapper so the
+       map loading veil can sit over it. */
+    .tgwm-ov-mapcol {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+    }
+    .tgwm-ov-map {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      background: #A5D2EC; /* ocean tone while tiles load */
+    }
+    .tgwm-ov-map .leaflet-container { width: 100%; height: 100%; background: #A5D2EC; }
+
+    /* Loading veil specific to the big map (separate from the small map's). */
+    .tgwm-ov-loading {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
+      background: var(--tgwm-bg);
+      color: var(--tgwm-text-muted);
+      font-size: 13px;
+      z-index: 1200;
+      transition: opacity 220ms var(--tgwm-ease);
+    }
+    .tgwm-ov-loading.is-hidden { opacity: 0; pointer-events: none; }
+
+    /* Zoom controls — restyle Leaflet's default to match the brand. These only
+       appear in the big map (the small map has zoomControl:false). */
+    .tgwm-ov-map .leaflet-control-zoom {
+      border: 1px solid var(--tgwm-border) !important;
+      border-radius: var(--tgwm-radius-sm) !important;
+      box-shadow: var(--tgwm-shadow-md) !important;
+      overflow: hidden;
+    }
+    .tgwm-ov-map .leaflet-control-zoom a {
+      width: 36px !important;
+      height: 36px !important;
+      line-height: 36px !important;
+      background: var(--tgwm-bg) !important;
+      color: var(--tgwm-text) !important;
+      border-bottom: 1px solid var(--tgwm-border) !important;
+      font-size: 18px !important;
+      transition: background 140ms var(--tgwm-ease);
+    }
+    .tgwm-ov-map .leaflet-control-zoom a:last-child { border-bottom: 0 !important; }
+    .tgwm-ov-map .leaflet-control-zoom a:hover { background: var(--tgwm-surface) !important; }
+
+    /* Reuse the existing tg-pin styling for the big-map pins — they share the
+       .tg-pin-wrap / .tg-price-tag classes so no new pin CSS needed. The big
+       map shows ALL pins, so they may sit closer; that's fine when zoomed in. */
 
     /* Prevent the host page scrolling behind the overlay while it's open.
        Applied to the host <html> element via JS (class added/removed there). */
@@ -1122,6 +1181,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._lastFocus = null;
       this._onKeydown = null;
       this._prevHtmlOverflow = '';
+      // Overlay (big) map state
+      this.ovMap = null;
+      this.ovMarkers = [];
       this._render();
       this._init();
     }
@@ -1182,7 +1244,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
     _bind() {
       const fsBtn = this.shadow.querySelector('[data-fs-btn]');
       if (fsBtn) {
-        fsBtn.addEventListener('click', () => this._openFullscreen());
+        fsBtn.addEventListener('click', () => {
+          // Button open = "explore everything" → world view, not last country.
+          this._activeCountry = null;
+          this._openFullscreen();
+        });
       }
     }
 
@@ -1227,6 +1293,48 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Move focus into the overlay (close button is a safe first stop).
       const closeBtn = this.overlayEl.querySelector('[data-ov-close]');
       if (closeBtn) closeBtn.focus();
+
+      // Init or refresh the big map once the overlay is actually visible.
+      // Leaflet needs a sized, visible container to render tiles correctly, so
+      // we defer to the end of the open transition. If the map already exists
+      // (a later open), just invalidate its size and re-fit.
+      const startMap = () => {
+        if (!this._overlayOpen) return; // closed again before we got here
+        const L = window.L;
+        if (!L) {
+          // Leaflet not yet present (small map hadn't loaded it) — load then retry.
+          loadLeaflet().then(() => { if (this._overlayOpen) this._renderOverlayMap(window.L); })
+            .catch(() => this._overlayMapError());
+          return;
+        }
+        if (this.ovMap) {
+          this.ovMap.invalidateSize(false);
+          this._fitOverlayMap();
+          this._hideOverlayLoading();
+        } else {
+          this._renderOverlayMap(L);
+        }
+      };
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) {
+        startMap();
+      } else {
+        // Run after the 240ms open transition; rAF nudge guards against engines
+        // that don't fire it reliably for transform/opacity.
+        let ran = false;
+        const once = () => { if (ran) return; ran = true; this.overlayEl.removeEventListener('transitionend', onOpenEnd); startMap(); };
+        const onOpenEnd = (e) => { if (e.target === this.overlayEl && e.propertyName === 'opacity') once(); };
+        this.overlayEl.addEventListener('transitionend', onOpenEnd);
+        setTimeout(once, 300);
+      }
+    }
+
+    _overlayMapError() {
+      this._hideOverlayLoading();
+      const empty = this.overlayEl && this.overlayEl.querySelector('[data-ov-empty]');
+      const col = this.overlayEl && this.overlayEl.querySelector('[data-ov-mapcol]');
+      if (empty) { empty.hidden = false; empty.querySelector('p').textContent = 'Map unavailable. Please try again later.'; }
+      if (col) col.hidden = true;
     }
 
     /** Hide the overlay, restore scroll + focus. Does not destroy the DOM —
@@ -1298,13 +1406,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
           </button>
         </header>
         <div class="tgwm-overlay-body" data-ov-body>
-          <div class="tgwm-overlay-empty" data-ov-empty>
+          <div class="tgwm-ov-mapcol" data-ov-mapcol>
+            <div class="tgwm-ov-map" data-ov-map></div>
+            <div class="tgwm-ov-loading" data-ov-loading>
+              <div class="tgwm-spinner" aria-hidden="true"></div>
+              <span>Loading map…</span>
+            </div>
+          </div>
+          <div class="tgwm-overlay-empty" data-ov-empty hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10"/>
               <line x1="2" y1="12" x2="22" y2="12"/>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
-            <p>Pick a destination to see live deals. The interactive map and deal cards are loading in here next.</p>
+            <p>No destinations available right now. Please try again later.</p>
           </div>
         </div>
       `;
@@ -1342,6 +1457,111 @@ svg.leaflet-image-layer.leaflet-interactive path {
         e.preventDefault();
         first.focus();
       }
+    }
+
+    /** Build the interactive overlay map (once) and drop all pins. Leaflet must
+     *  init while the container has a real size, so this is called after the
+     *  open transition (see _showOverlay). On later opens we just re-fit. */
+    _renderOverlayMap(L) {
+      const mapEl = this.overlayEl && this.overlayEl.querySelector('[data-ov-map]');
+      if (!mapEl) return;
+
+      const countries = (this.data && Array.isArray(this.data.countries))
+        ? this.data.countries.filter(c => typeof c.lat === 'number' && typeof c.lng === 'number')
+        : [];
+
+      // No data → show the empty fallback, hide the loading veil, bail.
+      if (!countries.length) {
+        this._hideOverlayLoading();
+        const empty = this.overlayEl.querySelector('[data-ov-empty]');
+        const col = this.overlayEl.querySelector('[data-ov-mapcol]');
+        if (empty) empty.hidden = false;
+        if (col) col.hidden = true;
+        return;
+      }
+
+      // Build the map once.
+      if (!this.ovMap) {
+        this.ovMap = L.map(mapEl, {
+          zoomControl: true,
+          scrollWheelZoom: true,
+          doubleClickZoom: true,
+          dragging: true,
+          worldCopyJump: true,
+          minZoom: 2,
+          maxZoom: 12,
+          attributionControl: true,
+        });
+        this.ovMap.zoomControl.setPosition('topright');
+
+        const mapKey = this.cfg.mapKey || MAPTILER_KEY;
+        const tileUrl = TILE_TEMPLATE + encodeURIComponent(mapKey);
+        L.tileLayer(tileUrl, {
+          attribution: TILE_ATTRIBUTION,
+          maxZoom: 19,
+          crossOrigin: true,
+        }).addTo(this.ovMap);
+
+        // Drop ALL country pins (not just the featured subset).
+        this.ovMarkers = [];
+        for (const c of countries) {
+          const name = resolveCountryName(c);
+          const priceLabel = formatPrice(c.fromPricePP || c.fromPrice, c.currency);
+          const html = `
+            <div class="tg-pin-wrap" data-country="${esc(name)}">
+              <div class="tg-price-tag" title="${esc(name)} — from ${esc(priceLabel)} per person">
+                <span class="tg-tag-country">${esc(name)}</span>
+                <span class="tg-tag-price">${esc(priceLabel)}</span>
+              </div>
+              <div class="tg-price-anchor"></div>
+            </div>
+          `;
+          const marker = L.marker([c.lat, c.lng], {
+            icon: L.divIcon({ html, className: '', iconSize: [0, 0], iconAnchor: [0, 0] }),
+            keyboard: false,
+            interactive: true,
+            riseOnHover: true,
+          });
+          marker.on('click', () => this._onOverlayPinClick(c));
+          marker.addTo(this.ovMap);
+          this.ovMarkers.push(marker);
+        }
+      }
+
+      // Leaflet sized itself before the overlay finished animating in some
+      // engines — recompute now that it's visible, then fit the view.
+      this.ovMap.invalidateSize(false);
+      this._fitOverlayMap();
+      this._hideOverlayLoading();
+    }
+
+    /** Decide the initial view: zoom to the country we arrived from (pin click
+     *  on the small map), otherwise show the whole world with all pins. */
+    _fitOverlayMap() {
+      if (!this.ovMap) return;
+      const c = this._activeCountry;
+      if (c && typeof c.lat === 'number' && typeof c.lng === 'number') {
+        // Point-based "zoom to country" — we don't have per-country bounds in
+        // the payload, so fly to the country's centroid at a country-ish zoom.
+        this.ovMap.flyTo([c.lat, c.lng], 5, { duration: 0.6 });
+      } else {
+        // World view, slightly cropped to lose Antarctica whitespace.
+        this.ovMap.setView([25, 10], 2);
+      }
+    }
+
+    _onOverlayPinClick(country) {
+      // Store the selection so Piece 3 (deal cards) can read it, and zoom in.
+      this._activeCountry = country;
+      if (this.ovMap && typeof country.lat === 'number') {
+        this.ovMap.flyTo([country.lat, country.lng], 6, { duration: 0.6 });
+      }
+      console.info('[tgwm v3] overlay pin selected:', resolveCountryName(country), '— deal cards arrive in Piece 3');
+    }
+
+    _hideOverlayLoading() {
+      const el = this.overlayEl && this.overlayEl.querySelector('[data-ov-loading]');
+      if (el) el.classList.add('is-hidden');
     }
 
     _hideLoading() {
@@ -1483,6 +1703,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
       this._overlayOpen = false;
       this.overlayEl = null;
+      if (this.ovMap) {
+        this.ovMap.remove();
+        this.ovMap = null;
+        this.ovMarkers = [];
+      }
       if (this.map) {
         this.map.remove();
         this.map = null;
@@ -1504,6 +1729,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this._overlayOpen = false;
       }
       this.overlayEl = null;
+      if (this.ovMap) {
+        this.ovMap.remove();
+        this.ovMap = null;
+        this.ovMarkers = [];
+      }
       if (this.map) {
         this.map.remove();
         this.map = null;
