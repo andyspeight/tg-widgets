@@ -167,16 +167,29 @@ function summariseByResort(offers) {
     const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
     const ex = m.get(r);
     if (!ex) {
-      m.set(r, { resort: r, lat, lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, cheapestOfferId: o.id });
+      m.set(r, {
+        resort: r, lat, lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency,
+        offerCount: 1, cheapestOfferId: o.id,
+        // airport = the gateway for this resort's cheapest offer. The widget
+        // fetches deals?airport=… so it can pull a resort's real offers even
+        // when they're outside the country's cheapest slice. _airports tracks
+        // every gateway seen (a resort may be served by more than one).
+        airport: o.airport || null, airportName: o.airportName || null,
+        _airports: new Set(o.airport ? [o.airport] : []),
+      });
     } else {
       ex.offerCount += 1;
+      if (o.airport) ex._airports.add(o.airport);
       const exPP = Number.isFinite(ex.fromPricePP) ? ex.fromPricePP : ex.fromPrice;
       if (pp != null && (exPP == null || pp < exPP)) {
-        ex.fromPrice = o.price; ex.fromPricePP = o.pricePP; ex.lat = lat; ex.lng = lng; ex.cheapestOfferId = o.id;
+        ex.fromPrice = o.price; ex.fromPricePP = o.pricePP; ex.lat = lat; ex.lng = lng;
+        ex.cheapestOfferId = o.id; ex.airport = o.airport || ex.airport; ex.airportName = o.airportName || ex.airportName;
       }
     }
   }
-  return Array.from(m.values()).sort((a, b) => (a.fromPricePP || a.fromPrice || Infinity) - (b.fromPricePP || b.fromPrice || Infinity));
+  return Array.from(m.values())
+    .map(r => { const { _airports, ...rest } = r; return { ...rest, airports: Array.from(_airports) }; })
+    .sort((a, b) => (a.fromPricePP || a.fromPrice || Infinity) - (b.fromPricePP || b.fromPrice || Infinity));
 }
 
 // ── Tested sweep / merge / purge logic (unit-verified 22 May 2026) ──────────
