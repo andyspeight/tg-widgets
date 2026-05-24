@@ -1230,16 +1230,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
       overflow-y: auto;
       overflow-x: hidden;
       padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      display: block;            /* NOT flex — flex would shrink the cards */
       -webkit-overflow-scrolling: touch;
     }
+    /* Spacing between cards (gap doesn't apply to block flow). */
+    .tgwm-ov-cards-scroll > .tgwm-card { margin-bottom: 12px; }
+    .tgwm-ov-cards-scroll > .tgwm-skel { margin-bottom: 12px; }
+    .tgwm-ov-cards-scroll > *:last-child { margin-bottom: 0; }
 
     /* The deal card — image dominant, price-pp, hotel + stars, facts, CTA.
        Whole card is a clickable anchor to the Travelify deeplink. */
     .tgwm-card {
-      display: block;
+      display: flex;
+      flex-direction: column;
       text-decoration: none;
       color: inherit;
       background: var(--tgwm-bg);
@@ -1265,7 +1268,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
     .tgwm-card-img {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 10;
+      height: 168px;           /* explicit height — robust against flex/aspect-ratio edge cases */
+      flex: 0 0 auto;          /* never shrink the image */
       background: var(--tgwm-surface);
       overflow: hidden;
     }
@@ -1323,7 +1327,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       text-transform: uppercase;
     }
 
-    .tgwm-card-body { padding: 10px 12px 12px; }
+    .tgwm-card-body { padding: 10px 12px 12px; flex: 0 0 auto; }
     .tgwm-card-hotel {
       margin: 0;
       font-size: 14px;
@@ -1413,7 +1417,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       overflow: hidden;
       background: var(--tgwm-bg);
     }
-    .tgwm-skel-img { width: 100%; aspect-ratio: 16 / 10; }
+    .tgwm-skel-img { width: 100%; height: 168px; }
     .tgwm-skel-line { height: 12px; margin: 10px 12px; border-radius: 4px; }
     .tgwm-skel-img, .tgwm-skel-line {
       background: linear-gradient(90deg, var(--tgwm-surface) 25%, var(--tgwm-border) 37%, var(--tgwm-surface) 63%);
