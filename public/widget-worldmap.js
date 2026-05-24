@@ -950,14 +950,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(15,23,42,.18);
+      /* White ring so the navy pill always separates from the map behind it,
+         whatever the tile colour in that corner. */
+      box-shadow: 0 0 0 1.5px rgba(255,255,255,.9), 0 4px 12px rgba(15,23,42,.28);
       transition: transform 160ms var(--tgwm-ease), box-shadow 160ms;
     }
     .tgwm-fs-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(15,23,42,.24);
+      box-shadow: 0 0 0 1.5px rgba(255,255,255,.9), 0 8px 20px rgba(15,23,42,.34);
     }
     .tgwm-fs-btn:active { transform: translateY(0); }
+    .tgwm-fs-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,180,216,.55), 0 4px 12px rgba(15,23,42,.28);
+    }
     .tgwm-fs-btn svg { width: 14px; height: 14px; }
     @media (prefers-reduced-motion: reduce) { .tgwm-fs-btn { transition: none; } }
 
@@ -1228,7 +1234,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
               <div class="tgwm-spinner" aria-hidden="true"></div>
               <span data-loading-text>Loading map…</span>
             </div>
-            ${c.showFullscreenButton ? `
+            ${(c.showFullscreenButton !== false && c.showFullscreenButton !== 'false') ? `
               <button class="tgwm-fs-btn" data-fs-btn aria-label="View map in fullscreen">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="15 3 21 3 21 9"/>
@@ -1236,7 +1242,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
                   <line x1="21" y1="3" x2="14" y2="10"/>
                   <line x1="3" y1="21" x2="10" y2="14"/>
                 </svg>
-                <span>${esc(c.ctaLabel)}</span>
+                <span>${esc(c.ctaLabel || 'View fullscreen')}</span>
               </button>` : ''}
           </div>
         </div>
