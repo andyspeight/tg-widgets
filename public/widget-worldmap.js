@@ -1185,8 +1185,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       white-space: nowrap;
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(15,23,42,.28);
-      transform: translate(-50%, -50%);
-      transition: transform 140ms var(--tgwm-ease), box-shadow 140ms, background 140ms;
+      transition: box-shadow 140ms, background 140ms;
     }
     .tgwm-edge-chip:hover {
       background: var(--tgwm-pin-anchor-active, #00B4D8);
@@ -2221,11 +2220,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
         // Which way does the arrow point? Dominant axis of travel.
         const horiz = Math.abs(dx) > Math.abs(dy);
         const dir = horiz ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
-        layer.appendChild(this._edgeChip(c, ex, ey, dir));
+        // Which viewport edge the chip pins to (so it can be pushed inward).
+        const edge = horiz ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'bottom' : 'top');
+        layer.appendChild(this._edgeChip(c, ex, ey, dir, edge));
       }
     }
 
-    _edgeChip(country, x, y, dir) {
+    _edgeChip(country, x, y, dir, edge) {
       const name = resolveCountryName(country);
       const price = formatPrice(country.fromPricePP || country.fromPrice, country.currency);
       const ARROWS = {
@@ -2240,6 +2241,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
       chip.className = 'tgwm-edge-chip';
       chip.style.left = x + 'px';
       chip.style.top = y + 'px';
+      // Pin the chip's OUTER edge to the anchor and grow inward, so the whole
+      // chip (label + arrow) stays inside the map and never clips.
+      const T = {
+        left:   'translate(0, -50%)',
+        right:  'translate(-100%, -50%)',
+        top:    'translate(-50%, 0)',
+        bottom: 'translate(-50%, -100%)',
+      };
+      chip.style.transform = T[edge] || 'translate(-50%, -50%)';
       chip.title = name + ' — from ' + price + ', tap to view';
       // Arrow on the leading side: left/up arrows before the label, right/down after.
       const label = `<span class="tgwm-edge-name">${esc(name)}</span><span class="tgwm-edge-price">${esc(price)}</span>`;
