@@ -12,12 +12,16 @@
  * Reads from /api/destination-map-offers which is never empty (Redis →
  * seed fallback). Widget renders even if the cache is cold.
  *
- * Envelope mode only in this version. Fullscreen mode comes later.
+ * v3.3.0: adds the in-page fullscreen overlay (shell). The fullscreen button
+ * and pin clicks open a full-viewport overlay in the same Shadow DOM
+ * (Escape / backdrop / close button to dismiss, focus-trapped, scroll-locked).
+ * A configured fullscreenUrl still wins (opens in a new tab) for back-compat.
+ * The interactive map + deal cards + filters mount into the overlay body next.
  */
 (function () {
   'use strict';
 
-  const VERSION = '3.2.0';
+  const VERSION = '3.3.0';
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '';
   const OFFERS_URL = API_BASE + '/api/destination-map-offers';
   const CONFIG_URL = API_BASE + '/api/widget-config';
@@ -956,6 +960,125 @@ svg.leaflet-image-layer.leaflet-interactive path {
     .tgwm-fs-btn:active { transform: translateY(0); }
     .tgwm-fs-btn svg { width: 14px; height: 14px; }
     @media (prefers-reduced-motion: reduce) { .tgwm-fs-btn { transition: none; } }
+
+    /* ── Fullscreen overlay shell ────────────────────────────────────── */
+    /* Lives inside the same Shadow DOM, so host-page CSS can't bleed in and
+       the widget's own --tgwm-* tokens cascade straight through. Fixed to the
+       viewport at max z-index so it sits above all host page content. */
+
+    .tgwm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      display: flex;
+      flex-direction: column;
+      background: var(--tgwm-bg);
+      color: var(--tgwm-text);
+      opacity: 0;
+      transform: scale(.985);
+      transition: opacity 240ms var(--tgwm-ease), transform 240ms var(--tgwm-ease);
+      /* font re-declared because :host { all:initial } stops inheritance into
+         a fixed child that escapes the normal flow in some engines */
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .tgwm-overlay.is-open { opacity: 1; transform: scale(1); }
+    @media (prefers-reduced-motion: reduce) {
+      .tgwm-overlay { transition: opacity 240ms var(--tgwm-ease); transform: none; }
+      .tgwm-overlay.is-open { transform: none; }
+    }
+
+    /* Backdrop sits behind the panel; click-to-close lives here. In the full
+       split-view (pieces 2-4) the panel fills the overlay, but the backdrop
+       stays as the click-out target during the open/close transition. */
+    .tgwm-overlay-backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--tgwm-bg);
+      cursor: default;
+    }
+
+    .tgwm-overlay-header {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--tgwm-border);
+      background: var(--tgwm-bg);
+      flex: 0 0 auto;
+    }
+    .tgwm-overlay-titles { min-width: 0; flex: 1 1 auto; }
+    .tgwm-overlay-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgwm-overlay-sub {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: var(--tgwm-text-muted);
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tgwm-overlay-close {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--tgwm-border);
+      border-radius: var(--tgwm-radius-sm);
+      background: var(--tgwm-surface);
+      color: var(--tgwm-text);
+      cursor: pointer;
+      transition: background 160ms var(--tgwm-ease), border-color 160ms var(--tgwm-ease), transform 120ms var(--tgwm-ease);
+    }
+    .tgwm-overlay-close:hover { background: var(--tgwm-border); }
+    .tgwm-overlay-close:active { transform: scale(.94); }
+    .tgwm-overlay-close:focus-visible {
+      outline: none;
+      border-color: var(--tgwm-pin-anchor-active);
+      box-shadow: 0 0 0 3px rgba(0,180,216,.25);
+    }
+    .tgwm-overlay-close svg { width: 20px; height: 20px; }
+    @media (prefers-reduced-motion: reduce) { .tgwm-overlay-close { transition: none; } }
+
+    /* Content area — pieces 2-4 (map + deal cards + filters) mount in here.
+       For piece 1 it just holds the empty/placeholder state. */
+    .tgwm-overlay-body {
+      position: relative;
+      z-index: 2;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .tgwm-overlay-empty {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--tgwm-text-muted);
+    }
+    .tgwm-overlay-empty svg { width: 40px; height: 40px; opacity: .5; }
+    .tgwm-overlay-empty p { margin: 0; font-size: 14px; line-height: 1.5; max-width: 40ch; }
+
+    /* Prevent the host page scrolling behind the overlay while it's open.
+       Applied to the host <html> element via JS (class added/removed there). */
   `;
 
   const DEFAULTS = {
@@ -986,6 +1109,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this.data = null;
       this.map = null;
       this.markers = [];
+      // Fullscreen overlay state
+      this.overlayEl = null;
+      this._overlayOpen = false;
+      this._activeCountry = null;
+      this._lastFocus = null;
+      this._onKeydown = null;
+      this._prevHtmlOverflow = '';
       this._render();
       this._init();
     }
@@ -1051,14 +1181,159 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 
     _openFullscreen() {
+      // Backwards-compatible escape hatch: if a widget has fullscreenUrl set,
+      // honour the old behaviour and open it in a new tab. Otherwise open the
+      // in-page overlay (the default from v3.3.0 onwards).
       const url = this.cfg.fullscreenUrl;
       if (url) {
         const safe = safeUrl(url);
         if (safe !== '#') window.open(safe, '_blank', 'noopener');
         return;
       }
-      // No URL configured — log placeholder for now. Modal mode comes next session.
-      console.info('[tgwm v3] Fullscreen mode coming soon — configure fullscreenUrl for now');
+      this._showOverlay();
+    }
+
+    /** Build (once) and reveal the fullscreen overlay. */
+    _showOverlay() {
+      if (this._overlayOpen) return;
+      // Remember what had focus so we can restore it on close (a11y).
+      this._lastFocus = (this.shadow.activeElement) || document.activeElement || null;
+
+      if (!this.overlayEl) this._buildOverlay();
+
+      // Lock host-page scroll. Store the prior inline value so we restore
+      // exactly what was there (don't clobber a host that set its own).
+      const root = document.documentElement;
+      this._prevHtmlOverflow = root.style.overflow;
+      root.style.overflow = 'hidden';
+
+      this._overlayOpen = true;
+      this.overlayEl.hidden = false;
+      // Force a reflow so the transition runs from the hidden state.
+      // eslint-disable-next-line no-unused-expressions
+      this.overlayEl.offsetHeight;
+      this.overlayEl.classList.add('is-open');
+
+      // Wire global key handling (Escape + focus trap) while open.
+      this._onKeydown = (e) => this._handleOverlayKeydown(e);
+      this.shadow.addEventListener('keydown', this._onKeydown, true);
+
+      // Move focus into the overlay (close button is a safe first stop).
+      const closeBtn = this.overlayEl.querySelector('[data-ov-close]');
+      if (closeBtn) closeBtn.focus();
+    }
+
+    /** Hide the overlay, restore scroll + focus. Does not destroy the DOM —
+     *  it's reused on next open (cheaper, and piece 2's map can persist). */
+    _closeOverlay() {
+      if (!this._overlayOpen || !this.overlayEl) return;
+      this._overlayOpen = false;
+
+      this.overlayEl.classList.remove('is-open');
+
+      // Restore host-page scroll.
+      document.documentElement.style.overflow = this._prevHtmlOverflow || '';
+
+      // Detach key handler.
+      if (this._onKeydown) {
+        this.shadow.removeEventListener('keydown', this._onKeydown, true);
+        this._onKeydown = null;
+      }
+
+      // Hide after the exit transition (or immediately under reduced motion).
+      const finish = () => { if (this.overlayEl) this.overlayEl.hidden = true; };
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) {
+        finish();
+      } else {
+        let done = false;
+        const onEnd = (e) => {
+          if (e.target !== this.overlayEl || e.propertyName !== 'opacity') return;
+          done = true;
+          this.overlayEl.removeEventListener('transitionend', onEnd);
+          finish();
+        };
+        this.overlayEl.addEventListener('transitionend', onEnd);
+        // Safety net in case transitionend doesn't fire.
+        setTimeout(() => { if (!done) { this.overlayEl && this.overlayEl.removeEventListener('transitionend', onEnd); finish(); } }, 360);
+      }
+
+      // Return focus to whatever triggered the open.
+      if (this._lastFocus && typeof this._lastFocus.focus === 'function') {
+        try { this._lastFocus.focus(); } catch (_) {}
+      }
+      this._lastFocus = null;
+    }
+
+    /** Construct the overlay DOM inside the Shadow root (built once, reused). */
+    _buildOverlay() {
+      const c = this.cfg;
+      const wrap = document.createElement('div');
+      wrap.className = 'tgwm-overlay';
+      wrap.setAttribute('role', 'dialog');
+      wrap.setAttribute('aria-modal', 'true');
+      wrap.setAttribute('aria-label', (c.title || 'Destination map') + ' — fullscreen');
+      wrap.setAttribute('data-theme', esc(c.theme));
+      wrap.hidden = true;
+      wrap.innerHTML = `
+        <div class="tgwm-overlay-backdrop" data-ov-backdrop></div>
+        <header class="tgwm-overlay-header">
+          <div class="tgwm-overlay-titles">
+            <h2 class="tgwm-overlay-title">${esc(c.title)}</h2>
+            <p class="tgwm-overlay-sub">${esc(c.subtitle)}</p>
+          </div>
+          <button class="tgwm-overlay-close" data-ov-close type="button" aria-label="Close fullscreen map">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </header>
+        <div class="tgwm-overlay-body" data-ov-body>
+          <div class="tgwm-overlay-empty" data-ov-empty>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <p>Pick a destination to see live deals. The interactive map and deal cards are loading in here next.</p>
+          </div>
+        </div>
+      `;
+
+      // Close affordances: button, backdrop click.
+      wrap.querySelector('[data-ov-close]').addEventListener('click', () => this._closeOverlay());
+      wrap.querySelector('[data-ov-backdrop]').addEventListener('click', () => this._closeOverlay());
+
+      this.shadow.querySelector('.tgwm-root').appendChild(wrap);
+      this.overlayEl = wrap;
+    }
+
+    /** Escape to close + Tab focus trap, scoped to the overlay while open. */
+    _handleOverlayKeydown(e) {
+      if (!this._overlayOpen) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        this._closeOverlay();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusables = this.overlayEl.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = this.shadow.activeElement;
+
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
 
     _hideLoading() {
@@ -1179,14 +1454,27 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 
     _onPinClick(country) {
-      // In envelope mode, clicking a pin opens fullscreen (deal cards happen there).
-      // For now we just emit a console event — proper hook comes when fullscreen exists.
-      console.info('[tgwm v3] pin clicked:', resolveCountryName(country), '— fullscreen flow will pick this up');
+      // Stash the clicked country so the overlay (piece 2) can zoom to its
+      // bounds and load its deals. Honour the fullscreenUrl escape hatch via
+      // _openFullscreen() — which opens the overlay when no URL is configured.
+      this._activeCountry = country;
       this._openFullscreen();
     }
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      // _render() wipes shadow.innerHTML, which orphans the overlay node.
+      // Reset its state so a fresh one is built on next open. Also undo any
+      // live scroll lock so we don't strand the host page.
+      if (this._overlayOpen) {
+        document.documentElement.style.overflow = this._prevHtmlOverflow || '';
+        if (this._onKeydown) {
+          this.shadow.removeEventListener('keydown', this._onKeydown, true);
+          this._onKeydown = null;
+        }
+      }
+      this._overlayOpen = false;
+      this.overlayEl = null;
       if (this.map) {
         this.map.remove();
         this.map = null;
@@ -1197,6 +1485,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 
     destroy() {
+      // If the widget is destroyed while the overlay is open, undo the
+      // global side-effects first (host scroll lock + key handler).
+      if (this._overlayOpen) {
+        document.documentElement.style.overflow = this._prevHtmlOverflow || '';
+        if (this._onKeydown) {
+          this.shadow.removeEventListener('keydown', this._onKeydown, true);
+          this._onKeydown = null;
+        }
+        this._overlayOpen = false;
+      }
+      this.overlayEl = null;
       if (this.map) {
         this.map.remove();
         this.map = null;
