@@ -922,32 +922,39 @@ svg.leaflet-image-layer.leaflet-interactive path {
       pointer-events: auto;  /* but the tag does */
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
+      gap: 4px;
+      padding: 3px 7px;
       background: #FFFFFF;
       border: 1px solid #E2E8F0;
       border-radius: 999px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       line-height: 1;
-      box-shadow: 0 2px 6px rgba(15,23,42,.12), 0 1px 2px rgba(15,23,42,.06);
+      box-shadow: 0 1px 4px rgba(15,23,42,.16), 0 1px 2px rgba(15,23,42,.08);
       white-space: nowrap;
       cursor: pointer;
       transition: transform 180ms var(--tgwm-ease), box-shadow 180ms, border-color 180ms;
       color: #0F172A;
     }
     .tg-price-tag:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 6px 16px rgba(15,23,42,.16), 0 2px 4px rgba(15,23,42,.08);
+      transform: translateY(-2px) scale(1.06);
+      box-shadow: 0 6px 16px rgba(15,23,42,.18), 0 2px 4px rgba(15,23,42,.08);
       border-color: var(--tgwm-pin-anchor-active);
+      z-index: 1000;
     }
+    /* Compact pins: the price is the hero; the place name is a small label that
+       only shows on wider pins / hover so close-together pins stay tiny. */
     .tg-price-tag .tg-tag-country {
       color: #64748B;
       font-weight: 500;
+      font-size: 10px;
+      max-width: 96px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .tg-price-tag .tg-tag-price {
       color: #0F172A;
-      font-weight: 700;
+      font-weight: 800;
     }
     .tg-price-anchor {
       pointer-events: auto;
@@ -2054,7 +2061,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
     /** Thin resort pins the same way as country pins (pixel collision). */
     _thinResortPins() {
       if (!this.ovMap || !Array.isArray(this._resortMarkers) || !this._resortMarkers.length) return;
-      const PAD_X = 38, PAD_Y = 20;
+      // Compact pins → tighter collision footprint, so tightly-clustered
+      // resorts (e.g. the Algarve strip) surface more pins at the same zoom.
+      const PAD_X = 26, PAD_Y = 16;
       const map = this.ovMap;
       const shownPts = [];
       // Active resort first so it always survives a collision.
