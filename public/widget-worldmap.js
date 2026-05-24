@@ -1320,6 +1320,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         if (this.ovMap) {
           this.ovMap.invalidateSize(false);
           this._fitOverlayMap();
+          this._thinOverlayPins();
           this._hideOverlayLoading();
         } else {
           this._renderOverlayMap(L);
@@ -1522,9 +1523,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
             crossOrigin: true,
           }).addTo(this.ovMap);
 
-          // Drop ALL country pins (not just the featured subset).
+          // Build a marker per country, paired with its data, sorted cheapest
+          // first so the thinning pass always keeps the best-value pin when two
+          // would collide. Markers are all added once; visibility is then driven
+          // by _thinOverlayPins() on every zoom/move (Google-Flights style).
+          const priceOf = c => c.fromPricePP || c.fromPrice || Infinity;
+          const sorted = countries.slice().sort((a, b) => priceOf(a) - priceOf(b));
+
           this.ovMarkers = [];
-          for (const c of countries) {
+          for (const c of sorted) {
             const name = resolveCountryName(c);
             const priceLabel = formatPrice(c.fromPricePP || c.fromPrice, c.currency);
             const html = `
@@ -1544,18 +1551,65 @@ svg.leaflet-image-layer.leaflet-interactive path {
             });
             marker.on('click', () => this._onOverlayPinClick(c));
             marker.addTo(this.ovMap);
-            this.ovMarkers.push(marker);
+            // Pair the country with its marker for the thinning pass.
+            this.ovMarkers.push({ country: c, marker });
           }
+
+          // Re-thin pins whenever the view changes. moveend covers pan + zoom.
+          this.ovMap.on('moveend', () => this._thinOverlayPins());
         }
 
         // Leaflet sized itself before the overlay finished animating in some
         // engines — recompute now that it's visible, then fit the view.
         this.ovMap.invalidateSize(false);
         this._fitOverlayMap();
+        this._thinOverlayPins();
         this._hideOverlayLoading();
       } catch (err) {
         console.error('[tgwm v3] overlay map init failed:', err);
         this._overlayMapError();
+      }
+    }
+
+    /** Thin-and-reveal: show a pin only if it doesn't collide (in screen pixels
+     *  at the current zoom) with an already-shown, cheaper pin. Walks the
+     *  price-sorted marker list so the best-value pin always wins a collision.
+     *  Re-runs on every zoom/pan, so zooming into a dense region reveals more
+     *  pins as they stop overlapping — the Google Flights behaviour. */
+    _thinOverlayPins() {
+      if (!this.ovMap || !Array.isArray(this.ovMarkers) || !this.ovMarkers.length) return;
+
+      // Collision footprint of a price tag in screen pixels. Tags are ~70-130px
+      // wide and ~26px tall; we use a generous box so labels don't touch.
+      const PAD_X = 84; // half-width-ish horizontal clearance
+      const PAD_Y = 34; // vertical clearance
+      const map = this.ovMap;
+      const shownPts = [];
+
+      for (const entry of this.ovMarkers) {
+        const c = entry.country;
+        const el = entry.marker.getElement();
+        if (!el) continue; // not yet in DOM
+
+        let pt;
+        try { pt = map.latLngToContainerPoint([c.lat, c.lng]); }
+        catch (_) { continue; }
+
+        // The active (selected) country is always shown, even if it would collide.
+        const isActive = this._activeCountry &&
+          this._activeCountry.countryCode === c.countryCode &&
+          this._activeCountry.lat === c.lat;
+
+        const collides = !isActive && shownPts.some(p =>
+          Math.abs(p.x - pt.x) < PAD_X && Math.abs(p.y - pt.y) < PAD_Y
+        );
+
+        if (collides) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = '';
+          shownPts.push(pt);
+        }
       }
     }
 
