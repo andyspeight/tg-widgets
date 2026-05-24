@@ -1,5 +1,5 @@
 /**
- * Travelgenix World Map Widget v3.3.0
+ * Travelgenix World Map Widget v3.3.0 
  * Real-map version using Leaflet + MapTiler Streets tiles.
  *
  * Usage:
