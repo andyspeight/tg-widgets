@@ -2138,7 +2138,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
         if (!r || typeof lat !== 'number' || typeof lng !== 'number') continue;
         const pp = o.pricePP || o.fromPricePP || o.price || o.fromPrice || Infinity;
         const cur = byResort.get(r);
-        if (!cur || pp < cur.pp) byResort.set(r, { resort: r, lat, lng, pp, currency: o.currency });
+        if (!cur || pp < cur.pp) byResort.set(r, {
+          resort: r, lat, lng, pp, currency: o.currency,
+          // Carry the gateway through so a pin click can fetch this resort's
+          // deals by airport (resort summaries have it; raw offers have it too).
+          airport: o.airport || null,
+          airportName: o.airportName || null,
+        });
       }
 
       this._clearResortPins();
