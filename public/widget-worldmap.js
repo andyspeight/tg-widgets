@@ -2135,13 +2135,45 @@ svg.leaflet-image-layer.leaflet-interactive path {
         // Arrived focused on a country (small-map pin path) → load its deals.
         this._loadDeals(c);
       } else {
-        // World view, slightly cropped to lose Antarctica whitespace.
-        this.ovMap.setView([25, 10], 2);
-        // Button-open (no country) → back to country mode, reset the panel.
+        // Button-open: instead of the whole world (where dense regions look
+        // sparse), open framed on where the offers actually cluster. Fit to the
+        // main cluster of country pins, ignoring a few far-flung outliers so
+        // they don't drag the zoom back out to a full-world view.
         if (this._pinMode === 'resort') this._exitResortMode();
+        this._fitToPinCluster();
         this._resetCardsPanel();
       }
       this._ovHasView = true;
+    }
+
+    /** Fit the overlay map to the densest cluster of country pins. Outliers
+     *  (e.g. a lone USA or Maldives pin) are excluded so the view frames the
+     *  bulk of the deals rather than zooming out to fit the whole globe. */
+    _fitToPinCluster() {
+      const L = window.L;
+      const pts = Array.isArray(this.ovMarkers)
+        ? this.ovMarkers
+            .map(m => m.country)
+            .filter(c => c && typeof c.lat === 'number' && typeof c.lng === 'number')
+            .map(c => [c.lat, c.lng])
+        : [];
+      // Fallbacks if we somehow have no/very few pins.
+      if (!L || pts.length === 0) { this.ovMap.setView([25, 10], 2); return; }
+      if (pts.length <= 2) { this.ovMap.fitBounds(L.latLngBounds(pts), { padding: [60, 60], maxZoom: 5 }); return; }
+
+      // Median centre is robust to outliers (unlike the mean).
+      const lats = pts.map(p => p[0]).sort((a, b) => a - b);
+      const lngs = pts.map(p => p[1]).sort((a, b) => a - b);
+      const mid = arr => arr[Math.floor(arr.length / 2)];
+      const mLat = mid(lats), mLng = mid(lngs);
+
+      // Keep pins within a sensible band of the median (the main cluster).
+      // ~40° lat / ~60° lng covers Europe+Med+N.Africa together while dropping
+      // long-haul singletons. Always keep at least the closest few.
+      const within = pts.filter(p => Math.abs(p[0] - mLat) <= 40 && Math.abs(p[1] - mLng) <= 60);
+      const cluster = within.length >= 3 ? within : pts;
+
+      this.ovMap.fitBounds(L.latLngBounds(cluster), { padding: [50, 50], maxZoom: 5 });
     }
 
     /** Reset the left cards panel to its initial "pick a destination" prompt. */
