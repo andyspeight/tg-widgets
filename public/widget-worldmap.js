@@ -21,10 +21,11 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.3.0';
+  const VERSION = '3.4.0';
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '';
   const OFFERS_URL = API_BASE + '/api/destination-map-offers';
   const DEALS_URL = API_BASE + '/api/destination-map-deals';
+  const RESORTS_URL = API_BASE + '/api/destination-map-resorts';
   const CONFIG_URL = API_BASE + '/api/widget-config';
 
   // Max deal cards rendered per country (cheapest first). One-line tunable.
@@ -1662,6 +1663,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._resortMarkers = [];
       this._activeResort = null;
       this._dealsCache = null;
+      this._resortSummary = null; // full resort list from the resorts endpoint
+      this._resortToken = 0;
       // Filter state (in-country): max budget pp + min star rating.
       this._filterMaxPrice = null;  // null = Any
       this._filterMinRating = null; // null = Any
@@ -2115,19 +2118,23 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
     }
 
-    /** Build resort-level pins for the active country from its offers. Derives
-     *  the distinct resorts (cheapest pp + coords each), switches the map into
-     *  resort mode (country pins hidden), and drops resort markers. */
-    _buildResortPins(offers, fitToResorts) {
-      if (!this.ovMap || !Array.isArray(offers)) return;
+    /** Build resort-level pins for the active country. Accepts EITHER raw offers
+     *  (resortLat/resortLng + pricePP) OR pre-aggregated resort summaries
+     *  (lat/lng + fromPricePP) from the resorts endpoint, so it works whichever
+     *  source fed it. Switches the map into resort mode and drops the markers. */
+    _buildResortPins(items, fitToResorts) {
+      if (!this.ovMap || !Array.isArray(items)) return;
 
-      // Distinct resorts → cheapest offer (carries coords + price).
+      // Distinct resorts → cheapest. Tolerate both shapes:
+      //   offer:           { resort, resortLat, resortLng, pricePP|price }
+      //   resort summary:  { resort, lat, lng, fromPricePP|fromPrice }
       const byResort = new Map();
-      for (const o of offers) {
+      for (const o of items) {
         const r = o.resort;
-        const lat = o.resortLat, lng = o.resortLng;
+        const lat = (typeof o.resortLat === 'number') ? o.resortLat : o.lat;
+        const lng = (typeof o.resortLng === 'number') ? o.resortLng : o.lng;
         if (!r || typeof lat !== 'number' || typeof lng !== 'number') continue;
-        const pp = o.pricePP || o.price || Infinity;
+        const pp = o.pricePP || o.fromPricePP || o.price || o.fromPrice || Infinity;
         const cur = byResort.get(r);
         if (!cur || pp < cur.pp) byResort.set(r, { resort: r, lat, lng, pp, currency: o.currency });
       }
@@ -2185,6 +2192,37 @@ svg.leaflet-image-layer.leaflet-interactive path {
       if (!fitToResorts) this._thinResortPins();
     }
 
+    /** Fetch the COMPLETE resort list for a country and pin every resort. Falls
+     *  back to deriving resorts from the (capped) deals offers if the resorts
+     *  endpoint is unavailable or empty — so the map still works during rollout.
+     *  Token-guarded so a slower response for a previous country can't overwrite
+     *  pins for the one now selected. */
+    _loadResortPins(cc, fitToResorts) {
+      // Drop any previous country's full list so it can't pin the wrong place
+      // during the fetch window.
+      this._resortSummary = null;
+      // Immediate pins from whatever deals we already hold, so there's no blank
+      // gap while the fuller list loads.
+      if (this._dealsCache && Array.isArray(this._dealsCache.offers)) {
+        this._buildResortPins(this._applyFilters(this._dealsCache.offers), fitToResorts);
+      }
+      if (!cc) return;
+      const token = (this._resortToken = (this._resortToken || 0) + 1);
+      fetch(RESORTS_URL + '?country=' + encodeURIComponent(cc), { credentials: 'omit' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('resorts HTTP ' + r.status)))
+        .then(data => {
+          if (token !== this._resortToken) return;          // superseded
+          if (this._pinMode !== 'resort') return;            // left resort mode
+          const resorts = (data && Array.isArray(data.resorts)) ? data.resorts : [];
+          if (!resorts.length) return;                       // keep the deals-derived pins
+          this._resortSummary = resorts;
+          // Rebuild from the full list. Don't re-fit here — the initial fit
+          // already happened from the deals-derived pins; refitting would yank.
+          this._buildResortPins(resorts, false);
+        })
+        .catch(() => { /* keep deals-derived pins */ });
+    }
+
     _clearResortPins() {
       if (Array.isArray(this._resortMarkers)) {
         for (const e of this._resortMarkers) {
@@ -2192,6 +2230,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
         }
       }
       this._resortMarkers = [];
+    }
+
+    /** Which items to build resort pins from on a rebuild (click/filter change):
+     *  - no in-country filter active → the FULL resort summary (every resort);
+     *  - a filter active → deals-derived resorts, which carry the per-offer
+     *    detail (rating/price) needed to filter accurately. The summary only
+     *    holds each resort's cheapest price, so it can't honour a rating filter. */
+    _resortPinSource() {
+      const filtering = (this._filterMaxPrice != null || this._filterMinRating != null);
+      if (!filtering && Array.isArray(this._resortSummary) && this._resortSummary.length) {
+        return this._resortSummary;
+      }
+      return this._dealsCache ? this._applyFilters(this._dealsCache.offers) : [];
     }
 
     _setCountryPinsVisible(visible) {
@@ -2204,10 +2255,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     _onResortPinClick(r) {
       this._activeResort = r.resort;
-      if (this.ovMap && this._ovHasView) this.ovMap.flyTo([r.lat, r.lng], 9, { duration: 0.5 });
+      // Zoom in tight to the resort (town level) so the click clearly drills in,
+      // not just a gentle nudge. flyTo is safe — a view always exists by now.
+      if (this.ovMap) {
+        const targetZoom = Math.max(this.ovMap.getZoom(), 11);
+        this.ovMap.flyTo([r.lat, r.lng], targetZoom, { duration: 0.7 });
+      }
       this._filterCardsByResort(r.resort);
-      // Re-render resort pins (filtered) so the clicked one shows as active.
-      if (this._dealsCache) this._buildResortPins(this._applyFilters(this._dealsCache.offers));
+      // Re-render resort pins so the clicked one shows as active. Uses the full
+      // resort set when unfiltered, deals-derived when a filter is active.
+      this._buildResortPins(this._resortPinSource());
     }
 
     /** Thin resort pins the same way as country pins (pixel collision). */
@@ -2244,6 +2301,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._pinMode = 'country';
       this._activeResort = null;
       this._dealsCache = null;
+      this._resortSummary = null;
       this._setCountryPinsVisible(true);
       this._thinOverlayPins();
       this._renderEdgeArrows();
@@ -2604,7 +2662,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this._buildFilterControls(this._dealsCache.offers);
         const shown = this._applyFilters(this._dealsCache.offers);
         this._renderCards(shown, this._dealsCache.total, name);
-        this._buildResortPins(shown, true);
+        this._loadResortPins(cc, true);
         return;
       }
 
@@ -2634,7 +2692,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           this._filterMinRating = null;
           this._buildFilterControls(offers);
           this._renderCards(offers, total, name);
-          this._buildResortPins(offers, true);
+          this._loadResortPins(cc, true);
         })
         .catch(err => {
           if (token !== this._dealsToken) return;
@@ -2730,7 +2788,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Refresh the controls so pressed states + disabled options stay correct.
       this._buildFilterControls(this._dealsCache.offers);
       this._renderCards(shown, this._dealsCache.total, this._dealsCache.name);
-      this._buildResortPins(shown, false);
+      this._buildResortPins(this._resortPinSource(), false);
       // Map-level: also dim country pins above the budget cap (price-only).
       this._applyWorldPriceFilter();
     }
@@ -2810,7 +2868,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const shown = this._applyFilters(this._dealsCache.offers);
       this._renderCards(shown, this._dealsCache.total, this._dealsCache.name);
       // Re-highlight: rebuild resort pins so none is marked active.
-      this._buildResortPins(shown);
+      this._buildResortPins(this._resortPinSource());
     }
 
     _skeletonsHtml(n) {
@@ -3046,8 +3104,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this.ovMarkers = [];
         this._resortMarkers = [];
         this._pinMode = 'country';
-        this._activeResort = null;
+                this._activeResort = null;
         this._dealsCache = null;
+        this._resortSummary = null;
         this._ovHasView = false;
         this._activeRegion = null;
       }
@@ -3078,8 +3137,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this.ovMarkers = [];
         this._resortMarkers = [];
         this._pinMode = 'country';
-        this._activeResort = null;
+                this._activeResort = null;
         this._dealsCache = null;
+        this._resortSummary = null;
         this._ovHasView = false;
         this._activeRegion = null;
       }
