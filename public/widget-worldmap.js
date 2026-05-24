@@ -24,7 +24,11 @@
   const VERSION = '3.3.0';
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '';
   const OFFERS_URL = API_BASE + '/api/destination-map-offers';
+  const DEALS_URL = API_BASE + '/api/destination-map-deals';
   const CONFIG_URL = API_BASE + '/api/widget-config';
+
+  // Max deal cards rendered per country (cheapest first). One-line tunable.
+  const MAX_DEAL_CARDS = 20;
 
   const LEAFLET_JS_URL = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
 
@@ -73,6 +77,41 @@
     if (!Number.isFinite(p) || p <= 0) return '';
     const sym = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '';
     return sym + Math.round(p).toLocaleString('en-GB');
+  }
+
+  // Travelify boardBasis comes camelCase ("AllInclusivePlus"); humanise for display.
+  const BOARD_LABELS = {
+    RoomOnly: 'Room only',
+    SelfCatering: 'Self catering',
+    BedAndBreakfast: 'B&B',
+    HalfBoard: 'Half board',
+    FullBoard: 'Full board',
+    AllInclusive: 'All inclusive',
+    AllInclusivePlus: 'All inclusive+',
+  };
+  function boardLabel(b) {
+    if (!b) return '';
+    if (BOARD_LABELS[b]) return BOARD_LABELS[b];
+    // Fallback: split camelCase into words.
+    return String(b).replace(/([a-z])([A-Z])/g, '$1 $2');
+  }
+
+  // Star rating → inline SVG string. Supports half stars (e.g. 4.5).
+  function starsSvg(rating) {
+    const r = Number(rating);
+    if (!Number.isFinite(r) || r <= 0) return '';
+    const full = Math.floor(r);
+    const half = (r - full) >= 0.5;
+    const FULL = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+    const HALF = '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="tgwmhalf"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path fill="url(#tgwmhalf)" stroke="currentColor" stroke-width="1" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+    const EMPTY = '<svg viewBox="0 0 24 24" fill="currentColor" class="tgwm-star-empty" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+    let out = '';
+    for (let i = 0; i < 5; i++) {
+      if (i < full) out += FULL;
+      else if (i === full && half) out += HALF;
+      else out += EMPTY;
+    }
+    return out;
   }
 
   // Two-letter ISO country code → display name. The live offers payload keys
@@ -1150,6 +1189,256 @@ svg.leaflet-image-layer.leaflet-interactive path {
        .tg-pin-wrap / .tg-price-tag classes so no new pin CSS needed. The big
        map shows ALL pins, so they may sit closer; that's fine when zoomed in. */
 
+    /* ── Deal cards panel (Piece 3) ──────────────────────────────────── */
+    /* Split layout: cards left ~40%, map right ~60% (Google Flights Explore).
+       The overlay body is a flex row; the cards column is a fixed-ish width and
+       the map column flexes to fill. On narrow widths (container query) they
+       stack — map on top, cards scroll beneath. */
+    .tgwm-overlay-body { container-type: inline-size; container-name: tgwmbody; }
+
+    .tgwm-ov-cards {
+      flex: 0 0 40%;
+      max-width: 460px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--tgwm-border);
+      background: var(--tgwm-bg);
+      overflow: hidden;
+    }
+    .tgwm-ov-cards-head {
+      flex: 0 0 auto;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--tgwm-border);
+    }
+    .tgwm-ov-cards-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--tgwm-text);
+    }
+    .tgwm-ov-cards-meta {
+      margin: 3px 0 0;
+      font-size: 12px;
+      color: var(--tgwm-text-muted);
+      line-height: 1.3;
+    }
+    .tgwm-ov-cards-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* The deal card — image dominant, price-pp, hotel + stars, facts, CTA.
+       Whole card is a clickable anchor to the Travelify deeplink. */
+    .tgwm-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--tgwm-bg);
+      border: 1px solid var(--tgwm-border);
+      border-radius: var(--tgwm-radius-sm);
+      overflow: hidden;
+      box-shadow: var(--tgwm-shadow-md);
+      transition: transform 160ms var(--tgwm-ease), box-shadow 160ms var(--tgwm-ease), border-color 160ms var(--tgwm-ease);
+      cursor: pointer;
+    }
+    .tgwm-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--tgwm-shadow-lg);
+      border-color: var(--tgwm-pin-anchor-active);
+    }
+    .tgwm-card:focus-visible {
+      outline: none;
+      border-color: var(--tgwm-pin-anchor-active);
+      box-shadow: 0 0 0 3px rgba(0,180,216,.3);
+    }
+    @media (prefers-reduced-motion: reduce) { .tgwm-card { transition: none; } }
+
+    .tgwm-card-img {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: var(--tgwm-surface);
+      overflow: hidden;
+    }
+    .tgwm-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* Price chip overlaid on the image, bottom-left */
+    .tgwm-card-price {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+      padding: 6px 10px;
+      background: rgba(255,255,255,.96);
+      border-radius: var(--tgwm-radius-sm);
+      box-shadow: 0 2px 8px rgba(15,23,42,.18);
+    }
+    .tgwm-card-price-pp {
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+      color: #0F172A;
+      font-variant-numeric: tabular-nums;
+    }
+    .tgwm-card-price-pp span { font-size: 11px; font-weight: 600; color: #64748B; }
+    .tgwm-card-price-total {
+      font-size: 11px;
+      color: #64748B;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    [data-theme="dark"] .tgwm-card-price { background: rgba(30,41,59,.96); }
+    [data-theme="dark"] .tgwm-card-price-pp { color: #F8FAFC; }
+    [data-theme="dark"] .tgwm-card-price-pp span,
+    [data-theme="dark"] .tgwm-card-price-total { color: #CBD5E1; }
+
+    /* Direct-flight badge, image top-right */
+    .tgwm-card-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 8px;
+      background: rgba(16,185,129,.95);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      border-radius: var(--tgwm-radius-sm);
+      text-transform: uppercase;
+    }
+
+    .tgwm-card-body { padding: 10px 12px 12px; }
+    .tgwm-card-hotel {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--tgwm-text);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .tgwm-card-resort {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--tgwm-text-muted);
+      line-height: 1.3;
+    }
+    .tgwm-card-stars {
+      display: inline-flex;
+      gap: 1px;
+      margin-top: 6px;
+      color: #F59E0B;
+    }
+    .tgwm-card-stars svg { width: 14px; height: 14px; }
+    .tgwm-card-stars .tgwm-star-empty { color: var(--tgwm-border); }
+
+    .tgwm-card-facts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .tgwm-card-fact {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: var(--tgwm-surface);
+      border: 1px solid var(--tgwm-border);
+      border-radius: var(--tgwm-radius-sm);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--tgwm-text-muted);
+      white-space: nowrap;
+    }
+    .tgwm-card-fact svg { width: 12px; height: 12px; opacity: .8; }
+
+    .tgwm-card-cta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--tgwm-border);
+    }
+    .tgwm-card-cta-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--tgwm-pin-anchor-active);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tgwm-card-cta-label svg { width: 15px; height: 15px; }
+    .tgwm-card-carrier { font-size: 11px; color: var(--tgwm-text-muted); }
+
+    /* Cards panel: prompt / loading / empty / error states */
+    .tgwm-ov-cards-state {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--tgwm-text-muted);
+    }
+    .tgwm-ov-cards-state[hidden] { display: none !important; }
+    .tgwm-ov-cards-state svg { width: 36px; height: 36px; opacity: .5; }
+    .tgwm-ov-cards-state p { margin: 0; font-size: 13px; line-height: 1.5; max-width: 34ch; }
+
+    /* Skeleton card shimmer for the loading state */
+    .tgwm-skel {
+      border: 1px solid var(--tgwm-border);
+      border-radius: var(--tgwm-radius-sm);
+      overflow: hidden;
+      background: var(--tgwm-bg);
+    }
+    .tgwm-skel-img { width: 100%; aspect-ratio: 16 / 10; }
+    .tgwm-skel-line { height: 12px; margin: 10px 12px; border-radius: 4px; }
+    .tgwm-skel-img, .tgwm-skel-line {
+      background: linear-gradient(90deg, var(--tgwm-surface) 25%, var(--tgwm-border) 37%, var(--tgwm-surface) 63%);
+      background-size: 400% 100%;
+      animation: tgwm-shimmer 1.4s ease infinite;
+    }
+    .tgwm-skel-line.short { width: 50%; }
+    @keyframes tgwm-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+    @media (prefers-reduced-motion: reduce) { .tgwm-skel-img, .tgwm-skel-line { animation: none; } }
+
+    /* ── Responsive: stack on narrow containers (your locked @container rule) ── */
+    @container tgwmbody (max-width: 720px) {
+      .tgwm-overlay-body { flex-direction: column; }
+      .tgwm-ov-cards {
+        flex: 1 1 auto;
+        max-width: none;
+        width: 100%;
+        border-right: 0;
+        border-top: 1px solid var(--tgwm-border);
+        order: 2;            /* map on top, cards below */
+        max-height: 55%;
+      }
+      .tgwm-ov-mapcol { order: 1; flex: 1 1 auto; min-height: 200px; }
+    }
+
     /* Prevent the host page scrolling behind the overlay while it's open.
        Applied to the host <html> element via JS (class added/removed there). */
   `;
@@ -1194,6 +1483,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this.ovMarkers = [];
       this._ovMapHeightRetried = false;
       this._ovHasView = false;
+      this._dealsToken = 0;
       this._render();
       this._init();
     }
@@ -1417,6 +1707,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
           </button>
         </header>
         <div class="tgwm-overlay-body" data-ov-body>
+          <aside class="tgwm-ov-cards" data-ov-cards>
+            <div class="tgwm-ov-cards-head">
+              <h3 class="tgwm-ov-cards-title" data-ov-cards-title>Latest deals</h3>
+              <p class="tgwm-ov-cards-meta" data-ov-cards-meta>Tap any destination on the map to see its deals.</p>
+            </div>
+            <div class="tgwm-ov-cards-scroll" data-ov-cards-scroll>
+              <div class="tgwm-ov-cards-state" data-ov-cards-prompt>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <p>Pick a destination to see live deals — tap a price on the map.</p>
+              </div>
+            </div>
+          </aside>
           <div class="tgwm-ov-mapcol" data-ov-mapcol>
             <div class="tgwm-ov-map" data-ov-map></div>
             <div class="tgwm-ov-loading" data-ov-loading>
@@ -1628,27 +1933,182 @@ svg.leaflet-image-layer.leaflet-interactive path {
         // so centre on the country's point at a country-ish zoom.
         if (hasView) this.ovMap.flyTo([c.lat, c.lng], 5, { duration: 0.6 });
         else this.ovMap.setView([c.lat, c.lng], 5);
+        // Arrived focused on a country (small-map pin path) → load its deals.
+        this._loadDeals(c);
       } else {
         // World view, slightly cropped to lose Antarctica whitespace.
         this.ovMap.setView([25, 10], 2);
+        // Button-open (no country) → reset the cards panel to the prompt.
+        this._resetCardsPanel();
       }
       this._ovHasView = true;
     }
 
+    /** Reset the left cards panel to its initial "pick a destination" prompt. */
+    _resetCardsPanel() {
+      if (!this.overlayEl) return;
+      this._dealsToken = (this._dealsToken || 0) + 1; // cancel any in-flight fetch
+      const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
+      const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
+      const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
+      if (titleEl) titleEl.textContent = 'Latest deals';
+      if (metaEl) metaEl.textContent = 'Tap any destination on the map to see its deals.';
+      if (scroll) {
+        scroll.innerHTML = `
+          <div class="tgwm-ov-cards-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            <p>Pick a destination to see live deals — tap a price on the map.</p>
+          </div>`;
+      }
+    }
+
     _onOverlayPinClick(country) {
-      // Store the selection so Piece 3 (deal cards) can read it, and zoom in.
+      // Store the selection, zoom in, and load its deals into the left panel.
       this._activeCountry = country;
       if (this.ovMap && typeof country.lat === 'number') {
         // A view always exists by the time a pin is clickable, so flyTo is safe.
         if (this._ovHasView) this.ovMap.flyTo([country.lat, country.lng], 6, { duration: 0.6 });
         else { this.ovMap.setView([country.lat, country.lng], 6); this._ovHasView = true; }
       }
-      console.info('[tgwm v3] overlay pin selected:', resolveCountryName(country), '— deal cards arrive in Piece 3');
+      this._loadDeals(country);
     }
 
     _hideOverlayLoading() {
       const el = this.overlayEl && this.overlayEl.querySelector('[data-ov-loading]');
       if (el) el.classList.add('is-hidden');
+    }
+
+    /** Fetch + render deals for a selected country into the left cards panel.
+     *  Guards against out-of-order responses (rapid pin clicks) with a token. */
+    _loadDeals(country) {
+      if (!this.overlayEl || !country) return;
+      const cc = country.countryCode;
+      const name = resolveCountryName(country);
+      const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
+      const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
+      const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
+      if (!scroll) return;
+
+      if (titleEl) titleEl.textContent = name;
+      if (metaEl) metaEl.textContent = 'Finding the best deals…';
+
+      // Token to discard stale responses if another country is picked mid-fetch.
+      const token = (this._dealsToken = (this._dealsToken || 0) + 1);
+
+      // Loading skeletons.
+      scroll.innerHTML = this._skeletonsHtml(4);
+
+      if (!cc) { this._renderDealsError(scroll, metaEl); return; }
+
+      fetch(DEALS_URL + '?country=' + encodeURIComponent(cc), { credentials: 'omit' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('deals HTTP ' + r.status)))
+        .then(data => {
+          if (token !== this._dealsToken) return; // superseded
+          const offers = (data && Array.isArray(data.offers)) ? data.offers : [];
+          if (!offers.length) { this._renderDealsEmpty(scroll, metaEl, name); return; }
+          // Cheapest first, capped.
+          const sorted = offers.slice().sort((a, b) =>
+            (a.pricePP || a.price || Infinity) - (b.pricePP || b.price || Infinity)
+          ).slice(0, MAX_DEAL_CARDS);
+          if (metaEl) {
+            const total = data.total || offers.length;
+            metaEl.textContent = sorted.length + ' of ' + total.toLocaleString('en-GB') + ' deals · cheapest first';
+          }
+          scroll.innerHTML = sorted.map(o => this._cardHtml(o)).join('');
+        })
+        .catch(err => {
+          if (token !== this._dealsToken) return;
+          console.warn('[tgwm v3] deals fetch failed:', err.message);
+          this._renderDealsError(scroll, metaEl);
+        });
+    }
+
+    _skeletonsHtml(n) {
+      let out = '';
+      for (let i = 0; i < n; i++) {
+        out += `<div class="tgwm-skel"><div class="tgwm-skel-img"></div><div class="tgwm-skel-line"></div><div class="tgwm-skel-line short"></div></div>`;
+      }
+      return out;
+    }
+
+    _renderDealsEmpty(scroll, metaEl, name) {
+      if (metaEl) metaEl.textContent = '';
+      scroll.innerHTML = `
+        <div class="tgwm-ov-cards-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <p>No deals available for ${esc(name)} right now. Try another destination.</p>
+        </div>`;
+    }
+
+    _renderDealsError(scroll, metaEl) {
+      if (metaEl) metaEl.textContent = '';
+      scroll.innerHTML = `
+        <div class="tgwm-ov-cards-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>Couldn't load deals just now. Please try again in a moment.</p>
+        </div>`;
+    }
+
+    /** Build one deal card. Whole card is an anchor to the Travelify deeplink. */
+    _cardHtml(o) {
+      const href = safeUrl(o.url);
+      const img = safeUrl(o.image);
+      const pp = formatPrice(o.pricePP || o.price, o.currency);
+      const total = (o.price && o.pricePP && o.price !== o.pricePP)
+        ? formatPrice(o.price, o.currency) + ' total' : '';
+      const hotel = esc(o.hotel || 'Hotel');
+      const resort = esc([o.resort, o.airportName ? o.airportName.replace(/\s*\([^)]*\)\s*$/, '') : '']
+        .filter(Boolean).join(' · '));
+      const stars = starsSvg(o.rating);
+      const facts = [];
+      if (o.boardBasis) facts.push(this._factHtml('board', boardLabel(o.boardBasis)));
+      if (o.nights) facts.push(this._factHtml('moon', o.nights + (o.nights === 1 ? ' night' : ' nights')));
+      if (o.resort) facts.push(this._factHtml('pin', esc(o.resort)));
+      const carrier = o.carrier ? esc(o.carrier) : '';
+      const directBadge = o.direct ? `<span class="tgwm-card-badge">Direct</span>` : '';
+      const imgHtml = img !== '#'
+        ? `<img src="${img}" alt="${hotel}" loading="lazy" onerror="this.style.display='none'">`
+        : '';
+
+      return `
+        <a class="tgwm-card" href="${href}" target="_blank" rel="noopener noreferrer">
+          <div class="tgwm-card-img">
+            ${imgHtml}
+            ${directBadge}
+            <div class="tgwm-card-price">
+              <span class="tgwm-card-price-pp">${esc(pp)}<span> pp</span></span>
+              ${total ? `<span class="tgwm-card-price-total">${esc(total)}</span>` : ''}
+            </div>
+          </div>
+          <div class="tgwm-card-body">
+            <h4 class="tgwm-card-hotel">${hotel}</h4>
+            ${resort ? `<p class="tgwm-card-resort">${resort}</p>` : ''}
+            ${stars ? `<div class="tgwm-card-stars">${stars}</div>` : ''}
+            <div class="tgwm-card-facts">${facts.join('')}</div>
+            <div class="tgwm-card-cta">
+              <span class="tgwm-card-cta-label">View deal
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+              ${carrier ? `<span class="tgwm-card-carrier">${carrier}</span>` : ''}
+            </div>
+          </div>
+        </a>`;
+    }
+
+    _factHtml(icon, label) {
+      const ICONS = {
+        board: '<path d="M3 11h18M3 11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2M5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8M9 9V7a3 3 0 0 1 6 0v2"/>',
+        moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+        pin: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+      };
+      const path = ICONS[icon] || '';
+      return `<span class="tgwm-card-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>${label}</span>`;
     }
 
     _hideLoading() {
