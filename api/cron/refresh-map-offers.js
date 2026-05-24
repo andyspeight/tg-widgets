@@ -65,6 +65,7 @@ const SUMMARY_KEY = 'map:offers:v1';
 const LASTRUN_KEY = 'map:offers:lastRunAt';
 const CURSOR_KEY = 'map:offers:cursor';
 const countryKey = (cc) => `offers:packages:${cc}`;
+const resortsKey = (cc) => `map:resorts:${cc}`;
 
 // ── Tested offer parser (unit-verified 22 May 2026) ─────────────────────────
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
@@ -151,6 +152,31 @@ function summariseByCountry(offers, regionByCC = {}) {
   return Array.from(m.values())
     .map(c => { const { _airports, ...rest } = c; return { ...rest, airportCount: _airports.size, region: regionByCC[c.countryCode] || 'Other' }; })
     .sort((a, b) => a.fromPrice - b.fromPrice);
+}
+
+/** Distinct resorts within ONE country's offers — cheapest price + coords +
+ *  offer count per resort, across ALL stored offers (not just the cheapest
+ *  slice the deals endpoint returns). This is what lets the map pin every
+ *  resort, not only the handful in the cheapest 60. */
+function summariseByResort(offers) {
+  const m = new Map();
+  for (const o of offers) {
+    const r = o.resort;
+    const lat = num(o.resortLat), lng = num(o.resortLng);
+    if (!r || lat == null || lng == null) continue;
+    const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
+    const ex = m.get(r);
+    if (!ex) {
+      m.set(r, { resort: r, lat, lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, cheapestOfferId: o.id });
+    } else {
+      ex.offerCount += 1;
+      const exPP = Number.isFinite(ex.fromPricePP) ? ex.fromPricePP : ex.fromPrice;
+      if (pp != null && (exPP == null || pp < exPP)) {
+        ex.fromPrice = o.price; ex.fromPricePP = o.pricePP; ex.lat = lat; ex.lng = lng; ex.cheapestOfferId = o.id;
+      }
+    }
+  }
+  return Array.from(m.values()).sort((a, b) => (a.fromPricePP || a.fromPrice || Infinity) - (b.fromPricePP || b.fromPrice || Infinity));
 }
 
 // ── Tested sweep / merge / purge logic (unit-verified 22 May 2026) ──────────
@@ -316,7 +342,14 @@ async function rebuildSummary(rows) {
   let all = [];
   for (const cc of allCountryCodes) {
     const stored = await getJson(countryKey(cc));
-    if (stored && Array.isArray(stored.offers)) all = all.concat(stored.offers);
+    if (stored && Array.isArray(stored.offers)) {
+      all = all.concat(stored.offers);
+      // Write a compact per-country resort summary (ALL resorts, cheapest +
+      // coords + count each) so the widget can pin every resort, not just the
+      // handful in the deals endpoint's cheapest slice.
+      const resorts = summariseByResort(stored.offers);
+      await setJson(resortsKey(cc), { resorts, refreshedAt: new Date().toISOString() });
+    }
   }
   const countries = summariseByCountry(all, regionByCC);
   const airports = summariseByAirport(all, regionByCC);
