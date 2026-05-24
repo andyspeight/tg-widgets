@@ -126,7 +126,7 @@ function normaliseOffers(rawArray) {
   }
   return out;
 }
-function summariseByAirport(offers) {
+function summariseByAirport(offers, regionByCC = {}) {
   const m = new Map();
   for (const o of offers) {
     if (!o.airport) continue;
@@ -134,9 +134,11 @@ function summariseByAirport(offers) {
     if (!c) m.set(o.airport, { airport: o.airport, airportName: o.airportName, countryCode: o.countryCode, lat: o.lat, lng: o.lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, cheapestOfferId: o.id });
     else { c.offerCount += 1; if (o.price < c.fromPrice) { c.fromPrice = o.price; c.fromPricePP = o.pricePP; c.cheapestOfferId = o.id; } }
   }
-  return Array.from(m.values()).sort((a, b) => a.fromPrice - b.fromPrice);
+  return Array.from(m.values())
+    .map(a => ({ ...a, region: regionByCC[a.countryCode] || 'Other' }))
+    .sort((a, b) => a.fromPrice - b.fromPrice);
 }
-function summariseByCountry(offers) {
+function summariseByCountry(offers, regionByCC = {}) {
   const m = new Map();
   for (const o of offers) {
     if (!o.countryCode) continue;
@@ -144,7 +146,11 @@ function summariseByCountry(offers) {
     if (!c) m.set(o.countryCode, { countryCode: o.countryCode, lat: o.lat, lng: o.lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, _airports: new Set([o.airport]), cheapestOfferId: o.id });
     else { c.offerCount += 1; c._airports.add(o.airport); if (o.price < c.fromPrice) { c.fromPrice = o.price; c.fromPricePP = o.pricePP; c.lat = o.lat; c.lng = o.lng; c.cheapestOfferId = o.id; } }
   }
-  return Array.from(m.values()).map(c => { const { _airports, ...rest } = c; return { ...rest, airportCount: _airports.size }; }).sort((a, b) => a.fromPrice - b.fromPrice);
+  // Stamp the region (from the MapSearches rows) onto each country so the widget
+  // can offer region filtering. Unknown codes fall back to 'Other'.
+  return Array.from(m.values())
+    .map(c => { const { _airports, ...rest } = c; return { ...rest, airportCount: _airports.size, region: regionByCC[c.countryCode] || 'Other' }; })
+    .sort((a, b) => a.fromPrice - b.fromPrice);
 }
 
 // ── Tested sweep / merge / purge logic (unit-verified 22 May 2026) ──────────
@@ -293,14 +299,27 @@ async function sweepCountry(row) {
 }
 
 // ── Summary rebuild from all stored country keys ────────────────────────────
-async function rebuildSummary(allCountryCodes) {
+async function rebuildSummary(rows) {
+  // Build countryCode → region from the MapSearches rows (the single source of
+  // truth for region — already populated in Airtable). Region travels into the
+  // summary so the widget can filter the map by region.
+  const regionByCC = {};
+  const allCountryCodes = [];
+  for (const r of rows) {
+    const f = r.fields || {};
+    const cc = (f.CountryCode || '').trim();
+    if (!cc) continue;
+    allCountryCodes.push(cc);
+    if (f.Region) regionByCC[cc] = f.Region;
+  }
+
   let all = [];
   for (const cc of allCountryCodes) {
     const stored = await getJson(countryKey(cc));
     if (stored && Array.isArray(stored.offers)) all = all.concat(stored.offers);
   }
-  const countries = summariseByCountry(all);
-  const airports = summariseByAirport(all);
+  const countries = summariseByCountry(all, regionByCC);
+  const airports = summariseByAirport(all, regionByCC);
   const payload = {
     version: 1,
     generatedAt: new Date().toISOString(),
@@ -308,6 +327,7 @@ async function rebuildSummary(allCountryCodes) {
     currency: 'GBP',
     // ENVELOPE reads `countries`; FULLSCREEN reads `airports`.
     // Widget displays fromPricePP (per-person), per locked decision.
+    // Each country/airport now carries `region` for map-level region filtering.
     countries,
     airports,
     stats: { totalOffers: all.length, countriesCovered: countries.length, airportsCovered: airports.length },
@@ -469,8 +489,8 @@ export default async function handler(req, res) {
     }
 
     // ── Rebuild the widget summary from ALL country keys (full coverage) ───
-    const allCodes = rows.map(r => (r.fields || {}).CountryCode).filter(Boolean);
-    const summary = await rebuildSummary(allCodes);
+    // Pass the full rows so region (from MapSearches) travels into the summary.
+    const summary = await rebuildSummary(rows);
 
     // ── Advance the rotation cursor (hourly only) ─────────────────────────
     if (!full) await setJson(CURSOR_KEY, { i: nextCursor });
