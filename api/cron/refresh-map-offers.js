@@ -53,6 +53,13 @@ const PER_REQUEST_TIMEOUT_MS = 10000;
 const REQUEST_CONCURRENCY = 4;     // parallel proxy calls within a country
 const HOURLY_FRACTION = 0.15;      // ~15% of countries per hourly run
 const MAX_AGE_DAYS = 4;            // purge offers older than this
+// Trip-duration bounds. Travelify returns offers of varying real durations and
+// sort:price:asc surfaces the cheapest — which can be a 1-night stay. We keep
+// holiday-length offers only: 2 nights (so short city breaks still qualify) up
+// to 28 nights. Offers outside this range never enter Redis, so the map pins
+// and the deal cards both stay clean. (Per-country override territory later.)
+const MIN_NIGHTS = 2;
+const MAX_NIGHTS = 28;
 
 const SUMMARY_KEY = 'map:offers:v1';
 const LASTRUN_KEY = 'map:offers:lastRunAt';
@@ -105,10 +112,18 @@ function normaliseOffer(offer) {
     url: offer.url || null, updated: offer.updated || null, fetchedAt: new Date().toISOString(),
   };
 }
+function withinNightsRange(o) {
+  // Keep only holiday-length stays. If nights is missing/unparseable, drop it
+  // (we'd rather omit an offer than show a duration-less "deal").
+  return Number.isFinite(o.nights) && o.nights >= MIN_NIGHTS && o.nights <= MAX_NIGHTS;
+}
 function normaliseOffers(rawArray) {
   if (!Array.isArray(rawArray)) return [];
   const out = [];
-  for (const o of rawArray) { const n = normaliseOffer(o); if (n) out.push(n); }
+  for (const o of rawArray) {
+    const n = normaliseOffer(o);
+    if (n && withinNightsRange(n)) out.push(n);
+  }
   return out;
 }
 function summariseByAirport(offers) {
@@ -144,6 +159,10 @@ function purgeOffers(offers, now = new Date(), maxAgeDays = MAX_AGE_DAYS) {
   const nowMs = now.getTime();
   const maxAgeMs = maxAgeDays * 24 * 60 * 60 * 1000;
   return (offers || []).filter(o => {
+    // Drop offers outside the holiday-length range. This also clears any
+    // pre-existing out-of-range offers stored before the nights filter existed,
+    // so the fix takes effect on the next sweep rather than over MAX_AGE_DAYS.
+    if (!withinNightsRange(o)) return false;
     const td = travelDateOf(o);
     if (td) { const t = Date.parse(td); if (Number.isFinite(t) && t < nowMs) return false; }
     if (o.fetchedAt) { const f = Date.parse(o.fetchedAt); if (Number.isFinite(f) && (nowMs - f) > maxAgeMs) return false; }
