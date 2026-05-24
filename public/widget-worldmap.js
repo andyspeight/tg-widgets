@@ -1187,6 +1187,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this.ovMap = null;
       this.ovMarkers = [];
       this._ovMapHeightRetried = false;
+      this._ovHasView = false;
       this._render();
       this._init();
     }
@@ -1554,25 +1555,33 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 
     /** Decide the initial view: zoom to the country we arrived from (pin click
-     *  on the small map), otherwise show the whole world with all pins. */
+     *  on the small map), otherwise show the whole world with all pins.
+     *  Leaflet's flyTo() calls getCenter() internally and throws if the map has
+     *  never had a view — so the FIRST positioning must use setView(); animated
+     *  flyTo is only safe once a view already exists. */
     _fitOverlayMap() {
       if (!this.ovMap) return;
+      const hasView = this._ovHasView === true;
       const c = this._activeCountry;
       if (c && typeof c.lat === 'number' && typeof c.lng === 'number') {
-        // Point-based "zoom to country" — we don't have per-country bounds in
-        // the payload, so fly to the country's centroid at a country-ish zoom.
-        this.ovMap.flyTo([c.lat, c.lng], 5, { duration: 0.6 });
+        // Point-based "zoom to country" — no per-country bounds in the payload,
+        // so centre on the country's point at a country-ish zoom.
+        if (hasView) this.ovMap.flyTo([c.lat, c.lng], 5, { duration: 0.6 });
+        else this.ovMap.setView([c.lat, c.lng], 5);
       } else {
         // World view, slightly cropped to lose Antarctica whitespace.
         this.ovMap.setView([25, 10], 2);
       }
+      this._ovHasView = true;
     }
 
     _onOverlayPinClick(country) {
       // Store the selection so Piece 3 (deal cards) can read it, and zoom in.
       this._activeCountry = country;
       if (this.ovMap && typeof country.lat === 'number') {
-        this.ovMap.flyTo([country.lat, country.lng], 6, { duration: 0.6 });
+        // A view always exists by the time a pin is clickable, so flyTo is safe.
+        if (this._ovHasView) this.ovMap.flyTo([country.lat, country.lng], 6, { duration: 0.6 });
+        else { this.ovMap.setView([country.lat, country.lng], 6); this._ovHasView = true; }
       }
       console.info('[tgwm v3] overlay pin selected:', resolveCountryName(country), '— deal cards arrive in Piece 3');
     }
@@ -1725,6 +1734,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this.ovMap.remove();
         this.ovMap = null;
         this.ovMarkers = [];
+        this._ovHasView = false;
       }
       if (this.map) {
         this.map.remove();
@@ -1751,6 +1761,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this.ovMap.remove();
         this.ovMap = null;
         this.ovMarkers = [];
+        this._ovHasView = false;
       }
       if (this.map) {
         this.map.remove();
