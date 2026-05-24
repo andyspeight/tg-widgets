@@ -407,6 +407,11 @@ export default async function handler(req, res) {
         byCountry: summariseByCountry(offers),
         byAirport: summariseByAirport(offers),
         sampleOffer: offers[0] || null,
+        // rawSample = the UNTOUCHED Travelify offer (before our parser), so we can
+        // see exactly which fields it carries (e.g. where nights/duration lives).
+        // Two samples in case the first is atypical. TEMPORARY diagnostic.
+        rawSample: arr && arr[0] ? arr[0] : null,
+        rawSample2: arr && arr[1] ? arr[1] : null,
         redisReadback,
       });
     }
