@@ -1158,6 +1158,49 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
     .tgwm-ov-map .leaflet-container { width: 100%; height: 100%; background: #A5D2EC; }
 
+    /* ── Off-screen deal indicators (edge arrows) ──────────────────────── */
+    /* A screen-fixed layer over the map; chips pin to the viewport edges and
+       point toward deals that are currently off-screen. Pointer-events are
+       off on the layer, on per-chip, so the map stays draggable between them. */
+    .tgwm-ov-edges {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 600; /* above tiles + markers, below zoom controls (700) */
+      overflow: hidden;
+    }
+    .tgwm-edge-chip {
+      position: absolute;
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: var(--tgwm-pin-anchor, #1B2B5B);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(15,23,42,.28);
+      transform: translate(-50%, -50%);
+      transition: transform 140ms var(--tgwm-ease), box-shadow 140ms, background 140ms;
+    }
+    .tgwm-edge-chip:hover {
+      background: var(--tgwm-pin-anchor-active, #00B4D8);
+      box-shadow: 0 4px 12px rgba(15,23,42,.34);
+    }
+    .tgwm-edge-chip svg { width: 11px; height: 11px; flex: 0 0 auto; }
+    .tgwm-edge-chip .tgwm-edge-name {
+      max-width: 90px; overflow: hidden; text-overflow: ellipsis;
+      font-weight: 600; opacity: .92;
+    }
+    .tgwm-edge-chip .tgwm-edge-price { font-weight: 800; }
+    [data-theme="dark"] .tgwm-edge-chip { background: var(--tgwm-pin-anchor-active, #00B4D8); }
+    @media (prefers-reduced-motion: reduce) { .tgwm-edge-chip { transition: none; } }
+
     /* Loading veil specific to the big map (separate from the small map's). */
     .tgwm-ov-loading {
       position: absolute; inset: 0;
@@ -1771,6 +1814,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           </aside>
           <div class="tgwm-ov-mapcol" data-ov-mapcol>
             <div class="tgwm-ov-map" data-ov-map></div>
+            <div class="tgwm-ov-edges" data-ov-edges aria-hidden="true"></div>
             <div class="tgwm-ov-loading" data-ov-loading>
               <div class="tgwm-spinner" aria-hidden="true"></div>
               <span>Loading map…</span>
@@ -2013,6 +2057,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Switch to resort mode: hide country pins.
       this._pinMode = 'resort';
       this._setCountryPinsVisible(false);
+      this._clearEdgeArrows();
 
       // On initial entry, frame the actual spread of resorts rather than flying
       // to one fixed point — so a country like Portugal (Porto far north,
@@ -2094,6 +2139,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._dealsCache = null;
       this._setCountryPinsVisible(true);
       this._thinOverlayPins();
+      this._renderEdgeArrows();
     }
 
     // Zoom at/above this shows resort pins; below it, country pins.
@@ -2113,9 +2159,108 @@ svg.leaflet-image-layer.leaflet-interactive path {
         } else {
           this._thinResortPins();
         }
+        this._clearEdgeArrows(); // no edge arrows while drilled into one country
       } else {
         this._thinOverlayPins();
+        this._renderEdgeArrows();
       }
+    }
+
+    /** Draw chips at the viewport edges pointing toward country deals that are
+     *  currently off-screen, each showing the cheapest price in that direction.
+     *  Click flies the map to that country. Country mode only. */
+    _renderEdgeArrows() {
+      const layer = this.overlayEl && this.overlayEl.querySelector('[data-ov-edges]');
+      if (!layer || !this.ovMap || !Array.isArray(this.ovMarkers)) return;
+      this._clearEdgeArrows();
+
+      const map = this.ovMap;
+      const size = map.getSize();          // {x,y} pixels
+      const W = size.x, H = size.y;
+      if (!W || !H) return;
+      const bounds = map.getBounds();
+      const cx = W / 2, cy = H / 2;
+      const MARGIN = 14;                   // inset from the very edge
+      const MAX_CHIPS = 5;                 // cheapest few only
+
+      // Off-screen countries, cheapest first.
+      const off = this.ovMarkers
+        .map(m => m.country)
+        .filter(c => c && typeof c.lat === 'number' && typeof c.lng === 'number')
+        .filter(c => !bounds.contains([c.lat, c.lng]))
+        .sort((a, b) => (a.fromPricePP || a.fromPrice || Infinity) - (b.fromPricePP || b.fromPrice || Infinity))
+        .slice(0, MAX_CHIPS);
+
+      if (!off.length) return;
+
+      const placed = [];
+      for (const c of off) {
+        let p;
+        try { p = map.latLngToContainerPoint([c.lat, c.lng]); }
+        catch (_) { continue; }
+
+        // Direction from centre to the off-screen pin.
+        let dx = p.x - cx, dy = p.y - cy;
+        if (dx === 0 && dy === 0) continue;
+
+        // Find where that ray exits the padded viewport rectangle.
+        const halfW = cx - MARGIN, halfH = cy - MARGIN;
+        const scale = Math.min(
+          halfW / Math.abs(dx || 1e-6),
+          halfH / Math.abs(dy || 1e-6)
+        );
+        let ex = cx + dx * scale;
+        let ey = cy + dy * scale;
+        ex = Math.max(MARGIN, Math.min(W - MARGIN, ex));
+        ey = Math.max(MARGIN, Math.min(H - MARGIN, ey));
+
+        // De-clutter: skip if within ~28px of an already-placed chip.
+        if (placed.some(q => Math.abs(q.x - ex) < 28 && Math.abs(q.y - ey) < 28)) continue;
+        placed.push({ x: ex, y: ey });
+
+        // Which way does the arrow point? Dominant axis of travel.
+        const horiz = Math.abs(dx) > Math.abs(dy);
+        const dir = horiz ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+        layer.appendChild(this._edgeChip(c, ex, ey, dir));
+      }
+    }
+
+    _edgeChip(country, x, y, dir) {
+      const name = resolveCountryName(country);
+      const price = formatPrice(country.fromPricePP || country.fromPrice, country.currency);
+      const ARROWS = {
+        left:  '<polyline points="15 18 9 12 15 6"/>',
+        right: '<polyline points="9 18 15 12 9 6"/>',
+        up:    '<polyline points="18 15 12 9 6 15"/>',
+        down:  '<polyline points="6 9 12 15 18 9"/>',
+      };
+      const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ARROWS[dir] || ARROWS.right}</svg>`;
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'tgwm-edge-chip';
+      chip.style.left = x + 'px';
+      chip.style.top = y + 'px';
+      chip.title = name + ' — from ' + price + ', tap to view';
+      // Arrow on the leading side: left/up arrows before the label, right/down after.
+      const label = `<span class="tgwm-edge-name">${esc(name)}</span><span class="tgwm-edge-price">${esc(price)}</span>`;
+      chip.innerHTML = (dir === 'left' || dir === 'up') ? (arrow + label) : (label + arrow);
+      chip.addEventListener('click', () => this._goToCountry(country));
+      return chip;
+    }
+
+    /** Fly to an off-screen country and select it (loads deals, resort pins). */
+    _goToCountry(country) {
+      if (!this.ovMap) return;
+      this._activeCountry = country;
+      this._clearEdgeArrows();
+      if (this._ovHasView) this.ovMap.flyTo([country.lat, country.lng], 6, { duration: 0.7 });
+      else { this.ovMap.setView([country.lat, country.lng], 6); this._ovHasView = true; }
+      this._loadDeals(country);
+    }
+
+    _clearEdgeArrows() {
+      const layer = this.overlayEl && this.overlayEl.querySelector('[data-ov-edges]');
+      if (layer) layer.innerHTML = '';
     }
 
     /** Decide the initial view: zoom to the country we arrived from (pin click
