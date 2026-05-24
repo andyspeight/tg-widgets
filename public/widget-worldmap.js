@@ -1579,10 +1579,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
     _thinOverlayPins() {
       if (!this.ovMap || !Array.isArray(this.ovMarkers) || !this.ovMarkers.length) return;
 
-      // Collision footprint of a price tag in screen pixels. Tags are ~70-130px
-      // wide and ~26px tall; we use a generous box so labels don't touch.
-      const PAD_X = 84; // half-width-ish horizontal clearance
-      const PAD_Y = 34; // vertical clearance
+      // Collision footprint of a price tag in screen pixels. Loosened so the
+      // world view shows more destinations (closer to Google Flights density)
+      // while still preventing labels from physically overlapping.
+      const PAD_X = 48; // horizontal clearance
+      const PAD_Y = 22; // vertical clearance
       const map = this.ovMap;
       const shownPts = [];
 
