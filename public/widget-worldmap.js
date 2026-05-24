@@ -2912,7 +2912,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
       if (scroll) scroll.innerHTML = this._skeletonsHtml(3);
 
       const token = (this._resortDealsToken = (this._resortDealsToken || 0) + 1);
-      fetch(DEALS_URL + '?airport=' + encodeURIComponent(airport) + '&limit=60', { credentials: 'omit' })
+      // Request the airport's full set (endpoint max 200), not the cheapest 60 —
+      // we're narrowing to ONE resort, and dearer resorts (e.g. Imerovigli on
+      // Santorini) sit outside the cheapest 60 for a busy gateway like JTR.
+      fetch(DEALS_URL + '?airport=' + encodeURIComponent(airport) + '&limit=200', { credentials: 'omit' })
         .then(r => r.ok ? r.json() : Promise.reject(new Error('deals HTTP ' + r.status)))
         .then(data => {
           if (token !== this._resortDealsToken) return;   // superseded by another click
