@@ -1189,6 +1189,29 @@ svg.leaflet-image-layer.leaflet-interactive path {
        .tg-pin-wrap / .tg-price-tag classes so no new pin CSS needed. The big
        map shows ALL pins, so they may sit closer; that's fine when zoomed in. */
 
+    /* Active resort pin (clicked) — teal tag so the selection reads on the map. */
+    .tg-pin-wrap.is-active .tg-price-tag {
+      background: var(--tgwm-pin-anchor-active);
+      border-color: var(--tgwm-pin-anchor-active);
+    }
+    .tg-pin-wrap.is-active .tg-tag-country,
+    .tg-pin-wrap.is-active .tg-tag-price { color: #fff; }
+    .tg-pin-wrap.is-active .tg-price-anchor { background: var(--tgwm-pin-anchor-active); }
+
+    /* "Show all <country>" link in the cards meta when a resort filter is on. */
+    .tgwm-clear-resort {
+      background: none;
+      border: 0;
+      padding: 0;
+      font: inherit;
+      font-size: 12px;
+      color: var(--tgwm-pin-anchor-active);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .tgwm-clear-resort:hover { opacity: .85; }
+
     /* ── Deal cards panel (Piece 3) ──────────────────────────────────── */
     /* Split layout: cards left ~40%, map right ~60% (Google Flights Explore).
        The overlay body is a flex row; the cards column is a fixed-ish width and
@@ -1488,6 +1511,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._ovMapHeightRetried = false;
       this._ovHasView = false;
       this._dealsToken = 0;
+      // Resort drill-down state
+      this._pinMode = 'country';
+      this._resortMarkers = [];
+      this._activeResort = null;
+      this._dealsCache = null;
       this._render();
       this._init();
     }
@@ -1865,7 +1893,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           }
 
           // Re-thin pins whenever the view changes. moveend covers pan + zoom.
-          this.ovMap.on('moveend', () => this._thinOverlayPins());
+          this.ovMap.on('moveend', () => this._onOverlayMapMove());
         }
 
         // Leaflet sized itself before the overlay finished animating in some
@@ -1923,6 +1951,137 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
     }
 
+    /** Build resort-level pins for the active country from its offers. Derives
+     *  the distinct resorts (cheapest pp + coords each), switches the map into
+     *  resort mode (country pins hidden), and drops resort markers. */
+    _buildResortPins(offers) {
+      if (!this.ovMap || !Array.isArray(offers)) return;
+
+      // Distinct resorts → cheapest offer (carries coords + price).
+      const byResort = new Map();
+      for (const o of offers) {
+        const r = o.resort;
+        const lat = o.resortLat, lng = o.resortLng;
+        if (!r || typeof lat !== 'number' || typeof lng !== 'number') continue;
+        const pp = o.pricePP || o.price || Infinity;
+        const cur = byResort.get(r);
+        if (!cur || pp < cur.pp) byResort.set(r, { resort: r, lat, lng, pp, currency: o.currency });
+      }
+
+      this._clearResortPins();
+      this._resortMarkers = [];
+      const L = window.L;
+      if (!L) return;
+
+      for (const r of byResort.values()) {
+        const priceLabel = formatPrice(r.pp, r.currency);
+        const active = this._activeResort === r.resort;
+        const html = `
+          <div class="tg-pin-wrap${active ? ' is-active' : ''}" data-resort="${esc(r.resort)}">
+            <div class="tg-price-tag" title="${esc(r.resort)} — from ${esc(priceLabel)} per person">
+              <span class="tg-tag-country">${esc(r.resort)}</span>
+              <span class="tg-tag-price">${esc(priceLabel)}</span>
+            </div>
+            <div class="tg-price-anchor"></div>
+          </div>`;
+        const marker = L.marker([r.lat, r.lng], {
+          icon: L.divIcon({ html, className: '', iconSize: [0, 0], iconAnchor: [0, 0] }),
+          keyboard: false, interactive: true, riseOnHover: true,
+        });
+        marker.on('click', () => this._onResortPinClick(r));
+        marker.addTo(this.ovMap);
+        this._resortMarkers.push({ resort: r, marker });
+      }
+
+      // Switch to resort mode: hide country pins, thin resort pins.
+      this._pinMode = 'resort';
+      this._setCountryPinsVisible(false);
+      this._thinResortPins();
+    }
+
+    _clearResortPins() {
+      if (Array.isArray(this._resortMarkers)) {
+        for (const e of this._resortMarkers) {
+          try { this.ovMap.removeLayer(e.marker); } catch (_) {}
+        }
+      }
+      this._resortMarkers = [];
+    }
+
+    _setCountryPinsVisible(visible) {
+      if (!Array.isArray(this.ovMarkers)) return;
+      for (const entry of this.ovMarkers) {
+        const el = entry.marker.getElement();
+        if (el) el.style.display = visible ? '' : 'none';
+      }
+    }
+
+    _onResortPinClick(r) {
+      this._activeResort = r.resort;
+      if (this.ovMap && this._ovHasView) this.ovMap.flyTo([r.lat, r.lng], 9, { duration: 0.5 });
+      this._filterCardsByResort(r.resort);
+      // Re-render resort pins so the clicked one shows as active.
+      if (this._dealsCache) this._buildResortPins(this._dealsCache.offers);
+    }
+
+    /** Thin resort pins the same way as country pins (pixel collision). */
+    _thinResortPins() {
+      if (!this.ovMap || !Array.isArray(this._resortMarkers) || !this._resortMarkers.length) return;
+      const PAD_X = 48, PAD_Y = 22;
+      const map = this.ovMap;
+      const shownPts = [];
+      // Active resort first so it always survives a collision.
+      const ordered = this._resortMarkers.slice().sort((a, b) => {
+        const aa = this._activeResort === a.resort.resort ? -1 : 0;
+        const bb = this._activeResort === b.resort.resort ? -1 : 0;
+        return aa - bb || (a.resort.pp - b.resort.pp);
+      });
+      for (const entry of ordered) {
+        const el = entry.marker.getElement();
+        if (!el) continue;
+        let pt;
+        try { pt = map.latLngToContainerPoint([entry.resort.lat, entry.resort.lng]); }
+        catch (_) { continue; }
+        const isActive = this._activeResort === entry.resort.resort;
+        const collides = !isActive && shownPts.some(p =>
+          Math.abs(p.x - pt.x) < PAD_X && Math.abs(p.y - pt.y) < PAD_Y);
+        if (collides) { el.style.display = 'none'; }
+        else { el.style.display = ''; shownPts.push(pt); }
+      }
+    }
+
+    /** Return to country mode: clear resort pins, show country pins, re-thin. */
+    _exitResortMode() {
+      this._clearResortPins();
+      this._pinMode = 'country';
+      this._activeResort = null;
+      this._dealsCache = null;
+      this._setCountryPinsVisible(true);
+      this._thinOverlayPins();
+    }
+
+    // Zoom at/above this shows resort pins; below it, country pins.
+    // Country fly-to lands at z5, so the threshold sits just under it.
+    static get RESORT_ZOOM() { return 5; }
+
+    /** moveend handler: keep pins thinned, and switch between country/resort
+     *  modes based on zoom. Zoom out far enough → back to country pins. */
+    _onOverlayMapMove() {
+      if (!this.ovMap) return;
+      const z = this.ovMap.getZoom();
+      if (this._pinMode === 'resort') {
+        if (z < TGWorldMapWidget.RESORT_ZOOM) {
+          // Zoomed back out — leave resort mode, reset the cards panel.
+          this._exitResortMode();
+          this._resetCardsPanel();
+        } else {
+          this._thinResortPins();
+        }
+      } else {
+        this._thinOverlayPins();
+      }
+    }
+
     /** Decide the initial view: zoom to the country we arrived from (pin click
      *  on the small map), otherwise show the whole world with all pins.
      *  Leaflet's flyTo() calls getCenter() internally and throws if the map has
@@ -1942,7 +2101,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       } else {
         // World view, slightly cropped to lose Antarctica whitespace.
         this.ovMap.setView([25, 10], 2);
-        // Button-open (no country) → reset the cards panel to the prompt.
+        // Button-open (no country) → back to country mode, reset the panel.
+        if (this._pinMode === 'resort') this._exitResortMode();
         this._resetCardsPanel();
       }
       this._ovHasView = true;
@@ -1985,6 +2145,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 
     /** Fetch + render deals for a selected country into the left cards panel.
+     *  Caches the offers so the cards can be re-filtered by resort without a
+     *  re-fetch, and builds resort pins from the same payload.
      *  Guards against out-of-order responses (rapid pin clicks) with a token. */
     _loadDeals(country) {
       if (!this.overlayEl || !country) return;
@@ -1994,6 +2156,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
       if (!scroll) return;
+
+      // If we already have this country's offers cached, reuse them — no fetch.
+      if (this._dealsCache && this._dealsCache.cc === cc) {
+        this._activeResort = null;
+        this._renderCards(this._dealsCache.offers, this._dealsCache.total, name);
+        this._buildResortPins(this._dealsCache.offers);
+        return;
+      }
 
       if (titleEl) titleEl.textContent = name;
       if (metaEl) metaEl.textContent = 'Finding the best deals…';
@@ -2012,21 +2182,61 @@ svg.leaflet-image-layer.leaflet-interactive path {
           if (token !== this._dealsToken) return; // superseded
           const offers = (data && Array.isArray(data.offers)) ? data.offers : [];
           if (!offers.length) { this._renderDealsEmpty(scroll, metaEl, name); return; }
-          // Cheapest first, capped.
-          const sorted = offers.slice().sort((a, b) =>
-            (a.pricePP || a.price || Infinity) - (b.pricePP || b.price || Infinity)
-          ).slice(0, MAX_DEAL_CARDS);
-          if (metaEl) {
-            const total = data.total || offers.length;
-            metaEl.textContent = sorted.length + ' of ' + total.toLocaleString('en-GB') + ' deals · cheapest first';
-          }
-          scroll.innerHTML = sorted.map(o => this._cardHtml(o)).join('');
+          const total = data.total || offers.length;
+          // Cache for resort filtering + zoom re-entry.
+          this._dealsCache = { cc, name, offers, total };
+          this._activeResort = null;
+          this._renderCards(offers, total, name);
+          this._buildResortPins(offers);
         })
         .catch(err => {
           if (token !== this._dealsToken) return;
           console.warn('[tgwm v3] deals fetch failed:', err.message);
           this._renderDealsError(scroll, metaEl);
         });
+    }
+
+    /** Render cards from a set of offers (cheapest first, capped). Used for the
+     *  full country list and for resort-filtered subsets. */
+    _renderCards(offers, total, countryName, resortName) {
+      const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
+      const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
+      const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
+      if (!scroll) return;
+
+      const sorted = offers.slice().sort((a, b) =>
+        (a.pricePP || a.price || Infinity) - (b.pricePP || b.price || Infinity)
+      ).slice(0, MAX_DEAL_CARDS);
+
+      if (titleEl) titleEl.textContent = resortName ? (resortName + ', ' + countryName) : countryName;
+      if (metaEl) {
+        if (resortName) {
+          metaEl.innerHTML = sorted.length + ' deals in ' + esc(resortName) +
+            ' · <button type="button" class="tgwm-clear-resort" data-ov-clear-resort>Show all ' + esc(countryName) + '</button>';
+          const clr = metaEl.querySelector('[data-ov-clear-resort]');
+          if (clr) clr.addEventListener('click', () => this._clearResortFilter());
+        } else {
+          metaEl.textContent = sorted.length + ' of ' + (total || offers.length).toLocaleString('en-GB') + ' deals · cheapest first';
+        }
+      }
+      scroll.innerHTML = sorted.map(o => this._cardHtml(o)).join('');
+      scroll.scrollTop = 0;
+    }
+
+    /** Filter the cached cards to a single resort. */
+    _filterCardsByResort(resort) {
+      if (!this._dealsCache) return;
+      this._activeResort = resort;
+      const subset = this._dealsCache.offers.filter(o => o.resort === resort);
+      this._renderCards(subset, subset.length, this._dealsCache.name, resort);
+    }
+
+    _clearResortFilter() {
+      if (!this._dealsCache) return;
+      this._activeResort = null;
+      this._renderCards(this._dealsCache.offers, this._dealsCache.total, this._dealsCache.name);
+      // Re-highlight: rebuild resort pins so none is marked active.
+      this._buildResortPins(this._dealsCache.offers);
     }
 
     _skeletonsHtml(n) {
@@ -2258,6 +2468,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this.ovMap.remove();
         this.ovMap = null;
         this.ovMarkers = [];
+        this._resortMarkers = [];
+        this._pinMode = 'country';
+        this._activeResort = null;
+        this._dealsCache = null;
         this._ovHasView = false;
       }
       if (this.map) {
@@ -2285,6 +2499,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this.ovMap.remove();
         this.ovMap = null;
         this.ovMarkers = [];
+        this._resortMarkers = [];
+        this._pinMode = 'country';
+        this._activeResort = null;
+        this._dealsCache = null;
         this._ovHasView = false;
       }
       if (this.map) {
