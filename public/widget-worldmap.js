@@ -1400,6 +1400,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
     .tgwm-seg button[disabled] { opacity: .38; cursor: not-allowed; }
     @media (prefers-reduced-motion: reduce) { .tgwm-seg button { transition: none; } }
 
+    /* The scrolling list fills the column beneath the fixed head. min-height:0
+       is essential — without it this flex child won't shrink below its content
+       height, so it never scrolls. */
+    .tgwm-ov-cards-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 14px 16px;
       display: block;            /* NOT flex — flex would shrink the cards */
       -webkit-overflow-scrolling: touch;
     }
