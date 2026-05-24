@@ -1,6 +1,6 @@
 /**
- * Travelgenix World Map Widget v3.2.0
- * Real-map version using Leaflet + CartoDB Voyager tiles.
+ * Travelgenix World Map Widget v3.3.0
+ * Real-map version using Leaflet + MapTiler Streets tiles.
  *
  * Usage:
  *   <div data-tg-widget="worldmap" data-tg-id="YOUR_WIDGET_ID"></div>
