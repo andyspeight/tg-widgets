@@ -1665,6 +1665,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._dealsCache = null;
       this._resortSummary = null; // full resort list from the resorts endpoint
       this._resortToken = 0;
+      this._activeResortAirportName = null;
+      this._resortDealsToken = 0;
       // Filter state (in-country): max budget pp + min star rating.
       this._filterMaxPrice = null;  // null = Any
       this._filterMinRating = null; // null = Any
@@ -2261,7 +2263,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
         const targetZoom = Math.max(this.ovMap.getZoom(), 11);
         this.ovMap.flyTo([r.lat, r.lng], targetZoom, { duration: 0.7 });
       }
-      this._filterCardsByResort(r.resort);
+      // Pass the whole resort object so the card loader can fetch this resort's
+      // real deals by airport when they're outside the country's cheapest slice.
+      this._filterCardsByResort(r);
       // Re-render resort pins so the clicked one shows as active. Uses the full
       // resort set when unfiltered, deals-derived when a filter is active.
       this._buildResortPins(this._resortPinSource());
@@ -2784,6 +2788,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     _onFilterChange() {
       if (!this._dealsCache) return;
       this._activeResort = null;
+      this._activeResortAirportName = null;
       const shown = this._applyFilters(this._dealsCache.offers);
       // Refresh the controls so pressed states + disabled options stay correct.
       this._buildFilterControls(this._dealsCache.offers);
@@ -2816,7 +2821,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
       if (!scroll) return;
 
-      if (titleEl) titleEl.textContent = resortName ? (resortName + ', ' + countryName) : countryName;
+      if (titleEl) {
+        if (resortName) {
+          // "Akrotiri · Santorini" when we know the gateway, else "Akrotiri, Greece".
+          const gateway = this._activeResortAirportName;
+          titleEl.textContent = gateway
+            ? (resortName + ' · ' + gateway)
+            : (resortName + ', ' + countryName);
+        } else {
+          titleEl.textContent = countryName;
+        }
+      }
 
       // Zero matches (usually from an over-tight filter) → friendly empty state.
       if (!offers.length) {
@@ -2853,18 +2868,67 @@ svg.leaflet-image-layer.leaflet-interactive path {
       scroll.scrollTop = 0;
     }
 
-    /** Filter the cached cards to a single resort (respecting active filters). */
-    _filterCardsByResort(resort) {
+    /** Show deals for a single resort. Accepts the resort object (preferred,
+     *  carries airport) or a bare resort name. If the country cache already has
+     *  offers for the resort, filter to them; otherwise the resort's deals are
+     *  outside the cheapest slice, so fetch them by the resort's airport. */
+    _filterCardsByResort(resortArg) {
       if (!this._dealsCache) return;
+      const resort = (typeof resortArg === 'string') ? resortArg : (resortArg && resortArg.resort);
+      const airport = (resortArg && typeof resortArg === 'object') ? resortArg.airport : null;
+      if (!resort) return;
       this._activeResort = resort;
-      const base = this._applyFilters(this._dealsCache.offers);
-      const subset = base.filter(o => o.resort === resort);
-      this._renderCards(subset, subset.length, this._dealsCache.name, resort);
+      // Remember the gateway name so the cards header can say where this is
+      // (e.g. "Akrotiri · Santorini") — helps when the resort name alone is
+      // unfamiliar or you've zoomed into an island you can't identify.
+      this._activeResortAirportName = (resortArg && typeof resortArg === 'object') ? (resortArg.airportName || null) : null;
+
+      const country = this._dealsCache.name;
+      const subset = this._applyFilters(this._dealsCache.offers).filter(o => o.resort === resort);
+
+      if (subset.length) {
+        // Cache already holds this resort's offers — render straight away.
+        this._renderCards(subset, subset.length, country, resort);
+        return;
+      }
+
+      // Not in the cached slice → fetch this resort's deals by its airport.
+      if (!airport) {
+        // No airport to fetch with; show an honest empty rather than a wrong one.
+        this._renderCards([], 0, country, resort);
+        return;
+      }
+      const scroll = this.overlayEl && this.overlayEl.querySelector('[data-ov-cards-scroll]');
+      const titleEl = this.overlayEl && this.overlayEl.querySelector('[data-ov-cards-title]');
+      const metaEl = this.overlayEl && this.overlayEl.querySelector('[data-ov-cards-meta]');
+      if (titleEl) titleEl.textContent = resort + ', ' + country;
+      if (metaEl) metaEl.textContent = 'Finding ' + resort + ' deals…';
+      if (scroll) scroll.innerHTML = this._skeletonsHtml(3);
+
+      const token = (this._resortDealsToken = (this._resortDealsToken || 0) + 1);
+      fetch(DEALS_URL + '?airport=' + encodeURIComponent(airport) + '&limit=60', { credentials: 'omit' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('deals HTTP ' + r.status)))
+        .then(data => {
+          if (token !== this._resortDealsToken) return;   // superseded by another click
+          if (this._activeResort !== resort) return;        // user moved on
+          const offers = (data && Array.isArray(data.offers)) ? data.offers : [];
+          // The airport may serve several resorts — narrow to this one, then
+          // honour any active in-country filters.
+          let mine = offers.filter(o => o.resort === resort);
+          if (this._filterMaxPrice != null) mine = mine.filter(o => (o.pricePP || o.price || Infinity) <= this._filterMaxPrice);
+          if (this._filterMinRating != null) mine = mine.filter(o => typeof o.rating === 'number' && o.rating >= this._filterMinRating);
+          this._renderCards(mine, mine.length, country, resort);
+        })
+        .catch(() => {
+          if (token !== this._resortDealsToken) return;
+          this._renderCards([], 0, country, resort);
+        });
     }
 
     _clearResortFilter() {
       if (!this._dealsCache) return;
       this._activeResort = null;
+      this._activeResortAirportName = null;
       const shown = this._applyFilters(this._dealsCache.offers);
       this._renderCards(shown, this._dealsCache.total, this._dealsCache.name);
       // Re-highlight: rebuild resort pins so none is marked active.
