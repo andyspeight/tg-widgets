@@ -1228,7 +1228,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
       border-right: 1px solid var(--tgwm-border);
       background: var(--tgwm-bg);
       overflow: hidden;
+      transition: flex-basis 280ms var(--tgwm-ease), max-width 280ms var(--tgwm-ease);
     }
+    /* Collapsed until a destination is picked — map takes the full width. */
+    .tgwm-overlay-body[data-cards-hidden] .tgwm-ov-cards {
+      flex-basis: 0;
+      max-width: 0;
+      border-right: 0;
+    }
+    @media (prefers-reduced-motion: reduce) { .tgwm-ov-cards { transition: none; } }
     .tgwm-ov-cards-head {
       flex: 0 0 auto;
       padding: 14px 16px 10px;
@@ -1738,7 +1746,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
             </svg>
           </button>
         </header>
-        <div class="tgwm-overlay-body" data-ov-body>
+        <div class="tgwm-overlay-body" data-ov-body data-cards-hidden>
           <aside class="tgwm-ov-cards" data-ov-cards>
             <div class="tgwm-ov-cards-head">
               <h3 class="tgwm-ov-cards-title" data-ov-cards-title>Latest deals</h3>
@@ -1954,7 +1962,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     /** Build resort-level pins for the active country from its offers. Derives
      *  the distinct resorts (cheapest pp + coords each), switches the map into
      *  resort mode (country pins hidden), and drops resort markers. */
-    _buildResortPins(offers) {
+    _buildResortPins(offers, fitToResorts) {
       if (!this.ovMap || !Array.isArray(offers)) return;
 
       // Distinct resorts → cheapest offer (carries coords + price).
@@ -1973,6 +1981,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const L = window.L;
       if (!L) return;
 
+      const latlngs = [];
       for (const r of byResort.values()) {
         const priceLabel = formatPrice(r.pp, r.currency);
         const active = this._activeResort === r.resort;
@@ -1991,12 +2000,30 @@ svg.leaflet-image-layer.leaflet-interactive path {
         marker.on('click', () => this._onResortPinClick(r));
         marker.addTo(this.ovMap);
         this._resortMarkers.push({ resort: r, marker });
+        latlngs.push([r.lat, r.lng]);
       }
 
-      // Switch to resort mode: hide country pins, thin resort pins.
+      // Switch to resort mode: hide country pins.
       this._pinMode = 'resort';
       this._setCountryPinsVisible(false);
-      this._thinResortPins();
+
+      // On initial entry, frame the actual spread of resorts rather than flying
+      // to one fixed point — so a country like Portugal (Porto far north,
+      // Algarve south) shows its resorts filling the view, not two lone pins.
+      if (fitToResorts && latlngs.length) {
+        try {
+          if (latlngs.length === 1) {
+            this.ovMap.setView(latlngs[0], 8);
+          } else {
+            const bounds = L.latLngBounds(latlngs);
+            this.ovMap.fitBounds(bounds, { padding: [60, 60], maxZoom: 9, animate: true, duration: 0.6 });
+          }
+          this._ovHasView = true;
+        } catch (_) {}
+      }
+      // fitBounds fires moveend → thinning runs automatically. If we didn't fit
+      // (e.g. an active-resort rebuild), thin now so pins still de-clutter.
+      if (!fitToResorts) this._thinResortPins();
     }
 
     _clearResortPins() {
@@ -2112,6 +2139,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
     _resetCardsPanel() {
       if (!this.overlayEl) return;
       this._dealsToken = (this._dealsToken || 0) + 1; // cancel any in-flight fetch
+      // Collapse the panel — nothing to show until a destination is picked.
+      this._setCardsPanelVisible(false);
       const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
       const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
@@ -2126,6 +2155,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <p>Pick a destination to see live deals — tap a price on the map.</p>
           </div>`;
       }
+    }
+
+    /** Show/collapse the left cards column. Reflows the map after the width
+     *  transition so Leaflet recomputes its size (no grey tile strip). */
+    _setCardsPanelVisible(visible) {
+      const body = this.overlayEl && this.overlayEl.querySelector('[data-ov-body]');
+      if (!body) return;
+      const wasHidden = body.hasAttribute('data-cards-hidden');
+      if (visible && wasHidden) body.removeAttribute('data-cards-hidden');
+      else if (!visible && !wasHidden) body.setAttribute('data-cards-hidden', '');
+      else return; // no change → no reflow needed
+      // Recompute map size after the 280ms width transition settles.
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const after = () => { if (this.ovMap) this.ovMap.invalidateSize(false); };
+      if (reduce) after();
+      else setTimeout(after, 300);
     }
 
     _onOverlayPinClick(country) {
@@ -2157,11 +2202,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
       if (!scroll) return;
 
+      // A destination was picked → reveal the cards panel (slides in).
+      this._setCardsPanelVisible(true);
+
       // If we already have this country's offers cached, reuse them — no fetch.
       if (this._dealsCache && this._dealsCache.cc === cc) {
         this._activeResort = null;
         this._renderCards(this._dealsCache.offers, this._dealsCache.total, name);
-        this._buildResortPins(this._dealsCache.offers);
+        this._buildResortPins(this._dealsCache.offers, true);
         return;
       }
 
@@ -2187,7 +2235,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           this._dealsCache = { cc, name, offers, total };
           this._activeResort = null;
           this._renderCards(offers, total, name);
-          this._buildResortPins(offers);
+          this._buildResortPins(offers, true);
         })
         .catch(err => {
           if (token !== this._dealsToken) return;
