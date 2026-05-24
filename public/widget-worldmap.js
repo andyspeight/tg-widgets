@@ -1304,12 +1304,53 @@ svg.leaflet-image-layer.leaflet-interactive path {
       color: var(--tgwm-text-muted);
       line-height: 1.3;
     }
-    .tgwm-ov-cards-scroll {
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 12px;
+    /* ── In-country filter row ─────────────────────────────────────────── */
+    .tgwm-ov-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      margin-top: 10px;
+    }
+    .tgwm-ov-filters[hidden] { display: none; }
+    .tgwm-filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .tgwm-filter-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--tgwm-text-muted);
+    }
+    .tgwm-seg {
+      display: inline-flex;
+      background: var(--tgwm-surface, #F1F5F9);
+      border: 1px solid var(--tgwm-border);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .tgwm-seg button {
+      appearance: none;
+      border: 0;
+      background: none;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--tgwm-text-muted);
+      padding: 6px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 140ms, color 140ms;
+    }
+    .tgwm-seg button:hover:not([disabled]) { color: var(--tgwm-text); }
+    .tgwm-seg button[aria-pressed="true"] {
+      background: var(--tgwm-pin-anchor-active, #00B4D8);
+      color: #fff;
+    }
+    .tgwm-seg button[disabled] { opacity: .38; cursor: not-allowed; }
+    @media (prefers-reduced-motion: reduce) { .tgwm-seg button { transition: none; } }
+
       display: block;            /* NOT flex — flex would shrink the cards */
       -webkit-overflow-scrolling: touch;
     }
@@ -1573,6 +1614,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._resortMarkers = [];
       this._activeResort = null;
       this._dealsCache = null;
+      // Filter state (in-country): max budget pp + min star rating.
+      this._filterMaxPrice = null;  // null = Any
+      this._filterMinRating = null; // null = Any
       this._render();
       this._init();
     }
@@ -1800,6 +1844,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <div class="tgwm-ov-cards-head">
               <h3 class="tgwm-ov-cards-title" data-ov-cards-title>Latest deals</h3>
               <p class="tgwm-ov-cards-meta" data-ov-cards-meta>Tap any destination on the map to see its deals.</p>
+              <div class="tgwm-ov-filters" data-ov-filters hidden>
+                <div class="tgwm-filter-group" data-ov-filter-rating>
+                  <span class="tgwm-filter-label">Rating</span>
+                  <div class="tgwm-seg" role="group" aria-label="Filter by star rating" data-ov-rating-seg></div>
+                </div>
+                <div class="tgwm-filter-group" data-ov-filter-budget>
+                  <span class="tgwm-filter-label">Max budget</span>
+                  <div class="tgwm-seg" role="group" aria-label="Filter by maximum budget" data-ov-budget-seg></div>
+                </div>
+              </div>
             </div>
             <div class="tgwm-ov-cards-scroll" data-ov-cards-scroll>
               <div class="tgwm-ov-cards-state" data-ov-cards-prompt>
@@ -2098,8 +2152,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._activeResort = r.resort;
       if (this.ovMap && this._ovHasView) this.ovMap.flyTo([r.lat, r.lng], 9, { duration: 0.5 });
       this._filterCardsByResort(r.resort);
-      // Re-render resort pins so the clicked one shows as active.
-      if (this._dealsCache) this._buildResortPins(this._dealsCache.offers);
+      // Re-render resort pins (filtered) so the clicked one shows as active.
+      if (this._dealsCache) this._buildResortPins(this._applyFilters(this._dealsCache.offers));
     }
 
     /** Thin resort pins the same way as country pins (pixel collision). */
@@ -2337,6 +2391,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._dealsToken = (this._dealsToken || 0) + 1; // cancel any in-flight fetch
       // Collapse the panel — nothing to show until a destination is picked.
       this._setCardsPanelVisible(false);
+      // Clear filters + their controls, and un-dim any world pins.
+      this._filterMaxPrice = null;
+      this._filterMinRating = null;
+      const filterWrap = this.overlayEl.querySelector('[data-ov-filters]');
+      if (filterWrap) filterWrap.hidden = true;
+      this._applyWorldPriceFilter();
       const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
       const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
@@ -2404,8 +2464,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // If we already have this country's offers cached, reuse them — no fetch.
       if (this._dealsCache && this._dealsCache.cc === cc) {
         this._activeResort = null;
-        this._renderCards(this._dealsCache.offers, this._dealsCache.total, name);
-        this._buildResortPins(this._dealsCache.offers, true);
+        this._buildFilterControls(this._dealsCache.offers);
+        const shown = this._applyFilters(this._dealsCache.offers);
+        this._renderCards(shown, this._dealsCache.total, name);
+        this._buildResortPins(shown, true);
         return;
       }
 
@@ -2430,6 +2492,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
           // Cache for resort filtering + zoom re-entry.
           this._dealsCache = { cc, name, offers, total };
           this._activeResort = null;
+          // New country → reset filters, rebuild the controls from its prices.
+          this._filterMaxPrice = null;
+          this._filterMinRating = null;
+          this._buildFilterControls(offers);
           this._renderCards(offers, total, name);
           this._buildResortPins(offers, true);
         })
@@ -2440,25 +2506,150 @@ svg.leaflet-image-layer.leaflet-interactive path {
         });
     }
 
+    /** Return the offers passing the active in-country filters (budget + rating). */
+    _applyFilters(offers) {
+      if (!Array.isArray(offers)) return [];
+      const maxP = this._filterMaxPrice;
+      const minR = this._filterMinRating;
+      return offers.filter(o => {
+        const pp = o.pricePP || o.price || Infinity;
+        if (maxP != null && pp > maxP) return false;
+        if (minR != null && (typeof o.rating !== 'number' || o.rating < minR)) return false;
+        return true;
+      });
+    }
+
+    /** Build the rating + budget segmented controls for the loaded country.
+     *  Budget presets are derived from the country's own price spread so they're
+     *  always meaningful; options that would yield zero results are disabled. */
+    _buildFilterControls(offers) {
+      const wrap = this.overlayEl && this.overlayEl.querySelector('[data-ov-filters]');
+      const ratingSeg = this.overlayEl && this.overlayEl.querySelector('[data-ov-rating-seg]');
+      const budgetSeg = this.overlayEl && this.overlayEl.querySelector('[data-ov-budget-seg]');
+      if (!wrap || !ratingSeg || !budgetSeg) return;
+
+      const prices = offers.map(o => o.pricePP || o.price).filter(n => typeof n === 'number');
+      const minPrice = prices.length ? Math.min(...prices) : 0;
+      const maxPrice = prices.length ? Math.max(...prices) : 0;
+
+      // Rating options: Any, 3★+, 4★+, 5★. Disable any with no matching offers.
+      const ratingOpts = [
+        { label: 'Any', val: null },
+        { label: '3★+', val: 3 },
+        { label: '4★+', val: 4 },
+        { label: '5★', val: 5 },
+      ];
+      ratingSeg.innerHTML = '';
+      for (const opt of ratingOpts) {
+        const has = opt.val == null || offers.some(o => typeof o.rating === 'number' && o.rating >= opt.val);
+        ratingSeg.appendChild(this._segButton(opt.label, this._filterMinRating === opt.val, !has, () => {
+          this._filterMinRating = opt.val;
+          this._onFilterChange();
+        }));
+      }
+
+      // Budget options: Any + up to three round thresholds spanning the spread.
+      const budgetOpts = [{ label: 'Any', val: null }];
+      if (maxPrice > minPrice) {
+        const span = maxPrice - minPrice;
+        const round = n => {
+          const step = n < 400 ? 50 : (n < 1000 ? 100 : 250);
+          return Math.ceil(n / step) * step;
+        };
+        const t1 = round(minPrice + span * 0.34);
+        const t2 = round(minPrice + span * 0.67);
+        const t3 = round(maxPrice);
+        [t1, t2, t3].filter((v, i, a) => a.indexOf(v) === i) // dedupe
+          .forEach(v => budgetOpts.push({ label: '≤ ' + formatPrice(v), val: v }));
+      }
+      budgetSeg.innerHTML = '';
+      for (const opt of budgetOpts) {
+        const has = opt.val == null || offers.some(o => (o.pricePP || o.price || Infinity) <= opt.val);
+        budgetSeg.appendChild(this._segButton(opt.label, this._filterMaxPrice === opt.val, !has, () => {
+          this._filterMaxPrice = opt.val;
+          this._onFilterChange();
+        }));
+      }
+
+      wrap.hidden = false;
+    }
+
+    _segButton(label, pressed, disabled, onClick) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+      if (disabled) b.disabled = true;
+      else b.addEventListener('click', onClick);
+      return b;
+    }
+
+    /** Re-apply filters: refresh pressed states, re-render cards + resort pins
+     *  from the filtered set, and clear any active resort filter. */
+    _onFilterChange() {
+      if (!this._dealsCache) return;
+      this._activeResort = null;
+      const shown = this._applyFilters(this._dealsCache.offers);
+      // Refresh the controls so pressed states + disabled options stay correct.
+      this._buildFilterControls(this._dealsCache.offers);
+      this._renderCards(shown, this._dealsCache.total, this._dealsCache.name);
+      this._buildResortPins(shown, false);
+      // Map-level: also dim country pins above the budget cap (price-only).
+      this._applyWorldPriceFilter();
+    }
+
+    /** World-map price filter: hide country pins whose cheapest price exceeds
+     *  the active max budget. Rating can't apply here (summary has no ratings).
+     *  Only meaningful in country mode. */
+    _applyWorldPriceFilter() {
+      if (this._pinMode === 'resort' || !Array.isArray(this.ovMarkers)) return;
+      const maxP = this._filterMaxPrice;
+      for (const entry of this.ovMarkers) {
+        const c = entry.country;
+        const el = entry.marker.getElement();
+        if (!el) continue;
+        const pp = c.fromPricePP || c.fromPrice || Infinity;
+        el.style.opacity = (maxP != null && pp > maxP) ? '0.28' : '';
+      }
+    }
+
     /** Render cards from a set of offers (cheapest first, capped). Used for the
-     *  full country list and for resort-filtered subsets. */
+     *  full country list, resort-filtered subsets, and filter-narrowed sets. */
     _renderCards(offers, total, countryName, resortName) {
       const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
       const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
       if (!scroll) return;
 
+      if (titleEl) titleEl.textContent = resortName ? (resortName + ', ' + countryName) : countryName;
+
+      // Zero matches (usually from an over-tight filter) → friendly empty state.
+      if (!offers.length) {
+        const filtered = (this._filterMaxPrice != null || this._filterMinRating != null);
+        if (metaEl) metaEl.textContent = filtered ? 'No deals match your filters' : '';
+        scroll.innerHTML = `
+          <div class="tgwm-ov-cards-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p>${filtered ? 'No deals match these filters. Try widening your budget or rating.' : 'No deals to show right now.'}</p>
+          </div>`;
+        return;
+      }
+
       const sorted = offers.slice().sort((a, b) =>
         (a.pricePP || a.price || Infinity) - (b.pricePP || b.price || Infinity)
       ).slice(0, MAX_DEAL_CARDS);
 
-      if (titleEl) titleEl.textContent = resortName ? (resortName + ', ' + countryName) : countryName;
+      const filterActive = (this._filterMaxPrice != null || this._filterMinRating != null);
       if (metaEl) {
         if (resortName) {
           metaEl.innerHTML = sorted.length + ' deals in ' + esc(resortName) +
             ' · <button type="button" class="tgwm-clear-resort" data-ov-clear-resort>Show all ' + esc(countryName) + '</button>';
           const clr = metaEl.querySelector('[data-ov-clear-resort]');
           if (clr) clr.addEventListener('click', () => this._clearResortFilter());
+        } else if (filterActive) {
+          metaEl.textContent = sorted.length + ' of ' + (total || offers.length).toLocaleString('en-GB') + ' deals match · cheapest first';
         } else {
           metaEl.textContent = sorted.length + ' of ' + (total || offers.length).toLocaleString('en-GB') + ' deals · cheapest first';
         }
@@ -2467,20 +2658,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
       scroll.scrollTop = 0;
     }
 
-    /** Filter the cached cards to a single resort. */
+    /** Filter the cached cards to a single resort (respecting active filters). */
     _filterCardsByResort(resort) {
       if (!this._dealsCache) return;
       this._activeResort = resort;
-      const subset = this._dealsCache.offers.filter(o => o.resort === resort);
+      const base = this._applyFilters(this._dealsCache.offers);
+      const subset = base.filter(o => o.resort === resort);
       this._renderCards(subset, subset.length, this._dealsCache.name, resort);
     }
 
     _clearResortFilter() {
       if (!this._dealsCache) return;
       this._activeResort = null;
-      this._renderCards(this._dealsCache.offers, this._dealsCache.total, this._dealsCache.name);
+      const shown = this._applyFilters(this._dealsCache.offers);
+      this._renderCards(shown, this._dealsCache.total, this._dealsCache.name);
       // Re-highlight: rebuild resort pins so none is marked active.
-      this._buildResortPins(this._dealsCache.offers);
+      this._buildResortPins(shown);
     }
 
     _skeletonsHtml(n) {
