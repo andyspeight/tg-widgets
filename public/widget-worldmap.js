@@ -1916,11 +1916,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
     _thinOverlayPins() {
       if (!this.ovMap || !Array.isArray(this.ovMarkers) || !this.ovMarkers.length) return;
 
-      // Collision footprint of a price tag in screen pixels. Loosened so the
-      // world view shows more destinations (closer to Google Flights density)
-      // while still preventing labels from physically overlapping.
-      const PAD_X = 48; // horizontal clearance
-      const PAD_Y = 22; // vertical clearance
+      // Collision footprint of a price tag in screen pixels. Tightened so close
+      // neighbours (e.g. Portugal next to Spain) survive at world zoom rather
+      // than the whole region collapsing to one pin; the rest reveal on zoom-in.
+      const PAD_X = 38; // horizontal clearance
+      const PAD_Y = 20; // vertical clearance
       const map = this.ovMap;
       const shownPts = [];
 
@@ -2027,7 +2027,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     /** Thin resort pins the same way as country pins (pixel collision). */
     _thinResortPins() {
       if (!this.ovMap || !Array.isArray(this._resortMarkers) || !this._resortMarkers.length) return;
-      const PAD_X = 48, PAD_Y = 22;
+      const PAD_X = 38, PAD_Y = 20;
       const map = this.ovMap;
       const shownPts = [];
       // Active resort first so it always survives a collision.
@@ -2359,12 +2359,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
         return { ...c, _score: priceScore * 0.55 + offerScore * 0.45 };
       }).sort((a, b) => b._score - a._score);
 
-      // Collision check at world-zoom projection (z=2, viewBox-ish):
-      // Two pins within ~12 latitude AND ~35 longitude overlap visually.
-      // Walk from highest-scored down, accept each pin only if no accepted pin is too close.
-      const MIN_LAT = 12;
-      const MIN_LNG = 35;
-      const max = this.cfg.maxPins || 10;
+      // Collision check at world-zoom projection. Two pins overlap visually if
+      // close in BOTH lat and lng. The longitude box was far too wide (35°
+      // ≈ Lisbon→Moscow), which culled every European/Med country behind Spain.
+      // Tightened so neighbours like Portugal, Italy, Greece survive while the
+      // view stays tidy.
+      const MIN_LAT = 9;
+      const MIN_LNG = 13;
+      const max = this.cfg.maxPins || 12;
       const accepted = [];
       for (const c of scored) {
         if (accepted.length >= max) break;
