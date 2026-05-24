@@ -980,8 +980,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
       /* font re-declared because :host { all:initial } stops inheritance into
          a fixed child that escapes the normal flow in some engines */
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      /* While not open, the overlay must never intercept clicks meant for the
+         map/pins beneath it. pointer-events is re-enabled only on .is-open. */
+      pointer-events: none;
     }
-    .tgwm-overlay.is-open { opacity: 1; transform: scale(1); }
+    /* [hidden] loses to display:flex on specificity (documented gotcha), so
+       force it. A hidden overlay is fully removed from hit-testing. */
+    .tgwm-overlay[hidden] { display: none !important; }
+    .tgwm-overlay.is-open { opacity: 1; transform: scale(1); pointer-events: auto; }
     @media (prefers-reduced-motion: reduce) {
       .tgwm-overlay { transition: opacity 240ms var(--tgwm-ease); transform: none; }
       .tgwm-overlay.is-open { transform: none; }
@@ -1241,7 +1247,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
 
       // Hide after the exit transition (or immediately under reduced motion).
-      const finish = () => { if (this.overlayEl) this.overlayEl.hidden = true; };
+      // Guard against a re-open during the transition: only apply hidden if the
+      // overlay is still closed when the timer/event fires.
+      const finish = () => { if (this.overlayEl && !this._overlayOpen) this.overlayEl.hidden = true; };
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) {
         finish();
