@@ -1158,6 +1158,54 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
     .tgwm-ov-map .leaflet-container { width: 100%; height: 100%; background: #A5D2EC; }
 
+    /* ── Region pills (float over the map top) ─────────────────────────── */
+    .tgwm-ov-regions {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 64px; /* leave room for the zoom control top-right */
+      z-index: 620; /* above edge arrows (600), below zoom controls (700) */
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 2px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .tgwm-ov-regions[hidden] { display: none; }
+    .tgwm-ov-regions::-webkit-scrollbar { display: none; }
+    .tgwm-region-pill {
+      flex: 0 0 auto;
+      appearance: none;
+      border: 1px solid var(--tgwm-border);
+      background: var(--tgwm-bg, #fff);
+      color: var(--tgwm-text);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(15,23,42,.12);
+      transition: background 140ms, color 140ms, border-color 140ms, box-shadow 140ms;
+    }
+    .tgwm-region-pill:hover { border-color: var(--tgwm-pin-anchor-active, #00B4D8); }
+    .tgwm-region-pill[aria-pressed="true"] {
+      background: var(--tgwm-pin-anchor, #1B2B5B);
+      border-color: var(--tgwm-pin-anchor, #1B2B5B);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(15,23,42,.2);
+    }
+    .tgwm-region-pill .tgwm-region-count {
+      opacity: .6;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    .tgwm-region-pill[aria-pressed="true"] .tgwm-region-count { opacity: .8; }
+    @media (prefers-reduced-motion: reduce) { .tgwm-region-pill { transition: none; } }
+
     /* ── Off-screen deal indicators (edge arrows) ──────────────────────── */
     /* A screen-fixed layer over the map; chips pin to the viewport edges and
        point toward deals that are currently off-screen. Pointer-events are
@@ -1617,6 +1665,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Filter state (in-country): max budget pp + min star rating.
       this._filterMaxPrice = null;  // null = Any
       this._filterMinRating = null; // null = Any
+      // Region selector state (world map). null = Worldwide (cluster view).
+      this._activeRegion = null;
       this._render();
       this._init();
     }
@@ -1868,6 +1918,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <div class="tgwm-ov-mapcol" data-ov-mapcol>
             <div class="tgwm-ov-map" data-ov-map></div>
             <div class="tgwm-ov-edges" data-ov-edges aria-hidden="true"></div>
+            <div class="tgwm-ov-regions" data-ov-regions role="group" aria-label="Filter the map by region" hidden></div>
             <div class="tgwm-ov-loading" data-ov-loading>
               <div class="tgwm-spinner" aria-hidden="true"></div>
               <span>Loading map…</span>
@@ -2013,6 +2064,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this.ovMap.invalidateSize(false);
         this._fitOverlayMap();
         this._thinOverlayPins();
+        this._buildRegionPills();
         this._hideOverlayLoading();
       } catch (err) {
         console.error('[tgwm v3] overlay map init failed:', err);
@@ -2111,6 +2163,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._pinMode = 'resort';
       this._setCountryPinsVisible(false);
       this._clearEdgeArrows();
+      const regionBar = this.overlayEl && this.overlayEl.querySelector('[data-ov-regions]');
+      if (regionBar) regionBar.hidden = true;
 
       // On initial entry, frame the actual spread of resorts rather than flying
       // to one fixed point — so a country like Portugal (Porto far north,
@@ -2193,6 +2247,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._setCountryPinsVisible(true);
       this._thinOverlayPins();
       this._renderEdgeArrows();
+      this._buildRegionPills();
     }
 
     // Zoom at/above this shows resort pins; below it, country pins.
@@ -2383,6 +2438,88 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const cluster = within.length >= 3 ? within : pts;
 
       this.ovMap.fitBounds(L.latLngBounds(cluster), { padding: [50, 50], maxZoom: 5 });
+    }
+
+    // Display order for region pills (only those present in the data show).
+    static get REGION_ORDER() {
+      return ['Europe', 'Mediterranean', 'Middle East', 'Africa', 'Asia', 'Americas', 'Caribbean', 'Indian Ocean', 'Oceania', 'Other'];
+    }
+
+    /** Build the region pill row from the regions actually present in the pins.
+     *  "Worldwide" resets to the cluster view; each region reframes to its pins.
+     *  Counts come from how many country pins fall in each region. */
+    _buildRegionPills() {
+      const bar = this.overlayEl && this.overlayEl.querySelector('[data-ov-regions]');
+      if (!bar || !Array.isArray(this.ovMarkers)) return;
+
+      // Tally regions across the country pins.
+      const counts = new Map();
+      for (const m of this.ovMarkers) {
+        const r = m.country && m.country.region;
+        if (!r) continue;
+        counts.set(r, (counts.get(r) || 0) + 1);
+      }
+
+      // Fewer than two regions → a region selector adds nothing; hide it.
+      if (counts.size < 2) { bar.hidden = true; bar.innerHTML = ''; return; }
+
+      // Order: known order first, then any unexpected regions alphabetically.
+      const order = TGWorldMapWidget.REGION_ORDER;
+      const present = Array.from(counts.keys()).sort((a, b) => {
+        const ia = order.indexOf(a), ib = order.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+
+      bar.innerHTML = '';
+      // Worldwide reset pill first.
+      bar.appendChild(this._regionPill('Worldwide', null, this._activeRegion == null));
+      for (const r of present) {
+        bar.appendChild(this._regionPill(r, r, this._activeRegion === r, counts.get(r)));
+      }
+      bar.hidden = false;
+    }
+
+    _regionPill(label, regionValue, pressed, count) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tgwm-region-pill';
+      b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+      b.innerHTML = esc(label) +
+        (count != null ? `<span class="tgwm-region-count">${count}</span>` : '');
+      b.addEventListener('click', () => this._selectRegion(regionValue));
+      return b;
+    }
+
+    /** Reframe the map to a region's pins (or the cluster view for Worldwide).
+     *  Pins all stay visible — this only moves the view, per the locked decision. */
+    _selectRegion(region) {
+      this._activeRegion = region;
+      // Refresh pressed states.
+      this._buildRegionPills();
+
+      if (!this.ovMap) return;
+      const L = window.L;
+
+      if (region == null) {
+        // Worldwide → back to the default cluster framing.
+        this._fitToPinCluster();
+        return;
+      }
+
+      const pts = (this.ovMarkers || [])
+        .map(m => m.country)
+        .filter(c => c && c.region === region && typeof c.lat === 'number' && typeof c.lng === 'number')
+        .map(c => [c.lat, c.lng]);
+
+      if (!L || pts.length === 0) return;
+      if (pts.length === 1) {
+        this.ovMap.flyTo(pts[0], 5, { duration: 0.7 });
+      } else {
+        this.ovMap.flyToBounds(L.latLngBounds(pts), { padding: [60, 60], maxZoom: 6, duration: 0.7 });
+      }
     }
 
     /** Reset the left cards panel to its initial "pick a destination" prompt. */
@@ -2912,6 +3049,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this._activeResort = null;
         this._dealsCache = null;
         this._ovHasView = false;
+        this._activeRegion = null;
       }
       if (this.map) {
         this.map.remove();
@@ -2943,6 +3081,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this._activeResort = null;
         this._dealsCache = null;
         this._ovHasView = false;
+        this._activeRegion = null;
       }
       if (this.map) {
         this.map.remove();
