@@ -1,5 +1,5 @@
 /**
- * Travelgenix World Map Widget v3.3.0 
+ * Travelgenix World Map Widget v3.3.0
  * Real-map version using Leaflet + MapTiler Streets tiles.
  *
  * Usage:
@@ -1093,11 +1093,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
       flex: 1 1 auto;
       min-width: 0;
       min-height: 0;
-      display: flex;
     }
+    /* Absolute-fill rather than height:100% — a percentage height inside a
+       flex-stretched parent computes to 0 in several engines, which left
+       Leaflet initialising into a zero-height box (infinite "Loading map…"). */
     .tgwm-ov-map {
-      flex: 1 1 auto;
-      min-height: 0;
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       background: #A5D2EC; /* ocean tone while tiles load */
@@ -1184,6 +1186,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Overlay (big) map state
       this.ovMap = null;
       this.ovMarkers = [];
+      this._ovMapHeightRetried = false;
       this._render();
       this._init();
     }
@@ -1280,6 +1283,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       root.style.overflow = 'hidden';
 
       this._overlayOpen = true;
+      this._ovMapHeightRetried = false;
       this.overlayEl.hidden = false;
       // Force a reflow so the transition runs from the hidden state.
       // eslint-disable-next-line no-unused-expressions
@@ -1480,59 +1484,73 @@ svg.leaflet-image-layer.leaflet-interactive path {
         return;
       }
 
-      // Build the map once.
-      if (!this.ovMap) {
-        this.ovMap = L.map(mapEl, {
-          zoomControl: true,
-          scrollWheelZoom: true,
-          doubleClickZoom: true,
-          dragging: true,
-          worldCopyJump: true,
-          minZoom: 2,
-          maxZoom: 12,
-          attributionControl: true,
-        });
-        this.ovMap.zoomControl.setPosition('topright');
-
-        const mapKey = this.cfg.mapKey || MAPTILER_KEY;
-        const tileUrl = TILE_TEMPLATE + encodeURIComponent(mapKey);
-        L.tileLayer(tileUrl, {
-          attribution: TILE_ATTRIBUTION,
-          maxZoom: 19,
-          crossOrigin: true,
-        }).addTo(this.ovMap);
-
-        // Drop ALL country pins (not just the featured subset).
-        this.ovMarkers = [];
-        for (const c of countries) {
-          const name = resolveCountryName(c);
-          const priceLabel = formatPrice(c.fromPricePP || c.fromPrice, c.currency);
-          const html = `
-            <div class="tg-pin-wrap" data-country="${esc(name)}">
-              <div class="tg-price-tag" title="${esc(name)} — from ${esc(priceLabel)} per person">
-                <span class="tg-tag-country">${esc(name)}</span>
-                <span class="tg-tag-price">${esc(priceLabel)}</span>
-              </div>
-              <div class="tg-price-anchor"></div>
-            </div>
-          `;
-          const marker = L.marker([c.lat, c.lng], {
-            icon: L.divIcon({ html, className: '', iconSize: [0, 0], iconAnchor: [0, 0] }),
-            keyboard: false,
-            interactive: true,
-            riseOnHover: true,
-          });
-          marker.on('click', () => this._onOverlayPinClick(c));
-          marker.addTo(this.ovMap);
-          this.ovMarkers.push(marker);
-        }
+      // Guard: if the container has no height yet (CSS height chain not resolved),
+      // Leaflet would init into a 0px box and never render. Retry shortly.
+      if (mapEl.clientHeight < 40 && !this._ovMapHeightRetried) {
+        this._ovMapHeightRetried = true;
+        console.warn('[tgwm v3] overlay map container height', mapEl.clientHeight, '— retrying init');
+        setTimeout(() => { if (this._overlayOpen) this._renderOverlayMap(L); }, 120);
+        return;
       }
 
-      // Leaflet sized itself before the overlay finished animating in some
-      // engines — recompute now that it's visible, then fit the view.
-      this.ovMap.invalidateSize(false);
-      this._fitOverlayMap();
-      this._hideOverlayLoading();
+      try {
+        // Build the map once.
+        if (!this.ovMap) {
+          this.ovMap = L.map(mapEl, {
+            zoomControl: true,
+            scrollWheelZoom: true,
+            doubleClickZoom: true,
+            dragging: true,
+            worldCopyJump: true,
+            minZoom: 2,
+            maxZoom: 12,
+            attributionControl: true,
+          });
+          this.ovMap.zoomControl.setPosition('topright');
+
+          const mapKey = this.cfg.mapKey || MAPTILER_KEY;
+          const tileUrl = TILE_TEMPLATE + encodeURIComponent(mapKey);
+          L.tileLayer(tileUrl, {
+            attribution: TILE_ATTRIBUTION,
+            maxZoom: 19,
+            crossOrigin: true,
+          }).addTo(this.ovMap);
+
+          // Drop ALL country pins (not just the featured subset).
+          this.ovMarkers = [];
+          for (const c of countries) {
+            const name = resolveCountryName(c);
+            const priceLabel = formatPrice(c.fromPricePP || c.fromPrice, c.currency);
+            const html = `
+              <div class="tg-pin-wrap" data-country="${esc(name)}">
+                <div class="tg-price-tag" title="${esc(name)} — from ${esc(priceLabel)} per person">
+                  <span class="tg-tag-country">${esc(name)}</span>
+                  <span class="tg-tag-price">${esc(priceLabel)}</span>
+                </div>
+                <div class="tg-price-anchor"></div>
+              </div>
+            `;
+            const marker = L.marker([c.lat, c.lng], {
+              icon: L.divIcon({ html, className: '', iconSize: [0, 0], iconAnchor: [0, 0] }),
+              keyboard: false,
+              interactive: true,
+              riseOnHover: true,
+            });
+            marker.on('click', () => this._onOverlayPinClick(c));
+            marker.addTo(this.ovMap);
+            this.ovMarkers.push(marker);
+          }
+        }
+
+        // Leaflet sized itself before the overlay finished animating in some
+        // engines — recompute now that it's visible, then fit the view.
+        this.ovMap.invalidateSize(false);
+        this._fitOverlayMap();
+        this._hideOverlayLoading();
+      } catch (err) {
+        console.error('[tgwm v3] overlay map init failed:', err);
+        this._overlayMapError();
+      }
     }
 
     /** Decide the initial view: zoom to the country we arrived from (pin click
