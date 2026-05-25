@@ -202,6 +202,10 @@
       "destination": "/editor-worldmap.html"
     },
     {
+      "source": "/admin-worldmap",
+      "destination": "/admin-worldmap.html"
+    },
+    {
       "source": "/editor-test",
       "destination": "/editor-test.html"
     },
