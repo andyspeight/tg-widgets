@@ -532,6 +532,21 @@ const WIDGETS = [
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'worldmap',
+    name: 'World Map',
+    airtableType: 'World Map',
+    description: 'An interactive map of your live holiday offers — price pins by country, drill down to resorts, and an immersive fullscreen explore mode with price and rating filters. Curate which destinations show, set your brand colours, and embed anywhere.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
+    color: '#1B2B5B',
+    editorUrl: '/editor-worldmap',
+    demoUrl: '/demo-worldmap',
+    widgetTag: 'worldmap',
+    scriptFile: 'widget-worldmap.js',
+    access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'share',
     name: 'Social Share',
     airtableType: 'Social Share',
@@ -2789,6 +2804,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-textfx.js"></script>
 <script src="/widget-events.js"></script>
 <script src="/widget-offers.js"></script>
+<script src="/widget-worldmap.js"></script>
 <script src="/widget-share.js"></script>
 <script src="/widget-whatsapp.js"></script>
 <script src="/widget-hours.js"></script>
