@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Map Admin — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2B5B; --teal: #00B4D8;
+    --bg: #F6F8FB; --card: #FFFFFF; --border: #E2E8F0;
+    --text: #0F172A; --muted: #64748B; --muted-2: #94A3B8;
+    --ok: #059669; --ok-bg: #ECFDF5; --warn: #B45309; --warn-bg: #FFFBEB; --err: #DC2626; --err-bg: #FEF2F2;
+    --radius: 14px; --radius-sm: 9px;
+    --ft: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+    --shadow-lg: 0 12px 32px rgba(15,23,42,.14);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--ft); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 80px; }
+
+  /* Header */
+  .top { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 26px; }
+  .top-ico {
+    width: 46px; height: 46px; border-radius: 12px; flex: 0 0 auto;
+    background: linear-gradient(135deg, var(--navy), #2C4173);
+    display: flex; align-items: center; justify-content: center; color: #fff;
+  }
+  .top-ico svg { width: 24px; height: 24px; }
+  .top h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .top p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+  .top-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+  .crumb { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .crumb a { color: var(--muted); text-decoration: none; }
+  .crumb a:hover { color: var(--teal); }
+
+  /* Buttons */
+  .btn {
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: var(--radius-sm); padding: 9px 15px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); display: inline-flex; align-items: center; gap: 7px;
+    transition: all .14s; white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--teal); }
+  .btn svg { width: 15px; height: 15px; }
+  .btn--primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .btn--primary:hover { background: #16244d; border-color: #16244d; }
+  .btn--accent { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .btn--accent:hover { filter: brightness(.95); }
+  .btn--sm { padding: 6px 10px; font-size: 12px; }
+  .btn--ghost { background: transparent; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn--danger { color: var(--err); }
+  .btn--danger:hover { border-color: var(--err); background: var(--err-bg); }
+
+  /* Status bar */
+  .statusbar {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 18px; margin-bottom: 20px; box-shadow: var(--shadow);
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .stat-value { font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+  .stat-value.mono { font-family: var(--mono); font-size: 15px; font-weight: 500; }
+  .statusbar .sep { width: 1px; align-self: stretch; background: var(--border); }
+  .statusbar .grow { flex: 1; }
+
+  /* Table */
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .panel-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+  .panel-head h2 { margin: 0; font-size: 15px; font-weight: 700; }
+  .panel-head .grow { flex: 1; }
+  .search { position: relative; }
+  .search input {
+    font: inherit; font-size: 13px; padding: 7px 11px 7px 32px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--bg); width: 220px; color: var(--text);
+  }
+  .search input:focus { outline: none; border-color: var(--teal); }
+  .search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--muted-2); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .05em; padding: 11px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; background: #FBFCFE;
+  }
+  thead th.num { text-align: right; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #FBFCFE; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .cc-cell { display: flex; align-items: center; gap: 10px; }
+  .cc-flag { font-size: 20px; line-height: 1; }
+  .cc-name { font-weight: 600; }
+  .cc-code { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+  .region-tag {
+    display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+    background: #EEF2FF; color: #4338CA;
+  }
+  .region-tag[data-r="Africa"] { background: #FEF3C7; color: #92400E; }
+  .region-tag[data-r="Asia"] { background: #DCFCE7; color: #166534; }
+  .region-tag[data-r="Americas"] { background: #E0F2FE; color: #075985; }
+  .region-tag[data-r="Middle East"] { background: #FCE7F3; color: #9D174D; }
+  .region-tag[data-r="Oceania"] { background: #F3E8FF; color: #6B21A8; }
+
+  .airports { font-family: var(--mono); font-size: 11px; color: var(--muted); max-width: 240px; }
+  .airports.empty { color: var(--err); font-style: italic; font-family: var(--ft); }
+
+  .count-pill { display: inline-flex; align-items: baseline; gap: 4px; }
+  .count-pill b { font-size: 15px; font-weight: 800; }
+  .count-zero { color: var(--err); font-weight: 700; }
+  .count-na { color: var(--muted-2); }
+
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(15,23,42,.5); backdrop-filter: blur(2px);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+  }
+  .modal-backdrop.is-open { display: flex; }
+  .modal {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 460px; overflow: hidden;
+  }
+  .modal-head { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; }
+  .modal-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+  .modal-head button { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; }
+  .modal-body { padding: 20px; }
+  .modal-foot { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; background: #FBFCFE; }
+
+  .field { margin-bottom: 15px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; }
+  .field input, .field select {
+    width: 100%; font: inherit; font-size: 13px; padding: 9px 11px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--bg); color: var(--text);
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--teal); }
+  .field .hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .field-row { display: flex; gap: 12px; }
+  .field-row .field { flex: 1; }
+
+  /* States */
+  .empty-state, .auth-gate { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state svg, .auth-gate svg { width: 40px; height: 40px; color: var(--muted-2); margin-bottom: 12px; }
+  .skel { height: 14px; border-radius: 5px; background: linear-gradient(90deg,#EEF2F7 25%,#F8FAFC 50%,#EEF2F7 75%); background-size: 200% 100%; animation: sh 1.3s infinite; }
+  @keyframes sh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  /* Toast */
+  .toast-host { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .toast {
+    background: var(--navy); color: #fff; padding: 11px 18px; border-radius: 999px; font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-lg); animation: pop .2s ease; max-width: 90vw;
+  }
+  .toast.ok { background: var(--ok); }
+  .toast.err { background: var(--err); }
+  @keyframes pop { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 720px) {
+    .hide-sm { display: none; }
+    .search input { width: 130px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb"><a href="/">← Tool Hub</a></div>
+
+  <div class="top">
+    <div class="top-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </div>
+    <div>
+      <h1>World Map — Destinations</h1>
+      <p>Manage which destinations the map polls for offers, and rebuild the cache on demand.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="btn-refresh" title="Reload counts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Reload
+      </button>
+      <button class="btn btn--accent" id="btn-rebuild-all" title="Re-poll every destination">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+        Rebuild all offers
+      </button>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="statusbar" id="statusbar">
+    <div class="stat"><span class="stat-label">Destinations</span><span class="stat-value" id="s-count">—</span></div>
+    <div class="sep"></div>
+    <div class="stat"><span class="stat-label">Returning offers</span><span class="stat-value" id="s-live">—</span></div>
+    <div class="sep"></div>
+    <div class="stat"><span class="stat-label">Polling nothing</span><span class="stat-value" id="s-empty">—</span></div>
+    <div class="sep"></div>
+    <div class="stat"><span class="stat-label">Last rebuild</span><span class="stat-value mono" id="s-last">—</span></div>
+    <div class="grow"></div>
+    <button class="btn btn--primary btn--sm" id="btn-add">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add destination
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Destinations</h2>
+      <span class="region-tag" id="head-note" style="background:#F1F5F9;color:#64748B;display:none"></span>
+      <div class="grow"></div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search" placeholder="Search country or code…">
+      </div>
+    </div>
+    <div id="table-host">
+      <!-- table or states injected here -->
+    </div>
+  </div>
+
+</div>
+
+<!-- Add/Edit modal -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Add destination</h3>
+      <button id="modal-x" aria-label="Close"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f-id">
+      <div class="field-row">
+        <div class="field">
+          <label for="f-cc">Country code</label>
+          <input type="text" id="f-cc" maxlength="2" placeholder="GR" style="text-transform:uppercase">
+          <div class="hint">2-letter ISO code</div>
+        </div>
+        <div class="field">
+          <label for="f-region">Region</label>
+          <select id="f-region">
+            <option value="Europe">Europe</option>
+            <option value="Africa">Africa</option>
+            <option value="Middle East">Middle East</option>
+            <option value="Asia">Asia</option>
+            <option value="Americas">Americas</option>
+            <option value="Oceania">Oceania</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-airports">Airports</label>
+        <input type="text" id="f-airports" placeholder="HER, RHO, JTR" style="text-transform:uppercase; font-family:var(--mono)">
+        <div class="hint">Comma-separated 3-letter IATA codes. These are the destination gateways polled for offers.</div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-dmin">Date window from (days)</label>
+          <input type="number" id="f-dmin" min="0" max="800" placeholder="1">
+          <div class="hint">Earliest departure, days from today.</div>
+        </div>
+        <div class="field">
+          <label for="f-dmax">Date window to (days)</label>
+          <input type="number" id="f-dmax" min="0" max="800" placeholder="700">
+          <div class="hint">Latest departure. Long-haul needs a wide window.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn--danger" id="modal-delete" style="margin-right:auto; display:none">Delete</button>
+      <button class="btn" id="modal-cancel">Cancel</button>
+      <button class="btn btn--primary" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-host" id="toast-host"></div>
+
+<script>
+(function () {
+  'use strict';
+  const API_DEST = '/api/admin/map-destinations';
+  const API_REBUILD = '/api/admin/map-rebuild';
+
+  let DEST = [];        // current destinations
+  let lastRunAt = null;
+  let filter = '';
+
+  // ── helpers ──────────────────────────────────────────────────
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  function toast(msg, kind) {
+    const host = $('toast-host');
+    const el = document.createElement('div');
+    el.className = 'toast' + (kind ? ' ' + kind : '');
+    el.textContent = msg;
+    host.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 3200);
+  }
+
+  // Flag emoji from ISO code (regional indicator letters).
+  function flag(cc) {
+    if (!/^[A-Za-z]{2}$/.test(cc)) return '🏳️';
+    const A = 0x1F1E6;
+    return String.fromCodePoint(A + cc.toUpperCase().charCodeAt(0) - 65, A + cc.toUpperCase().charCodeAt(1) - 65);
+  }
+  const dn = (typeof Intl !== 'undefined' && Intl.DisplayNames) ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
+  function ccName(cc) { try { return (dn && dn.of(cc)) || cc; } catch { return cc; } }
+
+  function money(pp, cur) {
+    if (pp == null) return '';
+    const sym = cur === 'EUR' ? '€' : cur === 'USD' ? '$' : '£';
+    return sym + Math.round(pp).toLocaleString('en-GB');
+  }
+  function timeAgo(iso) {
+    if (!iso) return '—';
+    const t = Date.parse(iso); if (isNaN(t)) return '—';
+    const mins = Math.round((Date.now() - t) / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.round(hrs / 24) + 'd ago';
+  }
+
+  // ── data ─────────────────────────────────────────────────────
+  async function load() {
+    renderLoading();
+    try {
+      const r = await fetch(API_DEST, { credentials: 'include' });
+      if (r.status === 401 || r.status === 403) { renderAuthGate(r.status); return; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      DEST = d.destinations || [];
+      lastRunAt = d.lastRunAt || null;
+      renderStats(); renderTable();
+    } catch (e) {
+      renderError(e.message);
+    }
+  }
+
+  // ── render ───────────────────────────────────────────────────
+  function renderLoading() {
+    let rows = '';
+    for (let i = 0; i < 6; i++) rows += `<tr><td colspan="7"><div class="skel" style="width:${40 + Math.random()*50}%"></div></td></tr>`;
+    $('table-host').innerHTML = `<table><tbody>${rows}</tbody></table>`;
+  }
+  function renderError(msg) {
+    $('table-host').innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>Couldn't load destinations.<br><small>${esc(msg)}</small></div></div>`;
+  }
+  function renderAuthGate(status) {
+    const msg = status === 403 ? 'Your account is not an admin for the World Map.' : 'Please sign in to manage destinations.';
+    $('table-host').innerHTML = `<div class="auth-gate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><div>${esc(msg)}</div><div style="margin-top:14px"><a class="btn btn--primary" href="/signin">Sign in</a></div></div>`;
+    $('statusbar').style.opacity = '.4';
+  }
+
+  function renderStats() {
+    const total = DEST.length;
+    const live = DEST.filter(d => (d.offerCount || 0) > 0).length;
+    const empty = total - live;
+    $('s-count').textContent = total;
+    $('s-live').textContent = live;
+    $('s-empty').innerHTML = empty > 0 ? `<span style="color:var(--err)">${empty}</span>` : '0';
+    $('s-last').textContent = timeAgo(lastRunAt);
+    $('statusbar').style.opacity = '1';
+  }
+
+  function renderTable() {
+    const q = filter.trim().toLowerCase();
+    let rows = DEST.filter(d => {
+      if (!q) return true;
+      return d.countryCode.toLowerCase().includes(q) || ccName(d.countryCode).toLowerCase().includes(q);
+    });
+
+    if (!rows.length) {
+      $('table-host').innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>${q ? 'No destinations match your search.' : 'No destinations yet. Add your first one.'}</div></div>`;
+      return;
+    }
+
+    const body = rows.map(d => {
+      const name = ccName(d.countryCode);
+      const noAir = !d.airports || d.airports.length === 0;
+      const cnt = d.offerCount;
+      let cntCell;
+      if (cnt == null) cntCell = `<span class="count-na">—</span>`;
+      else if (cnt === 0) cntCell = `<span class="count-zero">0</span>`;
+      else cntCell = `<span class="count-pill"><b>${cnt.toLocaleString('en-GB')}</b></span>`;
+      const price = money(d.cheapestPP, d.currency);
+      return `<tr data-id="${esc(d.id)}">
+        <td><div class="cc-cell"><span class="cc-flag">${flag(d.countryCode)}</span><div><div class="cc-name">${esc(name)}</div><div class="cc-code">${esc(d.countryCode)}</div></div></div></td>
+        <td><span class="region-tag" data-r="${esc(d.region||'')}">${esc(d.region||'—')}</span></td>
+        <td class="hide-sm"><div class="airports ${noAir?'empty':''}">${noAir ? 'no airports — polls nothing' : esc(d.airports.join(', '))}</div></td>
+        <td class="num">${cntCell}</td>
+        <td class="num hide-sm">${d.airportCountLive != null ? d.airportCountLive : '—'}</td>
+        <td class="num hide-sm">${price ? esc(price) : '<span class="count-na">—</span>'}</td>
+        <td><div class="row-actions">
+          <button class="btn btn--sm btn--ghost" data-act="rebuild" data-cc="${esc(d.countryCode)}" title="Re-poll ${esc(name)}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/></svg>
+          </button>
+          <button class="btn btn--sm btn--ghost" data-act="edit" title="Edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div></td>
+      </tr>`;
+    }).join('');
+
+    $('table-host').innerHTML = `<table>
+      <thead><tr>
+        <th>Country</th><th>Region</th><th class="hide-sm">Airports</th>
+        <th class="num">Offers</th><th class="num hide-sm">Gateways</th><th class="num hide-sm">From</th><th></th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
+  // ── modal ────────────────────────────────────────────────────
+  function openModal(dest) {
+    $('modal-title').textContent = dest ? 'Edit destination' : 'Add destination';
+    $('f-id').value = dest ? dest.id : '';
+    $('f-cc').value = dest ? dest.countryCode : '';
+    $('f-region').value = dest ? (dest.region || 'Europe') : 'Europe';
+    $('f-airports').value = dest && dest.airports ? dest.airports.join(', ') : '';
+    $('f-dmin').value = dest && dest.datesMin != null ? dest.datesMin : '';
+    $('f-dmax').value = dest && dest.datesMax != null ? dest.datesMax : '';
+    $('f-cc').disabled = !!dest; // don't allow changing the code on edit (it's the key)
+    $('modal-delete').style.display = dest ? 'inline-flex' : 'none';
+    $('modal').classList.add('is-open');
+  }
+  function closeModal() { $('modal').classList.remove('is-open'); }
+
+  async function saveModal() {
+    const id = $('f-id').value;
+    const payload = {
+      countryCode: $('f-cc').value.toUpperCase().trim(),
+      region: $('f-region').value,
+      airports: $('f-airports').value,
+      datesMin: $('f-dmin').value === '' ? null : Number($('f-dmin').value),
+      datesMax: $('f-dmax').value === '' ? null : Number($('f-dmax').value),
+    };
+    if (!/^[A-Z]{2}$/.test(payload.countryCode)) { toast('Enter a valid 2-letter country code', 'err'); return; }
+
+    $('modal-save').disabled = true;
+    try {
+      let r;
+      if (id) {
+        r = await fetch(API_DEST, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...payload }) });
+      } else {
+        r = await fetch(API_DEST, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      }
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+      toast(id ? 'Destination updated' : 'Destination added', 'ok');
+      closeModal();
+      await load();
+    } catch (e) {
+      toast(e.message, 'err');
+    } finally {
+      $('modal-save').disabled = false;
+    }
+  }
+
+  async function deleteCurrent() {
+    const id = $('f-id').value;
+    if (!id) return;
+    if (!confirm('Remove this destination from the map? It will stop being polled.')) return;
+    $('modal-delete').disabled = true;
+    try {
+      const r = await fetch(API_DEST, { method: 'DELETE', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+      toast('Destination removed', 'ok');
+      closeModal();
+      await load();
+    } catch (e) {
+      toast(e.message, 'err');
+    } finally {
+      $('modal-delete').disabled = false;
+    }
+  }
+
+  // ── rebuild ──────────────────────────────────────────────────
+  async function rebuild(body, btn) {
+    const original = btn ? btn.innerHTML : null;
+    if (btn) { btn.disabled = true; btn.innerHTML = `<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg>`; }
+    try {
+      const r = await fetch(API_REBUILD, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await r.json().catch(() => ({}));
+      if (r.status === 401 || r.status === 403) { toast('Admin access required', 'err'); return; }
+      if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+      if (d.pending) toast(d.message || 'Rebuild running…', 'ok');
+      else toast('Rebuild complete', 'ok');
+      // Give the cron a moment, then reload counts.
+      setTimeout(load, body.scope === 'all' ? 3000 : 1500);
+    } catch (e) {
+      toast(e.message, 'err');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = original; }
+    }
+  }
+
+  // ── events ───────────────────────────────────────────────────
+  $('btn-refresh').addEventListener('click', load);
+  $('btn-add').addEventListener('click', () => openModal(null));
+  $('btn-rebuild-all').addEventListener('click', (e) => {
+    if (!confirm('Re-poll every destination? This can take a couple of minutes.')) return;
+    rebuild({ scope: 'all' }, e.currentTarget);
+  });
+  $('search').addEventListener('input', (e) => { filter = e.target.value; renderTable(); });
+
+  $('modal-x').addEventListener('click', closeModal);
+  $('modal-cancel').addEventListener('click', closeModal);
+  $('modal-save').addEventListener('click', saveModal);
+  $('modal-delete').addEventListener('click', deleteCurrent);
+  $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
+
+  // Delegated row actions
+  $('table-host').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    const tr = btn.closest('tr'); const id = tr && tr.getAttribute('data-id');
+    const dest = DEST.find(d => d.id === id);
+    if (btn.getAttribute('data-act') === 'edit') openModal(dest);
+    else if (btn.getAttribute('data-act') === 'rebuild') rebuild({ country: btn.getAttribute('data-cc') }, btn);
+  });
+
+  // Boot
+  load();
+})();
+</script>
+</body>
+</html>
