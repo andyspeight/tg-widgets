@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.4.0';
+  const VERSION = '3.5.0';
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '';
   const OFFERS_URL = API_BASE + '/api/destination-map-offers';
   const DEALS_URL = API_BASE + '/api/destination-map-deals';
@@ -73,6 +73,26 @@
     if (s.startsWith('#') || s.startsWith('/')) return s;
     if (/^(https?|mailto|tel):/i.test(s)) return s;
     return '#';
+  }
+  // Accept ONLY #RGB or #RRGGBB. Anything else (named colours, rgb(), url(),
+  // javascript:, garbage) returns '' so it can never reach a style attribute.
+  // This is what makes config-driven colours safe to inline.
+  function safeHex(v) {
+    if (typeof v !== 'string') return '';
+    const s = v.trim();
+    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(s) ? s : '';
+  }
+  // Build the inline custom-property overrides for brand colours from config.
+  // accent  → --tgwm-pin-anchor-active (highlight/active)
+  // primary → --tgwm-pin-anchor + --tgwm-cta-bg (structural navy)
+  // Returns '' when neither is set, so the stylesheet defaults stand.
+  function brandStyleAttr(cfg) {
+    const a = safeHex(cfg && cfg.accent);
+    const p = safeHex(cfg && cfg.primary);
+    let s = '';
+    if (a) s += '--tgwm-pin-anchor-active:' + a + ';';
+    if (p) s += '--tgwm-pin-anchor:' + p + ';--tgwm-cta-bg:' + p + ';';
+    return s;
   }
   function formatPrice(p, currency) {
     if (!Number.isFinite(p) || p <= 0) return '';
@@ -1632,6 +1652,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
     subtitle: 'Browse our latest offers from around the world',
     ctaLabel: 'View fullscreen',
     showFullscreenButton: true,
+    // Brand colours (editor-driven). Empty = use the built-in navy/teal tokens.
+    // accent  → the active/highlight colour (default teal #00B4D8)
+    // primary → the structural colour: pin anchors + CTA background (default navy #1B2B5B)
+    // Both are validated as #RGB/#RRGGBB before being applied; anything else is ignored.
+    accent: '',
+    primary: '',
+    // Country allow-list (array of ISO country codes, e.g. ['GR','ES']). Empty/absent
+    // = show every country with offers (current behaviour). When non-empty, only these
+    // countries are pinned. Regions are resolved to country codes in the editor before
+    // save, so there is no separate regions key here.
+    countries: [],
     // Click handler url — opened in new tab when fullscreen button clicked.
     // Fullscreen overlay (modal on same page) is a future enhancement.
     fullscreenUrl: '',
@@ -1691,13 +1722,28 @@ svg.leaflet-image-layer.leaflet-interactive path {
           loadLeaflet(),
           this._loadOffers(),
         ]);
-        this.data = offers;
+        this.data = this._applyCountryAllowList(offers);
         this._renderMap(L);
         this._hideLoading();
       } catch (e) {
         console.warn('[tgwm v3] init failed:', e.message);
         this._showError('Map unavailable. Please try again later.');
       }
+    }
+
+    /** If the config carries a non-empty countries allow-list, keep only those
+     *  countries in the summary. Done once here so every downstream consumer
+     *  (compact pins, overlay pins, edge arrows, region pills) is filtered
+     *  consistently. Empty/absent list = show everything (current behaviour). */
+    _applyCountryAllowList(offers) {
+      const allow = Array.isArray(this.cfg.countries)
+        ? this.cfg.countries.map(x => String(x || '').toUpperCase().trim()).filter(Boolean)
+        : [];
+      if (!allow.length || !offers || !Array.isArray(offers.countries)) return offers;
+      const set = new Set(allow);
+      const filtered = offers.countries.filter(c => set.has(String(c.countryCode || '').toUpperCase()));
+      // Return a shallow copy so we never mutate the fetched object.
+      return Object.assign({}, offers, { countries: filtered });
     }
 
     async _loadOffers() {
@@ -1708,9 +1754,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     _render() {
       const c = this.cfg;
+      const brand = brandStyleAttr(c);
       const html = `
         <style>${LEAFLET_CSS}${STYLES}</style>
-        <div class="tgwm-root" data-theme="${esc(c.theme)}">
+        <div class="tgwm-root" data-theme="${esc(c.theme)}"${brand ? ` style="${brand}"` : ''}>
           <div class="tgwm-header">
             <h2 class="tgwm-title">${esc(c.title)}</h2>
             <p class="tgwm-subtitle">${esc(c.subtitle)}</p>
@@ -1888,6 +1935,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
       wrap.setAttribute('aria-modal', 'true');
       wrap.setAttribute('aria-label', (c.title || 'Destination map') + ' — fullscreen');
       wrap.setAttribute('data-theme', esc(c.theme));
+      // Brand colour overrides (validated hex only) — mirror the compact root so
+      // the fullscreen overlay carries the agency's accent/primary too.
+      const _accent = safeHex(c.accent), _primary = safeHex(c.primary);
+      if (_accent) wrap.style.setProperty('--tgwm-pin-anchor-active', _accent);
+      if (_primary) { wrap.style.setProperty('--tgwm-pin-anchor', _primary); wrap.style.setProperty('--tgwm-cta-bg', _primary); }
       wrap.hidden = true;
       wrap.innerHTML = `
         <div class="tgwm-overlay-backdrop" data-ov-backdrop></div>
