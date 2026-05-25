@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Map Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* ── World Map editor — per-editor styles only (shell tokens live in editor-shell.css) ── */
+
+  .tgwm-field { margin-bottom: 16px; }
+  .tgwm-field:last-child { margin-bottom: 0; }
+  .tgwm-field-label {
+    display: block; font-size: 12px; font-weight: 600; color: var(--tgse-text);
+    margin-bottom: 6px; letter-spacing: .01em;
+  }
+  .tgwm-field-hint { font-size: 11px; color: var(--tgse-text-muted); margin-top: 5px; line-height: 1.45; }
+
+  .tgwm-input, .tgwm-textarea {
+    width: 100%; font: inherit; font-size: 13px; color: var(--tgse-text);
+    background: var(--tgse-surface); border: 1px solid var(--tgse-border);
+    border-radius: 8px; padding: 9px 11px; transition: border-color .15s, box-shadow .15s;
+  }
+  .tgwm-input:focus, .tgwm-textarea:focus {
+    outline: none; border-color: var(--tgse-accent, #00B4D8);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgse-accent, #00B4D8) 18%, transparent);
+  }
+  .tgwm-textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+
+  /* Colour row: native picker + hex text, house style */
+  .tgwm-colour-row { display: flex; gap: 8px; align-items: center; }
+  .tgwm-colour-row input[type="color"] {
+    inline-size: 38px; block-size: 38px; padding: 0; border: 1px solid var(--tgse-border);
+    border-radius: 8px; background: none; cursor: pointer; flex: 0 0 auto;
+  }
+  .tgwm-colour-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+  .tgwm-colour-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }
+  .tgwm-colour-row .tgwm-input { flex: 1 1 auto; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+
+  /* Contrast guardrail warning */
+  .tgwm-contrast-warn {
+    display: none; margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+    background: #FEF3C7; border: 1px solid #FCD34D; color: #92400E;
+    font-size: 11px; line-height: 1.45;
+  }
+  .tgwm-contrast-warn.is-show { display: block; }
+  .tgwm-contrast-warn strong { font-weight: 700; }
+
+  /* Curation: region groups + country checkboxes */
+  .tgwm-cur-toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tgwm-cur-toolbar button {
+    font: inherit; font-size: 11px; font-weight: 600; cursor: pointer;
+    padding: 5px 10px; border-radius: 999px; border: 1px solid var(--tgse-border);
+    background: var(--tgse-surface); color: var(--tgse-text); transition: all .14s;
+  }
+  .tgwm-cur-toolbar button:hover { border-color: var(--tgse-accent, #00B4D8); }
+
+  .tgwm-region { margin-bottom: 14px; }
+  .tgwm-region:last-child { margin-bottom: 0; }
+  .tgwm-region-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  }
+  .tgwm-region-pill {
+    font: inherit; font-size: 11px; font-weight: 700; cursor: pointer;
+    padding: 4px 11px; border-radius: 999px; border: 1px solid var(--tgse-border);
+    background: var(--tgse-surface); color: var(--tgse-text); transition: all .14s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .tgwm-region-pill[data-state="all"] { background: var(--tgse-accent, #00B4D8); border-color: var(--tgse-accent, #00B4D8); color: #fff; }
+  .tgwm-region-pill[data-state="some"] { border-color: var(--tgse-accent, #00B4D8); color: var(--tgse-accent, #00B4D8); }
+  .tgwm-region-count { font-size: 10px; opacity: .8; font-weight: 600; }
+
+  .tgwm-country-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+  .tgwm-country {
+    display: flex; align-items: center; gap: 7px; padding: 5px 7px; border-radius: 7px;
+    cursor: pointer; font-size: 12px; color: var(--tgse-text); transition: background .12s;
+  }
+  .tgwm-country:hover { background: var(--tgse-surface); }
+  .tgwm-country input { width: 15px; height: 15px; accent-color: var(--tgse-accent, #00B4D8); cursor: pointer; flex: 0 0 auto; }
+  .tgwm-country-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tgwm-country-cc { font-size: 10px; color: var(--tgse-text-muted); font-family: 'JetBrains Mono', monospace; }
+
+  .tgwm-cur-summary { font-size: 11px; color: var(--tgse-text-muted); margin-bottom: 10px; }
+  .tgwm-cur-summary strong { color: var(--tgse-text); font-weight: 700; }
+  .tgwm-cur-loading { font-size: 12px; color: var(--tgse-text-muted); padding: 12px 0; text-align: center; }
+
+  /* Toggle row (settings) */
+  .tgwm-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .tgwm-toggle-row .tgwm-field-label { margin-bottom: 0; }
+  .tgwm-switch { position: relative; inline-size: 42px; block-size: 24px; flex: 0 0 auto; }
+  .tgwm-switch input { opacity: 0; width: 0; height: 0; }
+  .tgwm-switch span {
+    position: absolute; inset: 0; cursor: pointer; border-radius: 999px;
+    background: var(--tgse-border); transition: background .18s;
+  }
+  .tgwm-switch span::before {
+    content: ''; position: absolute; inset-block-start: 3px; inset-inline-start: 3px;
+    inline-size: 18px; block-size: 18px; border-radius: 50%; background: #fff;
+    transition: transform .18s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .tgwm-switch input:checked + span { background: var(--tgse-accent, #00B4D8); }
+  .tgwm-switch input:checked + span::before { transform: translateX(18px); }
+
+  /* preview frame: the map widget wants real size */
+  #pv-frame { padding: 0; }
+  #widget-mount { width: 100%; }
+
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <!-- ============================== SIDEBAR ============================== -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">World Map</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled World Map" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== CONTENT TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="content">
+
+        <!-- Heading + intro -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+            <span class="tgse-section-label">Heading &amp; intro</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgwm-field">
+              <label class="tgwm-field-label" for="f-title">Title</label>
+              <input type="text" class="tgwm-input" id="f-title" maxlength="120" placeholder="Where will you go next?">
+            </div>
+            <div class="tgwm-field">
+              <label class="tgwm-field-label" for="f-subtitle">Intro text</label>
+              <textarea class="tgwm-textarea" id="f-subtitle" maxlength="240" placeholder="Browse our latest offers from around the world"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Curation -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="tgse-section-label">Destinations shown</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgwm-cur-summary" id="cur-summary">Loading destinations…</div>
+            <div class="tgwm-cur-toolbar" id="cur-toolbar" hidden>
+              <button type="button" id="cur-all">Show all</button>
+              <button type="button" id="cur-none">Clear all</button>
+            </div>
+            <div id="cur-loading" class="tgwm-cur-loading">Fetching available destinations…</div>
+            <div id="cur-regions"></div>
+            <div class="tgwm-field-hint">Pick which destinations appear on your map. Tick a region to toggle all its countries, or choose individually. Showing none means every available destination is shown.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== DESIGN TAB ===== -->
+      <div class="tgse-panel" data-tab="design">
+
+        <!-- Colours -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgwm-field">
+              <label class="tgwm-field-label" for="col-accent">Accent colour</label>
+              <div class="tgwm-colour-row">
+                <input type="color" id="col-accent" value="#00B4D8">
+                <input type="text" class="tgwm-input" id="col-accent-hex" maxlength="7" value="#00B4D8">
+              </div>
+              <div class="tgwm-field-hint">Used for highlights, active pins and the selected state.</div>
+            </div>
+            <div class="tgwm-field">
+              <label class="tgwm-field-label" for="col-primary">Primary colour</label>
+              <div class="tgwm-colour-row">
+                <input type="color" id="col-primary" value="#1B2B5B">
+                <input type="text" class="tgwm-input" id="col-primary-hex" maxlength="7" value="#1B2B5B">
+              </div>
+              <div class="tgwm-field-hint">The structural colour — price pins and the fullscreen button. White text sits on this, so it should stay dark.</div>
+              <div class="tgwm-contrast-warn" id="contrast-warn">
+                <strong>Low contrast.</strong> White text on this colour may be hard to read. Pick a darker shade for the best legibility.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgwm-field">
+              <label class="tgwm-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            <span class="tgse-section-label">Fullscreen</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgwm-field tgwm-toggle-row">
+              <label class="tgwm-field-label" for="f-fullscreen">Show fullscreen button</label>
+              <label class="tgwm-switch">
+                <input type="checkbox" id="f-fullscreen" checked>
+                <span></span>
+              </label>
+            </div>
+            <div class="tgwm-field-hint">Lets visitors open the immersive fullscreen map to browse and filter every deal.</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ============================== PREVIEW ============================== -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div data-tg-widget="worldmap" id="widget-mount"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-worldmap.js"></script>
+<script>
+/* ============================================================
+   WORLD MAP EDITOR — per-editor logic
+   Built on the unified shell (tgse). Writes the widget config
+   contract: title, subtitle, theme, accent, primary, countries[],
+   showFullscreenButton, fontFamily.
+   ============================================================ */
+
+  // Default config — mirrors the widget's DEFAULTS.
+  let C = {
+    theme: 'light',
+    title: 'Where will you go next?',
+    subtitle: 'Browse our latest offers from around the world',
+    accent: '',          // '' = widget's built-in teal
+    primary: '',         // '' = widget's built-in navy
+    countries: [],       // [] = show all available
+    showFullscreenButton: true,
+    fontFamily: 'Inter',
+  };
+
+  let widgetInst = null;
+  let availableCountries = [];   // [{ cc, name, region }]
+  const REGION_ORDER = ['Europe', 'Africa', 'Middle East', 'Asia', 'Americas', 'Oceania'];
+
+  // Resolve ISO code → country name via the browser (zero-dependency).
+  const _dn = (typeof Intl !== 'undefined' && Intl.DisplayNames)
+    ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
+  function ccName(cc) {
+    if (!cc) return '';
+    try { return (_dn && _dn.of(cc)) || cc; } catch (_) { return cc; }
+  }
+
+  // ── Colour helpers ──────────────────────────────────────────
+  function isHex(v) { return typeof v === 'string' && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v.trim()); }
+  // Relative luminance + contrast ratio (WCAG) for the primary-vs-white guardrail.
+  function _lin(c) { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+  function luminance(hex) {
+    let h = hex.replace('#', '');
+    if (h.length === 3) h = h.split('').map(x => x + x).join('');
+    const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+    return 0.2126 * _lin(r) + 0.7152 * _lin(g) + 0.0722 * _lin(b);
+  }
+  function contrastWithWhite(hex) {
+    const L = luminance(hex);
+    return (1.0 + 0.05) / (L + 0.05); // white luminance = 1.0
+  }
+  function updateContrastWarn() {
+    const warn = document.getElementById('contrast-warn');
+    const p = C.primary || '#1B2B5B';
+    // WCAG AA for large/bold UI text ~3:1; warn below that.
+    const ratio = isHex(p) ? contrastWithWhite(p) : 21;
+    warn.classList.toggle('is-show', ratio < 3);
+  }
+
+  // ── Shell init ──────────────────────────────────────────────
+  const shell = tgse.init({
+    widgetType: 'World Map',
+    widgetTag: 'worldmap',
+    scriptFile: 'widget-worldmap.js',
+
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); syncControls(); render(); },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+
+    onAIBuild: () => tgse.toast('AI builder coming soon for the World Map', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for the World Map', 'ok'),
+
+    onThemeToggle: (isDark) => { C.theme = isDark ? 'dark' : 'light'; shell.markDirty(); render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => { ensureCountries(); loadFromUrl(); },
+  });
+
+  // ── Render preview ──────────────────────────────────────────
+  function render() {
+    const host = document.getElementById('pv-frame');
+    if (!host) return;
+    // Tear down any existing instance + mount, build fresh.
+    if (widgetInst) { try { widgetInst.destroy(); } catch (_) {} widgetInst = null; }
+    host.innerHTML = '<div data-tg-widget="worldmap" id="widget-mount"></div>';
+    const mount = host.querySelector('#widget-mount');
+    try {
+      widgetInst = new window.TGWorldMapWidget(mount, Object.assign({}, C));
+    } catch (e) {
+      console.error('[editor-worldmap] preview failed:', e);
+    }
+    updateContrastWarn();
+  }
+
+  // ── Sync sidebar controls from C (after load / setConfig) ───
+  function syncControls() {
+    document.getElementById('f-title').value = C.title || '';
+    document.getElementById('f-subtitle').value = C.subtitle || '';
+    document.getElementById('f-fullscreen').checked = C.showFullscreenButton !== false;
+
+    const acc = isHex(C.accent) ? C.accent : '#00B4D8';
+    const pri = isHex(C.primary) ? C.primary : '#1B2B5B';
+    document.getElementById('col-accent').value = acc;
+    document.getElementById('col-accent-hex').value = acc.toUpperCase();
+    document.getElementById('col-primary').value = pri;
+    document.getElementById('col-primary-hex').value = pri.toUpperCase();
+
+    renderCuration();
+    updateContrastWarn();
+  }
+
+  // ── Curation UI ─────────────────────────────────────────────
+  function ensureCountries() {
+    if (availableCountries.length) { renderCuration(); return; }
+    fetch('/api/destination-map-offers')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const cs = (d && Array.isArray(d.countries)) ? d.countries : [];
+        availableCountries = cs
+          .map(c => ({ cc: String(c.countryCode || '').toUpperCase(), name: ccName(c.countryCode), region: c.region || 'Other' }))
+          .filter(c => c.cc)
+          .sort((a, b) => a.name.localeCompare(b.name));
+        renderCuration();
+      })
+      .catch(() => {
+        document.getElementById('cur-loading').textContent = 'Could not load destinations. They will still show on your map.';
+      });
+  }
+
+  function regionsPresent() {
+    const set = [...new Set(availableCountries.map(c => c.region))];
+    return set.sort((a, b) => {
+      const ia = REGION_ORDER.indexOf(a), ib = REGION_ORDER.indexOf(b);
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    });
+  }
+
+  function renderCuration() {
+    const loading = document.getElementById('cur-loading');
+    const toolbar = document.getElementById('cur-toolbar');
+    const wrap = document.getElementById('cur-regions');
+    const summary = document.getElementById('cur-summary');
+    if (!availableCountries.length) return;
+    loading.hidden = true;
+    toolbar.hidden = false;
+
+    const chosen = currentChosenSet();       // empty stored → full set
+    const total = availableCountries.length;
+    const storedAll = (C.countries || []).length === 0;
+    summary.innerHTML = storedAll
+      ? `Showing <strong>all ${total}</strong> available destinations.`
+      : `Showing <strong>${chosen.size}</strong> of ${total} destinations.`;
+
+    let html = '';
+    for (const region of regionsPresent()) {
+      const inRegion = availableCountries.filter(c => c.region === region);
+      const sel = inRegion.filter(c => chosen.has(c.cc)).length;
+      const state = sel === 0 ? 'none' : (sel === inRegion.length ? 'all' : 'some');
+      html += `<div class="tgwm-region">
+        <div class="tgwm-region-head">
+          <button type="button" class="tgwm-region-pill" data-region="${region}" data-state="${state}">
+            ${region} <span class="tgwm-region-count">${sel}/${inRegion.length}</span>
+          </button>
+        </div>
+        <div class="tgwm-country-grid">`;
+      for (const c of inRegion) {
+        html += `<label class="tgwm-country">
+          <input type="checkbox" data-cc="${c.cc}" ${chosen.has(c.cc) ? 'checked' : ''}>
+          <span class="tgwm-country-name">${c.name}</span>
+          <span class="tgwm-country-cc">${c.cc}</span>
+        </label>`;
+      }
+      html += `</div></div>`;
+    }
+    wrap.innerHTML = html;
+  }
+
+  // Curation semantics: the UI is always an explicit ticked-set. Empty C.countries
+  // means "all", so on load we present every box ticked. On save, if everything is
+  // ticked we store [] (future-proof as new countries appear); otherwise the explicit
+  // list. Unticking the very last country falls back to all (an empty map helps nobody).
+  function currentChosenSet() {
+    const arr = (C.countries || []).map(x => String(x).toUpperCase());
+    // Empty stored = all shown → present as the full set in the UI.
+    return arr.length ? new Set(arr) : new Set(availableCountries.map(c => c.cc));
+  }
+  function commitChosen(ccSet) {
+    if (ccSet.size === 0) {
+      // Refuse an empty map: fall back to all, tell the user.
+      C.countries = [];
+      tgse.toast('Showing all destinations — a map needs at least one', 'ok');
+    } else if (ccSet.size === availableCountries.length) {
+      C.countries = []; // all ticked → store as "all"
+    } else {
+      C.countries = [...ccSet];
+    }
+    shell.markDirty();
+    renderCuration();
+    render();
+  }
+
+  // ── Wire events once DOM is ready ───────────────────────────
+  function wire() {
+    // Title / intro
+    document.getElementById('f-title').addEventListener('input', (e) => { C.title = e.target.value; shell.markDirty(); render(); });
+    document.getElementById('f-subtitle').addEventListener('input', (e) => { C.subtitle = e.target.value; shell.markDirty(); render(); });
+    document.getElementById('f-fullscreen').addEventListener('change', (e) => { C.showFullscreenButton = e.target.checked; shell.markDirty(); render(); });
+
+    // Colours — picker ↔ hex sync
+    function bindColour(pickerId, hexId, key) {
+      const picker = document.getElementById(pickerId);
+      const hex = document.getElementById(hexId);
+      picker.addEventListener('input', () => {
+        const v = picker.value.toUpperCase();
+        hex.value = v; C[key] = v; shell.markDirty(); updateContrastWarn(); render();
+      });
+      hex.addEventListener('input', () => {
+        let v = hex.value.trim();
+        if (!v.startsWith('#')) v = '#' + v;
+        if (isHex(v)) { picker.value = v; C[key] = v.toUpperCase(); shell.markDirty(); updateContrastWarn(); render(); }
+      });
+    }
+    bindColour('col-accent', 'col-accent-hex', 'accent');
+    bindColour('col-primary', 'col-primary-hex', 'primary');
+
+    // Curation toolbar
+    document.getElementById('cur-all').addEventListener('click', () => {
+      commitChosen(new Set(availableCountries.map(c => c.cc)));
+    });
+    document.getElementById('cur-none').addEventListener('click', () => {
+      // Untick everything in the UI. commitChosen guards the empty case back to
+      // "all" (an empty map is never useful) and tells the user.
+      commitChosen(new Set());
+    });
+
+    // Delegated: region pills toggle their whole region
+    document.getElementById('cur-regions').addEventListener('click', (e) => {
+      const pill = e.target.closest('.tgwm-region-pill');
+      if (!pill) return;
+      const region = pill.getAttribute('data-region');
+      const inRegion = availableCountries.filter(c => c.region === region).map(c => c.cc);
+      const chosen = currentChosenSet();
+      const allIn = inRegion.every(cc => chosen.has(cc));
+      if (allIn) inRegion.forEach(cc => chosen.delete(cc));
+      else inRegion.forEach(cc => chosen.add(cc));
+      commitChosen(chosen);
+    });
+    // Delegated: individual country checkboxes
+    document.getElementById('cur-regions').addEventListener('change', (e) => {
+      const box = e.target.closest('input[data-cc]');
+      if (!box) return;
+      const cc = box.getAttribute('data-cc');
+      const chosen = currentChosenSet();
+      if (box.checked) chosen.add(cc); else chosen.delete(cc);
+      commitChosen(chosen);
+    });
+
+    // Name input → dirty
+    document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+  }
+
+  // ── Load existing config if ?id= present ────────────────────
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { syncControls(); render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && d.config) Object.assign(C, d.config);
+        if (d && d.name) document.getElementById('name-input').value = d.name;
+        syncControls();
+        render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  // ── Boot ────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    wire();
+    const boot = () => { ensureCountries(); if (tgse.isLoggedIn()) loadFromUrl(); else { syncControls(); render(); } };
+    if (window.tgse && typeof window.tgse.onReady === 'function') window.tgse.onReady(boot);
+    else boot();
+  });
+</script>
+
+</body>
+</html>
