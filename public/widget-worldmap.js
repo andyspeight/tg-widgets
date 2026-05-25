@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.5.0';
+  const VERSION = '3.6.0';
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '';
   const OFFERS_URL = API_BASE + '/api/destination-map-offers';
   const DEALS_URL = API_BASE + '/api/destination-map-deals';
@@ -150,6 +150,30 @@
   function resolveCountryName(c) {
     return c.country || COUNTRY_NAMES[c.countryCode] || c.countryCode || 'Destination';
   }
+
+  // UK (and Ireland) departure airports → [lat, lng] + short label. Used to draw
+  // Google-Flights-style routes from the gateway to the selected destination and
+  // to pin the departure airport(s). Only the airports that actually appear in
+  // the offers data are needed; unknown codes are simply skipped (no line drawn).
+  const UK_AIRPORTS = {
+    LGW: { lat: 51.1537, lng: -0.1821, label: 'London Gatwick' },
+    LHR: { lat: 51.4700, lng: -0.4543, label: 'London Heathrow' },
+    STN: { lat: 51.8849, lng: 0.2389, label: 'London Stansted' },
+    LTN: { lat: 51.8747, lng: -0.3683, label: 'London Luton' },
+    LCY: { lat: 51.5053, lng: 0.0553, label: 'London City' },
+    SEN: { lat: 51.5714, lng: 0.6956, label: 'Southend' },
+    MAN: { lat: 53.3650, lng: -2.2728, label: 'Manchester' },
+    BHX: { lat: 52.4539, lng: -1.7480, label: 'Birmingham' },
+    NCL: { lat: 55.0375, lng: -1.6917, label: 'Newcastle' },
+    GLA: { lat: 55.8719, lng: -4.4331, label: 'Glasgow' },
+    EDI: { lat: 55.9500, lng: -3.3725, label: 'Edinburgh' },
+    BRS: { lat: 51.3827, lng: -2.7191, label: 'Bristol' },
+    LBA: { lat: 53.8659, lng: -1.6606, label: 'Leeds Bradford' },
+    EMA: { lat: 52.8311, lng: -1.3281, label: 'East Midlands' },
+    BOH: { lat: 50.7800, lng: -1.8425, label: 'Bournemouth' },
+    LPL: { lat: 53.3336, lng: -2.8497, label: 'Liverpool' },
+    DUB: { lat: 53.4213, lng: -6.2701, label: 'Dublin' },
+  };
 
   // ── Leaflet CSS (inlined — needs to live inside Shadow DOM since <link> tags don't penetrate)
 
@@ -998,6 +1022,30 @@ svg.leaflet-image-layer.leaflet-interactive path {
       border-color: #0F172A;
     }
 
+    /* ── Departure (UK origin) pin + flight route ────────────────────────
+       Shown only on drill-down for the selected destination. The pin is the
+       brand primary colour with a plane glyph so it reads as "fly from here",
+       clearly different from the white price pins. */
+    .tgwm-dep-wrap {
+      display: inline-flex; align-items: center; gap: 5px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .tgwm-dep-pin {
+      pointer-events: auto;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 9px 4px 7px;
+      background: var(--tgwm-pin-anchor);
+      color: #FFFFFF;
+      border-radius: 999px;
+      font-size: 11px; font-weight: 700; line-height: 1; white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(15,23,42,.28);
+      border: 1.5px solid rgba(255,255,255,.85);
+    }
+    .tgwm-dep-pin svg { width: 12px; height: 12px; flex: 0 0 auto; }
+    .tgwm-dep-pin .tgwm-dep-label { font-weight: 600; opacity: .92; }
+    [data-theme="dark"] .tgwm-dep-pin { border-color: rgba(15,23,42,.6); }
+
     /* ── View Fullscreen CTA ─────────────────────────────────────────── */
 
     .tgwm-fs-btn {
@@ -1701,6 +1749,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Resort drill-down state
       this._pinMode = 'country';
       this._resortMarkers = [];
+      this._depLayers = [];
       this._activeResort = null;
       this._dealsCache = null;
       this._resortSummary = null; // full resort list from the resorts endpoint
@@ -2292,6 +2341,82 @@ svg.leaflet-image-layer.leaflet-interactive path {
         .catch(() => { /* keep deals-derived pins */ });
     }
 
+    /** Draw Google-Flights-style routes from the UK departure airport(s) that
+     *  serve this destination to the destination centroid, plus a pin at each
+     *  departure airport. Shown only in drill-down (a destination is selected),
+     *  so the overview stays clean. Caps to the busiest few origins to avoid a
+     *  spider-web. Safe to call repeatedly — clears previous routes first. */
+    _drawDepartureRoutes(country, offers) {
+      const L = window.L;
+      if (!L || !this.ovMap || !country) return;
+      if (typeof country.lat !== 'number' || typeof country.lng !== 'number') return;
+      this._clearDepartureRoutes();
+
+      // Count offers per UK origin we have coordinates for; keep the top few.
+      const counts = new Map();
+      for (const o of (offers || [])) {
+        const code = (o.origin || '').toUpperCase();
+        if (UK_AIRPORTS[code]) counts.set(code, (counts.get(code) || 0) + 1);
+      }
+      if (!counts.size) return; // no known UK origins → draw nothing
+      const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(e => e[0]);
+
+      const dest = [country.lat, country.lng];
+      const accent = (this.cfg && safeHex(this.cfg.accent)) || '#00B4D8';
+      this._depLayers = this._depLayers || [];
+
+      for (const code of top) {
+        const ap = UK_AIRPORTS[code];
+        const from = [ap.lat, ap.lng];
+        // A gentle two-segment arc via a lifted midpoint reads as a flight path
+        // (Leaflet polylines are straight lines; a curved control point fakes it).
+        const midLat = (from[0] + dest[0]) / 2;
+        const midLng = (from[1] + dest[1]) / 2;
+        const lift = Math.max(2, Math.abs(from[0] - dest[0]) * 0.18); // arc height ~ distance
+        const arc = this._arcPoints(from, dest, lift);
+        const line = L.polyline(arc, {
+          color: accent, weight: 2, opacity: 0.7, dashArray: '5 6',
+          lineCap: 'round', interactive: false,
+        }).addTo(this.ovMap);
+        this._depLayers.push(line);
+
+        // Departure pin (divIcon) at the airport.
+        const html = '<div class="tgwm-dep-wrap"><span class="tgwm-dep-pin">'
+          + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L12 19v-5.5z"/></svg>'
+          + '<span class="tgwm-dep-label">' + esc(code) + '</span></span></div>';
+        const marker = L.marker(from, {
+          icon: L.divIcon({ html, className: '', iconSize: [0, 0], iconAnchor: [0, 0] }),
+          keyboard: false, interactive: false, zIndexOffset: -200,
+        }).addTo(this.ovMap);
+        this._depLayers.push(marker);
+      }
+    }
+
+    /** Build a smooth-ish arc as a points array between two latlngs, lifting the
+     *  midpoint by `lift` degrees so a straight polyline reads as a flight curve. */
+    _arcPoints(from, to, lift) {
+      const steps = 24;
+      const pts = [];
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const lat = from[0] + (to[0] - from[0]) * t;
+        const lng = from[1] + (to[1] - from[1]) * t;
+        // Parabolic lift, peaking at the midpoint, applied to latitude.
+        const lifted = lat + lift * Math.sin(Math.PI * t);
+        pts.push([lifted, lng]);
+      }
+      return pts;
+    }
+
+    _clearDepartureRoutes() {
+      if (Array.isArray(this._depLayers)) {
+        for (const layer of this._depLayers) {
+          try { this.ovMap.removeLayer(layer); } catch (_) {}
+        }
+      }
+      this._depLayers = [];
+    }
+
     _clearResortPins() {
       if (Array.isArray(this._resortMarkers)) {
         for (const e of this._resortMarkers) {
@@ -2369,6 +2494,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     /** Return to country mode: clear resort pins, show country pins, re-thin. */
     _exitResortMode() {
       this._clearResortPins();
+      this._clearDepartureRoutes();
       this._pinMode = 'country';
       this._activeResort = null;
       this._dealsCache = null;
@@ -2554,6 +2680,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
       if (!L || pts.length === 0) { this.ovMap.setView([25, 10], 2); return; }
       if (pts.length <= 2) { this.ovMap.fitBounds(L.latLngBounds(pts), { padding: [60, 60], maxZoom: 5 }); return; }
 
+      // If the agency has curated to a subset, every pin was chosen deliberately,
+      // so frame ALL of them — no outlier exclusion. (The median-band heuristic
+      // below is only for the full uncurated world, where lone long-haul pins
+      // would otherwise zoom the map out to a sparse whole-world view.)
+      const curated = Array.isArray(this.cfg.countries) && this.cfg.countries.length > 0;
+      if (curated) { this.ovMap.fitBounds(L.latLngBounds(pts), { padding: [50, 50], maxZoom: 6 }); return; }
+
       // Median centre is robust to outliers (unlike the mean).
       const lats = pts.map(p => p[0]).sort((a, b) => a - b);
       const lngs = pts.map(p => p[1]).sort((a, b) => a - b);
@@ -2734,6 +2867,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         const shown = this._applyFilters(this._dealsCache.offers);
         this._renderCards(shown, this._dealsCache.total, name);
         this._loadResortPins(cc, true);
+        this._drawDepartureRoutes(country, this._dealsCache.offers);
         return;
       }
 
@@ -2764,6 +2898,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           this._buildFilterControls(offers);
           this._renderCards(offers, total, name);
           this._loadResortPins(cc, true);
+          this._drawDepartureRoutes(country, offers);
         })
         .catch(err => {
           if (token !== this._dealsToken) return;
@@ -3144,6 +3279,30 @@ svg.leaflet-image-layer.leaflet-interactive path {
       return accepted;
     }
 
+    /** Set the overview opening view. If the agency curated to a subset
+     *  (cfg.countries non-empty), fit the bounds of the shown countries so the
+     *  map opens framed on that area. Otherwise keep the off-centre world view.
+     *  Single country → tighter zoom; a region → fit its spread. */
+    _fitOverviewToData(L, featured) {
+      const curated = Array.isArray(this.cfg.countries) && this.cfg.countries.length > 0;
+      const pts = (featured || [])
+        .filter(c => typeof c.lat === 'number' && typeof c.lng === 'number')
+        .map(c => [c.lat, c.lng]);
+      if (!curated || pts.length === 0) {
+        this.map.setView([25, 10], 2); // default world view
+        return;
+      }
+      if (pts.length === 1) {
+        this.map.setView(pts[0], 5); // single country — as close as overview maxZoom allows
+        return;
+      }
+      try {
+        this.map.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 5 });
+      } catch (_) {
+        this.map.setView([25, 10], 2);
+      }
+    }
+
     _renderMap(L) {
       const mapEl = this.shadow.querySelector('[data-map]');
       if (!mapEl) return;
@@ -3176,8 +3335,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
         crossOrigin: true,
       }).addTo(this.map);
 
-      // Fit world — slightly off-centre and zoomed to crop Antarctica
-      this.map.setView([25, 10], 2);
+      // Opening view. When the agency has curated to a subset of destinations
+      // (config.countries non-empty), frame those instead of the whole world —
+      // a Europe-only or single-country map should open ON that area, not show
+      // a lonely cluster of pins floating in an empty world.
+      this._fitOverviewToData(L, featured);
 
       // Drop the pins
       for (const c of featured) {
@@ -3243,6 +3405,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this._resortSummary = null;
         this._ovHasView = false;
         this._activeRegion = null;
+        this._depLayers = [];
       }
       if (this.map) {
         this.map.remove();
@@ -3276,6 +3439,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this._resortSummary = null;
         this._ovHasView = false;
         this._activeRegion = null;
+        this._depLayers = [];
       }
       if (this.map) {
         this.map.remove();
