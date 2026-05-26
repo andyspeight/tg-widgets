@@ -1,302 +1,419 @@
 /**
- * Travelgenix Widget Suite — Quote PDF (public endpoint)
+ * Travelgenix Quote PDF Button v1.0.0
+ * Self-contained, embeddable button for the Quick Quote viewer page.
+ * Zero dependencies. Shadow DOM isolated. Reads the quote id + key from the
+ * page URL hash (#quoteid=ID/KEY), then calls the quote-pdf endpoint to
+ * download or email a branded PDF of the quote.
  *
- * Generates a print-ready A4 PDF of a Quick Quote, and optionally emails it.
- * Sits alongside api/booking-pdf.js and shares its stack (ESM, puppeteer-core +
- * @sparticuz/chromium via ../generate-pdf.js, setCors from ./_auth.js).
+ * Usage:
+ *   <div data-tg-widget="quote-pdf"></div>
+ *   <script src="https://tg-widgets.vercel.app/widget-quote-pdf.js"></script>
  *
- * Endpoint:
- *   POST /api/quote-pdf
- *
- * Body, either:
- *   A) { action, quoteDocument: {...}, quoteId?, key? }   ← page-data mode (LIVE)
- *      The button on the Quick Quote viewer sends the clean, cost-scrubbed
- *      quoteDocument the page already loaded. No Travelify call needed.
- *   B) { action, quoteId, key }                           ← server-fetch mode
- *      No doc supplied; the server fetches the quote itself from Travelify
- *      (fallback / future auto-email-to-client flow with no browser involved).
- *
- * action:
- *   - "download" (default): returns application/pdf for the browser to save.
- *   - "email":              generates the PDF and emails it (SendGrid) to the
- *                           quote's lead email, returns { ok: true }.
- *
- * Security (travelgenix-security):
- *   - Method check (POST only), setCors() like the other widget endpoints
- *   - Input validation (doc shape OR id+key; action enum)
- *   - Cost scrubbing server-side (never trust the client) — nett/member/cost
- *     fields stripped before the renderer sees the doc
- *   - Rate limited per IP
- *   - Generic error responses, detailed logs server-side only
- *   - Buffer coercion on the PDF (see generate-pdf.js)
- *
- * Vercel function config (vercel.json): memory 1024, maxDuration 30
- * Vercel deps (package.json): @sparticuz/chromium, puppeteer-core, @sendgrid/mail
- *
- * Env vars:
- *   Email:    SENDGRID_API_KEY, SENDGRID_FROM_EMAIL (verified sender),
- *             SENDGRID_FROM_NAME_FALLBACK (optional, default "Travelgenix").
- *             QUOTE_PDF_FROM_EMAIL / QUOTE_PDF_FROM_NAME override if set.
- *   Fallback: TRAVELIFY_APP_ID, TRAVELIFY_APP_KEY, TRAVELIFY_ORIGIN,
- *             QUOTE_API_BASE — only for server-fetch mode (Option A ignores these)
+ * Optional attributes on the mount div:
+ *   data-tg-api="https://tg-widgets.vercel.app/api/quote-pdf"  (endpoint override)
+ *   data-tg-label="Download PDF"                               (button label)
+ *   data-tg-theme="dark"                                       (force dark)
+ *   data-tg-actions="download,email"                           (which actions to show)
  */
+(function () {
+  'use strict';
 
-import { setCors } from './_auth.js';
-import { generateQuotePdf, pdfFilename } from '../generate-pdf.js';
+  var VERSION = '1.1.0';
+  var DEFAULT_API = (typeof window !== 'undefined' && window.__TG_QUOTE_PDF_API__) ||
+    'https://tg-widgets.vercel.app/api/quote-pdf';
 
-const TRAVELIFY_API_BASE = process.env.QUOTE_API_BASE || 'https://api.travelify.io';
-
-// ----- Rate limiting (mirrors api/booking-pdf.js) -----
-const rateLimitStore = new Map();
-const RL_WINDOW_MS = 15 * 60 * 1000;
-
-function rateLimit(key, max) {
-  const now = Date.now();
-  const entry = rateLimitStore.get(key);
-  if (rateLimitStore.size > 1000) {
-    for (const [k, v] of rateLimitStore.entries()) if (v.resetAt < now) rateLimitStore.delete(k);
-  }
-  if (!entry || entry.resetAt < now) {
-    rateLimitStore.set(key, { count: 1, resetAt: now + RL_WINDOW_MS });
-    return { ok: true };
-  }
-  if (entry.count >= max) return { ok: false, retryAfterMs: entry.resetAt - now };
-  entry.count++;
-  return { ok: true };
-}
-
-function getClientIp(req) {
-  const xff = req.headers['x-forwarded-for'];
-  if (typeof xff === 'string' && xff.length > 0) return xff.split(',')[0].trim();
-  return req.socket?.remoteAddress || 'unknown';
-}
-
-// ----- Cost scrubbing (defence in depth) -----
-// The button scrubs client-side too, but we never trust the client. Strip any
-// cost/nett/member fields from the doc before the renderer ever sees it.
-const COST_FIELDS = ['nettPrice', 'memberPrice', 'originalPrice', 'costPrice',
-  'costCurrency', 'inResortFees', 'priceBeforeChange'];
-
-function scrubCosts(value) {
-  if (Array.isArray(value)) return value.map(scrubCosts);
-  if (value && typeof value === 'object') {
-    const out = {};
-    for (const k of Object.keys(value)) {
-      if (COST_FIELDS.includes(k)) continue;
-      out[k] = scrubCosts(value[k]);
-    }
-    return out;
-  }
-  return value;
-}
-
-// ----- Shape check + validation -----
-// Accept EITHER the official hotlist shape ({ data:{ items:[{product}] } } or
-// the unwrapped { items:[{product}] }) OR the legacy flat quoteDocument
-// ({ setup, items:[...] }). The renderer's normaliseQuote handles both.
-function looksLikeQuoteDoc(o) {
-  if (!o || typeof o !== 'object') return false;
-  // Unwrap a { success, data } envelope.
-  const d = (o.data && typeof o.data === 'object') ? o.data : o;
-  if (!Array.isArray(d.items) || d.items.length === 0) return false;
-  const first = d.items[0];
-  // Official shape: item has a product object.
-  if (first && first.product && typeof first.product === 'object') return true;
-  // Legacy flat shape: item has accommodationName + a setup block on the doc.
-  if (first && first.accommodationName !== undefined &&
-      d.setup && typeof d.setup === 'object') return true;
-  return false;
-}
-
-function validate(body) {
-  const errors = [];
-  const action = (body && body.action) || 'download';
-  if (!['download', 'email'].includes(action)) errors.push('action');
-
-  const hasDoc = body && looksLikeQuoteDoc(body.quoteDocument);
-
-  const quoteId = body && body.quoteId;
-  const key = body && body.key;
-  const idOk = /^\d{1,12}$/.test(String(quoteId));
-  const keyOk = !!key && typeof key === 'string' && key.length >= 8 &&
-    key.length <= 64 && /^[A-Za-z0-9-]+$/.test(key);
-
-  if (!hasDoc) {
-    if (!idOk) errors.push('quoteId');
-    if (!keyOk) errors.push('key');
-    if (body && body.quoteDocument !== undefined && !hasDoc) errors.push('quoteDocument');
-  }
-
-  return {
-    ok: errors.length === 0,
-    errors,
-    action,
-    hasDoc,
-    quoteDocument: hasDoc ? scrubCosts(body.quoteDocument) : null,
-    quoteId: idOk ? String(quoteId) : null,
-    key: keyOk ? key : null,
+  // --- Inline SVG icons (no external deps) ---
+  var IC = {
+    doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>',
+    spin: '<svg class="tgqp-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
   };
-}
 
-// ----- Server-fetch fallback (Travelify hotlist) -----
-// NOTE: the LIVE Option A path does NOT use this — the browser sends the clean
-// quoteDocument it already loaded. This only matters for the future auto-email
-// flow where there is no browser.
-//
-// AUTH (same misleading-401 pattern proved in retrieve-order.js / booking-pdf):
-// Travelify returns "Unauthorized" if the Origin header is missing, even with a
-// valid key. Working combo for /account/order is:
-//     Authorization: Token {appId}:{apiKey}
-//     Origin:        https://www.travelgenix.io
-// We pre-wire the hotlist call with the SAME pattern. UNCONFIRMED whether
-// /account/hotlist accepts the App-250 token or instead needs the agent's
-// logged-in session cookie. To confirm: open a quote with DevTools, find the
-// hotlist request, inspect Request Headers — if auth is a Cookie (not
-// Authorization), swap the Authorization header below for that Cookie.
-async function fetchQuoteDocument(quoteId, key) {
-  const appId = process.env.TRAVELIFY_APP_ID;
-  const apiKey = process.env.TRAVELIFY_APP_KEY;
-
-  if (!appId || !apiKey) {
-    throw new Error('Travelify credentials not configured (TRAVELIFY_APP_ID/APP_KEY)');
+  function esc(s) {
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  // Official endpoint shape (confirmed by Travelify doc, May 2026):
-  //   GET /account/hotlist/{id}/{key}?isViewPage=true
-  //   Authorization: Token {appId}:{apiKey}    (e.g. Token 250:<key>)
-  const url = `${TRAVELIFY_API_BASE}/account/hotlist/${encodeURIComponent(quoteId)}/${encodeURIComponent(key)}?isViewPage=true`;
+  /**
+   * Parse the quote id + key from the current URL.
+   * Official format (Travelify doc, May 2026) is query params:
+   *   https://www.traveldemo.site/quick-quote?key=UUID&id=17629
+   * We also accept the older hash form (#quoteid=ID/KEY) as a fallback.
+   */
+  function parseQuoteRef(href) {
+    var url = href || (typeof window !== 'undefined' ? window.location.href : '');
+    if (!url) return null;
 
-  const r = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Token ${appId}:${apiKey}`,
-      'Accept': 'application/json',
-      'User-Agent': 'Travelgenix-QuotePDF/1.0',
-    },
-    signal: AbortSignal.timeout(12000),
-  });
+    // 1. Query params ?id=...&key=...
+    try {
+      var qs = url.indexOf('?') !== -1 ? url.slice(url.indexOf('?') + 1) : '';
+      // Strip any hash off the query string.
+      qs = qs.split('#')[0];
+      var params = {};
+      qs.split('&').forEach(function (pair) {
+        if (!pair) return;
+        var kv = pair.split('=');
+        params[decodeURIComponent(kv[0] || '').toLowerCase()] = decodeURIComponent(kv[1] || '');
+      });
+      if (params.id && params.key) {
+        return { quoteId: params.id, key: params.key };
+      }
+    } catch (e) { /* fall through to hash form */ }
 
-  if (!r.ok) {
-    console.error('[quote-pdf] hotlist fetch failed', r.status);
-    throw new Error(`Quote API ${r.status}`);
+    // 2. Legacy hash form #quoteid=ID/KEY
+    var hash = (typeof window !== 'undefined') ? window.location.hash : '';
+    var m = /quoteid=([^/&]+)\/([^&]+)/i.exec(hash || url || '');
+    if (m) return { quoteId: decodeURIComponent(m[1]), key: decodeURIComponent(m[2]) };
+
+    return null;
   }
 
-  const j = await r.json();
-  if (!j || j.success === false || !j.data) throw new Error('Quote not found');
+  // --- Quote-document auto-detection ----------------------------------------
+  // The Quick Quote viewer loads the quote into the page. We look for the clean,
+  // document-ready `quoteDocument` object (NOT the raw items array that carries
+  // cost prices). A valid quote object is either the official hotlist shape
+  // (items[].product.units[].rates[]) or an already-flat doc. We scrub all
+  // known cost keys before anything leaves the page. If we can't find a quote
+  // object, we return null and the button falls back to sending id+key for the
+  // server to fetch.
 
-  // The official response has NO curated quoteDocument node — it returns the
-  // raw hotlist in `data` (items[].product.units[].rates[]). The renderer's
-  // normaliseQuote() flattens this to the lead-in room per item and reads only
-  // sell-side fields. We hand back `data` and let normalisation + the
-  // server-side scrub do the rest.
-  return j.data;
-}
+  var COST_FIELDS = ['nettPrice', 'memberPrice', 'originalPrice', 'costPrice',
+    'costCurrency', 'inResortFees', 'priceBeforeChange', 'originalCurrency',
+    'exchangeRate', 'ruleIds', 'memberRuleIds'];
 
-// ----- Email send (SendGrid) -----
-// Sends the quote PDF as an attachment to the quote's lead email. The "from"
-// address must be a verified sender/domain in SendGrid.
-function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-async function emailQuotePdf(doc, pdfBuffer) {
-  // Recipient + names: official shape carries customerEmail/customerFirstname at
-  // the data root; legacy flat shape carries them under setup. Support both.
-  const d = (doc && doc.data && doc.data.items) ? doc.data : doc;
-  const setup = (d && d.setup) || {};
-  const to = setup.leadEmail || (d && d.customerEmail);
-  if (!to) throw new Error('No customer email on quote');
-
-  // Reuse the repo's existing SendGrid env vars (already set in Vercel):
-  //   SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, SENDGRID_FROM_NAME_FALLBACK.
-  // QUOTE_PDF_* names are accepted too as an override if ever set.
-  const fromEmail = process.env.QUOTE_PDF_FROM_EMAIL || process.env.SENDGRID_FROM_EMAIL;
-  const fromName = process.env.QUOTE_PDF_FROM_NAME || process.env.SENDGRID_FROM_NAME_FALLBACK || 'Travelgenix';
-  const apiKey = process.env.SENDGRID_API_KEY;
-
-  if (!apiKey || !fromEmail) {
-    return { to, bytes: pdfBuffer.length, sent: false, note: 'SendGrid not configured' };
+  /** True if obj looks like a quote we can render (official OR legacy shape). */
+  function looksLikeQuoteDoc(o) {
+    if (!o || typeof o !== 'object') return false;
+    var d = (o.data && typeof o.data === 'object') ? o.data : o;
+    if (!Array.isArray(d.items) || d.items.length === 0) return false;
+    var first = d.items[0];
+    // Official hotlist shape: item carries a product object.
+    if (first && first.product && typeof first.product === 'object') return true;
+    // Legacy flat shape: item has accommodationName and the doc has setup.
+    if (first && first.accommodationName !== undefined &&
+        d.setup && typeof d.setup === 'object') return true;
+    return false;
   }
 
-  const sg = (await import('@sendgrid/mail')).default;
-  sg.setApiKey(apiKey);
-
-  const title = setup.quoteTitle || (d && d.name) || 'your travel quote';
-  const lead = setup.leadName ||
-    [d && d.customerFirstname, d && d.customerSurname].filter(Boolean).join(' ').trim() ||
-    'there';
-  const filename = pdfFilename(d);
-
-  await sg.send({
-    to,
-    from: { email: fromEmail, name: fromName },
-    subject: `Your quote: ${title}`,
-    text: `Hi ${lead},\n\nPlease find your quote "${title}" attached as a PDF.\n\nKind regards,\n${fromName}`,
-    html: `<p>Hi ${escapeHtml(lead)},</p>` +
-          `<p>Please find your quote &ldquo;${escapeHtml(title)}&rdquo; attached as a PDF.</p>` +
-          `<p>Kind regards,<br>${escapeHtml(fromName)}</p>`,
-    attachments: [{
-      content: pdfBuffer.toString('base64'),
-      filename,
-      type: 'application/pdf',
-      disposition: 'attachment',
-    }],
-  });
-
-  return { to, bytes: pdfBuffer.length, sent: true };
-}
-
-// ----- Handler -----
-export default async function handler(req, res) {
-  setCors(res);
-  if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const ip = getClientIp(req);
-  const limit = rateLimit(`quotepdf:ip:${ip}`, 20);
-  if (!limit.ok) {
-    return res.status(429).json({ error: 'too_many_attempts', retryAfterMs: limit.retryAfterMs });
+  /**
+   * Deep-clone a quoteDocument while stripping any cost/nett/member fields.
+   * Defence in depth: even though the clean quoteDocument should only carry the
+   * sell `price`, we scrub known cost keys client-side so they can never leave
+   * the page through our endpoint. The server scrubs again, and the renderer
+   * only ever reads the sell `price`.
+   */
+  function scrubCosts(value) {
+    if (Array.isArray(value)) return value.map(scrubCosts);
+    if (value && typeof value === 'object') {
+      var out = {};
+      for (var k in value) {
+        if (!Object.prototype.hasOwnProperty.call(value, k)) continue;
+        if (COST_FIELDS.indexOf(k) !== -1) continue; // drop cost fields
+        out[k] = scrubCosts(value[k]);
+      }
+      return out;
+    }
+    return value;
   }
 
-  let body;
-  try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-  } catch {
-    return res.status(400).json({ error: 'Invalid request' });
-  }
+  /**
+   * Try to find the quoteDocument the page has already loaded.
+   * Strategy, in order:
+   *   1. A small set of likely named globals (fast path).
+   *   2. A bounded breadth-first walk of each candidate global, descending a
+   *      few levels, since frameworks (SvelteKit/Next/Nuxt) nest hydration data
+   *      deep (e.g. window.__x.state.data.quoteDocument).
+   * Returns a scrubbed quoteDocument, or null.
+   */
+  function findQuoteDoc() {
+    if (typeof window === 'undefined') return null;
 
-  const v = validate(body);
-  if (!v.ok) {
-    return res.status(400).json({ error: 'Invalid request', fields: v.errors });
-  }
-
-  try {
-    // Page-data mode uses the scrubbed doc the browser sent. Server-fetch mode
-    // pulls it from Travelify and scrubs it here.
-    const doc = v.hasDoc
-      ? v.quoteDocument
-      : scrubCosts(await fetchQuoteDocument(v.quoteId, v.key));
-
-    const pdf = await generateQuotePdf(doc);
-
-    if (v.action === 'email') {
-      const result = await emailQuotePdf(doc, pdf);
-      return res.status(200).json({ ok: true, emailed: result });
+    // Is this a plain data object/array we can safely inspect — and NOT a
+    // Window, frame, or other exotic host object? Reaching into a cross-origin
+    // iframe's Window (e.g. an embedded Google Maps frame) throws a SecurityError
+    // that can escape ordinary try/catch, so we exclude such objects up front.
+    function isSafeData(v) {
+      if (!v || typeof v !== 'object') return false;
+      try {
+        // A cross-origin Window exposes very few props and throws on most reads.
+        // These checks are wrapped so any throw => treat as unsafe.
+        if (v === window) return false;
+        if (typeof v.window === 'object' && v.window === v) return false; // self-ref Window
+        if (typeof Window !== 'undefined' && v instanceof Window) return false;
+        if (typeof v.self !== 'undefined' && v.self === v) return false;
+        if (v.nodeType !== undefined) return false; // DOM node
+        // location/document presence is a strong Window signal
+        if ('document' in v && 'location' in v && 'navigator' in v) return false;
+      } catch (e) {
+        return false; // any throw means it's not safe plain data
+      }
+      return true;
     }
 
-    // download
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Length', pdf.length);
-    res.setHeader('Content-Disposition', `attachment; filename="${pdfFilename(doc)}"`);
-    res.status(200);
-    return res.end(pdf);
-  } catch (err) {
-    console.error('[quote-pdf] error:', err?.message, err?.stack?.slice(0, 300));
-    return res.status(500).json({ error: 'server_error' });
-  }
-}
+    // Pass 1: only accept a value reached via an explicit `quoteDocument` key.
+    function bfs(root, preferKeyed) {
+      var MAX_NODES = 4000, MAX_DEPTH = 6;
+      if (!isSafeData(root)) return null;
+      var queue = [{ v: root, d: 0, viaKey: false }];
+      var visited = 0;
+      var seen = (typeof WeakSet !== 'undefined') ? new WeakSet() : null;
+      while (queue.length) {
+        if (visited++ > MAX_NODES) break;
+        var node = queue.shift();
+        var v = node.v;
+        if (!isSafeData(v)) continue;
+        if (seen) { if (seen.has(v)) continue; seen.add(v); }
+        if (looksLikeQuoteDoc(v) && (!preferKeyed || node.viaKey)) return v;
+        if (node.d >= MAX_DEPTH) continue;
+        var keys;
+        try { keys = Object.keys(v); } catch (e) { continue; }
+        for (var i = 0; i < keys.length; i++) {
+          var child;
+          try { child = v[keys[i]]; } catch (e) { continue; }
+          if (isSafeData(child)) {
+            queue.push({ v: child, d: node.d + 1, viaKey: keys[i] === 'quoteDocument' });
+          }
+        }
+      }
+      return null;
+    }
 
-// Exposed for tests.
-export { validate, fetchQuoteDocument };
+    // Gather candidate roots: likely-named globals first, then a bounded scan
+    // of other window globals.
+    function candidateRoots() {
+      var roots = [];
+      var NAMED = ['quoteDocument', 'quoteData', 'quote', '__QUOTE__', 'QUOTE',
+        'tgQuote', 'quoteResponse', 'tvlQuote', 'travelify', 'quickQuote',
+        '__NEXT_DATA__', '__NUXT__', '__sveltekit_data', '__INITIAL_STATE__'];
+      for (var i = 0; i < NAMED.length; i++) {
+        try { var v = window[NAMED[i]]; if (isSafeData(v)) roots.push(v); }
+        catch (e) { /* getter throw */ }
+      }
+      var keys;
+      try { keys = Object.keys(window); } catch (e) { keys = []; }
+      var scanned = 0;
+      for (var j = 0; j < keys.length; j++) {
+        if (scanned > 600) break;
+        // Skip obvious frame/window slots by name (numeric = frame index).
+        var name = keys[j];
+        if (/^\d+$/.test(name)) continue; // window[0], window[1] = child frames
+        if (name === 'window' || name === 'self' || name === 'top' ||
+            name === 'parent' || name === 'frames' || name === 'opener') continue;
+        scanned++;
+        var val;
+        try { val = window[name]; } catch (e) { continue; }
+        if (isSafeData(val)) roots.push(val);
+      }
+      return roots;
+    }
+
+    var roots = candidateRoots();
+    // Pass 1 across ALL roots: explicit `quoteDocument` key wins.
+    for (var a = 0; a < roots.length; a++) {
+      var keyed = bfs(roots[a], true);
+      if (keyed) return scrubCosts(keyed);
+    }
+    // Pass 2 across ALL roots: accept a structural quoteDocument.
+    for (var b = 0; b < roots.length; b++) {
+      var structural = bfs(roots[b], false);
+      if (structural) return scrubCosts(structural);
+    }
+    return null;
+  }
+
+  var STYLES = '\
+    :host{ all:initial; display:inline-block; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; }\
+    .tgqp-root{\
+      --tgqp-navy:#1B2B5B; --tgqp-navy-dark:#111D3E; --tgqp-teal:#00B4D8; --tgqp-teal-dark:#0096B7;\
+      --tgqp-ink:#0F172A; --tgqp-sub:#475569; --tgqp-bg:#FFFFFF; --tgqp-border:#E2E8F0;\
+      --tgqp-ok:#10B981; --tgqp-err:#EF4444; --tgqp-radius:10px;\
+      display:inline-flex; gap:10px; align-items:center;\
+    }\
+    .tgqp-root[data-theme="dark"]{ --tgqp-ink:#F8FAFC; --tgqp-sub:#CBD5E1; --tgqp-bg:#1E293B; --tgqp-border:#334155; }\
+    .tgqp-btn{\
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer;\
+      font-size:14px; font-weight:600; line-height:1; min-height:44px; padding:0 18px;\
+      border-radius:var(--tgqp-radius); border:1px solid transparent;\
+      transition:transform .12s ease-out, box-shadow .12s ease-out, background-color .12s ease-out;\
+      -webkit-tap-highlight-color:transparent; white-space:nowrap;\
+    }\
+    .tgqp-btn svg{ width:18px; height:18px; flex:0 0 auto; }\
+    .tgqp-btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(0,180,216,.35); }\
+    .tgqp-btn--primary{ background:var(--tgqp-navy); color:#fff; }\
+    .tgqp-btn--primary:hover{ background:var(--tgqp-navy-dark); }\
+    .tgqp-btn--primary:active{ transform:scale(.98); }\
+    .tgqp-btn--ghost{ background:var(--tgqp-bg); color:var(--tgqp-ink); border-color:var(--tgqp-border); }\
+    .tgqp-btn--ghost:hover{ border-color:var(--tgqp-teal); color:var(--tgqp-teal-dark); }\
+    .tgqp-btn--ghost:active{ transform:scale(.98); }\
+    .tgqp-btn[disabled]{ opacity:.6; cursor:default; pointer-events:none; }\
+    .tgqp-spin{ animation:tgqp-rot .7s linear infinite; }\
+    @keyframes tgqp-rot{ to{ transform:rotate(360deg); } }\
+    .tgqp-msg{ font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px; }\
+    .tgqp-msg svg{ width:16px; height:16px; }\
+    .tgqp-msg--ok{ color:var(--tgqp-ok); } .tgqp-msg--err{ color:var(--tgqp-err); }\
+    @media (prefers-reduced-motion: reduce){ .tgqp-btn{ transition:none; } .tgqp-spin{ animation:none; } }\
+  ';
+
+  function TGQuotePdfButton(container) {
+    this.el = container;
+    this.api = container.getAttribute('data-tg-api') || DEFAULT_API;
+    this.label = container.getAttribute('data-tg-label') || 'Download PDF';
+    this.theme = container.getAttribute('data-tg-theme') || 'light';
+    var actionsAttr = (container.getAttribute('data-tg-actions') || 'download,email')
+      .split(',').map(function (s) { return s.trim(); });
+    this.actions = actionsAttr.filter(function (a) { return a === 'download' || a === 'email'; });
+    if (this.actions.length === 0) this.actions = ['download'];
+    this.ref = parseQuoteRef();
+    this.shadow = container.attachShadow({ mode: 'open' });
+    this._render();
+  }
+
+  TGQuotePdfButton.prototype._render = function () {
+    var btns = '';
+    if (this.actions.indexOf('download') !== -1) {
+      btns += '<button class="tgqp-btn tgqp-btn--primary" data-act="download" type="button">' +
+        IC.doc + '<span>' + esc(this.label) + '</span></button>';
+    }
+    if (this.actions.indexOf('email') !== -1) {
+      btns += '<button class="tgqp-btn tgqp-btn--ghost" data-act="email" type="button">' +
+        IC.mail + '<span>Email me a copy</span></button>';
+    }
+    this.shadow.innerHTML =
+      '<style>' + STYLES + '</style>' +
+      '<div class="tgqp-root" data-theme="' + esc(this.theme) + '">' +
+        btns +
+        '<span class="tgqp-msg" data-msg hidden></span>' +
+      '</div>';
+    this._bind();
+  };
+
+  TGQuotePdfButton.prototype._bind = function () {
+    var self = this;
+    var buttons = this.shadow.querySelectorAll('.tgqp-btn');
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { self._run(b.getAttribute('data-act'), b); });
+    });
+  };
+
+  TGQuotePdfButton.prototype._setMsg = function (text, kind) {
+    var m = this.shadow.querySelector('[data-msg]');
+    if (!text) { m.hidden = true; m.textContent = ''; return; }
+    m.hidden = false;
+    m.className = 'tgqp-msg ' + (kind === 'err' ? 'tgqp-msg--err' : 'tgqp-msg--ok');
+    m.innerHTML = (kind === 'err' ? IC.alert : IC.check) + '<span>' + esc(text) + '</span>';
+  };
+
+  TGQuotePdfButton.prototype._busy = function (btn, on, busyLabel) {
+    var all = this.shadow.querySelectorAll('.tgqp-btn');
+    all.forEach(function (b) { b.disabled = on; });
+    if (!btn) return;
+    if (on) {
+      btn._html = btn.innerHTML;
+      btn.innerHTML = IC.spin + '<span>' + esc(busyLabel || 'Working…') + '</span>';
+    } else if (btn._html) {
+      btn.innerHTML = btn._html;
+    }
+  };
+
+  TGQuotePdfButton.prototype._run = function (action, btn) {
+    var self = this;
+    this._setMsg('');
+
+    // Re-read the id+key from the URL at click time.
+    if (!this.ref) this.ref = parseQuoteRef();
+
+    // If the URL gives us id+key (the normal case on the viewer page), prefer
+    // letting the SERVER fetch the quote from Travelify. That avoids scanning
+    // the page's JS at all — more robust on pages full of third-party iframes
+    // (maps, ads) where scanning can hit cross-origin frames. We only fall back
+    // to reading the quote off the page when the URL has no id+key.
+    var doc = null;
+    if (!this.ref) {
+      try { doc = findQuoteDoc(); } catch (e) { doc = null; }
+    }
+
+    if (!doc && !this.ref) {
+      this._setMsg('No quote found on this page', 'err');
+      return;
+    }
+
+    this._busy(btn, true, action === 'email' ? 'Sending…' : 'Preparing…');
+
+    // Build the request. With id+key the server fetches + renders. If we only
+    // have a page-scraped doc (no URL id+key), we send that instead.
+    var bodyObj = { action: action };
+    if (this.ref) { bodyObj.quoteId = this.ref.quoteId; bodyObj.key = this.ref.key; }
+    if (doc) {
+      bodyObj.quoteDocument = doc;
+      // Backfill id/key from the detected doc if the URL didn't carry them.
+      // Official shape: doc.data.id / doc.data.key (or unwrapped doc.id/key).
+      // Legacy shape: doc.setup.quoteId / doc.setup.quoteUuid.
+      var dd = (doc.data && doc.data.items) ? doc.data : doc;
+      if (!bodyObj.quoteId) {
+        if (dd.id !== undefined) bodyObj.quoteId = String(dd.id);
+        else if (dd.setup && dd.setup.quoteId !== undefined) bodyObj.quoteId = String(dd.setup.quoteId);
+      }
+      if (!bodyObj.key) {
+        if (dd.key) bodyObj.key = String(dd.key);
+        else if (dd.setup && dd.setup.quoteUuid) bodyObj.key = String(dd.setup.quoteUuid);
+      }
+    }
+
+    var payload = JSON.stringify(bodyObj);
+    var resolvedId = bodyObj.quoteId || 'document';
+
+    fetch(this.api, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload
+    }).then(function (res) {
+      if (action === 'email') {
+        return res.json().then(function (j) {
+          if (!res.ok || !j.ok) throw new Error('email failed');
+          self._setMsg('Sent to your email', 'ok');
+        });
+      }
+      // download: expect a PDF blob
+      if (!res.ok) throw new Error('download failed');
+      return res.blob().then(function (blob) {
+        var cd = res.headers.get('Content-Disposition') || '';
+        var nameMatch = /filename="?([^"]+)"?/.exec(cd);
+        var filename = nameMatch ? nameMatch[1] : ('Quote-' + resolvedId + '.pdf');
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+        self._setMsg('Downloaded', 'ok');
+      });
+    }).catch(function () {
+      self._setMsg(action === 'email' ? 'Could not send email' : 'Could not generate PDF', 'err');
+    }).then(function () {
+      self._busy(btn, false);
+      // auto-clear the message after a few seconds
+      setTimeout(function () { self._setMsg(''); }, 5000);
+    });
+  };
+
+  function init() {
+    var containers = document.querySelectorAll('[data-tg-widget="quote-pdf"]');
+    containers.forEach(function (c) {
+      if (c.__tgqpInit) return;
+      c.__tgqpInit = true;
+      try { new TGQuotePdfButton(c); } catch (e) { /* fail silent on host page */ }
+    });
+  }
+
+  window.TGQuotePdfButton = TGQuotePdfButton;
+  window.__TG_QUOTE_PDF_VERSION__ = VERSION;
+  // Exposed for debugging on the host page: run window.__TG_findQuoteDoc__()
+  // in the console to confirm the page's quoteDocument is auto-detected.
+  window.__TG_findQuoteDoc__ = findQuoteDoc;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
