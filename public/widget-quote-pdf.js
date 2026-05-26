@@ -132,9 +132,32 @@
   function findQuoteDoc() {
     if (typeof window === 'undefined') return null;
 
+    // Is this a plain data object/array we can safely inspect — and NOT a
+    // Window, frame, or other exotic host object? Reaching into a cross-origin
+    // iframe's Window (e.g. an embedded Google Maps frame) throws a SecurityError
+    // that can escape ordinary try/catch, so we exclude such objects up front.
+    function isSafeData(v) {
+      if (!v || typeof v !== 'object') return false;
+      try {
+        // A cross-origin Window exposes very few props and throws on most reads.
+        // These checks are wrapped so any throw => treat as unsafe.
+        if (v === window) return false;
+        if (typeof v.window === 'object' && v.window === v) return false; // self-ref Window
+        if (typeof Window !== 'undefined' && v instanceof Window) return false;
+        if (typeof v.self !== 'undefined' && v.self === v) return false;
+        if (v.nodeType !== undefined) return false; // DOM node
+        // location/document presence is a strong Window signal
+        if ('document' in v && 'location' in v && 'navigator' in v) return false;
+      } catch (e) {
+        return false; // any throw means it's not safe plain data
+      }
+      return true;
+    }
+
     // Pass 1: only accept a value reached via an explicit `quoteDocument` key.
     function bfs(root, preferKeyed) {
       var MAX_NODES = 4000, MAX_DEPTH = 6;
+      if (!isSafeData(root)) return null;
       var queue = [{ v: root, d: 0, viaKey: false }];
       var visited = 0;
       var seen = (typeof WeakSet !== 'undefined') ? new WeakSet() : null;
@@ -142,7 +165,7 @@
         if (visited++ > MAX_NODES) break;
         var node = queue.shift();
         var v = node.v;
-        if (!v || typeof v !== 'object') continue;
+        if (!isSafeData(v)) continue;
         if (seen) { if (seen.has(v)) continue; seen.add(v); }
         if (looksLikeQuoteDoc(v) && (!preferKeyed || node.viaKey)) return v;
         if (node.d >= MAX_DEPTH) continue;
@@ -151,7 +174,7 @@
         for (var i = 0; i < keys.length; i++) {
           var child;
           try { child = v[keys[i]]; } catch (e) { continue; }
-          if (child && typeof child === 'object') {
+          if (isSafeData(child)) {
             queue.push({ v: child, d: node.d + 1, viaKey: keys[i] === 'quoteDocument' });
           }
         }
@@ -167,7 +190,7 @@
         'tgQuote', 'quoteResponse', 'tvlQuote', 'travelify', 'quickQuote',
         '__NEXT_DATA__', '__NUXT__', '__sveltekit_data', '__INITIAL_STATE__'];
       for (var i = 0; i < NAMED.length; i++) {
-        try { var v = window[NAMED[i]]; if (v && typeof v === 'object') roots.push(v); }
+        try { var v = window[NAMED[i]]; if (isSafeData(v)) roots.push(v); }
         catch (e) { /* getter throw */ }
       }
       var keys;
@@ -175,10 +198,15 @@
       var scanned = 0;
       for (var j = 0; j < keys.length; j++) {
         if (scanned > 600) break;
+        // Skip obvious frame/window slots by name (numeric = frame index).
+        var name = keys[j];
+        if (/^\d+$/.test(name)) continue; // window[0], window[1] = child frames
+        if (name === 'window' || name === 'self' || name === 'top' ||
+            name === 'parent' || name === 'frames' || name === 'opener') continue;
         scanned++;
         var val;
-        try { val = window[keys[j]]; } catch (e) { continue; }
-        if (val && typeof val === 'object') roots.push(val);
+        try { val = window[name]; } catch (e) { continue; }
+        if (isSafeData(val)) roots.push(val);
       }
       return roots;
     }
@@ -295,10 +323,18 @@
     var self = this;
     this._setMsg('');
 
-    // Re-read the ref and try to find the page's quoteDocument at click time
-    // (the page may have loaded the data after this script ran).
+    // Re-read the id+key from the URL at click time.
     if (!this.ref) this.ref = parseQuoteRef();
-    var doc = findQuoteDoc();
+
+    // If the URL gives us id+key (the normal case on the viewer page), prefer
+    // letting the SERVER fetch the quote from Travelify. That avoids scanning
+    // the page's JS at all — more robust on pages full of third-party iframes
+    // (maps, ads) where scanning can hit cross-origin frames. We only fall back
+    // to reading the quote off the page when the URL has no id+key.
+    var doc = null;
+    if (!this.ref) {
+      try { doc = findQuoteDoc(); } catch (e) { doc = null; }
+    }
 
     if (!doc && !this.ref) {
       this._setMsg('No quote found on this page', 'err');
@@ -307,9 +343,8 @@
 
     this._busy(btn, true, action === 'email' ? 'Sending…' : 'Preparing…');
 
-    // Prefer sending the page's clean (cost-scrubbed) quoteDocument so the
-    // server doesn't need to call the quote API. Always include id+key too so
-    // the server can verify / fall back to fetching if no doc is sent.
+    // Build the request. With id+key the server fetches + renders. If we only
+    // have a page-scraped doc (no URL id+key), we send that instead.
     var bodyObj = { action: action };
     if (this.ref) { bodyObj.quoteId = this.ref.quoteId; bodyObj.key = this.ref.key; }
     if (doc) {
