@@ -196,45 +196,85 @@ function normaliseItem(it) {
  * Normalise either shape into { quoteId, title, leadName, contactEmail,
  * contactTelNo, currency, travellers, items:[flat], total }.
  */
+/**
+ * Normalise any of the hotlist shapes into a flat object the renderer uses:
+ *   { quoteId, title, leadName, contactEmail, contactTelNo, currency,
+ *     travellers, items:[flat], total }
+ *
+ * The Travelify hotlist API returns one of two shapes depending on the quote:
+ *   A) quoteDocument shape — data.quoteDocument = { setup, items:[flat], total }
+ *      Items are already curated/flat (accommodationName, checkIn, price, ...).
+ *      This is what most demo quotes use (e.g. 16809).
+ *   B) raw-items shape — data.items[].product.units[].rates[]
+ *      No quoteDocument; we extract the lead-in room per item (e.g. 17629).
+ * Plus a legacy already-flat sample shape. We detect and route all three.
+ */
 function normaliseQuote(input) {
-  // Unwrap { success, data } if a raw API response was passed.
-  const data = (input && input.data && input.data.items) ? input.data : input;
+  // Unwrap a { success, data } envelope if present.
+  const env = (input && input.data && typeof input.data === 'object') ? input.data : input;
+  const top = env || {};
 
-  // If it already looks flat (legacy sample: items[].accommodationName), pass through.
-  const looksFlat = data && Array.isArray(data.items) &&
-    data.items[0] && data.items[0].accommodationName !== undefined && !data.items[0].product;
-  if (looksFlat) {
+  // ---- Shape A: quoteDocument { setup, items:[flat], total } ----
+  const qd = top.quoteDocument;
+  if (qd && Array.isArray(qd.items) && qd.items.length) {
+    const setup = qd.setup || {};
+    const pax = Number(setup.adults || 0) + Number(setup.children || 0);
     return {
-      quoteId: data.quoteId || (data.setup && data.setup.quoteId) || '',
-      title: (data.setup && data.setup.quoteTitle) || data.name || 'Your holiday quote',
-      leadName: (data.setup && data.setup.leadName) || '',
-      contactEmail: data.contactEmail || '',
-      contactTelNo: data.contactTelNo || '',
-      currency: data.currency || 'GBP',
-      travellers: Number(data.setup && data.setup.adults) || null,
-      items: data.items,
-      total: Number(data.total) || data.items.reduce((s, i) => s + (Number(i.price) || 0), 0),
-      agent: data.agent || {},
+      quoteId: setup.quoteId || top.id || '',
+      title: setup.quoteTitle || top.name || 'Your holiday quote',
+      leadName: setup.leadName ||
+        [top.customerFirstname, top.customerSurname].filter(Boolean).join(' ').trim(),
+      contactEmail: top.contactEmail || '',
+      contactTelNo: top.contactTelNo || '',
+      currency: top.currency || qd.items[0].currency || 'GBP',
+      travellers: pax || null,
+      items: qd.items, // already flat; renderItem reads these directly
+      total: Number(qd.total) || Number(top.quoteTotal) ||
+        qd.items.reduce((s, i) => s + (Number(i.price) || 0), 0),
+      destination: top.destination || setup.tripDestination || '',
+      agent: top.agentName ? { name: top.agentName, email: top.contactEmail, phone: top.contactTelNo } : {},
     };
   }
 
-  const rawItems = Array.isArray(data && data.items) ? data.items : [];
+  // ---- Legacy already-flat shape (sample): items[].accommodationName, no product ----
+  const looksFlat = Array.isArray(top.items) && top.items[0] &&
+    top.items[0].accommodationName !== undefined && !top.items[0].product;
+  if (looksFlat) {
+    const setup = top.setup || {};
+    return {
+      quoteId: top.quoteId || setup.quoteId || top.id || '',
+      title: setup.quoteTitle || top.name || 'Your holiday quote',
+      leadName: setup.leadName || '',
+      contactEmail: top.contactEmail || '',
+      contactTelNo: top.contactTelNo || '',
+      currency: top.currency || 'GBP',
+      travellers: Number(setup.adults) || null,
+      items: top.items,
+      total: Number(top.total) || top.items.reduce((s, i) => s + (Number(i.price) || 0), 0),
+      destination: top.destination || '',
+      agent: top.agent || {},
+    };
+  }
+
+  // ---- Shape B: raw items[].product.units[].rates[] (extract lead-in room) ----
+  const rawItems = Array.isArray(top.items) ? top.items : [];
   const items = rawItems.map(normaliseItem);
   const total = items.reduce((s, i) => s + (Number(i.price) || 0), 0);
-  const lead = [data.customerTitle, data.customerFirstname, data.customerSurname]
+  const lead = [top.customerTitle, top.customerFirstname, top.customerSurname]
     .filter(Boolean).join(' ').trim();
   const travellers = rawItems.reduce((m, i) => Math.max(m, Number(i.travellers) || 0), 0) || null;
 
   return {
-    quoteId: data.id || '',
-    title: data.name || 'Your holiday quote',
+    quoteId: top.id || '',
+    title: top.name || 'Your holiday quote',
     leadName: lead,
-    contactEmail: data.contactEmail || '',
-    contactTelNo: data.contactTelNo || '',
-    currency: items[0] ? items[0].currency : 'GBP',
+    contactEmail: top.contactEmail || '',
+    contactTelNo: top.contactTelNo || '',
+    currency: items[0] ? items[0].currency : (top.currency || 'GBP'),
     travellers,
     items,
     total,
+    destination: top.destination || '',
     agent: {},
   };
 }
@@ -244,36 +284,50 @@ function normaliseQuote(input) {
 // ----------------------------------------------------------------------------
 
 function renderFlights(item) {
-  // Only render the flights block for packages that actually have flights.
-  if (!item.outboundFlightNumber && !item.departureAirport) return '';
+  // Show the flights block when we have any airport/airline/flight info.
+  const hasFlights = item.departureAirport || item.arrivalAirport ||
+    item.airline || item.outboundFlightNumber;
+  if (!hasFlights) return '';
+
+  // Return leg: use explicit return airports if present, otherwise it's the
+  // reverse of the outbound (arrival -> departure), which is what the viewer
+  // shows for round trips.
+  const retDep = item.returnDepartureAirport || item.arrivalAirport;
+  const retArr = item.returnArrivalAirport || item.departureAirport;
+  const retAirline = item.returnAirline || item.airline;
+
+  // Build the small meta line under each leg. Show airline + date, and the
+  // flight number only if we actually have one — otherwise "Flight details
+  // pending" (never invent a number or time we don't hold).
+  const legMeta = (airline, flightNo, date) => {
+    const bits = [];
+    if (airline) bits.push(esc(airline));
+    if (flightNo) bits.push(esc(flightNo));
+    if (date) bits.push(niceDate(date));
+    const line = bits.join(' &middot; ');
+    return line
+      ? `<div class="leg-meta">${line}</div>` +
+        (flightNo ? '' : '<div class="leg-pending">Flight details pending</div>')
+      : '<div class="leg-pending">Flight details pending</div>';
+  };
+
+  const leg = (tag, dep, arr, meta) => `
+    <div class="flight-leg">
+      <div class="leg-tag">${tag}</div>
+      <div class="leg-route">
+        <div class="airport"><div class="iata">${esc(dep || '')}</div></div>
+        <div class="leg-arrow" aria-hidden="true">&#9992;</div>
+        <div class="airport"><div class="iata">${esc(arr || '')}</div></div>
+      </div>
+      ${meta}
+    </div>`;
+
   return `
   <div class="flights">
-    <div class="flight-leg">
-      <div class="leg-tag">Outbound</div>
-      <div class="leg-route">
-        <div class="airport">
-          <div class="iata">${esc(item.departureAirport)}</div>
-        </div>
-        <div class="leg-arrow" aria-hidden="true">&#9992;</div>
-        <div class="airport">
-          <div class="iata">${esc(item.arrivalAirport)}</div>
-        </div>
-      </div>
-      <div class="leg-meta">${esc(item.airline)} &middot; ${esc(item.outboundFlightNumber)} &middot; ${niceDate(item.departureDate)}</div>
-    </div>
-    <div class="flight-leg">
-      <div class="leg-tag">Return</div>
-      <div class="leg-route">
-        <div class="airport">
-          <div class="iata">${esc(item.returnDepartureAirport)}</div>
-        </div>
-        <div class="leg-arrow" aria-hidden="true">&#9992;</div>
-        <div class="airport">
-          <div class="iata">${esc(item.returnArrivalAirport)}</div>
-        </div>
-      </div>
-      <div class="leg-meta">${esc(item.returnAirline)} &middot; ${esc(item.returnFlightNumber)} &middot; ${niceDate(item.returnDate)}</div>
-    </div>
+    ${leg('Outbound', item.departureAirport, item.arrivalAirport,
+      legMeta(item.airline, item.outboundFlightNumber, item.departureDate))}
+    ${leg('Return', retDep, retArr,
+      legMeta(retAirline, item.returnFlightNumber, item.returnDate))}
   </div>`;
 }
 
@@ -285,7 +339,7 @@ function renderImages(images) {
   // attachment limits (SendGrid hard limit 30MB; practical target <7MB). A
   // proper image-resize proxy is the fast-follow if multi-hotel quotes get big.
   const shots = images.slice(0, 2).map(img =>
-    `<div class="gallery-cell"><img crossorigin="anonymous" src="${esc(img.url)}" alt="${esc(img.name || 'Hotel image')}" /></div>`
+    `<div class="gallery-cell"><img src="${esc(img.url)}" alt="${esc(img.name || 'Hotel image')}" /></div>`
   ).join('');
   return `<div class="gallery">${shots}</div>`;
 }
@@ -433,6 +487,7 @@ function renderQuoteHTML(input) {
   .iata{font-size:14px;font-weight:600;color:var(--ink);}
   .leg-arrow{color:var(--teal);font-size:14px;}
   .leg-meta{margin-top:8px;font-size:11px;color:var(--slate);}
+  .leg-pending{margin-top:3px;font-size:10px;color:var(--mute);font-style:italic;}
 
   /* Details */
   .details{display:grid;grid-template-columns:1fr 1fr;column-gap:32px;row-gap:0;margin:0;padding:8px 22px;}
@@ -445,8 +500,8 @@ function renderQuoteHTML(input) {
 
   /* Gallery */
   .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:14px 22px;break-inside:avoid;}
-  .gallery-cell{aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:var(--bg3);}
-  .gallery-cell img{width:100%;height:100%;object-fit:cover;display:block;}
+  .gallery-cell{height:180px;border-radius:8px;overflow:hidden;background:var(--bg3);}
+  .gallery-cell img{width:100%;height:180px;object-fit:cover;display:block;}
 
   /* Description */
   .description{padding:6px 22px 22px;color:var(--slate);font-size:12.5px;}
@@ -496,7 +551,7 @@ function renderQuoteHTML(input) {
   <section class="chips">
     <div class="chip">
       <div class="chip-label">Destination</div>
-      <div class="chip-value">${esc(items[0] ? items[0].location : '—')}</div>
+      <div class="chip-value">${esc(q.destination || (items[0] ? items[0].location : '—'))}</div>
     </div>
     <div class="chip">
       <div class="chip-label">Travellers</div>
