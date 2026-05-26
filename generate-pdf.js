@@ -52,32 +52,38 @@ async function generateQuotePdf(doc) {
     // throws), we leave the original image in place — correctness over size.
     try {
       await page.evaluate(async () => {
-        const MAX_W = 700;        // plenty for a ~250px display cell at 2x
+        const MAX_W = 700;
         const QUALITY = 0.72;
         const imgs = Array.from(document.querySelectorAll('.gallery-cell img'));
-        await Promise.all(imgs.map(img => new Promise(resolve => {
+
+        // Wait for a freshly-set src to finish decoding before we move on, so
+        // the image is actually painted when page.pdf() runs.
+        const awaitDecode = (img) => new Promise((res) => {
+          if (img.complete && img.naturalWidth) return res();
+          img.onload = () => res();
+          img.onerror = () => res();
+          setTimeout(res, 2000); // hard backstop
+        });
+
+        await Promise.all(imgs.map(async (img) => {
           try {
-            if (!img.complete || !img.naturalWidth) return resolve();
-            const scale = Math.min(1, MAX_W / img.naturalWidth);
-            if (scale >= 1 && img.naturalWidth <= MAX_W) return resolve();
+            if (!img.complete || !img.naturalWidth) await awaitDecode(img);
+            if (!img.naturalWidth) return;
+            if (img.naturalWidth <= MAX_W) return; // already small enough
+            const scale = MAX_W / img.naturalWidth;
             const c = document.createElement('canvas');
             c.width = Math.round(img.naturalWidth * scale);
             c.height = Math.round(img.naturalHeight * scale);
-            const ctx = c.getContext('2d');
-            ctx.drawImage(img, 0, 0, c.width, c.height);
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
             const data = c.toDataURL('image/jpeg', QUALITY); // throws if tainted
-            img.src = data;
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-            // src may already be cached/decoded; resolve next tick as a backstop.
-            setTimeout(resolve, 50);
+            img.src = data;          // swap in the smaller version
+            await awaitDecode(img);  // and wait for it to actually decode
           } catch (e) {
-            resolve(); // tainted canvas or other issue — keep original
+            // Tainted canvas or any other issue — keep the original image.
+            // It already loaded fine, so it will still render.
           }
-        })));
+        }));
       });
-      // Give swapped data URLs a moment to decode before printing.
-      await page.evaluate(() => new Promise(r => setTimeout(r, 100)));
     } catch (e) {
       // Non-fatal — print with original images if downscaling failed entirely.
     }
