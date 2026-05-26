@@ -99,9 +99,12 @@ function looksLikeQuoteDoc(o) {
   if (!o || typeof o !== 'object') return false;
   // Unwrap a { success, data } envelope.
   const d = (o.data && typeof o.data === 'object') ? o.data : o;
+  // quoteDocument shape: data.quoteDocument.items[] (curated/flat).
+  if (d.quoteDocument && Array.isArray(d.quoteDocument.items) &&
+      d.quoteDocument.items.length > 0) return true;
   if (!Array.isArray(d.items) || d.items.length === 0) return false;
   const first = d.items[0];
-  // Official shape: item has a product object.
+  // Raw shape: item has a product object.
   if (first && first.product && typeof first.product === 'object') return true;
   // Legacy flat shape: item has accommodationName + a setup block on the doc.
   if (first && first.accommodationName !== undefined &&
