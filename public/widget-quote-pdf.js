@@ -261,6 +261,7 @@
   function TGQuotePdfButton(container) {
     this.el = container;
     this.api = container.getAttribute('data-tg-api') || DEFAULT_API;
+    this.widgetId = container.getAttribute('data-tg-id') || '';
     this.label = container.getAttribute('data-tg-label') || 'Download PDF';
     this.theme = container.getAttribute('data-tg-theme') || 'light';
     var actionsAttr = (container.getAttribute('data-tg-actions') || 'download,email')
@@ -346,6 +347,10 @@
     // Build the request. With id+key the server fetches + renders. If we only
     // have a page-scraped doc (no URL id+key), we send that instead.
     var bodyObj = { action: action };
+    // Pass the widgetId so the server resolves THIS client's Travelify creds +
+    // branding (via the widget's ClientEmail). Without it the server falls back
+    // to the demo App 250 path. The demo page has no id and relies on that.
+    if (this.widgetId) bodyObj.widgetId = this.widgetId;
     if (this.ref) { bodyObj.quoteId = this.ref.quoteId; bodyObj.key = this.ref.key; }
     if (doc) {
       bodyObj.quoteDocument = doc;
