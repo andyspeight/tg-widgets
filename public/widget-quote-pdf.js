@@ -307,6 +307,12 @@
     var styleVars = '';
     if (isHex(btn.bg))   { styleVars += '--tgqp-btn-bg:' + btn.bg.trim() + ';--tgqp-btn-bg-hover:' + shade(btn.bg.trim(), -12) + ';'; }
     if (isHex(btn.text)) { styleVars += '--tgqp-btn-text:' + btn.text.trim() + ';'; }
+    // Alignment (left/center/right) for placement inside a host container (e.g.
+    // a Duda section). The host becomes a full-width block and text-align moves
+    // the inline-flex button group. Default left.
+    var align = ({ left: 'left', center: 'center', centre: 'center', right: 'right' })[this.opts.align] || 'left';
+    this.el.style.display = 'block';
+    this.el.style.textAlign = align;
     this.shadow.innerHTML =
       '<style>' + STYLES + '</style>' +
       '<div class="tgqp-root" data-theme="' + esc(this.theme) + '"' + (styleVars ? ' style="' + styleVars + '"' : '') + '>' +
@@ -455,7 +461,7 @@
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
           var cfg = (data && data.config) ? data.config : (data || {});
-          mount(c, { button: cfg.button });
+          mount(c, { button: cfg.button, align: cfg.align });
         })
         .catch(function () { mount(c, {}); });
     });
