@@ -283,6 +283,9 @@ function normaliseQuote(input) {
 // Item block
 // ----------------------------------------------------------------------------
 
+// Package-embedded flights (legacy accommodation shape): uses IATA airport
+// codes (departureAirport/arrivalAirport). Standalone `flights` items use long
+// city strings via origin/destination and are rendered by renderFlightCard.
 function renderFlights(item) {
   // Show the flights block when we have any airport/airline/flight info.
   const hasFlights = item.departureAirport || item.arrivalAirport ||
@@ -349,51 +352,266 @@ function renderDetailRow(label, value) {
   return `<div class="detail"><dt>${esc(label)}</dt><dd>${value}</dd></div>`;
 }
 
-function renderItem(item, index, currency) {
-  const cur = item.currency || currency;
+// ----------------------------------------------------------------------------
+// Item cards — type-aware dispatcher
+// ----------------------------------------------------------------------------
+//
+// Quotes built in the current Quick Quote builder carry a flat `quoteDocument`
+// whose items each have a `type` field. Confirmed live types and their fields:
+//
+//   hotels      hotelName, city, propertyType, starRating, checkIn, checkOut,
+//               nights, roomType, boardBasis, description/descriptionHtml, images[]
+//   transfers   origin, destination, date, time, passengers, vehicleType
+//   activities  activityName, location, date, time, participants
+//   carhire     company, carType, pickupLocation, dropoffLocation,
+//               pickupDate, dropoffDate
+//   cruises     cruiseName, cruiseLine, shipName, departurePort, cabinType,
+//               nights, startDate, endDate, summary, itinerary[{day,port,description}]
+//   flights     airline, origin, destination, cabinClass, departureDate,
+//               returnDate, outboundFlightNumber, returnFlightNumber
+//
+// Legacy quotes (no quoteDocument) arrive via normaliseItem with `productType`
+// ('Accommodation'/'DynamicPackage') and the older accommodation field names
+// (accommodationName, departureAirport, atolProtected, transfersIncluded).
+// renderAccommodationCard handles BOTH the new `hotels` type and that legacy
+// shape, reading whichever field names are present.
+//
+// ATOL and transfers are quote-level (quoteDocument.setup.atolProtected) and are
+// NOT rendered per item, except on the legacy accommodation/package shape where
+// they genuinely live on the item.
+
+/** Shared card shell: header (type label, title, optional stars + sub), price. */
+function itemShell(opts) {
+  const { typeLabel, title, sub, starRating, price, cur, travellers, body } = opts;
+  const pp = Number(travellers) > 1
+    ? money(Number(price) / Number(travellers), cur) + ' pp'
+    : 'total';
+  return `
+  <section class="item">
+    <div class="item-head">
+      <div class="item-head-main">
+        <div class="item-type">${esc(typeLabel)}</div>
+        <h2 class="item-title">${esc(title || 'Item')}</h2>
+        ${(sub || starRating) ? `<div class="item-sub">
+          ${starRating ? `<span class="rating">${stars(starRating)}</span>` : ''}
+          ${sub ? `<span class="loc">${esc(sub)}</span>` : ''}
+        </div>` : ''}
+      </div>
+      <div class="item-price">
+        <div class="item-price-amount">${money(price, cur)}</div>
+        <div class="item-price-label">${pp}</div>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+/** Accommodation — handles new `hotels` type and legacy accommodation/package. */
+function renderAccommodationCard(item, cur) {
+  const name = item.hotelName || item.accommodationName || 'Accommodation';
+  const loc = item.city || item.location || '';
   const typeLabel = item.productType === 'DynamicPackage'
     ? 'Flight + Hotel Package'
-    : (item.productType === 'Accommodation' ? 'Accommodation' : esc(item.productType || 'Item'));
+    : (item.propertyType || 'Accommodation');
 
-  // Details list — values are pre-escaped or known-safe.
   const details = [
-    renderDetailRow('Accommodation', esc(item.accommodationName)),
-    renderDetailRow('Location', esc(item.location)),
+    renderDetailRow('Location', esc(loc)),
+    renderDetailRow('Property type', esc(item.propertyType)),
     renderDetailRow('Check-in', niceDate(item.checkIn)),
     renderDetailRow('Check-out', niceDate(item.checkOut)),
     renderDetailRow('Nights', esc(item.nights)),
     renderDetailRow('Room type', esc(item.roomType)),
     renderDetailRow('Board basis', esc(item.boardBasis)),
     renderDetailRow('Operator', esc(item.operator)),
-    renderDetailRow('ATOL protected', boolPill(item.atolProtected)),
-    renderDetailRow('Transfers included', boolPill(item.transfersIncluded)),
+    // ATOL/transfers only on the legacy shape that actually carries them.
+    item.atolProtected !== undefined && item.atolProtected !== ''
+      ? renderDetailRow('ATOL protected', boolPill(item.atolProtected)) : '',
+    item.transfersIncluded !== undefined && item.transfersIncluded !== ''
+      ? renderDetailRow('Transfers included', boolPill(item.transfersIncluded)) : '',
   ].join('');
 
-  return `
-  <section class="item">
-    <div class="item-head">
-      <div class="item-head-main">
-        <div class="item-type">${typeLabel}</div>
-        <h2 class="item-title">${esc(item.accommodationName)}</h2>
-        <div class="item-sub">
-          <span class="rating">${stars(item.starRating)}</span>
-          <span class="loc">${esc(item.location)}</span>
+  const desc = item.descriptionHtml || item.description;
+  return itemShell({
+    typeLabel, title: name, sub: loc, starRating: item.starRating,
+    price: item.price, cur, travellers: item.travellers,
+    body: `
+      ${renderFlights(item)}
+      <dl class="details">${details}</dl>
+      ${renderImages(item.images)}
+      ${desc ? `<div class="description">${sanitiseDescription(desc)}</div>` : ''}`,
+  });
+}
+
+/** Car hire. */
+function renderCarHireCard(item, cur) {
+  const days = (() => {
+    if (!item.pickupDate || !item.dropoffDate) return '';
+    const a = new Date(item.pickupDate), b = new Date(item.dropoffDate);
+    const n = Math.round((b - a) / 86400000);
+    return n > 0 ? `${n} day${n === 1 ? '' : 's'}` : '';
+  })();
+  const details = [
+    renderDetailRow('Vehicle', esc(item.carType)),
+    renderDetailRow('Supplier', esc(item.company)),
+    renderDetailRow('Pick-up', esc(item.pickupLocation)),
+    renderDetailRow('Pick-up date', niceDate(item.pickupDate)),
+    renderDetailRow('Drop-off', esc(item.dropoffLocation)),
+    renderDetailRow('Drop-off date', niceDate(item.dropoffDate)),
+    renderDetailRow('Duration', esc(days)),
+  ].join('');
+  return itemShell({
+    typeLabel: 'Car hire', title: item.carType || 'Car hire', sub: item.company,
+    price: item.price, cur, travellers: item.travellers,
+    body: `<dl class="details">${details}</dl>`,
+  });
+}
+
+/** Activity / ticket. */
+function renderActivityCard(item, cur) {
+  const details = [
+    renderDetailRow('Activity', esc(item.activityName)),
+    renderDetailRow('Location', esc(item.location)),
+    renderDetailRow('Date', niceDate(item.date)),
+    renderDetailRow('Time', esc(item.time)),
+    renderDetailRow('Participants', item.participants
+      ? esc(`${item.participants} ${Number(item.participants) === 1 ? 'person' : 'people'}`) : ''),
+  ].join('');
+  return itemShell({
+    typeLabel: 'Activity', title: item.activityName || 'Activity', sub: item.location,
+    price: item.price, cur, travellers: item.travellers,
+    body: `<dl class="details">${details}</dl>`,
+  });
+}
+
+/** Transfer. */
+function renderTransferCard(item, cur) {
+  const when = [niceDate(item.date), item.time].filter(Boolean).join(' &middot; ');
+  const details = [
+    renderDetailRow('From', esc(item.origin)),
+    renderDetailRow('To', esc(item.destination)),
+    renderDetailRow('Vehicle', esc(item.vehicleType)),
+    renderDetailRow('When', when),
+    renderDetailRow('Passengers', item.passengers
+      ? esc(`${item.passengers} ${Number(item.passengers) === 1 ? 'passenger' : 'passengers'}`) : ''),
+  ].join('');
+  const title = (item.origin && item.destination)
+    ? `${item.origin} to ${item.destination}` : (item.vehicleType || 'Transfer');
+  return itemShell({
+    typeLabel: 'Transfer', title, sub: item.vehicleType,
+    price: item.price, cur, travellers: item.travellers,
+    body: `<dl class="details">${details}</dl>`,
+  });
+}
+
+/** Standalone flight — uses long city strings (origin/destination), not IATA. */
+function renderFlightCard(item, cur) {
+  const cityLeg = (tag, from, to, airline, flightNo, date) => {
+    const meta = [airline && esc(airline), flightNo && esc(flightNo), date && niceDate(date)]
+      .filter(Boolean).join(' &middot; ');
+    return `
+      <div class="cityleg">
+        <div class="leg-tag">${tag}</div>
+        <div class="cityleg-route">
+          <span class="cityleg-pt">${esc(from || '')}</span>
+          <span class="cityleg-arrow" aria-hidden="true">&#9992;</span>
+          <span class="cityleg-pt">${esc(to || '')}</span>
         </div>
+        ${meta ? `<div class="leg-meta">${meta}</div>`
+               : '<div class="leg-pending">Flight details pending</div>'}
+      </div>`;
+  };
+  const details = [
+    renderDetailRow('Airline', esc(item.airline)),
+    renderDetailRow('Cabin class', esc(item.cabinClass)),
+  ].join('');
+  return itemShell({
+    typeLabel: 'Flights', title: item.airline || 'Flights',
+    sub: (item.origin && item.destination) ? `${item.origin} to ${item.destination}` : '',
+    price: item.price, cur, travellers: item.travellers,
+    body: `
+      <div class="cityflights">
+        ${cityLeg('Outbound', item.origin, item.destination, item.airline,
+          item.outboundFlightNumber, item.departureDate)}
+        ${cityLeg('Return', item.destination, item.origin, item.airline,
+          item.returnFlightNumber, item.returnDate)}
       </div>
-      <div class="item-price">
-        <div class="item-price-amount">${money(item.price, cur)}</div>
-        <div class="item-price-label">${Number(item.travellers) > 1 ? money(item.price / Number(item.travellers), cur) + ' pp' : 'total'}</div>
-      </div>
-    </div>
+      ${(item.airline || item.cabinClass) ? `<dl class="details">${details}</dl>` : ''}`,
+  });
+}
 
-    ${renderFlights(item)}
+/** Cruise — includes a day-by-day itinerary. */
+function renderCruiseCard(item, cur) {
+  const details = [
+    renderDetailRow('Cruise line', esc(item.cruiseLine)),
+    renderDetailRow('Ship', esc(item.shipName)),
+    renderDetailRow('Departure port', esc(item.departurePort)),
+    renderDetailRow('Cabin', esc(item.cabinType)),
+    renderDetailRow('Nights', esc(item.nights)),
+    renderDetailRow('Departs', niceDate(item.startDate)),
+    renderDetailRow('Returns', niceDate(item.endDate)),
+  ].join('');
 
-    <dl class="details">${details}</dl>
+  let itinerary = '';
+  if (Array.isArray(item.itinerary) && item.itinerary.length) {
+    const rows = item.itinerary.map(d => `
+      <div class="itin-row">
+        <div class="itin-day">Day ${esc(d.day)}</div>
+        <div class="itin-port">${esc(d.port || '')}${
+          d.description ? `<span class="itin-desc">${esc(d.description)}</span>` : ''}</div>
+      </div>`).join('');
+    itinerary = `<div class="itinerary"><div class="itin-head">Itinerary</div>${rows}</div>`;
+  }
 
-    ${renderImages(item.images)}
+  const summary = item.summary
+    ? `<div class="description">${sanitiseDescription(item.summary)}</div>` : '';
 
-    <div class="description">${sanitiseDescription(item.description)}</div>
-  </section>`;
+  return itemShell({
+    typeLabel: 'Cruise', title: item.cruiseName || 'Cruise', sub: item.cruiseLine,
+    price: item.price, cur, travellers: item.travellers,
+    body: `<dl class="details">${details}</dl>${itinerary}${summary}`,
+  });
+}
+
+/**
+ * Dispatch an item to the right card by its `type` (new quoteDocument shape) or
+ * `productType` (legacy shape). Unknown types fall back to a minimal card rather
+ * than forcing accommodation fields onto them.
+ */
+function renderItem(item, index, currency) {
+  const cur = item.currency || currency;
+  const type = String(item.type || '').toLowerCase();
+
+  switch (type) {
+    case 'hotels':
+    case 'hotel':
+    case 'accommodation':
+      return renderAccommodationCard(item, cur);
+    case 'carhire':
+      return renderCarHireCard(item, cur);
+    case 'activities':
+    case 'activity':
+      return renderActivityCard(item, cur);
+    case 'transfers':
+    case 'transfer':
+      return renderTransferCard(item, cur);
+    case 'flights':
+    case 'flight':
+      return renderFlightCard(item, cur);
+    case 'cruises':
+    case 'cruise':
+      return renderCruiseCard(item, cur);
+    default:
+      break;
+  }
+
+  // No flat `type` — legacy shape from normaliseItem (productType + accommodation
+  // fields), or has clear car-hire fields. Route accordingly.
+  if (item.carType || item.pickupLocation) return renderCarHireCard(item, cur);
+  if (item.cruiseName) return renderCruiseCard(item, cur);
+  if (item.activityName) return renderActivityCard(item, cur);
+  if (item.vehicleType && item.origin) return renderTransferCard(item, cur);
+  // Default: accommodation/package (legacy productType shape).
+  return renderAccommodationCard(item, cur);
 }
 
 // ----------------------------------------------------------------------------
@@ -488,6 +706,21 @@ function renderQuoteHTML(input) {
   .leg-arrow{color:var(--teal);font-size:14px;}
   .leg-meta{margin-top:8px;font-size:11px;color:var(--slate);}
   .leg-pending{margin-top:3px;font-size:10px;color:var(--mute);font-style:italic;}
+
+  /* Standalone flight (long city names, not IATA) */
+  .cityflights{display:flex;flex-direction:column;gap:10px;padding:18px 22px;background:var(--bg2);break-inside:avoid;}
+  .cityleg{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+  .cityleg-route{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .cityleg-pt{font-size:13px;font-weight:600;color:var(--ink);}
+  .cityleg-arrow{color:var(--teal);font-size:14px;}
+
+  /* Cruise itinerary */
+  .itinerary{padding:8px 22px 14px;break-inside:avoid;}
+  .itin-head{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal-dark);font-weight:700;margin:6px 0 8px;}
+  .itin-row{display:flex;gap:14px;padding:7px 0;border-bottom:1px solid var(--bg3);}
+  .itin-day{flex:0 0 64px;font-size:12px;font-weight:700;color:var(--teal-dark);}
+  .itin-port{font-size:12px;color:var(--ink);font-weight:600;}
+  .itin-desc{display:block;font-weight:400;color:var(--slate);margin-top:2px;}
 
   /* Details */
   .details{display:grid;grid-template-columns:1fr 1fr;column-gap:32px;row-gap:0;margin:0;padding:8px 22px;}
