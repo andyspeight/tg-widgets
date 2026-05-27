@@ -873,8 +873,12 @@ function renderQuoteHTML(input, opts) {
   /* Body */
   .body{padding:28px 32px;}
 
-  /* Item */
-  .item{border:1px solid var(--line);border-radius:14px;margin-bottom:24px;break-inside:avoid;}
+  /* Item — allow tall cards (e.g. a hotel with gallery + long facilities) to
+     break across a page boundary rather than being shoved whole onto the next
+     page, which leaves the previous page mostly blank. Inner blocks (header,
+     details, gallery, flights, itinerary) keep their own break-inside:avoid so
+     they stay intact; only the overall card is allowed to flow. */
+  .item{border:1px solid var(--line);border-radius:14px;margin-bottom:24px;break-inside:auto;}
   /* Keep the header glued to whatever follows so a title never orphans at a
      page foot even when a very tall card is forced to break internally. */
   .item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 22px;border-bottom:1px solid var(--line);break-inside:avoid;break-after:avoid;}
