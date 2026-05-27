@@ -427,6 +427,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'quote-pdf',
+    name: 'Quote PDF',
+    airtableType: 'Quote PDF',
+    description: 'Turn any Quick Quote into a polished, on-brand PDF your customers can download or receive by email. Pulls live from Travelify, renders every product type — flights, hotels, tours, cruises, car hire, transfers and fees — with your logo, colours and contact details. Itinerary day dividers and per-item cards built in.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>'},
+    color: '#1B2B5B',
+    editorUrl: '/editor-quote-pdf',
+    demoUrl: '/demo-quote-pdf',
+    widgetTag: 'quote-pdf',
+    scriptFile: 'widget-quote-pdf.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'countdown',
     name: 'Countdown Timer',
     airtableType: 'Countdown Timer',
@@ -1575,6 +1590,65 @@ function loadMiniPreview(w) {
             <div style="font-size: 14px; font-weight: 600; color: ${w.color}; letter-spacing: -.01em; font-variant-numeric: tabular-nums;">152 days</div>
             <div style="font-size: 10px; color: #475569; margin-top: 1px;">Ready to fly</div>
           </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (w.id === 'quote-pdf') {
+    container.innerHTML = `
+      <div style="
+        width: 100%; height: 100%;
+        background: #FFFFFF;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(15,23,42,.06);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+        box-sizing: border-box;
+      ">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-bottom:3px solid #00B4D8;">
+          <div>
+            <div style="font-size:15px; font-weight:700; color:${w.color}; letter-spacing:-.01em;">Your Travel Co</div>
+            <div style="font-size:10px; color:#475569;">Your personalised holiday quote</div>
+          </div>
+          <div style="text-align:right; font-size:10px; color:#475569; line-height:1.5;">
+            <div style="font-weight:700; color:#0F172A;">01202 000000</div>
+            <div>hello@yourco.com</div>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg, ${w.color} 0%, #111D3E 100%); color:#fff; padding:18px 18px;">
+          <div style="font-size:18px; font-weight:700; letter-spacing:-.02em; margin-bottom:3px;">Your holiday quote</div>
+          <div style="font-size:11px; color:#C7D2E8;">A curated itinerary tailored just for you.</div>
+          <div style="margin-top:10px; font-size:9px; color:#9DB0D4; letter-spacing:.04em; text-transform:uppercase;">Quote 17820 · Prepared 27 May 2026</div>
+        </div>
+
+        <div style="flex:1; padding:14px 18px; background:#FFFFFF;">
+          <div style="border:1px solid #E2E8F0; border-radius:12px; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:12px 14px; border-bottom:1px solid #E2E8F0;">
+              <div>
+                <div style="font-size:9px; font-weight:700; color:#0096B7; letter-spacing:.06em; text-transform:uppercase;">Resort</div>
+                <div style="font-size:15px; font-weight:700; color:${w.color}; letter-spacing:-.01em; margin:2px 0 3px;">Atlantis The Palm</div>
+                <div style="display:inline-flex; gap:1px; color:#F59E0B; font-size:10px;">★★★★★ <span style="color:#475569; margin-left:4px;">Dubai</span></div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:18px; font-weight:700; color:${w.color}; font-variant-numeric:tabular-nums;">£3,200</div>
+                <div style="font-size:9px; color:#94A3B8;">total</div>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 24px; padding:8px 14px;">
+              <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #F1F5F9; font-size:11px;"><span style="color:#475569;">Check-in</span><span style="font-weight:600; color:#0F172A;">17 Sept 2026</span></div>
+              <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #F1F5F9; font-size:11px;"><span style="color:#475569;">Nights</span><span style="font-weight:600; color:#0F172A;">7</span></div>
+              <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #F1F5F9; font-size:11px;"><span style="color:#475569;">Board</span><span style="font-weight:600; color:#0F172A;">Half Board</span></div>
+              <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #F1F5F9; font-size:11px;"><span style="color:#475569;">Room</span><span style="font-weight:600; color:#0F172A;">Ocean Suite</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:${w.color}; color:#fff;">
+          <div style="font-size:12px; font-weight:600;">Total price (1 item)</div>
+          <div style="font-size:20px; font-weight:700; font-variant-numeric:tabular-nums;">£3,200</div>
         </div>
       </div>
     `;
