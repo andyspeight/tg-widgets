@@ -42,10 +42,17 @@
  *             Airtable (lookupClientCredentials*) when that path is added.
  */
 
-import { setCors } from './_auth.js';
+import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail } from './_auth.js';
 import { generateQuotePdf, pdfFilename } from '../generate-pdf.js';
 
 const TRAVELIFY_API_BASE = process.env.QUOTE_API_BASE || 'https://api.travelify.io';
+
+const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
+const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
+
+// A widget can opt into the demo Travelify account by passing this sentinel
+// instead of a real widgetId (mirrors booking-pdf.js / retrieve-order.js).
+const DEMO_WIDGET_SENTINEL = 'demo';
 
 // ----- Rate limiting (mirrors api/booking-pdf.js) -----
 const rateLimitStore = new Map();
@@ -139,26 +146,103 @@ function validate(body) {
     quoteDocument: hasDoc ? scrubCosts(body.quoteDocument) : null,
     quoteId: idOk ? String(quoteId) : null,
     key: keyOk ? key : null,
+    // Optional: which widget this came from. Resolves client credentials +
+    // branding. Absent or 'demo' → demo App 250 + default branding.
+    widgetId: (body && typeof body.widgetId === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(body.widgetId))
+      ? body.widgetId : null,
   };
 }
 
 // ----- Demo credentials (mirrors booking-pdf.js / retrieve-order.js) -----
 // traveldemo.site runs on the Travelgenix demo Travelify account (App 250).
 // The "key" below is the PUBLIC demo key already hardcoded in booking-pdf.js —
-// it is NOT a client secret. When we extend this to real clients, replace the
-// demo branch in fetchQuoteDocument() with a lookupClientCredentialsByEmail /
-// lookupClientCredentialsByAppId call exactly like booking-pdf does.
+// it is NOT a client secret. Real clients resolve their own credentials from
+// the Clients table via lookupClientCredentialsByEmail, exactly like booking-pdf.
 const DEMO_APP_ID = '250';
 const DEMO_PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
+
+function airtableHeaders() {
+  const key = process.env.AIRTABLE_KEY;
+  if (!key) throw new Error('AIRTABLE_KEY env var missing');
+  return { 'Authorization': `Bearer ${key}` };
+}
+
+// Look up the widget record by its public WidgetID. Returns the record (with
+// ClientEmail + Config) or null. Mirrors booking-pdf.findWidgetById.
+async function findWidgetById(widgetId) {
+  const safe = sanitiseForFormula(widgetId);
+  const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${WIDGETS_TABLE}`);
+  url.searchParams.set('filterByFormula', `{WidgetID}='${safe}'`);
+  url.searchParams.set('maxRecords', '1');
+  const res = await fetch(url.toString(), { headers: airtableHeaders() });
+  if (!res.ok) throw new Error(`Widget lookup failed: ${res.status}`);
+  const data = await res.json();
+  return data.records?.[0] || null;
+}
+
+// Build the branding opts the renderer consumes from a widget's saved Config.
+// Only whitelisted fields are read; everything is bounded and validated inside
+// resolveBrand() in the renderer, so malformed config degrades to defaults.
+function buildRenderOpts(config) {
+  const c = (config && typeof config === 'object') ? config : {};
+  const colors = (c.colors && typeof c.colors === 'object') ? c.colors : {};
+  return {
+    brand: {
+      name: c.brandName,
+      tagline: c.tagline,
+      logoUrl: c.logoUrl,
+      supportEmail: c.supportEmail,
+      supportPhone: c.supportPhone,
+      colors: {
+        primary: colors.primary,
+        primaryDark: colors.primaryDark,
+        accent: colors.accent,
+        accentDark: colors.accentDark,
+      },
+    },
+  };
+}
+
+// Resolve the Travelify credentials AND branding opts for a request. Demo
+// sentinel (or no widgetId) → App 250 + default branding. Real widgetId →
+// look up the widget, resolve the client's creds, build branding from config.
+async function resolveContext(widgetId) {
+  if (!widgetId || widgetId === DEMO_WIDGET_SENTINEL) {
+    return { appId: DEMO_APP_ID, apiKey: DEMO_PUBLIC_KEY, opts: undefined };
+  }
+
+  const widget = await findWidgetById(widgetId);
+  if (!widget) throw new Error('widget_not_found');
+
+  const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
+  if (!clientEmail) throw new Error('widget_no_client');
+
+  let creds;
+  try {
+    creds = await lookupClientCredentialsByEmail(clientEmail);
+  } catch (err) {
+    console.error('[quote-pdf] credential lookup failed for', clientEmail, '—', err.message);
+    throw new Error('credential_lookup_failed');
+  }
+  if (!creds) {
+    console.warn(`[quote-pdf] No Travelify credentials on Clients record for ${clientEmail} (widgetId=${widgetId})`);
+    throw new Error('no_client_credentials');
+  }
+
+  let config = {};
+  try { config = JSON.parse(widget.fields?.Config || '{}'); } catch { config = {}; }
+
+  return { appId: creds.appId, apiKey: creds.apiKey, opts: buildRenderOpts(config) };
+}
 
 // ----- Server-fetch (Travelify hotlist) -----
 // Fetches the quote from Travelify so the server (not the browser) holds the
 // data. Auth mirrors booking-pdf.js: Token {appId}:{apiKey} + the Origin header
-// (Travelify returns a misleading 401 without Origin). Demo-only for now —
-// always App 250. Real-client credential resolution is a later addition.
-async function fetchQuoteDocument(quoteId, key) {
-  const appId = DEMO_APP_ID;
-  const apiKey = DEMO_PUBLIC_KEY;
+// (Travelify returns a misleading 401 without Origin). The URL path key is the
+// per-quote key from the viewer URL; the header key is the APP key.
+async function fetchQuoteDocument(quoteId, key, appId, apiKey) {
+  appId = appId || DEMO_APP_ID;
+  apiKey = apiKey || DEMO_PUBLIC_KEY;
 
   // Official endpoint shape (confirmed by Travelify doc, May 2026):
   //   GET /account/hotlist/{id}/{key}?isViewPage=true
@@ -273,13 +357,26 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Resolve client credentials + branding from the widget (demo → App 250 +
+    // defaults). For page-data mode we still resolve branding so the rendered
+    // doc carries the client's logo/colours.
+    let ctx;
+    try {
+      ctx = await resolveContext(v.widgetId);
+    } catch (err) {
+      const code = err?.message || 'context_error';
+      // Don't leak which part failed; the editor surfaces creds status separately.
+      const status = code === 'widget_not_found' ? 404 : 400;
+      return res.status(status).json({ error: code });
+    }
+
     // Page-data mode uses the scrubbed doc the browser sent. Server-fetch mode
-    // pulls it from Travelify and scrubs it here.
+    // pulls it from Travelify (with the resolved creds) and scrubs it here.
     const doc = v.hasDoc
       ? v.quoteDocument
-      : scrubCosts(await fetchQuoteDocument(v.quoteId, v.key));
+      : scrubCosts(await fetchQuoteDocument(v.quoteId, v.key, ctx.appId, ctx.apiKey));
 
-    const pdf = await generateQuotePdf(doc);
+    const pdf = await generateQuotePdf(doc, ctx.opts);
 
     if (v.action === 'email') {
       const result = await emailQuotePdf(doc, pdf);
