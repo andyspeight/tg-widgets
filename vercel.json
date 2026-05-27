@@ -58,6 +58,10 @@
       "destination": "/demo-mybooking.html"
     },
     {
+      "source": "/demo-quote-pdf",
+      "destination": "/demo-quote-pdf.html"
+    },
+    {
       "source": "/demo-countdown",
       "destination": "/demo-countdown.html"
     },
@@ -148,6 +152,10 @@
     {
       "source": "/editor-mybooking",
       "destination": "/editor-mybooking.html"
+    },
+    {
+      "source": "/editor-quote-pdf",
+      "destination": "/editor-quote-pdf.html"
     },
     {
       "source": "/editor-countdown",
