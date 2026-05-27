@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quote PDF Widget — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  // Seed the demo quote reference into the URL hash BEFORE the widget script
+  // runs, so its parseQuoteRef() picks it up exactly as it would on a real
+  // Quick Quote viewer page. Demo quote 17820 (flight + hotel + tour + cruise)
+  // on the public App 250 demo account.
+  (function () {
+    if (!/quoteid=/i.test(location.hash)) {
+      location.replace(location.pathname + location.search +
+        '#quoteid=17820/2F0752A0-2AF4-46B4-922C-5B490DE7FEA3');
+    }
+  })();
+</script>
+<style>
+  :root {
+    --primary: #1B2B5B;
+    --accent: #00B4D8;
+    --bg: #F8FAFC;
+    --bg-2: #F1F5F9;
+    --border: #E2E8F0;
+    --text: #0F172A;
+    --text-2: #475569;
+    --text-3: #94A3B8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+  .topbar { padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+  .topbar .brand { font-weight: 700; font-size: 16px; color: var(--primary); letter-spacing: -.01em; }
+  .topbar a.back { font-size: 13px; color: var(--text-2); text-decoration: none; }
+  .topbar a.back:hover { color: var(--accent); }
+  .topbar .theme { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); margin-left: auto; }
+  .topbar .switch { position: relative; width: 40px; height: 22px; background: var(--border); border-radius: 9999px; cursor: pointer; transition: background .2s; border: none; padding: 0; }
+  .topbar .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  body[data-demo-theme="dark"] .topbar .switch { background: var(--accent); }
+  body[data-demo-theme="dark"] .topbar .switch::after { transform: translateX(18px); }
+
+  .stage { padding: 48px 24px 96px; max-width: 880px; margin: 0 auto; }
+  .stage h1 { font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin: 0 0 8px; }
+  .stage h1 + p { font-size: 16px; color: var(--text-2); margin: 0 0 32px; }
+  .demo-info { padding: 12px 16px; background: rgba(0,180,216,.08); border: 1px solid rgba(0,180,216,.2); border-radius: 12px; font-size: 13px; color: #075985; margin-bottom: 24px; line-height: 1.5; }
+  .demo-info strong { color: var(--text); }
+  .demo-info code { padding: 1px 6px; background: rgba(0,180,216,.12); border-radius: 4px; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+
+  .panel { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(15,23,42,.05); }
+  .panel .mock-context { font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; margin-bottom: 14px; }
+  .panel .mock-quote-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 0 0 4px; letter-spacing: -.01em; }
+  .panel .mock-quote-sub { font-size: 13px; color: var(--text-2); margin: 0 0 22px; }
+  .widget-stage { display: flex; justify-content: flex-start; }
+
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 32px; }
+  .feature { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .feature h3 { font-size: 14px; font-weight: 600; margin: 0 0 6px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .feature h3 svg { width: 16px; height: 16px; color: var(--accent); }
+  .feature p { font-size: 13px; color: var(--text-2); margin: 0; line-height: 1.5; }
+
+  body[data-demo-theme="dark"] { background: #0F172A; color: #F8FAFC; }
+  body[data-demo-theme="dark"] .topbar { background: #1E293B; border-color: #334155; }
+  body[data-demo-theme="dark"] .topbar .brand { color: #F8FAFC; }
+  body[data-demo-theme="dark"] .demo-info { background: rgba(0,180,216,.12); border-color: rgba(0,180,216,.3); color: #67E8F9; }
+  body[data-demo-theme="dark"] .panel { background: #1E293B; border-color: #334155; }
+  body[data-demo-theme="dark"] .panel .mock-quote-title { color: #F8FAFC; }
+  body[data-demo-theme="dark"] .feature { background: #1E293B; border-color: #334155; }
+  body[data-demo-theme="dark"] .feature h3 { color: #F8FAFC; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="/" class="back">← Dashboard</a>
+  <span class="brand">Quote PDF — Demo</span>
+  <div class="theme">
+    <span>Dark mode</span>
+    <button class="switch" id="theme-switch" aria-label="Toggle dark mode"></button>
+  </div>
+</header>
+
+<main class="stage">
+  <h1>Quote PDF</h1>
+  <p>Turn any Quick Quote into a polished, on-brand PDF your customers can download or receive by email.</p>
+
+  <div class="demo-info">
+    <strong>Demo mode:</strong> this page is wired to a sample Quick Quote on the Travelify demo account (<code>App ID 250</code>) — a flight, hotel, tour and cruise. The button below pulls it live and renders a real branded PDF, exactly as it would sit on a client's Quick Quote viewer page.
+  </div>
+
+  <div class="panel">
+    <div class="mock-context">Quick Quote viewer</div>
+    <h2 class="mock-quote-title">Flight + Hotel Quote Builder 1</h2>
+    <p class="mock-quote-sub">Dubai · 4 items · prepared for your customer</p>
+    <div class="widget-stage">
+      <div data-tg-widget="quote-pdf" data-tg-actions="download,email"></div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Every product type</h3>
+      <p>Flights, hotels, packages, tours, cruises, car hire, transfers, extras and fees — each rendered as its own card, with day-by-day itineraries where they apply.</p>
+    </div>
+    <div class="feature">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 1 0 0 20"/></svg>Your branding</h3>
+      <p>Your logo, colours and contact details across every quote. Set once in the editor and every PDF re-themes to match.</p>
+    </div>
+    <div class="feature">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Download or email</h3>
+      <p>Customers grab the PDF instantly, or have it sent straight to their inbox. Costs are stripped server-side, so nothing sensitive ever leaves the page.</p>
+    </div>
+  </div>
+</main>
+
+<script src="/widget-quote-pdf.js"></script>
+<script>
+  // Theme toggle
+  (function () {
+    var sw = document.getElementById('theme-switch');
+    var theme = 'light';
+    sw.addEventListener('click', function () {
+      theme = theme === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-demo-theme', theme);
+    });
+  })();
+</script>
+</body>
+</html>
