@@ -546,6 +546,109 @@ function renderFlightCard(item, cur) {
   });
 }
 
+/** Fees — a custom charge line. Carries a nested items[] of
+ *  {description, amount, quantity} plus a roll-up price. Rendered as a compact
+ *  charge breakdown, not a product card (no images/dates/stars). */
+function renderFeesCard(item, cur) {
+  const lines = Array.isArray(item.items) ? item.items : [];
+  const rows = lines.map(f => {
+    const qty = Number(f.quantity) || 1;
+    const amt = Number(f.amount) || 0;
+    const label = qty > 1 ? `${esc(f.description)} x${qty}` : esc(f.description);
+    return `<div class="fee-row"><span class="fee-desc">${label}</span><span class="fee-amt">${money(amt * qty, cur)}</span></div>`;
+  }).join('');
+  const body = rows
+    ? `<div class="fees">${rows}</div>`
+    : `<div class="fees"><div class="fee-row"><span class="fee-desc">Additional charge</span><span class="fee-amt">${money(item.price, cur)}</span></div></div>`;
+  return itemShell({
+    typeLabel: 'Fees', title: lines.length === 1 ? (lines[0].description || 'Fees') : 'Additional fees',
+    price: item.price, cur, travellers: item.travellers,
+    body,
+  });
+}
+
+/** Day divider — a structural heading splitting the quote into days/sections.
+ *  Not a product and not priced, so it renders as a band rather than a card. */
+function renderDayDivider(item) {
+  const day = item.dayNumber !== undefined && item.dayNumber !== ''
+    ? `Day ${esc(item.dayNumber)}` : '';
+  const desc = item.descriptionHtml || item.description;
+  return `
+  <div class="day-divider">
+    <div class="day-divider-head">
+      ${day ? `<span class="day-divider-day">${day}</span>` : ''}
+      ${item.title ? `<span class="day-divider-title">${esc(item.title)}</span>` : ''}
+    </div>
+    ${desc ? `<div class="day-divider-desc">${sanitiseDescription(desc)}</div>` : ''}
+  </div>`;
+}
+
+/** Extra — a manually added add-on (festival, experience, upgrade). Carries a
+ *  title, extraType, optional flag, date range, description and optional image. */
+function renderExtraCard(item, cur) {
+  const start = item.startTime
+    ? `${niceDate(item.startDate)}, ${esc(item.startTime)}` : niceDate(item.startDate);
+  const end = item.endTime
+    ? `${niceDate(item.endDate)}, ${esc(item.endTime)}` : niceDate(item.endDate);
+
+  const details = [
+    renderDetailRow('Type', esc(item.extraType)),
+    renderDetailRow('From', start),
+    renderDetailRow('To', end),
+    item.optional !== undefined && item.optional !== ''
+      ? renderDetailRow('Optional', boolPill(item.optional)) : '',
+  ].join('');
+
+  const desc = item.descriptionHtml || item.description;
+  return itemShell({
+    typeLabel: 'Extra', title: item.title || 'Extra', sub: item.extraType,
+    price: item.price, cur, travellers: item.travellers,
+    body: `
+      <dl class="details">${details}</dl>
+      ${renderImages(item.images)}
+      ${desc ? `<div class="description">${sanitiseDescription(desc)}</div>` : ''}`,
+  });
+}
+
+/** Tour — includes a day-by-day itinerary. Itinerary steps carry
+ *  {day, title, location, description}; title/location are often blank, so the
+ *  day line falls back title -> location -> nothing, with the description below. */
+function renderTourCard(item, cur) {
+  const details = [
+    renderDetailRow('Operator', esc(item.operator)),
+    renderDetailRow('Tour code', esc(item.tourCode)),
+    renderDetailRow('Starts', esc(item.startLocation)),
+    renderDetailRow('Ends', esc(item.endLocation)),
+    renderDetailRow('Duration', item.durationDays
+      ? `${esc(item.durationDays)} day${String(item.durationDays) === '1' ? '' : 's'}` : ''),
+    renderDetailRow('Departs', niceDate(item.startDate)),
+    renderDetailRow('Returns', niceDate(item.endDate)),
+  ].join('');
+
+  let itinerary = '';
+  if (Array.isArray(item.itinerary) && item.itinerary.length) {
+    const rows = item.itinerary.map(d => {
+      const heading = d.title || d.location || '';
+      return `
+      <div class="itin-row">
+        <div class="itin-day">Day ${esc(d.day)}</div>
+        <div class="itin-port">${esc(heading)}${
+          d.description ? `<span class="itin-desc">${esc(d.description)}</span>` : ''}</div>
+      </div>`;
+    }).join('');
+    itinerary = `<div class="itinerary"><div class="itin-head">Itinerary</div>${rows}</div>`;
+  }
+
+  const summary = item.summary
+    ? `<div class="description">${sanitiseDescription(item.summary)}</div>` : '';
+
+  return itemShell({
+    typeLabel: 'Tour', title: item.tourName || 'Tour', sub: item.startLocation,
+    price: item.price, cur, travellers: item.travellers,
+    body: `<dl class="details">${details}</dl>${itinerary}${summary}`,
+  });
+}
+
 /** Cruise — includes a day-by-day itinerary. */
 function renderCruiseCard(item, cur) {
   const details = [
@@ -607,6 +710,17 @@ function renderItem(item, index, currency) {
     case 'cruises':
     case 'cruise':
       return renderCruiseCard(item, cur);
+    case 'tours':
+    case 'tour':
+      return renderTourCard(item, cur);
+    case 'extra':
+    case 'extras':
+      return renderExtraCard(item, cur);
+    case 'fees':
+    case 'fee':
+      return renderFeesCard(item, cur);
+    case 'daydivider':
+      return renderDayDivider(item);
     default:
       break;
   }
@@ -615,6 +729,9 @@ function renderItem(item, index, currency) {
   // fields), or has clear car-hire fields. Route accordingly.
   if (item.carType || item.pickupLocation) return renderCarHireCard(item, cur);
   if (item.cruiseName) return renderCruiseCard(item, cur);
+  if (item.tourName) return renderTourCard(item, cur);
+  if (item.extraType || item.productType === 'Extra') return renderExtraCard(item, cur);
+  if (item.productType === 'DayDivider' || item.dayNumber !== undefined) return renderDayDivider(item);
   if (item.activityName) return renderActivityCard(item, cur);
   if (item.vehicleType && item.origin) return renderTransferCard(item, cur);
   // Default: accommodation/package (legacy productType shape).
@@ -639,6 +756,11 @@ function renderQuoteHTML(input) {
   const perPerson = pax > 0 ? total / pax : null;
 
   const itemsHTML = items.map((it, i) => renderItem(it, i, currency)).join('');
+
+  // Day dividers are structural, not products — exclude them from the count.
+  const isDivider = (it) => String(it.type || '').toLowerCase() === 'daydivider'
+    || it.productType === 'DayDivider';
+  const productCount = items.filter(it => !isDivider(it)).length;
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
   const agent = q.agent || {};
 
@@ -728,6 +850,18 @@ function renderQuoteHTML(input) {
   .itin-day{flex:0 0 64px;font-size:12px;font-weight:700;color:var(--teal-dark);}
   .itin-port{font-size:12px;color:var(--ink);font-weight:600;}
   .itin-desc{display:block;font-weight:400;color:var(--slate);margin-top:2px;}
+  /* Fees */
+  .fees{padding:4px 22px 16px;}
+  .fee-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:7px 0;border-bottom:1px solid var(--bg3);font-size:12.5px;}
+  .fee-row:last-child{border-bottom:none;}
+  .fee-desc{color:var(--ink);}
+  .fee-amt{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  /* Day divider */
+  .day-divider{margin:18px 0 4px;padding:10px 22px;background:var(--bg2);border-left:3px solid var(--teal);break-inside:avoid;}
+  .day-divider-head{display:flex;align-items:baseline;gap:12px;}
+  .day-divider-day{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal-dark);font-weight:700;}
+  .day-divider-title{font-size:14px;font-weight:700;color:var(--navy);}
+  .day-divider-desc{font-size:12px;color:var(--slate);margin-top:4px;}
 
   /* Details */
   .details{display:grid;grid-template-columns:1fr 1fr;column-gap:32px;row-gap:0;margin:0;padding:8px 22px;}
@@ -807,7 +941,7 @@ function renderQuoteHTML(input) {
     ${itemsHTML}
 
     <div class="total">
-      <div class="total-label">Total price${items.length > 1 ? ' (' + items.length + ' items)' : ''}</div>
+      <div class="total-label">Total price${productCount > 1 ? ' (' + productCount + ' items)' : ''}</div>
       <div class="total-right">
         <div class="total-amount">${money(total, currency)}</div>
         ${perPerson ? `<div class="total-pp">Per person ${money(perPerson, currency)}</div>` : ''}
