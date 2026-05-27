@@ -33,8 +33,8 @@ async function getBrowser() {
 /**
  * Render a quoteDocument to a print-ready A4 PDF Buffer.
  */
-async function generateQuotePdf(doc) {
-  const html = renderQuoteHTML(doc);
+async function generateQuotePdf(doc, opts) {
+  const html = renderQuoteHTML(doc, opts);
   let browser;
   try {
     browser = await getBrowser();
