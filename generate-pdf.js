@@ -14,6 +14,53 @@
 
 import { renderQuoteHTML } from './render-quote.js';
 
+// ----- Attachment merge (pdf-lib, lazy-loaded) -----
+// Fetches each attachment PDF by URL and appends its pages to the end of the
+// quote PDF. Used for per-client documents like Terms & Conditions. A failed
+// fetch or unreadable PDF is skipped (the quote still goes out) rather than
+// failing the whole request — correctness of the quote over completeness.
+async function mergeAttachments(quoteBuffer, attachments) {
+  const list = Array.isArray(attachments) ? attachments.filter(a => a && typeof a.url === 'string') : [];
+  if (list.length === 0) return quoteBuffer;
+
+  let PDFDocument;
+  try {
+    ({ PDFDocument } = await import('pdf-lib'));
+  } catch (e) {
+    console.error('[generate-pdf] pdf-lib unavailable, skipping merge:', e?.message);
+    return quoteBuffer;
+  }
+
+  let merged;
+  try {
+    merged = await PDFDocument.load(quoteBuffer);
+  } catch (e) {
+    console.error('[generate-pdf] could not load quote PDF for merge:', e?.message);
+    return quoteBuffer;
+  }
+
+  for (const att of list) {
+    try {
+      const r = await fetch(att.url, { signal: AbortSignal.timeout(10000) });
+      if (!r.ok) { console.warn('[generate-pdf] attachment fetch failed', r.status, att.url); continue; }
+      const bytes = new Uint8Array(await r.arrayBuffer());
+      const src = await PDFDocument.load(bytes);
+      const pages = await merged.copyPages(src, src.getPageIndices());
+      pages.forEach(p => merged.addPage(p));
+    } catch (e) {
+      console.warn('[generate-pdf] skipping attachment (merge error):', att.url, e?.message);
+    }
+  }
+
+  try {
+    const out = await merged.save();
+    return Buffer.isBuffer(out) ? out : Buffer.from(out);
+  } catch (e) {
+    console.error('[generate-pdf] merged save failed, returning quote only:', e?.message);
+    return quoteBuffer;
+  }
+}
+
 // ----- Puppeteer (lazy-loaded so cold start is cheap on health checks) -----
 // Mirrors api/booking-pdf.js getBrowser() exactly.
 let _chromium, _puppeteer;
@@ -97,7 +144,9 @@ async function generateQuotePdf(doc, opts) {
     // Coerce to a Node Buffer. page.pdf() can return a Uint8Array depending on
     // version, and res.end/res.send can re-encode non-Buffer data as UTF-8 text
     // which corrupts the binary and yields a "file may be damaged" PDF.
-    return Buffer.isBuffer(pdfRaw) ? pdfRaw : Buffer.from(pdfRaw);
+    const quoteBuffer = Buffer.isBuffer(pdfRaw) ? pdfRaw : Buffer.from(pdfRaw);
+    // Merge any per-client attachment PDFs (e.g. T&Cs) onto the end.
+    return await mergeAttachments(quoteBuffer, opts && opts.attachments);
   } finally {
     try { await browser?.close(); } catch {}
   }
@@ -116,4 +165,25 @@ function pdfFilename(doc) {
   return title ? `Quote-${id}-${title}.pdf` : `Quote-${id}.pdf`;
 }
 
-export { generateQuotePdf, pdfFilename };
+/**
+ * Fetch each attachment PDF as a Buffer, for sending as SEPARATE email
+ * attachments (in addition to the merged copy). Returns [{ name, buffer }].
+ * Skips any that fail to fetch so the email still sends.
+ */
+async function fetchAttachmentBuffers(attachments) {
+  const list = Array.isArray(attachments) ? attachments.filter(a => a && typeof a.url === 'string') : [];
+  const out = [];
+  for (const att of list) {
+    try {
+      const r = await fetch(att.url, { signal: AbortSignal.timeout(10000) });
+      if (!r.ok) { console.warn('[generate-pdf] attachment fetch failed', r.status, att.url); continue; }
+      const buf = Buffer.from(new Uint8Array(await r.arrayBuffer()));
+      out.push({ name: (att.name && String(att.name)) || 'document.pdf', buffer: buf });
+    } catch (e) {
+      console.warn('[generate-pdf] could not fetch attachment for email:', att.url, e?.message);
+    }
+  }
+  return out;
+}
+
+export { generateQuotePdf, pdfFilename, fetchAttachmentBuffers };
