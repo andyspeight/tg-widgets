@@ -764,18 +764,29 @@ function resolveBrand(opts) {
   const c = b.colors || {};
   const hex = (v, fallback) =>
     (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v.trim())) ? v.trim() : fallback;
+  // Back-compat: older saved configs used {primary, primaryDark, accent,
+  // accentDark}. Map those onto the new 6-colour model when the new keys are
+  // absent, so existing widgets keep rendering correctly.
+  const topBar = hex(c.topBar, hex(c.primaryDark, '#111D3E'));
+  const hero   = hex(c.hero,   hex(c.primary,     '#1B2B5B'));
+  const accent = hex(c.accent, '#00B4D8');
+  const labels = hex(c.labels, hex(c.accentDark,  '#0096B7'));
+  const titles = hex(c.titles, hex(c.primary,     '#1B2B5B'));
+  const text   = hex(c.text,   '#0F172A');
+  const btn = (b.button && typeof b.button === 'object') ? b.button : {};
   return {
     name: (b.name && String(b.name).trim()) || 'Your Travel Co',
-    tagline: (b.tagline && String(b.tagline).trim()) || 'Your personalised holiday quote',
+    tagline: (b.tagline && String(b.tagline).trim()) || '',
     logoUrl: (typeof b.logoUrl === 'string' && isUsableLogo(b.logoUrl.trim()))
       ? b.logoUrl.trim() : '',
     supportEmail: (b.supportEmail && String(b.supportEmail).trim()) || '',
     supportPhone: (b.supportPhone && String(b.supportPhone).trim()) || '',
-    colors: {
-      primary:     hex(c.primary,     '#1B2B5B'),
-      primaryDark: hex(c.primaryDark, '#111D3E'),
-      accent:      hex(c.accent,      '#00B4D8'),
-      accentDark:  hex(c.accentDark,  '#0096B7'),
+    colors: { topBar, hero, accent, labels, titles, text },
+    // Embed Download/Email button colours (used by widget-quote-pdf.js, not the
+    // PDF itself). Kept here so a single config drives both.
+    button: {
+      bg:   hex(btn.bg,   accent),
+      text: hex(btn.text, '#FFFFFF'),
     },
   };
 }
@@ -810,8 +821,10 @@ function renderQuoteHTML(input, opts) {
 <title>${esc(q.title || 'Your holiday quote')}</title>
 <style>
   :root{
-    --navy:${brand.colors.primary}; --navy-dark:${brand.colors.primaryDark}; --teal:${brand.colors.accent}; --teal-dark:${brand.colors.accentDark};
-    --ink:#0F172A; --slate:#475569; --mute:#94A3B8;
+    --topbar:${brand.colors.topBar}; --hero:${brand.colors.hero}; --accent:${brand.colors.accent}; --labels:${brand.colors.labels}; --titles:${brand.colors.titles}; --text:${brand.colors.text};
+    /* Legacy aliases kept so existing rules resolve to the right new colour. */
+    --navy:${brand.colors.titles}; --navy-dark:${brand.colors.topBar}; --teal:${brand.colors.accent}; --teal-dark:${brand.colors.labels};
+    --ink:${brand.colors.text}; --slate:#475569; --mute:#94A3B8;
     --bg:#FFFFFF; --bg2:#F8FAFC; --bg3:#F1F5F9; --line:#E2E8F0;
     --ok:#10B981; --no:#94A3B8;
   }
@@ -833,17 +846,18 @@ function renderQuoteHTML(input, opts) {
   .brand{
     display:flex;align-items:center;justify-content:space-between;
     padding:22px 32px;border-bottom:3px solid var(--teal);
+    background:var(--navy-dark);
   }
   .brand-id{display:flex;flex-direction:column;gap:2px;}
-  .brand-name{font-size:18px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;}
+  .brand-name{font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.01em;}
   .brand-logo{max-height:44px;max-width:220px;width:auto;height:auto;display:block;}
-  .brand-tag{font-size:12px;color:var(--slate);}
-  .brand-meta{text-align:right;font-size:12px;color:var(--slate);line-height:1.5;}
-  .brand-meta strong{color:var(--ink);}
+  .brand-tag{font-size:12px;color:#C7D2E8;}
+  .brand-meta{text-align:right;font-size:12px;color:#C7D2E8;line-height:1.5;}
+  .brand-meta strong{color:#fff;}
 
   /* Hero */
   .hero{
-    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dark) 100%);
+    background:linear-gradient(135deg,var(--hero) 0%,var(--topbar) 100%);
     color:#fff;padding:34px 32px;
   }
   .hero h1{margin:0 0 6px;font-size:26px;font-weight:700;letter-spacing:-0.02em;}
@@ -957,12 +971,17 @@ function renderQuoteHTML(input, opts) {
       ${brand.logoUrl
         ? `<img class="brand-logo" src="${esc(brand.logoUrl)}" alt="${esc(brand.name)}" />`
         : `<div class="brand-name">${esc(brand.name)}</div>`}
-      <div class="brand-tag">${esc(brand.tagline)}</div>
+      ${brand.tagline ? `<div class="brand-tag">${esc(brand.tagline)}</div>` : ''}
     </div>
-    <div class="brand-meta">
-      <div><strong>${esc(brand.supportPhone || q.contactTelNo || '')}</strong></div>
-      <div>${esc(brand.supportEmail || q.contactEmail || '')}</div>
-    </div>
+    ${(() => {
+      const phone = brand.supportPhone || q.contactTelNo || '';
+      const email = brand.supportEmail || q.contactEmail || '';
+      if (!phone && !email) return '';
+      return `<div class="brand-meta">
+      ${phone ? `<div><strong>${esc(phone)}</strong></div>` : ''}
+      ${email ? `<div>${esc(email)}</div>` : ''}
+    </div>`;
+    })()}
   </header>
 
   <section class="hero">
@@ -1012,7 +1031,7 @@ function renderQuoteHTML(input, opts) {
   </main>
 
   <footer class="foot">
-    <div><strong>${esc(brand.name)}</strong> &middot; ${esc(brand.supportPhone || q.contactTelNo || '')} &middot; ${esc(brand.supportEmail || q.contactEmail || '')}</div>
+    <div><strong>${esc(brand.name)}</strong>${[esc(brand.supportPhone || q.contactTelNo || ''), esc(brand.supportEmail || q.contactEmail || '')].filter(Boolean).map(x => ' &middot; ' + x).join('')}</div>
     <div>Prices are subject to availability at the time of booking. This quote is for information only and does not constitute a confirmed booking.</div>
   </footer>
 
