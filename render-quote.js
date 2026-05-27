@@ -893,6 +893,9 @@ function renderQuoteHTML(input, opts) {
 <head>
 <meta charset="UTF-8" />
 <title>${esc(q.title || 'Your holiday quote')}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet" />
 <style>
   :root{
     --topbar:${brand.colors.topBar}; --hero:${brand.colors.hero}; --accent:${brand.colors.accent}; --labels:${brand.colors.labels}; --titles:${brand.colors.titles}; --text:${brand.colors.text};
@@ -1009,7 +1012,7 @@ function renderQuoteHTML(input, opts) {
   .info-card .item-title{margin:2px 0 0;font-size:18px;font-weight:700;color:var(--titles);letter-spacing:-0.01em;}
   .hl-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px 22px;}
   .hl-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink);break-inside:avoid;}
-  .hl-icon{flex-shrink:0;font-size:15px;line-height:1.3;}
+  .hl-icon{flex-shrink:0;font-size:15px;line-height:1.3;font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;}
   .hl-text{line-height:1.4;}
   .loc-image{margin:4px 0 12px;border-radius:8px;overflow:hidden;background:var(--bg3);break-inside:avoid;break-before:avoid;}
   .loc-image img{width:100%;height:220px;object-fit:cover;display:block;}
