@@ -742,8 +742,36 @@ function renderItem(item, index, currency) {
 // Document shell
 // ----------------------------------------------------------------------------
 
-function renderQuoteHTML(input) {
+/**
+ * Resolve the client's branding from editor config (opts.brand), falling back
+ * to the Travelgenix defaults so an unconfigured quote still renders cleanly.
+ * Colours map onto the CSS custom properties the template already uses, so the
+ * whole document re-themes from four values.
+ */
+function resolveBrand(opts) {
+  const b = (opts && opts.brand) || {};
+  const c = b.colors || {};
+  const hex = (v, fallback) =>
+    (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v.trim())) ? v.trim() : fallback;
+  return {
+    name: (b.name && String(b.name).trim()) || 'Your Travel Co',
+    tagline: (b.tagline && String(b.tagline).trim()) || 'Your personalised holiday quote',
+    logoUrl: (typeof b.logoUrl === 'string' && /^https:\/\//.test(b.logoUrl.trim()))
+      ? b.logoUrl.trim() : '',
+    supportEmail: (b.supportEmail && String(b.supportEmail).trim()) || '',
+    supportPhone: (b.supportPhone && String(b.supportPhone).trim()) || '',
+    colors: {
+      primary:     hex(c.primary,     '#1B2B5B'),
+      primaryDark: hex(c.primaryDark, '#111D3E'),
+      accent:      hex(c.accent,      '#00B4D8'),
+      accentDark:  hex(c.accentDark,  '#0096B7'),
+    },
+  };
+}
+
+function renderQuoteHTML(input, opts) {
   const q = normaliseQuote(input);
+  const brand = resolveBrand(opts);
   const currency = q.currency || 'GBP';
   const items = Array.isArray(q.items) ? q.items : [];
 
@@ -771,7 +799,7 @@ function renderQuoteHTML(input) {
 <title>${esc(q.title || 'Your holiday quote')}</title>
 <style>
   :root{
-    --navy:#1B2B5B; --navy-dark:#111D3E; --teal:#00B4D8; --teal-dark:#0096B7;
+    --navy:${brand.colors.primary}; --navy-dark:${brand.colors.primaryDark}; --teal:${brand.colors.accent}; --teal-dark:${brand.colors.accentDark};
     --ink:#0F172A; --slate:#475569; --mute:#94A3B8;
     --bg:#FFFFFF; --bg2:#F8FAFC; --bg3:#F1F5F9; --line:#E2E8F0;
     --ok:#10B981; --no:#94A3B8;
@@ -797,6 +825,7 @@ function renderQuoteHTML(input) {
   }
   .brand-id{display:flex;flex-direction:column;gap:2px;}
   .brand-name{font-size:18px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;}
+  .brand-logo{max-height:44px;max-width:220px;width:auto;height:auto;display:block;}
   .brand-tag{font-size:12px;color:var(--slate);}
   .brand-meta{text-align:right;font-size:12px;color:var(--slate);line-height:1.5;}
   .brand-meta strong{color:var(--ink);}
@@ -914,12 +943,14 @@ function renderQuoteHTML(input) {
 
   <header class="brand">
     <div class="brand-id">
-      <div class="brand-name">Your Travel Co</div>
-      <div class="brand-tag">Your personalised holiday quote</div>
+      ${brand.logoUrl
+        ? `<img class="brand-logo" src="${esc(brand.logoUrl)}" alt="${esc(brand.name)}" />`
+        : `<div class="brand-name">${esc(brand.name)}</div>`}
+      <div class="brand-tag">${esc(brand.tagline)}</div>
     </div>
     <div class="brand-meta">
-      <div><strong>${esc(q.contactTelNo || '')}</strong></div>
-      <div>${esc(q.contactEmail || '')}</div>
+      <div><strong>${esc(brand.supportPhone || q.contactTelNo || '')}</strong></div>
+      <div>${esc(brand.supportEmail || q.contactEmail || '')}</div>
     </div>
   </header>
 
@@ -970,7 +1001,7 @@ function renderQuoteHTML(input) {
   </main>
 
   <footer class="foot">
-    <div><strong>Your Travel Co</strong> &middot; ${esc(q.contactTelNo || '')} &middot; ${esc(q.contactEmail || '')}</div>
+    <div><strong>${esc(brand.name)}</strong> &middot; ${esc(brand.supportPhone || q.contactTelNo || '')} &middot; ${esc(brand.supportEmail || q.contactEmail || '')}</div>
     <div>Prices are subject to availability at the time of booking. This quote is for information only and does not constitute a confirmed booking.</div>
   </footer>
 
