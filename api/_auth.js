@@ -348,6 +348,15 @@ const TG_AIRTABLE_API = 'https://api.airtable.com/v0';
 const TG_AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const TG_CLIENTS_TABLE = 'tblikekpaTKraMktZ';
 
+// Users table (person-level accounts). A staff member (member/admin) owns
+// widgets under their OWN email but inherits Travelify credentials from the
+// account's Clients record via the `client` link. Mirrors schema.js USERS.
+const TG_USERS_TABLE = 'tblIpeQeZmF7CM7OJ';
+const TG_USER_FIELDS = {
+  email:  'fldSQLKBfsAcVS2s3',
+  client: 'fldyXVZjZKUjlYCm6', // linked → Clients
+};
+
 // Mirrors api/_lib/auth/schema.js CLIENTS.fields — duplicated here so the
 // public-facing endpoints don't need to reach into the admin auth module.
 const TG_CLIENT_FIELDS = {
@@ -400,7 +409,47 @@ export async function lookupClientCredentialsByEmail(clientEmail) {
   // LOWER() so email match is case-insensitive against whatever was stored.
   const formula = `LOWER({${TG_CLIENT_FIELDS.email}})='${safe}'`;
   const rec = await fetchOneClientByFormula(formula);
-  return packCredentials(rec);
+  const direct = packCredentials(rec);
+  if (direct) return direct;
+  // Fallback: the email may belong to a STAFF user (member/admin), not a
+  // client. Staff own widgets under their own email but inherit Travelify
+  // credentials from the account's Clients record via the User.client link.
+  // Resolve User → linked Client → credentials.
+  return await lookupCredentialsViaUser(clientEmail);
+}
+
+// Find the Client record linked from a User (by the user's email) and pack its
+// credentials. Returns null if no user, no link, or the linked client has no
+// Travelify credentials.
+async function lookupCredentialsViaUser(email) {
+  const safe = sanitiseForFormula(String(email).toLowerCase());
+  const headers = buildAirtableHeaders();
+  const userUrl = `${TG_AIRTABLE_API}/${TG_AIRTABLE_BASE}/${TG_USERS_TABLE}`
+    + `?filterByFormula=${encodeURIComponent(`LOWER({${TG_USER_FIELDS.email}})='${safe}'`)}`
+    + `&maxRecords=1`
+    + `&returnFieldsByFieldId=true`;
+  let userRec;
+  try {
+    const resp = await fetch(userUrl, { headers });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    userRec = (data.records || [])[0];
+  } catch { return null; }
+  if (!userRec) return null;
+
+  // The client link is an array of linked-record objects; take the first id.
+  const link = userRec.fields?.[TG_USER_FIELDS.client];
+  const clientRecId = Array.isArray(link) ? (link[0]?.id || link[0]) : null;
+  if (!clientRecId || typeof clientRecId !== 'string') return null;
+
+  try {
+    const clientUrl = `${TG_AIRTABLE_API}/${TG_AIRTABLE_BASE}/${TG_CLIENTS_TABLE}/${clientRecId}`
+      + `?returnFieldsByFieldId=true`;
+    const resp = await fetch(clientUrl, { headers });
+    if (!resp.ok) return null;
+    const clientRec = await resp.json();
+    return packCredentials(clientRec);
+  } catch { return null; }
 }
 
 export async function lookupClientCredentialsByAppId(appId) {
