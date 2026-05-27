@@ -1,69 +1,49 @@
 /**
- * Travelgenix Widget Suite — PDF Upload API
+ * Travelgenix Widget Suite — PDF Upload (Vercel Blob client-upload token route)
  *
- * Uploads a client's attachment PDF (e.g. Terms & Conditions) to Vercel Blob
- * and returns its public URL. Used by the Quote PDF editor so a client can
- * attach documents that get merged onto every quote and emailed alongside it.
+ * The Quote PDF editor uploads attachment PDFs (T&Cs etc) DIRECTLY to Vercel
+ * Blob from the browser, using a short-lived client token this route mints.
  *
- * Auth: Bearer token required (verified via the SSO middleware). The upload is
- * scoped to the authenticated user's ClientEmail so one client cannot overwrite
- * another's files (the blob path is namespaced by a hash of the email).
+ * Why client-upload (not the file through this function): Vercel functions have
+ * a hard 4.5MB request-body limit. A PDF base64-encoded in a JSON body easily
+ * breaches that and the platform rejects it with a 500 BEFORE our code runs.
+ * The client-upload pattern streams the file straight to Blob storage and never
+ * routes the bytes through this function, so file size is bounded only by the
+ * Blob limit (and our maximumSizeInBytes below), not the function body limit.
  *
- * Method:
- *   POST { filename, dataBase64 }  → { url, name, size }
+ * Flow:
+ *   1. Browser calls upload(pathname, file, { handleUploadUrl: '/api/upload-pdf' })
+ *   2. The SDK POSTs a "generate client token" request to THIS route.
+ *   3. onBeforeGenerateToken authenticates the user and restricts the upload
+ *      to PDFs under the size cap, scoped to the client's folder.
+ *   4. The browser uploads the file to Blob with the returned token.
  *
- * Request body is JSON (not multipart) to stay consistent with the rest of the
- * suite — the editor reads the file with FileReader and sends base64. The PDF
- * is validated (magic bytes + size cap) before it touches Blob storage.
+ * Auth: the initial token request comes from the browser and is authenticated
+ * via the same-origin tg_session cookie (the @vercel/blob client SDK cannot set
+ * a custom Authorization header on the token request — vercel/storage#796 — but
+ * the cookie rides along automatically on the same-origin POST). The follow-up
+ * upload-completed callback is a server-to-server webhook from Vercel with NO
+ * cookie; handleUpload verifies that one cryptographically via the
+ * BLOB_WEBHOOK_PUBLIC_KEY, so we must NOT gate it behind requireAuth.
  *
- * Storage: Vercel Blob. Requires the BLOB_READ_WRITE_TOKEN env var (Vercel sets
- * this automatically once a Blob store is connected to the project).
+ * Requires BLOB_READ_WRITE_TOKEN (set automatically when a Blob store is
+ * connected to the project).
  */
 
 import { requireAuth } from './_lib/auth/middleware.js';
 import { setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
-import { createHash } from 'crypto';
 
-// 5 MB cap on a single attachment PDF. T&C documents are well under this; the
-// cap stops a runaway upload from bloating storage or the merge step.
-const MAX_PDF_BYTES = 5 * 1024 * 1024;
-
-// Base64 inflates ~33%, plus JSON overhead. Reject obviously-too-large bodies
-// before we even decode, so a giant payload can't burn memory.
-const MAX_BODY_CHARS = Math.ceil(MAX_PDF_BYTES * 1.4);
-
-function sanitiseFilename(name) {
-  const base = String(name || 'document')
-    .replace(/\\/g, '/')
-    .split('/').pop()                 // strip any path
-    .replace(/[^a-zA-Z0-9._ -]/g, '') // keep safe chars only
-    .trim()
-    .slice(0, 80);
-  let out = base || 'document';
-  if (!/\.pdf$/i.test(out)) out += '.pdf';
-  return out;
-}
-
-// Namespace blob paths by a short hash of the client email so files are grouped
-// per client and one client can't guess/overwrite another's path.
-function clientFolder(email) {
-  return createHash('sha256').update(email).digest('hex').slice(0, 16);
-}
+const MAX_PDF_BYTES = 5 * 1024 * 1024; // 5 MB cap per attachment
 
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Auth — middleware writes its own 401 and returns null on failure.
-  const ctx = await requireAuth(req, res);
-  if (!ctx) return;
-
-  const clientEmail = (ctx.email || '').toLowerCase().trim();
-  if (!clientEmail) return res.status(401).json({ error: 'Authentication required' });
-
-  // Rate limit: treat as a write action, keyed per client.
-  if (!applyRateLimit(res, `uploadpdf:${clientEmail}`, RATE_LIMITS.widgetWrite)) return;
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.error('[upload-pdf] BLOB_READ_WRITE_TOKEN not set');
+    return res.status(500).json({ error: 'Storage not configured' });
+  }
 
   let body;
   try {
@@ -72,54 +52,46 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid request body' });
   }
 
-  const { filename, dataBase64 } = body;
-  if (typeof dataBase64 !== 'string' || !dataBase64) {
-    return res.status(400).json({ error: 'Missing file data' });
+  // The browser's initial token request must be authenticated. The Vercel
+  // upload-completed webhook (body.type === 'blob.upload-completed') carries no
+  // cookie and is verified by handleUpload itself, so don't gate that one.
+  if (body && body.type === 'blob.generate-client-token') {
+    const ctx = await requireAuth(req, res);
+    if (!ctx) return; // middleware wrote the 401
+    const clientEmail = (ctx.email || '').toLowerCase().trim();
+    if (!clientEmail) return res.status(401).json({ error: 'Authentication required' });
+    if (!applyRateLimit(res, `uploadpdf:${clientEmail}`, RATE_LIMITS.widgetWrite)) return;
   }
-  if (dataBase64.length > MAX_BODY_CHARS) {
-    return res.status(413).json({ error: 'File too large (max 5MB)' });
-  }
-
-  // Accept either a raw base64 string or a data URI; strip the prefix if present.
-  const b64 = dataBase64.includes(',') ? dataBase64.slice(dataBase64.indexOf(',') + 1) : dataBase64;
-
-  let buf;
-  try {
-    buf = Buffer.from(b64, 'base64');
-  } catch {
-    return res.status(400).json({ error: 'Could not decode file' });
-  }
-
-  if (buf.length === 0) return res.status(400).json({ error: 'Empty file' });
-  if (buf.length > MAX_PDF_BYTES) return res.status(413).json({ error: 'File too large (max 5MB)' });
-
-  // Validate it really is a PDF — magic bytes are "%PDF" at the start.
-  if (buf.slice(0, 5).toString('latin1').indexOf('%PDF-') !== 0) {
-    return res.status(400).json({ error: 'That file is not a valid PDF' });
-  }
-
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) {
-    console.error('[upload-pdf] BLOB_READ_WRITE_TOKEN not set');
-    return res.status(500).json({ error: 'Storage not configured' });
-  }
-
-  const name = sanitiseFilename(filename);
-  // Unique path per upload so re-uploading the same name doesn't clash, while
-  // still grouping by client. addRandomSuffix also guards against collisions.
-  const pathname = `quote-pdf/${clientFolder(clientEmail)}/${Date.now()}-${name}`;
 
   try {
-    const { put } = await import('@vercel/blob');
-    const blob = await put(pathname, buf, {
-      access: 'public',
-      contentType: 'application/pdf',
-      token,
-      addRandomSuffix: true,
+    const { handleUpload } = await import('@vercel/blob/client');
+    const jsonResponse = await handleUpload({
+      body,
+      request: req,
+      onBeforeGenerateToken: async (pathname) => {
+        // Authorise: PDFs only, under the quote-pdf/ prefix, within the size cap.
+        // These are public documents (shown to customers), uploads are auth-
+        // gated, and addRandomSuffix prevents overwrites, so a shared prefix is
+        // fine — per-client folders aren't a security boundary here.
+        if (typeof pathname !== 'string' || pathname.indexOf('quote-pdf/') !== 0) {
+          throw new Error('Invalid upload path');
+        }
+        return {
+          allowedContentTypes: ['application/pdf'],
+          maximumSizeInBytes: MAX_PDF_BYTES,
+          addRandomSuffix: true,
+        };
+      },
+      // upload-completed fires via a Blob webhook after the browser finishes.
+      // No server-side post-processing needed — the editor stores the returned
+      // URL in the widget config on save — so this is a no-op.
+      onUploadCompleted: async () => {},
     });
-    return res.status(200).json({ url: blob.url, name, size: buf.length });
+    return res.status(200).json(jsonResponse);
   } catch (err) {
-    console.error('[upload-pdf] blob put failed:', err?.message);
-    return res.status(500).json({ error: 'Upload failed' });
+    console.error('[upload-pdf] handleUpload failed:', err?.message);
+    const msg = err?.message || 'Upload failed';
+    const status = /path|content type|size|token/i.test(msg) ? 400 : 500;
+    return res.status(status).json({ error: msg });
   }
 }
