@@ -778,6 +778,11 @@ function renderQuoteHTML(input) {
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  /* Continuation pages get top + bottom breathing room so cards never touch the
+     paper edge. Page 1 keeps a full-bleed header, so its top margin is removed
+     via @page :first. Left/right stay 0 — horizontal insets come from .body. */
+  @page{margin:14mm 0;}
+  @page :first{margin-top:0;}
   body{
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     color:var(--ink); font-size:13px; line-height:1.6; background:var(--bg);
@@ -815,8 +820,10 @@ function renderQuoteHTML(input) {
   .body{padding:28px 32px;}
 
   /* Item */
-  .item{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:24px;}
-  .item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 22px;border-bottom:1px solid var(--line);break-inside:avoid;}
+  .item{border:1px solid var(--line);border-radius:14px;margin-bottom:24px;break-inside:avoid;}
+  /* Keep the header glued to whatever follows so a title never orphans at a
+     page foot even when a very tall card is forced to break internally. */
+  .item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 22px;border-bottom:1px solid var(--line);break-inside:avoid;break-after:avoid;}
   .item-type{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal-dark);font-weight:700;}
   .item-title{margin:4px 0 6px;font-size:19px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;}
   .item-sub{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--slate);}
@@ -864,7 +871,7 @@ function renderQuoteHTML(input) {
   .day-divider-desc{font-size:12px;color:var(--slate);margin-top:4px;}
 
   /* Details */
-  .details{display:grid;grid-template-columns:1fr 1fr;column-gap:32px;row-gap:0;margin:0;padding:8px 22px;}
+  .details{display:grid;grid-template-columns:1fr 1fr;column-gap:32px;row-gap:0;margin:0;padding:8px 22px;break-inside:avoid;}
   .detail{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--bg3);}
   .detail dt{color:var(--slate);font-size:12px;}
   .detail dd{margin:0;font-weight:600;font-size:12px;color:var(--ink);text-align:right;}
