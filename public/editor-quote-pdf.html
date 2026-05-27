@@ -32,9 +32,9 @@
   .qp-logo-drop .qp-drop-sub { font-size:11px; color:var(--tgse-ink-3); margin-top:2px; }
   .qp-logo-preview { display:none; align-items:center; gap:12px; padding:12px; border:1px solid var(--tgse-border); border-radius:10px; background:var(--tgse-panel); }
   .qp-logo-preview.show { display:flex; }
-  .qp-logo-preview img { max-height:44px; max-width:160px; border-radius:4px; }
-  .qp-logo-preview .qp-logo-meta { flex:1; font-size:11px; color:var(--tgse-ink-3); word-break:break-word; }
-  .qp-logo-preview .qp-logo-remove { font-size:12px; color:#EF4444; background:none; border:1px solid var(--tgse-border); border-radius:6px; padding:5px 10px; cursor:pointer; }
+  .qp-logo-preview img { max-height:44px; max-width:120px; border-radius:4px; flex-shrink:0; }
+  .qp-logo-preview .qp-logo-meta { flex:1; min-width:0; font-size:11px; color:var(--tgse-ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .qp-logo-preview .qp-logo-remove { font-size:12px; color:#EF4444; background:none; border:1px solid var(--tgse-border); border-radius:6px; padding:5px 10px; cursor:pointer; flex-shrink:0; }
   .qp-logo-preview .qp-logo-remove:hover { border-color:#EF4444; background:rgba(239,68,68,.05); }
 
   /* PDF attachment list */
@@ -57,7 +57,7 @@
 
   /* Live preview mock — themed by CSS vars from config */
   .qp-mock { width:560px; max-width:100%; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.08);
-    --p:#1B2B5B; --pd:#111D3E; --a:#00B4D8; --ad:#0096B7; font-family:'Inter',sans-serif; }
+    --p:#1B2B5B; --pd:#111D3E; --a:#00B4D8; --ad:#0096B7; --ti:#1B2B5B; --tx:#0F172A; --btnbg:#00B4D8; --btntx:#FFFFFF; font-family:'Inter',sans-serif; }
   .qp-mock .m-brand { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:3px solid var(--a); background:var(--pd); }
   .qp-mock .m-name { font-size:16px; font-weight:700; color:#fff; }
   .qp-mock .m-logo { max-height:38px; max-width:180px; }
@@ -69,9 +69,13 @@
   .qp-mock .m-item { margin:18px 22px; border:1px solid #E2E8F0; border-radius:12px; }
   .qp-mock .m-item-head { display:flex; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #E2E8F0; }
   .qp-mock .m-type { font-size:9px; text-transform:uppercase; letter-spacing:.06em; color:var(--ad); font-weight:700; }
-  .qp-mock .m-title { margin:3px 0 4px; font-size:16px; font-weight:700; color:var(--p); }
+  .qp-mock .m-title { margin:3px 0 4px; font-size:16px; font-weight:700; color:var(--ti); }
   .qp-mock .m-stars { color:#F59E0B; font-size:11px; }
-  .qp-mock .m-price { font-size:18px; font-weight:700; color:var(--p); text-align:right; }
+  .qp-mock .m-price { font-size:18px; font-weight:700; color:var(--ti); text-align:right; }
+  .qp-mock .m-actions { display:flex; gap:10px; padding:0 22px 4px; }
+  .qp-mock .m-btn { display:inline-block; font-size:12px; font-weight:600; padding:9px 16px; border-radius:8px; }
+  .qp-mock .m-btn--primary { background:var(--btnbg); color:var(--btntx); }
+  .qp-mock .m-btn--ghost { background:transparent; color:var(--btnbg); border:1px solid var(--btnbg); }
   .qp-mock .m-foot { padding:16px 22px; border-top:1px solid #E2E8F0; text-align:center; font-size:11px; color:#94A3B8; }
 </style>
 </head>
@@ -159,11 +163,27 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="qp-color-row"><label>Primary (header &amp; titles)</label><span class="qp-hex" id="hex-primary">#1B2B5B</span><input type="color" id="c-primary" data-key="primary" value="#1B2B5B"></div>
-            <div class="qp-color-row"><label>Primary dark (hero)</label><span class="qp-hex" id="hex-primaryDark">#111D3E</span><input type="color" id="c-primaryDark" data-key="primaryDark" value="#111D3E"></div>
-            <div class="qp-color-row"><label>Accent (stars &amp; lines)</label><span class="qp-hex" id="hex-accent">#00B4D8</span><input type="color" id="c-accent" data-key="accent" value="#00B4D8"></div>
-            <div class="qp-color-row"><label>Accent dark (labels)</label><span class="qp-hex" id="hex-accentDark">#0096B7</span><input type="color" id="c-accentDark" data-key="accentDark" value="#0096B7"></div>
-            <div class="qp-help">These four colours re-theme the whole quote.</div>
+            <div class="qp-color-row"><label>Top bar (logo area)</label><span class="qp-hex" id="hex-topBar">#111D3E</span><input type="color" id="c-topBar" data-key="topBar" value="#111D3E"></div>
+            <div class="qp-color-row"><label>Hero section</label><span class="qp-hex" id="hex-hero">#1B2B5B</span><input type="color" id="c-hero" data-key="hero" value="#1B2B5B"></div>
+            <div class="qp-color-row"><label>Accents &amp; lines</label><span class="qp-hex" id="hex-accent">#00B4D8</span><input type="color" id="c-accent" data-key="accent" value="#00B4D8"></div>
+            <div class="qp-color-row"><label>Labels</label><span class="qp-hex" id="hex-labels">#0096B7</span><input type="color" id="c-labels" data-key="labels" value="#0096B7"></div>
+            <div class="qp-color-row"><label>Titles &amp; prices</label><span class="qp-hex" id="hex-titles">#1B2B5B</span><input type="color" id="c-titles" data-key="titles" value="#1B2B5B"></div>
+            <div class="qp-color-row"><label>Text</label><span class="qp-hex" id="hex-text">#0F172A</span><input type="color" id="c-text" data-key="text" value="#0F172A"></div>
+            <div class="qp-help">These six colours re-theme the whole quote.</div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>
+            <span class="tgse-section-label">Buttons</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="qp-color-row"><label>Button colour</label><span class="qp-hex" id="hex-btnBg">#00B4D8</span><input type="color" id="c-btnBg" data-bkey="bg" value="#00B4D8"></div>
+            <div class="qp-color-row"><label>Button text</label><span class="qp-hex" id="hex-btnText">#FFFFFF</span><input type="color" id="c-btnText" data-bkey="text" value="#FFFFFF"></div>
+            <div class="qp-help">Styles the Download &amp; Email buttons your customer clicks on the quote page.</div>
           </div>
         </div>
 
@@ -256,6 +276,10 @@
               <div class="m-price">£3,200<div style="font-size:9px;color:#94A3B8;font-weight:400;">total</div></div>
             </div>
           </div>
+          <div class="m-actions">
+            <span class="m-btn m-btn--primary">Download PDF</span>
+            <span class="m-btn m-btn--ghost">Email me a copy</span>
+          </div>
           <div class="m-foot" id="m-foot"></div>
         </div>
       </div>
@@ -269,7 +293,8 @@
   const DEFAULTS = {
     brandName:'', tagline:'', logoUrl:'', supportEmail:'', supportPhone:'',
     attachments:[],
-    colors:{ primary:'#1B2B5B', primaryDark:'#111D3E', accent:'#00B4D8', accentDark:'#0096B7' },
+    colors:{ topBar:'#111D3E', hero:'#1B2B5B', accent:'#00B4D8', labels:'#0096B7', titles:'#1B2B5B', text:'#0F172A' },
+    button:{ bg:'#00B4D8', text:'#FFFFFF' },
   };
   let C = JSON.parse(JSON.stringify(DEFAULTS));
 
@@ -281,17 +306,22 @@
   const shell = tgse.init({
     widgetType:'Quote PDF', widgetTag:'quote-pdf', scriptFile:'widget-quote-pdf.js',
     getConfig: () => C,
-    setConfig: (c) => { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), c||{}); C.colors = Object.assign({}, DEFAULTS.colors, (c&&c.colors)||{}); if (!Array.isArray(C.attachments)) C.attachments = []; applyToUI(); render(); },
+    setConfig: (c) => { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), c||{}); C.colors = Object.assign({}, DEFAULTS.colors, (c&&c.colors)||{}); C.button = Object.assign({}, DEFAULTS.button, (c&&c.button)||{}); if (!Array.isArray(C.attachments)) C.attachments = []; applyToUI(); render(); },
     onThemeToggle: () => {},
     onLoginSuccess: () => loadFromUrl(),
   });
 
   function render() {
     const m = $('qp-mock');
-    m.style.setProperty('--p',  isHex(C.colors.primary)     ? C.colors.primary     : DEFAULTS.colors.primary);
-    m.style.setProperty('--pd', isHex(C.colors.primaryDark) ? C.colors.primaryDark : DEFAULTS.colors.primaryDark);
-    m.style.setProperty('--a',  isHex(C.colors.accent)      ? C.colors.accent      : DEFAULTS.colors.accent);
-    m.style.setProperty('--ad', isHex(C.colors.accentDark)  ? C.colors.accentDark  : DEFAULTS.colors.accentDark);
+    m.style.setProperty('--p',  isHex(C.colors.hero)   ? C.colors.hero   : DEFAULTS.colors.hero);
+    m.style.setProperty('--pd', isHex(C.colors.topBar) ? C.colors.topBar : DEFAULTS.colors.topBar);
+    m.style.setProperty('--a',  isHex(C.colors.accent) ? C.colors.accent : DEFAULTS.colors.accent);
+    m.style.setProperty('--ad', isHex(C.colors.labels) ? C.colors.labels : DEFAULTS.colors.labels);
+    m.style.setProperty('--ti', isHex(C.colors.titles) ? C.colors.titles : DEFAULTS.colors.titles);
+    m.style.setProperty('--tx', isHex(C.colors.text)   ? C.colors.text   : DEFAULTS.colors.text);
+    const btn = C.button || DEFAULTS.button;
+    m.style.setProperty('--btnbg', isHex(btn.bg)   ? btn.bg   : DEFAULTS.button.bg);
+    m.style.setProperty('--btntx', isHex(btn.text) ? btn.text : DEFAULTS.button.text);
     const name = C.brandName || 'Your Travel Co';
     const tag = (C.tagline || '').trim();
     const phone = (C.supportPhone || '').trim();
@@ -312,9 +342,14 @@
   function applyToUI() {
     $('brandName').value = C.brandName||''; $('tagline').value = C.tagline||'';
     $('supportEmail').value = C.supportEmail||''; $('supportPhone').value = C.supportPhone||'';
-    ['primary','primaryDark','accent','accentDark'].forEach(k => {
+    ['topBar','hero','accent','labels','titles','text'].forEach(k => {
       const v = isHex(C.colors[k]) ? C.colors[k] : DEFAULTS.colors[k];
       $('c-'+k).value = v; $('hex-'+k).textContent = v.toUpperCase();
+    });
+    if (!C.button || typeof C.button !== 'object') C.button = Object.assign({}, DEFAULTS.button);
+    [['bg','btnBg'],['text','btnText']].forEach(([k,id]) => {
+      const v = isHex(C.button[k]) ? C.button[k] : DEFAULTS.button[k];
+      $('c-'+id).value = v; $('hex-'+id).textContent = v.toUpperCase();
     });
     renderLogoState();
     renderPdfList();
@@ -324,14 +359,28 @@
     const has = isUsableLogo(C.logoUrl);
     $('logo-drop').style.display = has ? 'none' : 'block';
     $('logo-preview').classList.toggle('show', has);
-    if (has) { $('logo-thumb').src = C.logoUrl; }
+    if (has) {
+      $('logo-thumb').src = C.logoUrl;
+      if (!$('logo-meta').textContent) $('logo-meta').textContent = 'Logo uploaded';
+    }
   }
 
   // --- field bindings ---
   [['brandName','brandName'],['tagline','tagline'],['supportEmail','supportEmail'],['supportPhone','supportPhone']]
     .forEach(([id,key]) => $(id).addEventListener('input', e => { C[key] = e.target.value; render(); shell.markDirty(); }));
   document.querySelectorAll('input[type="color"]').forEach(inp =>
-    inp.addEventListener('input', e => { const k=e.target.dataset.key; C.colors[k]=e.target.value; $('hex-'+k).textContent=e.target.value.toUpperCase(); render(); shell.markDirty(); }));
+    inp.addEventListener('input', e => {
+      const el = e.target; const val = el.value;
+      if (el.dataset.bkey) {
+        if (!C.button || typeof C.button !== 'object') C.button = {};
+        C.button[el.dataset.bkey] = val;
+        $('hex-' + (el.dataset.bkey === 'bg' ? 'btnBg' : 'btnText')).textContent = val.toUpperCase();
+      } else {
+        C.colors[el.dataset.key] = val;
+        $('hex-' + el.dataset.key).textContent = val.toUpperCase();
+      }
+      render(); shell.markDirty();
+    }));
 
   // --- logo upload ---
   $('logo-drop').addEventListener('click', () => $('logo-input').click());
@@ -374,26 +423,43 @@
       }));
   }
 
-  function uploadOnePdf(file) {
-    return new Promise((resolve) => {
-      if (file.type !== 'application/pdf') { tgse.toast('Only PDF files can be attached', 'err'); return resolve(null); }
-      if (file.size > 5*1024*1024) { tgse.toast(file.name + ' is over 5MB — please use a smaller PDF', 'err'); return resolve(null); }
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        try {
-          const headers = Object.assign({ 'Content-Type': 'application/json' }, (tgse.authHeaders ? tgse.authHeaders() : {}));
-          const res = await fetch('/api/upload-pdf', {
-            method: 'POST', headers, credentials: 'include',
-            body: JSON.stringify({ filename: file.name, dataBase64: ev.target.result }),
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok) { tgse.toast(data.error || 'Upload failed', 'err'); return resolve(null); }
-          resolve({ url: data.url, name: data.name || file.name, size: data.size || file.size });
-        } catch (e) { tgse.toast('Upload failed — network error', 'err'); resolve(null); }
-      };
-      reader.onerror = () => { tgse.toast('Could not read ' + file.name, 'err'); resolve(null); };
-      reader.readAsDataURL(file);
-    });
+  // Lazy-load the Vercel Blob client SDK (ESM from CDN — the editor has no
+  // bundler). Cached after first load.
+  let _blobClient = null;
+  async function getBlobClient() {
+    if (_blobClient) return _blobClient;
+    _blobClient = await import('https://esm.sh/@vercel/blob@0.27.0/client');
+    return _blobClient;
+  }
+
+  function safeName(name) {
+    var base = String(name || 'document').replace(/[^a-zA-Z0-9._ -]/g, '').trim().slice(0, 80) || 'document';
+    if (!/\.pdf$/i.test(base)) base += '.pdf';
+    return base;
+  }
+
+  // Upload ONE PDF directly to Vercel Blob (client-upload pattern). The file
+  // streams straight to Blob, never through our function body, so it bypasses
+  // Vercel's 4.5MB request-body limit. Our /api/upload-pdf route mints a
+  // short-lived token (auth via the same-origin tg_session cookie).
+  async function uploadOnePdf(file) {
+    if (file.type !== 'application/pdf') { tgse.toast('Only PDF files can be attached', 'err'); return null; }
+    if (file.size > 5*1024*1024) { tgse.toast(file.name + ' is over 5MB — please use a smaller PDF', 'err'); return null; }
+    try {
+      const { upload } = await getBlobClient();
+      // Pathname must start with quote-pdf/ (server validates this prefix).
+      const pathname = 'quote-pdf/' + Date.now() + '-' + safeName(file.name);
+      const blob = await upload(pathname, file, {
+        access: 'public',
+        contentType: 'application/pdf',
+        handleUploadUrl: '/api/upload-pdf',
+      });
+      return { url: blob.url, name: safeName(file.name), size: file.size };
+    } catch (e) {
+      const msg = (e && e.message) ? e.message : 'Upload failed';
+      tgse.toast(/too large|size/i.test(msg) ? (file.name + ' is too large') : ('Upload failed: ' + msg), 'err');
+      return null;
+    }
   }
 
   $('pdf-drop').addEventListener('click', () => $('pdf-input').click());
@@ -440,7 +506,7 @@
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d) {
-          if (d.config) { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), d.config); C.colors = Object.assign({}, DEFAULTS.colors, d.config.colors||{}); if (!Array.isArray(C.attachments)) C.attachments = []; }
+          if (d.config) { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), d.config); C.colors = Object.assign({}, DEFAULTS.colors, d.config.colors||{}); C.button = Object.assign({}, DEFAULTS.button, d.config.button||{}); if (!Array.isArray(C.attachments)) C.attachments = []; }
           if (d.name) $('name-input').value = d.name;
         }
         applyToUI(); render();
