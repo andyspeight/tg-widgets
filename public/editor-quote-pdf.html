@@ -20,6 +20,12 @@
   .qp-color-row label { flex:1; font-size:12px; color:var(--tgse-ink-2); }
   .qp-color-row input[type="color"] { width:30px; height:30px; padding:0; border:1px solid var(--tgse-border); border-radius:6px; cursor:pointer; background:transparent; }
   .qp-color-row .qp-hex { font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--tgse-ink-3); width:64px; text-align:right; }
+  .qp-align-row { display:flex; align-items:center; gap:10px; padding:9px 0 4px; }
+  .qp-align-row label { flex:1; font-size:12px; color:var(--tgse-ink-2); }
+  .qp-seg { display:inline-flex; border:1px solid var(--tgse-border); border-radius:8px; overflow:hidden; }
+  .qp-seg button { font-size:12px; padding:6px 12px; background:var(--tgse-panel); color:var(--tgse-ink-2); border:none; border-right:1px solid var(--tgse-border); cursor:pointer; }
+  .qp-seg button:last-child { border-right:none; }
+  .qp-seg button.is-on { background:var(--tgse-accent); color:#fff; }
 
   /* Logo upload dropzone */
   .qp-logo-drop {
@@ -183,7 +189,15 @@
           <div class="tgse-section-body">
             <div class="qp-color-row"><label>Button colour</label><span class="qp-hex" id="hex-btnBg">#00B4D8</span><input type="color" id="c-btnBg" data-bkey="bg" value="#00B4D8"></div>
             <div class="qp-color-row"><label>Button text</label><span class="qp-hex" id="hex-btnText">#FFFFFF</span><input type="color" id="c-btnText" data-bkey="text" value="#FFFFFF"></div>
-            <div class="qp-help">Styles the Download &amp; Email buttons your customer clicks on the quote page.</div>
+            <div class="qp-align-row">
+              <label>Alignment</label>
+              <div class="qp-seg" id="align-seg">
+                <button type="button" data-align="left" class="is-on">Left</button>
+                <button type="button" data-align="center">Centre</button>
+                <button type="button" data-align="right">Right</button>
+              </div>
+            </div>
+            <div class="qp-help">Styles the Download &amp; Email buttons your customer clicks on the quote page. Alignment controls where they sit when placed in a page section.</div>
           </div>
         </div>
 
@@ -295,6 +309,7 @@
     attachments:[],
     colors:{ topBar:'#111D3E', hero:'#1B2B5B', accent:'#00B4D8', labels:'#0096B7', titles:'#1B2B5B', text:'#0F172A' },
     button:{ bg:'#00B4D8', text:'#FFFFFF' },
+    align:'left',
   };
   let C = JSON.parse(JSON.stringify(DEFAULTS));
 
@@ -306,7 +321,7 @@
   const shell = tgse.init({
     widgetType:'Quote PDF', widgetTag:'quote-pdf', scriptFile:'widget-quote-pdf.js',
     getConfig: () => C,
-    setConfig: (c) => { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), c||{}); C.colors = Object.assign({}, DEFAULTS.colors, (c&&c.colors)||{}); C.button = Object.assign({}, DEFAULTS.button, (c&&c.button)||{}); if (!Array.isArray(C.attachments)) C.attachments = []; applyToUI(); render(); },
+    setConfig: (c) => { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), c||{}); C.colors = Object.assign({}, DEFAULTS.colors, (c&&c.colors)||{}); C.button = Object.assign({}, DEFAULTS.button, (c&&c.button)||{}); if (!['left','center','right'].includes(C.align)) C.align = 'left'; if (!Array.isArray(C.attachments)) C.attachments = []; applyToUI(); render(); },
     onThemeToggle: () => {},
     onLoginSuccess: () => loadFromUrl(),
   });
@@ -322,6 +337,9 @@
     const btn = C.button || DEFAULTS.button;
     m.style.setProperty('--btnbg', isHex(btn.bg)   ? btn.bg   : DEFAULTS.button.bg);
     m.style.setProperty('--btntx', isHex(btn.text) ? btn.text : DEFAULTS.button.text);
+    const al = (C.align === 'center' || C.align === 'right') ? C.align : 'left';
+    const actions = m.querySelector('.m-actions');
+    if (actions) actions.style.justifyContent = al === 'center' ? 'center' : (al === 'right' ? 'flex-end' : 'flex-start');
     const name = C.brandName || 'Your Travel Co';
     const tag = (C.tagline || '').trim();
     const phone = (C.supportPhone || '').trim();
@@ -351,6 +369,8 @@
       const v = isHex(C.button[k]) ? C.button[k] : DEFAULTS.button[k];
       $('c-'+id).value = v; $('hex-'+id).textContent = v.toUpperCase();
     });
+    const al = (C.align === 'center' || C.align === 'right') ? C.align : 'left';
+    document.querySelectorAll('#align-seg button').forEach(x => x.classList.toggle('is-on', x.dataset.align === al));
     renderLogoState();
     renderPdfList();
   }
@@ -379,6 +399,14 @@
         C.colors[el.dataset.key] = val;
         $('hex-' + el.dataset.key).textContent = val.toUpperCase();
       }
+      render(); shell.markDirty();
+    }));
+
+  // --- button alignment segmented control ---
+  document.querySelectorAll('#align-seg button').forEach(b =>
+    b.addEventListener('click', () => {
+      C.align = b.dataset.align;
+      document.querySelectorAll('#align-seg button').forEach(x => x.classList.toggle('is-on', x === b));
       render(); shell.markDirty();
     }));
 
@@ -506,7 +534,7 @@
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d) {
-          if (d.config) { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), d.config); C.colors = Object.assign({}, DEFAULTS.colors, d.config.colors||{}); C.button = Object.assign({}, DEFAULTS.button, d.config.button||{}); if (!Array.isArray(C.attachments)) C.attachments = []; }
+          if (d.config) { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), d.config); C.colors = Object.assign({}, DEFAULTS.colors, d.config.colors||{}); C.button = Object.assign({}, DEFAULTS.button, d.config.button||{}); if (!['left','center','right'].includes(C.align)) C.align = 'left'; if (!Array.isArray(C.attachments)) C.attachments = []; }
           if (d.name) $('name-input').value = d.name;
         }
         applyToUI(); render();
