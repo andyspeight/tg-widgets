@@ -43,7 +43,7 @@
  */
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail } from './_auth.js';
-import { generateQuotePdf, pdfFilename } from '../generate-pdf.js';
+import { generateQuotePdf, pdfFilename, fetchAttachmentBuffers } from '../generate-pdf.js';
 
 const TRAVELIFY_API_BASE = process.env.QUOTE_API_BASE || 'https://api.travelify.io';
 
@@ -186,6 +186,14 @@ async function findWidgetById(widgetId) {
 function buildRenderOpts(config) {
   const c = (config && typeof config === 'object') ? config : {};
   const colors = (c.colors && typeof c.colors === 'object') ? c.colors : {};
+  // Attachments: only accept well-formed entries with an https URL. Cap the
+  // count so a malformed config can't trigger dozens of fetches.
+  const attachments = Array.isArray(c.attachments)
+    ? c.attachments
+        .filter(a => a && typeof a.url === 'string' && /^https:\/\//.test(a.url))
+        .slice(0, 10)
+        .map(a => ({ url: a.url, name: (a.name && String(a.name).slice(0, 120)) || 'document.pdf' }))
+    : [];
   return {
     brand: {
       name: c.brandName,
@@ -200,6 +208,7 @@ function buildRenderOpts(config) {
         accentDark: colors.accentDark,
       },
     },
+    attachments,
   };
 }
 
@@ -285,7 +294,7 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-async function emailQuotePdf(doc, pdfBuffer) {
+async function emailQuotePdf(doc, pdfBuffer, extraAttachments) {
   // Recipient + names: official shape carries customerEmail/customerFirstname at
   // the data root; legacy flat shape carries them under setup. Support both.
   const d = (doc && doc.data && doc.data.items) ? doc.data : doc;
@@ -313,6 +322,32 @@ async function emailQuotePdf(doc, pdfBuffer) {
     'there';
   const filename = pdfFilename(d);
 
+  // The main attachment is the merged quote (quote + any T&Cs). Then add each
+  // attachment again as a SEPARATE file so the customer has standalone copies.
+  // De-duplicate the filename if a T&C happens to share the quote's name.
+  const attachments = [{
+    content: pdfBuffer.toString('base64'),
+    filename,
+    type: 'application/pdf',
+    disposition: 'attachment',
+  }];
+  const extras = Array.isArray(extraAttachments) ? extraAttachments : [];
+  const used = new Set([filename.toLowerCase()]);
+  for (const att of extras) {
+    if (!att || !att.buffer) continue;
+    let fn = (att.name && String(att.name)) || 'document.pdf';
+    if (!/\.pdf$/i.test(fn)) fn += '.pdf';
+    // avoid an identical filename to the merged quote
+    if (used.has(fn.toLowerCase())) fn = fn.replace(/\.pdf$/i, '') + '-copy.pdf';
+    used.add(fn.toLowerCase());
+    attachments.push({
+      content: att.buffer.toString('base64'),
+      filename: fn,
+      type: 'application/pdf',
+      disposition: 'attachment',
+    });
+  }
+
   await sg.send({
     to,
     from: { email: fromEmail, name: fromName },
@@ -321,15 +356,10 @@ async function emailQuotePdf(doc, pdfBuffer) {
     html: `<p>Hi ${escapeHtml(lead)},</p>` +
           `<p>Please find your quote &ldquo;${escapeHtml(title)}&rdquo; attached as a PDF.</p>` +
           `<p>Kind regards,<br>${escapeHtml(fromName)}</p>`,
-    attachments: [{
-      content: pdfBuffer.toString('base64'),
-      filename,
-      type: 'application/pdf',
-      disposition: 'attachment',
-    }],
+    attachments,
   });
 
-  return { to, bytes: pdfBuffer.length, sent: true };
+  return { to, bytes: pdfBuffer.length, sent: true, extraAttachments: extras.length };
 }
 
 // ----- Handler -----
@@ -379,7 +409,10 @@ export default async function handler(req, res) {
     const pdf = await generateQuotePdf(doc, ctx.opts);
 
     if (v.action === 'email') {
-      const result = await emailQuotePdf(doc, pdf);
+      // The merged PDF already contains the attachments; also send each one as a
+      // SEPARATE attachment so the customer gets standalone copies too.
+      const extraAttachments = await fetchAttachmentBuffers(ctx.opts && ctx.opts.attachments);
+      const result = await emailQuotePdf(doc, pdf, extraAttachments);
       return res.status(200).json({ ok: true, emailed: result });
     }
 
