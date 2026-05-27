@@ -341,9 +341,16 @@ function renderImages(images) {
   // PDF. Two keeps the document attractive while staying well within email
   // attachment limits (SendGrid hard limit 30MB; practical target <7MB). A
   // proper image-resize proxy is the fast-follow if multi-hotel quotes get big.
-  const shots = images.slice(0, 2).map(img =>
-    `<div class="gallery-cell"><img src="${esc(img.url)}" alt="${esc(img.name || 'Hotel image')}" /></div>`
-  ).join('');
+  //
+  // Hotlist images carry a hosted `url`. Manually uploaded images instead carry
+  // a base64 `preview` data-URI (no url), so fall back to that. Skip any image
+  // with no usable source rather than emitting a broken/empty cell.
+  const shots = images.slice(0, 2).map(img => {
+    const src = img.url || img.preview || '';
+    if (!src) return '';
+    return `<div class="gallery-cell"><img src="${esc(src)}" alt="${esc(img.name || 'Hotel image')}" /></div>`;
+  }).filter(Boolean).join('');
+  if (!shots) return '';
   return `<div class="gallery">${shots}</div>`;
 }
 
