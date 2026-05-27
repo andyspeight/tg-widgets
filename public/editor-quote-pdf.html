@@ -37,6 +37,17 @@
   .qp-logo-preview .qp-logo-remove { font-size:12px; color:#EF4444; background:none; border:1px solid var(--tgse-border); border-radius:6px; padding:5px 10px; cursor:pointer; }
   .qp-logo-preview .qp-logo-remove:hover { border-color:#EF4444; background:rgba(239,68,68,.05); }
 
+  /* PDF attachment list */
+  #pdf-list { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .qp-pdf-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--tgse-border); border-radius:8px; background:var(--tgse-panel); }
+  .qp-pdf-item svg { width:16px; height:16px; color:var(--tgse-accent); flex-shrink:0; }
+  .qp-pdf-item .qp-pdf-meta { flex:1; min-width:0; }
+  .qp-pdf-item .qp-pdf-name { font-size:12px; color:var(--tgse-ink); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .qp-pdf-item .qp-pdf-size { font-size:11px; color:var(--tgse-ink-3); }
+  .qp-pdf-item .qp-pdf-remove { font-size:12px; color:#EF4444; background:none; border:1px solid var(--tgse-border); border-radius:6px; padding:4px 9px; cursor:pointer; flex-shrink:0; }
+  .qp-pdf-item .qp-pdf-remove:hover { border-color:#EF4444; background:rgba(239,68,68,.05); }
+  .qp-pdf-uploading { font-size:11px; color:var(--tgse-ink-3); padding:8px 12px; }
+
   .qp-status { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:8px; font-size:12px; line-height:1.4; }
   .qp-status svg { width:14px; height:14px; flex-shrink:0; }
   .qp-status.ok { background:rgba(16,185,129,.08); color:#065F46; border:1px solid rgba(16,185,129,.25); }
@@ -47,11 +58,11 @@
   /* Live preview mock — themed by CSS vars from config */
   .qp-mock { width:560px; max-width:100%; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.08);
     --p:#1B2B5B; --pd:#111D3E; --a:#00B4D8; --ad:#0096B7; font-family:'Inter',sans-serif; }
-  .qp-mock .m-brand { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:3px solid var(--a); }
-  .qp-mock .m-name { font-size:16px; font-weight:700; color:var(--p); }
+  .qp-mock .m-brand { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:3px solid var(--a); background:var(--pd); }
+  .qp-mock .m-name { font-size:16px; font-weight:700; color:#fff; }
   .qp-mock .m-logo { max-height:38px; max-width:180px; }
-  .qp-mock .m-tag { font-size:11px; color:#475569; margin-top:2px; }
-  .qp-mock .m-meta { text-align:right; font-size:11px; color:#475569; line-height:1.5; }
+  .qp-mock .m-tag { font-size:11px; color:#C7D2E8; margin-top:2px; }
+  .qp-mock .m-meta { text-align:right; font-size:11px; color:#C7D2E8; line-height:1.5; }
   .qp-mock .m-hero { background:linear-gradient(135deg,var(--p),var(--pd)); color:#fff; padding:26px 22px; }
   .qp-mock .m-hero h1 { margin:0 0 4px; font-size:21px; font-weight:700; }
   .qp-mock .m-hero p { margin:0; font-size:12px; color:#C7D2E8; }
@@ -199,8 +210,14 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="qp-status loading"><span>PDF attachments (T&amp;Cs etc) — coming soon.</span></div>
-            <div class="qp-help">You'll be able to attach one or more PDFs that get merged onto every quote and sent alongside it.</div>
+            <input type="file" id="pdf-input" accept="application/pdf" multiple hidden>
+            <div class="qp-logo-drop" id="pdf-drop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="qp-drop-title">Upload PDF documents</div>
+              <div class="qp-drop-sub">Terms &amp; Conditions etc · up to 5MB each</div>
+            </div>
+            <div id="pdf-list"></div>
+            <div class="qp-help">These PDFs are merged onto the end of every quote and also sent as separate email attachments.</div>
           </div>
         </div>
 
@@ -224,13 +241,9 @@
         <div class="qp-mock" id="qp-mock">
           <div class="m-brand">
             <div id="m-left">
-              <div class="m-name" id="m-name">Your Travel Co</div>
-              <div class="m-tag" id="m-tag">Your personalised holiday quote</div>
+              <div class="m-name">Your Travel Co</div>
             </div>
-            <div class="m-meta">
-              <div><strong id="m-phone">01202 000000</strong></div>
-              <div id="m-email">hello@yourco.com</div>
-            </div>
+            <div class="m-meta" id="m-right"></div>
           </div>
           <div class="m-hero"><h1>Your holiday quote</h1><p>A curated itinerary tailored just for you.</p></div>
           <div class="m-item">
@@ -243,7 +256,7 @@
               <div class="m-price">£3,200<div style="font-size:9px;color:#94A3B8;font-weight:400;">total</div></div>
             </div>
           </div>
-          <div class="m-foot"><strong id="m-foot">Your Travel Co</strong> · <span id="m-foot-phone">01202 000000</span> · <span id="m-foot-email">hello@yourco.com</span></div>
+          <div class="m-foot" id="m-foot"></div>
         </div>
       </div>
     </div>
@@ -255,6 +268,7 @@
 <script>
   const DEFAULTS = {
     brandName:'', tagline:'', logoUrl:'', supportEmail:'', supportPhone:'',
+    attachments:[],
     colors:{ primary:'#1B2B5B', primaryDark:'#111D3E', accent:'#00B4D8', accentDark:'#0096B7' },
   };
   let C = JSON.parse(JSON.stringify(DEFAULTS));
@@ -267,7 +281,7 @@
   const shell = tgse.init({
     widgetType:'Quote PDF', widgetTag:'quote-pdf', scriptFile:'widget-quote-pdf.js',
     getConfig: () => C,
-    setConfig: (c) => { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), c||{}); C.colors = Object.assign({}, DEFAULTS.colors, (c&&c.colors)||{}); applyToUI(); render(); },
+    setConfig: (c) => { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), c||{}); C.colors = Object.assign({}, DEFAULTS.colors, (c&&c.colors)||{}); if (!Array.isArray(C.attachments)) C.attachments = []; applyToUI(); render(); },
     onThemeToggle: () => {},
     onLoginSuccess: () => loadFromUrl(),
   });
@@ -279,14 +293,20 @@
     m.style.setProperty('--a',  isHex(C.colors.accent)      ? C.colors.accent      : DEFAULTS.colors.accent);
     m.style.setProperty('--ad', isHex(C.colors.accentDark)  ? C.colors.accentDark  : DEFAULTS.colors.accentDark);
     const name = C.brandName || 'Your Travel Co';
-    const tag = C.tagline || 'Your personalised holiday quote';
-    const phone = C.supportPhone || '01202 000000';
-    const email = C.supportEmail || 'hello@yourco.com';
+    const tag = (C.tagline || '').trim();
+    const phone = (C.supportPhone || '').trim();
+    const email = (C.supportEmail || '').trim();
+    const tagHtml = tag ? '<div class="m-tag">'+escAttr(tag)+'</div>' : '';
     const left = $('m-left');
-    if (isUsableLogo(C.logoUrl)) left.innerHTML = '<img class="m-logo" src="'+escAttr(C.logoUrl)+'" alt="'+escAttr(name)+'"><div class="m-tag">'+escAttr(tag)+'</div>';
-    else left.innerHTML = '<div class="m-name">'+escAttr(name)+'</div><div class="m-tag">'+escAttr(tag)+'</div>';
-    $('m-phone').textContent = phone; $('m-email').textContent = email;
-    $('m-foot').textContent = name; $('m-foot-phone').textContent = phone; $('m-foot-email').textContent = email;
+    if (isUsableLogo(C.logoUrl)) left.innerHTML = '<img class="m-logo" src="'+escAttr(C.logoUrl)+'" alt="'+escAttr(name)+'">'+tagHtml;
+    else left.innerHTML = '<div class="m-name">'+escAttr(name)+'</div>'+tagHtml;
+    // Contact block — only when something is entered
+    $('m-right').innerHTML = (phone || email)
+      ? (phone ? '<div><strong>'+escAttr(phone)+'</strong></div>' : '') + (email ? '<div>'+escAttr(email)+'</div>' : '')
+      : '';
+    // Footer — name, plus contact parts only when present
+    const footParts = [phone, email].filter(Boolean).map(x => ' · ' + escAttr(x)).join('');
+    $('m-foot').innerHTML = '<strong>'+escAttr(name)+'</strong>' + footParts;
   }
 
   function applyToUI() {
@@ -297,6 +317,7 @@
       $('c-'+k).value = v; $('hex-'+k).textContent = v.toUpperCase();
     });
     renderLogoState();
+    renderPdfList();
   }
 
   function renderLogoState() {
@@ -333,6 +354,66 @@
     reader.readAsDataURL(file);
   });
 
+  // --- PDF attachments upload (Vercel Blob via /api/upload-pdf) ---
+  function renderPdfList() {
+    const wrap = $('pdf-list');
+    const list = Array.isArray(C.attachments) ? C.attachments : [];
+    wrap.innerHTML = list.map((a, i) => {
+      const kb = a.size ? (a.size >= 1048576 ? (a.size/1048576).toFixed(1)+'MB' : Math.round(a.size/1024)+'KB') : '';
+      return `<div class="qp-pdf-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div class="qp-pdf-meta"><div class="qp-pdf-name">${escAttr(a.name||'document.pdf')}</div>${kb?`<div class="qp-pdf-size">${kb}</div>`:''}</div>
+        <button type="button" class="qp-pdf-remove" data-idx="${i}">Remove</button>
+      </div>`;
+    }).join('');
+    wrap.querySelectorAll('.qp-pdf-remove').forEach(btn =>
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.idx);
+        C.attachments.splice(idx, 1);
+        renderPdfList(); shell.markDirty();
+      }));
+  }
+
+  function uploadOnePdf(file) {
+    return new Promise((resolve) => {
+      if (file.type !== 'application/pdf') { tgse.toast('Only PDF files can be attached', 'err'); return resolve(null); }
+      if (file.size > 5*1024*1024) { tgse.toast(file.name + ' is over 5MB — please use a smaller PDF', 'err'); return resolve(null); }
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const headers = Object.assign({ 'Content-Type': 'application/json' }, (tgse.authHeaders ? tgse.authHeaders() : {}));
+          const res = await fetch('/api/upload-pdf', {
+            method: 'POST', headers, credentials: 'include',
+            body: JSON.stringify({ filename: file.name, dataBase64: ev.target.result }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) { tgse.toast(data.error || 'Upload failed', 'err'); return resolve(null); }
+          resolve({ url: data.url, name: data.name || file.name, size: data.size || file.size });
+        } catch (e) { tgse.toast('Upload failed — network error', 'err'); resolve(null); }
+      };
+      reader.onerror = () => { tgse.toast('Could not read ' + file.name, 'err'); resolve(null); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  $('pdf-drop').addEventListener('click', () => $('pdf-input').click());
+  $('pdf-input').addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length) return;
+    if (!Array.isArray(C.attachments)) C.attachments = [];
+    const drop = $('pdf-drop');
+    const original = drop.innerHTML;
+    drop.innerHTML = '<div class="qp-pdf-uploading">Uploading…</div>';
+    let added = 0;
+    for (const f of files) {
+      const result = await uploadOnePdf(f);
+      if (result) { C.attachments.push(result); added++; }
+    }
+    drop.innerHTML = original;
+    if (added) { renderPdfList(); shell.markDirty(); tgse.toast(added + ' document' + (added>1?'s':'') + ' added — save to apply', 'ok'); }
+  });
+
   // --- Travelify creds status ---
   function checkCreds() {
     const area = $('creds-area');
@@ -359,7 +440,7 @@
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d) {
-          if (d.config) { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), d.config); C.colors = Object.assign({}, DEFAULTS.colors, d.config.colors||{}); }
+          if (d.config) { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), d.config); C.colors = Object.assign({}, DEFAULTS.colors, d.config.colors||{}); if (!Array.isArray(C.attachments)) C.attachments = []; }
           if (d.name) $('name-input').value = d.name;
         }
         applyToUI(); render();
