@@ -1,358 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quote PDF — Editor</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote PDF Editor — Travelgenix</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/editor-shell.css">
 <style>
-  :root{
-    --radius-sm:6px; --radius-md:8px; --radius-lg:12px;
+  /* Per-editor styles only — shell tokens live in editor-shell.css */
+  .qp-field input[type="text"], .qp-field input[type="email"], .qp-field input[type="url"] {
+    width:100%; height:36px; padding:0 10px; font-family:inherit; font-size:13px;
+    color:var(--tgse-ink); background:var(--tgse-panel); border:1px solid var(--tgse-border);
+    border-radius:8px; outline:none; transition:border-color .15s; box-sizing:border-box;
   }
-  body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg-2);color:var(--text);-webkit-font-smoothing:antialiased;height:100vh;overflow:hidden;}
-  .layout{display:flex;height:100vh;}
-  .sidebar{width:380px;flex-shrink:0;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-  .sb-scroll{flex:1;overflow-y:auto;padding:16px;}
-  .sb-top{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;}
-  .sb-top .back{font-size:12px;color:var(--text-3);text-decoration:none;}
-  .sb-save{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;}
-  .sb-save input{flex:1;min-width:0;height:38px;padding:0 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);outline:none;}
-  .sb-save .save-btn{height:38px;padding:0 16px;background:#1B2B5B;color:#fff;font-weight:600;font-size:13px;border:none;border-radius:var(--radius-md);cursor:pointer;min-width:64px;}
-  .sb-save .save-btn.is-saved{background:#10B981;}
-  .preview-pane{flex:1;display:flex;flex-direction:column;background:var(--bg-2);overflow:hidden;}
-  .preview-stage{flex:1;overflow:auto;padding:32px;display:flex;align-items:flex-start;justify-content:center;}
+  .qp-field input:focus { border-color:var(--tgse-accent); box-shadow:0 0 0 3px rgba(0,180,216,.15); }
+  .qp-help { font-size:11px; color:var(--tgse-ink-3); margin-top:5px; line-height:1.4; }
 
-  .section{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;}
-  .section-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
-  .section-header h3{font-size:13px;font-weight:600;margin:0;letter-spacing:-.01em;color:var(--text);display:flex;align-items:center;gap:8px;}
-  .section-body{padding:0 16px 16px;}
+  .qp-color-row { display:flex; align-items:center; gap:10px; padding:7px 0; }
+  .qp-color-row label { flex:1; font-size:12px; color:var(--tgse-ink-2); }
+  .qp-color-row input[type="color"] { width:30px; height:30px; padding:0; border:1px solid var(--tgse-border); border-radius:6px; cursor:pointer; background:transparent; }
+  .qp-color-row .qp-hex { font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--tgse-ink-3); width:64px; text-align:right; }
 
-  .field{margin-bottom:12px;}
-  .field label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:4px;}
-  .field input,.field textarea{width:100%;min-height:36px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;transition:border-color .15s;font-family:inherit;box-sizing:border-box;}
-  .field input:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,180,216,.12);}
-  .field-help{font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.4;}
+  /* Logo upload dropzone */
+  .qp-logo-drop {
+    border:1.5px dashed var(--tgse-border); border-radius:10px; padding:18px 14px;
+    text-align:center; cursor:pointer; transition:all .15s; background:var(--tgse-panel-2);
+  }
+  .qp-logo-drop:hover { border-color:var(--tgse-accent); background:var(--tgse-panel); }
+  .qp-logo-drop svg { width:22px; height:22px; color:var(--tgse-ink-3); margin-bottom:6px; }
+  .qp-logo-drop .qp-drop-title { font-size:12px; font-weight:600; color:var(--tgse-ink-2); }
+  .qp-logo-drop .qp-drop-sub { font-size:11px; color:var(--tgse-ink-3); margin-top:2px; }
+  .qp-logo-preview { display:none; align-items:center; gap:12px; padding:12px; border:1px solid var(--tgse-border); border-radius:10px; background:var(--tgse-panel); }
+  .qp-logo-preview.show { display:flex; }
+  .qp-logo-preview img { max-height:44px; max-width:160px; border-radius:4px; }
+  .qp-logo-preview .qp-logo-meta { flex:1; font-size:11px; color:var(--tgse-ink-3); word-break:break-word; }
+  .qp-logo-preview .qp-logo-remove { font-size:12px; color:#EF4444; background:none; border:1px solid var(--tgse-border); border-radius:6px; padding:5px 10px; cursor:pointer; }
+  .qp-logo-preview .qp-logo-remove:hover { border-color:#EF4444; background:rgba(239,68,68,.05); }
 
-  .color-row{display:flex;align-items:center;gap:8px;padding:8px 0;}
-  .color-row label{flex:1;font-size:12px;font-weight:500;color:var(--text-2);margin:0;}
-  .color-row input[type="color"]{width:32px;height:32px;padding:0;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:transparent;}
-  .color-row .hex{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text-3);width:70px;text-align:right;}
+  .qp-status { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:8px; font-size:12px; line-height:1.4; }
+  .qp-status svg { width:14px; height:14px; flex-shrink:0; }
+  .qp-status.ok { background:rgba(16,185,129,.08); color:#065F46; border:1px solid rgba(16,185,129,.25); }
+  .qp-status.missing { background:rgba(245,158,11,.08); color:#78350F; border:1px solid rgba(245,158,11,.25); }
+  .qp-status.loading { background:var(--tgse-panel-2); color:var(--tgse-ink-3); border:1px solid var(--tgse-border); }
+  .qp-status .qp-meta { font-family:'JetBrains Mono',monospace; font-size:11px; }
 
-  .creds-status{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius-md);font-size:12px;margin-bottom:8px;}
-  .creds-status.ok{background:rgba(16,185,129,.08);color:#065F46;border:1px solid rgba(16,185,129,.25);}
-  .creds-status.missing{background:rgba(245,158,11,.08);color:#78350F;border:1px solid rgba(245,158,11,.25);}
-  .creds-status.loading{background:var(--bg-3);color:var(--text-3);border:1px solid var(--border);}
-  .creds-status svg{width:14px;height:14px;flex-shrink:0;}
-  .creds-meta{font-size:11px;color:var(--text-3);margin-top:2px;font-family:'JetBrains Mono',monospace;}
-
-  .embed-block{background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);line-height:1.5;word-break:break-all;}
-  .embed-actions{display:flex;gap:8px;margin-top:8px;}
-  .embed-actions button{flex:1;height:32px;font-size:12px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;}
-  .embed-actions button.copied{background:#10B981;color:#fff;border-color:#10B981;}
-
-  /* Live preview mock of the quote document — themed by CSS vars set from config */
-  .qmock{width:600px;max-width:100%;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.06);
-    --p:#1B2B5B; --pd:#111D3E; --a:#00B4D8; --ad:#0096B7;}
-  .qmock .qbrand{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:3px solid var(--a);}
-  .qmock .qbrand-name{font-size:17px;font-weight:700;color:var(--p);}
-  .qmock .qbrand-logo{max-height:40px;max-width:200px;}
-  .qmock .qbrand-tag{font-size:12px;color:#475569;margin-top:2px;}
-  .qmock .qbrand-meta{text-align:right;font-size:11px;color:#475569;line-height:1.5;}
-  .qmock .qhero{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;padding:28px 24px;}
-  .qmock .qhero h1{margin:0 0 4px;font-size:22px;font-weight:700;}
-  .qmock .qhero p{margin:0;font-size:13px;color:#C7D2E8;}
-  .qmock .qitem{margin:18px 24px;border:1px solid #E2E8F0;border-radius:12px;}
-  .qmock .qitem-head{display:flex;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #E2E8F0;}
-  .qmock .qitem-type{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ad);font-weight:700;}
-  .qmock .qitem-title{margin:3px 0 4px;font-size:17px;font-weight:700;color:var(--p);}
-  .qmock .qstars{color:#F59E0B;font-size:12px;}
-  .qmock .qprice{font-size:20px;font-weight:700;color:var(--p);text-align:right;}
-  .qmock .qfoot{padding:18px 24px;border-top:1px solid #E2E8F0;text-align:center;font-size:11px;color:#94A3B8;}
-  .preview-note{font-size:11px;color:var(--text-3);text-align:center;margin-bottom:12px;font-style:italic;}
+  /* Live preview mock — themed by CSS vars from config */
+  .qp-mock { width:560px; max-width:100%; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.08);
+    --p:#1B2B5B; --pd:#111D3E; --a:#00B4D8; --ad:#0096B7; font-family:'Inter',sans-serif; }
+  .qp-mock .m-brand { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:3px solid var(--a); }
+  .qp-mock .m-name { font-size:16px; font-weight:700; color:var(--p); }
+  .qp-mock .m-logo { max-height:38px; max-width:180px; }
+  .qp-mock .m-tag { font-size:11px; color:#475569; margin-top:2px; }
+  .qp-mock .m-meta { text-align:right; font-size:11px; color:#475569; line-height:1.5; }
+  .qp-mock .m-hero { background:linear-gradient(135deg,var(--p),var(--pd)); color:#fff; padding:26px 22px; }
+  .qp-mock .m-hero h1 { margin:0 0 4px; font-size:21px; font-weight:700; }
+  .qp-mock .m-hero p { margin:0; font-size:12px; color:#C7D2E8; }
+  .qp-mock .m-item { margin:18px 22px; border:1px solid #E2E8F0; border-radius:12px; }
+  .qp-mock .m-item-head { display:flex; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #E2E8F0; }
+  .qp-mock .m-type { font-size:9px; text-transform:uppercase; letter-spacing:.06em; color:var(--ad); font-weight:700; }
+  .qp-mock .m-title { margin:3px 0 4px; font-size:16px; font-weight:700; color:var(--p); }
+  .qp-mock .m-stars { color:#F59E0B; font-size:11px; }
+  .qp-mock .m-price { font-size:18px; font-weight:700; color:var(--p); text-align:right; }
+  .qp-mock .m-foot { padding:16px 22px; border-top:1px solid #E2E8F0; text-align:center; font-size:11px; color:#94A3B8; }
 </style>
 </head>
 <body>
-<div class="layout">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sb-top">
-      <a class="back" href="/dashboard">← Dashboard</a>
+
+<div class="tgse-app">
+
+  <!-- ============================== SIDEBAR ============================== -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
     </div>
-    <div class="sb-save">
-      <input type="text" id="name-input" placeholder="Untitled Quote PDF widget" maxlength="100">
-      <button class="save-btn" id="btn-save" title="Save (⌘S)"><span id="save-label">Save</span></button>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Quote PDF</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
     </div>
-    <div class="sb-scroll">
 
-      <!-- BRAND -->
-      <div class="section">
-        <div class="section-header"><h3>Branding</h3></div>
-        <div class="section-body">
-          <div class="field">
-            <label for="brandName">Company name</label>
-            <input id="brandName" type="text" maxlength="80" placeholder="Your Travel Co">
-            <div class="field-help">Shown top-left when no logo is set, and in the footer.</div>
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled Quote PDF widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Branding</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== BRANDING (Design) TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <!-- Logo + identity -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            <span class="tgse-section-label">Logo &amp; identity</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <div class="field">
-            <label for="tagline">Tagline</label>
-            <input id="tagline" type="text" maxlength="120" placeholder="Your personalised holiday quote">
-          </div>
-          <div class="field">
-            <label for="logoUrl">Logo URL (https)</label>
-            <input id="logoUrl" type="url" maxlength="500" placeholder="https://…/logo.png">
-            <div class="field-help">Must be an https image URL. Replaces the company name at the top of the quote. Max height 44px.</div>
-          </div>
-          <div class="field">
-            <label for="supportEmail">Support email</label>
-            <input id="supportEmail" type="email" maxlength="120" placeholder="hello@yourco.com">
-          </div>
-          <div class="field">
-            <label for="supportPhone">Support phone</label>
-            <input id="supportPhone" type="text" maxlength="40" placeholder="01202 000000">
+          <div class="tgse-section-body">
+            <div class="tgse-field qp-field">
+              <label class="tgse-field-label">Logo</label>
+              <input type="file" id="logo-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" hidden>
+              <div class="qp-logo-drop" id="logo-drop">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div class="qp-drop-title">Upload your logo</div>
+                <div class="qp-drop-sub">PNG, JPG, SVG or WebP · up to 500KB</div>
+              </div>
+              <div class="qp-logo-preview" id="logo-preview">
+                <img id="logo-thumb" alt="Logo preview">
+                <div class="qp-logo-meta" id="logo-meta"></div>
+                <button type="button" class="qp-logo-remove" id="logo-remove">Remove</button>
+              </div>
+              <div class="qp-help">Shown at the top of every quote. Replaces the company name when set.</div>
+            </div>
+            <div class="tgse-field qp-field">
+              <label class="tgse-field-label">Company name</label>
+              <input type="text" id="brandName" maxlength="80" placeholder="Your Travel Co">
+            </div>
+            <div class="tgse-field qp-field">
+              <label class="tgse-field-label">Tagline</label>
+              <input type="text" id="tagline" maxlength="120" placeholder="Your personalised holiday quote">
+            </div>
           </div>
         </div>
+
+        <!-- Colours -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="qp-color-row"><label>Primary (header &amp; titles)</label><span class="qp-hex" id="hex-primary">#1B2B5B</span><input type="color" id="c-primary" data-key="primary" value="#1B2B5B"></div>
+            <div class="qp-color-row"><label>Primary dark (hero)</label><span class="qp-hex" id="hex-primaryDark">#111D3E</span><input type="color" id="c-primaryDark" data-key="primaryDark" value="#111D3E"></div>
+            <div class="qp-color-row"><label>Accent (stars &amp; lines)</label><span class="qp-hex" id="hex-accent">#00B4D8</span><input type="color" id="c-accent" data-key="accent" value="#00B4D8"></div>
+            <div class="qp-color-row"><label>Accent dark (labels)</label><span class="qp-hex" id="hex-accentDark">#0096B7</span><input type="color" id="c-accentDark" data-key="accentDark" value="#0096B7"></div>
+            <div class="qp-help">These four colours re-theme the whole quote.</div>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span class="tgse-section-label">Contact details</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field qp-field">
+              <label class="tgse-field-label">Support email</label>
+              <input type="email" id="supportEmail" maxlength="120" placeholder="hello@yourco.com">
+            </div>
+            <div class="tgse-field qp-field">
+              <label class="tgse-field-label">Support phone</label>
+              <input type="text" id="supportPhone" maxlength="40" placeholder="01202 000000">
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- COLOURS -->
-      <div class="section">
-        <div class="section-header"><h3>Colours</h3></div>
-        <div class="section-body">
-          <div class="color-row"><label for="c-primary">Primary (header &amp; titles)</label><span class="hex" id="hex-primary">#1B2B5B</span><input id="c-primary" type="color" value="#1B2B5B" data-key="primary"></div>
-          <div class="color-row"><label for="c-primaryDark">Primary dark (hero gradient)</label><span class="hex" id="hex-primaryDark">#111D3E</span><input id="c-primaryDark" type="color" value="#111D3E" data-key="primaryDark"></div>
-          <div class="color-row"><label for="c-accent">Accent (stars &amp; lines)</label><span class="hex" id="hex-accent">#00B4D8</span><input id="c-accent" type="color" value="#00B4D8" data-key="accent"></div>
-          <div class="color-row"><label for="c-accentDark">Accent dark (labels)</label><span class="hex" id="hex-accentDark">#0096B7</span><input id="c-accentDark" type="color" value="#0096B7" data-key="accentDark"></div>
-          <div class="field-help">These four colours re-theme the whole quote. Leave as default to use Travelgenix navy/teal.</div>
-        </div>
-      </div>
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
 
-      <!-- TRAVELIFY CREDENTIALS -->
-      <div class="section">
-        <div class="section-header"><h3>Travelify connection</h3></div>
-        <div class="section-body">
-          <div id="creds-area">
-            <div class="creds-status loading"><span>Checking your Travelify connection…</span></div>
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+            <span class="tgse-section-label">Travelify connection</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <div class="field-help">Quotes are pulled securely on the server using your central Travelify credentials. Manage them in your account integrations — they are never entered or shown here.</div>
+          <div class="tgse-section-body">
+            <div id="creds-area"><div class="qp-status loading"><span>Checking your Travelify connection…</span></div></div>
+            <div class="qp-help">Quotes are pulled securely on the server using your central Travelify credentials. Manage them in your account integrations — they are never entered or shown here.</div>
+          </div>
         </div>
-      </div>
 
-      <!-- ATTACHMENTS (next session) -->
-      <div class="section">
-        <div class="section-header"><h3>Attached documents</h3></div>
-        <div class="section-body">
-          <div class="creds-status loading"><span>PDF attachments (T&amp;Cs etc) — coming soon.</span></div>
-          <div class="field-help">You'll be able to attach one or more PDFs that get merged onto every quote and sent alongside it.</div>
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <span class="tgse-section-label">Attached documents</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="qp-status loading"><span>PDF attachments (T&amp;Cs etc) — coming soon.</span></div>
+            <div class="qp-help">You'll be able to attach one or more PDFs that get merged onto every quote and sent alongside it.</div>
+          </div>
         </div>
-      </div>
 
-      <!-- EMBED -->
-      <div class="section">
-        <div class="section-header"><h3>Embed code</h3></div>
-        <div class="section-body">
-          <div class="embed-block" id="embed-code">&lt;!-- Save the widget first to get embed code --&gt;</div>
-          <div class="embed-actions"><button id="copy-embed">Copy code</button></div>
-        </div>
       </div>
 
     </div>
   </aside>
 
-  <!-- PREVIEW -->
-  <main class="preview-pane">
-    <div class="preview-stage">
-      <div>
-        <div class="preview-note">Live preview — a sample quote with your branding applied</div>
-        <div class="qmock" id="qmock">
-          <div class="qbrand">
-            <div>
-              <div class="qbrand-name" id="m-name">Your Travel Co</div>
-              <div class="qbrand-tag" id="m-tag">Your personalised holiday quote</div>
+  <!-- ============================== PREVIEW ============================== -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div class="qp-mock" id="qp-mock">
+          <div class="m-brand">
+            <div id="m-left">
+              <div class="m-name" id="m-name">Your Travel Co</div>
+              <div class="m-tag" id="m-tag">Your personalised holiday quote</div>
             </div>
-            <div class="qbrand-meta">
+            <div class="m-meta">
               <div><strong id="m-phone">01202 000000</strong></div>
               <div id="m-email">hello@yourco.com</div>
             </div>
           </div>
-          <div class="qhero"><h1>Your holiday quote</h1><p>A curated itinerary tailored just for you.</p></div>
-          <div class="qitem">
-            <div class="qitem-head">
+          <div class="m-hero"><h1>Your holiday quote</h1><p>A curated itinerary tailored just for you.</p></div>
+          <div class="m-item">
+            <div class="m-item-head">
               <div>
-                <div class="qitem-type">Resort</div>
-                <div class="qitem-title">Atlantis The Palm</div>
-                <div class="qstars">★★★★★ <span style="color:#475569;font-size:11px;">Dubai</span></div>
+                <div class="m-type">Resort</div>
+                <div class="m-title">Atlantis The Palm</div>
+                <div class="m-stars">★★★★★ <span style="color:#475569;font-size:11px;">Dubai</span></div>
               </div>
-              <div class="qprice">£3,200<div style="font-size:10px;color:#94A3B8;font-weight:400;">total</div></div>
+              <div class="m-price">£3,200<div style="font-size:9px;color:#94A3B8;font-weight:400;">total</div></div>
             </div>
           </div>
-          <div class="qfoot"><strong id="m-foot">Your Travel Co</strong> · <span id="m-foot-phone">01202 000000</span> · <span id="m-foot-email">hello@yourco.com</span></div>
+          <div class="m-foot"><strong id="m-foot">Your Travel Co</strong> · <span id="m-foot-phone">01202 000000</span> · <span id="m-foot-email">hello@yourco.com</span></div>
         </div>
       </div>
     </div>
-  </main>
+  </section>
+
 </div>
 
 <script src="/editor-shell.js"></script>
-<script type="module">
+<script>
   const DEFAULTS = {
-    brandName: '', tagline: '', logoUrl: '', supportEmail: '', supportPhone: '',
-    colors: { primary:'#1B2B5B', primaryDark:'#111D3E', accent:'#00B4D8', accentDark:'#0096B7' },
+    brandName:'', tagline:'', logoUrl:'', supportEmail:'', supportPhone:'',
+    colors:{ primary:'#1B2B5B', primaryDark:'#111D3E', accent:'#00B4D8', accentDark:'#0096B7' },
   };
-
-  const state = {
-    widgetId: new URLSearchParams(location.search).get('id') || null,
-    name: 'Quote PDF',
-    config: JSON.parse(JSON.stringify(DEFAULTS)),
-  };
+  let C = JSON.parse(JSON.stringify(DEFAULTS));
 
   const $ = (id) => document.getElementById(id);
-  const isHttps = (u) => typeof u === 'string' && /^https:\/\/\S+$/i.test(u.trim());
-  const isHex = (v) => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v.trim());
+  const isHex = (v) => typeof v==='string' && /^#[0-9a-fA-F]{6}$/.test(v.trim());
+  const isUsableLogo = (v) => typeof v==='string' && (/^https:\/\//.test(v) || (/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,/i.test(v) && v.length<=700000));
   const escAttr = (s) => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
 
-  function markDirty(){ if (window.tgse && tgse.markDirty) tgse.markDirty(); }
-
-  // ---- Preview ----
-  function renderPreview() {
-    const c = state.config;
-    const mock = $('qmock');
-    mock.style.setProperty('--p',  isHex(c.colors.primary)     ? c.colors.primary     : DEFAULTS.colors.primary);
-    mock.style.setProperty('--pd', isHex(c.colors.primaryDark) ? c.colors.primaryDark : DEFAULTS.colors.primaryDark);
-    mock.style.setProperty('--a',  isHex(c.colors.accent)      ? c.colors.accent      : DEFAULTS.colors.accent);
-    mock.style.setProperty('--ad', isHex(c.colors.accentDark)  ? c.colors.accentDark  : DEFAULTS.colors.accentDark);
-
-    const name = c.brandName || 'Your Travel Co';
-    const tag = c.tagline || 'Your personalised holiday quote';
-    const phone = c.supportPhone || '01202 000000';
-    const email = c.supportEmail || 'hello@yourco.com';
-
-    // Logo replaces name when valid https
-    const brandLeft = mock.querySelector('.qbrand > div:first-child');
-    if (isHttps(c.logoUrl)) {
-      brandLeft.innerHTML = `<img class="qbrand-logo" src="${escAttr(c.logoUrl.trim())}" alt="${escAttr(name)}"><div class="qbrand-tag">${escAttr(tag)}</div>`;
-    } else {
-      brandLeft.innerHTML = `<div class="qbrand-name">${escAttr(name)}</div><div class="qbrand-tag">${escAttr(tag)}</div>`;
-    }
-    $('m-phone').textContent = phone;
-    $('m-email').textContent = email;
-    $('m-foot').textContent = name;
-    $('m-foot-phone').textContent = phone;
-    $('m-foot-email').textContent = email;
-  }
-
-  // ---- Bind brand text fields ----
-  [['brandName','brandName'],['tagline','tagline'],['logoUrl','logoUrl'],['supportEmail','supportEmail'],['supportPhone','supportPhone']]
-    .forEach(([id,key]) => {
-      $(id).addEventListener('input', (e) => { state.config[key] = e.target.value; renderPreview(); markDirty(); });
-    });
-
-  // ---- Bind colours ----
-  document.querySelectorAll('input[type="color"]').forEach(inp => {
-    inp.addEventListener('input', (e) => {
-      const key = e.target.dataset.key;
-      state.config.colors[key] = e.target.value;
-      $('hex-' + key).textContent = e.target.value.toUpperCase();
-      renderPreview(); markDirty();
-    });
+  const shell = tgse.init({
+    widgetType:'Quote PDF', widgetTag:'quote-pdf', scriptFile:'widget-quote-pdf.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), c||{}); C.colors = Object.assign({}, DEFAULTS.colors, (c&&c.colors)||{}); applyToUI(); render(); },
+    onThemeToggle: () => {},
+    onLoginSuccess: () => loadFromUrl(),
   });
 
-  // ---- Apply config to UI ----
-  function applyConfigToUI() {
-    const c = state.config;
-    $('brandName').value = c.brandName || '';
-    $('tagline').value = c.tagline || '';
-    $('logoUrl').value = c.logoUrl || '';
-    $('supportEmail').value = c.supportEmail || '';
-    $('supportPhone').value = c.supportPhone || '';
+  function render() {
+    const m = $('qp-mock');
+    m.style.setProperty('--p',  isHex(C.colors.primary)     ? C.colors.primary     : DEFAULTS.colors.primary);
+    m.style.setProperty('--pd', isHex(C.colors.primaryDark) ? C.colors.primaryDark : DEFAULTS.colors.primaryDark);
+    m.style.setProperty('--a',  isHex(C.colors.accent)      ? C.colors.accent      : DEFAULTS.colors.accent);
+    m.style.setProperty('--ad', isHex(C.colors.accentDark)  ? C.colors.accentDark  : DEFAULTS.colors.accentDark);
+    const name = C.brandName || 'Your Travel Co';
+    const tag = C.tagline || 'Your personalised holiday quote';
+    const phone = C.supportPhone || '01202 000000';
+    const email = C.supportEmail || 'hello@yourco.com';
+    const left = $('m-left');
+    if (isUsableLogo(C.logoUrl)) left.innerHTML = '<img class="m-logo" src="'+escAttr(C.logoUrl)+'" alt="'+escAttr(name)+'"><div class="m-tag">'+escAttr(tag)+'</div>';
+    else left.innerHTML = '<div class="m-name">'+escAttr(name)+'</div><div class="m-tag">'+escAttr(tag)+'</div>';
+    $('m-phone').textContent = phone; $('m-email').textContent = email;
+    $('m-foot').textContent = name; $('m-foot-phone').textContent = phone; $('m-foot-email').textContent = email;
+  }
+
+  function applyToUI() {
+    $('brandName').value = C.brandName||''; $('tagline').value = C.tagline||'';
+    $('supportEmail').value = C.supportEmail||''; $('supportPhone').value = C.supportPhone||'';
     ['primary','primaryDark','accent','accentDark'].forEach(k => {
-      const v = isHex(c.colors[k]) ? c.colors[k] : DEFAULTS.colors[k];
-      $('c-' + k).value = v;
-      $('hex-' + k).textContent = v.toUpperCase();
+      const v = isHex(C.colors[k]) ? C.colors[k] : DEFAULTS.colors[k];
+      $('c-'+k).value = v; $('hex-'+k).textContent = v.toUpperCase();
     });
-    renderPreview();
+    renderLogoState();
   }
 
-  // ---- Travelify creds status (metadata only — key never returned) ----
-  async function checkCreds() {
-    const area = $('creds-area');
-    try {
-      const res = await fetch('/api/client-integrations?service=Travelify', { credentials: 'include' });
-      if (res.status === 401) {
-        area.innerHTML = `<div class="creds-status missing"><span>Sign in to check your Travelify connection.</span></div>`;
-        return;
-      }
-      const data = await res.json().catch(() => ({}));
-      const integ = data && data.integration ? data.integration : null;
-      const ok = res.ok && integ && (integ.status === 'Active' || !!integ.appId);
-      if (ok) {
-        const appId = integ.appId ? `App ${escAttr(String(integ.appId))}` : 'connected';
-        area.innerHTML = `<div class="creds-status ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Travelify connected.<div class="creds-meta">${appId}</div></span></div>`;
-      } else {
-        area.innerHTML = `<div class="creds-status missing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>No Travelify credentials found. Add them in your account integrations so quotes can be generated.</span></div>`;
-      }
-    } catch (e) {
-      area.innerHTML = `<div class="creds-status missing"><span>Couldn't check your Travelify connection. Try again shortly.</span></div>`;
-    }
+  function renderLogoState() {
+    const has = isUsableLogo(C.logoUrl);
+    $('logo-drop').style.display = has ? 'none' : 'block';
+    $('logo-preview').classList.toggle('show', has);
+    if (has) { $('logo-thumb').src = C.logoUrl; }
   }
 
-  // ---- Embed ----
-  function updateEmbedCode() {
-    const id = state.widgetId;
-    if (!id) { $('embed-code').textContent = '<!-- Save the widget first to get embed code -->'; return; }
-    const host = location.origin;
-    $('embed-code').textContent = `<div data-tg-widget="quote-pdf" data-tg-id="${id}"></div>\n<script src="${host}/widget-quote-pdf.js"><\/script>`;
-  }
-  $('copy-embed').addEventListener('click', (e) => {
-    const id = state.widgetId;
-    if (!id) return;
-    navigator.clipboard.writeText($('embed-code').textContent).then(() => {
-      e.currentTarget.textContent = 'Copied!'; e.currentTarget.classList.add('copied');
-      setTimeout(() => { e.currentTarget.textContent = 'Copy code'; e.currentTarget.classList.remove('copied'); }, 1500);
-    });
+  // --- field bindings ---
+  [['brandName','brandName'],['tagline','tagline'],['supportEmail','supportEmail'],['supportPhone','supportPhone']]
+    .forEach(([id,key]) => $(id).addEventListener('input', e => { C[key] = e.target.value; render(); shell.markDirty(); }));
+  document.querySelectorAll('input[type="color"]').forEach(inp =>
+    inp.addEventListener('input', e => { const k=e.target.dataset.key; C.colors[k]=e.target.value; $('hex-'+k).textContent=e.target.value.toUpperCase(); render(); shell.markDirty(); }));
+
+  // --- logo upload ---
+  $('logo-drop').addEventListener('click', () => $('logo-input').click());
+  $('logo-remove').addEventListener('click', () => { C.logoUrl=''; $('logo-input').value=''; renderLogoState(); render(); shell.markDirty(); });
+  $('logo-input').addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!/^image\/(png|jpeg|jpg|gif|webp|svg\+xml)$/i.test(file.type)) { tgse.toast('Please choose a PNG, JPG, SVG, GIF or WebP image', 'err'); return; }
+    if (file.size > 500*1024) { tgse.toast('Logo must be under 500KB — try a smaller or compressed image', 'err'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUri = ev.target.result;
+      if (!isUsableLogo(dataUri)) { tgse.toast('That image could not be used — try another file', 'err'); return; }
+      C.logoUrl = dataUri;
+      $('logo-meta').textContent = file.name + ' · ' + Math.round(file.size/1024) + 'KB';
+      renderLogoState(); render(); shell.markDirty();
+      tgse.toast('Logo added — save to apply', 'ok');
+    };
+    reader.onerror = () => tgse.toast('Could not read that file', 'err');
+    reader.readAsDataURL(file);
   });
 
-  // ---- Load existing ----
-  async function loadWidget(id) {
-    try {
-      const res = await fetch('/api/widget-config?id=' + encodeURIComponent(id));
-      if (!res.ok) return;
-      const data = await res.json();
-      state.name = data.name || 'Quote PDF';
-      const nameEl = $('name-input'); if (nameEl) nameEl.value = state.name;
-      if (data.config) {
-        state.config = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), data.config);
-        state.config.colors = Object.assign({}, DEFAULTS.colors, data.config.colors || {});
-      }
-      applyConfigToUI();
-      updateEmbedCode();
-    } catch (e) { /* keep defaults */ }
+  // --- Travelify creds status ---
+  function checkCreds() {
+    const area = $('creds-area');
+    fetch('/api/client-integrations?service=Travelify', { credentials:'include' })
+      .then(res => { if (res.status===401) throw new Error('auth'); return res.json(); })
+      .then(data => {
+        const integ = data && data.integration ? data.integration : null;
+        const ok = integ && (integ.status==='Active' || !!integ.appId);
+        if (ok) {
+          const appId = integ.appId ? 'App '+escAttr(String(integ.appId)) : 'connected';
+          area.innerHTML = '<div class="qp-status ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Travelify connected.<div class="qp-meta">'+appId+'</div></span></div>';
+        } else {
+          area.innerHTML = '<div class="qp-status missing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>No Travelify credentials found. Add them in your account integrations so quotes can be generated.</span></div>';
+        }
+      })
+      .catch(() => { area.innerHTML = '<div class="qp-status missing"><span>Couldn\u2019t check your Travelify connection. Try again shortly.</span></div>'; });
   }
 
-  // ---- Shell init ----
-  function boot() {
-    window.tgse.init({
-      widgetType: 'Quote PDF',
-      widgetTag: 'quote-pdf',
-      scriptFile: 'widget-quote-pdf.js',
-      getConfig: () => state.config,
-      setConfig: (c) => { if (c) { state.config = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), c); state.config.colors = Object.assign({}, DEFAULTS.colors, c.colors || {}); applyConfigToUI(); } },
-      onAfterSave: (d) => { if (d && (d.widgetId || d.id)) { state.widgetId = d.widgetId || d.id; updateEmbedCode(); } },
-    });
-    applyConfigToUI();
-    updateEmbedCode();
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
     checkCreds();
-    const nameEl = $('name-input');
-    if (nameEl) {
-      if (!state.widgetId && !nameEl.value) nameEl.value = state.name;
-      nameEl.addEventListener('input', () => { state.name = nameEl.value.trim() || 'Quote PDF'; markDirty(); });
-    }
-    if (state.widgetId) loadWidget(state.widgetId);
+    if (!wId) { applyToUI(); render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d) {
+          if (d.config) { C = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), d.config); C.colors = Object.assign({}, DEFAULTS.colors, d.config.colors||{}); }
+          if (d.name) $('name-input').value = d.name;
+        }
+        applyToUI(); render();
+      })
+      .catch(() => { applyToUI(); render(); });
   }
 
-  if (window.tgse && window.tgse.onReady) window.tgse.onReady(boot);
-  else window.addEventListener('DOMContentLoaded', boot);
+  document.addEventListener('DOMContentLoaded', () => {
+    applyToUI(); render();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); else checkCreds(); });
+    } else { if (tgse.isLoggedIn()) loadFromUrl(); }
+  });
+  $('name-input')?.addEventListener('input', () => shell.markDirty());
 </script>
+
 </body>
 </html>
