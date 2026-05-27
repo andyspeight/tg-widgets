@@ -583,6 +583,71 @@ function renderDayDivider(item) {
   </div>`;
 }
 
+/**
+ * Highlights — a non-priced panel of bullet points, each { icon, text }.
+ * Informational only; no price, excluded from the item count.
+ */
+function renderHighlightsCard(item) {
+  const rows = Array.isArray(item.items) ? item.items : [];
+  if (!rows.length) return '';
+  const lis = rows.map(r => {
+    const icon = (r && r.icon) ? `<span class="hl-icon">${esc(r.icon)}</span>` : '';
+    const text = (r && r.text) ? esc(r.text) : '';
+    if (!text) return '';
+    return `<li class="hl-item">${icon}<span class="hl-text">${text}</span></li>`;
+  }).filter(Boolean).join('');
+  if (!lis) return '';
+  return `
+  <section class="info-card">
+    <div class="info-card-head"><div class="item-type">Trip highlights</div></div>
+    <ul class="hl-list">${lis}</ul>
+  </section>`;
+}
+
+/**
+ * Location — a non-priced destination spotlight: image, overview, why-go
+ * (selling angle), visa notes, local currency, and weather if present.
+ * Informational only; no price, excluded from the item count.
+ */
+function renderLocationCard(item) {
+  const MONTHS = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  const name = item.locationName || 'Destination';
+  const overview = item.overviewHtml || item.overview;
+  const angle = item.sellingAngleHtml || item.sellingAngle;
+  const visa = item.visaNotesHtml || item.visaNotes;
+  const imgSrc = item.imagePreview || item.imageUrl || '';
+  const month = Number(item.monthOfTravel);
+  const metaParts = [];
+  if (item.localCurrency) metaParts.push(`Local currency: <strong>${esc(item.localCurrency)}</strong>`);
+  if (month >= 1 && month <= 12) metaParts.push(`Travelling in <strong>${MONTHS[month]}</strong>`);
+
+  const weather = Array.isArray(item.weatherAverages) ? item.weatherAverages.filter(Boolean) : [];
+  const weatherHtml = weather.length
+    ? `<div class="loc-weather">${weather.map(w => {
+        const m = Number(w && w.month);
+        const label = (m >= 1 && m <= 12) ? MONTHS[m].slice(0, 3) : esc(w && w.label || '');
+        const temp = (w && (w.high != null || w.temp != null)) ? esc(String(w.high != null ? w.high : w.temp)) + '&deg;' : '';
+        return `<div class="loc-weather-cell"><div class="lw-month">${label}</div><div class="lw-temp">${temp}</div></div>`;
+      }).join('')}</div>`
+    : '';
+
+  return `
+  <section class="info-card">
+    <div class="info-card-intro">
+      <div class="info-card-head"><div class="item-type">Destination</div>
+        <h2 class="item-title">${esc(name)}</h2>
+      </div>
+      ${imgSrc ? `<div class="loc-image"><img src="${esc(imgSrc)}" alt="${esc(name)}" /></div>` : ''}
+      ${metaParts.length ? `<div class="loc-meta">${metaParts.join(' &middot; ')}</div>` : ''}
+    </div>
+    ${overview ? `<div class="loc-block">${sanitiseDescription(overview)}</div>` : ''}
+    ${angle ? `<div class="loc-block"><div class="loc-block-label">Why go</div>${sanitiseDescription(angle)}</div>` : ''}
+    ${visa ? `<div class="loc-block"><div class="loc-block-label">Visa &amp; entry</div>${sanitiseDescription(visa)}</div>` : ''}
+    ${weatherHtml}
+  </section>`;
+}
+
 /** Extra — a manually added add-on (festival, experience, upgrade). Carries a
  *  title, extraType, optional flag, date range, description and optional image. */
 function renderExtraCard(item, cur) {
@@ -721,6 +786,11 @@ function renderItem(item, index, currency) {
       return renderFeesCard(item, cur);
     case 'daydivider':
       return renderDayDivider(item);
+    case 'highlights':
+      return renderHighlightsCard(item);
+    case 'locations':
+    case 'location':
+      return renderLocationCard(item);
     default:
       break;
   }
@@ -808,7 +878,11 @@ function renderQuoteHTML(input, opts) {
   const itemsHTML = items.map((it, i) => renderItem(it, i, currency)).join('');
 
   // Day dividers are structural, not products — exclude them from the count.
-  const isDivider = (it) => String(it.type || '').toLowerCase() === 'daydivider'
+  // Non-priced, informational blocks — excluded from the "N items" count and
+  // never contribute to the total. Covers day dividers, trip highlights, and
+  // destination spotlights.
+  const NON_PRODUCT_TYPES = ['daydivider', 'highlights', 'locations', 'location'];
+  const isDivider = (it) => NON_PRODUCT_TYPES.includes(String(it.type || '').toLowerCase())
     || it.productType === 'DayDivider';
   const productCount = items.filter(it => !isDivider(it)).length;
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -928,6 +1002,26 @@ function renderQuoteHTML(input, opts) {
   .day-divider-title{font-size:14px;font-weight:700;color:var(--navy);}
   .day-divider-desc{font-size:12px;color:var(--slate);margin-top:4px;}
 
+  /* Info cards (non-priced): highlights + destination spotlight */
+  .info-card{border:1px solid var(--line);border-radius:14px;margin-bottom:24px;padding:18px 22px;break-inside:auto;}
+  .info-card-head{margin-bottom:10px;break-inside:avoid;break-after:avoid;}
+  .info-card-intro{break-inside:avoid;}
+  .info-card .item-title{margin:2px 0 0;font-size:18px;font-weight:700;color:var(--titles);letter-spacing:-0.01em;}
+  .hl-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px 22px;}
+  .hl-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink);break-inside:avoid;}
+  .hl-icon{flex-shrink:0;font-size:15px;line-height:1.3;}
+  .hl-text{line-height:1.4;}
+  .loc-image{margin:4px 0 12px;border-radius:8px;overflow:hidden;background:var(--bg3);break-inside:avoid;break-before:avoid;}
+  .loc-image img{width:100%;height:220px;object-fit:cover;display:block;}
+  .loc-meta{font-size:12px;color:var(--slate);margin-bottom:10px;}
+  .loc-meta strong{color:var(--ink);}
+  .loc-block{font-size:13px;color:var(--ink);line-height:1.55;margin-top:10px;break-inside:avoid;}
+  .loc-block-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--labels);font-weight:700;margin-bottom:3px;}
+  .loc-weather{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .loc-weather-cell{flex:1;min-width:48px;text-align:center;padding:6px 4px;background:var(--bg2);border-radius:8px;}
+  .lw-month{font-size:10px;text-transform:uppercase;color:var(--slate);font-weight:600;}
+  .lw-temp{font-size:14px;font-weight:700;color:var(--titles);}
+
   /* Details */
   .details{display:grid;grid-template-columns:1fr 1fr;column-gap:32px;row-gap:0;margin:0;padding:8px 22px;break-inside:avoid;}
   .detail{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--bg3);}
@@ -997,7 +1091,7 @@ function renderQuoteHTML(input, opts) {
   <section class="chips">
     <div class="chip">
       <div class="chip-label">Destination</div>
-      <div class="chip-value">${esc(q.destination || (items[0] ? items[0].location : '—'))}</div>
+      <div class="chip-value">${esc(q.destination || (items.find(it => !isDivider(it)) || {}).location || '—')}</div>
     </div>
     <div class="chip">
       <div class="chip-label">Travellers</div>
@@ -1005,7 +1099,7 @@ function renderQuoteHTML(input, opts) {
     </div>
     <div class="chip">
       <div class="chip-label">Items</div>
-      <div class="chip-value">${items.length} ${items.length === 1 ? 'item' : 'items'}</div>
+      <div class="chip-value">${productCount} ${productCount === 1 ? 'item' : 'items'}</div>
     </div>
   </section>
 
