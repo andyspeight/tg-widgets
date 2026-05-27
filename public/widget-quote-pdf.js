@@ -38,6 +38,21 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // Darken/lighten a #rrggbb hex by pct (negative = darker). Used to derive the
+  // button hover colour from the configured button background.
+  function shade(hex, pct) {
+    var m = /^#([0-9a-fA-F]{6})$/.exec(String(hex).trim());
+    if (!m) return hex;
+    var n = parseInt(m[1], 16);
+    var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    var f = function (c) {
+      var v = Math.round(c + (pct / 100) * (pct < 0 ? c : 255 - c));
+      return Math.max(0, Math.min(255, v));
+    };
+    var to2 = function (c) { return ('0' + c.toString(16)).slice(-2); };
+    return '#' + to2(f(r)) + to2(f(g)) + to2(f(b));
+  }
+
   /**
    * Parse the quote id + key from the current URL.
    * Official format (Travelify doc, May 2026) is query params:
@@ -229,6 +244,7 @@
     :host{ all:initial; display:inline-block; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; }\
     .tgqp-root{\
       --tgqp-navy:#1B2B5B; --tgqp-navy-dark:#111D3E; --tgqp-teal:#00B4D8; --tgqp-teal-dark:#0096B7;\
+      --tgqp-btn-bg:#00B4D8; --tgqp-btn-bg-hover:#0096B7; --tgqp-btn-text:#FFFFFF;\
       --tgqp-ink:#0F172A; --tgqp-sub:#475569; --tgqp-bg:#FFFFFF; --tgqp-border:#E2E8F0;\
       --tgqp-ok:#10B981; --tgqp-err:#EF4444; --tgqp-radius:10px;\
       display:inline-flex; gap:10px; align-items:center;\
@@ -243,11 +259,11 @@
     }\
     .tgqp-btn svg{ width:18px; height:18px; flex:0 0 auto; }\
     .tgqp-btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(0,180,216,.35); }\
-    .tgqp-btn--primary{ background:var(--tgqp-navy); color:#fff; }\
-    .tgqp-btn--primary:hover{ background:var(--tgqp-navy-dark); }\
+    .tgqp-btn--primary{ background:var(--tgqp-btn-bg); color:var(--tgqp-btn-text); }\
+    .tgqp-btn--primary:hover{ background:var(--tgqp-btn-bg-hover); }\
     .tgqp-btn--primary:active{ transform:scale(.98); }\
-    .tgqp-btn--ghost{ background:var(--tgqp-bg); color:var(--tgqp-ink); border-color:var(--tgqp-border); }\
-    .tgqp-btn--ghost:hover{ border-color:var(--tgqp-teal); color:var(--tgqp-teal-dark); }\
+    .tgqp-btn--ghost{ background:var(--tgqp-bg); color:var(--tgqp-btn-bg); border-color:var(--tgqp-btn-bg); }\
+    .tgqp-btn--ghost:hover{ background:var(--tgqp-btn-bg); color:var(--tgqp-btn-text); }\
     .tgqp-btn--ghost:active{ transform:scale(.98); }\
     .tgqp-btn[disabled]{ opacity:.6; cursor:default; pointer-events:none; }\
     .tgqp-spin{ animation:tgqp-rot .7s linear infinite; }\
@@ -258,8 +274,9 @@
     @media (prefers-reduced-motion: reduce){ .tgqp-btn{ transition:none; } .tgqp-spin{ animation:none; } }\
   ';
 
-  function TGQuotePdfButton(container) {
+  function TGQuotePdfButton(container, opts) {
     this.el = container;
+    this.opts = opts || {};
     this.api = container.getAttribute('data-tg-api') || DEFAULT_API;
     this.widgetId = container.getAttribute('data-tg-id') || '';
     this.label = container.getAttribute('data-tg-label') || 'Download PDF';
@@ -283,9 +300,16 @@
       btns += '<button class="tgqp-btn tgqp-btn--ghost" data-act="email" type="button">' +
         IC.mail + '<span>Email me a copy</span></button>';
     }
+    // Button colour overrides from the widget config (if loaded). Validate hex
+    // before injecting so a bad value can't break the inline style.
+    var isHex = function (v) { return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v.trim()); };
+    var btn = this.opts.button || {};
+    var styleVars = '';
+    if (isHex(btn.bg))   { styleVars += '--tgqp-btn-bg:' + btn.bg.trim() + ';--tgqp-btn-bg-hover:' + shade(btn.bg.trim(), -12) + ';'; }
+    if (isHex(btn.text)) { styleVars += '--tgqp-btn-text:' + btn.text.trim() + ';'; }
     this.shadow.innerHTML =
       '<style>' + STYLES + '</style>' +
-      '<div class="tgqp-root" data-theme="' + esc(this.theme) + '">' +
+      '<div class="tgqp-root" data-theme="' + esc(this.theme) + '"' + (styleVars ? ' style="' + styleVars + '"' : '') + '>' +
         btns +
         '<span class="tgqp-msg" data-msg hidden></span>' +
       '</div>';
@@ -405,12 +429,35 @@
     });
   };
 
+  // Resolve the public widget-config endpoint from the same origin as the API
+  // (DEFAULT_API is .../api/quote-pdf → .../api/widget-config).
+  function configApi() {
+    try { return DEFAULT_API.replace(/\/quote-pdf$/, '/widget-config'); }
+    catch (e) { return '/api/widget-config'; }
+  }
+
+  function mount(c, opts) {
+    if (c.__tgqpInit) return;
+    c.__tgqpInit = true;
+    try { new TGQuotePdfButton(c, opts); } catch (e) { /* fail silent on host page */ }
+  }
+
   function init() {
     var containers = document.querySelectorAll('[data-tg-widget="quote-pdf"]');
     containers.forEach(function (c) {
       if (c.__tgqpInit) return;
-      c.__tgqpInit = true;
-      try { new TGQuotePdfButton(c); } catch (e) { /* fail silent on host page */ }
+      var id = c.getAttribute('data-tg-id') || '';
+      if (!id) { mount(c, {}); return; } // demo / no id → default colours
+      // Fetch the widget's public config to pick up button branding. Render
+      // immediately on success; on any failure, still render with defaults so
+      // the button is never missing on the host page.
+      fetch(configApi() + '?id=' + encodeURIComponent(id))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          var cfg = (data && data.config) ? data.config : (data || {});
+          mount(c, { button: cfg.button });
+        })
+        .catch(function () { mount(c, {}); });
     });
   }
 
