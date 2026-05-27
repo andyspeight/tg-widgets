@@ -748,6 +748,17 @@ function renderItem(item, index, currency) {
  * Colours map onto the CSS custom properties the template already uses, so the
  * whole document re-themes from four values.
  */
+// A logo is usable if it's an https URL or an inline image data URI (the latter
+// is what the editor's file upload produces). Data URIs are capped so a huge
+// upload can't bloat every quote; oversized ones are dropped (no logo shown).
+function isUsableLogo(v) {
+  if (/^https:\/\//.test(v)) return true;
+  if (/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,/i.test(v)) {
+    return v.length <= 700000; // ~512KB decoded — plenty for a logo
+  }
+  return false;
+}
+
 function resolveBrand(opts) {
   const b = (opts && opts.brand) || {};
   const c = b.colors || {};
@@ -756,7 +767,7 @@ function resolveBrand(opts) {
   return {
     name: (b.name && String(b.name).trim()) || 'Your Travel Co',
     tagline: (b.tagline && String(b.tagline).trim()) || 'Your personalised holiday quote',
-    logoUrl: (typeof b.logoUrl === 'string' && /^https:\/\//.test(b.logoUrl.trim()))
+    logoUrl: (typeof b.logoUrl === 'string' && isUsableLogo(b.logoUrl.trim()))
       ? b.logoUrl.trim() : '',
     supportEmail: (b.supportEmail && String(b.supportEmail).trim()) || '',
     supportPhone: (b.supportPhone && String(b.supportPhone).trim()) || '',
