@@ -115,6 +115,16 @@ a{text-decoration:none;color:inherit}
 .soon-placeholder svg{width:40px;height:40px;stroke:var(--bd);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:8px}
 .soon-placeholder p{font-size:12px;font-weight:600}
 
+/* Preview-soon: widget is built (live preview kept) but not yet released to
+   this client. Corner flash + create disabled. Distinct from the hard
+   coming-soon above (which has no editor/demo yet). */
+.w-card{position:relative}
+.flash-soon{position:absolute;top:0;right:0;width:108px;height:108px;overflow:hidden;pointer-events:none;z-index:3}
+.flash-soon span{position:absolute;display:block;width:160px;padding:5px 0;top:22px;right:-40px;transform:rotate(45deg);background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;text-align:center;box-shadow:0 2px 6px rgba(217,119,6,.35)}
+.btn-create.is-soon{background:var(--bg);color:var(--mt);border:1px solid var(--bd);cursor:not-allowed}
+.btn-create.is-soon:hover{background:var(--bg)}
+.btn-create.is-soon svg{opacity:.6}
+
 /* Locked overlay */
 .locked-overlay{position:absolute;inset:0;background:rgba(255,255,255,.85);backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;border-radius:16px 16px 0 0}
 .locked-icon{width:48px;height:48px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid var(--bd)}
@@ -1060,17 +1070,30 @@ function renderCatalogue() {
   const plan = getUserPlan();
 
   grid.innerHTML = filtered.map((w, i) => {
-    const isLive = w.status === 'live';
-    const isSoon = w.status === 'coming-soon';
+    // Two layers of "status":
+    //  1. registry w.status — 'coming-soon' means the widget isn't built yet
+    //     (no editor/demo). Hard gate, applies to everyone. Old behaviour.
+    //  2. effectiveStatus(w) — the audience-aware release status from the
+    //     Airtable catalogue. Staff always get 'live'. A client may see a
+    //     fully-built ('live') widget as 'coming-soon' here, in which case we
+    //     keep its preview but disable creation. This is `previewSoon`.
+    const isBuilt = w.status === 'live';
+    const isUnbuilt = w.status === 'coming-soon';           // genuinely not ready
+    const release = effectiveStatus(w);                      // 'live' | 'coming-soon'
+    const previewSoon = isBuilt && release === 'coming-soon'; // built, but withheld from this viewer
+
     const access = signedIn ? getAccess(w) : null;
-    const isLocked = signedIn && access === 0;
+    const isLocked = signedIn && access === 0 && !previewSoon; // tier-lock; preview-soon takes precedence visually
     const minTier = getMinTier(w);
-    const soonCls = isSoon ? ' soon' : '';
+    // Card greys-out only for the genuinely-unbuilt state, not preview-soon
+    // (preview-soon keeps a full-colour live preview, just with a flash).
+    const soonCls = isUnbuilt ? ' soon' : '';
 
     let preview = '';
-    if (isLive && !isLocked) {
+    if (isBuilt && !isLocked) {
+      // Live preview shown for both fully-live AND preview-soon widgets.
       preview = `<div class="w-card-preview"><div class="w-card-preview-inner" id="prev_${w.id}"></div></div>`;
-    } else if (isLive && isLocked) {
+    } else if (isBuilt && isLocked) {
       preview = `<div class="w-card-preview" style="position:relative">
         <div class="w-card-preview-inner" id="prev_${w.id}" style="filter:blur(3px);opacity:.5"></div>
         <div class="locked-overlay">
@@ -1083,9 +1106,13 @@ function renderCatalogue() {
       preview = `<div class="w-card-preview"><span class="soon-badge">Coming Soon</span><div class="soon-placeholder"><svg viewBox="${w.icon.viewBox}">${w.icon.paths}</svg><p>${w.name}</p></div></div>`;
     }
 
-    // Access badge (only when signed in)
+    // Corner flash for the preview-soon state.
+    const flash = previewSoon ? `<div class="flash-soon"><span>Coming Soon</span></div>` : '';
+
+    // Access badge (only when signed in, and not while preview-soon — the flash
+    // already tells the story and a tier badge would be misleading).
     let accessBadge = '';
-    if (signedIn && w.access) {
+    if (signedIn && w.access && !previewSoon) {
       const al = accessLabel(access);
       accessBadge = `<div class="access-badge ${al.cls}"><svg viewBox="0 0 24 24">${al.icon}</svg>${al.text}</div>`;
     }
@@ -1098,10 +1125,15 @@ function renderCatalogue() {
     const previewBtn = w.demoUrl
       ? `<button class="w-card-btn btn-preview" onclick="event.stopPropagation();location.href='${w.demoUrl}'"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>`
       : '';
-    if (isLive && !isLocked) {
+
+    if (previewSoon) {
+      // Built but withheld from this viewer: preview allowed, create disabled.
+      actions = `<button class="w-card-btn btn-create is-soon" disabled aria-disabled="true" title="This widget is coming soon" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Coming Soon</button>
+        ${previewBtn}`;
+    } else if (isBuilt && !isLocked) {
       actions = `<button class="w-card-btn btn-create" onclick="event.stopPropagation();${signedIn?`location.href='${w.editorUrl}'`:`openSignIn()`}"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>${signedIn?'Create Widget':'Sign In to Create'}</button>
         ${previewBtn}`;
-    } else if (isLive && isLocked) {
+    } else if (isBuilt && isLocked) {
       // If a demo exists, show just the Preview button. If not, render nothing
       // (the badge + description already communicate that this widget is
       // locked behind a higher tier).
@@ -1110,12 +1142,13 @@ function renderCatalogue() {
       actions = `<button class="w-card-btn btn-soon">Coming Soon</button>`;
     }
 
-    // Only make the card click-through when a demo URL exists. Otherwise the
-    // whole card would try to navigate to `undefined` and 404.
-    const cardOnClick = (isLive && !isLocked && w.demoUrl)
+    // Card is click-through to the demo for live AND preview-soon widgets
+    // (both have a working demo). Not for locked or unbuilt.
+    const cardOnClick = (isBuilt && !isLocked && w.demoUrl)
       ? `onclick="location.href='${w.demoUrl}'"`
       : '';
     return `<div class="w-card${soonCls} fade-up" style="animation-delay:${i*60}ms" ${cardOnClick}>
+      ${flash}
       ${preview}
       <div class="w-card-body">
         <div class="w-card-head">
@@ -1129,7 +1162,8 @@ function renderCatalogue() {
     </div>`;
   }).join('');
 
-  // Load live mini-previews
+  // Load live mini-previews — for every built widget (live or preview-soon),
+  // since preview-soon keeps its working preview.
   setTimeout(() => {
     filtered.filter(w => w.status === 'live').forEach(w => loadMiniPreview(w));
   }, 200);
@@ -1143,6 +1177,45 @@ function setFilter(cat) {
 
 /* ═══ ACCESS HELPERS ═══ */
 function getUserPlan() { return userData?.plan || null; }
+
+/* Catalogue release status, fetched from /api/widget-catalogue on load.
+   Maps widget id → 'live' | 'coming-soon'. Empty until loaded; the registry's
+   own `status` is the fallback. */
+let catalogueStatus = {};
+
+/* Staff bypass: a signed-in user whose email belongs to a Travelgenix /
+   Agendas domain sees every widget as fully live, regardless of the catalogue.
+   This mirrors the server-side STAFF_DOMAINS gate in /api/widget-catalogue.js —
+   keep the two lists in sync. The browser check is convenience only; the API
+   is the real gate on who can CHANGE statuses. */
+const STAFF_DOMAINS = ['travelgenix.io', 'travelgenix.com', 'agendas.group'];
+function isStaff() {
+  const email = (userData && userData.email || '').toLowerCase().trim();
+  const at = email.lastIndexOf('@');
+  if (at === -1) return false;
+  return STAFF_DOMAINS.includes(email.slice(at + 1));
+}
+
+/* The status this viewer should see for a widget.
+   - staff always see 'live'
+   - otherwise the Airtable catalogue wins, falling back to the registry. */
+function effectiveStatus(widget) {
+  if (isStaff()) return 'live';
+  return catalogueStatus[widget.id] || widget.status || 'live';
+}
+
+async function loadCatalogueStatus() {
+  try {
+    const r = await fetch('/api/widget-catalogue', { headers: { 'Accept': 'application/json' } });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d && d.statuses && typeof d.statuses === 'object') catalogueStatus = d.statuses;
+  } catch (e) {
+    // Fail open — dashboard falls back to registry statuses.
+    console.warn('[index] catalogue status load failed:', e && e.message);
+  }
+}
+
 function getAccess(widget) {
   // -1 = unlimited, 0 = locked, positive = max widgets allowed
   const plan = getUserPlan();
@@ -2920,6 +2993,12 @@ function esc(s){const d=document.createElement('div');d.textContent=s||'';return
 
 /* ═══ INIT ═══ */
 render();
+
+// Fetch the catalogue release statuses in parallel, then re-render so any
+// preview-soon widgets pick up their corner flash + disabled create. Runs
+// regardless of auth — statuses are public; the staff bypass is applied
+// client-side once we know who's signed in.
+loadCatalogueStatus().then(() => { render(); });
 
 // Cookie auth check runs in parallel. If it resolves to "signed in" and
 // we weren't already, re-render to show the user's widgets / dashboard
