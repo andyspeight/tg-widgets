@@ -35,6 +35,9 @@ const F = {
   // which left dashboard-added countries invisible to the sweep (Enabled
   // unticked) and under-specified (no Name / AppId / MaxOffers / Type).
   name:        'fldLYWrF0S1H9MNoh', // primary text — the display name
+  country:     'fldgjDRDYDWuCX4Kc', // second name field shown as the "Country" column
+  lat:         'fldM6fwLEUTvs4IHL', // number — reference latitude (map plots from offer coords, not this)
+  lng:         'flddZOPaWEkBVBAj9', // number — reference longitude
   enabled:     'fld03385gehh0UjGD', // checkbox — cron filters on {Enabled}=TRUE()
   appId:       'fld6G0QyB5eWVvH6n', // text — buildPayload reads f.AppId
   type:        'fldFP3tVEaGPDCyRg', // singleSelect — buildPayload reads f.Type ('Packages')
@@ -97,6 +100,16 @@ function cleanMaxOffers(v) {
   const n = Number(v);
   // Travelify caps per request; keep between 1 and 250.
   return Number.isFinite(n) && n >= 1 && n <= 250 ? Math.round(n) : undefined;
+}
+function cleanLat(v) {
+  if (v === '' || v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) && n >= -90 && n <= 90 ? n : undefined;
+}
+function cleanLng(v) {
+  if (v === '' || v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) && n >= -180 && n <= 180 ? n : undefined;
 }
 
 // ── Summary (offer counts) read ─────────────────────────────────
@@ -177,6 +190,8 @@ async function listDestinations(req, res) {
       enabled: rec.fields?.[F.enabled] === true,
       maxOffers: rec.fields?.[F.maxOffers] ?? null,
       appId: rec.fields?.[F.appId] || null,
+      lat: rec.fields?.[F.lat] ?? null,
+      lng: rec.fields?.[F.lng] ?? null,
       airports: airportsStr ? airportsStr.split(',').map(s => s.trim()).filter(Boolean) : [],
       region: rec.fields?.[F.region] || null,
       datesMin: rec.fields?.[F.datesMin] ?? null,
@@ -216,6 +231,10 @@ async function createDestination(req, res) {
   if (maxOffers === undefined) return res.status(400).json({ error: 'Max offers must be a number between 1 and 250.' });
   if (maxOffers == null) maxOffers = DEFAULT_MAX_OFFERS;
   const name = b.name ? String(b.name).trim().slice(0, 60) : countryName(cc);
+  const lat = cleanLat(b.lat);
+  const lng = cleanLng(b.lng);
+  if (lat === undefined) return res.status(400).json({ error: 'Latitude must be between -90 and 90.' });
+  if (lng === undefined) return res.status(400).json({ error: 'Longitude must be between -180 and 180.' });
 
   // Write the COMPLETE field set the cron relies on. The critical addition is
   // Enabled=true — without it the cron's {Enabled}=TRUE() filter skips the row
@@ -224,6 +243,7 @@ async function createDestination(req, res) {
     [F.countryCode]: cc,
     [F.region]: region,
     [F.name]: name,
+    [F.country]: name,
     [F.enabled]: true,
     [F.appId]: appId,
     [F.type]: DEFAULT_TYPE,
@@ -232,6 +252,8 @@ async function createDestination(req, res) {
     [F.datesMax]: datesMax,
   };
   if (airports) fields[F.airports] = airports;
+  if (lat != null) fields[F.lat] = lat;
+  if (lng != null) fields[F.lng] = lng;
 
   const resp = await fetch(`${AIRTABLE_API}/${BASE_ID}/${MAPSEARCHES_TABLE}`, {
     method: 'POST',
@@ -278,9 +300,23 @@ async function updateDestination(req, res) {
     if (m === undefined) return res.status(400).json({ error: 'Max offers must be a number between 1 and 250.' });
     if (m != null) fields[F.maxOffers] = m;
   }
-  if (b.name !== undefined) fields[F.name] = String(b.name).trim().slice(0, 60);
+  if (b.name !== undefined) {
+    const nm = String(b.name).trim().slice(0, 60);
+    fields[F.name] = nm;
+    fields[F.country] = nm;
+  }
   if (b.appId !== undefined) fields[F.appId] = String(b.appId).trim().slice(0, 20);
   if (b.enabled !== undefined) fields[F.enabled] = b.enabled === true || b.enabled === 'true';
+  if (b.lat !== undefined) {
+    const v = cleanLat(b.lat);
+    if (v === undefined) return res.status(400).json({ error: 'Latitude must be between -90 and 90.' });
+    if (v != null) fields[F.lat] = v;
+  }
+  if (b.lng !== undefined) {
+    const v = cleanLng(b.lng);
+    if (v === undefined) return res.status(400).json({ error: 'Longitude must be between -180 and 180.' });
+    if (v != null) fields[F.lng] = v;
+  }
   if (!Object.keys(fields).length) return res.status(400).json({ error: 'No valid fields to update.' });
 
   const resp = await fetch(`${AIRTABLE_API}/${BASE_ID}/${MAPSEARCHES_TABLE}`, {
