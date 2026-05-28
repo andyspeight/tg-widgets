@@ -461,6 +461,25 @@ export default async function handler(req, res) {
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
       const user = auth.user;
 
+      // Capture the OWNING-CLIENT provenance BEFORE hydration runs.
+      //
+      // user.clientId is trustworthy ONLY when it came from the JWT — i.e. the
+      // client the user actually signed into (their active session). If it's
+      // absent here, hydrateLegacyUserFields() will fill it from the user's
+      // first linked client (clientIds[0]), which is an ARBITRARY pick for a
+      // staff member who belongs to several clients — exactly the ambiguity
+      // that caused the wrong-account credential bug.
+      //
+      // So we record whether clientId was JWT-provided, and only stamp the
+      // widget's ClientRecordId when it was. When it wasn't, we deliberately
+      // leave ClientRecordId blank: the widget falls back to the ClientEmail
+      // resolution path (no worse than today) and fails LOUDLY rather than
+      // resolving confidently to the wrong account.
+      const ownerClientIdFromSession =
+        (typeof user.clientId === 'string' && /^rec[A-Za-z0-9]{14}$/.test(user.clientId))
+          ? user.clientId
+          : null;
+
       // Cookie-issued JWTs don't carry email or plan in the payload.
       // Fill them in from Airtable before we use them for rate limiting,
       // ownership checks, plan limits, or persistence.
@@ -614,22 +633,39 @@ export default async function handler(req, res) {
       // IDs and collisions with future auto-generated ones.
       const newWidgetId = `tgw_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const createUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`;
+      // Build the create fields. ClientEmail is retained for backward
+      // compatibility and the existing edit-ownership check, but the
+      // AUTHORITATIVE owner is ClientRecordId — the record ID of the client
+      // whose workspace this widget was created in. Credential-using widgets
+      // (Quote PDF, My Booking) resolve Travelify creds from ClientRecordId
+      // first, which is why stamping it correctly at birth matters.
+      // Only stamped when the session gave us a trustworthy client (see
+      // ownerClientIdFromSession above); omitted otherwise so we never write
+      // a guessed/wrong owner.
+      const createFields = {
+        WidgetID: newWidgetId,
+        Name: safeName,
+        Config: configStr,
+        Status: 'Active',
+        WidgetType: safeType,
+        ClientName: user.clientName || '',
+        ClientEmail: user.email,
+        CreatedAt: new Date().toISOString(),
+        UpdatedAt: new Date().toISOString(),
+      };
+      if (ownerClientIdFromSession) {
+        createFields.ClientRecordId = ownerClientIdFromSession;
+      } else {
+        console.warn(`[widget-config] Creating widget ${newWidgetId} WITHOUT ClientRecordId ` +
+          `— no trustworthy session clientId (user=${user.email}). ` +
+          `Credential resolution will fall back to ClientEmail.`);
+      }
       const createResp = await fetch(createUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({
           records: [{
-            fields: {
-              WidgetID: newWidgetId,
-              Name: safeName,
-              Config: configStr,
-              Status: 'Active',
-              WidgetType: safeType,
-              ClientName: user.clientName || '',
-              ClientEmail: user.email,
-              CreatedAt: new Date().toISOString(),
-              UpdatedAt: new Date().toISOString(),
-            },
+            fields: createFields,
           }],
         }),
       });
