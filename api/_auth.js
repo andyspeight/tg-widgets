@@ -403,6 +403,37 @@ function packCredentials(rec) {
   };
 }
 
+// Resolve credentials directly from a Clients record ID. This is the PRIMARY
+// resolution path: a widget records the ID of the client that OWNS it (captured
+// at save time from the authenticated session's clientId), and we read that
+// client's Travelify credentials with no email guessing involved.
+//
+// Why this exists: resolving by email is ambiguous for staff. A staff member
+// (e.g. an account manager) belongs to MANY clients via the Users table, so
+// "find a client for this email" can resolve to the wrong account. Keying off
+// the owning client's record ID removes that ambiguity entirely.
+//
+// Returns { appId, apiKey, clientName, recordId } or null. Validates the ID
+// shape before calling Airtable (fail closed on anything that isn't a recXXX).
+export async function lookupClientCredentialsByRecordId(recordId) {
+  if (!recordId || typeof recordId !== 'string') return null;
+  // Airtable record IDs are "rec" + 14 url-safe chars. Reject anything else so
+  // a malformed value can never be interpolated into the request path.
+  if (!/^rec[A-Za-z0-9]{14}$/.test(recordId)) return null;
+
+  const headers = buildAirtableHeaders();
+  const url = `${TG_AIRTABLE_API}/${TG_AIRTABLE_BASE}/${TG_CLIENTS_TABLE}/${recordId}`
+    + `?returnFieldsByFieldId=true`;
+  try {
+    const resp = await fetch(url, { headers });
+    if (!resp.ok) return null;
+    const clientRec = await resp.json();
+    return packCredentials(clientRec);
+  } catch {
+    return null;
+  }
+}
+
 export async function lookupClientCredentialsByEmail(clientEmail) {
   if (!clientEmail || typeof clientEmail !== 'string') return null;
   const safe = sanitiseForFormula(clientEmail.toLowerCase());
