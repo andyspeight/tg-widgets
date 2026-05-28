@@ -40,7 +40,7 @@
  *   run can never blank the map.
  */
 
-import { setJson, getJson, setString, configured } from '../_redis.js';
+import { setJson, getJson, setString, getString, configured } from '../_redis.js';
 
 // ── Config ────────────────────────────────────────────────────────────────
 const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
@@ -52,7 +52,7 @@ const DEMO_APP_ID = '250';
 const PER_REQUEST_TIMEOUT_MS = 10000;
 const REQUEST_CONCURRENCY = 4;     // parallel proxy calls within a country
 const HOURLY_FRACTION = 0.15;      // ~15% of countries per hourly run
-const MAX_AGE_DAYS = 4;            // purge offers older than this
+const MAX_AGE_HOURS = 70;          // purge offers older than this (was 4 days / 96h)
 // Trip-duration bounds. Travelify returns offers of varying real durations and
 // sort:price:asc surfaces the cheapest — which can be a 1-night stay. We keep
 // holiday-length offers only: 2 nights (so short city breaks still qualify) up
@@ -64,8 +64,37 @@ const MAX_NIGHTS = 28;
 const SUMMARY_KEY = 'map:offers:v1';
 const LASTRUN_KEY = 'map:offers:lastRunAt';
 const CURSOR_KEY = 'map:offers:cursor';
+const REFRESH_INTERVAL_KEY = 'tg:wm:refresh-interval-mins';
+const DEFAULT_INTERVAL_MINS = 45;
+const ALLOWED_INTERVALS = [15, 30, 45, 60, 120, 240, 1440];
 const countryKey = (cc) => `offers:packages:${cc}`;
 const resortsKey = (cc) => `map:resorts:${cc}`;
+
+/**
+ * Read the operator-configured min interval between re-sweeps of the same
+ * country (set from the admin dashboard). Returns minutes; falls back to the
+ * default if unset or off the allow-list. This is what makes the dashboard
+ * "Refresh every…" dropdown actually do something: a country whose stored
+ * offers were refreshed less than this many minutes ago is skipped this run,
+ * so the rotation spends its effort on the stalest countries instead.
+ */
+async function getRefreshIntervalMins() {
+  try {
+    const raw = await getString(REFRESH_INTERVAL_KEY);
+    const n = Number(raw);
+    return ALLOWED_INTERVALS.includes(n) ? n : DEFAULT_INTERVAL_MINS;
+  } catch {
+    return DEFAULT_INTERVAL_MINS;
+  }
+}
+
+/** True if this country's stored offers are younger than intervalMins. */
+function isFresh(stored, intervalMins, now = Date.now()) {
+  if (!stored || !stored.refreshedAt) return false;
+  const t = Date.parse(stored.refreshedAt);
+  if (!Number.isFinite(t)) return false;
+  return (now - t) < intervalMins * 60 * 1000;
+}
 
 // ── Tested offer parser (unit-verified 22 May 2026) ─────────────────────────
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
@@ -200,13 +229,13 @@ function mergeOffers(existing, fresh) {
   return Array.from(byId.values());
 }
 function travelDateOf(offer) { return offer.outboundDate || offer.checkinDate || null; }
-function purgeOffers(offers, now = new Date(), maxAgeDays = MAX_AGE_DAYS) {
+function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS) {
   const nowMs = now.getTime();
-  const maxAgeMs = maxAgeDays * 24 * 60 * 60 * 1000;
+  const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
   return (offers || []).filter(o => {
     // Drop offers outside the holiday-length range. This also clears any
     // pre-existing out-of-range offers stored before the nights filter existed,
-    // so the fix takes effect on the next sweep rather than over MAX_AGE_DAYS.
+    // so the fix takes effect on the next sweep rather than over MAX_AGE_HOURS.
     if (!withinNightsRange(o)) return false;
     const td = travelDateOf(o);
     if (td) { const t = Date.parse(td); if (Number.isFinite(t) && t < nowMs) return false; }
@@ -505,6 +534,46 @@ export default async function handler(req, res) {
       return res.status(500).json({ ok: false, error: 'Redis not configured' });
     }
 
+    // ── Single-country sweep (?country=XX) ────────────────────────────────
+    // Powers the per-row "refresh" button in the admin dashboard. Sweeps
+    // exactly the one requested country and rebuilds the summary. This is a
+    // deliberate manual override, so it ALWAYS runs regardless of the
+    // configured refresh interval (the operator asked for it now).
+    const reqCountry = q.country ? String(q.country).toUpperCase().trim() : null;
+    if (reqCountry) {
+      if (!/^[A-Z]{2}$/.test(reqCountry)) {
+        return res.status(400).json({ ok: false, error: 'country must be a 2-letter code' });
+      }
+      const row = rows.find(r => ((r.fields || {}).CountryCode || '').trim().toUpperCase() === reqCountry);
+      if (!row) {
+        return res.status(404).json({ ok: false, error: `country ${reqCountry} is not an enabled destination` });
+      }
+      const now = new Date();
+      const swept = await sweepCountry(row);
+      let stored = 'unchanged', fetched = 0;
+      if (swept.ok) {
+        const key = countryKey(swept.cc);
+        const existing = (await getJson(key)) || { offers: [] };
+        const surviving = updateCountryOffers(existing.offers || [], swept.freshOffers, now);
+        await setJson(key, { offers: surviving, refreshedAt: now.toISOString() });
+        stored = surviving.length;
+        fetched = swept.freshOffers.length;
+      }
+      const summary = await rebuildSummary(rows);
+      return res.status(200).json({
+        ok: true,
+        mode: 'country',
+        country: reqCountry,
+        swept: { cc: swept.cc, ok: swept.ok, fetched, stored, codeResults: swept.codeResults, error: swept.ok ? null : (swept.error || 'all requests failed') },
+        summary,
+        durationMs: Date.now() - startedAt,
+      });
+    }
+
+    // ── Read the operator-configured min re-sweep interval ────────────────
+    const intervalMins = await getRefreshIntervalMins();
+    const nowMs = Date.now();
+
     // ── Select the slice to sweep this run ────────────────────────────────
     const full = q.full === '1' || q.full === 'true';
     const { slice, nextCursor } = await selectSlice(rows, full);
@@ -512,7 +581,20 @@ export default async function handler(req, res) {
     // ── Sweep each country in the slice, store per-country with merge+purge ─
     const now = new Date();
     const perCountry = [];
+    let skippedFresh = 0;
     for (const row of slice) {
+      const rowCC = ((row.fields || {}).CountryCode || '').trim().toUpperCase();
+      // Interval gate: on a normal (rotating) run, skip any country whose
+      // offers are younger than the configured interval. A full sweep (?full=1)
+      // ignores the gate — it's the guaranteed complete refresh.
+      if (!full && rowCC) {
+        const existingForFreshness = await getJson(countryKey(rowCC));
+        if (isFresh(existingForFreshness, intervalMins, nowMs)) {
+          skippedFresh++;
+          perCountry.push({ cc: rowCC, ok: true, skipped: 'fresh', stored: (existingForFreshness.offers || []).length });
+          continue;
+        }
+      }
       const swept = await sweepCountry(row);
       if (!swept.cc || swept.cc === '(none)') {
         perCountry.push({ cc: swept.cc, ok: false, error: swept.error, stored: 0 });
@@ -544,7 +626,9 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       mode: full ? 'full' : 'hourly',
+      intervalMins,
       sweptCountries: slice.length,
+      skippedFresh,
       totalCountries: rows.length,
       summary,
       perCountry,
