@@ -31,9 +31,37 @@ const F = {
   region:      'fldUW6lZA8fLAuIEg',
   datesMin:    'fldmMohQbphR3MkBv',
   datesMax:    'fldRhDq6GDvXBoGTB',
+  // Fields the cron also relies on — were previously NOT written on create,
+  // which left dashboard-added countries invisible to the sweep (Enabled
+  // unticked) and under-specified (no Name / AppId / MaxOffers / Type).
+  name:        'fldLYWrF0S1H9MNoh', // primary text — the display name
+  enabled:     'fld03385gehh0UjGD', // checkbox — cron filters on {Enabled}=TRUE()
+  appId:       'fld6G0QyB5eWVvH6n', // text — buildPayload reads f.AppId
+  type:        'fldFP3tVEaGPDCyRg', // singleSelect — buildPayload reads f.Type ('Packages')
+  maxOffers:   'fldjkrF91EeKXUnnB', // number — buildPayload reads f.MaxOffers
 };
 
+// Sensible defaults for a new destination so the cron can poll it immediately.
+const DEFAULT_APP_ID = '250';
+const DEFAULT_TYPE = 'Packages';
+const DEFAULT_MAX_OFFERS = 250;
+const DEFAULT_DATES_MIN = 1;
+const DEFAULT_DATES_MAX = 700;
+
 const VALID_REGIONS = ['Europe', 'Africa', 'Middle East', 'Asia', 'Americas', 'Oceania'];
+
+// Resolve a country code to a display name for the Name field. Uses the
+// platform Intl data where available (Node 18+ has full ICU), falling back to
+// the raw code so a row always gets a sensible Name even for edge cases.
+function countryName(cc) {
+  try {
+    const dn = new Intl.DisplayNames(['en'], { type: 'region' });
+    const name = dn.of(cc);
+    return name && name !== cc ? name : cc;
+  } catch {
+    return cc;
+  }
+}
 
 function airtableHeaders() {
   const key = process.env.AIRTABLE_KEY;
@@ -63,6 +91,12 @@ function cleanDays(v) {
   if (v === '' || v == null) return null;
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 && n <= 800 ? Math.round(n) : undefined; // undefined = invalid
+}
+function cleanMaxOffers(v) {
+  if (v === '' || v == null) return null;
+  const n = Number(v);
+  // Travelify caps per request; keep between 1 and 250.
+  return Number.isFinite(n) && n >= 1 && n <= 250 ? Math.round(n) : undefined;
 }
 
 // ── Summary (offer counts) read ─────────────────────────────────
@@ -139,6 +173,10 @@ async function listDestinations(req, res) {
     return {
       id: rec.id,
       countryCode: cc,
+      name: rec.fields?.[F.name] || null,
+      enabled: rec.fields?.[F.enabled] === true,
+      maxOffers: rec.fields?.[F.maxOffers] ?? null,
+      appId: rec.fields?.[F.appId] || null,
       airports: airportsStr ? airportsStr.split(',').map(s => s.trim()).filter(Boolean) : [],
       region: rec.fields?.[F.region] || null,
       datesMin: rec.fields?.[F.datesMin] ?? null,
@@ -163,14 +201,37 @@ async function createDestination(req, res) {
   if (!cc) return res.status(400).json({ error: 'A valid 2-letter country code is required.' });
   if (!region) return res.status(400).json({ error: 'A valid region is required.' });
   const airports = cleanAirports(b.airports);
-  const datesMin = cleanDays(b.datesMin);
-  const datesMax = cleanDays(b.datesMax);
+  let datesMin = cleanDays(b.datesMin);
+  let datesMax = cleanDays(b.datesMax);
   if (datesMin === undefined || datesMax === undefined) return res.status(400).json({ error: 'Date windows must be numbers between 0 and 800.' });
+  // Default the departure window if the operator left it blank, so the row is
+  // always pollable. (Previously a blank window produced a row the cron could
+  // not use sensibly.)
+  if (datesMin == null) datesMin = DEFAULT_DATES_MIN;
+  if (datesMax == null) datesMax = DEFAULT_DATES_MAX;
 
-  const fields = { [F.countryCode]: cc, [F.region]: region };
+  // Optional overrides; otherwise fall back to the platform defaults.
+  const appId = b.appId ? String(b.appId).trim().slice(0, 20) : DEFAULT_APP_ID;
+  let maxOffers = cleanMaxOffers(b.maxOffers);
+  if (maxOffers === undefined) return res.status(400).json({ error: 'Max offers must be a number between 1 and 250.' });
+  if (maxOffers == null) maxOffers = DEFAULT_MAX_OFFERS;
+  const name = b.name ? String(b.name).trim().slice(0, 60) : countryName(cc);
+
+  // Write the COMPLETE field set the cron relies on. The critical addition is
+  // Enabled=true — without it the cron's {Enabled}=TRUE() filter skips the row
+  // entirely, which is why dashboard-added countries never returned offers.
+  const fields = {
+    [F.countryCode]: cc,
+    [F.region]: region,
+    [F.name]: name,
+    [F.enabled]: true,
+    [F.appId]: appId,
+    [F.type]: DEFAULT_TYPE,
+    [F.maxOffers]: maxOffers,
+    [F.datesMin]: datesMin,
+    [F.datesMax]: datesMax,
+  };
   if (airports) fields[F.airports] = airports;
-  if (datesMin != null) fields[F.datesMin] = datesMin;
-  if (datesMax != null) fields[F.datesMax] = datesMax;
 
   const resp = await fetch(`${AIRTABLE_API}/${BASE_ID}/${MAPSEARCHES_TABLE}`, {
     method: 'POST',
@@ -182,7 +243,7 @@ async function createDestination(req, res) {
     return res.status(502).json({ error: `Create failed (${resp.status})`, detail: body.slice(0, 200) });
   }
   const data = await resp.json();
-  return res.status(201).json({ ok: true, id: data.records?.[0]?.id || null });
+  return res.status(201).json({ ok: true, id: data.records?.[0]?.id || null, name, enabled: true });
 }
 
 async function updateDestination(req, res) {
@@ -212,6 +273,14 @@ async function updateDestination(req, res) {
     if (d === undefined) return res.status(400).json({ error: 'Invalid datesMax.' });
     fields[F.datesMax] = d;
   }
+  if (b.maxOffers !== undefined) {
+    const m = cleanMaxOffers(b.maxOffers);
+    if (m === undefined) return res.status(400).json({ error: 'Max offers must be a number between 1 and 250.' });
+    if (m != null) fields[F.maxOffers] = m;
+  }
+  if (b.name !== undefined) fields[F.name] = String(b.name).trim().slice(0, 60);
+  if (b.appId !== undefined) fields[F.appId] = String(b.appId).trim().slice(0, 20);
+  if (b.enabled !== undefined) fields[F.enabled] = b.enabled === true || b.enabled === 'true';
   if (!Object.keys(fields).length) return res.status(400).json({ error: 'No valid fields to update.' });
 
   const resp = await fetch(`${AIRTABLE_API}/${BASE_ID}/${MAPSEARCHES_TABLE}`, {
