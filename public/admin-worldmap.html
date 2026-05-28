@@ -255,6 +255,8 @@
   .field .hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
   .field-row { display: flex; gap: 12px; }
   .field-row .field { flex: 1; }
+  .check-inline { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); cursor: pointer; padding: 8px 0; }
+  .check-inline input { width: 16px; height: 16px; cursor: pointer; }
 
   /* States */
   .empty-state, .auth-gate { text-align: center; padding: 60px 20px; color: var(--muted); }
@@ -421,6 +423,18 @@
           <div class="hint">Latest departure. Long-haul needs a wide window.</div>
         </div>
       </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-maxoffers">Max offers per airport</label>
+          <input type="number" id="f-maxoffers" min="1" max="250" placeholder="250">
+          <div class="hint">How many offers to pull per gateway (1–250). Leave blank for 250.</div>
+        </div>
+        <div class="field">
+          <label for="f-enabled-wrap">Enabled</label>
+          <label class="check-inline" id="f-enabled-wrap"><input type="checkbox" id="f-enabled" checked> Poll this destination</label>
+          <div class="hint">Unticked destinations are skipped by the refresh cron.</div>
+        </div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn--danger" id="modal-delete" style="margin-right:auto; display:none">Delete</button>
@@ -570,8 +584,8 @@
       const expandBtn = hasBreakdown
         ? `<button class="expand-btn" data-act="toggle" data-cc="${esc(d.countryCode)}" aria-label="Show airport breakdown" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>`
         : `<button class="expand-btn" disabled aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>`;
-      return `<tr data-id="${esc(d.id)}" data-cc="${esc(d.countryCode)}">
-        <td><div class="cc-cell">${expandBtn}<span class="cc-flag">${flag(d.countryCode)}</span><div><div class="cc-name">${esc(name)}</div><div class="cc-code">${esc(d.countryCode)}</div></div></div></td>
+      return `<tr data-id="${esc(d.id)}" data-cc="${esc(d.countryCode)}"${d.enabled === false ? ' style="opacity:.55"' : ''}>
+        <td><div class="cc-cell">${expandBtn}<span class="cc-flag">${flag(d.countryCode)}</span><div><div class="cc-name">${esc(name)}${d.enabled === false ? ' <span class="region-tag" style="background:#FEE2E2;color:#B91C1C">disabled</span>' : ''}</div><div class="cc-code">${esc(d.countryCode)}</div></div></div></td>
         <td><span class="region-tag" data-r="${esc(d.region||'')}">${esc(d.region||'—')}</span></td>
         <td class="hide-sm"><div class="airports ${noAir?'empty':''}">${noAir ? 'no airports — polls nothing' : esc(d.airports.join(', '))}</div></td>
         <td class="num">${cntCell}</td>
@@ -660,6 +674,8 @@
     $('f-airports').value = dest && dest.airports ? dest.airports.join(', ') : '';
     $('f-dmin').value = dest && dest.datesMin != null ? dest.datesMin : '';
     $('f-dmax').value = dest && dest.datesMax != null ? dest.datesMax : '';
+    $('f-maxoffers').value = dest && dest.maxOffers != null ? dest.maxOffers : '';
+    $('f-enabled').checked = dest ? dest.enabled === true : true;
     $('f-cc').disabled = !!dest; // don't allow changing the code on edit (it's the key)
     $('modal-delete').style.display = dest ? 'inline-flex' : 'none';
     $('modal').classList.add('is-open');
@@ -674,6 +690,8 @@
       airports: $('f-airports').value,
       datesMin: $('f-dmin').value === '' ? null : Number($('f-dmin').value),
       datesMax: $('f-dmax').value === '' ? null : Number($('f-dmax').value),
+      maxOffers: $('f-maxoffers').value === '' ? null : Number($('f-maxoffers').value),
+      enabled: $('f-enabled').checked,
     };
     if (!/^[A-Z]{2}$/.test(payload.countryCode)) { toast('Enter a valid 2-letter country code', 'err'); return; }
 
