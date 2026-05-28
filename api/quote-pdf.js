@@ -42,7 +42,7 @@
  *             Airtable (lookupClientCredentials*) when that path is added.
  */
 
-import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail } from './_auth.js';
+import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { generateQuotePdf, pdfFilename, fetchAttachmentBuffers } from '../generate-pdf.js';
 
 const TRAVELIFY_API_BASE = process.env.QUOTE_API_BASE || 'https://api.travelify.io';
@@ -223,18 +223,40 @@ async function resolveContext(widgetId) {
   const widget = await findWidgetById(widgetId);
   if (!widget) throw new Error('widget_not_found');
 
+  // Resolve the OWNING CLIENT's Travelify credentials.
+  //
+  // Primary path: the widget records the Airtable record ID of the client that
+  // owns it (ClientRecordId), captured at save time from the authenticated
+  // session. We resolve credentials directly from that client — unambiguous,
+  // and correct even when the widget was created by a staff member who belongs
+  // to several client accounts.
+  //
+  // Fallback path: legacy widgets created before ClientRecordId existed only
+  // carry ClientEmail. We keep the old email-based resolution for those so they
+  // don't break. New widgets always have ClientRecordId, so the fallback fades
+  // out naturally over time.
+  const ownerRecordId = (widget.fields?.ClientRecordId || '').trim();
   const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
-  if (!clientEmail) throw new Error('widget_no_client');
 
-  let creds;
+  let creds = null;
   try {
-    creds = await lookupClientCredentialsByEmail(clientEmail);
+    if (ownerRecordId) {
+      creds = await lookupClientCredentialsByRecordId(ownerRecordId);
+    }
+    // Fallback for legacy widgets with no owning-client ID recorded.
+    if (!creds && clientEmail) {
+      creds = await lookupClientCredentialsByEmail(clientEmail);
+    }
   } catch (err) {
-    console.error('[quote-pdf] credential lookup failed for', clientEmail, '—', err.message);
+    console.error('[quote-pdf] credential lookup failed for',
+      ownerRecordId || clientEmail, '—', err.message);
     throw new Error('credential_lookup_failed');
   }
+
+  if (!ownerRecordId && !clientEmail) throw new Error('widget_no_client');
   if (!creds) {
-    console.warn(`[quote-pdf] No Travelify credentials on Clients record for ${clientEmail} (widgetId=${widgetId})`);
+    console.warn(`[quote-pdf] No Travelify credentials resolved for widgetId=${widgetId} ` +
+      `(ownerRecordId=${ownerRecordId || 'none'}, clientEmail=${clientEmail || 'none'})`);
     throw new Error('no_client_credentials');
   }
 
