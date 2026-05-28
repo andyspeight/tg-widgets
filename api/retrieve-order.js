@@ -29,7 +29,7 @@
  *   calls (widget → endpoint directly) keep the original 5/min cap.
  */
 
-import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail } from './_auth.js';
+import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -1131,38 +1131,51 @@ export default async function handler(req, res) {
         return notFound(res);
       }
 
+      const ownerRecordId = (widget.fields?.ClientRecordId || '').trim();
       const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
-      if (!clientEmail) return notFound(res);
+      if (!ownerRecordId && !clientEmail) return notFound(res);
 
-      // The widget's ClientEmail was historically used inconsistently — for
-      // post-May 2026 widgets it's a user email (the user who saved the
-      // widget), for legacy pre-May widgets it's a client email directly.
-      // The combined resolver tries the user path first, then falls back to
-      // a direct Clients table match.
-      let resolvedClientEmail;
-      try {
-        resolvedClientEmail = await resolveWidgetEmailToClientEmail(clientEmail);
-      } catch (err) {
-        console.error('[retrieve-order] widget→client resolution failed for', clientEmail, '—', err.message);
-        return notFound(res);
-      }
-      if (!resolvedClientEmail) {
-        console.warn(`No parent client found for widget ClientEmail ${clientEmail} (widgetId=${widgetId}). Neither a user nor a client record matched.`);
-        return notFound(res);
-      }
-
-      // 2. Look up the client's Travelify credentials from the Clients table.
-      //    Single source of truth — same record the admin console reads/writes,
-      //    same record SSO auto-populates on first sign-in.
+      // Resolve the OWNING CLIENT's Travelify credentials.
+      //
+      // Primary path: the widget records the Airtable record ID of the client
+      // that owns it (ClientRecordId), captured at save from the authenticated
+      // session. This is unambiguous and correct even when a staff member who
+      // belongs to several clients created the widget. It deliberately runs
+      // BEFORE the email path, because the email path (resolveWidgetEmailTo
+      // ClientEmail → resolveUserToClientEmail) walks the user→client link and
+      // takes the FIRST linked client, which picks the wrong account for
+      // multi-client staff.
+      //
+      // Fallback path: legacy widgets with no ClientRecordId keep the existing
+      // email-based resolution (user→client link, then direct Clients match),
+      // so nothing existing breaks.
       let creds;
       try {
-        creds = await lookupClientCredentialsByEmail(resolvedClientEmail);
+        if (ownerRecordId) {
+          creds = await lookupClientCredentialsByRecordId(ownerRecordId);
+        }
+        if (!creds && clientEmail) {
+          // Legacy resolution: map the widget's stored email (user or client)
+          // onto a canonical client email, then look up credentials.
+          const resolvedClientEmail = await resolveWidgetEmailToClientEmail(clientEmail);
+          if (!resolvedClientEmail) {
+            console.warn(`No parent client found for widget ClientEmail ${clientEmail} (widgetId=${widgetId}). Neither a user nor a client record matched.`);
+            return notFound(res);
+          }
+          creds = await lookupClientCredentialsByEmail(resolvedClientEmail);
+          if (!creds) {
+            console.warn(`No Travelify credentials on Clients record for ${resolvedClientEmail} (user=${clientEmail}, widgetId=${widgetId})`);
+            return notFound(res);
+          }
+        }
       } catch (err) {
-        console.error('[retrieve-order] credential lookup failed for', resolvedClientEmail, '—', err.message);
+        console.error('[retrieve-order] credential resolution failed for',
+          ownerRecordId || clientEmail, '—', err.message);
         return notFound(res);
       }
       if (!creds) {
-        console.warn(`No Travelify credentials on Clients record for ${resolvedClientEmail} (user=${clientEmail}, widgetId=${widgetId})`);
+        console.warn(`[retrieve-order] No Travelify credentials resolved for widgetId=${widgetId} ` +
+          `(ownerRecordId=${ownerRecordId || 'none'}, clientEmail=${clientEmail || 'none'})`);
         return notFound(res);
       }
 
