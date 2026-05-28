@@ -80,7 +80,7 @@ async function readSummaryCounts(req) {
     const r = await fetch(`${base}/api/destination-map-offers?_cb=${Date.now()}`, {
       headers: { 'Cache-Control': 'no-cache' },
     });
-    if (!r.ok) return { byCC: {}, lastRunAt: null };
+    if (!r.ok) return { byCC: {}, airportsByCC: {}, lastRunAt: null };
     const summary = await r.json();
     const byCC = {};
     const countries = summary && Array.isArray(summary.countries) ? summary.countries : [];
@@ -93,9 +93,27 @@ async function readSummaryCounts(req) {
         currency: c.currency || null,
       };
     }
-    return { byCC, lastRunAt: summary.lastRunAt || summary.refreshedAt || null };
+    // Group the per-airport summary by country so the dashboard can show a
+    // breakdown of which destination airports returned offers, and how many.
+    // The cron writes summary.airports[] as:
+    //   { airport, airportName, countryCode, fromPricePP, currency, offerCount, ... }
+    const airportsByCC = {};
+    const airports = summary && Array.isArray(summary.airports) ? summary.airports : [];
+    for (const a of airports) {
+      const cc = String(a.countryCode || '').toUpperCase();
+      if (!cc) continue;
+      if (!airportsByCC[cc]) airportsByCC[cc] = [];
+      airportsByCC[cc].push({
+        iata: String(a.airport || '').toUpperCase(),
+        airportName: a.airportName || null,
+        offerCount: a.offerCount ?? 0,
+        fromPricePP: a.fromPricePP ?? null,
+        currency: a.currency || null,
+      });
+    }
+    return { byCC, airportsByCC, lastRunAt: summary.lastRunAt || summary.refreshedAt || null };
   } catch {
-    return { byCC: {}, lastRunAt: null };
+    return { byCC: {}, airportsByCC: {}, lastRunAt: null };
   }
 }
 
@@ -116,6 +134,7 @@ async function listDestinations(req, res) {
   const destinations = (data.records || []).map(rec => {
     const cc = String(rec.fields?.[F.countryCode] || '').toUpperCase();
     const live = counts.byCC[cc] || {};
+    const breakdown = (counts.airportsByCC && counts.airportsByCC[cc]) || [];
     const airportsStr = String(rec.fields?.[F.airports] || '');
     return {
       id: rec.id,
@@ -129,6 +148,8 @@ async function listDestinations(req, res) {
       airportCountLive: live.airportCount ?? null,
       cheapestPP: live.cheapestPP ?? null,
       currency: live.currency ?? null,
+      // per-airport breakdown for the dashboard expand-row (empty if none)
+      airportBreakdown: breakdown,
     };
   }).sort((a, b) => (a.region || '').localeCompare(b.region || '') || a.countryCode.localeCompare(b.countryCode));
 
