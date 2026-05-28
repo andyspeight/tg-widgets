@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Widget Admin · Travelgenix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F8FA;--sf:#FFF;--bd:#E5E7EB;--tx:#111827;--sb:#6B7280;--mt:#9CA3AF;--br:#0891B2;--bl:#ECFEFF;--bk:#0E7490;--ac:#7C3AED;--ok:#10B981;--dn:#EF4444;--warn:#F59E0B;--ft:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ft);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+
+/* Nav */
+.nav{background:var(--sf);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:50}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--br),var(--ac));display:flex;align-items:center;justify-content:center}
+.nav-logo-icon svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-logo span{font-size:15px;font-weight:800;letter-spacing:-.02em}
+.nav-logo small{font-size:11px;font-weight:600;color:var(--ac);margin-left:6px;background:#7C3AED12;padding:2px 8px;border-radius:6px}
+.nav-back{font-size:13px;font-weight:500;color:var(--sb);padding:6px 12px;border-radius:8px;transition:all .15s;cursor:pointer;border:1px solid var(--bd);background:var(--sf);font-family:var(--ft);display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.nav-back:hover{color:var(--br);border-color:var(--br);background:var(--bl)}
+.nav-back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Page */
+.wrap{max-width:1100px;margin:0 auto;padding:32px 24px 64px}
+.head h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.head h1 em{font-style:normal;background:linear-gradient(135deg,var(--br),var(--ac));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.head p{font-size:14px;color:var(--sb);margin-top:6px;line-height:1.6;max-width:620px}
+
+/* Summary chips */
+.chips{display:flex;gap:10px;margin:22px 0 18px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600}
+.chip .dot{width:9px;height:9px;border-radius:50%}
+.chip .n{font-weight:800;font-size:15px}
+.dot-live{background:var(--ok)}.dot-soon{background:var(--warn)}
+
+/* Toolbar */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.search{flex:1;min-width:200px;position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--mt);fill:none;stroke-width:2}
+.search input{width:100%;padding:10px 12px 10px 34px;border:1px solid var(--bd);border-radius:9px;font-family:var(--ft);font-size:13px;background:var(--sf);color:var(--tx)}
+.search input:focus{outline:none;border-color:var(--br);box-shadow:0 0 0 3px #0891B220}
+.bulk{display:flex;gap:8px}
+.bulk button{font-size:12px;font-weight:600;font-family:var(--ft);padding:9px 13px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--sb);cursor:pointer;transition:all .15s}
+.bulk button:hover{color:var(--tx);border-color:var(--mt)}
+
+/* List */
+.list{background:var(--sf);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+.row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--bd);transition:background .12s}
+.row:last-child{border-bottom:none}
+.row:hover{background:var(--bg)}
+.row-logo{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.row-logo svg{width:17px;height:17px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.row-main{flex:1;min-width:0}
+.row-name{font-size:14px;font-weight:700;line-height:1.2}
+.row-id{font-size:11px;color:var(--mt);font-family:var(--mono);margin-top:3px}
+.row-meta{font-size:11px;color:var(--mt);margin-top:3px}
+.row-state{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.state-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;min-width:84px;text-align:right}
+.state-live{color:var(--ok)}.state-soon{color:var(--warn)}
+
+/* Toggle (live ↔ coming-soon) */
+.toggle{position:relative;width:128px;height:34px;border-radius:9px;background:var(--bg);border:1px solid var(--bd);cursor:pointer;flex-shrink:0;padding:0;font-family:var(--ft)}
+.toggle .knob{position:absolute;top:2px;bottom:2px;width:62px;border-radius:7px;transition:left .18s cubic-bezier(.4,0,.2,1),background .18s}
+.toggle .opt{position:absolute;top:0;bottom:0;width:64px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.2px;z-index:1;transition:color .18s;pointer-events:none}
+.toggle .opt-live{left:0}
+.toggle .opt-soon{right:0}
+.toggle[data-state="live"] .knob{left:2px;background:var(--ok)}
+.toggle[data-state="live"] .opt-live{color:#fff}
+.toggle[data-state="live"] .opt-soon{color:var(--mt)}
+.toggle[data-state="coming-soon"] .knob{left:64px;background:var(--warn)}
+.toggle[data-state="coming-soon"] .opt-soon{color:#fff}
+.toggle[data-state="coming-soon"] .opt-live{color:var(--mt)}
+.toggle.busy{opacity:.55;pointer-events:none}
+
+/* States: loading / denied */
+.panel{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:40px;text-align:center}
+.panel svg{width:42px;height:42px;stroke:var(--mt);fill:none;stroke-width:1.6;margin-bottom:14px}
+.panel h2{font-size:18px;font-weight:700;margin-bottom:8px}
+.panel p{font-size:14px;color:var(--sb);line-height:1.6;max-width:420px;margin:0 auto 18px}
+.panel a.btn{display:inline-flex;align-items:center;gap:7px;background:var(--br);color:#fff;font-size:13px;font-weight:700;padding:10px 18px;border-radius:9px;text-decoration:none}
+.panel a.btn:hover{background:var(--bk)}
+.spin{width:34px;height:34px;border:3px solid var(--bd);border-top-color:var(--br);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:var(--tx);color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);opacity:0;transform:translateY(8px);transition:all .2s;display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{background:#065F46}.toast.err{background:#991B1B}
+.toast svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.4}
+
+@media(max-width:640px){
+  .row{flex-wrap:wrap}
+  .state-label{display:none}
+  .row-state{width:100%;justify-content:flex-end}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-logo-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <span>Widget Suite</span><small>Admin</small>
+    </div>
+    <a class="nav-back" href="/"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Back to dashboard</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="head">
+    <h1>Widget <em>release control</em></h1>
+    <p>Set each widget to <strong>Live</strong> or <strong>Coming soon</strong> for your clients. Coming-soon widgets still show a live preview to clients but the create button is disabled. Your Travelgenix team always sees and can build everything.</p>
+  </div>
+
+  <div id="stage">
+    <div class="panel"><div class="spin"></div><h2>Checking access…</h2><p>One moment.</p></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ───────────────────────── State ───────────────────────── */
+let userData = null, signedIn = false;
+let WIDGETS = [];          // registry metadata (name, icon, colour, category)
+let statuses = {};         // widgetId → 'live' | 'coming-soon' (from API)
+let filter = '';
+
+const STAFF_DOMAINS = ['travelgenix.io', 'travelgenix.com', 'agendas.group'];
+function isStaff(){
+  const email = (userData && userData.email || '').toLowerCase().trim();
+  const at = email.lastIndexOf('@');
+  return at !== -1 && STAFF_DOMAINS.includes(email.slice(at+1));
+}
+
+/* ───────────── Auth (mirrors index.html exactly) ───────────── */
+function getAuthToken(){
+  const t = localStorage.getItem('tg_token');
+  if (t) return t;
+  try { return JSON.parse(localStorage.getItem('tgw_session') || sessionStorage.getItem('tgw_session'))?.token || ''; } catch { return ''; }
+}
+function authHeaders(){
+  const t = getAuthToken();
+  return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
+// Synchronous localStorage read for an immediate identity guess.
+try {
+  const tok = localStorage.getItem('tg_token');
+  const usrRaw = localStorage.getItem('tg_user');
+  if (tok && usrRaw) {
+    const usr = JSON.parse(usrRaw);
+    userData = { ...usr, email: usr.email || '' };
+    signedIn = true;
+  }
+} catch(e){}
+
+// Authoritative cookie-session check against id.travelify.io.
+async function bootstrapCookieAuth(){
+  try {
+    const r = await fetch('https://id.travelify.io/api/auth/me', { method:'GET', credentials:'include', cache:'no-store' });
+    if (!r.ok) return false;
+    const data = await r.json();
+    if (!data || !data.ok || !data.user) return false;
+    userData = {
+      email: data.user.email,
+      fullName: data.user.fullName,
+      role: data.user.role,
+      clientName: data.client && data.client.clientName,
+      plan: data.client && data.client.packageName,
+    };
+    signedIn = true;
+    return true;
+  } catch(e){ return false; }
+}
+
+/* ───────────────────────── Data ───────────────────────── */
+// Pull the widget registry straight from the dashboard so names/icons/colours
+// stay in one place. We parse the WIDGETS array out of index.html.
+async function loadRegistry(){
+  try {
+    const html = await fetch('/index.html', { cache:'no-store' }).then(r=>r.text());
+    const start = html.indexOf('const WIDGETS = [');
+    if (start === -1) return [];
+    const end = html.indexOf('\n];', start);
+    const block = html.slice(start + 'const WIDGETS = '.length, end + 2);
+    // The block is a JS array literal with single quotes and trailing commas —
+    // not valid JSON. Evaluate it in a contained Function rather than JSON.parse.
+    // Source is our own same-origin file, so this is safe.
+    const arr = Function('"use strict";return (' + block + ')')();
+    return Array.isArray(arr) ? arr : [];
+  } catch(e){
+    console.warn('[admin] registry parse failed:', e && e.message);
+    return [];
+  }
+}
+
+async function loadStatuses(){
+  try {
+    const r = await fetch('/api/widget-catalogue', { headers:{ 'Accept':'application/json' } });
+    if (!r.ok) return {};
+    const d = await r.json();
+    return (d && d.statuses && typeof d.statuses === 'object') ? d.statuses : {};
+  } catch(e){ return {}; }
+}
+
+/* ───────────────────────── Render ───────────────────────── */
+function effStatus(id){ return statuses[id] || 'live'; }
+
+function render(){
+  const stage = document.getElementById('stage');
+
+  if (!signedIn) {
+    stage.innerHTML = panel('lock',
+      'Sign in required',
+      'You need to sign in to manage widget release status.',
+      '<a class="btn" href="/">Go to dashboard</a>');
+    return;
+  }
+  if (!isStaff()) {
+    stage.innerHTML = panel('lock',
+      'Staff access only',
+      'This page is restricted to the Travelgenix team. If you think you should have access, check you are signed in with your Travelgenix email.',
+      '<a class="btn" href="/">Back to dashboard</a>');
+    return;
+  }
+
+  // Build the row set from the registry, but only those present in the
+  // catalogue store (so toggling always hits a real record).
+  const known = WIDGETS.filter(w => Object.prototype.hasOwnProperty.call(statuses, w.id));
+  // Any catalogue ids without a registry match (shouldn't happen) still show.
+  const extra = Object.keys(statuses)
+    .filter(id => !WIDGETS.some(w => w.id === id))
+    .map(id => ({ id, name: id, category:'', color:'#94A3B8', icon:{viewBox:'0 0 24 24', paths:'<rect x="3" y="3" width="18" height="18" rx="2"/>'} }));
+  const all = known.concat(extra);
+
+  const liveN = all.filter(w => effStatus(w.id) === 'live').length;
+  const soonN = all.length - liveN;
+
+  const q = filter.toLowerCase();
+  const rows = all.filter(w => !q || w.name.toLowerCase().includes(q) || w.id.toLowerCase().includes(q));
+
+  stage.innerHTML = `
+    <div class="chips">
+      <div class="chip"><span class="dot dot-live"></span><span class="n">${liveN}</span> Live</div>
+      <div class="chip"><span class="dot dot-soon"></span><span class="n">${soonN}</span> Coming soon</div>
+      <div class="chip">${all.length} total</div>
+    </div>
+    <div class="toolbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" type="text" placeholder="Search widgets…" value="${escAttr(filter)}">
+      </div>
+      <div class="bulk">
+        <button onclick="bulkSet('live')">Set all live</button>
+        <button onclick="bulkSet('coming-soon')">Set all coming soon</button>
+      </div>
+    </div>
+    <div class="list">
+      ${rows.map(rowHtml).join('') || '<div class="row" style="color:var(--mt);font-size:13px;justify-content:center">No widgets match your search.</div>'}
+    </div>`;
+
+  const si = document.getElementById('searchInput');
+  if (si) si.addEventListener('input', e => { filter = e.target.value; render(); setTimeout(()=>{const n=document.getElementById('searchInput'); if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length);}},0); });
+}
+
+function rowHtml(w){
+  const st = effStatus(w.id);
+  const cat = w.category ? `<div class="row-meta">${esc(w.category)}</div>` : '';
+  return `
+    <div class="row" data-id="${escAttr(w.id)}">
+      <div class="row-logo" style="background:${esc(w.color)}14">
+        <svg viewBox="${esc(w.icon.viewBox)}" style="stroke:${esc(w.color)}">${w.icon.paths}</svg>
+      </div>
+      <div class="row-main">
+        <div class="row-name">${esc(w.name)}</div>
+        <div class="row-id">${esc(w.id)}</div>
+        ${cat}
+      </div>
+      <div class="row-state">
+        <span class="state-label ${st==='live'?'state-live':'state-soon'}">${st==='live'?'Live':'Coming soon'}</span>
+        <button class="toggle" data-state="${st}" onclick="toggle('${escAttr(w.id)}')" aria-label="Toggle release status for ${escAttr(w.name)}">
+          <span class="knob"></span>
+          <span class="opt opt-live">Live</span>
+          <span class="opt opt-soon">Soon</span>
+        </button>
+      </div>
+    </div>`;
+}
+
+function panel(icon, title, body, action){
+  const icons = {
+    lock:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>'
+  };
+  return `<div class="panel"><svg viewBox="0 0 24 24">${icons[icon]||''}</svg><h2>${title}</h2><p>${body}</p>${action||''}</div>`;
+}
+
+/* ───────────────────────── Mutations ───────────────────────── */
+async function setStatus(id, next){
+  const prev = statuses[id] || 'live';
+  if (prev === next) return true;
+  // Optimistic
+  statuses[id] = next;
+  render();
+  const btn = document.querySelector(`.row[data-id="${cssEsc(id)}"] .toggle`);
+  if (btn) btn.classList.add('busy');
+  try {
+    const r = await fetch('/api/widget-catalogue', {
+      method:'POST',
+      headers: authHeaders(),
+      credentials:'include',
+      body: JSON.stringify({ widgetId:id, status:next }),
+    });
+    const d = await r.json().catch(()=>({}));
+    if (!r.ok || !d.ok) {
+      statuses[id] = prev;           // rollback
+      render();
+      toast(d.error || `Update failed (HTTP ${r.status})`, 'err');
+      return false;
+    }
+    return true;
+  } catch(e){
+    statuses[id] = prev;
+    render();
+    toast('Network error — change not saved.', 'err');
+    return false;
+  }
+}
+
+async function toggle(id){
+  const next = (statuses[id] || 'live') === 'live' ? 'coming-soon' : 'live';
+  const ok = await setStatus(id, next);
+  if (ok) toast(`${nameOf(id)} → ${next === 'live' ? 'Live' : 'Coming soon'}`, 'ok');
+}
+
+async function bulkSet(target){
+  const ids = WIDGETS.filter(w => Object.prototype.hasOwnProperty.call(statuses, w.id))
+    .map(w => w.id).filter(id => (statuses[id]||'live') !== target);
+  if (!ids.length) { toast(`All widgets are already ${target === 'live' ? 'live' : 'coming soon'}.`, 'ok'); return; }
+  if (!confirm(`Set ${ids.length} widget${ids.length>1?'s':''} to ${target === 'live' ? 'Live' : 'Coming soon'}?`)) return;
+  let done = 0, failed = 0;
+  for (const id of ids) {
+    const ok = await setStatus(id, target);   // sequential — gentle on the API rate limiter
+    ok ? done++ : failed++;
+  }
+  toast(`${done} updated${failed?`, ${failed} failed`:''}.`, failed ? 'err' : 'ok');
+}
+
+function nameOf(id){ const w = WIDGETS.find(x=>x.id===id); return w ? w.name : id; }
+
+/* ───────────────────────── Utils ───────────────────────── */
+function esc(s){ const d=document.createElement('div'); d.textContent=s==null?'':String(s); return d.innerHTML; }
+function escAttr(s){ return esc(s).replace(/"/g,'&quot;'); }
+function cssEsc(s){ return String(s).replace(/[^a-zA-Z0-9_-]/g,'\\$&'); }
+
+let toastTimer;
+function toast(msg, kind){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (kind||'');
+  const tick = kind==='err'
+    ? '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+    : '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+  el.innerHTML = tick + '<span>' + esc(msg) + '</span>';
+  wrap.appendChild(el);
+  requestAnimationFrame(()=> el.classList.add('show'));
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(), 250); }, 2600);
+}
+
+/* ───────────────────────── Boot ───────────────────────── */
+(async function init(){
+  render(); // shows the "checking access" spinner (signedIn may be false initially)
+  // Resolve identity authoritatively, then load data.
+  await bootstrapCookieAuth();
+  if (!signedIn || !isStaff()) { render(); return; }
+  [WIDGETS, statuses] = await Promise.all([ loadRegistry(), loadStatuses() ]);
+  render();
+})();
+</script>
+</body>
+</html>
