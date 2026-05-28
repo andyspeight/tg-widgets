@@ -274,6 +274,31 @@
     .ent-on { color: var(--tg-success); }
     .ent-off { color: var(--tg-text-tertiary); }
 
+    /* Editable entitlement toggle (Phase 3) */
+    .ent-toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: none; background: transparent; cursor: pointer;
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      padding: 4px 0; min-width: 80px; justify-content: flex-end;
+      transition: opacity 0.15s ease;
+    }
+    .ent-toggle:disabled { cursor: default; }
+    .ent-toggle-track {
+      position: relative; width: 34px; height: 20px; border-radius: 999px;
+      background: var(--tg-bg-tertiary); transition: background 0.18s ease;
+      flex-shrink: 0;
+    }
+    .ent-toggle-thumb {
+      position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+      border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      transition: transform 0.18s ease;
+    }
+    .ent-toggle--on .ent-toggle-track { background: var(--tg-success); }
+    .ent-toggle--on .ent-toggle-thumb { transform: translateX(14px); }
+    .ent-toggle--on .ent-toggle-label { color: var(--tg-success); }
+    .ent-toggle--off .ent-toggle-label { color: var(--tg-text-tertiary); }
+    .ent-toggle-label { min-width: 24px; text-align: right; }
+
     .users-table { width: 100%; border-collapse: collapse; }
     .users-table th {
       text-align: left;
@@ -943,22 +968,65 @@
       }
     }
 
-    function renderEntitlements() {
-      const enabledTotal = clientData.entitlements.filter(e => e.enabled).length;
-      if (enabledTotal === 0) {
-        return `
-          <div class="panel">
-            <div class="center-state">
-              <h3 style="margin:0 0 8px;color:var(--tg-text-primary);">No entitlements yet</h3>
-              <p>This client has no enabled products. Once they're onboarded with a package, their entitlements appear here.</p>
-            </div>
-          </div>`;
-      }
+    // Toggle a single product entitlement on/off. Mirrors the
+    // saveTravelifyIntegration pattern: optimistic disable, call the endpoint,
+    // patch local state, re-render. On failure, revert and toast.
+    async function toggleEntitlement(catalogueItemId, btn) {
+      const item = clientData.entitlements.find(e => e.catalogueItemId === catalogueItemId);
+      if (!item) return;
 
+      const next = !item.enabled;
+      if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+
+      try {
+        const data = await apiCall('/api/admin/clients/update-entitlement', {
+          method: 'POST',
+          body: JSON.stringify({
+            clientId: clientData.client.id,
+            catalogueItemId,
+            enabled: next,
+          }),
+        });
+
+        // Patch local state from the server response so the re-render is correct.
+        item.enabled = data.entitlement.enabled;
+        item.source = data.entitlement.source || item.source;
+        item.entitlementId = data.entitlement.entitlementId || item.entitlementId;
+
+        // Keep the grouped copy in sync (renderEntitlements reads from it).
+        for (const cat of Object.keys(clientData.entitlementsByCategory)) {
+          const row = clientData.entitlementsByCategory[cat].find(r => r.catalogueItemId === catalogueItemId);
+          if (row) { row.enabled = item.enabled; row.source = item.source; row.entitlementId = item.entitlementId; }
+        }
+
+        toast(`${item.productName} ${item.enabled ? 'enabled' : 'disabled'}`, 'ok');
+
+        // Re-render the entitlements tab and refresh the tab count.
+        const tc = document.getElementById('tab-content');
+        if (tc) tc.innerHTML = renderEntitlements();
+        refreshEntitlementCount();
+      } catch (err) {
+        console.error('[toggle entitlement] failed', err);
+        toast(err?.message || 'Could not update — try again', 'err');
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+      }
+    }
+
+    // Update the "Entitlements (N)" sub-tab label after a change.
+    function refreshEntitlementCount() {
+      const n = clientData.entitlements.filter(e => e.enabled).length;
+      const tabBtn = document.querySelector('[data-tab="entitlements"] span');
+      if (tabBtn) tabBtn.textContent = `(${n})`;
+    }
+
+    function renderEntitlements() {
+      // Show EVERY catalogue item for every category (including products that
+      // are off, and products added to the catalogue after onboarding such as
+      // Luna Travel). Each row is a toggle the owner/admin can flip.
       const sectionsHtml = clientData.categoryOrder.map(cat => {
         const items = clientData.entitlementsByCategory[cat] || [];
+        if (items.length === 0) return '';
         const enabled = items.filter(i => i.enabled);
-        if (enabled.length === 0) return '';
 
         return `
           <section class="cat-section">
@@ -967,13 +1035,21 @@
               <span style="font-size: 11px; color: var(--tg-text-tertiary);">${enabled.length} of ${items.length} enabled</span>
             </header>
             ${items.map(item => `
-              <div class="ent-row">
+              <div class="ent-row" data-cat-id="${escapeHtml(item.catalogueItemId)}">
                 <div class="ent-row-meta">
                   <div class="ent-row-name">${escapeHtml(item.productName)}</div>
                   <div class="ent-row-code">${escapeHtml(item.productCode)}</div>
                 </div>
                 <span class="ent-source" data-src="${escapeHtml(item.source)}">${escapeHtml(item.source || '—')}</span>
-                <span class="ent-state ${item.enabled ? 'ent-on' : 'ent-off'}">${item.enabled ? 'On' : 'Off'}</span>
+                <button type="button"
+                        class="ent-toggle ${item.enabled ? 'ent-toggle--on' : 'ent-toggle--off'}"
+                        role="switch"
+                        aria-checked="${item.enabled ? 'true' : 'false'}"
+                        aria-label="${item.enabled ? 'Disable' : 'Enable'} ${escapeHtml(item.productName)}"
+                        onclick="toggleEntitlement('${escapeHtml(item.catalogueItemId)}', this)">
+                  <span class="ent-toggle-track"><span class="ent-toggle-thumb"></span></span>
+                  <span class="ent-toggle-label">${item.enabled ? 'On' : 'Off'}</span>
+                </button>
               </div>
             `).join('')}
           </section>
@@ -984,7 +1060,7 @@
         <div class="panel">
           <header class="panel-header">
             <h2>Product access</h2>
-            <p>Every catalogue item, with this client's current state. Source shows whether each entitlement came from the package default or a manual override.</p>
+            <p>Every catalogue item, with this client's current state. Toggle any product on or off — changes are saved immediately and marked as a manual override.</p>
           </header>
           ${sectionsHtml}
         </div>
