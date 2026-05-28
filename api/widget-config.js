@@ -132,6 +132,63 @@ async function hydrateLegacyUserFields(user) {
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
+const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
+
+/**
+ * Capture the OWNING-CLIENT id from the session, trusting it ONLY when it
+ * came from the JWT. Must be called on the raw `user` object BEFORE
+ * hydrateLegacyUserFields() runs — once hydration fills user.clientId from
+ * the user's first linked client (clientIds[0]), it's an arbitrary pick for
+ * a multi-client staff member and no longer safe to act on.
+ *
+ * Returns the rec... id when trustworthy, else null.
+ */
+function captureSessionClientId(user) {
+  return (user && typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId))
+    ? user.clientId
+    : null;
+}
+
+/**
+ * Decide whether the current session may modify (edit or delete) a widget.
+ *
+ * A widget belongs to a CLIENT, not the staff member who created it. The
+ * authoritative owner is the widget's ClientRecordId. So the rule is:
+ *
+ *   - Widget HAS a ClientRecordId (stamped at creation, Stage 5 onward):
+ *       permit iff the session's owning client === that ClientRecordId.
+ *       Client-scoped — any user signed into the owning client passes,
+ *       regardless of who originally created the widget. The session is the
+ *       source of truth: a staff member who belongs to several clients can
+ *       only act on the one they're currently signed into.
+ *
+ *   - Widget has NO ClientRecordId (legacy, pre-Stage-5):
+ *       fall back to the original creator-email check so existing widgets
+ *       keep working exactly as before. No regression.
+ *
+ * Fails closed in both branches.
+ *
+ * @returns {true | string} true if permitted, else a human-readable reason.
+ */
+function canModifyWidget(record, { sessionClientId, userEmail }) {
+  const fields = record.fields || {};
+  const widgetClientId = typeof fields.ClientRecordId === 'string'
+    ? fields.ClientRecordId.trim()
+    : '';
+
+  // Authoritative path: widget has a known owning client.
+  if (widgetClientId) {
+    if (sessionClientId && sessionClientId === widgetClientId) return true;
+    return 'client-mismatch';
+  }
+
+  // Legacy path: no owning client recorded — fall back to creator email.
+  const widgetEmail = (fields.ClientEmail || '').toLowerCase().trim();
+  const email = (userEmail || '').toLowerCase().trim();
+  if (widgetEmail && email && widgetEmail === email) return true;
+  return 'email-mismatch';
+}
+
 // Allowed widget type names. Canonical casing — must match the Airtable
 // singleSelect "WidgetType" option names exactly (the field is case-sensitive).
 // If you add a new widget type, update THREE places:
@@ -462,23 +519,9 @@ export default async function handler(req, res) {
       const user = auth.user;
 
       // Capture the OWNING-CLIENT provenance BEFORE hydration runs.
-      //
-      // user.clientId is trustworthy ONLY when it came from the JWT — i.e. the
-      // client the user actually signed into (their active session). If it's
-      // absent here, hydrateLegacyUserFields() will fill it from the user's
-      // first linked client (clientIds[0]), which is an ARBITRARY pick for a
-      // staff member who belongs to several clients — exactly the ambiguity
-      // that caused the wrong-account credential bug.
-      //
-      // So we record whether clientId was JWT-provided, and only stamp the
-      // widget's ClientRecordId when it was. When it wasn't, we deliberately
-      // leave ClientRecordId blank: the widget falls back to the ClientEmail
-      // resolution path (no worse than today) and fails LOUDLY rather than
-      // resolving confidently to the wrong account.
-      const ownerClientIdFromSession =
-        (typeof user.clientId === 'string' && /^rec[A-Za-z0-9]{14}$/.test(user.clientId))
-          ? user.clientId
-          : null;
+      // Trustworthy only when JWT-provided; see captureSessionClientId().
+      // Used both to stamp ClientRecordId at create AND to authorise edits.
+      const ownerClientIdFromSession = captureSessionClientId(user);
 
       // Cookie-issued JWTs don't carry email or plan in the payload.
       // Fill them in from Airtable before we use them for rate limiting,
@@ -539,13 +582,18 @@ export default async function handler(req, res) {
         if (searchData.records && searchData.records.length > 0) {
           const record = searchData.records[0];
           
-          // Verify ownership — widget must belong to this user.
-          // Fail closed if the email is missing, empty, or doesn't match.
-          // Prior version skipped the check entirely when widgetEmail was
-          // falsy, letting any signed-in user overwrite unattributed widgets.
-          const widgetEmail = (record.fields.ClientEmail || '').toLowerCase().trim();
-          const userEmail = (user.email || '').toLowerCase().trim();
-          if (!widgetEmail || !userEmail || widgetEmail !== userEmail) {
+          // Verify ownership — a widget belongs to a CLIENT, not the staff
+          // member who created it. canModifyWidget() permits any user signed
+          // into the owning client (via ClientRecordId), and falls back to
+          // the legacy creator-email check for widgets created before
+          // ClientRecordId existed. Fails closed either way.
+          const verdict = canModifyWidget(record, {
+            sessionClientId: ownerClientIdFromSession,
+            userEmail: user.email,
+          });
+          if (verdict !== true) {
+            console.warn(`[widget-config] edit denied (${verdict}) widget=${widgetId} ` +
+              `session=${ownerClientIdFromSession || 'none'} user=${user.email}`);
             return res.status(403).json({ error: 'You do not have permission to edit this widget' });
           }
 
@@ -686,9 +734,13 @@ export default async function handler(req, res) {
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
       const user = auth.user;
 
-      // Cookie-issued JWTs don't carry email in the payload. DELETE only
-      // needs email (for rate limit + ownership check), not plan, so this
-      // is cheap on the legacy-cookie path and a no-op on new ones.
+      // Capture owning-client from session BEFORE hydration (same trust rule
+      // as the POST path) so delete authorisation is client-scoped.
+      const ownerClientIdFromSession = captureSessionClientId(user);
+
+      // Cookie-issued JWTs don't carry email in the payload. DELETE needs
+      // email (for rate limit + the legacy ownership fallback), not plan, so
+      // this is cheap on the legacy-cookie path and a no-op on new ones.
       await hydrateLegacyUserFields(user);
 
       // Rate limit (per-user, same preset as POST writes)
@@ -715,11 +767,16 @@ export default async function handler(req, res) {
 
       const record = searchData.records[0];
 
-      // Verify ownership — fail closed if email is missing or doesn't match.
-      // Same pattern as the UPDATE path; prevents cross-account deletes.
-      const widgetEmail = (record.fields.ClientEmail || '').toLowerCase().trim();
-      const userEmail = (user.email || '').toLowerCase().trim();
-      if (!widgetEmail || !userEmail || widgetEmail !== userEmail) {
+      // Verify ownership — client-scoped, same rule as the edit path.
+      // Prevents cross-account deletes; any user of the owning client may
+      // delete, legacy widgets fall back to creator email. Fails closed.
+      const verdict = canModifyWidget(record, {
+        sessionClientId: ownerClientIdFromSession,
+        userEmail: user.email,
+      });
+      if (verdict !== true) {
+        console.warn(`[widget-config] delete denied (${verdict}) widget=${widgetId} ` +
+          `session=${ownerClientIdFromSession || 'none'} user=${user.email}`);
         return res.status(403).json({ error: 'You do not have permission to delete this widget' });
       }
 
