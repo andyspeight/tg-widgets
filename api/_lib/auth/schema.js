@@ -49,7 +49,8 @@ export const CLIENTS = {
     appName:              'fld0H6vOJOYqiODF5', // app name travellers see
     brandPrimaryColour:   'fldz0cwl3jvX9PL6s', // hex, e.g. #1B2B5B
     brandAccentColour:    'fld9dUcFDE5Nxm1lE', // hex, e.g. #00B4D8
-    welcomeMessage:       'fld10hwtIDkX2YWTx'  // greeting on first app open
+    welcomeMessage:       'fld10hwtIDkX2YWTx', // greeting on first app open
+    logoUrl:              'fldGAJdxjdzz2X0sp'  // public URL of the agency logo (Vercel Blob)
   }
 };
 
