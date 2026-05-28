@@ -22,6 +22,10 @@
   ],
   "rewrites": [
     {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
       "source": "/demo",
       "destination": "/demo.html"
     },
