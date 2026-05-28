@@ -119,6 +119,95 @@
 
   .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
 
+  /* Expand chevron in the country cell */
+  .expand-btn {
+    width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--card); color: var(--muted); cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all .14s; flex: 0 0 auto;
+  }
+  .expand-btn:hover { color: var(--text); border-color: var(--teal); }
+  .expand-btn svg { width: 12px; height: 12px; transition: transform .15s; }
+  .expand-btn.is-open svg { transform: rotate(90deg); }
+  .expand-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* Airport breakdown sub-table */
+  .breakdown-row td { padding: 0 !important; background: #F8FAFC; border-bottom: 1px solid var(--border) !important; }
+  .breakdown {
+    padding: 14px 18px 16px 64px; /* indent under the country name */
+  }
+  .breakdown h4 {
+    margin: 0 0 8px; font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .breakdown-empty { color: var(--muted); font-size: 13px; padding: 4px 0; }
+  .breakdown table { background: transparent; }
+  .breakdown thead th {
+    background: transparent; padding: 6px 10px; font-size: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .breakdown tbody td {
+    padding: 7px 10px; background: transparent; border-bottom: 1px solid #EEF2F7;
+    font-size: 12px;
+  }
+  .breakdown tbody tr:last-child td { border-bottom: none; }
+  .breakdown tbody tr:hover { background: rgba(0,180,216,.04); }
+  .ap-iata { font-family: var(--mono); font-weight: 700; font-size: 12px; color: var(--text); }
+  .ap-name { color: var(--muted); }
+  .ap-not-config { color: var(--warn); font-size: 11px; font-weight: 600; margin-left: 6px; }
+  .ap-no-offers { color: var(--err); font-style: italic; }
+
+  /* Departures meta note (sits next to the search input) */
+  .meta-note {
+    font-size: 11px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg);
+    white-space: nowrap;
+  }
+  .meta-note svg { width: 12px; height: 12px; color: var(--muted-2); }
+  .meta-note b { color: var(--text); font-weight: 600; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px; padding: 12px 18px 0; border-bottom: 1px solid var(--border);
+    background: #FBFCFE;
+  }
+  .tab {
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 1px solid transparent; border-bottom: none;
+    background: transparent; color: var(--muted);
+    padding: 9px 14px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    display: inline-flex; align-items: center; gap: 7px;
+    margin-bottom: -1px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.is-active {
+    background: var(--card); color: var(--text);
+    border-color: var(--border); border-bottom-color: var(--card);
+  }
+  .tab-count {
+    font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+    background: #E2E8F0; color: var(--muted);
+  }
+  .tab.is-active .tab-count { background: var(--navy); color: #fff; }
+  .tab[data-tab="empty"] .tab-count[data-nonzero="1"] { background: var(--err); color: #fff; }
+  .tab.is-active[data-tab="empty"] .tab-count[data-nonzero="1"] { background: var(--err); }
+
+  /* Interval selector */
+  .interval-wrap {
+    display: inline-flex; align-items: center; gap: 8px; padding: 0 4px 0 12px;
+    border-left: 1px solid var(--border); margin-left: 4px; height: 32px;
+  }
+  .interval-wrap label { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .interval-wrap select {
+    font: inherit; font-size: 13px; padding: 7px 28px 7px 11px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--card); color: var(--text);
+    cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat; background-position: right 8px center; background-size: 12px;
+  }
+  .interval-wrap select:focus { outline: none; border-color: var(--teal); }
+  .interval-wrap select:disabled { opacity: .6; cursor: progress; }
+
   /* Modal */
   .modal-backdrop {
     position: fixed; inset: 0; background: rgba(15,23,42,.5); backdrop-filter: blur(2px);
@@ -194,6 +283,18 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
         Rebuild all offers
       </button>
+      <div class="interval-wrap" title="How often the cron is allowed to actually refresh the cache. Vercel still fires the cron on its schedule, but runs are skipped until this interval has elapsed.">
+        <label for="cache-interval">Refresh every</label>
+        <select id="cache-interval" disabled>
+          <option value="15">15 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="45" selected>45 minutes</option>
+          <option value="60">1 hour</option>
+          <option value="120">2 hours</option>
+          <option value="240">4 hours</option>
+          <option value="1440">24 hours</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -215,10 +316,28 @@
 
   <!-- Table -->
   <div class="panel">
+    <div class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="all" role="tab" aria-selected="true">
+        All <span class="tab-count" id="tc-all">—</span>
+      </button>
+      <button class="tab" data-tab="live" role="tab" aria-selected="false">
+        Returning offers <span class="tab-count" id="tc-live">—</span>
+      </button>
+      <button class="tab" data-tab="empty" role="tab" aria-selected="false">
+        Polling nothing <span class="tab-count" id="tc-empty">—</span>
+      </button>
+    </div>
     <div class="panel-head">
-      <h2>Destinations</h2>
-      <span class="region-tag" id="head-note" style="background:#F1F5F9;color:#64748B;display:none"></span>
+      <h2 id="panel-title">Destinations</h2>
+      <button class="btn btn--sm btn--accent" id="btn-rebuild-empty" style="display:none" title="Re-poll only the destinations currently returning zero offers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/></svg>
+        Rebuild empties
+      </button>
       <div class="grow"></div>
+      <span class="meta-note" title="The cron polls Travelify without a departures filter — offers come back from any UK departure airport Travelify can ship from. Per-airport breakdown is the destination airport, not the origin.">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.2.6-.6.5-1.1z"/></svg>
+        Departures: <b>any UK airport</b>
+      </span>
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="search" placeholder="Search country or code…">
@@ -291,10 +410,15 @@
   'use strict';
   const API_DEST = '/api/admin/map-destinations';
   const API_REBUILD = '/api/admin/map-rebuild';
+  const API_CONFIG = '/api/admin/map-config';
+
+  const ALLOWED_INTERVALS = [15, 30, 45, 60, 120, 240, 1440];
 
   let DEST = [];        // current destinations
   let lastRunAt = null;
   let filter = '';
+  let activeTab = 'all'; // 'all' | 'live' | 'empty'
+  let configLoaded = false;
 
   // ── helpers ──────────────────────────────────────────────────
   const $ = (id) => document.getElementById(id);
@@ -374,17 +498,35 @@
     $('s-empty').innerHTML = empty > 0 ? `<span style="color:var(--err)">${empty}</span>` : '0';
     $('s-last').textContent = timeAgo(lastRunAt);
     $('statusbar').style.opacity = '1';
+
+    // Tab counts mirror the stats but show on the tab pills too
+    $('tc-all').textContent = total;
+    $('tc-live').textContent = live;
+    const tcEmpty = $('tc-empty');
+    tcEmpty.textContent = empty;
+    tcEmpty.setAttribute('data-nonzero', empty > 0 ? '1' : '0');
   }
 
   function renderTable() {
     const q = filter.trim().toLowerCase();
     let rows = DEST.filter(d => {
+      // Tab filter first
+      const cnt = d.offerCount || 0;
+      if (activeTab === 'live' && cnt <= 0) return false;
+      if (activeTab === 'empty' && cnt > 0) return false;
       if (!q) return true;
       return d.countryCode.toLowerCase().includes(q) || ccName(d.countryCode).toLowerCase().includes(q);
     });
 
     if (!rows.length) {
-      $('table-host').innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>${q ? 'No destinations match your search.' : 'No destinations yet. Add your first one.'}</div></div>`;
+      const emptyMsg = q
+        ? 'No destinations match your search.'
+        : activeTab === 'live'
+          ? 'No destinations are returning offers right now.'
+          : activeTab === 'empty'
+            ? 'Every destination is returning offers — nothing to fix.'
+            : 'No destinations yet. Add your first one.';
+      $('table-host').innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>${esc(emptyMsg)}</div></div>`;
       return;
     }
 
@@ -397,8 +539,12 @@
       else if (cnt === 0) cntCell = `<span class="count-zero">0</span>`;
       else cntCell = `<span class="count-pill"><b>${cnt.toLocaleString('en-GB')}</b></span>`;
       const price = money(d.cheapestPP, d.currency);
-      return `<tr data-id="${esc(d.id)}">
-        <td><div class="cc-cell"><span class="cc-flag">${flag(d.countryCode)}</span><div><div class="cc-name">${esc(name)}</div><div class="cc-code">${esc(d.countryCode)}</div></div></div></td>
+      const hasBreakdown = Array.isArray(d.airportBreakdown) && d.airportBreakdown.length > 0;
+      const expandBtn = hasBreakdown
+        ? `<button class="expand-btn" data-act="toggle" data-cc="${esc(d.countryCode)}" aria-label="Show airport breakdown" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>`
+        : `<button class="expand-btn" disabled aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>`;
+      return `<tr data-id="${esc(d.id)}" data-cc="${esc(d.countryCode)}">
+        <td><div class="cc-cell">${expandBtn}<span class="cc-flag">${flag(d.countryCode)}</span><div><div class="cc-name">${esc(name)}</div><div class="cc-code">${esc(d.countryCode)}</div></div></div></td>
         <td><span class="region-tag" data-r="${esc(d.region||'')}">${esc(d.region||'—')}</span></td>
         <td class="hide-sm"><div class="airports ${noAir?'empty':''}">${noAir ? 'no airports — polls nothing' : esc(d.airports.join(', '))}</div></td>
         <td class="num">${cntCell}</td>
@@ -412,7 +558,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
         </div></td>
-      </tr>`;
+      </tr>${hasBreakdown ? renderBreakdownRow(d) : ''}`;
     }).join('');
 
     $('table-host').innerHTML = `<table>
@@ -422,6 +568,60 @@
       </tr></thead>
       <tbody>${body}</tbody>
     </table>`;
+  }
+
+  // Builds the hidden sub-row that shows per-airport offer breakdown for a country.
+  // Initially hidden (display:none); the toggle handler reveals it.
+  function renderBreakdownRow(d) {
+    const configured = new Set((d.airports || []).map(s => s.toUpperCase()));
+    const bd = (d.airportBreakdown || []).slice().sort((a, b) => (b.offerCount || 0) - (a.offerCount || 0));
+    const totalOffers = bd.reduce((s, a) => s + (a.offerCount || 0), 0);
+
+    let rowsHtml;
+    if (!bd.length) {
+      rowsHtml = `<div class="breakdown-empty">No offers returned for any airport in the last poll.</div>`;
+    } else {
+      const trs = bd.map(a => {
+        const iata = String(a.iata || a.airport || '').toUpperCase();
+        const isConfigured = configured.has(iata);
+        const name = a.airportName ? esc(a.airportName) : '';
+        const cnt = (a.offerCount || 0).toLocaleString('en-GB');
+        const cntCell = (a.offerCount || 0) === 0
+          ? `<span class="ap-no-offers">0</span>`
+          : `<b>${cnt}</b>`;
+        const price = money(a.fromPricePP, a.currency || d.currency);
+        return `<tr>
+          <td><span class="ap-iata">${esc(iata)}</span>${name ? ` <span class="ap-name">${name}</span>` : ''}${isConfigured ? '' : '<span class="ap-not-config" title="Not in the configured airports list for this country — Travelify returned offers from it anyway">not configured</span>'}</td>
+          <td class="num">${cntCell}</td>
+          <td class="num">${price ? esc(price) : '<span class="count-na">—</span>'}</td>
+        </tr>`;
+      }).join('');
+      rowsHtml = `<table style="width:100%; border-collapse:collapse;">
+        <thead><tr>
+          <th style="text-align:left">Destination airport</th>
+          <th class="num" style="text-align:right">Offers</th>
+          <th class="num" style="text-align:right">From (pp)</th>
+        </tr></thead>
+        <tbody>${trs}</tbody>
+      </table>`;
+    }
+
+    // Note the configured airports that returned zero
+    const returningIatas = new Set(bd.filter(a => (a.offerCount || 0) > 0).map(a => String(a.iata || a.airport || '').toUpperCase()));
+    const silent = (d.airports || []).filter(a => !returningIatas.has(String(a).toUpperCase()));
+    const silentNote = silent.length
+      ? `<div style="margin-top:10px; font-size:11px; color: var(--warn);"><b>Configured but silent:</b> ${esc(silent.join(', '))}</div>`
+      : '';
+
+    return `<tr class="breakdown-row" data-bd-for="${esc(d.countryCode)}" style="display:none">
+      <td colspan="7">
+        <div class="breakdown">
+          <h4>Per-airport breakdown · ${(d.airportBreakdown || []).length} airport${(d.airportBreakdown || []).length === 1 ? '' : 's'} returning, ${totalOffers.toLocaleString('en-GB')} offers total</h4>
+          ${rowsHtml}
+          ${silentNote}
+        </div>
+      </td>
+    </tr>`;
   }
 
   // ── modal ────────────────────────────────────────────────────
@@ -509,6 +709,101 @@
     }
   }
 
+  // ── tabs ─────────────────────────────────────────────────────
+  function setTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab').forEach(el => {
+      const isActive = el.getAttribute('data-tab') === tab;
+      el.classList.toggle('is-active', isActive);
+      el.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    // Show the "Rebuild empties" CTA only on the empty tab, and only if there are any
+    const empties = DEST.filter(d => (d.offerCount || 0) === 0).length;
+    $('btn-rebuild-empty').style.display = (tab === 'empty' && empties > 0) ? 'inline-flex' : 'none';
+    $('panel-title').textContent =
+      tab === 'live' ? 'Destinations returning offers' :
+      tab === 'empty' ? 'Destinations polling nothing' :
+      'Destinations';
+    renderTable();
+  }
+
+  // ── rebuild empties ──────────────────────────────────────────
+  async function rebuildEmpties(btn) {
+    const empties = DEST.filter(d => (d.offerCount || 0) === 0);
+    if (!empties.length) { toast('No empties to rebuild', 'ok'); return; }
+    if (!confirm(`Re-poll ${empties.length} destination${empties.length === 1 ? '' : 's'} currently returning zero offers? This may take a minute or two.`)) return;
+
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg> Rebuilding…`;
+
+    let ok = 0, fail = 0;
+    // Sequential to keep load on Travelify polite; per-country call already
+    // exists and is what the per-row button uses.
+    for (const d of empties) {
+      try {
+        const r = await fetch(API_REBUILD, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ country: d.countryCode }),
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        ok++;
+      } catch (e) {
+        fail++;
+      }
+      // Live progress in the button
+      btn.innerHTML = `<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg> ${ok + fail}/${empties.length}`;
+    }
+
+    btn.innerHTML = original; btn.disabled = false;
+    toast(fail ? `Rebuild done. ${ok} ok, ${fail} failed.` : `Rebuilt ${ok} destination${ok === 1 ? '' : 's'}.`, fail ? 'err' : 'ok');
+    setTimeout(load, 1500);
+  }
+
+  // ── config (refresh interval) ────────────────────────────────
+  async function loadConfig() {
+    try {
+      const r = await fetch(API_CONFIG, { credentials: 'include' });
+      if (r.status === 401 || r.status === 403) { $('cache-interval').disabled = true; return; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      const mins = Number(d.refreshIntervalMins);
+      if (ALLOWED_INTERVALS.includes(mins)) $('cache-interval').value = String(mins);
+      $('cache-interval').disabled = false;
+      configLoaded = true;
+    } catch (e) {
+      // Silent: if the endpoint isn't deployed yet, keep the dropdown disabled
+      // so we never claim a value is persisted when it isn't.
+      $('cache-interval').disabled = true;
+    }
+  }
+  async function saveConfig() {
+    const sel = $('cache-interval');
+    const mins = Number(sel.value);
+    if (!ALLOWED_INTERVALS.includes(mins)) return;
+    if (!configLoaded) return;
+    const prev = sel.dataset.prev || '45';
+    sel.disabled = true;
+    try {
+      const r = await fetch(API_CONFIG, {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshIntervalMins: mins }),
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      sel.dataset.prev = String(mins);
+      const label = sel.options[sel.selectedIndex].text;
+      toast(`Refresh interval set to ${label}`, 'ok');
+    } catch (e) {
+      sel.value = prev;
+      toast('Couldn’t save interval. Try again.', 'err');
+    } finally {
+      sel.disabled = false;
+    }
+  }
+
   // ── events ───────────────────────────────────────────────────
   $('btn-refresh').addEventListener('click', load);
   $('btn-add').addEventListener('click', () => openModal(null));
@@ -516,7 +811,17 @@
     if (!confirm('Re-poll every destination? This can take a couple of minutes.')) return;
     rebuild({ scope: 'all' }, e.currentTarget);
   });
+  $('btn-rebuild-empty').addEventListener('click', (e) => rebuildEmpties(e.currentTarget));
   $('search').addEventListener('input', (e) => { filter = e.target.value; renderTable(); });
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(el => {
+    el.addEventListener('click', () => setTab(el.getAttribute('data-tab')));
+  });
+
+  // Cache interval
+  $('cache-interval').dataset.prev = $('cache-interval').value;
+  $('cache-interval').addEventListener('change', saveConfig);
 
   $('modal-x').addEventListener('click', closeModal);
   $('modal-cancel').addEventListener('click', closeModal);
@@ -528,14 +833,28 @@
   $('table-host').addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-act]');
     if (!btn) return;
+    const act = btn.getAttribute('data-act');
+
+    if (act === 'toggle') {
+      const cc = btn.getAttribute('data-cc');
+      const bdRow = document.querySelector(`tr.breakdown-row[data-bd-for="${cc}"]`);
+      if (!bdRow) return;
+      const isOpen = bdRow.style.display !== 'none';
+      bdRow.style.display = isOpen ? 'none' : '';
+      btn.classList.toggle('is-open', !isOpen);
+      btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      return;
+    }
+
     const tr = btn.closest('tr'); const id = tr && tr.getAttribute('data-id');
     const dest = DEST.find(d => d.id === id);
-    if (btn.getAttribute('data-act') === 'edit') openModal(dest);
-    else if (btn.getAttribute('data-act') === 'rebuild') rebuild({ country: btn.getAttribute('data-cc') }, btn);
+    if (act === 'edit') openModal(dest);
+    else if (act === 'rebuild') rebuild({ country: btn.getAttribute('data-cc') }, btn);
   });
 
   // Boot
-  load();
+  load().then(() => setTab(activeTab));
+  loadConfig();
 })();
 </script>
 </body>
