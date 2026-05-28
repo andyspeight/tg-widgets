@@ -42,7 +42,14 @@ export const CLIENTS = {
     setupFeeCharged:      'fld4oBOWPZESceJds',
     primaryContactName:   'fldDh0OLM30UtU9Fv',
     primaryContactPhone:  'fldFES7Aa057MB3VT',
-    package:              'fldgQIlUsSBKIEWzd' // linked → Packages
+    package:              'fldgQIlUsSBKIEWzd', // linked → Packages
+    // Added 28 May 2026 — white-label branding for Luna Travel (the
+    // post-booking traveller app). Read by /api/admin/clients/get and
+    // written by /api/admin/clients/update-branding.
+    appName:              'fld0H6vOJOYqiODF5', // app name travellers see
+    brandPrimaryColour:   'fldz0cwl3jvX9PL6s', // hex, e.g. #1B2B5B
+    brandAccentColour:    'fld9dUcFDE5Nxm1lE', // hex, e.g. #00B4D8
+    welcomeMessage:       'fld10hwtIDkX2YWTx'  // greeting on first app open
   }
 };
 
