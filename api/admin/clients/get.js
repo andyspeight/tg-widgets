@@ -189,6 +189,12 @@ export default async function handler(req, res) {
         createdAt: client.fields[CLIENTS.fields.createdAt] || null,
         lastLogin: client.fields[CLIENTS.fields.lastLogin] || null,
         notes: client.fields[CLIENTS.fields.notes] || '',
+        // White-label branding (Luna Travel). Blank until set on the
+        // client detail page or during onboarding.
+        appName: client.fields[CLIENTS.fields.appName] || '',
+        brandPrimaryColour: client.fields[CLIENTS.fields.brandPrimaryColour] || '',
+        brandAccentColour: client.fields[CLIENTS.fields.brandAccentColour] || '',
+        welcomeMessage: client.fields[CLIENTS.fields.welcomeMessage] || '',
       },
       package: pkg,
       users: clientUsers,
