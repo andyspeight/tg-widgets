@@ -195,6 +195,7 @@ export default async function handler(req, res) {
         brandPrimaryColour: client.fields[CLIENTS.fields.brandPrimaryColour] || '',
         brandAccentColour: client.fields[CLIENTS.fields.brandAccentColour] || '',
         welcomeMessage: client.fields[CLIENTS.fields.welcomeMessage] || '',
+        logoUrl: client.fields[CLIENTS.fields.logoUrl] || '',
       },
       package: pkg,
       users: clientUsers,
