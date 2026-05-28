@@ -435,6 +435,18 @@
           <div class="hint">Unticked destinations are skipped by the refresh cron.</div>
         </div>
       </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-lat">Latitude (optional)</label>
+          <input type="number" id="f-lat" step="0.1" min="-90" max="90" placeholder="e.g. 40.4">
+          <div class="hint">Reference only. The map plots from live offer coordinates.</div>
+        </div>
+        <div class="field">
+          <label for="f-lng">Longitude (optional)</label>
+          <input type="number" id="f-lng" step="0.1" min="-180" max="180" placeholder="e.g. -3.7">
+          <div class="hint">Leave blank if unsure.</div>
+        </div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn--danger" id="modal-delete" style="margin-right:auto; display:none">Delete</button>
@@ -676,6 +688,8 @@
     $('f-dmax').value = dest && dest.datesMax != null ? dest.datesMax : '';
     $('f-maxoffers').value = dest && dest.maxOffers != null ? dest.maxOffers : '';
     $('f-enabled').checked = dest ? dest.enabled === true : true;
+    $('f-lat').value = dest && dest.lat != null ? dest.lat : '';
+    $('f-lng').value = dest && dest.lng != null ? dest.lng : '';
     $('f-cc').disabled = !!dest; // don't allow changing the code on edit (it's the key)
     $('modal-delete').style.display = dest ? 'inline-flex' : 'none';
     $('modal').classList.add('is-open');
@@ -692,6 +706,8 @@
       datesMax: $('f-dmax').value === '' ? null : Number($('f-dmax').value),
       maxOffers: $('f-maxoffers').value === '' ? null : Number($('f-maxoffers').value),
       enabled: $('f-enabled').checked,
+      lat: $('f-lat').value === '' ? null : Number($('f-lat').value),
+      lng: $('f-lng').value === '' ? null : Number($('f-lng').value),
     };
     if (!/^[A-Z]{2}$/.test(payload.countryCode)) { toast('Enter a valid 2-letter country code', 'err'); return; }
 
