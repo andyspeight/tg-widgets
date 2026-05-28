@@ -26,7 +26,7 @@
  *   @sparticuz/chromium, puppeteer-core
  */
 
-import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail } from './_auth.js';
+import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { renderPdfHtml } from '../public/_pdf-template.js';
 
 // ----- Constants (matched 1:1 with retrieve-order.js) -----
@@ -630,19 +630,37 @@ export default async function handler(req, res) {
       const widgetStatus = widget.fields?.Status;
       if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') return notFound(res);
 
+      const ownerRecordId = (widget.fields?.ClientRecordId || '').trim();
       const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
-      if (!clientEmail) return notFound(res);
+      if (!ownerRecordId && !clientEmail) return notFound(res);
 
-      // Look up the client's Travelify credentials from the Clients table.
+      // Resolve the OWNING CLIENT's Travelify credentials.
+      //
+      // Primary path: the widget records the Airtable record ID of the client
+      // that owns it (ClientRecordId), captured at save time from the
+      // authenticated session. Resolve directly from that client — unambiguous,
+      // and correct even when the widget was created by a staff member who
+      // belongs to several client accounts (resolving by their email would
+      // otherwise pick the wrong account via the user→client link).
+      //
+      // Fallback path: legacy widgets with no ClientRecordId resolve by
+      // ClientEmail as before, so nothing existing breaks.
       let creds;
       try {
-        creds = await lookupClientCredentialsByEmail(clientEmail);
+        if (ownerRecordId) {
+          creds = await lookupClientCredentialsByRecordId(ownerRecordId);
+        }
+        if (!creds && clientEmail) {
+          creds = await lookupClientCredentialsByEmail(clientEmail);
+        }
       } catch (err) {
-        console.error('[booking-pdf] credential lookup failed for', clientEmail, '—', err.message);
+        console.error('[booking-pdf] credential lookup failed for',
+          ownerRecordId || clientEmail, '—', err.message);
         return notFound(res);
       }
       if (!creds) {
-        console.warn(`[booking-pdf] No Travelify credentials on Clients record for ${clientEmail} (widgetId=${widgetId})`);
+        console.warn(`[booking-pdf] No Travelify credentials resolved for widgetId=${widgetId} ` +
+          `(ownerRecordId=${ownerRecordId || 'none'}, clientEmail=${clientEmail || 'none'})`);
         return notFound(res);
       }
 
