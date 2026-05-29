@@ -197,6 +197,22 @@
     var onResize = function(){ position(); };
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // ---- DIAGNOSTIC BUILD: on-screen readout + console log ----
+    var _dbg = null;
+    function dbg(msg){
+      try { console.info('[TOUR-DEBUG]', msg); } catch(e){}
+      if (!_dbg){
+        _dbg = document.createElement('div');
+        _dbg.id = 'tgt-debug';
+        _dbg.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:99999;max-width:340px;'+
+          'background:#0b1020;color:#7CF;border:1px solid #2af;border-radius:8px;'+
+          'font:600 11px/1.45 monospace;padding:8px 10px;white-space:pre-wrap;pointer-events:none;'+
+          'box-shadow:0 6px 20px rgba(0,0,0,.4)';
+        document.body.appendChild(_dbg);
+      }
+      _dbg.textContent = 'TOUR-DEBUG\n' + msg;
+    }
+
     function ensureLayers() {
       if (veil) return;
       // clear any orphaned layers left by a previous controller for this id
@@ -273,6 +289,7 @@
       if (n >= steps.length){ if (done) { i = steps.length; showDone(); return; } finish(true); return; }
       i = n;
       var st = steps[i];
+      dbg('go step '+(i+1)+'/'+steps.length+'  tab='+(st.tab||'(none)'));
 
       if (st.tab) clickTab(st.tab);
       if (typeof st.beforeShow === 'function') { try{ st.beforeShow(api); }catch(e){} }
@@ -291,10 +308,12 @@
     }
     function paintInner(st){
       var el = resolve(st.target);
-      if (!el){ // target missing — skip forward gracefully
-        console.warn('[tgse-tour] target not found, skipping:', st.target);
+      if (!el){
+        dbg('step '+(i+1)+' TARGET NOT FOUND -> skipping. selector='+String(st.target));
         return go(i+1);
       }
+      var _r0 = el.getBoundingClientRect();
+      dbg('step '+(i+1)+' target FOUND\nrect '+Math.round(_r0.width)+'x'+Math.round(_r0.height)+' @'+Math.round(_r0.left)+','+Math.round(_r0.top)+'\nvisible='+(el.offsetParent!==null)+' tab='+(st.tab||'-'));
       // If the target sits inside a collapsed accordion section, open it first
       // (TG editor shell uses .tgse-section / .is-open). Set the class directly
       // rather than clicking the head — clicking would fire the shell's own
@@ -377,6 +396,7 @@
       else if (place==='bottom'){ py=r.bottom+gap; px=clamp(r.left + r.width/2 - pw/2, 8, vw-pw-8); ay=-6; ax=clampLocal(r.left+r.width/2-px, 14, pw-26); arot='border-bottom:0;border-right:0'; }
       else { py=r.top-gap-ph; px=clamp(r.left + r.width/2 - pw/2, 8, vw-pw-8); ay=ph-6; ax=clampLocal(r.left+r.width/2-px, 14, pw-26); arot='border-top:0;border-left:0'; }
       pop.style.left=px+'px'; pop.style.top=py+'px';
+      dbg('step '+(i+1)+' PAINTED\nplacement='+place+'  callout @'+Math.round(px)+','+Math.round(py)+'\npop '+pop.offsetWidth+'x'+pop.offsetHeight+'  z='+getComputedStyle(pop).zIndex+'\npopVisible='+(pop.classList.contains('is-on')));
       var arrow = pop.querySelector('.tgt-pop-arrow');
       if (arrow){ arrow.style.left=ax+'px'; arrow.style.top=ay+'px'; arrow.setAttribute('style', arrow.getAttribute('style')+';'+arot); }
     }
@@ -425,6 +445,6 @@
   window.tgse.tour = tour;
   window.tgse.tourLauncher = tourLauncher;
   window.tgse.isTourDismissed = isDismissed;
-  window.tgse.tourVersion = '1.0.0';
+  window.tgse.tourVersion = '1.0.0-debug';
 
 })();
