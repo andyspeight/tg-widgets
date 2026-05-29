@@ -46,10 +46,10 @@
     /* a LIGHT scrim with a transparent spotlight hole — the editor stays clearly
        visible so the user can see exactly what they are about to use. The target
        is made to pop with a bright ring + glow, not by darkening everything. */
-    .tgt-veil{ position:fixed; inset:0; z-index:940; pointer-events:none; opacity:0; transition:opacity .25s ease; }
+    .tgt-veil{ position:fixed; inset:0; z-index:3000; pointer-events:none; opacity:0; transition:opacity .25s ease; }
     .tgt-veil.is-on{ opacity:1; }
     .tgt-spot{
-      position:fixed; z-index:941; border-radius:11px; pointer-events:none;
+      position:fixed; z-index:3001; border-radius:11px; pointer-events:none;
       box-shadow:0 0 0 9999px rgba(10,15,28,.34);
       transition:left .3s cubic-bezier(.34,1.1,.4,1), top .3s cubic-bezier(.34,1.1,.4,1), width .3s cubic-bezier(.34,1.1,.4,1), height .3s cubic-bezier(.34,1.1,.4,1);
       outline:2.5px solid var(--tgse-brand,#0891B2); outline-offset:3px;
@@ -68,7 +68,7 @@
 
     /* the instruction callout, anchored beside the spotlight */
     .tgt-pop{
-      position:fixed; z-index:943; width:312px; max-width:calc(100vw - 32px);
+      position:fixed; z-index:3003; width:312px; max-width:calc(100vw - 32px);
       background:var(--tgse-surface,#0e1726); color:var(--tgse-text,#e6edf6);
       border:1px solid var(--tgse-border,#1e293b); border-radius:14px;
       box-shadow:0 24px 60px -20px rgba(0,0,0,.6);
@@ -105,7 +105,7 @@
 
     /* persistent launcher */
     .tgt-launch{
-      position:fixed; inset-block-end:22px; inset-inline-end:22px; z-index:880;
+      position:fixed; inset-block-end:22px; inset-inline-end:22px; z-index:2990;
       display:inline-flex; align-items:center; gap:9px;
       font:inherit; font-size:13.5px; font-weight:600; color:#fff; cursor:pointer; border:none;
       padding:11px 17px 11px 13px; border-radius:999px;
@@ -121,7 +121,7 @@
 
     /* welcome / done cards (centred, used only for the first + last beats) */
     .tgt-card{
-      position:fixed; z-index:944; left:50%; top:50%; transform:translate(-50%,-46%) scale(.97);
+      position:fixed; z-index:3004; left:50%; top:50%; transform:translate(-50%,-46%) scale(.97);
       width:420px; max-width:calc(100vw - 32px);
       background:var(--tgse-surface,#0e1726); color:var(--tgse-text,#e6edf6);
       border:1px solid var(--tgse-border,#1e293b); border-radius:18px;
@@ -199,6 +199,8 @@
 
     function ensureLayers() {
       if (veil) return;
+      // clear any orphaned layers left by a previous controller for this id
+      document.querySelectorAll('.tgt-veil,.tgt-spot,.tgt-pop,.tgt-card').forEach(function(n){ n.remove(); });
       veil = document.createElement('div'); veil.className = 'tgt-veil';
       spot = document.createElement('div'); spot.className = 'tgt-spot'; spot.style.display = 'none';
       pop  = document.createElement('div'); pop.className = 'tgt-pop'; pop.style.display = 'none';
@@ -280,22 +282,29 @@
     }
 
     function paint(st){
+      try { paintInner(st); }
+      catch(err){
+        console.warn('[tgse-tour] paint failed, recovering:', err);
+        // never leave the user stranded — at minimum show the callout centred
+        if (pop){ pop.style.display='block'; pop.style.left='50%'; pop.style.top='24px'; pop.style.transform='translateX(-50%)'; pop.classList.add('is-on'); }
+      }
+    }
+    function paintInner(st){
       var el = resolve(st.target);
       if (!el){ // target missing — skip forward gracefully
         console.warn('[tgse-tour] target not found, skipping:', st.target);
         return go(i+1);
       }
       // If the target sits inside a collapsed accordion section, open it first
-      // (TG editor shell uses .tgse-section / .is-open). Without this, a hidden
-      // control has no size and the callout lands in the corner.
+      // (TG editor shell uses .tgse-section / .is-open). Set the class directly
+      // rather than clicking the head — clicking would fire the shell's own
+      // document-level accordion toggler, whose timing/side-effects we do not
+      // control. The one-shot guard stops any chance of a re-paint loop.
       var sec = el.closest ? el.closest('.tgse-section') : null;
-      if (sec && !sec.classList.contains('is-open')){
-        var head = sec.querySelector('.tgse-section-head');
-        if (head){ head.click(); }
-        // if no handler opened it, force the state so the control is revealed
-        if (!sec.classList.contains('is-open')) sec.classList.add('is-open');
-        // section open animates; give it a beat before measuring
-        return setTimeout(function(){ paint(st); }, 200);
+      if (sec && !sec.classList.contains('is-open') && !st._revealed){
+        st._revealed = true;
+        sec.classList.add('is-open');
+        return setTimeout(function(){ paint(st); }, 180);
       }
       // scroll into view
       try { el.scrollIntoView({ behavior: reduce?'auto':'smooth', block:'center', inline:'nearest' }); } catch(e){}
