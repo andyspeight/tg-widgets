@@ -399,7 +399,7 @@
   });
 
   // ── Render preview ──────────────────────────────────────────
-  function render() {
+  function renderNow() {
     const host = document.getElementById('pv-frame');
     if (!host) return;
     // Tear down any existing instance + mount, build fresh.
@@ -412,6 +412,16 @@
       console.error('[editor-worldmap] preview failed:', e);
     }
     updateContrastWarn();
+  }
+
+  // Debounced preview rebuild. Rebuilding the widget re-fetches offers and
+  // reloads map tiles, so doing it on every keystroke makes the preview flash.
+  // We coalesce rapid edits and only rebuild once the user pauses.
+  let _renderTimer = null;
+  function render() {
+    updateContrastWarn();
+    clearTimeout(_renderTimer);
+    _renderTimer = setTimeout(renderNow, 300);
   }
 
   // ── Sync sidebar controls from C (after load / setConfig) ───
@@ -584,14 +594,14 @@
   // ── Load existing config if ?id= present ────────────────────
   function loadFromUrl() {
     const wId = new URLSearchParams(location.search).get('id');
-    if (!wId) { syncControls(); render(); return; }
+    if (!wId) { syncControls(); renderNow(); return; }
     fetch('/api/widget-config?id=' + encodeURIComponent(wId))
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d && d.config) Object.assign(C, d.config);
         if (d && d.name) document.getElementById('name-input').value = d.name;
         syncControls();
-        render();
+        renderNow();
       })
       .catch(() => tgse.toast('Failed to load widget', 'err'));
   }
@@ -599,7 +609,7 @@
   // ── Boot ────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     wire();
-    const boot = () => { ensureCountries(); if (tgse.isLoggedIn()) { loadFromUrl(); initWorldMapTour(); } else { syncControls(); render(); } };
+    const boot = () => { ensureCountries(); if (tgse.isLoggedIn()) { loadFromUrl(); initWorldMapTour(); } else { syncControls(); renderNow(); } };
     if (window.tgse && typeof window.tgse.onReady === 'function') window.tgse.onReady(boot);
     else boot();
   });
