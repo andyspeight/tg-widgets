@@ -862,6 +862,10 @@
   <!-- ======================== Shell behaviour (must come BEFORE editor script) ======================== -->
   <script src="/editor-shell.js"></script>
 
+  <!-- Guided setup tour (reusable engine + step list) -->
+  <script src="/editor-tour.js"></script>
+  <script src="/tour-faq.js"></script>
+
   <!-- ======================== Editor logic ======================== -->
   <script>
   (function () {
@@ -2449,6 +2453,11 @@
       });
 
       bindKeyboard();
+
+      // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
+      // pill reopens it any time. init() runs on onReady (gated on login) and on
+      // onLoginSuccess; the _booted guard inside keeps it idempotent.
+      if (typeof window.initFaqTour === 'function') window.initFaqTour();
     }
 
     /* ============================ BOOT ============================ */
