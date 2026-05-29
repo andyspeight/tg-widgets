@@ -79,8 +79,8 @@
       },
       {
         target: '#btn-embed',
-        title: 'Grab your embed code',
-        body: 'Click here for a single line of code. Paste it wherever you want the map on your site and you are live. That is the whole job done.',
+        title: 'Last thing: your embed code',
+        body: 'This button gives you a single line of code to paste on your site. We will not open it just yet. Hit Finish below, then click here whenever you are ready.',
         placement: 'left'
       }
     ];
@@ -91,8 +91,8 @@
     body: 'A quick walk through the setup, one control at a time. It takes about a minute, and you can do each step yourself as we go. Ready?'
   };
   var DONE = {
-    titleHtml: 'That\u2019s your map <em>ready to go</em>.',
-    body: 'Heading set, destinations chosen, brand applied, embed in hand. Paste that one line on your site and your live offers are on the map. You can reopen this walkthrough any time from the button in the corner.'
+    titleHtml: 'Nicely done. <em>Your map is ready.</em>',
+    body: 'Heading set, destinations chosen, brand applied. Save your map, then click Get embed code and paste that one line on your site. Your live offers will be on the map. You can reopen this walkthrough any time from the button in the corner.'
   };
 
   var _api = null;
