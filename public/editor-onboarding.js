@@ -301,20 +301,30 @@
       else if (e.key === 'ArrowLeft') { if (idx > 0) go(idx - 1); }
     }
 
+    var _prevCh = null, _prevFrame = null;
     function render() {
+      // tear down the outgoing chapter's live content (e.g. a mounted widget)
+      if (_prevCh && typeof _prevCh.onLeave === 'function') {
+        try { _prevCh.onLeave(_prevFrame); } catch (e) {}
+      }
+
       var ch = chapters[idx];
       var titleHtml = ch.titleHtml ? ch.titleHtml : esc(ch.title || '');
       copyWrap.innerHTML =
         (ch.kicker ? '<div class="tgob-kicker">' + esc(ch.kicker) + '</div>' : '') +
         '<h2 class="tgob-title">' + titleHtml + '</h2>' +
         (ch.body ? '<p class="tgob-text">' + esc(ch.body) + '</p>' : '');
-      artWrap.innerHTML = ch.art ? ('<div class="tgob-art-frame">' + ch.art + '</div>') : '';
-      artWrap.style.display = ch.art ? '' : 'none';
 
-      if (ch.art && typeof ch.onArt === 'function') {
-        var frame = artWrap.querySelector('.tgob-art-frame');
+      // art may be a string OR a function returning a string (built fresh each visit)
+      var artHtml = typeof ch.art === 'function' ? ch.art() : ch.art;
+      artWrap.innerHTML = artHtml ? ('<div class="tgob-art-frame">' + artHtml + '</div>') : '';
+      artWrap.style.display = artHtml ? '' : 'none';
+
+      var frame = artWrap.querySelector('.tgob-art-frame');
+      if (artHtml && typeof ch.onArt === 'function') {
         requestAnimationFrame(function () { try { ch.onArt(frame); } catch (e) {} });
       }
+      _prevCh = ch; _prevFrame = frame;
 
       Array.prototype.forEach.call(dotsWrap.children, function (d, i) { d.classList.toggle('is-on', i === idx); });
 
@@ -340,7 +350,13 @@
       dontShowCb.checked = isDismissed(id);
       requestAnimationFrame(function () { root.classList.add('is-open'); });
     }
-    function close() { if (root) root.classList.remove('is-open'); }
+    function close() {
+      if (_prevCh && typeof _prevCh.onLeave === 'function') {
+        try { _prevCh.onLeave(_prevFrame); } catch (e) {}
+        _prevCh = null; _prevFrame = null;
+      }
+      if (root) root.classList.remove('is-open');
+    }
 
     function mountBlob() {
       if (document.querySelector('.tgob-blob[data-tgob="' + id + '"]')) return;
@@ -359,6 +375,6 @@
   }
 
   window.tgse.onboarding = onboarding;
-  window.tgse.onboardingVersion = '1.1.0';
+  window.tgse.onboardingVersion = '1.2.0';
 
 })();
