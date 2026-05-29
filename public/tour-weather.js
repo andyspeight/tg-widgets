@@ -1,17 +1,21 @@
 /* ============================================================================
-   Weather — guided setup tour  v1.0.0
+   Weather — guided setup tour  v1.1.0
    ----------------------------------------------------------------------------
    Step-by-step walkthrough for the Weather widget editor. Each step spotlights a
    REAL control and tells the user what to do. The tour switches tabs as needed
    and advances on Next.
 
+   ORDER: destination FIRST. The preview shows nothing until a destination is
+   chosen, so we get that in before the design steps, otherwise there is nothing
+   live to style and the preview steps fall flat.
+
    Requires editor-tour.js (adds tgse.tour + tgse.tourLauncher).
 
    Real anchors (verified against editor-weather.html):
-     #layoutSeg          Layout segmented control   (Design tab, "Layout" section, open)
-     #presets            Colour presets             (Design tab, "Colours" section, open)
      #destSearch         Live destination search    (Content tab, "Destination" section, open)
      #slugSource         Auto-detect source         (Content tab, "Auto-detect" section, COLLAPSED)
+     #layoutSeg          Layout segmented control   (Design tab, "Layout" section, open)
+     #presets            Colour presets             (Design tab, "Colours" section, open)
      #sectionTogglesWrap Section visibility toggles (Settings tab, "Section visibility" section, open)
      .tgse-preview       Live preview               (main area)
      #btn-save           Save button                (header)
@@ -33,24 +37,10 @@
   function buildSteps() {
     return [
       {
-        tab: 'design',
-        target: '#layoutSeg',
-        title: 'Pick a layout',
-        body: 'Compact keeps it small and tidy, Standard is the everyday view, Wide spreads it out with more room for the forecast. Choose one and watch the preview.',
-        placement: 'right'
-      },
-      {
-        tab: 'design',
-        target: '#presets',
-        title: 'Match your brand',
-        body: 'Tap a preset for an instant matching pair, or set the brand and accent colours by hand just above so the widget sits with the rest of your site.',
-        placement: 'right'
-      },
-      {
         tab: 'content',
         target: '#destSearch',
-        title: 'Choose your destination',
-        body: 'Start typing a country, city or resort and pick it from the list. The widget will show live weather for wherever you choose, ideal for a single destination page.',
+        title: 'Start with your destination',
+        body: 'Start typing a country, city or resort and pick it from the list. Choose one now and the preview will spring to life with live weather, then the rest of the setup has something real to work with.',
         placement: 'right'
       },
       {
@@ -64,6 +54,20 @@
         },
         title: 'Or detect it automatically',
         body: 'Running one widget across lots of destination pages? Auto-detect reads the destination from the page address, so the same widget shows the right weather everywhere. Use a fixed destination above or this, not both.',
+        placement: 'right'
+      },
+      {
+        tab: 'design',
+        target: '#layoutSeg',
+        title: 'Pick a layout',
+        body: 'Compact keeps it small and tidy, Standard is the everyday view, Wide spreads it out with more room for the forecast. Choose one and watch the preview update.',
+        placement: 'right'
+      },
+      {
+        tab: 'design',
+        target: '#presets',
+        title: 'Match your brand',
+        body: 'Tap a preset for an instant matching pair, or set the brand and accent colours by hand just above so the widget sits with the rest of your site.',
         placement: 'right'
       },
       {
