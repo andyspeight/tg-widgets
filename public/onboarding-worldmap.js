@@ -28,8 +28,8 @@
   function injectArtStyles() {
     if (document.getElementById(STYLE_ID)) return;
     var css = `
-    /* live widget mount — fills the square art frame */
-    .wmL-mount{ position:absolute; inset:0; border-radius:15px; overflow:hidden; background:color-mix(in srgb, var(--tgse-text,#fff) 4%, transparent); }
+    /* live widget mount — fills the full-width art frame */
+    .wmL-mount{ position:absolute; inset:0; border-radius:13px; overflow:hidden; background:color-mix(in srgb, var(--tgse-text,#fff) 4%, transparent); }
     .wmL-mount > [data-tg-widget]{ display:block; width:100%; height:100%; }
     .wmL-loading{ position:absolute; inset:0; display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center;
       color:var(--tgse-text-muted,#94a3b8); font-family:Inter,sans-serif; font-size:12.5px; }
@@ -38,17 +38,9 @@
       border-top-color:var(--tgse-brand,#0891B2); animation:wmL-spin .8s linear infinite; }
     @keyframes wmL-spin{ to{ transform:rotate(360deg); } }
 
-    /* a soft caption chip that floats over the live map to point at the feature in focus */
-    .wmL-tip{ position:absolute; left:12px; bottom:12px; right:12px; z-index:5;
-      font-family:Inter,sans-serif; font-size:12px; line-height:1.4; color:var(--tgse-text,#e6edf6);
-      background:color-mix(in srgb, var(--tgse-surface,#0e1726) 88%, transparent);
-      border:1px solid var(--tgse-border,#334155); border-radius:10px; padding:9px 12px;
-      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:0 8px 20px -10px rgba(0,0,0,.5); }
-    .wmL-tip b{ color:var(--tgse-brand,#0891B2); font-weight:700; }
-
-    /* ── SETUP chapter mocks (real editor-control look, no live widget needed) ── */
-    .wmS{ position:absolute; inset:0; display:flex; flex-direction:column; gap:12px; justify-content:center; padding:2px; }
-    .wmS-panel{ border:1px solid var(--tgse-border,#334155); border-radius:13px; overflow:hidden;
+    /* ── SETUP chapter mocks — centred in the wide frame ── */
+    .wmS{ position:absolute; inset:0; display:flex; flex-direction:column; gap:12px; justify-content:center; align-items:center; padding:16px; }
+    .wmS-panel{ width:100%; max-width:560px; border:1px solid var(--tgse-border,#334155); border-radius:13px; overflow:hidden;
       background:color-mix(in srgb, var(--tgse-text,#fff) 3%, transparent); }
     .wmS-head{ display:flex; align-items:center; gap:9px; padding:11px 14px; border-bottom:1px solid var(--tgse-border,#334155);
       font-family:Inter,sans-serif; font-size:12.5px; font-weight:700; color:var(--tgse-text,#e6edf6); }
@@ -102,7 +94,7 @@
            '</div>';
   }
 
-  function mountLive(frame, cfg, tipHtml) {
+  function mountLive(frame, cfg) {
     if (!frame) return;
     var mount = frame.querySelector('[data-wm-live]');
     if (!mount) return;
@@ -111,10 +103,8 @@
       mount.innerHTML = '<div class="wmL-loading"><span>Live map needs widget-worldmap.js</span></div>';
       return;
     }
-    // build the widget host
     var host = document.createElement('div');
     host.setAttribute('data-tg-widget', 'worldmap');
-    // keep the loading state until the widget paints, then swap
     try {
       var inst = new window.TGWorldMapWidget(host, cfg || {});
       mount._tgInst = inst;
@@ -122,17 +112,9 @@
       mount.innerHTML = '<div class="wmL-loading"><span>Map unavailable right now</span></div>';
       return;
     }
-    // replace loader with the live host once it has a shadowRoot painting
     var loader = mount.querySelector('.wmL-loading');
     mount.appendChild(host);
-    // give Leaflet a tick, then drop the loader
     setTimeout(function () { if (loader && loader.parentNode) loader.parentNode.removeChild(loader); }, 650);
-
-    if (tipHtml) {
-      var tip = document.createElement('div');
-      tip.className = 'wmL-tip'; tip.innerHTML = tipHtml;
-      mount.appendChild(tip);
-    }
   }
 
   function leaveLive(frame) {
@@ -147,15 +129,16 @@
     mount.innerHTML = '';
   }
 
-  // shared base config for the in-guide widget. maxPins kept generous so the
-  // map looks full; fullscreen button on so chapter 4 can show it.
+  // shared base config for the in-guide widget. No countries allow-list, so the
+  // map opens on the genuine world view a client sees by default, showing the
+  // full spread of live offers.
   function baseCfg(extra) {
     return Object.assign({
       theme: 'dark',
       title: 'Where will you go next?',
       subtitle: 'Browse our latest offers from around the world',
       showFullscreenButton: true,
-      maxPins: 12
+      maxPins: 16
     }, extra || {});
   }
 
@@ -255,45 +238,49 @@
     {
       kicker: 'Chapter 1',
       titleHtml: 'This is your map. <em>Live, right now.</em>',
-      body: 'Everything in the panel is the real widget, running on real data. Those are your latest holiday offers, plotted where they go, with genuine "from" prices per person. Pan it, zoom it, have a click. Nothing here is a mock-up, and it updates itself in the background so it is never out of date.',
+      body: 'Everything below is the real widget on real data. Your latest holiday offers, plotted where they go, with genuine prices per person. It refreshes itself in the background, so it never goes stale.',
+      hint: 'Drag it, zoom it, click a pin. It is all live.',
       art: liveArt,
-      onArt: function (f) { mountLive(f, baseCfg(), 'Drag the map. Scroll to zoom. The prices are real, pulled live.'); },
+      onArt: function (f) { mountLive(f, baseCfg()); },
       onLeave: leaveLive
     },
     {
       kicker: 'Chapter 2',
       titleHtml: 'Your customers <em>browse by region</em>.',
-      body: 'Open the map up and a region selector appears across the top. Worldwide gives the clustered overview, then one tap reframes to Europe, the Caribbean, Asia, wherever. It is how a daydreaming visitor narrows a whole world of choice down to the part they actually care about.',
+      body: 'Open the map up and a region selector appears. Worldwide gives the clustered overview, then one tap reframes to Europe, the Caribbean, Asia, wherever they fancy.',
+      hint: 'Tap View fullscreen to see the regions.',
       art: liveArt,
-      onArt: function (f) { mountLive(f, baseCfg(), 'Tap <b>View fullscreen</b> on the map to see the region pills in action.'); },
+      onArt: function (f) { mountLive(f, baseCfg()); },
       onLeave: leaveLive
     },
     {
       kicker: 'Chapter 3',
       titleHtml: 'Every pin <em>opens right up</em>.',
-      body: 'Tap a country and the map drills into its resorts, while a "Latest deals" panel fills with real, bookable offers for that destination. Photos, hotel names, star ratings, price per person, straight through to book. The map stops being a picture and becomes a shop window.',
+      body: 'Tap a country and the map drills into its resorts while a deals panel fills with real, bookable offers. Photos, hotels, star ratings, prices, straight through to book.',
+      hint: 'In fullscreen, tap a price pin.',
       art: liveArt,
-      onArt: function (f) { mountLive(f, baseCfg(), 'Open fullscreen, then tap a price pin to load that destination\u2019s live deals.'); },
+      onArt: function (f) { mountLive(f, baseCfg()); },
       onLeave: leaveLive
     },
     {
       kicker: 'Chapter 4',
       titleHtml: 'They <em>filter to what fits</em>.',
-      body: 'Inside the immersive fullscreen view, visitors filter the deals by maximum budget per person and by minimum star rating, so a family on a number and a couple chasing five stars both find their trip fast. It is the difference between browsing and booking.',
+      body: 'Inside the immersive fullscreen view, visitors filter the deals by budget per person and by star rating, so every kind of traveller finds their trip fast.',
+      hint: 'Look for Rating and Max budget.',
       art: liveArt,
-      onArt: function (f) { mountLive(f, baseCfg(), 'In fullscreen, the <b>Rating</b> and <b>Max budget</b> filters sit above the deals.'); },
+      onArt: function (f) { mountLive(f, baseCfg()); },
       onLeave: leaveLive
     },
     {
       kicker: 'Chapter 5  ·  Setup',
       titleHtml: 'Choose <em>what goes on your map</em>.',
-      body: 'Now the easy part: making it yours. Under "Destinations shown" you decide what appears. Specialise in the Greek islands? Show only those. Sell the world? Leave it open and every destination you have offers for is pinned automatically. You are never editing pins by hand.',
+      body: 'Now the easy part. Under "Destinations shown" you pick what appears. Show only the Greek islands, or leave it open and every destination you have offers for is pinned automatically. You never edit pins by hand.',
       art: ART_CURATE
     },
     {
       kicker: 'Chapter 6  ·  Setup',
       titleHtml: 'Brand it, then <em>go live</em>.',
-      body: 'Set your accent and primary colours, pick a font, write your heading, and the map looks built for your site. Then save, copy the one-line embed, and paste it wherever you want it. That is the whole setup. Your offers are on the map.',
+      body: 'Set your colours, font and heading so the map looks built for your site. Then copy the one-line embed and paste it anywhere. The map fills with your live offers the moment it loads.',
       art: ART_SHIP,
       onArt: shipHook
     }
