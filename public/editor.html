@@ -348,6 +348,10 @@
 <!-- Then the widget (so window.TGPricingWidget is available for preview) -->
 <script src="/widget.js"></script>
 
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-pricing.js"></script>
+
 <script>
 /* ============================================================
    PRICING TABLE EDITOR — refactored onto unified shell
@@ -880,6 +884,11 @@ function boot(){
     C.header = { ...TPL[0].hd };
     snap(); ren(); renP();
   }
+
+  // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
+  // pill reopens it any time. The _booted guard inside makes this idempotent,
+  // so calling it from boot() (hit by both onReady and onLoginSuccess) is safe.
+  if (typeof window.initPricingTour === 'function') window.initPricingTour();
 }
 
 /* ── Initialise the shell ─────────────────────────────────── */
