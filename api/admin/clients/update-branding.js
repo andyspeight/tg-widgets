@@ -6,6 +6,7 @@
  *   - brandPrimaryColour (hex string, e.g. #1B2B5B)
  *   - brandAccentColour  (hex string, e.g. #00B4D8)
  *   - welcomeMessage     (text, greeting on first app open)
+ *   - logoUrl            (https URL of the agency logo, public Vercel Blob)
  *
  * Phase 3 (continued). Companion to update-integration.js and
  * update-entitlement.js — same auth, same helpers, same response style.
@@ -35,6 +36,7 @@ const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 const HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 const APP_NAME_MAX = 60;
 const WELCOME_MAX = 500;
+const LOGO_URL_MAX = 1000;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -93,6 +95,15 @@ export default async function handler(req, res) {
     updates[CLIENTS.fields.welcomeMessage] = v;
   }
 
+  if (body.logoUrl !== undefined) {
+    const v = String(body.logoUrl).trim();
+    if (v) {
+      if (v.length > LOGO_URL_MAX) errors.push(`logoUrl must be ${LOGO_URL_MAX} characters or fewer`);
+      if (!/^https:\/\//i.test(v)) errors.push('logoUrl must be an https URL');
+    }
+    updates[CLIENTS.fields.logoUrl] = v;
+  }
+
   if (Object.keys(updates).length === 0) {
     return jsonError(res, 400, 'nothing_to_update', 'No fields supplied');
   }
@@ -125,6 +136,7 @@ export default async function handler(req, res) {
         brandPrimaryColour: updated.fields[CLIENTS.fields.brandPrimaryColour] || '',
         brandAccentColour: updated.fields[CLIENTS.fields.brandAccentColour] || '',
         welcomeMessage: updated.fields[CLIENTS.fields.welcomeMessage] || '',
+        logoUrl: updated.fields[CLIENTS.fields.logoUrl] || '',
       },
     });
   } catch (err) {
