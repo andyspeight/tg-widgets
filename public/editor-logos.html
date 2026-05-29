@@ -857,6 +857,10 @@
 <!-- Shell behaviour first — exposes window.tgse -->
 <script src="/editor-shell.js"></script>
 <script src="/widget-logos.js"></script>
+
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-logos.js"></script>
 <script>
 /* =================================================================
    STATE
@@ -1698,6 +1702,11 @@ function boot() {
   syncUIFromState();
   updateSaveButton();
   mountFontPickerShell();
+
+  // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
+  // pill reopens it any time. The _booted guard inside makes this idempotent,
+  // so calling it from boot() (hit by both onReady and onLoginSuccess) is safe.
+  if (typeof window.initLogosTour === 'function') window.initLogosTour();
 }
 
 // Mount the shell font picker into the Typography section.
