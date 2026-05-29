@@ -321,7 +321,9 @@
 </div>
 
 <script src="/editor-shell.js"></script>
+<script src="/editor-onboarding.js"></script>
 <script src="/widget-worldmap.js"></script>
+<script src="/onboarding-worldmap.js"></script>
 <script>
 /* ============================================================
    WORLD MAP EDITOR — per-editor logic
@@ -393,7 +395,7 @@
 
     onThemeToggle: (isDark) => { C.theme = isDark ? 'dark' : 'light'; shell.markDirty(); render(); },
     onDesignMode: () => {},
-    onLoginSuccess: () => { ensureCountries(); loadFromUrl(); },
+    onLoginSuccess: () => { ensureCountries(); loadFromUrl(); initWorldMapOnboarding(); },
   });
 
   // ── Render preview ──────────────────────────────────────────
@@ -597,7 +599,7 @@
   // ── Boot ────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     wire();
-    const boot = () => { ensureCountries(); if (tgse.isLoggedIn()) loadFromUrl(); else { syncControls(); render(); } };
+    const boot = () => { ensureCountries(); if (tgse.isLoggedIn()) { loadFromUrl(); initWorldMapOnboarding(); } else { syncControls(); render(); } };
     if (window.tgse && typeof window.tgse.onReady === 'function') window.tgse.onReady(boot);
     else boot();
   });
