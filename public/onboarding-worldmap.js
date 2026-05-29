@@ -27,8 +27,7 @@
         target: '#f-title',
         title: 'Give your map a heading',
         body: 'This sits above the map on your site. Something inviting works best, like "Where will you go next?". Type yours here.',
-        placement: 'right',
-        advanceOn: { event: 'input', selector: '#f-title' }
+        placement: 'right'
       },
       {
         tab: 'content',
@@ -42,8 +41,7 @@
         target: function () { return document.querySelector('#col-accent') ? document.querySelector('#col-accent').closest('.tgwm-field') || document.querySelector('#col-accent') : null; },
         title: 'Set your accent colour',
         body: 'This is the colour of your active pins and highlights. Click the swatch or type a hex code to match your brand.',
-        placement: 'right',
-        advanceOn: { event: 'input', selector: '#col-accent' }
+        placement: 'right'
       },
       {
         tab: 'design',
@@ -77,8 +75,7 @@
         target: '#btn-save',
         title: 'Save your map',
         body: 'When it looks right, hit Save. You can come back and tweak any of this whenever you like.',
-        placement: 'bottom',
-        advanceOn: { event: 'click', selector: '#btn-save' }
+        placement: 'bottom'
       },
       {
         target: '#btn-embed',
