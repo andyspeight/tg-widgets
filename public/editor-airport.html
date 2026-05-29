@@ -557,6 +557,10 @@
 <!-- Widget JS for live preview -->
 <script src="/widget-airport.js"></script>
 
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-airport.js"></script>
+
 <!-- Editor logic -->
 <script>
 (function () {
@@ -852,6 +856,14 @@
     }
     // No ?id= → editor renders with its default DOM values (already set
     // in the HTML), which is the desired "new widget" UX.
+
+    // Guided setup tour — only once authenticated. boot() also runs pre-login
+    // via onReady(boot); onLoginSuccess re-runs boot() after sign-in, when
+    // isLoggedIn() is true. The _booted guard inside keeps it idempotent.
+    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn() &&
+        typeof window.initAirportTour === 'function') {
+      window.initAirportTour();
+    }
   }
 
   // Initial preview
