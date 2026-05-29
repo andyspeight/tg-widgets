@@ -1,29 +1,31 @@
 /* ============================================================================
-   Travelgenix Editor Onboarding Overlay  v1.1.0
+   Travelgenix Editor Onboarding Overlay  v1.3.0
    ----------------------------------------------------------------------------
-   A shared, reusable first-run guide for every widget editor — now animated.
+   Layout reset: copy on TOP, art FULL-WIDTH below.
 
-   v1.1 adds:
-     - Cinematic entrance (backdrop bloom + card spring-in)
-     - Staggered copy reveal (kicker -> title -> body)
-     - Directional chapter transitions (content slides the way you travel)
-     - A GENERIC ANIMATION LIBRARY any widget's art can opt into via classes,
-       so each guide's illustration *demonstrates* the feature instead of
-       sitting there as a static picture:
-         .tgob-a-drop   drops in from above with a soft bounce
-         .tgob-a-pop    pops in (scale overshoot)
-         .tgob-a-rise   fades up
-         .tgob-a-draw   SVG stroke draws itself (set --len to path length)
-         .tgob-pulse    perpetual pulse ring (for a "live" feel)
-         .tgob-caret    blinking text caret (for typewriter effects)
-       Stagger by setting inline  style="animation-delay:120ms"  per element.
-     - Optional per-chapter  onArt(frameEl)  JS hook (e.g. typewriter).
-     - Full prefers-reduced-motion fallback: instant final state, no loops.
+   v1.0  static SVG art (scrapped)
+   v1.1  animation library + moving art
+   v1.2  onLeave teardown hook (live widgets can mount/unmount cleanly)
+   v1.3  STACKED LAYOUT — the art is no longer squashed into a right column.
+         A compact two-column copy header sits at the top (title left,
+         supporting line + optional "try this" hint right), and the art zone
+         runs the full width of the card beneath it. Maps, dashboards and
+         control panels finally get room to breathe. Card is wider and the
+         vertical rhythm is more generous.
 
-   Behaviour (unchanged from v1.0): auto-open once per login unless dismissed;
-   persistent "Show me how" blob; Skip / Back / Next / dots / Esc / arrows.
+   CHAPTER SHAPE
+     {
+       kicker, title|titleHtml, body,
+       hint:   'small try-this line shown under the body' (optional),
+       art:    'html' | function(){...returns html...} (optional),
+       onArt:  function(frameEl){...}   (optional, after art mounts),
+       onLeave:function(frameEl){...}   (optional, before art is torn down)
+     }
 
-   API:  tgse.onboarding({ id, chapters })
+   Animation classes any art can use: tgob-a-drop / -pop / -rise / -draw,
+   tgob-pulse, tgob-sweep (+ .tgob-sweep-host), tgob-caret.
+
+   API: tgse.onboarding({ id, chapters })
    ============================================================================ */
 (function () {
   'use strict';
@@ -48,26 +50,26 @@
 
     .tgob-card{
       --dir:1;
-      position:relative; width:100%; max-width:900px; aspect-ratio:4 / 3;
-      max-height:min(648px, calc(100vh - 48px));
+      position:relative; width:100%; max-width:1000px;
+      height:min(660px, calc(100vh - 40px)); min-height:min(620px, calc(100vh - 40px));
       background:var(--tgse-surface,#0e1726); color:var(--tgse-text,#e6edf6);
       border:1px solid var(--tgse-border,#1e293b); border-radius:20px; overflow:hidden;
       box-shadow:0 40px 90px -28px rgba(0,0,0,.62), 0 0 0 1px rgba(255,255,255,.02) inset;
       display:flex; flex-direction:column;
-      transform:translateY(16px) scale(.965); opacity:.4;
+      transform:translateY(16px) scale(.97); opacity:.4;
       transition:transform .42s cubic-bezier(.34,1.4,.5,1), opacity .3s ease;
     }
     .tgob-overlay.is-open .tgob-card{ transform:none; opacity:1; }
 
     .tgob-card::before{
       content:''; position:absolute; inset:-40%; z-index:0; pointer-events:none;
-      background:radial-gradient(60% 50% at 70% 18%, color-mix(in srgb, var(--tgse-brand,#0891B2) 16%, transparent), transparent 70%);
-      opacity:.6;
+      background:radial-gradient(50% 40% at 50% 6%, color-mix(in srgb, var(--tgse-brand,#0891B2) 14%, transparent), transparent 70%);
+      opacity:.7;
     }
     .tgob-card > *{ position:relative; z-index:1; }
 
     .tgob-top{
-      position:absolute; inset-block-start:0; inset-inline:0; height:56px;
+      position:absolute; inset-block-start:0; inset-inline:0; height:54px;
       display:flex; align-items:center; justify-content:space-between;
       padding:0 18px; z-index:3; pointer-events:none;
     }
@@ -87,31 +89,50 @@
     .tgob-close:hover{ color:var(--tgse-text,#e6edf6); border-color:var(--tgse-border-strong,#334155); transform:rotate(90deg); }
     .tgob-close svg{ width:16px; height:16px; }
 
+    /* ── body is now a vertical stack: header on top, art full-width below ── */
     .tgob-body{
       flex:1 1 auto; min-height:0;
-      display:grid; grid-template-columns:1fr 0.94fr; gap:0; padding:56px 0 0;
+      display:flex; flex-direction:column;
+      padding:54px 0 0;
     }
-    .tgob-copy{ align-self:center; padding:8px 8px 8px 46px; display:flex; flex-direction:column; gap:16px; }
+
+    /* copy header — title left, supporting line + hint right */
+    .tgob-copy{
+      flex:0 0 auto;
+      display:grid; grid-template-columns:1.08fr 0.92fr; gap:12px 40px; align-items:end;
+      padding:8px 46px 16px;
+    }
+    .tgob-head-l{ display:flex; flex-direction:column; gap:13px; }
+    .tgob-head-r{ display:flex; flex-direction:column; gap:12px; padding-bottom:3px; }
     .tgob-kicker{
       display:flex; align-items:center; gap:10px;
       font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
       color:var(--tgse-brand,#0891B2);
     }
     .tgob-kicker::before{ content:''; width:22px; height:2px; border-radius:2px; background:var(--tgse-brand,#0891B2); }
-    .tgob-title{ margin:0; font-size:31px; line-height:1.1; font-weight:800; letter-spacing:-.022em; color:var(--tgse-text,#e6edf6); }
+    .tgob-title{ margin:0; font-size:29px; line-height:1.1; font-weight:800; letter-spacing:-.022em; color:var(--tgse-text,#e6edf6); }
     .tgob-title em{ font-style:normal; color:var(--tgse-brand,#0891B2); }
-    .tgob-text{ margin:0; font-size:14.5px; line-height:1.62; max-width:38ch; color:var(--tgse-text-muted,#94a3b8); }
+    .tgob-text{ margin:0; font-size:14px; line-height:1.6; color:var(--tgse-text-muted,#94a3b8); }
+    .tgob-hint{
+      display:inline-flex; align-items:center; gap:8px; align-self:flex-start;
+      font-size:12px; font-weight:600; color:var(--tgse-brand,#0891B2);
+      background:color-mix(in srgb, var(--tgse-brand,#0891B2) 10%, transparent);
+      border:1px solid color-mix(in srgb, var(--tgse-brand,#0891B2) 30%, transparent);
+      padding:6px 11px; border-radius:999px;
+    }
+    .tgob-hint svg{ width:13px; height:13px; flex:0 0 auto; }
 
-    .tgob-art{ align-self:center; justify-self:center; padding:8px 46px 8px 8px; width:100%; max-width:380px; }
+    /* art zone — full width, fills the rest of the card */
+    .tgob-art{ flex:1 1 auto; min-height:0; display:flex; padding:0 22px 20px; }
     .tgob-art-frame{
-      position:relative; width:100%; aspect-ratio:1 / 1; box-sizing:border-box;
-      border:1px solid var(--tgse-border,#1e293b); border-radius:16px;
+      position:relative; flex:1 1 auto; min-height:280px; box-sizing:border-box;
+      border:1px solid var(--tgse-border,#1e293b); border-radius:14px;
       background:color-mix(in srgb, var(--tgse-text,#fff) 3%, transparent);
-      padding:20px; overflow:hidden;
+      overflow:hidden;
     }
 
     .tgob-foot{
-      flex:0 0 auto; height:64px; display:flex; align-items:center; justify-content:space-between;
+      flex:0 0 auto; height:62px; display:flex; align-items:center; justify-content:space-between;
       padding:0 24px; border-top:1px solid var(--tgse-border,#1e293b);
       background:color-mix(in srgb, var(--tgse-surface,#0e1726) 60%, transparent);
     }
@@ -166,15 +187,13 @@
     @keyframes tgob-blob-breath { 0%,100%{ box-shadow:0 10px 26px -8px color-mix(in srgb, var(--tgse-brand,#0891B2) 60%, transparent);} 50%{ box-shadow:0 12px 32px -6px color-mix(in srgb, var(--tgse-brand,#0891B2) 95%, transparent);} }
     .tgob-blob.is-show{ animation:tgob-blob-breath 3.4s ease-in-out infinite; }
 
-    /* copy + art entrance, replays on every render */
-    .tgob-copy > *{ animation:tgob-rise .42s cubic-bezier(.16,1,.3,1) both; }
-    .tgob-copy > :nth-child(1){ animation-delay:.02s; }
-    .tgob-copy > :nth-child(2){ animation-delay:.09s; }
-    .tgob-copy > :nth-child(3){ animation-delay:.16s; }
-    .tgob-art-frame{ animation:tgob-rise .46s cubic-bezier(.16,1,.3,1) both; animation-delay:.06s; }
+    /* entrance, replays each render */
+    .tgob-head-l{ animation:tgob-rise .42s cubic-bezier(.16,1,.3,1) both; animation-delay:.02s; }
+    .tgob-head-r{ animation:tgob-rise .42s cubic-bezier(.16,1,.3,1) both; animation-delay:.1s; }
+    .tgob-art-frame{ animation:tgob-rise .5s cubic-bezier(.16,1,.3,1) both; animation-delay:.14s; }
 
-    /* ── generic animation library (art opts in) ─────────────────────────── */
-    @keyframes tgob-rise { from{ opacity:0; transform:translate(calc(var(--dir,1)*16px), 8px);} to{ opacity:1; transform:none;} }
+    /* generic animation library (art opts in) */
+    @keyframes tgob-rise { from{ opacity:0; transform:translate(calc(var(--dir,1)*14px), 10px);} to{ opacity:1; transform:none;} }
     @keyframes tgob-drop { 0%{ opacity:0; transform:translateY(-26px) scale(.9);} 60%{ opacity:1;} 100%{ opacity:1; transform:translateY(0) scale(1);} }
     @keyframes tgob-pop  { 0%{ opacity:0; transform:scale(.5);} 70%{ transform:scale(1.12);} 100%{ opacity:1; transform:scale(1);} }
     @keyframes tgob-pulse{ 0%{ transform:scale(.6); opacity:.65;} 70%{ opacity:0;} 100%{ transform:scale(2.4); opacity:0;} }
@@ -195,17 +214,19 @@
     }
     .tgob-caret{ display:inline-block; width:2px; height:1em; vertical-align:-2px; background:var(--tgse-brand,#22D3EE); margin-inline-start:2px; animation:tgob-blink 1s steps(1) infinite; }
 
-    @media (max-width:720px){
-      .tgob-card{ aspect-ratio:auto; max-height:calc(100vh - 32px); }
-      .tgob-body{ grid-template-columns:1fr; gap:8px; padding-top:52px; overflow:auto; }
-      .tgob-copy{ padding:8px 24px; }
-      .tgob-art{ padding:0 24px 8px; max-width:260px; }
-      .tgob-title{ font-size:24px; }
+    @media (max-width:760px){
+      .tgob-card{ max-height:calc(100vh - 28px); }
+      .tgob-body{ padding-top:50px; overflow:auto; }
+      .tgob-copy{ grid-template-columns:1fr; gap:12px; padding:10px 22px 16px; }
+      .tgob-head-r{ padding-bottom:0; }
+      .tgob-title{ font-size:23px; }
+      .tgob-art{ padding:0 16px 16px; }
+      .tgob-art-frame{ min-height:240px; }
     }
     @media (prefers-reduced-motion:reduce){
       .tgob-overlay, .tgob-card, .tgob-blob, .tgob-dot, .tgob-close, .tgob-btn{ transition:none !important; }
       .tgob-card{ transform:none; opacity:1; }
-      .tgob-copy > *, .tgob-art-frame,
+      .tgob-head-l, .tgob-head-r, .tgob-art-frame,
       .tgob-a-drop, .tgob-a-pop, .tgob-a-rise, .tgob-a-draw,
       .tgob-pulse, .tgob-sweep-host .tgob-sweep, .tgob-blob.is-show{ animation:none !important; opacity:1 !important; transform:none !important; }
       .tgob-a-draw{ stroke-dashoffset:0 !important; }
@@ -230,6 +251,7 @@
   var ICON_CHEV_L = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
   var ICON_CHEV_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
   var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  var ICON_HINT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg>';
 
   function onboarding(config) {
     config = config || {};
@@ -303,7 +325,6 @@
 
     var _prevCh = null, _prevFrame = null;
     function render() {
-      // tear down the outgoing chapter's live content (e.g. a mounted widget)
       if (_prevCh && typeof _prevCh.onLeave === 'function') {
         try { _prevCh.onLeave(_prevFrame); } catch (e) {}
       }
@@ -311,11 +332,15 @@
       var ch = chapters[idx];
       var titleHtml = ch.titleHtml ? ch.titleHtml : esc(ch.title || '');
       copyWrap.innerHTML =
-        (ch.kicker ? '<div class="tgob-kicker">' + esc(ch.kicker) + '</div>' : '') +
-        '<h2 class="tgob-title">' + titleHtml + '</h2>' +
-        (ch.body ? '<p class="tgob-text">' + esc(ch.body) + '</p>' : '');
+        '<div class="tgob-head-l">' +
+          (ch.kicker ? '<div class="tgob-kicker">' + esc(ch.kicker) + '</div>' : '') +
+          '<h2 class="tgob-title">' + titleHtml + '</h2>' +
+        '</div>' +
+        '<div class="tgob-head-r">' +
+          (ch.body ? '<p class="tgob-text">' + esc(ch.body) + '</p>' : '') +
+          (ch.hint ? '<span class="tgob-hint">' + ICON_HINT + esc(ch.hint) + '</span>' : '') +
+        '</div>';
 
-      // art may be a string OR a function returning a string (built fresh each visit)
       var artHtml = typeof ch.art === 'function' ? ch.art() : ch.art;
       artWrap.innerHTML = artHtml ? ('<div class="tgob-art-frame">' + artHtml + '</div>') : '';
       artWrap.style.display = artHtml ? '' : 'none';
@@ -375,6 +400,6 @@
   }
 
   window.tgse.onboarding = onboarding;
-  window.tgse.onboardingVersion = '1.2.0';
+  window.tgse.onboardingVersion = '1.3.0';
 
 })();
