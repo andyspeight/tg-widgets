@@ -1049,6 +1049,10 @@
 
 <script src="/widget-newsletter.js"></script>
 <script src="/editor-shell.js"></script>
+
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-newsletter.js"></script>
 <script>
 (function(){
   'use strict';
@@ -1301,6 +1305,11 @@
     }
     renderAll();
     updatePreview();
+
+    // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
+    // pill reopens it any time. init() runs on onReady (gated on login) and on
+    // onLoginSuccess; the _booted guard inside keeps it idempotent.
+    if (typeof window.initNewsletterTour === 'function') window.initNewsletterTour();
   }
 
   // Load the saved widget config back into the editor on reopen.
