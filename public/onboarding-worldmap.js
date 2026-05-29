@@ -101,11 +101,13 @@
       console.warn('[worldmap-tour] tgse.tour not available — load editor-tour.js');
       return;
     }
+    // tear down any previous run so reopening never stacks overlays
+    if (_api && typeof _api.finish === 'function') { try { _api.finish(false); } catch (e) {} }
     _api = window.tgse.tour({
       id: 'worldmap',
       welcome: WELCOME,
       done: DONE,
-      steps: buildSteps()
+      steps: buildSteps()   // fresh steps each open (clears any _revealed flags)
     });
     _api.start();
     return _api;
