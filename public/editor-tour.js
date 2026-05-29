@@ -22,7 +22,6 @@
        title:    'Give it a heading',
        body:     'Short instruction. One or two lines.',
        placement:'auto'|'top'|'bottom'|'left'|'right',  // callout side (default auto)
-       advanceOn:{ event:'input', selector:'#f-title' },// optional: auto-advance when
                                                          // the user does the thing
        spotlightPadding: 8,                        // optional px around target
        allowClickThrough: true,                    // default true: control stays usable
@@ -44,22 +43,28 @@
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
     var css = `
-    /* dim layer with a transparent spotlight hole (box-shadow trick on a moving frame) */
+    /* a LIGHT scrim with a transparent spotlight hole — the editor stays clearly
+       visible so the user can see exactly what they are about to use. The target
+       is made to pop with a bright ring + glow, not by darkening everything. */
     .tgt-veil{ position:fixed; inset:0; z-index:940; pointer-events:none; opacity:0; transition:opacity .25s ease; }
     .tgt-veil.is-on{ opacity:1; }
-    /* the spotlight: a transparent rounded rect whose giant box-shadow IS the dim */
     .tgt-spot{
-      position:fixed; z-index:941; border-radius:12px; pointer-events:none;
-      box-shadow:0 0 0 9999px color-mix(in srgb, var(--tgse-bg-page,#0b1220) 72%, #000 28%);
-      transition:all .34s cubic-bezier(.34,1.1,.4,1);
-      outline:2px solid var(--tgse-brand,#0891B2); outline-offset:2px;
+      position:fixed; z-index:941; border-radius:11px; pointer-events:none;
+      box-shadow:0 0 0 9999px rgba(10,15,28,.34);
+      transition:left .3s cubic-bezier(.34,1.1,.4,1), top .3s cubic-bezier(.34,1.1,.4,1), width .3s cubic-bezier(.34,1.1,.4,1), height .3s cubic-bezier(.34,1.1,.4,1);
+      outline:2.5px solid var(--tgse-brand,#0891B2); outline-offset:3px;
+    }
+    /* a soft brand halo so the highlighted control lifts off the page */
+    .tgt-spot::before{
+      content:''; position:absolute; inset:-3px; border-radius:13px; pointer-events:none;
+      box-shadow:0 0 0 3px color-mix(in srgb, var(--tgse-brand,#0891B2) 35%, transparent), 0 0 22px 4px color-mix(in srgb, var(--tgse-brand,#0891B2) 30%, transparent);
     }
     .tgt-spot::after{
-      content:''; position:absolute; inset:-2px; border-radius:12px; pointer-events:none;
-      box-shadow:0 0 0 4px color-mix(in srgb, var(--tgse-brand,#0891B2) 28%, transparent);
+      content:''; position:absolute; inset:-3px; border-radius:13px; pointer-events:none;
+      box-shadow:0 0 0 6px color-mix(in srgb, var(--tgse-brand,#0891B2) 22%, transparent);
       animation:tgt-breath 2.2s ease-in-out infinite;
     }
-    @keyframes tgt-breath{ 0%,100%{ opacity:.5; } 50%{ opacity:1; } }
+    @keyframes tgt-breath{ 0%,100%{ opacity:.4; } 50%{ opacity:1; } }
 
     /* the instruction callout, anchored beside the spotlight */
     .tgt-pop{
@@ -173,7 +178,7 @@
 
     injectStyles();
 
-    var veil, spot, pop, card, i = -1, advanceCleanup = null, dismissCb = null;
+    var veil, spot, pop, card, i = -1, dismissCb = null;
     var onResize = function(){ position(); };
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -192,12 +197,15 @@
 
     function onKey(e){
       if (i < 0) return;
-      if (e.key === 'Escape') finish(false);
-      else if (e.key === 'ArrowRight') next();
+      if (e.key === 'Escape') { finish(false); return; }
+      // never hijack arrow keys while the user is typing/selecting in a field
+      var a = document.activeElement;
+      var typing = a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable || a.tagName === 'SELECT');
+      if (typing) return;
+      if (e.key === 'ArrowRight') next();
       else if (e.key === 'ArrowLeft') prev();
     }
 
-    function clearAdvance(){ if (advanceCleanup) { try{advanceCleanup();}catch(e){} advanceCleanup = null; } }
 
     function showWelcome(cb){
       ensureLayers();
@@ -242,7 +250,7 @@
     }
 
     function go(n){
-      clearAdvance();
+
       if (n < 0) n = 0;
       if (n >= steps.length){ if (done) { i = steps.length; showDone(); return; } finish(true); return; }
       i = n;
@@ -272,14 +280,12 @@
       spot._el = el;
 
       // build callout
-      var doit = st.advanceOn ? '<div class="tgt-pop-doit">'+ICON_CURSOR+'Try it, the tour moves on by itself</div>' : '';
       var isLast = i === steps.length - 1;
       pop.innerHTML =
         '<button type="button" class="tgt-skip" data-skip>Skip tour</button>'+
         '<div class="tgt-pop-step">Step '+(i+1)+' of '+steps.length+'</div>'+
         '<h3 class="tgt-pop-title">'+esc(st.title||'')+'</h3>'+
         '<p class="tgt-pop-body">'+(st.bodyHtml||esc(st.body||''))+'</p>'+
-        doit+
         '<div class="tgt-pop-foot">'+
           '<div class="tgt-dots">'+steps.map(function(_,k){return '<span class="tgt-dot'+(k===i?' is-on':'')+'"></span>';}).join('')+'</div>'+
           '<div class="tgt-nav">'+
@@ -292,17 +298,6 @@
       pop.querySelector('[data-skip]').addEventListener('click', function(){ finish(false); });
       pop.querySelector('[data-next]').addEventListener('click', next);
       var pv = pop.querySelector('[data-prev]'); if (pv) pv.addEventListener('click', prev);
-
-      // optional auto-advance when the user actually performs the action
-      if (st.advanceOn){
-        var watchEl = st.advanceOn.selector ? document.querySelector(st.advanceOn.selector) : el;
-        var ev = st.advanceOn.event || 'input';
-        if (watchEl){
-          var handler = function(){ clearAdvance(); setTimeout(next, 380); };
-          watchEl.addEventListener(ev, handler, { once:true });
-          advanceCleanup = function(){ watchEl.removeEventListener(ev, handler); };
-        }
-      }
 
       requestAnimationFrame(function(){
         position();
@@ -355,7 +350,7 @@
     function prev(){ go(i-1); }
 
     function finish(completed){
-      clearAdvance();
+
       teardownCard();
       if (veil) veil.classList.remove('is-on');
       if (spot){ spot.classList.remove('is-on'); spot.style.display='none'; }
