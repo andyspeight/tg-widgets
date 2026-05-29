@@ -142,8 +142,23 @@
 
     @media (prefers-reduced-motion:reduce){
       .tgt-veil,.tgt-spot,.tgt-pop,.tgt-card,.tgt-launch,.tgt-dot{ transition:none !important; }
-      .tgt-spot::after,.tgt-launch.is-on{ animation:none !important; }
+      .tgt-spot::before,.tgt-spot::after,.tgt-launch.is-on{ animation:none !important; }
+      .tgt-card-ico-pop,.tgt-done-burst span{ animation:none !important; }
     }
+
+    /* celebratory completion tile */
+    .tgt-card-done{ text-align:center; }
+    .tgt-card-done .tgt-card-ico{ margin-left:auto; margin-right:auto; }
+    .tgt-card-done h2, .tgt-card-done p{ text-align:center; }
+    .tgt-card-done .tgt-card-foot{ justify-content:center; }
+    .tgt-card-ico-pop{ animation:tgt-ico-pop .5s cubic-bezier(.34,1.6,.5,1) both; animation-delay:.08s; }
+    @keyframes tgt-ico-pop{ 0%{ transform:scale(.3); opacity:0; } 60%{ transform:scale(1.15); } 100%{ transform:scale(1); opacity:1; } }
+    .tgt-done-burst{ position:absolute; top:38px; left:50%; width:0; height:0; pointer-events:none; }
+    .tgt-done-burst span{ position:absolute; left:0; top:0; width:46px; height:46px; margin:-23px 0 0 -23px; border-radius:50%;
+      border:2px solid color-mix(in srgb, var(--tgse-brand,#0891B2) 60%, transparent); opacity:0; animation:tgt-burst 1.1s ease-out both; }
+    .tgt-done-burst span:nth-child(2){ animation-delay:.14s; }
+    .tgt-done-burst span:nth-child(3){ animation-delay:.28s; }
+    @keyframes tgt-burst{ 0%{ transform:scale(.3); opacity:.7; } 100%{ transform:scale(3.4); opacity:0; } }
     `;
     var el = document.createElement('style');
     el.id = STYLE_ID; el.textContent = css;
@@ -235,9 +250,10 @@
     function showDone(){
       ensureLayers();
       spot.style.display='none'; pop.style.display='none';
-      card = document.createElement('div'); card.className='tgt-card';
+      card = document.createElement('div'); card.className='tgt-card tgt-card-done';
       card.innerHTML =
-        '<div class="tgt-card-ico">'+ICON_CHECK+'</div>'+
+        '<div class="tgt-done-burst" aria-hidden="true"><span></span><span></span><span></span></div>'+
+        '<div class="tgt-card-ico tgt-card-ico-pop">'+ICON_CHECK+'</div>'+
         '<h2>'+(done.titleHtml||esc(done.title||''))+'</h2>'+
         '<p>'+esc(done.body||'')+'</p>'+
         '<div class="tgt-card-foot">'+
@@ -268,6 +284,18 @@
       if (!el){ // target missing — skip forward gracefully
         console.warn('[tgse-tour] target not found, skipping:', st.target);
         return go(i+1);
+      }
+      // If the target sits inside a collapsed accordion section, open it first
+      // (TG editor shell uses .tgse-section / .is-open). Without this, a hidden
+      // control has no size and the callout lands in the corner.
+      var sec = el.closest ? el.closest('.tgse-section') : null;
+      if (sec && !sec.classList.contains('is-open')){
+        var head = sec.querySelector('.tgse-section-head');
+        if (head){ head.click(); }
+        // if no handler opened it, force the state so the control is revealed
+        if (!sec.classList.contains('is-open')) sec.classList.add('is-open');
+        // section open animates; give it a beat before measuring
+        return setTimeout(function(){ paint(st); }, 200);
       }
       // scroll into view
       try { el.scrollIntoView({ behavior: reduce?'auto':'smooth', block:'center', inline:'nearest' }); } catch(e){}
