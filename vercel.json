@@ -15,6 +15,9 @@
     },
     "api/screenshot-to-code.js": {
       "maxDuration": 60
+    },
+    "api/slice-emit.js": {
+      "maxDuration": 300
     }
   },
   "crons": [
