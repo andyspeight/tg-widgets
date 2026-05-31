@@ -344,6 +344,10 @@
 <!-- Then the widget (so window.TGReviewsWidget is available for preview) -->
 <script src="/widget-reviews.js"></script>
 
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-reviews.js"></script>
+
 <script>
 /* ============================================================
    GOOGLE REVIEWS EDITOR — refactored onto unified shell
@@ -860,6 +864,9 @@ function boot() {
     C.place = { ...TPL[0].place };
     snap(); ren(); renP();
   }
+  // Guided setup tour. boot() only reaches here when logged in; the _booted
+  // guard inside keeps it idempotent across boot() and onLoginSuccess.
+  if (typeof window.initReviewsTour === 'function') window.initReviewsTour();
 }
 
 /* ── Initialise the shell ────────────────────────────────────── */
@@ -890,7 +897,7 @@ shell = tgse.init({
     else { clearOv(); closePop(); }
   },
   onTabChange: (newTab) => { tab = newTab; },
-  onLoginSuccess: () => boot(),
+  onLoginSuccess: () => { boot(); if (typeof window.initReviewsTour === 'function') window.initReviewsTour(); },
   onAfterSave: (d) => { if (d?.widgetId) wId = d.widgetId; },
 });
 

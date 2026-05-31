@@ -603,6 +603,10 @@
 <script src="/editor-shell.js"></script>
 <script src="/widget-team.js"></script>
 
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-team.js"></script>
+
 <script>
   /* ============================================================
      PER-EDITOR SCRIPT — Team Showcase
@@ -708,7 +712,7 @@
     onDesignMode: (isOn) => {
       // No bespoke overlay for v1
     },
-    onLoginSuccess: () => loadFromUrl(),
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initTeamTour === 'function') window.initTeamTour(); },
   });
 
   // ─── Render preview ───
@@ -1099,7 +1103,7 @@
     syncUIFromState();
     if (window.tgse && typeof window.tgse.onReady === 'function') {
       window.tgse.onReady(() => {
-        if (tgse.isLoggedIn()) loadFromUrl();
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initTeamTour === 'function') window.initTeamTour(); }
         else render();
       });
     } else {

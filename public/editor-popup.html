@@ -493,6 +493,10 @@
 <!-- The popup widget — used to render the live preview -->
 <script src="/widget-popup.js"></script>
 
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-popup.js"></script>
+
 <script>
   /* ============================================================
      POPUP EDITOR — per-editor script
@@ -634,7 +638,7 @@
     onAfterSave: (d) => {
       // shell handles the URL sync; nothing extra needed here
     },
-    onLoginSuccess: () => loadFromUrl(),
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initPopupTour === 'function') window.initPopupTour(); },
   });
 
   /* ── Helpers ────────────────────────────────────────────── */
@@ -1419,7 +1423,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     if (window.tgse && typeof window.tgse.onReady === 'function') {
       window.tgse.onReady(() => {
-        if (tgse.isLoggedIn()) loadFromUrl();
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initPopupTour === 'function') window.initPopupTour(); }
         // Otherwise the shell shows the login overlay; onLoginSuccess calls loadFromUrl.
       });
     } else {

@@ -632,6 +632,10 @@
 <script src="/editor-shell.js"></script>
 <script src="/widget-hours.js"></script>
 
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-hours.js"></script>
+
 <script>
   function defaultsCfg() {
     return {
@@ -682,7 +686,7 @@
       if (stage) stage.setAttribute('data-theme', C.theme.mode);
       render();
     },
-    onLoginSuccess: () => loadFromUrl(),
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initHoursTour === 'function') window.initHoursTour(); },
   });
 
   function tearDown() {
@@ -1042,6 +1046,7 @@
     const boot = () => {
       if (tgse.isLoggedIn()) {
         loadFromUrl();
+        if (typeof window.initHoursTour === 'function') window.initHoursTour();
       } else {
         document.getElementById('app').removeAttribute('hidden');
         syncUI(); render();

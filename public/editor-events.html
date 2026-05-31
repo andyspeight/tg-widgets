@@ -669,6 +669,10 @@
 
 <script src="/editor-shell.js"></script>
 <script src="/widget-events.js"></script>
+
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-events.js"></script>
 <script>
 (function () {
   'use strict';
@@ -830,7 +834,7 @@
       });
     },
     onAfterSave: () => { /* shell handles URL sync */ },
-    onLoginSuccess: () => loadFromUrl(),
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initEventsTour === 'function') window.initEventsTour(); },
   });
 
   // Expose the shell's auth headers so the widget can call /api/events-content
@@ -1449,6 +1453,7 @@
     const boot = () => {
       if (tgse.isLoggedIn()) {
         loadFromUrl();
+        if (typeof window.initEventsTour === 'function') window.initEventsTour();
       } else {
         // Shell will show the login overlay; render the sidebar with defaults so it's not blank
         renderAllSections();

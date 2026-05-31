@@ -1464,6 +1464,10 @@
   <!-- Shell behaviour first — exposes window.tgse -->
   <script src="/editor-shell.js"></script>
   <script src="/widget-textfx.js"></script>
+
+  <!-- Guided setup tour (reusable engine + step list) -->
+  <script src="/editor-tour.js"></script>
+  <script src="/tour-textfx.js"></script>
   <script>
     /* ============================================================
        STATE & CONSTANTS
@@ -2839,7 +2843,7 @@
           $$('.sb-tab').forEach(b => b.dataset.active = b.dataset.tab === tabName ? '1' : '0');
         },
 
-        onLoginSuccess: () => boot(),
+        onLoginSuccess: () => { boot(); if (typeof window.initTextfxTour === 'function') window.initTextfxTour(); },
 
         onAfterSave: (d) => {
           if (d && d.widgetId) {
@@ -2866,7 +2870,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (window.tgse && typeof window.tgse.onReady === 'function') {
         window.tgse.onReady(() => {
-          if (isLoggedIn()) boot();
+          if (isLoggedIn()) { boot(); if (typeof window.initTextfxTour === 'function') window.initTextfxTour(); }
           // If not logged in, the shell has already shown its login overlay;
           // onLoginSuccess will call boot() after a successful login.
         });

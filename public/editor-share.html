@@ -660,6 +660,10 @@
 <script src="/editor-shell.js"></script>
 <script src="/widget-share.js"></script>
 
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-share.js"></script>
+
 <script>
   /* =========================================================
      App state
@@ -727,7 +731,7 @@
       if (stage) stage.setAttribute('data-theme', C.theme.mode);
       render();
     },
-    onLoginSuccess: () => loadFromUrl(),
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initShareTour === 'function') window.initShareTour(); },
   });
 
   /* =========================================================
@@ -1052,6 +1056,7 @@
     const boot = () => {
       if (tgse.isLoggedIn()) {
         loadFromUrl();
+        if (typeof window.initShareTour === 'function') window.initShareTour();
       } else {
         // Shell shows login overlay; onLoginSuccess fires loadFromUrl()
         // Render the empty default once so something shows.

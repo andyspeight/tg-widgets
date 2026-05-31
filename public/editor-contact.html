@@ -597,6 +597,10 @@
 
 <script src="/editor-shell.js"></script>
 <script src="/widget-contact.js"></script>
+
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-contact.js"></script>
 <script>
 (function () {
   'use strict';
@@ -689,7 +693,7 @@
       });
     },
     onAfterSave: () => {},
-    onLoginSuccess: () => loadFromUrl(),
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initContactTour === 'function') window.initContactTour(); },
   });
 
   // ────────────────────────────────────────────────────────────
@@ -1011,6 +1015,9 @@
     const boot = () => {
       if (tgse.isLoggedIn()) {
         loadFromUrl();
+        // Guided setup tour. _booted guard inside keeps it idempotent across
+        // this branch and onLoginSuccess.
+        if (typeof window.initContactTour === 'function') window.initContactTour();
       } else {
         // Render an empty preview behind the login overlay
         renderLayoutPicker();
