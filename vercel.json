@@ -12,6 +12,9 @@
     },
     "api/cron/refresh-map-offers.js": {
       "maxDuration": 300
+    },
+    "api/screenshot-to-code.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -216,6 +219,10 @@
     {
       "source": "/admin-worldmap",
       "destination": "/admin-worldmap.html"
+    },
+    {
+      "source": "/screenshot-to-code",
+      "destination": "/screenshot-to-code.html"
     },
     {
       "source": "/editor-test",
@@ -639,7 +646,7 @@
       ]
     },
     {
-      "source": "/(editor|editor-[a-z0-9-]+|inbox-enquiry|admin-worldmap)(\\.html)?",
+      "source": "/(editor|editor-[a-z0-9-]+|inbox-enquiry|admin-worldmap|screenshot-to-code)(\\.html)?",
       "headers": [
         {
           "key": "X-Frame-Options",
