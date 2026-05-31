@@ -1841,6 +1841,10 @@
   <script src="/widget-offers.js"></script>
   <script src="/editor-shell.js"></script>
 
+  <!-- Guided setup tour (reusable engine + step list) -->
+  <script src="/editor-tour.js"></script>
+  <script src="/tour-offers.js"></script>
+
   <script>
     /* ============================================================
        State + helpers
@@ -3227,6 +3231,7 @@
       wireInputs();
       renderTemplates();
       renderAiSuggestions();
+      if (typeof window.initOffersTour === 'function') window.initOffersTour();
 
       const fontMount = $('fontPickerMount');
       if (fontMount && window.tgse && window.tgse.mountFontPicker) {
