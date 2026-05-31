@@ -11,7 +11,7 @@
  */
 
 const MODEL = process.env.TGS_MODEL || "claude-sonnet-4-6";
-const MAX_TOKENS = parseInt(process.env.TGS_MAX_TOKENS || "14000", 10);
+const MAX_TOKENS = parseInt(process.env.TGS_MAX_TOKENS || "32000", 10);
 const MAX_SLICE_BYTES = 400 * 1024;
 const RATE_MAX = 30;
 const RATE_WINDOW_S = 60;
