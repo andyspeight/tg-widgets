@@ -575,6 +575,10 @@
 <!-- Shell behaviour first — exposes window.tgse -->
 <script src="/editor-shell.js"></script>
 <script src="/widget-mybooking.js"></script>
+
+  <!-- Guided setup tour (reusable engine + step list) -->
+  <script src="/editor-tour.js"></script>
+  <script src="/tour-mybooking.js"></script>
 <script type="module">
 import { renderPdfHtml } from '/_pdf-template.js';
 import { renderEmailHtml } from '/_email-template.js';
@@ -1196,6 +1200,10 @@ import { renderEmailHtml } from '/_email-template.js';
   // ===== Bootstrap =====
   async function bootstrap() {
     if (!ensureAuth()) return;
+    // Guided setup tour. Kicked off as soon as auth passes so a later render
+    // hiccup can't block it; the _booted guard keeps it idempotent across
+    // onReady and onLoginSuccess.
+    if (typeof window.initMyBookingTour === 'function') window.initMyBookingTour();
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     if (id) {
