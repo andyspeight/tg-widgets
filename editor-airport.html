@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airport Spotlight Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Per-editor styles — airport-specific UI inside the sidebar */
+
+  /* ── Form controls — match the rest of the widget suite ─── */
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--tgse-ink-2);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .field-hint { font-size: 11px; color: var(--tgse-muted); font-weight: 400; }
+  .input, .textarea, .select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm, 6px);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input { height: 34px; }
+  .select { height: 34px; cursor: pointer; appearance: none; padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+  .textarea { min-height: 72px; resize: vertical; font-family: inherit; }
+  .input:focus, .textarea:focus, .select:focus {
+    border-color: var(--tgse-brand);
+    box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .input::placeholder, .textarea::placeholder { color: var(--tgse-muted); }
+
+  .ap-picker {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .ap-picker-search {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px 0 36px;
+    border: 1px solid var(--tgse-border);
+    border-radius: 8px;
+    background: var(--tgse-bg-input);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--tgse-text);
+    transition: border-color .15s ease-out;
+  }
+  .ap-picker-search:focus {
+    outline: none;
+    border-color: var(--tgse-accent);
+    box-shadow: 0 0 0 3px rgba(0,180,216,0.15);
+  }
+  .ap-picker-icon {
+    position: absolute; left: 12px; top: 11px;
+    color: var(--tgse-muted);
+    pointer-events: none;
+  }
+
+  .ap-results {
+    display: flex; flex-direction: column;
+    gap: 4px;
+    max-height: 280px;
+    overflow-y: auto;
+    margin-top: 8px;
+  }
+  .ap-result {
+    appearance: none;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--tgse-border);
+    background: var(--tgse-bg-card);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    font-family: inherit;
+    transition: border-color .15s ease-out, background .15s ease-out;
+  }
+  .ap-result:hover {
+    border-color: var(--tgse-accent);
+    background: var(--tgse-bg-input);
+  }
+  .ap-result.is-selected {
+    border-color: var(--tgse-accent);
+    background: rgba(0,180,216,0.06);
+  }
+  .ap-result-iata {
+    width: 44px; flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 600;
+    color: var(--tgse-brand);
+    background: var(--tgse-bg-input);
+    padding: 4px 0;
+    text-align: center;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+  }
+  .ap-result-meta { flex: 1; min-width: 0; }
+  .ap-result-name {
+    font-size: 13px; font-weight: 600;
+    color: var(--tgse-text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .ap-result-sub {
+    font-size: 11px;
+    color: var(--tgse-muted);
+    margin-top: 1px;
+  }
+  .ap-result-chips {
+    display: flex; gap: 4px;
+    flex-shrink: 0;
+  }
+  .ap-chip {
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 6px;
+    border-radius: 4px;
+  }
+  .ap-chip.role-origin      { background: rgba(27,43,91,0.10); color: #1B2B5B; }
+  .ap-chip.role-destination { background: rgba(0,180,216,0.15); color: #0096B7; }
+  .ap-chip.role-both        { background: rgba(245,158,11,0.15); color: #B45309; }
+  .ap-chip.status-draft     { background: rgba(245,158,11,0.15); color: #B45309; }
+  .ap-chip.status-live      { background: rgba(16,185,129,0.15); color: #047857; }
+
+  .ap-selected {
+    padding: 12px;
+    background: var(--tgse-bg-input);
+    border: 1px solid var(--tgse-accent);
+    border-radius: 8px;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .ap-selected-iata {
+    width: 48px; height: 48px; flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; font-weight: 700;
+    color: #FFFFFF;
+    background: var(--tgse-accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    letter-spacing: 0.04em;
+  }
+  .ap-selected-meta { flex: 1; min-width: 0; }
+  .ap-selected-name {
+    font-size: 14px; font-weight: 600;
+    color: var(--tgse-text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .ap-selected-sub {
+    font-size: 12px;
+    color: var(--tgse-muted);
+    margin-top: 2px;
+  }
+  .ap-selected-clear {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--tgse-border);
+    border-radius: 6px;
+    color: var(--tgse-muted);
+    width: 28px; height: 28px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: color .15s ease-out, border-color .15s ease-out;
+  }
+  .ap-selected-clear:hover {
+    color: var(--tgse-error, #EF4444);
+    border-color: var(--tgse-error, #EF4444);
+  }
+
+  .ap-cta-pair { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .ap-cta-pair > .tgse-field { margin-bottom: 0; }
+  .ap-cta-mode {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--tgse-muted);
+    padding-top: 6px;
+    border-top: 1px dashed var(--tgse-border);
+    margin-top: 8px;
+  }
+  .ap-cta-mode:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+
+  .ap-cta-help {
+    font-size: 11px;
+    color: var(--tgse-muted);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .ap-cta-help code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 1px 4px;
+    background: var(--tgse-bg-input);
+    border-radius: 3px;
+    color: var(--tgse-brand);
+  }
+
+  .ap-toggles {
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  .ap-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--tgse-bg-card);
+    border: 1px solid var(--tgse-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color .15s ease-out;
+  }
+  .ap-toggle:hover { border-color: var(--tgse-accent); }
+  .ap-toggle-label {
+    font-size: 13px; font-weight: 500;
+    color: var(--tgse-text);
+  }
+  .ap-toggle input[type="checkbox"] {
+    appearance: none;
+    width: 36px; height: 20px;
+    border-radius: 12px;
+    background: var(--tgse-border);
+    position: relative;
+    cursor: pointer;
+    transition: background .15s ease-out;
+    flex-shrink: 0;
+  }
+  .ap-toggle input[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    transition: transform .15s ease-out;
+  }
+  .ap-toggle input[type="checkbox"]:checked {
+    background: var(--tgse-accent);
+  }
+  .ap-toggle input[type="checkbox"]:checked::after {
+    transform: translateX(16px);
+  }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <!-- Crumb -->
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <!-- Identity -->
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5c.5-.5 1-2.5.5-3-1-.5-3 0-3.5.5L13 8.5 4.8 6.5c-.5-.1-.9.2-.9.7v.4c0 .3.2.6.5.8L8 10.5 6 14H3l-.5 1.5L5 17l1.5 2.5L8 19v-3l3.5-2 2.8 3.5c.2.3.5.5.8.5h.4c.5 0 .8-.4.7-.9z"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Airport Spotlight</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <!-- Actions row -->
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <!-- Name + Save -->
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design"  role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <!-- Body -->
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== CONTENT TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="content">
+
+        <!-- Airport picker -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5c.5-.5 1-2.5.5-3-1-.5-3 0-3.5.5L13 8.5 4.8 6.5c-.5-.1-.9.2-.9.7v.4c0 .3.2.6.5.8L8 10.5 6 14H3l-.5 1.5L5 17l1.5 2.5L8 19v-3l3.5-2 2.8 3.5c.2.3.5.5.8.5h.4c.5 0 .8-.4.7-.9z"/></svg>
+            <span class="tgse-section-label">Airport</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+
+            <!-- Selected airport summary (shown when one is picked) -->
+            <div id="ap-selected" class="ap-selected" style="display: none;">
+              <div id="ap-selected-iata" class="ap-selected-iata">—</div>
+              <div class="ap-selected-meta">
+                <div id="ap-selected-name" class="ap-selected-name">—</div>
+                <div id="ap-selected-sub"  class="ap-selected-sub">—</div>
+              </div>
+              <button class="ap-selected-clear" id="ap-clear" title="Change airport" aria-label="Change airport">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
+            <!-- Picker (shown when no airport is selected) -->
+            <div id="ap-picker-wrap">
+              <div class="ap-picker">
+                <span class="ap-picker-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" class="ap-picker-search" id="ap-search" placeholder="Search by airport name or IATA..." autocomplete="off">
+              </div>
+              <div class="ap-results" id="ap-results">
+                <div style="font-size:12px;color:var(--tgse-muted);padding:12px;text-align:center;">Start typing to search airports</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CTAs -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+            <span class="tgse-section-label">Call-to-action</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="ap-cta-help">
+              Two CTA sets — origin (UK departure airports) and destination (overseas arrival airports). The widget shows the right pair based on the airport's role.
+              Use placeholders <code>{{airportName}}</code> · <code>{{iata}}</code> · <code>{{cityServed}}</code> · <code>{{country}}</code>.
+            </div>
+
+            <div class="ap-cta-pair" style="margin-top:12px;">
+              <div class="ap-cta-mode">For UK Origin airports</div>
+              <div class="tgse-field">
+                <label class="tgse-field-label">Title</label>
+                <input type="text" id="cta-orig-title" class="input" maxlength="100" placeholder="Flying from {{airportName}}?">
+                <div class="field-hint">Main heading. Shown in big text at the bottom of the widget.</div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label">Subtitle</label>
+                <input type="text" id="cta-orig-sub" class="input" maxlength="160" placeholder="Search flights, hotels and transfers from {{iata}}">
+                <div class="field-hint">Smaller supporting line under the title.</div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label">Button label</label>
+                <input type="text" id="cta-orig-label" class="input" maxlength="40" placeholder="Search flights">
+                <div class="field-hint">The call-to-action button text.</div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label">Button URL</label>
+                <input type="url" id="cta-orig-url" class="input" placeholder="https://...">
+                <div class="field-hint">Where the button sends the visitor. Leave blank to hide the button.</div>
+              </div>
+            </div>
+
+            <div class="ap-cta-pair">
+              <div class="ap-cta-mode">For Destination airports</div>
+              <div class="tgse-field">
+                <label class="tgse-field-label">Title</label>
+                <input type="text" id="cta-dest-title" class="input" maxlength="100" placeholder="Plan a holiday near {{airportName}}">
+                <div class="field-hint">Shown when the airport is a destination (Antalya, Faro etc).</div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label">Subtitle</label>
+                <input type="text" id="cta-dest-sub" class="input" maxlength="160" placeholder="Explore the resorts served by {{iata}}">
+                <div class="field-hint">Smaller supporting line under the title.</div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label">Button label</label>
+                <input type="text" id="cta-dest-label" class="input" maxlength="40" placeholder="Browse resorts">
+                <div class="field-hint">The call-to-action button text.</div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label">Button URL</label>
+                <input type="url" id="cta-dest-url" class="input" placeholder="https://...">
+                <div class="field-hint">Where the button sends the visitor. Leave blank to hide the button.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== DESIGN TAB ===== -->
+      <div class="tgse-panel" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Brand colour</label>
+              <input type="color" id="brand-color" class="tgse-color-input" value="#1B2B5B">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Accent colour</label>
+              <input type="color" id="accent-color" class="tgse-color-input" value="#00B4D8">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+            <span class="tgse-section-label">Hero image</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Image URL (optional)</label>
+              <input type="url" id="hero-url" class="input" placeholder="https://images.unsplash.com/...">
+              <div class="ap-cta-help" style="margin-top:6px;">Leave blank to use a brand-coloured fallback. Use Unsplash, your own CDN, or a Duda asset URL.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="tgse-section-label">Sections to show</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="ap-toggles">
+              <label class="ap-toggle"><span class="ap-toggle-label">Hero</span><input type="checkbox" data-section="hero" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Serves (destination only)</span><input type="checkbox" data-section="serves" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Quick facts</span><input type="checkbox" data-section="facts" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Overview</span><input type="checkbox" data-section="overview" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Terminals &amp; airlines</span><input type="checkbox" data-section="terminals" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Map &amp; getting there</span><input type="checkbox" data-section="located" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Facilities</span><input type="checkbox" data-section="facilities" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Recommended arrival</span><input type="checkbox" data-section="arrival" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Tips</span><input type="checkbox" data-section="tips" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Call-to-action</span><input type="checkbox" data-section="cta" checked></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 4 5v16l5-2 6 2 5-2V3l-5 2-6-2z"/></svg>
+            <span class="tgse-section-label">Map options</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="ap-toggles">
+              <label class="ap-toggle"><span class="ap-toggle-label">Show map</span><input type="checkbox" id="opt-showMap" checked></label>
+              <label class="ap-toggle"><span class="ap-toggle-label">Show OSM attribution</span><input type="checkbox" id="opt-attrib" checked></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- Preview -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div data-tg-widget="airport" id="widget-mount" data-tg-no-autoinit></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Shell behaviour -->
+<script src="/editor-shell.js"></script>
+
+<!-- Widget JS for live preview -->
+<script src="/widget-airport.js"></script>
+
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-airport.js"></script>
+
+<!-- Editor logic -->
+<script>
+(function () {
+  'use strict';
+
+  // ---- Local state ----
+  let selectedAirport = null;   // { recordId, iata, name, role, status, cityServed, country, ... fullAirportData? }
+  let airportContent = null;    // full airport payload from /api/airport-content for preview
+  const searchInput = document.getElementById('ap-search');
+  const resultsEl   = document.getElementById('ap-results');
+  const selectedWrap = document.getElementById('ap-selected');
+  const pickerWrap  = document.getElementById('ap-picker-wrap');
+  let searchTimer = null;
+
+  // ---- Build current config (passed to shell on save and to preview) ----
+  function buildConfig() {
+    const sections = {};
+    document.querySelectorAll('[data-section]').forEach(cb => {
+      sections[cb.getAttribute('data-section')] = cb.checked;
+    });
+    return {
+      airport: selectedAirport ? {
+        recordId: selectedAirport.recordId || '',
+        iata: selectedAirport.iata || '',
+      } : null,
+      brandColor: document.getElementById('brand-color').value,
+      accentColor: document.getElementById('accent-color').value,
+      heroImageUrl: document.getElementById('hero-url').value.trim(),
+      sections,
+      showMap: document.getElementById('opt-showMap').checked,
+      showAttribution: document.getElementById('opt-attrib').checked,
+      cta: {
+        originTitle:           document.getElementById('cta-orig-title').value,
+        originSubtitle:        document.getElementById('cta-orig-sub').value,
+        originButtonLabel:     document.getElementById('cta-orig-label').value,
+        originButtonUrl:       document.getElementById('cta-orig-url').value,
+        destinationTitle:      document.getElementById('cta-dest-title').value,
+        destinationSubtitle:   document.getElementById('cta-dest-sub').value,
+        destinationButtonLabel: document.getElementById('cta-dest-label').value,
+        destinationButtonUrl:  document.getElementById('cta-dest-url').value,
+      },
+    };
+  }
+
+  // ---- Restore config from saved record ----
+  function setConfig(cfg) {
+    if (!cfg) return;
+    if (cfg.brandColor)   document.getElementById('brand-color').value = cfg.brandColor;
+    if (cfg.accentColor)  document.getElementById('accent-color').value = cfg.accentColor;
+    document.getElementById('hero-url').value = cfg.heroImageUrl || '';
+    document.getElementById('opt-showMap').checked = cfg.showMap !== false;
+    document.getElementById('opt-attrib').checked  = cfg.showAttribution !== false;
+    const s = cfg.sections || {};
+    document.querySelectorAll('[data-section]').forEach(cb => {
+      const k = cb.getAttribute('data-section');
+      cb.checked = s[k] !== false;
+    });
+    const c = cfg.cta || {};
+    document.getElementById('cta-orig-title').value  = c.originTitle           || 'Flying from {{airportName}}?';
+    document.getElementById('cta-orig-sub').value    = c.originSubtitle        || 'Search flights, hotels and transfers from {{iata}}';
+    document.getElementById('cta-orig-label').value  = c.originButtonLabel     || 'Search flights';
+    document.getElementById('cta-orig-url').value    = c.originButtonUrl       || '';
+    document.getElementById('cta-dest-title').value  = c.destinationTitle      || 'Plan a holiday near {{airportName}}';
+    document.getElementById('cta-dest-sub').value    = c.destinationSubtitle   || 'Explore the resorts served by {{iata}}';
+    document.getElementById('cta-dest-label').value  = c.destinationButtonLabel|| 'Browse resorts';
+    document.getElementById('cta-dest-url').value    = c.destinationButtonUrl  || '';
+
+    if (cfg.airport && (cfg.airport.recordId || cfg.airport.iata)) {
+      // Re-fetch the airport summary so we can show the chip
+      hydrateSelected(cfg.airport).then(() => renderPreview());
+    } else {
+      renderPreview();
+    }
+  }
+
+  // ---- Hydrate the selected-airport summary from the API
+  async function hydrateSelected(ref) {
+    const qs = ref.recordId
+      ? '?recordId=' + encodeURIComponent(ref.recordId)
+      : '?iata=' + encodeURIComponent(ref.iata);
+    try {
+      const r = await fetch('/api/airport-content' + qs);
+      if (!r.ok) return;
+      const d = await r.json();
+      if (!d || !d.airport) return;
+      selectedAirport = {
+        recordId: ref.recordId || '',
+        iata: d.airport.iata,
+        name: d.airport.name,
+        role: d.airport.role,
+        status: 'Draft',
+        cityServed: d.airport.cityServed,
+        country: d.airport.country,
+      };
+      airportContent = d.airport;
+      paintSelected();
+    } catch (e) { /* noop */ }
+  }
+
+  // ---- Search ----
+  async function runSearch(q) {
+    if (!q || q.length < 2) {
+      resultsEl.innerHTML = '<div style="font-size:12px;color:var(--tgse-muted);padding:12px;text-align:center;">Start typing to search airports</div>';
+      return;
+    }
+    resultsEl.innerHTML = '<div style="font-size:12px;color:var(--tgse-muted);padding:12px;text-align:center;">Searching...</div>';
+    try {
+      const r = await fetch('/api/airport-search?q=' + encodeURIComponent(q));
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      const list = Array.isArray(d.results) ? d.results : [];
+      if (!list.length) {
+        resultsEl.innerHTML = '<div style="font-size:12px;color:var(--tgse-muted);padding:12px;text-align:center;">No matches found</div>';
+        return;
+      }
+      resultsEl.innerHTML = list.map(a => renderResult(a)).join('');
+      resultsEl.querySelectorAll('.ap-result').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const recId = btn.getAttribute('data-record-id');
+          const match = list.find(x => x.recordId === recId);
+          if (match) selectAirport(match);
+        });
+      });
+    } catch (e) {
+      resultsEl.innerHTML = '<div style="font-size:12px;color:var(--tgse-error,#EF4444);padding:12px;text-align:center;">Search failed. Try again in a moment.</div>';
+    }
+  }
+
+  function renderResult(a) {
+    const role = (a.role || 'origin').toLowerCase();
+    const status = (a.status || 'draft').toLowerCase();
+    return '' +
+      '<button class="ap-result" data-record-id="' + esc(a.recordId) + '">' +
+        '<span class="ap-result-iata">' + esc(a.iata || '—') + '</span>' +
+        '<span class="ap-result-meta">' +
+          '<div class="ap-result-name">' + esc(a.name) + '</div>' +
+          '<div class="ap-result-sub">' + esc((a.cityServed || '') + ' · ' + (a.country || '')) + '</div>' +
+        '</span>' +
+        '<span class="ap-result-chips">' +
+          '<span class="ap-chip role-' + esc(role) + '">' + esc(role) + '</span>' +
+          '<span class="ap-chip status-' + esc(status) + '">' + esc(status) + '</span>' +
+        '</span>' +
+      '</button>';
+  }
+
+  function selectAirport(a) {
+    selectedAirport = a;
+    paintSelected();
+    // Pull full content for the preview pane
+    hydrateSelected({ recordId: a.recordId }).then(() => renderPreview());
+  }
+
+  function paintSelected() {
+    if (!selectedAirport) {
+      selectedWrap.style.display = 'none';
+      pickerWrap.style.display = 'block';
+      return;
+    }
+    selectedWrap.style.display = 'flex';
+    pickerWrap.style.display = 'none';
+    document.getElementById('ap-selected-iata').textContent = selectedAirport.iata || '—';
+    document.getElementById('ap-selected-name').textContent = selectedAirport.name || '—';
+    document.getElementById('ap-selected-sub').textContent  =
+      (selectedAirport.cityServed || '') + ' · ' + (selectedAirport.country || '') +
+      (selectedAirport.role ? ' · ' + selectedAirport.role : '');
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // ---- Live preview ----
+  function renderPreview() {
+    const mount = document.getElementById('widget-mount');
+    if (!mount) return;
+    if (mount.__tgInstance && typeof mount.__tgInstance.destroy === 'function') {
+      mount.__tgInstance.destroy();
+    }
+    while (mount.firstChild) mount.removeChild(mount.firstChild);
+    mount.removeAttribute('data-tg-initialised');
+
+    if (!window.TGAirportWidget) {
+      // Widget JS not yet loaded — try again in a moment
+      setTimeout(renderPreview, 60);
+      return;
+    }
+
+    const cfg = buildConfig();
+    // Merge airport content into airportData for live preview without API fetch
+    cfg.airportData = airportContent || null;
+    // theme — let the shell own the toggle; default light
+    cfg.theme = (window.tgse && window.tgse.previewTheme) ? window.tgse.previewTheme : 'light';
+    cfg.fontFamily = (window.tgse && window.tgse.currentFont) ? window.tgse.currentFont : '';
+
+    mount.__tgInstance = new window.TGAirportWidget(mount, cfg);
+  }
+
+  // ---- Wire inputs ----
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    searchTimer = setTimeout(() => runSearch(q), 250);
+  });
+  document.getElementById('ap-clear').addEventListener('click', () => {
+    selectedAirport = null;
+    airportContent = null;
+    paintSelected();
+    renderPreview();
+  });
+
+  // Every change triggers a debounced preview re-render
+  let previewTimer = null;
+  function debouncedPreview() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(renderPreview, 120);
+  }
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('input', debouncedPreview);
+    el.addEventListener('change', debouncedPreview);
+  });
+
+  // ---- Initialise shell ----
+  // The shell's tgse object handles save/auth/templates/AI/embed/font picker.
+  // We supply the per-widget glue.
+  if (window.tgse && typeof window.tgse.init === 'function') {
+    window.tgse.init({
+      widgetType:  'Airport Spotlight',
+      widgetTag:   'airport',
+      scriptFile:  'widget-airport.js',
+      getConfig:   buildConfig,
+      setConfig:   setConfig,
+      onFontChange: () => renderPreview(),
+      onThemeChange: () => renderPreview(),
+      // After a successful save, re-read the URL so subsequent reload-edit
+      // cycles work. The shell already updates location.search with the new
+      // widgetId on create; we just need to render the embed-able state.
+      onAfterSave: () => { renderPreview(); },
+      // Called after the user signs in via the shell's login overlay.
+      // Re-runs boot() so a fresh ?id= load happens with the new session.
+      onLoginSuccess: () => boot(),
+    });
+  } else {
+    // Shell not loaded — render preview with defaults anyway
+    setConfig({});
+  }
+
+  // ---- Load an existing saved widget by ?id= ----
+  // The shell handles save (using getConfig + onAfterSave) but doesn't
+  // auto-load saved configs — that's each editor's responsibility. This
+  // function fetches the saved record and feeds it back through setConfig
+  // so the editor populates with the saved values.
+  async function loadExisting(id) {
+    try {
+      // cache: 'no-store' bypasses both browser and CDN cache. The GET endpoint
+      // returns s-maxage=300 (5min) for public embeds; the editor needs fresh
+      // data after every save round-trip.
+      const bust = '&_=' + Date.now();
+      const r = await fetch('/api/widget-config?id=' + encodeURIComponent(id) + bust, {
+        cache: 'no-store',
+      });
+      if (!r.ok) {
+        // 404 here means the URL has an ID for a widget that doesn't exist
+        // (or was deleted). Start fresh rather than showing an error — the
+        // user can save and a new ID will be minted.
+        return;
+      }
+      const data = await r.json();
+      // API returns { config, name, ...config } — config is the canonical
+      // shape. Fall back to root for legacy responses just in case.
+      const cfg = (data && data.config && typeof data.config === 'object') ? data.config : data;
+      setConfig(cfg);
+      // If the API returned a name, sync it to the topbar name input so the
+      // shell's save flow uses the existing name on update.
+      if (data && typeof data.name === 'string') {
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) nameInput.value = data.name;
+      }
+    } catch (err) {
+      // Silent — first-load failure means the user starts with defaults,
+      // which is the same UX as visiting /editor-airport with no ?id=.
+      console.warn('[airport-editor] load existing failed:', err && err.message);
+    }
+  }
+
+  // ---- Boot: read ?id= and load if present ----
+  function boot() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (wId) {
+      loadExisting(wId);
+    }
+    // No ?id= → editor renders with its default DOM values (already set
+    // in the HTML), which is the desired "new widget" UX.
+
+    // Guided setup tour — only once authenticated. boot() also runs pre-login
+    // via onReady(boot); onLoginSuccess re-runs boot() after sign-in, when
+    // isLoggedIn() is true. The _booted guard inside keeps it idempotent.
+    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn() &&
+        typeof window.initAirportTour === 'function') {
+      window.initAirportTour();
+    }
+  }
+
+  // Initial preview
+  setTimeout(renderPreview, 100);
+
+  // ---- Wait for auth to resolve before loading saved configs ----
+  // The shell performs an async cookie auth check on module load. The
+  // /api/widget-config GET endpoint is public (no auth required to read
+  // a widget by ID), so technically we could fetch immediately. But other
+  // editors all use this pattern, and it future-proofs against the GET
+  // endpoint requiring auth for owner-only fields. Also matches the
+  // canonical onReady boot pattern used across the rest of the suite.
+  if (window.tgse && typeof window.tgse.onReady === 'function') {
+    window.tgse.onReady(boot);
+  } else {
+    // Defensive fallback for older shells lacking onReady
+    boot();
+  }
+
+})();
+</script>
+
+</body>
+</html>

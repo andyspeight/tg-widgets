@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WhatsApp Chat Editor — Travelgenix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/editor-shell.css" />
+<style>
+  [hidden] { display: none !important; }
+
+  /* Sidebar fields */
+  .field { margin-bottom: 14px; }
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--tgse-text-3, #94A3B8);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .field-help {
+    font-size: 11px;
+    color: var(--tgse-text-3, #94A3B8);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .input, .select, .textarea {
+    appearance: none;
+    width: 100%;
+    background: var(--tgse-bg, #FFFFFF);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--tgse-text, #0F172A);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    font-family: inherit;
+  }
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--tgse-accent, #0891B2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgse-accent, #0891B2) 18%, transparent);
+  }
+  .textarea { min-height: 64px; resize: vertical; }
+  .select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px 16px;
+    padding-right: 28px;
+  }
+
+  /* Layout cards */
+  .layout-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .layout-card {
+    appearance: none;
+    background: var(--tgse-bg, #FFFFFF);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 10px;
+    padding: 10px 8px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .layout-card:hover { border-color: var(--tgse-text-3, #94A3B8); }
+  .layout-card.is-active {
+    border-color: var(--tgse-accent, #0891B2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgse-accent, #0891B2) 18%, transparent);
+  }
+  .layout-thumb {
+    height: 38px;
+    background: var(--tgse-bg-2, #F8FAFC);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .layout-thumb .thumb-fab {
+    position: absolute; right: 4px; bottom: 4px;
+    width: 14px; height: 14px; background: #25D366; border-radius: 50%;
+  }
+  .layout-thumb .thumb-pill {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 70%; height: 12px; background: #25D366; border-radius: 999px;
+  }
+  .layout-thumb .thumb-card {
+    position: absolute; left: 4px; right: 4px; top: 50%; transform: translateY(-50%);
+    height: 18px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px;
+  }
+  .layout-thumb .thumb-card::before {
+    content: ''; position: absolute; left: 3px; top: 50%; transform: translateY(-50%);
+    width: 10px; height: 10px; background: #25D366; border-radius: 50%;
+  }
+  .layout-thumb .thumb-card::after {
+    content: ''; position: absolute; right: 3px; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 8px; background: #25D366; border-radius: 999px;
+  }
+  .layout-thumb .thumb-vertical {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 24px; background: #25D366; border-radius: 4px 0 0 4px;
+  }
+  .layout-name { font-size: 12px; font-weight: 600; }
+  .layout-desc { font-size: 10px; color: var(--tgse-text-3, #94A3B8); margin-top: 2px; }
+
+  /* Position picker — 3x2 grid mirroring viewport corners and middles */
+  .pos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 4px;
+    padding: 8px;
+    background: var(--tgse-bg-2, #F8FAFC);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    aspect-ratio: 16 / 10;
+  }
+  .pos-grid button {
+    appearance: none;
+    border: 1px solid transparent;
+    background: var(--tgse-bg, #FFFFFF);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+    padding: 0;
+    font-family: inherit;
+  }
+  .pos-grid button:hover { border-color: var(--tgse-text-3, #94A3B8); }
+  .pos-grid button.is-active {
+    border-color: var(--tgse-accent, #0891B2);
+    background: color-mix(in srgb, var(--tgse-accent, #0891B2) 8%, var(--tgse-bg, #FFFFFF));
+  }
+  .pos-grid button.is-active::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    background: #25D366;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #25D366 30%, transparent);
+  }
+  /* Place the dot in each cell to indicate position */
+  .pos-grid button[data-pos="top-left"].is-active::after     { top: 6px; left: 6px; }
+  .pos-grid button[data-pos="top-right"].is-active::after    { top: 6px; right: 6px; }
+  .pos-grid button[data-pos="middle-left"].is-active::after  { top: 50%; left: 6px;  transform: translateY(-50%); }
+  .pos-grid button[data-pos="middle-right"].is-active::after { top: 50%; right: 6px; transform: translateY(-50%); }
+  .pos-grid button[data-pos="bottom-left"].is-active::after  { bottom: 6px; left: 6px; }
+  .pos-grid button[data-pos="bottom-right"].is-active::after { bottom: 6px; right: 6px; }
+  .pos-grid button[disabled] { opacity: 0.35; cursor: not-allowed; }
+  .pos-grid button[disabled]:hover { border-color: transparent; }
+
+  /* Segmented control */
+  .seg {
+    display: grid;
+    background: var(--tgse-bg-2, #F8FAFC);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg button {
+    appearance: none; border: 0; background: transparent;
+    font: inherit; font-size: 12px; font-weight: 500;
+    padding: 6px 8px; border-radius: 6px; cursor: pointer;
+    color: var(--tgse-text-2, #475569);
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .seg button.is-active {
+    background: var(--tgse-bg, #FFFFFF);
+    color: var(--tgse-text, #0F172A);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+  .seg-2 { grid-template-columns: 1fr 1fr; }
+  .seg-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* Toggle row */
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+  }
+  .toggle-row + .toggle-row { border-top: 1px solid var(--tgse-border-light, #F1F5F9); }
+  .toggle-label { font-size: 13px; font-weight: 500; color: var(--tgse-text, #0F172A); }
+  .toggle-help { font-size: 11px; color: var(--tgse-text-3, #94A3B8); margin-top: 2px; }
+  .toggle {
+    appearance: none;
+    width: 36px; height: 20px;
+    background: var(--tgse-bg-2, #F8FAFC);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: ''; position: absolute;
+    top: 1px; left: 1px;
+    width: 16px; height: 16px;
+    background: var(--tgse-text-3, #94A3B8);
+    border-radius: 50%;
+    transition: all 0.15s ease;
+  }
+  .toggle.is-on { background: var(--tgse-accent, #0891B2); border-color: var(--tgse-accent, #0891B2); }
+  .toggle.is-on::after { left: 17px; background: #FFFFFF; }
+
+  /* Colour row */
+  .colour-row { display: flex; gap: 8px; align-items: center; }
+  .colour-row input[type="color"] {
+    width: 36px; height: 36px;
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    cursor: pointer; background: transparent; padding: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Slider */
+  .slider-wrap { display: flex; align-items: center; gap: 10px; }
+  .slider {
+    -webkit-appearance: none; appearance: none;
+    flex: 1; height: 4px;
+    background: var(--tgse-border, #E2E8F0);
+    border-radius: 999px; outline: none;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px;
+    background: var(--tgse-accent, #0891B2);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .slider::-moz-range-thumb {
+    width: 16px; height: 16px;
+    background: var(--tgse-accent, #0891B2);
+    border-radius: 50%;
+    border: none; cursor: pointer;
+  }
+  .slider-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 500;
+    color: var(--tgse-text-2, #475569);
+    min-width: 36px; text-align: right;
+  }
+
+  /* Agents list */
+  .agents-list { display: flex; flex-direction: column; gap: 8px; }
+  .agent-row {
+    background: var(--tgse-bg, #FFFFFF);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .agent-row-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .agent-row .input { font-size: 12px; padding: 6px 8px; }
+  .agent-row-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 4px;
+  }
+  .agent-row-foot-toggles {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--tgse-text-3, #94A3B8);
+  }
+  .agent-row-foot button {
+    appearance: none; border: 0; background: transparent;
+    color: #EF4444; font-size: 11px; font-weight: 600;
+    cursor: pointer; padding: 2px 6px; font-family: inherit;
+  }
+  .agent-row-foot button:hover { text-decoration: underline; }
+  .agent-add {
+    appearance: none;
+    width: 100%;
+    background: var(--tgse-bg, #FFFFFF);
+    border: 1px dashed var(--tgse-border, #E2E8F0);
+    border-radius: 10px;
+    padding: 10px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tgse-text-2, #475569);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .agent-add:hover {
+    border-color: var(--tgse-accent, #0891B2);
+    color: var(--tgse-accent, #0891B2);
+  }
+
+  /* Office hours grid */
+  .hours-grid { display: flex; flex-direction: column; gap: 6px; }
+  .hours-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 1fr 28px;
+    gap: 6px;
+    align-items: center;
+  }
+  .hours-day {
+    font-size: 12px; font-weight: 600; color: var(--tgse-text-2, #475569);
+  }
+  .hours-row .input { padding: 5px 8px; font-size: 12px; text-align: center; }
+  .hours-row[data-closed="true"] .input { opacity: 0.4; pointer-events: none; }
+  .hours-row .day-toggle {
+    appearance: none; border: 1px solid var(--tgse-border, #E2E8F0);
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: var(--tgse-bg, #FFFFFF);
+    color: var(--tgse-text-2, #475569);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .hours-row .day-toggle.is-on { background: var(--tgse-accent, #0891B2); color: #FFFFFF; border-color: var(--tgse-accent, #0891B2); }
+
+  /* Preview stage */
+  .preview-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #F8FAFC;
+    border-radius: 12px;
+    transform: translateZ(0);
+  }
+  .preview-page {
+    padding: 32px;
+    height: 100%;
+    overflow-y: auto;
+    color: #0F172A;
+  }
+  .preview-page h1 {
+    font-size: 28px; font-weight: 800; line-height: 1.2;
+    letter-spacing: -0.02em; margin-bottom: 12px;
+    color: #0F172A;
+  }
+  .preview-page p {
+    font-size: 14px; line-height: 1.55; color: #475569;
+    margin-bottom: 14px; max-width: 540px;
+  }
+  .preview-page .lede { font-size: 16px; color: #1E293B; max-width: 540px; }
+  .preview-stage[data-theme="dark"] { background: #0F172A; }
+  .preview-stage[data-theme="dark"] .preview-page h1 { color: #F1F5F9; }
+  .preview-stage[data-theme="dark"] .preview-page p { color: #94A3B8; }
+  .preview-stage[data-theme="dark"] .preview-page .lede { color: #E2E8F0; }
+
+  .inline-host, .card-host {
+    margin: 24px 0;
+    display: flex;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="tgse-app" id="app" hidden>
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 14.1c-.3-.1-1.6-.8-1.9-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-1.6-.8-2.7-1.5-3.7-3.4-.3-.5.3-.4.7-1.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.2 4.5 1.9.8 2.7.9 3.6.7.6-.1 1.6-.7 1.9-1.3.2-.7.2-1.2.2-1.3-.1-.1-.3-.2-.5-.3zM12 2C6.5 2 2 6.5 2 12c0 1.7.4 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">WhatsApp Chat</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled WhatsApp widget" maxlength="80" />
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button class="tab is-active" data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button class="tab" data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+      <div class="sb-body">
+
+        <!-- ===== DESIGN TAB ===== -->
+        <div class="tgse-panel is-active" data-tab="design">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+              <span class="tgse-section-label">Layout</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="layout-grid" id="layoutGrid">
+                <button class="layout-card is-active" data-layout="floating" type="button">
+                  <div class="layout-thumb"><div class="thumb-fab"></div></div>
+                  <div class="layout-name">Floating</div>
+                  <div class="layout-desc">Corner button</div>
+                </button>
+                <button class="layout-card" data-layout="vertical" type="button">
+                  <div class="layout-thumb"><div class="thumb-vertical"></div></div>
+                  <div class="layout-name">Vertical tab</div>
+                  <div class="layout-desc">Side tab pill</div>
+                </button>
+                <button class="layout-card" data-layout="inline" type="button">
+                  <div class="layout-thumb"><div class="thumb-pill"></div></div>
+                  <div class="layout-name">Inline pill</div>
+                  <div class="layout-desc">Embed in page</div>
+                </button>
+                <button class="layout-card" data-layout="card" type="button">
+                  <div class="layout-thumb"><div class="thumb-card"></div></div>
+                  <div class="layout-name">Inline card</div>
+                  <div class="layout-desc">With agent</div>
+                </button>
+              </div>
+
+              <div class="field" id="positionField" style="margin-top:14px">
+                <span class="field-label">Position</span>
+                <div class="pos-grid" id="posGrid">
+                  <button data-pos="top-left" type="button" style="grid-column: 1; grid-row: 1" aria-label="Top left"></button>
+                  <button data-pos="top-right" type="button" style="grid-column: 3; grid-row: 1" aria-label="Top right"></button>
+                  <button data-pos="middle-left" type="button" style="grid-column: 1; grid-row: 2" aria-label="Middle left"></button>
+                  <button data-pos="middle-right" type="button" style="grid-column: 3; grid-row: 2" aria-label="Middle right"></button>
+                  <button data-pos="bottom-left" type="button" style="grid-column: 1; grid-row: 3" aria-label="Bottom left"></button>
+                  <button data-pos="bottom-right" type="button" class="is-active" style="grid-column: 3; grid-row: 3" aria-label="Bottom right"></button>
+                </div>
+                <div class="field-help" id="positionHelp">Pick a corner or edge of the viewport for the floating button.</div>
+              </div>
+
+              <div class="field" id="tabLabelField" style="margin-top:14px;display:none">
+                <span class="field-label">Tab label (vertical only)</span>
+                <input class="input" id="tabLabelInput" maxlength="40" placeholder="Chat with us" />
+                <div class="field-help">Text shown rotated down the side tab. Keep short — 2 to 4 words works best.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+              <span class="tgse-section-label">Style</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Brand colour</span>
+                <div class="colour-row">
+                  <input type="color" id="colBrand" value="#25D366" />
+                  <input type="text" class="input" id="colBrandHex" value="#25D366" maxlength="7" />
+                </div>
+                <div class="field-help">WhatsApp green by default. Most agents leave this alone.</div>
+              </div>
+              <div class="field">
+                <span class="field-label">Header colour (panel)</span>
+                <div class="colour-row">
+                  <input type="color" id="colBrandDark" value="#128C7E" />
+                  <input type="text" class="input" id="colBrandDarkHex" value="#128C7E" maxlength="7" />
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">Corner radius</span>
+                <div class="slider-wrap">
+                  <input type="range" min="0" max="28" step="2" id="radiusSlider" class="slider" value="16" />
+                  <span class="slider-val" id="radiusVal">16px</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              <span class="tgse-section-label">Typography</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Font family</span>
+                <div id="fontPickerMount"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CONTENT TAB ===== -->
+        <div class="tgse-panel" data-tab="content">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              <span class="tgse-section-label">Agents</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Mode</span>
+                <div class="seg seg-2" id="modeSeg">
+                  <button data-mode="single" type="button" class="is-active">Single agent</button>
+                  <button data-mode="multi" type="button">Multi-agent</button>
+                </div>
+                <div class="field-help">Multi shows a picker so the visitor chooses who to chat with.</div>
+              </div>
+              <div class="agents-list" id="agentsList"></div>
+              <button class="agent-add" id="agentAdd" type="button" hidden>+ Add agent</button>
+            </div>
+          </div>
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span class="tgse-section-label">Pre-filled message</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Message text</span>
+                <textarea class="textarea" id="messageInput" maxlength="500"></textarea>
+                <div class="field-help">Tokens: <code>{page_url}</code>, <code>{page_title}</code>, <code>{site_name}</code>. WhatsApp will pre-fill this when the visitor taps to chat.</div>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Append page URL automatically</div>
+                  <div class="toggle-help">Adds the current page URL on a new line. Useful even if your message doesn't include a token.</div>
+                </div>
+                <button class="toggle is-on" id="toggleAppendUrl" type="button" aria-pressed="true"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span class="tgse-section-label">Panel copy (floating)</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Header title</span>
+                <input class="input" id="headerTitleInput" maxlength="80" />
+              </div>
+              <div class="field">
+                <span class="field-label">Header subtitle</span>
+                <input class="input" id="headerSubtitleInput" maxlength="100" />
+              </div>
+              <div class="field">
+                <span class="field-label">Welcome message (in chat)</span>
+                <textarea class="textarea" id="chatIntroInput" maxlength="200"></textarea>
+                <div class="field-help">Shown as the first agent message when the panel opens.</div>
+              </div>
+              <div class="field">
+                <span class="field-label">Start chat button label</span>
+                <input class="input" id="ctaLabelInput" maxlength="40" />
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              <span class="tgse-section-label">Inline copy</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Inline pill label</span>
+                <input class="input" id="inlineLabelInput" maxlength="40" />
+              </div>
+              <div class="field">
+                <span class="field-label">Inline pill subtitle</span>
+                <input class="input" id="inlineSubLabelInput" maxlength="60" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===== SETTINGS TAB ===== -->
+        <div class="tgse-panel" data-tab="settings">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span class="tgse-section-label">Behaviour (floating)</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Pulse animation</div>
+                  <div class="toggle-help">Subtle ripple around the floating button to draw attention.</div>
+                </div>
+                <button class="toggle is-on" id="togglePulse" type="button" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Show greeting bubble</div>
+                  <div class="toggle-help">Speech bubble appears after a delay with attention-grabbing copy.</div>
+                </div>
+                <button class="toggle" id="toggleGreeting" type="button" aria-pressed="false"></button>
+              </div>
+              <div class="field" id="greetingFields" style="display:none">
+                <span class="field-label">Greeting text</span>
+                <input class="input" id="greetingTextInput" maxlength="120" />
+                <div class="field-help" style="margin-top:10px">
+                  <div class="field-label" style="margin-bottom:6px">Greeting delay (seconds)</div>
+                  <div class="slider-wrap">
+                    <input type="range" min="0" max="30" step="1" id="greetingDelaySlider" class="slider" value="8" />
+                    <span class="slider-val" id="greetingDelayVal">8s</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span class="tgse-section-label">Office hours</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Use office hours</div>
+                  <div class="toggle-help">Show different state when you're closed. Visitor's local time.</div>
+                </div>
+                <button class="toggle" id="toggleHours" type="button" aria-pressed="false"></button>
+              </div>
+              <div class="field" id="hoursFields" style="display:none">
+                <div class="hours-grid" id="hoursGrid"></div>
+                <div class="field" style="margin-top:14px">
+                  <span class="field-label">Out-of-hours message</span>
+                  <textarea class="textarea" id="offlineMessageInput" maxlength="200"></textarea>
+                </div>
+                <div class="toggle-row">
+                  <div>
+                    <div class="toggle-label">Hide button entirely when closed</div>
+                    <div class="toggle-help">Otherwise the button still shows but says "Currently offline".</div>
+                  </div>
+                  <button class="toggle" id="toggleHideClosed" type="button" aria-pressed="false"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <span class="tgse-section-label">Tracking</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Track click events</div>
+                  <div class="toggle-help">Logs when visitors click "Start chat" so you can see which pages drive WhatsApp engagement. No personal data.</div>
+                </div>
+                <button class="toggle is-on" id="toggleTrack" type="button" aria-pressed="true"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       PREVIEW
+       ============================================================ -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div class="preview-stage" id="previewStage" data-theme="light">
+          <div class="preview-page">
+            <h1>The Hidden Greek Islands</h1>
+            <p class="lede">Skip Mykonos. Seven islands every travel agent should be quietly recommending instead.</p>
+            <p>Greece has 227 inhabited islands. Most of your clients can name three. The fix isn't fighting harder for Santorini bookings, it's offering them somewhere they haven't seen on Instagram yet.</p>
+
+            <div class="inline-host" id="inlineHost"></div>
+
+            <p>Folegandros is Cycladic, whitewashed and dramatically clifftop. Two hours from Santorini but two decades earlier in feel.</p>
+
+            <div class="card-host" id="cardHost"></div>
+
+            <p>Each of these islands books at higher margins because clients aren't price-comparing them on the OTAs. Send them to Folegandros and they'll send you their friends.</p>
+          </div>
+          <div class="floating-host" id="floatingHost"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-whatsapp.js"></script>
+
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-whatsapp.js"></script>
+
+<script>
+  /* =========================================================
+     App state
+     ========================================================= */
+  function defaultsCfg() {
+    return {
+      layout: 'floating',
+      position: 'bottom-right',
+      mode: 'single',
+      agents: [
+        { name: 'Travel Team', role: 'Online now', phone: '+447900900900', photo: '', online: true }
+      ],
+      message: 'Hi! I have a question about your travel services.',
+      appendPageUrl: true,
+      headerTitle: 'Chat with us on WhatsApp',
+      headerSubtitle: 'Typically replies in a few minutes',
+      chatIntro: 'Hi there! 👋 How can we help with your next trip?',
+      ctaLabel: 'Start chat',
+      tabLabel: 'Chat with us',
+      inlineLabel: 'Chat on WhatsApp',
+      inlineSubLabel: 'Typically replies in a few minutes',
+      greetingEnabled: false,
+      greetingText: 'Need help finding your perfect trip?',
+      greetingDelay: 8,
+      pulse: true,
+      hoursEnabled: false,
+      hours: {
+        sun: [], mon: [['09:00', '17:30']], tue: [['09:00', '17:30']],
+        wed: [['09:00', '17:30']], thu: [['09:00', '17:30']],
+        fri: [['09:00', '17:30']], sat: []
+      },
+      offlineMessage: 'We\'re closed at the moment. Leave a message and we\'ll get back to you when we\'re open.',
+      hideWhenClosed: false,
+      trackClicks: true,
+      fontFamily: 'Inter',
+      theme: { mode: 'light', brand: '#25D366', brandDark: '#128C7E', radius: 16 },
+    };
+  }
+
+  let C = defaultsCfg();
+  let inst = null;
+
+  /* =========================================================
+     Shell init
+     ========================================================= */
+  const shell = tgse.init({
+    widgetType: 'WhatsApp Chat',
+    widgetTag: 'whatsapp',
+    scriptFile: 'widget-whatsapp.js',
+
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); render(); },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; render(); },
+
+    onAIBuild: () => { tgse.toast('AI builder coming soon', 'ok'); },
+    onTemplates: () => { tgse.toast('Templates coming soon', 'ok'); },
+    onThemeToggle: (isDark) => {
+      C.theme.mode = isDark ? 'dark' : 'light';
+      const stage = document.getElementById('previewStage');
+      if (stage) stage.setAttribute('data-theme', C.theme.mode);
+      render();
+    },
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initWhatsappTour === 'function') window.initWhatsappTour(); },
+  });
+
+  /* =========================================================
+     Render preview
+     ========================================================= */
+  function tearDown() {
+    if (inst && typeof inst.destroy === 'function') {
+      try { inst.destroy(); } catch (e) {}
+    }
+    inst = null;
+    ['inlineHost', 'cardHost', 'floatingHost'].forEach(id => {
+      const old = document.getElementById(id);
+      if (!old) return;
+      const fresh = document.createElement('div');
+      fresh.id = id;
+      fresh.className = old.className;
+      old.replaceWith(fresh);
+    });
+  }
+
+  function render() {
+    if (!window.TGWhatsAppWidget) return;
+    tearDown();
+
+    let mountId;
+    switch (C.layout) {
+      case 'inline': mountId = 'inlineHost'; break;
+      case 'card':   mountId = 'cardHost'; break;
+      case 'floating':
+      default:       mountId = 'floatingHost'; break;
+    }
+
+    const host = document.getElementById(mountId);
+    if (!host) return;
+    const widgetEl = document.createElement('div');
+    widgetEl.setAttribute('data-tg-widget', 'whatsapp');
+    host.appendChild(widgetEl);
+    inst = new window.TGWhatsAppWidget(widgetEl, C);
+  }
+
+  function dirty() { shell.markDirty(); }
+
+  /* =========================================================
+     Wiring: layout / corner / mode / colour / sliders / toggles / inputs
+     ========================================================= */
+  /* Layout/position rules:
+     - floating supports all 6 positions
+     - vertical only supports middle-left and middle-right
+     - inline + card don't show the position picker at all */
+  function applyLayoutVisibility() {
+    const isFloating = C.layout === 'floating';
+    const isVertical = C.layout === 'vertical';
+    const showPos = isFloating || isVertical;
+    document.getElementById('positionField').style.display = showPos ? '' : 'none';
+    document.getElementById('tabLabelField').style.display = isVertical ? '' : 'none';
+
+    // For vertical, disable all positions except middle-left and middle-right
+    document.querySelectorAll('#posGrid button').forEach(btn => {
+      const p = btn.getAttribute('data-pos');
+      const allowed = !isVertical || p === 'middle-left' || p === 'middle-right';
+      btn.disabled = !allowed;
+    });
+
+    // Update help text
+    const help = document.getElementById('positionHelp');
+    if (help) {
+      help.textContent = isVertical
+        ? 'Vertical tab can only be on the middle-left or middle-right edge.'
+        : 'Pick a corner or edge of the viewport for the floating button.';
+    }
+
+    // If switching to vertical with an invalid position, snap to middle-right
+    if (isVertical && C.position !== 'middle-left' && C.position !== 'middle-right') {
+      C.position = 'middle-right';
+      syncPositionUI();
+    }
+  }
+
+  function syncPositionUI() {
+    document.querySelectorAll('#posGrid button').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-pos') === C.position);
+    });
+  }
+
+  document.getElementById('layoutGrid').addEventListener('click', (e) => {
+    const card = e.target.closest('[data-layout]');
+    if (!card) return;
+    document.querySelectorAll('#layoutGrid .layout-card').forEach(c => c.classList.toggle('is-active', c === card));
+    C.layout = card.getAttribute('data-layout');
+    applyLayoutVisibility();
+    dirty(); render();
+  });
+
+  document.getElementById('posGrid').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pos]');
+    if (!b || b.disabled) return;
+    C.position = b.getAttribute('data-pos');
+    syncPositionUI();
+    dirty(); render();
+  });
+
+  document.getElementById('modeSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-mode]');
+    if (!b) return;
+    document.querySelectorAll('#modeSeg button').forEach(x => x.classList.toggle('is-active', x === b));
+    C.mode = b.getAttribute('data-mode');
+    document.getElementById('agentAdd').toggleAttribute('hidden', C.mode === 'single');
+    // If switching to single and there are multiple agents, keep them all (they're hidden but preserved)
+    dirty(); renderAgents(); render();
+  });
+
+  // Brand colours
+  function syncBrand(v) {
+    const hex = (v || '').match(/^#[0-9a-fA-F]{6}$/) ? v : '#25D366';
+    document.getElementById('colBrand').value = hex;
+    document.getElementById('colBrandHex').value = hex;
+    C.theme.brand = hex;
+  }
+  function syncBrandDark(v) {
+    const hex = (v || '').match(/^#[0-9a-fA-F]{6}$/) ? v : '#128C7E';
+    document.getElementById('colBrandDark').value = hex;
+    document.getElementById('colBrandDarkHex').value = hex;
+    C.theme.brandDark = hex;
+  }
+  document.getElementById('colBrand').addEventListener('input', (e) => { syncBrand(e.target.value); dirty(); render(); });
+  document.getElementById('colBrandHex').addEventListener('input', (e) => {
+    const v = e.target.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) { syncBrand(v); dirty(); render(); }
+  });
+  document.getElementById('colBrandDark').addEventListener('input', (e) => { syncBrandDark(e.target.value); dirty(); render(); });
+  document.getElementById('colBrandDarkHex').addEventListener('input', (e) => {
+    const v = e.target.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) { syncBrandDark(v); dirty(); render(); }
+  });
+
+  // Sliders
+  function bindSlider(id, valId, key, suffix, transform) {
+    const slider = document.getElementById(id);
+    const val = document.getElementById(valId);
+    slider.addEventListener('input', () => {
+      const v = Number(slider.value);
+      val.textContent = v + (suffix || '');
+      const tv = transform ? transform(v) : v;
+      if (key === 'radius') C.theme.radius = tv;
+      else if (key === 'greetingDelay') C.greetingDelay = tv;
+      dirty(); render();
+    });
+  }
+  bindSlider('radiusSlider', 'radiusVal', 'radius', 'px');
+  bindSlider('greetingDelaySlider', 'greetingDelayVal', 'greetingDelay', 's');
+
+  // Toggles
+  function bindToggle(id, onChange) {
+    const t = document.getElementById(id);
+    t.addEventListener('click', () => {
+      const isOn = !t.classList.contains('is-on');
+      t.classList.toggle('is-on', isOn);
+      t.setAttribute('aria-pressed', String(isOn));
+      onChange(isOn);
+      dirty(); render();
+    });
+  }
+  bindToggle('toggleAppendUrl', (on) => { C.appendPageUrl = on; });
+  bindToggle('togglePulse', (on) => { C.pulse = on; });
+  bindToggle('toggleGreeting', (on) => {
+    C.greetingEnabled = on;
+    document.getElementById('greetingFields').style.display = on ? '' : 'none';
+  });
+  bindToggle('toggleHours', (on) => {
+    C.hoursEnabled = on;
+    document.getElementById('hoursFields').style.display = on ? '' : 'none';
+  });
+  bindToggle('toggleHideClosed', (on) => { C.hideWhenClosed = on; });
+  bindToggle('toggleTrack', (on) => { C.trackClicks = on; });
+
+  // Text inputs
+  function bindInput(id, key) {
+    document.getElementById(id).addEventListener('input', (e) => {
+      C[key] = e.target.value;
+      dirty(); render();
+    });
+  }
+  bindInput('messageInput', 'message');
+  bindInput('headerTitleInput', 'headerTitle');
+  bindInput('headerSubtitleInput', 'headerSubtitle');
+  bindInput('chatIntroInput', 'chatIntro');
+  bindInput('ctaLabelInput', 'ctaLabel');
+  bindInput('tabLabelInput', 'tabLabel');
+  bindInput('inlineLabelInput', 'inlineLabel');
+  bindInput('inlineSubLabelInput', 'inlineSubLabel');
+  bindInput('greetingTextInput', 'greetingText');
+  bindInput('offlineMessageInput', 'offlineMessage');
+
+  // Name input
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  /* =========================================================
+     Agents list
+     ========================================================= */
+  function renderAgents() {
+    const list = document.getElementById('agentsList');
+    list.innerHTML = '';
+    const agents = C.agents.length ? C.agents : [{ name: '', role: '', phone: '', photo: '', online: true }];
+    if (!C.agents.length) C.agents = agents;
+
+    // Single mode shows only the first agent
+    const visible = (C.mode === 'single') ? agents.slice(0, 1) : agents;
+
+    visible.forEach((a, i) => {
+      const row = document.createElement('div');
+      row.className = 'agent-row';
+      row.innerHTML = `
+        <div class="agent-row-grid">
+          <input class="input" data-agent="${i}" data-field="name" placeholder="Name" value="${escAttr(a.name)}" maxlength="60" />
+          <input class="input" data-agent="${i}" data-field="role" placeholder="Role" value="${escAttr(a.role)}" maxlength="60" />
+        </div>
+        <div class="agent-row-grid">
+          <input class="input" data-agent="${i}" data-field="phone" placeholder="+447900900900" value="${escAttr(a.phone)}" maxlength="32" />
+          <input class="input" data-agent="${i}" data-field="photo" placeholder="Photo URL (optional)" value="${escAttr(a.photo)}" maxlength="500" />
+        </div>
+        <div class="agent-row-foot">
+          <label class="agent-row-foot-toggles" style="cursor:pointer">
+            <input type="checkbox" data-agent="${i}" data-field="online" ${a.online ? 'checked' : ''} style="margin-right:4px" />
+            Online
+          </label>
+          ${C.mode === 'multi' && C.agents.length > 1 ? `<button data-agent="${i}" data-action="remove" type="button">Remove</button>` : ''}
+        </div>
+      `;
+      list.appendChild(row);
+    });
+
+    // Wire field inputs
+    list.querySelectorAll('input[data-field]').forEach(el => {
+      const handler = () => {
+        const idx = Number(el.getAttribute('data-agent'));
+        const field = el.getAttribute('data-field');
+        const val = (field === 'online') ? el.checked : el.value;
+        if (!C.agents[idx]) C.agents[idx] = { name: '', role: '', phone: '', photo: '', online: true };
+        C.agents[idx][field] = val;
+        // Sync single-mode shortcut fields
+        if (C.mode === 'single' && idx === 0) {
+          if (field === 'name') C.name = val;
+          if (field === 'role') C.role = val;
+          if (field === 'phone') C.phone = val;
+          if (field === 'photo') C.photo = val;
+          if (field === 'online') C.online = val;
+        }
+        dirty();
+        render();
+      };
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+    });
+
+    // Remove buttons
+    list.querySelectorAll('[data-action="remove"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-agent'));
+        C.agents.splice(idx, 1);
+        if (!C.agents.length) C.agents.push({ name: '', role: '', phone: '', photo: '', online: true });
+        dirty(); renderAgents(); render();
+      });
+    });
+  }
+
+  document.getElementById('agentAdd').addEventListener('click', () => {
+    if (C.agents.length >= 8) {
+      tgse.toast('Maximum 8 agents', 'err');
+      return;
+    }
+    C.agents.push({ name: '', role: '', phone: '', photo: '', online: true });
+    dirty(); renderAgents(); render();
+  });
+
+  function escAttr(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  /* =========================================================
+     Office hours grid
+     ========================================================= */
+  const DAY_LABELS = [
+    ['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'],
+    ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']
+  ];
+
+  function renderHours() {
+    const grid = document.getElementById('hoursGrid');
+    grid.innerHTML = '';
+    DAY_LABELS.forEach(([key, label]) => {
+      const slots = Array.isArray(C.hours[key]) ? C.hours[key] : [];
+      const isOpen = slots.length > 0;
+      const row = document.createElement('div');
+      row.className = 'hours-row';
+      row.setAttribute('data-closed', !isOpen);
+      const open = isOpen ? slots[0][0] : '09:00';
+      const close = isOpen ? slots[0][1] : '17:30';
+      row.innerHTML = `
+        <div class="hours-day">${label}</div>
+        <input class="input" data-day="${key}" data-pos="0" type="time" value="${escAttr(open)}" />
+        <input class="input" data-day="${key}" data-pos="1" type="time" value="${escAttr(close)}" />
+        <button class="day-toggle ${isOpen ? 'is-on' : ''}" type="button" data-day-toggle="${key}">${isOpen ? '✓' : '×'}</button>
+      `;
+      grid.appendChild(row);
+    });
+
+    grid.querySelectorAll('input[data-day]').forEach(el => {
+      el.addEventListener('input', () => {
+        const day = el.getAttribute('data-day');
+        const pos = Number(el.getAttribute('data-pos'));
+        const all = grid.querySelectorAll(`[data-day="${day}"]`);
+        const open = all[0].value || '09:00';
+        const close = all[1].value || '17:30';
+        if (Array.isArray(C.hours[day]) && C.hours[day].length) {
+          C.hours[day] = [[open, close]];
+        }
+        dirty(); render();
+      });
+    });
+
+    grid.querySelectorAll('[data-day-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.getAttribute('data-day-toggle');
+        const isOn = btn.classList.contains('is-on');
+        if (isOn) {
+          C.hours[day] = [];
+        } else {
+          C.hours[day] = [['09:00', '17:30']];
+        }
+        dirty(); renderHours(); render();
+      });
+    });
+  }
+
+  /* =========================================================
+     Sync sidebar UI to current C
+     ========================================================= */
+  function syncUI() {
+    document.querySelectorAll('#layoutGrid .layout-card').forEach(c => {
+      c.classList.toggle('is-active', c.getAttribute('data-layout') === C.layout);
+    });
+
+    // Backwards compat: if loaded config has cfg.corner but not cfg.position, migrate
+    if (!C.position && C.corner) C.position = C.corner;
+    if (!C.position) C.position = 'bottom-right';
+
+    syncPositionUI();
+    applyLayoutVisibility();
+
+    document.querySelectorAll('#modeSeg button').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-mode') === C.mode);
+    });
+    document.getElementById('agentAdd').toggleAttribute('hidden', C.mode === 'single');
+
+    syncBrand(C.theme.brand);
+    syncBrandDark(C.theme.brandDark);
+    document.getElementById('radiusSlider').value = C.theme.radius;
+    document.getElementById('radiusVal').textContent = C.theme.radius + 'px';
+    document.getElementById('greetingDelaySlider').value = C.greetingDelay;
+    document.getElementById('greetingDelayVal').textContent = C.greetingDelay + 's';
+
+    [
+      ['toggleAppendUrl', C.appendPageUrl],
+      ['togglePulse', C.pulse],
+      ['toggleGreeting', C.greetingEnabled],
+      ['toggleHours', C.hoursEnabled],
+      ['toggleHideClosed', C.hideWhenClosed],
+      ['toggleTrack', C.trackClicks],
+    ].forEach(([id, on]) => {
+      const t = document.getElementById(id);
+      t.classList.toggle('is-on', !!on);
+      t.setAttribute('aria-pressed', String(!!on));
+    });
+
+    document.getElementById('greetingFields').style.display = C.greetingEnabled ? '' : 'none';
+    document.getElementById('hoursFields').style.display = C.hoursEnabled ? '' : 'none';
+
+    document.getElementById('messageInput').value = C.message || '';
+    document.getElementById('headerTitleInput').value = C.headerTitle || '';
+    document.getElementById('headerSubtitleInput').value = C.headerSubtitle || '';
+    document.getElementById('chatIntroInput').value = C.chatIntro || '';
+    document.getElementById('ctaLabelInput').value = C.ctaLabel || '';
+    document.getElementById('tabLabelInput').value = C.tabLabel || '';
+    document.getElementById('inlineLabelInput').value = C.inlineLabel || '';
+    document.getElementById('inlineSubLabelInput').value = C.inlineSubLabel || '';
+    document.getElementById('greetingTextInput').value = C.greetingText || '';
+    document.getElementById('offlineMessageInput').value = C.offlineMessage || '';
+
+    document.getElementById('previewStage').setAttribute('data-theme', C.theme.mode || 'light');
+    renderAgents();
+    renderHours();
+  }
+
+  /* =========================================================
+     Load existing widget
+     ========================================================= */
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) {
+      document.getElementById('app').removeAttribute('hidden');
+      syncUI(); render();
+      return;
+    }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && d.config) {
+          const def = defaultsCfg();
+          C = Object.assign({}, def, d.config);
+          C.theme = Object.assign({}, def.theme, d.config.theme || {});
+          C.hours = Object.assign({}, def.hours, d.config.hours || {});
+          if (!Array.isArray(C.agents) || !C.agents.length) C.agents = def.agents;
+        }
+        if (d && d.name) document.getElementById('name-input').value = d.name;
+        document.getElementById('app').removeAttribute('hidden');
+        syncUI(); render();
+      })
+      .catch(() => {
+        document.getElementById('app').removeAttribute('hidden');
+        syncUI(); render();
+        tgse.toast('Failed to load widget', 'err');
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // v1.1 shell — wait for cookie auth to resolve before deciding whether
+    // to load the saved widget or show the default state.
+    const boot = () => {
+      if (tgse.isLoggedIn()) {
+        loadFromUrl();
+        if (typeof window.initWhatsappTour === 'function') window.initWhatsappTour();
+      } else {
+        document.getElementById('app').removeAttribute('hidden');
+        syncUI(); render();
+      }
+    };
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(boot);
+    } else {
+      boot();
+    }
+  });
+</script>
+
+</body>
+</html>

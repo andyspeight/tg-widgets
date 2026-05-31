@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Showcase — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* ─── Per-editor sidebar inner styles ─── */
+
+  /* Section helpers (mirror conventions used across other unified-shell editors) */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tgse-ink-2);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+  .field-hint {
+    display: block;
+    font-size: 11px;
+    color: var(--tgse-ink-3);
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+  .input, .textarea, .select {
+    width: 100%;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 13px;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .input:focus, .textarea:focus, .select:focus {
+    outline: none;
+    border-color: var(--tgse-brand);
+    box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+  }
+  .textarea { resize: vertical; min-height: 64px; line-height: 1.4; }
+  .select { appearance: none; padding-right: 28px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1l4 4 4-4' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* Layout picker */
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .layout-btn {
+    appearance: none;
+    border: 1.5px solid var(--tgse-border);
+    background: var(--tgse-panel);
+    padding: 10px 8px;
+    border-radius: var(--tgse-radius-sm);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 160ms ease, background 160ms ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .layout-btn:hover { background: var(--tgse-hover); }
+  .layout-btn.is-on {
+    border-color: var(--tgse-brand);
+    background: var(--tgse-brand-tint);
+  }
+  .layout-btn-svg {
+    width: 100%;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .layout-btn-svg svg { width: 100%; height: 100%; }
+  .layout-btn-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tgse-ink);
+  }
+  .layout-btn.is-on .layout-btn-label { color: var(--tgse-brand-dark); }
+
+  /* Colour rows */
+  .colour-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .colour-swatch-wrap {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--tgse-radius-sm);
+    border: 1px solid var(--tgse-border);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .colour-swatch-wrap input[type="color"] {
+    position: absolute;
+    inset: -2px;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .colour-hex {
+    flex: 1;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  /* Switch (iOS style) */
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+  }
+  .switch-row-label {
+    font-size: 13px;
+    color: var(--tgse-ink);
+    font-weight: 500;
+  }
+  .switch {
+    appearance: none;
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--tgse-border);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    transition: background 160ms ease;
+    flex-shrink: 0;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #FFFFFF;
+    top: 2px;
+    left: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    transition: transform 160ms ease;
+  }
+  .switch.is-on {
+    background: var(--tgse-brand);
+  }
+  .switch.is-on::after { transform: translateX(16px); }
+
+  /* Slider with value */
+  .slider-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .slider-row input[type="range"] { width: 100%; accent-color: var(--tgse-brand); }
+  .slider-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tgse-ink-2);
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* Member list */
+  .members-toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .btn {
+    appearance: none;
+    border: 1px solid var(--tgse-border);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 12px;
+    border-radius: var(--tgse-radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+  .btn:hover { background: var(--tgse-hover); }
+  .btn svg { width: 14px; height: 14px; }
+  .btn-primary {
+    background: var(--tgse-brand);
+    color: #FFFFFF;
+    border-color: var(--tgse-brand);
+  }
+  .btn-primary:hover { background: var(--tgse-brand-dark); border-color: var(--tgse-brand-dark); }
+
+  .member-list { display: flex; flex-direction: column; gap: 8px; }
+  .member-item {
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    background: var(--tgse-panel);
+    overflow: hidden;
+  }
+  .member-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .member-head:hover { background: var(--tgse-hover); }
+  .member-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: var(--tgse-panel-3);
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .member-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .member-summary { flex: 1; min-width: 0; }
+  .member-summary-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tgse-ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .member-summary-role {
+    font-size: 11px;
+    color: var(--tgse-ink-3);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .member-actions { display: flex; gap: 4px; }
+  .icon-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--tgse-ink-3);
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease;
+  }
+  .icon-btn:hover { background: var(--tgse-panel-3); color: var(--tgse-ink); }
+  .icon-btn svg { width: 14px; height: 14px; }
+  .icon-btn--danger:hover { color: var(--tgse-danger); }
+
+  .member-body {
+    padding: 12px;
+    border-top: 1px solid var(--tgse-border);
+    background: var(--tgse-panel-2);
+    display: none;
+  }
+  .member-item.is-open .member-body { display: block; }
+  .member-item.is-open .member-head-chev { transform: rotate(180deg); }
+  .member-head-chev {
+    color: var(--tgse-ink-3);
+    transition: transform 160ms ease;
+  }
+  .member-head-chev svg { width: 14px; height: 14px; }
+
+  .badge-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: var(--tgse-warning);
+    margin-left: 6px;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 24px;
+    border: 2px dashed var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    color: var(--tgse-ink-3);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <!-- ============================================================ SIDEBAR ============================================================ -->
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true" style="background:#3B82F615;color:#3B82F6">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Team Showcase</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== DESIGN TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <!-- Layout picker -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+            <span class="tgse-section-label">Layout</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="layout-grid" id="layout-picker">
+              <button class="layout-btn" data-layout="grid" type="button">
+                <div class="layout-btn-svg"><svg viewBox="0 0 60 36" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="16" height="14" rx="2" fill="currentColor" opacity="0.25"/><rect x="22" y="2" width="16" height="14" rx="2" fill="currentColor" opacity="0.25"/><rect x="42" y="2" width="16" height="14" rx="2" fill="currentColor" opacity="0.25"/><rect x="2" y="20" width="16" height="14" rx="2" fill="currentColor" opacity="0.25"/><rect x="22" y="20" width="16" height="14" rx="2" fill="currentColor" opacity="0.25"/><rect x="42" y="20" width="16" height="14" rx="2" fill="currentColor" opacity="0.25"/></svg></div>
+                <div class="layout-btn-label">Grid</div>
+              </button>
+              <button class="layout-btn" data-layout="compact" type="button">
+                <div class="layout-btn-svg"><svg viewBox="0 0 60 36" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="9" r="4" fill="currentColor" opacity="0.25"/><rect x="14" y="7" width="16" height="2" rx="1" fill="currentColor" opacity="0.4"/><rect x="14" y="11" width="10" height="2" rx="1" fill="currentColor" opacity="0.25"/><circle cx="8" cy="27" r="4" fill="currentColor" opacity="0.25"/><rect x="14" y="25" width="16" height="2" rx="1" fill="currentColor" opacity="0.4"/><rect x="14" y="29" width="10" height="2" rx="1" fill="currentColor" opacity="0.25"/><circle cx="38" cy="9" r="4" fill="currentColor" opacity="0.25"/><rect x="44" y="7" width="14" height="2" rx="1" fill="currentColor" opacity="0.4"/><rect x="44" y="11" width="10" height="2" rx="1" fill="currentColor" opacity="0.25"/></svg></div>
+                <div class="layout-btn-label">Compact</div>
+              </button>
+              <button class="layout-btn" data-layout="carousel" type="button">
+                <div class="layout-btn-svg"><svg viewBox="0 0 60 36" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="6" width="16" height="24" rx="2" fill="currentColor" opacity="0.25"/><rect x="24" y="6" width="16" height="24" rx="2" fill="currentColor" opacity="0.5"/><rect x="42" y="6" width="16" height="24" rx="2" fill="currentColor" opacity="0.25"/><path d="M2 18l3-3v6z" fill="currentColor"/><path d="M58 18l-3-3v6z" fill="currentColor"/></svg></div>
+                <div class="layout-btn-label">Carousel</div>
+              </button>
+              <button class="layout-btn" data-layout="spotlight" type="button">
+                <div class="layout-btn-svg"><svg viewBox="0 0 60 36" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="30" height="28" rx="2" fill="currentColor" opacity="0.4"/><rect x="36" y="4" width="22" height="7" rx="1" fill="currentColor" opacity="0.25"/><rect x="36" y="13" width="22" height="7" rx="1" fill="currentColor" opacity="0.25"/><rect x="36" y="22" width="22" height="7" rx="1" fill="currentColor" opacity="0.25"/></svg></div>
+                <div class="layout-btn-label">Spotlight</div>
+              </button>
+            </div>
+
+            <div class="field" id="grid-cols-field" style="margin-top:14px">
+              <label class="field-label">Grid columns</label>
+              <div class="slider-row">
+                <input type="range" id="cols-input" min="2" max="4" step="1" value="3">
+                <span class="slider-val" id="cols-val">3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colours -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Brand colour</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="brand-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="brand-hex" value="#0891B2" maxlength="9">
+              </div>
+              <span class="field-hint">Used for the role text, badges and active states.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Accent colour</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#6366F1"></div>
+                <input class="input colour-hex" id="accent-hex" value="#6366F1" maxlength="9">
+              </div>
+              <span class="field-hint">Secondary highlights and focus rings.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shape -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Shape</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Card radius</label>
+              <div class="slider-row">
+                <input type="range" id="radius-input" min="0" max="32" step="2" value="16">
+                <span class="slider-val" id="radius-val">16px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== CONTENT TAB ===== -->
+      <div class="tgse-panel" data-tab="content">
+
+        <!-- Heading -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="18" y2="18"/></svg>
+            <span class="tgse-section-label">Heading</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="switch-row">
+              <span class="switch-row-label">Show heading</span>
+              <button type="button" class="switch is-on" id="show-heading" aria-pressed="true" aria-label="Show heading"></button>
+            </div>
+            <div class="field">
+              <label class="field-label">Eyebrow</label>
+              <input type="text" class="input" id="eyebrow" maxlength="40">
+            </div>
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input type="text" class="input" id="title" maxlength="120">
+            </div>
+            <div class="field">
+              <label class="field-label">Subtitle</label>
+              <textarea class="textarea" id="subtitle" maxlength="240" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team members -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <span class="tgse-section-label">Team members <span id="member-count" style="color:var(--tgse-ink-3);font-weight:500">(0)</span></span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="members-toolbar">
+              <button type="button" class="btn btn-primary" id="add-member">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add member
+              </button>
+            </div>
+            <div class="member-list" id="member-list"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="tgse-section-label">Display options</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="switch-row">
+              <span class="switch-row-label">Department filter chips</span>
+              <button type="button" class="switch is-on" id="show-filter" aria-pressed="true"></button>
+            </div>
+            <span class="field-hint">Only renders if 2+ departments are used across members.</span>
+            <div class="switch-row" style="margin-top:8px">
+              <span class="switch-row-label">Contact icons (LinkedIn, email, etc.)</span>
+              <button type="button" class="switch is-on" id="show-contacts" aria-pressed="true"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section" id="carousel-settings" style="display:none">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span class="tgse-section-label">Carousel</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="switch-row">
+              <span class="switch-row-label">Autoplay</span>
+              <button type="button" class="switch" id="autoplay" aria-pressed="false"></button>
+            </div>
+            <div class="field">
+              <label class="field-label">Interval (seconds)</label>
+              <input type="number" class="input" id="interval" min="2" max="30" step="1" value="5">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ============================================================ PREVIEW ============================================================ -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+        Design mode
+        <span class="tgse-kbd">D</span>
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div data-tg-widget="team" id="widget-mount"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-team.js"></script>
+
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-team.js"></script>
+
+<script>
+  /* ============================================================
+     PER-EDITOR SCRIPT — Team Showcase
+     ============================================================ */
+
+  // SVG icon strings used in the dynamic member list
+  const SVG = {
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+    dup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  };
+
+  function escAttr(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+  function initials(name) {
+    if (!name) return '?';
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+  function avatarColor(name) {
+    const palette = ['#0891B2','#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6','#EF4444','#14B8A6','#F97316'];
+    let h = 0; const s = String(name || '');
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return palette[Math.abs(h) % palette.length];
+  }
+
+  function makeMember(overrides) {
+    return Object.assign({
+      name: 'New member',
+      role: '',
+      department: '',
+      bio: '',
+      photo: '',
+      specialisms: '',
+      years: '',
+      languages: '',
+      linkedin: '',
+      email: '',
+      phone: '',
+      whatsapp: '',
+      instagram: '',
+      facebook: '',
+      featured: false,
+    }, overrides || {});
+  }
+
+  // Config state
+  let C = {
+    layout: 'grid',
+    columns: 3,
+    theme: 'light',
+    brand: '#0891B2',
+    accent: '#6366F1',
+    radius: 16,
+    fontFamily: 'Inter',
+    showHeading: true,
+    eyebrow: 'Our Team',
+    title: 'Meet the experts behind your trip',
+    subtitle: 'Decades of travel experience, ready to plan your perfect getaway.',
+    showDepartmentFilter: true,
+    showContactIcons: true,
+    carouselAutoplay: false,
+    carouselInterval: 5,
+    members: [
+      makeMember({ name: 'Sarah Mitchell', role: 'Senior Travel Consultant', department: 'Tailor-made', bio: 'Twenty years arranging unforgettable trips across Europe and Asia.', specialisms: 'Honeymoons, Family, Italy', years: 20, languages: 'English, Italian', email: 'sarah@example.com', featured: true }),
+      makeMember({ name: 'James Thornton', role: 'Cruise Specialist', department: 'Cruise', bio: 'Personally sailed every major cruise line.', specialisms: 'River Cruise, Caribbean', years: 12, languages: 'English' }),
+      makeMember({ name: 'Priya Patel', role: 'Long-Haul Expert', department: 'Tailor-made', bio: 'Specialist in tailor-made adventures across Asia and Africa.', specialisms: 'Safari, India, Wildlife', years: 15, languages: 'English, Hindi' }),
+    ],
+  };
+
+  let widgetInst = null;
+  let openMemberIdx = -1;
+
+  // ─── Shell init ───
+  const shell = tgse.init({
+    widgetType: 'Team Showcase',
+    widgetTag: 'team',
+    scriptFile: 'widget-team.js',
+
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); render(); },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; render(); },
+
+    onAIBuild: () => {
+      tgse.toast('AI builder coming soon for Team Showcase', 'ok');
+    },
+    onTemplates: () => {
+      tgse.toast('Templates coming soon for Team Showcase', 'ok');
+    },
+    onThemeToggle: (isDark) => {
+      C.theme = isDark ? 'dark' : 'light';
+      render();
+    },
+    onDesignMode: (isOn) => {
+      // No bespoke overlay for v1
+    },
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initTeamTour === 'function') window.initTeamTour(); },
+  });
+
+  // ─── Render preview ───
+  function render() {
+    const host = document.getElementById('widget-mount');
+    if (!host) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} }
+    // Replace node to clear shadow DOM cleanly
+    const fresh = host.cloneNode(false);
+    host.parentNode.replaceChild(fresh, host);
+    if (window.TGTeamWidget) {
+      widgetInst = new window.TGTeamWidget(fresh, C);
+    }
+  }
+
+  // ─── Load from URL ───
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) { render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        syncUIFromState();
+        render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  // ─── Sync UI ───
+  function syncUIFromState() {
+    // Layout buttons
+    document.querySelectorAll('[data-layout]').forEach(b => {
+      b.classList.toggle('is-on', b.getAttribute('data-layout') === C.layout);
+    });
+    document.getElementById('grid-cols-field').style.display =
+      (C.layout === 'grid') ? '' : 'none';
+    document.getElementById('carousel-settings').style.display =
+      (C.layout === 'carousel') ? '' : 'none';
+
+    // Sliders
+    document.getElementById('cols-input').value = C.columns;
+    document.getElementById('cols-val').textContent = C.columns;
+    document.getElementById('radius-input').value = C.radius;
+    document.getElementById('radius-val').textContent = C.radius + 'px';
+
+    // Colours
+    document.getElementById('brand-col').value = C.brand;
+    document.getElementById('brand-hex').value = (C.brand || '').toUpperCase();
+    document.getElementById('accent-col').value = C.accent;
+    document.getElementById('accent-hex').value = (C.accent || '').toUpperCase();
+
+    // Heading
+    document.getElementById('eyebrow').value = C.eyebrow || '';
+    document.getElementById('title').value = C.title || '';
+    document.getElementById('subtitle').value = C.subtitle || '';
+    toggleSwitch('show-heading', !!C.showHeading);
+
+    // Settings
+    toggleSwitch('show-filter', !!C.showDepartmentFilter);
+    toggleSwitch('show-contacts', !!C.showContactIcons);
+    toggleSwitch('autoplay', !!C.carouselAutoplay);
+    document.getElementById('interval').value = parseInt(C.carouselInterval, 10) || 5;
+
+    // Members
+    renderMemberList();
+  }
+
+  function toggleSwitch(id, on) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('is-on', !!on);
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function renderMemberList() {
+    const wrap = document.getElementById('member-list');
+    const count = document.getElementById('member-count');
+    count.textContent = '(' + C.members.length + ')';
+    if (!C.members.length) {
+      wrap.innerHTML = '<div class="empty">No team members yet. Click "Add member" to start.</div>';
+      return;
+    }
+    wrap.innerHTML = C.members.map((m, i) => {
+      const isOpen = i === openMemberIdx;
+      const photo = (m.photo || '').trim();
+      const avatar = photo
+        ? `<div class="member-avatar"><img src="${escAttr(photo)}" alt=""></div>`
+        : `<div class="member-avatar" style="background:${escAttr(avatarColor(m.name))}">${escAttr(initials(m.name))}</div>`;
+      return `
+        <div class="member-item ${isOpen ? 'is-open' : ''}" data-idx="${i}">
+          <div class="member-head" data-action="toggle">
+            ${avatar}
+            <div class="member-summary">
+              <div class="member-summary-name">${escAttr(m.name || 'Unnamed')}${m.featured ? ' <span class="badge-dot" title="Featured"></span>' : ''}</div>
+              <div class="member-summary-role">${escAttr(m.role || '—')}</div>
+            </div>
+            <div class="member-actions">
+              <button type="button" class="icon-btn" data-action="up" title="Move up" ${i === 0 ? 'disabled' : ''} aria-label="Move up">${SVG.up}</button>
+              <button type="button" class="icon-btn" data-action="down" title="Move down" ${i === C.members.length - 1 ? 'disabled' : ''} aria-label="Move down">${SVG.down}</button>
+              <button type="button" class="icon-btn" data-action="dup" title="Duplicate" aria-label="Duplicate">${SVG.dup}</button>
+              <button type="button" class="icon-btn icon-btn--danger" data-action="del" title="Delete" aria-label="Delete">${SVG.del}</button>
+            </div>
+            <span class="member-head-chev">${SVG.chev}</span>
+          </div>
+          ${isOpen ? renderMemberBody(m, i) : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderMemberBody(m, i) {
+    return `
+      <div class="member-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Name</label>
+            <input type="text" class="input" data-mfield="name" data-idx="${i}" value="${escAttr(m.name)}" maxlength="80">
+          </div>
+          <div class="field">
+            <label class="field-label">Role / title</label>
+            <input type="text" class="input" data-mfield="role" data-idx="${i}" value="${escAttr(m.role)}" maxlength="80">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Department</label>
+            <input type="text" class="input" data-mfield="department" data-idx="${i}" value="${escAttr(m.department)}" maxlength="40" placeholder="e.g. Cruise">
+          </div>
+          <div class="field">
+            <label class="field-label">Years of experience</label>
+            <input type="number" class="input" data-mfield="years" data-idx="${i}" value="${escAttr(m.years)}" min="0" max="80">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Photo URL</label>
+          <input type="url" class="input" data-mfield="photo" data-idx="${i}" value="${escAttr(m.photo)}" placeholder="https://…">
+          <span class="field-hint">Leave blank to use initials avatar.</span>
+        </div>
+        <div class="field">
+          <label class="field-label">Bio</label>
+          <textarea class="textarea" data-mfield="bio" data-idx="${i}" maxlength="320" rows="3">${escAttr(m.bio)}</textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">Specialisms</label>
+          <input type="text" class="input" data-mfield="specialisms" data-idx="${i}" value="${escAttr(m.specialisms)}" placeholder="Honeymoons, Italy, Cruise">
+          <span class="field-hint">Comma-separated. Shown as chips. First 4 displayed.</span>
+        </div>
+        <div class="field">
+          <label class="field-label">Languages</label>
+          <input type="text" class="input" data-mfield="languages" data-idx="${i}" value="${escAttr(m.languages)}" placeholder="English, Italian">
+          <span class="field-hint">Comma-separated.</span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">LinkedIn URL</label>
+            <input type="url" class="input" data-mfield="linkedin" data-idx="${i}" value="${escAttr(m.linkedin)}" placeholder="https://linkedin.com/in/…">
+          </div>
+          <div class="field">
+            <label class="field-label">Email</label>
+            <input type="email" class="input" data-mfield="email" data-idx="${i}" value="${escAttr(m.email)}">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Phone</label>
+            <input type="tel" class="input" data-mfield="phone" data-idx="${i}" value="${escAttr(m.phone)}">
+          </div>
+          <div class="field">
+            <label class="field-label">WhatsApp</label>
+            <input type="tel" class="input" data-mfield="whatsapp" data-idx="${i}" value="${escAttr(m.whatsapp)}" placeholder="+44…">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Instagram URL</label>
+            <input type="url" class="input" data-mfield="instagram" data-idx="${i}" value="${escAttr(m.instagram)}">
+          </div>
+          <div class="field">
+            <label class="field-label">Facebook URL</label>
+            <input type="url" class="input" data-mfield="facebook" data-idx="${i}" value="${escAttr(m.facebook)}">
+          </div>
+        </div>
+        <div class="switch-row">
+          <span class="switch-row-label">Featured (default Spotlight selection)</span>
+          <button type="button" class="switch ${m.featured ? 'is-on' : ''}" data-mfield="featured" data-idx="${i}" aria-pressed="${m.featured ? 'true' : 'false'}"></button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─── Wire up controls ───
+
+  // Layout picker
+  document.getElementById('layout-picker').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-layout]');
+    if (!btn) return;
+    const layout = btn.getAttribute('data-layout');
+    if (layout === C.layout) return;
+    C.layout = layout;
+    syncUIFromState();
+    shell.markDirty();
+    render();
+  });
+
+  // Sliders
+  document.getElementById('cols-input').addEventListener('input', (e) => {
+    C.columns = parseInt(e.target.value, 10) || 3;
+    document.getElementById('cols-val').textContent = C.columns;
+    shell.markDirty();
+    render();
+  });
+  document.getElementById('radius-input').addEventListener('input', (e) => {
+    C.radius = parseInt(e.target.value, 10) || 16;
+    document.getElementById('radius-val').textContent = C.radius + 'px';
+    shell.markDirty();
+    render();
+  });
+
+  // Colour pickers — keep colour input and hex input in sync
+  function wireColour(idCol, idHex, key) {
+    const col = document.getElementById(idCol);
+    const hex = document.getElementById(idHex);
+    col.addEventListener('input', () => {
+      const v = col.value.toUpperCase();
+      hex.value = v;
+      C[key] = v;
+      shell.markDirty();
+      render();
+    });
+    hex.addEventListener('input', () => {
+      const v = (hex.value || '').trim().toUpperCase();
+      if (/^#[0-9A-F]{6}$/.test(v)) {
+        col.value = v;
+        C[key] = v;
+        shell.markDirty();
+        render();
+      }
+    });
+  }
+  wireColour('brand-col', 'brand-hex', 'brand');
+  wireColour('accent-col', 'accent-hex', 'accent');
+
+  // Heading inputs
+  function wireText(id, key) {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      C[key] = el.value;
+      shell.markDirty();
+      render();
+    });
+  }
+  wireText('eyebrow', 'eyebrow');
+  wireText('title', 'title');
+  wireText('subtitle', 'subtitle');
+
+  // Switches
+  function wireSwitch(id, key) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', () => {
+      C[key] = !C[key];
+      toggleSwitch(id, !!C[key]);
+      shell.markDirty();
+      render();
+    });
+  }
+  wireSwitch('show-heading', 'showHeading');
+  wireSwitch('show-filter', 'showDepartmentFilter');
+  wireSwitch('show-contacts', 'showContactIcons');
+  wireSwitch('autoplay', 'carouselAutoplay');
+
+  document.getElementById('interval').addEventListener('input', (e) => {
+    const v = Math.max(2, Math.min(30, parseInt(e.target.value, 10) || 5));
+    C.carouselInterval = v * 1000;
+    shell.markDirty();
+    render();
+  });
+
+  // Member list — actions + edits (event delegation)
+  const memberListEl = document.getElementById('member-list');
+  memberListEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    e.stopPropagation();
+    const item = btn.closest('[data-idx]');
+    if (!item) return;
+    const idx = parseInt(item.getAttribute('data-idx'), 10);
+    const action = btn.getAttribute('data-action');
+
+    if (action === 'toggle') {
+      // Don't toggle when clicking an action button or switch inside body
+      if (e.target.closest('.member-actions') || e.target.closest('.member-body')) return;
+      openMemberIdx = (openMemberIdx === idx) ? -1 : idx;
+      renderMemberList();
+    } else if (action === 'up' && idx > 0) {
+      const tmp = C.members[idx - 1];
+      C.members[idx - 1] = C.members[idx];
+      C.members[idx] = tmp;
+      if (openMemberIdx === idx) openMemberIdx = idx - 1;
+      else if (openMemberIdx === idx - 1) openMemberIdx = idx;
+      shell.markDirty();
+      renderMemberList();
+      render();
+    } else if (action === 'down' && idx < C.members.length - 1) {
+      const tmp = C.members[idx + 1];
+      C.members[idx + 1] = C.members[idx];
+      C.members[idx] = tmp;
+      if (openMemberIdx === idx) openMemberIdx = idx + 1;
+      else if (openMemberIdx === idx + 1) openMemberIdx = idx;
+      shell.markDirty();
+      renderMemberList();
+      render();
+    } else if (action === 'dup') {
+      const copy = JSON.parse(JSON.stringify(C.members[idx]));
+      copy.name = (copy.name || 'Unnamed') + ' (copy)';
+      copy.featured = false;
+      C.members.splice(idx + 1, 0, copy);
+      openMemberIdx = idx + 1;
+      shell.markDirty();
+      renderMemberList();
+      render();
+    } else if (action === 'del') {
+      if (!confirm('Delete this team member?')) return;
+      C.members.splice(idx, 1);
+      if (openMemberIdx === idx) openMemberIdx = -1;
+      else if (openMemberIdx > idx) openMemberIdx--;
+      shell.markDirty();
+      renderMemberList();
+      render();
+    }
+  });
+
+  // Toggle switch inside member body (featured flag) — needs separate listener
+  // because click delegation above stops propagation for [data-action].
+  memberListEl.addEventListener('click', (e) => {
+    const sw = e.target.closest('.switch[data-mfield]');
+    if (!sw) return;
+    const idx = parseInt(sw.getAttribute('data-idx'), 10);
+    const field = sw.getAttribute('data-mfield');
+    if (!C.members[idx]) return;
+    C.members[idx][field] = !C.members[idx][field];
+    sw.classList.toggle('is-on', !!C.members[idx][field]);
+    sw.setAttribute('aria-pressed', C.members[idx][field] ? 'true' : 'false');
+    shell.markDirty();
+    renderMemberList();
+    render();
+  });
+
+  // Field inputs inside member body
+  memberListEl.addEventListener('input', (e) => {
+    const el = e.target.closest('[data-mfield]');
+    if (!el || el.tagName === 'BUTTON') return;
+    const idx = parseInt(el.getAttribute('data-idx'), 10);
+    const field = el.getAttribute('data-mfield');
+    if (!C.members[idx]) return;
+    let val = el.value;
+    if (field === 'years') {
+      val = el.value === '' ? '' : Math.max(0, Math.min(80, parseInt(el.value, 10) || 0));
+    }
+    C.members[idx][field] = val;
+    // Update header summary live for name/role
+    if (field === 'name' || field === 'role') {
+      const head = el.closest('.member-item').querySelector('.member-summary');
+      if (field === 'name') head.querySelector('.member-summary-name').textContent = val || 'Unnamed';
+      if (field === 'role') head.querySelector('.member-summary-role').textContent = val || '—';
+    }
+    shell.markDirty();
+    render();
+  });
+
+  // Add member
+  document.getElementById('add-member').addEventListener('click', () => {
+    C.members.push(makeMember({ name: 'New member' }));
+    openMemberIdx = C.members.length - 1;
+    shell.markDirty();
+    renderMemberList();
+    render();
+  });
+
+  // Name input
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  // Boot — wait for shell auth to resolve, then load if there's an ?id=
+  document.addEventListener('DOMContentLoaded', () => {
+    syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initTeamTour === 'function') window.initTeamTour(); }
+        else render();
+      });
+    } else {
+      if (tgse.isLoggedIn()) loadFromUrl();
+      else render();
+    }
+  });
+</script>
+
+</body>
+</html>

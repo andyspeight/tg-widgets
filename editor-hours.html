@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Opening Hours Editor — Travelgenix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/editor-shell.css" />
+<style>
+  [hidden] { display: none !important; }
+
+  .field { margin-bottom: 14px; }
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--tgse-text-3, #94A3B8);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .field-help {
+    font-size: 11px;
+    color: var(--tgse-text-3, #94A3B8);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .input, .select, .textarea {
+    appearance: none;
+    width: 100%;
+    background: var(--tgse-bg, #FFFFFF);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--tgse-text, #0F172A);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    font-family: inherit;
+  }
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--tgse-accent, #0891B2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgse-accent, #0891B2) 18%, transparent);
+  }
+
+  .layout-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .layout-card {
+    appearance: none;
+    background: var(--tgse-bg, #FFFFFF);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 10px;
+    padding: 10px 8px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .layout-card:hover { border-color: var(--tgse-text-3, #94A3B8); }
+  .layout-card.is-active {
+    border-color: var(--tgse-accent, #0891B2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgse-accent, #0891B2) 18%, transparent);
+  }
+  .layout-thumb {
+    height: 38px;
+    background: var(--tgse-bg-2, #F8FAFC);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .layout-thumb .thumb-card-shape {
+    position: absolute; left: 6px; right: 6px; top: 4px; bottom: 4px;
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px;
+  }
+  .layout-thumb .thumb-card-shape::before {
+    content: ''; position: absolute; left: 4px; right: 4px; top: 4px;
+    height: 4px; background: #94A3B8; border-radius: 1px;
+  }
+  .layout-thumb .thumb-card-shape::after {
+    content: ''; position: absolute; left: 4px; right: 4px; top: 12px; bottom: 4px;
+    background: repeating-linear-gradient(180deg, #E2E8F0 0 1px, transparent 1px 4px);
+  }
+  .layout-thumb .thumb-list-shape {
+    position: absolute; left: 6px; right: 6px; top: 6px;
+    background: repeating-linear-gradient(180deg, #94A3B8 0 1px, transparent 1px 5px);
+    height: 26px;
+  }
+  .layout-thumb .thumb-pill-shape {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 70%; height: 14px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 999px;
+  }
+  .layout-thumb .thumb-pill-shape::before {
+    content: ''; position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
+    width: 6px; height: 6px; background: #16A34A; border-radius: 50%;
+  }
+  .layout-name { font-size: 12px; font-weight: 600; }
+  .layout-desc { font-size: 10px; color: var(--tgse-text-3, #94A3B8); margin-top: 2px; }
+
+  .seg {
+    display: grid;
+    background: var(--tgse-bg-2, #F8FAFC);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg button {
+    appearance: none; border: 0; background: transparent;
+    font: inherit; font-size: 12px; font-weight: 500;
+    padding: 6px 8px; border-radius: 6px; cursor: pointer;
+    color: var(--tgse-text-2, #475569);
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .seg button.is-active {
+    background: var(--tgse-bg, #FFFFFF);
+    color: var(--tgse-text, #0F172A);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+  .seg-2 { grid-template-columns: 1fr 1fr; }
+  .seg-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+  }
+  .toggle-row + .toggle-row { border-top: 1px solid var(--tgse-border-light, #F1F5F9); }
+  .toggle-label { font-size: 13px; font-weight: 500; color: var(--tgse-text, #0F172A); }
+  .toggle-help { font-size: 11px; color: var(--tgse-text-3, #94A3B8); margin-top: 2px; }
+  .toggle {
+    appearance: none;
+    width: 36px; height: 20px;
+    background: var(--tgse-bg-2, #F8FAFC);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: ''; position: absolute;
+    top: 1px; left: 1px;
+    width: 16px; height: 16px;
+    background: var(--tgse-text-3, #94A3B8);
+    border-radius: 50%;
+    transition: all 0.15s ease;
+  }
+  .toggle.is-on { background: var(--tgse-accent, #0891B2); border-color: var(--tgse-accent, #0891B2); }
+  .toggle.is-on::after { left: 17px; background: #FFFFFF; }
+
+  .colour-row { display: flex; gap: 8px; align-items: center; }
+  .colour-row input[type="color"] {
+    width: 36px; height: 36px;
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    cursor: pointer; background: transparent; padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .slider-wrap { display: flex; align-items: center; gap: 10px; }
+  .slider {
+    -webkit-appearance: none; appearance: none;
+    flex: 1; height: 4px;
+    background: var(--tgse-border, #E2E8F0);
+    border-radius: 999px; outline: none;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px;
+    background: var(--tgse-accent, #0891B2);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .slider::-moz-range-thumb {
+    width: 16px; height: 16px;
+    background: var(--tgse-accent, #0891B2);
+    border-radius: 50%;
+    border: none; cursor: pointer;
+  }
+  .slider-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 500;
+    color: var(--tgse-text-2, #475569);
+    min-width: 36px; text-align: right;
+  }
+
+  /* Hours grid: per-day with multi-slot support */
+  .hours-grid { display: flex; flex-direction: column; gap: 10px; }
+  .hours-day {
+    background: var(--tgse-bg-2, #F8FAFC);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .hours-day-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .hours-day-name {
+    font-size: 13px; font-weight: 600;
+    color: var(--tgse-text, #0F172A);
+  }
+  .hours-day-actions { display: flex; gap: 6px; }
+  .hours-day-actions button {
+    appearance: none; border: 1px solid var(--tgse-border, #E2E8F0);
+    background: var(--tgse-bg, #FFFFFF);
+    color: var(--tgse-text-2, #475569);
+    font-family: inherit;
+    font-size: 11px; font-weight: 500;
+    padding: 3px 8px; border-radius: 6px; cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .hours-day-actions button:hover {
+    border-color: var(--tgse-accent, #0891B2);
+    color: var(--tgse-accent, #0891B2);
+  }
+  .hours-day[data-closed="true"] .hours-day-name { color: var(--tgse-text-3, #94A3B8); }
+  .hours-slot {
+    display: grid; grid-template-columns: 1fr 8px 1fr 28px;
+    gap: 6px; align-items: center;
+    margin-bottom: 5px;
+  }
+  .hours-slot:last-child { margin-bottom: 0; }
+  .hours-slot .input { padding: 5px 8px; font-size: 12px; text-align: center; }
+  .hours-slot-sep {
+    font-size: 11px; color: var(--tgse-text-3, #94A3B8); text-align: center;
+  }
+  .hours-slot button.slot-remove {
+    appearance: none; border: 0;
+    background: transparent;
+    color: var(--tgse-text-3, #94A3B8);
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px;
+    font-family: inherit;
+  }
+  .hours-slot button.slot-remove:hover { color: #EF4444; }
+  .hours-day-closed-msg {
+    font-size: 12px;
+    color: var(--tgse-text-3, #94A3B8);
+    font-style: italic;
+    padding: 4px 0 2px;
+  }
+
+  /* Holidays list */
+  .holidays-list { display: flex; flex-direction: column; gap: 6px; }
+  .holiday-row {
+    background: var(--tgse-bg, #FFFFFF);
+    border: 1px solid var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 28px;
+    gap: 6px;
+    align-items: center;
+  }
+  .holiday-row .input { padding: 5px 8px; font-size: 12px; }
+  .holiday-row button {
+    appearance: none; border: 0;
+    background: transparent;
+    color: var(--tgse-text-3, #94A3B8);
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px;
+    font-family: inherit;
+  }
+  .holiday-row button:hover { color: #EF4444; }
+  .holiday-add {
+    appearance: none;
+    width: 100%;
+    background: var(--tgse-bg, #FFFFFF);
+    border: 1px dashed var(--tgse-border, #E2E8F0);
+    border-radius: 8px;
+    padding: 8px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tgse-text-2, #475569);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    margin-top: 6px;
+  }
+  .holiday-add:hover {
+    border-color: var(--tgse-accent, #0891B2);
+    color: var(--tgse-accent, #0891B2);
+  }
+
+  /* Preview */
+  .preview-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #F8FAFC;
+    border-radius: 12px;
+    transform: translateZ(0);
+  }
+  .preview-page {
+    padding: 56px 48px;
+    height: 100%;
+    overflow-y: auto;
+    color: #0F172A;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .preview-page > .widget-mount {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    justify-content: center;
+  }
+  .preview-stage[data-theme="dark"] { background: #0F172A; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app" id="app" hidden>
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Opening Hours</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled hours widget" maxlength="80" />
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button class="tab is-active" data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button class="tab" data-tab="hours" role="tab" aria-selected="false">Hours</button>
+      <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+      <div class="sb-body">
+
+        <!-- ===== DESIGN TAB ===== -->
+        <div class="tgse-panel is-active" data-tab="design">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+              <span class="tgse-section-label">Layout</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="layout-grid" id="layoutGrid">
+                <button class="layout-card is-active" data-layout="card" type="button">
+                  <div class="layout-thumb"><div class="thumb-card-shape"></div></div>
+                  <div class="layout-name">Card</div>
+                  <div class="layout-desc">Boxed schedule</div>
+                </button>
+                <button class="layout-card" data-layout="list" type="button">
+                  <div class="layout-thumb"><div class="thumb-list-shape"></div></div>
+                  <div class="layout-name">List</div>
+                  <div class="layout-desc">Plain rows</div>
+                </button>
+                <button class="layout-card" data-layout="compact" type="button">
+                  <div class="layout-thumb"><div class="thumb-pill-shape"></div></div>
+                  <div class="layout-name">Compact</div>
+                  <div class="layout-desc">One-line status</div>
+                </button>
+              </div>
+
+              <div class="field" id="compactStyleField" style="margin-top:14px;display:none">
+                <span class="field-label">Compact style</span>
+                <div class="seg seg-2" id="compactStyleSeg">
+                  <button data-cstyle="pill" type="button" class="is-active">Pill</button>
+                  <button data-cstyle="inline" type="button">Inline text</button>
+                </div>
+              </div>
+
+              <div class="toggle-row" id="compactExpandableField" style="display:none;margin-top:10px;border-top:1px solid var(--tgse-border-light, #F1F5F9);padding-top:14px">
+                <div>
+                  <div class="toggle-label">Allow click to expand</div>
+                  <div class="toggle-help">Clicking the pill pops out the full schedule underneath. Click outside or press Escape to close.</div>
+                </div>
+                <button class="toggle is-on" id="toggleCompactExpandable" type="button" aria-pressed="true"></button>
+              </div>
+
+              <div class="field">
+                <span class="field-label">Title</span>
+                <input class="input" id="titleInput" maxlength="60" placeholder="Opening hours" />
+                <div class="field-help">Leave blank to hide the title.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+              <span class="tgse-section-label">Style</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Accent colour (phone link)</span>
+                <div class="colour-row">
+                  <input type="color" id="colAccent" value="#1B2B5B" />
+                  <input type="text" class="input" id="colAccentHex" value="#1B2B5B" maxlength="7" />
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">Card corner radius</span>
+                <div class="slider-wrap">
+                  <input type="range" min="0" max="24" step="2" id="radiusSlider" class="slider" value="14" />
+                  <span class="slider-val" id="radiusVal">14px</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">Day labels</span>
+                <div class="seg seg-2" id="dayLabelsSeg">
+                  <button data-dlabel="full" type="button" class="is-active">Full (Monday)</button>
+                  <button data-dlabel="short" type="button">Short (Mon)</button>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">Time format</span>
+                <div class="seg seg-2" id="timeFormatSeg">
+                  <button data-tfmt="12" type="button" class="is-active">12-hour (5pm)</button>
+                  <button data-tfmt="24" type="button">24-hour (17:00)</button>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">Week starts on</span>
+                <div class="seg seg-2" id="weekStartSeg">
+                  <button data-wstart="mon" type="button" class="is-active">Monday</button>
+                  <button data-wstart="sun" type="button">Sunday</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              <span class="tgse-section-label">Typography</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Font family</span>
+                <div id="fontPickerMount"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== HOURS TAB ===== -->
+        <div class="tgse-panel" data-tab="hours">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span class="tgse-section-label">Weekly hours</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="hours-grid" id="hoursGrid"></div>
+              <div class="field-help" style="margin-top:12px">Click "+ Add slot" to add a split shift (e.g. 9-12 then 14-17:30). Click "Mark closed" to close the day.</div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span class="tgse-section-label">Holiday overrides</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field-help" style="margin-bottom:10px">Specific dates that override the weekly schedule. Christmas Day, Bank Holidays, etc.</div>
+              <div class="holidays-list" id="holidaysList"></div>
+              <button class="holiday-add" id="holidayAdd" type="button">+ Add holiday</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SETTINGS TAB ===== -->
+        <div class="tgse-panel" data-tab="settings">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+              <span class="tgse-section-label">Live status</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Show "Open now / Closed" pill</div>
+                  <div class="toggle-help">Live status indicator that updates every minute.</div>
+                </div>
+                <button class="toggle is-on" id="toggleStatus" type="button" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Highlight today's row</div>
+                  <div class="toggle-help">Bold today's schedule so visitors can see at a glance.</div>
+                </div>
+                <button class="toggle is-on" id="toggleHighlight" type="button" aria-pressed="true"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span class="tgse-section-label">Phone number</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Phone number</span>
+                <input class="input" id="phoneInput" placeholder="+44 1202 555 0123" maxlength="32" />
+                <div class="field-help">Becomes a click-to-call link below the schedule. Leave blank to hide.</div>
+              </div>
+              <div class="field">
+                <span class="field-label">Phone display label (optional)</span>
+                <input class="input" id="phoneLabelInput" placeholder="Call us: 01202 555 0123" maxlength="80" />
+                <div class="field-help">Override the displayed text. Leave blank to use the number itself.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span class="tgse-section-label">Timezone note</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Show timezone label</div>
+                  <div class="toggle-help">Useful if you have international clients.</div>
+                </div>
+                <button class="toggle" id="toggleTz" type="button" aria-pressed="false"></button>
+              </div>
+              <div class="field" id="tzLabelField" style="display:none;margin-top:8px">
+                <span class="field-label">Timezone label text</span>
+                <input class="input" id="tzLabelInput" placeholder="Times shown in UK time" maxlength="80" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div class="preview-stage" id="previewStage" data-theme="light">
+          <div class="preview-page">
+            <div class="widget-mount" id="widgetMount"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-hours.js"></script>
+
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-hours.js"></script>
+
+<script>
+  function defaultsCfg() {
+    return {
+      layout: 'card',
+      compactStyle: 'pill',
+      compactExpandable: true,
+      title: 'Opening hours',
+      showStatus: true,
+      highlightToday: true,
+      timeFormat: '12',
+      dayLabels: 'full',
+      startWeekOn: 'mon',
+      showTimezoneNote: false,
+      timezoneLabel: 'Times shown in UK time',
+      hours: {
+        mon: [['09:00', '17:30']],
+        tue: [['09:00', '17:30']],
+        wed: [['09:00', '17:30']],
+        thu: [['09:00', '17:30']],
+        fri: [['09:00', '17:30']],
+        sat: [['10:00', '14:00']],
+        sun: [],
+      },
+      holidays: [],
+      phone: '',
+      phoneLabel: '',
+      fontFamily: 'Inter',
+      theme: { mode: 'light', accent: '#1B2B5B', radius: 14 },
+    };
+  }
+
+  let C = defaultsCfg();
+  let inst = null;
+
+  const shell = tgse.init({
+    widgetType: 'Opening Hours',
+    widgetTag: 'hours',
+    scriptFile: 'widget-hours.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; render(); },
+    onAIBuild: () => { tgse.toast('AI builder coming soon', 'ok'); },
+    onTemplates: () => { tgse.toast('Templates coming soon', 'ok'); },
+    onThemeToggle: (isDark) => {
+      C.theme.mode = isDark ? 'dark' : 'light';
+      const stage = document.getElementById('previewStage');
+      if (stage) stage.setAttribute('data-theme', C.theme.mode);
+      render();
+    },
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initHoursTour === 'function') window.initHoursTour(); },
+  });
+
+  function tearDown() {
+    if (inst && typeof inst.destroy === 'function') {
+      try { inst.destroy(); } catch (e) {}
+    }
+    inst = null;
+    const old = document.getElementById('widgetMount');
+    if (old) {
+      const fresh = document.createElement('div');
+      fresh.id = 'widgetMount';
+      fresh.className = old.className;
+      old.replaceWith(fresh);
+    }
+  }
+
+  function render() {
+    if (!window.TGHoursWidget) return;
+    tearDown();
+    const host = document.getElementById('widgetMount');
+    if (!host) return;
+    const widgetEl = document.createElement('div');
+    widgetEl.setAttribute('data-tg-widget', 'hours');
+    host.appendChild(widgetEl);
+    inst = new window.TGHoursWidget(widgetEl, C);
+  }
+
+  function dirty() { shell.markDirty(); }
+
+  function escAttr(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // Show/hide the "Allow click to expand" toggle.
+  // Only meaningful when layout=compact AND compactStyle=pill (inline text doesn't expand).
+  function syncCompactExpandableVisibility() {
+    const show = (C.layout === 'compact') && (C.compactStyle === 'pill');
+    document.getElementById('compactExpandableField').style.display = show ? '' : 'none';
+  }
+
+  // Layout
+  document.getElementById('layoutGrid').addEventListener('click', (e) => {
+    const card = e.target.closest('[data-layout]');
+    if (!card) return;
+    document.querySelectorAll('#layoutGrid .layout-card').forEach(c => c.classList.toggle('is-active', c === card));
+    C.layout = card.getAttribute('data-layout');
+    document.getElementById('compactStyleField').style.display = (C.layout === 'compact') ? '' : 'none';
+    syncCompactExpandableVisibility();
+    dirty(); render();
+  });
+
+  document.getElementById('compactStyleSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-cstyle]');
+    if (!b) return;
+    document.querySelectorAll('#compactStyleSeg button').forEach(x => x.classList.toggle('is-active', x === b));
+    C.compactStyle = b.getAttribute('data-cstyle');
+    syncCompactExpandableVisibility();
+    dirty(); render();
+  });
+
+  // Day labels / time format / week start segmented controls
+  function bindSeg(segId, key, attr) {
+    document.getElementById(segId).addEventListener('click', (e) => {
+      const b = e.target.closest('[data-' + attr + ']');
+      if (!b) return;
+      document.querySelectorAll('#' + segId + ' button').forEach(x => x.classList.toggle('is-active', x === b));
+      C[key] = b.getAttribute('data-' + attr);
+      dirty(); render();
+    });
+  }
+  bindSeg('dayLabelsSeg', 'dayLabels', 'dlabel');
+  bindSeg('timeFormatSeg', 'timeFormat', 'tfmt');
+  bindSeg('weekStartSeg', 'startWeekOn', 'wstart');
+
+  // Accent colour
+  function syncAccent(v) {
+    const hex = (v || '').match(/^#[0-9a-fA-F]{6}$/) ? v : '#1B2B5B';
+    document.getElementById('colAccent').value = hex;
+    document.getElementById('colAccentHex').value = hex;
+    C.theme.accent = hex;
+  }
+  document.getElementById('colAccent').addEventListener('input', (e) => { syncAccent(e.target.value); dirty(); render(); });
+  document.getElementById('colAccentHex').addEventListener('input', (e) => {
+    const v = e.target.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) { syncAccent(v); dirty(); render(); }
+  });
+
+  // Radius
+  document.getElementById('radiusSlider').addEventListener('input', (e) => {
+    const v = Number(e.target.value);
+    document.getElementById('radiusVal').textContent = v + 'px';
+    C.theme.radius = v;
+    dirty(); render();
+  });
+
+  // Toggles
+  function bindToggle(id, onChange) {
+    const t = document.getElementById(id);
+    t.addEventListener('click', () => {
+      const isOn = !t.classList.contains('is-on');
+      t.classList.toggle('is-on', isOn);
+      t.setAttribute('aria-pressed', String(isOn));
+      onChange(isOn);
+      dirty(); render();
+    });
+  }
+  bindToggle('toggleStatus', (on) => { C.showStatus = on; });
+  bindToggle('toggleHighlight', (on) => { C.highlightToday = on; });
+  bindToggle('toggleCompactExpandable', (on) => { C.compactExpandable = on; });
+  bindToggle('toggleTz', (on) => {
+    C.showTimezoneNote = on;
+    document.getElementById('tzLabelField').style.display = on ? '' : 'none';
+  });
+
+  // Text inputs
+  function bindInput(id, key) {
+    document.getElementById(id).addEventListener('input', (e) => {
+      C[key] = e.target.value;
+      dirty(); render();
+    });
+  }
+  bindInput('titleInput', 'title');
+  bindInput('phoneInput', 'phone');
+  bindInput('phoneLabelInput', 'phoneLabel');
+  bindInput('tzLabelInput', 'timezoneLabel');
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  // ============= Hours grid =============
+  const DAY_DEFS = [
+    ['mon', 'Monday'], ['tue', 'Tuesday'], ['wed', 'Wednesday'],
+    ['thu', 'Thursday'], ['fri', 'Friday'], ['sat', 'Saturday'], ['sun', 'Sunday'],
+  ];
+
+  function renderHours() {
+    const grid = document.getElementById('hoursGrid');
+    grid.innerHTML = '';
+
+    DAY_DEFS.forEach(([key, label]) => {
+      const slots = Array.isArray(C.hours[key]) ? C.hours[key] : [];
+      const isClosed = !slots.length;
+      const dayEl = document.createElement('div');
+      dayEl.className = 'hours-day';
+      dayEl.setAttribute('data-closed', isClosed);
+
+      let slotsHtml = '';
+      if (isClosed) {
+        slotsHtml = '<div class="hours-day-closed-msg">Closed all day</div>';
+      } else {
+        slotsHtml = slots.map((slot, idx) => `
+          <div class="hours-slot">
+            <input class="input" data-day="${key}" data-idx="${idx}" data-pos="0" type="time" value="${escAttr(slot[0])}" />
+            <span class="hours-slot-sep">–</span>
+            <input class="input" data-day="${key}" data-idx="${idx}" data-pos="1" type="time" value="${escAttr(slot[1])}" />
+            <button class="slot-remove" data-day="${key}" data-idx="${idx}" type="button" title="Remove slot" aria-label="Remove slot">×</button>
+          </div>
+        `).join('');
+      }
+
+      dayEl.innerHTML = `
+        <div class="hours-day-head">
+          <div class="hours-day-name">${label}</div>
+          <div class="hours-day-actions">
+            ${isClosed
+              ? `<button data-day="${key}" data-action="open" type="button">Mark open</button>`
+              : `<button data-day="${key}" data-action="add-slot" type="button">+ Add slot</button>
+                 <button data-day="${key}" data-action="close" type="button">Mark closed</button>`}
+          </div>
+        </div>
+        ${slotsHtml}
+      `;
+      grid.appendChild(dayEl);
+    });
+
+    // Wire time inputs
+    grid.querySelectorAll('input[data-day][data-pos]').forEach(el => {
+      el.addEventListener('input', () => {
+        const day = el.getAttribute('data-day');
+        const idx = Number(el.getAttribute('data-idx'));
+        const pos = Number(el.getAttribute('data-pos'));
+        if (!Array.isArray(C.hours[day]) || !C.hours[day][idx]) return;
+        const v = el.value || (pos === 0 ? '09:00' : '17:30');
+        C.hours[day][idx][pos] = v;
+        dirty(); render();
+      });
+    });
+
+    // Wire slot remove
+    grid.querySelectorAll('.slot-remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.getAttribute('data-day');
+        const idx = Number(btn.getAttribute('data-idx'));
+        if (!Array.isArray(C.hours[day])) return;
+        C.hours[day].splice(idx, 1);
+        dirty(); renderHours(); render();
+      });
+    });
+
+    // Wire day actions
+    grid.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.getAttribute('data-day');
+        const action = btn.getAttribute('data-action');
+        if (action === 'close') {
+          C.hours[day] = [];
+        } else if (action === 'open') {
+          C.hours[day] = [['09:00', '17:30']];
+        } else if (action === 'add-slot') {
+          if (!Array.isArray(C.hours[day])) C.hours[day] = [];
+          C.hours[day].push(['14:00', '17:30']);
+        }
+        dirty(); renderHours(); render();
+      });
+    });
+  }
+
+  // ============= Holidays =============
+  function renderHolidays() {
+    const list = document.getElementById('holidaysList');
+    list.innerHTML = '';
+    const holidays = Array.isArray(C.holidays) ? C.holidays : [];
+    holidays.forEach((h, idx) => {
+      const row = document.createElement('div');
+      row.className = 'holiday-row';
+      row.innerHTML = `
+        <input class="input" data-h="${idx}" data-field="date" type="date" value="${escAttr(h.date || '')}" />
+        <input class="input" data-h="${idx}" data-field="label" placeholder="Christmas Day" value="${escAttr(h.label || '')}" maxlength="60" />
+        <button data-h="${idx}" data-action="remove" type="button" title="Remove" aria-label="Remove">×</button>
+      `;
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll('input[data-field]').forEach(el => {
+      el.addEventListener('input', () => {
+        const idx = Number(el.getAttribute('data-h'));
+        const field = el.getAttribute('data-field');
+        if (!C.holidays[idx]) C.holidays[idx] = { date: '', label: '', closed: true };
+        C.holidays[idx][field] = el.value;
+        // For now, all holiday overrides default to closed=true
+        C.holidays[idx].closed = true;
+        dirty(); render();
+      });
+    });
+
+    list.querySelectorAll('[data-action="remove"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-h'));
+        C.holidays.splice(idx, 1);
+        dirty(); renderHolidays(); render();
+      });
+    });
+  }
+
+  document.getElementById('holidayAdd').addEventListener('click', () => {
+    if (!Array.isArray(C.holidays)) C.holidays = [];
+    if (C.holidays.length >= 30) {
+      tgse.toast('Maximum 30 holidays', 'err');
+      return;
+    }
+    // Default to today's date
+    const today = new Date();
+    const dateStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    C.holidays.push({ date: dateStr, label: '', closed: true });
+    dirty(); renderHolidays(); render();
+  });
+
+  // ============= Sync UI from C =============
+  function syncUI() {
+    // Layout
+    document.querySelectorAll('#layoutGrid .layout-card').forEach(c => {
+      c.classList.toggle('is-active', c.getAttribute('data-layout') === C.layout);
+    });
+    document.getElementById('compactStyleField').style.display = (C.layout === 'compact') ? '' : 'none';
+
+    // Compact style
+    document.querySelectorAll('#compactStyleSeg button').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-cstyle') === C.compactStyle);
+    });
+
+    // Compact expandable toggle visibility
+    syncCompactExpandableVisibility();
+
+    // Day labels / time fmt / week start
+    document.querySelectorAll('#dayLabelsSeg button').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-dlabel') === C.dayLabels);
+    });
+    document.querySelectorAll('#timeFormatSeg button').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-tfmt') === C.timeFormat);
+    });
+    document.querySelectorAll('#weekStartSeg button').forEach(b => {
+      b.classList.toggle('is-active', b.getAttribute('data-wstart') === C.startWeekOn);
+    });
+
+    syncAccent(C.theme.accent);
+    document.getElementById('radiusSlider').value = C.theme.radius;
+    document.getElementById('radiusVal').textContent = C.theme.radius + 'px';
+
+    [
+      ['toggleStatus', C.showStatus],
+      ['toggleHighlight', C.highlightToday],
+      ['toggleCompactExpandable', C.compactExpandable !== false],
+      ['toggleTz', C.showTimezoneNote],
+    ].forEach(([id, on]) => {
+      const t = document.getElementById(id);
+      t.classList.toggle('is-on', !!on);
+      t.setAttribute('aria-pressed', String(!!on));
+    });
+
+    document.getElementById('tzLabelField').style.display = C.showTimezoneNote ? '' : 'none';
+
+    document.getElementById('titleInput').value = C.title || '';
+    document.getElementById('phoneInput').value = C.phone || '';
+    document.getElementById('phoneLabelInput').value = C.phoneLabel || '';
+    document.getElementById('tzLabelInput').value = C.timezoneLabel || '';
+
+    document.getElementById('previewStage').setAttribute('data-theme', C.theme.mode || 'light');
+    renderHours();
+    renderHolidays();
+  }
+
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) {
+      document.getElementById('app').removeAttribute('hidden');
+      syncUI(); render();
+      return;
+    }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && d.config) {
+          const def = defaultsCfg();
+          C = Object.assign({}, def, d.config);
+          C.theme = Object.assign({}, def.theme, d.config.theme || {});
+          C.hours = Object.assign({}, def.hours, d.config.hours || {});
+          if (!Array.isArray(C.holidays)) C.holidays = [];
+        }
+        if (d && d.name) document.getElementById('name-input').value = d.name;
+        document.getElementById('app').removeAttribute('hidden');
+        syncUI(); render();
+      })
+      .catch(() => {
+        document.getElementById('app').removeAttribute('hidden');
+        syncUI(); render();
+        tgse.toast('Failed to load widget', 'err');
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // v1.1 shell — wait for cookie auth to resolve before deciding whether
+    // to load the saved widget or show the default state. Without this,
+    // a signed-in user lands during the cookie-check window, isLoggedIn()
+    // returns false, and the default state is rendered instead of their
+    // saved widget.
+    const boot = () => {
+      if (tgse.isLoggedIn()) {
+        loadFromUrl();
+        if (typeof window.initHoursTour === 'function') window.initHoursTour();
+      } else {
+        document.getElementById('app').removeAttribute('hidden');
+        syncUI(); render();
+      }
+    };
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(boot);
+    } else {
+      boot();
+    }
+  });
+</script>
+
+</body>
+</html>
