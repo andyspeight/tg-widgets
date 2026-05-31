@@ -22,12 +22,14 @@
  *  TGS_SHARED_SECRET        shared secret the extension must send
  * Env optional:
  *  TGS_MODEL                model id (default below)
+ *  TGS_MAX_TOKENS           output token ceiling (default 8000)
  *  TGS_ALLOWED_ORIGIN       exact extension origin, e.g. chrome-extension://abc...
  *  UPSTASH_REDIS_REST_URL   } if both present, per-secret rate limiting is enabled
  *  UPSTASH_REDIS_REST_TOKEN }
  */
 
 const MODEL = process.env.TGS_MODEL || "claude-sonnet-4-6";
+const MAX_TOKENS = parseInt(process.env.TGS_MAX_TOKENS || "8000", 10);
 const MAX_SLICE_BYTES = 400 * 1024;   // 400KB total slice payload
 const RATE_MAX = 30;                  // requests
 const RATE_WINDOW_S = 60;             // per minute, per secret
@@ -88,7 +90,7 @@ export default async function handler(req, res) {
   const system = buildSystemPrompt();
   const userMsg = buildUserMessage({ html, css: css || "", meta: meta || {} });
 
-  let raw;
+  let raw, stopReason;
   try {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -99,7 +101,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 4000,
+        max_tokens: MAX_TOKENS,
         system,
         messages: [{ role: "user", content: userMsg }]
       })
@@ -110,19 +112,25 @@ export default async function handler(req, res) {
       return fail(res, 502, "The emit step failed upstream. Try again.");
     }
     const data = await r.json();
+    stopReason = data.stop_reason;
     raw = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
   } catch (e) {
     console.error("[slice-emit] anthropic fetch threw", String(e));
     return fail(res, 502, "Could not reach the emit step.");
   }
 
-  // --- Parse the model's JSON ---
+  // --- Parse the model's JSON (tolerant of fences / stray text) ---
   let sheet;
   try {
-    sheet = JSON.parse(stripFences(raw));
+    sheet = extractJson(raw);
   } catch {
-    console.error("[slice-emit] model returned non-JSON", raw.slice(0, 300));
-    return fail(res, 502, "The emit step returned an unexpected format. Try again.");
+    const truncated = stopReason === "max_tokens";
+    console.error("[slice-emit] JSON parse failed", {
+      stopReason, truncated, head: raw.slice(0, 200), tail: raw.slice(-200)
+    });
+    return fail(res, 502, truncated
+      ? "That component was too big to build in one pass. Try selecting a smaller part of it."
+      : "The emit step returned an unexpected format. Try again.");
   }
 
   // --- Validate + sanitise the build sheet ---
@@ -146,6 +154,10 @@ function buildSystemPrompt() {
     "YOUR JOB: produce a reusable Duda widget that reproduces the STRUCTURE and LAYOUT of the captured",
     "component, restyled to the Travelgenix brand, with the editable parts exposed as Duda inputs.",
     "",
+    "KEEP IT TIGHT. Produce clean, minimal HTML and CSS, no redundant declarations, no vendor prefixes",
+    "unless essential, no commentary. The whole build sheet must fit comfortably in the response. Favour",
+    "concise CSS (shorthands, sensible defaults) over exhaustive longhand.",
+    "",
     "DEBRAND BY DEFAULT. This is inspiration, never a clone:",
     "- Remove the source site's brand name, logo, trademarked wording and any specific copy.",
     "- Replace text with sensible neutral travel-industry placeholder copy a UK travel agent could use.",
@@ -164,7 +176,7 @@ function buildSystemPrompt() {
     "- Text the author would change (headings, body, button labels) -> content inputs (Text / Large Text).",
     "- Repeated items (cards, list rows, logos) -> a single List input with sub-inputs, looped with",
     "  {{#each}}. Seed it with 3-4 realistic default items so the widget looks finished on drop.",
-    "- Links -> Link input, output with the {{#custom_link var}}…{{/custom_link}} helper.",
+    "- Links -> Link input, output with the {{#custom_link var}}...{{/custom_link}} helper.",
     "- Images -> Image input.",
     "- Fonts/colours/spacing the author may tune -> design inputs mapped to a selector.",
     "",
@@ -220,6 +232,24 @@ function buildUserMessage({ html, css, meta }) {
   ].join("\n");
 }
 
+/* ----------------- JSON extraction ----------------- */
+
+function stripFences(s) {
+  return String(s).replace(/```(?:json)?/gi, "").trim();
+}
+
+// Tolerant: strip fences and parse; if that fails, slice first { to last } and retry.
+function extractJson(raw) {
+  const cleaned = stripFences(raw);
+  try { return JSON.parse(cleaned); } catch (_) {}
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    return JSON.parse(cleaned.slice(start, end + 1)); // may throw -> caller handles
+  }
+  throw new Error("no json object found");
+}
+
 /* ----------------- validation + sanitising ----------------- */
 
 const SCRIPT_RE = /<\s*script[\s\S]*?<\s*\/\s*script\s*>/gi;
@@ -244,20 +274,16 @@ function validateSheet(sheet) {
       return { ok: false, error: "missing " + k };
     }
   }
-  // Force a safe class prefix shape.
   if (!/^[a-z][a-z0-9]*-$/.test(sheet.classPrefix)) {
     sheet.classPrefix = "tgs-";
   }
-  // Scrub anything executable out of the HTML the model produced.
   sheet.html = scrub(sheet.html);
-  // CSS: drop @import and url(javascript:) just in case.
   const cssScrub = (c) => (typeof c === "string"
     ? c.replace(/@import[^;]+;/gi, "").replace(/url\(\s*javascript:[^)]*\)/gi, "none")
     : "");
   sheet.cssDesktop = cssScrub(sheet.cssDesktop);
   sheet.cssMobile = cssScrub(sheet.cssMobile);
 
-  // Normalise arrays so the client never has to guard.
   sheet.contentInputs = Array.isArray(sheet.contentInputs) ? sheet.contentInputs : [];
   sheet.designInputs = Array.isArray(sheet.designInputs) ? sheet.designInputs : [];
   sheet.notes = Array.isArray(sheet.notes) ? sheet.notes : [];
@@ -271,10 +297,6 @@ function validateSheet(sheet) {
 
 function fail(res, code, message) {
   return res.status(code).json({ ok: false, error: message });
-}
-
-function stripFences(s) {
-  return String(s).replace(/```(?:json)?/gi, "").trim();
 }
 
 function clientIp(req) {
@@ -299,7 +321,6 @@ async function rateLimit(key) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return true; // no limiter configured -> allow (secret is the gate)
-  // INCR then set expiry on first hit. Upstash REST pipeline.
   const r = await fetch(`${url}/pipeline`, {
     method: "POST",
     headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
