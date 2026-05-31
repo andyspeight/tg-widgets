@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Screenshot to Code · Travelgenix</title>
+<style>
+  :root{
+    --tg-primary:#1B2B5B; --tg-primary-light:#2A3F7A; --tg-primary-dark:#111D3E;
+    --tg-accent:#00B4D8; --tg-accent-light:#48CAE4; --tg-accent-dark:#0096B7;
+    --tg-success:#10B981; --tg-warning:#F59E0B; --tg-error:#EF4444;
+    --tg-bg-primary:#FFFFFF; --tg-bg-secondary:#F8FAFC; --tg-bg-tertiary:#F1F5F9;
+    --tg-border:#E2E8F0; --tg-border-light:#F1F5F9;
+    --tg-text-primary:#0F172A; --tg-text-secondary:#475569; --tg-text-tertiary:#94A3B8; --tg-text-inverse:#FFFFFF;
+    --tg-font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --tg-mono:'JetBrains Mono','SF Mono','Fira Code',ui-monospace,monospace;
+    --tg-radius-sm:8px; --tg-radius:12px; --tg-radius-lg:18px;
+    --tg-shadow-sm:0 1px 2px rgba(15,23,42,.06);
+    --tg-shadow:0 4px 16px rgba(15,23,42,.08);
+    --tg-shadow-lg:0 16px 40px rgba(15,23,42,.14);
+  }
+  [data-theme="dark"]{
+    --tg-bg-primary:#0F172A; --tg-bg-secondary:#1E293B; --tg-bg-tertiary:#334155;
+    --tg-border:#334155; --tg-border-light:#1E293B;
+    --tg-text-primary:#F8FAFC; --tg-text-secondary:#CBD5E1; --tg-text-tertiary:#64748B;
+    --tg-shadow:0 4px 16px rgba(0,0,0,.4); --tg-shadow-lg:0 16px 40px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--tg-font); background:var(--tg-bg-secondary); color:var(--tg-text-primary);
+    line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  a{color:var(--tg-accent-dark);}
+  [data-theme="dark"] a{color:var(--tg-accent-light);}
+
+  /* Header */
+  .hdr{
+    display:flex; align-items:center; gap:14px; padding:16px 24px;
+    background:var(--tg-bg-primary); border-bottom:1px solid var(--tg-border);
+    position:sticky; top:0; z-index:10;
+  }
+  .hdr .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--tg-primary),var(--tg-accent));flex:0 0 auto;}
+  .hdr h1{font-size:17px;font-weight:700;margin:0;letter-spacing:-.01em;}
+  .hdr .sub{font-size:12px;color:var(--tg-text-tertiary);margin-left:2px;}
+  .hdr .spacer{flex:1;}
+  .pill{font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--tg-bg-tertiary);color:var(--tg-text-secondary);}
+  .icon-btn{
+    width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid var(--tg-border);border-radius:var(--tg-radius-sm);background:var(--tg-bg-primary);
+    color:var(--tg-text-secondary);cursor:pointer;font-size:16px;
+  }
+  .icon-btn:hover{border-color:var(--tg-accent);color:var(--tg-accent-dark);}
+  .icon-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--tg-accent) 35%,transparent);outline-offset:2px;}
+
+  /* Layout */
+  .wrap{max-width:1440px;margin:0 auto;padding:24px;}
+  .banner{
+    display:flex;gap:10px;align-items:flex-start;background:var(--tg-bg-primary);
+    border:1px solid var(--tg-border);border-left:4px solid var(--tg-accent);
+    border-radius:var(--tg-radius);padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--tg-text-secondary);
+  }
+  .banner b{color:var(--tg-text-primary);}
+  .grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:24px;align-items:start;}
+  @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+
+  .card{background:var(--tg-bg-primary);border:1px solid var(--tg-border);border-radius:var(--tg-radius-lg);box-shadow:var(--tg-shadow-sm);}
+  .card h2{font-size:14px;font-weight:700;margin:0;padding:16px 18px;border-bottom:1px solid var(--tg-border-light);}
+  .card .body{padding:18px;}
+
+  /* Dropzone */
+  .drop{
+    border:2px dashed var(--tg-border);border-radius:var(--tg-radius);
+    padding:28px 18px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;
+    color:var(--tg-text-secondary);
+  }
+  .drop:hover,.drop.drag{border-color:var(--tg-accent);background:color-mix(in srgb,var(--tg-accent) 6%,transparent);}
+  .drop:focus-visible{outline:3px solid color-mix(in srgb,var(--tg-accent) 35%,transparent);outline-offset:2px;}
+  .drop .big{font-size:14px;color:var(--tg-text-primary);font-weight:600;margin-bottom:4px;}
+  .drop .small{font-size:12px;color:var(--tg-text-tertiary);}
+  .thumb{margin-top:14px;display:none;}
+  .thumb img{max-width:100%;max-height:240px;border-radius:var(--tg-radius-sm);border:1px solid var(--tg-border);}
+  .thumb .meta{font-size:12px;color:var(--tg-text-tertiary);margin-top:8px;}
+
+  label.fld{display:block;font-size:12px;font-weight:600;color:var(--tg-text-secondary);margin:18px 0 6px;}
+  textarea{
+    width:100%;min-height:78px;resize:vertical;font-family:inherit;font-size:13px;line-height:1.5;
+    padding:10px 12px;border:1px solid var(--tg-border);border-radius:var(--tg-radius-sm);
+    background:var(--tg-bg-secondary);color:var(--tg-text-primary);
+  }
+  textarea:focus-visible{outline:none;border-color:var(--tg-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--tg-accent) 18%,transparent);}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:44px;padding:0 20px;border:none;border-radius:var(--tg-radius-sm);
+    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:18px;
+    background:var(--tg-accent);color:#fff;transition:background .15s,opacity .15s;
+  }
+  .btn:hover{background:var(--tg-accent-dark);}
+  .btn:focus-visible{outline:3px solid color-mix(in srgb,var(--tg-accent) 35%,transparent);outline-offset:2px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn.secondary{background:var(--tg-bg-tertiary);color:var(--tg-text-primary);width:auto;margin:0;min-height:38px;padding:0 14px;font-size:13px;}
+  .btn.secondary:hover{background:var(--tg-border);}
+
+  /* Preview pane */
+  .preview-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--tg-border-light);}
+  .preview-head .spacer{flex:1;}
+  .seg{display:inline-flex;border:1px solid var(--tg-border);border-radius:var(--tg-radius-sm);overflow:hidden;}
+  .seg button{border:none;background:var(--tg-bg-primary);color:var(--tg-text-secondary);font:inherit;font-size:12px;font-weight:600;padding:7px 12px;cursor:pointer;min-height:34px;}
+  .seg button[aria-pressed="true"]{background:var(--tg-primary);color:#fff;}
+  .stage{min-height:420px;background:repeating-conic-gradient(var(--tg-bg-tertiary) 0% 25%,var(--tg-bg-secondary) 0% 50%) 50%/20px 20px;border-radius:0 0 var(--tg-radius-lg) var(--tg-radius-lg);overflow:hidden;}
+  .stage iframe{width:100%;min-height:420px;border:0;background:#fff;display:block;}
+  pre.code{margin:0;max-height:520px;overflow:auto;padding:16px;font-family:var(--tg-mono);font-size:12px;line-height:1.55;background:var(--tg-bg-secondary);color:var(--tg-text-primary);white-space:pre-wrap;word-break:break-word;border-radius:0 0 var(--tg-radius-lg) var(--tg-radius-lg);}
+  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;color:var(--tg-text-tertiary);font-size:13px;text-align:center;padding:24px;gap:8px;}
+  .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--tg-border);border-top-color:var(--tg-accent);animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion:reduce){.spinner{animation:none;}}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--tg-text-primary);color:var(--tg-bg-primary);font-size:13px;font-weight:600;padding:10px 18px;border-radius:999px;box-shadow:var(--tg-shadow-lg);opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;}
+  .toast.show{opacity:1;}
+  .err{color:var(--tg-error);font-size:13px;font-weight:600;margin-top:14px;display:none;}
+  .hide{display:none !important;}
+</style>
+</head>
+<body>
+  <header class="hdr">
+    <div class="mark" aria-hidden="true"></div>
+    <div>
+      <h1>Screenshot&nbsp;to&nbsp;Code <span class="sub">Stage 1</span></h1>
+    </div>
+    <div class="spacer"></div>
+    <span class="pill" title="Internal accelerator">Internal tool</span>
+    <button class="icon-btn" id="themeBtn" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
+  </header>
+
+  <main class="wrap">
+    <div class="banner">
+      <span aria-hidden="true">✦</span>
+      <div><b>This is an approximate first draft, not a pixel-perfect clone.</b> The model reads your image, works out the structure, and rebuilds it in Travelgenix tokens. Treat the result as a strong starting point to refine in Duda. Logos, brand names and photography from the source are deliberately stripped.</div>
+    </div>
+
+    <div class="grid">
+      <!-- INPUT -->
+      <section class="card" aria-label="Upload">
+        <h2>1 · Upload a design</h2>
+        <div class="body">
+          <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose or drop an image">
+            <div class="big">Drop an image here</div>
+            <div class="small">or click to choose · PNG, JPEG, WebP or GIF</div>
+            <div class="thumb" id="thumb"><img id="thumbImg" alt="Selected design preview" /><div class="meta" id="thumbMeta"></div></div>
+          </div>
+          <input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hide" />
+
+          <label class="fld" for="notes">Notes for the model (optional)</label>
+          <textarea id="notes" maxlength="600" placeholder="e.g. 'This is a hero with a search bar. Keep it to one section.'"></textarea>
+
+          <button class="btn" id="gen" disabled>Generate block</button>
+          <div class="err" id="err" role="alert" aria-live="assertive"></div>
+        </div>
+      </section>
+
+      <!-- OUTPUT -->
+      <section class="card" aria-label="Result">
+        <div class="preview-head">
+          <div class="seg" role="group" aria-label="View mode">
+            <button id="tabPreview" aria-pressed="true">Preview</button>
+            <button id="tabCode" aria-pressed="false">Code</button>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn secondary hide" id="copyBlock">Copy paste-block</button>
+          <button class="btn secondary hide" id="copyHtml">HTML</button>
+          <button class="btn secondary hide" id="copyCss">CSS</button>
+        </div>
+        <div id="stage" class="stage">
+          <div class="empty" id="empty">Your generated block will appear here.</div>
+        </div>
+        <pre class="code hide" id="codeView"></pre>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var ENDPOINT = "/api/screenshot-to-code";
+  var MAX_EDGE = 1600;            // downscale long edge before upload (cost + 4.5MB body limit)
+  var current = null;            // { media_type, data }
+  var result = null;            // { html, css, scopeClass }
+
+  var $ = function(id){ return document.getElementById(id); };
+  function toast(msg){ var t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(function(){t.classList.remove("show");},2600); }
+  function showErr(msg){ var e=$("err"); e.textContent=msg; e.style.display="block"; }
+  function clearErr(){ $("err").style.display="none"; }
+
+  // ---- Theme ----
+  try{ var saved=localStorage.getItem("tg_s2c_theme"); if(saved) document.documentElement.setAttribute("data-theme",saved); }catch(e){}
+  $("themeBtn").addEventListener("click",function(){
+    var n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",n);
+    try{ localStorage.setItem("tg_s2c_theme",n); }catch(e){}
+  });
+
+  // ---- Session discovery (cookie flow OR legacy bearer) ----
+  function findBearer(){
+    var keys=["tg_session","tgSession","tg-session","tgse_session","session"];
+    function tok(v){ try{ var o=JSON.parse(v); if(o&&typeof o.token==="string") return o.token; }catch(e){} return null; }
+    for(var i=0;i<keys.length;i++){ var v=localStorage.getItem(keys[i]); if(v){ var t=tok(v); if(t) return t; } }
+    // fallback: scan for any stored object carrying a token
+    for(var j=0;j<localStorage.length;j++){ var k=localStorage.key(j); var t2=tok(localStorage.getItem(k)); if(t2) return t2; }
+    return null;
+  }
+
+  // ---- File handling + downscale ----
+  var drop=$("drop"), fileInput=$("file");
+  drop.addEventListener("click",function(){ fileInput.click(); });
+  drop.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fileInput.click(); } });
+  ["dragenter","dragover"].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.add("drag"); }); });
+  ["dragleave","drop"].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.remove("drag"); }); });
+  drop.addEventListener("drop",function(e){ var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) handleFile(f); });
+  fileInput.addEventListener("change",function(){ if(fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+  var ALLOWED=["image/png","image/jpeg","image/webp","image/gif"];
+  function handleFile(f){
+    clearErr();
+    if(ALLOWED.indexOf(f.type)===-1){ showErr("Unsupported type. Use PNG, JPEG, WebP or GIF."); return; }
+    var reader=new FileReader();
+    reader.onload=function(){ downscale(reader.result,f.type,f.name); };
+    reader.onerror=function(){ showErr("Could not read that file."); };
+    reader.readAsDataURL(f);
+  }
+
+  function downscale(dataUrl,type,name){
+    var img=new Image();
+    img.onload=function(){
+      var w=img.naturalWidth,h=img.naturalHeight;
+      var scale=Math.min(1, MAX_EDGE/Math.max(w,h));
+      var ow=Math.round(w*scale), oh=Math.round(h*scale);
+      var canvas=document.createElement("canvas"); canvas.width=ow; canvas.height=oh;
+      canvas.getContext("2d").drawImage(img,0,0,ow,oh);
+      // PNG keeps UI text crisp; if it gets heavy, fall back to JPEG.
+      var outType="image/png", url=canvas.toDataURL("image/png");
+      if(url.length>3.0*1024*1024){ outType="image/jpeg"; url=canvas.toDataURL("image/jpeg",0.92); }
+      current={ media_type:outType, data:url.replace(/^data:[^;]+;base64,/,"") };
+      var ti=$("thumbImg"); ti.src=url; $("thumb").style.display="block";
+      $("thumbMeta").textContent=ow+"×"+oh+" px · "+(scale<1?"downscaled from "+w+"×"+h:"original size");
+      $("gen").disabled=false;
+    };
+    img.onerror=function(){ showErr("That image could not be decoded."); };
+    img.src=dataUrl;
+  }
+
+  // ---- View tabs ----
+  var tabPreview=$("tabPreview"), tabCode=$("tabCode");
+  function setView(v){
+    var p=v==="preview";
+    tabPreview.setAttribute("aria-pressed",p?"true":"false");
+    tabCode.setAttribute("aria-pressed",p?"false":"true");
+    $("stage").classList.toggle("hide",!p);
+    $("codeView").classList.toggle("hide",p);
+  }
+  tabPreview.addEventListener("click",function(){ setView("preview"); });
+  tabCode.addEventListener("click",function(){ setView("code"); });
+
+  // ---- Generate ----
+  $("gen").addEventListener("click",generate);
+  function setLoading(on){
+    $("gen").disabled=on;
+    $("gen").textContent=on?"Generating…":"Generate block";
+    if(on){
+      var stage=$("stage"); stage.classList.remove("hide"); $("codeView").classList.add("hide");
+      stage.innerHTML='<div class="empty"><div class="spinner"></div><div>Reading the design and rebuilding it in Travelgenix tokens. This can take up to a minute.</div></div>';
+    }
+  }
+  function resetStage(){ $("stage").innerHTML='<div class="empty">Your generated block will appear here.</div>'; }
+
+  function buildPasteBlock(r){ return "<style>\n"+r.css+"\n</style>\n"+r.html; }
+
+  function render(r){
+    result=r;
+    // Sandboxed preview — no scripts, fully isolated from this page.
+    var theme=document.documentElement.getAttribute("data-theme")||"light";
+    var srcdoc='<!doctype html><html data-theme="'+theme+'"><head><meta charset="utf-8">'
+      +'<meta name="viewport" content="width=device-width,initial-scale=1">'
+      +'<style>html,body{margin:0;padding:16px;}</style>'
+      +'<style>'+r.css+'</style></head><body>'+r.html+'</body></html>';
+    var stage=$("stage");
+    stage.classList.remove("hide");
+    stage.innerHTML="";
+    var f=document.createElement("iframe");
+    f.setAttribute("sandbox","");                 // no allow-scripts, no allow-same-origin
+    f.setAttribute("title","Generated block preview");
+    f.srcdoc=srcdoc;
+    stage.appendChild(f);
+    $("codeView").textContent=buildPasteBlock(r);
+    ["copyBlock","copyHtml","copyCss"].forEach(function(id){ $(id).classList.remove("hide"); });
+    setView("preview");
+  }
+
+  function generate(){
+    if(!current){ return; }
+    clearErr(); setLoading(true);
+    ["copyBlock","copyHtml","copyCss"].forEach(function(id){ $(id).classList.add("hide"); });
+
+    var headers={ "Content-Type":"application/json" };
+    var bearer=findBearer(); if(bearer) headers["Authorization"]="Bearer "+bearer;
+
+    fetch(ENDPOINT,{
+      method:"POST",
+      headers:headers,
+      credentials:"include",      // carry tg_session cookie for the unified sign-in flow
+      body:JSON.stringify({ image:current, notes:$("notes").value })
+    }).then(function(res){
+      return res.json().then(function(j){ return { ok:res.ok, status:res.status, j:j }; });
+    }).then(function(r){
+      setLoading(false);
+      if(!r.ok){
+        if(r.status===401){ showErr("Please sign in to the widget dashboard first, then reload this page."); }
+        else { showErr(r.j&&r.j.error?r.j.error:"Something went wrong. Please try again."); }
+        resetStage();
+        $("gen").disabled=false;
+        return;
+      }
+      render(r.j);
+    }).catch(function(){
+      setLoading(false); $("gen").disabled=false;
+      showErr("Network error. Please try again.");
+    });
+  }
+
+  // ---- Copy ----
+  function copy(text,label){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ toast(label+" copied"); },function(){ fallbackCopy(text,label); });
+    } else { fallbackCopy(text,label); }
+  }
+  function fallbackCopy(text,label){
+    var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); toast(label+" copied"); }catch(e){ toast("Copy failed"); }
+    document.body.removeChild(ta);
+  }
+  $("copyBlock").addEventListener("click",function(){ if(result) copy(buildPasteBlock(result),"Paste-block"); });
+  $("copyHtml").addEventListener("click",function(){ if(result) copy(result.html,"HTML"); });
+  $("copyCss").addEventListener("click",function(){ if(result) copy(result.css,"CSS"); });
+})();
+</script>
+</body>
+</html>
