@@ -68,7 +68,7 @@
 
     /* the instruction callout, anchored beside the spotlight */
     .tgt-pop{
-      position:fixed; z-index:3003; width:312px; max-width:calc(100vw - 32px);
+      position:fixed; z-index:3003; width:312px; max-width:calc(100vw - 32px); box-sizing:border-box;
       background:var(--tgse-surface,#0e1726); color:var(--tgse-text,#e6edf6);
       border:1px solid var(--tgse-border,#1e293b); border-radius:14px;
       box-shadow:0 24px 60px -20px rgba(0,0,0,.6);
@@ -82,11 +82,11 @@
     .tgt-pop-body{ margin:0 0 13px; font-size:13px; line-height:1.55; color:var(--tgse-text-muted,#94a3b8); }
     .tgt-pop-body b{ color:var(--tgse-text,#e6edf6); font-weight:600; }
 
-    .tgt-pop-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .tgt-dots{ display:flex; gap:5px; align-items:center; }
+    .tgt-pop-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; row-gap:10px; }
+    .tgt-dots{ display:flex; gap:5px; align-items:center; flex:1 1 auto; min-width:0; flex-wrap:wrap; }
     .tgt-dot{ width:6px; height:6px; border-radius:50%; background:var(--tgse-border-strong,#334155); transition:all .25s; }
     .tgt-dot.is-on{ width:18px; border-radius:3px; background:var(--tgse-brand,#0891B2); }
-    .tgt-nav{ display:flex; gap:7px; align-items:center; }
+    .tgt-nav{ display:flex; gap:7px; align-items:center; flex:0 0 auto; margin-left:auto; }
     .tgt-btn{ font:inherit; font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid transparent; border-radius:9px; padding:7px 13px; transition:transform .1s, filter .14s, border-color .14s, color .14s; }
     .tgt-btn:active{ transform:translateY(1px); }
     .tgt-btn-ghost{ color:var(--tgse-text-muted,#94a3b8); background:transparent; border-color:var(--tgse-border,#1e293b); }
