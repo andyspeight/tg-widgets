@@ -43,9 +43,9 @@
       },
       {
         tab: 'content',
-        target: '#cta-orig-title',
+        target: function () { var el = document.querySelector('#cta-orig-title'); return el && el.closest ? el.closest('.tgse-section') : el; },
         title: 'Set your call to action',
-        body: 'Two sets of buttons here, one for airports people fly from and one for the airports they fly to. Type {{airportName}} or {{iata}} into a field and the widget drops the real name in for you.',
+        body: 'Two sets of buttons here, one for airports people fly from and one for the airports they fly to, each with a title, button label and link. Type {{airportName}} or {{iata}} into any field and the widget drops the real name in for you.',
         placement: 'right'
       },
       {
@@ -70,10 +70,15 @@
       },
       {
         tab: 'settings',
-        target: function () { return document.querySelector('.tgse-panel[data-tab="settings"] .tgse-section'); },
+        target: '#ap-show-group',
+        // Map options ships collapsed — open it so it sits under the spotlight too.
+        beforeShow: function () {
+          document.querySelectorAll('#ap-show-group .tgse-section').forEach(function (s) { s.classList.add('is-open'); });
+        },
         title: 'Choose what to show',
-        body: 'Switch the different blocks on or off, the overview, terminals and airlines, facilities, getting there, tips and more. Show as much or as little as suits your page, with map options just below.',
-        placement: 'right'
+        body: 'Sections to show switches the different blocks on or off, the overview, terminals and airlines, facilities, getting there, tips and more. Just below, Map options lets you turn the map itself on or off and show or hide the map attribution. Show as much or as little as suits your page.',
+        placement: 'right',
+        spotlightPadding: 6
       },
       {
         target: '.tgse-preview',
