@@ -61,9 +61,9 @@
       },
       {
         tab: 'settings',
-        target: '[data-toggle="search.enabled"]',
+        target: '[data-section="display"]',
         title: 'Set the behaviour',
-        body: 'Add a search box, show category icons, or give visitors an expand all button. Small touches that make a long FAQ much easier to use.',
+        body: 'More than one switch here. Turn the search bar on or off and set its placeholder text, show category icons next to each question, add an expand and collapse all button, and show last-updated timestamps. Flip whichever ones suit your FAQ before you move on.',
         placement: 'right'
       },
       {
