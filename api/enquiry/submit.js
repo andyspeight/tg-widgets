@@ -132,6 +132,7 @@ const SUB_FIELDS = {
   notes:             'fldEQAYJmYQlatoWq',
   contactConsent:    'fld4kh6AfKWuamN0i',
   marketingConsent:  'fldiHCjnbG8EaWj6Z',
+  flightsIncluded:   'fldokKF0PY9g2TI03',
   rawPayloadJSON:    'fld1LrJ05E51ieQaF',
   routingStatusJSON: 'fldwxrWm49MhddhUd',
   status:            'fld4C1iU7lC3BVmtU',
@@ -243,6 +244,9 @@ function validatePayload(raw) {
   }
   if (f.marketing_consent !== undefined && typeof f.marketing_consent !== 'boolean') {
     fail('fields.marketing_consent', 'Invalid consent flag.');
+  }
+  if (f.flights_included !== undefined && typeof f.flights_included !== 'boolean') {
+    fail('fields.flights_included', 'Invalid flights flag.');
   }
 
   // Destinations — accepts two shapes:
@@ -555,6 +559,9 @@ async function writeMasterRecord({ form, payload, meta, sequential, reference })
       [SUB_FIELDS.notes]:            cleanString(p.notes, 2000),
       [SUB_FIELDS.contactConsent]:   !!p.contact_consent,
       [SUB_FIELDS.marketingConsent]: !!p.marketing_consent,
+      // Flights Included — only the Enquiry Pro widget sends this. Legacy
+      // enquiry-form submissions omit it, leaving the column unset.
+      [SUB_FIELDS.flightsIncluded]:  p.flights_included === undefined ? null : !!p.flights_included,
       [SUB_FIELDS.rawPayloadJSON]:   JSON.stringify(payload).slice(0, 60000),
       [SUB_FIELDS.status]:           'New',
       // CRITICAL: Owner Email scopes submissions per agent in the inbox.
