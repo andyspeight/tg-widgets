@@ -59,10 +59,12 @@
       },
       {
         tab: 'design',
-        target: '#sb-colours',
-        title: 'Match your brand',
-        body: 'Set your colours so the popup looks like part of your site, not an ad that landed on top of it.',
-        placement: 'right'
+        target: '#pop-style-group',
+        beforeShow: function () { openSecByTitle('Colours'); openSecByTitle('Shape'); openSecByTitle('Typography'); },
+        title: 'Style it to match your site',
+        body: 'Everything that controls the look sits here. Colours set the popup to your brand, Shape adjusts how rounded the corners are, and Typography picks the font. Get these right and it reads as part of your site, not an ad that landed on top of it.',
+        placement: 'right',
+        spotlightPadding: 6
       },
       {
         tab: 'settings',
@@ -71,6 +73,22 @@
         body: 'Nobody likes the same popup on every visit. Show it once per session, or once every few days, so it stays a nudge and never a nuisance.',
         placement: 'right',
         beforeShow: function () { openSecByTitle('Frequency'); }
+      },
+      {
+        tab: 'settings',
+        target: function () { var b = document.querySelector('#sb-pages'); return b && b.closest ? b.closest('.sec') : b; },
+        title: 'Choose where it appears',
+        body: 'Page targeting lets you limit the popup to certain pages instead of the whole site. Show it everywhere, or only on specific paths — for example just your holidays pages, or one landing page running a campaign. Leave it open to show site-wide.',
+        placement: 'right',
+        beforeShow: function () { openSecByTitle('Page targeting'); }
+      },
+      {
+        tab: 'settings',
+        target: function () { var b = document.querySelector('#sb-devices'); return b && b.closest ? b.closest('.sec') : b; },
+        title: 'Desktop, mobile or both',
+        body: 'Devices controls who sees it by screen size. Keep it on for everyone, or show it only on desktop or only on mobile — handy when an offer or layout suits one better than the other.',
+        placement: 'right',
+        beforeShow: function () { openSecByTitle('Devices'); }
       },
       {
         target: '.tgse-preview',
