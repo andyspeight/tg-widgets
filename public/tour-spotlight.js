@@ -63,14 +63,14 @@
       },
       {
         tab: 'content',
-        target: '#ctaTitle',
+        target: function () { var el = document.querySelector('#ctaTitle'); return el && el.closest ? el.closest('.section') : el; },
         title: 'Set your call to action',
-        body: 'Give visitors a clear next step, a button to enquire, browse holidays or get in touch. There are smart variables too, type one in and the widget drops the real destination name in for you.',
+        body: 'Give visitors a clear next step. Set the title, button label and link here for a button to enquire, browse holidays or get in touch. There are smart variables too, type one in and the widget drops the real destination name in for you.',
         placement: 'right'
       },
       {
         tab: 'content',
-        target: '#hHighlights',
+        target: function () { var el = document.querySelector('#hHighlights'); return el && el.closest ? el.closest('.section') : el; },
         beforeShow: function () { openSectionOf('#hHighlights'); },
         title: 'Rename the sections',
         body: 'Your spotlight is built from blocks like highlights, quick facts, climate and events, all filled in automatically for your destination. Here you can rename any of those headings to match your own wording.',
@@ -78,24 +78,31 @@
       },
       {
         tab: 'design',
-        target: '#presets',
+        target: function () { var el = document.querySelector('#presets'); return el && el.closest ? el.closest('.section') : el; },
         title: 'Match your brand',
-        body: 'Tap a preset for an instant matching pair, or set the brand and accent colours by hand just above so the spotlight sits with the rest of your site.',
+        body: 'Set your brand and accent colours here, or tap a preset for an instant matching pair, so the spotlight sits comfortably with the rest of your site.',
         placement: 'right'
       },
       {
         tab: 'design',
-        target: '#radius',
+        target: '#spot-design-group',
+        // Climate chart ships collapsed — open both sections so they sit under the spotlight.
+        beforeShow: function () {
+          var g = document.querySelector('#spot-design-group');
+          if (g) g.querySelectorAll('.section').forEach(function (s) { s.setAttribute('data-open', 'true'); });
+        },
         title: 'Shape and type',
-        body: 'Round the corners to taste and choose a font here. You can also set whether temperatures show in Celsius or Fahrenheit.',
-        placement: 'right'
+        body: 'Round the corners to taste and choose a font in Shape and type. Just below, the Climate chart section sets whether temperatures show in Celsius or Fahrenheit by default, readers can still flip between the two on the widget itself.',
+        placement: 'right',
+        spotlightPadding: 6
       },
       {
         tab: 'settings',
-        target: '#sectionTogglesWrap',
+        target: '#spot-show-group',
         title: 'Choose what to show',
-        body: 'Switch the different blocks on or off, the highlights, quick facts, climate chart, events and more. Show as much or as little as suits the page.',
-        placement: 'right'
+        body: 'Section visibility switches the different blocks on or off, the highlights, quick facts, climate chart, events and more. Just below, Extras handles the finishing touches, the image attribution (required when showing Unsplash photos) and the "best time to visit" callout above the climate chart. Show as much or as little as suits the page.',
+        placement: 'right',
+        spotlightPadding: 6
       },
       {
         target: '.tgse-preview',
