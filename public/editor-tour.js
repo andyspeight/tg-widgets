@@ -76,9 +76,11 @@
       transition:opacity .22s ease, transform .26s cubic-bezier(.34,1.3,.5,1);
     }
     .tgt-pop.is-on{ opacity:1; transform:none; }
-    .tgt-pop-step{ font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--tgse-brand,#0891B2); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    .tgt-pop-step{ font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--tgse-brand,#0891B2); margin-bottom:8px; display:flex; align-items:center; gap:8px; cursor:move; }
     .tgt-pop-step::before{ content:''; width:16px; height:2px; border-radius:2px; background:var(--tgse-brand,#0891B2); }
-    .tgt-pop-title{ margin:0 0 6px; font-size:16.5px; font-weight:800; letter-spacing:-.01em; line-height:1.2; }
+    .tgt-pop-grip{ margin-left:auto; letter-spacing:2px; opacity:.45; font-weight:700; }
+    .tgt-pop-title{ margin:0 0 6px; font-size:16.5px; font-weight:800; letter-spacing:-.01em; line-height:1.2; cursor:move; }
+    .tgt-pop.tgt-dragging{ user-select:none; }
     .tgt-pop-body{ margin:0 0 13px; font-size:13px; line-height:1.55; color:var(--tgse-text-muted,#94a3b8); }
     .tgt-pop-body b{ color:var(--tgse-text,#e6edf6); font-weight:600; }
 
@@ -207,9 +209,41 @@
       document.body.appendChild(veil);
       document.body.appendChild(spot);
       document.body.appendChild(pop);
+      makeDraggable(pop);
       window.addEventListener('resize', onResize, { passive:true });
       window.addEventListener('scroll', onResize, { passive:true, capture:true });
       document.addEventListener('keydown', onKey);
+    }
+
+    // Let the user drag the callout out of the way if it covers what they want
+    // to see. Once moved, position() leaves it where they put it for this step;
+    // advancing to a new step repositions it fresh.
+    function makeDraggable(node){
+      var dragging = false, ox = 0, oy = 0;
+      node.addEventListener('pointerdown', function(e){
+        if (e.button !== 0) return;
+        if (e.target.closest('button, a, input, textarea, select, label')) return;
+        var rect = node.getBoundingClientRect();
+        node.style.transform = 'none';
+        node.style.left = rect.left + 'px';
+        node.style.top  = rect.top  + 'px';
+        ox = e.clientX - rect.left; oy = e.clientY - rect.top;
+        dragging = true; node._moved = true;
+        var ar = node.querySelector('.tgt-pop-arrow'); if (ar) ar.style.display = 'none';
+        node.classList.add('tgt-dragging');
+        try { node.setPointerCapture(e.pointerId); } catch (_) {}
+        e.preventDefault();
+      });
+      node.addEventListener('pointermove', function(e){
+        if (!dragging) return;
+        var pw = node.offsetWidth, ph = node.offsetHeight;
+        var nx = Math.max(4, Math.min(e.clientX - ox, window.innerWidth  - pw - 4));
+        var ny = Math.max(4, Math.min(e.clientY - oy, window.innerHeight - ph - 4));
+        node.style.left = nx + 'px'; node.style.top = ny + 'px';
+      });
+      function end(e){ if (!dragging) return; dragging = false; node.classList.remove('tgt-dragging'); try { node.releasePointerCapture(e.pointerId); } catch (_) {} }
+      node.addEventListener('pointerup', end);
+      node.addEventListener('pointercancel', end);
     }
 
     function onKey(e){
@@ -312,6 +346,7 @@
       veil.classList.add('is-on');
       spot.style.display='block';
       pop.style.display='block';
+      pop._moved = false; // fresh position for each step (until the user drags it)
       pop.dataset.placement = st.placement || 'auto';
       spot._padding = (st.spotlightPadding != null ? st.spotlightPadding : 8);
       spot._el = el;
@@ -320,7 +355,7 @@
       var isLast = i === steps.length - 1;
       pop.innerHTML =
         '<button type="button" class="tgt-skip" data-skip>Skip tour</button>'+
-        '<div class="tgt-pop-step">Step '+(i+1)+' of '+steps.length+'</div>'+
+        '<div class="tgt-pop-step">Step '+(i+1)+' of '+steps.length+'<span class="tgt-pop-grip" title="Drag to move">⠿</span></div>'+
         '<h3 class="tgt-pop-title">'+esc(st.title||'')+'</h3>'+
         '<p class="tgt-pop-body">'+(st.bodyHtml||esc(st.body||''))+'</p>'+
         '<div class="tgt-pop-foot">'+
@@ -346,6 +381,7 @@
 
     function position(){
       if (i<0 || !spot || !spot._el) return;
+      if (pop && pop._moved) return; // user has dragged the callout — leave it
       var el = spot._el;
       if (!el.isConnected){ return; }
       var r = el.getBoundingClientRect();
