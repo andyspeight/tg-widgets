@@ -42,9 +42,9 @@
       },
       {
         tab: 'design',
-        target: function () { var el = document.querySelector('input[data-bind="brandColor"]'); return el && el.closest ? el.closest('.cr') : el; },
+        target: function () { var el = document.querySelector('input[data-bind="brandColor"]'); return el && el.closest ? el.closest('.sec') : el; },
         title: 'Match your brand',
-        body: 'Set your brand and accent colours here, plus the page and card backgrounds. In a hurry? The presets just below set a matching pair in one click.',
+        body: 'This is where you colour your table. Click a colour swatch to open the picker, choose a shade and the preview updates straight away. There are five to set if you want, the brand and accent colours plus the page, card and text colours, so work through each swatch you want to change before you hit Next. In a hurry? Tap a preset just below for a matching brand and accent pair in one click.',
         placement: 'right'
       },
       {
