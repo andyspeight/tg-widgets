@@ -227,7 +227,12 @@
     .grid-row:last-child { border-bottom: none; }
     .grid-row:hover { background: var(--tg-bg-secondary); }
     .grid-row-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .grid-row-name { font-weight: 500; font-size: 14px; color: var(--tg-text-primary); }
+    .grid-row-name { font-weight: 500; font-size: 14px; color: var(--tg-text-primary); display: flex; align-items: center; gap: var(--space-2); }
+    .grid-row-inactive {
+      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+      padding: 2px 6px; border-radius: 3px;
+      background: var(--tg-bg-tertiary); color: var(--tg-text-secondary);
+    }
     .grid-row-code { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 11px; color: var(--tg-text-tertiary); }
     .grid-toggle {
       display: flex; align-items: center; justify-content: center;
@@ -550,7 +555,7 @@
             ${items.map((item) => `
               <div class="grid-row">
                 <div class="grid-row-meta">
-                  <div class="grid-row-name">${escapeHtml(item.productName)}</div>
+                  <div class="grid-row-name">${escapeHtml(item.productName)}${item.active === false ? '<span class="grid-row-inactive">Inactive</span>' : ''}</div>
                   <div class="grid-row-code">${escapeHtml(item.productCode)}</div>
                 </div>
                 <label class="grid-toggle included" title="Included by default for new clients on this package">
