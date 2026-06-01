@@ -48,6 +48,7 @@
         responseTime: 'one working day',
         branding: { buttonColour: brand.buttonColour, accentColour: brand.accentColour, theme: theme }
       });
+      window.__epWidget = widget;
     }
     document.querySelectorAll('.sw').forEach(function(s){
       s.onclick = function(){
@@ -65,6 +66,11 @@
       build();
     };
     build();
+  </script>
+  <script src="/tour-enquirypro.js"></script>
+  <script>
+    // Offer the guided product tour, driving the live widget above.
+    TGEnquiryProTour.mount({ getWidget: function () { return window.__epWidget; } });
   </script>
 </body>
 </html>
