@@ -2487,6 +2487,8 @@
        use this same pattern.
        ============================================================== -->
   <script src="/editor-shell.js"></script>
+  <!-- Guided tour engine (adds tgse.tour + tgse.tourLauncher). Used by Enquiry Pro mode. -->
+  <script src="/editor-tour.js"></script>
 
   <script>
   (function () {
@@ -2509,6 +2511,54 @@
         const n = document.getElementById('form-name-input'); if (n && !n.placeholder.includes('Pro')) n.placeholder = 'Untitled Enquiry Pro form';
         document.title = 'Enquiry Pro Editor — Travelgenix';
       } catch (e) {}
+    }
+    // Guided walkthrough for the Enquiry Pro editor. Uses the shared tour engine
+    // (tgse.tour / tgse.tourLauncher from editor-tour.js). Anchored to real
+    // editor controls; beforeShow switches the relevant palette tab.
+    var _proTourApi = null, _proTourBooted = false;
+    function setupProTour() {
+      if (!EP_IS_PRO || _proTourBooted) return;
+      if (!window.tgse || typeof window.tgse.tour !== 'function' || typeof window.tgse.tourLauncher !== 'function') return;
+      _proTourBooted = true;
+      function launch() {
+        if (_proTourApi && typeof _proTourApi.finish === 'function') { try { _proTourApi.finish(false); } catch (e) {} }
+        _proTourApi = window.tgse.tour({
+          id: 'enquirypro',
+          welcome: {
+            titleHtml: 'Welcome to <em>Enquiry Pro</em>',
+            body: "A quick tour of how to set up your multi-step enquiry form. It takes about a minute, and you can reopen it any time from the button in the corner."
+          },
+          done: {
+            titleHtml: "You're all set",
+            body: 'Set it Live from the Settings tab, then grab your embed code. Reopen this walkthrough any time from the button in the corner.'
+          },
+          steps: [
+            { target: '.canvas', placement: 'left',
+              title: 'Your live form',
+              body: 'This is exactly what your visitors see — a guided, multi-step enquiry. It updates instantly as you make changes.' },
+            { beforeShow: () => setPaletteTab('settings'),
+              target: '.palette-tab[data-palette-tab="settings"]', placement: 'right',
+              title: 'Make it yours',
+              body: 'Open Settings to edit your header, thank-you message, branding and anti-spam. Click any item and edit it on the right.' },
+            { beforeShow: () => setPaletteTab('routing'),
+              target: '.palette-tab[data-palette-tab="routing"]', placement: 'right',
+              title: 'Where your leads go',
+              body: 'Routing sends every enquiry where you need it — email, Google Sheets or your CRM. It lands in the same inbox as your classic forms.' },
+            { target: '#btn-embed', placement: 'bottom',
+              title: 'Get your embed code',
+              body: 'When you are happy, grab the one-line snippet and paste it onto your website.' },
+            { target: '#save-btn', placement: 'bottom',
+              title: 'Save to go live',
+              body: 'Save your form, then set it Live from the Settings tab. That is everything.' }
+          ]
+        });
+        _proTourApi.start();
+        return _proTourApi;
+      }
+      window.tgse.tourLauncher({ id: 'enquirypro', label: 'Show me how', onClick: launch });
+      if (!window.tgse.isTourDismissed || !window.tgse.isTourDismissed('enquirypro')) {
+        setTimeout(launch, 650);
+      }
     }
     const STORAGE_KEY     = 'tgw_session';               // shared with rest of suite
     const AUTOSAVE_DELAY  = 2000;                         // ms after last change
@@ -3093,6 +3143,9 @@
     }
 
     function togglePreview() {
+      // In Enquiry Pro the canvas always shows the live widget and the side
+      // panels must stay usable, so the global preview toggle is disabled.
+      if (EP_IS_PRO) return;
       state.previewMode = !state.previewMode;
       const body = $('#body');
       const stage = $('#canvas-stage');
@@ -7233,12 +7286,17 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       syncSaveBtn();
       bindKeyboard();
 
-      // Enquiry Pro: show the live multi-step widget straight away (header,
-      // thank-you, branding etc. are edited from the Settings tab + inspector).
+      // Enquiry Pro: show the live multi-step widget in the canvas WITHOUT
+      // entering full preview mode (which hides the inspector). We mark only
+      // the canvas stage as preview, so header/thank-you/branding/routing all
+      // stay fully editable from the Settings + Routing tabs and the inspector.
       if (EP_IS_PRO && !state.previewMode) {
-        togglePreview();
+        state.previewMode = true;
+        const st = $('#canvas-stage'); if (st) st.classList.add('is-preview');
+        updatePreview();
         const cl = $('#canvas-label'); if (cl) cl.textContent = 'Live preview';
         const ch = $('#canvas-hint'); if (ch) ch.textContent = 'Exactly what your visitors see — edit from the Settings tab';
+        setupProTour();
       }
 
       // Show the templates modal for NEW forms (no ?id= in URL).
