@@ -666,6 +666,21 @@ const WIDGETS = [
     scriptFile: 'widget-newsletter.js',
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
+  {
+    id: 'loader',
+    name: 'Loader',
+    airtableType: 'Loader',  // matches Airtable WidgetType singleSelect option
+    description: 'Animated loading graphics for any site — simple bars and spinners plus travel-themed loaders: a plane drawing its flight path, a spinning globe, hopping luggage, a route between map pins and a hot air balloon. Recolour everything, set speed, size, opacity and transparency, embed live or download as GIF, WebM, APNG, MP4 or a PNG sequence.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M21 12a9 9 0 1 1-6.219-8.56"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-loader',
+    demoUrl: '/demo-loader',
+    widgetTag: 'loader',
+    scriptFile: 'widget-loader.js',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
 ];
 
 const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
@@ -1260,6 +1275,19 @@ function loadMiniPreview(w) {
   const el = document.createElement('div');
   el.setAttribute('data-tg-widget', w.widgetTag);
   container.appendChild(el);
+
+  if (w.id === 'loader' && window.TGLoaderWidget) {
+    new window.TGLoaderWidget(el, {
+      template: 'plane-path',
+      size: 124,
+      speed: 1,
+      colors: { primary: w.color, secondary: '#1B2B5B', track: '#E2E8F0' },
+      background: 'transparent',
+      label: 'Finding your best deals',
+      labelColor: '#64748B',
+      labelSize: 13,
+    });
+  }
 
   if (w.id === 'pricing' && window.TGPricingWidget) {
     new window.TGPricingWidget(el, {
@@ -3115,5 +3143,6 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-newsletter.js"></script>
 <script src="/widget-contact.js"></script>
 <script src="/widget-team.js"></script>
+<script src="/widget-loader.js"></script>
 </body>
 </html>
