@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loader — Widget Editor | Travelgenix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Per-editor inner styles — built on the shell's --tgse-* tokens.
+     The shell styles the chrome (.tgse-*) and the .tgse-id-tile / .tgse-id-type;
+     everything below is editor-specific, matching the conventions in the live editors. */
+  [hidden] { display: none !important; }
+
+  .sb-body { padding: 4px 0 24px; }
+  .tgse-panel { display: none; }
+  .tgse-panel.is-active { display: block; }
+
+  .sec { border-bottom: 1px solid var(--tgse-border); }
+  .sec-head {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+    padding: 14px 16px; background: none; border: none; cursor: pointer; text-align: left; font: inherit;
+  }
+  .sec-title { font-size: 13px; font-weight: 600; color: var(--tgse-ink); letter-spacing: .01em; }
+  .sec-chev { width: 16px; height: 16px; color: var(--tgse-muted); transition: transform .18s ease; flex: none; }
+  .sec.is-open .sec-chev { transform: rotate(180deg); }
+  .sec-body { display: none; padding: 4px 16px 18px; }
+  .sec.is-open .sec-body { display: block; }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display: block; font-size: 13px; font-weight: 500; color: var(--tgse-ink-2); margin-bottom: 6px; }
+  .field-label .val { float: right; color: var(--tgse-ink-3); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .field-hint { font-size: 12px; color: var(--tgse-ink-3); margin-top: 6px; line-height: 1.45; }
+  .input {
+    width: 100%; height: 40px; padding: 0 12px; font-size: 14px; color: var(--tgse-ink);
+    background: var(--tgse-panel); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md);
+    outline: none; font-family: inherit;
+  }
+  .input:focus { border-color: var(--tgse-brand); box-shadow: 0 0 0 3px var(--tgse-brand-tint); }
+
+  .range { width: 100%; accent-color: var(--tgse-brand); height: 28px; cursor: pointer; }
+
+  .colour-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .colour-row > .field-label { flex: 1; margin: 0; }
+  .colour-swatch-wrap {
+    width: 38px; height: 38px; border-radius: var(--tgse-radius-md); overflow: hidden;
+    border: 1px solid var(--tgse-border-strong); position: relative; flex: none;
+  }
+  .colour-swatch-wrap input[type=color] {
+    position: absolute; inset: -8px; width: calc(100% + 16px); height: calc(100% + 16px);
+    border: none; padding: 0; background: none; cursor: pointer;
+  }
+  .colour-hex {
+    width: 96px; height: 38px; padding: 0 10px; font-size: 13px; font-variant-numeric: tabular-nums;
+    text-transform: uppercase; color: var(--tgse-ink); background: var(--tgse-panel);
+    border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); outline: none; flex: none;
+    font-family: var(--tgse-font-mono, 'JetBrains Mono', monospace);
+  }
+  .colour-hex:focus { border-color: var(--tgse-brand); box-shadow: 0 0 0 3px var(--tgse-brand-tint); }
+
+  .switch {
+    position: relative; width: 44px; height: 26px; border-radius: 999px; border: none;
+    background: var(--tgse-border-strong); cursor: pointer; flex: none; transition: background .18s ease;
+  }
+  .switch::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; box-shadow: var(--tgse-shadow-sm); transition: transform .18s ease;
+  }
+  .switch.is-on { background: var(--tgse-brand); }
+  .switch.is-on::after { transform: translateX(18px); }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  .tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tpl-tile {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px;
+    background: var(--tgse-panel-2); border: 1.5px solid var(--tgse-border); border-radius: var(--tgse-radius-lg);
+    cursor: pointer; transition: border-color .15s ease, background .15s ease; font: inherit;
+  }
+  .tpl-tile:hover { border-color: var(--tgse-border-strong); }
+  .tpl-tile.is-active { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .tpl-cv { display: block; }
+  .tpl-name { font-size: 11px; font-weight: 500; color: var(--tgse-ink-2); text-align: center; }
+
+  .exp-grid { display: grid; gap: 8px; }
+  .exp-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+    padding: 12px 14px; background: var(--tgse-panel-2); border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md); cursor: pointer; text-align: left; font: inherit;
+  }
+  .exp-item:hover { border-color: var(--tgse-brand); }
+  .exp-item .exp-fmt { font-size: 14px; font-weight: 600; color: var(--tgse-ink); }
+  .exp-item .exp-desc { font-size: 12px; color: var(--tgse-ink-3); margin-top: 2px; }
+  .exp-item .exp-go { font-size: 12px; font-weight: 600; color: var(--tgse-brand); flex: none; }
+  .exp-note {
+    margin-top: 14px; padding: 12px 14px; font-size: 12px; line-height: 1.5; color: var(--tgse-ink-2);
+    background: var(--tgse-brand-tint); border-radius: var(--tgse-radius-md);
+  }
+
+  .pv-stage {
+    width: 100%; min-height: 360px; display: flex; align-items: center; justify-content: center;
+    border-radius: var(--tgse-radius-lg);
+  }
+  .pv-stage.is-light { background: #F1F5F9; }
+  .pv-stage.is-dark { background: #0F172A; }
+  .pv-stage.is-checker {
+    background-color: #F8FAFC;
+    background-image:
+      linear-gradient(45deg, #E2E8F0 25%, transparent 25%),
+      linear-gradient(-45deg, #E2E8F0 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #E2E8F0 75%),
+      linear-gradient(-45deg, transparent 75%, #E2E8F0 75%);
+    background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  }
+
+  /* Presets overlay */
+  .ov { position: fixed; inset: 0; z-index: 200; }
+  .ov-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,.45); }
+  .ov-card {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: min(420px, 92vw); background: var(--tgse-panel); border-radius: var(--tgse-radius-lg);
+    box-shadow: var(--tgse-shadow-lg); padding: 20px; z-index: 1;
+  }
+  .ov-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .ov-title { font-size: 16px; font-weight: 700; color: var(--tgse-ink); }
+  .ov-close { background: none; border: none; cursor: pointer; color: var(--tgse-ink-3); font-size: 20px; line-height: 1; padding: 4px; }
+  .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .preset-tile {
+    display: flex; align-items: center; gap: 6px; padding: 10px 12px; cursor: pointer; font: inherit;
+    background: var(--tgse-panel-2); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md);
+  }
+  .preset-tile:hover { border-color: var(--tgse-brand); }
+  .preset-sw { width: 16px; height: 16px; border-radius: 4px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .preset-name { font-size: 13px; font-weight: 500; color: var(--tgse-ink); margin-left: 4px; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+  <aside class="tgse-sidebar">
+    <div class="tgse-crumb"><a href="/">&larr; All widgets</a></div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Loader</div>
+        <div class="tgse-id-type" id="topbarSub">New widget</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" type="button" title="Colour presets">Presets</button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled loader">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" type="button"><span id="save-label">Save</span></button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button class="tab is-active" data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      <button class="tab" data-tab="export" role="tab" aria-selected="false">Export</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+      <div class="sb-body">
+
+        <!-- DESIGN -->
+        <div class="tgse-panel is-active" data-tab="design">
+          <div class="sec is-open">
+            <button class="tgse-section-head sec-head" type="button"><span class="sec-title">Template</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body"><div class="tpl-grid" id="tplGrid"></div></div>
+          </div>
+
+          <div class="sec is-open">
+            <button class="tgse-section-head sec-head" type="button"><span class="sec-title">Colours</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="colour-row">
+                <span class="field-label">Primary</span>
+                <span class="colour-swatch-wrap"><input type="color" data-col="primary"></span>
+                <input type="text" class="colour-hex" data-hex="primary" maxlength="7" spellcheck="false">
+              </div>
+              <div class="colour-row">
+                <span class="field-label">Secondary</span>
+                <span class="colour-swatch-wrap"><input type="color" data-col="secondary"></span>
+                <input type="text" class="colour-hex" data-hex="secondary" maxlength="7" spellcheck="false">
+              </div>
+              <div class="colour-row">
+                <span class="field-label">Track</span>
+                <span class="colour-swatch-wrap"><input type="color" data-col="track"></span>
+                <input type="text" class="colour-hex" data-hex="track" maxlength="7" spellcheck="false">
+              </div>
+            </div>
+          </div>
+
+          <div class="sec is-open">
+            <button class="tgse-section-head sec-head" type="button"><span class="sec-title">Background</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="switch-row" style="margin-bottom:12px">
+                <span class="field-label" style="margin:0">Transparent</span>
+                <button class="switch is-on" id="bgTransparent" role="switch" aria-checked="true" type="button" aria-label="Transparent background"></button>
+              </div>
+              <div class="colour-row" id="bgColorWrap">
+                <span class="field-label">Matte colour</span>
+                <span class="colour-swatch-wrap"><input type="color" id="bgColor" value="#FFFFFF"></span>
+              </div>
+              <p class="field-hint">Transparent sits over any page. A matte colour gives clean edges on GIF, which only supports hard-cut transparency.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="tgse-panel" data-tab="settings">
+          <div class="sec is-open">
+            <button class="tgse-section-head sec-head" type="button"><span class="sec-title">Animation</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="field">
+                <label class="field-label" for="rng-size">Size <span class="val" id="rng-size-out"></span></label>
+                <input class="range" type="range" id="rng-size" min="24" max="600" step="2">
+              </div>
+              <div class="field">
+                <label class="field-label" for="rng-speed">Speed <span class="val" id="rng-speed-out"></span></label>
+                <input class="range" type="range" id="rng-speed" min="0.25" max="3" step="0.05">
+              </div>
+              <div class="field">
+                <label class="field-label" for="rng-durationMs">Loop length <span class="val" id="rng-durationMs-out"></span></label>
+                <input class="range" type="range" id="rng-durationMs" min="600" max="4000" step="50">
+              </div>
+              <div class="field">
+                <label class="field-label" for="rng-opacity">Opacity <span class="val" id="rng-opacity-out"></span></label>
+                <input class="range" type="range" id="rng-opacity" min="0" max="1" step="0.01">
+              </div>
+            </div>
+          </div>
+
+          <div class="sec is-open">
+            <button class="tgse-section-head sec-head" type="button"><span class="sec-title">Caption</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="field">
+                <label class="field-label" for="labelText">Label text</label>
+                <input class="input" type="text" id="labelText" maxlength="80" placeholder="e.g. Finding your best deals">
+              </div>
+              <div class="colour-row">
+                <span class="field-label">Label colour</span>
+                <span class="colour-swatch-wrap"><input type="color" id="labelColor"></span>
+              </div>
+              <div class="field">
+                <label class="field-label" for="rng-labelSize">Label size <span class="val" id="rng-labelSize-out"></span></label>
+                <input class="range" type="range" id="rng-labelSize" min="8" max="48" step="1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPORT -->
+        <div class="tgse-panel" data-tab="export">
+          <div class="sec is-open">
+            <button class="tgse-section-head sec-head" type="button"><span class="sec-title">Quality</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="field">
+                <label class="field-label" for="rng-fps">Frame rate <span class="val" id="rng-fps-out"></span></label>
+                <input class="range" type="range" id="rng-fps" min="10" max="60" step="1">
+                <p class="field-hint">Higher is smoother but larger. 24 to 30 suits most loaders.</p>
+              </div>
+            </div>
+          </div>
+          <div class="sec is-open">
+            <button class="tgse-section-head sec-head" type="button"><span class="sec-title">Download</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="sec-body">
+              <div class="exp-grid">
+                <button class="exp-item" data-export="gif" type="button"><span><span class="exp-fmt">GIF</span><span class="exp-desc">Universal. Hard-cut transparency</span></span><span class="exp-go">Export</span></button>
+                <button class="exp-item" data-export="webm" type="button"><span><span class="exp-fmt">WebM</span><span class="exp-desc">Smooth alpha transparency</span></span><span class="exp-go">Export</span></button>
+                <button class="exp-item" data-export="apng" type="button"><span><span class="exp-fmt">APNG</span><span class="exp-desc">Smooth alpha, wide support</span></span><span class="exp-go">Export</span></button>
+                <button class="exp-item" data-export="mp4" type="button"><span><span class="exp-fmt">MP4</span><span class="exp-desc">Solid background only</span></span><span class="exp-go">Export</span></button>
+                <button class="exp-item" data-export="png-sequence" type="button"><span><span class="exp-fmt">PNG sequence</span><span class="exp-desc">For video editors</span></span><span class="exp-go">Export</span></button>
+              </div>
+              <p class="exp-note">Encoders are wired in the next build step. The download uses the current template, colours and the transparent or matte choice from the Design tab.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" type="button" title="Toggle preview backdrop">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" type="button" title="Get embed code">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="pv-stage is-checker" id="pv-stage"></div>
+    </div>
+  </section>
+</div>
+
+<!-- Presets overlay -->
+<div class="ov" id="presetOverlay" hidden>
+  <div class="ov-backdrop" id="presetBackdrop"></div>
+  <div class="ov-card" role="dialog" aria-modal="true" aria-label="Colour presets">
+    <div class="ov-head">
+      <span class="ov-title">Colour presets</span>
+      <button class="ov-close" id="presetClose" type="button" aria-label="Close">&times;</button>
+    </div>
+    <div class="preset-grid" id="presetGrid"></div>
+  </div>
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-loader.js"></script>
+<script>
+/* editor-loader inline logic — validated standalone, then embedded into editor-loader.html */
+(function () {
+  'use strict';
+
+  var TPL = window.TGLoader.TEMPLATES;
+  var DIMS = window.TGLoader.dimsFor;
+  var DRAW = window.TGLoader.draw;
+
+  // Working config (starts from engine defaults)
+  var C = Object.assign({}, window.TGLoader.DEFAULTS, {
+    colors: Object.assign({}, window.TGLoader.DEFAULTS.colors)
+  });
+
+  var widgetInst = null;
+  var host = null;
+  var stage = null;
+  var stageDark = false;
+  var galleryTiles = [];
+  var galStart = 0;
+
+  var PRESETS = [
+    { name: 'Travelgenix', colors: { primary: '#00B4D8', secondary: '#1B2B5B', track: '#E2E8F0' } },
+    { name: 'Ocean', colors: { primary: '#0EA5E9', secondary: '#0F766E', track: '#CFFAFE' } },
+    { name: 'Sunset', colors: { primary: '#F97316', secondary: '#BE123C', track: '#FEE2E2' } },
+    { name: 'Forest', colors: { primary: '#16A34A', secondary: '#14532D', track: '#DCFCE7' } },
+    { name: 'Monochrome', colors: { primary: '#0F172A', secondary: '#64748B', track: '#E2E8F0' } },
+    { name: 'Candy', colors: { primary: '#D946EF', secondary: '#6366F1', track: '#F3E8FF' } }
+  ];
+
+  /* ---------- Shell init ---------- */
+  var shell = tgse.init({
+    widgetType: 'Loader',          // must match the Airtable WidgetType option (added in wiring step)
+    widgetTag: 'loader',
+    scriptFile: 'widget-loader.js',
+    getConfig: function () { return C; },
+    onTemplates: function () { togglePresets(true); },
+    onThemeToggle: function (isDark) { stageDark = !!isDark; applyStageBackdrop(); },
+    onLoginSuccess: function () { loadFromUrl(); },
+    onAfterSave: function () { /* embed snippet handled by shell */ }
+  });
+
+  /* ---------- Preview ---------- */
+  function ensureHost() {
+    stage = document.getElementById('pv-stage');
+    if (!host) {
+      host = document.createElement('div');
+      host.id = 'pv-host';
+      stage.appendChild(host);
+    }
+    return host;
+  }
+
+  function render() {
+    ensureHost();
+    if (widgetInst) widgetInst.update(C);
+    else widgetInst = new window.TGLoaderWidget(host, C);
+    applyStageBackdrop();
+  }
+
+  function applyStageBackdrop() {
+    if (!stage) return;
+    var cls = 'pv-stage ';
+    if (C.background !== 'transparent') cls += stageDark ? 'is-dark' : 'is-light';
+    else cls += stageDark ? 'is-dark' : 'is-checker';
+    stage.className = cls;
+  }
+
+  /* ---------- Template gallery (live mini-previews) ---------- */
+  function fitSize(aspect, W, H) {
+    var pad = 0.78;
+    if (aspect >= 1) return Math.min(W * pad, H * pad * aspect);
+    return Math.min(H * pad, W * pad / aspect);
+  }
+
+  function buildGallery() {
+    var grid = document.getElementById('tplGrid');
+    grid.innerHTML = '';
+    galleryTiles = [];
+    Object.keys(TPL).forEach(function (id) {
+      var tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'tpl-tile';
+      tile.setAttribute('data-tpl', id);
+      tile.setAttribute('aria-label', TPL[id].name);
+
+      var cv = document.createElement('canvas');
+      cv.className = 'tpl-cv';
+      var nm = document.createElement('span');
+      nm.className = 'tpl-name';
+      nm.textContent = TPL[id].name;
+
+      tile.appendChild(cv);
+      tile.appendChild(nm);
+      grid.appendChild(tile);
+
+      var W = 138, H = 66, dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.style.width = W + 'px';
+      cv.style.height = H + 'px';
+      cv.width = Math.round(W * dpr);
+      cv.height = Math.round(H * dpr);
+      var ctx = cv.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      galleryTiles.push({ id: id, ctx: ctx, W: W, H: H });
+
+      tile.addEventListener('click', function () {
+        C.template = id;
+        markGallery();
+        shell.markDirty();
+        render();
+      });
+    });
+    markGallery();
+  }
+
+  function markGallery() {
+    var tiles = document.querySelectorAll('.tpl-tile');
+    for (var i = 0; i < tiles.length; i++) {
+      tiles[i].classList.toggle('is-active', tiles[i].getAttribute('data-tpl') === C.template);
+    }
+  }
+
+  function galLoop(now) {
+    if (!galStart) galStart = now;
+    var t = ((now - galStart) % 1600) / 1600;
+    for (var i = 0; i < galleryTiles.length; i++) {
+      var g = galleryTiles[i];
+      var tpl = TPL[g.id];
+      var d = DIMS(tpl.aspect, fitSize(tpl.aspect, g.W, g.H));
+      var ctx = g.ctx;
+      ctx.clearRect(0, 0, g.W, g.H);
+      ctx.save();
+      ctx.translate((g.W - d.w) / 2, (g.H - d.h) / 2);
+      DRAW(ctx, t, { template: g.id, colors: C.colors, background: 'transparent' }, d.w, d.h);
+      ctx.restore();
+    }
+    requestAnimationFrame(galLoop);
+  }
+
+  /* ---------- Colour controls ---------- */
+  function wireColours() {
+    var colInputs = document.querySelectorAll('input[type=color][data-col]');
+    for (var i = 0; i < colInputs.length; i++) {
+      (function (inp) {
+        var key = inp.getAttribute('data-col');
+        inp.value = C.colors[key];
+        inp.addEventListener('input', function () {
+          C.colors[key] = inp.value;
+          syncHex(key);
+          shell.markDirty();
+          render();
+        });
+      })(colInputs[i]);
+    }
+    var hexInputs = document.querySelectorAll('.colour-hex[data-hex]');
+    for (var j = 0; j < hexInputs.length; j++) {
+      (function (inp) {
+        var key = inp.getAttribute('data-hex');
+        inp.value = C.colors[key];
+        inp.addEventListener('change', function () {
+          var v = inp.value.trim();
+          if (v && v[0] !== '#') v = '#' + v;
+          if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) {
+            C.colors[key] = v;
+            var ci = document.querySelector('input[type=color][data-col="' + key + '"]');
+            if (ci) ci.value = v;
+            shell.markDirty();
+            render();
+          } else {
+            inp.value = C.colors[key];
+          }
+        });
+      })(hexInputs[j]);
+    }
+  }
+
+  function syncHex(key) {
+    var t = document.querySelector('.colour-hex[data-hex="' + key + '"]');
+    if (t) t.value = C.colors[key];
+  }
+
+  function reflectColours() {
+    ['primary', 'secondary', 'track'].forEach(function (key) {
+      var ci = document.querySelector('input[type=color][data-col="' + key + '"]');
+      if (ci) ci.value = C.colors[key];
+      syncHex(key);
+    });
+  }
+
+  /* ---------- Background (transparent vs matte) ---------- */
+  function wireBg() {
+    var sw = document.getElementById('bgTransparent');
+    var wrap = document.getElementById('bgColorWrap');
+    var col = document.getElementById('bgColor');
+
+    function reflectBg() {
+      var transp = C.background === 'transparent';
+      sw.classList.toggle('is-on', transp);
+      sw.setAttribute('aria-checked', String(transp));
+      wrap.style.opacity = transp ? '.4' : '1';
+      wrap.style.pointerEvents = transp ? 'none' : 'auto';
+      if (!transp && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(C.background)) col.value = C.background;
+    }
+    sw.addEventListener('click', function () {
+      C.background = (C.background === 'transparent') ? (col.value || '#FFFFFF') : 'transparent';
+      reflectBg();
+      shell.markDirty();
+      render();
+    });
+    col.addEventListener('input', function () {
+      if (C.background !== 'transparent') {
+        C.background = col.value;
+        shell.markDirty();
+        render();
+      }
+    });
+    reflectBg();
+    wireBg.reflect = reflectBg;
+  }
+
+  /* ---------- Ranges ---------- */
+  var RANGE_FMT = {
+    size: function (v) { return Math.round(v) + ' px'; },
+    speed: function (v) { return (Math.round(v * 100) / 100) + '×'; },
+    durationMs: function (v) { return (Math.round(v) / 1000).toFixed(2) + ' s'; },
+    opacity: function (v) { return Math.round(v * 100) + '%'; },
+    fps: function (v) { return Math.round(v) + ' fps'; },
+    labelSize: function (v) { return Math.round(v) + ' px'; }
+  };
+
+  function wireRange(id, key) {
+    var r = document.getElementById(id);
+    var out = document.getElementById(id + '-out');
+    if (!r) return;
+    var fmt = RANGE_FMT[key] || function (v) { return v; };
+    r.value = C[key];
+    if (out) out.textContent = fmt(r.value);
+    r.addEventListener('input', function () {
+      C[key] = parseFloat(r.value);
+      if (out) out.textContent = fmt(r.value);
+      shell.markDirty();
+      render();
+    });
+  }
+
+  function reflectRanges() {
+    ['size', 'speed', 'durationMs', 'opacity', 'fps', 'labelSize'].forEach(function (key) {
+      var id = 'rng-' + key;
+      var r = document.getElementById(id);
+      var out = document.getElementById(id + '-out');
+      if (!r) return;
+      r.value = C[key];
+      if (out) out.textContent = (RANGE_FMT[key] || function (v) { return v; })(r.value);
+    });
+  }
+
+  /* ---------- Label ---------- */
+  function wireLabel() {
+    var txt = document.getElementById('labelText');
+    var col = document.getElementById('labelColor');
+    txt.value = C.label;
+    col.value = C.labelColor;
+    txt.addEventListener('input', function () { C.label = txt.value; shell.markDirty(); render(); });
+    col.addEventListener('input', function () { C.labelColor = col.value; shell.markDirty(); render(); });
+  }
+
+  function reflectLabel() {
+    var txt = document.getElementById('labelText');
+    var col = document.getElementById('labelColor');
+    if (txt) txt.value = C.label;
+    if (col) col.value = C.labelColor;
+  }
+
+  /* ---------- Presets ---------- */
+  function wirePresets() {
+    var grid = document.getElementById('presetGrid');
+    grid.innerHTML = '';
+    PRESETS.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'preset-tile';
+      b.innerHTML =
+        '<span class="preset-sw" style="background:' + p.colors.primary + '"></span>' +
+        '<span class="preset-sw" style="background:' + p.colors.secondary + '"></span>' +
+        '<span class="preset-sw" style="background:' + p.colors.track + '"></span>' +
+        '<span class="preset-name"></span>';
+      b.querySelector('.preset-name').textContent = p.name;
+      b.addEventListener('click', function () {
+        C.colors = Object.assign({}, p.colors);
+        reflectColours();
+        shell.markDirty();
+        render();
+        togglePresets(false);
+      });
+      grid.appendChild(b);
+    });
+    var close = document.getElementById('presetClose');
+    var back = document.getElementById('presetBackdrop');
+    if (close) close.addEventListener('click', function () { togglePresets(false); });
+    if (back) back.addEventListener('click', function () { togglePresets(false); });
+  }
+
+  function togglePresets(open) {
+    var ov = document.getElementById('presetOverlay');
+    if (ov) ov.hidden = !open;
+  }
+
+  /* ---------- Export (encoders wired in the next build step) ---------- */
+  function wireExport() {
+    var btns = document.querySelectorAll('[data-export]');
+    for (var i = 0; i < btns.length; i++) {
+      (function (b) {
+        b.addEventListener('click', function () {
+          tgse.toast(b.getAttribute('data-export').toUpperCase() + ' export is wired in the next build step', 'ok');
+        });
+      })(btns[i]);
+    }
+  }
+
+  /* ---------- Load existing config ---------- */
+  function reflectAll() {
+    reflectColours();
+    reflectRanges();
+    reflectLabel();
+    if (wireBg.reflect) wireBg.reflect();
+    markGallery();
+  }
+
+  function loadFromUrl() {
+    var wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && d.config) {
+          C = Object.assign({}, C, d.config);
+          C.colors = Object.assign({}, window.TGLoader.DEFAULTS.colors, d.config.colors || {});
+        }
+        if (d && d.name) {
+          var ni = document.getElementById('name-input');
+          if (ni) ni.value = d.name;
+        }
+        reflectAll();
+        render();
+      })
+      .catch(function () { render(); });
+  }
+
+  /* ---------- Boot ---------- */
+  buildGallery();
+  wireColours();
+  wireBg();
+  ['size', 'speed', 'durationMs', 'opacity', 'fps', 'labelSize'].forEach(function (key) { wireRange('rng-' + key, key); });
+  wireLabel();
+  wirePresets();
+  wireExport();
+  requestAnimationFrame(galLoop);
+
+  var nameInput = document.getElementById('name-input');
+  if (nameInput) nameInput.addEventListener('input', function () { shell.markDirty(); });
+
+  render(); // show defaults immediately
+  tgse.onReady(function () { if (tgse.isLoggedIn()) loadFromUrl(); });
+})();
+
+</script>
+</body>
+</html>
