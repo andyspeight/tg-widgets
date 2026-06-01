@@ -33,14 +33,14 @@
     return [
       {
         tab: 'content',
-        target: '#pick-logo',
+        target: function () { var c = document.querySelector('#pick-logo'); return c && c.closest ? c.closest('.section') : c; },
         title: 'Add your logos',
         body: 'Click Pick from library to drop in common travel logos like ABTA and ATOL, Add blank logo to bring in your own, or import a batch from a spreadsheet. Leave it for now and hit Next, you can come back to it.',
         placement: 'right'
       },
       {
         tab: 'content',
-        target: '#title',
+        target: function () { var c = document.querySelector('#title'); return c && c.closest ? c.closest('.section') : c; },
         title: 'Give it a heading',
         body: 'A short line above the logos sets the tone, something like Our partners and accreditations. There is room for a small eyebrow line and a subtitle underneath too if you want them.',
         placement: 'right'
@@ -54,20 +54,21 @@
       },
       {
         tab: 'design',
-        target: '#color-brand',
-        // The Colours section ships collapsed. Open its .section before we paint.
+        target: '#design-style-group',
+        // Colours, Shape & treatment and Typography ship collapsed — open all
+        // three so the whole styling group is visible under the spotlight.
         beforeShow: function () {
-          var el = document.querySelector('#color-brand');
-          var sec = el && el.closest ? el.closest('.section') : null;
-          if (sec) sec.classList.add('is-open');
+          var grp = document.querySelector('#design-style-group');
+          if (grp) grp.querySelectorAll('.section').forEach(function (s) { s.classList.add('is-open'); });
         },
-        title: 'Match your brand',
-        body: 'Set your brand colour and the background here so the wall sits comfortably with the rest of your site.',
-        placement: 'right'
+        title: 'Style it to match',
+        body: 'Everything that controls the look lives here. Colours sets your brand and background, Shape & treatment handles the logo shape, padding and greyscale, and Typography picks the font. Adjust any of them and the preview updates as you go.',
+        placement: 'right',
+        spotlightPadding: 6
       },
       {
         tab: 'settings',
-        target: '#show-captions',
+        target: function () { var c = document.querySelector('#show-captions'); return c && c.closest ? c.closest('.section') : c; },
         title: 'Tidy up the details',
         body: 'Turn captions under each logo on or off, and switch on filters if you want visitors to sort by type. Small touches that keep the wall looking clean.',
         placement: 'right'
