@@ -68,7 +68,21 @@
     { k: 'Tailor-made tour',  i: 'map'    },
     { k: 'Something else',    i: 'spark'  }
   ];
-  var DEST_SUGGEST = ['Algarve', 'Greek Islands', 'Maldives', 'Dubai', 'Caribbean', 'Italy', 'Tenerife', 'New York'];
+  // Quick-pick suggestion chips, tailored to the chosen trip type. Free typing
+  // still searches the full destination database; these are just fast starts.
+  var DEST_SUGGEST_BY_TRIP = {
+    'Beach holiday':    ['Algarve', 'Maldives', 'Canary Islands', 'Caribbean', 'Balearics', 'Turkey'],
+    'City break':       ['Barcelona', 'Rome', 'Amsterdam', 'Prague', 'New York', 'Dubai'],
+    'Family holiday':   ['Orlando', 'Tenerife', 'Costa del Sol', 'Majorca', 'Algarve', 'Disneyland Paris'],
+    'Honeymoon':        ['Maldives', 'Santorini', 'Mauritius', 'Bali', 'Seychelles', 'Bora Bora'],
+    'Cruise':           ['Mediterranean', 'Caribbean', 'Norwegian Fjords', 'Greek Islands', 'Alaska', 'Canary Islands'],
+    'Ski trip':         ['French Alps', 'Austria', 'Italian Dolomites', 'Switzerland', 'Andorra', 'Bulgaria'],
+    'Tailor-made tour': ['Japan', 'Italy', 'Vietnam', 'South Africa', 'Peru', 'Thailand']
+  };
+  var DEST_SUGGEST_DEFAULT = ['Algarve', 'Greek Islands', 'Dubai', 'Italy', 'New York', 'Caribbean'];
+  function suggestionsFor(tripType) {
+    return DEST_SUGGEST_BY_TRIP[tripType] || DEST_SUGGEST_DEFAULT;
+  }
   var AIRPORTS = ['London Gatwick', 'London Heathrow', 'Manchester', 'Birmingham', 'Bristol', 'Edinburgh', 'Other'];
   // Board basis — labels shown to the traveller, codes emitted to the pipeline (RO/BB/HB/FB/AI).
   var BOARD = [
@@ -584,9 +598,9 @@
     var results = document.createElement('div'); results.className = 'ep-dest-results'; results.hidden = true; wrap.appendChild(results);
     f.appendChild(wrap);
 
-    // suggestion chips (only before typing)
+    // suggestion chips (only before typing), tailored to the chosen trip type
     var sugg = document.createElement('div'); sugg.className = 'ep-chips'; sugg.style.marginTop = '10px';
-    DEST_SUGGEST.forEach(function (d) {
+    suggestionsFor(S.tripType).forEach(function (d) {
       sugg.appendChild(chip(d, false, function () { self._addDestination({ name: d, type: 'free-text', id: '' }); input.value = ''; self._renderStep(); }));
     });
     f.appendChild(sugg);
