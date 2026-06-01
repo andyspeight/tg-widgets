@@ -1,10 +1,11 @@
 /**
  * GET /api/admin/packages/get?id=recXXX
  *
- * Returns a single package and a complete product grid: every active
- * catalogue item alongside this package's current included/add-on flags.
- * Used by the Packages tab edit view — gives the UI everything it needs
- * to render the full grid in one fetch.
+ * Returns a single package and a complete product grid: every catalogue
+ * item (active and inactive) alongside this package's current included/add-on
+ * flags. Inactive items carry active:false so the UI can flag them. Used by
+ * the Packages tab edit view — gives the UI everything it needs to render the
+ * full grid in one fetch.
  *
  * Auth: widget_suite owner or admin.
  */
@@ -67,9 +68,10 @@ export default async function handler(req, res) {
       for (const cid of catIds) joinByCatalogueId.set(cid, j);
     }
 
-    // Build the grid: one row per active catalogue item
+    // Build the grid: one row per catalogue item (active AND inactive, so the
+    // Packages admin view mirrors the Catalogue tab exactly — inactive products
+    // are flagged so they read as "coming soon", not missing).
     const grid = catalogueRecords
-      .filter((c) => !!c.fields[CATALOGUE.fields.active])
       .map((c) => {
         const join = joinByCatalogueId.get(c.id);
         return {
@@ -78,6 +80,7 @@ export default async function handler(req, res) {
           productName: c.fields[CATALOGUE.fields.productName] || '',
           category: c.fields[CATALOGUE.fields.category] || '',
           sortOrder: c.fields[CATALOGUE.fields.sortOrder] ?? 999,
+          active: !!c.fields[CATALOGUE.fields.active],
           joinId: join?.id || null,
           includedByDefault: join
             ? !!join.fields[PACKAGE_CATALOGUE.fields.includedByDefault]
