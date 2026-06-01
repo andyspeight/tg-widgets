@@ -2534,80 +2534,89 @@
           },
           steps: [
             { target: '.canvas', placement: 'left', spotlightPadding: 6,
-              title: '1. Your live form',
-              body: 'This is exactly what visitors see — a guided, multi-step travel enquiry. It updates instantly as you change settings, so keep an eye on it as we go. The fields themselves (trip type, destinations, dates, travellers) are fixed and built for conversion, so there is no field-building to do — you just brand it and decide where leads go.' },
+              title: 'Your live form',
+              body: 'This is exactly what visitors see — a guided, multi-step travel enquiry. It updates instantly as you change settings, so keep an eye on it as we go. The fields themselves (trip type, destinations, dates, travellers) are fixed and built for conversion, so there is no field-building to do — you just name it, brand it and decide where leads go.' },
+
+            { target: '.topbar-name', placement: 'bottom', spotlightPadding: 6,
+              title: 'Name your form',
+              body: 'Give the form a name here — something you will recognise later, like "Maldives landing page" or "Homepage enquiry". This is just for your own dashboard; visitors never see it. The name is saved with the form.' },
 
             { beforeShow: () => setPaletteTab('settings'),
               target: '.palette-tab[data-palette-tab="settings"]', placement: 'right',
-              title: '2. The Settings tab',
+              title: 'The Settings tab',
               body: 'Everything you can change lives here. Click any item in this list and its controls open in the panel on the right. We will walk through each one now.' },
 
             { beforeShow: () => { setPaletteTab('settings'); selectItem({ kind: 'header' }); },
               target: '#inspector', placement: 'left',
-              title: '3. Header & intro',
+              title: 'Header & intro',
               body: 'Set the Title shown at the top of the form (e.g. "Tell us about your dream holiday") and an optional Subtitle to set expectations underneath it. This is the first thing a visitor reads, so make it warm and specific to you.' },
 
             { beforeShow: () => selectItem({ kind: 'thankyou' }),
               target: '#inspector', placement: 'left',
-              title: '4. Thank-you message',
+              title: 'Thank-you message',
               body: 'What the visitor sees after they send their enquiry. Choose the behaviour: Inline shows the message below the form, Replace form swaps the form out for it, or Redirect sends them to another URL (handy for a thank-you page). You can use {firstName} in the text and it fills in their name.' },
 
             { beforeShow: () => selectItem({ kind: 'settings', category: 'branding' }),
               target: '#inspector', placement: 'left',
-              title: '5. Branding',
+              title: 'Branding',
               body: 'Match the form to the client. Set the Button colour (the main accent visitors act on), the Accent colour, and the Theme (light or dark). The live preview recolours as you change these, so you can dial it in by eye.' },
 
             { beforeShow: () => selectItem({ kind: 'settings', category: 'status' }),
               target: '#inspector', placement: 'left',
-              title: '6. Status — important',
+              title: 'Status — important',
               body: 'Draft, Live or Archived. A form must be set to Live before it will accept any submissions — Draft is for setting up safely, and Archived hides it but keeps past enquiries. Remember to switch to Live before you hand the embed to a client.' },
 
             { beforeShow: () => selectItem({ kind: 'settings', category: 'security' }),
               target: '#inspector', placement: 'left',
-              title: '7. Security & anti-spam',
+              title: 'Security & anti-spam',
               body: 'The Honeypot is on by default and stops most bots invisibly. For busier sites, turn on Cloudflare Turnstile (a quiet challenge) and paste its site key. Set the Submission rate limit (Strict / Standard / Lenient) and, under Allowed origins, list the domains permitted to embed this form to stop it being used elsewhere.' },
 
             { beforeShow: () => selectItem({ kind: 'settings', category: 'reference' }),
               target: '#inspector', placement: 'left',
-              title: '8. Reference format',
+              title: 'Reference format',
               body: 'Every enquiry gets a unique reference. Set the Prefix here (e.g. "TG-") and references read like TG-0042 — useful when you and the client refer to a specific enquiry by number.' },
 
             { beforeShow: () => setPaletteTab('routing'),
               target: '.palette-tab[data-palette-tab="routing"]', placement: 'right',
-              title: '9. Routing — where leads go',
+              title: 'Routing — where leads go',
               body: 'This is the important part. Every enquiry is delivered through the destinations you switch on here. Email is always on so you never miss one; add any others you need. Click a destination to open its setup on the right, and use its toggle to turn it on.' },
 
             { beforeShow: () => { setPaletteTab('routing'); selectItem({ kind: 'routing', destination: 'email' }); },
               target: '#inspector', placement: 'left',
-              title: '10. Email (always on)',
+              title: 'Email (always on)',
               body: 'The essential one. Enter the address (or addresses) that should be notified the instant someone enquires — usually the agent or a shared sales inbox. This is what guarantees a lead is never missed.' },
 
             { beforeShow: () => selectItem({ kind: 'routing', destination: 'googleSheets' }),
               target: '#inspector', placement: 'left',
-              title: '11. Google Sheets (optional)',
+              title: 'Google Sheets (optional)',
               body: 'Toggle this on to append every enquiry as a new row in a spreadsheet — handy for a simple shared log or pipeline. Connect the account, then give the spreadsheet and the tab name (it defaults to "Enquiries").' },
 
             { beforeShow: () => selectItem({ kind: 'routing', destination: 'airtable' }),
               target: '#inspector', placement: 'left',
-              title: '12. Your Airtable (optional)',
+              title: 'Your Airtable (optional)',
               body: 'Push enquiries straight into your own Airtable base. Create a personal access token scoped to just that base with data.records:write, paste it in, and choose the base and table. Great if you already run your pipeline in Airtable.' },
 
             { beforeShow: () => selectItem({ kind: 'routing', destination: 'webhook' }),
               target: '#inspector', placement: 'left',
-              title: '13. Webhook (advanced)',
+              title: 'Webhook (advanced)',
               body: 'For connecting to a CRM or custom system. Enter a URL and every submission is POSTed to it as JSON, signed with an HMAC signature so the receiving end can verify it really came from us.' },
 
             { target: '#inspector', placement: 'left',
-              title: '14. Luna destinations',
+              title: 'Luna destinations',
               body: 'Further down you will also see Luna Chat, Luna Marketing and Luna Work. Switch these on to pass enquiry context into Luna Chat, auto-enrol consenting visitors into marketing drips, or create a CRM lead. Turn on only what the client uses.' },
 
             { target: '#btn-embed', placement: 'bottom',
-              title: '15. Get your embed code',
+              title: 'Get your embed code',
               body: 'Once it looks right and routing is set, click here for the one-line embed snippet. Paste it where you want the form on the website — it carries the Enquiry Pro tag automatically.' },
 
-            { target: '#save-btn', placement: 'bottom',
-              title: '16. Save, then go Live',
-              body: 'Save your work (or just press Cmd/Ctrl+S). Then make sure Status is set to Live back in Settings, and you are done. You can reopen this walkthrough any time from the button in the corner.' }
+            { target: '#save-btn', placement: 'bottom', spotlightPadding: 6,
+              title: 'Save your form',
+              body: 'Click Save to store everything (or just press Cmd/Ctrl+S — it also autosaves as you work). Saving is what creates the form and gives it the ID used in your embed code, so always save before grabbing the embed.' },
+
+            { beforeShow: () => selectItem({ kind: 'settings', category: 'status' }),
+              target: '#inspector', placement: 'left',
+              title: 'Set it Live and you are done',
+              body: 'Last step: set the Status to Live so the form starts accepting enquiries, then paste your embed on the site. You can reopen this walkthrough any time from the button in the corner.' }
           ]
         });
         _proTourApi.start();
