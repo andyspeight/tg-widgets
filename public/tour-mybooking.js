@@ -38,9 +38,10 @@
     return [
       {
         tab: 'content',
-        target: '#copy-title',
+        target: sectionEl('copy'),
+        beforeShow: function () { openSection('copy'); },
         title: 'Welcome your customers in',
-        body: 'This is the heading and intro on the lookup screen, the first thing a customer sees when they come to check their trip. Keep it warm. The preview shows a sample booking so you can see exactly how it reads.',
+        body: 'This is the wording on the lookup screen, the first thing a customer sees. The Title shows on every layout. There are two subtitles: the longer welcome line is the one used on the vertical layout, while the horizontal layout uses the shorter subtitle to save space. The eyebrow is the small line above the title. Keep it warm, the preview shows it exactly as it reads.',
         placement: 'right'
       },
       {
@@ -52,7 +53,7 @@
       },
       {
         tab: 'design',
-        target: '#brand-name',
+        target: function () { var el = document.querySelector('#brand-name'); return el && el.closest ? el.closest('.field') : el; },
         title: 'Make it yours',
         body: 'Add your company name and set your colours just below, so the booking screen feels like your own site, not a third-party tool.',
         placement: 'right',
@@ -68,7 +69,7 @@
       },
       {
         tab: 'content',
-        target: '#luna-connect-btn',
+        target: sectionEl('luna'),
         title: 'Connect Luna, your AI assistant',
         body: 'This is the clever part. Link your Luna chat and when a customer asks about their booking in chat, Luna looks it up through this widget and answers instantly. A real concierge touch, day or night.',
         placement: 'right',
