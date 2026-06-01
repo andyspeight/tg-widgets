@@ -33,9 +33,9 @@
     return [
       {
         tab: 'design',
-        target: 'input[data-bind="place.name"]',
+        target: function () { var el = document.querySelector('input[data-bind="place.name"]'); return el && el.closest ? el.closest('.sec') : el; },
         title: 'Your business',
-        body: 'Pop in your business name, your star rating and how many reviews you have. The preview shows the rating summary straight away, the bit that builds instant trust.',
+        body: 'This is your business info, and there are three fields to fill in here, your business name, your star rating and how many reviews you have. Set each one and the preview shows the rating summary straight away, the bit that builds instant trust. Fill them all in before you hit Next.',
         placement: 'right'
       },
       {
