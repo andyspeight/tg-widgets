@@ -45,22 +45,22 @@
       },
       {
         tab: 'content',
-        target: '#slugSource',
+        target: function () { var el = document.querySelector('#slugSource'); return el && el.closest ? el.closest('.section') : el; },
         // The Auto-detect section ships collapsed. Open it before we paint.
         beforeShow: function () {
           var el = document.querySelector('#slugSource');
           var sec = el && el.closest ? el.closest('.section') : null;
           if (sec) sec.setAttribute('data-open', 'true');
         },
-        title: 'Or detect it automatically',
-        body: 'Running one widget across lots of destination pages? Auto-detect reads the destination from the page address, so the same widget shows the right weather everywhere. Use a fixed destination above or this, not both.',
+        title: 'Or detect the destination automatically',
+        body: 'Most people just pick a fixed destination above and skip this. Auto-detect is for running one widget across lots of destination pages: instead of a fixed place, it reads the destination from the page web address, so /destinations/greece shows Greece on its own. Choose where to read it from, the last part of the URL, a query parameter, or a CSS selector, and it looks up resort, then city, then country until it finds a match. Use a fixed destination or auto-detect, not both.',
         placement: 'right'
       },
       {
         tab: 'design',
-        target: '#layoutSeg',
+        target: function () { var el = document.querySelector('#layoutSeg'); return el && el.closest ? el.closest('.section') : el; },
         title: 'Pick a layout',
-        body: 'Compact keeps it small and tidy, Standard is the everyday view, Wide spreads it out with more room for the forecast. Choose one and watch the preview update.',
+        body: 'Compact, Standard or Wide. The sizing guide just underneath tells you roughly how wide each one is and where it fits best, Compact (~380px) for sidebars, Standard (~440px) mid-article, Wide (~820px) as a hero strip above the fold. All three adapt on mobile. Pick one and watch the preview update.',
         placement: 'right'
       },
       {
@@ -72,10 +72,11 @@
       },
       {
         tab: 'settings',
-        target: '#sectionTogglesWrap',
+        target: '#weather-show-group',
         title: 'Choose what to show',
-        body: 'Turn the different parts on or off, like the current conditions, the day by day forecast and the climate notes. Show as much or as little as you like.',
-        placement: 'right'
+        body: 'Two sets of switches. Section visibility turns the main parts on or off, the current conditions, the day by day forecast, the climate notes and so on. Extras covers the finishing touches, like the country flag beside the destination name. Show as much or as little as you like.',
+        placement: 'right',
+        spotlightPadding: 6
       },
       {
         target: '.tgse-preview',
