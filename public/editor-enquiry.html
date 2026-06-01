@@ -325,6 +325,18 @@
     .canvas-stage.is-preview .preview-mount-wrapper { display: block; }
     .canvas-stage.is-preview > *:not(.preview-mount-wrapper) { display: none; }
 
+    /* ===== Enquiry Pro mode ===== */
+    /* Pro has a fixed multi-step flow, so the field builder is hidden. The
+       agent still edits header, thank-you, branding, security, domains and
+       routing — all of which live in the settings/routing tabs + inspector. */
+    body.tgep-pro .palette-tab[data-palette-tab="fields"] { display: none; }
+    body.tgep-pro #btn-preview { display: none; }
+    body.tgep-pro #canvas-stage .field-card,
+    body.tgep-pro #canvas-stage .drop-slot,
+    body.tgep-pro #canvas-stage .canvas-fields-empty,
+    body.tgep-pro #canvas-stage .step-separator { display: none !important; }
+    body.tgep-pro [data-setting-hide-pro="1"] { display: none !important; }
+
     /* ============================= INSPECTOR =============================== */
     .inspector {
       background: var(--panel);
@@ -2466,6 +2478,7 @@
   <!-- ================= WIDGET SCRIPT ================= -->
   <!-- Loaded once. The class window.TGEnquiryWidget is used to mount the live preview. -->
   <script src="/widget-enquiry.js"></script>
+  <script src="/widget-enquirypro.js"></script>
 
   <!-- ======================== Shell behaviour (must come BEFORE editor script) ========================
        PHASE 1 OF UNIFIED SHELL MIGRATION:
@@ -2972,6 +2985,32 @@
       const mount = $('#preview-mount');
       if (!mount) return;
 
+      // Enquiry Pro preview — render the real multi-step widget. Pro ignores
+      // the field list; it only uses header, thank-you, branding and security.
+      if (EP_IS_PRO) {
+        const c = state.config;
+        const proCfg = {
+          formId: 'preview',
+          header: { title: c.headerTitle, subtitle: c.headerSubtitle },
+          thankYou: { mode: c.thankYouMode, message: c.thankYouMessage, redirectUrl: c.redirectUrl },
+          branding: { buttonColour: c.buttonColour, accentColour: c.accentColour, theme: c.theme },
+          security: { honeypot: c.security && c.security.honeypot, turnstile: c.security && c.security.turnstile, turnstileSiteKey: c.security && c.security.turnstileSiteKey },
+          agencyName: c.clientName || c.headerTitle || 'our travel team',
+          responseTime: c.responseTime || 'one working day'
+        };
+        try {
+          if (state.widget && window.TGEnquiryProWidget && state.widget instanceof window.TGEnquiryProWidget && typeof state.widget.update === 'function') {
+            state.widget.update(proCfg);
+          } else if (window.TGEnquiryProWidget) {
+            try { mount.innerHTML = ''; } catch (e) {}
+            state.widget = new TGEnquiryProWidget(mount, proCfg);
+          } else {
+            mount.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted)">Enquiry Pro script not loaded</div>';
+          }
+        } catch (e) { console.warn('[pro preview] update failed', e); }
+        return;
+      }
+
       // Build a config shape matching what widget._normalise() expects.
       // The branding object includes every new knob so preview reflects
       // fontFamily, corner radius, field size/style, extended colours, logo etc.
@@ -3384,6 +3423,8 @@
       // unsaved forms, the template picker already appeared on load so this
       // button would be redundant. Styled slightly less prominently than
       // the embed shortcut since it's a destructive action.
+      // (Hidden entirely in Enquiry Pro — Pro has a fixed flow, no templates.)
+      if (!EP_IS_PRO) {
       const changeBtn = document.createElement('div');
       changeBtn.className = 'setting-card';
       changeBtn.innerHTML = `
@@ -3405,6 +3446,26 @@
       `;
       changeBtn.addEventListener('click', () => openChangeTemplateConfirm());
       body.appendChild(changeBtn);
+      }
+
+      // Enquiry Pro: Header and Thank-you live in the canvas for the classic
+      // builder, but Pro hides the canvas, so surface them here as setting
+      // cards that open the same inspector editors.
+      if (EP_IS_PRO) {
+        [
+          { kind: 'header',   name: 'Header & intro', desc: 'The title and subtitle shown at the top of the form.', icon: '<path d="M4 7h16M4 12h10M4 17h7"/>' },
+          { kind: 'thankyou', name: 'Thank-you message', desc: 'What visitors see after they send their enquiry.', icon: '<path d="M20 6L9 17l-5-5"/>' }
+        ].forEach(item => {
+          const c = document.createElement('div');
+          const seld = state.selectedItem && state.selectedItem.kind === item.kind;
+          c.className = 'setting-card' + (seld ? ' is-selected' : '');
+          c.innerHTML = '<span class="setting-card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + item.icon + '</svg></span>'
+            + '<div class="setting-card-info"><div class="setting-card-name">' + item.name + '</div><div class="setting-card-desc">' + item.desc + '</div></div>'
+            + '<svg class="setting-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+          c.addEventListener('click', () => selectItem({ kind: item.kind }));
+          body.appendChild(c);
+        });
+      }
 
       // Embed code shortcut — handy access from the settings tab since it's
       // where agents naturally look for "how do I use this form now?"
@@ -3431,6 +3492,7 @@
 
       // Settings categories
       SETTINGS_CATEGORIES.forEach(cat => {
+        if (EP_IS_PRO && cat.id === 'layout') return; // Pro is inherently multi-step
         const isSelected = state.selectedItem
           && state.selectedItem.kind === 'settings'
           && state.selectedItem.category === cat.id;
@@ -7144,6 +7206,10 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       if (state.config && state.config.variant === 'pro') EP_IS_PRO = true;
       if (EP_IS_PRO && state.config) state.config.variant = 'pro';
       applyProChrome();
+      if (EP_IS_PRO) {
+        document.body.classList.add('tgep-pro');
+        state.activePaletteTab = 'settings'; // land on settings, Fields tab hidden
+      }
 
       // Bind topbar controls
       const nameInput = $('#form-name-input');
@@ -7167,11 +7233,19 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       syncSaveBtn();
       bindKeyboard();
 
+      // Enquiry Pro: show the live multi-step widget straight away (header,
+      // thank-you, branding etc. are edited from the Settings tab + inspector).
+      if (EP_IS_PRO && !state.previewMode) {
+        togglePreview();
+        const cl = $('#canvas-label'); if (cl) cl.textContent = 'Live preview';
+        const ch = $('#canvas-hint'); if (ch) ch.textContent = 'Exactly what your visitors see — edit from the Settings tab';
+      }
+
       // Show the templates modal for NEW forms (no ?id= in URL).
       // If the agent is loading an existing form they already have fields and
       // don't need the starter picker. Deferred one tick so first paint lands
       // first — gives a nicer impression of the editor behind the overlay.
-      if (!loadId) {
+      if (!loadId && !EP_IS_PRO) {
         setTimeout(() => openTemplatesModal(), 50);
       }
 
