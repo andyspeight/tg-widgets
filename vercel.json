@@ -164,6 +164,10 @@
       "destination": "/editor-enquiry.html"
     },
     {
+      "source": "/editor-enquirypro",
+      "destination": "/editor-enquiry.html"
+    },
+    {
       "source": "/editor-mybooking",
       "destination": "/editor-mybooking.html"
     },
