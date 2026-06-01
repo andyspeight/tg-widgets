@@ -124,6 +124,49 @@
       letter-spacing: 0.04em;
     }
 
+    /* Inline active toggle (per-row, no drawer needed) */
+    .toggle-cell {
+      display: flex; align-items: center; gap: var(--space-2);
+      justify-content: flex-end;
+    }
+    .toggle-label {
+      font-size: 12px; font-weight: 600; min-width: 52px; text-align: right;
+      color: var(--tg-text-tertiary);
+      transition: color 150ms ease;
+      user-select: none;
+    }
+    .toggle[aria-checked="true"] + .toggle-label,
+    .toggle-cell[data-on="true"] .toggle-label { color: var(--tg-success); }
+    .toggle {
+      --w: 40px; --h: 24px; --pad: 3px;
+      position: relative; flex-shrink: 0;
+      width: var(--w); height: var(--h);
+      margin: 0; padding: 0; border: none;
+      border-radius: 999px;
+      background: var(--tg-border);
+      cursor: pointer;
+      transition: background 200ms ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Extend hit area to >=44px without changing the visual size (touch target) */
+    .toggle::after { content: ""; position: absolute; inset: -11px -4px; }
+    .toggle .knob {
+      position: absolute; top: var(--pad); left: var(--pad);
+      width: calc(var(--h) - var(--pad) * 2);
+      height: calc(var(--h) - var(--pad) * 2);
+      background: #fff; border-radius: 50%;
+      box-shadow: var(--shadow-sm);
+      transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toggle[aria-checked="true"] { background: var(--tg-success); }
+    .toggle[aria-checked="true"] .knob { transform: translateX(calc(var(--w) - var(--h))); }
+    .toggle:hover { filter: brightness(0.97); }
+    .toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.3); }
+    .toggle[data-busy="true"] { cursor: progress; opacity: 0.6; }
+    @media (prefers-reduced-motion: reduce) {
+      .toggle, .toggle .knob { transition: none; }
+    }
+
     /* Drawer */
     .drawer-backdrop {
       position: fixed; inset: 0;
@@ -239,6 +282,8 @@
     @media (max-width: 640px) {
       .page-header { flex-direction: column; align-items: stretch; }
       .product-row { grid-template-columns: 1fr; gap: var(--space-2); }
+      .toggle-cell { justify-content: flex-start; }
+      .toggle-label { min-width: 0; text-align: left; }
     }
   </style>
 </head>
@@ -374,13 +419,18 @@
               ${items.map((item) => `
                 <div class="product-row">
                   <div class="product-meta">
-                    <div class="product-name">
-                      ${escapeHtml(item.productName)}
-                      ${item.active ? '' : '<span class="badge-inactive">Inactive</span>'}
-                    </div>
+                    <div class="product-name">${escapeHtml(item.productName)}</div>
                     <div class="product-code">${escapeHtml(item.productCode)}</div>
                   </div>
-                  <div></div>
+                  <div class="toggle-cell" data-on="${item.active ? 'true' : 'false'}">
+                    <button class="toggle" type="button" role="switch"
+                      aria-checked="${item.active ? 'true' : 'false'}"
+                      data-toggle-id="${escapeHtml(item.id)}"
+                      aria-label="Toggle ${escapeHtml(item.productName)} on or off">
+                      <span class="knob"></span>
+                    </button>
+                    <span class="toggle-label" aria-hidden="true">${item.active ? 'Active' : 'Inactive'}</span>
+                  </div>
                   <button class="btn btn-ghost" type="button" data-edit-id="${escapeHtml(item.id)}">Edit</button>
                 </div>
               `).join('')}
@@ -397,6 +447,72 @@
           if (item) openDrawer(item);
         });
       });
+
+      // Wire inline active toggles
+      container.querySelectorAll('[data-toggle-id]').forEach((sw) => {
+        sw.addEventListener('click', () => toggleActive(sw.dataset.toggleId, sw));
+      });
+    }
+
+    // ─── Inline active toggle ──────────────────────────────────────────
+    // Flips a product's active flag in place via the existing upsert
+    // endpoint. Optimistic: the switch moves immediately, locks while the
+    // request is in flight, and reverts if the server rejects it.
+    async function toggleActive(id, sw) {
+      if (!catalogueData || sw.dataset.busy === 'true') return;
+      const item = catalogueData.items.find((i) => i.id === id);
+      if (!item) return;
+
+      const next = !item.active;
+      const cell = sw.closest('.toggle-cell');
+      const labelEl = cell ? cell.querySelector('.toggle-label') : null;
+
+      // Optimistic UI
+      sw.dataset.busy = 'true';
+      sw.disabled = true;
+      sw.setAttribute('aria-checked', String(next));
+      if (cell) cell.dataset.on = String(next);
+      if (labelEl) labelEl.textContent = next ? 'Active' : 'Inactive';
+
+      try {
+        const r = await fetch('/api/admin/catalogue/upsert', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: item.id,
+            productName: item.productName,
+            productCode: item.productCode,
+            category: item.category,
+            description: item.description,
+            sortOrder: item.sortOrder,
+            active: next,
+          }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const errMsg = data.errors?.join(' · ') || data.error || 'Could not update';
+          throw new Error(errMsg);
+        }
+        // Commit to local state (items + byCategory hold separate objects)
+        item.active = next;
+        const catArr = catalogueData.byCategory?.[item.category];
+        if (catArr) {
+          const c = catArr.find((i) => i.id === id);
+          if (c) c.active = next;
+        }
+        showToast(`${item.productName} ${next ? 'turned on' : 'turned off'}`, 'success');
+      } catch (err) {
+        console.error(err);
+        // Revert
+        sw.setAttribute('aria-checked', String(item.active));
+        if (cell) cell.dataset.on = String(item.active);
+        if (labelEl) labelEl.textContent = item.active ? 'Active' : 'Inactive';
+        showToast(err.message || 'Network error. Try again.', 'error');
+      } finally {
+        sw.disabled = false;
+        sw.dataset.busy = 'false';
+      }
     }
 
     async function loadCatalogue() {
