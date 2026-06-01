@@ -64,6 +64,10 @@
       "destination": "/demo-enquiry.html"
     },
     {
+      "source": "/demo-enquirypro",
+      "destination": "/demo-enquirypro.html"
+    },
+    {
       "source": "/demo-mybooking",
       "destination": "/demo-mybooking.html"
     },
@@ -374,6 +378,23 @@
     },
     {
       "source": "/widget-enquiry.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-enquirypro.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
