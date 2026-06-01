@@ -2484,6 +2484,19 @@
     const API_CONFIG      = '/api/enquiry-form-config';  // new endpoint
     const API_LIST        = '/api/widget-list';
     const WIDGET_TYPE     = 'Enquiry Form';
+    // Enquiry Pro shares this editor and pipeline; only the embed output and a
+    // little chrome differ. Detected from the URL, then persisted in the form
+    // config (cfg.variant) so a reopened Pro form stays Pro.
+    let EP_IS_PRO = (location.pathname.indexOf('enquirypro') !== -1)
+      || new URLSearchParams(location.search).get('variant') === 'pro';
+    function applyProChrome() {
+      if (!EP_IS_PRO) return;
+      try {
+        const t = document.querySelector('.topbar-title'); if (t) t.textContent = 'Enquiry Pro Editor';
+        const n = document.getElementById('form-name-input'); if (n && !n.placeholder.includes('Pro')) n.placeholder = 'Untitled Enquiry Pro form';
+        document.title = 'Enquiry Pro Editor — Travelgenix';
+      } catch (e) {}
+    }
     const STORAGE_KEY     = 'tgw_session';               // shared with rest of suite
     const AUTOSAVE_DELAY  = 2000;                         // ms after last change
 
@@ -6690,8 +6703,10 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       body.className = 'modal-body';
 
       const origin = window.location.origin;
-      const snippet = `<div data-tg-widget="enquiry" data-tg-id="${state.widgetId}"></div>
-<script src="${origin}/widget-enquiry.js" defer><\/script>`;
+      const epTag  = EP_IS_PRO ? 'enquirypro' : 'enquiry';
+      const epFile = EP_IS_PRO ? 'widget-enquirypro.js' : 'widget-enquiry.js';
+      const snippet = `<div data-tg-widget="${epTag}" data-tg-id="${state.widgetId}"></div>
+<script src="${origin}/${epFile}" defer><\/script>`;
 
       const codeWrap = document.createElement('div');
       codeWrap.className = 'modal-code-wrap';
@@ -6747,11 +6762,11 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       // Syntax-highlighted version
       code.innerHTML =
         '<span class="tag">&lt;div</span> ' +
-        '<span class="attr">data-tg-widget</span>=<span class="str">"enquiry"</span> ' +
+        '<span class="attr">data-tg-widget</span>=<span class="str">"' + epTag + '"</span> ' +
         '<span class="attr">data-tg-id</span>=<span class="str">"' + escapeHtml(state.widgetId) + '"</span>' +
         '<span class="tag">&gt;&lt;/div&gt;</span>\n' +
         '<span class="tag">&lt;script</span> ' +
-        '<span class="attr">src</span>=<span class="str">"' + escapeHtml(origin + '/widget-enquiry.js') + '"</span> ' +
+        '<span class="attr">src</span>=<span class="str">"' + escapeHtml(origin + '/' + epFile) + '"</span> ' +
         '<span class="attr">defer</span>' +
         '<span class="tag">&gt;&lt;/script&gt;</span>';
       codeWrap.appendChild(code);
@@ -7122,6 +7137,13 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
           }
         }
       }
+
+      // Resolve Enquiry Pro mode: URL flag OR a previously saved variant, then
+      // persist it on the config so it survives future re-edits and the embed
+      // stays correct.
+      if (state.config && state.config.variant === 'pro') EP_IS_PRO = true;
+      if (EP_IS_PRO && state.config) state.config.variant = 'pro';
+      applyProChrome();
 
       // Bind topbar controls
       const nameInput = $('#form-name-input');
