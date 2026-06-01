@@ -258,6 +258,14 @@
     {
       "source": "/accept-invite",
       "destination": "/accept-invite.html"
+    },
+    {
+      "source": "/editor-loader",
+      "destination": "/editor-loader.html"
+    },
+    {
+      "source": "/demo-loader",
+      "destination": "/demo-loader.html"
     }
   ],
   "headers": [
@@ -501,6 +509,23 @@
     },
     {
       "source": "/widget-popup.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-loader.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
