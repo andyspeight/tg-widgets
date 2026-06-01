@@ -98,7 +98,7 @@
     .product-list { display: flex; flex-direction: column; }
     .product-row {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr auto auto auto;
       align-items: center;
       gap: var(--space-4);
       padding: var(--space-4) var(--space-5);
@@ -166,6 +166,42 @@
     @media (prefers-reduced-motion: reduce) {
       .toggle, .toggle .knob { transition: none; }
     }
+
+    /* Per-product package inclusion chips */
+    .pkg-cell { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; justify-content: flex-end; }
+    .pkg-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      min-height: 32px; padding: 4px 10px 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--tg-border);
+      background: var(--tg-bg-primary);
+      color: var(--tg-text-secondary);
+      font-family: inherit; font-size: 12px; font-weight: 600;
+      cursor: pointer; user-select: none;
+      transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pkg-chip .tick {
+      width: 15px; height: 15px; flex-shrink: 0;
+      border-radius: 50%;
+      border: 1.5px solid var(--tg-border);
+      display: inline-flex; align-items: center; justify-content: center;
+      color: transparent;
+      transition: all 150ms ease;
+    }
+    .pkg-chip .tick svg { width: 9px; height: 9px; }
+    .pkg-chip:hover { border-color: var(--tg-accent); color: var(--tg-text-primary); }
+    .pkg-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.3); }
+    .pkg-chip[aria-checked="true"] {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: var(--tg-success);
+      color: var(--tg-success);
+    }
+    .pkg-chip[aria-checked="true"] .tick {
+      background: var(--tg-success); border-color: var(--tg-success); color: #fff;
+    }
+    .pkg-chip[data-busy="true"] { opacity: 0.55; cursor: progress; }
+    .pkg-cell.is-loading { color: var(--tg-text-tertiary); font-size: 12px; }
 
     /* Drawer */
     .drawer-backdrop {
@@ -284,6 +320,7 @@
       .product-row { grid-template-columns: 1fr; gap: var(--space-2); }
       .toggle-cell { justify-content: flex-start; }
       .toggle-label { min-width: 0; text-align: left; }
+      .pkg-cell { justify-content: flex-start; }
     }
   </style>
 </head>
@@ -292,7 +329,7 @@
     <header class="page-header">
       <div>
         <h1>Catalogue</h1>
-        <p>Every product Travelgenix sells. Add new widgets here when they are built. Mark old ones inactive when retired. Used by Packages and client onboarding.</p>
+        <p>Every product Travelgenix sells. Toggle a product on or off, and tick which packages include it. Package ticks feed new client onboarding and stay in sync with the Packages tab. Used by Packages and client onboarding.</p>
       </div>
       <button class="btn btn-primary" id="add-btn" type="button">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -384,6 +421,9 @@
 
     // ─── State ────────────────────────────────────────────────────────
     let catalogueData = null;
+    let packagesData = null; // { packages: [...], included: { itemId: [pkgId,...] } }
+
+    const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
 
     // ─── Helpers ──────────────────────────────────────────────────────
     function escapeHtml(str) {
@@ -397,6 +437,24 @@
       el.className = 'toast toast-' + kind;
       el.dataset.visible = 'true';
       setTimeout(() => { el.dataset.visible = 'false'; }, 3000);
+    }
+
+    // Build the package-inclusion chips for one product. Reads the live
+    // matrix in packagesData; shows a quiet placeholder until it loads.
+    function renderPkgChips(item) {
+      if (!packagesData || !Array.isArray(packagesData.packages)) {
+        return '<span class="is-loading">…</span>';
+      }
+      const inc = new Set((packagesData.included && packagesData.included[item.id]) || []);
+      return packagesData.packages.map((pkg) => {
+        const on = inc.has(pkg.id);
+        return `
+          <button class="pkg-chip" type="button" role="checkbox" aria-checked="${on ? 'true' : 'false'}"
+            data-pkg-item="${escapeHtml(item.id)}" data-pkg-id="${escapeHtml(pkg.id)}"
+            aria-label="${escapeHtml(pkg.packageName)} package — ${escapeHtml(item.productName)} ${on ? 'included, tick to remove' : 'not included, tick to add'}">
+            <span class="tick">${CHECK_SVG}</span>${escapeHtml(pkg.packageName)}
+          </button>`;
+      }).join('');
     }
 
     // ─── Render ───────────────────────────────────────────────────────
@@ -421,6 +479,9 @@
                   <div class="product-meta">
                     <div class="product-name">${escapeHtml(item.productName)}</div>
                     <div class="product-code">${escapeHtml(item.productCode)}</div>
+                  </div>
+                  <div class="pkg-cell" data-pkg-cell="${escapeHtml(item.id)}">
+                    ${renderPkgChips(item)}
                   </div>
                   <div class="toggle-cell" data-on="${item.active ? 'true' : 'false'}">
                     <button class="toggle" type="button" role="switch"
@@ -452,6 +513,56 @@
       container.querySelectorAll('[data-toggle-id]').forEach((sw) => {
         sw.addEventListener('click', () => toggleActive(sw.dataset.toggleId, sw));
       });
+
+      // Wire package-inclusion chips
+      container.querySelectorAll('[data-pkg-item]').forEach((chip) => {
+        chip.addEventListener('click', () => setPackage(chip));
+      });
+    }
+
+    // ─── Package inclusion ─────────────────────────────────────────────
+    // Ticks/unticks whether a product is included by default in a package.
+    // Writes the same Package Catalogue join the Packages tab uses, so both
+    // screens stay in sync. Optimistic with revert on failure.
+    async function setPackage(chip) {
+      if (!packagesData || chip.dataset.busy === 'true') return;
+      const itemId = chip.dataset.pkgItem;
+      const pkgId = chip.dataset.pkgId;
+      const inc = packagesData.included[itemId] || (packagesData.included[itemId] = []);
+      const currentlyOn = inc.includes(pkgId);
+      const next = !currentlyOn;
+
+      chip.dataset.busy = 'true';
+      chip.setAttribute('aria-checked', String(next));
+
+      try {
+        const r = await fetch('/api/admin/catalogue/set-package', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ catalogueItemId: itemId, packageId: pkgId, includedByDefault: next }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const msg = data.errors?.join(' · ') || data.error || 'Could not update';
+          throw new Error(msg);
+        }
+        // Commit local state
+        if (next) {
+          if (!inc.includes(pkgId)) inc.push(pkgId);
+        } else {
+          packagesData.included[itemId] = inc.filter((x) => x !== pkgId);
+        }
+        const pkgName = packagesData.packages.find((p) => p.id === pkgId)?.packageName || 'package';
+        const itemName = catalogueData?.items.find((i) => i.id === itemId)?.productName || 'Product';
+        showToast(`${itemName} ${next ? 'added to' : 'removed from'} ${pkgName}`, 'success');
+      } catch (err) {
+        console.error(err);
+        chip.setAttribute('aria-checked', String(currentlyOn)); // revert
+        showToast(err.message || 'Network error. Try again.', 'error');
+      } finally {
+        chip.dataset.busy = 'false';
+      }
     }
 
     // ─── Inline active toggle ──────────────────────────────────────────
@@ -525,6 +636,22 @@
         console.error(err);
         document.getElementById('content').innerHTML =
           '<div class="center-state"><p>Could not load catalogue. Check your connection and reload.</p></div>';
+      }
+    }
+
+    // Loads the package x product inclusion matrix. Independent of the
+    // catalogue load — when it lands we re-render so the chips fill in.
+    async function loadPackages() {
+      try {
+        const r = await fetch('/api/admin/catalogue/packages', { credentials: 'include' });
+        if (!r.ok) throw new Error('packages failed: ' + r.status);
+        packagesData = await r.json();
+        if (!packagesData.included) packagesData.included = {};
+        if (catalogueData) render();
+      } catch (err) {
+        console.error('[catalogue] package matrix unavailable:', err);
+        // Leave packagesData null — chips degrade to a quiet placeholder,
+        // toggles and editing keep working.
       }
     }
 
@@ -606,6 +733,7 @@
 
     // ─── Boot ─────────────────────────────────────────────────────────
     loadCatalogue();
+    loadPackages();
   </script>
 </body>
 </html>
