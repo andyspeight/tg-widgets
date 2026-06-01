@@ -2627,6 +2627,127 @@
         setTimeout(launch, 650);
       }
     }
+
+    // Guided walkthrough for the CLASSIC Enquiry Form editor (template picker +
+    // field builder). Sibling to setupProTour. Uses the shared tour engine and
+    // the editor's own helpers (setPaletteTab, selectItem, parseFields) so every
+    // step lands on a real control. Mounts the launcher; auto-launch is handled
+    // by maybeAutoLaunchClassicTour so it never collides with the templates modal.
+    var _classicTourApi = null, _classicTourBooted = false, _classicTourLaunch = null;
+    function setupClassicTour() {
+      if (EP_IS_PRO || _classicTourBooted) return;
+      if (!window.tgse || typeof window.tgse.tour !== 'function' || typeof window.tgse.tourLauncher !== 'function') return;
+      _classicTourBooted = true;
+      function selectFirstField() {
+        try {
+          var fs = parseFields(state.config.fieldsJSON);
+          if (fs && fs.length) selectItem({ kind: 'field', id: fs[0].id });
+        } catch (e) {}
+      }
+      function launch() {
+        if (_classicTourApi && typeof _classicTourApi.finish === 'function') { try { _classicTourApi.finish(false); } catch (e) {} }
+        _classicTourApi = window.tgse.tour({
+          id: 'enquiry',
+          welcome: {
+            titleHtml: 'Let\u2019s build your <em>enquiry form</em>',
+            body: 'A quick walk through the builder, one step at a time. About a minute, and you can shape your real form as we go. You can reopen this any time from the button in the corner. Ready?'
+          },
+          done: {
+            titleHtml: 'All set. <em>Your form is ready.</em>',
+            body: 'Save it, set the status to Live so it accepts enquiries, then grab your embed code and paste that one line on your site. Reopen this walkthrough any time from the button in the corner.'
+          },
+          steps: [
+            { beforeShow: () => setPaletteTab('fields'),
+              target: '.canvas', placement: 'left', spotlightPadding: 6,
+              title: 'Your form takes shape here',
+              body: 'This is your form, built from cards. A header sits at the top, your questions go in the middle, and a thank-you message rounds it off. It updates live as you work. Most forms start from a template, so you will already have a sensible set of fields to tweak rather than a blank page.' },
+
+            { target: '.topbar-name', placement: 'bottom', spotlightPadding: 6,
+              title: 'Name your form',
+              body: 'Give the form a name you will recognise later, like "Maldives landing page" or "Homepage enquiry". This is just for your own dashboard, visitors never see it, and it is saved with the form.' },
+
+            { beforeShow: () => setPaletteTab('fields'),
+              target: '.palette', placement: 'right', spotlightPadding: 6,
+              title: 'The field palette',
+              body: 'Every field you can add lives here, name, email, phone, destination, dates, dropdowns and more. Drag one onto the canvas to add it, then drag the cards on the canvas to reorder them. Ask for exactly what you need and no more, short forms convert best.' },
+
+            { beforeShow: () => selectFirstField(),
+              target: '#inspector', placement: 'left',
+              title: 'Edit a field',
+              body: 'Click any field on the canvas and its settings open here. Set the label, the placeholder, whether it is required, and for dropdowns or checkboxes the list of choices. This is where you fine-tune each question.' },
+
+            { beforeShow: () => selectItem({ kind: 'header' }),
+              target: '#inspector', placement: 'left',
+              title: 'Header and intro',
+              body: 'Set the Title shown at the top of the form, like "Tell us about your dream holiday", and an optional Subtitle underneath to set expectations. This is the first thing a visitor reads, so make it warm and specific to you.' },
+
+            { beforeShow: () => selectItem({ kind: 'thankyou' }),
+              target: '#inspector', placement: 'left',
+              title: 'Thank-you message',
+              body: 'What the visitor sees after they send their enquiry. Choose the behaviour: Inline shows the message below the form, Replace form swaps the form out for it, or Redirect sends them to a page of your choosing. Pop {firstName} in the text and it fills in their name.' },
+
+            { beforeShow: () => selectItem({ kind: 'settings', category: 'branding' }),
+              target: '#inspector', placement: 'left',
+              title: 'Branding',
+              body: 'Match the form to the site. Set the Button colour visitors act on, the Accent colour, and the Theme, light or dark. The live preview recolours as you change these, so you can dial it in by eye.' },
+
+            { beforeShow: () => selectItem({ kind: 'settings', category: 'layout' }),
+              target: '#inspector', placement: 'left',
+              title: 'Single page or steps',
+              body: 'Keep the form as one tidy page, or split a longer form into friendly steps with a progress bar so it never feels like a wall of boxes. Your call, and you can change it any time.' },
+
+            { beforeShow: () => setPaletteTab('routing'),
+              target: '.palette-tab[data-palette-tab="routing"]', placement: 'right',
+              title: 'Routing, where leads go',
+              body: 'This is the important part. Every enquiry is delivered through the destinations you switch on here. Email is always on so you never miss one, and you can add Google Sheets, your own Airtable, a Webhook, and Luna Chat, Marketing or Work alongside it. Click a destination to set it up on the right.' },
+
+            { beforeShow: () => { setPaletteTab('routing'); selectItem({ kind: 'routing', destination: 'email' }); },
+              target: '#inspector', placement: 'left',
+              title: 'Email (always on)',
+              body: 'The essential one. Enter the address or addresses that should be notified the instant someone enquires, usually the agent or a shared sales inbox. This is what guarantees a lead is never missed.' },
+
+            { beforeShow: () => selectItem({ kind: 'settings', category: 'status' }),
+              target: '#inspector', placement: 'left',
+              title: 'Status, set it Live',
+              body: 'Draft, Live or Archived. A form must be set to Live before it will accept any submissions. Draft is for setting up and testing safely, and Archived hides it but keeps past enquiries. Remember to switch to Live before you hand the embed to a client.' },
+
+            { beforeShow: () => selectItem({ kind: 'settings', category: 'security' }),
+              target: '#inspector', placement: 'left',
+              title: 'Security and anti-spam',
+              body: 'The Honeypot is on by default and stops most bots invisibly. For busier sites, turn on Cloudflare Turnstile, a quiet challenge, and paste its site key. Set the Submission rate limit, and under Allowed origins list the domains permitted to embed this form so it cannot be used elsewhere.' },
+
+            { target: '#btn-preview', placement: 'bottom',
+              title: 'Preview as you go',
+              body: 'Click Preview to see and test the form exactly as a visitor would, then click again to drop back into the builder. Handy for a final check before you go live.' },
+
+            { target: '#save-btn', placement: 'bottom', spotlightPadding: 6,
+              title: 'Save your form',
+              body: 'Click Save to store everything, or just press Cmd/Ctrl+S, and it autosaves as you work too. Saving is what creates the form and gives it the ID used in your embed code, so always save before grabbing the embed.' },
+
+            { target: '#btn-embed', placement: 'bottom',
+              title: 'Last thing, your embed code',
+              body: 'Once it looks right and routing is set, click here for the one-line snippet. Paste it where you want the form to appear on the website and you are done. You can reopen this walkthrough any time from the button in the corner.' }
+          ]
+        });
+        _classicTourApi.start();
+        return _classicTourApi;
+      }
+      _classicTourLaunch = launch;
+      window.tgse.tourLauncher({ id: 'enquiry', label: 'Show me how', onClick: launch });
+    }
+
+    // One-shot auto-launch for the classic tour. Called once the editor is ready
+    // (existing forms) or once the templates modal has closed (new forms), so the
+    // tour welcome never stacks on top of the template picker.
+    var _classicAutoKicked = false;
+    function maybeAutoLaunchClassicTour() {
+      if (EP_IS_PRO || _classicAutoKicked) return;
+      _classicAutoKicked = true;
+      if (!window.tgse) return;
+      if (window.tgse.isTourDismissed && window.tgse.isTourDismissed('enquiry')) return;
+      if (typeof _classicTourLaunch === 'function') setTimeout(_classicTourLaunch, 500);
+    }
+
     const STORAGE_KEY     = 'tgw_session';               // shared with rest of suite
     const AUTOSAVE_DELAY  = 2000;                         // ms after last change
 
@@ -6805,6 +6926,8 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       if (!overlay) return;
       overlay.classList.remove('is-open');
       setTimeout(() => overlay.remove(), 220);
+      // New-form path: now the picker is gone, offer the guided tour (once).
+      try { maybeAutoLaunchClassicTour(); } catch (e) {}
     }
 
     // Apply a chosen template to state.config, dismiss modal, re-render.
@@ -7364,6 +7487,14 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
         const cl = $('#canvas-label'); if (cl) cl.textContent = 'Live preview';
         const ch = $('#canvas-hint'); if (ch) ch.textContent = 'Exactly what your visitors see — edit from the Settings tab';
         setupProTour();
+      }
+
+      // Classic Enquiry Form: mount the guided tour launcher. For an existing
+      // form (no templates modal) we can auto-launch right away; for a new form
+      // the kick happens when the templates modal closes (see closeTemplatesModal).
+      if (!EP_IS_PRO) {
+        setupClassicTour();
+        if (loadId) maybeAutoLaunchClassicTour();
       }
 
       // Show the templates modal for NEW forms (no ?id= in URL).
