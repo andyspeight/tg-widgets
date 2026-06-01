@@ -370,6 +370,7 @@
     this.config = this._normalise(config || {});
     this._resetState();
     this._render();
+    try { container.__tgWidget = this; } catch (e) {}
   }
 
   TGEnquiryProWidget.prototype._normalise = function (c) {
@@ -408,6 +409,12 @@
     this.config = this._normalise(config || {});
     this._applyTheme();
     this._render();
+  };
+  // Public: jump to a step (used by the product tour). Clamps to valid range.
+  TGEnquiryProWidget.prototype.gotoStep = function (n) {
+    if (this._turnstile) { try { this._turnstile.destroy(); } catch (e) {} this._turnstile = null; }
+    this.S.step = Math.max(0, Math.min(STEPS.length - 1, n | 0));
+    this._renderStep();
   };
   TGEnquiryProWidget.prototype.destroy = function () {
     if (this._turnstile) { try { this._turnstile.destroy(); } catch (e) {} this._turnstile = null; }
