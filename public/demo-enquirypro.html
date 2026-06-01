@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Enquiry Pro — demo</title>
+<style>
+  body{margin:0;background:#F6F7F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0F172A;min-height:100dvh}
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 16px;background:#fff;border-bottom:1px solid #E6E8EC;font-size:12.5px;color:#64748B;position:sticky;top:0;z-index:5}
+  .bar strong{color:#0F172A}
+  .bar .sp{flex:1}
+  .sw{width:22px;height:22px;border-radius:50%;border:2px solid #fff;outline:1px solid #E6E8EC;cursor:pointer;padding:0}
+  .sw[aria-pressed="true"]{outline:2px solid #0F172A;transform:scale(1.08)}
+  .tg{border:1px solid #CBD5E1;background:transparent;color:#475569;border-radius:999px;padding:5px 12px;font:inherit;font-size:12px;cursor:pointer}
+  .stage{display:flex;justify-content:center;padding:clamp(16px,4vw,48px) 16px 64px}
+  .note{max-width:540px;margin:0 auto 18px;font-size:13px;color:#64748B;text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <strong>Enquiry Pro</strong> &nbsp;·&nbsp; demo (preview mode — no live submit)
+    <span class="sp"></span>
+    <button class="sw" style="background:#0891B2" data-b="#0891B2|#F97316" aria-pressed="true" title="Travelgenix teal"></button>
+    <button class="sw" style="background:#7C3AED" data-b="#7C3AED|#F59E0B" aria-pressed="false" title="Violet"></button>
+    <button class="sw" style="background:#0D9488" data-b="#0D9488|#F97316" aria-pressed="false" title="Emerald"></button>
+    <button class="tg" id="themeBtn">Dark mode</button>
+  </div>
+
+  <div class="stage">
+    <div id="mount"></div>
+  </div>
+  <div class="note">This demo runs the production widget with no <code>formId</code>, so submitting just shows the success state. On a client site it loads config from <code>?id=</code> and posts to the same inbox as their enquiry form.</div>
+
+  <script src="/widget-enquirypro.js"></script>
+  <script>
+    var theme = 'light';
+    var brand = { buttonColour: '#0891B2', accentColour: '#F97316', theme: 'light' };
+    var mount = document.getElementById('mount');
+    var widget;
+    function build(){
+      mount.innerHTML = '';
+      var host = document.createElement('div');
+      mount.appendChild(host);
+      widget = new TGEnquiryProWidget(host, {
+        formId: 'preview',
+        header: { title: 'Blue Horizon Travel' },
+        agencyName: 'Blue Horizon Travel',
+        responseTime: 'one working day',
+        branding: { buttonColour: brand.buttonColour, accentColour: brand.accentColour, theme: theme }
+      });
+    }
+    document.querySelectorAll('.sw').forEach(function(s){
+      s.onclick = function(){
+        document.querySelectorAll('.sw').forEach(function(x){x.setAttribute('aria-pressed','false');});
+        s.setAttribute('aria-pressed','true');
+        var v = s.getAttribute('data-b').split('|');
+        brand.buttonColour = v[0]; brand.accentColour = v[1];
+        build();
+      };
+    });
+    document.getElementById('themeBtn').onclick = function(){
+      theme = theme === 'dark' ? 'light' : 'dark';
+      this.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+      document.body.style.background = theme === 'dark' ? '#0B1220' : '#F6F7F5';
+      build();
+    };
+    build();
+  </script>
+</body>
+</html>
