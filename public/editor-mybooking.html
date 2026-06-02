@@ -474,6 +474,11 @@
             <div class="toggle-row"><span>Hotel description</span><button class="switch on" data-display="showHotelDescription" type="button"></button></div>
             <div class="toggle-row"><span>Cancellation policy</span><button class="switch on" data-display="showCancellation" type="button"></button></div>
             <div class="toggle-row"><span>Online cancellation<small>Let customers cancel a product from the widget — they see the policy and charges before confirming.</small></span><button class="switch on" data-display="showCancel" type="button"></button></div>
+            <div class="toggle-row"><span>Send cancellation email<small>Email the traveller a confirmation when they cancel a product. Turn off if you'd rather handle this yourself.</small></span><button class="switch on" data-display="cancelEmail" type="button"></button></div>
+            <div class="field">
+              <label>Cancellation email message</label>
+              <textarea id="copy-cancel-email-msg" rows="4" placeholder="Leave blank to use the default confirmation wording.">We're writing to confirm that your booking has been cancelled as requested. If any refund is due it will be processed in line with the cancellation policy. If you didn't request this or have any questions, please get in touch.</textarea>
+            </div>
             <div class="toggle-row"><span>Local fees</span><button class="switch on" data-display="showLocalFees" type="button"></button></div>
           </div></div>
         </div>
@@ -611,7 +616,7 @@ import { renderEmailHtml } from '/_email-template.js';
       colors: Object.assign({}, DEFAULT_COLOURS),
       radius: 12,
       support: { email: '', phone: '' },
-      display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, showLocalFees: true },
+      display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
     previewTheme: 'light',
@@ -803,7 +808,7 @@ import { renderEmailHtml } from '/_email-template.js';
   });
 
   // ===== Copy fields =====
-  ['copy-title', 'copy-subtitle', 'copy-subtitle-short', 'copy-eyebrow', 'support-email', 'support-phone'].forEach(id => {
+  ['copy-title', 'copy-subtitle', 'copy-subtitle-short', 'copy-eyebrow', 'support-email', 'support-phone', 'copy-cancel-email-msg'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('input', () => {
       if (id === 'copy-title') state.config.title = el.value;
@@ -812,6 +817,7 @@ import { renderEmailHtml } from '/_email-template.js';
       else if (id === 'copy-eyebrow') state.config.eyebrow = el.value;
       else if (id === 'support-email') state.config.support.email = el.value;
       else if (id === 'support-phone') state.config.support.phone = el.value;
+      else if (id === 'copy-cancel-email-msg') state.config.cancelEmailMessage = el.value;
       schedulePreview();
     });
   });
@@ -1119,6 +1125,7 @@ import { renderEmailHtml } from '/_email-template.js';
       document.getElementById('copy-eyebrow').value = state.config.eyebrow || '';
       document.getElementById('support-email').value = state.config.support?.email || '';
       document.getElementById('support-phone').value = state.config.support?.phone || '';
+      document.getElementById('copy-cancel-email-msg').value = state.config.cancelEmailMessage || '';
       document.getElementById('brand-name').value = state.config.brand?.name || '';
       // Layout tile
       document.querySelectorAll('.layout-tile').forEach(t => t.classList.toggle('active', t.dataset.layout === state.config.layout));
