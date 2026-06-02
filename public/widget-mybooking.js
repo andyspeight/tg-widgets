@@ -1,7 +1,21 @@
 /**
- * Travelgenix My Booking Widget v1.4.1
+ * Travelgenix My Booking Widget v1.6.0
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.6.0 changes:
+ *   - Pay balance: order-level balance/instalment payment. Reads paidToDate +
+ *     depositOption from the order, shows "Pay balance · £X" CTAs (one in the
+ *     Payment card, one above the cancellation section), POSTs /api/pay-balance
+ *     and redirects to the Travelify basket. Server computes the amount.
+ *   - Payment card now surfaces order-level "Paid so far", "Balance remaining"
+ *     and "Next payment due" rows (previously these read empty hotel-deposit
+ *     data, so nothing showed).
+ *   - Multiple pay CTAs bound and error-scoped independently.
+ *
+ * v1.5.0 changes:
+ *   - Per-product online cancellation (two-step policy → confirm) with optional
+ *     confirmation email. Gated behind the showCancel / cancelEmail toggles.
  *
  * v1.4.1 changes (CRITICAL DATA-INTEGRITY FIX):
  *   - Removed all fabricated fallbacks on supplier (Travelify) data. Booking
@@ -1703,15 +1717,13 @@
       <div data-tgm-cancel-mount></div>`;
   }
 
-  // Work out the next payment to collect from the order's deposit schedule —
-  // mirrors the server's logic in /api/pay-balance so the displayed amount
-  // matches what the basket will charge. The server stays authoritative; this
-  // is for the button label only. (The trimmed schedule has no paid flag, so
-  // we take the earliest payment by due date.)
-  function computeNextDue(installPlan, standardDep) {
-    const plan = installPlan || standardDep;
-    if (!plan) return null;
-    const entries = (Array.isArray(plan.breakdown) ? plan.breakdown : [])
+  // Work out the next payment to collect from the ORDER-LEVEL deposit option
+  // (order.depositOption.breakdown = the outstanding schedule). Mirrors the
+  // server in /api/pay-balance so the displayed amount matches the basket.
+  function computeNextDue(order) {
+    const dep = order && order.depositOption;
+    const bd = dep && Array.isArray(dep.breakdown) ? dep.breakdown : [];
+    const entries = bd
       .map(b => ({ amount: Number(b.amount), dueDate: b.dueDate || '', due: Date.parse(b.dueDate) }))
       .filter(e => Number.isFinite(e.amount) && e.amount > 0);
     if (!entries.length) return null;
@@ -1723,13 +1735,13 @@
       dueDate: next.dueDate,
       remaining: rest.length,
       remainingAmount: rest.reduce((s, e) => s + e.amount, 0),
-      isInstalment: !!installPlan,
+      isInstalment: entries.length > 1,
     };
   }
 
   // The "Pay balance / Pay next payment" CTA inside the Payment section.
-  function renderPayBalance(installPlan, standardDep, currency, c) {
-    const next = computeNextDue(installPlan, standardDep);
+  function renderPayBalance(order, currency, c) {
+    const next = computeNextDue(order);
     if (!next || !(next.amount > 0)) return '';
     const label = next.isInstalment
       ? (c.labels?.payNextBtn || 'Pay next payment')
@@ -2093,6 +2105,29 @@
                 </div>
               `;
             })()}
+            ${(() => {
+              // Order-level payment state — paid so far + outstanding balance,
+              // from the order's own payments + depositOption (works for any
+              // booking, not just hotels with a deposit schedule).
+              const dep = order.depositOption;
+              const paid = typeof order.paidToDate === 'number' ? order.paidToDate : 0;
+              const balance = (dep && Array.isArray(dep.breakdown))
+                ? dep.breakdown.reduce((s, b) => s + (typeof b.amount === 'number' ? b.amount : 0), 0)
+                : 0;
+              if (!(paid > 0) && !(balance > 0)) return '';
+              let rows = '';
+              if (paid > 0) {
+                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.paidSoFar || 'Paid so far')}</span><span class="v paid">${esc(fmtMoney(paid, currency))}</span></div>`;
+              }
+              if (balance > 0) {
+                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || 'Balance remaining')}</span><span class="v due">${esc(fmtMoney(balance, currency))}</span></div>`;
+                const next = (dep.breakdown || []).slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0];
+                if (next && next.dueDate) {
+                  rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.nextDueDate || 'Next payment due')}</span><span class="v">${esc(fmtDate(next.dueDate))}</span></div>`;
+                }
+              }
+              return rows;
+            })()}
             ${standardDep ? `
               <div class="tgm-pay-row">
                 <span class="tgm-pay-label">${esc(c.labels?.depositPaid || 'Deposit paid')}</span>
@@ -2171,7 +2206,7 @@
                 </div>
               `;
             })()}
-            ${(c.display?.showPayBalance !== false) ? renderPayBalance(installPlan, standardDep, currency, c) : ''}
+            ${(c.display?.showPayBalance !== false) ? renderPayBalance(order, currency, c) : ''}
           </div>
 
           <div class="tgm-section">
@@ -2305,6 +2340,8 @@
             ` : ''}
           </div></div>
         </div>` : ''}
+
+        ${(c.display?.showPayBalance !== false) ? renderPayBalance(order, currency, c) : ''}
 
         ${renderCancelSection(order, c)}
 
@@ -2560,9 +2597,10 @@
       // If a cancellation flow was mid-way when the view re-rendered, paint it.
       if (this._cancel && this._cancel.open) this._renderCancelModal();
 
-      // Pay balance / next payment.
-      const payBtn = root.querySelector('[data-tgm-pay]');
-      if (payBtn) payBtn.addEventListener('click', () => this._payBalance(payBtn));
+      // Pay balance / next payment (the CTA can appear in more than one place).
+      root.querySelectorAll('[data-tgm-pay]').forEach(payBtn => {
+        payBtn.addEventListener('click', () => this._payBalance(payBtn));
+      });
 
       // Issue 4: "Look up another booking" returns to the lookup form. We
       // clear the cached booking, PDF blob and lookup details so the next
@@ -2880,8 +2918,9 @@
       if (!this.lookup || !this.c.widgetId) return;
 
       const root = this.shadow.querySelector('.tgm-root');
+      const action = btn.closest('.tgm-pay-action');
       const label = btn.querySelector('[data-tgm-pay-label]');
-      const errMount = root?.querySelector('[data-tgm-pay-error]');
+      const errMount = action ? action.querySelector('[data-tgm-pay-error]') : null;
       const prevLabel = label ? label.textContent : '';
       if (errMount) errMount.innerHTML = '';
 
