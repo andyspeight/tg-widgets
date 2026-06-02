@@ -1,784 +1,1586 @@
 /**
- * Travelgenix Widget Suite — Booking PDF (public endpoint)
+ * Travelgenix Widget Suite — PDF HTML template
  *
- * Generates a print-ready A4 PDF of a confirmed booking.
+ * Renders the trimmed `order` object (see retrieve-order.js trimOrder())
+ * into a print-ready A4 HTML document. Two pages when there's enough
+ * hotel detail to justify it, single page otherwise.
  *
- * Mirrors retrieve-order.js exactly for auth/lookup/Travelify call so the
- * two endpoints behave identically — same env var, same widget+integration
- * resolution, same Origin handling, same DEMO_WIDGET_ID bypass. Differs only
- * in output: this one renders HTML via _pdf-template.js and pipes through
- * Puppeteer to produce a PDF buffer instead of returning JSON.
+ * Used by booking-pdf.js — Puppeteer turns the returned HTML into a PDF.
  *
- * Endpoint:
- *   POST /api/booking-pdf
- *   Body: { widgetId, emailAddress, departDate, orderRef }
+ * Design language is locked to the approved A4 mockup:
+ *   - Inter (body) + Fraunces (display) via Google Fonts
+ *   - Travelgenix navy #1B2B5B header band + hero gradient
+ *   - Soft slate body, accent cyan for callouts, success green / warning amber
+ *   - 794 × 1123 px page size (A4 at 96dpi)
  *
- * Response:
- *   200 → application/pdf (binary attachment)
- *   404 → { error: 'not_found' }
- *   429 → { error: 'too_many_attempts' }
- *   5xx → { error: 'server_error' }
- *
- * Vercel function config (vercel.json):
- *   memory: 1024, maxDuration: 30
- *
- * Vercel deps (package.json):
- *   @sparticuz/chromium, puppeteer-core
+ * Public API:
+ *   renderPdfHtml(order, opts) → string (full HTML document)
  */
 
-import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
-import { renderPdfHtml } from '../public/_pdf-template.js';
+// ----- Helpers -----
 
-// ----- Constants (matched 1:1 with retrieve-order.js) -----
+const escapeHtml = (s) => {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
 
-const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
-const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
-
-const TRAVELIFY_API = 'https://api.travelify.io/account/order';
-
-// ----- Demo bypass (mirrors retrieve-order.js) -----
-// When widgetId === DEMO_WIDGET_SENTINEL, skip the Airtable widget lookup
-// and use the hardcoded Travelgenix demo credentials (App 250). Same fallback
-// as /api/offers and /api/retrieve-order.
-const DEMO_WIDGET_SENTINEL = 'DEMO_WIDGET_ID';
-const DEMO_APP_ID = '250';
-const DEMO_PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
-
-// ----- Puppeteer (lazy-loaded so cold start is cheap on health checks) -----
-
-let _chromium, _puppeteer;
-async function getBrowser() {
-  if (!_chromium) {
-    _chromium = (await import('@sparticuz/chromium')).default;
-    _puppeteer = (await import('puppeteer-core')).default;
-  }
-  return await _puppeteer.launch({
-    args: [..._chromium.args, '--font-render-hinting=none'],
-    defaultViewport: _chromium.defaultViewport,
-    executablePath: await _chromium.executablePath(),
-    headless: _chromium.headless,
+const formatMoney = (amount, currency) => {
+  if (amount == null || !Number.isFinite(amount)) return '—';
+  const symbol = currencySymbol(currency);
+  const formatted = Math.abs(amount).toLocaleString('en-GB', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
-}
+  return amount < 0 ? `– ${symbol}${formatted}` : `${symbol}${formatted}`;
+};
 
-// ----- Rate limiting -----
-
-const rateLimitStore = new Map();
-const RL_WINDOW_MS = 15 * 60 * 1000;
-
-function rateLimit(key, max) {
-  const now = Date.now();
-  const entry = rateLimitStore.get(key);
-  if (rateLimitStore.size > 1000) {
-    for (const [k, v] of rateLimitStore.entries()) if (v.resetAt < now) rateLimitStore.delete(k);
+const currencySymbol = (code) => {
+  switch ((code || '').toUpperCase()) {
+    case 'GBP': return '£';
+    case 'EUR': return '€';
+    case 'USD': return '$';
+    case 'AUD': return 'A$';
+    case 'CAD': return 'C$';
+    default: return code ? `${code} ` : '£';
   }
-  if (!entry || entry.resetAt < now) {
-    rateLimitStore.set(key, { count: 1, resetAt: now + RL_WINDOW_MS });
-    return { ok: true };
-  }
-  if (entry.count >= max) return { ok: false, retryAfterMs: entry.resetAt - now };
-  entry.count++;
-  return { ok: true };
-}
+};
 
-function getClientIp(req) {
-  const xff = req.headers['x-forwarded-for'];
-  if (typeof xff === 'string' && xff.length > 0) return xff.split(',')[0].trim();
-  return req.socket?.remoteAddress || 'unknown';
-}
+const formatDate = (iso, opts = {}) => {
+  if (!iso) return '—';
+  const d = new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  const day = opts.includeWeekday
+    ? d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' }) + ' '
+    : '';
+  return day + d.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: opts.shortMonth ? 'short' : 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+};
 
-// ----- Validation -----
+const formatDateShort = (iso) => {
+  if (!iso) return '—';
+  const d = new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
+  });
+};
 
-function validateEmail(s) {
-  if (typeof s !== 'string') return null;
-  const v = s.trim().toLowerCase();
-  if (v.length < 5 || v.length > 254) return null;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return null;
-  return v;
-}
-function validateDate(s) {
-  if (typeof s !== 'string') return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  const d = new Date(s + 'T00:00:00Z');
+const computeNights = (startDate, duration) => {
+  if (Number.isFinite(duration) && duration > 0) return duration;
+  return null;
+};
+
+const computeCheckout = (startDate, nights) => {
+  if (!startDate || !Number.isFinite(nights)) return null;
+  const d = new Date(startDate.length === 10 ? startDate + 'T00:00:00Z' : startDate);
   if (Number.isNaN(d.getTime())) return null;
-  const yr = parseInt(s.slice(0, 4), 10);
-  if (yr < 2020 || yr > 2050) return null;
-  return s;
-}
-function validateOrderRef(s) {
-  if (typeof s !== 'string') return null;
-  const v = s.trim().toUpperCase();
-  if (!/^[A-Z0-9_\-]{3,40}$/.test(v)) return null;
-  return v;
-}
-function validateWidgetId(s) {
-  if (typeof s !== 'string') return null;
-  if (!/^[a-zA-Z0-9_\-]{8,80}$/.test(s)) return null;
-  return s;
-}
+  d.setUTCDate(d.getUTCDate() + nights);
+  return d.toISOString().slice(0, 10);
+};
 
-// ----- Airtable (identical pattern to retrieve-order.js) -----
+// Render star rating as inline SVG, not Unicode characters.
+//
+// Why SVG: in production the PDF is generated by headless Chromium running
+// in a Vercel serverless function. That environment ships with a minimal
+// system font set, and the Inter/Fraunces Google Fonts we load are Latin-
+// focused — neither contains U+2605 (BLACK STAR). When the renderer can't
+// find the glyph it falls back to whatever generic font is available; if
+// nothing has a star glyph, the result is a tofu box (missing-glyph
+// rectangle). SVG avoids the entire font-fallback problem because the
+// shape is drawn directly from path coordinates.
+//
+// Style matches the widget (filled gold-amber polygon, 14px square).
+const renderStars = (rating) => {
+  if (!Number.isFinite(rating)) return '';
+  const n = Math.max(0, Math.min(5, Math.round(rating)));
+  if (n === 0) return '';
+  const oneStar = '<svg viewBox="0 0 24 24" width="14" height="14" fill="#FFD166" aria-hidden="true"><polygon points="12 2 15 9 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 9 12 2"/></svg>';
+  return oneStar.repeat(n);
+};
 
-function airtableHeaders() {
-  const key = process.env.AIRTABLE_KEY;
-  if (!key) throw new Error('AIRTABLE_KEY env var missing');
-  return { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' };
-}
-
-async function findWidgetById(widgetId) {
-  const safe = sanitiseForFormula(widgetId);
-  const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${WIDGETS_TABLE}`);
-  url.searchParams.set('filterByFormula', `{WidgetID}='${safe}'`);
-  url.searchParams.set('maxRecords', '1');
-  const res = await fetch(url.toString(), { headers: airtableHeaders() });
-  if (!res.ok) throw new Error(`Widget lookup failed: ${res.status}`);
-  const data = await res.json();
-  return data.records?.[0] || null;
-}
-
-// ----- Trim (mirrors retrieve-order.js shape so template input is identical) -----
-// Kept inline rather than imported to avoid coupling the public retrieve
-// endpoint's trim function as a stable contract.
-
-const safeStr = (v, max = 500) => v == null ? null : String(v).slice(0, max);
-const safeNum = (v) => typeof v === 'number' && Number.isFinite(v) ? v : null;
-const sanitiseDesc = (t) => typeof t === 'string' ? t.replace(/<[^>]*>/g, '').slice(0, 4000) : null;
-const sanitiseUrl = (u) => (typeof u === 'string' && /^https:\/\/[^\s]+$/i.test(u) && u.length <= 500) ? u : null;
-
-function trimAccommodation(d) {
-  return {
-    name: safeStr(d.name, 200),
-    propertyType: safeStr(d.propertyType, 60),
-    rating: safeNum(d.rating),
-    location: d.location ? {
-      address1: safeStr(d.location.address1, 300),
-      city: safeStr(d.location.city, 100),
-      state: safeStr(d.location.state, 100),
-      postalCode: safeStr(d.location.postalCode, 30),
-      country: safeStr(d.location.country, 10),
-    } : null,
-    pricing: d.pricing ? {
-      currency: safeStr(d.pricing.currency, 10),
-      price: safeNum(d.pricing.price),
-      inResortFees: safeNum(d.pricing.inResortFees),
-      isRefundable: !!d.pricing.isRefundable,
-      refundability: safeStr(d.pricing.refundability, 30),
-      breakdown: Array.isArray(d.pricing.breakdown)
-        ? d.pricing.breakdown.slice(0, 10).map(b => ({
-            type: safeStr(b.type, 30), name: safeStr(b.name, 100),
-            description: safeStr(b.description, 200),
-            unitPrice: safeNum(b.unitPrice), qty: safeNum(b.qty),
-          })) : [],
-      payAtLocation: Array.isArray(d.pricing.payAtLocation)
-        ? d.pricing.payAtLocation.slice(0, 10).map(b => ({
-            type: safeStr(b.type, 30), name: safeStr(b.name, 100),
-            description: safeStr(b.description, 200),
-            unitPrice: safeNum(b.unitPrice), qty: safeNum(b.qty),
-          })) : [],
-      depositOptions: Array.isArray(d.pricing.depositOptions)
-        ? d.pricing.depositOptions.slice(0, 5).map(opt => ({
-            id: safeNum(opt.id), name: safeStr(opt.name, 60),
-            amount: safeNum(opt.amount), dueDate: safeStr(opt.dueDate, 30),
-            breakdown: Array.isArray(opt.breakdown)
-              ? opt.breakdown.slice(0, 12).map(b => ({
-                  num: safeNum(b.num), amount: safeNum(b.amount), dueDate: safeStr(b.dueDate, 30),
-                })) : [],
-          })) : [],
-    } : null,
-    descriptions: Array.isArray(d.descriptions)
-      ? d.descriptions.slice(0, 30).map(desc => ({
-          type: safeStr(desc.type, 40), title: safeStr(desc.title, 100),
-          text: sanitiseDesc(desc.text),
-        })).filter(x => x.text) : [],
-    amenities: Array.isArray(d.amenities)
-      ? d.amenities.slice(0, 30).map(a => safeStr(a, 60)).filter(Boolean) : [],
-    media: Array.isArray(d.media)
-      ? d.media.slice(0, 12).map(m => ({
-          type: safeStr(m.type, 40), url: sanitiseUrl(m.url), caption: safeStr(m.caption, 200),
-        })).filter(m => m.url) : [],
-    units: Array.isArray(d.units)
-      ? d.units.slice(0, 5).map(u => ({
-          name: safeStr(u.name, 200), roomType: safeStr(u.roomType, 60),
-          checkin: safeStr(u.checkin, 30), nights: safeNum(u.nights),
-          rates: Array.isArray(u.rates)
-            ? u.rates.slice(0, 3).map(r => ({
-                name: safeStr(r.name, 100), board: safeStr(r.board, 40),
-              })) : [],
-        })) : [],
-    guests: Array.isArray(d.guests)
-      ? d.guests.slice(0, 12).map(g => ({
-          type: safeStr(g.type, 30), title: safeStr(g.title, 30),
-          firstname: safeStr(g.firstname, 80), surname: safeStr(g.surname, 80),
-        })) : [],
-  };
-}
-
-function trimFlightSegment(s) {
-  if (!s || typeof s !== 'object') return null;
-  return {
-    origin: s.origin ? { iataCode: safeStr(s.origin.iataCode, 10), terminal: safeStr(s.origin.terminal, 20), name: safeStr(s.origin.name, 200) } : null,
-    destination: s.destination ? { iataCode: safeStr(s.destination.iataCode, 10), terminal: safeStr(s.destination.terminal, 20), name: safeStr(s.destination.name, 200) } : null,
-    depart: safeStr(s.depart, 30), arrive: safeStr(s.arrive, 30),
-    duration: safeNum(s.duration), cabinClass: safeStr(s.cabinClass, 40), fareName: safeStr(s.fareName, 80),
-    baggage: s.baggage ? { allowance: safeStr(s.baggage.allowance, 200), weight: safeStr(s.baggage.weight, 40) } : null,
-    marketingCarrier: s.marketingCarrier ? { code: safeStr(s.marketingCarrier.code, 10), name: safeStr(s.marketingCarrier.name, 100) } : null,
-    flightNo: safeStr(s.flightNo, 20), aircraft: safeStr(s.aircraft, 20),
-  };
-}
-
-function trimFlights(d) {
-  return {
-    fareType: safeStr(d.fareType, 40),
-    pricing: d.pricing ? { currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price) } : null,
-    routes: Array.isArray(d.routes)
-      ? d.routes.slice(0, 4).map(r => ({
-          direction: safeStr(r.direction, 30), duration: safeNum(r.duration),
-          segments: Array.isArray(r.segments) ? r.segments.slice(0, 6).map(trimFlightSegment).filter(Boolean) : [],
-        })) : [],
-    fareInformation: Array.isArray(d.fareInformation)
-      ? d.fareInformation.slice(0, 10).map(f => ({
-          type: safeStr(f.type, 40), title: safeStr(f.title, 100), text: safeStr(f.text, 1000),
-        })).filter(f => f.text) : [],
-    travellers: Array.isArray(d.travellers)
-      ? d.travellers.slice(0, 12).map(t => ({
-          type: safeStr(t.type, 30), title: safeStr(t.title, 30),
-          firstname: safeStr(t.firstname, 80), surname: safeStr(t.surname, 80),
-        })) : [],
-  };
-}
-
-function trimAirportExtras(d) {
-  return {
-    type: safeStr(d.type, 40), name: safeStr(d.name, 200), subTitle: safeStr(d.subTitle, 200),
-    startDateTime: safeStr(d.startDateTime, 30), endDateTime: safeStr(d.endDateTime, 30),
-    location: d.location ? { iataCode: safeStr(d.location.iataCode, 10), terminal: safeStr(d.location.terminal, 20) } : null,
-    descriptions: Array.isArray(d.descriptions)
-      ? d.descriptions.slice(0, 12).map(desc => ({
-          type: safeStr(desc.type, 40), title: safeStr(desc.title, 100), text: sanitiseDesc(desc.text),
-        })).filter(x => x.text) : [],
-    pricing: d.pricing ? { currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price) } : null,
-    travellers: Array.isArray(d.travellers)
-      ? d.travellers.slice(0, 12).map(t => ({
-          type: safeStr(t.type, 30), title: safeStr(t.title, 30),
-          firstname: safeStr(t.firstname, 80), surname: safeStr(t.surname, 80),
-        })) : [],
-  };
-}
-
-// Shared between Transfers and CarRental. Same shape: a pickup or dropoff
-// point with optional airport metadata.
-function trimLocationPoint(p) {
-  if (!p || typeof p !== 'object') return null;
-  return {
-    dateTime: safeStr(p.dateTime, 30),
-    name: safeStr(p.name, 200),
-    address1: safeStr(p.address1, 200),
-    iataCode: safeStr(p.iataCode, 10),
-    onAirport: !!p.onAirport,
-    country: safeStr(p.country, 10),
-    latitude: safeNum(p.latitude),
-    longitude: safeNum(p.longitude),
-  };
-}
-
-// Transfers (Travelify product = "Transfers") — distinct from AirportExtras
-// with type=Transfer; different dataObject shape (Hoppa, Holiday Taxis etc).
-function trimTransfers(d) {
-  return {
-    type: safeStr(d.type, 40),
-    vehicle: safeStr(d.vehicle, 100),
-    company: safeStr(d.company, 120),
-    journeyDistance: safeStr(d.journeyDistance, 30),
-    journeyDuration: safeStr(d.journeyDuration, 30),
-    numberUnits: safeNum(d.numberUnits),
-    minOccupancy: safeNum(d.minOccupancy),
-    maxOccupancy: safeNum(d.maxOccupancy),
-    smallBagAllowance: safeNum(d.smallBagAllowance),
-    bigBagAllowance: safeNum(d.bigBagAllowance),
-    outPickup: trimLocationPoint(d.outPickup),
-    outDropoff: trimLocationPoint(d.outDropoff),
-    returnPickup: trimLocationPoint(d.returnPickup),
-    returnDropoff: trimLocationPoint(d.returnDropoff),
-    information: Array.isArray(d.information)
-      ? d.information.slice(0, 8).map(i => ({
-          type: safeStr(i.type, 40), title: safeStr(i.title, 100), text: sanitiseDesc(i.text),
-        })).filter(x => x.text) : [],
-    media: Array.isArray(d.media)
-      ? d.media.slice(0, 4).map(m => ({
-          type: safeStr(m.type, 40), url: sanitiseUrl(m.url), caption: safeStr(m.caption, 200),
-        })).filter(m => m.url) : [],
-    pricing: d.pricing ? {
-      currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price),
-      memberPrice: safeNum(d.pricing.memberPrice), refundability: safeStr(d.pricing.refundability, 30),
-    } : null,
-    travellers: Array.isArray(d.travellers)
-      ? d.travellers.slice(0, 12).map(t => ({
-          type: safeStr(t.type, 30), title: safeStr(t.title, 30),
-          firstname: safeStr(t.firstname, 80), surname: safeStr(t.surname, 80),
-        })) : [],
-  };
-}
-
-// Car Rental (Travelify product = "CarRental"). Vehicle specs + pickup/dropoff
-// + inclusions from the booked package + free-text policies.
-function trimCarRental(d) {
-  const pkg = Array.isArray(d.packages) && d.packages[0] ? d.packages[0] : null;
-  const pkgPricing = pkg?.pricing || null;
-  const payAtLocation = Array.isArray(pkgPricing?.payAtLocation)
-    ? pkgPricing.payAtLocation
-    : (Array.isArray(d.pricing?.payAtLocation) ? d.pricing.payAtLocation : []);
-  return {
-    name: safeStr(d.name, 200),
-    classCode: safeStr(d.classCode, 60),
-    className: safeStr(d.className, 60),
-    transmission: safeStr(d.transmission, 30),
-    fuelType: safeStr(d.fuelType, 30),
-    doors: safeNum(d.doors),
-    seats: safeNum(d.seats),
-    luggageLarge: safeNum(d.luggageLarge),
-    luggageSmall: safeNum(d.luggageSmall),
-    oneWay: !!d.oneWay,
-    rentalOperator: d.rentalOperator ? {
-      code: safeStr(d.rentalOperator.code, 30),
-      name: safeStr(d.rentalOperator.name, 120),
-    } : null,
-    pickup: trimLocationPoint(d.pickup),
-    dropoff: trimLocationPoint(d.dropoff),
-    inclusions: Array.isArray(pkg?.inclusions)
-      ? pkg.inclusions.slice(0, 20).map(i => safeStr(i, 60)).filter(Boolean) : [],
-    information: Array.isArray(d.information)
-      ? d.information.slice(0, 12).map(i => ({
-          type: safeStr(i.type, 40), title: safeStr(i.title, 120), text: sanitiseDesc(i.text),
-        })).filter(x => x.text) : [],
-    descriptions: Array.isArray(pkg?.descriptions)
-      ? pkg.descriptions.slice(0, 6).map(desc => ({
-          type: safeStr(desc.type, 40), title: safeStr(desc.title, 100), text: sanitiseDesc(desc.text),
-        })).filter(x => x.text) : [],
-    media: Array.isArray(d.media)
-      ? d.media.slice(0, 4).map(m => ({
-          type: safeStr(m.type, 40), url: sanitiseUrl(m.url), caption: safeStr(m.caption, 200),
-        })).filter(m => m.url) : [],
-    payAtLocation: payAtLocation.slice(0, 12).map(line => ({
-      name: safeStr(line.name, 120), description: safeStr(line.description, 500),
-      unitPrice: safeNum(line.unitPrice), qty: safeNum(line.qty),
-    })).filter(l => l.name || l.description),
-    pricing: d.pricing ? {
-      currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price),
-      memberPrice: safeNum(d.pricing.memberPrice), refundability: safeStr(d.pricing.refundability, 30),
-    } : null,
-    travellers: d.driver ? [{
-      type: safeStr(d.driver.type, 30), title: safeStr(d.driver.title, 30),
-      firstname: safeStr(d.driver.firstname, 80), surname: safeStr(d.driver.surname, 80),
-      isDriver: true,
-    }] : [],
-  };
-}
-
-// Tickets & Attractions (Travelify product = "TicketsAttractions").
-function trimTicketsAttractions(d) {
-  const opt = Array.isArray(d.options) && d.options[0] ? d.options[0] : null;
-  const dateOpt = Array.isArray(opt?.dateOptions) && opt.dateOptions[0] ? opt.dateOptions[0] : null;
-  const subOpt = Array.isArray(opt?.subOptions) && opt.subOptions[0] ? opt.subOptions[0] : null;
-  return {
-    name: safeStr(d.name, 200),
-    ticketType: safeStr(d.ticketType, 60),
-    minDuration: safeNum(d.minDuration),
-    maxDuration: safeNum(d.maxDuration),
-    reviewCount: safeNum(d.reviewCount),
-    reviewAvg: safeNum(d.reviewAvg),
-    location: d.location ? {
-      city: safeStr(d.location.city, 100),
-      country: safeStr(d.location.country, 10),
-      address1: safeStr(d.location.address1, 200),
-      latitude: safeNum(d.location.latitude),
-      longitude: safeNum(d.location.longitude),
-    } : null,
-    categories: Array.isArray(d.categories)
-      ? d.categories.slice(0, 8).map(c => safeStr(c, 60)).filter(Boolean) : [],
-    features: Array.isArray(d.features)
-      ? d.features.slice(0, 20).map(f => safeStr(f, 60)).filter(Boolean) : [],
-    selectedOption: opt ? {
-      name: safeStr(opt.name, 200),
-      type: safeStr(opt.type, 60),
-      scheduledDateTime: safeStr(dateOpt?.date, 30),
-      scheduledLabel: safeStr(dateOpt?.label, 200),
-      subOption: subOpt ? {
-        name: safeStr(subOpt.name, 120),
-        type: safeStr(subOpt.type, 60),
-        travellerType: safeStr(subOpt.travellerType, 30),
-      } : null,
-    } : null,
-    descriptions: Array.isArray(d.descriptions)
-      ? d.descriptions.slice(0, 10).map(desc => ({
-          type: safeStr(desc.type, 40), title: safeStr(desc.title, 100), text: sanitiseDesc(desc.text),
-        })).filter(x => x.text) : [],
-    media: Array.isArray(d.media)
-      ? d.media.slice(0, 6).map(m => ({
-          type: safeStr(m.type, 40), url: sanitiseUrl(m.url), caption: safeStr(m.caption, 200),
-        })).filter(m => m.url) : [],
-    pricing: d.pricing ? {
-      currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price),
-      memberPrice: safeNum(d.pricing.memberPrice), refundability: safeStr(d.pricing.refundability, 30),
-    } : null,
-    guests: Array.isArray(d.guests)
-      ? d.guests.slice(0, 20).map(g => ({
-          type: safeStr(g.type, 30), title: safeStr(g.title, 30),
-          firstname: safeStr(g.firstname, 80), surname: safeStr(g.surname, 80),
-        })) : [],
-  };
-}
-
-// Packages (Travelify product = "Packages") = ATOL-protected holiday
-// packages (Jet2 Holidays, EveryHoliday, TUI, etc). Composite of hotel +
-// flights with an ATOL operator. Splits the package's dataObject into
-// virtual accommodation + flights so existing render paths just work.
-function trimPackages(d) {
-  return {
-    accommodation: trimAccommodation(d),
-    flights: trimFlights(d),
-    operator: d.operator ? {
-      code: safeStr(d.operator.code, 30),
-      name: safeStr(d.operator.name, 120),
-      message: safeStr(d.operator.message, 300),
-    } : null,
-    atolProtected: Array.isArray(d.inclusions)
-      ? d.inclusions.some(i => /^ATOLProtection$/i.test(i))
-      : false,
-    inclusions: Array.isArray(d.inclusions)
-      ? d.inclusions.slice(0, 15).map(i => safeStr(i, 60)).filter(Boolean) : [],
-  };
-}
-
-function trimItem(item) {
-  if (!item || typeof item !== 'object') return null;
-  const out = {
-    id: safeNum(item.id), status: safeStr(item.status, 30), product: safeStr(item.product, 30),
-    bookingReference: safeStr(item.bookingReference, 100), price: safeNum(item.price),
-    currency: safeStr(item.originalCurrency, 10), startDate: safeStr(item.startDate, 30),
-    duration: safeNum(item.duration),
-  };
-  if (item.product === 'Accommodation' && item.dataObject) {
-    out.accommodation = trimAccommodation(item.dataObject);
-  } else if (item.product === 'Flights' && item.dataObject) {
-    out.flights = trimFlights(item.dataObject);
-  } else if (item.product === 'AirportExtras' && item.dataObject) {
-    out.airportExtras = trimAirportExtras(item.dataObject);
-  } else if (item.product === 'Transfers' && item.dataObject) {
-    out.transfers = trimTransfers(item.dataObject);
-  } else if (item.product === 'CarRental' && item.dataObject) {
-    out.carRental = trimCarRental(item.dataObject);
-  } else if (item.product === 'TicketsAttractions' && item.dataObject) {
-    out.ticketsAttractions = trimTicketsAttractions(item.dataObject);
-  } else if (item.product === 'Packages' && item.dataObject) {
-    // Packages are composite: expose accommodation + flights directly on
-    // the item so all existing rendering Just Works. Operator info and
-    // ATOL flag travel alongside on item.package for the hero badge.
-    const pkg = trimPackages(item.dataObject);
-    out.accommodation = pkg.accommodation;
-    out.flights = pkg.flights;
-    out.package = {
-      operator: pkg.operator,
-      atolProtected: pkg.atolProtected,
-      inclusions: pkg.inclusions,
+/**
+ * Mirror of widget-mybooking.js and booking-email-template.js
+ * resolveTotalLabel. Kept in sync so the PDF Total line reads the same as
+ * the widget the customer just used.
+ *
+ * Tiered logic (in order of precedence):
+ *   1. Accommodation present  → "Total holiday cost"
+ *   2. Flights only / mixed   → "Total flight cost"
+ *   3. Single product type    → product-specific label
+ *   4. Mixed / unknown        → "Total cost"
+ */
+const resolveTotalLabel = (items) => {
+  if (!Array.isArray(items) || items.length === 0) return 'Total cost';
+  const products = new Set(items.map(i => i?.product).filter(Boolean));
+  // Packages bundle hotel + flights — same tier as Accommodation.
+  if (products.has('Accommodation') || products.has('Packages')) return 'Total holiday cost';
+  if (products.has('Flights')) return 'Total flight cost';
+  if (products.size === 1) {
+    const only = products.values().next().value;
+    const map = {
+      AirportExtras:       'Total cost',
+      TicketsAttractions:  'Total ticket cost',
+      Tickets:             'Total ticket cost',
+      Ticket:              'Total ticket cost',
+      CarRental:           'Total car hire cost',
+      CarHire:             'Total car hire cost',
+      Transfers:           'Total transfer cost',
+      Transfer:            'Total transfer cost',
+      Insurance:           'Total insurance cost',
     };
+    return map[only] || 'Total cost';
   }
-  return out;
-}
+  return 'Total cost';
+};
 
-function computeSummary(items) {
-  const summary = {
-    totalPrice: 0,
-    hasAccommodation: false, hasFlights: false, hasAirportExtras: false,
-    hasTransfers: false, hasCarRental: false, hasTicketsAttractions: false, hasPackages: false,
-    earliestStart: null, travellers: [],
+const titleCaseName = (parts) => parts.filter(Boolean).join(' ');
+
+// Pick the best hero image: EXTERIOR > first available
+const pickHeroImage = (media) => {
+  if (!Array.isArray(media) || media.length === 0) return null;
+  const exterior = media.find((m) => /exterior/i.test(m?.type || ''));
+  return (exterior?.url) || media[0]?.url || null;
+};
+
+// Render an ISO timestamp as HH:MM in airport-local clock. Travelify dresses
+// local times as UTC so we read UTC components — same convention used by
+// the widget. Mismatching this would shift printed clock times by hours.
+const fmtTimeUtc = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const mm = String(d.getUTCMinutes()).padStart(2, '0');
+  return hh + ':' + mm;
+};
+
+const fmtDuration = (mins) => {
+  if (typeof mins !== 'number' || !Number.isFinite(mins) || mins <= 0) return '';
+  const h = Math.floor(mins / 60);
+  const m = Math.round(mins % 60);
+  if (h && m) return h + 'h ' + m + 'm';
+  if (h) return h + 'h';
+  return m + 'm';
+};
+
+// Render a single Flights item as a print-safe table block. Each leg
+// (Outbound / Inbound) becomes a row group: depart info | route arrow |
+// arrive info, then a meta strip with cabin + baggage, then segment
+// detail rows for multi-stop legs. No collapsibles — print is always-on.
+const renderPdfFlightItem = (item) => {
+  const f = item?.flights;
+  if (!f || !Array.isArray(f.routes) || f.routes.length === 0) return '';
+
+  const carrierNames = new Set();
+  for (const r of f.routes) {
+    for (const s of (r.segments || [])) {
+      if (s.marketingCarrier?.name) carrierNames.add(s.marketingCarrier.name);
+    }
+  }
+  const carrier = Array.from(carrierNames).slice(0, 3).join(', ');
+
+  const renderLeg = (route) => {
+    const segs = route.segments || [];
+    if (segs.length === 0) return '';
+    const first = segs[0];
+    const last = segs[segs.length - 1];
+    const stops = segs.length - 1;
+    const flightMins = segs.reduce((a, s) => a + (typeof s.duration === 'number' ? s.duration : 0), 0);
+    const baggage = first.baggage?.allowance || first.baggage?.weight || '';
+    const cabin = first.cabinClass || '';
+    const fareName = first.fareName || '';
+
+    const segRows = stops > 0 ? segs.map((s, i) => {
+      const next = segs[i + 1];
+      let stopHtml = '';
+      if (next) {
+        const arr = Date.parse(s.arrive || '');
+        const dep = Date.parse(next.depart || '');
+        const gap = (Number.isFinite(arr) && Number.isFinite(dep)) ? Math.round((dep - arr) / 60000) : 0;
+        stopHtml = `
+          <tr><td colspan="3" style="padding:6px 0 6px 18px; font-size:11px; color:#64748B; font-style:italic; border-left:2px solid #E2E8F0; margin-left:18px;">
+            ${gap > 0 ? `${escapeHtml(fmtDuration(gap))} stopover in ${escapeHtml(s.destination?.iataCode || '')}` : `Stopover in ${escapeHtml(s.destination?.iataCode || '')}`}
+          </td></tr>`;
+      }
+      return `
+        <tr>
+          <td style="padding:6px 0; font-size:12px; color:#0F172A; vertical-align:top; width:60px;">
+            <strong class="num">${escapeHtml(fmtTimeUtc(s.depart))}</strong><br>
+            <span style="font-size:10px; color:#94A3B8;">${escapeHtml(s.origin?.iataCode || '')}</span>
+          </td>
+          <td style="padding:6px 12px; font-size:12px; color:#475569; vertical-align:top;">
+            <strong>${escapeHtml((s.marketingCarrier?.code || '') + (s.flightNo || ''))}</strong>${s.marketingCarrier?.name ? ` · ${escapeHtml(s.marketingCarrier.name)}` : ''}
+            <div style="font-size:10px; color:#94A3B8;">${escapeHtml(fmtDuration(s.duration))}${s.aircraft ? ` · Aircraft ${escapeHtml(s.aircraft)}` : ''}</div>
+          </td>
+          <td style="padding:6px 0; font-size:12px; color:#0F172A; vertical-align:top; width:60px; text-align:right;">
+            <strong class="num">${escapeHtml(fmtTimeUtc(s.arrive))}</strong><br>
+            <span style="font-size:10px; color:#94A3B8;">${escapeHtml(s.destination?.iataCode || '')}</span>
+          </td>
+        </tr>${stopHtml}`;
+    }).join('') : '';
+
+    return `
+      <div class="pdf-flight-route" style="padding:14px 0; border-top:1px solid #E2E8F0;">
+        <div style="display:inline-block; padding:2px 10px; background:#F1F5F9; border-radius:9999px; font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#475569; margin-bottom:10px;">
+          ${escapeHtml(route.direction || 'Flight')}
+        </div>
+        <table style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="vertical-align:top; width:35%;">
+              <div style="font-size:18px; font-weight:700; color:#0F172A; line-height:1.1;" class="num">${escapeHtml(fmtTimeUtc(first.depart))}</div>
+              <div style="font-size:11px; font-weight:600; color:#475569; margin-top:2px; letter-spacing:.04em;">${escapeHtml(first.origin?.iataCode || '')}${first.origin?.terminal ? ` · T${escapeHtml(first.origin.terminal)}` : ''}</div>
+              <div style="font-size:11px; color:#94A3B8; margin-top:2px;">${escapeHtml(first.origin?.name || '')}</div>
+            </td>
+            <td style="vertical-align:middle; text-align:center; width:30%;">
+              <div style="font-size:10px; color:#94A3B8;" class="num">${escapeHtml(fmtDuration(flightMins))}</div>
+              <div style="height:1px; background:#CBD5E1; margin:6px 12px; position:relative;">
+                <span style="display:inline-block; position:absolute; left:0; top:-3px; width:7px; height:7px; border-radius:50%; background:#00B4D8;"></span>
+                <span style="display:inline-block; position:absolute; right:0; top:-3px; width:7px; height:7px; border-radius:50%; background:#00B4D8;"></span>
+              </div>
+              <div style="font-size:10px; color:#94A3B8;">${stops === 0 ? 'Direct' : (stops + ' stop' + (stops === 1 ? '' : 's'))}</div>
+            </td>
+            <td style="vertical-align:top; width:35%; text-align:right;">
+              <div style="font-size:18px; font-weight:700; color:#0F172A; line-height:1.1;" class="num">${escapeHtml(fmtTimeUtc(last.arrive))}</div>
+              <div style="font-size:11px; font-weight:600; color:#475569; margin-top:2px; letter-spacing:.04em;">${escapeHtml(last.destination?.iataCode || '')}${last.destination?.terminal ? ` · T${escapeHtml(last.destination.terminal)}` : ''}</div>
+              <div style="font-size:11px; color:#94A3B8; margin-top:2px;">${escapeHtml(last.destination?.name || '')}</div>
+            </td>
+          </tr>
+        </table>
+        ${(cabin || baggage) ? `
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0; font-size:11px; color:#475569;">
+          ${cabin ? `<strong style="color:#0F172A;">${escapeHtml(cabin)}</strong>${fareName ? ` · ${escapeHtml(fareName)}` : ''}` : ''}
+          ${cabin && baggage ? ' &nbsp;·&nbsp; ' : ''}
+          ${baggage ? `${escapeHtml(baggage)}` : ''}
+        </div>` : ''}
+        ${segRows ? `
+        <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+          ${segRows}
+        </table>` : ''}
+      </div>`;
   };
-  for (const item of items) {
-    if (typeof item.price === 'number') summary.totalPrice += item.price;
-    if (item.product === 'Accommodation') summary.hasAccommodation = true;
-    else if (item.product === 'Flights') summary.hasFlights = true;
-    else if (item.product === 'AirportExtras') summary.hasAirportExtras = true;
-    else if (item.product === 'Transfers') summary.hasTransfers = true;
-    else if (item.product === 'CarRental') summary.hasCarRental = true;
-    else if (item.product === 'TicketsAttractions') summary.hasTicketsAttractions = true;
-    else if (item.product === 'Packages') {
-      // Packages bundle hotel + flights — set both flags so downstream
-      // consumers treat the booking as a holiday with flights.
-      summary.hasPackages = true;
-      summary.hasAccommodation = true;
-      summary.hasFlights = true;
-    }
-    if (item.startDate) {
-      const ts = Date.parse(item.startDate);
-      if (Number.isFinite(ts) && (!summary.earliestStart || ts < Date.parse(summary.earliestStart))) {
-        summary.earliestStart = item.startDate;
-      }
-    }
-  }
-  summary.totalPrice = Math.round(summary.totalPrice * 100) / 100;
-  if (summary.totalPrice === 0) summary.totalPrice = null;
-  const seen = new Set();
-  for (const item of items) {
-    // Pull travellers from all product types. Order matters: prefer the
-    // explicit travellers/guests array on the most-specific sub-object.
-    const list = item.accommodation?.guests
-      || item.flights?.travellers
-      || item.airportExtras?.travellers
-      || item.transfers?.travellers
-      || item.carRental?.travellers
-      || item.ticketsAttractions?.guests
-      || [];
-    for (const t of list) {
-      const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
-      if (!seen.has(key) && (t.firstname || t.surname)) {
-        seen.add(key); summary.travellers.push(t);
-      }
-    }
-  }
-  return summary;
-}
 
-function trimOrder(raw) {
-  if (!raw || typeof raw !== 'object') return null;
-  const items = Array.isArray(raw.items) ? raw.items.slice(0, 8).map(trimItem).filter(Boolean) : [];
-  return {
-    id: safeNum(raw.id), status: safeStr(raw.status, 30),
-    customerTitle: safeStr(raw.customerTitle, 30),
-    customerFirstname: safeStr(raw.customerFirstname, 80),
-    customerSurname: safeStr(raw.customerSurname, 80),
-    customerEmail: safeStr(raw.customerEmail, 254),
-    specialRequests: safeStr(raw.specialRequests, 1000),
-    currency: safeStr(raw.currency, 10), created: safeStr(raw.created, 30),
-    items, summary: computeSummary(items),
+  const fareInfo = (Array.isArray(f.fareInformation) ? f.fareInformation : []).filter((fi) => {
+    if (!fi.title || !fi.text) return false;
+    if ((fi.type || '').toLowerCase() === 'farebasis') return false;
+    if (/fare\s*basis/i.test(fi.title)) return false;
+    return true;
+  });
+
+  return `
+    <div style="margin-bottom:16px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;">
+        <div style="font-size:14px; font-weight:600; color:#0F172A;">✈ Flights</div>
+        ${carrier ? `<div style="font-size:11px; color:#94A3B8;">${escapeHtml(carrier)}</div>` : ''}
+      </div>
+      ${f.routes.map(renderLeg).join('')}
+      ${fareInfo.length > 0 ? `
+        <div style="margin-top:12px; padding:12px 14px; background:#F8FAFC; border-radius:8px;">
+          <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:8px;">Fare conditions</div>
+          ${fareInfo.map((fi) => `<div style="font-size:11px; color:#475569; margin-bottom:4px;"><strong style="color:#0F172A;">${escapeHtml(fi.title)}:</strong> ${escapeHtml(fi.text)}</div>`).join('')}
+        </div>` : ''}
+    </div>`;
+};
+
+// Render an AirportExtras item (Lounge / Transfer / Parking) for the PDF.
+const renderPdfExtraItem = (item) => {
+  const e = item?.airportExtras;
+  if (!e) return '';
+
+  const kindLabel = e.type === 'Lounge' ? 'Airport lounge'
+    : e.type === 'Transfer' ? 'Airport transfer'
+    : e.type === 'Parking' ? 'Airport parking'
+    : (e.type || 'Airport extra');
+
+  const airport = e.location?.iataCode || '';
+  const terminal = e.location?.terminal ? `T${e.location.terminal}` : '';
+  const startTime = fmtTimeUtc(e.startDateTime);
+  const endTime = fmtTimeUtc(e.endDateTime);
+  const dateLabel = e.startDateTime ? formatDateShort(e.startDateTime) : '';
+
+  const descByType = (type) => (e.descriptions || []).find((d) => d.type === type);
+  const fullDesc = descByType('Generic')?.text || '';
+  const openingTimes = descByType('OpeningTimes')?.text || '';
+  const dressCode = descByType('DressCode')?.text || '';
+
+  return `
+    <div class="pdf-extra-card" style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
+      <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">${escapeHtml(kindLabel)}</div>
+      <div style="font-size:14px; font-weight:600; color:#0F172A; margin-bottom:4px;">${escapeHtml(e.name || 'Airport extra')}</div>
+      ${e.subTitle ? `<div style="font-size:11px; color:#475569; margin-bottom:8px;">${escapeHtml(e.subTitle)}</div>` : ''}
+      <div style="font-size:11px; color:#475569; padding-top:8px; border-top:1px solid #E2E8F0;">
+        ${airport ? `<strong style="color:#0F172A;">${escapeHtml(airport)}</strong>${terminal ? ` · ${escapeHtml(terminal)}` : ''}` : ''}
+        ${(airport && dateLabel) ? '  ·  ' : ''}
+        ${dateLabel ? escapeHtml(dateLabel) : ''}
+        ${(dateLabel && startTime) ? '  ·  ' : ''}
+        ${startTime ? `<span class="num">${escapeHtml(startTime)}${endTime ? ` – ${escapeHtml(endTime)}` : ''}</span>` : ''}
+      </div>
+      ${(fullDesc || openingTimes || dressCode) ? `
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0; font-size:11px; color:#475569; line-height:1.55;">
+          ${fullDesc ? `<p style="margin:0 0 6px;">${escapeHtml(fullDesc.slice(0, 400))}${fullDesc.length > 400 ? '…' : ''}</p>` : ''}
+          ${openingTimes ? `<div><strong style="color:#0F172A;">Opening times:</strong> ${escapeHtml(openingTimes)}</div>` : ''}
+          ${dressCode ? `<div><strong style="color:#0F172A;">Dress code:</strong> ${escapeHtml(dressCode)}</div>` : ''}
+        </div>` : ''}
+    </div>`;
+};
+
+// Format a duration in minutes for PDF (matches widget fmtDurationMinutes).
+const fmtMins = (mins) => {
+  if (typeof mins !== 'number' || !Number.isFinite(mins) || mins <= 0) return '';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+};
+
+// Friendly location label — strips supplier-prepended airport codes so we
+// don't render "Paris (ORY-Orly) (ORY)" on transfers.
+const locLabel = (p) => {
+  if (!p) return '';
+  if (p.iataCode && p.onAirport && p.name && p.name.toUpperCase().includes(p.iataCode.toUpperCase())) {
+    return p.name;
+  }
+  if (p.iataCode && p.onAirport) return `${p.name || ''} (${p.iataCode})`.trim();
+  return p.name || p.address1 || '';
+};
+
+// PDF: Transfer card
+const renderPdfTransferItem = (item) => {
+  const t = item?.transfers;
+  if (!t) return '';
+  const outDate = t.outPickup?.dateTime ? formatDateShort(t.outPickup.dateTime) : '';
+  const outTime = t.outPickup?.dateTime ? formatTime(t.outPickup.dateTime) : '';
+  const returnDate = t.returnPickup?.dateTime ? formatDateShort(t.returnPickup.dateTime) : '';
+  const returnTime = t.returnPickup?.dateTime ? formatTime(t.returnPickup.dateTime) : '';
+  const fromLabel = locLabel(t.outPickup);
+  const toLabel = locLabel(t.outDropoff);
+  const route = [fromLabel, toLabel].filter(Boolean).join(' → ');
+  const importantInfo = (t.information || []).find(i => i.type === 'Generic' || /important/i.test(i.title || ''));
+  const cancelInfo = (t.information || []).find(i => i.type === 'CancelAndAmendments' || /cancel/i.test(i.title || ''));
+
+  const chips = [];
+  if (t.maxOccupancy) chips.push(`${t.maxOccupancy} ${t.maxOccupancy === 1 ? 'passenger' : 'passengers'}`);
+  if (t.bigBagAllowance) chips.push(`${t.bigBagAllowance} large ${t.bigBagAllowance === 1 ? 'bag' : 'bags'}`);
+  if (t.smallBagAllowance) chips.push(`${t.smallBagAllowance} small ${t.smallBagAllowance === 1 ? 'bag' : 'bags'}`);
+
+  return `
+    <div class="pdf-extra-card" style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
+      <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">Transfer${t.type ? ' · ' + escapeHtml(t.type) : ''}</div>
+      <div style="font-size:14px; font-weight:600; color:#0F172A; margin-bottom:4px;">${escapeHtml(route || t.vehicle || 'Transfer')}</div>
+      ${t.vehicle ? `<div style="font-size:11px; color:#475569; margin-bottom:8px;">${escapeHtml(t.vehicle)}${t.company ? ' · ' + escapeHtml(t.company) : ''}</div>` : ''}
+      <div style="font-size:11px; color:#475569; padding-top:8px; border-top:1px solid #E2E8F0;">
+        ${outDate ? `<div><strong style="color:#0F172A;">Outbound:</strong> ${escapeHtml(outDate)}${outTime ? ` · <span class="num">${escapeHtml(outTime)}</span>` : ''}</div>` : ''}
+        ${returnDate ? `<div style="margin-top:2px;"><strong style="color:#0F172A;">Return:</strong> ${escapeHtml(returnDate)}${returnTime ? ` · <span class="num">${escapeHtml(returnTime)}</span>` : ''}</div>` : ''}
+        ${t.journeyDuration ? `<div style="margin-top:2px;">${escapeHtml(t.journeyDuration)}${t.journeyDistance ? ` · ${escapeHtml(t.journeyDistance)}` : ''}</div>` : ''}
+      </div>
+      ${chips.length ? `<div style="margin-top:8px; font-size:11px; color:#475569;">${chips.map(escapeHtml).join(' · ')}</div>` : ''}
+      ${(importantInfo?.text || cancelInfo?.text) ? `
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0; font-size:11px; color:#475569; line-height:1.55;">
+          ${importantInfo?.text ? `<p style="margin:0 0 6px;">${escapeHtml(importantInfo.text.slice(0, 400))}${importantInfo.text.length > 400 ? '…' : ''}</p>` : ''}
+          ${cancelInfo?.text ? `<div><strong style="color:#0F172A;">Cancellation:</strong> ${escapeHtml(cancelInfo.text.slice(0, 300))}</div>` : ''}
+        </div>` : ''}
+    </div>`;
+};
+
+// PDF: Car Rental card
+const renderPdfCarRentalItem = (item) => {
+  const cr = item?.carRental;
+  if (!cr) return '';
+  const pickupDate = cr.pickup?.dateTime ? formatDateShort(cr.pickup.dateTime) : '';
+  const pickupTime = cr.pickup?.dateTime ? formatTime(cr.pickup.dateTime) : '';
+  const dropoffDate = cr.dropoff?.dateTime ? formatDateShort(cr.dropoff.dateTime) : '';
+  const dropoffTime = cr.dropoff?.dateTime ? formatTime(cr.dropoff.dateTime) : '';
+  const pickupLoc = locLabel(cr.pickup);
+  const dropoffLoc = locLabel(cr.dropoff);
+  const sameLocation = cr.pickup?.name && cr.dropoff?.name && cr.pickup.name === cr.dropoff.name;
+
+  const specs = [];
+  if (cr.transmission) specs.push(cr.transmission);
+  if (cr.seats) specs.push(`${cr.seats} seats`);
+  if (cr.doors) specs.push(`${cr.doors} doors`);
+  if (cr.luggageLarge) specs.push(`${cr.luggageLarge} large ${cr.luggageLarge === 1 ? 'bag' : 'bags'}`);
+  if (cr.fuelType && cr.fuelType !== 'Unknown') specs.push(cr.fuelType);
+
+  // Inclusion labels (split PascalCase fallback).
+  const inclusionMap = {
+    FreeCancellation: 'Free cancellation',
+    RoadsideAssistance: 'Roadside assistance',
+    LiabilityInsurance: 'Liability insurance',
+    TheftProtection: 'Theft protection',
+    UnlimitedMileage: 'Unlimited mileage',
   };
+  const splitPascal = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+  const inclusions = (cr.inclusions || []).map(i => inclusionMap[i] || splitPascal(i));
+
+  return `
+    <div class="pdf-extra-card" style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
+      <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">Car hire${cr.className ? ' · ' + escapeHtml(cr.className) : ''}</div>
+      <div style="font-size:14px; font-weight:600; color:#0F172A; margin-bottom:4px;">${escapeHtml(cr.name || 'Hire car')}</div>
+      ${cr.rentalOperator?.name ? `<div style="font-size:11px; color:#475569; margin-bottom:8px;">Supplied by ${escapeHtml(cr.rentalOperator.name)}</div>` : ''}
+      <div style="font-size:11px; color:#475569; padding-top:8px; border-top:1px solid #E2E8F0;">
+        ${pickupDate ? `<div><strong style="color:#0F172A;">Pickup:</strong> ${escapeHtml(pickupDate)}${pickupTime ? ` · <span class="num">${escapeHtml(pickupTime)}</span>` : ''}${pickupLoc ? ` · ${escapeHtml(pickupLoc)}` : ''}</div>` : ''}
+        ${dropoffDate ? `<div style="margin-top:2px;"><strong style="color:#0F172A;">Dropoff:</strong> ${escapeHtml(dropoffDate)}${dropoffTime ? ` · <span class="num">${escapeHtml(dropoffTime)}</span>` : ''}${(dropoffLoc && !sameLocation) ? ` · ${escapeHtml(dropoffLoc)}` : ''}</div>` : ''}
+      </div>
+      ${specs.length ? `<div style="margin-top:8px; font-size:11px; color:#475569;">${specs.map(escapeHtml).join(' · ')}</div>` : ''}
+      ${inclusions.length ? `
+        <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #E2E8F0;">
+          <div style="font-size:10px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">Included</div>
+          <div style="font-size:11px; color:#475569;">${inclusions.map(escapeHtml).join(' · ')}</div>
+        </div>` : ''}
+    </div>`;
+};
+
+// PDF: Tickets / Attractions card
+const renderPdfTicketsItem = (item) => {
+  const t = item?.ticketsAttractions;
+  if (!t) return '';
+  const opt = t.selectedOption;
+  const schedISO = opt?.scheduledDateTime || item.startDate;
+  const schedDate = schedISO ? formatDateShort(schedISO) : '';
+  const schedTime = schedISO ? formatTime(schedISO) : '';
+  const duration = fmtMins(t.minDuration === t.maxDuration ? t.minDuration : (t.maxDuration || t.minDuration));
+  const cityLine = t.location?.city ? [t.location.city, t.location.country].filter(Boolean).join(', ') : '';
+
+  // Pick a short description if available
+  const descByTitle = (title) => (t.descriptions || []).find(d => (d.title || '').toLowerCase() === title.toLowerCase());
+  const overview = descByTitle('Description')?.text || descByTitle('About')?.text || '';
+  const meetingPoint = (t.descriptions || []).find(d => /meeting\s*point/i.test(d.title || ''))?.text || '';
+
+  return `
+    <div class="pdf-extra-card" style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
+      <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">${escapeHtml(t.ticketType || 'Ticket')}${opt?.subOption?.name ? ' · ' + escapeHtml(opt.subOption.name) : ''}</div>
+      <div style="font-size:14px; font-weight:600; color:#0F172A; margin-bottom:4px;">${escapeHtml(t.name || 'Booking')}</div>
+      ${cityLine ? `<div style="font-size:11px; color:#475569; margin-bottom:8px;">${escapeHtml(cityLine)}</div>` : ''}
+      <div style="font-size:11px; color:#475569; padding-top:8px; border-top:1px solid #E2E8F0;">
+        ${schedDate ? `<div><strong style="color:#0F172A;">When:</strong> ${escapeHtml(schedDate)}${schedTime ? ` · <span class="num">${escapeHtml(schedTime)}</span>` : ''}</div>` : ''}
+        ${duration ? `<div style="margin-top:2px;"><strong style="color:#0F172A;">Duration:</strong> ${escapeHtml(duration)}</div>` : ''}
+        ${(t.guests && t.guests.length) ? `<div style="margin-top:2px;"><strong style="color:#0F172A;">Guests:</strong> ${escapeHtml(String(t.guests.length))}</div>` : ''}
+      </div>
+      ${(overview || meetingPoint) ? `
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0; font-size:11px; color:#475569; line-height:1.55;">
+          ${overview ? `<p style="margin:0 0 6px;">${escapeHtml(overview.slice(0, 400))}${overview.length > 400 ? '…' : ''}</p>` : ''}
+          ${meetingPoint ? `<div><strong style="color:#0F172A;">Meeting point:</strong> ${escapeHtml(meetingPoint.slice(0, 300))}</div>` : ''}
+        </div>` : ''}
+    </div>`;
+};
+
+// Pick a description for the page-2 hotel block
+const pickHotelDescription = (descriptions) => {
+  if (!Array.isArray(descriptions) || descriptions.length === 0) return null;
+  // Prefer something that looks editorial; fall back to first
+  const main =
+    descriptions.find((d) => /general|description|introduction|overview/i.test(d?.type || '')) ||
+    descriptions.find((d) => (d?.text || '').length > 200) ||
+    descriptions[0];
+  return main?.text || null;
+};
+
+// Lighten (positive) or darken (negative) a hex colour by a percentage.
+// Used to derive primary-dark from primary in the gradient ramp.
+function shiftHex(hex, percent) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 0xff;
+  const g = (n >> 8) & 0xff;
+  const b = n & 0xff;
+  const target = percent >= 0 ? 255 : 0;
+  const ratio = Math.abs(percent) / 100;
+  const adj = (c) => Math.round(c + (target - c) * ratio);
+  const out = (adj(r) << 16) | (adj(g) << 8) | adj(b);
+  return '#' + out.toString(16).padStart(6, '0');
 }
 
-// ----- Errors -----
+// ----- Main render -----
 
-function notFound(res) {
-  return res.status(404).json({ error: 'not_found', message: "We couldn't find a confirmed booking with those details." });
-}
+/**
+ * @param {object} order — trimmed order from retrieve-order
+ * @param {object} opts — {
+ *   issuedAt?: ISO string,
+ *   brandName?: string,            // displayed in header/footer when set; omitted when blank
+ *   supportEmail?: string,
+ *   supportPhone?: string,
+ *   colors?: { primary, accent, success, warning, text },
+ *   radius?: number                // base radius in px
+ * }
+ */
+export function renderPdfHtml(order, opts = {}) {
+  const issuedAt = opts.issuedAt || new Date().toISOString();
+  const brandName = (opts.brandName || '').trim();         // empty = no brand row
+  const hasBrand = brandName.length > 0;
+  const supportEmail = opts.supportEmail || null;
+  const supportPhone = opts.supportPhone || null;
 
-// ----- Handler -----
+  // Colour overrides — defaults match the Travelgenix design language but
+  // are fully overridable per widget.
+  const COLOR_DEFAULTS = {
+    primary: '#1B2B5B',
+    accent:  '#00B4D8',
+    success: '#10B981',
+    warning: '#F59E0B',
+    text:    '#0F172A',
+  };
+  const colors = Object.assign({}, COLOR_DEFAULTS, opts.colors || {});
+  // Note: don't use `|| 12` — that would treat 0 (Sharp) as falsy and
+  // substitute 12. Default only when the value is missing or NaN.
+  const parsedRadius = parseInt(opts.radius, 10);
+  const radius = Math.max(0, Math.min(28, Number.isFinite(parsedRadius) ? parsedRadius : 12));
+  // Derive a darker primary for the gradient ramp
+  const primaryDark = shiftHex(colors.primary, -18);
 
-export default async function handler(req, res) {
-  setCors(res);
-  if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  // First accommodation item is the v1 case. Packages bundle hotel + flights
+  // and expose item.accommodation directly (populated server-side by
+  // trimPackages), so widening the find here also picks them up.
+  const accomItem = (order.items || []).find((it) => it?.product === 'Accommodation' || it?.product === 'Packages') || (order.items || [])[0] || null;
+  const accom = accomItem?.accommodation || null;
 
-  // Internal-call detection. /api/booking-email calls this endpoint server-to-
-  // server to get the PDF for an outgoing email. Those calls come from the
-  // Vercel function's egress IP — if we rate-limited by that IP, every email
-  // user across the platform would share a tiny bucket. Instead, when the
-  // shared secret header matches, we trust the X-TG-Real-IP header for rate
-  // limiting and apply a higher per-IP cap (the email endpoint already
-  // rate-limits the user, so this is just a backstop).
-  const isInternalCall = !!process.env.TG_INTERNAL_KEY
-    && req.headers['x-tg-internal-key'] === process.env.TG_INTERNAL_KEY;
+  // Multi-product items. The PDF mirrors the widget: hotel on top, flights
+  // and extras as their own sections below the trip overview. Packages also
+  // expose item.flights so they flow through the flight rendering path.
+  const flightItems = (order.items || []).filter((it) => it?.product === 'Flights' || it?.product === 'Packages');
+  const extraItems = (order.items || []).filter((it) => it?.product === 'AirportExtras');
+  const transferItems = (order.items || []).filter((it) => it?.product === 'Transfers');
+  const carRentalItems = (order.items || []).filter((it) => it?.product === 'CarRental');
+  const ticketsItems = (order.items || []).filter((it) => it?.product === 'TicketsAttractions');
+  // Package metadata for the ATOL badge / operator disclosure on the PDF.
+  // Null when this isn't a package booking.
+  const packageItem = (order.items || []).find((it) => it?.product === 'Packages') || null;
+  const packageInfo = packageItem?.package || null;
+  const summary = order.summary || {};
 
-  const realIp = isInternalCall && typeof req.headers['x-tg-real-ip'] === 'string'
-    ? req.headers['x-tg-real-ip']
-    : getClientIp(req);
+  // Booking reference policy (must match the widget and email template):
+  //   1. Real supplier bookingReference on Accommodation/Flights/AirportExtras
+  //   2. Customer-typed orderRef (uppercase) — passed in from booking-pdf.js
+  //   3. Empty string — never fall back to the numeric order.id. That's an
+  //      internal identifier the customer has never seen; rendering it as
+  //      "Booking 84497" mismatches their confirmation email and triggers
+  //      support tickets ("That's not my booking reference").
+  // Variable name kept as orderRef because it appears in many downstream
+  // template strings; meaning is unchanged from the customer's perspective.
+  const customerTypedRef = (opts.orderRef && String(opts.orderRef).trim())
+    ? String(opts.orderRef).trim().toUpperCase()
+    : '';
+  const orderRef = accomItem?.bookingReference
+    || flightItems[0]?.bookingReference
+    || extraItems[0]?.bookingReference
+    || transferItems[0]?.bookingReference
+    || carRentalItems[0]?.bookingReference
+    || ticketsItems[0]?.bookingReference
+    || packageItem?.bookingReference
+    || customerTypedRef
+    || '';
+  const heroImg = accom ? pickHeroImage(accom.media) : null;
+  // stars is SVG markup for visual rendering in the hero block. starsCount
+  // is the plain integer (0-5) used wherever we need a numeric value in
+  // escapable text contexts (e.g. "3-star hotel" in property type lines).
+  const starsCount = Number.isFinite(accom?.rating)
+    ? Math.max(0, Math.min(5, Math.round(accom.rating)))
+    : 0;
+  const stars = accom ? renderStars(accom.rating) : '';
+  const propertyName = accom?.name || '—';
+  const city = accom?.location?.city || '';
+  const country = accom?.location?.country || '';
+  const locationLine = [city, country].filter(Boolean).join(', ');
 
-  const ipLimit = rateLimit(`pdf:ip:${realIp}`, isInternalCall ? 30 : 5);
-  if (!ipLimit.ok) {
-    return res.status(429).json({ error: 'too_many_attempts', retryAfterMs: ipLimit.retryAfterMs });
+  const startDate = accomItem?.startDate || (accom?.units?.[0]?.checkin) || null;
+  const nights = computeNights(startDate, accomItem?.duration ?? accom?.units?.[0]?.nights);
+  const checkout = nights ? computeCheckout(startDate, nights) : null;
+
+  const unit = accom?.units?.[0] || null;
+  const rate = unit?.rates?.[0] || null;
+
+  // Total cost prefers the multi-product summary. For hotel-only orders the
+  // summary is missing or single-product, so we fall back to the hotel price.
+  const totalCost = (typeof summary.totalPrice === 'number' && summary.totalPrice > 0)
+    ? summary.totalPrice
+    : (accom?.pricing?.price ?? accomItem?.price ?? null);
+  const currency = accom?.pricing?.currency || accomItem?.currency || flightItems[0]?.currency || extraItems[0]?.currency || order.currency || 'GBP';
+
+  // Payment state — prefer order-level (paidToDate + depositOption), where the
+  // real balance/instalments live; fall back to the legacy hotel deposit.
+  const orderDep = order.depositOption;
+  const orderBreakdown = (orderDep && Array.isArray(orderDep.breakdown)) ? orderDep.breakdown : [];
+  let depositPaid = (typeof order.paidToDate === 'number' && order.paidToDate > 0) ? order.paidToDate : null;
+  let balance = orderBreakdown.length
+    ? Math.round(orderBreakdown.reduce((s, b) => s + (typeof b.amount === 'number' ? b.amount : 0), 0) * 100) / 100
+    : null;
+  let balanceDueDate = orderBreakdown.length
+    ? (orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0]?.dueDate || null)
+    : null;
+  let instalments = orderBreakdown.length > 1 ? orderBreakdown : [];
+
+  // Legacy fallback when the order carries no order-level payment data.
+  if (depositPaid == null && balance == null) {
+    const depositOption =
+      (accom?.pricing?.depositOptions || []).find((d) => Array.isArray(d.breakdown) && d.breakdown.length > 0) ||
+      (accom?.pricing?.depositOptions || [])[0] ||
+      null;
+    depositPaid = depositOption?.amount ?? null;
+    balance = totalCost != null && depositPaid != null ? totalCost - depositPaid : null;
+    balanceDueDate = depositOption?.dueDate || null;
+    instalments = depositOption?.breakdown || [];
   }
 
-  let body;
-  try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-  } catch {
-    return notFound(res);
+  const isRefundable = !!accom?.pricing?.isRefundable;
+  const refundability = accom?.pricing?.refundability || null;
+
+  const customerName = titleCaseName([order.customerTitle, order.customerFirstname, order.customerSurname]);
+  const customerSurnameOnly = order.customerSurname || '';
+
+  const guests = (Array.isArray(summary.travellers) && summary.travellers.length > 0)
+    ? summary.travellers
+    : (accom?.guests || []);
+  const leadGuest = guests.find((g) => g?.type === 'Lead') || guests[0] || {
+    title: order.customerTitle,
+    firstname: order.customerFirstname,
+    surname: order.customerSurname,
+  };
+  const leadGuestName = titleCaseName([leadGuest?.title, leadGuest?.firstname, leadGuest?.surname]);
+
+  const specialRequests = order.specialRequests || null;
+
+  const hotelDesc = accom ? pickHotelDescription(accom.descriptions) : null;
+  const amenities = (accom?.amenities || []).slice(0, 12);
+
+  // Decide whether to render page 2
+  const hasHotelDetail = !!(hotelDesc || amenities.length > 0);
+
+  // Pre-compute small bits used inline
+  const refBarBookedDate = formatDateShort(order.created);
+  const checkinFmt = startDate ? formatDate(startDate, { includeWeekday: true }) : '—';
+  const checkoutFmt = checkout ? formatDate(checkout, { includeWeekday: true }) : '—';
+  const propertyTypeLine = [accom?.propertyType, starsCount ? `${starsCount}-star` : null].filter(Boolean).join(' · ');
+  const addressLine = [
+    accom?.location?.address1,
+    accom?.location?.city,
+    accom?.location?.state,
+  ].filter(Boolean).join(', ');
+
+  // ---------- Documents ----------
+  // Safe document list for the PDF. We never inline supplier-provided HTML
+  // here — only the name (escaped) and the URL (https-vetted). Clicking the
+  // doc in any modern PDF viewer opens the link in the user's browser.
+  // URL safety: only HTTPS, and we reject private/loopback/link-local hosts
+  // as defence-in-depth. Same logic as booking-email.js and the email
+  // template — kept inline rather than imported because _pdf-template.js
+  // is loaded both server-side (booking-pdf.js) and could be rendered in
+  // other contexts in future.
+  const isSafeDocUrl = (raw) => {
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== 'https:') return false;
+      const host = u.hostname.toLowerCase();
+      if (host === 'localhost' || host === '0.0.0.0') return false;
+      if (host.endsWith('.local') || host.endsWith('.internal')) return false;
+      if (/^127\./.test(host)) return false;
+      if (/^10\./.test(host)) return false;
+      if (/^192\.168\./.test(host)) return false;
+      if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)) return false;
+      if (/^169\.254\./.test(host)) return false;
+      if (host === '::1' || host === '[::1]') return false;
+      if (/^\[?fc[0-9a-f]{2}:/i.test(host) || /^\[?fd[0-9a-f]{2}:/i.test(host)) return false;
+      if (/^\[?fe80:/i.test(host)) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const docList = Array.isArray(order.documents) ? order.documents : [];
+  const safeDocs = docList
+    .filter(d => d && typeof d.url === 'string' && isSafeDocUrl(d.url))
+    .slice(0, 20); // hard cap — protect against pathological payloads
+
+  const fmtBytes = (n) => {
+    if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) return '';
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  // ---------- HTML ----------
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Booking ${escapeHtml(orderRef || 'Confirmation')}${hasBrand ? ' — ' + escapeHtml(brandName) : ''}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: ${colors.primary};
+    --primary-dark: ${primaryDark};
+    --accent: ${colors.accent};
+    --accent-dark: ${shiftHex(colors.accent, -16)};
+    --success: ${colors.success};
+    --warning: ${colors.warning};
+    --text: ${colors.text};
+    --text-2: #475569;
+    --text-3: #94A3B8;
+    --bg: #F8FAFC;
+    --bg-2: #F1F5F9;
+    --border: #E2E8F0;
+    --border-light: #F1F5F9;
+    --radius: ${radius}px;
+    --radius-sm: ${Math.round(radius * 0.5)}px;
+    --radius-md: ${Math.round(radius * 0.66)}px;
+    --radius-lg: ${radius}px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Fraunces', Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    background: #fff;
+  }
+  .num, .price, time { font-variant-numeric: tabular-nums; }
+
+  .page {
+    width: 794px;
+    min-height: 1123px;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* PAGE BREAKS — keep visual blocks intact across page boundaries.
+     Without these rules, Chromium will happily split a card or section in
+     half at the bottom of A4. break-inside is the modern property; the
+     -webkit- and page-break-inside variants are kept for older Chromium
+     builds that ship inside Puppeteer. */
+  .pdf-section,
+  .pdf-ref-bar,
+  .pdf-pay-box,
+  .pdf-banner,
+  .pdf-onarrival,
+  .pdf-policy,
+  .pdf-flight-route,
+  .pdf-extra-card,
+  .pdf-contact-card,
+  .pdf-amenity,
+  .pdf-instalment,
+  .pdf-doc {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
   }
 
-  const widgetId = validateWidgetId(body.widgetId);
-  const emailAddress = validateEmail(body.emailAddress);
-  const departDate = validateDate(body.departDate);
-  const orderRef = validateOrderRef(body.orderRef);
-
-  if (!widgetId || !emailAddress || !departDate || !orderRef) return notFound(res);
-
-  const widgetLimit = rateLimit(`pdf:ipw:${realIp}:${widgetId}`, 30);
-  if (!widgetLimit.ok) {
-    return res.status(429).json({ error: 'too_many_attempts', retryAfterMs: widgetLimit.retryAfterMs });
+  /* Don't strand a section title at the bottom of a page — push to next
+     page with the content that follows. */
+  .pdf-section-title,
+  .pdf-pay-box-title {
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
-  let browser;
-  try {
-    let appId;
-    let apiKey;
+  /* Long sections that exceed an A4 page (e.g. flights with many segments,
+     or the payment block when an instalment plan is present, or a long
+     documents list) are allowed to break, but only between their child
+     blocks — never mid-block. */
+  .pdf-pay,
+  .pdf-policies,
+  .pdf-amenities,
+  .pdf-contact,
+  .pdf-docs {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
 
-    if (widgetId === DEMO_WIDGET_SENTINEL) {
-      // ----- Demo path -----
-      // Use the hardcoded Travelgenix demo credentials (App 250).
-      appId = DEMO_APP_ID;
-      apiKey = DEMO_PUBLIC_KEY;
+  /* HEADER BAND */
+  .pdf-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pdf-header-brand {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .pdf-header-meta {
+    text-align: right;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.72);
+    line-height: 1.7;
+  }
 
-      console.log('[PDF DEMO DEBUG] About to call Travelify with:', {
-        appId: String(appId),
-        keyLength: typeof apiKey === 'string' ? apiKey.length : 0,
-        keyPreview: typeof apiKey === 'string' ? `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}` : 'invalid',
-        emailAddress, departDate, orderRef,
-      });
-    } else {
-      // ----- Real client path -----
-      const widget = await findWidgetById(widgetId);
-      if (!widget) return notFound(res);
+  /* HERO */
+  .pdf-hero {
+    position: relative;
+    height: 240px;
+    ${heroImg
+      ? `background-image: url('${escapeHtml(heroImg)}'); background-size: cover; background-position: center;`
+      : `background: linear-gradient(135deg, #1B2B5B 0%, #00B4D8 100%);`
+    }
+  }
+  .pdf-hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(15,23,42,.05) 0%, rgba(15,23,42,.78) 100%);
+  }
+  .pdf-hero-content {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 28px 48px;
+    color: #fff;
+  }
+  .pdf-confirmed {
+    display: inline-block;
+    padding: 5px 12px;
+    background: var(--success);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .pdf-atol {
+    display: inline-block;
+    padding: 5px 12px;
+    background: linear-gradient(135deg, #4338CA, #5B21B6);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 12px;
+    margin-left: 6px;
+  }
+  .pdf-atol .pdf-atol-shield {
+    color: #FCD34D;
+    margin-right: 4px;
+  }
+  .pdf-atol .pdf-atol-op {
+    margin-left: 6px;
+    font-weight: 500;
+    letter-spacing: .02em;
+    text-transform: none;
+    opacity: .92;
+  }
+  .pdf-atol .pdf-atol-op::before {
+    content: "·";
+    margin-right: 6px;
+    opacity: .5;
+  }
+  .pdf-hero-eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    opacity: .85;
+    margin-bottom: 4px;
+  }
+  .pdf-hero-name {
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    line-height: 1.05;
+    margin: 0 0 8px;
+  }
+  .pdf-hero-stars {
+    display: inline-flex;
+    gap: 2px;
+    align-items: center;
+  }
+  .pdf-hero-stars svg { display: block; }
 
-      const widgetType = widget.fields?.WidgetType;
-      if (widgetType !== 'My Booking') return notFound(res);
+  /* BODY */
+  .pdf-body { padding: 36px 48px; }
 
-      const widgetStatus = widget.fields?.Status;
-      if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') return notFound(res);
+  .pdf-greeting {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.65;
+    margin: 0 0 28px;
+    max-width: 60ch;
+  }
+  .pdf-greeting strong { font-weight: 600; }
 
-      const ownerRecordId = (widget.fields?.ClientRecordId || '').trim();
-      const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
-      if (!ownerRecordId && !clientEmail) return notFound(res);
+  /* SECTION */
+  .pdf-section { margin-bottom: 24px; }
+  .pdf-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
 
-      // Resolve the OWNING CLIENT's Travelify credentials.
-      //
-      // Primary path: the widget records the Airtable record ID of the client
-      // that owns it (ClientRecordId), captured at save time from the
-      // authenticated session. Resolve directly from that client — unambiguous,
-      // and correct even when the widget was created by a staff member who
-      // belongs to several client accounts (resolving by their email would
-      // otherwise pick the wrong account via the user→client link).
-      //
-      // Fallback path: legacy widgets with no ClientRecordId resolve by
-      // ClientEmail as before, so nothing existing breaks.
-      let creds;
-      try {
-        if (ownerRecordId) {
-          creds = await lookupClientCredentialsByRecordId(ownerRecordId);
+  /* REF BAR */
+  .pdf-ref-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .pdf-ref-cell { padding: 16px 20px; border-right: 1px solid var(--border); }
+  .pdf-ref-cell:last-child { border-right: none; }
+  .pdf-ref-label {
+    font-size: 9px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--text-3); margin-bottom: 4px;
+  }
+  .pdf-ref-value {
+    font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: .02em;
+  }
+  .pdf-ref-value.money { font-size: 18px; letter-spacing: -.01em; }
+
+  /* KV */
+  .pdf-kv {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 0 20px;
+    font-size: 13px;
+    margin: 0;
+  }
+  .pdf-kv dt {
+    color: var(--text-2);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .pdf-kv dd {
+    margin: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text);
+    font-weight: 500;
+  }
+  .pdf-kv dt:last-of-type, .pdf-kv dd:last-of-type { border-bottom: none; }
+
+  /* PAY */
+  .pdf-pay {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 20px;
+  }
+  .pdf-pay-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .pdf-pay-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 7px 0; font-size: 13px;
+  }
+  .pdf-pay-row .label { color: var(--text-2); }
+  .pdf-pay-row .value { font-weight: 600; color: var(--text); }
+  .pdf-pay-row .value.paid { color: var(--success); }
+  .pdf-pay-row .value.due { color: var(--warning); }
+  .pdf-pay-row.total {
+    border-top: 1px solid var(--border);
+    margin-top: 8px; padding-top: 14px; font-size: 14px;
+  }
+  .pdf-pay-row.total .value { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+
+  .pdf-pay-box-title {
+    font-size: 9px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--text-3); margin: 0 0 10px;
+  }
+  .pdf-instalment {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; font-size: 13px;
+    border-bottom: 1px dashed var(--border-light);
+  }
+  .pdf-instalment:last-child { border-bottom: none; }
+  .pdf-instalment .date { color: var(--text-2); }
+  .pdf-instalment .amt { font-weight: 600; }
+
+  /* BANNER */
+  .pdf-banner {
+    margin-top: 16px; padding: 14px 18px;
+    background: #ECFEFF;
+    border: 1px solid #A5F3FC;
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    font-size: 12px; line-height: 1.5;
+    color: #075985;
+  }
+  .pdf-banner strong { color: var(--primary-dark); }
+
+  /* On-arrival fees inside the payment section — amber treatment to flag
+     it as an additional cost the customer should plan for, distinct from
+     the holiday cost already paid towards. */
+  .pdf-onarrival {
+    margin-top: 16px; padding: 14px 18px;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-left: 3px solid #F59E0B;
+    border-radius: 8px;
+  }
+  .pdf-onarrival-title {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: #B45309;
+    margin-bottom: 8px;
+  }
+  .pdf-onarrival-line {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 12px;
+    padding: 5px 0;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .pdf-onarrival-line .name { color: var(--text-2); }
+  .pdf-onarrival-line .name small {
+    display: block;
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 1px;
+  }
+  .pdf-onarrival-line .val {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .pdf-onarrival-note {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* POLICIES */
+  .pdf-policies { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pdf-policy {
+    padding: 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .pdf-policy-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--text-3); margin-bottom: 6px;
+  }
+  .pdf-policy-title {
+    font-family: var(--font-display);
+    font-size: 14px; font-weight: 600;
+    color: var(--text); margin-bottom: 6px; letter-spacing: -.01em;
+  }
+  .pdf-policy-body { font-size: 12px; line-height: 1.55; color: var(--text-2); }
+  .pdf-policy-body .good { color: var(--success); font-weight: 600; }
+  .pdf-policy-body strong { color: var(--text); }
+
+  /* DOCUMENTS */
+  /* Linked list of supplier-provided documents (vouchers, tickets, etc).
+     Each row is a clickable link in the rendered PDF — Chromium honours
+     <a href> in printed PDFs, so clicking the file name in any modern PDF
+     viewer opens the document in a browser. */
+  .pdf-docs { display: flex; flex-direction: column; gap: 8px; }
+  .pdf-doc {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .pdf-doc-icon {
+    width: 32px; height: 32px;
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--accent);
+    flex-shrink: 0;
+    letter-spacing: .02em;
+  }
+  .pdf-doc-info { flex: 1; min-width: 0; }
+  .pdf-doc-name {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    line-height: 1.3; margin-bottom: 2px;
+  }
+  .pdf-doc-meta {
+    font-size: 11px; color: var(--text-3);
+    word-break: break-all;
+  }
+  .pdf-doc-action {
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    letter-spacing: .04em; text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  /* FOOTER */
+  .pdf-footer {
+    position: absolute;
+    left: 48px; right: 48px; bottom: 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--text-3); letter-spacing: .02em;
+  }
+  .pdf-footer-brand { font-weight: 700; color: var(--text-2); letter-spacing: -.01em; }
+
+  /* PAGE 2 HEADER */
+  .pdf-page-header {
+    padding: 16px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; color: var(--text-3); letter-spacing: .02em;
+  }
+  .pdf-page-header .brand {
+    font-family: var(--font-display);
+    font-weight: 600; color: var(--primary);
+    font-size: 16px; letter-spacing: -.01em;
+  }
+
+  /* HOTEL DETAIL */
+  .pdf-hotel-h1 {
+    font-family: var(--font-display);
+    font-size: 24px; font-weight: 600; letter-spacing: -.02em;
+    margin: 0 0 6px;
+  }
+  .pdf-hotel-sub {
+    font-size: 12px; color: var(--text-2);
+    margin: 0 0 16px; line-height: 1.5;
+  }
+  .pdf-hotel-desc {
+    font-size: 13px; color: var(--text-2); line-height: 1.65;
+    margin: 0 0 16px;
+    white-space: pre-wrap;
+  }
+
+  .pdf-amenities {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .pdf-amenity {
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 11px; color: var(--text-2);
+    text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .pdf-amenity::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+  }
+
+  .pdf-contact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .pdf-contact-card {
+    padding: 16px 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .pdf-contact-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--text-3); margin-bottom: 4px;
+  }
+  .pdf-contact-value {
+    font-size: 13px; font-weight: 600;
+    color: var(--text); line-height: 1.5; letter-spacing: -.01em;
+  }
+  .pdf-contact-value small {
+    display: block;
+    font-size: 11px; color: var(--text-3);
+    font-weight: 400; margin-top: 2px; letter-spacing: 0;
+  }
+
+  @media print { body { background: #fff; } }
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 ============ -->
+<div class="page">
+
+  <div class="pdf-header">
+    <div class="pdf-header-brand">${hasBrand ? escapeHtml(brandName) : '&nbsp;'}</div>
+    <div class="pdf-header-meta">
+      Booking Confirmation<br>
+      <span class="num">Issued ${escapeHtml(formatDateShort(issuedAt))}</span>
+    </div>
+  </div>
+
+  <div class="pdf-hero">
+    <div class="pdf-hero-overlay"></div>
+    <div class="pdf-hero-content">
+      <div class="pdf-confirmed">✓ &nbsp;Confirmed</div>
+      ${(packageInfo?.atolProtected || packageInfo?.operator?.name) ? `
+        <div class="pdf-atol">
+          <svg class="pdf-atol-shield" viewBox="0 0 24 24" width="11" height="11" fill="#FCD34D" aria-hidden="true" style="vertical-align:-1px;"><path d="M12 1 4 4v8c0 5 3.5 9 8 11 4.5-2 8-6 8-11V4l-8-3z"/></svg>${packageInfo?.atolProtected ? 'ATOL Protected' : 'Package Holiday'}${packageInfo?.operator?.name ? `<span class="pdf-atol-op">operated by ${escapeHtml(packageInfo.operator.name)}</span>` : ''}
+        </div>
+      ` : ''}
+      ${locationLine ? `<div class="pdf-hero-eyebrow">${escapeHtml(locationLine)}</div>` : ''}
+      <div class="pdf-hero-name">${escapeHtml(propertyName)}</div>
+      ${stars ? `<div class="pdf-hero-stars">${stars}</div>` : ''}
+    </div>
+  </div>
+
+  <div class="pdf-body">
+
+    <p class="pdf-greeting">
+      Dear <strong>${escapeHtml(customerSurnameOnly ? `Mr ${customerSurnameOnly}` : (customerName || 'Customer'))}</strong>, thank you for booking with us. This document contains everything you need for your upcoming stay. Please keep it safe and bring it with you, or save it to your phone.
+    </p>
+
+    <div class="pdf-ref-bar">
+      <div class="pdf-ref-cell">
+        <div class="pdf-ref-label">Booking reference</div>
+        <div class="pdf-ref-value num">${escapeHtml(orderRef || '—')}</div>
+      </div>
+      <div class="pdf-ref-cell">
+        <div class="pdf-ref-label">Booked</div>
+        <div class="pdf-ref-value num" style="font-size:14px;">${escapeHtml(refBarBookedDate)}</div>
+      </div>
+      <div class="pdf-ref-cell">
+        <div class="pdf-ref-label">Total</div>
+        <div class="pdf-ref-value money num">${escapeHtml(formatMoney(totalCost, currency))}</div>
+      </div>
+    </div>
+
+    <div class="pdf-section">
+      <div class="pdf-section-title">Your Trip</div>
+      <dl class="pdf-kv">
+        ${locationLine ? `<dt>Destination</dt><dd>${escapeHtml(locationLine)}</dd>` : ''}
+        <dt>Accommodation</dt>
+        <dd>${escapeHtml(propertyName)}${propertyTypeLine ? ` · ${escapeHtml(propertyTypeLine)}` : ''}</dd>
+        ${addressLine ? `<dt>Address</dt><dd>${escapeHtml(addressLine)}</dd>` : ''}
+        <dt>Check-in</dt>
+        <dd class="num">${escapeHtml(checkinFmt)} &nbsp;·&nbsp; from 15:00</dd>
+        <dt>Check-out</dt>
+        <dd class="num">${escapeHtml(checkoutFmt)} &nbsp;·&nbsp; by 12:00</dd>
+        ${nights ? `<dt>Duration</dt><dd class="num">${nights} night${nights === 1 ? '' : 's'}</dd>` : ''}
+        ${unit ? `<dt>Room type</dt><dd>${escapeHtml([(unit.roomType && unit.roomType !== 'Unknown') ? unit.roomType : unit.name, rate?.board].filter(Boolean).join(' · '))}</dd>` : ''}
+        ${leadGuestName ? `<dt>Lead guest</dt><dd>${escapeHtml(leadGuestName)}</dd>` : ''}
+        ${specialRequests ? `<dt>Special requests</dt><dd style="font-style:italic; color:var(--text-2);">${escapeHtml(specialRequests)}</dd>` : ''}
+      </dl>
+    </div>
+
+    ${flightItems.length > 0 ? `
+    <div class="pdf-section">
+      ${flightItems.map(renderPdfFlightItem).join('')}
+    </div>` : ''}
+
+    ${extraItems.length > 0 ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">Airport Extras</div>
+      ${extraItems.map(renderPdfExtraItem).join('')}
+    </div>` : ''}
+
+    ${transferItems.length > 0 ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">${transferItems.length === 1 ? 'Transfer' : 'Transfers'}</div>
+      ${transferItems.map(renderPdfTransferItem).join('')}
+    </div>` : ''}
+
+    ${carRentalItems.length > 0 ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">Car Hire</div>
+      ${carRentalItems.map(renderPdfCarRentalItem).join('')}
+    </div>` : ''}
+
+    ${ticketsItems.length > 0 ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">${ticketsItems.length === 1 ? 'Ticket' : 'Tickets & Attractions'}</div>
+      ${ticketsItems.map(renderPdfTicketsItem).join('')}
+    </div>` : ''}
+
+    ${totalCost != null ? (() => {
+      // Breakdown lines. Packages must be treated as a single "Holiday
+      // package" line because the customer paid one bundled price — listing
+      // it under Accommodation AND Flights would double-count visually.
+      // Filter the supporting arrays to "pure" types for the breakdown.
+      const packagesItems = (order.items || []).filter(it => it?.product === 'Packages');
+      const pureFlightItems = flightItems.filter(it => it?.product === 'Flights');
+      const isPackage = accomItem?.product === 'Packages';
+      const multiProduct = (pureFlightItems.length > 0 ? 1 : 0)
+        + (extraItems.length > 0 ? 1 : 0)
+        + (transferItems.length > 0 ? 1 : 0)
+        + (carRentalItems.length > 0 ? 1 : 0)
+        + (ticketsItems.length > 0 ? 1 : 0)
+        + (packagesItems.length > 0 ? 1 : 0)
+        + ((accomItem && !isPackage) ? 1 : 0);
+      return `
+    <div class="pdf-section">
+      <div class="pdf-section-title">Payment Schedule</div>
+      <div class="pdf-pay">
+        <div class="pdf-pay-box">
+          <div class="pdf-pay-row">
+            <span class="label">${escapeHtml(resolveTotalLabel(order.items))}</span>
+            <span class="value num">${escapeHtml(formatMoney(totalCost, currency))}</span>
+          </div>
+          ${(multiProduct > 1 && accomItem && !isPackage && typeof accomItem.price === 'number') ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Accommodation</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(accomItem.price, currency))}</span>
+          </div>` : ''}
+          ${(multiProduct > 1 && packagesItems.length > 0) ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Holiday package</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(packagesItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${(multiProduct > 1 && pureFlightItems.length > 0) ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Flights</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(pureFlightItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${(multiProduct > 1 && extraItems.length > 0) ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Airport extras</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(extraItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${(multiProduct > 1 && transferItems.length > 0) ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Transfers</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(transferItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${(multiProduct > 1 && carRentalItems.length > 0) ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Car hire</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(carRentalItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${(multiProduct > 1 && ticketsItems.length > 0) ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Tickets</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(ticketsItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${depositPaid != null ? `
+          <div class="pdf-pay-row">
+            <span class="label">Paid so far</span>
+            <span class="value paid num">– ${escapeHtml(formatMoney(depositPaid, currency))}</span>
+          </div>` : ''}
+          ${balance != null && balance > 0 ? `
+          <div class="pdf-pay-row">
+            <span class="label">Balance remaining${balanceDueDate ? ` (due by ${escapeHtml(formatDateShort(balanceDueDate))})` : ''}</span>
+            <span class="value due num">${escapeHtml(formatMoney(balance, currency))}</span>
+          </div>` : ''}
+          <div class="pdf-pay-row total">
+            <span class="label">${escapeHtml(resolveTotalLabel(order.items))}</span>
+            <span class="value num">${escapeHtml(formatMoney(totalCost, currency))}</span>
+          </div>
+        </div>
+        ${instalments.length > 0 ? `
+        <div class="pdf-pay-box">
+          <div class="pdf-pay-box-title">Instalment Plan</div>
+          ${instalments.map((b) => `
+            <div class="pdf-instalment">
+              <span class="date num">${escapeHtml(formatDateShort(b.dueDate))}</span>
+              <span class="amt num">${escapeHtml(formatMoney(b.amount, currency))}</span>
+            </div>
+          `).join('')}
+        </div>` : `
+        <div class="pdf-pay-box">
+          <div class="pdf-pay-box-title">Payment</div>
+          <p style="font-size:12px; color:var(--text-2); line-height:1.55; margin:0;">
+            Your booking is fully secured. ${depositPaid != null ? 'Your deposit has been received.' : ''} Any remaining balance is due before travel.
+          </p>
+        </div>`}
+      </div>
+      ${(() => {
+        // On-arrival fees block in PDF. Prefer itemised payAtLocation lines
+        // when supplied; fall back to inResortFees total only when no
+        // itemised data is available. Same filter rule as widget/email:
+        // skip any line without name AND description.
+        const accPricing = accom?.pricing;
+        const inResortFees = accPricing?.inResortFees;
+        const payAtLocationLines = (accPricing?.payAtLocation || [])
+          .filter(line => line.name || line.description);
+        if (payAtLocationLines.length === 0 && !inResortFees) return '';
+        const lineCurrency = accPricing?.currency || currency;
+        if (payAtLocationLines.length > 0) {
+          return `
+            <div class="pdf-onarrival">
+              <div class="pdf-onarrival-title">Also payable on arrival</div>
+              ${payAtLocationLines.map(line => {
+                const label = line.name || line.description;
+                const subLabel = (line.description && line.description !== line.name) ? line.description : '';
+                const hasPrice = typeof line.unitPrice === 'number';
+                const amount = hasPrice ? (line.unitPrice || 0) * (line.qty || 1) : null;
+                return `
+                  <div class="pdf-onarrival-line">
+                    <span class="name">
+                      ${escapeHtml(label)}
+                      ${subLabel ? `<small>${escapeHtml(subLabel)}</small>` : ''}
+                    </span>
+                    <span class="val num">${amount != null ? escapeHtml(formatMoney(amount, lineCurrency)) : '—'}</span>
+                  </div>
+                `;
+              }).join('')}
+              <div class="pdf-onarrival-note">Paid directly to the hotel at check-in. Not included in your holiday cost above.</div>
+            </div>
+          `;
         }
-        if (!creds && clientEmail) {
-          creds = await lookupClientCredentialsByEmail(clientEmail);
-        }
-      } catch (err) {
-        console.error('[booking-pdf] credential lookup failed for',
-          ownerRecordId || clientEmail, '—', err.message);
-        return notFound(res);
-      }
-      if (!creds) {
-        console.warn(`[booking-pdf] No Travelify credentials resolved for widgetId=${widgetId} ` +
-          `(ownerRecordId=${ownerRecordId || 'none'}, clientEmail=${clientEmail || 'none'})`);
-        return notFound(res);
-      }
+        return `
+          <div class="pdf-onarrival">
+            <div class="pdf-onarrival-title">Also payable on arrival</div>
+            <div class="pdf-onarrival-line">
+              <span class="name">Resort fees</span>
+              <span class="val num">${escapeHtml(formatMoney(inResortFees, lineCurrency))}</span>
+            </div>
+            <div class="pdf-onarrival-note">Paid directly to the hotel at check-in. Not included in your holiday cost above.</div>
+          </div>
+        `;
+      })()}
+    </div>`;
+    })() : ''}
 
-      appId = creds.appId;
-      apiKey = creds.apiKey;
-    }
+    ${safeDocs.length > 0 ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">Your Documents</div>
+      <div class="pdf-docs">
+        ${safeDocs.map((d, i) => {
+          const name = escapeHtml(((d.name || `Document ${i + 1}`).toString()).slice(0, 100));
+          const extLabel = (d.ext || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4) || 'FILE';
+          const sizeLabel = fmtBytes(typeof d.size === 'number' ? d.size : 0);
+          const url = d.url; // already https-vetted above
+          const displayUrl = url.length > 80 ? url.slice(0, 77) + '...' : url;
+          const metaBits = [sizeLabel].filter(Boolean).join(' · ');
+          return `
+            <a class="pdf-doc" href="${escapeHtml(url)}">
+              <div class="pdf-doc-icon">${escapeHtml(extLabel)}</div>
+              <div class="pdf-doc-info">
+                <div class="pdf-doc-name">${name}</div>
+                <div class="pdf-doc-meta">${escapeHtml(displayUrl)}${metaBits ? ` · ${escapeHtml(metaBits)}` : ''}</div>
+              </div>
+              <div class="pdf-doc-action">View</div>
+            </a>
+          `;
+        }).join('')}
+      </div>
+    </div>` : ''}
 
-    // Travelify requires the Origin header (without it returns a misleading 401).
-    const travelifyRes = await fetch(TRAVELIFY_API, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${appId}:${apiKey}`,
-        'Content-Type': 'application/json',
-        'Origin': 'https://www.travelgenix.io',
-      },
-      body: JSON.stringify({ emailAddress, departDate, orderRef }),
-      signal: AbortSignal.timeout(12000),
-    });
+    <div class="pdf-section">
+      <div class="pdf-section-title">Policies</div>
+      <div class="pdf-policies">
+        <div class="pdf-policy">
+          <div class="pdf-policy-label">Cancellation</div>
+          <div class="pdf-policy-title">${isRefundable ? 'Refundable' : 'Non-refundable'}</div>
+          <div class="pdf-policy-body">
+            ${isRefundable
+              ? `<span class="good">Fully refundable</span> until your refundability deadline. After that, the full room rate will be charged.`
+              : `This rate is non-refundable. Please contact us if your plans change.`}
+          </div>
+        </div>
+        <div class="pdf-policy">
+          <div class="pdf-policy-label">Check-in / out</div>
+          <div class="pdf-policy-title">Standard hours</div>
+          <div class="pdf-policy-body">
+            Check-in from <strong class="num">15:00</strong>, check-out by <strong class="num">12:00</strong>. Photo ID required on arrival.
+          </div>
+        </div>
+      </div>
+    </div>
 
-    // Capture body as text first so we can log it on the demo path even on
-    // non-200 responses.
-    const rawText = await travelifyRes.text();
-    const isDemo = widgetId === DEMO_WIDGET_SENTINEL;
+  </div>
 
-    if (isDemo) {
-      console.log('[PDF DEMO DEBUG] Travelify response:', {
-        status: travelifyRes.status,
-        statusText: travelifyRes.statusText,
-        contentType: travelifyRes.headers.get('content-type'),
-        bodyPreview: rawText.slice(0, 1500),
-      });
-    }
+  <div class="pdf-footer">
+    <span class="pdf-footer-brand">${hasBrand ? escapeHtml(brandName) : ''}</span>
+    <span class="num">Booking ${escapeHtml(orderRef)}${hasHotelDetail ? ' · Page 1 of 2' : ''}</span>
+    <span>${escapeHtml(supportEmail || '')}</span>
+  </div>
 
-    if (travelifyRes.status === 404) return notFound(res);
-    if (!travelifyRes.ok) {
-      console.error(`PDF: Travelify ${travelifyRes.status} for widget ${widgetId}`);
-      return notFound(res);
-    }
+</div>
 
-    let raw;
-    try { raw = JSON.parse(rawText); } catch { return notFound(res); }
-    if (raw && (raw.code === '404' || raw.code === 404)) return notFound(res);
+${hasHotelDetail ? `
+<!-- ============ PAGE 2 ============ -->
+<div class="page">
 
-    const order = trimOrder(raw);
-    if (!order || !order.id) return notFound(res);
+  <div class="pdf-page-header">
+    <span class="brand">${hasBrand ? escapeHtml(brandName) : '&nbsp;'}</span>
+    <span class="num">Booking ${escapeHtml(orderRef)} · ${escapeHtml(propertyName)}${startDate ? ` · ${escapeHtml(formatDateShort(startDate))}` : ''}</span>
+  </div>
 
-    // Pull brand/contact/styling from the widget record. Two sources:
-    //   - Settings JSON (existing — colours, radius, support contact, brand name)
-    //   - Top-level fields (FromName, LogoUrl, EmailFooter — added Apr 2026
-    //     for the email-send feature; used here too so the PDF logo matches
-    //     the email logo).
-    // Skip on demo path since there's no widget record — use defaults.
-    let widgetSettings = {};
-    let pdfBrandName = '';
-    let pdfLogoUrl = '';
-    if (widgetId !== DEMO_WIDGET_SENTINEL) {
-      const widget = await findWidgetById(widgetId);
-      const s = widget?.fields?.Settings;
-      if (s) {
-        if (typeof s === 'object') widgetSettings = s;
-        else { try { widgetSettings = JSON.parse(s); } catch { widgetSettings = {}; } }
-      }
-      const fields = widget?.fields || {};
-      pdfBrandName = (fields.FromName || '').toString().trim()
-        || widgetSettings?.brand?.name
-        || (fields.ClientName || '').toString().trim()
-        || '';
-      const logoUrl = (fields.LogoUrl || '').toString().trim();
-      // Only accept HTTPS — Puppeteer will refuse mixed content and a typo'd
-      // URL renders as a broken-image placeholder in the PDF.
-      pdfLogoUrl = (logoUrl && /^https:\/\//i.test(logoUrl)) ? logoUrl : '';
-    }
+  <div class="pdf-body">
 
-    const html = renderPdfHtml(order, {
-      brandName: pdfBrandName,
-      logoUrl: pdfLogoUrl,
-      supportEmail: widgetSettings?.support?.email || null,
-      supportPhone: widgetSettings?.support?.phone || null,
-      colors: widgetSettings?.colors || {},
-      radius: typeof widgetSettings?.radius === 'number' ? widgetSettings.radius : 12,
-      // The customer-typed orderRef is the final fallback when no supplier
-      // bookingReference exists on any item. Without it, the template
-      // displays the internal numeric order.id, which the customer has
-      // never seen and doesn't match their confirmation paperwork.
-      orderRef,
-    });
+    <div class="pdf-section">
+      <div class="pdf-section-title">Your Hotel</div>
+      <h2 class="pdf-hotel-h1">${escapeHtml(propertyName)}${city ? `, ${escapeHtml(city)}` : ''}</h2>
+      <p class="pdf-hotel-sub">${escapeHtml([addressLine, propertyTypeLine].filter(Boolean).join(' · '))}</p>
+      ${hotelDesc ? `<p class="pdf-hotel-desc">${escapeHtml(hotelDesc)}</p>` : ''}
 
-    browser = await getBrowser();
-    const page = await browser.newPage();
-    // Emulate print media so @media print rules fire and break-inside / 
-    // page-break-inside CSS is honoured. Without this, Chromium treats 
-    // the document as on-screen and ignores print-only break rules — which 
-    // causes sections to flow across page boundaries instead of moving 
-    // cleanly to the next page.
-    await page.emulateMediaType('print');
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    const pdfRaw = await page.pdf({
-      format: 'A4', printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-    });
-    await browser.close();
-    browser = null;
+      ${amenities.length > 0 ? `
+      <div class="pdf-amenities">
+        ${amenities.map((a) => `<div class="pdf-amenity">${escapeHtml(a)}</div>`).join('')}
+      </div>` : ''}
+    </div>
 
-    // Coerce to a Node Buffer. Puppeteer's page.pdf() may return a Uint8Array
-    // depending on version, and res.send() can re-encode anything non-Buffer
-    // as UTF-8 text — which silently corrupts PDF binary data and produces a
-    // file that opens to "may be damaged".
-    const pdfBuffer = Buffer.isBuffer(pdfRaw) ? pdfRaw : Buffer.from(pdfRaw);
+    <div class="pdf-section">
+      <div class="pdf-section-title">Guest Details</div>
+      <dl class="pdf-kv">
+        ${customerName ? `<dt>Name</dt><dd>${escapeHtml(customerName)}</dd>` : ''}
+        ${order.customerEmail ? `<dt>Email</dt><dd>${escapeHtml(order.customerEmail)}</dd>` : ''}
+      </dl>
+    </div>
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Length', pdfBuffer.length);
-    res.setHeader('Content-Disposition', `inline; filename="booking-${orderRef}.pdf"`);
-    res.status(200);
-    return res.end(pdfBuffer);
+    ${(supportEmail || supportPhone) ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">Need Help?</div>
+      <div class="pdf-contact">
+        ${supportEmail ? `
+        <div class="pdf-contact-card">
+          <div class="pdf-contact-label">Email</div>
+          <div class="pdf-contact-value">
+            ${escapeHtml(supportEmail)}
+            <small>We're here to help with anything about your booking</small>
+          </div>
+        </div>` : ''}
+        ${supportPhone ? `
+        <div class="pdf-contact-card">
+          <div class="pdf-contact-label">Phone</div>
+          <div class="pdf-contact-value num">
+            ${escapeHtml(supportPhone)}
+            <small style="font-variant-numeric: tabular-nums;">Mon–Fri 9am–6pm</small>
+          </div>
+        </div>` : ''}
+      </div>
+    </div>` : ''}
 
-  } catch (err) {
-    console.error('booking-pdf error:', err.message, err.stack?.slice(0, 500));
-    try { await browser?.close(); } catch {}
-    return res.status(500).json({ error: 'server_error' });
-  }
+    <p style="margin-top:36px; font-size:11px; color:var(--text-3); line-height:1.6;">
+      ${hasBrand
+        ? `This confirmation is issued under ${escapeHtml(brandName)}'s standard booking terms. Please retain this document for your records.`
+        : `Please retain this document for your records.`}
+    </p>
+
+  </div>
+
+  <div class="pdf-footer">
+    <span class="pdf-footer-brand">${hasBrand ? escapeHtml(brandName) : ''}</span>
+    <span class="num">Booking ${escapeHtml(orderRef)} · Page 2 of 2</span>
+    <span>${escapeHtml(supportEmail || '')}</span>
+  </div>
+
+</div>` : ''}
+
+</body>
+</html>`;
 }
