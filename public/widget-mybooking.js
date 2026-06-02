@@ -113,7 +113,8 @@
   const API_RETRIEVE = (typeof window !== 'undefined' && window.__TG_RETRIEVE_API__) || (API_BASE + '/api/retrieve-order');
   const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || (API_BASE + '/api/booking-pdf');
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
-  const VERSION = '1.4.1';
+  const API_CANCEL = (typeof window !== 'undefined' && window.__TG_CANCEL_API__) || (API_BASE + '/api/cancel-product');
+  const VERSION = '1.5.0';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -609,6 +610,47 @@
       .tgm-modal-foot { flex-direction: column-reverse; }
       .tgm-modal-foot .tgm-btn-1, .tgm-modal-foot .tgm-btn-2 { width: 100%; }
     }
+
+    /* ----- Cancel a product (manage booking) ----- */
+    .tgm-cancel-sec { margin-top: 20px; border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); overflow: hidden; }
+    .tgm-cancel-sec-head { padding: 16px 20px; background: var(--tgm-bg-2); border-bottom: 1px solid var(--tgm-border); }
+    .tgm-cancel-sec-head h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--tgm-text); display: flex; align-items: center; gap: 8px; }
+    .tgm-cancel-sec-head h3 svg { width: 17px; height: 17px; flex-shrink: 0; color: var(--tgm-text-2); }
+    .tgm-cancel-sec-head p { margin: 4px 0 0; font-size: 13px; color: var(--tgm-text-3); }
+    .tgm-cancel-row { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--tgm-border-light); }
+    .tgm-cancel-row:last-child { border-bottom: 0; }
+    .tgm-cancel-row-icon { width: 34px; height: 34px; flex-shrink: 0; border-radius: var(--tgm-radius-md); background: var(--tgm-bg-3); display: flex; align-items: center; justify-content: center; color: var(--tgm-text-2); }
+    .tgm-cancel-row-icon svg { width: 17px; height: 17px; }
+    .tgm-cancel-row-text { flex: 1; min-width: 0; }
+    .tgm-cancel-row-title { font-size: 14px; font-weight: 600; color: var(--tgm-text); }
+    .tgm-cancel-row-sub { font-size: 12.5px; color: var(--tgm-text-3); margin-top: 1px; }
+    .tgm-cancel-btn { height: 38px; padding: 0 16px; flex-shrink: 0; background: var(--tgm-bg); border: 1px solid rgba(239,68,68,.4); border-radius: var(--tgm-radius-md); font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--tgm-error); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
+    .tgm-cancel-btn:hover { background: rgba(239,68,68,.07); border-color: var(--tgm-error); }
+    .tgm-cancel-btn svg { width: 14px; height: 14px; }
+    .tgm-cancel-row.is-cancelled .tgm-cancel-btn { display: none; }
+    .tgm-cancel-pill { flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--tgm-text-3); background: var(--tgm-bg-3); border-radius: 999px; padding: 5px 12px; }
+    /* Danger primary button for the final confirm */
+    .tgm-btn-danger { height: 44px; padding: 0 20px; background: var(--tgm-error); border: 1px solid var(--tgm-error); border-radius: var(--tgm-radius-md); font-family: inherit; font-size: 15px; font-weight: 500; color: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all .15s; }
+    .tgm-btn-danger:hover { filter: brightness(.94); }
+    .tgm-btn-danger[disabled] { opacity: .6; cursor: default; }
+    .tgm-btn-danger svg { width: 16px; height: 16px; }
+    /* Policy list inside the modal */
+    .tgm-policies { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 2px; }
+    .tgm-policy { display: flex; gap: 10px; align-items: flex-start; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border-light); border-radius: var(--tgm-radius-md); padding: 11px 13px; font-size: 13.5px; line-height: 1.45; color: var(--tgm-text); }
+    .tgm-policy svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; color: var(--tgm-warning); }
+    .tgm-cancel-warn { display: flex; gap: 10px; align-items: flex-start; background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.28); border-radius: var(--tgm-radius-md); padding: 11px 13px; font-size: 13px; line-height: 1.45; color: var(--tgm-text); margin-top: 12px; }
+    .tgm-cancel-warn svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; color: var(--tgm-warning); }
+    .tgm-reason-count { text-align: right; font-size: 12px; color: var(--tgm-text-3); margin-top: 4px; }
+    .tgm-cancel-done { text-align: center; padding: 8px 4px 4px; }
+    .tgm-cancel-done-icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: rgba(16,185,129,.12); display: flex; align-items: center; justify-content: center; color: var(--tgm-success); }
+    .tgm-cancel-done-icon svg { width: 28px; height: 28px; }
+    .tgm-cancel-done h2 { margin: 0 0 6px; font-size: 18px; font-weight: 700; color: var(--tgm-text); }
+    .tgm-cancel-done p { margin: 0; font-size: 14px; color: var(--tgm-text-3); }
+    .tgm-cancel-ref { display: inline-block; margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--tgm-text); background: var(--tgm-bg-2); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); padding: 8px 16px; }
+    .tgm-cancel-spin { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 28px 4px; color: var(--tgm-text-3); font-size: 14px; }
+    .tgm-cancel-spin .tgm-spinner { width: 32px; height: 32px; border: 3px solid var(--tgm-border); border-top-color: var(--tgm-primary); border-radius: 50%; animation: tgm-spin .7s linear infinite; }
+    @keyframes tgm-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .tgm-cancel-spin .tgm-spinner { animation-duration: 2s; } }
 
     /* Toast notifications */
     .tgm-toast-stack { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; z-index: 999999; max-width: 380px; }
@@ -1593,6 +1635,63 @@
     `;
   }
 
+  // Display label + icon for a product type, used by the cancel section.
+  function productMeta(item) {
+    switch (item?.product) {
+      case 'Accommodation':      return { icon: IC.bed,    label: 'Accommodation' };
+      case 'Packages':           return { icon: IC.bag,    label: 'Package' };
+      case 'Flights':            return { icon: IC.plane,  label: 'Flights' };
+      case 'Transfers':          return { icon: IC.van,    label: 'Transfer' };
+      case 'CarRental':          return { icon: IC.car,    label: 'Car hire' };
+      case 'TicketsAttractions': return { icon: IC.ticket, label: 'Tickets & attractions' };
+      case 'AirportExtras':      return { icon: IC.bag,    label: 'Airport extras' };
+      default:                   return { icon: IC.booking, label: item?.product || 'Booked item' };
+    }
+  }
+
+  // "Cancel a product" section. Lists each item in the order with its own
+  // Cancel button (cancellation is per-product in the Travelify API — each has
+  // its own policy to accept, and any one call can fail independently). The
+  // policy fetch + confirm flow runs in a modal mounted at data-tgm-cancel-mount.
+  function renderCancelSection(order, c) {
+    if (c.display?.showCancel === false) return '';
+    const items = Array.isArray(order?.items) ? order.items : [];
+    const rows = items
+      .filter(it => it && it.id != null)
+      .map(it => {
+        const meta = productMeta(it);
+        const isCancelled = String(it.status || '').toLowerCase() === 'cancelled';
+        const subBits = [];
+        if (it.bookingReference) subBits.push(esc(it.bookingReference));
+        if (it.startDate) subBits.push(esc(fmtDate(it.startDate, { day: 'numeric', month: 'short', year: 'numeric' })));
+        const sub = subBits.join(' · ');
+        return `
+          <div class="tgm-cancel-row${isCancelled ? ' is-cancelled' : ''}">
+            <div class="tgm-cancel-row-icon">${svg(meta.icon)}</div>
+            <div class="tgm-cancel-row-text">
+              <div class="tgm-cancel-row-title">${esc(meta.label)}</div>
+              ${sub ? `<div class="tgm-cancel-row-sub">${sub}</div>` : ''}
+            </div>
+            ${isCancelled
+              ? `<span class="tgm-cancel-pill">${esc(c.labels?.cancelledPill || 'Cancelled')}</span>`
+              : `<button type="button" class="tgm-cancel-btn" data-tgm-cancel-item data-item-id="${esc(String(it.id))}">${svg(IC.x)}${esc(c.labels?.cancelBtn || 'Cancel')}</button>`}
+          </div>`;
+      })
+      .join('');
+
+    if (!rows) return '';
+
+    return `
+      <div class="tgm-cancel-sec">
+        <div class="tgm-cancel-sec-head">
+          <h3>${svg(IC.shield)}${esc(c.labels?.cancelSecTitle || 'Need to cancel something?')}</h3>
+          <p>${esc(c.labels?.cancelSecSub || "You'll see the cancellation policy and any charges before anything is confirmed.")}</p>
+        </div>
+        ${rows}
+      </div>
+      <div data-tgm-cancel-mount></div>`;
+  }
+
   function renderFound(order, c, lookup) {
     const items = order.items || [];
     const summary = order.summary || {};
@@ -2151,6 +2250,8 @@
           </div></div>
         </div>` : ''}
 
+        ${renderCancelSection(order, c)}
+
         ${(c.support?.email || c.support?.phone) ? `
         <div class="tgm-help">
           <div>
@@ -2188,6 +2289,7 @@
       this.state = { stage: 'form', order: null, error: null };
       this.lookup = null;
       this._lastAttempt = null;            // pre-fills form on retry / try-again
+      this._cancel = null;                 // active per-product cancellation flow state
       this._toastTimers = new Map();
       this._pdfBlob = null;          // cached blob, shared by preview & download
       this._pdfPreviewUrl = null;    // object URL for the inline iframe
@@ -2393,6 +2495,14 @@
       if (downloadBtn) downloadBtn.addEventListener('click', () => this._handlePdfDownload(downloadBtn));
       const emailBtn = root.querySelector('[data-tgm-pdf-email]');
       if (emailBtn) emailBtn.addEventListener('click', () => this._handleEmailOpen(emailBtn));
+
+      // Per-product cancel buttons. Each opens the policy → confirm modal for
+      // that single item id.
+      root.querySelectorAll('[data-tgm-cancel-item]').forEach(btn => {
+        btn.addEventListener('click', () => this._openCancel(btn.getAttribute('data-item-id')));
+      });
+      // If a cancellation flow was mid-way when the view re-rendered, paint it.
+      if (this._cancel && this._cancel.open) this._renderCancelModal();
 
       // Issue 4: "Look up another booking" returns to the lookup form. We
       // clear the cached booking, PDF blob and lookup details so the next
@@ -2700,6 +2810,282 @@
     // The modal is mounted inside the widget shadow root so it inherits theme
     // tokens. We use position: fixed on the backdrop so it overlays the host
     // page viewport, not just the widget's box.
+
+    // ----- Per-product cancellation flow -----
+    // Two steps against /api/cancel-product (which proxies Travelify):
+    //   1. fetch this product's cancellation policy + charges, show them
+    //   2. customer accepts → collect a reason (<=250) → confirm
+    // The order key never touches the browser — the proxy resolves it server-side.
+
+    _findCancelItem(itemId) {
+      const items = this.state.order?.items || [];
+      return items.find(it => it && String(it.id) === String(itemId)) || null;
+    }
+
+    _openCancel(itemId) {
+      const item = this._findCancelItem(itemId);
+      if (!item) return;
+      if (!this.lookup || !this.c.widgetId) return; // can't cancel without a resolved booking
+      // If another flow is open, tear it down first.
+      if (this._cancel && this._cancel.open) this._closeCancel({ silent: true });
+
+      this._cancel = {
+        open: true,
+        stage: 'loading',
+        itemId: String(itemId),
+        item,
+        meta: productMeta(item),
+        data: null,
+        error: null,
+        reference: null,
+      };
+      this._renderCancelModal();
+      this._cancelFetchPolicies();
+      this._fireEvent('cancel-opened', { itemId: String(itemId) });
+    }
+
+    async _cancelFetchPolicies() {
+      try {
+        const res = await fetch(API_CANCEL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widgetId: this.c.widgetId,
+            emailAddress: this.lookup.email,
+            departDate: this.lookup.date,
+            orderRef: this.lookup.ref,
+            productId: this._cancel.itemId,
+          }),
+        });
+        if (res.status === 429) {
+          this._cancel.stage = 'error';
+          this._cancel.error = 'Too many attempts. Please wait a few minutes and try again.';
+          this._renderCancelModal();
+          return;
+        }
+        const data = await res.json().catch(() => null);
+        if (data && data.success === true) {
+          this._cancel.stage = 'policies';
+          this._cancel.data = data.data || {};
+        } else {
+          this._cancel.stage = 'error';
+          this._cancel.error = (data && data.error) || "This product can't be cancelled online. Please contact us for help.";
+        }
+      } catch (_) {
+        this._cancel.stage = 'error';
+        this._cancel.error = "We couldn't load the cancellation details. Please try again.";
+      }
+      if (this._cancel && this._cancel.open) this._renderCancelModal();
+    }
+
+    async _cancelConfirm(reason) {
+      if (!this._cancel || !this._cancel.open) return;
+      this._cancel.stage = 'working';
+      this._renderCancelModal();
+      try {
+        const res = await fetch(API_CANCEL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widgetId: this.c.widgetId,
+            emailAddress: this.lookup.email,
+            departDate: this.lookup.date,
+            orderRef: this.lookup.ref,
+            productId: this._cancel.itemId,
+            confirm: true,
+            cancellationReason: (reason || '').slice(0, 250),
+          }),
+        });
+        if (res.status === 429) {
+          this._cancel.stage = 'error';
+          this._cancel.error = 'Too many attempts. Please wait a few minutes and try again.';
+          this._renderCancelModal();
+          return;
+        }
+        const data = await res.json().catch(() => null);
+        if (data && data.success === true) {
+          this._cancel.stage = 'done';
+          this._cancel.reference = (data.data && data.data.cancellationReference) || '';
+          this._fireEvent('cancel-confirmed', { itemId: this._cancel.itemId, reference: this._cancel.reference });
+        } else {
+          this._cancel.stage = 'error';
+          this._cancel.error = (data && data.error) || "The cancellation couldn't be completed. Please contact us and we'll sort it out.";
+        }
+      } catch (_) {
+        this._cancel.stage = 'error';
+        this._cancel.error = "Something went wrong completing the cancellation. Please try again.";
+      }
+      if (this._cancel && this._cancel.open) this._renderCancelModal();
+    }
+
+    // Apply a successful cancellation to the in-memory order, then close and
+    // re-render so the item shows as cancelled without another lookup.
+    _finishCancel() {
+      const item = this._cancel && this._findCancelItem(this._cancel.itemId);
+      if (item) item.status = 'Cancelled';
+      this._closeCancel({ silent: true });
+      this._render();
+    }
+
+    _closeCancel(opts) {
+      const root = this.shadow.querySelector('.tgm-root');
+      const mount = root?.querySelector('[data-tgm-cancel-mount]');
+      if (mount) mount.innerHTML = '';
+      if (this._cancelEscHandler) {
+        document.removeEventListener('keydown', this._cancelEscHandler);
+        this._cancelEscHandler = null;
+      }
+      this._cancel = null;
+      if (!opts || !opts.silent) this._fireEvent('cancel-closed');
+    }
+
+    _renderCancelModal() {
+      const root = this.shadow.querySelector('.tgm-root');
+      const mount = root?.querySelector('[data-tgm-cancel-mount]');
+      if (!mount || !this._cancel) return;
+      const c = this.c;
+      const st = this._cancel;
+      const title = st.meta?.label || 'this product';
+
+      let headIcon = IC.shield, headTitle, headSub, body, foot;
+
+      if (st.stage === 'loading') {
+        headTitle = c.labels?.cancelModalTitle || 'Cancel ' + title;
+        headSub = c.labels?.cancelLoadingSub || 'Checking the cancellation policy…';
+        body = `<div class="tgm-cancel-spin"><div class="tgm-spinner"></div><span>${esc(c.labels?.cancelLoading || 'Loading cancellation details…')}</span></div>`;
+        foot = '';
+      } else if (st.stage === 'policies') {
+        const d = st.data || {};
+        const policies = Array.isArray(d.policies) ? d.policies : [];
+        headTitle = c.labels?.cancelModalTitle || 'Cancel ' + title;
+        headSub = d.bookingReference
+          ? `${esc(c.labels?.cancelRef || 'Booking reference')}: ${esc(d.bookingReference)}`
+          : (c.labels?.cancelPoliciesSub || 'Please review the cancellation policy below.');
+        body = `
+          <div class="tgm-modal-field">
+            <label>${esc(c.labels?.cancelPoliciesLabel || 'Cancellation policy & charges')}</label>
+            ${policies.length
+              ? `<div class="tgm-policies">${policies.map(p => `<div class="tgm-policy">${svg(IC.info)}<span>${esc(p)}</span></div>`).join('')}</div>`
+              : `<div class="tgm-policy">${svg(IC.info)}<span>${esc(c.labels?.cancelNoPolicy || 'No specific charges were returned for this product.')}</span></div>`}
+          </div>
+          <div class="tgm-cancel-warn">${svg(IC.alert)}<span>${esc(c.labels?.cancelWarn || 'Cancelling cannot be undone. Any charges above will apply.')}</span></div>`;
+        foot = `
+          <button type="button" class="tgm-btn-2" data-tgm-cancel-keep>${esc(c.labels?.cancelKeep || 'Keep booking')}</button>
+          <button type="button" class="tgm-btn-1" data-tgm-cancel-continue>${esc(c.labels?.cancelContinue || 'Continue')}${svg(IC.arrow)}</button>`;
+      } else if (st.stage === 'reason') {
+        headTitle = c.labels?.cancelReasonTitle || 'Confirm cancellation';
+        headSub = c.labels?.cancelReasonSub || 'Let us know why you\'re cancelling (optional).';
+        body = `
+          <div class="tgm-modal-field">
+            <label for="tgm-cancel-reason">${esc(c.labels?.cancelReasonLabel || 'Reason for cancelling')}</label>
+            <textarea id="tgm-cancel-reason" class="tgm-modal-textarea" data-tgm-cancel-reason rows="3" maxlength="250"
+              placeholder="${esc(c.labels?.cancelReasonPlaceholder || 'e.g. change of plans')}"></textarea>
+            <div class="tgm-reason-count"><span data-tgm-reason-count>0</span>/250</div>
+          </div>
+          <div class="tgm-cancel-warn">${svg(IC.alert)}<span>${esc(c.labels?.cancelFinalWarn || "This will cancel the product and can't be undone.")}</span></div>
+          <div data-tgm-cancel-error-mount></div>`;
+        foot = `
+          <button type="button" class="tgm-btn-2" data-tgm-cancel-back>${esc(c.labels?.cancelBack || 'Back')}</button>
+          <button type="button" class="tgm-btn-danger" data-tgm-cancel-confirm>${svg(IC.x)}<span data-tgm-cancel-confirm-label>${esc(c.labels?.cancelConfirm || 'Cancel this product')}</span></button>`;
+      } else if (st.stage === 'working') {
+        headTitle = c.labels?.cancelWorkingTitle || 'Cancelling…';
+        headSub = c.labels?.cancelWorkingSub || 'Please wait while we process this.';
+        body = `<div class="tgm-cancel-spin"><div class="tgm-spinner"></div><span>${esc(c.labels?.cancelWorking || 'Cancelling your product…')}</span></div>`;
+        foot = '';
+      } else if (st.stage === 'done') {
+        headIcon = IC.check;
+        headTitle = c.labels?.cancelDoneTitle || 'Cancellation confirmed';
+        headSub = '';
+        body = `
+          <div class="tgm-cancel-done">
+            <div class="tgm-cancel-done-icon">${svg(IC.check)}</div>
+            <h2>${esc(c.labels?.cancelDoneHead || 'That\'s cancelled')}</h2>
+            <p>${esc(c.labels?.cancelDoneBody || 'Your ' + (st.meta?.label || 'product').toLowerCase() + ' has been cancelled.')}</p>
+            ${st.reference ? `<div class="tgm-cancel-ref">${esc(c.labels?.cancelRefLabel || 'Reference')}: ${esc(st.reference)}</div>` : ''}
+          </div>`;
+        foot = `<button type="button" class="tgm-btn-1" data-tgm-cancel-done>${esc(c.labels?.cancelDoneBtn || 'Done')}</button>`;
+      } else { // 'error'
+        headIcon = IC.alert;
+        headTitle = c.labels?.cancelErrorTitle || 'Unable to cancel';
+        headSub = '';
+        body = `<div class="tgm-modal-error">${svg(IC.alert)}<span>${esc(st.error || 'Something went wrong.')}</span></div>`;
+        foot = `<button type="button" class="tgm-btn-2" data-tgm-cancel-keep>${esc(c.labels?.cancelClose || 'Close')}</button>`;
+      }
+
+      mount.innerHTML = `
+        <div class="tgm-modal-backdrop" data-tgm-cancel-backdrop role="dialog" aria-modal="true" aria-labelledby="tgm-cancel-title">
+          <div class="tgm-modal" role="document">
+            <div class="tgm-modal-head">
+              <div class="tgm-modal-head-icon">${svg(headIcon)}</div>
+              <div class="tgm-modal-head-text">
+                <h2 class="tgm-modal-head-title" id="tgm-cancel-title">${esc(headTitle)}</h2>
+                ${headSub ? `<p class="tgm-modal-head-sub">${esc(headSub)}</p>` : ''}
+              </div>
+              <button type="button" class="tgm-modal-close" data-tgm-cancel-close aria-label="Close">${svg(IC.x)}</button>
+            </div>
+            <div class="tgm-modal-body">${body}</div>
+            ${foot ? `<div class="tgm-modal-foot">${foot}</div>` : ''}
+          </div>
+        </div>`;
+
+      this._bindCancelModal(mount);
+    }
+
+    _bindCancelModal(mount) {
+      const close = () => this._closeCancel();
+
+      const backdrop = mount.querySelector('[data-tgm-cancel-backdrop]');
+      const closeBtn = mount.querySelector('[data-tgm-cancel-close]');
+      if (closeBtn) closeBtn.addEventListener('click', close);
+      if (backdrop) {
+        let downOnBackdrop = false;
+        backdrop.addEventListener('mousedown', (e) => { downOnBackdrop = e.target === backdrop; });
+        backdrop.addEventListener('mouseup', (e) => {
+          if (downOnBackdrop && e.target === backdrop) close();
+          downOnBackdrop = false;
+        });
+      }
+
+      // Esc to close (bound once per open flow).
+      if (!this._cancelEscHandler) {
+        this._cancelEscHandler = (e) => { if (e.key === 'Escape') this._closeCancel(); };
+        document.addEventListener('keydown', this._cancelEscHandler);
+      }
+
+      const keepBtn = mount.querySelector('[data-tgm-cancel-keep]');
+      if (keepBtn) keepBtn.addEventListener('click', close);
+
+      const continueBtn = mount.querySelector('[data-tgm-cancel-continue]');
+      if (continueBtn) continueBtn.addEventListener('click', () => {
+        this._cancel.stage = 'reason';
+        this._renderCancelModal();
+      });
+
+      const backBtn = mount.querySelector('[data-tgm-cancel-back]');
+      if (backBtn) backBtn.addEventListener('click', () => {
+        this._cancel.stage = 'policies';
+        this._renderCancelModal();
+      });
+
+      const reason = mount.querySelector('[data-tgm-cancel-reason]');
+      const counter = mount.querySelector('[data-tgm-reason-count]');
+      if (reason) {
+        reason.addEventListener('input', () => { if (counter) counter.textContent = String(reason.value.length); });
+        requestAnimationFrame(() => reason.focus());
+      }
+
+      const confirmBtn = mount.querySelector('[data-tgm-cancel-confirm]');
+      if (confirmBtn) confirmBtn.addEventListener('click', () => {
+        if (confirmBtn.disabled) return;
+        confirmBtn.disabled = true;
+        const label = mount.querySelector('[data-tgm-cancel-confirm-label]');
+        if (label) label.textContent = this.c.labels?.cancelConfirming || 'Cancelling…';
+        this._cancelConfirm(reason ? reason.value : '');
+      });
+
+      const doneBtn = mount.querySelector('[data-tgm-cancel-done]');
+      if (doneBtn) doneBtn.addEventListener('click', () => this._finishCancel());
+    }
 
     _handleEmailOpen(btn) {
       // The Email button doesn't trigger any fetch itself — the PDF is
