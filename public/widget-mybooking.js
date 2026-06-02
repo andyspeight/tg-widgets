@@ -114,7 +114,8 @@
   const API_PDF = (typeof window !== 'undefined' && window.__TG_PDF_API__) || (API_BASE + '/api/booking-pdf');
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
   const API_CANCEL = (typeof window !== 'undefined' && window.__TG_CANCEL_API__) || (API_BASE + '/api/cancel-product');
-  const VERSION = '1.5.0';
+  const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
+  const VERSION = '1.6.0';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -651,6 +652,16 @@
     .tgm-cancel-spin .tgm-spinner { width: 32px; height: 32px; border: 3px solid var(--tgm-border); border-top-color: var(--tgm-primary); border-radius: 50%; animation: tgm-spin .7s linear infinite; }
     @keyframes tgm-spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { .tgm-cancel-spin .tgm-spinner { animation-duration: 2s; } }
+
+    /* ----- Pay balance ----- */
+    .tgm-pay-action { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--tgm-border-light); }
+    .tgm-pay-cta { width: 100%; height: 48px; padding: 0 20px; background: var(--tgm-primary); border: 1px solid var(--tgm-primary); border-radius: var(--tgm-radius-md); color: #fff; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: filter .15s, opacity .15s; }
+    .tgm-pay-cta:hover { filter: brightness(1.07); }
+    .tgm-pay-cta[disabled] { opacity: .6; cursor: default; }
+    .tgm-pay-cta svg { width: 18px; height: 18px; }
+    .tgm-pay-note { font-size: 12.5px; color: var(--tgm-text-3); margin-top: 8px; text-align: center; line-height: 1.45; }
+    .tgm-pay-error { display: flex; gap: 8px; align-items: center; margin-top: 10px; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); border-radius: var(--tgm-radius-md); padding: 9px 12px; font-size: 13px; color: var(--tgm-error); }
+    .tgm-pay-error svg { width: 14px; height: 14px; flex-shrink: 0; }
 
     /* Toast notifications */
     .tgm-toast-stack { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; z-index: 999999; max-width: 380px; }
@@ -1692,6 +1703,50 @@
       <div data-tgm-cancel-mount></div>`;
   }
 
+  // Work out the next payment to collect from the order's deposit schedule —
+  // mirrors the server's logic in /api/pay-balance so the displayed amount
+  // matches what the basket will charge. The server stays authoritative; this
+  // is for the button label only. (The trimmed schedule has no paid flag, so
+  // we take the earliest payment by due date.)
+  function computeNextDue(installPlan, standardDep) {
+    const plan = installPlan || standardDep;
+    if (!plan) return null;
+    const entries = (Array.isArray(plan.breakdown) ? plan.breakdown : [])
+      .map(b => ({ amount: Number(b.amount), dueDate: b.dueDate || '', due: Date.parse(b.dueDate) }))
+      .filter(e => Number.isFinite(e.amount) && e.amount > 0);
+    if (!entries.length) return null;
+    entries.sort((a, b) => (Number.isFinite(a.due) ? a.due : Infinity) - (Number.isFinite(b.due) ? b.due : Infinity));
+    const next = entries[0];
+    const rest = entries.slice(1);
+    return {
+      amount: next.amount,
+      dueDate: next.dueDate,
+      remaining: rest.length,
+      remainingAmount: rest.reduce((s, e) => s + e.amount, 0),
+      isInstalment: !!installPlan,
+    };
+  }
+
+  // The "Pay balance / Pay next payment" CTA inside the Payment section.
+  function renderPayBalance(installPlan, standardDep, currency, c) {
+    const next = computeNextDue(installPlan, standardDep);
+    if (!next || !(next.amount > 0)) return '';
+    const label = next.isInstalment
+      ? (c.labels?.payNextBtn || 'Pay next payment')
+      : (c.labels?.payBalanceBtn || 'Pay balance');
+    const note = next.remaining > 0
+      ? `<div class="tgm-pay-note">${esc(String(next.remaining))} further ${next.remaining === 1 ? 'payment' : 'payments'} of ${esc(fmtMoney(next.remainingAmount, currency))} to follow.</div>`
+      : '';
+    return `
+      <div class="tgm-pay-action">
+        <button type="button" class="tgm-pay-cta" data-tgm-pay>
+          ${svg(IC.card)}<span data-tgm-pay-label>${esc(label)} · ${esc(fmtMoney(next.amount, currency))}</span>
+        </button>
+        ${note}
+        <div data-tgm-pay-error></div>
+      </div>`;
+  }
+
   function renderFound(order, c, lookup) {
     const items = order.items || [];
     const summary = order.summary || {};
@@ -2116,6 +2171,7 @@
                 </div>
               `;
             })()}
+            ${(c.display?.showPayBalance !== false) ? renderPayBalance(installPlan, standardDep, currency, c) : ''}
           </div>
 
           <div class="tgm-section">
@@ -2504,6 +2560,10 @@
       // If a cancellation flow was mid-way when the view re-rendered, paint it.
       if (this._cancel && this._cancel.open) this._renderCancelModal();
 
+      // Pay balance / next payment.
+      const payBtn = root.querySelector('[data-tgm-pay]');
+      if (payBtn) payBtn.addEventListener('click', () => this._payBalance(payBtn));
+
       // Issue 4: "Look up another booking" returns to the lookup form. We
       // clear the cached booking, PDF blob and lookup details so the next
       // search starts clean. _lastAttempt is also nulled so the form renders
@@ -2810,6 +2870,69 @@
     // The modal is mounted inside the widget shadow root so it inherits theme
     // tokens. We use position: fixed on the backdrop so it overlays the host
     // page viewport, not just the widget's box.
+
+    // ----- Pay balance / next payment -----
+    // Creates a basket server-side and redirects the customer to it. The
+    // amount is decided by the server from the order's schedule; the widget
+    // only triggers the flow.
+    async _payBalance(btn) {
+      if (!btn || btn.disabled) return;
+      if (!this.lookup || !this.c.widgetId) return;
+
+      const root = this.shadow.querySelector('.tgm-root');
+      const label = btn.querySelector('[data-tgm-pay-label]');
+      const errMount = root?.querySelector('[data-tgm-pay-error]');
+      const prevLabel = label ? label.textContent : '';
+      if (errMount) errMount.innerHTML = '';
+
+      const reset = () => { btn.disabled = false; if (label) label.textContent = prevLabel; };
+      const showErr = (msg) => {
+        if (errMount) errMount.innerHTML = `<div class="tgm-pay-error">${svg(IC.alert)}<span>${esc(msg)}</span></div>`;
+        reset();
+      };
+
+      btn.disabled = true;
+      if (label) label.textContent = this.c.labels?.payRedirecting || 'Setting up payment…';
+
+      try {
+        const res = await fetch(API_PAY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widgetId: this.c.widgetId,
+            emailAddress: this.lookup.email,
+            departDate: this.lookup.date,
+            orderRef: this.lookup.ref,
+          }),
+        });
+
+        if (res.status === 429) {
+          showErr(this.c.labels?.payRateLimited || 'Too many attempts. Please wait a few minutes and try again.');
+          return;
+        }
+
+        const data = await res.json().catch(() => null);
+
+        if (data && data.success === true && typeof data.url === 'string' && /^https:\/\//i.test(data.url)) {
+          this._fireEvent('pay-redirect', { url: data.url });
+          // Send the customer to the basket. The widget is embedded on the
+          // client's own site and the basket lives there too, so navigate the
+          // top window; fall back to the widget's own window if blocked.
+          try { (window.top || window).location.href = data.url; }
+          catch { window.location.href = data.url; }
+          return;
+        }
+
+        if (data && data.noBalance) {
+          showErr(this.c.labels?.payNoBalance || "There's nothing left to pay on this booking.");
+          return;
+        }
+
+        showErr(this.c.labels?.payFailed || "We couldn't start the payment just now. Please try again, or contact us.");
+      } catch (_) {
+        showErr(this.c.labels?.payFailed || "We couldn't start the payment just now. Please try again, or contact us.");
+      }
+    }
 
     // ----- Per-product cancellation flow -----
     // Two steps against /api/cancel-product (which proxies Travelify):
