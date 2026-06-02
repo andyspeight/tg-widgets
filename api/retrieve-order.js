@@ -1090,7 +1090,11 @@ export default async function handler(req, res) {
     ? req.headers['x-tg-real-ip']
     : getClientIp(req);
 
-  const ipLimit = rateLimit(`ro:ip:${ip}`, isInternalCall ? 30 : 5);
+  // Per-IP cap. The lookup is gated on three secrets (email + departure date
+  // + booking reference), so this is an abuse backstop rather than the primary
+  // control — 5/15min blocked normal use (e.g. look up → pay balance → return
+  // → look up again, plus any retries). 20/15min still stops a script.
+  const ipLimit = rateLimit(`ro:ip:${ip}`, isInternalCall ? 30 : 20);
   if (!ipLimit.ok) {
     return res.status(429).json({
       error: 'too_many_attempts',
