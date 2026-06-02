@@ -68,27 +68,19 @@ function isPaidEntry(b) {
   return /paid|settled|complete/.test(status);
 }
 
-// Find the order's payment schedule. Mirrors the widget: prefer an instalment
-// plan, else the standard deposit option. Schedule lives at the same raw path
-// for both Accommodation and Packages items.
+// Find the order's outstanding payment schedule. It lives at the ORDER level
+// as `depositOption` (singular); its `breakdown` is the set of payments still
+// owed (the taken deposit is `initialAmount`, not in the breakdown).
 function findPaymentPlan(raw) {
-  const items = Array.isArray(raw?.items) ? raw.items : [];
-  for (const it of items) {
-    const pricing = it?.dataObject?.pricing;
-    const opts = pricing?.depositOptions;
-    if (Array.isArray(opts) && opts.length) {
-      const instal = opts.find(o => o && o.installments && o.installmentsAmount);
-      const standard = opts.find(o => o && !o.installments) || opts[0];
-      const opt = instal || standard;
-      return {
-        opt,
-        breakdown: Array.isArray(opt?.breakdown) ? opt.breakdown : [],
-        currency: pricing.currency || raw.currency || 'GBP',
-        isInstalment: !!instal,
-      };
-    }
-  }
-  return null;
+  const opt = raw?.depositOption;
+  const breakdown = (opt && Array.isArray(opt.breakdown)) ? opt.breakdown : [];
+  if (!breakdown.length) return null;
+  return {
+    opt,
+    breakdown,
+    currency: opt.currency || raw.currency || 'GBP',
+    isInstalment: breakdown.length > 1,
+  };
 }
 
 // Determine the next payment to collect + how many remain after it.
@@ -148,13 +140,13 @@ function buildContactInfo(raw) {
   put('PostalCode', raw.customerPostalCode || raw.customerPostcode || raw.postalCode || raw.postcode || addr.postalCode);
   put('CountryCode', raw.customerCountryCode || raw.countryCode || addr.countryCode);
 
-  const tel = raw.telephone || raw.customerTelephone || addr.telephone;
-  if (tel && typeof tel === 'object') {
-    const t = {};
-    if (tel.countryPrefix) t.countryPrefix = String(tel.countryPrefix).trim();
-    const num = tel.Number || tel.number;
-    if (num) t.Number = String(num).trim();
-    if (t.countryPrefix || t.Number) ci.Telephone = t;
+  // Phone is flat fields on the order: customerTelPrefix + customerTelNum.
+  const prefix = raw.customerTelPrefix != null ? String(raw.customerTelPrefix).trim() : '';
+  const number = raw.customerTelNum != null ? String(raw.customerTelNum).trim() : '';
+  if (prefix || number) {
+    ci.Telephone = {};
+    if (prefix) ci.Telephone.countryPrefix = prefix;
+    if (number) ci.Telephone.Number = number;
   }
   return ci;
 }
