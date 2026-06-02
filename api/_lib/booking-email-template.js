@@ -205,20 +205,23 @@ function buildPaymentInfo(order) {
     balanceDueDate: null,
   };
 
-  // Prefer order-level payment state (paidToDate + depositOption), where the
-  // real balance/instalments live. Fall back to the legacy hotel deposit.
+  // Order-level truth: "Paid so far" = payments taken; "Balance remaining" =
+  // total − paid. The depositOption.breakdown is only a schedule (Travelify
+  // leaves it after a payment), so we use it ONLY for the next due date.
   const dep = order.depositOption;
   const paid = typeof order.paidToDate === 'number' ? order.paidToDate : null;
-  if (paid != null && paid > 0) result.depositPaid = Math.round(paid * 100) / 100;
-  if (dep && Array.isArray(dep.breakdown) && dep.breakdown.length) {
-    const bal = dep.breakdown.reduce((s, b) => s + (typeof b.amount === 'number' ? b.amount : 0), 0);
-    if (bal > 0) {
-      result.balanceDue = Math.round(bal * 100) / 100;
-      const next = dep.breakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0];
-      result.balanceDueDate = next?.dueDate || null;
+  if (paid != null) {
+    if (paid > 0) result.depositPaid = Math.round(paid * 100) / 100;
+    const outstanding = Math.max(0, Math.round((total - paid) * 100) / 100);
+    if (outstanding > 0) {
+      result.balanceDue = outstanding;
+      if (dep && Array.isArray(dep.breakdown) && dep.breakdown.length) {
+        const next = dep.breakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0];
+        result.balanceDueDate = next?.dueDate || null;
+      }
     }
-  }
-  if (result.depositPaid == null && result.balanceDue == null) {
+  } else {
+    // Legacy fallback: no order-level payment data — use the hotel deposit.
     const depositOpts = pricing?.depositOptions || [];
     const standardDep = depositOpts.find(d => !d.installments) || depositOpts[0] || null;
     if (standardDep) {
