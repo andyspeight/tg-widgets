@@ -892,6 +892,35 @@ function trimItem(item) {
 }
 
 
+function computePaidToDate(raw) {
+  const ps = Array.isArray(raw.payments) ? raw.payments : [];
+  const sum = ps
+    .filter(p => p && String(p.status || '').toLowerCase() === 'success')
+    .reduce((s, p) => s + (typeof p.amount === 'number' ? p.amount : 0), 0);
+  return Math.round(sum * 100) / 100;
+}
+
+// The order-level payment schedule (singular `depositOption`). Its `breakdown`
+// is the set of payments STILL OUTSTANDING — the already-taken deposit is
+// `initialAmount` (and reflected in `payments`), not in the breakdown. Returns
+// null when there's nothing left to pay.
+function trimDepositOption(opt) {
+  if (!opt || typeof opt !== 'object') return null;
+  const breakdown = Array.isArray(opt.breakdown)
+    ? opt.breakdown.slice(0, 24).map(b => ({
+        num: safeNum(b.num),
+        amount: safeNum(b.amount),
+        dueDate: safeStr(b.dueDate, 30),
+      })).filter(b => typeof b.amount === 'number' && b.amount > 0)
+    : [];
+  if (!breakdown.length) return null;
+  return {
+    initialAmount: safeNum(opt.initialAmount),
+    currency: safeStr(opt.currency, 10),
+    breakdown,
+  };
+}
+
 function trimOrder(raw) {
   if (!raw || typeof raw !== 'object') return null;
 
@@ -916,6 +945,9 @@ function trimOrder(raw) {
     created: safeStr(raw.created, 30),
     items,
     summary,
+    // Order-level payment state (where balance/instalments actually live).
+    paidToDate: computePaidToDate(raw),
+    depositOption: trimDepositOption(raw.depositOption),
     documents: Array.isArray(raw.documents)
       ? raw.documents.slice(0, 20).map(doc => ({
           name: safeStr(doc.name, 200),
