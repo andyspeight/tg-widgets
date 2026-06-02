@@ -230,7 +230,7 @@ async function resolveWidgetEmailToClientEmail(widgetClientEmail) {
 // type being used to drive a booking call.
 export async function resolveWidgetCredentials(widgetId, expectType = 'My Booking') {
   if (widgetId === DEMO_WIDGET_SENTINEL) {
-    return { appId: DEMO_APP_ID, apiKey: DEMO_PUBLIC_KEY, isDemo: true };
+    return { appId: DEMO_APP_ID, apiKey: DEMO_PUBLIC_KEY, isDemo: true, widget: null };
   }
 
   let widget;
@@ -280,7 +280,7 @@ export async function resolveWidgetCredentials(widgetId, expectType = 'My Bookin
     return null;
   }
 
-  return { appId: creds.appId, apiKey: creds.apiKey, isDemo: false };
+  return { appId: creds.appId, apiKey: creds.apiKey, isDemo: false, widget };
 }
 
 // ----- Public: fetch a raw order from Travelify -----
