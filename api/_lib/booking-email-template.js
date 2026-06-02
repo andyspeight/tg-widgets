@@ -197,23 +197,37 @@ function buildPaymentInfo(order) {
 
   if (!total) return null;
 
-  const depositOpts = pricing?.depositOptions || [];
-  const standardDep = depositOpts.find(d => !d.installments) || depositOpts[0] || null;
-
   const result = {
     total,
     currency,
-    depositPaid: null,
-    balanceDue: null,
+    depositPaid: null,   // rendered as "Paid so far"
+    balanceDue: null,    // rendered as "Balance remaining"
     balanceDueDate: null,
   };
 
-  if (standardDep) {
-    result.depositPaid = standardDep.amount;
-    const balanceLine = standardDep.breakdown?.[0];
-    if (balanceLine) {
-      result.balanceDue = balanceLine.amount;
-      result.balanceDueDate = balanceLine.dueDate;
+  // Prefer order-level payment state (paidToDate + depositOption), where the
+  // real balance/instalments live. Fall back to the legacy hotel deposit.
+  const dep = order.depositOption;
+  const paid = typeof order.paidToDate === 'number' ? order.paidToDate : null;
+  if (paid != null && paid > 0) result.depositPaid = Math.round(paid * 100) / 100;
+  if (dep && Array.isArray(dep.breakdown) && dep.breakdown.length) {
+    const bal = dep.breakdown.reduce((s, b) => s + (typeof b.amount === 'number' ? b.amount : 0), 0);
+    if (bal > 0) {
+      result.balanceDue = Math.round(bal * 100) / 100;
+      const next = dep.breakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0];
+      result.balanceDueDate = next?.dueDate || null;
+    }
+  }
+  if (result.depositPaid == null && result.balanceDue == null) {
+    const depositOpts = pricing?.depositOptions || [];
+    const standardDep = depositOpts.find(d => !d.installments) || depositOpts[0] || null;
+    if (standardDep) {
+      result.depositPaid = standardDep.amount;
+      const balanceLine = standardDep.breakdown?.[0];
+      if (balanceLine) {
+        result.balanceDue = balanceLine.amount;
+        result.balanceDueDate = balanceLine.dueDate;
+      }
     }
   }
 
@@ -484,7 +498,7 @@ export function renderBookingEmail(opts) {
       rows.push(`
         <tr>
           <td style="padding:12px 0;${borderStyle}font:400 15px/1.6 ${FONT};color:#64748b;">
-            Deposit paid
+            Paid so far
           </td>
           <td style="padding:12px 0;${borderStyle}text-align:right;font:600 15px/1.6 ${FONT};color:#0f172a;">
             ${escapeHtml(formatMoney(payment.depositPaid, payment.currency))}
@@ -495,8 +509,8 @@ export function renderBookingEmail(opts) {
 
     if (payment.balanceDue != null && payment.balanceDue > 0) {
       const dueLabel = payment.balanceDueDate
-        ? `Balance due by ${formatShortDate(payment.balanceDueDate)}`
-        : 'Balance due';
+        ? `Balance remaining (due by ${formatShortDate(payment.balanceDueDate)})`
+        : 'Balance remaining';
       rows.push(`
         <tr>
           <td style="padding:12px 0;font:400 15px/1.6 ${FONT};color:#64748b;">
@@ -746,12 +760,12 @@ export function renderBookingEmail(opts) {
     textParts.push('', '─── Payment ───', '');
     textParts.push(`${resolveTotalLabel(order?.items)}: ${formatMoney(payment.total, payment.currency)}`);
     if (payment.depositPaid != null) {
-      textParts.push(`Deposit paid: ${formatMoney(payment.depositPaid, payment.currency)}`);
+      textParts.push(`Paid so far: ${formatMoney(payment.depositPaid, payment.currency)}`);
     }
     if (payment.balanceDue != null && payment.balanceDue > 0) {
       const dueLabel = payment.balanceDueDate
-        ? `Balance due by ${formatShortDate(payment.balanceDueDate)}`
-        : 'Balance due';
+        ? `Balance remaining (due by ${formatShortDate(payment.balanceDueDate)})`
+        : 'Balance remaining';
       textParts.push(`${dueLabel}: ${formatMoney(payment.balanceDue, payment.currency)}`);
     }
 
