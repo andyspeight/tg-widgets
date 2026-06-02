@@ -473,6 +473,7 @@
             <div class="toggle-row"><span>Hotel facilities</span><button class="switch on" data-display="showFacilities" type="button"></button></div>
             <div class="toggle-row"><span>Hotel description</span><button class="switch on" data-display="showHotelDescription" type="button"></button></div>
             <div class="toggle-row"><span>Cancellation policy</span><button class="switch on" data-display="showCancellation" type="button"></button></div>
+            <div class="toggle-row"><span>Online cancellation<small>Let customers cancel a product from the widget — they see the policy and charges before confirming.</small></span><button class="switch on" data-display="showCancel" type="button"></button></div>
             <div class="toggle-row"><span>Local fees</span><button class="switch on" data-display="showLocalFees" type="button"></button></div>
           </div></div>
         </div>
@@ -610,7 +611,7 @@ import { renderEmailHtml } from '/_email-template.js';
       colors: Object.assign({}, DEFAULT_COLOURS),
       radius: 12,
       support: { email: '', phone: '' },
-      display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showLocalFees: true },
+      display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
     previewTheme: 'light',
