@@ -3,6 +3,12 @@
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
  *
+ * v1.6.1 changes:
+ *   - Balance/next-due/Pay CTA now reconcile against payments taken
+ *     (outstanding = total − paidToDate). The depositOption.breakdown is
+ *     only a schedule and isn't cleared after payment, so a fully-paid
+ *     order no longer shows a phantom balance or Pay button.
+ *
  * v1.6.0 changes:
  *   - Pay balance: order-level balance/instalment payment. Reads paidToDate +
  *     depositOption from the order, shows "Pay balance · £X" CTAs (one in the
@@ -129,7 +135,7 @@
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
   const API_CANCEL = (typeof window !== 'undefined' && window.__TG_CANCEL_API__) || (API_BASE + '/api/cancel-product');
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
-  const VERSION = '1.6.0';
+  const VERSION = '1.6.1';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -1739,20 +1745,42 @@
     };
   }
 
+  // Authoritative "what's still owed" = total holiday cost − payments taken.
+  // The depositOption.breakdown is only a SCHEDULE (Travelify leaves it in
+  // place after a payment), so we never treat its sum as the balance — we use
+  // it only for the next due date. Mirrors decideCharge() in /api/pay-balance.
+  function computeOutstanding(order) {
+    const items = order.items || [];
+    const summary = order.summary || {};
+    const accItem = items.find(i => i.product === 'Accommodation' || i.product === 'Packages') || null;
+    const pricing = accItem?.accommodation?.pricing;
+    const total = (typeof summary.totalPrice === 'number' && summary.totalPrice > 0)
+      ? summary.totalPrice
+      : (pricing?.memberPrice ?? pricing?.price ?? accItem?.price ?? 0);
+    const paid = typeof order.paidToDate === 'number' ? order.paidToDate : 0;
+    const outstanding = Math.max(0, Math.round((total - paid) * 100) / 100);
+    return { total, paid, outstanding };
+  }
+
   // The "Pay balance / Pay next payment" CTA inside the Payment section.
   function renderPayBalance(order, currency, c) {
+    const { outstanding } = computeOutstanding(order);
+    if (!(outstanding > 0)) return ''; // nothing owed → no CTA (e.g. fully paid)
     const next = computeNextDue(order);
-    if (!next || !(next.amount > 0)) return '';
-    const label = next.isInstalment
+    const isInstalment = !!(next && next.isInstalment) && next.amount < outstanding;
+    const chargeAmount = isInstalment ? Math.min(next.amount, outstanding) : outstanding;
+    if (!(chargeAmount > 0)) return '';
+    const label = isInstalment
       ? (c.labels?.payNextBtn || 'Pay next payment')
       : (c.labels?.payBalanceBtn || 'Pay balance');
-    const note = next.remaining > 0
-      ? `<div class="tgm-pay-note">${esc(String(next.remaining))} further ${next.remaining === 1 ? 'payment' : 'payments'} of ${esc(fmtMoney(next.remainingAmount, currency))} to follow.</div>`
+    const followAmount = Math.max(0, Math.round((outstanding - chargeAmount) * 100) / 100);
+    const note = (isInstalment && followAmount > 0)
+      ? `<div class="tgm-pay-note">${esc(fmtMoney(followAmount, currency))} balance remaining after this payment.</div>`
       : '';
     return `
       <div class="tgm-pay-action">
         <button type="button" class="tgm-pay-cta" data-tgm-pay>
-          ${svg(IC.card)}<span data-tgm-pay-label>${esc(label)} · ${esc(fmtMoney(next.amount, currency))}</span>
+          ${svg(IC.card)}<span data-tgm-pay-label>${esc(label)} · ${esc(fmtMoney(chargeAmount, currency))}</span>
         </button>
         ${note}
         <div data-tgm-pay-error></div>
@@ -2106,25 +2134,23 @@
               `;
             })()}
             ${(() => {
-              // Order-level payment state — paid so far + outstanding balance,
-              // from the order's own payments + depositOption (works for any
-              // booking, not just hotels with a deposit schedule).
-              const dep = order.depositOption;
-              const paid = typeof order.paidToDate === 'number' ? order.paidToDate : 0;
-              const balance = (dep && Array.isArray(dep.breakdown))
-                ? dep.breakdown.reduce((s, b) => s + (typeof b.amount === 'number' ? b.amount : 0), 0)
-                : 0;
-              if (!(paid > 0) && !(balance > 0)) return '';
+              // Order-level payment state — paid so far + the REAL outstanding
+              // balance (total − payments taken), not the raw deposit schedule
+              // (which Travelify leaves in place after a payment is made).
+              const { paid, outstanding } = computeOutstanding(order);
+              if (!(paid > 0) && !(outstanding > 0)) return '';
               let rows = '';
               if (paid > 0) {
                 rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.paidSoFar || 'Paid so far')}</span><span class="v paid">${esc(fmtMoney(paid, currency))}</span></div>`;
               }
-              if (balance > 0) {
-                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || 'Balance remaining')}</span><span class="v due">${esc(fmtMoney(balance, currency))}</span></div>`;
-                const next = (dep.breakdown || []).slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0];
+              if (outstanding > 0) {
+                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || 'Balance remaining')}</span><span class="v due">${esc(fmtMoney(outstanding, currency))}</span></div>`;
+                const next = computeNextDue(order);
                 if (next && next.dueDate) {
                   rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.nextDueDate || 'Next payment due')}</span><span class="v">${esc(fmtDate(next.dueDate))}</span></div>`;
                 }
+              } else if (paid > 0) {
+                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || 'Balance remaining')}</span><span class="v paid">${esc(c.labels?.paidInFull || 'Paid in full')}</span></div>`;
               }
               return rows;
             })()}
