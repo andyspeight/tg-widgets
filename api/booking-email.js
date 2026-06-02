@@ -437,6 +437,9 @@ export default async function handler(req, res) {
       supportEmail,
       supportPhone,
       orderRef,
+      // Origin for wrapping document links through /api/doc-redirect, which
+      // launders the referrer so Travelify serves DOC/DOCX (not just PDFs).
+      baseUrl: buildInternalUrl(req, ''),
     });
 
     // ----- 6. Send via SendGrid -----
