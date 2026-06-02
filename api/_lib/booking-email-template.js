@@ -672,33 +672,33 @@ export function renderBookingEmail(opts) {
 
   // Wrap each document URL through our /api/doc-redirect endpoint.
   //
-  // Why: clicking a Travelify document URL directly from an email fails
-  // for DOC/DOCX (Travelify's host rejects the request when the referrer
-  // chain comes from a mail provider). Going via our redirect means the
-  // user's browser navigates from their mail client to tg-widgets.vercel.app
-  // first, then 302s to Travelify with our origin as referrer — which
-  // Travelify accepts (it's the same path the widget itself uses).
+  // Why: Travelify serves documents (static.travelify.io) with NO
+  // Content-Disposition header. Browsers render a PDF inline, so a raw PDF
+  // link works — but they have no inline viewer for .docx/.doc, and with no
+  // attachment header a target="_blank" click opens a blank tab that closes,
+  // looking like the page "just refreshed". Our endpoint streams the file back
+  // through our origin WITH Content-Disposition: attachment so it downloads
+  // cleanly (PDFs stay inline). The doc host has no referrer check, so this is
+  // purely about the disposition.
   //
-  // The redirect token is AES-256-GCM encrypted so it can't be tampered
-  // with or used as an open-redirector vector. We embed an expiry (90
-  // days from send) inside the encrypted payload — even if the token
-  // leaks, it dies on its own.
+  // The token is AES-256-GCM encrypted (url + filename + expiry) so the
+  // endpoint can't be used as an open proxy. We embed a 90-day expiry inside
+  // the payload — even if a link leaks, it dies on its own.
   //
-  // Fallback: if encryption fails (e.g. TG_ENCRYPTION_KEY missing in a
-  // non-prod environment) OR no baseUrl was passed, we fall back to the
-  // raw Travelify URL. The DOC/DOCX issue returns but at least the email
-  // sends — better than a broken render.
-  const buildDocLink = (url) => {
+  // Fallback: if encryption fails (e.g. TG_ENCRYPTION_KEY missing) OR no
+  // baseUrl was passed, we fall back to the raw Travelify URL so the email
+  // still sends.
+  const buildDocLink = (url, name) => {
     if (!baseUrl) return url;
     try {
       const expiresAt = Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60); // 90 days
-      const token = encrypt(JSON.stringify({ url, exp: expiresAt }));
+      const token = encrypt(JSON.stringify({ url, name: name || null, exp: expiresAt }));
       // Use encodeURIComponent on the token because base64 contains
       // characters (+, /, =) that have special meaning in URL query strings.
       return `${baseUrl}/api/doc-redirect?t=${encodeURIComponent(token)}`;
     } catch (err) {
       // Soft fail — see comment above.
-      console.warn('Email template: doc redirect token encryption failed, falling back to direct URL:', err.message);
+      console.warn('Email template: doc link token encryption failed, falling back to direct URL:', err.message);
       return url;
     }
   };
@@ -722,7 +722,7 @@ export function renderBookingEmail(opts) {
                 const extLabel = (d.ext || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
                 const sizeLabel = fmtBytes(typeof d.size === 'number' ? d.size : 0);
                 const metaBits = [extLabel || 'FILE', sizeLabel].filter(Boolean).join(' · ');
-                const url = buildDocLink(d.url); // wraps through /api/doc-redirect
+                const url = buildDocLink(d.url, d.name); // wraps through /api/doc-redirect
                 const isLast = i === safeDocs.length - 1;
                 return `
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
@@ -798,7 +798,7 @@ export function renderBookingEmail(opts) {
     textParts.push('', '─── Your documents ───', '');
     for (const d of safeDocs) {
       const name = (d.name || 'Document').toString();
-      textParts.push(`${name}: ${buildDocLink(d.url)}`);
+      textParts.push(`${name}: ${buildDocLink(d.url, d.name)}`);
     }
   }
 
