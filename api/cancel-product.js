@@ -48,6 +48,8 @@ import {
   readOrderKey,
   TRAVELIFY_ORIGIN,
 } from './_lib/travelify.js';
+import { renderCancellationEmail } from './_lib/cancellation-email-template.js';
+import { sendViaSendGrid, buildFromField, isValidEmail } from './_lib/sendgrid.js';
 
 const CANCEL_API_BASE = 'https://api.travelify.io/cancel';
 const REASON_MAX = 250;
@@ -94,6 +96,117 @@ function shapeConfirmation(data) {
     bookingReference: safeText(data?.bookingReference, 100),
     cancellationReference: safeText(data?.cancellationReference, 120),
   };
+}
+
+// ----- Cancellation confirmation email -----
+
+const PRODUCT_LABELS = {
+  Accommodation: 'Accommodation',
+  Packages: 'Package',
+  Flights: 'Flights',
+  Transfers: 'Transfer',
+  CarRental: 'Car hire',
+  TicketsAttractions: 'Tickets & attractions',
+  AirportExtras: 'Airport extras',
+};
+function productLabel(item) {
+  return PRODUCT_LABELS[item?.product] || item?.product || 'Booked item';
+}
+
+// Pull brand + the agency's saved Settings (config JSON) off the widget record,
+// mirroring how /api/booking-email reads brand. Returns null-safe defaults.
+function readBrandAndSettings(widget) {
+  const fields = widget?.fields || {};
+  let settings = {};
+  const s = fields.Settings;
+  if (s) {
+    if (typeof s === 'object') settings = s;
+    else { try { settings = JSON.parse(s); } catch { settings = {}; } }
+  }
+  const fromName = (fields.FromName || '').toString().trim();
+  const fromEmail = (fields.FromEmail || '').toString().trim().toLowerCase();
+  const logoUrl = (fields.LogoUrl || '').toString().trim();
+  const emailFooter = (fields.EmailFooter || '').toString().trim();
+  const clientName = (fields.ClientName || '').toString().trim();
+
+  let replyTo = null;
+  if (fromEmail && isValidEmail(fromEmail)) replyTo = fromEmail;
+  else {
+    const fb = (fields.ClientEmail || '').toString().trim().toLowerCase();
+    if (fb && isValidEmail(fb)) replyTo = fb;
+  }
+
+  return {
+    settings: settings || {},
+    brand: {
+      name: fromName || settings?.brand?.name || clientName || 'Travel Team',
+      logoUrl: (logoUrl && /^https:\/\//i.test(logoUrl)) ? logoUrl : '',
+      footerLine: emailFooter,
+      primary: settings?.colors?.primary || '',
+    },
+    replyTo,
+    supportEmail: settings?.support?.email || replyTo || null,
+    supportPhone: settings?.support?.phone || null,
+  };
+}
+
+// Sends the traveller a cancellation confirmation, IF the agency's saved
+// config has it enabled (default ON). Never throws — a failed/disabled email
+// must NOT fail the cancellation, which has already succeeded upstream.
+// Returns true only if an email was actually sent.
+async function maybeSendCancellationEmail({ creds, raw, item, emailAddress, confirmed }) {
+  try {
+    let settings = {};
+    let brand = { name: 'Travelgenix Demo', logoUrl: '', footerLine: '', primary: '' };
+    let replyTo = null, supportEmail = null, supportPhone = null;
+
+    if (creds.widget) {
+      const r = readBrandAndSettings(creds.widget);
+      settings = r.settings;
+      brand = r.brand;
+      replyTo = r.replyTo;
+      supportEmail = r.supportEmail;
+      supportPhone = r.supportPhone;
+    }
+
+    // Agency toggle — default ON unless explicitly disabled in their config.
+    if (settings?.display?.cancelEmail === false) return false;
+
+    // Only ever email the traveller's own booking address.
+    const to = (raw.customerEmail || emailAddress || '').toLowerCase().trim();
+    if (!to || !isValidEmail(to)) return false;
+
+    const { subject, html, text } = renderCancellationEmail({
+      brand,
+      customerName: raw.customerFirstname || '',
+      productLabel: productLabel(item),
+      bookingReference: confirmed.bookingReference || item?.bookingReference || '',
+      cancellationReference: confirmed.cancellationReference || '',
+      message: typeof settings?.cancelEmailMessage === 'string' ? settings.cancelEmailMessage : '',
+      supportEmail,
+      supportPhone,
+    });
+
+    const sendResult = await sendViaSendGrid({
+      from: buildFromField(brand.name),
+      to,
+      replyTo: replyTo || undefined,
+      subject,
+      html,
+      text,
+      categoryTag: 'cancellation-confirmation',
+      headers: { 'X-TG-Widget-Cancel': '1' },
+    });
+
+    if (!sendResult || sendResult.status !== 'sent') {
+      console.error('[cancel-product] confirmation email not sent:', sendResult && sendResult.error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('[cancel-product] confirmation email error:', err.message);
+    return false;
+  }
 }
 
 // Call the Travelify cancel endpoint (GET for policies, POST to confirm).
@@ -189,8 +302,8 @@ export default async function handler(req, res) {
     //    part of THIS order. Prevents a valid order's session being used to
     //    aim a cancel at an arbitrary product id.
     const items = Array.isArray(raw.items) ? raw.items : [];
-    const itemMatch = items.some(it => it && String(it.id) === productId);
-    if (!itemMatch) {
+    const item = items.find(it => it && String(it.id) === productId) || null;
+    if (!item) {
       return fail(res, "That item could not be found on this booking.");
     }
 
@@ -215,7 +328,11 @@ export default async function handler(req, res) {
       cancellationReason: cancellationReason || 'Customer requested cancellation',
     });
     if (r.json && r.json.success === true) {
-      return res.status(200).json({ success: true, step: 'confirmed', data: shapeConfirmation(r.json.data) });
+      const confirmed = shapeConfirmation(r.json.data);
+      // Fire the traveller confirmation email (agency toggle, default on).
+      // Never let an email problem fail a cancellation that already succeeded.
+      const emailSent = await maybeSendCancellationEmail({ creds, raw, item, emailAddress, confirmed });
+      return res.status(200).json({ success: true, step: 'confirmed', data: confirmed, emailSent });
     }
     const errMsg = r.json && typeof r.json.error === 'string'
       ? safeText(r.json.error, 300)
