@@ -215,16 +215,29 @@ export function renderEmailHtml(order, opts = {}) {
     : (accom?.pricing?.price ?? accomItem?.price ?? null);
   const currency = accom?.pricing?.currency || accomItem?.currency || flightItems[0]?.currency || extraItems[0]?.currency || order.currency || 'GBP';
 
-  // Pick a deposit option that has a breakdown
-  const depositOption =
-    (accom?.pricing?.depositOptions || []).find((d) => Array.isArray(d.breakdown) && d.breakdown.length > 0) ||
-    (accom?.pricing?.depositOptions || [])[0] ||
-    null;
+  // Payment state — prefer order-level (paidToDate + depositOption), where the
+  // real balance/instalments live; fall back to the legacy hotel deposit.
+  const orderDep = order.depositOption;
+  const orderBreakdown = (orderDep && Array.isArray(orderDep.breakdown)) ? orderDep.breakdown : [];
+  let depositPaid = (typeof order.paidToDate === 'number' && order.paidToDate > 0) ? order.paidToDate : null;
+  let balance = orderBreakdown.length
+    ? Math.round(orderBreakdown.reduce((s, b) => s + (typeof b.amount === 'number' ? b.amount : 0), 0) * 100) / 100
+    : null;
+  let balanceDueDate = orderBreakdown.length
+    ? (orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0]?.dueDate || null)
+    : null;
+  let instalments = orderBreakdown.length > 1 ? orderBreakdown : [];
 
-  const depositPaid = depositOption?.amount ?? null;
-  const balance = totalCost != null && depositPaid != null ? totalCost - depositPaid : null;
-  const balanceDueDate = depositOption?.dueDate || null;
-  const instalments = depositOption?.breakdown || [];
+  if (depositPaid == null && balance == null) {
+    const depositOption =
+      (accom?.pricing?.depositOptions || []).find((d) => Array.isArray(d.breakdown) && d.breakdown.length > 0) ||
+      (accom?.pricing?.depositOptions || [])[0] ||
+      null;
+    depositPaid = depositOption?.amount ?? null;
+    balance = totalCost != null && depositPaid != null ? totalCost - depositPaid : null;
+    balanceDueDate = depositOption?.dueDate || null;
+    instalments = depositOption?.breakdown || [];
+  }
 
   const isRefundable = !!accom?.pricing?.isRefundable;
 
@@ -539,12 +552,12 @@ export function renderEmailHtml(order, opts = {}) {
                     </tr>` : ''}
                     ${depositPaid != null ? `
                     <tr>
-                      <td style="font-size:14px;color:#475569;padding:4px 0;font-family:${fontStack};">Deposit paid</td>
+                      <td style="font-size:14px;color:#475569;padding:4px 0;font-family:${fontStack};">Paid so far</td>
                       <td align="right" style="font-size:14px;font-weight:600;color:${colors.success};padding:4px 0;font-family:${fontStack};font-variant-numeric:tabular-nums;">${escapeHtml(formatMoney(depositPaid, currency))}</td>
                     </tr>` : ''}
                     ${balance != null && balance > 0 ? `
                     <tr>
-                      <td style="font-size:14px;color:#475569;padding:4px 0;font-family:${fontStack};">Balance due</td>
+                      <td style="font-size:14px;color:#475569;padding:4px 0;font-family:${fontStack};">Balance remaining</td>
                       <td align="right" style="font-size:14px;font-weight:600;color:${colors.warning};padding:4px 0;font-family:${fontStack};font-variant-numeric:tabular-nums;">${escapeHtml(formatMoney(balance, currency))}${balanceDueDate ? ' by ' + escapeHtml(formatDateShort(balanceDueDate)) : ''}</td>
                     </tr>` : ''}
                   </table>
