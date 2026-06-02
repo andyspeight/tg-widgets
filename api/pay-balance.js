@@ -122,6 +122,57 @@ function computeNextPayment(plan) {
   };
 }
 
+// Sum of successful payments already taken against the order.
+function computePaidToDate(raw) {
+  const ps = Array.isArray(raw?.payments) ? raw.payments : [];
+  const sum = ps
+    .filter(p => p && String(p.status || '').toLowerCase() === 'success')
+    .reduce((s, p) => s + (typeof p.amount === 'number' ? p.amount : 0), 0);
+  return Math.round(sum * 100) / 100;
+}
+
+// The order's payable total (sum of item prices — the holiday cost the
+// payments are taken against; in-resort/pay-at-location fees are separate).
+function computeOrderTotal(raw) {
+  const items = Array.isArray(raw?.items) ? raw.items : [];
+  const sum = items.reduce((s, it) => s + (typeof it.price === 'number' ? it.price : 0), 0);
+  return Math.round(sum * 100) / 100;
+}
+
+// Single source of truth for "what (if anything) do we collect now". The
+// depositOption.breakdown is only a SCHEDULE — Travelify does NOT clear it
+// after a payment is taken — so the authoritative outstanding figure is
+// total - paidToDate, never the raw breakdown sum. We use the breakdown only
+// to pick the next instalment's amount/date, and we cap that at outstanding.
+export function decideCharge(raw) {
+  const plan = findPaymentPlan(raw);
+  const next = computeNextPayment(plan);
+  const paid = computePaidToDate(raw);
+  const total = computeOrderTotal(raw);
+  const outstanding = Math.max(0, Math.round((total - paid) * 100) / 100);
+
+  if (!(outstanding > 0)) return { noBalance: true, total, paid, outstanding };
+  if (!next || !(next.amount > 0)) return { noBalance: true, total, paid, outstanding };
+
+  // Instalment plan → collect the next instalment, but never more than what's
+  // actually still owed. Single balance → collect the outstanding amount.
+  const chargeAmount = next.isInstalment
+    ? Math.min(Math.round(next.amount * 100) / 100, outstanding)
+    : outstanding;
+  if (!(chargeAmount > 0)) return { noBalance: true, total, paid, outstanding };
+
+  const followAmount = Math.max(0, Math.round((outstanding - chargeAmount) * 100) / 100);
+  return {
+    noBalance: false,
+    total, paid, outstanding,
+    amount: chargeAmount,
+    currency: next.currency,
+    dueDate: next.dueDate,
+    isInstalment: next.isInstalment && followAmount > 0,
+    remainingAmount: followAmount,
+  };
+}
+
 // Build ContactInfo from the raw order, omitting anything we don't have (per
 // the API guide — never send empty strings). Field paths are best-effort; the
 // logged key dump on first run lets us pin the exact raw shape.
@@ -208,17 +259,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: false });
     }
 
-    // 3. Work out the next payment to collect (server-authoritative amount).
-    const plan = findPaymentPlan(raw);
-    const next = computeNextPayment(plan);
+    // 3. Work out what to collect — reconciled against payments already taken,
+    //    NOT the raw breakdown (which Travelify leaves in place after payment).
+    const decision = decideCharge(raw);
 
-    // One-time shape dump (keys only, no PII values) so we can pin the real
-    // field names for paid-status and contact/address against live data.
-    console.log('[pay-balance] order', orderId, 'rawKeys:', Object.keys(raw).join(','),
-      'firstBreakdownKeys:', plan?.breakdown?.[0] ? Object.keys(plan.breakdown[0]).join(',') : 'none');
+    console.log('[pay-balance] order', orderId,
+      'total:', decision.total, 'paid:', decision.paid, 'outstanding:', decision.outstanding,
+      'charge:', decision.noBalance ? 'none' : decision.amount);
 
-    if (!next || !(next.amount > 0)) {
-      // Nothing left to pay (or no schedule we could read).
+    if (decision.noBalance) {
+      // Nothing left to pay (fully paid, or no schedule we could read).
       return res.status(200).json({ success: false, noBalance: true });
     }
 
@@ -229,8 +279,8 @@ export default async function handler(req, res) {
       Reference: orderRef,
       Title: 'Balance Payment',
       Description: `Balance Payment for Order ${orderRef}`,
-      Price: next.amount,
-      Currency: next.currency,
+      Price: decision.amount,
+      Currency: decision.currency,
       OrderRef: `${orderId}/${orderKey}`,
       ContactInfo: buildContactInfo(raw),
     };
@@ -269,12 +319,11 @@ export default async function handler(req, res) {
       success: true,
       url: url.trim(),
       payment: {
-        amount: next.amount,
-        currency: next.currency,
-        remaining: next.remaining,
-        remainingAmount: next.remainingAmount,
-        dueDate: next.dueDate,
-        isInstalment: next.isInstalment,
+        amount: decision.amount,
+        currency: decision.currency,
+        remainingAmount: decision.remainingAmount,
+        dueDate: decision.dueDate,
+        isInstalment: decision.isInstalment,
       },
     });
   } catch (err) {
