@@ -215,20 +215,26 @@ export function renderEmailHtml(order, opts = {}) {
     : (accom?.pricing?.price ?? accomItem?.price ?? null);
   const currency = accom?.pricing?.currency || accomItem?.currency || flightItems[0]?.currency || extraItems[0]?.currency || order.currency || 'GBP';
 
-  // Payment state — prefer order-level (paidToDate + depositOption), where the
-  // real balance/instalments live; fall back to the legacy hotel deposit.
+  // Authoritative balance is total − payments taken, not the breakdown sum
+  // (Travelify leaves the schedule in place after a payment). Breakdown is
+  // used only for due dates / instalment rows, and only when a balance remains.
   const orderDep = order.depositOption;
   const orderBreakdown = (orderDep && Array.isArray(orderDep.breakdown)) ? orderDep.breakdown : [];
-  let depositPaid = (typeof order.paidToDate === 'number' && order.paidToDate > 0) ? order.paidToDate : null;
-  let balance = orderBreakdown.length
-    ? Math.round(orderBreakdown.reduce((s, b) => s + (typeof b.amount === 'number' ? b.amount : 0), 0) * 100) / 100
-    : null;
-  let balanceDueDate = orderBreakdown.length
-    ? (orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0]?.dueDate || null)
-    : null;
-  let instalments = orderBreakdown.length > 1 ? orderBreakdown : [];
+  let depositPaid = null, balance = null, balanceDueDate = null, instalments = [];
 
-  if (depositPaid == null && balance == null) {
+  if (typeof order.paidToDate === 'number') {
+    if (order.paidToDate > 0) depositPaid = Math.round(order.paidToDate * 100) / 100;
+    const outstanding = (totalCost != null)
+      ? Math.max(0, Math.round((totalCost - order.paidToDate) * 100) / 100)
+      : null;
+    if (outstanding && outstanding > 0) {
+      balance = outstanding;
+      if (orderBreakdown.length) {
+        balanceDueDate = orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0]?.dueDate || null;
+        instalments = orderBreakdown.length > 1 ? orderBreakdown : [];
+      }
+    }
+  } else {
     const depositOption =
       (accom?.pricing?.depositOptions || []).find((d) => Array.isArray(d.breakdown) && d.breakdown.length > 0) ||
       (accom?.pricing?.depositOptions || [])[0] ||
