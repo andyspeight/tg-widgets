@@ -605,21 +605,28 @@ export function renderPdfHtml(order, opts = {}) {
     : (accom?.pricing?.price ?? accomItem?.price ?? null);
   const currency = accom?.pricing?.currency || accomItem?.currency || flightItems[0]?.currency || extraItems[0]?.currency || order.currency || 'GBP';
 
-  // Payment state — prefer order-level (paidToDate + depositOption), where the
-  // real balance/instalments live; fall back to the legacy hotel deposit.
+  // Payment state — the authoritative balance is total − payments taken, NOT
+  // the depositOption.breakdown sum (Travelify leaves the schedule in place
+  // after a payment). The breakdown is used only for due dates / instalment
+  // rows, and only when a balance genuinely remains.
   const orderDep = order.depositOption;
   const orderBreakdown = (orderDep && Array.isArray(orderDep.breakdown)) ? orderDep.breakdown : [];
-  let depositPaid = (typeof order.paidToDate === 'number' && order.paidToDate > 0) ? order.paidToDate : null;
-  let balance = orderBreakdown.length
-    ? Math.round(orderBreakdown.reduce((s, b) => s + (typeof b.amount === 'number' ? b.amount : 0), 0) * 100) / 100
-    : null;
-  let balanceDueDate = orderBreakdown.length
-    ? (orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0]?.dueDate || null)
-    : null;
-  let instalments = orderBreakdown.length > 1 ? orderBreakdown : [];
+  let depositPaid = null, balance = null, balanceDueDate = null, instalments = [];
 
-  // Legacy fallback when the order carries no order-level payment data.
-  if (depositPaid == null && balance == null) {
+  if (typeof order.paidToDate === 'number') {
+    if (order.paidToDate > 0) depositPaid = Math.round(order.paidToDate * 100) / 100;
+    const outstanding = (totalCost != null)
+      ? Math.max(0, Math.round((totalCost - order.paidToDate) * 100) / 100)
+      : null;
+    if (outstanding && outstanding > 0) {
+      balance = outstanding;
+      if (orderBreakdown.length) {
+        balanceDueDate = orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0]?.dueDate || null;
+        instalments = orderBreakdown.length > 1 ? orderBreakdown : [];
+      }
+    }
+  } else {
+    // Legacy fallback when the order carries no order-level payment data.
     const depositOption =
       (accom?.pricing?.depositOptions || []).find((d) => Array.isArray(d.breakdown) && d.breakdown.length > 0) ||
       (accom?.pricing?.depositOptions || [])[0] ||
@@ -716,6 +723,14 @@ export function renderPdfHtml(order, opts = {}) {
 <title>Booking ${escapeHtml(orderRef || 'Confirmation')}${hasBrand ? ' — ' + escapeHtml(brandName) : ''}</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
+  /* Per-sheet margins. Puppeteer is set to honour CSS page size/margins
+     (preferCSSPageSize), so these apply to every physical sheet. The first
+     sheet keeps margin-top:0 so the navy header band stays full-bleed to the
+     top edge; every subsequent sheet (including content that overflows page 1)
+     gets a top margin so sections never butt against the paper edge. */
+  @page { size: A4; margin: 12mm 0 12mm 0; }
+  @page :first { margin-top: 0; }
+
   :root {
     --primary: ${colors.primary};
     --primary-dark: ${primaryDark};
@@ -749,7 +764,7 @@ export function renderPdfHtml(order, opts = {}) {
 
   .page {
     width: 794px;
-    min-height: 1123px;
+    min-height: 1020px;
     background: #fff;
     position: relative;
     overflow: hidden;
@@ -1402,7 +1417,9 @@ export function renderPdfHtml(order, opts = {}) {
         <div class="pdf-pay-box">
           <div class="pdf-pay-box-title">Payment</div>
           <p style="font-size:12px; color:var(--text-2); line-height:1.55; margin:0;">
-            Your booking is fully secured. ${depositPaid != null ? 'Your deposit has been received.' : ''} Any remaining balance is due before travel.
+            ${balance != null && balance > 0
+              ? `Your booking is secured.${depositPaid != null ? ' Your deposit has been received.' : ''} Any remaining balance is due before travel.`
+              : (depositPaid != null ? 'Your booking is paid in full. Thank you.' : 'Your booking is fully secured.')}
           </p>
         </div>`}
       </div>
