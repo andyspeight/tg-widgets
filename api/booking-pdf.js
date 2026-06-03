@@ -735,7 +735,12 @@ export default async function handler(req, res) {
     let pdfLogoUrl = '';
     if (widgetId !== DEMO_WIDGET_SENTINEL) {
       const widget = await findWidgetById(widgetId);
-      const s = widget?.fields?.Settings;
+      // The widget's brand config (colours, radius, support, brand name) lives
+      // in the `Config` field — that's what the editor saves and what the live
+      // widget reads. (`Settings` is a legacy field the widget never writes, so
+      // reading it left the PDF on Travelgenix defaults.) Fall back to Settings
+      // for any old record that still carries it.
+      const s = widget?.fields?.Config || widget?.fields?.Settings;
       if (s) {
         if (typeof s === 'object') widgetSettings = s;
         else { try { widgetSettings = JSON.parse(s); } catch { widgetSettings = {}; } }
@@ -776,7 +781,7 @@ export default async function handler(req, res) {
     await page.setContent(html, { waitUntil: 'networkidle0' });
     const pdfRaw = await page.pdf({
       format: 'A4', printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      preferCSSPageSize: true,
     });
     await browser.close();
     browser = null;
