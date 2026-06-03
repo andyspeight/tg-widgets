@@ -1,19 +1,39 @@
 /**
  * GET /api/dashboard/me-products
  *
- * Returns the list of products the signed-in user has access to, for use by
- * the dashboard launchpad page. Reads from the unified Permissions table.
+ * Returns the list of products the signed-in user should see on the
+ * id.travelify.io launchpad.
  *
- * Each product comes with its display name, description, the user's role
- * on that product, the URL to open it, and a staff flag indicating whether
- * the product is for Travelgenix staff only (renders a "Staff" pill in the UI).
+ * SOURCE OF TRUTH: TG Control.
+ *
+ * The launchpad is now driven by the client's entitlements (the Catalogue +
+ * Client Entitlements tables that Control reads and writes), NOT by per-user
+ * Permissions rows. Whatever a client has switched on in Control is exactly
+ * what their people see when they sign in. This is the wiring that the
+ * Catalogue.productSlug bridge field (added 7 May 2026) was always meant to
+ * enable but never had connected.
+ *
+ * Resolution:
+ *   1. Travelgenix staff in their OWN account see every active product
+ *      (full internal view, including staff-only tools like TG Control).
+ *   2. Travelgenix staff ACTING AS a client see exactly that client's
+ *      entitlement-derived tiles, so the act-as switcher doubles as a true
+ *      preview of what the client sees.
+ *   3. A normal client user sees the tiles their client is entitled to:
+ *      every enabled Client Entitlement, mapped through Catalogue.productSlug
+ *      to a launchpad product.
+ *
+ * SAFETY NET: if a client has no enabled entitlements yet (e.g. an older
+ * client onboarded before the catalogue model, whose entitlement rows were
+ * never seeded), we fall back to the legacy per-user Permissions tiles so
+ * nobody is left staring at an empty launchpad mid-migration. When that
+ * fallback fires we log it, so we can see which clients still need their
+ * entitlements seeded in Control.
  *
  * Response:
  *   {
  *     user: { email, fullName, clientName },
- *     products: [
- *       { slug, name, description, role, roleLabel, url, staff }
- *     ]
+ *     products: [ { slug, name, description, role, roleLabel, url, staff } ]
  *   }
  *
  * Auth: any signed-in user.
@@ -22,25 +42,18 @@
 import { requireAuth } from '../_lib/auth/middleware.js';
 import { listAllRecords, getRecord } from '../_lib/auth/airtable.js';
 import { jsonError } from '../_lib/auth/http.js';
+import { isStaffEmail } from '../_lib/auth/staff.js';
 import {
   PRODUCTS,
   PERMISSIONS,
   CLIENTS,
+  USERS,
+  CATALOGUE,
+  CLIENT_ENTITLEMENTS,
 } from '../_lib/auth/schema.js';
 
-// Where each product lives. When the user clicks a tile, we send them here.
-//
-// Same-domain products (widgets.travelify.io) use relative paths.
-// Other Travelgenix products live on their own subdomains and need
-// absolute URLs so the browser jumps to the right place.
-//
-//   - widget_suite  → / (the existing widgets dashboard at the root)
-//   - tool_hub      → /admin/ (the TG Control admin console)
-//   - luna_chat     → https://chat.travelify.io/dashboard.html
-//   - luna_marketing → https://marketing.travelify.io/ (placeholder until built)
-//   - luna_brain    → placeholder
-//   - luna_trends   → placeholder
-//   - luna_qa       → placeholder
+// Where each product opens. Same-domain products use relative paths; other
+// Travelgenix products live on their own subdomains and need absolute URLs.
 const PRODUCT_URLS = {
   [PRODUCTS.slugs.WIDGET_SUITE]:   '/',
   [PRODUCTS.slugs.LUNA_CHAT]:      'https://chat.travelify.io/dashboard.html',
@@ -52,20 +65,19 @@ const PRODUCT_URLS = {
 };
 
 // Products that are Travelgenix staff only. The launchpad renders a small
-// "Staff" pill on these tiles so it's clear they're internal tools, not
-// client-facing apps. Staff slugs gate visual treatment, not access — the
-// Permissions table is still the source of truth for who sees the tile at all.
+// "Staff" pill on these tiles. Staff slugs gate visual treatment; the
+// entitlement/permission resolution still decides who sees the tile at all.
 const STAFF_SLUGS = new Set([
-  PRODUCTS.slugs.TOOL_HUB,   // TG Control — admin console for Travelgenix staff
-  PRODUCTS.slugs.LUNA_QA,    // Luna QA test suite — internal QA tooling
+  PRODUCTS.slugs.TOOL_HUB,
+  PRODUCTS.slugs.LUNA_QA,
 ]);
 
-// Friendly labels for each role, shown on the tile
 const ROLE_LABELS = {
   owner:        'Owner',
   admin:        'Admin',
   client_owner: 'Owner',
   client_user:  'User',
+  member:       'User',
   agent:        'Agent',
   supervisor:   'Supervisor',
   viewer:       'Viewer',
@@ -80,64 +92,119 @@ export default async function handler(req, res) {
   if (!ctx) return;
 
   try {
-    const [allProducts, allPermissions] = await Promise.all([
+    const [allProducts, catalogue, entitlements, allPermissions, userRec] = await Promise.all([
       listAllRecords(PRODUCTS.tableId),
+      listAllRecords(CATALOGUE.tableId),
+      listAllRecords(CLIENT_ENTITLEMENTS.tableId),
       listAllRecords(PERMISSIONS.tableId),
+      getRecord(USERS.tableId, ctx.userRecordId).catch(() => null),
     ]);
 
-    // Filter permissions to those for this user, with active status
-    const myPermissions = allPermissions.filter((p) => {
-      const userIds = p.fields[PERMISSIONS.fields.user] || [];
-      const status = p.fields[PERMISSIONS.fields.status];
-      return userIds.includes(ctx.userRecordId) && status === PERMISSIONS.statuses.ACTIVE;
-    });
-
-    // Build map: productId → { slug, name, description, status }
-    const productById = new Map();
+    // Build slug → product tile, for ACTIVE products only.
+    const productBySlug = new Map();
     for (const p of allProducts) {
-      productById.set(p.id, {
-        recordId: p.id,
-        slug: p.fields[PRODUCTS.fields.productId] || '',
-        name: p.fields[PRODUCTS.fields.displayName] || '',
+      const slug = p.fields[PRODUCTS.fields.productId] || '';
+      const status = p.fields[PRODUCTS.fields.status] || '';
+      if (!slug || status !== PRODUCTS.statuses.ACTIVE) continue;
+      productBySlug.set(slug, {
+        slug,
+        name: p.fields[PRODUCTS.fields.displayName] || slug,
         description: p.fields[PRODUCTS.fields.description] || '',
-        status: p.fields[PRODUCTS.fields.status] || '',
+        url: PRODUCT_URLS[slug] || '/',
+        staff: STAFF_SLUGS.has(slug),
       });
     }
 
-    // One entry per accessible product, deduped by slug
-    const seenSlugs = new Map();
-    for (const perm of myPermissions) {
-      const productIds = perm.fields[PERMISSIONS.fields.product] || [];
-      for (const productId of productIds) {
-        const product = productById.get(productId);
-        if (!product) continue;
-        if (product.status !== PRODUCTS.statuses.ACTIVE) continue;
+    // catalogueItemId → productSlug (the Control → launchpad bridge).
+    const slugByCatalogueId = new Map();
+    for (const c of catalogue) {
+      const ps = c.fields[CATALOGUE.fields.productSlug];
+      // singleSelect comes back as { name } when expanded, or a string.
+      const slug = typeof ps === 'string' ? ps : (ps && ps.name) || '';
+      if (slug) slugByCatalogueId.set(c.id, slug);
+    }
 
-        const role = perm.fields[PERMISSIONS.fields.role] || '';
-        const existing = seenSlugs.get(product.slug);
+    // Is this Travelgenix staff, and are they acting as a client that isn't
+    // one of their own linked clients (impersonation / preview)?
+    const email = ctx.email || (userRec?.fields?.[USERS.fields.email]) || '';
+    const staff = isStaffEmail(email);
+    const linkedClientIds = (userRec?.fields?.[USERS.fields.client] || [])
+      .map((x) => (typeof x === 'string' ? x : x && x.id))
+      .filter(Boolean);
+    const impersonating =
+      !!ctx.clientRecordId && !linkedClientIds.includes(ctx.clientRecordId);
 
-        if (!existing) {
-          seenSlugs.set(product.slug, {
-            slug: product.slug,
-            name: product.name,
-            description: product.description,
-            role,
-            roleLabel: ROLE_LABELS[role] || role,
-            url: PRODUCT_URLS[product.slug] || '/',
-            staff: STAFF_SLUGS.has(product.slug),
-          });
+    // Decide which product slugs are visible.
+    let visibleSlugs;
+    let resolvedFrom;
+
+    if (staff && !impersonating) {
+      // Staff in their own account: full internal view.
+      visibleSlugs = new Set(productBySlug.keys());
+      resolvedFrom = 'staff_all';
+    } else {
+      // Client view (real client user, OR staff previewing a client):
+      // derive from the client's enabled entitlements.
+      const enabledSlugs = new Set();
+      for (const e of entitlements) {
+        const clientLinks = e.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
+        if (!clientLinks.includes(ctx.clientRecordId)) continue;
+        if (!e.fields[CLIENT_ENTITLEMENTS.fields.enabled]) continue;
+        const catLinks = e.fields[CLIENT_ENTITLEMENTS.fields.catalogueItem] || [];
+        for (const cid of catLinks) {
+          const slug = slugByCatalogueId.get(cid);
+          if (slug && productBySlug.has(slug)) enabledSlugs.add(slug);
         }
+      }
+
+      if (enabledSlugs.size > 0) {
+        visibleSlugs = enabledSlugs;
+        resolvedFrom = 'entitlements';
+      } else {
+        // SAFETY NET: no entitlements seeded for this client yet. Fall back to
+        // the legacy per-user Permissions tiles so the launchpad isn't blank.
+        const fallback = new Set();
+        for (const perm of allPermissions) {
+          const userIds = perm.fields[PERMISSIONS.fields.user] || [];
+          const status = perm.fields[PERMISSIONS.fields.status];
+          if (!userIds.includes(ctx.userRecordId)) continue;
+          if (status !== PERMISSIONS.statuses.ACTIVE) continue;
+          const productIds = perm.fields[PERMISSIONS.fields.product] || [];
+          for (const pid of productIds) {
+            const prodRec = allProducts.find((p) => p.id === pid);
+            const slug = prodRec?.fields?.[PRODUCTS.fields.productId];
+            if (slug && productBySlug.has(slug)) fallback.add(slug);
+          }
+        }
+        visibleSlugs = fallback;
+        resolvedFrom = 'permissions_fallback';
+        console.warn(
+          `[dashboard/me-products] no entitlements for client ${ctx.clientRecordId} ` +
+          `(user ${ctx.userRecordId}) — fell back to ${fallback.size} permission tile(s). ` +
+          `Seed entitlements in Control to fix.`
+        );
       }
     }
 
-    // Widget Suite first, then alphabetical
-    const products = Array.from(seenSlugs.values()).sort((a, b) => {
-      if (a.slug === PRODUCTS.slugs.WIDGET_SUITE) return -1;
-      if (b.slug === PRODUCTS.slugs.WIDGET_SUITE) return 1;
-      return a.name.localeCompare(b.name);
-    });
+    // Role label comes from the user's client role (we no longer carry a
+    // per-product role in the entitlement model).
+    const role = ctx.role || 'member';
+    const roleLabel = ROLE_LABELS[role] || '';
 
-    // Lookup the client name for the signed-in user (for the page header)
+    const products = Array.from(visibleSlugs)
+      .map((slug) => {
+        const tile = productBySlug.get(slug);
+        if (!tile) return null;
+        return { ...tile, role, roleLabel };
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        if (a.slug === PRODUCTS.slugs.WIDGET_SUITE) return -1;
+        if (b.slug === PRODUCTS.slugs.WIDGET_SUITE) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+    // Client name for the page header.
     let clientName = '';
     if (ctx.clientRecordId) {
       try {
@@ -148,11 +215,12 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       user: {
-        email: ctx.email || '',
+        email,
         fullName: ctx.fullName || '',
         clientName,
       },
       products,
+      _resolvedFrom: resolvedFrom,
     });
   } catch (err) {
     console.error('[dashboard/me-products] error:', err);
