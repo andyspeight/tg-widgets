@@ -1003,11 +1003,12 @@ import { renderEmailHtml } from '/_email-template.js';
         name: state.name || 'Untitled My Booking widget',
         config: state.config,
       };
-      if (state.widgetId) body.id = state.widgetId;
+      if (state.widgetId) body.widgetId = state.widgetId;
 
       const res = await fetch('/api/widget-config', {
         method: 'POST',
         headers: authH(),
+        credentials: 'include',
         body: JSON.stringify(body),
       });
       if (res.status === 401) {
