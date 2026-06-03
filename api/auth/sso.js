@@ -57,6 +57,7 @@ import { getRequestIp, getUserAgent } from '../_lib/auth/http.js';
 import { resolveUserPermissions } from '../_lib/auth/permissions.js';
 import { logAuthEvent } from '../_lib/auth/audit.js';
 import { revokeAllUserSessions } from '../_lib/auth/sessions.js';
+import { isStaffEmail } from '../_lib/auth/staff.js';
 
 // ─── Config ─────────────────────────────────────────────────────────
 const SIGNIN_PATH = '/signin.html';
@@ -598,7 +599,14 @@ export default async function handler(req, res) {
       // user's set of accessible products varies depending on which client
       // the session is currently scoped to.
       const userClientIds = userRec.fields[USERS.fields.client] || [];
-      if (!userClientIds.includes(clientId)) {
+      if (!userClientIds.includes(clientId) && isStaffEmail(email)) {
+        // Travelgenix staff act as any client via the switcher without becoming
+        // a member. Auto-linking them here is what silently turned act-as into
+        // permanent membership and broke impersonation detection. Skip it.
+        console.log('[sso] staff', userRec.id, 'arrived with client', clientId,
+          '— not auto-linking (act-as is membership-free for staff)');
+      }
+      if (!userClientIds.includes(clientId) && !isStaffEmail(email)) {
         try {
           await updateRecord(USERS.tableId, userRec.id, {
             [USERS.fields.client]: [...userClientIds, clientId],
