@@ -1,7 +1,13 @@
 /**
- * Travelgenix My Booking Widget v1.6.0
+ * Travelgenix My Booking Widget v1.7.0
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
+ *
+ * v1.7.0 changes:
+ *   - Pay balance now opens an editable, prefilled amount field: a customer
+ *     can pay in full (one tap) or overtype a smaller part payment. The typed
+ *     amount is validated client-side AND re-validated server-side against the
+ *     real outstanding (never trusting the client).
  *
  * v1.6.1 changes:
  *   - Balance/next-due/Pay CTA now reconcile against payments taken
@@ -135,7 +141,7 @@
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
   const API_CANCEL = (typeof window !== 'undefined' && window.__TG_CANCEL_API__) || (API_BASE + '/api/cancel-product');
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
-  const VERSION = '1.6.1';
+  const VERSION = '1.7.0';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -680,6 +686,19 @@
     .tgm-pay-cta[disabled] { opacity: .6; cursor: default; }
     .tgm-pay-cta svg { width: 18px; height: 18px; }
     .tgm-pay-note { font-size: 12.5px; color: var(--tgm-text-3); margin-top: 8px; text-align: center; line-height: 1.45; }
+    .tgm-pay-form { margin-top: 14px; }
+    .tgm-pay-field { display: block; }
+    .tgm-pay-field-label { display: block; font-size: 13px; font-weight: 500; color: var(--tgm-text-2); margin-bottom: 6px; }
+    .tgm-pay-input-wrap { display: flex; align-items: center; height: 48px; border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); background: var(--tgm-bg); transition: border-color .15s, box-shadow .15s; }
+    .tgm-pay-input-wrap:focus-within { border-color: var(--tgm-accent); box-shadow: 0 0 0 3px rgba(0,180,216,.18); }
+    .tgm-pay-cur { padding: 0 2px 0 14px; font-size: 16px; font-weight: 600; color: var(--tgm-text-2); }
+    .tgm-pay-input { flex: 1 1 auto; min-width: 0; width: 100%; height: 100%; border: 0; outline: 0; background: transparent; padding: 0 14px 0 4px; font-family: inherit; font-size: 16px; font-weight: 600; color: var(--tgm-text); font-variant-numeric: tabular-nums; }
+    .tgm-pay-hint { font-size: 12.5px; color: var(--tgm-text-3); margin-top: 8px; line-height: 1.45; }
+    .tgm-pay-hint.tgm-err { color: #DC2626; }
+    .tgm-pay-form-row { display: flex; gap: 10px; align-items: stretch; margin-top: 14px; }
+    .tgm-pay-cancel { flex: 0 0 auto; height: 48px; padding: 0 18px; background: transparent; border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); color: var(--tgm-text-2); font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; transition: background .15s; }
+    .tgm-pay-cancel:hover { background: var(--tgm-border-light); }
+    .tgm-pay-confirm { flex: 1 1 auto; }
     .tgm-pay-error { display: flex; gap: 8px; align-items: center; margin-top: 10px; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); border-radius: var(--tgm-radius-md); padding: 9px 12px; font-size: 13px; color: var(--tgm-error); }
     .tgm-pay-error svg { width: 14px; height: 14px; flex-shrink: 0; }
 
@@ -1763,27 +1782,53 @@
   }
 
   // The "Pay balance / Pay next payment" CTA inside the Payment section.
+  // Clicking it reveals an editable amount field, prefilled with the correct
+  // figure, so a customer can pay in full (one tap) or overtype a part amount.
   function renderPayBalance(order, currency, c) {
     const { outstanding } = computeOutstanding(order);
     if (!(outstanding > 0)) return ''; // nothing owed → no CTA (e.g. fully paid)
     const next = computeNextDue(order);
     const isInstalment = !!(next && next.isInstalment) && next.amount < outstanding;
-    const chargeAmount = isInstalment ? Math.min(next.amount, outstanding) : outstanding;
-    if (!(chargeAmount > 0)) return '';
-    const label = isInstalment
+    const defaultAmount = isInstalment ? Math.min(next.amount, outstanding) : outstanding;
+    if (!(defaultAmount > 0)) return '';
+
+    const MIN_PART = 1; // smallest part payment; full settlement always allowed
+    const min = outstanding <= MIN_PART ? outstanding : MIN_PART;
+    const openLabel = isInstalment
       ? (c.labels?.payNextBtn || 'Pay next payment')
       : (c.labels?.payBalanceBtn || 'Pay balance');
-    const followAmount = Math.max(0, Math.round((outstanding - chargeAmount) * 100) / 100);
-    const note = (isInstalment && followAmount > 0)
-      ? `<div class="tgm-pay-note">${esc(fmtMoney(followAmount, currency))} balance remaining after this payment.</div>`
-      : '';
+    const payVerb = c.labels?.payConfirm || 'Pay';
+    const amountLabel = c.labels?.payAmountLabel || 'Amount to pay';
+    // Currency symbol for the input prefix (e.g. "£") derived from the formatter.
+    const sym = (fmtMoney(0, currency).match(/^[^\d\s]+/) || [''])[0];
+    const hint = isInstalment
+      ? `Your next payment is ${fmtMoney(defaultAmount, currency)}. Pay that, or enter a different amount up to ${fmtMoney(outstanding, currency)}.`
+      : `Pay your balance in full, or enter a smaller amount (up to ${fmtMoney(outstanding, currency)}).`;
+
     return `
-      <div class="tgm-pay-action">
-        <button type="button" class="tgm-pay-cta" data-tgm-pay>
-          ${svg(IC.card)}<span data-tgm-pay-label>${esc(label)} · ${esc(fmtMoney(chargeAmount, currency))}</span>
+      <div class="tgm-pay-action" data-tgm-pay-max="${esc(outstanding.toFixed(2))}" data-tgm-pay-min="${esc(min.toFixed(2))}" data-tgm-pay-cur="${esc(currency)}">
+        <button type="button" class="tgm-pay-cta" data-tgm-pay-open>
+          ${svg(IC.card)}<span>${esc(openLabel)} · ${esc(fmtMoney(defaultAmount, currency))}</span>
         </button>
-        ${note}
-        <div data-tgm-pay-error></div>
+        <div class="tgm-pay-form" data-tgm-pay-form hidden>
+          <label class="tgm-pay-field">
+            <span class="tgm-pay-field-label">${esc(amountLabel)}</span>
+            <span class="tgm-pay-input-wrap">
+              <span class="tgm-pay-cur" aria-hidden="true">${esc(sym)}</span>
+              <input type="text" inputmode="decimal" class="tgm-pay-input" data-tgm-pay-input
+                     value="${esc(defaultAmount.toFixed(2))}" autocomplete="off" spellcheck="false"
+                     aria-label="${esc(amountLabel)}">
+            </span>
+          </label>
+          <div class="tgm-pay-hint" data-tgm-pay-hint data-default="${esc(hint)}">${esc(hint)}</div>
+          <div class="tgm-pay-form-row">
+            <button type="button" class="tgm-pay-cancel" data-tgm-pay-cancel>${esc(c.labels?.payCancel || 'Cancel')}</button>
+            <button type="button" class="tgm-pay-cta tgm-pay-confirm" data-tgm-pay-confirm>
+              ${svg(IC.card)}<span data-tgm-pay-label>${esc(payVerb)} · ${esc(fmtMoney(defaultAmount, currency))}</span>
+            </button>
+          </div>
+          <div data-tgm-pay-error></div>
+        </div>
       </div>`;
   }
 
@@ -2623,9 +2668,42 @@
       // If a cancellation flow was mid-way when the view re-rendered, paint it.
       if (this._cancel && this._cancel.open) this._renderCancelModal();
 
-      // Pay balance / next payment (the CTA can appear in more than one place).
-      root.querySelectorAll('[data-tgm-pay]').forEach(payBtn => {
-        payBtn.addEventListener('click', () => this._payBalance(payBtn));
+      // Pay balance — open the amount editor, validate, confirm. The CTA can
+      // appear in more than one place; each is scoped to its own action box.
+      root.querySelectorAll('[data-tgm-pay-open]').forEach(openBtn => {
+        openBtn.addEventListener('click', () => {
+          const action = openBtn.closest('.tgm-pay-action');
+          const form = action && action.querySelector('[data-tgm-pay-form]');
+          if (!form) return;
+          openBtn.hidden = true;
+          form.hidden = false;
+          this._validatePay(action);
+          const input = form.querySelector('[data-tgm-pay-input]');
+          if (input) { input.focus(); try { input.select(); } catch (_) {} }
+        });
+      });
+      root.querySelectorAll('[data-tgm-pay-input]').forEach(input => {
+        input.addEventListener('input', () => this._validatePay(input.closest('.tgm-pay-action')));
+      });
+      root.querySelectorAll('[data-tgm-pay-cancel]').forEach(cancelBtn => {
+        cancelBtn.addEventListener('click', () => {
+          const action = cancelBtn.closest('.tgm-pay-action');
+          if (!action) return;
+          const form = action.querySelector('[data-tgm-pay-form]');
+          const openBtn = action.querySelector('[data-tgm-pay-open]');
+          const err = action.querySelector('[data-tgm-pay-error]');
+          if (form) form.hidden = true;
+          if (openBtn) openBtn.hidden = false;
+          if (err) err.innerHTML = '';
+        });
+      });
+      root.querySelectorAll('[data-tgm-pay-confirm]').forEach(confirmBtn => {
+        confirmBtn.addEventListener('click', () => {
+          const action = confirmBtn.closest('.tgm-pay-action');
+          const v = this._validatePay(action);
+          if (!v.valid) return;
+          this._payBalance(action, v.amount);
+        });
       });
 
       // Issue 4: "Look up another booking" returns to the lookup form. We
@@ -2939,24 +3017,68 @@
     // Creates a basket server-side and redirects the customer to it. The
     // amount is decided by the server from the order's schedule; the widget
     // only triggers the flow.
-    async _payBalance(btn) {
-      if (!btn || btn.disabled) return;
-      if (!this.lookup || !this.c.widgetId) return;
+    // Sanitise + validate the typed amount against the booking's outstanding
+    // figure (carried in data- attributes). Returns { valid, amount } and
+    // updates the confirm button label, hint, and disabled state live. The
+    // server re-validates independently — this is just for UX.
+    _validatePay(action) {
+      if (!action) return { valid: false, amount: null };
+      const input = action.querySelector('[data-tgm-pay-input]');
+      const confirm = action.querySelector('[data-tgm-pay-confirm]');
+      const label = confirm && confirm.querySelector('[data-tgm-pay-label]');
+      const hint = action.querySelector('[data-tgm-pay-hint]');
+      const cur = action.dataset.tgmPayCur || 'GBP';
+      const max = parseFloat(action.dataset.tgmPayMax);
+      const min = parseFloat(action.dataset.tgmPayMin);
+      if (!input) return { valid: false, amount: null };
 
-      const root = this.shadow.querySelector('.tgm-root');
-      const action = btn.closest('.tgm-pay-action');
-      const label = btn.querySelector('[data-tgm-pay-label]');
-      const errMount = action ? action.querySelector('[data-tgm-pay-error]') : null;
+      // Keep only digits and a single decimal point, max 2 dp.
+      let raw = String(input.value || '').replace(/[^0-9.]/g, '');
+      const dot = raw.indexOf('.');
+      if (dot !== -1) raw = raw.slice(0, dot + 1) + raw.slice(dot + 1).replace(/\./g, '').slice(0, 2);
+      if (raw !== input.value) input.value = raw;
+
+      const amt = parseFloat(raw);
+      let valid = false;
+      let msg = null;
+      if (!raw || isNaN(amt) || amt <= 0) {
+        valid = false;
+      } else if (amt > max + 0.001) {
+        msg = `That's more than your balance of ${fmtMoney(max, cur)}.`;
+      } else if (amt < min - 0.001 && Math.abs(amt - max) > 0.005) {
+        msg = `The smallest part payment is ${fmtMoney(min, cur)}.`;
+      } else {
+        valid = true;
+      }
+
+      if (confirm) confirm.disabled = !valid;
+      if (label) {
+        const shown = valid ? amt : (isNaN(amt) || amt <= 0 ? max : Math.min(amt, max));
+        label.textContent = `${this.c.labels?.payConfirm || 'Pay'} · ${fmtMoney(shown, cur)}`;
+      }
+      if (hint) {
+        if (msg) { hint.textContent = msg; hint.classList.add('tgm-err'); }
+        else { hint.textContent = hint.dataset.default || ''; hint.classList.remove('tgm-err'); }
+      }
+      return { valid, amount: valid ? Math.round(amt * 100) / 100 : null };
+    }
+
+    async _payBalance(action, amount) {
+      if (!action || !this.lookup || !this.c.widgetId) return;
+
+      const confirm = action.querySelector('[data-tgm-pay-confirm]');
+      const label = confirm && confirm.querySelector('[data-tgm-pay-label]');
+      const errMount = action.querySelector('[data-tgm-pay-error]');
       const prevLabel = label ? label.textContent : '';
       if (errMount) errMount.innerHTML = '';
 
-      const reset = () => { btn.disabled = false; if (label) label.textContent = prevLabel; };
+      const reset = () => { if (confirm) confirm.disabled = false; if (label) label.textContent = prevLabel; };
       const showErr = (msg) => {
         if (errMount) errMount.innerHTML = `<div class="tgm-pay-error">${svg(IC.alert)}<span>${esc(msg)}</span></div>`;
         reset();
       };
 
-      btn.disabled = true;
+      if (confirm) confirm.disabled = true;
       if (label) label.textContent = this.c.labels?.payRedirecting || 'Setting up payment…';
 
       try {
@@ -2968,6 +3090,7 @@
             emailAddress: this.lookup.email,
             departDate: this.lookup.date,
             orderRef: this.lookup.ref,
+            amount,
           }),
         });
 
@@ -2979,12 +3102,18 @@
         const data = await res.json().catch(() => null);
 
         if (data && data.success === true && typeof data.url === 'string' && /^https:\/\//i.test(data.url)) {
-          this._fireEvent('pay-redirect', { url: data.url });
+          this._fireEvent('pay-redirect', { url: data.url, amount });
           // Send the customer to the basket. The widget is embedded on the
           // client's own site and the basket lives there too, so navigate the
           // top window; fall back to the widget's own window if blocked.
           try { (window.top || window).location.href = data.url; }
           catch { window.location.href = data.url; }
+          return;
+        }
+
+        // Server rejected the amount (too big/small/invalid) — show its message.
+        if (data && data.error) {
+          showErr(data.error);
           return;
         }
 
