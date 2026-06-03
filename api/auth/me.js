@@ -17,6 +17,7 @@ import { getRecord, listAllRecords } from '../_lib/auth/airtable.js';
 import {
   USERS, CLIENTS, PACKAGES, PRODUCTS, CATALOGUE, CLIENT_ENTITLEMENTS,
 } from '../_lib/auth/schema.js';
+import { isStaffEmail } from '../_lib/auth/staff.js';
 
 export default async function handler(req, res) {
   if (setCors(req, res)) return;
@@ -49,9 +50,10 @@ export default async function handler(req, res) {
   // with the client's enabled entitlements). Each entry: { slug, name, role }.
   let accessibleProducts = [];
 
+  let userRec = null;
   try {
     if (ctx.userRecordId) {
-      const userRec = await getRecord(USERS.tableId, ctx.userRecordId);
+      userRec = await getRecord(USERS.tableId, ctx.userRecordId);
       lastLogin = userRec.fields[USERS.fields.lastLogin] || null;
     }
   } catch {}
@@ -76,27 +78,26 @@ export default async function handler(req, res) {
         listAllRecords(CLIENT_ENTITLEMENTS.tableId),
       ]);
 
-      // Map productRecordId → { slug, name } for friendly rendering
-      const productInfoByRecordId = new Map();
+      // Product slug → { slug, name }, and the set of ACTIVE product slugs.
       const productInfoBySlug = new Map();
+      const activeSlugs = new Set();
       for (const p of products) {
         const slug = p.fields[PRODUCTS.fields.productId];
-        const name = p.fields[PRODUCTS.fields.displayName] || slug || '';
-        if (slug) {
-          const info = { slug, name };
-          productInfoByRecordId.set(p.id, info);
-          productInfoBySlug.set(slug, info);
-        }
+        if (!slug) continue;
+        const name = p.fields[PRODUCTS.fields.displayName] || slug;
+        productInfoBySlug.set(slug, { slug, name });
+        if (p.fields[PRODUCTS.fields.status] === 'active') activeSlugs.add(slug);
       }
 
-      // Map catalogueId → product slug
+      // Map catalogueId → product slug (the Control → launchpad bridge)
       const slugByCatalogueId = new Map();
       for (const c of catalogue) {
-        const slug = c.fields[CATALOGUE.fields.productSlug];
+        const ps = c.fields[CATALOGUE.fields.productSlug];
+        const slug = typeof ps === 'string' ? ps : (ps && ps.name) || '';
         if (slug) slugByCatalogueId.set(c.id, slug);
       }
 
-      // Slugs the client is currently entitled to
+      // Slugs the client is currently entitled to. Control is the source of truth.
       const entitledSlugs = new Set();
       for (const ent of entitlements) {
         const linked = ent.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
@@ -109,17 +110,39 @@ export default async function handler(req, res) {
         }
       }
 
-      // Intersect with the user's permissions
+      // Travelgenix staff in their OWN account see every active product. Staff
+      // ACTING AS a client (the active client is not one of their linked
+      // clients) and ordinary client users both see the client's entitled
+      // products, so the launchpad mirrors Control exactly. This replaces the
+      // old permission ∩ entitlement intersection, which gated the launchpad
+      // on the signed-in user's own permissions and so never matched Control.
+      const linkedClientIds = (userRec?.fields?.[USERS.fields.client] || [])
+        .map((x) => (typeof x === 'string' ? x : x && x.id))
+        .filter(Boolean);
+      const staff = isStaffEmail(ctx.email || '');
+      const impersonating = !linkedClientIds.includes(client.recordId);
+
+      let launchSlugs;
+      if (staff && !impersonating) {
+        launchSlugs = Array.from(activeSlugs);
+      } else if (entitledSlugs.size > 0) {
+        launchSlugs = Array.from(entitledSlugs).filter((s) => productInfoBySlug.has(s));
+      } else {
+        // Safety net: this client has no entitlements seeded yet. Fall back to
+        // the user's permission products so the launchpad is not blank while
+        // the client is being set up in Control.
+        launchSlugs = (ctx.permissions || []).map((p) => p.product);
+      }
+
       const seen = new Set();
-      for (const perm of (ctx.permissions || [])) {
-        if (!entitledSlugs.has(perm.product)) continue;
-        if (seen.has(perm.product)) continue;
-        seen.add(perm.product);
-        const info = productInfoBySlug.get(perm.product);
+      for (const slug of launchSlugs) {
+        if (!slug || seen.has(slug)) continue;
+        seen.add(slug);
+        const info = productInfoBySlug.get(slug);
         accessibleProducts.push({
-          slug: perm.product,
-          name: info ? info.name : perm.product,
-          role: perm.role,
+          slug,
+          name: info ? info.name : slug,
+          role: ctx.role || 'member',
         });
       }
     } catch (err) {
