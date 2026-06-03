@@ -258,7 +258,11 @@ export default async function handler(req, res) {
       if (widget) {
         const fields = widget.fields || {};
 
-        const s = fields.Settings;
+        // Brand config (colours, support, brand name) lives in `Config` — the
+        // field the editor saves and the live widget reads. `Settings` is a
+        // legacy field the widget never writes, so reading it left emails on
+        // Travelgenix defaults. Fall back to Settings for old records.
+        const s = fields.Config || fields.Settings;
         if (s) {
           if (typeof s === 'object') widgetSettings = s;
           else { try { widgetSettings = JSON.parse(s); } catch { widgetSettings = {}; } }
