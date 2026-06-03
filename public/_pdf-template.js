@@ -243,8 +243,8 @@ const renderPdfFlightItem = (item) => {
             <td style="vertical-align:middle; text-align:center; width:30%;">
               <div style="font-size:10px; color:#94A3B8;" class="num">${escapeHtml(fmtDuration(flightMins))}</div>
               <div style="height:1px; background:#CBD5E1; margin:6px 12px; position:relative;">
-                <span style="display:inline-block; position:absolute; left:0; top:-3px; width:7px; height:7px; border-radius:50%; background:#00B4D8;"></span>
-                <span style="display:inline-block; position:absolute; right:0; top:-3px; width:7px; height:7px; border-radius:50%; background:#00B4D8;"></span>
+                <span style="display:inline-block; position:absolute; left:0; top:-3px; width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
+                <span style="display:inline-block; position:absolute; right:0; top:-3px; width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
               </div>
               <div style="font-size:10px; color:#94A3B8;">${stops === 0 ? 'Direct' : (stops + ' stop' + (stops === 1 ? '' : 's'))}</div>
             </td>
@@ -846,7 +846,7 @@ export function renderPdfHtml(order, opts = {}) {
     height: 240px;
     ${heroImg
       ? `background-image: url('${escapeHtml(heroImg)}'); background-size: cover; background-position: center;`
-      : `background: linear-gradient(135deg, #1B2B5B 0%, #00B4D8 100%);`
+      : `background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);`
     }
   }
   .pdf-hero-overlay {
