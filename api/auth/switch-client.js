@@ -1,9 +1,9 @@
 /**
  * POST /api/auth/switch-client
  *
- * Switches the current user's active session to a different company they're
- * linked to. Mints a new tg_session JWT with the new clientId, revokes the
- * old session, and sets the new cookie.
+ * Switches the current user's active session to a different company. Mints a
+ * new tg_session JWT with the new clientId, revokes the old session, and sets
+ * the new cookie.
  *
  * Body: { clientId: 'rec...' }
  * Returns: { ok: true, client: { recordId, clientName, plan, status } }
@@ -12,12 +12,15 @@
  *   - Must have a valid current session (requireAuth)
  *   - Target clientId MUST be in the user's USERS.client[] array
  *     (defends against id-guessing privilege escalation)
- *   - Target client MUST not be suspended
+ *       EXCEPTION: Travelgenix staff (isTravelgenixStaff) may switch into ANY
+ *       client to provide support. This is the "act as client" capability and
+ *       is logged distinctly (source: 'staff_act_as') for the audit trail.
+ *   - Target client MUST not be suspended (applies to staff too)
  *   - Rate limited per user (20/min — generous but stops thrash)
  *   - Old session record is revoked
  *   - New session record created
  *   - Origin header validated against allowlist (CSRF defence)
- *   - Logs SIGNIN_SUCCESS with source: 'client_switch'
+ *   - Logs SIGNIN_SUCCESS with the resolved source
  */
 
 import {
@@ -35,6 +38,7 @@ import { setSessionCookie, clearSessionCookie } from '../_lib/auth/cookie.js';
 import { revokeSession } from '../_lib/auth/sessions.js';
 import { resolveUserPermissions, invalidateUserPermissions } from '../_lib/auth/permissions.js';
 import { logAuthEvent } from '../_lib/auth/audit.js';
+import { isTravelgenixStaff } from '../_lib/auth/staff.js';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 
@@ -91,7 +95,10 @@ export default async function handler(req, res) {
     });
   }
 
-  // 1. Load user, verify target is in their client[] array
+  const isStaff = isTravelgenixStaff(ctx);
+
+  // 1. Load user, verify target is in their client[] array — UNLESS the caller
+  //    is Travelgenix staff, who may act as any live client for support.
   let userRec;
   try {
     userRec = await getRecord(USERS.tableId, ctx.userRecordId);
@@ -101,7 +108,9 @@ export default async function handler(req, res) {
   }
 
   const userClientIds = userRec.fields[USERS.fields.client] || [];
-  if (!userClientIds.includes(targetClientId)) {
+  const isLinked = userClientIds.includes(targetClientId);
+
+  if (!isLinked && !isStaff) {
     logAuthEvent({
       type: AUTH_EVENTS.types.SIGNIN_FAIL, success: false,
       userRecordId: ctx.userRecordId,
@@ -115,6 +124,10 @@ export default async function handler(req, res) {
     }).catch(() => {});
     return jsonError(res, 403, 'not_authorised', "You don't have access to that company");
   }
+
+  // Distinguish a genuine membership switch from a staff impersonation so the
+  // audit trail is unambiguous about when staff acted inside a client account.
+  const switchSource = (!isLinked && isStaff) ? 'staff_act_as' : 'client_switch';
 
   // 2. Load target client, verify active
   let targetClient;
@@ -186,7 +199,7 @@ export default async function handler(req, res) {
   }
 
   console.log('[auth/switch-client] user', ctx.userRecordId,
-    `switched ${ctx.clientRecordId} → ${targetClientId}, new session ${sessionId}`);
+    `(${switchSource}) switched ${ctx.clientRecordId} → ${targetClientId}, new session ${sessionId}`);
 
   // 6. Bump lastLogin (mirrors signin.js)
   updateRecord(USERS.tableId, ctx.userRecordId, {
@@ -208,7 +221,7 @@ export default async function handler(req, res) {
     emailAttempted: ctx.email,
     ip, userAgent: ua,
     detail: {
-      source: 'client_switch',
+      source: switchSource,
       fromClientId: ctx.clientRecordId,
       toClientId: targetClientId,
     },
