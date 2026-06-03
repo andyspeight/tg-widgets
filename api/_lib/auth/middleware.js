@@ -22,6 +22,7 @@ import { getRecord } from './airtable.js';
 import { jsonError } from './http.js';
 import { readSessionCookie } from './cookie.js';
 import { resolveUserPermissions } from './permissions.js';
+import { isStaffEmail } from './staff.js';
 
 /**
  * Extract a session token from either the Authorization header (Bearer)
@@ -116,15 +117,22 @@ export async function requireAuth(req, res) {
   // fall back to the user's first linked client (or null if they have
   // none). For legacy tokens without a clientId claim, also fall back.
   const userClientIds = f[USERS.fields.client] || [];
+  // Travelgenix staff may "act as" any live client via /api/auth/switch-client,
+  // which mints a session whose clientId is a client they are NOT linked to.
+  // That is the whole point of the act-as capability, so for staff we must
+  // honour the session's clientId even when it isn't in their linked array.
+  // Without this, every staff act-as session silently reverts to their home
+  // client here and the switch appears to do nothing.
+  const isStaff = isStaffEmail(f[USERS.fields.email] || '');
   let clientRecordId = null;
-  if (payload.clientId && userClientIds.includes(payload.clientId)) {
+  if (payload.clientId && (userClientIds.includes(payload.clientId) || isStaff)) {
     clientRecordId = payload.clientId;
   } else if (payload.clientId) {
-    // JWT had a clientId but the user is no longer linked to that client.
-    // Could happen if an admin removed them between sign-in and now.
+    // Non-staff JWT had a clientId but the user is no longer linked to that
+    // client. Could happen if an admin removed them between sign-in and now.
     console.warn('[auth/middleware] JWT clientId', payload.clientId,
-      'no longer in user.client[] for', userRec.id,
-      '— falling back to first linked client');
+      'not in user.client[] for', userRec.id,
+      '(non-staff) — falling back to first linked client');
     clientRecordId = userClientIds[0] || null;
   } else {
     // Legacy token with no clientId claim — fall back to first linked.
