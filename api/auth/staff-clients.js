@@ -2,29 +2,31 @@
  * GET /api/auth/staff-clients
  *
  * Staff-only. Returns every LIVE (Active) client account so a Travelgenix
- * staff member can pick one to "act as" and set up that client's widgets.
+ * staff member can pick one to "act as" and set up that client's widgets,
+ * plus the context the front-end needs to render the act-as UI.
  *
  * Contrast with /api/auth/companies, which returns only the clients the
- * current user is personally linked to (the membership switcher on /home).
- * This endpoint returns the full live client list and is therefore gated
- * strictly to Travelgenix staff via isTravelgenixStaff(). Non-staff get a
- * 403 and never see the list.
+ * current user is personally linked to. This returns the full live list and
+ * is gated strictly to staff via isTravelgenixStaff(); non-staff get 403 and
+ * never see it. The 403/200 split also doubles as the front-end staff gate —
+ * the switcher renders only on a 200.
  *
- * This single endpoint also doubles as the staff gate for the front-end
- * switcher: the browser calls it on load, renders the switcher on 200, and
- * renders nothing on 401/403. So the picker is invisible to non-staff with
- * no separate "am I staff" round-trip.
+ * Response:
+ *   {
+ *     ok: true,
+ *     clients: [{ id, name, plan, status }],   // all live clients, sorted
+ *     currentClientId: 'rec...' | null,         // the session's active client
+ *     homeClientId:    'rec...' | null,         // the staff user's own client
+ *     impersonating:   true | false             // acting as a non-home client
+ *   }
  *
- * Response: { ok:true, clients:[{ id, name, plan, status }], currentClientId }
- *
- * "Live" is defined as Status === 'Active'. If a different status vocabulary
- * is introduced later (e.g. a dedicated 'Live'), broaden the filter below.
+ * "Live" = Status === 'Active'.
  */
 
 import { setCors, requireMethod, jsonOk, jsonError } from '../_lib/auth/http.js';
 import { requireAuth } from '../_lib/auth/middleware.js';
-import { listAllRecords } from '../_lib/auth/airtable.js';
-import { CLIENTS } from '../_lib/auth/schema.js';
+import { listAllRecords, getRecord } from '../_lib/auth/airtable.js';
+import { CLIENTS, USERS } from '../_lib/auth/schema.js';
 import { isTravelgenixStaff } from '../_lib/auth/staff.js';
 
 export default async function handler(req, res) {
@@ -34,11 +36,28 @@ export default async function handler(req, res) {
   const ctx = await requireAuth(req, res);
   if (!ctx) return;
 
-  // Hard staff gate. This is the single control on a capability that lets the
-  // caller act inside any client account, so it fails closed.
+  // Hard staff gate — the single control on a capability that lets the caller
+  // act inside any client account, so it fails closed.
   if (!isTravelgenixStaff(ctx)) {
     return jsonError(res, 403, 'not_staff', 'Staff access required');
   }
+
+  // Resolve the staff user's own linked clients → home + impersonation flag.
+  let linkedClientIds = [];
+  try {
+    const u = await getRecord(USERS.tableId, ctx.userRecordId);
+    const links = u?.fields?.[USERS.fields.client];
+    if (Array.isArray(links)) {
+      linkedClientIds = links
+        .map((x) => (typeof x === 'string' ? x : x && x.id))
+        .filter(Boolean);
+    }
+  } catch (err) {
+    console.warn('[auth/staff-clients] could not load user links:', err.message);
+  }
+  const homeClientId = linkedClientIds[0] || null;
+  const currentClientId = ctx.clientRecordId || null;
+  const impersonating = !!currentClientId && !linkedClientIds.includes(currentClientId);
 
   let records;
   try {
@@ -55,10 +74,9 @@ export default async function handler(req, res) {
       plan: c.fields[CLIENTS.fields.plan] || '',
       status: String(c.fields[CLIENTS.fields.status] || '').trim(),
     }))
-    // Live = Active, and must have a company name to show in the picker.
     .filter((c) => c.status.toLowerCase() === 'active' && c.name)
     .sort((a, b) => a.name.localeCompare(b.name));
 
   res.setHeader('Cache-Control', 'private, max-age=30');
-  return jsonOk(res, { clients, currentClientId: ctx.clientRecordId || null });
+  return jsonOk(res, { clients, currentClientId, homeClientId, impersonating });
 }
