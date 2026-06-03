@@ -144,7 +144,16 @@ function computeOrderTotal(raw) {
 // after a payment is taken — so the authoritative outstanding figure is
 // total - paidToDate, never the raw breakdown sum. We use the breakdown only
 // to pick the next instalment's amount/date, and we cap that at outstanding.
-export function decideCharge(raw) {
+// Minimum a customer can choose to part-pay. Full settlement is always allowed
+// even if the outstanding is below this floor.
+const MIN_PART_PAYMENT = 1;
+
+// Decide what to actually collect.
+//   - requested == null  → the default (next instalment, or full balance).
+//   - requested provided → the customer's chosen amount, RE-VALIDATED here
+//     against the real outstanding. The client figure is only a request; the
+//     server is the authority on what may be charged.
+export function decideCharge(raw, requested) {
   const plan = findPaymentPlan(raw);
   const next = computeNextPayment(plan);
   const paid = computePaidToDate(raw);
@@ -154,11 +163,32 @@ export function decideCharge(raw) {
   if (!(outstanding > 0)) return { noBalance: true, total, paid, outstanding };
   if (!next || !(next.amount > 0)) return { noBalance: true, total, paid, outstanding };
 
-  // Instalment plan → collect the next instalment, but never more than what's
-  // actually still owed. Single balance → collect the outstanding amount.
-  const chargeAmount = next.isInstalment
+  const currency = next.currency;
+
+  // Default (no custom amount): next instalment, capped at outstanding;
+  // single balance → the full outstanding.
+  const defaultAmount = next.isInstalment
     ? Math.min(Math.round(next.amount * 100) / 100, outstanding)
     : outstanding;
+
+  let chargeAmount = defaultAmount;
+
+  if (requested != null && requested !== '') {
+    const amt = Math.round(Number(requested) * 100) / 100;
+    if (!Number.isFinite(amt) || amt <= 0) {
+      return { invalid: 'Please enter a valid amount.', outstanding, currency };
+    }
+    if (amt > outstanding + 0.001) {
+      return { invalid: `That's more than the balance on this booking. You can pay up to ${money(outstanding, currency)}.`, outstanding, currency };
+    }
+    // Allow full settlement of any size; otherwise enforce the part-payment floor.
+    const isFull = Math.abs(amt - outstanding) < 0.005;
+    if (!isFull && amt < MIN_PART_PAYMENT) {
+      return { invalid: `The smallest part payment is ${money(MIN_PART_PAYMENT, currency)}. Pay ${money(outstanding, currency)} to settle in full.`, outstanding, currency };
+    }
+    chargeAmount = amt;
+  }
+
   if (!(chargeAmount > 0)) return { noBalance: true, total, paid, outstanding };
 
   const followAmount = Math.max(0, Math.round((outstanding - chargeAmount) * 100) / 100);
@@ -166,11 +196,20 @@ export function decideCharge(raw) {
     noBalance: false,
     total, paid, outstanding,
     amount: chargeAmount,
-    currency: next.currency,
+    currency,
     dueDate: next.dueDate,
     isInstalment: next.isInstalment && followAmount > 0,
     remainingAmount: followAmount,
   };
+}
+
+// Minimal money formatter for server-side validation messages.
+function money(n, currency) {
+  try {
+    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency || 'GBP' }).format(n);
+  } catch {
+    return `${currency || 'GBP'} ${Number(n).toFixed(2)}`;
+  }
 }
 
 // Build ContactInfo from the raw order, omitting anything we don't have (per
@@ -261,11 +300,21 @@ export default async function handler(req, res) {
 
     // 3. Work out what to collect — reconciled against payments already taken,
     //    NOT the raw breakdown (which Travelify leaves in place after payment).
-    const decision = decideCharge(raw);
+    //    A customer-chosen amount (body.amount) is re-validated server-side.
+    const requestedAmount = (body.amount === undefined || body.amount === null || body.amount === '')
+      ? null
+      : body.amount;
+    const decision = decideCharge(raw, requestedAmount);
+
+    if (decision.invalid) {
+      // The chosen amount didn't pass server validation (too big, too small,
+      // not a number). Tell the widget why so it can show the message.
+      return res.status(400).json({ success: false, error: decision.invalid });
+    }
 
     console.log('[pay-balance] order', orderId,
       'total:', decision.total, 'paid:', decision.paid, 'outstanding:', decision.outstanding,
-      'charge:', decision.noBalance ? 'none' : decision.amount);
+      'requested:', requestedAmount, 'charge:', decision.noBalance ? 'none' : decision.amount);
 
     if (decision.noBalance) {
       // Nothing left to pay (fully paid, or no schedule we could read).
