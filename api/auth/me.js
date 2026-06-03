@@ -89,9 +89,15 @@ export default async function handler(req, res) {
         if (p.fields[PRODUCTS.fields.status] === 'active') activeSlugs.add(slug);
       }
 
-      // Map catalogueId → product slug (the Control → launchpad bridge)
+      // Map catalogueId → product slug (the Control → launchpad bridge).
+      // Skip INACTIVE catalogue items. A client can carry a stale enabled
+      // entitlement row for a product that was later switched off in the
+      // catalogue (package-seeded at onboarding, then deactivated). Those must
+      // not surface as launchpad tiles. The Catalogue tab's Active flag is the
+      // single gate, and the Entitlements tab already honours it (get.js).
       const slugByCatalogueId = new Map();
       for (const c of catalogue) {
+        if (!c.fields[CATALOGUE.fields.active]) continue;
         const ps = c.fields[CATALOGUE.fields.productSlug];
         const slug = typeof ps === 'string' ? ps : (ps && ps.name) || '';
         if (slug) slugByCatalogueId.set(c.id, slug);
