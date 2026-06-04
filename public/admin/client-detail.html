@@ -978,9 +978,23 @@
                 </div>
 
                 <div class="field">
-                  <label class="field-label" for="brand-logo">Logo URL</label>
-                  <input class="input" id="brand-logo" type="url" maxlength="1000" value="${escapeHtml(logo)}" placeholder="https://…/logo.png" />
-                  <div class="field-hint">Paste a public https image URL. Upload from the Luna Travel app is coming soon.</div>
+                  <label class="field-label">Logo</label>
+                  <input type="hidden" id="brand-logo" value="${escapeHtml(logo)}" />
+                  <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <div id="brand-logo-thumb" style="width:84px;height:84px;border:1px solid var(--border,#e2e8f0);border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden;flex:0 0 auto;">
+                      ${logo
+                        ? `<img src="${escapeHtml(logo)}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;" />`
+                        : `<span style="font-size:12px;color:#94a3b8;">No logo</span>`}
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                      <input type="file" id="brand-logo-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden />
+                      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button type="button" class="btn btn--sm" id="brand-logo-upload">Upload logo</button>
+                        <button type="button" class="btn btn--sm" id="brand-logo-remove"${logo ? '' : ' hidden'}>Remove</button>
+                      </div>
+                      <div class="field-hint" id="brand-logo-hint" style="margin-top:8px;">PNG, JPG, WebP or SVG. We resize and optimise it for you, then you Save to apply.</div>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="travelify-edit-error" id="brand-error" hidden style="margin-top:4px;"></div>
@@ -990,9 +1004,8 @@
                 <div class="field-label" style="margin-bottom:8px;">Preview</div>
                 <div style="border:1px solid var(--border,#e2e8f0);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);">
                   <div id="brand-preview-head" style="background:${escapeHtml(primary || DEF_P)};padding:22px 20px;color:#fff;">
-                    <div style="height:36px;margin-bottom:12px;display:flex;align-items:center;">
-                      <img id="brand-preview-logo" alt="" src="${escapeHtml(logo)}" style="max-height:36px;max-width:170px;object-fit:contain;${logo ? '' : 'display:none;'}" />
-                      <span id="brand-preview-logo-fallback" style="font-weight:700;font-size:15px;opacity:.85;${logo ? 'display:none;' : ''}">${escapeHtml(appName || 'Your agency')}</span>
+                    <div id="brand-preview-logo-wrap" style="height:36px;margin-bottom:12px;align-items:center;display:${logo ? 'flex' : 'none'};">
+                      <img id="brand-preview-logo" alt="" src="${escapeHtml(logo)}" style="max-height:36px;max-width:170px;object-fit:contain;" />
                     </div>
                     <div id="brand-preview-title" style="font-size:20px;font-weight:700;line-height:1.2;">${escapeHtml(appName || 'Your app name')}</div>
                   </div>
@@ -1020,14 +1033,20 @@
       if (aColor) aColor.addEventListener('input', () => { aHex.value = aColor.value.toUpperCase(); updateBrandingPreview(); });
       if (aHex) aHex.addEventListener('input', () => { const v = aHex.value.trim(); if (brandIsHex(v)) aColor.value = v; updateBrandingPreview(); });
 
-      ['brand-appName', 'brand-welcome', 'brand-logo'].forEach((id) => {
+      ['brand-appName', 'brand-welcome'].forEach((id) => {
         const el = $(id); if (el) el.addEventListener('input', updateBrandingPreview);
       });
 
-      const img = $('brand-preview-logo');
-      if (img) img.addEventListener('error', () => {
-        img.style.display = 'none';
-        const fb = $('brand-preview-logo-fallback'); if (fb) fb.style.display = '';
+      // Logo upload (file → convert in browser → stream straight to Blob)
+      const fileInput = $('brand-logo-file');
+      $('brand-logo-upload')?.addEventListener('click', () => fileInput?.click());
+      if (fileInput) fileInput.addEventListener('change', onLogoFileChosen);
+      $('brand-logo-remove')?.addEventListener('click', () => {
+        $('brand-logo').value = '';
+        setLogoThumb('');
+        const rm = $('brand-logo-remove'); if (rm) rm.hidden = true;
+        const hint = $('brand-logo-hint'); if (hint) hint.textContent = 'PNG, JPG, WebP or SVG. We resize and optimise it for you, then you Save to apply.';
+        updateBrandingPreview();
       });
 
       $('brand-save')?.addEventListener('click', saveBranding);
@@ -1047,12 +1066,101 @@
       const cta = $('brand-preview-cta'); if (cta) cta.style.background = accent;
       const title = $('brand-preview-title'); if (title) title.textContent = appName || 'Your app name';
       const welc = $('brand-preview-welcome'); if (welc) welc.textContent = welcome || 'Welcome aboard. Everything for your trip is right here.';
-      const fb = $('brand-preview-logo-fallback'); if (fb) fb.textContent = appName || 'Your agency';
 
+      const wrap = $('brand-preview-logo-wrap');
       const img = $('brand-preview-logo');
-      if (img) {
-        if (logo) { img.src = logo; img.style.display = ''; if (fb) fb.style.display = 'none'; }
-        else { img.style.display = 'none'; if (fb) fb.style.display = ''; }
+      if (wrap) wrap.style.display = logo ? 'flex' : 'none';
+      if (img && logo) img.src = logo;
+    }
+
+    function setLogoThumb(url) {
+      const box = document.getElementById('brand-logo-thumb');
+      if (!box) return;
+      box.innerHTML = url
+        ? `<img src="${escapeHtml(url)}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;" />`
+        : `<span style="font-size:12px;color:#94a3b8;">No logo</span>`;
+    }
+
+    // Lazy-load the Vercel Blob client SDK (ESM from CDN). The Control pages
+    // carry no CSP, so the CDN import, the upload and blob images are allowed.
+    let _logoBlobClient = null;
+    async function getLogoBlobClient() {
+      if (_logoBlobClient) return _logoBlobClient;
+      _logoBlobClient = await import('https://esm.sh/@vercel/blob@0.27.0/client');
+      return _logoBlobClient;
+    }
+
+    // Resize + flatten to PNG in the browser so every uploaded logo lands as a
+    // tidy, transparent PNG no bigger than 480px on its longest side. SVGs are
+    // passed through untouched (they scale themselves).
+    function convertLogoToPng(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const MAX = 480;
+          let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+          if (!w || !h) { reject(new Error('Could not read image size')); return; }
+          if (w > MAX || h > MAX) {
+            const s = Math.min(MAX / w, MAX / h);
+            w = Math.round(w * s); h = Math.round(h * s);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Could not process image')), 'image/png');
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that image')); };
+        img.src = url;
+      });
+    }
+
+    async function onLogoFileChosen(e) {
+      const file = (e.target.files || [])[0];
+      e.target.value = '';
+      if (!file) return;
+
+      const $ = (id) => document.getElementById(id);
+      const hint = $('brand-logo-hint');
+      const uploadBtn = $('brand-logo-upload');
+      const setHint = (t) => { if (hint) hint.textContent = t; };
+
+      const okTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+      if (!okTypes.includes(file.type)) { setHint('Please choose a PNG, JPG, WebP or SVG image'); return; }
+      if (file.size > 8 * 1024 * 1024) { setHint('That image is over 8MB — please choose a smaller file'); return; }
+
+      if (uploadBtn) { uploadBtn.disabled = true; uploadBtn.textContent = 'Uploading…'; }
+      setHint('Optimising and uploading…');
+
+      try {
+        let toUpload, contentType, ext;
+        if (file.type === 'image/svg+xml') {
+          toUpload = file; contentType = 'image/svg+xml'; ext = 'svg';
+        } else {
+          toUpload = await convertLogoToPng(file); contentType = 'image/png'; ext = 'png';
+        }
+        const { upload } = await getLogoBlobClient();
+        const pathname = 'client-logos/' + clientData.client.id + '-' + Date.now() + '.' + ext;
+        const blob = await upload(pathname, toUpload, {
+          access: 'public',
+          contentType,
+          handleUploadUrl: '/api/admin/clients/upload-logo',
+        });
+        $('brand-logo').value = blob.url;
+        setLogoThumb(blob.url);
+        const rm = $('brand-logo-remove'); if (rm) rm.hidden = false;
+        updateBrandingPreview();
+        setHint('Uploaded. Click Save branding to apply it.');
+        toast('Logo uploaded', 'ok');
+      } catch (err) {
+        console.error('[logo upload] failed', err);
+        setHint('Upload failed — ' + (err?.message || 'please try again'));
+        toast('Logo upload failed', 'err');
+      } finally {
+        if (uploadBtn) { uploadBtn.disabled = false; uploadBtn.textContent = 'Upload logo'; }
       }
     }
 
