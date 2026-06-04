@@ -667,6 +667,7 @@
           <button class="sub-tab" role="tab" data-tab="users" aria-selected="false" type="button">
             Users <span style="opacity:0.6;font-weight:400;">(${clientData.users.length})</span>
           </button>
+          <button class="sub-tab" role="tab" data-tab="branding" aria-selected="false" type="button">Branding</button>
         </div>
 
         <div id="tab-content"></div>
@@ -691,6 +692,7 @@
       }
       else if (tab === 'entitlements') tc.innerHTML = renderEntitlements();
       else if (tab === 'users') tc.innerHTML = renderUsers();
+      else if (tab === 'branding') { tc.innerHTML = renderBranding(); attachBrandingHandlers(); }
     }
 
     function renderOverview() {
@@ -919,6 +921,185 @@
       }
     }
 
+
+    // ─── Branding tab (Luna Travel white-label) ──────────────────────────
+    function renderBranding() {
+      const c = clientData.client;
+      const appName = c.appName || '';
+      const primary = c.brandPrimaryColour || '';
+      const accent = c.brandAccentColour || '';
+      const welcome = c.welcomeMessage || '';
+      const logo = c.logoUrl || '';
+      const DEF_P = '#1B2B5B', DEF_A = '#00B4D8';
+
+      const swatch = (id, hex, fallback, label) => `
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="color" id="${id}-color" value="${escapeHtml(hex || fallback)}" style="width:44px;height:38px;border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:2px;background:#fff;cursor:pointer;flex:0 0 auto;" aria-label="${label} picker" />
+          <input class="input" id="${id}-hex" type="text" maxlength="7" value="${escapeHtml(hex)}" placeholder="${fallback}" style="font-family:ui-monospace,monospace;text-transform:uppercase;" />
+        </div>`;
+
+      return `
+        <div class="panel">
+          <header class="panel-header">
+            <div class="panel-header-actions">
+              <div>
+                <h2>Branding</h2>
+                <p>White-label the Luna Travel app this agency's travellers see. Changes apply on the next app open.</p>
+              </div>
+              <button type="button" class="btn btn--sm btn--primary" id="brand-save">Save branding</button>
+            </div>
+          </header>
+          <div class="panel-body">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start;">
+              <div>
+                <div class="field">
+                  <label class="field-label" for="brand-appName">App name</label>
+                  <input class="input" id="brand-appName" type="text" maxlength="60" value="${escapeHtml(appName)}" placeholder="e.g. The Lapland Experience" />
+                  <div class="field-hint">Shown as the app title. Up to 60 characters.</div>
+                </div>
+
+                <div class="field-grid" style="margin-top:4px;">
+                  <div class="field">
+                    <label class="field-label" for="brand-primary-hex">Primary colour</label>
+                    ${swatch('brand-primary', primary, DEF_P, 'Primary colour')}
+                    <div class="field-hint">Header and key buttons.</div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="brand-accent-hex">Accent colour</label>
+                    ${swatch('brand-accent', accent, DEF_A, 'Accent colour')}
+                    <div class="field-hint">Highlights and call-to-action.</div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="brand-welcome">Welcome message</label>
+                  <textarea class="input" id="brand-welcome" rows="3" maxlength="500" style="min-height:84px;resize:vertical;" placeholder="Welcome aboard. Everything for your trip is right here.">${escapeHtml(welcome)}</textarea>
+                  <div class="field-hint">Greeting on first app open. Up to 500 characters.</div>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="brand-logo">Logo URL</label>
+                  <input class="input" id="brand-logo" type="url" maxlength="1000" value="${escapeHtml(logo)}" placeholder="https://…/logo.png" />
+                  <div class="field-hint">Paste a public https image URL. Upload from the Luna Travel app is coming soon.</div>
+                </div>
+
+                <div class="travelify-edit-error" id="brand-error" hidden style="margin-top:4px;"></div>
+              </div>
+
+              <div>
+                <div class="field-label" style="margin-bottom:8px;">Preview</div>
+                <div style="border:1px solid var(--border,#e2e8f0);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+                  <div id="brand-preview-head" style="background:${escapeHtml(primary || DEF_P)};padding:22px 20px;color:#fff;">
+                    <div style="height:36px;margin-bottom:12px;display:flex;align-items:center;">
+                      <img id="brand-preview-logo" alt="" src="${escapeHtml(logo)}" style="max-height:36px;max-width:170px;object-fit:contain;${logo ? '' : 'display:none;'}" />
+                      <span id="brand-preview-logo-fallback" style="font-weight:700;font-size:15px;opacity:.85;${logo ? 'display:none;' : ''}">${escapeHtml(appName || 'Your agency')}</span>
+                    </div>
+                    <div id="brand-preview-title" style="font-size:20px;font-weight:700;line-height:1.2;">${escapeHtml(appName || 'Your app name')}</div>
+                  </div>
+                  <div style="padding:18px 20px;background:#fff;">
+                    <div id="brand-preview-welcome" style="font-size:14px;line-height:1.55;color:#334155;min-height:42px;">${escapeHtml(welcome || 'Welcome aboard. Everything for your trip is right here.')}</div>
+                    <button id="brand-preview-cta" type="button" tabindex="-1" style="margin-top:16px;border:0;border-radius:10px;padding:11px 16px;font-weight:600;font-size:14px;color:#fff;background:${escapeHtml(accent || DEF_A)};cursor:default;width:100%;">View my trip</button>
+                  </div>
+                </div>
+                <div class="field-hint" style="margin-top:10px;">A rough preview. The live app may differ slightly.</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function brandIsHex(v) { return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v); }
+
+    function attachBrandingHandlers() {
+      const $ = (id) => document.getElementById(id);
+      const pColor = $('brand-primary-color'), pHex = $('brand-primary-hex');
+      const aColor = $('brand-accent-color'), aHex = $('brand-accent-hex');
+
+      if (pColor) pColor.addEventListener('input', () => { pHex.value = pColor.value.toUpperCase(); updateBrandingPreview(); });
+      if (pHex) pHex.addEventListener('input', () => { const v = pHex.value.trim(); if (brandIsHex(v)) pColor.value = v; updateBrandingPreview(); });
+      if (aColor) aColor.addEventListener('input', () => { aHex.value = aColor.value.toUpperCase(); updateBrandingPreview(); });
+      if (aHex) aHex.addEventListener('input', () => { const v = aHex.value.trim(); if (brandIsHex(v)) aColor.value = v; updateBrandingPreview(); });
+
+      ['brand-appName', 'brand-welcome', 'brand-logo'].forEach((id) => {
+        const el = $(id); if (el) el.addEventListener('input', updateBrandingPreview);
+      });
+
+      const img = $('brand-preview-logo');
+      if (img) img.addEventListener('error', () => {
+        img.style.display = 'none';
+        const fb = $('brand-preview-logo-fallback'); if (fb) fb.style.display = '';
+      });
+
+      $('brand-save')?.addEventListener('click', saveBranding);
+    }
+
+    function updateBrandingPreview() {
+      const $ = (id) => document.getElementById(id);
+      const val = (id) => ($(id)?.value ?? '');
+      const DEF_P = '#1B2B5B', DEF_A = '#00B4D8';
+      const primary = val('brand-primary-hex').trim() || DEF_P;
+      const accent = val('brand-accent-hex').trim() || DEF_A;
+      const appName = val('brand-appName').trim();
+      const welcome = val('brand-welcome');
+      const logo = val('brand-logo').trim();
+
+      const head = $('brand-preview-head'); if (head) head.style.background = primary;
+      const cta = $('brand-preview-cta'); if (cta) cta.style.background = accent;
+      const title = $('brand-preview-title'); if (title) title.textContent = appName || 'Your app name';
+      const welc = $('brand-preview-welcome'); if (welc) welc.textContent = welcome || 'Welcome aboard. Everything for your trip is right here.';
+      const fb = $('brand-preview-logo-fallback'); if (fb) fb.textContent = appName || 'Your agency';
+
+      const img = $('brand-preview-logo');
+      if (img) {
+        if (logo) { img.src = logo; img.style.display = ''; if (fb) fb.style.display = 'none'; }
+        else { img.style.display = 'none'; if (fb) fb.style.display = ''; }
+      }
+    }
+
+    async function saveBranding() {
+      const $ = (id) => document.getElementById(id);
+      const val = (id) => ($(id)?.value ?? '').trim();
+      const saveBtn = $('brand-save');
+      const errEl = $('brand-error');
+
+      const primary = val('brand-primary-hex');
+      const accent = val('brand-accent-hex');
+      const logo = val('brand-logo');
+
+      const errs = [];
+      if (primary && !brandIsHex(primary)) errs.push('Primary colour must be a hex value like #1B2B5B');
+      if (accent && !brandIsHex(accent)) errs.push('Accent colour must be a hex value like #00B4D8');
+      if (logo && !/^https:\/\//i.test(logo)) errs.push('Logo URL must start with https://');
+      if (errs.length) { if (errEl) { errEl.textContent = errs.join(' · '); errEl.hidden = false; } return; }
+      if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
+
+      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+      try {
+        const data = await apiCall('/api/admin/clients/update-branding', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: clientData.client.id,
+            appName: val('brand-appName'),
+            brandPrimaryColour: primary,
+            brandAccentColour: accent,
+            welcomeMessage: $('brand-welcome')?.value ?? '',
+            logoUrl: logo,
+          }),
+        });
+        const b = data.branding || {};
+        clientData.client.appName = b.appName ?? '';
+        clientData.client.brandPrimaryColour = b.brandPrimaryColour ?? '';
+        clientData.client.brandAccentColour = b.brandAccentColour ?? '';
+        clientData.client.welcomeMessage = b.welcomeMessage ?? '';
+        clientData.client.logoUrl = b.logoUrl ?? '';
+        toast('Branding saved', 'ok');
+      } catch (err) {
+        console.error('[branding save] failed', err);
+        if (errEl) { errEl.textContent = err?.message || 'Save failed — try again'; errEl.hidden = false; }
+      } finally {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save branding'; }
+      }
+    }
 
     // ─── Travelify integration panel ────────────────────────────────────
     // Three states: display (default), edit (form), saving (form disabled).
