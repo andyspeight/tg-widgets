@@ -134,6 +134,27 @@ a{text-decoration:none;color:inherit}
 .upgrade-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--ft);cursor:pointer;border:none;background:linear-gradient(135deg,var(--ac),var(--br));color:#fff;transition:all .15s;display:flex;align-items:center;gap:5px}
 .upgrade-btn:hover{box-shadow:0 4px 12px rgba(124,58,237,.3);transform:scale(1.03)}
 .upgrade-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.upgrade-btn.is-requested{background:#ECFDF5;color:#059669}
+.upgrade-btn.is-requested:hover{box-shadow:none;transform:none}
+.access-badge.access-included{color:#059669}
+.ureq-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;animation:ureqFade .15s ease}
+@keyframes ureqFade{from{opacity:0}to{opacity:1}}
+.ureq-card{background:#fff;border-radius:18px;max-width:380px;width:100%;padding:28px 26px;text-align:center;box-shadow:0 24px 60px rgba(15,23,42,.28);animation:ureqPop .18s cubic-bezier(.2,.8,.3,1)}
+@keyframes ureqPop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.ureq-icon{width:52px;height:52px;border-radius:15px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--ac),var(--br))}
+.ureq-icon svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ureq-icon.ureq-ok{background:linear-gradient(135deg,#10B981,#059669)}
+.ureq-title{font-size:18px;font-weight:800;color:var(--tx);margin-bottom:6px}
+.ureq-sub{font-size:13px;line-height:1.5;color:var(--mt);margin-bottom:18px}
+.ureq-error{font-size:12px;color:#DC2626;background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:8px 10px;margin-bottom:14px;text-align:left}
+.ureq-actions{display:flex;gap:10px}
+.ureq-btn{flex:1;padding:11px 14px;border-radius:10px;font-size:13px;font-weight:700;font-family:var(--ft);cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.ureq-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ureq-cancel{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.ureq-cancel:hover{background:#EEF2F7}
+.ureq-send{background:linear-gradient(135deg,var(--ac),var(--br));color:#fff}
+.ureq-send:hover{box-shadow:0 6px 16px rgba(124,58,237,.32);transform:translateY(-1px)}
+.ureq-send:disabled,.ureq-send.is-loading{opacity:.7;cursor:default;transform:none;box-shadow:none}
 
 /* Access badge on card */
 .access-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;margin-top:8px}
@@ -1112,8 +1133,14 @@ function renderCatalogue() {
     const release = effectiveStatus(w);                      // 'live' | 'coming-soon'
     const previewSoon = isBuilt && release === 'coming-soon'; // built, but withheld from this viewer
 
-    const access = signedIn ? getAccess(w) : null;
-    const isLocked = signedIn && access === 0 && !previewSoon; // tier-lock; preview-soon takes precedence visually
+    const code = catalogueCodeFor(w);
+    // Entitlement-driven lock: a signed-in client sees a widget unlocked only
+    // when Control has granted it (mirrors /api/auth/me entitledWidgetCodes).
+    // Staff see everything; widgets with no catalogue code (e.g. Loader) are
+    // never gated. preview-soon still takes visual precedence.
+    const isEntitled = isStaff() || !code || !entitlementsLoaded || entitledWidgetCodes.has(code);
+    const isLocked = signedIn && !isEntitled && !previewSoon;
+    const isRequested = !!code && requestedCodes.has(code);
     const minTier = getMinTier(w);
     // Card greys-out only for the genuinely-unbuilt state, not preview-soon
     // (preview-soon keeps a full-colour live preview, just with a flash).
@@ -1128,9 +1155,11 @@ function renderCatalogue() {
         <div class="w-card-preview-inner" id="prev_${w.id}" style="filter:blur(3px);opacity:.5"></div>
         <div class="locked-overlay">
           <div class="locked-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-          <div class="locked-text">Upgrade to unlock</div>
-          <div class="locked-sub">Available on ${minTier} and above</div>
-          <button class="upgrade-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>Upgrade to ${minTier}</button>
+          <div class="locked-text">${isRequested ? 'Requested' : 'Not on your plan'}</div>
+          <div class="locked-sub">${isRequested ? 'Your account manager will be in touch' : 'Available on ' + minTier + ' and above'}</div>
+          ${isRequested
+            ? `<button class="upgrade-btn is-requested" disabled aria-disabled="true" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Requested</button>`
+            : `<button class="upgrade-btn" onclick="event.stopPropagation();requestUpgrade('${w.id}')"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>Request access</button>`}
         </div></div>`;
     } else {
       preview = `<div class="w-card-preview"><span class="soon-badge">Coming Soon</span><div class="soon-placeholder"><svg viewBox="${w.icon.viewBox}">${w.icon.paths}</svg><p>${w.name}</p></div></div>`;
@@ -1142,9 +1171,8 @@ function renderCatalogue() {
     // Access badge (only when signed in, and not while preview-soon — the flash
     // already tells the story and a tier badge would be misleading).
     let accessBadge = '';
-    if (signedIn && w.access && !previewSoon) {
-      const al = accessLabel(access);
-      accessBadge = `<div class="access-badge ${al.cls}"><svg viewBox="0 0 24 24">${al.icon}</svg>${al.text}</div>`;
+    if (signedIn && !previewSoon && isEntitled && code) {
+      accessBadge = `<div class="access-badge access-included"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Included</div>`;
     }
 
     // Actions
@@ -1212,6 +1240,14 @@ function getUserPlan() { return userData?.plan || null; }
    Maps widget id → 'live' | 'coming-soon'. Empty until loaded; the registry's
    own `status` is the fallback. */
 let catalogueStatus = {};
+// Per-widget Control catalogue codes this client may use, from /api/auth/me.
+// Drives the show-and-tag lock so the grid mirrors Control exactly.
+let entitledWidgetCodes = new Set();
+// True only once we have real entitlement data. Until then the grid fails open
+// (no locks) so a signed-in user is never shown an all-locked grid by mistake.
+let entitlementsLoaded = false;
+// Widget codes the client has requested this session (quiet "Requested" state).
+let requestedCodes = new Set();
 
 /* Staff bypass: a signed-in user whose email belongs to a Travelgenix /
    Agendas domain sees every widget as fully live, regardless of the catalogue.
@@ -1261,6 +1297,99 @@ function getMinTier(widget) {
   }
   return 'Ignite';
 }
+
+/* Bridge a registry widget to its Control catalogue product code, which is the
+   key entitlements are granted against. Almost always `widget-<id>`, with a
+   few exceptions, and Loader has no catalogue item (never gated). Keep in sync
+   with the Control catalogue (tblhT8lhDWVieFxsT). */
+const CATALOGUE_CODE_OVERRIDES = {
+  'quote-pdf': 'quote-pdf',
+  'logos': 'widget-logo-showcase',
+  'event-calendar': 'widget-events',
+  'loader': null,
+};
+function catalogueCodeFor(widget) {
+  if (Object.prototype.hasOwnProperty.call(CATALOGUE_CODE_OVERRIDES, widget.id)) {
+    return CATALOGUE_CODE_OVERRIDES[widget.id];
+  }
+  return 'widget-' + widget.id;
+}
+
+/* ═══ UPGRADE REQUEST ═══
+   Locked widgets raise a lightweight interest request rather than a checkout.
+   Logs to the Upgrade Requests table via /api/dashboard/request-widget, then
+   flips the card to a quiet "Requested" state. */
+function requestUpgrade(widgetId) {
+  const w = WIDGETS.find((x) => x.id === widgetId);
+  if (!w) return;
+  const code = catalogueCodeFor(w);
+  if (!code) return;
+  openUpgradeModal(w, code, getMinTier(w));
+}
+
+function closeUpgradeModal() {
+  const b = document.getElementById('ureqBackdrop');
+  if (b) b.remove();
+}
+
+function openUpgradeModal(w, code, minTier) {
+  closeUpgradeModal();
+  const back = document.createElement('div');
+  back.id = 'ureqBackdrop';
+  back.className = 'ureq-backdrop';
+  back.addEventListener('click', (e) => { if (e.target === back) closeUpgradeModal(); });
+  back.innerHTML = `
+    <div class="ureq-card" role="dialog" aria-modal="true" aria-label="Request ${w.name}">
+      <div class="ureq-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+      <div class="ureq-title">Add ${w.name}?</div>
+      <div class="ureq-sub">Send a quick request and your account manager will get this set up on your site. Usually included from the ${minTier} plan.</div>
+      <div class="ureq-error" id="ureqError" style="display:none"></div>
+      <div class="ureq-actions">
+        <button class="ureq-btn ureq-cancel" id="ureqCancel">Not now</button>
+        <button class="ureq-btn ureq-send" id="ureqSend"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send request</button>
+      </div>
+    </div>`;
+  document.body.appendChild(back);
+  document.getElementById('ureqCancel').addEventListener('click', closeUpgradeModal);
+  document.getElementById('ureqSend').addEventListener('click', () => sendUpgradeRequest(w, code, minTier));
+  const esc = (e) => { if (e.key === 'Escape') { closeUpgradeModal(); document.removeEventListener('keydown', esc); } };
+  document.addEventListener('keydown', esc);
+}
+
+async function sendUpgradeRequest(w, code, minTier) {
+  const sendBtn = document.getElementById('ureqSend');
+  const errEl = document.getElementById('ureqError');
+  if (!sendBtn) return;
+  sendBtn.disabled = true;
+  sendBtn.classList.add('is-loading');
+  sendBtn.textContent = 'Sending…';
+  if (errEl) errEl.style.display = 'none';
+  try {
+    const r = await fetch('/api/dashboard/request-widget', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ widgetCode: code, widgetName: w.name, neededTier: minTier }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.ok) throw new Error((d && d.error) || 'Could not send your request');
+    requestedCodes.add(code);
+    const card = document.querySelector('.ureq-card');
+    if (card) {
+      card.innerHTML = `
+        <div class="ureq-icon ureq-ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="ureq-title">${d.already ? 'Already requested' : 'Request sent'}</div>
+        <div class="ureq-sub">${d.already ? "This one is already on your account manager's list." : 'Your account manager will be in touch shortly.'}</div>`;
+    }
+    setTimeout(() => { closeUpgradeModal(); renderCatalogue(); }, 1300);
+  } catch (e) {
+    sendBtn.disabled = false;
+    sendBtn.classList.remove('is-loading');
+    sendBtn.innerHTML = '<svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send request';
+    if (errEl) { errEl.textContent = e.message || 'Something went wrong'; errEl.style.display = 'block'; }
+  }
+}
+
 function accessLabel(limit) {
   if (limit === -1) return { text: 'Unlimited', cls: 'access-included', icon: '<polyline points="20 6 9 17 4 12"/>' };
   if (limit > 0) return { text: `Up to ${limit} widget${limit>1?'s':''}`, cls: 'access-limit', icon: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' };
@@ -2991,6 +3120,8 @@ async function bootstrapCookieAuth() {
     };
     signedIn = true;
     userEmail = userData.email || '';
+    entitledWidgetCodes = new Set(Array.isArray(data.entitledWidgetCodes) ? data.entitledWidgetCodes : []);
+    entitlementsLoaded = true;
     return true;
   } catch (e) {
     console.warn('[index] cookie auth check failed:', e && e.message);
@@ -3144,8 +3275,5 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-contact.js"></script>
 <script src="/widget-team.js"></script>
 <script src="/widget-loader.js"></script>
-
-<!-- Staff act-as-client switcher (self-gating: only renders for Travelgenix staff) -->
-<script defer src="/staff-switcher.js"></script>
 </body>
 </html>
