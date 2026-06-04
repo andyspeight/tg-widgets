@@ -566,6 +566,10 @@ export function renderEmailHtml(order, opts = {}) {
                       <td style="font-size:14px;color:#475569;padding:4px 0;font-family:${fontStack};">Balance remaining</td>
                       <td align="right" style="font-size:14px;font-weight:600;color:${colors.warning};padding:4px 0;font-family:${fontStack};font-variant-numeric:tabular-nums;">${escapeHtml(formatMoney(balance, currency))}${balanceDueDate ? ' by ' + escapeHtml(formatDateShort(balanceDueDate)) : ''}</td>
                     </tr>` : ''}
+                    ${(depositPaid != null && depositPaid > 0 && (balance == null || balance <= 0) && totalCost != null && Math.round((totalCost - depositPaid) * 100) / 100 <= 0) ? `
+                    <tr>
+                      <td colspan="2" style="text-align:center;padding:10px 0 2px;font-size:14px;font-weight:700;color:${colors.success};font-family:${fontStack};"><span style="color:${colors.success};font-size:16px;">&#9679;</span>&nbsp; Paid in full — thank you</td>
+                    </tr>` : ''}
                   </table>
                 </td>
               </tr>
