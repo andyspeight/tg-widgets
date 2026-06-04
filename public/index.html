@@ -93,14 +93,14 @@ a{text-decoration:none;color:inherit}
 .w-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);border-color:#D1D5DB;transform:translateY(-3px)}
 .w-card-preview{height:200px;background:var(--bg);border-bottom:1px solid var(--bd);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
 .w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px}
-.w-card-body{padding:18px 20px}
+.w-card-body{padding:18px 20px 20px}
 .w-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
 .w-card-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .w-card-logo svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .w-card-name{font-size:16px;font-weight:700;line-height:1.2}
 .w-card-cat{font-size:11px;font-weight:600;color:var(--mt);margin-top:2px}
 .w-card-desc{font-size:13px;color:var(--sb);line-height:1.5;margin-bottom:14px}
-.w-card-actions{display:flex;gap:8px}
+.w-card-actions{display:flex;gap:8px;margin-top:16px}
 .w-card-btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--ft);cursor:pointer;transition:all .15s;border:none;display:flex;align-items:center;gap:5px}
 .w-card-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .btn-create{background:var(--br);color:#fff}.btn-create:hover{background:var(--bk)}
@@ -692,21 +692,6 @@ const WIDGETS = [
     scriptFile: 'widget-newsletter.js',
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
-  {
-    id: 'loader',
-    name: 'Loader',
-    airtableType: 'Loader',  // matches Airtable WidgetType singleSelect option
-    description: 'Animated loading graphics for any site — simple bars and spinners plus travel-themed loaders: a plane drawing its flight path, a spinning globe, hopping luggage, a route between map pins and a hot air balloon. Recolour everything, set speed, size, opacity and transparency, embed live or download as GIF, WebM, APNG, MP4 or a PNG sequence.',
-    category: 'Content',
-    status: 'live',
-    icon: {viewBox:'0 0 24 24', paths:'<path d="M21 12a9 9 0 1 1-6.219-8.56"/>'},
-    color: '#0891B2',
-    editorUrl: '/editor-loader',
-    demoUrl: '/demo-loader',
-    widgetTag: 'loader',
-    scriptFile: 'widget-loader.js',
-    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  },
 ];
 
 const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
@@ -1228,7 +1213,7 @@ function renderCatalogue() {
         <p class="w-card-desc">${w.description}</p>
         ${packagePills}
         ${accessBadge}
-        <div class="w-card-actions" style="margin-top:${accessBadge?'8':'0'}px">${actions}</div>
+        <div class="w-card-actions">${actions}</div>
       </div>
     </div>`;
   }).join('');
@@ -1331,13 +1316,12 @@ function getMinTier(widget) {
 
 /* Bridge a registry widget to its Control catalogue product code, which is the
    key entitlements are granted against. Almost always `widget-<id>`, with a
-   few exceptions, and Loader has no catalogue item (never gated). Keep in sync
+   few exceptions. Keep in sync
    with the Control catalogue (tblhT8lhDWVieFxsT). */
 const CATALOGUE_CODE_OVERRIDES = {
   'quote-pdf': 'quote-pdf',
   'logos': 'widget-logo-showcase',
   'event-calendar': 'widget-events',
-  'loader': null,
 };
 function catalogueCodeFor(widget) {
   if (Object.prototype.hasOwnProperty.call(CATALOGUE_CODE_OVERRIDES, widget.id)) {
@@ -1435,19 +1419,6 @@ function loadMiniPreview(w) {
   const el = document.createElement('div');
   el.setAttribute('data-tg-widget', w.widgetTag);
   container.appendChild(el);
-
-  if (w.id === 'loader' && window.TGLoaderWidget) {
-    new window.TGLoaderWidget(el, {
-      template: 'plane-path',
-      size: 124,
-      speed: 1,
-      colors: { primary: w.color, secondary: '#1B2B5B', track: '#E2E8F0' },
-      background: 'transparent',
-      label: 'Finding your best deals',
-      labelColor: '#64748B',
-      labelSize: 13,
-    });
-  }
 
   if (w.id === 'pricing' && window.TGPricingWidget) {
     new window.TGPricingWidget(el, {
@@ -3309,7 +3280,6 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-newsletter.js"></script>
 <script src="/widget-contact.js"></script>
 <script src="/widget-team.js"></script>
-<script src="/widget-loader.js"></script>
 
 <!-- Staff act-as-client switcher (self-gating: only renders for Travelgenix staff) -->
 <script defer src="/staff-switcher.js"></script>
