@@ -17,7 +17,6 @@ import { getRecord, listAllRecords } from '../_lib/auth/airtable.js';
 import {
   USERS, CLIENTS, PACKAGES, PRODUCTS, CATALOGUE, CLIENT_ENTITLEMENTS,
 } from '../_lib/auth/schema.js';
-import { isStaffEmail } from '../_lib/auth/staff.js';
 
 export default async function handler(req, res) {
   if (setCors(req, res)) return;
@@ -49,11 +48,13 @@ export default async function handler(req, res) {
   // their current client (intersection of their per-product permissions
   // with the client's enabled entitlements). Each entry: { slug, name, role }.
   let accessibleProducts = [];
+  // Per-widget catalogue codes the client is entitled to (enabled). Drives the
+  // widget dashboard's show-and-tag lock so it mirrors Control exactly.
+  let entitledWidgetCodes = [];
 
-  let userRec = null;
   try {
     if (ctx.userRecordId) {
-      userRec = await getRecord(USERS.tableId, ctx.userRecordId);
+      const userRec = await getRecord(USERS.tableId, ctx.userRecordId);
       lastLogin = userRec.fields[USERS.fields.lastLogin] || null;
     }
   } catch {}
@@ -78,33 +79,32 @@ export default async function handler(req, res) {
         listAllRecords(CLIENT_ENTITLEMENTS.tableId),
       ]);
 
-      // Product slug → { slug, name }, and the set of ACTIVE product slugs.
+      // Map productRecordId → { slug, name } for friendly rendering
+      const productInfoByRecordId = new Map();
       const productInfoBySlug = new Map();
-      const activeSlugs = new Set();
       for (const p of products) {
         const slug = p.fields[PRODUCTS.fields.productId];
-        if (!slug) continue;
-        const name = p.fields[PRODUCTS.fields.displayName] || slug;
-        productInfoBySlug.set(slug, { slug, name });
-        if (p.fields[PRODUCTS.fields.status] === 'active') activeSlugs.add(slug);
+        const name = p.fields[PRODUCTS.fields.displayName] || slug || '';
+        if (slug) {
+          const info = { slug, name };
+          productInfoByRecordId.set(p.id, info);
+          productInfoBySlug.set(slug, info);
+        }
       }
 
-      // Map catalogueId → product slug (the Control → launchpad bridge).
-      // Skip INACTIVE catalogue items. A client can carry a stale enabled
-      // entitlement row for a product that was later switched off in the
-      // catalogue (package-seeded at onboarding, then deactivated). Those must
-      // not surface as launchpad tiles. The Catalogue tab's Active flag is the
-      // single gate, and the Entitlements tab already honours it (get.js).
+      // Map catalogueId → product slug, and catalogueId → product code
       const slugByCatalogueId = new Map();
+      const codeByCatalogueId = new Map();
       for (const c of catalogue) {
-        if (!c.fields[CATALOGUE.fields.active]) continue;
-        const ps = c.fields[CATALOGUE.fields.productSlug];
-        const slug = typeof ps === 'string' ? ps : (ps && ps.name) || '';
+        const slug = c.fields[CATALOGUE.fields.productSlug];
         if (slug) slugByCatalogueId.set(c.id, slug);
+        const code = c.fields[CATALOGUE.fields.productCode];
+        if (code) codeByCatalogueId.set(c.id, code);
       }
 
-      // Slugs the client is currently entitled to. Control is the source of truth.
+      // Slugs (product-level) and codes (per-widget) the client is entitled to
       const entitledSlugs = new Set();
+      const entitledCodes = new Set();
       for (const ent of entitlements) {
         const linked = ent.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
         if (!linked.includes(client.recordId)) continue;
@@ -113,42 +113,23 @@ export default async function handler(req, res) {
         for (const cId of cats) {
           const slug = slugByCatalogueId.get(cId);
           if (slug) entitledSlugs.add(slug);
+          const code = codeByCatalogueId.get(cId);
+          if (code) entitledCodes.add(code);
         }
       }
+      entitledWidgetCodes = [...entitledCodes];
 
-      // Travelgenix staff in their OWN account see every active product. Staff
-      // ACTING AS a client (the active client is not one of their linked
-      // clients) and ordinary client users both see the client's entitled
-      // products, so the launchpad mirrors Control exactly. This replaces the
-      // old permission ∩ entitlement intersection, which gated the launchpad
-      // on the signed-in user's own permissions and so never matched Control.
-      const linkedClientIds = (userRec?.fields?.[USERS.fields.client] || [])
-        .map((x) => (typeof x === 'string' ? x : x && x.id))
-        .filter(Boolean);
-      const staff = isStaffEmail(ctx.email || '');
-      const impersonating = !linkedClientIds.includes(client.recordId);
-
-      let launchSlugs;
-      if (staff && !impersonating) {
-        launchSlugs = Array.from(activeSlugs);
-      } else if (entitledSlugs.size > 0) {
-        launchSlugs = Array.from(entitledSlugs).filter((s) => productInfoBySlug.has(s));
-      } else {
-        // Safety net: this client has no entitlements seeded yet. Fall back to
-        // the user's permission products so the launchpad is not blank while
-        // the client is being set up in Control.
-        launchSlugs = (ctx.permissions || []).map((p) => p.product);
-      }
-
+      // Intersect with the user's permissions
       const seen = new Set();
-      for (const slug of launchSlugs) {
-        if (!slug || seen.has(slug)) continue;
-        seen.add(slug);
-        const info = productInfoBySlug.get(slug);
+      for (const perm of (ctx.permissions || [])) {
+        if (!entitledSlugs.has(perm.product)) continue;
+        if (seen.has(perm.product)) continue;
+        seen.add(perm.product);
+        const info = productInfoBySlug.get(perm.product);
         accessibleProducts.push({
-          slug,
-          name: info ? info.name : slug,
-          role: ctx.role || 'member',
+          slug: perm.product,
+          name: info ? info.name : perm.product,
+          role: perm.role,
         });
       }
     } catch (err) {
@@ -175,5 +156,6 @@ export default async function handler(req, res) {
       expiresAt: p.expiresAt || null
     })),
     accessibleProducts,
+    entitledWidgetCodes,
   });
 }
