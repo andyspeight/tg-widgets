@@ -1,23 +1,22 @@
 /**
  * POST /api/admin/clients/upload-logo
  *
- * Vercel Blob client-upload token route for agency logos set on the Control
- * client-detail Branding tab. Mirrors api/upload-pdf.js: the browser uploads
- * the (already resized + PNG-converted) image DIRECTLY to Blob using a
- * short-lived token this route mints, so the bytes never pass through the
- * function body and we sidestep Vercel's 4.5MB request-body limit.
+ * Stores an agency logo for the Control Branding tab. The browser rasterises
+ * the chosen image (including SVG) down to a small PNG and POSTs it here as a
+ * base64 data URL. This route decodes it and writes it to Vercel Blob with a
+ * SERVER-SIDE put().
  *
- * Flow:
- *   1. Browser calls upload(pathname, file, { handleUploadUrl: '/api/admin/clients/upload-logo' })
- *   2. The SDK POSTs a "generate client token" request to THIS route.
- *   3. onBeforeGenerateToken restricts uploads to images under the size cap,
- *      scoped to the client-logos/ prefix.
- *   4. The browser uploads the file to Blob with the returned token.
+ * Why server-side put (not the client-upload token flow used by upload-pdf.js):
+ * logos are tiny (<=480px PNG), so they sit far under Vercel's request-body
+ * limit. Posting the bytes here and writing to Blob server-side avoids the
+ * browser's cross-origin PUT to blob.vercel-storage.com — that PUT was being
+ * rejected (400) without CORS headers, so the client SDK could not read the
+ * error and the upload stalled. This path has no cross-origin step and returns
+ * a clean, readable error on failure.
  *
- * Auth: the token request is gated to Travelgenix staff (widget_suite owner or
- * admin) via the same-origin tg_session cookie. The upload-completed webhook
- * from Vercel carries no cookie and is verified by handleUpload itself, so it
- * must NOT be gated behind auth.
+ * Auth: widget_suite owner or admin (Travelgenix staff).
+ * Body: { id?: 'recXXX', dataUrl: 'data:image/png;base64,...' }
+ * Returns: { ok: true, url }
  *
  * Requires BLOB_READ_WRITE_TOKEN (set automatically when a Blob store is
  * connected to the project).
@@ -25,71 +24,82 @@
 
 import { requireAuth, requireProductAccess } from '../../_lib/auth/middleware.js';
 import { setCors, applyRateLimit, RATE_LIMITS } from '../../_auth.js';
+import { jsonError } from '../../_lib/auth/http.js';
 import { PRODUCTS, PERMISSIONS } from '../../_lib/auth/schema.js';
 
-const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB cap (logos are tiny after client-side resize)
-// The browser rasterises every logo (including SVG) to PNG before upload, so
-// only raster types are accepted here. Raw SVG is never stored.
-const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
+const MAX_BYTES = 2 * 1024 * 1024; // 2 MB cap after browser-side resize
+const DATA_URL_RE = /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/;
 
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') return jsonError(res, 405, 'method_not_allowed', 'POST only');
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     console.error('[upload-logo] BLOB_READ_WRITE_TOKEN not set');
-    return res.status(500).json({ error: 'Storage not configured' });
+    return jsonError(res, 500, 'storage_unconfigured', 'Storage not configured');
   }
+
+  const ctx = await requireAuth(req, res);
+  if (!ctx) return;
+  const role = requireProductAccess(
+    ctx,
+    PRODUCTS.slugs.WIDGET_SUITE,
+    [PERMISSIONS.roles.OWNER, PERMISSIONS.roles.ADMIN],
+    res
+  );
+  if (!role) return;
+  const who = (ctx.email || '').toLowerCase().trim() || 'staff';
+  if (!applyRateLimit(res, `uploadlogo:${who}`, RATE_LIMITS.widgetWrite)) return;
 
   let body;
   try {
     body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
   } catch {
-    return res.status(400).json({ error: 'Invalid request body' });
+    return jsonError(res, 400, 'invalid_json', 'Body must be JSON');
   }
 
-  // Gate the browser's token request to staff. The Vercel upload-completed
-  // webhook (body.type === 'blob.upload-completed') has no cookie and is
-  // verified cryptographically by handleUpload, so don't gate that one.
-  if (body && body.type === 'blob.generate-client-token') {
-    const ctx = await requireAuth(req, res);
-    if (!ctx) return; // middleware wrote the 401
-    const role = requireProductAccess(
-      ctx,
-      PRODUCTS.slugs.WIDGET_SUITE,
-      [PERMISSIONS.roles.OWNER, PERMISSIONS.roles.ADMIN],
-      res
-    );
-    if (!role) return; // requireProductAccess wrote the 403
-    const who = (ctx.email || '').toLowerCase().trim() || 'staff';
-    if (!applyRateLimit(res, `uploadlogo:${who}`, RATE_LIMITS.widgetWrite)) return;
+  const id = String(body.id || '').trim();
+  if (id && !REC_ID_RE.test(id)) {
+    return jsonError(res, 400, 'invalid_id', 'id must be a valid record id');
   }
+
+  const m = DATA_URL_RE.exec(String(body.dataUrl || ''));
+  if (!m) return jsonError(res, 400, 'invalid_image', 'Expected a PNG, JPEG or WebP image');
+  const contentType = m[1];
+
+  let buffer;
+  try {
+    buffer = Buffer.from(m[2], 'base64');
+  } catch {
+    return jsonError(res, 400, 'invalid_image', 'Could not decode the image');
+  }
+  if (!buffer.length) return jsonError(res, 400, 'invalid_image', 'The image was empty');
+  if (buffer.length > MAX_BYTES) {
+    return jsonError(res, 400, 'too_large', 'Logo must be 2MB or smaller after processing');
+  }
+
+  // Magic-byte check so the declared type matches the actual bytes.
+  const okMagic =
+    (contentType === 'image/png'  && buffer.length > 8  && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) ||
+    (contentType === 'image/jpeg' && buffer.length > 3  && buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) ||
+    (contentType === 'image/webp' && buffer.length > 12 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP');
+  if (!okMagic) return jsonError(res, 400, 'invalid_image', 'That does not look like a valid image');
+
+  const ext = contentType === 'image/jpeg' ? 'jpg' : (contentType === 'image/webp' ? 'webp' : 'png');
+  const pathname = `client-logos/${id || 'logo'}-${Date.now()}.${ext}`;
 
   try {
-    const { handleUpload } = await import('@vercel/blob/client');
-    const jsonResponse = await handleUpload({
-      body,
-      request: req,
-      onBeforeGenerateToken: async (pathname) => {
-        if (typeof pathname !== 'string' || pathname.indexOf('client-logos/') !== 0) {
-          throw new Error('Invalid upload path');
-        }
-        return {
-          allowedContentTypes: ALLOWED_TYPES,
-          maximumSizeInBytes: MAX_LOGO_BYTES,
-          addRandomSuffix: true,
-        };
-      },
-      // The browser stores the returned URL in the Branding form and persists
-      // it via update-branding on Save, so no server post-processing is needed.
-      onUploadCompleted: async () => {},
+    const { put } = await import('@vercel/blob');
+    const blob = await put(pathname, buffer, {
+      access: 'public',
+      addRandomSuffix: true,
+      contentType,
     });
-    return res.status(200).json(jsonResponse);
+    return res.status(200).json({ ok: true, url: blob.url });
   } catch (err) {
-    console.error('[upload-logo] handleUpload failed:', err?.message);
-    const msg = err?.message || 'Upload failed';
-    const status = /path|content type|size|token/i.test(msg) ? 400 : 500;
-    return res.status(status).json({ error: msg });
+    console.error('[upload-logo] put failed:', err?.message);
+    return jsonError(res, 500, 'internal_error', 'Failed to store the logo');
   }
 }
