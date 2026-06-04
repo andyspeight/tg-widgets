@@ -3,6 +3,13 @@
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
  *
+ * v1.9.0 changes:
+ *   - Amendment requests: customers can send the travel company a free-text
+ *     change request (date change, name correction, room/seat preference).
+ *     It does NOT change the booking — the widget says so clearly. Gated by
+ *     the new "Online amendments" toggle (on by default). 1000-char cap,
+ *     validated client + server. New endpoint: /api/amend-order.
+ *
  * v1.8.0 changes:
  *   - Flight info now shows the flight date, flight number(s) and an
  *     overnight "+1" arrival marker; baggage reads from any segment.
@@ -156,7 +163,9 @@
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
   const API_CANCEL = (typeof window !== 'undefined' && window.__TG_CANCEL_API__) || (API_BASE + '/api/cancel-product');
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
-  const VERSION = '1.8.0';
+  const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
+  const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
+  const VERSION = '1.9.0';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -174,6 +183,8 @@
     file:    'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6',
     dl:      'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
     print:   'M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z',
+    edit:    'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z',
+    send:    'M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z',
     home:    'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
     info:    'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 8v4M12 16h.01',
     coin:    'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
@@ -694,6 +705,36 @@
     .tgm-cancel-spin .tgm-spinner { width: 32px; height: 32px; border: 3px solid var(--tgm-border); border-top-color: var(--tgm-primary); border-radius: 50%; animation: tgm-spin .7s linear infinite; }
     @keyframes tgm-spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { .tgm-cancel-spin .tgm-spinner { animation-duration: 2s; } }
+
+    /* ===== Amendment request section ===== */
+    .tgm-amend-sec { margin-top: 16px; border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); overflow: hidden; }
+    .tgm-amend-head { padding: 16px 20px; background: var(--tgm-bg-2); border-bottom: 1px solid var(--tgm-border); }
+    .tgm-amend-head h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--tgm-text); display: flex; align-items: center; gap: 8px; }
+    .tgm-amend-head h3 svg { width: 17px; height: 17px; flex-shrink: 0; color: var(--tgm-text-2); }
+    .tgm-amend-head p { margin: 4px 0 0; font-size: 13px; color: var(--tgm-text-3); line-height: 1.45; }
+    .tgm-amend-body { padding: 16px 20px; }
+    .tgm-amend-open { height: 40px; padding: 0 16px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); font-family: inherit; font-size: 14px; font-weight: 600; color: var(--tgm-text); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all .15s; }
+    .tgm-amend-open:hover { border-color: var(--tgm-accent); }
+    .tgm-amend-open svg { width: 15px; height: 15px; color: var(--tgm-accent); }
+    .tgm-amend-label { display: block; font-size: 13px; font-weight: 500; color: var(--tgm-text-2); margin-bottom: 6px; }
+    .tgm-amend-input { width: 100%; min-height: 96px; resize: vertical; padding: 12px 14px; font-family: inherit; font-size: 15px; line-height: 1.5; color: var(--tgm-text); background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); box-sizing: border-box; transition: border-color .15s, box-shadow .15s; }
+    .tgm-amend-input:focus { outline: 0; border-color: var(--tgm-accent); box-shadow: 0 0 0 3px rgba(0,180,216,.18); }
+    .tgm-amend-foot { display: flex; justify-content: flex-end; margin-top: 6px; }
+    .tgm-amend-count { font-size: 12px; color: var(--tgm-text-3); font-variant-numeric: tabular-nums; }
+    .tgm-amend-count.tgm-near { color: #D97706; }
+    .tgm-amend-note { font-size: 12.5px; color: var(--tgm-text-3); line-height: 1.45; margin-top: 10px; }
+    .tgm-amend-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .tgm-amend-cancel { height: 44px; padding: 0 18px; background: transparent; border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); color: var(--tgm-text-2); font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; transition: background .15s; }
+    .tgm-amend-cancel:hover { background: var(--tgm-border-light); }
+    .tgm-amend-submit { flex: 1; height: 44px; padding: 0 18px; background: var(--tgm-primary); border: none; border-radius: var(--tgm-radius-md); color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, opacity .15s; }
+    .tgm-amend-submit:hover:not(:disabled) { background: var(--tgm-primary-light); }
+    .tgm-amend-submit:disabled { opacity: .5; cursor: not-allowed; }
+    .tgm-amend-submit svg { width: 16px; height: 16px; }
+    .tgm-amend-done { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--tgm-bg-2); border: 1px solid var(--tgm-border-light); border-radius: var(--tgm-radius-md); }
+    .tgm-amend-done-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--tgm-success); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tgm-amend-done-icon svg { width: 16px; height: 16px; }
+    .tgm-amend-done-text { font-size: 13.5px; color: var(--tgm-text); line-height: 1.5; }
+    .tgm-amend-done-text strong { display: block; margin-bottom: 2px; }
 
     /* ----- Pay balance ----- */
     .tgm-pay-action { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--tgm-border-light); }
@@ -1798,6 +1839,44 @@
       <div data-tgm-cancel-mount></div>`;
   }
 
+  // Amendment request section. Sends the travel company a free-text request to
+  // change the booking — it does NOT change anything itself, so the copy is
+  // careful to say so. Whole-order (no per-product id), one step.
+  function renderAmendSection(order, c) {
+    if (c.display?.showAmend === false) return '';
+    const title = c.labels?.amendSecTitle || 'Need to change something?';
+    const sub = c.labels?.amendSecSub || "Tell us what you'd like to change and we'll pass it to the team. Nothing on your booking changes until they confirm it.";
+    const openLabel = c.labels?.amendOpen || 'Request a change';
+    const fieldLabel = c.labels?.amendFieldLabel || 'What would you like to change?';
+    const placeholder = c.labels?.amendPlaceholder || 'For example a date change, a name correction, or a room or seat preference.';
+    const note = c.labels?.amendNote || "This sends a request only. We'll be in touch to confirm, and your booking won't change straight away.";
+    const submitLabel = c.labels?.amendSubmit || 'Send request';
+    return `
+      <div class="tgm-amend-sec" data-tgm-amend>
+        <div class="tgm-amend-head">
+          <h3>${svg(IC.edit)}${esc(title)}</h3>
+          <p>${esc(sub)}</p>
+        </div>
+        <div class="tgm-amend-body">
+          <button type="button" class="tgm-amend-open" data-tgm-amend-open>${svg(IC.edit)}<span>${esc(openLabel)}</span></button>
+          <div class="tgm-amend-form" data-tgm-amend-form hidden>
+            <label class="tgm-amend-field">
+              <span class="tgm-amend-label">${esc(fieldLabel)}</span>
+              <textarea class="tgm-amend-input" data-tgm-amend-input rows="4" maxlength="${AMEND_MAX}" placeholder="${esc(placeholder)}" aria-label="${esc(fieldLabel)}"></textarea>
+            </label>
+            <div class="tgm-amend-foot"><span class="tgm-amend-count" data-tgm-amend-count>0 / ${AMEND_MAX}</span></div>
+            <div class="tgm-amend-note">${esc(note)}</div>
+            <div class="tgm-amend-actions">
+              <button type="button" class="tgm-amend-cancel" data-tgm-amend-cancel>${esc(c.labels?.amendCancel || 'Cancel')}</button>
+              <button type="button" class="tgm-amend-submit" data-tgm-amend-submit disabled>${svg(IC.send)}<span>${esc(submitLabel)}</span></button>
+            </div>
+            <div data-tgm-amend-error></div>
+          </div>
+          <div data-tgm-amend-result></div>
+        </div>
+      </div>`;
+  }
+
   // Work out the next payment to collect from the ORDER-LEVEL deposit option
   // (order.depositOption.breakdown = the outstanding schedule). Mirrors the
   // server in /api/pay-balance so the displayed amount matches the basket.
@@ -2517,6 +2596,8 @@
 
         ${renderCancelSection(order, c)}
 
+        ${renderAmendSection(order, c)}
+
         ${(c.support?.email || c.support?.phone) ? `
         <div class="tgm-help">
           <div>
@@ -2768,6 +2849,34 @@
       root.querySelectorAll('[data-tgm-cancel-item]').forEach(btn => {
         btn.addEventListener('click', () => this._openCancel(btn.getAttribute('data-item-id')));
       });
+
+      // Amendment request — reveal the box, count characters, submit.
+      const amendOpen = root.querySelector('[data-tgm-amend-open]');
+      if (amendOpen) amendOpen.addEventListener('click', () => {
+        const sec = amendOpen.closest('[data-tgm-amend]');
+        const form = sec && sec.querySelector('[data-tgm-amend-form]');
+        if (!form) return;
+        amendOpen.hidden = true;
+        form.hidden = false;
+        const ta = form.querySelector('[data-tgm-amend-input]');
+        if (ta) { ta.focus(); }
+        this._validateAmend(sec);
+      });
+      const amendInput = root.querySelector('[data-tgm-amend-input]');
+      if (amendInput) amendInput.addEventListener('input', () => this._validateAmend(amendInput.closest('[data-tgm-amend]')));
+      const amendCancelBtn = root.querySelector('[data-tgm-amend-cancel]');
+      if (amendCancelBtn) amendCancelBtn.addEventListener('click', () => {
+        const sec = amendCancelBtn.closest('[data-tgm-amend]');
+        if (!sec) return;
+        const form = sec.querySelector('[data-tgm-amend-form]');
+        const open = sec.querySelector('[data-tgm-amend-open]');
+        const err = sec.querySelector('[data-tgm-amend-error]');
+        if (form) form.hidden = true;
+        if (open) open.hidden = false;
+        if (err) err.innerHTML = '';
+      });
+      const amendSubmit = root.querySelector('[data-tgm-amend-submit]');
+      if (amendSubmit) amendSubmit.addEventListener('click', () => this._submitAmend(amendSubmit.closest('[data-tgm-amend]')));
       // If a cancellation flow was mid-way when the view re-rendered, paint it.
       if (this._cancel && this._cancel.open) this._renderCancelModal();
 
@@ -3140,6 +3249,93 @@
       } finally {
         btn.disabled = false;
         btn.classList.remove('is-loading');
+      }
+    }
+
+    // ----- Amendment request -----
+    // Char counter + enable/disable submit. Native maxlength caps the length;
+    // this just mirrors it in the UI and blocks an empty submit.
+    _validateAmend(sec) {
+      if (!sec) return;
+      const ta = sec.querySelector('[data-tgm-amend-input]');
+      const submit = sec.querySelector('[data-tgm-amend-submit]');
+      const count = sec.querySelector('[data-tgm-amend-count]');
+      if (!ta) return;
+      const len = (ta.value || '').length;
+      const trimmed = (ta.value || '').trim().length;
+      if (count) {
+        count.textContent = `${len} / ${AMEND_MAX}`;
+        count.classList.toggle('tgm-near', len >= AMEND_MAX - 50);
+      }
+      if (submit) submit.disabled = trimmed === 0;
+    }
+
+    // Send the amendment request. On success the form is replaced with a clear
+    // "request sent, nothing changed yet" confirmation. This never modifies the
+    // booking — it only forwards the customer's text to the travel company.
+    async _submitAmend(sec) {
+      if (!sec || !this.lookup || !this.c.widgetId) return;
+      const ta = sec.querySelector('[data-tgm-amend-input]');
+      const submit = sec.querySelector('[data-tgm-amend-submit]');
+      const errMount = sec.querySelector('[data-tgm-amend-error]');
+      const details = ((ta && ta.value) || '').trim();
+      if (!details) return;
+      if (errMount) errMount.innerHTML = '';
+
+      const label = submit && submit.querySelector('span');
+      const prev = label ? label.textContent : '';
+      const showErr = (msg) => {
+        if (errMount) errMount.innerHTML = `<div class="tgm-pay-error">${svg(IC.alert)}<span>${esc(msg)}</span></div>`;
+        if (submit) submit.disabled = false;
+        if (label) label.textContent = prev;
+      };
+
+      if (submit) submit.disabled = true;
+      if (label) label.textContent = this.c.labels?.amendSending || 'Sending…';
+
+      try {
+        const res = await fetch(API_AMEND, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widgetId: this.c.widgetId,
+            emailAddress: this.lookup.email,
+            departDate: this.lookup.date,
+            orderRef: this.lookup.ref,
+            amendmentDetails: details,
+          }),
+        });
+
+        if (res.status === 429) {
+          showErr(this.c.labels?.amendRateLimited || 'Too many attempts. Please wait a few minutes and try again.');
+          return;
+        }
+
+        const data = await res.json().catch(() => null);
+
+        if (data && data.success === true) {
+          const form = sec.querySelector('[data-tgm-amend-form]');
+          const open = sec.querySelector('[data-tgm-amend-open]');
+          const result = sec.querySelector('[data-tgm-amend-result]');
+          if (form) form.hidden = true;
+          if (open) open.hidden = true;
+          if (result) {
+            result.innerHTML = `
+              <div class="tgm-amend-done">
+                <div class="tgm-amend-done-icon">${svg(IC.check)}</div>
+                <div class="tgm-amend-done-text"><strong>${esc(this.c.labels?.amendDoneTitle || 'Request sent')}</strong>${esc(this.c.labels?.amendDoneBody || "We've passed your request to the team. Nothing on your booking has changed yet, and we'll be in touch to confirm.")}</div>
+              </div>`;
+          }
+          this._fireEvent('amend-sent', {});
+          return;
+        }
+
+        // Server-side validation / Travelify error — show its message.
+        if (data && data.error) { showErr(data.error); return; }
+
+        showErr(this.c.labels?.amendFailed || "We couldn't send your request just now. Please try again, or contact us.");
+      } catch (_) {
+        showErr(this.c.labels?.amendFailed || "We couldn't send your request just now. Please try again, or contact us.");
       }
     }
 
