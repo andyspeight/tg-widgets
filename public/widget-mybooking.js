@@ -3,6 +3,13 @@
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
  *
+ * v1.8.0 changes:
+ *   - Flight info now shows the flight date, flight number(s) and an
+ *     overnight "+1" arrival marker; baggage reads from any segment.
+ *   - Payment section shows the full instalment schedule (every payment
+ *     and date), not just the next one, when a plan is set up.
+ *   - Added a Print action alongside Preview / Email / Download.
+ *
  * v1.7.1 changes:
  *   - Cancellation info now follows the cancel toggle: when cancellation is
  *     off, cancellation terms are hidden everywhere (the flight "Fare
@@ -149,7 +156,7 @@
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
   const API_CANCEL = (typeof window !== 'undefined' && window.__TG_CANCEL_API__) || (API_BASE + '/api/cancel-product');
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
-  const VERSION = '1.7.1';
+  const VERSION = '1.8.0';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -166,6 +173,7 @@
     card:    'M2 5h20v14H2zM2 10h20',
     file:    'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6',
     dl:      'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
+    print:   'M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z',
     home:    'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
     info:    'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 8v4M12 16h.01',
     coin:    'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
@@ -543,7 +551,7 @@
     .tgm-countdown strong { color: var(--tgm-accent-dark); font-weight: 700; font-variant-numeric: tabular-nums; }
 
     /* ===== PDF action row — three buttons (Preview + Email + Download) ===== */
-    .tgm-action-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .tgm-action-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
     @media (max-width: 760px) { .tgm-action-row { grid-template-columns: 1fr; } }
     .tgm-action { display: flex; align-items: center; gap: 12px; padding: 16px 18px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); cursor: pointer; text-align: left; font-family: inherit; transition: all .25s cubic-bezier(.2,.7,.2,1); width: 100%; position: relative; }
     .tgm-action:hover:not(:disabled) { border-color: var(--tgm-accent); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04); }
@@ -839,6 +847,13 @@
     .tgm-leg { padding: 16px 0; border-top: 1px solid var(--tgm-border-light); }
     .tgm-leg:first-of-type { border-top: none; padding-top: 0; }
     .tgm-leg-dir { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; background: var(--tgm-bg-2); border-radius: 9999px; font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--tgm-text-2); margin-bottom: 12px; }
+    .tgm-leg-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .tgm-leg-head .tgm-leg-dir { margin-bottom: 0; }
+    .tgm-leg-head { margin-bottom: 12px; }
+    .tgm-leg-date { font-size: 12px; font-weight: 600; color: var(--tgm-text-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .tgm-leg-plus { font-size: 11px; font-weight: 600; color: var(--tgm-accent); margin-left: 1px; }
+    .tgm-inst.is-next { background: var(--tgm-bg-2); }
+    .tgm-inst .tgm-inst-tag { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--tgm-accent); margin-left: 8px; }
     .tgm-leg-route { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
     .tgm-leg-end { min-width: 0; }
     .tgm-leg-end.dest { text-align: right; }
@@ -1160,15 +1175,43 @@
     const last = segs[segs.length - 1];
     const stops = segs.length - 1;
 
-    const baggage = first.baggage?.allowance || first.baggage?.weight || '';
+    // Baggage can sit on any segment, not only the first.
+    const bagSeg = segs.find(s => s.baggage && (s.baggage.allowance || s.baggage.weight));
+    const baggage = bagSeg ? (bagSeg.baggage.allowance || bagSeg.baggage.weight) : '';
     const cabin = first.cabinClass || '';
     const fareName = first.fareName || '';
 
+    // Flight number(s), e.g. "BA2629". Skip values that already carry a letter
+    // prefix (avoid "BABA2629"); de-duplicate across segments.
+    const flightNos = [];
+    for (const s of segs) {
+      const no = (s.flightNo || '').toString().trim();
+      if (!no) continue;
+      const code = (s.marketingCarrier?.code || '').toString().trim();
+      const label = /[A-Za-z]/.test(no) ? no : (code ? code + no : no);
+      if (label && !flightNos.includes(label)) flightNos.push(label);
+    }
+    const flightNoLabel = flightNos.join(' · ');
+
     const flightMins = segs.reduce((acc, s) => acc + (typeof s.duration === 'number' ? s.duration : 0), 0);
+
+    // Leg date + overnight offset (arrival on a later calendar day → "+1").
+    const legDate = first.depart ? fmtDate(first.depart) : '';
+    let dayOffset = 0;
+    const d0 = first.depart ? new Date(first.depart) : null;
+    const d1 = last.arrive ? new Date(last.arrive) : null;
+    if (d0 && d1 && !isNaN(d0.getTime()) && !isNaN(d1.getTime())) {
+      const diff = Math.round((Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate())
+        - Date.UTC(d0.getFullYear(), d0.getMonth(), d0.getDate())) / 86400000);
+      if (diff > 0) dayOffset = diff;
+    }
 
     return `
       <div class="tgm-leg">
-        <div class="tgm-leg-dir">${esc(route.direction || 'Flight')}</div>
+        <div class="tgm-leg-head">
+          <span class="tgm-leg-dir">${esc(route.direction || 'Flight')}</span>
+          ${legDate ? `<span class="tgm-leg-date">${esc(legDate)}</span>` : ''}
+        </div>
         <div class="tgm-leg-route">
           <div class="tgm-leg-end">
             <div class="tgm-leg-time">${esc(fmtTime(first.depart))}</div>
@@ -1181,12 +1224,13 @@
             <div class="tgm-leg-stops">${stops === 0 ? 'Direct' : `${stops} ${stops === 1 ? 'stop' : 'stops'}`}</div>
           </div>
           <div class="tgm-leg-end dest">
-            <div class="tgm-leg-time">${esc(fmtTime(last.arrive))}</div>
+            <div class="tgm-leg-time">${esc(fmtTime(last.arrive))}${dayOffset > 0 ? `<sup class="tgm-leg-plus">+${dayOffset}</sup>` : ''}</div>
             <div class="tgm-leg-iata">${esc(last.destination?.iataCode || '')}${last.destination?.terminal ? ` · T${esc(last.destination.terminal)}` : ''}</div>
             <div class="tgm-leg-airport" title="${esc(last.destination?.name || '')}">${esc(last.destination?.name || '')}</div>
           </div>
         </div>
         <div class="tgm-leg-meta">
+          ${flightNoLabel ? `<span class="tgm-leg-meta-item">${svg(IC.plane, 2, 14)}<span>${esc(flightNoLabel)}</span></span>` : ''}
           ${cabin ? `<span class="tgm-leg-meta-item">${svg(IC.user, 2, 14)}<span><strong>${esc(cabin)}</strong>${fareName ? ` · ${esc(fareName)}` : ''}</span></span>` : ''}
           ${baggage ? `<span class="tgm-leg-meta-item">${svg(IC.bag, 2, 14)}<span>${esc(baggage)}</span></span>` : ''}
         </div>
@@ -1776,6 +1820,18 @@
     };
   }
 
+  // Full payment schedule (all scheduled instalments, earliest first) from the
+  // order-level depositOption.breakdown — the same source computeNextDue reads.
+  // Used to show the whole plan, not just the next payment.
+  function computeSchedule(order) {
+    const dep = order && order.depositOption;
+    const bd = dep && Array.isArray(dep.breakdown) ? dep.breakdown : [];
+    return bd
+      .map(b => ({ amount: Number(b.amount), dueDate: b.dueDate || '', due: Date.parse(b.dueDate) }))
+      .filter(e => Number.isFinite(e.amount) && e.amount > 0)
+      .sort((a, b) => (Number.isFinite(a.due) ? a.due : Infinity) - (Number.isFinite(b.due) ? b.due : Infinity));
+  }
+
   // Authoritative "what's still owed" = total holiday cost − payments taken.
   // The depositOption.breakdown is only a SCHEDULE (Travelify leaves it in
   // place after a payment), so we never treat its sum as the balance — we use
@@ -2074,6 +2130,15 @@
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
           </button>
+          <button type="button" class="tgm-action" data-tgm-pdf-print>
+            <div class="tgm-action-icon">${svg(IC.print)}</div>
+            <div class="tgm-action-text">
+              <div class="tgm-action-title">${esc(c.labels?.actionPrint || 'Print')}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionPrintSub || 'Open a printable copy')}</div>
+            </div>
+            <div class="tgm-action-loader" aria-hidden="true"></div>
+            ${svg(IC.arrow)}
+          </button>
         </div>
         <div data-tgm-pdf-viewer-mount></div>
         <div data-tgm-modal-mount></div>
@@ -2213,7 +2278,21 @@
               if (outstanding > 0) {
                 rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || 'Balance remaining')}</span><span class="v due">${esc(fmtMoney(outstanding, currency))}</span></div>`;
                 const next = computeNextDue(order);
-                if (next && next.dueDate) {
+                const sched = computeSchedule(order);
+                // Instalment plan: show the whole schedule (unless the
+                // accommodation pricing already provided an installPlan block
+                // below, to avoid showing it twice). Otherwise just the next due.
+                if (next && next.isInstalment && !installPlan && sched.length > 1) {
+                  rows += `<div class="tgm-pay-sched">
+                    <div class="tgm-pay-sched-title">${esc(c.labels?.paymentSchedule || 'Payment schedule')} · ${sched.length} ${esc(c.labels?.payments || 'payments')}</div>
+                    ${sched.map((b, i) => `
+                      <div class="tgm-inst${i === 0 ? ' is-next' : ''}">
+                        <span class="date">${esc(fmtDate(b.dueDate))}${i === 0 ? `<span class="tgm-inst-tag">${esc(c.labels?.next || 'Next')}</span>` : ''}</span>
+                        <span class="amt">${esc(fmtMoney(b.amount, currency))}</span>
+                      </div>
+                    `).join('')}
+                  </div>`;
+                } else if (next && next.dueDate) {
                   rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.nextDueDate || 'Next payment due')}</span><span class="v">${esc(fmtDate(next.dueDate))}</span></div>`;
                 }
               } else if (paid > 0) {
@@ -2681,6 +2760,8 @@
       if (downloadBtn) downloadBtn.addEventListener('click', () => this._handlePdfDownload(downloadBtn));
       const emailBtn = root.querySelector('[data-tgm-pdf-email]');
       if (emailBtn) emailBtn.addEventListener('click', () => this._handleEmailOpen(emailBtn));
+      const printBtn = root.querySelector('[data-tgm-pdf-print]');
+      if (printBtn) printBtn.addEventListener('click', () => this._handlePdfPrint(printBtn));
 
       // Per-product cancel buttons. Each opens the policy → confirm modal for
       // that single item id.
@@ -3018,6 +3099,44 @@
 
         this._showToast('success', 'PDF downloaded', filename, 4000);
         this._fireEvent('pdf-downloaded', { filename });
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+      }
+    }
+
+    // Print — reuses the same booking-pack PDF. Opens it in a new tab and asks
+    // the browser to print. If pop-ups are blocked we tell the customer rather
+    // than failing silently. (window.open here is inside a click handler, so
+    // it counts as a user gesture and is normally allowed.)
+    async _handlePdfPrint(btn) {
+      if (btn.disabled) return;
+
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+
+      try {
+        const blob = await this._ensurePdfBlob();
+        if (!blob) return;
+
+        const url = URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+
+        if (!win) {
+          this._showToast('info', 'Allow pop-ups to print', 'Or use Download, then print the saved PDF.', 6000);
+          setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} }, 1000);
+          return;
+        }
+
+        // Best-effort: open the print dialog once the PDF has loaded. The load
+        // event is unreliable for PDF documents, so we also try on a timer. If
+        // neither fires the customer still has the PDF open to print manually.
+        const triggerPrint = () => { try { win.focus(); win.print(); } catch {} };
+        try { win.addEventListener('load', triggerPrint); } catch {}
+        setTimeout(triggerPrint, 1200);
+
+        setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} }, 60000);
+        this._fireEvent('pdf-print', {});
       } finally {
         btn.disabled = false;
         btn.classList.remove('is-loading');
