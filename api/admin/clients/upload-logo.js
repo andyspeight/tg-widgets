@@ -18,8 +18,8 @@
  * Body: { id?: 'recXXX', dataUrl: 'data:image/png;base64,...' }
  * Returns: { ok: true, url }
  *
- * Requires BLOB_READ_WRITE_TOKEN (set automatically when a Blob store is
- * connected to the project).
+ * Requires TG_Blob_READ_WRITE_TOKEN (the public Blob store's read-write token).
+ * Falls back to BLOB_READ_WRITE_TOKEN if the public token is not present.
  */
 
 import { requireAuth, requireProductAccess } from '../../_lib/auth/middleware.js';
@@ -36,8 +36,12 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return jsonError(res, 405, 'method_not_allowed', 'POST only');
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    console.error('[upload-logo] BLOB_READ_WRITE_TOKEN not set');
+  // Use the PUBLIC Blob store token. The default BLOB_READ_WRITE_TOKEN on this
+  // project is locked to a PRIVATE store, which rejects access:'public' writes,
+  // so logos write via the dedicated public-store token (TG_Blob_READ_WRITE_TOKEN).
+  const blobToken = process.env.TG_Blob_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+  if (!blobToken) {
+    console.error('[upload-logo] No Blob read-write token set');
     return jsonError(res, 500, 'storage_unconfigured', 'Storage not configured');
   }
 
@@ -96,6 +100,7 @@ export default async function handler(req, res) {
       access: 'public',
       addRandomSuffix: true,
       contentType,
+      token: blobToken,
     });
     return res.status(200).json({ ok: true, url: blob.url });
   } catch (err) {
