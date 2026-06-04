@@ -1081,18 +1081,9 @@
         : `<span style="font-size:12px;color:#94a3b8;">No logo</span>`;
     }
 
-    // Lazy-load the Vercel Blob client SDK (ESM from CDN). The Control pages
-    // carry no CSP, so the CDN import, the upload and blob images are allowed.
-    let _logoBlobClient = null;
-    async function getLogoBlobClient() {
-      if (_logoBlobClient) return _logoBlobClient;
-      _logoBlobClient = await import('https://esm.sh/@vercel/blob@0.27.0/client');
-      return _logoBlobClient;
-    }
-
-    // Resize + flatten to PNG in the browser so every uploaded logo lands as a
-    // tidy, transparent PNG no bigger than 480px on its longest side. SVGs are
-    // passed through untouched (they scale themselves).
+    // Rasterise raster AND svg to a small PNG data URL, max 480px on the long
+    // side. We POST this to our own endpoint (which writes it to Blob), so
+    // there is no cross-origin upload to stall.
     function convertLogoToPng(file) {
       return new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
@@ -1115,7 +1106,10 @@
           const ctx = canvas.getContext('2d');
           ctx.clearRect(0, 0, w, h);
           ctx.drawImage(img, 0, 0, w, h);
-          canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Could not process image')), 'image/png');
+          let dataUrl;
+          try { dataUrl = canvas.toDataURL('image/png'); }
+          catch { reject(new Error('Could not process that image')); return; }
+          resolve(dataUrl);
         };
         img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that image')); };
         img.src = url;
@@ -1140,22 +1134,15 @@
       setHint('Optimising and uploading…');
 
       try {
-        // Rasterise everything (raster AND svg) to a tidy PNG. This normalises
-        // the format, keeps files small, and avoids storing raw SVG.
-        const png = await convertLogoToPng(file);
-        const { upload } = await getLogoBlobClient();
-        const pathname = 'client-logos/' + clientData.client.id + '-' + Date.now() + '.png';
-        const blob = await withTimeout(
-          upload(pathname, png, {
-            access: 'public',
-            contentType: 'image/png',
-            handleUploadUrl: '/api/admin/clients/upload-logo',
-          }),
-          30000,
-          'Upload timed out — check your connection and try again'
-        );
-        $('brand-logo').value = blob.url;
-        setLogoThumb(blob.url);
+        // Rasterise to a small PNG, then POST it to our endpoint, which writes
+        // it to Blob server-side. No cross-origin PUT, so nothing to stall.
+        const dataUrl = await convertLogoToPng(file);
+        const data = await apiCall('/api/admin/clients/upload-logo', {
+          method: 'POST',
+          body: JSON.stringify({ id: clientData.client.id, dataUrl }),
+        });
+        $('brand-logo').value = data.url;
+        setLogoThumb(data.url);
         const rm = $('brand-logo-remove'); if (rm) rm.hidden = false;
         updateBrandingPreview();
         setHint('Uploaded. Click Save branding to apply it.');
@@ -1167,12 +1154,6 @@
       } finally {
         if (uploadBtn) { uploadBtn.disabled = false; uploadBtn.textContent = 'Upload logo'; }
       }
-    }
-
-    function withTimeout(promise, ms, msg) {
-      let t;
-      const timeout = new Promise((_, reject) => { t = setTimeout(() => reject(new Error(msg)), ms); });
-      return Promise.race([promise, timeout]).finally(() => clearTimeout(t));
     }
 
     async function saveBranding() {
