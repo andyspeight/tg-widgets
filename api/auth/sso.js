@@ -57,7 +57,6 @@ import { getRequestIp, getUserAgent } from '../_lib/auth/http.js';
 import { resolveUserPermissions } from '../_lib/auth/permissions.js';
 import { logAuthEvent } from '../_lib/auth/audit.js';
 import { revokeAllUserSessions } from '../_lib/auth/sessions.js';
-import { isStaffEmail } from '../_lib/auth/staff.js';
 
 // ─── Config ─────────────────────────────────────────────────────────
 const SIGNIN_PATH = '/signin.html';
@@ -386,9 +385,16 @@ export default async function handler(req, res) {
       }
 
       // Create entitlements: every Package Catalogue row marked includedByDefault=true
-      // gets a Client Entitlement row with source=Package Default.
+      // gets a Client Entitlement row with source=Package Default — but only when the
+      // linked catalogue item is currently ACTIVE. Switched-off products are skipped.
       try {
-        const packageCatalogue = await listAllRecords(PACKAGE_CATALOGUE.tableId);
+        const [packageCatalogue, catalogue] = await Promise.all([
+          listAllRecords(PACKAGE_CATALOGUE.tableId),
+          listAllRecords(CATALOGUE.tableId),
+        ]);
+        const activeCatIds = new Set(
+          catalogue.filter((c) => !!c.fields[CATALOGUE.fields.active]).map((c) => c.id)
+        );
         const defaults = packageCatalogue.filter((pc) => {
           const linkedPackages = pc.fields[PACKAGE_CATALOGUE.fields.package] || [];
           const included = pc.fields[PACKAGE_CATALOGUE.fields.includedByDefault];
@@ -397,6 +403,7 @@ export default async function handler(req, res) {
         for (const pc of defaults) {
           const catLinks = pc.fields[PACKAGE_CATALOGUE.fields.catalogueItem] || [];
           if (catLinks.length === 0) continue;
+          if (!activeCatIds.has(catLinks[0])) continue; // skip switched-off products
           await createRecord(CLIENT_ENTITLEMENTS.tableId, {
             [CLIENT_ENTITLEMENTS.fields.client]:        [clientRec.id],
             [CLIENT_ENTITLEMENTS.fields.catalogueItem]: [catLinks[0]],
@@ -460,19 +467,23 @@ export default async function handler(req, res) {
           });
 
           // 2. Load entitlements + package_catalogue to compute the diff
-          const [allEntitlements, packageCatalogue] = await Promise.all([
+          const [allEntitlements, packageCatalogue, catalogue] = await Promise.all([
             listAllRecords(CLIENT_ENTITLEMENTS.tableId),
             listAllRecords(PACKAGE_CATALOGUE.tableId),
+            listAllRecords(CATALOGUE.tableId),
           ]);
+          const activeCatIds = new Set(
+            catalogue.filter((c) => !!c.fields[CATALOGUE.fields.active]).map((c) => c.id)
+          );
 
-          // Which catalogue items are the new package's defaults?
+          // Which catalogue items are the new package's defaults? (active only)
           const newDefaultsCatIds = new Set();
           for (const pc of packageCatalogue) {
             const linkedPkgs = pc.fields[PACKAGE_CATALOGUE.fields.package] || [];
             if (!linkedPkgs.includes(jwtPackageRec.id)) continue;
             if (!pc.fields[PACKAGE_CATALOGUE.fields.includedByDefault]) continue;
             const catLinks = pc.fields[PACKAGE_CATALOGUE.fields.catalogueItem] || [];
-            if (catLinks[0]) newDefaultsCatIds.add(catLinks[0]);
+            if (catLinks[0] && activeCatIds.has(catLinks[0])) newDefaultsCatIds.add(catLinks[0]);
           }
 
           // Existing entitlements for this client, by source
@@ -599,14 +610,7 @@ export default async function handler(req, res) {
       // user's set of accessible products varies depending on which client
       // the session is currently scoped to.
       const userClientIds = userRec.fields[USERS.fields.client] || [];
-      if (!userClientIds.includes(clientId) && isStaffEmail(email)) {
-        // Travelgenix staff act as any client via the switcher without becoming
-        // a member. Auto-linking them here is what silently turned act-as into
-        // permanent membership and broke impersonation detection. Skip it.
-        console.log('[sso] staff', userRec.id, 'arrived with client', clientId,
-          '— not auto-linking (act-as is membership-free for staff)');
-      }
-      if (!userClientIds.includes(clientId) && !isStaffEmail(email)) {
+      if (!userClientIds.includes(clientId)) {
         try {
           await updateRecord(USERS.tableId, userRec.id, {
             [USERS.fields.client]: [...userClientIds, clientId],
