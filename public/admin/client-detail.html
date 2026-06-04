@@ -1100,8 +1100,12 @@
         img.onload = () => {
           URL.revokeObjectURL(url);
           const MAX = 480;
-          let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
-          if (!w || !h) { reject(new Error('Could not read image size')); return; }
+          // SVGs often report no intrinsic size — fall back to a sensible box.
+          let w = img.naturalWidth || img.width || 0;
+          let h = img.naturalHeight || img.height || 0;
+          if (!w && !h) { w = 400; h = 400; }
+          else if (!w) { w = h; }
+          else if (!h) { h = w; }
           if (w > MAX || h > MAX) {
             const s = Math.min(MAX / w, MAX / h);
             w = Math.round(w * s); h = Math.round(h * s);
@@ -1136,19 +1140,20 @@
       setHint('Optimising and uploading…');
 
       try {
-        let toUpload, contentType, ext;
-        if (file.type === 'image/svg+xml') {
-          toUpload = file; contentType = 'image/svg+xml'; ext = 'svg';
-        } else {
-          toUpload = await convertLogoToPng(file); contentType = 'image/png'; ext = 'png';
-        }
+        // Rasterise everything (raster AND svg) to a tidy PNG. This normalises
+        // the format, keeps files small, and avoids storing raw SVG.
+        const png = await convertLogoToPng(file);
         const { upload } = await getLogoBlobClient();
-        const pathname = 'client-logos/' + clientData.client.id + '-' + Date.now() + '.' + ext;
-        const blob = await upload(pathname, toUpload, {
-          access: 'public',
-          contentType,
-          handleUploadUrl: '/api/admin/clients/upload-logo',
-        });
+        const pathname = 'client-logos/' + clientData.client.id + '-' + Date.now() + '.png';
+        const blob = await withTimeout(
+          upload(pathname, png, {
+            access: 'public',
+            contentType: 'image/png',
+            handleUploadUrl: '/api/admin/clients/upload-logo',
+          }),
+          30000,
+          'Upload timed out — check your connection and try again'
+        );
         $('brand-logo').value = blob.url;
         setLogoThumb(blob.url);
         const rm = $('brand-logo-remove'); if (rm) rm.hidden = false;
@@ -1162,6 +1167,12 @@
       } finally {
         if (uploadBtn) { uploadBtn.disabled = false; uploadBtn.textContent = 'Upload logo'; }
       }
+    }
+
+    function withTimeout(promise, ms, msg) {
+      let t;
+      const timeout = new Promise((_, reject) => { t = setTimeout(() => reject(new Error(msg)), ms); });
+      return Promise.race([promise, timeout]).finally(() => clearTimeout(t));
     }
 
     async function saveBranding() {
