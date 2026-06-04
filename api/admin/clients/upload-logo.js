@@ -100,6 +100,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, url: blob.url });
   } catch (err) {
     console.error('[upload-logo] put failed:', err?.message);
-    return jsonError(res, 500, 'internal_error', 'Failed to store the logo');
+    return jsonError(res, 500, 'store_failed', 'Could not store the logo: ' + (err?.message || 'unknown error'));
   }
 }
