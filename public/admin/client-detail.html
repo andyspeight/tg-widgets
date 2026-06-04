@@ -563,7 +563,7 @@
 
     let clientData = null;
     let currentTab = 'overview';
-    let overviewMode = 'display'; // 'display' | 'edit' — Overview company/contact/package editing
+    let overviewEdit = null; // null | 'company' | 'contact' | 'pricing' | 'notes' — which Overview panel is being edited in place
 
     // Packages offered in the Overview package picker. Stable record ids from
     // the Packages table. The server re-validates the id on save, so this list
@@ -696,15 +696,120 @@
     function renderOverview() {
       const c = clientData.client;
       const pkg = clientData.package;
-      const editing = overviewMode === 'edit';
 
       const fld = (label, value, opts = {}) => `
         <div class="field-display">
           <span class="label">${escapeHtml(label)}</span>
           <span class="value ${value ? (opts.mono ? 'mono' : '') : 'empty'}">${value ? escapeHtml(value) : '—'}</span>
         </div>`;
+      const txt = (id, label, value, opts = {}) => `
+        <div class="field">
+          <label class="field-label" for="${id}">${escapeHtml(label)}</label>
+          <input class="input" id="${id}" type="${opts.type || 'text'}" value="${escapeHtml(value == null ? '' : String(value))}"${opts.attrs || ''} />
+        </div>`;
+      const editBtn = (sec) => `<button type="button" class="btn btn--sm ov-edit" data-sec="${sec}">Edit</button>`;
+      const actions = (sec) => `
+        <div class="travelify-edit-error ov-error" hidden></div>
+        <div class="travelify-edit-actions">
+          <button type="button" class="btn btn--sm ov-cancel">Cancel</button>
+          <button type="button" class="btn btn--sm btn--primary ov-save" data-sec="${sec}">Save</button>
+        </div>`;
+      const panelHead = (title, sec) =>
+        `<header class="panel-header"><div class="panel-header-actions"><div><h2>${title}</h2></div>${editBtn(sec)}</div></header>`;
 
-      // Travelify panel is identical in both modes (it has its own inline edit).
+      // ── Company ─────────────────────────────────────────────────────────
+      const company = overviewEdit === 'company' ? `
+        <div class="panel">
+          <header class="panel-header"><h2>Company</h2></header>
+          <div class="panel-body">
+            <div class="field-grid">
+              ${txt('cmp-clientName', 'Legal name', c.clientName, { attrs: ' maxlength="120"' })}
+              ${txt('cmp-tradingName', 'Trading name', c.tradingName, { attrs: ' maxlength="120"' })}
+              ${txt('cmp-websiteUrl', 'Website', c.websiteUrl, { attrs: ' maxlength="300" placeholder="https://example.com"' })}
+              <div class="field">
+                <label class="field-label" for="cmp-status">Status</label>
+                <select class="select" id="cmp-status">
+                  ${STATUS_OPTIONS.map(s => `<option value="${s}"${c.status === s ? ' selected' : ''}>${s}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            ${actions('company')}
+          </div>
+        </div>` : `
+        <div class="panel">
+          ${panelHead('Company', 'company')}
+          <div class="panel-body">
+            <div class="field-grid">
+              ${fld('Legal name', c.clientName)}
+              ${fld('Trading name', c.tradingName)}
+              ${fld('Website', c.websiteUrl)}
+              ${fld('Status', c.status)}
+            </div>
+          </div>
+        </div>`;
+
+      // ── Primary contact ─────────────────────────────────────────────────
+      const contact = overviewEdit === 'contact' ? `
+        <div class="panel">
+          <header class="panel-header"><h2>Primary contact</h2></header>
+          <div class="panel-body">
+            <div class="field-grid">
+              ${txt('con-name', 'Name', c.primaryContactName, { attrs: ' maxlength="120"' })}
+              ${txt('con-email', 'Email', c.primaryEmail, { type: 'email', attrs: ' maxlength="200" autocomplete="off" spellcheck="false"' })}
+              ${txt('con-phone', 'Phone', c.primaryContactPhone, { attrs: ' maxlength="40"' })}
+            </div>
+            ${actions('contact')}
+          </div>
+        </div>` : `
+        <div class="panel">
+          ${panelHead('Primary contact', 'contact')}
+          <div class="panel-body">
+            <div class="field-grid">
+              ${fld('Name', c.primaryContactName)}
+              ${fld('Email', c.primaryEmail, { mono: true })}
+              ${fld('Phone', c.primaryContactPhone)}
+            </div>
+          </div>
+        </div>`;
+
+      // ── Package & pricing ───────────────────────────────────────────────
+      const pricing = overviewEdit === 'pricing' ? `
+        <div class="panel">
+          <header class="panel-header"><h2>Package &amp; pricing</h2></header>
+          <div class="panel-body">
+            <div class="field-grid">
+              <div class="field">
+                <label class="field-label" for="prc-package">Package</label>
+                <select class="select" id="prc-package">
+                  <option value="">—</option>
+                  ${PACKAGE_OPTIONS.map(p => `<option value="${p.id}"${pkg && pkg.id === p.id ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+                </select>
+                <div class="field-hint">Stored on the record only. Changing this does not add or remove products — manage those on the Entitlements tab.</div>
+              </div>
+              ${txt('prc-mrr', 'MRR (£)', c.mrr, { type: 'number', attrs: ' min="0" step="0.01" inputmode="decimal"' })}
+              ${txt('prc-setupFee', 'Setup fee charged (£)', c.setupFeeCharged, { type: 'number', attrs: ' min="0" step="0.01" inputmode="decimal"' })}
+              ${txt('prc-setupDate', 'Setup date', (c.setupDate || '').slice(0, 10), { type: 'date' })}
+              ${txt('prc-goLiveDate', 'Go-live date', (c.goLiveDate || '').slice(0, 10), { type: 'date' })}
+            </div>
+            ${actions('pricing')}
+          </div>
+        </div>` : `
+        <div class="panel">
+          ${panelHead('Package &amp; pricing', 'pricing')}
+          <div class="panel-body">
+            <div class="field-grid">
+              ${fld('Package', pkg?.name)}
+              ${fld('MRR', c.mrr != null ? fmtMoney(c.mrr) : null)}
+              ${fld('Setup fee charged', c.setupFeeCharged != null ? fmtMoney(c.setupFeeCharged) : null)}
+              ${fld('Setup date', fmtDate(c.setupDate))}
+              ${fld('Go-live date', fmtDate(c.goLiveDate))}
+              ${fld('Created', fmtDateTime(c.createdAt))}
+              ${fld('Last login', fmtDateTime(c.lastLogin))}
+            </div>
+          </div>
+        </div>`;
+
+      // ── Travelify (its own inline edit, unchanged) ──────────────────────
       const travelifyPanel = `
         <div class="panel" id="travelify-panel">
           <header class="panel-header">
@@ -721,173 +826,75 @@
           </div>
         </div>`;
 
-      // ── Edit mode ───────────────────────────────────────────────────────
-      if (editing) {
-        const grp = (t) => `<h3 style="margin:20px 0 10px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;">${escapeHtml(t)}</h3>`;
-        const txt = (id, label, value, opts = {}) => `
-          <div class="field">
-            <label class="field-label" for="${id}">${escapeHtml(label)}</label>
-            <input class="input" id="${id}" type="${opts.type || 'text'}" value="${escapeHtml(value == null ? '' : String(value))}"${opts.attrs || ''} />
-          </div>`;
-        const statusSel = `
-          <div class="field">
-            <label class="field-label" for="ov-status">Status</label>
-            <select class="select" id="ov-status">
-              ${STATUS_OPTIONS.map(s => `<option value="${s}"${c.status === s ? ' selected' : ''}>${s}</option>`).join('')}
-            </select>
-          </div>`;
-        const pkgSel = `
-          <div class="field">
-            <label class="field-label" for="ov-package">Package</label>
-            <select class="select" id="ov-package">
-              <option value="">—</option>
-              ${PACKAGE_OPTIONS.map(p => `<option value="${p.id}"${pkg && pkg.id === p.id ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
-            </select>
-            <div class="field-hint">Stored on the record only. Changing this does not add or remove products — manage those on the Entitlements tab.</div>
-          </div>`;
-
-        return `
-          <div class="panel" id="overview-edit">
-            <header class="panel-header"><h2>Edit details</h2></header>
-            <div class="panel-body">
-              ${grp('Company')}
-              <div class="field-grid">
-                ${txt('ov-clientName', 'Legal name', c.clientName, { attrs: ' maxlength="120"' })}
-                ${txt('ov-tradingName', 'Trading name', c.tradingName, { attrs: ' maxlength="120"' })}
-                ${txt('ov-websiteUrl', 'Website', c.websiteUrl, { attrs: ' maxlength="300" placeholder="https://example.com"' })}
-                ${statusSel}
-              </div>
-
-              ${grp('Primary contact')}
-              <div class="field-grid">
-                ${txt('ov-contactName', 'Name', c.primaryContactName, { attrs: ' maxlength="120"' })}
-                ${txt('ov-email', 'Email', c.primaryEmail, { type: 'email', attrs: ' maxlength="200" autocomplete="off" spellcheck="false"' })}
-                ${txt('ov-phone', 'Phone', c.primaryContactPhone, { attrs: ' maxlength="40"' })}
-              </div>
-
-              ${grp('Package & pricing')}
-              <div class="field-grid">
-                ${pkgSel}
-                ${txt('ov-mrr', 'MRR (£)', c.mrr, { type: 'number', attrs: ' min="0" step="0.01" inputmode="decimal"' })}
-                ${txt('ov-setupFee', 'Setup fee charged (£)', c.setupFeeCharged, { type: 'number', attrs: ' min="0" step="0.01" inputmode="decimal"' })}
-                ${txt('ov-setupDate', 'Setup date', (c.setupDate || '').slice(0, 10), { type: 'date' })}
-                ${txt('ov-goLiveDate', 'Go-live date', (c.goLiveDate || '').slice(0, 10), { type: 'date' })}
-              </div>
-
-              ${grp('Notes')}
-              <div class="field">
-                <textarea class="input" id="ov-notes" rows="4" maxlength="5000" style="min-height:92px;resize:vertical;" placeholder="Internal notes about this client">${escapeHtml(c.notes || '')}</textarea>
-              </div>
-
-              <div class="travelify-edit-error" id="ov-error" hidden></div>
-              <div class="travelify-edit-actions">
-                <button type="button" class="btn btn--sm" id="ov-cancel">Cancel</button>
-                <button type="button" class="btn btn--sm btn--primary" id="ov-save">Save changes</button>
-              </div>
-            </div>
-          </div>
-
-          ${travelifyPanel}
-        `;
-      }
-
-      // ── Display mode ────────────────────────────────────────────────────
-      return `
+      // ── Notes ───────────────────────────────────────────────────────────
+      const notes = overviewEdit === 'notes' ? `
         <div class="panel">
-          <header class="panel-header">
-            <div class="panel-header-actions">
-              <div><h2>Company</h2></div>
-              <button type="button" class="btn btn--sm" id="overview-edit-btn">Edit</button>
-            </div>
-          </header>
+          <header class="panel-header"><h2>Notes</h2></header>
           <div class="panel-body">
-            <div class="field-grid">
-              ${fld('Legal name', c.clientName)}
-              ${fld('Trading name', c.tradingName)}
-              ${fld('Website', c.websiteUrl)}
-              ${fld('Status', c.status)}
+            <div class="field">
+              <textarea class="input" id="nts-notes" rows="4" maxlength="5000" style="min-height:92px;resize:vertical;" placeholder="Internal notes about this client">${escapeHtml(c.notes || '')}</textarea>
             </div>
+            ${actions('notes')}
           </div>
-        </div>
-
+        </div>` : `
         <div class="panel">
-          <header class="panel-header">
-            <h2>Primary contact</h2>
-          </header>
+          ${panelHead('Notes', 'notes')}
           <div class="panel-body">
-            <div class="field-grid">
-              ${fld('Name', c.primaryContactName)}
-              ${fld('Email', c.primaryEmail, { mono: true })}
-              ${fld('Phone', c.primaryContactPhone)}
-            </div>
+            ${c.notes
+              ? `<div style="white-space: pre-wrap; line-height: 1.6;">${escapeHtml(c.notes)}</div>`
+              : `<span class="value empty">—</span>`}
           </div>
-        </div>
+        </div>`;
 
-        <div class="panel">
-          <header class="panel-header">
-            <h2>Package &amp; pricing</h2>
-          </header>
-          <div class="panel-body">
-            <div class="field-grid">
-              ${fld('Package', pkg?.name)}
-              ${fld('MRR', c.mrr != null ? fmtMoney(c.mrr) : null)}
-              ${fld('Setup fee charged', c.setupFeeCharged != null ? fmtMoney(c.setupFeeCharged) : null)}
-              ${fld('Setup date', fmtDate(c.setupDate))}
-              ${fld('Go-live date', fmtDate(c.goLiveDate))}
-              ${fld('Created', fmtDateTime(c.createdAt))}
-              ${fld('Last login', fmtDateTime(c.lastLogin))}
-            </div>
-          </div>
-        </div>
-
-        ${travelifyPanel}
-
-        ${c.notes ? `
-        <div class="panel">
-          <header class="panel-header">
-            <h2>Notes</h2>
-          </header>
-          <div class="panel-body">
-            <div style="white-space: pre-wrap; line-height: 1.6;">${escapeHtml(c.notes)}</div>
-          </div>
-        </div>` : ''}
-      `;
+      return company + contact + pricing + travelifyPanel + notes;
     }
 
-    // ─── Overview editing (company / contact / package — store only) ──────
+    // ─── Overview editing — each panel edits in place, store only ─────────
+    function ovVal(id) { return (document.getElementById(id)?.value ?? '').trim(); }
+
+    const OV_SECTION_FIELDS = {
+      company: () => ({
+        clientName: ovVal('cmp-clientName'),
+        tradingName: ovVal('cmp-tradingName'),
+        websiteUrl: ovVal('cmp-websiteUrl'),
+        status: ovVal('cmp-status'),
+      }),
+      contact: () => ({
+        primaryContactName: ovVal('con-name'),
+        primaryEmail: ovVal('con-email'),
+        primaryContactPhone: ovVal('con-phone'),
+      }),
+      pricing: () => ({
+        packageId: ovVal('prc-package'),
+        mrr: ovVal('prc-mrr'),
+        setupFeeCharged: ovVal('prc-setupFee'),
+        setupDate: ovVal('prc-setupDate'),
+        goLiveDate: ovVal('prc-goLiveDate'),
+      }),
+      notes: () => ({
+        notes: document.getElementById('nts-notes')?.value ?? '',
+      }),
+    };
+
     function attachOverviewHandlers() {
-      const editBtn = document.getElementById('overview-edit-btn');
-      if (editBtn) editBtn.addEventListener('click', () => { overviewMode = 'edit'; renderTab('overview'); });
+      document.querySelectorAll('.ov-edit').forEach((b) =>
+        b.addEventListener('click', () => { overviewEdit = b.dataset.sec; renderTab('overview'); }));
 
-      const cancelBtn = document.getElementById('ov-cancel');
-      if (cancelBtn) cancelBtn.addEventListener('click', () => { overviewMode = 'display'; renderTab('overview'); });
+      const cancel = document.querySelector('.ov-cancel');
+      if (cancel) cancel.addEventListener('click', () => { overviewEdit = null; renderTab('overview'); });
 
-      const saveBtn = document.getElementById('ov-save');
-      if (saveBtn) saveBtn.addEventListener('click', saveOverview);
+      const save = document.querySelector('.ov-save');
+      if (save) save.addEventListener('click', () => saveOverviewSection(save.dataset.sec));
     }
 
-    async function saveOverview() {
-      const val = (id) => (document.getElementById(id)?.value ?? '').trim();
-      const saveBtn = document.getElementById('ov-save');
-      const cancelBtn = document.getElementById('ov-cancel');
-      const errEl = document.getElementById('ov-error');
+    async function saveOverviewSection(sec) {
+      const build = OV_SECTION_FIELDS[sec];
+      if (!build) return;
+      const saveBtn = document.querySelector('.ov-save');
+      const cancelBtn = document.querySelector('.ov-cancel');
+      const errEl = document.querySelector('.ov-error');
 
-      const payload = {
-        id: clientData.client.id,
-        clientName: val('ov-clientName'),
-        tradingName: val('ov-tradingName'),
-        websiteUrl: val('ov-websiteUrl'),
-        status: val('ov-status'),
-        primaryContactName: val('ov-contactName'),
-        primaryEmail: val('ov-email'),
-        primaryContactPhone: val('ov-phone'),
-        mrr: val('ov-mrr'),
-        setupFeeCharged: val('ov-setupFee'),
-        setupDate: val('ov-setupDate'),
-        goLiveDate: val('ov-goLiveDate'),
-        notes: document.getElementById('ov-notes')?.value ?? '',
-        packageId: val('ov-package'),
-      };
+      const payload = Object.assign({ id: clientData.client.id }, build());
 
       if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
       if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
@@ -900,14 +907,14 @@
         });
         Object.assign(clientData.client, data.client);
         if (data.package) clientData.package = data.package;
-        overviewMode = 'display';
-        toast('Client details saved', 'ok');
+        overviewEdit = null;
+        toast('Saved', 'ok');
         renderHeader();
         renderTab('overview');
       } catch (err) {
         console.error('[overview save] failed', err);
         if (errEl) { errEl.textContent = err?.message || 'Save failed — try again'; errEl.hidden = false; }
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; }
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
         if (cancelBtn) cancelBtn.disabled = false;
       }
     }
