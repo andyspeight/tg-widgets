@@ -28,7 +28,9 @@ import { setCors, applyRateLimit, RATE_LIMITS } from '../../_auth.js';
 import { PRODUCTS, PERMISSIONS } from '../../_lib/auth/schema.js';
 
 const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB cap (logos are tiny after client-side resize)
-const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+// The browser rasterises every logo (including SVG) to PNG before upload, so
+// only raster types are accepted here. Raw SVG is never stored.
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
 export default async function handler(req, res) {
   setCors(res);
