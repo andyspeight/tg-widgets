@@ -563,6 +563,18 @@
 
     let clientData = null;
     let currentTab = 'overview';
+    let overviewMode = 'display'; // 'display' | 'edit' — Overview company/contact/package editing
+
+    // Packages offered in the Overview package picker. Stable record ids from
+    // the Packages table. The server re-validates the id on save, so this list
+    // is only for rendering the dropdown.
+    const PACKAGE_OPTIONS = [
+      { id: 'recNlGhngVPyIZ7rZ', name: 'Spark' },
+      { id: 'recYZtljqRsjILDDn', name: 'Boost' },
+      { id: 'recUkf6bjNEohshk9', name: 'Ignite' },
+      { id: 'recged7J6tx24f6S6', name: 'Bespoke' },
+    ];
+    const STATUS_OPTIONS = ['Active', 'Pending', 'Disabled'];
 
     function escapeHtml(str) {
       return String(str || '').replace(/[&<>"']/g, (c) => ({
@@ -647,10 +659,6 @@
           </div>
         </div>
 
-        <div class="placeholder-banner">
-          <strong>Mostly read-only.</strong> Company and Package details are not yet editable from here — full edit support arrives in Phase 3. The Travelify integration panel is editable. Use the Users tab to manage who has access.
-        </div>
-
         <div class="sub-tabs" role="tablist">
           <button class="sub-tab" role="tab" data-tab="overview" aria-selected="true" type="button">Overview</button>
           <button class="sub-tab" role="tab" data-tab="entitlements" aria-selected="false" type="button">
@@ -678,6 +686,7 @@
       const tc = document.getElementById('tab-content');
       if (tab === 'overview') {
         tc.innerHTML = renderOverview();
+        attachOverviewHandlers();
         attachTravelifyHandlers();
       }
       else if (tab === 'entitlements') tc.innerHTML = renderEntitlements();
@@ -687,6 +696,7 @@
     function renderOverview() {
       const c = clientData.client;
       const pkg = clientData.package;
+      const editing = overviewMode === 'edit';
 
       const fld = (label, value, opts = {}) => `
         <div class="field-display">
@@ -694,10 +704,101 @@
           <span class="value ${value ? (opts.mono ? 'mono' : '') : 'empty'}">${value ? escapeHtml(value) : '—'}</span>
         </div>`;
 
+      // Travelify panel is identical in both modes (it has its own inline edit).
+      const travelifyPanel = `
+        <div class="panel" id="travelify-panel">
+          <header class="panel-header">
+            <div class="panel-header-actions">
+              <div>
+                <h2>Travelify integration</h2>
+                <p>IDs and API key used for deep links, mid-office handoff, and SSO. Auto-populated by Travelify SSO on first sign-in, or add manually here.</p>
+              </div>
+              <button type="button" class="btn btn--sm" id="travelify-edit-btn">Edit</button>
+            </div>
+          </header>
+          <div class="panel-body" id="travelify-body">
+            ${renderTravelifyDisplay(c)}
+          </div>
+        </div>`;
+
+      // ── Edit mode ───────────────────────────────────────────────────────
+      if (editing) {
+        const grp = (t) => `<h3 style="margin:20px 0 10px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;">${escapeHtml(t)}</h3>`;
+        const txt = (id, label, value, opts = {}) => `
+          <div class="field">
+            <label class="field-label" for="${id}">${escapeHtml(label)}</label>
+            <input class="input" id="${id}" type="${opts.type || 'text'}" value="${escapeHtml(value == null ? '' : String(value))}"${opts.attrs || ''} />
+          </div>`;
+        const statusSel = `
+          <div class="field">
+            <label class="field-label" for="ov-status">Status</label>
+            <select class="select" id="ov-status">
+              ${STATUS_OPTIONS.map(s => `<option value="${s}"${c.status === s ? ' selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </div>`;
+        const pkgSel = `
+          <div class="field">
+            <label class="field-label" for="ov-package">Package</label>
+            <select class="select" id="ov-package">
+              <option value="">—</option>
+              ${PACKAGE_OPTIONS.map(p => `<option value="${p.id}"${pkg && pkg.id === p.id ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+            </select>
+            <div class="field-hint">Stored on the record only. Changing this does not add or remove products — manage those on the Entitlements tab.</div>
+          </div>`;
+
+        return `
+          <div class="panel" id="overview-edit">
+            <header class="panel-header"><h2>Edit details</h2></header>
+            <div class="panel-body">
+              ${grp('Company')}
+              <div class="field-grid">
+                ${txt('ov-clientName', 'Legal name', c.clientName, { attrs: ' maxlength="120"' })}
+                ${txt('ov-tradingName', 'Trading name', c.tradingName, { attrs: ' maxlength="120"' })}
+                ${txt('ov-websiteUrl', 'Website', c.websiteUrl, { attrs: ' maxlength="300" placeholder="https://example.com"' })}
+                ${statusSel}
+              </div>
+
+              ${grp('Primary contact')}
+              <div class="field-grid">
+                ${txt('ov-contactName', 'Name', c.primaryContactName, { attrs: ' maxlength="120"' })}
+                ${txt('ov-email', 'Email', c.primaryEmail, { type: 'email', attrs: ' maxlength="200" autocomplete="off" spellcheck="false"' })}
+                ${txt('ov-phone', 'Phone', c.primaryContactPhone, { attrs: ' maxlength="40"' })}
+              </div>
+
+              ${grp('Package & pricing')}
+              <div class="field-grid">
+                ${pkgSel}
+                ${txt('ov-mrr', 'MRR (£)', c.mrr, { type: 'number', attrs: ' min="0" step="0.01" inputmode="decimal"' })}
+                ${txt('ov-setupFee', 'Setup fee charged (£)', c.setupFeeCharged, { type: 'number', attrs: ' min="0" step="0.01" inputmode="decimal"' })}
+                ${txt('ov-setupDate', 'Setup date', (c.setupDate || '').slice(0, 10), { type: 'date' })}
+                ${txt('ov-goLiveDate', 'Go-live date', (c.goLiveDate || '').slice(0, 10), { type: 'date' })}
+              </div>
+
+              ${grp('Notes')}
+              <div class="field">
+                <textarea class="input" id="ov-notes" rows="4" maxlength="5000" style="min-height:92px;resize:vertical;" placeholder="Internal notes about this client">${escapeHtml(c.notes || '')}</textarea>
+              </div>
+
+              <div class="travelify-edit-error" id="ov-error" hidden></div>
+              <div class="travelify-edit-actions">
+                <button type="button" class="btn btn--sm" id="ov-cancel">Cancel</button>
+                <button type="button" class="btn btn--sm btn--primary" id="ov-save">Save changes</button>
+              </div>
+            </div>
+          </div>
+
+          ${travelifyPanel}
+        `;
+      }
+
+      // ── Display mode ────────────────────────────────────────────────────
       return `
         <div class="panel">
           <header class="panel-header">
-            <h2>Company</h2>
+            <div class="panel-header-actions">
+              <div><h2>Company</h2></div>
+              <button type="button" class="btn btn--sm" id="overview-edit-btn">Edit</button>
+            </div>
           </header>
           <div class="panel-body">
             <div class="field-grid">
@@ -739,20 +840,7 @@
           </div>
         </div>
 
-        <div class="panel" id="travelify-panel">
-          <header class="panel-header">
-            <div class="panel-header-actions">
-              <div>
-                <h2>Travelify integration</h2>
-                <p>IDs and API key used for deep links, mid-office handoff, and SSO. Auto-populated by Travelify SSO on first sign-in, or add manually here.</p>
-              </div>
-              <button type="button" class="btn btn--sm" id="travelify-edit-btn">Edit</button>
-            </div>
-          </header>
-          <div class="panel-body" id="travelify-body">
-            ${renderTravelifyDisplay(c)}
-          </div>
-        </div>
+        ${travelifyPanel}
 
         ${c.notes ? `
         <div class="panel">
@@ -765,6 +853,65 @@
         </div>` : ''}
       `;
     }
+
+    // ─── Overview editing (company / contact / package — store only) ──────
+    function attachOverviewHandlers() {
+      const editBtn = document.getElementById('overview-edit-btn');
+      if (editBtn) editBtn.addEventListener('click', () => { overviewMode = 'edit'; renderTab('overview'); });
+
+      const cancelBtn = document.getElementById('ov-cancel');
+      if (cancelBtn) cancelBtn.addEventListener('click', () => { overviewMode = 'display'; renderTab('overview'); });
+
+      const saveBtn = document.getElementById('ov-save');
+      if (saveBtn) saveBtn.addEventListener('click', saveOverview);
+    }
+
+    async function saveOverview() {
+      const val = (id) => (document.getElementById(id)?.value ?? '').trim();
+      const saveBtn = document.getElementById('ov-save');
+      const cancelBtn = document.getElementById('ov-cancel');
+      const errEl = document.getElementById('ov-error');
+
+      const payload = {
+        id: clientData.client.id,
+        clientName: val('ov-clientName'),
+        tradingName: val('ov-tradingName'),
+        websiteUrl: val('ov-websiteUrl'),
+        status: val('ov-status'),
+        primaryContactName: val('ov-contactName'),
+        primaryEmail: val('ov-email'),
+        primaryContactPhone: val('ov-phone'),
+        mrr: val('ov-mrr'),
+        setupFeeCharged: val('ov-setupFee'),
+        setupDate: val('ov-setupDate'),
+        goLiveDate: val('ov-goLiveDate'),
+        notes: document.getElementById('ov-notes')?.value ?? '',
+        packageId: val('ov-package'),
+      };
+
+      if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
+      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+      if (cancelBtn) cancelBtn.disabled = true;
+
+      try {
+        const data = await apiCall('/api/admin/clients/update-client', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        Object.assign(clientData.client, data.client);
+        if (data.package) clientData.package = data.package;
+        overviewMode = 'display';
+        toast('Client details saved', 'ok');
+        renderHeader();
+        renderTab('overview');
+      } catch (err) {
+        console.error('[overview save] failed', err);
+        if (errEl) { errEl.textContent = err?.message || 'Save failed — try again'; errEl.hidden = false; }
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; }
+        if (cancelBtn) cancelBtn.disabled = false;
+      }
+    }
+
 
     // ─── Travelify integration panel ────────────────────────────────────
     // Three states: display (default), edit (form), saving (form disabled).
