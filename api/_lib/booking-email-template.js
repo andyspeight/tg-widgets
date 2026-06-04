@@ -33,7 +33,6 @@
 //  truth; the email is the friendly summary.
 // =============================================================================
 
-import { encrypt } from '../_crypto.js';
 
 // One font stack used everywhere. -apple-system maps to SF Pro on macOS/iOS,
 // BlinkMacSystemFont keeps Chrome on Mac happy, Segoe UI is Windows, Roboto
@@ -233,6 +232,13 @@ function buildPaymentInfo(order) {
       }
     }
   }
+
+  // Clear "settled" signal for the cost summary when nothing is outstanding.
+  result.paidInFull = result.depositPaid != null
+    && result.depositPaid > 0
+    && (result.balanceDue == null || result.balanceDue <= 0)
+    && typeof total === 'number' && total > 0
+    && Math.round((total - result.depositPaid) * 100) / 100 <= 0;
 
   return result;
 }
@@ -496,15 +502,28 @@ export function renderBookingEmail(opts) {
     `);
 
     if (payment.depositPaid != null) {
-      const isLast = payment.balanceDue == null || payment.balanceDue <= 0;
+      const isLast = (payment.balanceDue == null || payment.balanceDue <= 0) && !payment.paidInFull;
       const borderStyle = isLast ? '' : 'border-bottom:1px solid #e2e8f0;';
+      const amtColor = payment.paidInFull ? '#10b981' : '#0f172a';
       rows.push(`
         <tr>
           <td style="padding:12px 0;${borderStyle}font:400 15px/1.6 ${FONT};color:#64748b;">
             Paid so far
           </td>
-          <td style="padding:12px 0;${borderStyle}text-align:right;font:600 15px/1.6 ${FONT};color:#0f172a;">
+          <td style="padding:12px 0;${borderStyle}text-align:right;font:600 15px/1.6 ${FONT};color:${amtColor};">
             ${escapeHtml(formatMoney(payment.depositPaid, payment.currency))}
+          </td>
+        </tr>
+      `);
+    }
+
+    if (payment.paidInFull) {
+      // Settled status — green is permitted for status indicators. Green
+      // Unicode bullet (not a CSS span) for Outlook reliability.
+      rows.push(`
+        <tr>
+          <td colspan="2" style="padding:14px 0 2px;text-align:center;font:700 14px/1.5 ${FONT};color:#10b981;">
+            <span style="color:#10b981;font-size:16px;">&#9679;</span>&nbsp; Paid in full — thank you
           </td>
         </tr>
       `);
@@ -670,37 +689,25 @@ export function renderBookingEmail(opts) {
   const safeDocs = docList
     .filter(d => d && typeof d.url === 'string' && isSafeDocUrl(d.url));
 
-  // Wrap each document URL through our /api/doc-redirect endpoint.
+  // Make each document open in the browser when clicked from the email.
   //
-  // Why: Travelify serves documents (static.travelify.io) with NO
-  // Content-Disposition header. Browsers render a PDF inline, so a raw PDF
-  // link works — but they have no inline viewer for .docx/.doc, and with no
-  // attachment header a target="_blank" click opens a blank tab that closes,
-  // looking like the page "just refreshed". Our endpoint streams the file back
-  // through our origin WITH Content-Disposition: attachment so it downloads
-  // cleanly (PDFs stay inline). The doc host has no referrer check, so this is
-  // purely about the disposition.
-  //
-  // The token is AES-256-GCM encrypted (url + filename + expiry) so the
-  // endpoint can't be used as an open proxy. We embed a 90-day expiry inside
-  // the payload — even if a link leaks, it dies on its own.
-  //
-  // Fallback: if encryption fails (e.g. TG_ENCRYPTION_KEY missing) OR no
-  // baseUrl was passed, we fall back to the raw Travelify URL so the email
-  // still sends.
-  const buildDocLink = (url, name) => {
-    if (!baseUrl) return url;
+  // PDFs open natively in every browser, so we link them directly. Office
+  // formats (.doc/.docx/.xls/.xlsx/.ppt/.pptx) have no native browser viewer —
+  // a raw link just downloads (or opens a blank tab that closes), so we route
+  // them through Microsoft's free Office Online viewer, which renders them
+  // in-browser from the public file URL. Anything else falls back to a direct
+  // link. The document host (static.travelify.io) serves these publicly, which
+  // is what the viewer needs.
+  const OFFICE_VIEWER = 'https://view.officeapps.live.com/op/view.aspx?src=';
+  const OFFICE_EXTS = new Set(['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
+  const docExt = (u) => {
     try {
-      const expiresAt = Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60); // 90 days
-      const token = encrypt(JSON.stringify({ url, name: name || null, exp: expiresAt }));
-      // Use encodeURIComponent on the token because base64 contains
-      // characters (+, /, =) that have special meaning in URL query strings.
-      return `${baseUrl}/api/doc-redirect?t=${encodeURIComponent(token)}`;
-    } catch (err) {
-      // Soft fail — see comment above.
-      console.warn('Email template: doc link token encryption failed, falling back to direct URL:', err.message);
-      return url;
-    }
+      const m = new URL(u).pathname.match(/\.([a-z0-9]{1,8})$/i);
+      return m ? m[1].toLowerCase() : '';
+    } catch { return ''; }
+  };
+  const buildDocLink = (url) => {
+    return OFFICE_EXTS.has(docExt(url)) ? OFFICE_VIEWER + encodeURIComponent(url) : url;
   };
 
   const fmtBytes = (n) => {
@@ -722,7 +729,7 @@ export function renderBookingEmail(opts) {
                 const extLabel = (d.ext || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
                 const sizeLabel = fmtBytes(typeof d.size === 'number' ? d.size : 0);
                 const metaBits = [extLabel || 'FILE', sizeLabel].filter(Boolean).join(' · ');
-                const url = buildDocLink(d.url, d.name); // wraps through /api/doc-redirect
+                const url = buildDocLink(d.url); // Office viewer for Office formats, direct for PDF
                 const isLast = i === safeDocs.length - 1;
                 return `
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
@@ -798,7 +805,7 @@ export function renderBookingEmail(opts) {
     textParts.push('', '─── Your documents ───', '');
     for (const d of safeDocs) {
       const name = (d.name || 'Document').toString();
-      textParts.push(`${name}: ${buildDocLink(d.url, d.name)}`);
+      textParts.push(`${name}: ${buildDocLink(d.url)}`);
     }
   }
 
