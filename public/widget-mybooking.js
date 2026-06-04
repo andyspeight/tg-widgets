@@ -3,6 +3,14 @@
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
  *
+ * v1.7.1 changes:
+ *   - Cancellation info now follows the cancel toggle: when cancellation is
+ *     off, cancellation terms are hidden everywhere (the flight "Fare
+ *     conditions" block and the "Cancellation policy" accordion), not just
+ *     the cancel action.
+ *   - "Things to know" heading only renders when a child block has content
+ *     (no more orphaned heading on flight-only bookings).
+ *
  * v1.7.0 changes:
  *   - Pay balance now opens an editable, prefilled amount field: a customer
  *     can pay in full (one tap) or overtype a smaller part payment. The typed
@@ -141,7 +149,7 @@
   const API_EMAIL = (typeof window !== 'undefined' && window.__TG_EMAIL_API__) || (API_BASE + '/api/booking-email');
   const API_CANCEL = (typeof window !== 'undefined' && window.__TG_CANCEL_API__) || (API_BASE + '/api/cancel-product');
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
-  const VERSION = '1.7.0';
+  const VERSION = '1.7.1';
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -1105,10 +1113,14 @@
     const carrierSummary = Array.from(carrierNames).slice(0, 3).join(', ');
 
     const fareInfo = Array.isArray(f.fareInformation) ? f.fareInformation : [];
+    // When the agent has turned cancellation off, the cancellation terms that
+    // arrive as flight fare information must not leak into "Fare conditions".
+    const hideCancel = c.display?.showCancel === false;
     const meaningfulFareInfo = fareInfo.filter(fi => {
       if (!fi.title || !fi.text) return false;
       if ((fi.type || '').toLowerCase() === 'farebasis') return false;
       if (/fare\s*basis/i.test(fi.title)) return false;
+      if (hideCancel && (/cancel/i.test(fi.title) || /cancel/i.test(fi.type || ''))) return false;
       return true;
     });
 
@@ -1956,6 +1968,16 @@
     const docs = order.documents || [];
     const showDocs = c.display?.showDocuments !== false && docs.length > 0;
 
+    // "Things to know" groups three optional accordions. The heading must only
+    // appear when at least one of them has content (otherwise a flight-only
+    // booking shows an orphaned heading). Cancellation policy text also follows
+    // the cancel toggle, so turning cancellation off hides the policy here too.
+    const showCancelInfo = c.display?.showCancel !== false;
+    const ttkAboutHotel = !!(hotelDesc?.text || acc?.location?.address1 || paymentMethods.length || yearBuilt || totalRooms || roomMix.length || facilities.length);
+    const ttkCancelPolicy = showCancelInfo && cancelDescs.length > 0;
+    const ttkAtHotel = !!(importantInfo.length || checkinTime || checkoutTime);
+    const showThingsToKnow = ttkAboutHotel || ttkCancelPolicy || ttkAtHotel;
+
     const firstName = order.customerFirstname || 'there';
     const destCity = acc?.location?.city || '';
 
@@ -2326,9 +2348,9 @@
         </div>
         ` : ''}
 
-        <h3 class="tgm-h-eyebrow">${esc(c.labels?.thingsToKnow || 'Things to know')}</h3>
+        ${showThingsToKnow ? `<h3 class="tgm-h-eyebrow">${esc(c.labels?.thingsToKnow || 'Things to know')}</h3>` : ''}
 
-        ${(hotelDesc?.text || acc?.location?.address1 || paymentMethods.length || yearBuilt || totalRooms || roomMix.length || facilities.length) ? `
+        ${ttkAboutHotel ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
             <div class="tgm-collapse-left">${svg(IC.bed)}${esc(c.labels?.aboutHotel || 'About the hotel')}</div>
@@ -2374,7 +2396,7 @@
           </div></div>
         </div>` : ''}
 
-        ${cancelDescs.length ? `
+        ${ttkCancelPolicy ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
             <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.cancellation || 'Cancellation policy')}</div>
@@ -2385,7 +2407,7 @@
           </div></div>
         </div>` : ''}
 
-        ${(importantInfo.length || checkinTime || checkoutTime) ? `
+        ${ttkAtHotel ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
             <div class="tgm-collapse-left">${svg(IC.coin)}${esc(c.labels?.localFees || 'At the hotel')}</div>
