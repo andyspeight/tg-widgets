@@ -137,6 +137,11 @@ a{text-decoration:none;color:inherit}
 .upgrade-btn.is-requested{background:#ECFDF5;color:#059669}
 .upgrade-btn.is-requested:hover{box-shadow:none;transform:none}
 .access-badge.access-included{color:#059669}
+.pkg-pills{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.pkg-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.01em}
+.pkg-spark{background:#EEF2F7;color:#475569}
+.pkg-boost{background:#ECFEFF;color:#0E7490}
+.pkg-ignite{background:#FEF3C7;color:#B45309}
 .ureq-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;animation:ureqFade .15s ease}
 @keyframes ureqFade{from{opacity:0}to{opacity:1}}
 .ureq-card{background:#fff;border-radius:18px;max-width:380px;width:100%;padding:28px 26px;text-align:center;box-shadow:0 24px 60px rgba(15,23,42,.28);animation:ureqPop .18s cubic-bezier(.2,.8,.3,1)}
@@ -1134,11 +1139,12 @@ function renderCatalogue() {
     const previewSoon = isBuilt && release === 'coming-soon'; // built, but withheld from this viewer
 
     const code = catalogueCodeFor(w);
-    // Entitlement-driven lock: a signed-in client sees a widget unlocked only
-    // when Control has granted it (mirrors /api/auth/me entitledWidgetCodes).
-    // Staff see everything; widgets with no catalogue code (e.g. Loader) are
-    // never gated. preview-soon still takes visual precedence.
-    const isEntitled = isStaff() || !code || !entitlementsLoaded || entitledWidgetCodes.has(code);
+    // Entitlement-driven lock, mirroring Control. A widget only locks when it is
+    // a productised (Active) catalogue item the signed-in client hasn't been
+    // granted. Staff see all; inactive or uncoded items stay open; until real
+    // entitlement data loads we fail open so nobody sees an all-locked grid.
+    const isGated = !!code && activeWidgetCodes.has(code);
+    const isEntitled = isStaff() || !isGated || !entitlementsLoaded || entitledWidgetCodes.has(code);
     const isLocked = signedIn && !isEntitled && !previewSoon;
     const isRequested = !!code && requestedCodes.has(code);
     const minTier = getMinTier(w);
@@ -1171,9 +1177,15 @@ function renderCatalogue() {
     // Access badge (only when signed in, and not while preview-soon — the flash
     // already tells the story and a tier badge would be misleading).
     let accessBadge = '';
-    if (signedIn && !previewSoon && isEntitled && code) {
+    if (signedIn && !previewSoon && code && entitledWidgetCodes.has(code)) {
       accessBadge = `<div class="access-badge access-included"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Included</div>`;
     }
+
+    // "Included on" pills — which standard plans carry this widget.
+    const pills = (code && Array.isArray(packagesByCode[code])) ? packagesByCode[code] : [];
+    const packagePills = pills.length
+      ? `<div class="pkg-pills">${pills.map(t => `<span class="pkg-pill pkg-${String(t).toLowerCase()}">${t}</span>`).join('')}</div>`
+      : '';
 
     // Actions
     let actions = '';
@@ -1214,6 +1226,7 @@ function renderCatalogue() {
           <div><div class="w-card-name">${w.name}</div><div class="w-card-cat">${w.category}</div></div>
         </div>
         <p class="w-card-desc">${w.description}</p>
+        ${packagePills}
         ${accessBadge}
         <div class="w-card-actions" style="margin-top:${accessBadge?'8':'0'}px">${actions}</div>
       </div>
@@ -1248,6 +1261,12 @@ let entitledWidgetCodes = new Set();
 let entitlementsLoaded = false;
 // Widget codes the client has requested this session (quiet "Requested" state).
 let requestedCodes = new Set();
+// Catalogue codes that are Active (sellable). Only these get gated; inactive
+// items stay open. From /api/auth/me.
+let activeWidgetCodes = new Set();
+// productCode → standard tiers that include it (Spark/Boost/Ignite), from
+// /api/widget-packages. Drives the "included on" pills.
+let packagesByCode = {};
 
 /* Staff bypass: a signed-in user whose email belongs to a Travelgenix /
    Agendas domain sees every widget as fully live, regardless of the catalogue.
@@ -1279,6 +1298,18 @@ async function loadCatalogueStatus() {
   } catch (e) {
     // Fail open — dashboard falls back to registry statuses.
     console.warn('[index] catalogue status load failed:', e && e.message);
+  }
+}
+
+async function loadWidgetPackages() {
+  try {
+    const r = await fetch('/api/widget-packages', { headers: { 'Accept': 'application/json' } });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d && d.packages && typeof d.packages === 'object') packagesByCode = d.packages;
+  } catch (e) {
+    // Fail soft — no pills if the feed is unavailable.
+    console.warn('[index] widget packages load failed:', e && e.message);
   }
 }
 
@@ -3121,6 +3152,7 @@ async function bootstrapCookieAuth() {
     signedIn = true;
     userEmail = userData.email || '';
     entitledWidgetCodes = new Set(Array.isArray(data.entitledWidgetCodes) ? data.entitledWidgetCodes : []);
+    activeWidgetCodes = new Set(Array.isArray(data.activeWidgetCodes) ? data.activeWidgetCodes : []);
     entitlementsLoaded = true;
     return true;
   } catch (e) {
@@ -3241,6 +3273,9 @@ render();
 // client-side once we know who's signed in.
 loadCatalogueStatus().then(() => { render(); });
 
+// Package membership for the "included on" pills — public, loads in parallel.
+loadWidgetPackages().then(() => { render(); });
+
 // Cookie auth check runs in parallel. If it resolves to "signed in" and
 // we weren't already, re-render to show the user's widgets / dashboard
 // instead of the sign-in prompt. If localStorage already had us signed
@@ -3275,5 +3310,8 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-contact.js"></script>
 <script src="/widget-team.js"></script>
 <script src="/widget-loader.js"></script>
+
+<!-- Staff act-as-client switcher (self-gating: only renders for Travelgenix staff) -->
+<script defer src="/staff-switcher.js"></script>
 </body>
 </html>
