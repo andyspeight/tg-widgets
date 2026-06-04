@@ -12,8 +12,8 @@ import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimi
 // (email, plan) the rest of this endpoint depends on. Once every active
 // session has been re-issued under the new auth/signin + auth/sso flow
 // (which now embed email + plan natively), this fallback becomes a no-op.
-import { getRecord } from './_lib/auth/airtable.js';
-import { USERS, CLIENTS } from './_lib/auth/schema.js';
+import { getRecord, listAllRecords } from './_lib/auth/airtable.js';
+import { USERS, CLIENTS, CATALOGUE, CLIENT_ENTITLEMENTS } from './_lib/auth/schema.js';
 import { normalisePlanValue } from './_lib/auth/plan.js';
 
 /**
@@ -133,6 +133,9 @@ const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
+// Staff bypass the entitlement gate (they create widgets for demos/setup).
+// Keep in sync with STAFF_DOMAINS in the dashboard and /api/widget-catalogue.
+const ENTITLEMENT_STAFF_DOMAINS = ['travelgenix.io', 'travelgenix.com', 'agendas.group'];
 
 /**
  * Capture the OWNING-CLIENT id from the session, trusting it ONLY when it
@@ -626,6 +629,52 @@ export default async function handler(req, res) {
         return res.status(400).json({
           error: 'widgetType is required when creating a new widget'
         });
+      }
+
+      // ── Entitlement gate (Control) ───────────────────────────────
+      // Server-side mirror of the dashboard show-and-tag. A create is blocked
+      // ONLY when the widget maps to a productised (Active) catalogue item that
+      // the owning client has not been granted. Staff bypass. Anything we can't
+      // confidently match, or any lookup failure, FAILS OPEN — we never block a
+      // legitimate create over an Airtable hiccup or a naming mismatch.
+      try {
+        const email = (user.email || '').toLowerCase();
+        const at = email.lastIndexOf('@');
+        const domain = at === -1 ? '' : email.slice(at + 1);
+        const isStaff = ENTITLEMENT_STAFF_DOMAINS.includes(domain);
+        const clientId = (typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId))
+          ? user.clientId
+          : null;
+
+        if (!isStaff && clientId) {
+          const [catalogue, entitlements] = await Promise.all([
+            listAllRecords(CATALOGUE.tableId),
+            listAllRecords(CLIENT_ENTITLEMENTS.tableId),
+          ]);
+          const typeLc = safeType.toLowerCase();
+          const catItem = catalogue.find(
+            (c) => String(c.fields[CATALOGUE.fields.productName] || '').toLowerCase() === typeLc
+          );
+          // Enforce only when we matched an ACTIVE catalogue item.
+          if (catItem && !!catItem.fields[CATALOGUE.fields.active]) {
+            const entitled = entitlements.some((e) => {
+              const clients = e.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
+              const cats = e.fields[CLIENT_ENTITLEMENTS.fields.catalogueItem] || [];
+              return e.fields[CLIENT_ENTITLEMENTS.fields.enabled]
+                && clients.includes(clientId)
+                && cats.includes(catItem.id);
+            });
+            if (!entitled) {
+              console.warn(`[widget-config] create blocked (not entitled) type=${safeType} client=${clientId}`);
+              return res.status(403).json({
+                error: `${safeType} isn't enabled on your account yet. Request it from your dashboard and we'll switch it on for you.`,
+                code: 'not_entitled',
+              });
+            }
+          }
+        }
+      } catch (gateErr) {
+        console.warn('[widget-config] entitlement gate skipped (fail-open):', gateErr?.message);
       }
 
       const planLimits = PLAN_WIDGET_LIMITS[safeType];
