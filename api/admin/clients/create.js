@@ -228,6 +228,21 @@ export default async function handler(req, res) {
     return jsonError(res, 500, 'internal_error', 'Could not verify uniqueness');
   }
 
+  // ─── Gate: only seed entitlements for ACTIVE catalogue items ─────
+  // A product switched off in the catalogue must never land on a new
+  // client's account, even if a stale wizard payload still lists it.
+  const activeCatIds = new Set(
+    (allCatalogue || [])
+      .filter((c) => !!c.fields[CATALOGUE.fields.active])
+      .map((c) => c.id)
+  );
+  const activeEntitlements = entitlements.filter((e) => activeCatIds.has(e.catalogueItemId));
+  const skippedInactive = entitlements.filter((e) => !activeCatIds.has(e.catalogueItemId));
+  if (skippedInactive.length) {
+    console.warn('[admin/clients/create] skipped inactive catalogue items:',
+      skippedInactive.map((e) => e.catalogueItemId).join(', '));
+  }
+
   // ─── 1. Create the Client record ─────────────────────────────────
   let clientRec;
   try {
@@ -268,7 +283,7 @@ export default async function handler(req, res) {
   // ─── 2. Create entitlement rows ──────────────────────────────────
   let entitlementsCreated = 0;
   try {
-    for (const e of entitlements) {
+    for (const e of activeEntitlements) {
       await createRecord(CLIENT_ENTITLEMENTS.tableId, {
         [CLIENT_ENTITLEMENTS.fields.client]:        [clientId],
         [CLIENT_ENTITLEMENTS.fields.catalogueItem]: [e.catalogueItemId],
@@ -287,7 +302,7 @@ export default async function handler(req, res) {
       clientId,
       entitlementsCreated,
       partial: true,
-      message: `Client created but entitlement loop failed at ${entitlementsCreated}/${entitlements.length}. Edit the client to fix.`,
+      message: `Client created but entitlement loop failed at ${entitlementsCreated}/${activeEntitlements.length}. Edit the client to fix.`,
     });
   }
 
@@ -340,7 +355,7 @@ export default async function handler(req, res) {
 
   // Walk the enabled entitlements and figure out which product slugs are needed
   const neededSlugs = new Set();
-  for (const e of entitlements) {
+  for (const e of activeEntitlements) {
     const slug = slugByCatalogueId.get(e.catalogueItemId);
     if (slug) neededSlugs.add(slug);
   }
@@ -442,6 +457,7 @@ export default async function handler(req, res) {
     ok: true,
     clientId,
     entitlementsCreated,
+    entitlementsSkipped: skippedInactive.length,
     invites: inviteResults,
     permissionsCreated,
     lunaChatConfigured: !!lunaChatPayload,
