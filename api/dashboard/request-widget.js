@@ -24,6 +24,55 @@ import { listAllRecords, getRecord, createRecord } from '../_lib/auth/airtable.j
 import { jsonOk, jsonError } from '../_lib/auth/http.js';
 import { applyRateLimit, RATE_LIMITS } from '../_auth.js';
 import { CATALOGUE, CLIENTS } from '../_lib/auth/schema.js';
+import { sendViaSendGrid, buildFromField } from '../_lib/sendgrid.js';
+
+const NOTIFY_TO = 'info@travelgenix.io';
+const CONTROL_URL = 'https://widgets.travelify.io/admin#clients';
+
+// Branded HTML notification for the account-manager inbox. Plain text would get
+// missed, so this is a proper card with the request at a glance and one CTA.
+function renderRequestEmail({ widgetName, widgetCode, clientName, currentPlan, neededTier, userEmail, whenText }) {
+  const row = (label, value) => `
+    <tr>
+      <td style="padding:10px 0;border-bottom:1px solid #E2E8F0;font:600 12px/1.4 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#64748B;text-transform:uppercase;letter-spacing:.04em;width:130px;vertical-align:top">${label}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #E2E8F0;font:400 14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0F172A">${value}</td>
+    </tr>`;
+  const tierVal = neededTier
+    ? `<span style="display:inline-block;background:#ECFDF5;color:#0E9488;font-weight:700;font-size:13px;padding:3px 10px;border-radius:999px">${neededTier}</span>`
+    : '<span style="color:#94A3B8">Not specified</span>';
+  return `<!doctype html>
+<html><body style="margin:0;padding:0;background:#F1F5F9">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0">A client wants to add ${widgetName} to their site.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:28px 16px">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(15,23,42,.08)">
+        <tr><td style="background:#1B2B5B;padding:20px 32px">
+          <span style="font:800 16px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Travelgenix Control</span>
+        </td></tr>
+        <tr><td style="padding:32px 32px 8px">
+          <div style="font:700 11px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0E9488;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">New upgrade request</div>
+          <h1 style="margin:0 0 6px;font:800 22px/1.25 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0F172A">${clientName || 'A client'} wants ${widgetName}</h1>
+          <p style="margin:0 0 20px;font:400 14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#64748B">They tapped Request access from their widget dashboard. Reach out to get them set up.</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            ${row('Widget', `${widgetName} <span style="color:#94A3B8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px">${widgetCode}</span>`)}
+            ${row('Current plan', currentPlan || '<span style="color:#94A3B8">Unknown</span>')}
+            ${row('Included from', tierVal)}
+            ${row('Requested by', userEmail || '<span style="color:#94A3B8">Unknown</span>')}
+            ${row('When', whenText)}
+          </table>
+        </td></tr>
+        <tr><td style="padding:24px 32px 32px">
+          <a href="${CONTROL_URL}" style="display:inline-block;background:#0E9488;color:#FFFFFF;font:700 15px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;text-decoration:none;padding:14px 28px;border-radius:10px">Open Control</a>
+          <p style="margin:16px 0 0;font:400 13px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#94A3B8">Reply to this email to respond to ${userEmail || 'the client'} directly.</p>
+        </td></tr>
+        <tr><td style="padding:18px 32px;background:#F8FAFC;border-top:1px solid #E2E8F0">
+          <p style="margin:0;font:400 12px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#94A3B8">Travelgenix · Running a travel business can be complex, but your technology shouldn't be.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
 
 // "Upgrade Requests" table (Control base appAYzWZxvK6qlwXK). Inlined rather
 // than added to the shared schema so the blast radius of this feature is one
@@ -128,6 +177,27 @@ export default async function handler(req, res) {
       [REQ.fields.status]:      REQ.statuses.NEW,
       [REQ.fields.created]:     nowIso,
     });
+
+    // Best-effort notify the account-manager inbox. Never blocks the request —
+    // the Airtable row is the source of truth, the email is the nudge.
+    try {
+      const whenText = new Date().toLocaleString('en-GB', {
+        timeZone: 'Europe/London', dateStyle: 'medium', timeStyle: 'short',
+      });
+      await sendViaSendGrid({
+        from: buildFromField('Travelgenix Control'),
+        to: NOTIFY_TO,
+        replyTo: ctx.email || undefined,
+        subject: `Upgrade request: ${widgetName} — ${clientName || 'a client'}`,
+        html: renderRequestEmail({
+          widgetName, widgetCode, clientName, currentPlan, neededTier,
+          userEmail: ctx.email || '', whenText,
+        }),
+        categoryTag: 'upgrade-request',
+      });
+    } catch (mailErr) {
+      console.warn('[dashboard/request-widget] notify email failed:', mailErr?.message);
+    }
 
     return jsonOk(res, { ok: true, requested: true });
   } catch (err) {
