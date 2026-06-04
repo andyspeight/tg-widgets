@@ -475,6 +475,7 @@
             <div class="toggle-row"><span>Cancellation policy</span><button class="switch on" data-display="showCancellation" type="button"></button></div>
             <div class="toggle-row"><span>Online cancellation<small>Let customers cancel a product from the widget — they see the policy and charges before confirming.</small></span><button class="switch on" data-display="showCancel" type="button"></button></div>
             <div class="toggle-row"><span>Send cancellation email<small>Email the traveller a confirmation when they cancel a product. Turn off if you'd rather handle this yourself.</small></span><button class="switch on" data-display="cancelEmail" type="button"></button></div>
+            <div class="toggle-row"><span>Online amendments<small>Let customers send a change request from the widget. It notifies the team. The booking isn't changed automatically.</small></span><button class="switch on" data-display="showAmend" type="button"></button></div>
             <div class="field">
               <label>Cancellation email message</label>
               <textarea id="copy-cancel-email-msg" rows="4" placeholder="Leave blank to use the default confirmation wording.">We're writing to confirm that your booking has been cancelled as requested. If any refund is due it will be processed in line with the cancellation policy. If you didn't request this or have any questions, please get in touch.</textarea>
@@ -617,7 +618,7 @@ import { renderEmailHtml } from '/_email-template.js';
       colors: Object.assign({}, DEFAULT_COLOURS),
       radius: 12,
       support: { email: '', phone: '' },
-      display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showPayBalance: true, showLocalFees: true },
+      display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
     previewTheme: 'light',
@@ -1003,12 +1004,11 @@ import { renderEmailHtml } from '/_email-template.js';
         name: state.name || 'Untitled My Booking widget',
         config: state.config,
       };
-      if (state.widgetId) body.widgetId = state.widgetId;
+      if (state.widgetId) body.id = state.widgetId;
 
       const res = await fetch('/api/widget-config', {
         method: 'POST',
         headers: authH(),
-        credentials: 'include',
         body: JSON.stringify(body),
       });
       if (res.status === 401) {
