@@ -1333,7 +1333,12 @@ async function setWidgetStatus(widgetId, status) {
       body: JSON.stringify({ widgetId, status }),
     });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.ok) throw new Error(d.error || `HTTP ${r.status}`);
+    if (!r.ok || !d.ok) {
+      const msg = typeof d.error === 'string' ? d.error
+        : (d.error && d.error.message) ? d.error.message
+        : `HTTP ${r.status}`;
+      throw new Error(msg);
+    }
     showToast(`${w ? w.name : widgetId} set to ${label}`, 'ok');
   } catch (e) {
     if (prev === null) delete catalogueStatus[widgetId]; else catalogueStatus[widgetId] = prev;
