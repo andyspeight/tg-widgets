@@ -478,6 +478,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'rss',
+    name: 'RSS News Feed',
+    airtableType: 'RSS Feed',
+    description: 'Pull the latest articles from any RSS or Atom feeds — travel news, your own blog, partner sites — into a tidy list, grid or compact headline strip. Merge several feeds into one always-current stream. No API key; ships with one-click travel feeds to get started.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none"/>'},
+    color: '#F26522',
+    editorUrl: '/editor-rss',
+    demoUrl: '/demo-rss',
+    widgetTag: 'rss',
+    scriptFile: 'widget-rss.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'enquiry',
     name: 'Enquiry Form',
     airtableType: 'Enquiry Form',
@@ -1770,6 +1785,17 @@ function loadMiniPreview(w) {
       showHeader: false, showChannelCta: false,
       showTitle: true, showPublished: false, showViews: false,
       play: 'lightbox',
+    });
+  }
+
+  if (w.id === 'rss' && window.TGRssWidget) {
+    new window.TGRssWidget(el, {
+      feeds: ['https://www.theguardian.com/uk/travel/rss'],
+      layout: 'list', maxItems: 4,
+      theme: 'light', accent: w.color, radius: 12,
+      showHeader: false, showImages: true,
+      showSource: true, showDate: true, showExcerpt: false,
+      openNewTab: true,
     });
   }
 
@@ -3394,6 +3420,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-weather.js"></script>
 <script src="/widget-maps.js"></script>
 <script src="/widget-youtube.js"></script>
+<script src="/widget-rss.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
 <script src="/widget-countdown.js"></script>
