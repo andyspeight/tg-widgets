@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Google Maps — Travelgenix Widget Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC; color: #0F172A; min-height: 100vh; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body[data-bg="dark"] { background: #020617; color: #F1F5F9; }
+
+  .demo-bar {
+    background: rgba(255,255,255,0.85); border-bottom: 1px solid #E2E8F0;
+    padding: 14px 24px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px);
+  }
+  body[data-bg="dark"] .demo-bar { background: rgba(15,23,42,0.85); border-bottom-color: #1E293B; }
+  .demo-bar-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .demo-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: inherit; }
+  .demo-brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #0891B2 0%, #6366F1 100%); }
+  .demo-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .demo-pill {
+    appearance: none; border: 1px solid #E2E8F0; background: #fff; color: #475569;
+    font: inherit; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 999px;
+    cursor: pointer; transition: all 0.18s ease;
+  }
+  body[data-bg="dark"] .demo-pill { background: #1E293B; color: #94A3B8; border-color: #334155; }
+  .demo-pill:hover { background: #F1F5F9; color: #0F172A; }
+  body[data-bg="dark"] .demo-pill:hover { background: #334155; color: #F1F5F9; }
+  .demo-pill[aria-pressed="true"] { background: #0F172A; color: #fff; border-color: #0F172A; }
+  body[data-bg="dark"] .demo-pill[aria-pressed="true"] { background: #F8FAFC; color: #0F172A; border-color: #F8FAFC; }
+  .demo-divider { width: 1px; height: 20px; background: #E2E8F0; margin: 0 4px; }
+  body[data-bg="dark"] .demo-divider { background: #334155; }
+  .demo-select {
+    appearance: none; border: 1px solid #E2E8F0; background: #fff; color: #475569;
+    font: inherit; font-size: 13px; font-weight: 500; padding: 7px 30px 7px 14px; border-radius: 999px; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 11px center;
+  }
+  body[data-bg="dark"] .demo-select { background-color: #1E293B; color: #94A3B8; border-color: #334155; }
+
+  .mock-site { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+  .mock-hero { text-align: center; padding: 24px 24px 8px; }
+  .mock-hero h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; }
+  .mock-hero p { color: #64748B; margin-top: 8px; font-size: 16px; }
+  body[data-bg="dark"] .mock-hero p { color: #94A3B8; }
+
+  .widget-mount { margin-top: 28px; }
+  .demo-foot { max-width: 1100px; margin: 28px auto 0; color: #94A3B8; font-size: 12px; text-align: center; }
+</style>
+</head>
+<body data-bg="light">
+
+  <div class="demo-bar">
+    <div class="demo-bar-inner">
+      <div class="demo-brand"><span class="demo-brand-mark"></span> Travelgenix — Google Maps widget</div>
+      <div class="demo-controls">
+        <button class="demo-pill" data-scenario="offices" aria-pressed="true">Our offices</button>
+        <button class="demo-pill" data-scenario="single" aria-pressed="false">Single location</button>
+        <button class="demo-pill" data-scenario="resorts" aria-pressed="false">Resort collection</button>
+        <span class="demo-divider"></span>
+        <select class="demo-select" id="styleSel" aria-label="Map style">
+          <option value="streets">Streets</option>
+          <option value="minimal">Minimal</option>
+          <option value="muted">Muted</option>
+          <option value="dark">Dark</option>
+          <option value="satellite">Satellite</option>
+        </select>
+        <button class="demo-pill" id="themeBtn" aria-pressed="false">Dark page</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mock-site">
+    <div class="mock-hero">
+      <h1>Find us &amp; our partners</h1>
+      <p>The same widget handles a single pin or a whole collection of locations.</p>
+    </div>
+    <div class="widget-mount">
+      <div id="mount"></div>
+    </div>
+    <div class="demo-foot">Demo page · widget-maps.js v1.0.0 · pins, controls and info cards all render inside the widget’s Shadow DOM. Tiles by MapTiler (Leaflet) — no API key setup required.</div>
+  </div>
+
+  <script src="/widget-maps.js"></script>
+  <script>
+    var SCENARIOS = {
+      offices: {
+        title: 'Our offices',
+        subtitle: 'Pop in for a chat — we’re open Mon–Sat.',
+        mapStyle: 'streets', showList: 'auto', directionsButton: true,
+        locations: [
+          { title: 'Bournemouth (Head office)', address: 'Richmond Hill, Bournemouth BH2 6EZ', lat: 50.7206, lng: -1.8795, description: 'Our home base on the south coast.', color: '#0891B2', link: 'https://travelgenix.io', linkLabel: 'Visit website' },
+          { title: 'London', address: '90 High Holborn, London WC1V 6LJ', lat: 51.5176, lng: -0.1199, description: 'Central London meeting space.', color: '#6366F1' },
+          { title: 'Manchester', address: 'Spinningfields, Manchester M3 3JE', lat: 53.4794, lng: -2.2533, description: 'Serving the North West.', color: '#10B981' },
+          { title: 'Edinburgh', address: 'George Street, Edinburgh EH2 2LR', lat: 55.9533, lng: -3.1980, description: 'Our Scottish base.', color: '#F59E0B' }
+        ]
+      },
+      single: {
+        title: 'Travelgenix HQ', subtitle: '',
+        mapStyle: 'streets', zoom: 15, showList: 'never', openFirst: true, directionsButton: true,
+        locations: [
+          { title: 'Travelgenix', address: 'Richmond Hill, Bournemouth BH2 6EZ', lat: 50.7206, lng: -1.8795, description: 'Find us on Richmond Hill, a short walk from the seafront.', color: '#0891B2', link: 'https://travelgenix.io', linkLabel: 'travelgenix.io' }
+        ]
+      },
+      resorts: {
+        title: 'Featured Algarve collection',
+        subtitle: 'Hand-picked resorts along the southern coast of Portugal.',
+        mapStyle: 'satellite', showList: 'always', directionsButton: true, accent: '#6366F1',
+        locations: [
+          { title: 'Albufeira', address: 'Albufeira, Algarve, Portugal', lat: 37.0891, lng: -8.2475, description: 'Lively beaches and a buzzing old town.', image: 'https://images.unsplash.com/photo-1591608971362-f08b2a75731a?w=640&q=70&auto=format&fit=crop', color: '#6366F1' },
+          { title: 'Lagos', address: 'Lagos, Algarve, Portugal', lat: 37.1028, lng: -8.6741, description: 'Dramatic cliffs and golden coves.', image: 'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=640&q=70&auto=format&fit=crop', color: '#0891B2' },
+          { title: 'Faro', address: 'Faro, Algarve, Portugal', lat: 37.0194, lng: -7.9304, description: 'Gateway to the Ria Formosa lagoon.', image: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=640&q=70&auto=format&fit=crop', color: '#10B981' }
+        ]
+      }
+    };
+
+    var current = 'offices';
+
+    function buildConfig(name) {
+      var base = JSON.parse(JSON.stringify(SCENARIOS[name]));
+      base.mapStyle = document.getElementById('styleSel').value || base.mapStyle;
+      base.theme = document.body.getAttribute('data-bg') === 'dark' ? 'dark' : 'light';
+      base.height = 480;
+      return base;
+    }
+
+    function mount() {
+      var host = document.getElementById('mount');
+      host.innerHTML = '';
+      var div = document.createElement('div');
+      host.appendChild(div);
+      try { new window.TGMapsWidget(div, buildConfig(current)); } catch (e) { console.error(e); }
+    }
+
+    document.querySelectorAll('.demo-pill[data-scenario]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        current = btn.getAttribute('data-scenario');
+        document.querySelectorAll('.demo-pill[data-scenario]').forEach(function (b) {
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+        mount();
+      });
+    });
+
+    document.getElementById('styleSel').addEventListener('change', mount);
+
+    document.getElementById('themeBtn').addEventListener('click', function () {
+      var dark = document.body.getAttribute('data-bg') !== 'dark';
+      document.body.setAttribute('data-bg', dark ? 'dark' : 'light');
+      this.setAttribute('aria-pressed', dark ? 'true' : 'false');
+      this.textContent = dark ? 'Light page' : 'Dark page';
+      mount();
+    });
+
+    mount();
+  </script>
+</body>
+</html>
