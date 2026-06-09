@@ -64,6 +64,10 @@
       "destination": "/demo-maps.html"
     },
     {
+      "source": "/demo-youtube",
+      "destination": "/demo-youtube.html"
+    },
+    {
       "source": "/demo-enquiry",
       "destination": "/demo-enquiry.html"
     },
@@ -166,6 +170,10 @@
     {
       "source": "/editor-maps",
       "destination": "/editor-maps.html"
+    },
+    {
+      "source": "/editor-youtube",
+      "destination": "/editor-youtube.html"
     },
     {
       "source": "/editor-enquiry",
@@ -398,6 +406,23 @@
     },
     {
       "source": "/widget-maps.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-youtube.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
