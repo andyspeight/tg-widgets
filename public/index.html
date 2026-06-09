@@ -463,6 +463,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'youtube',
+    name: 'YouTube',
+    airtableType: 'YouTube',
+    description: 'Show a channel’s latest videos automatically — a tidy grid, swipeable carousel or list that always stays current as you upload. Privacy-friendly playback in a lightbox or on YouTube. No API key, no setup: paste a channel link and you’re done.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="2" y="5" width="20" height="14" rx="4"/><polygon points="10 9 16 12 10 15 10 9"/>'},
+    color: '#FF0000',
+    editorUrl: '/editor-youtube',
+    demoUrl: '/demo-youtube',
+    widgetTag: 'youtube',
+    scriptFile: 'widget-youtube.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'enquiry',
     name: 'Enquiry Form',
     airtableType: 'Enquiry Form',
@@ -1744,6 +1759,17 @@ function loadMiniPreview(w) {
         { title: 'Manchester', lat: 53.4794, lng: -2.2533, color: '#10B981' },
         { title: 'Edinburgh', lat: 55.9533, lng: -3.1980, color: '#F59E0B' },
       ],
+    });
+  }
+
+  if (w.id === 'youtube' && window.TGYouTubeWidget) {
+    new window.TGYouTubeWidget(el, {
+      channelId: 'UCchgIh8Tc4sTmBfnMQ5pDdg',
+      layout: 'grid', columns: 2, maxVideos: 4,
+      theme: 'light', accent: w.color, radius: 12,
+      showHeader: false, showChannelCta: false,
+      showTitle: true, showPublished: false, showViews: false,
+      play: 'lightbox',
     });
   }
 
@@ -3367,6 +3393,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-airport.js"></script>
 <script src="/widget-weather.js"></script>
 <script src="/widget-maps.js"></script>
+<script src="/widget-youtube.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
 <script src="/widget-countdown.js"></script>
