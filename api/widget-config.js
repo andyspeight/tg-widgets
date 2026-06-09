@@ -223,6 +223,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Contact Card',
   'Loader',
   'Maps',
+  'YouTube',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -255,6 +256,7 @@ const PLAN_WIDGET_LIMITS = {
   'Contact Card':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Loader':                { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Maps':                  { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'YouTube':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -336,6 +338,9 @@ const WIDGET_TYPE_ALIASES = {
   'maps':              'Maps',
   'map':               'Maps',
   'google-maps':       'Maps',
+  'youtube':           'YouTube',
+  'youtube-feed':      'YouTube',
+  'yt':                'YouTube',
 };
 
 function canonicaliseWidgetType(raw) {
