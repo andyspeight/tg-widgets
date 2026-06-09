@@ -448,6 +448,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'maps',
+    name: 'Maps',
+    airtableType: 'Maps',
+    description: 'Interactive location map — plot a single place or a whole collection of pins (offices, partner hotels, meeting points) with custom colours, photos, descriptions, links and one-tap directions. Powered by MapTiler, with no API key to manage.',
+    category: 'Information',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-maps',
+    demoUrl: '/demo-maps',
+    widgetTag: 'maps',
+    scriptFile: 'widget-maps.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'enquiry',
     name: 'Enquiry Form',
     airtableType: 'Enquiry Form',
@@ -1707,6 +1722,28 @@ function loadMiniPreview(w) {
           season: ['off','off','shoulder','shoulder','best','best','best','best','best','shoulder','off','off'],
         },
       },
+    });
+  }
+
+  if (w.id === 'maps' && window.TGMapsWidget) {
+    new window.TGMapsWidget(el, {
+      theme: 'light',
+      mapStyle: 'streets',
+      accent: w.color,
+      radius: 12,
+      height: 320,
+      showList: 'never',
+      showControls: true,
+      showInfoCard: false,
+      autoFit: true,
+      title: '',
+      subtitle: '',
+      locations: [
+        { title: 'Bournemouth', lat: 50.7206, lng: -1.8795, color: w.color },
+        { title: 'London', lat: 51.5176, lng: -0.1199, color: '#6366F1' },
+        { title: 'Manchester', lat: 53.4794, lng: -2.2533, color: '#10B981' },
+        { title: 'Edinburgh', lat: 55.9533, lng: -3.1980, color: '#F59E0B' },
+      ],
     });
   }
 
@@ -3329,6 +3366,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-spotlight.js"></script>
 <script src="/widget-airport.js"></script>
 <script src="/widget-weather.js"></script>
+<script src="/widget-maps.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
 <script src="/widget-countdown.js"></script>
