@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maps — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* ─── Per-editor sidebar inner styles (shared conventions across editors) ─── */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .textarea, .select {
+    width:100%; padding:8px 10px; font:inherit; font-size:13px;
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); color:var(--tgse-ink);
+    transition:border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .input:focus, .textarea:focus, .select:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+  .textarea { resize:vertical; min-height:60px; line-height:1.4; }
+  .select { appearance:none; padding-right:28px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1l4 4 4-4' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat; background-position:right 10px center; }
+  .field-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  /* Style picker */
+  .layout-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .layout-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:8px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center;
+    transition:border-color 160ms ease, background 160ms ease; display:flex; flex-direction:column; gap:6px; align-items:center; }
+  .layout-btn:hover { background:var(--tgse-hover); }
+  .layout-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .layout-sw { width:100%; height:30px; border-radius:6px; border:1px solid var(--tgse-border); }
+  .layout-btn-label { font-size:11px; font-weight:600; color:var(--tgse-ink); }
+  .layout-btn.is-on .layout-btn-label { color:var(--tgse-brand-dark); }
+
+  /* Colour rows */
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  /* Switch */
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  /* Slider */
+  .slider-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+  .slider-row input[type="range"] { width:100%; accent-color:var(--tgse-brand); }
+  .slider-val { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; min-width:42px; text-align:right; }
+
+  /* Repeater */
+  .loc-toolbar { display:flex; gap:8px; margin-bottom:12px; }
+  .btn { appearance:none; border:1px solid var(--tgse-border); background:var(--tgse-panel); color:var(--tgse-ink); font:inherit; font-size:12px; font-weight:500; padding:7px 12px; border-radius:var(--tgse-radius-sm); cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background 160ms ease, border-color 160ms ease; }
+  .btn:hover { background:var(--tgse-hover); }
+  .btn svg { width:14px; height:14px; }
+  .btn-primary { background:var(--tgse-brand); color:#fff; border-color:var(--tgse-brand); }
+  .btn-primary:hover { background:var(--tgse-brand-dark); border-color:var(--tgse-brand-dark); }
+  .btn[disabled] { opacity:.55; cursor:default; }
+
+  .loc-list { display:flex; flex-direction:column; gap:8px; }
+  .loc-item { border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-md); background:var(--tgse-panel); overflow:hidden; }
+  .loc-head { display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; user-select:none; }
+  .loc-head:hover { background:var(--tgse-hover); }
+  .loc-dot { width:14px; height:18px; flex-shrink:0; }
+  .loc-dot svg { width:14px; height:18px; }
+  .loc-summary { flex:1; min-width:0; }
+  .loc-summary-title { font-size:13px; font-weight:600; color:var(--tgse-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .loc-summary-sub { font-size:11px; color:var(--tgse-ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .loc-actions { display:flex; gap:4px; }
+  .icon-btn { appearance:none; border:0; background:transparent; color:var(--tgse-ink-3); width:26px; height:26px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:background 160ms ease, color 160ms ease; }
+  .icon-btn:hover { background:var(--tgse-panel-3); color:var(--tgse-ink); }
+  .icon-btn[disabled] { opacity:.4; cursor:default; }
+  .icon-btn svg { width:14px; height:14px; }
+  .icon-btn--danger:hover { color:var(--tgse-danger); }
+  .loc-head-chev { color:var(--tgse-ink-3); transition:transform 160ms ease; }
+  .loc-head-chev svg { width:14px; height:14px; }
+  .loc-item.is-open .loc-head-chev { transform:rotate(180deg); }
+  .loc-body { padding:12px; border-top:1px solid var(--tgse-border); background:var(--tgse-panel-2); display:none; }
+  .loc-item.is-open .loc-body { display:block; }
+  .geo-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:end; }
+  .empty { text-align:center; padding:24px; border:2px dashed var(--tgse-border); border-radius:var(--tgse-radius-md); color:var(--tgse-ink-3); font-size:13px; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Maps</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled map" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            <span class="tgse-section-label">Map style</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="layout-grid" id="style-picker">
+              <button type="button" class="layout-btn" data-style="streets"><span class="layout-sw" style="background:linear-gradient(135deg,#eef2f6,#cfe8ef)"></span><span class="layout-btn-label">Streets</span></button>
+              <button type="button" class="layout-btn" data-style="minimal"><span class="layout-sw" style="background:linear-gradient(135deg,#f8fafc,#e2e8f0)"></span><span class="layout-btn-label">Minimal</span></button>
+              <button type="button" class="layout-btn" data-style="muted"><span class="layout-sw" style="background:linear-gradient(135deg,#eaf0f3,#d7e3ea)"></span><span class="layout-btn-label">Muted</span></button>
+              <button type="button" class="layout-btn" data-style="dark"><span class="layout-sw" style="background:linear-gradient(135deg,#334155,#0f172a)"></span><span class="layout-btn-label">Dark</span></button>
+              <button type="button" class="layout-btn" data-style="satellite"><span class="layout-sw" style="background:linear-gradient(135deg,#3f5733,#1f2d18)"></span><span class="layout-btn-label">Satellite</span></button>
+              <button type="button" class="layout-btn" data-style="auto"><span class="layout-sw" style="background:linear-gradient(135deg,#cfe8ef 50%,#0f172a 50%)"></span><span class="layout-btn-label">Auto</span></button>
+            </div>
+            <span class="field-hint">“Auto” follows the widget theme (light/dark).</span>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Pin colour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Default pin &amp; accent colour</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
+              </div>
+              <span class="field-hint">Each location can override this with its own pin colour.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Shape &amp; size</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Corner radius</label>
+              <div class="slider-row">
+                <input type="range" id="radius-input" min="0" max="28" step="1" value="16">
+                <span class="slider-val" id="radius-val">16px</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Map height</label>
+              <div class="slider-row">
+                <input type="range" id="height-input" min="260" max="700" step="10" value="460">
+                <span class="slider-val" id="height-val">460px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== CONTENT ===== -->
+      <div class="tgse-panel" data-tab="content">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="18" y2="18"/></svg>
+            <span class="tgse-section-label">Heading (optional)</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input type="text" class="input" id="title" maxlength="120" placeholder="e.g. Find us">
+            </div>
+            <div class="field">
+              <label class="field-label">Subtitle</label>
+              <textarea class="textarea" id="subtitle" maxlength="240" rows="2"></textarea>
+            </div>
+            <span class="field-hint">Leave both blank to hide the heading above the map.</span>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="tgse-section-label">Locations <span id="loc-count" style="color:var(--tgse-ink-3);font-weight:500">(0)</span></span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="loc-toolbar">
+              <button type="button" class="btn btn-primary" id="add-loc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add location
+              </button>
+            </div>
+            <div class="loc-list" id="loc-list"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+            <span class="tgse-section-label">Display</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Location list panel</label>
+              <select class="select" id="show-list">
+                <option value="auto">Auto (show when 2+ locations)</option>
+                <option value="always">Always show</option>
+                <option value="never">Never show</option>
+              </select>
+            </div>
+            <div class="switch-row"><span class="switch-row-label">Info card on pin click</span><button type="button" class="switch is-on" id="show-card" aria-pressed="true"></button></div>
+            <div class="switch-row"><span class="switch-row-label">“Get directions” button</span><button type="button" class="switch is-on" id="show-directions" aria-pressed="true"></button></div>
+            <div class="switch-row"><span class="switch-row-label">Zoom / recentre controls</span><button type="button" class="switch is-on" id="show-controls" aria-pressed="true"></button></div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+            <span class="tgse-section-label">Map behaviour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="switch-row"><span class="switch-row-label">Auto-fit to all pins</span><button type="button" class="switch is-on" id="auto-fit" aria-pressed="true"></button></div>
+            <span class="field-hint">When off (or single location), uses the default zoom below.</span>
+            <div class="field" style="margin-top:10px">
+              <label class="field-label">Default zoom</label>
+              <div class="slider-row">
+                <input type="range" id="zoom-input" min="1" max="19" step="1" value="13">
+                <span class="slider-val" id="zoom-val">13</span>
+              </div>
+            </div>
+            <div class="switch-row"><span class="switch-row-label">Scroll-wheel zoom</span><button type="button" class="switch" id="scroll-wheel" aria-pressed="false"></button></div>
+            <span class="field-hint">Off is friendlier on embeds — the page keeps scrolling past the map.</span>
+            <div class="switch-row" style="margin-top:8px"><span class="switch-row-label">Open first location on load</span><button type="button" class="switch" id="open-first" aria-pressed="false"></button></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg> Design mode <span class="tgse-kbd">D</span></button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div data-tg-widget="maps" id="widget-mount"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-maps.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-maps.js"></script>
+<script>
+  // MapTiler key (same shared, domain-restricted key the widget uses). Geocoding
+  // here runs client-side from the editor (an authenticated UI on our own
+  // allowlisted origin, explicit-click only) — consistent with how the tile key
+  // is already exposed. The public widget never geocodes; it plots stored coords.
+  const MAPTILER_KEY = 'zSDRMRY6Fi2YzknQVzXf';
+
+  const SVG = {
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+    dup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  };
+
+  function escAttr(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+
+  function makeLoc(o) {
+    o = o || {};
+    return {
+      title: o.title || '', address: o.address || '',
+      lat: (o.lat ?? ''), lng: (o.lng ?? ''),
+      description: o.description || '', image: o.image || '',
+      link: o.link || '', linkLabel: o.linkLabel || '',
+      color: o.color || '',
+    };
+  }
+
+  let C = {
+    title: 'Find us',
+    subtitle: '',
+    mapStyle: 'streets',
+    accent: '#0891B2',
+    radius: 16,
+    height: 460,
+    fontFamily: 'Inter',
+    theme: 'light',
+    showList: 'auto',
+    showInfoCard: true,
+    directionsButton: true,
+    showControls: true,
+    autoFit: true,
+    zoom: 13,
+    scrollWheel: false,
+    openFirst: false,
+    locations: [
+      makeLoc({ title: 'Travelgenix (Head office)', address: 'Richmond Hill, Bournemouth BH2 6EZ', lat: 50.7206, lng: -1.8795, description: 'Our home base on the south coast.', color: '#0891B2' }),
+      makeLoc({ title: 'London', address: '90 High Holborn, London WC1V 6LJ', lat: 51.5176, lng: -0.1199, color: '#6366F1' }),
+    ],
+  };
+
+  let widgetInst = null;
+  let openIdx = 0;
+
+  const shell = tgse.init({
+    widgetType: 'Maps',
+    widgetTag: 'maps',
+    scriptFile: 'widget-maps.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); syncUIFromState(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for Maps', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for Maps', 'ok'),
+    onThemeToggle: (isDark) => { C.theme = isDark ? 'dark' : 'light'; render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initMapsTour === 'function') window.initMapsTour(); },
+  });
+
+  function render() {
+    const host = document.getElementById('widget-mount');
+    if (!host) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} }
+    const fresh = host.cloneNode(false);
+    host.parentNode.replaceChild(fresh, host);
+    if (window.TGMapsWidget) widgetInst = new window.TGMapsWidget(fresh, C);
+  }
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (!Array.isArray(C.locations)) C.locations = [];
+        if (d.name) document.getElementById('name-input').value = d.name;
+        openIdx = C.locations.length ? 0 : -1;
+        syncUIFromState();
+        render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  function toggleSwitch(id, on) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('is-on', !!on);
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function syncUIFromState() {
+    document.querySelectorAll('[data-style]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-style') === C.mapStyle));
+    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2';
+    document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
+    document.getElementById('radius-input').value = C.radius; document.getElementById('radius-val').textContent = C.radius + 'px';
+    document.getElementById('height-input').value = C.height; document.getElementById('height-val').textContent = C.height + 'px';
+    document.getElementById('title').value = C.title || '';
+    document.getElementById('subtitle').value = C.subtitle || '';
+    document.getElementById('show-list').value = C.showList || 'auto';
+    toggleSwitch('show-card', C.showInfoCard);
+    toggleSwitch('show-directions', C.directionsButton);
+    toggleSwitch('show-controls', C.showControls);
+    toggleSwitch('auto-fit', C.autoFit);
+    document.getElementById('zoom-input').value = C.zoom; document.getElementById('zoom-val').textContent = C.zoom;
+    toggleSwitch('scroll-wheel', C.scrollWheel);
+    toggleSwitch('open-first', C.openFirst);
+    renderLocList();
+  }
+
+  function renderLocList() {
+    const wrap = document.getElementById('loc-list');
+    document.getElementById('loc-count').textContent = '(' + C.locations.length + ')';
+    if (!C.locations.length) { wrap.innerHTML = '<div class="empty">No locations yet. Click “Add location”, type an address and press Find on map.</div>'; return; }
+    wrap.innerHTML = C.locations.map((l, i) => {
+      const isOpen = i === openIdx;
+      const col = hexOk(l.color) ? l.color : (hexOk(C.accent) ? C.accent : '#0891B2');
+      const sub = l.address || ((l.lat !== '' && l.lng !== '') ? (l.lat + ', ' + l.lng) : 'No location set');
+      return `
+        <div class="loc-item ${isOpen ? 'is-open' : ''}" data-idx="${i}">
+          <div class="loc-head" data-action="toggle">
+            <span class="loc-dot" style="color:${escAttr(col)}">${SVG.pin}</span>
+            <div class="loc-summary">
+              <div class="loc-summary-title">${escAttr(l.title || 'Untitled location')}</div>
+              <div class="loc-summary-sub">${escAttr(sub)}</div>
+            </div>
+            <div class="loc-actions">
+              <button type="button" class="icon-btn" data-action="up" title="Move up" ${i === 0 ? 'disabled' : ''} aria-label="Move up">${SVG.up}</button>
+              <button type="button" class="icon-btn" data-action="down" title="Move down" ${i === C.locations.length - 1 ? 'disabled' : ''} aria-label="Move down">${SVG.down}</button>
+              <button type="button" class="icon-btn" data-action="dup" title="Duplicate" aria-label="Duplicate">${SVG.dup}</button>
+              <button type="button" class="icon-btn icon-btn--danger" data-action="del" title="Delete" aria-label="Delete">${SVG.del}</button>
+            </div>
+            <span class="loc-head-chev">${SVG.chev}</span>
+          </div>
+          ${isOpen ? renderLocBody(l, i) : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function renderLocBody(l, i) {
+    return `
+      <div class="loc-body">
+        <div class="field">
+          <label class="field-label">Title</label>
+          <input type="text" class="input" data-lfield="title" data-idx="${i}" value="${escAttr(l.title)}" maxlength="100" placeholder="e.g. Head office">
+        </div>
+        <div class="field">
+          <label class="field-label">Address</label>
+          <div class="geo-row">
+            <input type="text" class="input" data-lfield="address" data-idx="${i}" value="${escAttr(l.address)}" placeholder="Type an address…">
+            <button type="button" class="btn" data-action="geocode" data-idx="${i}" title="Find this address on the map">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              Find
+            </button>
+          </div>
+          <span class="field-hint">Press Find to drop the pin, or enter coordinates below.</span>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Latitude</label><input type="number" class="input" data-lfield="lat" data-idx="${i}" value="${escAttr(l.lat)}" step="any" placeholder="50.7206"></div>
+          <div class="field"><label class="field-label">Longitude</label><input type="number" class="input" data-lfield="lng" data-idx="${i}" value="${escAttr(l.lng)}" step="any" placeholder="-1.8795"></div>
+        </div>
+        <div class="field"><label class="field-label">Description</label><textarea class="textarea" data-lfield="description" data-idx="${i}" maxlength="320" rows="2">${escAttr(l.description)}</textarea></div>
+        <div class="field"><label class="field-label">Image URL (optional)</label><input type="url" class="input" data-lfield="image" data-idx="${i}" value="${escAttr(l.image)}" placeholder="https://…"></div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Link URL (optional)</label><input type="url" class="input" data-lfield="link" data-idx="${i}" value="${escAttr(l.link)}" placeholder="https://…"></div>
+          <div class="field"><label class="field-label">Link label</label><input type="text" class="input" data-lfield="linkLabel" data-idx="${i}" value="${escAttr(l.linkLabel)}" maxlength="40" placeholder="Visit website"></div>
+        </div>
+        <div class="field">
+          <label class="field-label">Pin colour</label>
+          <div class="colour-row">
+            <div class="colour-swatch-wrap"><input type="color" data-lcolor="${i}" value="${escAttr(hexOk(l.color) ? l.color : (hexOk(C.accent) ? C.accent : '#0891B2'))}"></div>
+            <input class="input colour-hex" data-lhex="${i}" value="${escAttr((l.color || '').toUpperCase())}" maxlength="9" placeholder="(uses default)">
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ─── Design controls ───
+  document.getElementById('style-picker').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-style]'); if (!btn) return;
+    C.mapStyle = btn.getAttribute('data-style');
+    document.querySelectorAll('[data-style]').forEach(b => b.classList.toggle('is-on', b === btn));
+    shell.markDirty(); render();
+  });
+
+  function wireColour(idCol, idHex, key) {
+    const col = document.getElementById(idCol), hex = document.getElementById(idHex);
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C[key] = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C[key] = v; shell.markDirty(); render(); } });
+  }
+  wireColour('accent-col', 'accent-hex', 'accent');
+
+  document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); render(); });
+  document.getElementById('height-input').addEventListener('input', (e) => { C.height = parseInt(e.target.value, 10) || 460; document.getElementById('height-val').textContent = C.height + 'px'; shell.markDirty(); render(); });
+
+  // ─── Heading ───
+  function wireText(id, key) { const el = document.getElementById(id); el.addEventListener('input', () => { C[key] = el.value; shell.markDirty(); render(); }); }
+  wireText('title', 'title'); wireText('subtitle', 'subtitle');
+
+  // ─── Settings ───
+  document.getElementById('show-list').addEventListener('change', (e) => { C.showList = e.target.value; shell.markDirty(); render(); });
+  function wireSwitch(id, key) { const el = document.getElementById(id); el.addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); shell.markDirty(); render(); }); }
+  wireSwitch('show-card', 'showInfoCard');
+  wireSwitch('show-directions', 'directionsButton');
+  wireSwitch('show-controls', 'showControls');
+  wireSwitch('auto-fit', 'autoFit');
+  wireSwitch('scroll-wheel', 'scrollWheel');
+  wireSwitch('open-first', 'openFirst');
+  document.getElementById('zoom-input').addEventListener('input', (e) => { C.zoom = parseInt(e.target.value, 10) || 13; document.getElementById('zoom-val').textContent = C.zoom; shell.markDirty(); render(); });
+
+  // ─── Locations repeater ───
+  const listEl = document.getElementById('loc-list');
+
+  async function geocode(idx, btn) {
+    const loc = C.locations[idx]; if (!loc) return;
+    const q = (loc.address || '').trim();
+    if (!q) { tgse.toast('Enter an address first', 'err'); return; }
+    const label = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Finding…'; }
+    try {
+      const url = 'https://api.maptiler.com/geocoding/' + encodeURIComponent(q) + '.json?key=' + MAPTILER_KEY + '&limit=1';
+      const r = await fetch(url);
+      const d = await r.json();
+      const f = d && d.features && d.features[0];
+      if (f && Array.isArray(f.center) && f.center.length === 2) {
+        loc.lng = +f.center[0].toFixed(6);
+        loc.lat = +f.center[1].toFixed(6);
+        if (!loc.title && f.place_name) loc.title = String(f.place_name).split(',')[0];
+        shell.markDirty();
+        renderLocList();
+        render();
+        tgse.toast('Pin placed', 'ok');
+      } else {
+        tgse.toast('No match for that address', 'err');
+        if (btn) { btn.disabled = false; btn.innerHTML = label; }
+      }
+    } catch (e) {
+      tgse.toast('Geocoding failed — try again', 'err');
+      if (btn) { btn.disabled = false; btn.innerHTML = label; }
+    }
+  }
+
+  listEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]'); if (!btn) return;
+    const item = btn.closest('[data-idx]'); if (!item) return;
+    const idx = parseInt(item.getAttribute('data-idx'), 10);
+    const action = btn.getAttribute('data-action');
+
+    if (action === 'geocode') { e.stopPropagation(); geocode(idx, btn); return; }
+    if (action === 'toggle') {
+      if (e.target.closest('.loc-actions') || e.target.closest('.loc-body')) return;
+      openIdx = (openIdx === idx) ? -1 : idx; renderLocList(); return;
+    }
+    e.stopPropagation();
+    if (action === 'up' && idx > 0) {
+      const t = C.locations[idx - 1]; C.locations[idx - 1] = C.locations[idx]; C.locations[idx] = t;
+      openIdx = openIdx === idx ? idx - 1 : (openIdx === idx - 1 ? idx : openIdx);
+    } else if (action === 'down' && idx < C.locations.length - 1) {
+      const t = C.locations[idx + 1]; C.locations[idx + 1] = C.locations[idx]; C.locations[idx] = t;
+      openIdx = openIdx === idx ? idx + 1 : (openIdx === idx + 1 ? idx : openIdx);
+    } else if (action === 'dup') {
+      const copy = JSON.parse(JSON.stringify(C.locations[idx])); copy.title = (copy.title || 'Location') + ' (copy)';
+      C.locations.splice(idx + 1, 0, copy); openIdx = idx + 1;
+    } else if (action === 'del') {
+      if (!confirm('Delete this location?')) return;
+      C.locations.splice(idx, 1);
+      openIdx = openIdx === idx ? -1 : (openIdx > idx ? openIdx - 1 : openIdx);
+    } else { return; }
+    shell.markDirty(); renderLocList(); render();
+  });
+
+  // Per-location colour pickers (inside the open body)
+  listEl.addEventListener('input', (e) => {
+    const colEl = e.target.closest('[data-lcolor]');
+    if (colEl) {
+      const idx = parseInt(colEl.getAttribute('data-lcolor'), 10);
+      if (!C.locations[idx]) return;
+      const v = colEl.value.toUpperCase(); C.locations[idx].color = v;
+      const hex = listEl.querySelector('[data-lhex="' + idx + '"]'); if (hex) hex.value = v;
+      const dot = colEl.closest('.loc-item').querySelector('.loc-dot'); if (dot) dot.style.color = v;
+      shell.markDirty(); render(); return;
+    }
+    const hexEl = e.target.closest('[data-lhex]');
+    if (hexEl) {
+      const idx = parseInt(hexEl.getAttribute('data-lhex'), 10);
+      if (!C.locations[idx]) return;
+      const v = (hexEl.value || '').trim().toUpperCase();
+      if (v === '') { C.locations[idx].color = ''; shell.markDirty(); render(); return; }
+      if (hexOk(v)) { C.locations[idx].color = v; const col = listEl.querySelector('[data-lcolor="' + idx + '"]'); if (col) col.value = v; shell.markDirty(); render(); }
+      return;
+    }
+    const fEl = e.target.closest('[data-lfield]');
+    if (fEl) {
+      const idx = parseInt(fEl.getAttribute('data-idx'), 10);
+      const field = fEl.getAttribute('data-lfield');
+      if (!C.locations[idx]) return;
+      let val = fEl.value;
+      if (field === 'lat' || field === 'lng') val = (fEl.value === '') ? '' : Number(fEl.value);
+      C.locations[idx][field] = val;
+      if (field === 'title' || field === 'address') {
+        const it = fEl.closest('.loc-item');
+        if (field === 'title') it.querySelector('.loc-summary-title').textContent = val || 'Untitled location';
+        if (field === 'address') it.querySelector('.loc-summary-sub').textContent = val || 'No location set';
+      }
+      shell.markDirty(); render();
+    }
+  });
+
+  document.getElementById('add-loc').addEventListener('click', () => {
+    C.locations.push(makeLoc({ title: 'New location' }));
+    openIdx = C.locations.length - 1;
+    shell.markDirty(); renderLocList(); render();
+  });
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  // Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initMapsTour === 'function') window.initMapsTour(); }
+        else render();
+      });
+    } else {
+      if (tgse.isLoggedIn()) loadFromUrl(); else render();
+    }
+  });
+</script>
+
+</body>
+</html>
