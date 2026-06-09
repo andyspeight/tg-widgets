@@ -203,18 +203,41 @@ function decodeEntities(s) {
     .replace(/&#(\d+);/g, (_, n) => { try { return String.fromCodePoint(+n); } catch (e) { return ''; } })
     .replace(/&amp;/g, '&');
 }
-function stripHtml(s) { return decodeEntities(String(s || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim(); }
+function stripHtml(s) {
+  // Decode first (twice — feeds often double-encode, e.g. "&amp;nbsp;"), THEN strip
+  // tags. Stripping before decoding leaves entity-encoded tags (&lt;p&gt;) intact,
+  // which then decode back into visible "<p>" text — the bug this avoids.
+  let t = decodeEntities(decodeEntities(String(s || '')));
+  t = t.replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<[^>]+>/g, ' ');
+  return t.replace(/\s+/g, ' ').trim();
+}
 function firstMatch(re, str) { const m = re.exec(str); return m ? m[1] : ''; }
 function clip(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; }
 
+function attrOf(tag, attr) { const m = new RegExp('\\b' + attr + '=["\']([^"\']+)["\']', 'i').exec(tag); return m ? m[1] : ''; }
+function looksImage(tag, url) {
+  return /medium=["']image["']/i.test(tag) || /type=["']image\//i.test(tag) || /\.(jpe?g|png|webp|gif)(\?|#|$)/i.test(url);
+}
 function extractImage(block) {
-  let m = /<media:thumbnail[^>]*\burl=["']([^"']+)["']/i.exec(block); if (m) return m[1];
-  m = /<media:content[^>]*\burl=["']([^"']+)["'][^>]*>/i.exec(block);
-  if (m && /image|jpg|jpeg|png|webp|gif/i.test(m[0])) return m[1];
-  m = /<enclosure[^>]*\burl=["']([^"']+)["'][^>]*type=["']image/i.exec(block); if (m) return m[1];
-  m = /<enclosure[^>]*type=["']image[^>]*\burl=["']([^"']+)["']/i.exec(block); if (m) return m[1];
-  m = /<itunes:image[^>]*\bhref=["']([^"']+)["']/i.exec(block); if (m) return m[1];
-  m = /<img[^>]*\bsrc=["']([^"']+)["']/i.exec(block); if (m) return m[1];
+  // media:thumbnail
+  let m = /<media:thumbnail\b[^>]*>/i.exec(block);
+  if (m) { const u = attrOf(m[0], 'url'); if (u) return u; }
+  // media:content — prefer the widest image-ish one (feeds list several sizes)
+  let best = '', bestW = -1, firstMC = '';
+  const mcRe = /<media:content\b[^>]*>/gi; let mc;
+  while ((mc = mcRe.exec(block)) !== null) {
+    const tag = mc[0], u = attrOf(tag, 'url'); if (!u) continue;
+    if (!firstMC) firstMC = u;
+    if (looksImage(tag, u)) { const w = parseInt((/(?:\bwidth=["']?)(\d+)/i.exec(tag) || [])[1] || '0', 10); if (w >= bestW) { bestW = w; best = u; } }
+  }
+  if (best) return best;
+  if (firstMC) return firstMC;
+  // enclosure (image only)
+  const enRe = /<enclosure\b[^>]*>/gi; let en;
+  while ((en = enRe.exec(block)) !== null) { const tag = en[0], u = attrOf(tag, 'url'); if (u && looksImage(tag, u)) return u; }
+  // itunes / generic image tag
+  m = /<itunes:image\b[^>]*>/i.exec(block); if (m) { const u = attrOf(m[0], 'href') || attrOf(m[0], 'url'); if (u) return u; }
+  m = /<img\b[^>]*>/i.exec(block); if (m) { const u = attrOf(m[0], 'src'); if (u) return u; }
   return '';
 }
 function safeImg(u) { return /^https?:\/\//i.test(String(u || '').trim()) ? u.trim() : ''; }
@@ -253,13 +276,21 @@ function parseFeed(xml) {
     const rawDesc = isAtom
       ? (firstMatch(/<summary[^>]*>([\s\S]*?)<\/summary>/i, b) || firstMatch(/<content[^>]*>([\s\S]*?)<\/content>/i, b))
       : (firstMatch(/<description>([\s\S]*?)<\/description>/i, b) || firstMatch(/<content:encoded>([\s\S]*?)<\/content:encoded>/i, b));
-    const image = safeImg(extractImage(b) || extractImage(rawDesc || ''));
+    const image = safeImg(decodeEntities(extractImage(b) || extractImage(decodeEntities(rawDesc || ''))));
     if (!link) continue;
+    let summary = clip(stripHtml(rawDesc), 400);
+    // Drop excerpts that merely repeat the headline (common in Google News and
+    // other aggregator feeds, where the description is just the linked title).
+    if (summary && title) {
+      const norm = (x) => x.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const nt = norm(title), ns = norm(summary);
+      if (ns && nt && (ns === nt || ns.startsWith(nt.slice(0, Math.min(nt.length, 50))))) summary = '';
+    }
     items.push({
       title,
       link: String(link).trim(),
       published: toIso(date),
-      summary: clip(stripHtml(rawDesc), 400),
+      summary,
       image,
     });
   }
