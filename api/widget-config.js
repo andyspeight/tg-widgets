@@ -222,6 +222,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Newsletter Signup',
   'Contact Card',
   'Loader',
+  'Maps',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -253,6 +254,7 @@ const PLAN_WIDGET_LIMITS = {
   'Newsletter Signup':     { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Contact Card':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Loader':                { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Maps':                  { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -331,6 +333,9 @@ const WIDGET_TYPE_ALIASES = {
   'newsletter-signup': 'Newsletter Signup',
   'contact':           'Contact Card',
   'contact-card':      'Contact Card',
+  'maps':              'Maps',
+  'map':               'Maps',
+  'google-maps':       'Maps',
 };
 
 function canonicaliseWidgetType(raw) {
