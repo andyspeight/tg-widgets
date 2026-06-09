@@ -224,6 +224,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Loader',
   'Maps',
   'YouTube',
+  'RSS Feed',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -257,6 +258,7 @@ const PLAN_WIDGET_LIMITS = {
   'Loader':                { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Maps':                  { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'YouTube':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'RSS Feed':              { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -341,6 +343,11 @@ const WIDGET_TYPE_ALIASES = {
   'youtube':           'YouTube',
   'youtube-feed':      'YouTube',
   'yt':                'YouTube',
+  'rss':               'RSS Feed',
+  'rss-feed':          'RSS Feed',
+  'rss feed':          'RSS Feed',
+  'news':              'RSS Feed',
+  'feed':              'RSS Feed',
 };
 
 function canonicaliseWidgetType(raw) {
