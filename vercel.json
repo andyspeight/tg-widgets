@@ -72,6 +72,10 @@
       "destination": "/demo-rss.html"
     },
     {
+      "source": "/demo-backtotop",
+      "destination": "/demo-backtotop.html"
+    },
+    {
       "source": "/demo-enquiry",
       "destination": "/demo-enquiry.html"
     },
@@ -182,6 +186,10 @@
     {
       "source": "/editor-rss",
       "destination": "/editor-rss.html"
+    },
+    {
+      "source": "/editor-backtotop",
+      "destination": "/editor-backtotop.html"
     },
     {
       "source": "/editor-enquiry",
@@ -448,6 +456,23 @@
     },
     {
       "source": "/widget-rss.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-backtotop.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
