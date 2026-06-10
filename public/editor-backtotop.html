@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Back to Top — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* ─── Per-editor sidebar inner styles (shared conventions across editors) ─── */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .select {
+    width:100%; padding:8px 10px; font:inherit; font-size:13px;
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); color:var(--tgse-ink);
+    transition:border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .input:focus, .select:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+
+  /* Option picker (position / shape / icon) */
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:10px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center;
+    transition:border-color 160ms ease, background 160ms ease; display:flex; flex-direction:column; gap:7px; align-items:center; }
+  .pick-btn:hover { background:var(--tgse-hover); }
+  .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .pick-label { font-size:11px; font-weight:600; color:var(--tgse-ink); }
+  .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
+
+  /* Position swatch — mini frame with a dot in the chosen corner */
+  .pos-sw { width:40px; height:28px; border:1px solid var(--tgse-border); border-radius:5px; position:relative; background:var(--tgse-hover); }
+  .pos-sw::after { content:''; position:absolute; width:8px; height:8px; border-radius:999px; background:var(--tgse-brand); bottom:4px; }
+  .pos-sw.br::after { right:4px; }
+  .pos-sw.bl::after { left:4px; }
+  .pos-sw.bc::after { left:50%; transform:translateX(-50%); }
+
+  /* Shape swatch */
+  .shape-sw { width:26px; height:26px; background:var(--tgse-brand); }
+  .shape-sw.circle { border-radius:999px; }
+  .shape-sw.rounded { border-radius:7px; }
+  .shape-sw.square { border-radius:2px; }
+
+  /* Icon swatch */
+  .icon-sw { width:28px; height:28px; border-radius:999px; background:var(--tgse-brand); display:flex; align-items:center; justify-content:center; }
+  .icon-sw svg { width:15px; height:15px; fill:none; stroke:#fff; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* Colour rows */
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  /* Switch */
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  /* Slider */
+  .slider-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+  .slider-row input[type="range"] { width:100%; accent-color:var(--tgse-brand); }
+  .slider-val { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; min-width:42px; text-align:right; }
+
+  .is-hidden { display:none !important; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Back to Top</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled back to top" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <!-- Position -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="17" cy="17" r="1.6" fill="currentColor" stroke="none"/></svg>
+            <span class="tgse-section-label">Position</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid" id="pos-picker">
+                <button type="button" class="pick-btn" data-pos="bottom-left"><span class="pos-sw bl"></span><span class="pick-label">Left</span></button>
+                <button type="button" class="pick-btn" data-pos="bottom-center"><span class="pos-sw bc"></span><span class="pick-label">Centre</span></button>
+                <button type="button" class="pick-btn" data-pos="bottom-right"><span class="pos-sw br"></span><span class="pick-label">Right</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shape -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+            <span class="tgse-section-label">Shape</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid" id="shape-picker">
+                <button type="button" class="pick-btn" data-shape="circle"><span class="shape-sw circle"></span><span class="pick-label">Circle</span></button>
+                <button type="button" class="pick-btn" data-shape="rounded"><span class="shape-sw rounded"></span><span class="pick-label">Rounded</span></button>
+                <button type="button" class="pick-btn" data-shape="square"><span class="shape-sw square"></span><span class="pick-label">Square</span></button>
+              </div>
+            </div>
+            <div class="field is-hidden" id="radius-field">
+              <label class="field-label">Corner radius</label>
+              <div class="slider-row">
+                <input type="range" id="radius-input" min="0" max="28" step="1" value="16">
+                <span class="slider-val" id="radius-val">16px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Size & spacing -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            <span class="tgse-section-label">Size &amp; spacing</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Button size</label>
+              <div class="slider-row">
+                <input type="range" id="size-input" min="40" max="72" step="2" value="52">
+                <span class="slider-val" id="size-val">52px</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Distance from edge</label>
+              <div class="slider-row">
+                <input type="range" id="offset-input" min="8" max="48" step="2" value="24">
+                <span class="slider-val" id="offset-val">24px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accent colour -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Accent colour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
+              </div>
+              <span class="field-hint">The icon colour adjusts automatically for contrast.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shadow -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+            <span class="tgse-section-label">Shadow</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Drop shadow</span><button type="button" class="switch is-on" id="show-shadow" aria-pressed="true"></button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Label font</label>
+              <div id="fontPickerMount"></div>
+              <span class="field-hint">Only used when a text label is shown.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== CONTENT ===== -->
+      <div class="tgse-panel" data-tab="content">
+
+        <!-- Icon -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            <span class="tgse-section-label">Icon</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid" id="icon-picker">
+                <button type="button" class="pick-btn" data-icon="chevron"><span class="icon-sw"><svg viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15"/></svg></span><span class="pick-label">Chevron</span></button>
+                <button type="button" class="pick-btn" data-icon="arrow"><span class="icon-sw"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg></span><span class="pick-label">Arrow</span></button>
+                <button type="button" class="pick-btn" data-icon="double"><span class="icon-sw"><svg viewBox="0 0 24 24"><polyline points="6 17 12 11 18 17"/><polyline points="6 11 12 5 18 11"/></svg></span><span class="pick-label">Double</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Label -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <span class="tgse-section-label">Text label</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Show a text label</span><button type="button" class="switch" id="show-label" aria-pressed="false"></button></div>
+            </div>
+            <div class="field is-hidden" id="label-text-field">
+              <label class="field-label">Label text</label>
+              <input type="text" class="input" id="label-input" value="Top" maxlength="16" placeholder="Top">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <!-- Appearance trigger -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            <span class="tgse-section-label">When it appears</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Show after scrolling</label>
+              <div class="slider-row">
+                <input type="range" id="after-input" min="5" max="80" step="5" value="25">
+                <span class="slider-val" id="after-val">25%</span>
+              </div>
+              <span class="field-hint">The button stays hidden until the visitor scrolls this far down the page.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scrolling -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12l7-7 7 7"/></svg>
+            <span class="tgse-section-label">Scrolling</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Smooth scroll to top</span><button type="button" class="switch is-on" id="smooth-scroll" aria-pressed="true"></button></div>
+              <span class="field-hint">Animate the scroll back to the top. Respects reduced-motion settings.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-backtotop.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-backtotop.js"></script>
+<style>
+  /* Preview faux page — gives the fixed button a scroll context + containing block */
+  .pv-faux { position:relative; width:100%; max-width:760px; background:#fff; border-radius:12px;
+    box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); overflow:hidden;
+    min-height:520px; isolation:isolate; transform:translateZ(0); }
+  .pv-faux[data-bg="dark"] { background:#0B1220; }
+  .pvf-head { background:#1B2B5B; color:#fff; padding:14px 22px; display:flex; align-items:center; justify-content:space-between; font-size:13px; }
+  .pvf-head .logo { font-weight:700; }
+  .pvf-head .nav { display:flex; gap:16px; opacity:.8; font-size:12px; }
+  .pvf-body { padding:30px 26px 46px; }
+  .pvf-body h1 { margin:0 0 10px; font-size:24px; color:#0F172A; font-weight:800; letter-spacing:-.01em; }
+  .pv-faux[data-bg="dark"] .pvf-body h1 { color:#F1F5F9; }
+  .pvf-body p { margin:0 0 14px; color:#475569; font-size:14px; line-height:1.6; }
+  .pv-faux[data-bg="dark"] .pvf-body p { color:#94A3B8; }
+  .pvf-block { height:70px; border-radius:10px; background:#F1F5F9; margin:0 0 12px; }
+  .pv-faux[data-bg="dark"] .pvf-block { background:#1E293B; }
+  .pvf-note { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); font-size:11px; color:#94A3B8; background:rgba(255,255,255,.7); padding:4px 10px; border-radius:999px; }
+  .pv-faux[data-bg="dark"] .pvf-note { background:rgba(15,23,42,.6); }
+</style>
+<script>
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+
+  let C = {
+    showAfter: 25,
+    position: 'bottom-right',
+    offset: 24,
+    shape: 'circle',
+    size: 52,
+    radius: 16,
+    accent: '#0891B2',
+    icon: 'chevron',
+    showLabel: false,
+    labelText: 'Top',
+    smoothScroll: true,
+    shadow: true,
+    theme: 'light',
+    fontFamily: 'Inter',
+  };
+
+  let widgetInst = null;
+
+  const shell = tgse.init({
+    widgetType: 'Back to Top',
+    widgetTag: 'backtotop',
+    scriptFile: 'widget-backtotop.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); syncUIFromState(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for Back to Top', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for Back to Top', 'ok'),
+    onThemeToggle: (isDark) => { C.theme = isDark ? 'dark' : 'light'; render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initBackToTopTour === 'function') window.initBackToTopTour(); },
+  });
+
+  function buildFauxPage() {
+    return `<div class="pv-faux" id="pv-faux" data-bg="${C.theme === 'dark' ? 'dark' : 'light'}">
+      <div class="pvf-head"><span class="logo">Sunshine Holidays</span><span class="nav"><span>Destinations</span><span>Cruises</span><span>Late Deals</span></span></div>
+      <div class="pvf-body">
+        <h1>Find your next holiday</h1>
+        <p>This sample page gives the button somewhere to sit. On a real site the button is fixed to the screen and only appears once the visitor scrolls past your chosen point.</p>
+        <div class="pvf-block"></div><div class="pvf-block"></div><div class="pvf-block"></div>
+      </div>
+      <div class="pvf-note">Always shown here so you can style it · appears after ${C.showAfter}% on a live page</div>
+      <div data-tg-widget="backtotop" id="widget-mount"></div>
+    </div>`;
+  }
+
+  function render() {
+    const frame = document.getElementById('pv-frame');
+    if (!frame) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    frame.innerHTML = buildFauxPage();
+    const host = document.getElementById('widget-mount');
+    if (!host) return;
+    requestAnimationFrame(() => {
+      if (window.TGBackToTopWidget) {
+        try { widgetInst = new window.TGBackToTopWidget(host, Object.assign({}, C, { previewMode: true })); }
+        catch (e) { console.error(e); }
+      }
+    });
+  }
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        syncUIFromState();
+        render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  function toggleSwitch(id, on) {
+    const el = document.getElementById(id); if (!el) return;
+    el.classList.toggle('is-on', !!on);
+    el.setAttribute('aria-checked', on ? 'true' : 'false');
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function syncUIFromState() {
+    document.querySelectorAll('#pos-picker [data-pos]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-pos') === C.position));
+    document.querySelectorAll('#shape-picker [data-shape]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-shape') === C.shape));
+    document.querySelectorAll('#icon-picker [data-icon]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-icon') === C.icon));
+    document.getElementById('radius-field').classList.toggle('is-hidden', C.shape !== 'rounded');
+    document.getElementById('radius-input').value = C.radius; document.getElementById('radius-val').textContent = C.radius + 'px';
+    document.getElementById('size-input').value = C.size; document.getElementById('size-val').textContent = C.size + 'px';
+    document.getElementById('offset-input').value = C.offset; document.getElementById('offset-val').textContent = C.offset + 'px';
+    document.getElementById('after-input').value = C.showAfter; document.getElementById('after-val').textContent = C.showAfter + '%';
+    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2';
+    document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
+    document.getElementById('label-input').value = C.labelText || 'Top';
+    document.getElementById('label-text-field').classList.toggle('is-hidden', !C.showLabel);
+    toggleSwitch('show-shadow', C.shadow);
+    toggleSwitch('show-label', C.showLabel);
+    toggleSwitch('smooth-scroll', C.smoothScroll);
+  }
+
+  // ─── Pickers ───
+  document.getElementById('pos-picker').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pos]'); if (!b) return;
+    C.position = b.getAttribute('data-pos');
+    document.querySelectorAll('#pos-picker [data-pos]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+  document.getElementById('shape-picker').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-shape]'); if (!b) return;
+    C.shape = b.getAttribute('data-shape');
+    document.querySelectorAll('#shape-picker [data-shape]').forEach(x => x.classList.toggle('is-on', x === b));
+    document.getElementById('radius-field').classList.toggle('is-hidden', C.shape !== 'rounded');
+    shell.markDirty(); render();
+  });
+  document.getElementById('icon-picker').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-icon]'); if (!b) return;
+    C.icon = b.getAttribute('data-icon');
+    document.querySelectorAll('#icon-picker [data-icon]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+
+  // ─── Sliders ───
+  document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); render(); });
+  document.getElementById('size-input').addEventListener('input', (e) => { C.size = parseInt(e.target.value, 10) || 52; document.getElementById('size-val').textContent = C.size + 'px'; shell.markDirty(); render(); });
+  document.getElementById('offset-input').addEventListener('input', (e) => { C.offset = parseInt(e.target.value, 10) || 24; document.getElementById('offset-val').textContent = C.offset + 'px'; shell.markDirty(); render(); });
+  document.getElementById('after-input').addEventListener('input', (e) => { C.showAfter = parseInt(e.target.value, 10) || 25; document.getElementById('after-val').textContent = C.showAfter + '%'; shell.markDirty(); render(); });
+
+  // ─── Colour ───
+  (function wireColour() {
+    const col = document.getElementById('accent-col'), hex = document.getElementById('accent-hex');
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); render(); } });
+  })();
+
+  // ─── Label ───
+  document.getElementById('label-input').addEventListener('input', (e) => { C.labelText = e.target.value; shell.markDirty(); render(); });
+
+  // ─── Switches ───
+  function wireSwitch(id, key, after) { const el = document.getElementById(id); el.addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); if (after) after(); shell.markDirty(); render(); }); }
+  wireSwitch('show-shadow', 'shadow');
+  wireSwitch('show-label', 'showLabel', () => document.getElementById('label-text-field').classList.toggle('is-hidden', !C.showLabel));
+  wireSwitch('smooth-scroll', 'smoothScroll');
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  // Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initBackToTopTour === 'function') window.initBackToTopTour(); }
+        else render();
+      });
+    } else {
+      if (tgse.isLoggedIn()) loadFromUrl(); else render();
+    }
+  });
+</script>
+
+</body>
+</html>
