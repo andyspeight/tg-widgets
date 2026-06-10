@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Destination Carousel — Travelgenix Widget Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F8FAFC; color: #0F172A; }
+  .hero { max-width: 1140px; margin: 0 auto; padding: 56px 24px 28px; text-align: center; }
+  .hero .badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #0891B2; background: rgba(8,145,178,.08); border: 1px solid rgba(8,145,178,.2); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .hero h1 { font-size: 34px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 10px; color: #1B2B5B; }
+  .hero p { font-size: 15px; line-height: 1.65; color: #475569; max-width: 640px; margin: 0 auto; }
+  .stage { max-width: 1240px; margin: 24px auto 0; padding: 0 24px; }
+  .how { max-width: 860px; margin: 48px auto 72px; padding: 0 24px; }
+  .how h2 { font-size: 20px; font-weight: 700; color: #1B2B5B; margin: 0 0 8px; }
+  .how p { font-size: 14px; line-height: 1.65; color: #475569; margin: 0 0 16px; }
+  pre { background: #0F172A; color: #E2E8F0; border-radius: 12px; padding: 18px 20px; overflow-x: auto; font-size: 12.5px; line-height: 1.7; }
+  code { font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace; }
+  .note { font-size: 12.5px; color: #64748B; line-height: 1.6; }
+  a { color: #0891B2; }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <span class="badge">Travelgenix Widget Suite</span>
+    <h1>Destination Carousel</h1>
+    <p>A cinematic showcase for your destinations. Cards enter small on the right, travel left growing through a fanned sweep, and arrive as a full-size hero with title, copy and call to action. Click a card, swipe, use the arrows — or just let it play.</p>
+  </div>
+
+  <div class="stage">
+    <div data-tg-widget="carousel" data-tg-config='{
+      "intro": "From vibrant coastal towns to peaceful beaches and world-class resorts, find the perfect place to stay and experience the magic of Mauritius.",
+      "slides": [
+        { "title": "Grand Baie", "subtitle": "The Heart of Mauritius", "body": "Vibrant, elegant and full of life. Grand Baie offers crystal-clear waters, luxury resorts, shopping, fine dining and unforgettable sunset moments.", "ctaLabel": "Explore Grand Baie", "ctaUrl": "#", "image": "https://picsum.photos/seed/grandbaie-harbour/1200/900" },
+        { "title": "Belle Mare", "subtitle": "Pure Tranquility", "body": "Soft white sands, turquoise lagoons and a peaceful atmosphere made for pure relaxation.", "ctaLabel": "Explore Belle Mare", "ctaUrl": "#", "image": "https://picsum.photos/seed/bellemare-beach/900/1200" },
+        { "title": "Le Morne", "subtitle": "Wild. Majestic. Timeless.", "body": "Iconic landscapes, rich heritage and some of the most stunning natural beauty in Mauritius.", "ctaLabel": "Explore Le Morne", "ctaUrl": "#", "image": "https://picsum.photos/seed/lemorne-mountain/900/1200" },
+        { "title": "Flic en Flac", "subtitle": "Sunset Coast", "body": "A laid-back west-coast favourite with one of the island&apos;s longest beaches, calm swimming waters and front-row sunsets every evening.", "ctaLabel": "Explore Flic en Flac", "ctaUrl": "#", "image": "https://picsum.photos/seed/flicenflac-sunset/900/1200" }
+      ]
+    }'></div>
+  </div>
+
+  <div class="how">
+    <h2>Embed it on your site</h2>
+    <p>Create and style your carousel in the editor, then paste two lines anywhere on your page:</p>
+    <pre><code>&lt;div data-tg-widget="carousel" data-tg-id="YOUR_WIDGET_ID"&gt;&lt;/div&gt;
+&lt;script src="https://tg-widgets.vercel.app/widget-carousel.js"&gt;&lt;/script&gt;</code></pre>
+    <p class="note">The widget is self-contained: Shadow DOM keeps its styles isolated from your site, it adapts to the width of its container (collapsing to a single full-bleed slide below 720px), respects reduced-motion preferences, and pauses its auto-rotation while off-screen.</p>
+  </div>
+
+  <script src="/widget-carousel.js"></script>
+</body>
+</html>
