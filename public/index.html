@@ -508,6 +508,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'carousel',
+    name: 'Destination Carousel',
+    airtableType: 'Carousel',  // matches Airtable WidgetType singleSelect option
+    description: 'A cinematic destination showcase \u2014 cards sweep in from the right and grow into a full-size hero with title, copy and call to action. Fanned 3D card lean, gold-luxury styling out of the box, fully rebrandable. Auto-rotates, swipeable, and collapses to a single full-bleed slide on mobile.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="2" y="5" width="13" height="14" rx="2"/><rect x="17" y="7" width="5" height="10" rx="1.5"/>'},
+    color: '#D9B36A',
+    editorUrl: '/editor-carousel',
+    demoUrl: '/demo-carousel',
+    widgetTag: 'carousel',
+    scriptFile: 'widget-carousel.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'enquiry',
     name: 'Enquiry Form',
     airtableType: 'Enquiry Form',
@@ -1830,6 +1845,20 @@ function loadMiniPreview(w) {
         </div>
       </div>`;
     return;
+  }
+
+  if (w.id === 'carousel' && window.TGCarouselWidget) {
+    new window.TGCarouselWidget(el, {
+      showIntro: false, showDeco: false,
+      height: 320, interval: 5, lean: 4,
+      showArrows: false, showDots: true,
+      accent: w.color,
+      slides: [
+        { title: 'Grand Baie', subtitle: 'The Heart of Mauritius', image: 'https://picsum.photos/seed/grandbaie-harbour/900/700' },
+        { title: 'Belle Mare', subtitle: 'Pure Tranquility', image: 'https://picsum.photos/seed/bellemare-beach/700/900' },
+        { title: 'Le Morne', subtitle: 'Wild. Majestic. Timeless.', image: 'https://picsum.photos/seed/lemorne-mountain/700/900' },
+      ],
+    });
   }
 
   if (w.id === 'enquirypro') {
@@ -3455,6 +3484,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-youtube.js"></script>
 <script src="/widget-rss.js"></script>
 <script src="/widget-backtotop.js"></script>
+<script src="/widget-carousel.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
 <script src="/widget-countdown.js"></script>
