@@ -1,5 +1,5 @@
 /**
- * Travelgenix Google Reviews Widget v1.0.0
+ * Travelgenix Reviews Widget v1.1.0 (multi-platform)
  * Self-contained, embeddable reviews widget
  * Zero dependencies — works on any website via a single script tag
  *
@@ -72,6 +72,24 @@
     if (n === 'google') return IC.google;
     return `<svg class="${cls || ''}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${IC[n] || ''}</svg>`;
   }
+
+  /* ━━━ Review-source registry (multi-platform branding) ━━━━━━━━
+     Manually/AI-seeded widget: each review carries an optional `source`
+     and the widget a primary `source`. Marks are simplified, brand-
+     coloured glyphs; the platform name text carries identification. */
+  var BADGE_STAR = '<polygon points="12 6 13.7 10.1 18 10.4 14.7 13 15.85 17.2 12 14.9 8.15 17.2 9.3 13 6 10.4 10.3 10.1" fill="#fff"/>';
+  var SOURCES = {
+    google:      { name: 'Google',      mark: IC.google },
+    trustpilot:  { name: 'Trustpilot',  mark: '<svg viewBox="0 0 24 24" style="width:16px;height:16px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#00B67A"/></svg>' },
+    tripadvisor: { name: 'Tripadvisor', mark: '<svg viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="8" cy="13" r="4.3" fill="none" stroke="#00AA6C" stroke-width="2"/><circle cx="16" cy="13" r="4.3" fill="none" stroke="#00AA6C" stroke-width="2"/><circle cx="8" cy="13" r="1.5" fill="#00AA6C"/><circle cx="16" cy="13" r="1.5" fill="#00AA6C"/><path d="M5 5.5c2.4-1.2 5-1.8 7-1.8s4.6.6 7 1.8" fill="none" stroke="#00AA6C" stroke-width="1.6" stroke-linecap="round"/></svg>' },
+    feefo:       { name: 'Feefo',       mark: '<svg viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="2" y="2" width="20" height="20" rx="5" fill="#27CCC0"/>' + BADGE_STAR + '</svg>' },
+    reviewsio:   { name: 'Reviews.io',  mark: '<svg viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="2" y="2" width="20" height="20" rx="5" fill="#1A6DFF"/>' + BADGE_STAR + '</svg>' },
+    facebook:    { name: 'Facebook',    mark: '<svg viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07c0 6.03 4.39 11.03 10.13 11.93v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z" fill="#1877F2"/></svg>' },
+    yelp:        { name: 'Yelp',        mark: '<svg viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="2" y="2" width="20" height="20" rx="5" fill="#FF1A1A"/>' + BADGE_STAR + '</svg>' },
+  };
+  function srcMeta(k) { return SOURCES[k] || SOURCES.google; }
+  function srcName(k) { return srcMeta(k).name; }
+  function srcTag(k) { var m = srcMeta(k); return '<span class="tgr-src">' + m.mark + esc(m.name) + '</span>'; }
 
   function stars(count, size, color) {
     let h = '';
@@ -146,6 +164,8 @@
     .tgr-date { font-size:12px; color:var(--tgr-muted); }
     .tgr-google { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--tgr-muted); }
     .tgr-google svg { width:16px; height:16px; }
+    .tgr-src { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--tgr-muted); white-space:nowrap; }
+    .tgr-src svg { width:16px; height:16px; flex:0 0 auto; }
 
     .tgr-photo { margin-bottom:12px; border-radius:var(--tgr-radius-sm); overflow:hidden; }
     .tgr-photo img { width:100%; height:144px; object-fit:cover; display:block; transition:transform .5s; }
@@ -279,13 +299,14 @@
     _defaults(c) {
       return Object.assign({
         place: { name: 'My Business', rating: 4.8, total: 50 },
+        source: 'google',
         header: { title: '', subtitle: '' },
         brandColor: '#0891B2', accentColor: '#6366F1', pageBg: '#F8FAFC', cardBg: '#FFFFFF',
         textColor: '#0F172A', subtextColor: '#64748B', borderRadius: 16,
         layout: 'cards', theme: 'light', fontFamily: '',
         showHeader: true, showAI: true, showTags: true, showPhotos: true,
         showReplies: true, showHelpful: true, showTrust: true, showCTA: true,
-        trustText: 'Verified reviews powered by Google',
+        trustText: '',
         ctaText: 'Write a Review', ctaUrl: '#',
         aiHighlights: [
           { label: 'Most praised', value: 'Personal service', color: '#EC4899', icon: 'heart' },
@@ -350,7 +371,7 @@
       let h = `<div class="tgr-header"><div class="tgr-header-left">`;
       h += `<div class="tgr-rating-box">${icon('star')}</div>`;
       h += `<div><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px"><span class="tgr-rating-num">${p.rating}</span>${stars(Math.round(p.rating),18,c.brandColor)}</div>`;
-      h += `<p class="tgr-rating-info">Based on <strong>${p.total} reviews</strong> on Google</p></div></div>`;
+      h += `<p class="tgr-rating-info">Based on <strong>${p.total} reviews</strong> on ${esc(srcName(c.source || 'google'))}</p></div></div>`;
       if (c.showCTA) {
         h += `<a href="${esc(c.ctaUrl)}" class="tgr-cta" target="_blank" rel="noopener">${icon('msgSq')}${esc(c.ctaText)}${icon('extLink')}</a>`;
       }
@@ -389,7 +410,7 @@
         h += `<div class="tgr-photo-overlay"><div class="tgr-photo tgr-photo-hero"><img src="${esc(r.photoUrl)}" alt="" loading="lazy"></div>`;
         h += `<div class="tgr-photo-overlay-inner">${avatar(r.author,'tgr-avatar-sm')}<div><p class="tgr-author-name">${esc(r.author)}</p>${stars(r.rating,10,'#FBBF24')}</div></div></div>`;
         h += `<div style="padding:4px 0 0"><p class="tgr-text">${esc(r.text).slice(0,150)}${r.text.length>150?'...':''}</p>`;
-        h += `<div class="tgr-card-foot"><span class="tgr-date">${esc(r.date)}</span><span class="tgr-google">${icon('google')}Google</span></div></div>`;
+        h += `<div class="tgr-card-foot"><span class="tgr-date">${esc(r.date)}</span>${srcTag(r.source || c.source)}</div></div>`;
         return h + `</div>`;
       }
 
@@ -410,7 +431,7 @@
       }
 
       // Standard / withReply
-      h += `<div class="tgr-card-head"><div class="tgr-card-author">${avatar(r.author)}<div><p class="tgr-author-name">${esc(r.author)}</p><div class="tgr-author-meta">${stars(r.rating,12,'#F59E0B')}<span class="tgr-date">${esc(r.date)}</span></div></div></div><span class="tgr-google">${icon('google')}Google</span></div>`;
+      h += `<div class="tgr-card-head"><div class="tgr-card-author">${avatar(r.author)}<div><p class="tgr-author-name">${esc(r.author)}</p><div class="tgr-author-meta">${stars(r.rating,12,'#F59E0B')}<span class="tgr-date">${esc(r.date)}</span></div></div></div>${srcTag(r.source || c.source)}</div>`;
 
       if (c.showPhotos && r.hasPhoto && r.photoUrl) {
         h += `<div class="tgr-photo"><img src="${esc(r.photoUrl)}" alt="" loading="lazy"></div>`;
@@ -477,7 +498,7 @@
     _badge() {
       const c = this.c, p = c.place, reviews = c.reviews.slice(0, 3);
       let h = `<div class="tgr-badge-wrap"><div style="position:relative">`;
-      h += `<button class="tgr-badge tgr-badge-toggle"><div class="tgr-badge-star">${icon('star')}</div><span class="tgr-badge-num">${p.rating}</span>${stars(5,11,'#F59E0B')}<span class="tgr-badge-count">${p.total} reviews</span><span class="tgr-google">${icon('google')}</span></button>`;
+      h += `<button class="tgr-badge tgr-badge-toggle"><div class="tgr-badge-star">${icon('star')}</div><span class="tgr-badge-num">${p.rating}</span>${stars(5,11,'#F59E0B')}<span class="tgr-badge-count">${p.total} reviews</span><span class="tgr-src">${srcMeta(c.source || 'google').mark}</span></button>`;
       h += `<div class="tgr-badge-popup${this.badgeOpen?' open':''}">`;
       h += `<div class="tgr-badge-popup-head"><div><p class="tgr-author-name">${esc(p.name)}</p><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="tgr-rating-num" style="font-size:24px">${p.rating}</span><div>${stars(5,13,c.brandColor)}<p style="font-size:11px;color:var(--tgr-muted);margin-top:2px">${p.total} reviews</p></div></div></div><button class="tgr-badge-popup-close tgr-badge-close">${icon('x')}</button></div>`;
       h += `<div class="tgr-badge-reviews">${reviews.map(r=>`<div class="tgr-badge-review">${avatar(r.author,'tgr-avatar-xs')}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><p class="tgr-author-name" style="font-size:11px">${esc(r.author)}</p>${stars(r.rating,9,'#F59E0B')}</div><p class="tgr-badge-review-text">${esc(r.text).slice(0,80)}...</p></div></div>`).join('')}</div>`;
@@ -497,7 +518,8 @@
 
     /* ── Trust ── */
     _trust() {
-      return `<div class="tgr-trust">${icon('shield')}<span>${esc(this.c.trustText)}</span></div>`;
+      const t = this.c.trustText || ('Verified reviews powered by ' + srcName(this.c.source || 'google'));
+      return `<div class="tgr-trust">${icon('shield')}<span>${esc(t)}</span></div>`;
     }
 
     /* ── Events ── */
