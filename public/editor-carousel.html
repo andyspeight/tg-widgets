@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Destination Carousel — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* ─── Per-editor sidebar inner styles (shared conventions across editors) ─── */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .select, .textarea {
+    width:100%; padding:8px 10px; font:inherit; font-size:13px;
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); color:var(--tgse-ink);
+    transition:border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+  .input:focus, .select:focus, .textarea:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+
+  /* Colour rows */
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  /* Switch */
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  /* Slider */
+  .slider-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+  .slider-row input[type="range"] { width:100%; accent-color:var(--tgse-brand); }
+  .slider-val { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; min-width:42px; text-align:right; }
+
+  /* ─── Slides repeater ─── */
+  .slide-card {
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); margin-bottom:10px; overflow:hidden;
+  }
+  .slide-head {
+    display:flex; align-items:center; gap:8px; padding:8px 10px;
+    background:var(--tgse-hover); cursor:pointer; user-select:none;
+  }
+  .slide-head-title { flex:1; font-size:12.5px; font-weight:600; color:var(--tgse-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .slide-head-no { font-size:11px; font-weight:700; color:var(--tgse-ink-3); font-family:'JetBrains Mono', monospace; }
+  .slide-tools { display:flex; gap:2px; }
+  .slide-tool {
+    appearance:none; border:0; background:transparent; cursor:pointer; padding:4px;
+    border-radius:6px; color:var(--tgse-ink-3); display:inline-flex;
+    transition:background 140ms ease, color 140ms ease;
+  }
+  .slide-tool:hover { background:var(--tgse-border); color:var(--tgse-ink); }
+  .slide-tool.danger:hover { color:#DC2626; }
+  .slide-tool svg { width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .slide-chev { transition:transform 160ms ease; }
+  .slide-card.is-open .slide-chev { transform:rotate(180deg); }
+  .slide-body { display:none; padding:12px 10px; border-top:1px solid var(--tgse-border); }
+  .slide-card.is-open .slide-body { display:block; }
+
+  .btn-add {
+    width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; border:1.5px dashed var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:transparent; color:var(--tgse-ink-2); font:inherit; font-size:13px; font-weight:600;
+    cursor:pointer; transition:border-color 160ms ease, color 160ms ease, background 160ms ease;
+  }
+  .btn-add:hover { border-color:var(--tgse-brand); color:var(--tgse-brand-dark); background:var(--tgse-brand-tint); }
+  .btn-add svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+  .is-hidden { display:none !important; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="13" height="14" rx="2"/><rect x="17" y="7" width="5" height="10" rx="1.5"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Destination Carousel</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled carousel" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <!-- Colours -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Background</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="bg-col" value="#060A14"></div>
+                <input class="input colour-hex" id="bg-hex" value="#060A14" maxlength="9">
+              </div>
+              <span class="field-hint">Deep, dark backgrounds make the imagery and gold glow.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Accent (titles, buttons, lines)</label>
+              <div class="colour-row" id="accent-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#D9B36A"></div>
+                <input class="input colour-hex" id="accent-hex" value="#D9B36A" maxlength="9">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Text</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="text-col" value="#F5F1E8"></div>
+                <input class="input colour-hex" id="text-hex" value="#F5F1E8" maxlength="9">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Title font</label>
+              <div id="fontPickerMount"></div>
+              <span class="field-hint">The display font for destination names. Cinzel gives the classic luxury look; subtitles use an elegant serif automatically.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shape & motion -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+            <span class="tgse-section-label">Shape &amp; motion</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field" id="lean-field">
+              <label class="field-label">Card lean</label>
+              <div class="slider-row">
+                <input type="range" id="lean-input" min="0" max="8" step="1" value="4">
+                <span class="slider-val" id="lean-val">4°</span>
+              </div>
+              <span class="field-hint">How much the travelling cards fan and tilt. 0° keeps everything straight.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Corner radius</label>
+              <div class="slider-row">
+                <input type="range" id="radius-input" min="0" max="32" step="1" value="18">
+                <span class="slider-val" id="radius-val">18px</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Height</label>
+              <div class="slider-row">
+                <input type="range" id="height-input" min="320" max="640" step="10" value="430">
+                <span class="slider-val" id="height-val">430px</span>
+              </div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Palm decoration</span><button type="button" class="switch is-on" id="show-deco" aria-pressed="true"></button></div>
+              <span class="field-hint">The subtle gold palm fronds in the top-left corner.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== CONTENT ===== -->
+      <div class="tgse-panel" data-tab="content">
+
+        <!-- Intro -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="16" y2="12"/><line x1="4" y1="17" x2="12" y2="17"/></svg>
+            <span class="tgse-section-label">Intro line</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Show intro line</span><button type="button" class="switch is-on" id="show-intro" aria-pressed="true"></button></div>
+            </div>
+            <div class="field" id="intro-field">
+              <label class="field-label">Intro text</label>
+              <textarea class="textarea" id="intro-input" maxlength="220" placeholder="A short line that sets the scene above the carousel…"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slides -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="13" height="14" rx="2"/><rect x="17" y="7" width="5" height="10" rx="1.5"/></svg>
+            <span class="tgse-section-label">Slides</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div id="slides-list"></div>
+            <button type="button" class="btn-add" id="btn-add-slide">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add slide
+            </button>
+            <span class="field-hint">Up to 10 destinations. The first slide is the opening hero.</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <!-- Playback -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span class="tgse-section-label">Playback</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Auto-rotate slides</span><button type="button" class="switch is-on" id="autoplay" aria-pressed="true"></button></div>
+            </div>
+            <div class="field" id="interval-field">
+              <label class="field-label">Time per slide</label>
+              <div class="slider-row">
+                <input type="range" id="interval-input" min="3" max="15" step="1" value="6">
+                <span class="slider-val" id="interval-val">6s</span>
+              </div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Pause on hover</span><button type="button" class="switch is-on" id="pause-hover" aria-pressed="true"></button></div>
+              <span class="field-hint">Rotation also pauses automatically while the widget is off-screen.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span class="tgse-section-label">Controls</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Arrow buttons</span><button type="button" class="switch is-on" id="show-arrows" aria-pressed="true"></button></div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Progress dots</span><button type="button" class="switch is-on" id="show-dots" aria-pressed="true"></button></div>
+            </div>
+            <span class="field-hint">Visitors can also click any card, swipe, or use arrow keys.</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-carousel.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-carousel.js"></script>
+<style>
+  /* Preview stage — the carousel is a full-width banner, give it a page context */
+  .pv-stage { width:100%; max-width:1100px; }
+  .pv-note { text-align:center; font-size:11px; color:#94A3B8; margin-top:12px; }
+</style>
+<script>
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+  function escAttr(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function blankSlide() {
+    return { title: '', subtitle: '', body: '', ctaLabel: '', ctaUrl: '', image: '' };
+  }
+
+  let C = {
+    intro: 'From vibrant coastal towns to peaceful beaches and world-class resorts, find the perfect place to stay and experience the magic of Mauritius.',
+    showIntro: true,
+    slides: [
+      { title: 'Grand Baie', subtitle: 'The Heart of Mauritius', body: 'Vibrant, elegant and full of life. Grand Baie offers crystal-clear waters, luxury resorts, shopping, fine dining and unforgettable sunset moments.', ctaLabel: 'Explore Grand Baie', ctaUrl: '#', image: 'https://picsum.photos/seed/grandbaie-harbour/1200/900' },
+      { title: 'Belle Mare', subtitle: 'Pure Tranquility', body: 'Soft white sands, turquoise lagoons and a peaceful atmosphere made for pure relaxation.', ctaLabel: 'Explore Belle Mare', ctaUrl: '#', image: 'https://picsum.photos/seed/bellemare-beach/900/1200' },
+      { title: 'Le Morne', subtitle: 'Wild. Majestic. Timeless.', body: 'Iconic landscapes, rich heritage and some of the most stunning natural beauty in Mauritius.', ctaLabel: 'Explore Le Morne', ctaUrl: '#', image: 'https://picsum.photos/seed/lemorne-mountain/900/1200' }
+    ],
+    bg: '#060A14',
+    accent: '#D9B36A',
+    textColor: '#F5F1E8',
+    cardRadius: 18,
+    lean: 4,
+    height: 430,
+    showDeco: true,
+    autoplay: true,
+    interval: 6,
+    pauseOnHover: true,
+    showArrows: true,
+    showDots: true,
+    fontFamily: 'Cinzel',
+  };
+
+  let widgetInst = null;
+  let openSlide = 0; // which slide card is expanded in the sidebar
+
+  const shell = tgse.init({
+    widgetType: 'Carousel',
+    widgetTag: 'carousel',
+    scriptFile: 'widget-carousel.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); syncUIFromState(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for the Destination Carousel', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for the Destination Carousel', 'ok'),
+    onThemeToggle: () => {}, // the carousel carries its own palette; backdrop handled by the shell canvas
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initCarouselTour === 'function') window.initCarouselTour(); },
+  });
+
+  function render() {
+    const frame = document.getElementById('pv-frame');
+    if (!frame) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    frame.innerHTML = '<div class="pv-stage"><div data-tg-widget="carousel" id="widget-mount"></div>' +
+      '<div class="pv-note">Click the smaller cards, use the arrows, or wait for the auto-rotate — every card travels left and grows into the hero.</div></div>';
+    const host = document.getElementById('widget-mount');
+    if (!host) return;
+    requestAnimationFrame(() => {
+      if (window.TGCarouselWidget) {
+        try { widgetInst = new window.TGCarouselWidget(host, Object.assign({}, C)); }
+        catch (e) { console.error(e); }
+      }
+    });
+  }
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        syncUIFromState();
+        render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  function toggleSwitch(id, on) {
+    const el = document.getElementById(id); if (!el) return;
+    el.classList.toggle('is-on', !!on);
+    el.setAttribute('aria-checked', on ? 'true' : 'false');
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  /* ─── Slides repeater ─── */
+  const TOOL = {
+    up:   '<svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>',
+    down: '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>',
+    copy: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    del:  '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" class="slide-chev"><polyline points="6 9 12 15 18 9"/></svg>'
+  };
+
+  function slideField(idx, key, label, value, opts) {
+    opts = opts || {};
+    if (opts.textarea) {
+      return '<div class="field"><label class="field-label">' + label + '</label>' +
+        '<textarea class="textarea" data-idx="' + idx + '" data-key="' + key + '" maxlength="' + (opts.max || 400) + '" placeholder="' + (opts.ph || '') + '">' + escAttr(value) + '</textarea></div>';
+    }
+    return '<div class="field"><label class="field-label">' + label + '</label>' +
+      '<input type="text" class="input" data-idx="' + idx + '" data-key="' + key + '" value="' + escAttr(value) + '" maxlength="' + (opts.max || 80) + '" placeholder="' + (opts.ph || '') + '">' +
+      (opts.hint ? '<span class="field-hint">' + opts.hint + '</span>' : '') + '</div>';
+  }
+
+  function renderSlidesList() {
+    const list = document.getElementById('slides-list');
+    list.innerHTML = C.slides.map((s, i) => {
+      return '<div class="slide-card' + (i === openSlide ? ' is-open' : '') + '" data-card="' + i + '">' +
+        '<div class="slide-head" data-toggle="' + i + '">' +
+          '<span class="slide-head-no">' + (i + 1) + '</span>' +
+          '<span class="slide-head-title">' + (escAttr(s.title) || 'Untitled slide') + '</span>' +
+          '<span class="slide-tools">' +
+            '<button type="button" class="slide-tool" data-act="up" data-idx="' + i + '" title="Move up" aria-label="Move up">' + TOOL.up + '</button>' +
+            '<button type="button" class="slide-tool" data-act="down" data-idx="' + i + '" title="Move down" aria-label="Move down">' + TOOL.down + '</button>' +
+            '<button type="button" class="slide-tool" data-act="copy" data-idx="' + i + '" title="Duplicate" aria-label="Duplicate">' + TOOL.copy + '</button>' +
+            '<button type="button" class="slide-tool danger" data-act="del" data-idx="' + i + '" title="Delete" aria-label="Delete">' + TOOL.del + '</button>' +
+          '</span>' +
+          TOOL.chev +
+        '</div>' +
+        '<div class="slide-body">' +
+          slideField(i, 'title', 'Destination name', s.title, { max: 60, ph: 'Grand Baie' }) +
+          slideField(i, 'subtitle', 'Tagline', s.subtitle, { max: 80, ph: 'The Heart of Mauritius' }) +
+          slideField(i, 'body', 'Description', s.body, { textarea: true, max: 400, ph: 'A sentence or two that sells the destination…' }) +
+          slideField(i, 'image', 'Image URL', s.image, { max: 500, ph: 'https://…', hint: 'Portrait or landscape — it fills the card. Use bright, high-quality photography.' }) +
+          slideField(i, 'ctaLabel', 'Button label', s.ctaLabel, { max: 40, ph: 'Explore Grand Baie' }) +
+          slideField(i, 'ctaUrl', 'Button link', s.ctaUrl, { max: 500, ph: 'https://… or /page' }) +
+        '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('btn-add-slide').disabled = C.slides.length >= 10;
+  }
+
+  document.getElementById('slides-list').addEventListener('click', (e) => {
+    const tool = e.target.closest('.slide-tool');
+    if (tool) {
+      e.stopPropagation();
+      const i = parseInt(tool.getAttribute('data-idx'), 10);
+      const act = tool.getAttribute('data-act');
+      if (act === 'up' && i > 0) { const t = C.slides[i - 1]; C.slides[i - 1] = C.slides[i]; C.slides[i] = t; openSlide = i - 1; }
+      if (act === 'down' && i < C.slides.length - 1) { const t = C.slides[i + 1]; C.slides[i + 1] = C.slides[i]; C.slides[i] = t; openSlide = i + 1; }
+      if (act === 'copy' && C.slides.length < 10) { C.slides.splice(i + 1, 0, Object.assign({}, C.slides[i])); openSlide = i + 1; }
+      if (act === 'del') { C.slides.splice(i, 1); openSlide = Math.max(0, Math.min(openSlide, C.slides.length - 1)); }
+      renderSlidesList(); shell.markDirty(); render();
+      return;
+    }
+    const head = e.target.closest('[data-toggle]');
+    if (head) {
+      const i = parseInt(head.getAttribute('data-toggle'), 10);
+      openSlide = (openSlide === i) ? -1 : i;
+      renderSlidesList();
+    }
+  });
+
+  document.getElementById('slides-list').addEventListener('input', (e) => {
+    const el = e.target.closest('[data-idx][data-key]');
+    if (!el) return;
+    const i = parseInt(el.getAttribute('data-idx'), 10);
+    const key = el.getAttribute('data-key');
+    if (!C.slides[i]) return;
+    C.slides[i][key] = el.value;
+    if (key === 'title') {
+      const card = document.querySelector('.slide-card[data-card="' + i + '"] .slide-head-title');
+      if (card) card.textContent = el.value || 'Untitled slide';
+    }
+    shell.markDirty(); renderDebounced();
+  });
+
+  document.getElementById('btn-add-slide').addEventListener('click', () => {
+    if (C.slides.length >= 10) return;
+    C.slides.push(blankSlide());
+    openSlide = C.slides.length - 1;
+    renderSlidesList(); shell.markDirty(); render();
+  });
+
+  // Debounce preview re-renders while typing (the widget re-instantiates per render)
+  let _rt = null;
+  function renderDebounced() { clearTimeout(_rt); _rt = setTimeout(render, 350); }
+
+  /* ─── Sync sidebar from state ─── */
+  function syncUIFromState() {
+    document.getElementById('bg-col').value = hexOk(C.bg) ? C.bg : '#060A14';
+    document.getElementById('bg-hex').value = (C.bg || '#060A14').toUpperCase();
+    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#D9B36A';
+    document.getElementById('accent-hex').value = (C.accent || '#D9B36A').toUpperCase();
+    document.getElementById('text-col').value = hexOk(C.textColor) ? C.textColor : '#F5F1E8';
+    document.getElementById('text-hex').value = (C.textColor || '#F5F1E8').toUpperCase();
+    document.getElementById('lean-input').value = C.lean; document.getElementById('lean-val').textContent = C.lean + '\u00B0';
+    document.getElementById('radius-input').value = C.cardRadius; document.getElementById('radius-val').textContent = C.cardRadius + 'px';
+    document.getElementById('height-input').value = C.height; document.getElementById('height-val').textContent = C.height + 'px';
+    document.getElementById('interval-input').value = C.interval; document.getElementById('interval-val').textContent = C.interval + 's';
+    document.getElementById('intro-input').value = C.intro || '';
+    document.getElementById('intro-field').classList.toggle('is-hidden', !C.showIntro);
+    document.getElementById('interval-field').classList.toggle('is-hidden', !C.autoplay);
+    toggleSwitch('show-deco', C.showDeco);
+    toggleSwitch('show-intro', C.showIntro);
+    toggleSwitch('autoplay', C.autoplay);
+    toggleSwitch('pause-hover', C.pauseOnHover);
+    toggleSwitch('show-arrows', C.showArrows);
+    toggleSwitch('show-dots', C.showDots);
+    renderSlidesList();
+  }
+
+  /* ─── Colours ─── */
+  function wireColour(colId, hexId, key) {
+    const col = document.getElementById(colId), hex = document.getElementById(hexId);
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C[key] = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C[key] = v; shell.markDirty(); render(); } });
+  }
+  wireColour('bg-col', 'bg-hex', 'bg');
+  wireColour('accent-col', 'accent-hex', 'accent');
+  wireColour('text-col', 'text-hex', 'textColor');
+
+  /* ─── Sliders ─── */
+  document.getElementById('lean-input').addEventListener('input', (e) => { C.lean = parseInt(e.target.value, 10) || 0; document.getElementById('lean-val').textContent = C.lean + '\u00B0'; shell.markDirty(); renderDebounced(); });
+  document.getElementById('radius-input').addEventListener('input', (e) => { C.cardRadius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.cardRadius + 'px'; shell.markDirty(); renderDebounced(); });
+  document.getElementById('height-input').addEventListener('input', (e) => { C.height = parseInt(e.target.value, 10) || 430; document.getElementById('height-val').textContent = C.height + 'px'; shell.markDirty(); renderDebounced(); });
+  document.getElementById('interval-input').addEventListener('input', (e) => { C.interval = parseInt(e.target.value, 10) || 6; document.getElementById('interval-val').textContent = C.interval + 's'; shell.markDirty(); renderDebounced(); });
+
+  /* ─── Intro ─── */
+  document.getElementById('intro-input').addEventListener('input', (e) => { C.intro = e.target.value; shell.markDirty(); renderDebounced(); });
+
+  /* ─── Switches ─── */
+  function wireSwitch(id, key, after) { const el = document.getElementById(id); el.addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); if (after) after(); shell.markDirty(); render(); }); }
+  wireSwitch('show-deco', 'showDeco');
+  wireSwitch('show-intro', 'showIntro', () => document.getElementById('intro-field').classList.toggle('is-hidden', !C.showIntro));
+  wireSwitch('autoplay', 'autoplay', () => document.getElementById('interval-field').classList.toggle('is-hidden', !C.autoplay));
+  wireSwitch('pause-hover', 'pauseOnHover');
+  wireSwitch('show-arrows', 'showArrows');
+  wireSwitch('show-dots', 'showDots');
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  // Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initCarouselTour === 'function') window.initCarouselTour(); }
+        else render();
+      });
+    } else {
+      if (tgse.isLoggedIn()) loadFromUrl(); else render();
+    }
+  });
+</script>
+
+</body>
+</html>
