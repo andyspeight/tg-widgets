@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -103,11 +103,17 @@
 
   function styles(c) {
     const speed = prefersReducedMotion() ? '0s' : '1s';
-    const lean1 = (c.lean / 2).toFixed(2);
-    const lean2 = c.lean.toFixed(2);
-    const ry1 = (c.lean * 1.75).toFixed(2);
-    const ry2 = (c.lean * 2.25).toFixed(2);
     const r = c.cardRadius;
+    // lean drives a gentle dimensional tilt: the middle card stays near-upright (it is the
+    // feature — raised and on top); the last card tucks back further; the queued card most.
+    const ryMid = (c.lean * 0.6).toFixed(2);
+    const rzMid = (c.lean * 0.3).toFixed(2);
+    const ryLast = (c.lean * 1.6).toFixed(2);
+    const rzLast = (c.lean * 0.9).toFixed(2);
+    const ryQ = (c.lean * 1.9).toFixed(2);
+    const rzQ = (c.lean * 1.15).toFixed(2);
+    // Hero top-right sweeps down (elliptical) so the raised middle card crests above it — the "curve".
+    const heroRadius = `0 60px ${r + 8}px 0 / 0 88px ${r + 8}px 0`;
     return `
       :host { all: initial; display: block; }
       *, *::before, *::after { box-sizing: border-box; }
@@ -168,35 +174,38 @@
       .tgcar-card.no-anim { transition: none !important; }
       .tgcar-card:focus-visible { outline: 2px solid var(--tgcar-gold); outline-offset: 3px; }
 
-      /* Conveyor positions — hero bleeds off the left edge; travelling cards fan with a 3D lean */
+      /* Conveyor positions.
+         Hero bleeds off the left edge, full height, top-right swept down. The middle card is
+         RAISED and sits ON TOP of both neighbours (highest z); the last card sits LOWER and
+         BEHIND the middle (lower z), clipping off the right. Tops form a flowing curve. */
       .tgcar-card.pos0 {
-        left: 0; width: 56%; height: 100%;
+        left: 0; width: 53%; height: 100%;
         transform: translateY(-50%);
-        border-radius: 0 ${r + 8}px ${r + 8}px 0;
+        border-radius: ${heroRadius};
         z-index: 4; cursor: default;
       }
       .tgcar-card.pos1 {
-        left: 58.5%; width: 21.5%; height: 89%;
-        transform: translateY(-50%) perspective(1100px) rotateY(-${ry1}deg) rotate(${lean1}deg);
+        left: 50.5%; width: 28%; height: 86%;
+        transform: translateY(calc(-50% - 20px)) perspective(1200px) rotateY(-${ryMid}deg) rotate(${rzMid}deg);
+        border-radius: ${r}px;
+        z-index: 6;
+      }
+      .tgcar-card.pos2 {
+        left: 75.5%; width: 25%; height: 72%;
+        transform: translateY(calc(-50% + 10px)) perspective(1200px) rotateY(-${ryLast}deg) rotate(${rzLast}deg);
         border-radius: ${r}px;
         z-index: 3;
       }
-      .tgcar-card.pos2 {
-        left: 83%; width: 19%; height: 77%;
-        transform: translateY(-50%) perspective(1100px) rotateY(-${ry2}deg) rotate(${lean2}deg);
-        border-radius: ${Math.max(r - 2, 4)}px;
-        z-index: 2;
-      }
       .tgcar-card.posQ {
-        left: 108%; width: 18%; height: 70%;
-        transform: translateY(-50%) perspective(1100px) rotateY(-${ry2}deg) rotate(${(c.lean * 1.25).toFixed(2)}deg);
-        border-radius: ${Math.max(r - 2, 4)}px;
+        left: 103%; width: 24%; height: 66%;
+        transform: translateY(calc(-50% + 16px)) perspective(1200px) rotateY(-${ryQ}deg) rotate(${rzQ}deg);
+        border-radius: ${r}px;
         opacity: 0; z-index: 1; pointer-events: none;
       }
       .tgcar-card.posX {
-        left: -60%; width: 56%; height: 100%;
+        left: -56%; width: 53%; height: 100%;
         transform: translateY(-50%);
-        border-radius: 0 ${r + 8}px ${r + 8}px 0;
+        border-radius: ${heroRadius};
         opacity: 0; z-index: 5; pointer-events: none;
       }
 
@@ -211,9 +220,12 @@
       .tgcar-noimg { position: absolute; inset: 0; z-index: -2; background:
         radial-gradient(120% 90% at 30% 20%, color-mix(in srgb, var(--tgcar-gold) 22%, var(--tgcar-bg)), var(--tgcar-bg)); }
 
+      /* Every card gets a left haze + bottom darkening so the bottom-left text stays legible. */
       .tgcar-scrim {
         position: absolute; inset: 0; z-index: -1;
-        background: linear-gradient(180deg, color-mix(in srgb, var(--tgcar-bg) 6%, transparent) 30%, color-mix(in srgb, var(--tgcar-bg) 88%, transparent) 100%);
+        background:
+          linear-gradient(90deg, color-mix(in srgb, var(--tgcar-bg) 78%, transparent) 0%, color-mix(in srgb, var(--tgcar-bg) 32%, transparent) 42%, transparent 72%),
+          linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--tgcar-bg) 82%, transparent) 100%);
       }
       .tgcar-card.pos0 .tgcar-scrim {
         background:
@@ -386,7 +398,7 @@
       .tgcar.is-compact .tgcar-card.pos0 .tgcar-sub { font-size: 19px; }
       .tgcar.is-compact .tgcar-card.pos1, .tgcar.is-compact .tgcar-card.pos2 {
         left: 112%; width: 80%; height: 90%; opacity: 0; pointer-events: none;
-        transform: translateY(-50%) rotate(${lean1}deg);
+        transform: translateY(-50%) rotate(${rzMid}deg);
       }
       .tgcar.is-compact .tgcar-card.posX { left: -110%; width: 100%; border-radius: 0; }
       .tgcar.is-compact .tgcar-controls { padding: 0 20px; }
