@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -52,6 +52,31 @@
   function safeImg(u) {
     const s = String(u || '').trim();
     return /^https?:\/\//i.test(s) && !/[<>"']/.test(s) ? s : '';
+  }
+
+  // Build a clip polygon with a sloped top edge and rounded corners.
+  // topL / topR  = top-edge height at the left / right side, as percentages (the slope).
+  // radL / radR  = corner radius (px) for the left / right corners.
+  // % positions keep it responsive; px radii keep the rounding uniform across cards of
+  // different sizes. Always emits 12 points (3 per corner) so clip-path tweens smoothly
+  // as a card travels between positions — even when a radius is 0 (points collapse, count holds).
+  function clipShape(topL, topR, radL, radR) {
+    const RL = radL + 'px', kL = (radL * 0.293).toFixed(2) + 'px';
+    const RR = radR + 'px', kR = (radR * 0.293).toFixed(2) + 'px';
+    return 'polygon(' + [
+      '0% calc(' + topL + '% + ' + RL + ')',                 // TL — down the left edge
+      'calc(0% + ' + kL + ') calc(' + topL + '% + ' + kL + ')', // TL — arc
+      'calc(0% + ' + RL + ') ' + topL + '%',                 // TL — onto the top edge
+      'calc(100% - ' + RR + ') ' + topR + '%',               // TR — along the top edge
+      'calc(100% - ' + kR + ') calc(' + topR + '% + ' + kR + ')', // TR — arc
+      '100% calc(' + topR + '% + ' + RR + ')',               // TR — down the right edge
+      '100% calc(100% - ' + RR + ')',                        // BR — up the right edge
+      'calc(100% - ' + kR + ') calc(100% - ' + kR + ')',     // BR — arc
+      'calc(100% - ' + RR + ') 100%',                        // BR — along the bottom
+      'calc(0% + ' + RL + ') 100%',                          // BL — along the bottom
+      'calc(0% + ' + kL + ') calc(100% - ' + kL + ')',       // BL — arc
+      '0% calc(100% - ' + RL + ')'                           // BL — up the left edge
+    ].join(', ') + ')';
   }
 
   // Inject a Google Font once per page (editors/host pages may already have it).
@@ -103,7 +128,6 @@
 
   function styles(c) {
     const speed = prefersReducedMotion() ? '0s' : '1s';
-    const r = c.cardRadius;
     // lean drives a gentle dimensional tilt: the middle card stays near-upright (it is the
     // feature — raised and on top); the last card tucks back further; the queued card most.
     const ryMid = (c.lean * 0.6).toFixed(2);
@@ -112,13 +136,15 @@
     const rzLast = (c.lean * 0.9).toFixed(2);
     const ryQ = (c.lean * 1.9).toFixed(2);
     const rzQ = (c.lean * 1.15).toFixed(2);
-    // SHAPE — real sloped/curved tops, cut with clip-path (percentage points, so they scale).
-    // 5 points each (TL, top-mid, TR, BR, BL) so the shape tweens smoothly as cards travel.
-    // Hero: top edge slopes DOWN to the right. Middle: rises to a gentle crest (it sits over
-    // the hero's lowered right edge). Last: a softer version of the same slope.
-    const clipHero = 'polygon(0 0, 50% 8%, 100% 18%, 100% 100%, 0 100%)';
-    const clipMid  = 'polygon(0 0, 50% 6%, 100% 14%, 100% 100%, 0 100%)';
-    const clipLast = 'polygon(0 2%, 50% 8%, 100% 16%, 100% 100%, 0 100%)';
+    // SHAPE — sloped tops with soft, rounded corners, cut with clip-path.
+    // The slope reads as the angled top edge; the radius (your Corner-radius control) softens
+    // the corners. Hero keeps SQUARE left corners (it bleeds off the left edge) and rounded
+    // right corners; middle and last are rounded all round. The top edge slopes down to the
+    // right on every card, gentlest on the middle so its top sits cleanly over the hero.
+    const rad = clampNum(c.cardRadius, 0, 32, 18);
+    const clipHero = clipShape(0, 15, 0, rad);
+    const clipMid  = clipShape(0, 10, rad, rad);
+    const clipLast = clipShape(2, 14, rad, rad);
     return `
       :host { all: initial; display: block; }
       *, *::before, *::after { box-sizing: border-box; }
@@ -161,7 +187,9 @@
 
       .tgcar-card {
         position: absolute;
-        top: 50%;
+        top: auto;
+        bottom: 0;
+        transform-origin: bottom center;
         overflow: hidden;
         cursor: pointer;
         isolation: isolate;
@@ -171,6 +199,7 @@
           left var(--tgcar-speed) var(--tgcar-ease),
           width var(--tgcar-speed) var(--tgcar-ease),
           height var(--tgcar-speed) var(--tgcar-ease),
+          bottom var(--tgcar-speed) var(--tgcar-ease),
           transform var(--tgcar-speed) var(--tgcar-ease),
           clip-path var(--tgcar-speed) var(--tgcar-ease),
           opacity .6s var(--tgcar-ease);
@@ -180,37 +209,38 @@
       .tgcar-card:focus-visible { outline: 2px solid var(--tgcar-gold); outline-offset: 3px; }
 
       /* Conveyor positions.
-         Hero bleeds off the left edge, full height, with a TRUE sloped top (clip-path) that
-         descends to the right. The middle card is RAISED, on the top layer (highest z), its
-         top cresting above the hero's lowered right edge; the last card sits LOWER and BEHIND
-         the middle (lower z), clipping off the right. Tops form the flowing line. */
+         All cards share a common BASELINE — their bottoms line up — and are similar heights,
+         so the stagger happens at the TOP (the sloped edges), matching the design. The hero is
+         tallest and bleeds off the left; the middle is a touch shorter, lifted a few px and on
+         the top layer (highest z) so it reads as raised and sitting OVER its neighbours; the
+         last card is shortest and tucks BEHIND the middle (lowest z), clipping off the right. */
       .tgcar-card.pos0 {
-        left: 0; width: 53%; height: 100%;
-        transform: translateY(-50%);
+        left: 0; width: 53%; height: 100%; bottom: 0;
+        transform: none;
         clip-path: ${clipHero};
         z-index: 4; cursor: default;
       }
       .tgcar-card.pos1 {
-        left: 50.5%; width: 28%; height: 86%;
-        transform: translateY(calc(-50% - 20px)) perspective(1200px) rotateY(-${ryMid}deg) rotate(${rzMid}deg);
+        left: 50.5%; width: 28%; height: 90%; bottom: 8px;
+        transform: perspective(1200px) rotateY(-${ryMid}deg) rotate(${rzMid}deg);
         clip-path: ${clipMid};
         z-index: 6;
       }
       .tgcar-card.pos2 {
-        left: 75.5%; width: 25%; height: 72%;
-        transform: translateY(calc(-50% + 10px)) perspective(1200px) rotateY(-${ryLast}deg) rotate(${rzLast}deg);
+        left: 75.5%; width: 25%; height: 82%; bottom: 0;
+        transform: perspective(1200px) rotateY(-${ryLast}deg) rotate(${rzLast}deg);
         clip-path: ${clipLast};
         z-index: 3;
       }
       .tgcar-card.posQ {
-        left: 103%; width: 24%; height: 66%;
-        transform: translateY(calc(-50% + 16px)) perspective(1200px) rotateY(-${ryQ}deg) rotate(${rzQ}deg);
+        left: 103%; width: 24%; height: 78%; bottom: 0;
+        transform: perspective(1200px) rotateY(-${ryQ}deg) rotate(${rzQ}deg);
         clip-path: ${clipLast};
         opacity: 0; z-index: 1; pointer-events: none;
       }
       .tgcar-card.posX {
-        left: -56%; width: 53%; height: 100%;
-        transform: translateY(-50%);
+        left: -56%; width: 53%; height: 100%; bottom: 0;
+        transform: none;
         clip-path: ${clipHero};
         opacity: 0; z-index: 5; pointer-events: none;
       }
@@ -396,8 +426,8 @@
       .tgcar.is-compact .tgcar-card.pos0 .tgcar-title { font-size: 28px; }
       .tgcar.is-compact .tgcar-card.pos0 .tgcar-sub { font-size: 19px; }
       .tgcar.is-compact .tgcar-card.pos1, .tgcar.is-compact .tgcar-card.pos2 {
-        left: 112%; width: 80%; height: 90%; opacity: 0; pointer-events: none;
-        transform: translateY(-50%) rotate(${rzMid}deg);
+        left: 112%; width: 80%; height: 90%; bottom: 0; opacity: 0; pointer-events: none;
+        transform: rotate(${rzMid}deg);
       }
       .tgcar.is-compact .tgcar-card.posX { left: -110%; width: 100%; clip-path: none; }
       .tgcar.is-compact .tgcar-controls { padding: 0 20px; }
