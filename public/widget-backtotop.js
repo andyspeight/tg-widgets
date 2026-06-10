@@ -1,5 +1,5 @@
 /**
- * Travelgenix Back to Top Widget v1.0.0
+ * Travelgenix Back to Top Widget v1.0.1
  * A floating "scroll to top" button that fades in once the visitor has scrolled
  * a configurable percentage down the page, and smooth-scrolls back to the top
  * on click. Self-contained, zero dependencies, Shadow DOM, accessible.
@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -121,7 +121,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
-      this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
+      this.shadow = container.shadowRoot || (container.attachShadow ? container.attachShadow({ mode: 'open' }) : container);
       this._onScroll = this._onScroll.bind(this);
       this._onClick = this._onClick.bind(this);
       this._ticking = false;
