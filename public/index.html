@@ -493,6 +493,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'backtotop',
+    name: 'Back to Top',
+    airtableType: 'Back to Top',
+    description: 'A floating button that appears once visitors scroll a set percentage down the page, then smooth-scrolls them back to the top. Choose the corner, shape, size, icon and colour. Nice and simple — no API key.',
+    category: 'Engagement',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<line x1="12" y1="19" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-backtotop',
+    demoUrl: '/demo-backtotop',
+    widgetTag: 'backtotop',
+    scriptFile: 'widget-backtotop.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'enquiry',
     name: 'Enquiry Form',
     airtableType: 'Enquiry Form',
@@ -1797,6 +1812,24 @@ function loadMiniPreview(w) {
       showSource: true, showDate: true, showExcerpt: false,
       openNewTab: true,
     });
+  }
+
+  if (w.id === 'backtotop') {
+    container.innerHTML = `
+      <div style="position:relative; width:100%; height:100%; min-height:150px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 1px 3px rgba(15,23,42,.06); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+        <div style="height:34px; background:#1B2B5B;"></div>
+        <div style="padding:18px 20px;">
+          <div style="height:12px; width:55%; background:#E2E8F0; border-radius:4px; margin-bottom:13px;"></div>
+          <div style="height:8px; width:100%; background:#EEF2F6; border-radius:4px; margin-bottom:7px;"></div>
+          <div style="height:8px; width:92%; background:#EEF2F6; border-radius:4px; margin-bottom:7px;"></div>
+          <div style="height:8px; width:96%; background:#EEF2F6; border-radius:4px; margin-bottom:7px;"></div>
+          <div style="height:8px; width:78%; background:#EEF2F6; border-radius:4px;"></div>
+        </div>
+        <div style="position:absolute; right:16px; bottom:16px; width:46px; height:46px; border-radius:999px; background:${w.color}; box-shadow:0 6px 18px rgba(15,23,42,.22); display:flex; align-items:center; justify-content:center;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg>
+        </div>
+      </div>`;
+    return;
   }
 
   if (w.id === 'enquirypro') {
@@ -3421,6 +3454,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-maps.js"></script>
 <script src="/widget-youtube.js"></script>
 <script src="/widget-rss.js"></script>
+<script src="/widget-backtotop.js"></script>
 <script src="/widget-mybooking.js"></script>
 <script src="/widget-logos.js"></script>
 <script src="/widget-countdown.js"></script>
