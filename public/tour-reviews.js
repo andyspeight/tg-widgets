@@ -1,7 +1,7 @@
 /* ============================================================================
-   Google Reviews — guided setup tour  v1.0.0
+   Reviews — guided setup tour  v1.0.0
    ----------------------------------------------------------------------------
-   Walkthrough for the Google Reviews editor. Preview-first: we lead with the
+   Walkthrough for the Reviews editor. Preview-first: we lead with the
    business header (name + rating + total), which renders in the preview from
    the defaults, then the reviews themselves, then design and display.
 
