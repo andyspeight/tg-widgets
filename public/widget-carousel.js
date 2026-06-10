@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -112,8 +112,13 @@
     const rzLast = (c.lean * 0.9).toFixed(2);
     const ryQ = (c.lean * 1.9).toFixed(2);
     const rzQ = (c.lean * 1.15).toFixed(2);
-    // Hero top-right sweeps down (elliptical) so the raised middle card crests above it — the "curve".
-    const heroRadius = `0 60px ${r + 8}px 0 / 0 88px ${r + 8}px 0`;
+    // SHAPE — real sloped/curved tops, cut with clip-path (percentage points, so they scale).
+    // 5 points each (TL, top-mid, TR, BR, BL) so the shape tweens smoothly as cards travel.
+    // Hero: top edge slopes DOWN to the right. Middle: rises to a gentle crest (it sits over
+    // the hero's lowered right edge). Last: a softer version of the same slope.
+    const clipHero = 'polygon(0 0, 50% 8%, 100% 18%, 100% 100%, 0 100%)';
+    const clipMid  = 'polygon(0 0, 50% 6%, 100% 14%, 100% 100%, 0 100%)';
+    const clipLast = 'polygon(0 2%, 50% 8%, 100% 16%, 100% 100%, 0 100%)';
     return `
       :host { all: initial; display: block; }
       *, *::before, *::after { box-sizing: border-box; }
@@ -167,7 +172,7 @@
           width var(--tgcar-speed) var(--tgcar-ease),
           height var(--tgcar-speed) var(--tgcar-ease),
           transform var(--tgcar-speed) var(--tgcar-ease),
-          border-radius var(--tgcar-speed) var(--tgcar-ease),
+          clip-path var(--tgcar-speed) var(--tgcar-ease),
           opacity .6s var(--tgcar-ease);
         -webkit-tap-highlight-color: transparent;
       }
@@ -175,37 +180,38 @@
       .tgcar-card:focus-visible { outline: 2px solid var(--tgcar-gold); outline-offset: 3px; }
 
       /* Conveyor positions.
-         Hero bleeds off the left edge, full height, top-right swept down. The middle card is
-         RAISED and sits ON TOP of both neighbours (highest z); the last card sits LOWER and
-         BEHIND the middle (lower z), clipping off the right. Tops form a flowing curve. */
+         Hero bleeds off the left edge, full height, with a TRUE sloped top (clip-path) that
+         descends to the right. The middle card is RAISED, on the top layer (highest z), its
+         top cresting above the hero's lowered right edge; the last card sits LOWER and BEHIND
+         the middle (lower z), clipping off the right. Tops form the flowing line. */
       .tgcar-card.pos0 {
         left: 0; width: 53%; height: 100%;
         transform: translateY(-50%);
-        border-radius: ${heroRadius};
+        clip-path: ${clipHero};
         z-index: 4; cursor: default;
       }
       .tgcar-card.pos1 {
         left: 50.5%; width: 28%; height: 86%;
         transform: translateY(calc(-50% - 20px)) perspective(1200px) rotateY(-${ryMid}deg) rotate(${rzMid}deg);
-        border-radius: ${r}px;
+        clip-path: ${clipMid};
         z-index: 6;
       }
       .tgcar-card.pos2 {
         left: 75.5%; width: 25%; height: 72%;
         transform: translateY(calc(-50% + 10px)) perspective(1200px) rotateY(-${ryLast}deg) rotate(${rzLast}deg);
-        border-radius: ${r}px;
+        clip-path: ${clipLast};
         z-index: 3;
       }
       .tgcar-card.posQ {
         left: 103%; width: 24%; height: 66%;
         transform: translateY(calc(-50% + 16px)) perspective(1200px) rotateY(-${ryQ}deg) rotate(${rzQ}deg);
-        border-radius: ${r}px;
+        clip-path: ${clipLast};
         opacity: 0; z-index: 1; pointer-events: none;
       }
       .tgcar-card.posX {
         left: -56%; width: 53%; height: 100%;
         transform: translateY(-50%);
-        border-radius: ${heroRadius};
+        clip-path: ${clipHero};
         opacity: 0; z-index: 5; pointer-events: none;
       }
 
@@ -234,15 +240,8 @@
         box-shadow: inset 0 0 72px 18px color-mix(in srgb, var(--tgcar-bg) 55%, transparent);
       }
 
-      .tgcar-card::after {
-        content: '';
-        position: absolute; inset: 0;
-        border-radius: inherit;
-        border: 1px solid color-mix(in srgb, var(--tgcar-gold) 20%, transparent);
-        pointer-events: none;
-        transition: opacity var(--tgcar-speed) var(--tgcar-ease);
-      }
-      .tgcar-card.pos0::after { opacity: 0; }
+      /* (Gold hairline removed: a rectangular border clips to 3 sides under the sloped polygon,
+         which reads as broken. The slope + left haze define each card cleanly on the dark field.) */
 
       .tgcar-content {
         position: absolute;
@@ -392,7 +391,7 @@
       .tgcar.is-compact .tgcar-stage { height: ${clampNum(c.height, 320, 640, 430) + 40}px; }
       .tgcar.is-compact .tgcar-intro { font-size: 12.5px; margin-bottom: 14px; }
       .tgcar.is-compact .tgcar-deco { width: 160px; height: 130px; }
-      .tgcar.is-compact .tgcar-card.pos0 { left: 0; width: 100%; height: 100%; border-radius: 0; }
+      .tgcar.is-compact .tgcar-card.pos0 { left: 0; width: 100%; height: 100%; clip-path: none; }
       .tgcar.is-compact .tgcar-card.pos0 .tgcar-content { padding: 26px 24px; max-width: none; justify-content: flex-end; top: auto; }
       .tgcar.is-compact .tgcar-card.pos0 .tgcar-title { font-size: 28px; }
       .tgcar.is-compact .tgcar-card.pos0 .tgcar-sub { font-size: 19px; }
@@ -400,7 +399,7 @@
         left: 112%; width: 80%; height: 90%; opacity: 0; pointer-events: none;
         transform: translateY(-50%) rotate(${rzMid}deg);
       }
-      .tgcar.is-compact .tgcar-card.posX { left: -110%; width: 100%; border-radius: 0; }
+      .tgcar.is-compact .tgcar-card.posX { left: -110%; width: 100%; clip-path: none; }
       .tgcar.is-compact .tgcar-controls { padding: 0 20px; }
 
       @media (prefers-reduced-motion: reduce) {
