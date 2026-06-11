@@ -1,50 +1,71 @@
-# TG Slicer — v0.2 (full loop)
+# TG Slicer — v0.3.0
 
-Point at any component on any live website, capture it clean, and turn it into a Travelgenix Duda widget build sheet, restyled to our brand and ready to paste into Duda's Widget Builder.
+Point at any component on any live website, capture it clean, and turn it into an
+editable Travelgenix Duda widget. An internal accelerator, not a product to sell.
 
-This is the whole loop: **capture → emit → review.**
+The whole loop runs locally in the extension: **capture, build, review.** No
+network, no model, nothing to deploy. The capture engine is in `capture.js`, the
+build sheet is assembled by `emit-local.js`, and the review tab shows it back to
+you ready for Duda.
 
 ## The flow
 
 1. Click the toolbar icon, hit **Start slicing this page**.
-2. Hover any component. Use **↑ / ↓** to widen or narrow to the exact boundary. Click to lock, press **C** to capture.
-3. Hit **Make Duda widget**. The slice is sent to your Stage 2 endpoint, Claude turns it into a Duda build sheet, and a **review tab** opens.
-4. In the review tab: see an approximate preview, the content and design inputs to create, the Handlebars HTML and CSS, each with a copy button, plus **Copy full build sheet** for the lot.
-5. Paste into Duda Widget Builder once, publish, and it's a reusable section on every client site.
+2. Hover a component. **↑** widens to the parent, **↓** narrows to a child. Click
+   to lock, then press **C** (or the **Capture** button).
+3. Hit **Make Duda widget**. The build sheet is assembled on the spot and a
+   **review tab** opens. No endpoint, no waiting.
+4. In the review tab: an approximate preview, the content and design inputs to
+   create, the Handlebars HTML and the desktop and mobile CSS each with a copy
+   button, plus **Copy full build sheet**, **Open full preview** and
+   **Download HTML**.
+5. Paste into Duda Widget Builder once, publish, and it is a reusable section on
+   every client site.
 
-If you don't set an endpoint, the older **Copy HTML+CSS** and **Copy slice JSON** buttons still work for manual use.
+The older capture-and-copy buttons, **Copy HTML+CSS** and **Copy slice JSON**,
+are still on the capture bar if you want them.
 
 ## Setup
 
-1. Load unpacked: `chrome://extensions` → Developer mode → Load unpacked → pick this folder.
-2. Open the popup and set:
-   - **Stage 2 endpoint**: `https://tg-widgets.vercel.app/api/slice-emit`
-   - **Shared secret**: the same value as `TGS_SHARED_SECRET` in the tg-widgets Vercel project.
-3. Deploy the endpoint first (see `SLICE-EMIT-DEPLOY.md`).
+Load unpacked: `chrome://extensions` → Developer mode → Load unpacked → pick this
+folder. That is it. Leave the popup's endpoint and secret blank, the default path
+does not use them.
 
-Both settings are stored locally in your browser and sent only to your own endpoint.
+## What the review tab gives you
 
-## The review tab
+- **Approximate preview.** A quick in-tab render with defaults filled. It is not
+  pixel-exact and is labelled as such. Hit **Open full preview** for the real,
+  full-width render in its own tab. The true proof is dropping it into Duda.
+- **Content inputs and design inputs.** The exact inputs to create in Widget
+  Builder, in order, with variables, defaults and any list sub-inputs.
+- **HTML and CSS blocks.** Copy each into the matching Widget Builder field.
+- **Copy full build sheet.** The whole thing as Markdown, the same shape as a
+  written build sheet.
 
-- **Approximate preview.** A best-effort render that fills in default values, loops list items a few times, and shows icon placeholders. It is not pixel-exact and it is labelled as such. The real proof is dropping the widget into Duda.
-- **Content inputs / Design inputs.** The exact inputs to create in Widget Builder, in order, with variables, defaults and list sub-inputs spelled out.
-- **HTML / CSS blocks.** Copy each into the matching Widget Builder field.
-- **Copy full build sheet.** One click gives you the whole thing as Markdown, same shape as a written build sheet, handy for pasting into notes or handing to someone else to build.
+## Deliberate limits (rebuilt in Duda, not faults)
 
-## What's deliberately not here yet
+- Hover and focus states and `@media` rules are not captured. The responsive
+  layout is rebuilt to our tokens in Duda.
+- Repeated cards come through one by one, not yet as a single repeating list.
+- Anything painted by JavaScript (a WebGL shader, a JS counter) cannot be lifted
+  as CSS. A WebGL hero becomes an editable pure-CSS animated gradient stand-in.
 
-- The build sheet is pasted into Duda by hand, once per component. Auto-install depends on whether Duda's Partner API allows programmatic widget creation, which is still an open question on the project.
-- Source JavaScript behaviour is not reconstructed. Anything interactive is listed in the review tab's Notes for us to rebuild deliberately, restyled, rather than copied.
-- Hover/focus states and `@media` rules aren't captured at the source. The emit step rebuilds a clean responsive layout to our tokens instead.
+## The optional AI path
+
+There is an optional "AI smarten up" endpoint for later. It is not needed for the
+default build or the show. See `AI-EMIT-ENDPOINT.md`.
 
 ## Files
 
 | File | Role |
 |------|------|
-| `manifest.json` | MV3 manifest (v0.2) |
-| `background.js` | On-demand injection + opens the review tab |
-| `capture.js` | Capture engine (unchanged from v0.1) |
-| `content.js` | Selector overlay, capture bar, authenticated send |
-| `overlay.css` | Scoped overlay styles (unchanged) |
-| `popup.html` / `popup.js` | Activate + endpoint and secret config |
+| `manifest.json` | MV3 manifest (v0.3.0) |
+| `background.js` | On-demand injection, opens the review tab |
+| `capture.js` | Capture engine: snapshot, scope, absolutise, inline sprites |
+| `emit-local.js` | Builds the Duda build sheet locally |
+| `content.js` | Selector overlay, capture bar, local build |
+| `overlay.css` | Scoped overlay styles |
+| `popup.html` / `popup.js` | Activate, plus the optional endpoint and secret |
 | `review.html` / `review.css` / `review.js` | The build-sheet review screen |
+| `AI-EMIT-ENDPOINT.md` | The optional AI endpoint reference |
+| `SHOW-RUNBOOK.md` | Build one widget into Duda, then run the stand demo |
