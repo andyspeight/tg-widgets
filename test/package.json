@@ -1,0 +1,14 @@
+{
+  "name": "tg-slicer-test",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright smoke harness for the TG Slicer capture and emit engine. Test tooling only, kept out of the Vercel deploy.",
+  "scripts": {
+    "smoke": "node run-smoke.mjs tg-slicer f",
+    "smoke:moving": "node run-smoke.mjs tg-slicer i"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}

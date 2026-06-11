@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "TG Slicer",
+  "version": "0.3.0",
+  "description": "Point at any component on any website, capture it clean, and emit it as a Travelgenix Duda widget.",
+  "action": { "default_popup": "popup.html", "default_title": "TG Slicer" },
+  "background": { "service_worker": "background.js" },
+  "permissions": ["activeTab", "scripting", "storage", "clipboardWrite", "tabs"],
+  "host_permissions": ["<all_urls>"]
+}

@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><title>WebGL-style hero (blank canvas + brand colour vars) — gradient stand-in</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif}
+.hero{position:relative;padding:110px 48px;text-align:center;background:#0b1220;overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%;z-index:0;--gradient-color-1:#a960ee;--gradient-color-2:#ff333d;--gradient-color-3:#90e0ff;--gradient-color-4:#ffcb57}
+.in{position:relative;z-index:1}
+.hero h1{margin:0 0 12px;color:#fff;font-size:50px;font-weight:800}
+.hero p{margin:0;color:#e6edf6;font-size:20px}
+</style></head><body>
+<section class="hero" id="target"><canvas id="cv"></canvas><div class="in"><h1>Moving gradient, the Stripe way</h1><p>Painted by WebGL on the original. We stand in an editable CSS gradient.</p></div></section>
+</body></html>

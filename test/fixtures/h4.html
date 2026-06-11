@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Alternating feature rows (zig-zag image+text, bullet lists, links)</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#fff;color:#0f172a}
+.sec{max-width:1080px;margin:0 auto;padding:56px 24px}
+.row{display:flex;gap:48px;align-items:center;margin-bottom:56px}
+.row.rev{flex-direction:row-reverse}
+.row .media{flex:1;border-radius:18px;overflow:hidden;aspect-ratio:16/11}
+.row .media img{width:100%;height:100%;object-fit:cover;display:block}
+.row .copy{flex:1}
+.row .copy .k{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0ea5b7}
+.row .copy h3{margin:6px 0 10px;font-size:30px;font-weight:800;letter-spacing:-.02em}
+.row .copy p{margin:0 0 14px;color:#475569;font-size:16px;line-height:1.6}
+.row .copy ul{list-style:none;padding:0;margin:0 0 16px}
+.row .copy li{display:flex;gap:10px;margin:0 0 8px;font-size:15px;color:#334155}
+.row .copy li svg{flex:none;width:18px;height:18px;color:#0ea5b7}
+.row .copy a{color:#0ea5b7;font-weight:700;text-decoration:none}
+</style></head><body>
+<section class="sec" id="target">
+  <div class="row"><div class="media"><img src="g-img2.jpg" alt=""></div><div class="copy"><div class="k">Booking engine</div><h3>Sell every product in one place</h3><p>Flights, hotels, packages and extras, all bookable from a site that looks like you.</p><ul><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Live availability</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Secure payments</li></ul><a href="#">Explore the engine →</a></div></div>
+  <div class="row rev"><div class="media"><img src="g-img1.jpg" alt=""></div><div class="copy"><div class="k">Marketing</div><h3>Fill quiet weeks automatically</h3><p>Smart campaigns that go out while you sleep, built for travel and ready to send.</p><ul><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Pre-built journeys</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>One-click sends</li></ul><a href="#">See marketing →</a></div></div>
+</section>
+</body></html>

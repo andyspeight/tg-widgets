@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Pricing — 3 tiers, highlighted card, badge, feature lists, toggle</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f7f8fb;color:#0f172a}
+.sec{max-width:1080px;margin:0 auto;padding:64px 24px;text-align:center}
+.sec h2{margin:0 0 6px;font-size:38px;font-weight:800;letter-spacing:-.02em}
+.sec .lede{margin:0 0 22px;color:#64748b;font-size:18px}
+.toggle{display:inline-flex;background:#e9edf3;border-radius:999px;padding:4px;margin-bottom:34px}
+.toggle span{padding:8px 18px;border-radius:999px;font-size:14px;font-weight:600;color:#475569}
+.toggle span.on{background:#fff;color:#0f172a;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;text-align:left}
+.card{position:relative;background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:28px}
+.card.pop{border:2px solid #6366f1;box-shadow:0 24px 50px -20px rgba(99,102,241,.45);transform:scale(1.04)}
+.badge{position:absolute;top:-12px;right:20px;background:#6366f1;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px}
+.tier{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6366f1}
+.price{font-size:42px;font-weight:800;margin:10px 0 2px}
+.price span{font-size:15px;font-weight:500;color:#64748b}
+.feat{list-style:none;padding:0;margin:18px 0 22px}
+.feat li{display:flex;gap:10px;align-items:flex-start;margin:0 0 10px;font-size:14px;color:#334155}
+.feat svg{flex:none;width:18px;height:18px;color:#10b981;margin-top:1px}
+.btn{display:block;text-align:center;padding:12px;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none}
+.btn.solid{background:#6366f1;color:#fff}.btn.ghost{background:#eef0fb;color:#4338ca}
+</style></head><body>
+<section class="sec" id="target">
+  <h2>Simple, honest pricing</h2>
+  <p class="lede">Pick a plan that grows with you. Switch any time.</p>
+  <div class="toggle"><span class="on">Monthly</span><span>Annual</span></div>
+  <div class="grid">
+    <div class="card"><div class="tier">Spark</div><div class="price">£159<span>/mo</span></div><ul class="feat"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Booking engine</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Up to 5 pages</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Email support</li></ul><a class="btn ghost" href="#">Choose Spark</a></div>
+    <div class="card pop"><span class="badge">Most popular</span><div class="tier">Boost</div><div class="price">£229<span>/mo</span></div><ul class="feat"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Everything in Spark</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Quick Quote add-on</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Priority support</li></ul><a class="btn solid" href="#">Choose Boost</a></div>
+    <div class="card"><div class="tier">Ignite</div><div class="price">£299<span>/mo</span></div><ul class="feat"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Everything in Boost</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Quick Quote included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Dedicated manager</li></ul><a class="btn ghost" href="#">Choose Ignite</a></div>
+  </div>
+</section>
+</body></html>
