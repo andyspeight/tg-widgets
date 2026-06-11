@@ -67,8 +67,11 @@ capture), `popup.html/js`, `overlay.css`, `manifest.json`.
 
 There is also an **optional, non-default** AI emit endpoint `api/slice-emit.js`
 in the tg-widgets repo (maxDuration 300 in `vercel.json`, MAX_TOKENS 32000). It
-is deployed and harmless and is the basis for a future optional "AI smarten up"
-button. The default local path needs no endpoint and no redeploy.
+is live at `https://widgets.travelify.io/api/slice-emit` (alias
+`https://tg-widgets.vercel.app/api/slice-emit`). It is deployed and harmless and
+is the basis for a future optional "AI smarten up" button. The default local
+path needs no endpoint and no redeploy. The full endpoint, shared-secret and env
+var reference is in `tg-slicer/AI-EMIT-ENDPOINT.md`.
 
 ## What the engine handles (all proven by fixtures)
 
