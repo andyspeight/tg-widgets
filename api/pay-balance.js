@@ -84,7 +84,14 @@ function findPaymentPlan(raw) {
 }
 
 // Determine the next payment to collect + how many remain after it.
-function computeNextPayment(plan) {
+// `outstanding` (total − paidToDate) is the authority on what's still owed:
+// Travelify leaves the breakdown unchanged after payments are taken (online
+// OR added manually by the agent), so the genuinely remaining schedule is the
+// TAIL of the plan that sums to the outstanding — payments settle the
+// earliest entries first. Walk from the last entry backwards, capping the
+// boundary entry if a payment part-covered it. This stops an already-settled
+// instalment being offered (and charged) again.
+function computeNextPayment(plan, outstanding) {
   if (!plan) return null;
 
   const entries = plan.breakdown
@@ -99,7 +106,8 @@ function computeNextPayment(plan) {
   if (!entries.length) return null;
 
   // Prefer entries not flagged paid. If nothing carries a paid flag, treat all
-  // scheduled payments as still collectable (next = earliest by date).
+  // scheduled payments as candidates — the reconciliation below settles them
+  // against the real outstanding.
   const unpaid = entries.filter(e => !e.paid);
   const pool = unpaid.length ? unpaid : entries;
 
@@ -110,15 +118,28 @@ function computeNextPayment(plan) {
     return a.due - b.due;
   });
 
-  const next = pool[0];
-  const rest = pool.slice(1);
+  // Reconcile: keep only the latest entries summing to the outstanding.
+  let remaining = pool;
+  if (Number.isFinite(outstanding) && outstanding > 0) {
+    let need = Math.round(outstanding * 100) / 100;
+    const left = [];
+    for (let i = pool.length - 1; i >= 0 && need > 0.004; i--) {
+      const take = Math.min(pool[i].amount, need);
+      left.unshift({ ...pool[i], amount: Math.round(take * 100) / 100 });
+      need = Math.round((need - take) * 100) / 100;
+    }
+    if (left.length) remaining = left;
+  }
+
+  const next = remaining[0];
+  const rest = remaining.slice(1);
   return {
     amount: Math.round(next.amount * 100) / 100,
     currency: plan.currency,
     dueDate: next.dueDate || null,
     remaining: rest.length,
     remainingAmount: Math.round(rest.reduce((s, e) => s + e.amount, 0) * 100) / 100,
-    isInstalment: plan.isInstalment,
+    isInstalment: remaining.length > 1,
   };
 }
 
@@ -155,10 +176,10 @@ const MIN_PART_PAYMENT = 1;
 //     server is the authority on what may be charged.
 export function decideCharge(raw, requested) {
   const plan = findPaymentPlan(raw);
-  const next = computeNextPayment(plan);
   const paid = computePaidToDate(raw);
   const total = computeOrderTotal(raw);
   const outstanding = Math.max(0, Math.round((total - paid) * 100) / 100);
+  const next = computeNextPayment(plan, outstanding);
 
   if (!(outstanding > 0)) return { noBalance: true, total, paid, outstanding };
   if (!next || !(next.amount > 0)) return { noBalance: true, total, paid, outstanding };
