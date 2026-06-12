@@ -215,8 +215,19 @@ function buildPaymentInfo(order) {
     if (outstanding > 0) {
       result.balanceDue = outstanding;
       if (dep && Array.isArray(dep.breakdown) && dep.breakdown.length) {
-        const next = dep.breakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0];
-        result.balanceDueDate = next?.dueDate || null;
+        // The breakdown is the original PLAN (Travelify leaves it unchanged
+        // after payments are taken), so the next due date comes from the
+        // RECONCILED remaining schedule: payments settle the earliest entries
+        // first, so the remaining entries are the tail of the plan summing to
+        // the outstanding. Walk from the latest entry backwards until the
+        // outstanding is covered; the first kept entry is the next one due.
+        const sorted = dep.breakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity));
+        let need = outstanding, nextDue = null;
+        for (let i = sorted.length - 1; i >= 0 && need > 0.004; i--) {
+          const amt = Number(sorted[i].amount) || 0;
+          if (amt > 0) { nextDue = sorted[i].dueDate || nextDue; need = Math.round((need - Math.min(amt, need)) * 100) / 100; }
+        }
+        result.balanceDueDate = nextDue || sorted[0]?.dueDate || null;
       }
     }
   } else {
