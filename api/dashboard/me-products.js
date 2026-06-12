@@ -62,6 +62,7 @@ const PRODUCT_URLS = {
   [PRODUCTS.slugs.LUNA_TRENDS]:    'https://trends.travelify.io/',
   [PRODUCTS.slugs.LUNA_QA]:        'https://qa.travelify.io/',
   [PRODUCTS.slugs.TOOL_HUB]:       '/admin/',
+  [PRODUCTS.slugs.CONTRACT_LOADER]: 'https://contracts.travelify.io',
 };
 
 // Products that are Travelgenix staff only. The launchpad renders a small

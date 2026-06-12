@@ -199,7 +199,8 @@ export const PRODUCTS = {
     LUNA_BRAIN:     'luna_brain',
     LUNA_TRENDS:    'luna_trends',
     LUNA_QA:        'luna_qa',
-    TOOL_HUB:       'tool_hub'
+    TOOL_HUB:       'tool_hub',
+    CONTRACT_LOADER: 'contract_loader'
   },
   statuses: {
     ACTIVE:      'active',
@@ -266,9 +267,10 @@ export const CATALOGUE = {
     CRM:         'CRM',
     QUICK_QUOTE: 'Quick Quote',
     UNIVERSITY:  'University',
-    WIDGET:      'Widget'
+    WIDGET:      'Widget',
+    CONTRACTING: 'Contracting'
   },
-  categoryOrder: ['Luna Suite', 'Marketing', 'CRM', 'Quick Quote', 'University', 'Widget']
+  categoryOrder: ['Luna Suite', 'Marketing', 'CRM', 'Quick Quote', 'University', 'Widget', 'Contracting']
 };
 
 // ----------------------------------------------------------------------------

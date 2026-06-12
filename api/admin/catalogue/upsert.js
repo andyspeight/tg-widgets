@@ -12,7 +12,7 @@
  *     id?: 'recXXX' (omit for create),
  *     productCode: 'widget-foo',
  *     productName: 'Foo Widget',
- *     category: 'Widget' | 'Luna Suite' | 'Marketing' | 'CRM' | 'Quick Quote' | 'University',
+ *     category: 'Widget' | 'Luna Suite' | 'Marketing' | 'CRM' | 'Quick Quote' | 'University' | 'Contracting',
  *     description?: string,
  *     active?: boolean,
  *     sortOrder?: number
@@ -24,14 +24,8 @@ import { createRecord, updateRecord } from '../../_lib/auth/airtable.js';
 import { jsonError } from '../../_lib/auth/http.js';
 import { PRODUCTS, PERMISSIONS, CATALOGUE } from '../../_lib/auth/schema.js';
 
-const ALLOWED_CATEGORIES = new Set([
-  'Luna Suite',
-  'Marketing',
-  'CRM',
-  'Quick Quote',
-  'University',
-  'Widget',
-]);
+// Derived from the schema so a new category only needs adding in one place.
+const ALLOWED_CATEGORIES = new Set(CATALOGUE.categoryOrder);
 
 // Product code rules: lowercase, alphanumeric + hyphens only, 3–60 chars,
 // must start with a letter (so we don't accept '-foo' or '0widget')
