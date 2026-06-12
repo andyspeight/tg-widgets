@@ -230,8 +230,24 @@ export function renderEmailHtml(order, opts = {}) {
     if (outstanding && outstanding > 0) {
       balance = outstanding;
       if (orderBreakdown.length) {
-        balanceDueDate = orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity))[0]?.dueDate || null;
-        instalments = orderBreakdown.length > 1 ? orderBreakdown : [];
+        // The breakdown is the original PLAN (Travelify leaves it unchanged
+        // after payments are taken), so reconcile: payments settle the
+        // earliest entries first, leaving the TAIL of the plan that sums to
+        // the outstanding. Walk from the latest entry backwards, capping the
+        // boundary entry if a payment part-covered it.
+        const sortedPlan = orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity));
+        let need = outstanding;
+        const remainingSched = [];
+        for (let i = sortedPlan.length - 1; i >= 0 && need > 0.004; i--) {
+          const amt = Number(sortedPlan[i].amount) || 0;
+          if (amt > 0) {
+            const take = Math.min(amt, need);
+            remainingSched.unshift({ amount: Math.round(take * 100) / 100, dueDate: sortedPlan[i].dueDate });
+            need = Math.round((need - take) * 100) / 100;
+          }
+        }
+        balanceDueDate = remainingSched[0]?.dueDate || sortedPlan[0]?.dueDate || null;
+        instalments = remainingSched.length > 1 ? remainingSched : [];
       }
     }
   } else {
