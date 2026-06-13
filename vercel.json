@@ -184,6 +184,10 @@
       "destination": "/editor-weather.html"
     },
     {
+      "source": "/editor-currency",
+      "destination": "/editor-currency.html"
+    },
+    {
       "source": "/editor-maps",
       "destination": "/editor-maps.html"
     },

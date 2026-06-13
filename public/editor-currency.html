@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Currency Converter — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .select {
+    width:100%; padding:8px 10px; font:inherit; font-size:13px;
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); color:var(--tgse-ink);
+    transition:border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .input:focus, .select:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:10px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center;
+    transition:border-color 160ms ease, background 160ms ease; }
+  .pick-btn:hover { background:var(--tgse-hover); }
+  .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .pick-label { font-size:12px; font-weight:600; color:var(--tgse-ink); }
+  .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
+
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  /* Currency multi-select chips */
+  .cur-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; max-height:260px; overflow:auto; padding:2px; }
+  .cur-chip { display:flex; align-items:center; gap:7px; padding:7px 9px; border:1.5px solid var(--tgse-border); border-radius:var(--tgse-radius-sm); cursor:pointer; font-size:12px; background:var(--tgse-panel); user-select:none; }
+  .cur-chip:hover { background:var(--tgse-hover); }
+  .cur-chip.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .cur-chip .code { font-weight:700; }
+  .cur-chip .nm { color:var(--tgse-ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .is-hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 2.5-1.5c1.5 0 2.5 1 2.5 2s-1 1.6-2.5 2-2.5 1-2.5 2 1 2 2.5 2a2.5 2.5 0 0 0 2.5-1.5"/><line x1="12" y1="6" x2="12" y2="7.5"/><line x1="12" y1="16.5" x2="12" y2="18"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Currency Converter</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled currency converter" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== CONTENT ===== -->
+      <div class="tgse-panel is-active" data-tab="content">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Heading</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input type="text" class="input" id="heading-input" maxlength="60" placeholder="Currency converter">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 10a2.5 2.5 0 0 1 5 0"/></svg>
+            <span class="tgse-section-label">Currencies</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Base currency</label>
+              <select class="select" id="base-select"></select>
+              <span class="field-hint">The currency your prices are quoted in. Always available in the dropdowns.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Currencies shown</label>
+              <div class="cur-grid" id="cur-grid"></div>
+              <span class="field-hint">Pick which currencies appear in the From and To menus.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
+            <span class="tgse-section-label">Defaults</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Default amount</label>
+              <input type="number" class="input" id="amount-input" min="0" step="any" value="100">
+            </div>
+            <div class="field">
+              <label class="field-label">Convert from</label>
+              <select class="select" id="from-select"></select>
+            </div>
+            <div class="field">
+              <label class="field-label">Convert to</label>
+              <select class="select" id="to-select"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span class="tgse-section-label">Disclaimer</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Note shown under the converter</label>
+              <input type="text" class="input" id="note-input" maxlength="160" placeholder="Rates are indicative and for guidance only.">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Layout</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid" id="layout-picker">
+                <button type="button" class="pick-btn" data-layout="card"><span class="pick-label">Card</span></button>
+                <button type="button" class="pick-btn" data-layout="inline"><span class="pick-label">Plain</span></button>
+              </div>
+              <span class="field-hint">Card adds a bordered panel and shadow. Plain blends into the page.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Accent colour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Font</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="tgse-section-label">Display</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Country flags</span><button type="button" class="switch is-on" id="sw-flags" aria-pressed="true"></button></div>
+              <div class="switch-row"><span class="switch-row-label">Show the rate line</span><button type="button" class="switch is-on" id="sw-rate" aria-pressed="true"></button></div>
+              <div class="switch-row"><span class="switch-row-label">Show last updated</span><button type="button" class="switch is-on" id="sw-updated" aria-pressed="true"></button></div>
+            </div>
+            <div class="field">
+              <label class="field-label">Decimal places</label>
+              <select class="select" id="decimals-select">
+                <option value="0">0</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-currency.js"></script>
+<style>
+  .pv-faux { width:100%; max-width:620px; background:#fff; border-radius:12px;
+    box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05);
+    padding:40px; display:flex; justify-content:center; }
+  .pv-faux[data-bg="dark"] { background:#0B1220; }
+  #widget-mount { width:100%; }
+</style>
+<script>
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+
+  // Mirror of the supported set (code → name). Kept in sync with api/fx-rates.js.
+  const NAMES = {
+    AUD:'Australian Dollar', BGN:'Bulgarian Lev', BRL:'Brazilian Real', CAD:'Canadian Dollar',
+    CHF:'Swiss Franc', CNY:'Chinese Yuan', CZK:'Czech Koruna', DKK:'Danish Krone', EUR:'Euro',
+    GBP:'British Pound', HKD:'Hong Kong Dollar', HUF:'Hungarian Forint', IDR:'Indonesian Rupiah',
+    ILS:'Israeli Shekel', INR:'Indian Rupee', ISK:'Icelandic Krona', JPY:'Japanese Yen',
+    KRW:'South Korean Won', MXN:'Mexican Peso', MYR:'Malaysian Ringgit', NOK:'Norwegian Krone',
+    NZD:'New Zealand Dollar', PHP:'Philippine Peso', PLN:'Polish Zloty', RON:'Romanian Leu',
+    SEK:'Swedish Krona', SGD:'Singapore Dollar', THB:'Thai Baht', TRY:'Turkish Lira',
+    USD:'US Dollar', ZAR:'South African Rand'
+  };
+  const ALL = Object.keys(NAMES);
+  function flagFor(code){ const cc=String(code||'').slice(0,2).toUpperCase(); if(!/^[A-Z]{2}$/.test(cc)) return ''; return String.fromCodePoint(...[...cc].map(ch=>0x1F1E6+ch.charCodeAt(0)-65)); }
+
+  let C = {
+    heading: 'Currency converter',
+    baseCurrency: 'GBP',
+    currencies: ['GBP','EUR','USD','AUD','CAD','CHF','JPY','NZD'],
+    defaultFrom: 'GBP',
+    defaultTo: 'EUR',
+    defaultAmount: 100,
+    decimals: 2,
+    accent: '#0891B2',
+    layout: 'card',
+    showFlags: true,
+    showRate: true,
+    showUpdated: true,
+    note: 'Rates are indicative and for guidance only.',
+    theme: 'light',
+    fontFamily: 'Inter',
+  };
+
+  let widgetInst = null;
+
+  const shell = tgse.init({
+    widgetType: 'Currency Converter',
+    widgetTag: 'currency',
+    scriptFile: 'widget-currency.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); normalise(); syncUIFromState(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for Currency Converter', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for Currency Converter', 'ok'),
+    onThemeToggle: (isDark) => { C.theme = isDark ? 'dark' : 'light'; render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); },
+  });
+
+  // Keep the config internally consistent (base always present, defaults valid).
+  function normalise() {
+    C.currencies = [...new Set((C.currencies || []).map(x => String(x).toUpperCase()).filter(x => NAMES[x]))];
+    if (!NAMES[C.baseCurrency]) C.baseCurrency = C.currencies[0] || 'GBP';
+    if (!C.currencies.includes(C.baseCurrency)) C.currencies.unshift(C.baseCurrency);
+    if (C.currencies.length < 2) C.currencies = [...new Set([C.baseCurrency, 'EUR', 'USD'])];
+    if (!C.currencies.includes(C.defaultFrom)) C.defaultFrom = C.baseCurrency;
+    if (!C.currencies.includes(C.defaultTo) || C.defaultTo === C.defaultFrom) C.defaultTo = C.currencies.find(x => x !== C.defaultFrom) || C.currencies[0];
+  }
+
+  function buildFauxPage() {
+    return '<div class="pv-faux" data-bg="' + (C.theme === 'dark' ? 'dark' : 'light') + '"><div data-tg-widget="currency" id="widget-mount"></div></div>';
+  }
+
+  function render() {
+    const frame = document.getElementById('pv-frame');
+    if (!frame) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    frame.innerHTML = buildFauxPage();
+    const host = document.getElementById('widget-mount');
+    if (!host) return;
+    requestAnimationFrame(() => {
+      if (window.TGCurrencyWidget) {
+        try { widgetInst = new window.TGCurrencyWidget(host, Object.assign({}, C, { previewMode: true })); }
+        catch (e) { console.error(e); }
+      }
+    });
+  }
+
+  function optionsHtml(selected) {
+    return C.currencies.map(code => '<option value="' + code + '"' + (code === selected ? ' selected' : '') + '>' + flagFor(code) + ' ' + code + ' · ' + NAMES[code] + '</option>').join('');
+  }
+  function baseOptionsHtml() {
+    return ALL.map(code => '<option value="' + code + '"' + (code === C.baseCurrency ? ' selected' : '') + '>' + flagFor(code) + ' ' + code + ' · ' + NAMES[code] + '</option>').join('');
+  }
+
+  function buildCurrencyGrid() {
+    const grid = document.getElementById('cur-grid');
+    grid.innerHTML = ALL.map(code =>
+      '<label class="cur-chip' + (C.currencies.includes(code) ? ' is-on' : '') + '" data-code="' + code + '">' +
+        '<span class="code">' + flagFor(code) + ' ' + code + '</span><span class="nm">' + NAMES[code] + '</span>' +
+      '</label>').join('');
+  }
+
+  function syncUIFromState() {
+    document.getElementById('heading-input').value = C.heading || '';
+    document.getElementById('note-input').value = C.note || '';
+    document.getElementById('amount-input').value = C.defaultAmount;
+    document.getElementById('base-select').innerHTML = baseOptionsHtml();
+    document.getElementById('from-select').innerHTML = optionsHtml(C.defaultFrom);
+    document.getElementById('to-select').innerHTML = optionsHtml(C.defaultTo);
+    document.getElementById('decimals-select').value = String(C.decimals);
+    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2';
+    document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
+    document.querySelectorAll('#layout-picker [data-layout]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-layout') === C.layout));
+    toggleSwitch('sw-flags', C.showFlags);
+    toggleSwitch('sw-rate', C.showRate);
+    toggleSwitch('sw-updated', C.showUpdated);
+    buildCurrencyGrid();
+  }
+
+  function toggleSwitch(id, on) {
+    const el = document.getElementById(id); if (!el) return;
+    el.classList.toggle('is-on', !!on);
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  // ─── Wiring ───
+  document.getElementById('heading-input').addEventListener('input', e => { C.heading = e.target.value; shell.markDirty(); render(); });
+  document.getElementById('note-input').addEventListener('input', e => { C.note = e.target.value; shell.markDirty(); render(); });
+  document.getElementById('amount-input').addEventListener('input', e => { C.defaultAmount = Math.max(0, Number(e.target.value) || 0); shell.markDirty(); render(); });
+
+  document.getElementById('base-select').addEventListener('change', e => {
+    C.baseCurrency = e.target.value; normalise(); syncUIFromState(); shell.markDirty(); render();
+  });
+  document.getElementById('from-select').addEventListener('change', e => { C.defaultFrom = e.target.value; normalise(); document.getElementById('to-select').innerHTML = optionsHtml(C.defaultTo); shell.markDirty(); render(); });
+  document.getElementById('to-select').addEventListener('change', e => { C.defaultTo = e.target.value; shell.markDirty(); render(); });
+  document.getElementById('decimals-select').addEventListener('change', e => { C.decimals = parseInt(e.target.value, 10) || 0; shell.markDirty(); render(); });
+
+  document.getElementById('cur-grid').addEventListener('click', e => {
+    const chip = e.target.closest('[data-code]'); if (!chip) return;
+    e.preventDefault();
+    const code = chip.getAttribute('data-code');
+    if (code === C.baseCurrency) { tgse.toast('The base currency is always shown', 'ok'); return; }
+    const i = C.currencies.indexOf(code);
+    if (i >= 0) {
+      if (C.currencies.length <= 2) { tgse.toast('Keep at least two currencies', 'ok'); return; }
+      C.currencies.splice(i, 1);
+    } else { C.currencies.push(code); }
+    normalise(); syncUIFromState(); shell.markDirty(); render();
+  });
+
+  document.getElementById('layout-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-layout]'); if (!b) return;
+    C.layout = b.getAttribute('data-layout');
+    document.querySelectorAll('#layout-picker [data-layout]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+
+  (function wireColour() {
+    const col = document.getElementById('accent-col'), hex = document.getElementById('accent-hex');
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); render(); } });
+  })();
+
+  function wireSwitch(id, key) { const el = document.getElementById(id); el.addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); shell.markDirty(); render(); }); }
+  wireSwitch('sw-flags', 'showFlags');
+  wireSwitch('sw-rate', 'showRate');
+  wireSwitch('sw-updated', 'showUpdated');
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { normalise(); render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        normalise(); syncUIFromState(); render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    normalise(); syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); else render(); });
+    } else { if (tgse.isLoggedIn()) loadFromUrl(); else render(); }
+  });
+</script>
+
+</body>
+</html>

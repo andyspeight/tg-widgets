@@ -448,6 +448,20 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'currency',
+    name: 'Currency Converter',
+    airtableType: 'Currency Converter',  // matches Airtable WidgetType singleSelect option
+    description: 'A live currency converter for travellers. They type an amount, pick the from and to currencies and see the result straight away. Live European Central Bank rates, a clean card or plain layout, country flags, your own currency list and an indicative-rates note. No API key.',
+    category: 'Information',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 2.5-1.5c1.5 0 2.5 1 2.5 2s-1 1.6-2.5 2-2.5 1-2.5 2 1 2 2.5 2a2.5 2.5 0 0 0 2.5-1.5"/><line x1="12" y1="6" x2="12" y2="7.5"/><line x1="12" y1="16.5" x2="12" y2="18"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-currency',
+    widgetTag: 'currency',
+    scriptFile: 'widget-currency.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'maps',
     name: 'Maps',
     airtableType: 'Maps',
