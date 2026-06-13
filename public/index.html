@@ -478,6 +478,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'flighttime',
+    name: 'Flight Time & Distance',
+    airtableType: 'Flight Time',  // matches Airtable WidgetType singleSelect option
+    description: 'Pick two airports and see the direct great-circle distance and an approximate flight time. No API and no key, the maths runs in the browser from bundled airport coordinates. Visitors can change either airport. Card or plain layout, kilometres or miles, country flags.',
+    category: 'Information',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M17.8 19.2 16 11l3.5-3.5a2.12 2.12 0 0 0-3-3L13 8 4.8 6.2a.5.5 0 0 0-.5.8l3.9 4.3-2.2 2.2-1.6-.4a.5.5 0 0 0-.5.8L6 18l1.7 2.6a.5.5 0 0 0 .8-.1l2.2-1.6 4.3 3.9a.5.5 0 0 0 .8-.5z"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-flighttime',
+    demoUrl: '/demo-flighttime',
+    widgetTag: 'flighttime',
+    scriptFile: 'widget-flighttime.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'maps',
     name: 'Maps',
     airtableType: 'Maps',

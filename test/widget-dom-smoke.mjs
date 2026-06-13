@@ -122,5 +122,27 @@ async function mount(scriptFile, configAttr, { stubFetch = true } = {}) {
   dom.window.close(); // stops the tick interval
 }
 
+// ── 7. Flight Time & Distance computes a great-circle route ──
+{
+  const cfg = JSON.stringify({ heading: 'Route', defaultFrom: 'LHR', defaultTo: 'JFK', units: 'both' }).replace(/'/g, '&#39;');
+  const dom = new JSDOM(`<!doctype html><html><body><div data-tg-widget="flighttime" data-tg-config='${cfg}'></div></body></html>`, { runScripts: 'dangerously', url: 'https://x.example/' });
+  const s = dom.window.document.createElement('script');
+  s.textContent = readFileSync(new URL('../public/widget-flighttime.js', import.meta.url), 'utf8');
+  dom.window.document.body.appendChild(s);
+  await sleep(40);
+  const host = dom.window.document.querySelector('[data-tg-widget="flighttime"]');
+  ok(!!host.shadowRoot, 'flighttime: shadow root attached');
+  const kmOf = (txt) => parseInt(((txt.match(/([\d,]+)\s*km/) || [])[1] || '0').replace(/,/g, ''), 10);
+  const distTxt = host.shadowRoot.getElementById('dist').textContent;
+  ok(kmOf(distTxt) >= 5400 && kmOf(distTxt) <= 5700, 'flighttime: LHR→JFK ~5540 km (got ' + distTxt + ')');
+  ok(/\d+h/.test(host.shadowRoot.getElementById('time').textContent), 'flighttime: shows an approximate flight time');
+  ok(typeof dom.window.TGFlightTimeWidget.AIRPORTS === 'object', 'flighttime: exposes the bundled AIRPORTS table');
+  // swap to JFK→LHR — distance is symmetric, should stay in range
+  host.shadowRoot.getElementById('swap').click();
+  await sleep(5);
+  ok(kmOf(host.shadowRoot.getElementById('dist').textContent) >= 5400, 'flighttime: swap keeps the symmetric distance');
+  dom.window.close();
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 assert.strictEqual(failed, 0, 'DOM smoke failures');

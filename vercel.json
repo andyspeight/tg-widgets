@@ -72,6 +72,10 @@
       "destination": "/demo-worldclock.html"
     },
     {
+      "source": "/demo-flighttime",
+      "destination": "/demo-flighttime.html"
+    },
+    {
       "source": "/demo-maps",
       "destination": "/demo-maps.html"
     },
@@ -198,6 +202,10 @@
     {
       "source": "/editor-worldclock",
       "destination": "/editor-worldclock.html"
+    },
+    {
+      "source": "/editor-flighttime",
+      "destination": "/editor-flighttime.html"
     },
     {
       "source": "/editor-maps",
@@ -491,6 +499,23 @@
     },
     {
       "source": "/widget-worldclock.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-flighttime.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
