@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deal Bar — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* ─── Per-editor sidebar inner styles (shared conventions across editors) ─── */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .select, textarea.input {
+    width:100%; padding:8px 10px; font:inherit; font-size:13px;
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); color:var(--tgse-ink);
+    transition:border-color 160ms ease, box-shadow 160ms ease;
+  }
+  textarea.input { resize:vertical; min-height:58px; line-height:1.5; }
+  .input:focus, .select:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+
+  /* Option picker */
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:10px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center;
+    transition:border-color 160ms ease, background 160ms ease; display:flex; flex-direction:column; gap:7px; align-items:center; }
+  .pick-btn:hover { background:var(--tgse-hover); }
+  .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .pick-label { font-size:11px; font-weight:600; color:var(--tgse-ink); }
+  .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
+  .pos-sw { width:40px; height:28px; border:1px solid var(--tgse-border); border-radius:5px; position:relative; background:var(--tgse-hover); overflow:hidden; }
+  .pos-sw::after { content:''; position:absolute; left:0; right:0; height:8px; background:var(--tgse-brand); }
+  .pos-sw.top::after { top:0; }
+  .pos-sw.bottom::after { bottom:0; }
+
+  /* Colour rows */
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  /* Switch */
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  .is-hidden { display:none !important; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="6" rx="2"/><path d="M6 8h.01M10 8h6"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Deal Bar</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled deal bar" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <!-- Position -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+            <span class="tgse-section-label">Position</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid" id="pos-picker">
+                <button type="button" class="pick-btn" data-pos="top"><span class="pos-sw top"></span><span class="pick-label">Top of page</span></button>
+                <button type="button" class="pick-btn" data-pos="bottom"><span class="pos-sw bottom"></span><span class="pick-label">Bottom of page</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar colours -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Bar colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Background</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="bg-col" value="#0F2742"></div>
+                <input class="input colour-hex" id="bg-hex" value="#0F2742" maxlength="9">
+              </div>
+              <span class="field-hint">The text colour adjusts automatically for contrast.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Button colours -->
+        <div class="tgse-section is-open" id="cta-colours">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>
+            <span class="tgse-section-label">Button colour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Button background</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="ctabg-col" value="#F59E0B"></div>
+                <input class="input colour-hex" id="ctabg-hex" value="#F59E0B" maxlength="9">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== CONTENT ===== -->
+      <div class="tgse-panel" data-tab="content">
+
+        <!-- Message -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="tgse-section-label">Message</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Announcement text</label>
+              <textarea class="input" id="msg-input" maxlength="160" placeholder="Late deals out now. Save up to 40% on selected summer breaks."></textarea>
+            </div>
+            <div class="field">
+              <label class="field-label">Leading emoji (optional)</label>
+              <input type="text" class="input" id="emoji-input" maxlength="4" placeholder="✈️">
+              <span class="field-hint">A single glyph shown before the text, e.g. a plane or a sun.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call to action -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            <span class="tgse-section-label">Button</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body" id="cta-fields">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Show a button</span><button type="button" class="switch is-on" id="cta-show" aria-pressed="true"></button></div>
+            </div>
+            <div id="cta-detail">
+              <div class="field">
+                <label class="field-label">Button label</label>
+                <input type="text" class="input" id="cta-label" maxlength="32" placeholder="See the deals">
+              </div>
+              <div class="field">
+                <label class="field-label">Link</label>
+                <input type="text" class="input" id="cta-url" maxlength="300" placeholder="https://yoursite.com/late-deals">
+              </div>
+              <div class="field">
+                <div class="switch-row"><span class="switch-row-label">Open in a new tab</span><button type="button" class="switch is-on" id="cta-newtab" aria-pressed="true"></button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Countdown -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>
+            <span class="tgse-section-label">Countdown</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body" id="countdown-fields">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Show a countdown</span><button type="button" class="switch" id="cd-show" aria-pressed="false"></button></div>
+              <span class="field-hint">Adds urgency by counting down to your deadline.</span>
+            </div>
+            <div id="cd-detail" class="is-hidden">
+              <div class="field">
+                <label class="field-label">Counts down to</label>
+                <input type="datetime-local" class="input" id="cd-to">
+              </div>
+              <div class="field">
+                <label class="field-label">Label before the clock</label>
+                <input type="text" class="input" id="cd-label" maxlength="24" placeholder="Ends in">
+              </div>
+              <div class="field">
+                <label class="field-label">When it ends, show</label>
+                <input type="text" class="input" id="cd-expired" maxlength="32" placeholder="Offer ended">
+              </div>
+              <div class="field">
+                <div class="switch-row"><span class="switch-row-label">Hide the bar when it ends</span><button type="button" class="switch" id="cd-hide" aria-pressed="false"></button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <!-- Behaviour -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="tgse-section-label">Behaviour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Stick to the screen as the visitor scrolls</span><button type="button" class="switch is-on" id="sticky" aria-pressed="true"></button></div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Nudge the page so it never covers content</span><button type="button" class="switch is-on" id="push" aria-pressed="true"></button></div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Let visitors dismiss it</span><button type="button" class="switch is-on" id="dismiss" aria-pressed="true"></button></div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Remember when it is closed</span><button type="button" class="switch is-on" id="remember" aria-pressed="true"></button></div>
+              <span class="field-hint">Once closed it stays closed on that visitor's device.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="tgse-section-label">Schedule</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Start showing (optional)</label>
+              <input type="datetime-local" class="input" id="start-at">
+            </div>
+            <div class="field">
+              <label class="field-label">Stop showing (optional)</label>
+              <input type="datetime-local" class="input" id="end-at">
+              <span class="field-hint">Leave both blank to show the bar all the time.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-dealbar.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-dealbar.js"></script>
+<style>
+  /* Preview faux page — the transform creates a containing block so the
+     position:fixed bar is contained within the frame, not the viewport. */
+  .pv-faux { position:relative; width:100%; max-width:820px; background:#fff; border-radius:12px;
+    box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); overflow:hidden;
+    min-height:480px; isolation:isolate; transform:translateZ(0); }
+  .pv-faux[data-bg="dark"] { background:#0B1220; }
+  .pvf-head { background:#1B2B5B; color:#fff; padding:14px 22px; display:flex; align-items:center; justify-content:space-between; font-size:13px; }
+  .pvf-head .logo { font-weight:700; }
+  .pvf-head .nav { display:flex; gap:16px; opacity:.8; font-size:12px; }
+  .pvf-body { padding:34px 26px 56px; }
+  .pvf-body h1 { margin:0 0 10px; font-size:24px; color:#0F172A; font-weight:800; letter-spacing:-.01em; }
+  .pv-faux[data-bg="dark"] .pvf-body h1 { color:#F1F5F9; }
+  .pvf-body p { margin:0 0 14px; color:#475569; font-size:14px; line-height:1.6; }
+  .pv-faux[data-bg="dark"] .pvf-body p { color:#94A3B8; }
+  .pvf-block { height:70px; border-radius:10px; background:#F1F5F9; margin:0 0 12px; }
+  .pv-faux[data-bg="dark"] .pvf-block { background:#1E293B; }
+</style>
+<script>
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+  // datetime-local <-> ISO helpers
+  function toLocalInput(iso) {
+    const t = Date.parse(iso || ''); if (!Number.isFinite(t)) return '';
+    const d = new Date(t); const pad = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function fromLocalInput(v) {
+    if (!v) return ''; const t = Date.parse(v); return Number.isFinite(t) ? new Date(t).toISOString() : '';
+  }
+
+  let C = {
+    message: 'Late deals out now. Save up to 40% on selected summer breaks.',
+    emoji: '✈️',
+    position: 'top',
+    sticky: true,
+    pushPage: true,
+    bg: '#0F2742',
+    textColor: '',
+    ctaShow: true,
+    ctaLabel: 'See the deals',
+    ctaUrl: '#',
+    ctaNewTab: true,
+    ctaBg: '#F59E0B',
+    ctaText: '',
+    dismissible: true,
+    rememberDismiss: true,
+    showCountdown: false,
+    countdownTo: '',
+    countdownLabel: 'Ends in',
+    hideOnExpire: false,
+    expiredText: 'Offer ended',
+    startAt: '',
+    endAt: '',
+    fontFamily: 'DM Sans',
+  };
+
+  let widgetInst = null;
+  let previewDark = false;
+
+  const shell = tgse.init({
+    widgetType: 'Announcement Bar',
+    widgetTag: 'dealbar',
+    scriptFile: 'widget-dealbar.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); syncUIFromState(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for the Deal Bar', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for the Deal Bar', 'ok'),
+    onThemeToggle: (isDark) => { previewDark = isDark; render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initDealBarTour === 'function') window.initDealBarTour(); },
+  });
+
+  function buildFauxPage() {
+    const dark = !!previewDark;
+    return `<div class="pv-faux" id="pv-faux" data-bg="${dark ? 'dark' : 'light'}">
+      <div class="pvf-head"><span class="logo">Sunshine Holidays</span><span class="nav"><span>Destinations</span><span>Cruises</span><span>Late Deals</span></span></div>
+      <div class="pvf-body">
+        <h1>Find your next holiday</h1>
+        <p>This sample page gives the bar somewhere to sit. On a real site the bar pins to the ${C.position === 'bottom' ? 'bottom' : 'top'} of the window and stays as the visitor scrolls.</p>
+        <div class="pvf-block"></div><div class="pvf-block"></div><div class="pvf-block"></div>
+      </div>
+      <div data-tg-widget="dealbar" id="widget-mount"></div>
+    </div>`;
+  }
+
+  function render() {
+    const frame = document.getElementById('pv-frame');
+    if (!frame) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    frame.innerHTML = buildFauxPage();
+    const host = document.getElementById('widget-mount');
+    if (!host) return;
+    requestAnimationFrame(() => {
+      if (window.TGDealBarWidget) {
+        try { widgetInst = new window.TGDealBarWidget(host, Object.assign({}, C, { font: C.fontFamily, previewMode: true })); }
+        catch (e) { console.error(e); }
+      }
+    });
+  }
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        syncUIFromState();
+        render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  function toggleSwitch(id, on) {
+    const el = document.getElementById(id); if (!el) return;
+    el.classList.toggle('is-on', !!on);
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function syncUIFromState() {
+    document.querySelectorAll('#pos-picker [data-pos]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-pos') === C.position));
+    document.getElementById('msg-input').value = C.message || '';
+    document.getElementById('emoji-input').value = C.emoji || '';
+    document.getElementById('cta-label').value = C.ctaLabel || '';
+    document.getElementById('cta-url').value = C.ctaUrl || '';
+    document.getElementById('cd-to').value = toLocalInput(C.countdownTo);
+    document.getElementById('cd-label').value = C.countdownLabel || '';
+    document.getElementById('cd-expired').value = C.expiredText || '';
+    document.getElementById('start-at').value = toLocalInput(C.startAt);
+    document.getElementById('end-at').value = toLocalInput(C.endAt);
+    document.getElementById('bg-col').value = hexOk(C.bg) ? C.bg : '#0F2742';
+    document.getElementById('bg-hex').value = (C.bg || '#0F2742').toUpperCase();
+    document.getElementById('ctabg-col').value = hexOk(C.ctaBg) ? C.ctaBg : '#F59E0B';
+    document.getElementById('ctabg-hex').value = (C.ctaBg || '#F59E0B').toUpperCase();
+    document.getElementById('cd-detail').classList.toggle('is-hidden', !C.showCountdown);
+    document.getElementById('cta-detail').classList.toggle('is-hidden', !C.ctaShow);
+    toggleSwitch('cta-show', C.ctaShow);
+    toggleSwitch('cta-newtab', C.ctaNewTab);
+    toggleSwitch('cd-show', C.showCountdown);
+    toggleSwitch('cd-hide', C.hideOnExpire);
+    toggleSwitch('sticky', C.sticky);
+    toggleSwitch('push', C.pushPage);
+    toggleSwitch('dismiss', C.dismissible);
+    toggleSwitch('remember', C.rememberDismiss);
+  }
+
+  // ─── Position ───
+  document.getElementById('pos-picker').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pos]'); if (!b) return;
+    C.position = b.getAttribute('data-pos');
+    document.querySelectorAll('#pos-picker [data-pos]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+
+  // ─── Text inputs ───
+  function wireText(id, key) { document.getElementById(id).addEventListener('input', (e) => { C[key] = e.target.value; shell.markDirty(); render(); }); }
+  wireText('msg-input', 'message');
+  wireText('emoji-input', 'emoji');
+  wireText('cta-label', 'ctaLabel');
+  wireText('cta-url', 'ctaUrl');
+  wireText('cd-label', 'countdownLabel');
+  wireText('cd-expired', 'expiredText');
+
+  // ─── Datetime inputs ───
+  document.getElementById('cd-to').addEventListener('input', (e) => { C.countdownTo = fromLocalInput(e.target.value); shell.markDirty(); render(); });
+  document.getElementById('start-at').addEventListener('input', (e) => { C.startAt = fromLocalInput(e.target.value); shell.markDirty(); });
+  document.getElementById('end-at').addEventListener('input', (e) => { C.endAt = fromLocalInput(e.target.value); shell.markDirty(); });
+
+  // ─── Colours ───
+  function wireColour(colId, hexId, key, fb) {
+    const col = document.getElementById(colId), hex = document.getElementById(hexId);
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C[key] = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C[key] = v; shell.markDirty(); render(); } });
+  }
+  wireColour('bg-col', 'bg-hex', 'bg', '#0F2742');
+  wireColour('ctabg-col', 'ctabg-hex', 'ctaBg', '#F59E0B');
+
+  // ─── Switches ───
+  function wireSwitch(id, key, after) { const el = document.getElementById(id); el.addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); if (after) after(); shell.markDirty(); render(); }); }
+  wireSwitch('cta-show', 'ctaShow', () => document.getElementById('cta-detail').classList.toggle('is-hidden', !C.ctaShow));
+  wireSwitch('cta-newtab', 'ctaNewTab');
+  wireSwitch('cd-show', 'showCountdown', () => document.getElementById('cd-detail').classList.toggle('is-hidden', !C.showCountdown));
+  wireSwitch('cd-hide', 'hideOnExpire');
+  wireSwitch('sticky', 'sticky');
+  wireSwitch('push', 'pushPage');
+  wireSwitch('dismiss', 'dismissible');
+  wireSwitch('remember', 'rememberDismiss');
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  // Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initDealBarTour === 'function') window.initDealBarTour(); }
+        else render();
+      });
+    } else {
+      if (tgse.isLoggedIn()) loadFromUrl(); else render();
+    }
+  });
+</script>
+
+</body>
+</html>

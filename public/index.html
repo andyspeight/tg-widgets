@@ -508,6 +508,36 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'dealbar',
+    name: 'Deal Bar',
+    airtableType: 'Announcement Bar',  // matches Airtable WidgetType singleSelect option
+    description: 'A slim sticky bar for late deals and announcements, pinned to the top or bottom of every page. Optional live countdown to your deadline, a call-to-action button, page scheduling and a remembered dismiss. Pure client-side, no API key.',
+    category: 'Engagement',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="2" y="5" width="20" height="6" rx="2"/><path d="M6 8h.01M10 8h6"/>'},
+    color: '#F59E0B',
+    editorUrl: '/editor-dealbar',
+    demoUrl: '/demo-dealbar',
+    widgetTag: 'dealbar',
+    scriptFile: 'widget-dealbar.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'appointment',
+    name: 'Appointment Scheduler',
+    airtableType: 'Appointment',  // matches Airtable WidgetType singleSelect option
+    description: 'Let visitors book a consultation or callback in seconds. Pick a day and time from availability you set with working days, hours, slot length and lead time, then the request lands with your team. Travel-consultation shaped, fully rebrandable.',
+    category: 'Lead Gen',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-appointment',
+    demoUrl: '/demo-appointment',
+    widgetTag: 'appointment',
+    scriptFile: 'widget-appointment.js',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'carousel',
     name: 'Destination Carousel',
     airtableType: 'Carousel',  // matches Airtable WidgetType singleSelect option

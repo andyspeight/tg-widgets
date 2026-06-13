@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deal Bar — Travelgenix Widget Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC; color: #0F172A; min-height: 100vh; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  body[data-bg="dark"] { background: #020617; color: #F1F5F9; }
+
+  .demo-bar { background: rgba(255,255,255,0.85); border-bottom: 1px solid #E2E8F0; padding: 14px 24px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); }
+  body[data-bg="dark"] .demo-bar { background: rgba(15,23,42,0.85); border-bottom-color: #1E293B; }
+  .demo-bar-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .demo-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: inherit; }
+  .demo-brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #0891B2 0%, #6366F1 100%); }
+  .demo-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .demo-group { display: flex; gap: 6px; align-items: center; }
+  .demo-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94A3B8; margin-right: 2px; }
+  .demo-pill { appearance: none; border: 1px solid #E2E8F0; background: #fff; color: #475569; font: inherit; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 999px; cursor: pointer; transition: all 0.18s ease; }
+  body[data-bg="dark"] .demo-pill { background: #1E293B; color: #94A3B8; border-color: #334155; }
+  .demo-pill:hover { background: #F1F5F9; color: #0F172A; }
+  body[data-bg="dark"] .demo-pill:hover { background: #334155; color: #F1F5F9; }
+  .demo-pill[aria-pressed="true"] { background: #0F172A; color: #fff; border-color: #0F172A; }
+  body[data-bg="dark"] .demo-pill[aria-pressed="true"] { background: #F8FAFC; color: #0F172A; border-color: #F8FAFC; }
+  .demo-divider { width: 1px; height: 20px; background: #E2E8F0; margin: 0 4px; }
+  body[data-bg="dark"] .demo-divider { background: #334155; }
+
+  .hero { max-width: 820px; margin: 0 auto; padding: 64px 24px 8px; }
+  .hero .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0891B2; }
+  .hero h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 800; line-height: 1.1; margin: 12px 0 14px; letter-spacing: -0.02em; }
+  .hero .lede { font-size: 18px; color: #475569; max-width: 64ch; }
+  body[data-bg="dark"] .hero .lede { color: #94A3B8; }
+
+  article { max-width: 720px; margin: 0 auto; padding: 32px 24px 120px; }
+  article h2 { font-size: 24px; font-weight: 700; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  article p { color: #334155; margin: 0 0 18px; }
+  body[data-bg="dark"] article p { color: #CBD5E1; }
+  article .figure { height: 200px; border-radius: 16px; margin: 8px 0 24px; background: linear-gradient(135deg, #0891B2 0%, #6366F1 100%); opacity: .9; }
+  article .figure.alt { background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%); }
+  article .figure.alt2 { background: linear-gradient(135deg, #10B981 0%, #0891B2 100%); }
+
+  .demo-foot { max-width: 720px; margin: 0 auto; padding: 0 24px 80px; font-size: 12px; color: #94A3B8; }
+</style>
+</head>
+<body>
+  <div class="demo-bar">
+    <div class="demo-bar-inner">
+      <div class="demo-brand"><span class="demo-brand-mark"></span> Sunshine Holidays</div>
+      <div class="demo-controls">
+        <span class="demo-label">Position</span>
+        <div class="demo-group" id="posGroup">
+          <button class="demo-pill" data-pos="top" aria-pressed="true">Top</button>
+          <button class="demo-pill" data-pos="bottom" aria-pressed="false">Bottom</button>
+        </div>
+        <span class="demo-divider"></span>
+        <button class="demo-pill" id="cdToggle" aria-pressed="false">Countdown</button>
+        <button class="demo-pill" id="ctaToggle" aria-pressed="true">Button</button>
+        <span class="demo-divider"></span>
+        <button class="demo-pill" id="darkToggle" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">Late deals</div>
+    <h1>Your summer, sorted</h1>
+    <p class="lede">A sample travel page. The Deal Bar pins to the top or bottom of the window, nudges the page so it never covers anything, and can count down to your deadline. Close it and it stays closed, here it is set to reappear so you can keep playing.</p>
+  </div>
+
+  <article id="article"></article>
+  <div class="demo-foot">Demo page · widget-dealbar.js v1.0.0 · pure client-side, no API key. Sticky announcement bar with optional countdown and call to action.</div>
+
+  <div data-tg-widget="dealbar" id="mount"></div>
+
+  <script src="/widget-dealbar.js"></script>
+  <script>
+    (function () {
+      const paras = [
+        "We hold back a handful of our very best summer breaks each week and release them right here. They go quickly, which is rather the point.",
+        "Seven nights in the Algarve, flights and a sea-view room, the sort of price that makes you check it twice. Greece, the Balearics, the Canaries, all on the same short list.",
+        "Our travel team knows these places first hand. Tell us roughly what you want and we will match it, often for less than the headline price you saw elsewhere.",
+        "Flexible dates help. Shift your trip by a day or two and the saving can be considerable. We will always tell you when waiting a week is the smarter move.",
+        "Every booking is fully protected, so you can grab the deal now and sort the details later with a real person on the end of the phone.",
+      ];
+      const figs = ['', ' alt', ' alt2'];
+      const headings = ['This week’s releases', 'Where everyone is going', 'Matched to you', 'A tip on dates', 'Booked with confidence'];
+      const art = document.getElementById('article');
+      let html = '';
+      for (let i = 0; i < headings.length; i++) {
+        html += '<h2>' + headings[i] + '</h2>';
+        html += '<div class="figure' + figs[i % figs.length] + '"></div>';
+        html += '<p>' + paras[i] + '</p>';
+      }
+      art.innerHTML = html;
+    })();
+
+    const mount = document.getElementById('mount');
+    const state = { position: 'top', showCountdown: false, ctaShow: true };
+    let inst = null;
+
+    function soonISO(hoursAhead) {
+      return new Date(Date.now() + hoursAhead * 3600 * 1000).toISOString();
+    }
+    function rebuild() {
+      if (inst) { try { inst.destroy(); } catch (e) {} }
+      inst = new window.TGDealBarWidget(mount, {
+        message: 'Late deals out now. Save up to 40% on selected summer breaks.',
+        emoji: '✈️',
+        position: state.position,
+        bg: '#0F2742', ctaBg: '#F59E0B',
+        ctaShow: state.ctaShow, ctaLabel: 'See the deals', ctaUrl: '#',
+        showCountdown: state.showCountdown, countdownTo: soonISO(53), countdownLabel: 'Ends in',
+        dismissible: true, rememberDismiss: false, pushPage: true,
+      });
+    }
+    function wireToggle(id, key) {
+      document.getElementById(id).addEventListener('click', (e) => {
+        state[key] = !state[key]; e.currentTarget.setAttribute('aria-pressed', String(state[key])); rebuild();
+      });
+    }
+    document.getElementById('posGroup').addEventListener('click', (e) => {
+      const b = e.target.closest('.demo-pill'); if (!b) return;
+      [...e.currentTarget.querySelectorAll('.demo-pill')].forEach(p => p.setAttribute('aria-pressed', String(p === b)));
+      state.position = b.dataset.pos; rebuild();
+    });
+    wireToggle('cdToggle', 'showCountdown');
+    wireToggle('ctaToggle', 'ctaShow');
+    document.getElementById('darkToggle').addEventListener('click', (e) => {
+      const on = document.body.getAttribute('data-bg') !== 'dark';
+      document.body.setAttribute('data-bg', on ? 'dark' : 'light'); e.currentTarget.setAttribute('aria-pressed', String(on));
+    });
+
+    if (window.TGDealBarWidget) rebuild();
+    else window.addEventListener('load', rebuild);
+  </script>
+</body>
+</html>

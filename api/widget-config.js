@@ -226,6 +226,8 @@ const ALLOWED_WIDGET_TYPES = [
   'YouTube',
   'RSS Feed',
   'Back to Top',
+  'Announcement Bar',
+  'Appointment',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -261,6 +263,8 @@ const PLAN_WIDGET_LIMITS = {
   'YouTube':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'RSS Feed':              { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Back to Top':           { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Announcement Bar':      { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Appointment':           { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -356,6 +360,18 @@ const WIDGET_TYPE_ALIASES = {
   'scroll-top':        'Back to Top',
   'scrolltop':         'Back to Top',
   'totop':             'Back to Top',
+  'dealbar':           'Announcement Bar',
+  'deal-bar':          'Announcement Bar',
+  'announcement':      'Announcement Bar',
+  'announcement-bar':  'Announcement Bar',
+  'notification-bar':  'Announcement Bar',
+  'promo-bar':         'Announcement Bar',
+  'appointment':       'Appointment',
+  'appointments':      'Appointment',
+  'scheduler':         'Appointment',
+  'callback':          'Appointment',
+  'booking-scheduler': 'Appointment',
+  'consultation':      'Appointment',
 };
 
 function canonicaliseWidgetType(raw) {

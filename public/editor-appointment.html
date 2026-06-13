@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointment Scheduler — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .select, textarea.input {
+    width:100%; padding:8px 10px; font:inherit; font-size:13px;
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); color:var(--tgse-ink);
+    transition:border-color 160ms ease, box-shadow 160ms ease;
+  }
+  textarea.input { resize:vertical; min-height:58px; line-height:1.5; }
+  .input:focus, .select:focus, textarea.input:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+  .row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pick-grid.cols-4 { grid-template-columns:repeat(4,1fr); }
+  .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:9px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center;
+    transition:border-color 160ms ease, background 160ms ease; display:flex; flex-direction:column; gap:6px; align-items:center; }
+  .pick-btn:hover { background:var(--tgse-hover); }
+  .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .pick-btn svg { width:18px; height:18px; fill:none; stroke:var(--tgse-ink-2); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .pick-btn.is-on svg { stroke:var(--tgse-brand-dark); }
+  .pick-label { font-size:11px; font-weight:600; color:var(--tgse-ink); }
+  .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
+
+  /* Weekday chips */
+  .wd-row { display:flex; gap:5px; }
+  .wd-chip { flex:1; appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:8px 0; border-radius:9px; cursor:pointer; font:inherit; font-size:12px; font-weight:700; color:var(--tgse-ink-2);
+    transition:border-color 160ms ease, background 160ms ease; }
+  .wd-chip.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); color:var(--tgse-brand-dark); }
+
+  /* Segmented */
+  .seg { display:flex; gap:6px; }
+  .seg button { flex:1; appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:8px 0; border-radius:9px; cursor:pointer; font:inherit; font-size:12px; font-weight:600; color:var(--tgse-ink-2); }
+  .seg button.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); color:var(--tgse-brand-dark); }
+
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  .slider-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+  .slider-row input[type="range"] { width:100%; accent-color:var(--tgse-brand); }
+  .slider-val { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; min-width:52px; text-align:right; }
+
+  .is-hidden { display:none !important; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Appointment Scheduler</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled scheduler" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Accent</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Card background</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="bg-col" value="#FFFFFF"></div>
+                <input class="input colour-hex" id="bg-hex" value="#FFFFFF" maxlength="9">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Text</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="ink-col" value="#0F172A"></div>
+                <input class="input colour-hex" id="ink-hex" value="#0F172A" maxlength="9">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+            <span class="tgse-section-label">Corner radius</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="slider-row">
+                <input type="range" id="radius-input" min="0" max="28" step="1" value="16">
+                <span class="slider-val" id="radius-val">16px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== CONTENT ===== -->
+      <div class="tgse-panel" data-tab="content">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+            <span class="tgse-section-label">Heading</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input type="text" class="input" id="heading-input" maxlength="80" placeholder="Book a free consultation">
+            </div>
+            <div class="field">
+              <label class="field-label">Subtitle</label>
+              <textarea class="input" id="subheading-input" maxlength="180" placeholder="Pick a time that suits you and one of our travel experts will be in touch."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span class="tgse-section-label">Appointment type</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid cols-4" id="mode-picker">
+                <button type="button" class="pick-btn" data-mode="callback"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg><span class="pick-label">Callback</span></button>
+                <button type="button" class="pick-btn" data-mode="phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg><span class="pick-label">Phone</span></button>
+                <button type="button" class="pick-btn" data-mode="video"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span class="pick-label">Video</span></button>
+                <button type="button" class="pick-btn" data-mode="inperson"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="pick-label">In person</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <span class="tgse-section-label">Topic list</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Ask what it is about</span><button type="button" class="switch is-on" id="ask-topic" aria-pressed="true"></button></div>
+            </div>
+            <div class="field" id="topics-field">
+              <label class="field-label">Topics, one per line</label>
+              <textarea class="input" id="topics-input" style="min-height:96px" placeholder="Tailor-made holiday&#10;Cruise&#10;Honeymoon&#10;Family holiday&#10;Something else"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="tgse-section-label">Button &amp; confirmation</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Submit button label</label>
+              <input type="text" class="input" id="btnlabel-input" maxlength="40" placeholder="Request this time">
+            </div>
+            <div class="field">
+              <label class="field-label">Confirmation title</label>
+              <input type="text" class="input" id="success-title" maxlength="80" placeholder="Thank you, that is booked in">
+            </div>
+            <div class="field">
+              <label class="field-label">Confirmation message</label>
+              <textarea class="input" id="success-body" maxlength="200" placeholder="We have your preferred time and will confirm by email shortly."></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open" id="avail-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span class="tgse-section-label">Availability</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Working days</label>
+              <div class="wd-row" id="days-picker">
+                <button type="button" class="wd-chip" data-wd="1">M</button>
+                <button type="button" class="wd-chip" data-wd="2">T</button>
+                <button type="button" class="wd-chip" data-wd="3">W</button>
+                <button type="button" class="wd-chip" data-wd="4">T</button>
+                <button type="button" class="wd-chip" data-wd="5">F</button>
+                <button type="button" class="wd-chip" data-wd="6">S</button>
+                <button type="button" class="wd-chip" data-wd="0">S</button>
+              </div>
+            </div>
+            <div class="field">
+              <div class="row-2">
+                <div>
+                  <label class="field-label">Day starts</label>
+                  <select class="select" id="start-hour"></select>
+                </div>
+                <div>
+                  <label class="field-label">Day ends</label>
+                  <select class="select" id="end-hour"></select>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Slot length</label>
+              <div class="seg" id="slot-seg">
+                <button type="button" data-slot="15">15 min</button>
+                <button type="button" data-slot="30">30 min</button>
+                <button type="button" data-slot="45">45 min</button>
+                <button type="button" data-slot="60">60 min</button>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Earliest booking from now</label>
+              <div class="slider-row">
+                <input type="range" id="lead-input" min="0" max="96" step="2" value="24">
+                <span class="slider-val" id="lead-val">24 hrs</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">How far ahead to offer</label>
+              <div class="slider-row">
+                <input type="range" id="days-input" min="3" max="60" step="1" value="14">
+                <span class="slider-val" id="days-val">14 days</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Timezone note</label>
+              <input type="text" class="input" id="tz-input" maxlength="80" placeholder="All times shown are UK time.">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open" id="fields-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+            <span class="tgse-section-label">Fields &amp; consent</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Ask for a phone number</span><button type="button" class="switch is-on" id="ask-phone" aria-pressed="true"></button></div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Ask for notes</span><button type="button" class="switch is-on" id="ask-notes" aria-pressed="true"></button></div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Require a consent tick</span><button type="button" class="switch is-on" id="req-consent" aria-pressed="true"></button></div>
+            </div>
+            <div class="field" id="consent-text-field">
+              <label class="field-label">Consent wording</label>
+              <input type="text" class="input" id="consent-input" maxlength="160" placeholder="I am happy to be contacted about my enquiry.">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <span class="tgse-section-label">Where requests go</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Submit endpoint (advanced)</label>
+              <input type="text" class="input" id="submit-url" maxlength="300" placeholder="Leave blank to use the Travelgenix default">
+              <span class="field-hint">Requests post to the Travelgenix contact endpoint by default. Set a full https URL to route them through your own enquiry handler.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-appointment.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-appointment.js"></script>
+<style>
+  .pv-wrap { width:100%; max-width:600px; padding:24px; }
+</style>
+<script>
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+  function fmtHour(h) { const ap = h < 12 ? 'am' : 'pm'; let hh = h % 12; if (hh === 0) hh = 12; return hh + ' ' + ap; }
+
+  let C = {
+    heading: 'Book a free consultation',
+    subheading: 'Pick a time that suits you and one of our travel experts will be in touch.',
+    mode: 'callback',
+    daysAhead: 14,
+    workingDays: [1, 2, 3, 4, 5],
+    startHour: 9,
+    endHour: 17,
+    slotMins: 30,
+    leadTimeHours: 24,
+    timezoneNote: 'All times shown are UK time.',
+    askPhone: true,
+    askNotes: true,
+    askTopic: true,
+    topics: ['Tailor-made holiday', 'Cruise', 'Honeymoon', 'Family holiday', 'Something else'],
+    requireConsent: true,
+    consentText: 'I am happy to be contacted about my enquiry.',
+    accent: '#0891B2',
+    bg: '#FFFFFF',
+    textColor: '#0F172A',
+    radius: 16,
+    buttonLabel: 'Request this time',
+    successTitle: 'Thank you, that is booked in',
+    successBody: 'We have your preferred time and will confirm by email shortly.',
+    submitUrl: '',
+    fontFamily: 'DM Sans',
+  };
+
+  let widgetInst = null;
+
+  const shell = tgse.init({
+    widgetType: 'Appointment',
+    widgetTag: 'appointment',
+    scriptFile: 'widget-appointment.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); syncUIFromState(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for the Scheduler', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for the Scheduler', 'ok'),
+    onThemeToggle: () => {},
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); },
+  });
+
+  function render() {
+    const frame = document.getElementById('pv-frame');
+    if (!frame) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    frame.innerHTML = '<div class="pv-wrap"><div data-tg-widget="appointment" id="widget-mount"></div></div>';
+    const host = document.getElementById('widget-mount');
+    if (!host) return;
+    requestAnimationFrame(() => {
+      if (window.TGAppointmentWidget) {
+        try { widgetInst = new window.TGAppointmentWidget(host, Object.assign({}, C, { font: C.fontFamily, previewMode: true })); }
+        catch (e) { console.error(e); }
+      }
+    });
+  }
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        syncUIFromState();
+        render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  function toggleSwitch(id, on) {
+    const el = document.getElementById(id); if (!el) return;
+    el.classList.toggle('is-on', !!on);
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  // Populate hour selects once
+  (function fillHours() {
+    const s = document.getElementById('start-hour'), e = document.getElementById('end-hour');
+    for (let h = 6; h <= 22; h++) s.insertAdjacentHTML('beforeend', `<option value="${h}">${fmtHour(h)}</option>`);
+    for (let h = 7; h <= 23; h++) e.insertAdjacentHTML('beforeend', `<option value="${h}">${fmtHour(h)}</option>`);
+  })();
+
+  function syncUIFromState() {
+    document.getElementById('heading-input').value = C.heading || '';
+    document.getElementById('subheading-input').value = C.subheading || '';
+    document.getElementById('btnlabel-input').value = C.buttonLabel || '';
+    document.getElementById('success-title').value = C.successTitle || '';
+    document.getElementById('success-body').value = C.successBody || '';
+    document.getElementById('topics-input').value = (C.topics || []).join('\n');
+    document.getElementById('consent-input').value = C.consentText || '';
+    document.getElementById('tz-input').value = C.timezoneNote || '';
+    document.getElementById('submit-url').value = C.submitUrl || '';
+    document.getElementById('start-hour').value = String(C.startHour);
+    document.getElementById('end-hour').value = String(C.endHour);
+    document.getElementById('lead-input').value = C.leadTimeHours; document.getElementById('lead-val').textContent = C.leadTimeHours + ' hrs';
+    document.getElementById('days-input').value = C.daysAhead; document.getElementById('days-val').textContent = C.daysAhead + ' days';
+    document.getElementById('radius-input').value = C.radius; document.getElementById('radius-val').textContent = C.radius + 'px';
+    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2'; document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
+    document.getElementById('bg-col').value = hexOk(C.bg) ? C.bg : '#FFFFFF'; document.getElementById('bg-hex').value = (C.bg || '#FFFFFF').toUpperCase();
+    document.getElementById('ink-col').value = hexOk(C.textColor) ? C.textColor : '#0F172A'; document.getElementById('ink-hex').value = (C.textColor || '#0F172A').toUpperCase();
+    document.querySelectorAll('#mode-picker [data-mode]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-mode') === C.mode));
+    document.querySelectorAll('#days-picker [data-wd]').forEach(b => b.classList.toggle('is-on', (C.workingDays || []).includes(parseInt(b.getAttribute('data-wd'), 10))));
+    document.querySelectorAll('#slot-seg [data-slot]').forEach(b => b.classList.toggle('is-on', parseInt(b.getAttribute('data-slot'), 10) === C.slotMins));
+    toggleSwitch('ask-topic', C.askTopic); document.getElementById('topics-field').classList.toggle('is-hidden', !C.askTopic);
+    toggleSwitch('ask-phone', C.askPhone);
+    toggleSwitch('ask-notes', C.askNotes);
+    toggleSwitch('req-consent', C.requireConsent); document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent);
+  }
+
+  // ─── Text inputs ───
+  function wireText(id, key) { document.getElementById(id).addEventListener('input', (e) => { C[key] = e.target.value; shell.markDirty(); render(); }); }
+  wireText('heading-input', 'heading');
+  wireText('subheading-input', 'subheading');
+  wireText('btnlabel-input', 'buttonLabel');
+  wireText('success-title', 'successTitle');
+  wireText('success-body', 'successBody');
+  wireText('consent-input', 'consentText');
+  wireText('tz-input', 'timezoneNote');
+  document.getElementById('submit-url').addEventListener('input', (e) => { C.submitUrl = e.target.value.trim(); shell.markDirty(); });
+  document.getElementById('topics-input').addEventListener('input', (e) => {
+    C.topics = e.target.value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 20); shell.markDirty(); render();
+  });
+
+  // ─── Mode ───
+  document.getElementById('mode-picker').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-mode]'); if (!b) return;
+    C.mode = b.getAttribute('data-mode');
+    document.querySelectorAll('#mode-picker [data-mode]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+
+  // ─── Working days ───
+  document.getElementById('days-picker').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-wd]'); if (!b) return;
+    const wd = parseInt(b.getAttribute('data-wd'), 10);
+    const set = new Set(C.workingDays || []);
+    if (set.has(wd)) set.delete(wd); else set.add(wd);
+    C.workingDays = [...set].sort();
+    b.classList.toggle('is-on', set.has(wd));
+    shell.markDirty(); render();
+  });
+
+  // ─── Slot length ───
+  document.getElementById('slot-seg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-slot]'); if (!b) return;
+    C.slotMins = parseInt(b.getAttribute('data-slot'), 10);
+    document.querySelectorAll('#slot-seg [data-slot]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+
+  // ─── Hour selects ───
+  document.getElementById('start-hour').addEventListener('change', (e) => { C.startHour = parseInt(e.target.value, 10); shell.markDirty(); render(); });
+  document.getElementById('end-hour').addEventListener('change', (e) => { C.endHour = parseInt(e.target.value, 10); shell.markDirty(); render(); });
+
+  // ─── Sliders ───
+  document.getElementById('lead-input').addEventListener('input', (e) => { C.leadTimeHours = parseInt(e.target.value, 10) || 0; document.getElementById('lead-val').textContent = C.leadTimeHours + ' hrs'; shell.markDirty(); render(); });
+  document.getElementById('days-input').addEventListener('input', (e) => { C.daysAhead = parseInt(e.target.value, 10) || 14; document.getElementById('days-val').textContent = C.daysAhead + ' days'; shell.markDirty(); render(); });
+  document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); render(); });
+
+  // ─── Colours ───
+  function wireColour(colId, hexId, key, fb) {
+    const col = document.getElementById(colId), hex = document.getElementById(hexId);
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C[key] = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C[key] = v; shell.markDirty(); render(); } });
+  }
+  wireColour('accent-col', 'accent-hex', 'accent', '#0891B2');
+  wireColour('bg-col', 'bg-hex', 'bg', '#FFFFFF');
+  wireColour('ink-col', 'ink-hex', 'textColor', '#0F172A');
+
+  // ─── Switches ───
+  function wireSwitch(id, key, after) { const el = document.getElementById(id); el.addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); if (after) after(); shell.markDirty(); render(); }); }
+  wireSwitch('ask-topic', 'askTopic', () => document.getElementById('topics-field').classList.toggle('is-hidden', !C.askTopic));
+  wireSwitch('ask-phone', 'askPhone');
+  wireSwitch('ask-notes', 'askNotes');
+  wireSwitch('req-consent', 'requireConsent', () => document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent));
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  // Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); }
+        else render();
+      });
+    } else {
+      if (tgse.isLoggedIn()) loadFromUrl(); else render();
+    }
+  });
+</script>
+
+</body>
+</html>

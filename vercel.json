@@ -196,6 +196,22 @@
       "destination": "/editor-backtotop.html"
     },
     {
+      "source": "/demo-dealbar",
+      "destination": "/demo-dealbar.html"
+    },
+    {
+      "source": "/editor-dealbar",
+      "destination": "/editor-dealbar.html"
+    },
+    {
+      "source": "/demo-appointment",
+      "destination": "/demo-appointment.html"
+    },
+    {
+      "source": "/editor-appointment",
+      "destination": "/editor-appointment.html"
+    },
+    {
       "source": "/editor-carousel",
       "destination": "/editor-carousel.html"
     },
@@ -481,6 +497,40 @@
     },
     {
       "source": "/widget-backtotop.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-dealbar.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-appointment.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

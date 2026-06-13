@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Appointment Scheduler — Travelgenix Widget Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC; color: #0F172A; min-height: 100vh; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  body[data-bg="dark"] { background: #020617; color: #F1F5F9; }
+
+  .demo-bar { background: rgba(255,255,255,0.85); border-bottom: 1px solid #E2E8F0; padding: 14px 24px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); }
+  body[data-bg="dark"] .demo-bar { background: rgba(15,23,42,0.85); border-bottom-color: #1E293B; }
+  .demo-bar-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .demo-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: inherit; }
+  .demo-brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #0891B2 0%, #6366F1 100%); }
+  .demo-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .demo-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94A3B8; margin-right: 2px; }
+  .demo-pill { appearance: none; border: 1px solid #E2E8F0; background: #fff; color: #475569; font: inherit; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 999px; cursor: pointer; transition: all 0.18s ease; }
+  body[data-bg="dark"] .demo-pill { background: #1E293B; color: #94A3B8; border-color: #334155; }
+  .demo-pill[aria-pressed="true"] { background: #0F172A; color: #fff; border-color: #0F172A; }
+  body[data-bg="dark"] .demo-pill[aria-pressed="true"] { background: #F8FAFC; color: #0F172A; border-color: #F8FAFC; }
+  .demo-group { display:flex; gap:6px; }
+
+  .hero { max-width: 900px; margin: 0 auto; padding: 56px 24px 8px; text-align: center; }
+  .hero .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0891B2; }
+  .hero h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; line-height: 1.1; margin: 12px 0 14px; letter-spacing: -0.02em; }
+  .hero .lede { font-size: 18px; color: #475569; max-width: 60ch; margin: 0 auto; }
+  body[data-bg="dark"] .hero .lede { color: #94A3B8; }
+
+  .stage { max-width: 620px; margin: 0 auto; padding: 36px 24px 90px; display: flex; justify-content: center; }
+  .demo-foot { max-width: 720px; margin: 0 auto; padding: 0 24px 80px; font-size: 12px; color: #94A3B8; text-align: center; }
+</style>
+</head>
+<body>
+  <div class="demo-bar">
+    <div class="demo-bar-inner">
+      <div class="demo-brand"><span class="demo-brand-mark"></span> Sunshine Holidays</div>
+      <div class="demo-controls">
+        <span class="demo-label">Type</span>
+        <div class="demo-group" id="modeGroup">
+          <button class="demo-pill" data-mode="callback" aria-pressed="true">Callback</button>
+          <button class="demo-pill" data-mode="video" aria-pressed="false">Video</button>
+          <button class="demo-pill" data-mode="inperson" aria-pressed="false">In person</button>
+        </div>
+        <button class="demo-pill" id="darkToggle" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">Talk to an expert</div>
+    <h1>Book a time that suits you</h1>
+    <p class="lede">A sample travel page. Pick a day and a time, add your details and the request goes to the agency. In this demo nothing is actually sent, it just shows the confirmation.</p>
+  </div>
+
+  <div class="stage">
+    <div data-tg-widget="appointment" id="mount" style="width:100%"></div>
+  </div>
+
+  <div class="demo-foot">Demo page · widget-appointment.js v1.0.0 · availability is generated from working hours, slot length and lead time. Requests post to your enquiry handler on a live site.</div>
+
+  <script src="/widget-appointment.js"></script>
+  <script>
+    const mount = document.getElementById('mount');
+    const state = { mode: 'callback' };
+    let inst = null;
+
+    function rebuild() {
+      if (inst) { try { inst.destroy(); } catch (e) {} }
+      inst = new window.TGAppointmentWidget(mount, {
+        mode: state.mode,
+        heading: state.mode === 'inperson' ? 'Pop in and see us' : 'Book a free consultation',
+        subheading: 'Pick a time that suits you and one of our travel experts will be in touch.',
+        accent: '#0891B2', font: 'DM Sans',
+        workingDays: [1, 2, 3, 4, 5, 6], startHour: 9, endHour: 17, slotMins: 30, leadTimeHours: 4, daysAhead: 14,
+        topics: ['Tailor-made holiday', 'Cruise', 'Honeymoon', 'Family holiday', 'Something else'],
+        previewMode: true,
+      });
+    }
+    document.getElementById('modeGroup').addEventListener('click', (e) => {
+      const b = e.target.closest('.demo-pill'); if (!b) return;
+      [...e.currentTarget.querySelectorAll('.demo-pill')].forEach(p => p.setAttribute('aria-pressed', String(p === b)));
+      state.mode = b.dataset.mode; rebuild();
+    });
+    document.getElementById('darkToggle').addEventListener('click', (e) => {
+      const on = document.body.getAttribute('data-bg') !== 'dark';
+      document.body.setAttribute('data-bg', on ? 'dark' : 'light'); e.currentTarget.setAttribute('aria-pressed', String(on));
+    });
+
+    if (window.TGAppointmentWidget) rebuild();
+    else window.addEventListener('load', rebuild);
+  </script>
+</body>
+</html>
