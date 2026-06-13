@@ -332,11 +332,49 @@
       this.shadow = container.shadowRoot || (container.attachShadow ? container.attachShadow({ mode: 'open' }) : container);
       this.viewTz = detectTz();
       this.hour12 = this.cfg.timeFormat !== '24';
-      this.eventIdx = (this.cfg.eventTypes.length === 1) ? 0 : -1;
+      this.widgetId = (container.getAttribute && container.getAttribute('data-tg-id')) || this.cfg.widgetId || '';
+      this.rescheduleToken = this.cfg.rescheduleToken || '';
+      this.backend = !!this.widgetId && !this.cfg.previewMode;
+      this.eventIdx = this._initialEventIdx();
       this.viewMonth = null;          // {y, m0}
       this.selectedKey = null;        // host date key 'YYYY-MM-DD'
       this.selectedSlot = null;       // { inst:Date }
       this._build();
+    }
+
+    _initialEventIdx() {
+      if (this.rescheduleToken) {
+        const i = this.cfg.eventTypes.findIndex(e => e.id === this.cfg.rescheduleEventId);
+        return i >= 0 ? i : 0;
+      }
+      return (this.cfg.eventTypes.length === 1) ? 0 : -1;
+    }
+
+    _hostDateKey(iso) {
+      const v = ymdInTz(new Date(iso), this._hostTz());
+      return v ? dateKey(v.y, v.m - 1, v.d) : '';
+    }
+
+    // In backend mode, fetch real free/busy slots from the server and rebuild
+    // the calendar from them. Falls back silently to the client-side baseline.
+    async _fetchServerSlots() {
+      try {
+        const ev = this._event();
+        const from = new Date().toISOString();
+        const to = new Date(Date.now() + clampNum(this.cfg.dateRangeDays, 1, 120, 30) * 86400000).toISOString();
+        const url = (SCRIPT_ORIGIN || '') + '/api/appointment/availability?widgetId=' + encodeURIComponent(this.widgetId) +
+          '&eventId=' + encodeURIComponent(ev.id || '') + '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
+        const r = await fetch(url, { credentials: 'omit' });
+        if (!r.ok) return false;
+        const d = await r.json();
+        if (!d || !Array.isArray(d.slots)) return false;
+        if (d.timezone) this.cfg.timezone = d.timezone;
+        const map = {};
+        d.slots.forEach(s => { const k = this._hostDateKey(s.startISO); if (k) (map[k] = map[k] || []).push({ inst: new Date(s.startISO) }); });
+        this.slotsByDate = map;
+        this.availableKeys = Object.keys(map).sort();
+        return true;
+      } catch (e) { return false; }
     }
 
     _event() { return this.cfg.eventTypes[this.eventIdx] || this.cfg.eventTypes[0]; }
@@ -503,6 +541,22 @@
       this._renderMonth();
       this._wireScheduler();
       if (this.selectedKey) this._renderTimes();
+
+      // Backend mode: refine the calendar with real free/busy from the server.
+      if (this.backend && !this._serverLoaded) {
+        this._fetchServerSlots().then(ok => {
+          this._serverLoaded = ok;
+          if (!ok) return;
+          // Keep the current month if it still has availability, else jump to the first open one.
+          if (!this.availableKeys.length) { this.viewMonth = null; }
+          else {
+            const cur = this.viewMonth ? (this.viewMonth.y * 100 + this.viewMonth.m0) : -1;
+            const hasInView = this.availableKeys.some(k => { const [y, m] = k.split('-'); return (+y * 100 + (+m - 1)) === cur; });
+            if (!hasInView) { const [y, m] = this.availableKeys[0].split('-'); this.viewMonth = { y: +y, m0: +m - 1 }; }
+          }
+          if (this.shadow.getElementById('tga-cal')) { this._renderMonth(); if (this.selectedKey && this.slotsByDate[this.selectedKey]) this._renderTimes(); }
+        });
+      }
     }
 
     _fillTz() {
@@ -622,8 +676,44 @@
       return { main: `${startStr} at ${timeStr}`, sub: `${ev.mins} min · ${tzName}`, timeStr, startStr };
     }
 
+    // ── Reschedule mode: confirm a new time, no details form ──
+    _renderRescheduleConfirm() {
+      const when = this._whenLines();
+      this.root.innerHTML = `<div class="tga-grid">
+        ${this._asideHtml(true)}
+        <div class="tga-main">
+          <button type="button" class="tga-back" id="tga-back-cal"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+          <div class="tga-chosen"><strong>${esc(when.main)}</strong><br><span style="opacity:.7">${esc(when.sub)}</span></div>
+          <p class="tga-sub" style="margin-bottom:14px">Move your booking to this time.</p>
+          <div class="tga-form-err" id="tga-form-err"></div>
+          <button type="button" class="tga-submit" id="tga-submit">Confirm new time</button>
+        </div>
+      </div>`;
+      this.shadow.getElementById('tga-back-cal').addEventListener('click', () => this._renderScheduler());
+      this.shadow.getElementById('tga-submit').addEventListener('click', () => this._submitReschedule());
+    }
+
+    _submitReschedule() {
+      const sh = this.shadow, formErr = sh.getElementById('tga-form-err');
+      const btn = sh.getElementById('tga-submit');
+      const when = this._whenLines();
+      const startMs = this.selectedSlot.inst.getTime();
+      if (this.cfg.previewMode) { this._showSuccess(when, startMs, startMs + this._event().mins * 60000); return; }
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Moving…';
+      fetch((SCRIPT_ORIGIN || '') + '/api/appointment/manage', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: this.rescheduleToken, action: 'reschedule', startISO: this.selectedSlot.inst.toISOString() }),
+      }).then(r => r.json().then(b => ({ ok: r.ok, body: b })).catch(() => ({ ok: r.ok, body: {} })))
+        .then(res => {
+          if (res.ok && res.body.ok) this._showSuccess(when, startMs, startMs + this._event().mins * 60000, { title: 'Your booking has been moved', body: 'We have updated your appointment to the new time.' });
+          else { btn.disabled = false; btn.textContent = orig; formErr.textContent = (res.body && res.body.error) || 'Could not move the booking.'; formErr.classList.add('is-shown'); }
+        })
+        .catch(() => { btn.disabled = false; btn.textContent = orig; formErr.textContent = 'Network error. Please try again.'; formErr.classList.add('is-shown'); });
+    }
+
     // ── Step 3: details ──
     _renderConfirm() {
+      if (this.rescheduleToken) return this._renderRescheduleConfirm();
       const c = this.cfg, ev = this._event();
       const when = this._whenLines();
       const qFields = (Array.isArray(c.questions) ? c.questions : []).map((q, i) => {
@@ -726,13 +816,20 @@
       };
 
       const btn = sh.getElementById('tga-submit');
-      if (c.previewMode) { this._showSuccess(when, startMs, endMs, answers); return; }
+      if (c.previewMode) { this._showSuccess(when, startMs, endMs); return; }
       btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Sending…';
-      const url = (c.submitUrl && /^https?:\/\//i.test(c.submitUrl)) ? c.submitUrl : (SCRIPT_ORIGIN + '/api/contact');
+
+      // Backend mode posts to the booking endpoint (real calendar, manage link);
+      // otherwise it falls back to the generic contact endpoint.
+      const backend = this.backend;
+      const url = backend ? (SCRIPT_ORIGIN + '/api/appointment/book')
+        : ((c.submitUrl && /^https?:\/\//i.test(c.submitUrl)) ? c.submitUrl : (SCRIPT_ORIGIN + '/api/contact'));
+      if (backend) { payload.eventId = ev.id; payload.startISO = new Date(startMs).toISOString(); payload.visitorTimezone = this.viewTz; }
+
       fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         .then(r => r.json().then(b => ({ ok: r.ok, body: b })).catch(() => ({ ok: r.ok, body: {} })))
         .then(res => {
-          if (res.ok && (res.body.ok === undefined || res.body.ok)) this._showSuccess(when, startMs, endMs, answers);
+          if (res.ok && (res.body.ok === undefined || res.body.ok)) this._showSuccess(when, startMs, endMs, null, res.body);
           else { btn.disabled = false; btn.textContent = orig; formErr.textContent = (res.body && res.body.error) || 'Something went wrong. Please try again.'; formErr.classList.add('is-shown'); }
         })
         .catch(() => { btn.disabled = false; btn.textContent = orig; formErr.textContent = 'Network error. Please try again.'; formErr.classList.add('is-shown'); });
@@ -771,10 +868,12 @@
       catch (e) { return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics); }
     }
 
-    _showSuccess(when, startMs, endMs) {
+    _showSuccess(when, startMs, endMs, override, serverBody) {
       const c = this.cfg;
+      const title = (override && override.title) || c.successTitle;
+      const bodyText = (override && override.body) || c.successBody;
       let cal = '';
-      if (c.addToCalendar) {
+      if (c.addToCalendar && !this.rescheduleToken) {
         const g = safeUrl(this._googleUrl(startMs, endMs));
         const ics = this._icsUrl(startMs, endMs);
         cal = `<div class="tga-cal-actions">
@@ -782,13 +881,19 @@
           <a class="tga-cal-btn" href="${esc(ics)}" download="appointment.ics"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download .ics</a>
         </div>`;
       }
+      // A real backend booking returns a manage link (reschedule / cancel).
+      let foot = '';
+      const manageUrl = serverBody && safeUrl(serverBody.manageUrl);
+      if (manageUrl) foot = `<div class="tga-change"><a href="${esc(manageUrl)}" style="color:var(--tga-accent,#0891B2);font-weight:600;text-decoration:underline;font-size:13px">Manage or cancel this booking</a></div>`;
+      else if (!this.rescheduleToken && !this.backend) foot = `<div class="tga-change"><button type="button" id="tga-again">Need a different time?</button></div>`;
+
       this.root.innerHTML = `<div class="tga-success" role="status" aria-live="polite">
         <span class="tga-success-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        <h3>${esc(c.successTitle)}</h3>
-        <p>${esc(c.successBody)}</p>
+        <h3>${esc(title)}</h3>
+        <p>${esc(bodyText)}</p>
         <div class="tga-when">${esc(when.main)}<small>${esc(when.sub)}</small></div>
         ${cal}
-        <div class="tga-change"><button type="button" id="tga-again">Need a different time?</button></div>
+        ${foot}
       </div>`;
       const again = this.shadow.getElementById('tga-again');
       if (again) again.addEventListener('click', () => { this.selectedSlot = null; this._computeSlots(); this._renderScheduler(); });
@@ -798,7 +903,11 @@
       this.cfg = Object.assign({}, DEFAULTS, migrate(newConfig || {}));
       this.viewTz = detectTz();
       this.hour12 = this.cfg.timeFormat !== '24';
-      this.eventIdx = (this.cfg.eventTypes.length === 1) ? 0 : -1;
+      this.widgetId = (this.el.getAttribute && this.el.getAttribute('data-tg-id')) || this.cfg.widgetId || '';
+      this.rescheduleToken = this.cfg.rescheduleToken || '';
+      this.backend = !!this.widgetId && !this.cfg.previewMode;
+      this.eventIdx = this._initialEventIdx();
+      this._serverLoaded = false;
       this.viewMonth = null; this.selectedKey = null; this.selectedSlot = null;
       this._build();
     }

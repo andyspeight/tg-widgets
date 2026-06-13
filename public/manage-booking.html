@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Manage your booking — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F1F5F9;color:#0F172A;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:48px 18px;line-height:1.5}
+  .wrap{width:100%;max-width:880px}
+  .card{background:#fff;border:1px solid rgba(15,23,42,.1);border-radius:16px;padding:28px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 14px 44px rgba(15,23,42,.07)}
+  .badge{width:46px;height:46px;border-radius:12px;background:rgba(8,145,178,.14);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .badge svg{width:23px;height:23px;fill:none;stroke:#0891B2;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:21px;font-weight:700;margin-bottom:6px;letter-spacing:-.01em}
+  .sub{font-size:14px;opacity:.7;margin-bottom:20px}
+  .detail{font-size:15px;font-weight:600;padding:13px 15px;border-radius:11px;background:rgba(8,145,178,.09);margin-bottom:8px}
+  .detail small{display:block;font-weight:500;opacity:.7;font-size:13px;margin-top:3px}
+  .pill{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;margin-bottom:14px}
+  .pill.ok{background:rgba(16,185,129,.14);color:#047857}
+  .pill.cancel{background:rgba(220,38,38,.12);color:#B91C1C}
+  .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;cursor:pointer;font:inherit;font-size:14px;font-weight:700;border:1.5px solid rgba(15,23,42,.16);background:transparent;color:inherit}
+  .btn:hover{background:rgba(15,23,42,.05)}
+  .btn.primary{background:#0891B2;color:#fff;border-color:#0891B2}
+  .btn.danger{color:#B91C1C;border-color:rgba(220,38,38,.4)}
+  .btn.danger:hover{background:rgba(220,38,38,.08)}
+  .msg{font-size:14px;margin-top:14px}
+  .msg.err{color:#B91C1C}
+  .hidden{display:none!important}
+  .resched-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+  .link{background:transparent;border:0;color:#0891B2;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline}
+  .foot{margin-top:18px;font-size:12px;opacity:.55}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="badge" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div id="body"><p class="sub">Loading your booking…</p></div>
+    </div>
+    <div class="foot">Travelgenix · secure booking management</div>
+  </div>
+
+  <script src="/widget-appointment.js"></script>
+  <script>
+    var token = new URLSearchParams(location.search).get('token') || '';
+    var bodyEl = document.getElementById('body');
+    var booking = null;
+
+    function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
+    function whenText(b){
+      try{
+        var d=new Date(b.startISO);
+        var ds=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,weekday:'long',day:'numeric',month:'long'}).format(d);
+        var ts=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,hour:'numeric',minute:'2-digit',hour12:true}).format(d).replace(/[ \s]/g,'').toLowerCase();
+        return ds+' at '+ts;
+      }catch(e){return b.startISO;}
+    }
+
+    function renderView(){
+      var cancelled = booking.status==='cancelled';
+      bodyEl.innerHTML =
+        '<span class="pill '+(cancelled?'cancel':'ok')+'">'+(cancelled?'Cancelled':'Confirmed')+'</span>'+
+        '<h1>'+(cancelled?'Booking cancelled':'Your booking')+'</h1>'+
+        '<p class="sub">'+esc(booking.eventLabel||'Appointment')+' · '+esc(booking.durationMins)+' min</p>'+
+        '<div class="detail">'+esc(whenText(booking))+'<small>'+esc(booking.timezone||'')+'</small></div>'+
+        (cancelled ? '<p class="msg">This appointment has been cancelled. To book again, head back to the website.</p>'
+          : '<div class="actions"><button class="btn primary" id="btn-resched">Reschedule</button><button class="btn danger" id="btn-cancel">Cancel booking</button></div>')+
+        '<div class="msg" id="msg" style="display:none"></div>';
+      if(!cancelled){
+        document.getElementById('btn-cancel').addEventListener('click', doCancel);
+        document.getElementById('btn-resched').addEventListener('click', startReschedule);
+      }
+    }
+
+    function showMsg(text, isErr){ var m=document.getElementById('msg'); if(!m)return; m.textContent=text; m.className='msg'+(isErr?' err':''); m.style.display='block'; }
+
+    function doCancel(){
+      if(!confirm('Cancel this appointment?')) return;
+      var b=document.getElementById('btn-cancel'); b.disabled=true; b.textContent='Cancelling…';
+      fetch('/api/appointment/manage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token,action:'cancel'})})
+        .then(function(r){return r.json();})
+        .then(function(d){ if(d&&d.ok){ booking=d.booking; renderView(); } else { showMsg((d&&d.error)||'Could not cancel.',true); b.disabled=false; b.textContent='Cancel booking'; } })
+        .catch(function(){ showMsg('Network error. Please try again.',true); b.disabled=false; b.textContent='Cancel booking'; });
+    }
+
+    function startReschedule(){
+      // Load the widget's public config, then mount the scheduler in reschedule mode.
+      fetch('/api/widget-config?id='+encodeURIComponent(booking.widgetId))
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(d){
+          var config = (d&&d.config)||{};
+          config.widgetId = booking.widgetId;
+          config.rescheduleToken = token;
+          config.rescheduleEventId = booking.eventId;
+          bodyEl.innerHTML =
+            '<div class="resched-head"><h1 style="font-size:18px">Pick a new time</h1><button class="link" id="back-view">Keep current time</button></div>'+
+            '<div id="resched-mount"></div>';
+          document.getElementById('back-view').addEventListener('click', renderView);
+          var mount = document.getElementById('resched-mount');
+          try { new window.TGAppointmentWidget(mount, config); }
+          catch(e){ showMsg('Could not load the scheduler.',true); }
+        })
+        .catch(function(){ showMsg('Could not load the scheduler.',true); });
+    }
+
+    if(!token){ bodyEl.innerHTML='<h1>Link not valid</h1><p class="sub">This management link is missing its token. Please use the link from your confirmation.</p>'; }
+    else {
+      fetch('/api/appointment/manage?token='+encodeURIComponent(token))
+        .then(function(r){return r.json();})
+        .then(function(d){ if(d&&d.ok&&d.booking){ booking=d.booking; renderView(); } else { bodyEl.innerHTML='<h1>Booking not found</h1><p class="sub">'+esc((d&&d.error)||'This link may have expired.')+'</p>'; } })
+        .catch(function(){ bodyEl.innerHTML='<h1>Something went wrong</h1><p class="sub">Please try again shortly.</p>'; });
+    }
+  </script>
+</body>
+</html>

@@ -214,6 +214,18 @@
       <!-- ===== SETTINGS ===== -->
       <div class="tgse-panel" data-tab="settings">
 
+        <div class="tgse-section is-open" id="calendar-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M16 14l-4 4-2-2"/></svg>
+            <span class="tgse-section-label">Your calendar</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div id="cal-status" style="font-size:13px;color:var(--tgse-ink-2)">Checking…</div>
+            <span class="field-hint">Connect Google Calendar so booked times disappear automatically and every booking is added to your diary, with an invite sent to the visitor. Without it the widget still works, but it cannot see your real free/busy.</span>
+          </div>
+        </div>
+
         <div class="tgse-section is-open" id="avail-section">
           <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -580,11 +592,40 @@
 
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 
+  // ── Calendar connection (OAuth) ──
+  function renderCalStatus(s) {
+    const el = document.getElementById('cal-status'); if (!el) return;
+    if (!s) { el.textContent = 'Could not check calendar status.'; return; }
+    if (!s.configured) { el.innerHTML = '<span style="opacity:.7">Calendar connecting is not switched on for this account yet. The scheduler still works without it.</span>'; return; }
+    if (!s.storage) { el.innerHTML = '<span style="opacity:.7">Booking storage is not configured yet, so connecting is unavailable.</span>'; return; }
+    if (s.connected) {
+      el.innerHTML = '<span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:999px;background:#10B981;display:inline-block"></span> Connected' + (s.email ? (' as <strong>' + esc(s.email) + '</strong>') : '') + '</span> · <button type="button" data-cal="disconnect" style="background:none;border:0;color:var(--tgse-brand);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline">Disconnect</button>';
+    } else {
+      el.innerHTML = '<button type="button" class="tgse-btn tgse-btn--primary tgse-btn--sm" data-cal="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Connect Google Calendar</button>';
+    }
+  }
+  function refreshCalStatus() {
+    fetch('/api/calendar/status').then(r => r.ok ? r.json() : null).then(renderCalStatus).catch(() => renderCalStatus(null));
+  }
+  document.getElementById('cal-status').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-cal]'); if (!b) return;
+    const act = b.getAttribute('data-cal');
+    if (act === 'connect') { location.href = '/api/calendar/connect?ret=' + encodeURIComponent(location.pathname + location.search); }
+    else if (act === 'disconnect') { fetch('/api/calendar/disconnect', { method: 'POST' }).then(() => { tgse.toast('Calendar disconnected', 'ok'); refreshCalStatus(); }); }
+  });
+  (function calReturnFlag() {
+    const cal = new URLSearchParams(location.search).get('calendar');
+    if (!cal) return;
+    const map = { connected: ['Calendar connected', 'ok'], error: ['Could not connect the calendar', 'err'], denied: ['Calendar connection cancelled', 'err'], norefresh: ['Please remove access in Google then reconnect', 'err'], nostore: ['Booking storage is not configured', 'err'] };
+    const m = map[cal]; if (m && window.tgse) tgse.toast(m[0], m[1]);
+    const u = new URL(location); u.searchParams.delete('calendar'); history.replaceState(null, '', u);
+  })();
+
   document.addEventListener('DOMContentLoaded', () => {
     syncUIFromState();
     if (window.tgse && typeof window.tgse.onReady === 'function') {
-      window.tgse.onReady(() => { if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); } else render(); });
-    } else { if (tgse.isLoggedIn()) loadFromUrl(); else render(); }
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) { loadFromUrl(); refreshCalStatus(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); } else render(); });
+    } else { if (tgse.isLoggedIn()) { loadFromUrl(); refreshCalStatus(); } else render(); }
   });
 </script>
 

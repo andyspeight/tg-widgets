@@ -212,6 +212,10 @@
       "destination": "/editor-appointment.html"
     },
     {
+      "source": "/manage-booking",
+      "destination": "/manage-booking.html"
+    },
+    {
       "source": "/editor-carousel",
       "destination": "/editor-carousel.html"
     },
