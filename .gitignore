@@ -1,0 +1,10 @@
+# Dependencies — never commit these (a leaked node_modules has bitten this package before)
+node_modules/
+package-lock.json
+
+# Playwright / test browser binaries
+test-results/
+playwright-report/
+
+# OS noise
+.DS_Store
