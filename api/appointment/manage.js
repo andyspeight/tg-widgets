@@ -12,6 +12,7 @@ import { resolveWidget, pickEvent } from '../_lib/calendar/state.js';
 import { isValidSlot } from '../_lib/calendar/slots.js';
 import { getBookingByToken, saveBooking, getAccessToken, placeHold, releaseHold } from '../_lib/calendar/store.js';
 import * as google from '../_lib/calendar/google.js';
+import { sendCancelled, sendRescheduled } from '../_lib/calendar/mail.js';
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -62,6 +63,7 @@ export default async function handler(req, res) {
     booking.status = 'cancelled';
     booking.cancelledAt = new Date().toISOString();
     await saveBooking(booking);
+    await sendCancelled(booking);
     return res.status(200).json({ ok: true, booking: publicView(booking) });
   }
 
@@ -103,6 +105,9 @@ export default async function handler(req, res) {
     booking.endISO = endISO;
     booking.rescheduledAt = new Date().toISOString();
     await saveBooking(booking);
+    const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
+    const manageUrl = booking.manageToken ? (proto + '://' + req.headers.host + '/manage-booking?token=' + booking.manageToken) : '';
+    await sendRescheduled(booking, { manageUrl });
     return res.status(200).json({ ok: true, booking: publicView(booking) });
   }
 

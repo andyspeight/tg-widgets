@@ -42,10 +42,12 @@ export default async function handler(req, res) {
     if (tok) {
       connected = true;
       if (slots.length) {
-        const timeMin = slots[0].startISO;
-        const timeMax = slots[slots.length - 1].endISO;
+        const before = Math.max(0, Number(config.bufferBefore) || 0);
+        const after = Math.max(0, Number(config.bufferAfter) || 0);
+        const timeMin = new Date(Date.parse(slots[0].startISO) - before * 60000).toISOString();
+        const timeMax = new Date(Date.parse(slots[slots.length - 1].endISO) + after * 60000).toISOString();
         const busy = await google.freeBusy(tok.accessToken, tok.calendarId, timeMin, timeMax);
-        slots = subtractBusy(slots, busy);
+        slots = subtractBusy(slots, busy, { before, after });
       }
     }
   } catch (e) {

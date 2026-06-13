@@ -15,6 +15,7 @@ import { resolveWidget, pickEvent, bookingRef, manageToken } from '../_lib/calen
 import { isValidSlot } from '../_lib/calendar/slots.js';
 import { getAccessToken, saveBooking, placeHold, releaseHold } from '../_lib/calendar/store.js';
 import * as google from '../_lib/calendar/google.js';
+import { sendNewBooking } from '../_lib/calendar/mail.js';
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,18 +24,6 @@ function cors(res) {
 }
 const clean = (v) => String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim();
 const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 150;
-const esc = (v) => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-async function sgSend(payload) {
-  if (!process.env.SENDGRID_API_KEY) return;
-  try {
-    await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + process.env.SENDGRID_API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-  } catch (e) { console.error('[book] sendgrid', e.message); }
-}
 
 export default async function handler(req, res) {
   cors(res);
@@ -84,8 +73,13 @@ export default async function handler(req, res) {
     const tok = await getAccessToken(w.clientRecordId);
     if (tok) {
       connected = true;
-      const busy = await google.freeBusy(tok.accessToken, tok.calendarId, startISO, endISO);
-      const clash = busy.some(b => Date.parse(b.start) < endMs && Date.parse(b.end) > startMs);
+      // Respect before/after buffers: the slot plus its buffers must be clear.
+      const before = Math.max(0, Number(config.bufferBefore) || 0) * 60000;
+      const after = Math.max(0, Number(config.bufferAfter) || 0) * 60000;
+      const guardMin = new Date(startMs - before).toISOString();
+      const guardMax = new Date(endMs + after).toISOString();
+      const busy = await google.freeBusy(tok.accessToken, tok.calendarId, guardMin, guardMax);
+      const clash = busy.some(b => Date.parse(b.start) < (endMs + after) && Date.parse(b.end) > (startMs - before));
       if (clash) { await releaseHold(w.clientRecordId, startISO); return res.status(409).json({ error: 'That time was just booked. Please pick another.' }); }
 
       const answers = (body.appointment && body.appointment.answers) || body.answers || {};
@@ -126,23 +120,9 @@ export default async function handler(req, res) {
   const origin = proto + '://' + req.headers.host;
   const manageUrl = saved ? (origin + '/manage-booking?token=' + token) : '';
 
-  // Notify the agency (best effort).
-  const to = w.clientEmail || process.env.CONTACT_TO || 'info@travelgenix.io';
-  const whenStr = new Date(startMs).toUTCString();
-  const rows = [['Meeting', ev.label + ' (' + ev.mins + ' min)'], ['When', whenStr + ' · ' + (config.timezone || '')], ['Name', name], ['Email', email], ['Phone', phone || '—']];
-  const answers = booking.invitee.answers || {};
-  Object.keys(answers).forEach(k => { if (answers[k]) rows.push([k, String(answers[k])]); });
-  const html = '<div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5">' +
-    '<h2 style="margin:0 0 12px">New appointment booked</h2><table style="border-collapse:collapse">' +
-    rows.map(([k, v]) => '<tr><td style="padding:4px 14px 4px 0;color:#64748b;font-weight:bold">' + esc(k) + '</td><td style="padding:4px 0">' + esc(v) + '</td></tr>').join('') +
-    '</table><p style="margin:14px 0 0;font-size:13px;color:#64748b">Reference ' + esc(ref) + (connected ? ' · added to your calendar' : '') + '</p></div>';
-  await sgSend({
-    personalizations: [{ to: [{ email: to }] }],
-    from: { email: process.env.CONTACT_FROM || 'info@travelgenix.io', name: 'Travelgenix Scheduler' },
-    reply_to: { email, name },
-    subject: 'New booking: ' + ev.label + ' with ' + name,
-    content: [{ type: 'text/html', value: html }],
-  });
+  // Confirmation to the visitor (with .ics + manage link) and the agency note.
+  booking.location = config.location || '';
+  await sendNewBooking(booking, { manageUrl });
 
   return res.status(200).json({ ok: true, ref, manageUrl: manageUrl || undefined, calendarLink, connected });
 }

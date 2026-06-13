@@ -254,6 +254,14 @@
               <div class="slider-row"><input type="range" id="days-input" min="7" max="90" step="1" value="30"><span class="slider-val" id="days-val">30 days</span></div>
             </div>
             <div class="field">
+              <label class="field-label">Buffer between meetings</label>
+              <div class="row-2">
+                <div><span class="mini-label">Before</span><select class="select" id="buf-before"></select></div>
+                <div><span class="mini-label">After</span><select class="select" id="buf-after"></select></div>
+              </div>
+              <span class="field-hint">Keeps a gap clear around each booking. Applies when your calendar is connected.</span>
+            </div>
+            <div class="field">
               <label class="field-label">Blackout dates</label>
               <div class="row-2"><input type="date" class="input" id="blackout-date"><button type="button" class="le-add" id="add-blackout" style="border-style:solid">Add date</button></div>
               <div id="blackout-list" style="margin-top:8px"></div>
@@ -343,6 +351,8 @@
     blackoutDates: [],
     dateRangeDays: 30,
     minNoticeHours: 4,
+    bufferBefore: 0,
+    bufferAfter: 0,
     timeFormat: '12',
     askPhone: true,
     phoneRequired: false,
@@ -447,11 +457,17 @@
     wrap.innerHTML = WD.map(([k, label]) => {
       const ranges = C.availability[k] || C.availability[Number(k)] || [];
       const on = ranges.length > 0;
-      const r = on ? ranges[0] : ['09:00','17:00'];
-      return `<div class="av-row${on?'':' is-off'}" data-wd="${k}">
-        <button type="button" class="switch${on?' is-on':''}" data-av-toggle="${k}" aria-pressed="${on}"></button>
-        <span class="av-day">${label}</span>
-        <span class="av-times"><select data-av-f="start">${hourOpts(r[0])}</select> to <select data-av-f="end">${hourOpts(r[1])}</select></span>
+      const rowsHtml = ranges.map((r, ri) => `<span class="av-times" data-range="${ri}">
+        <select data-av-f="start">${hourOpts(r[0])}</select> to <select data-av-f="end">${hourOpts(r[1])}</select>
+        ${ranges.length > 1 ? `<button type="button" class="le-del" data-del-range="${ri}" aria-label="Remove hours"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
+      </span>`).join('');
+      return `<div class="av-day-block${on ? '' : ' is-off'}" data-wd="${k}" style="padding:7px 0;border-bottom:1px solid var(--tgse-border)">
+        <div style="display:flex;align-items:center;gap:8px;${on ? 'margin-bottom:6px' : ''}">
+          <button type="button" class="switch${on ? ' is-on' : ''}" data-av-toggle="${k}" aria-pressed="${on}"></button>
+          <span class="av-day" style="flex:1">${label}</span>
+          ${on ? `<button type="button" data-add-range="${k}" style="background:none;border:0;color:var(--tgse-brand);font:inherit;font-size:12px;font-weight:600;cursor:pointer">+ hours</button>` : '<span style="font-size:12px;color:var(--tgse-ink-3)">Unavailable</span>'}
+        </div>
+        <div class="av-ranges" style="display:flex;flex-direction:column;gap:5px;padding-left:44px">${rowsHtml}</div>
       </div>`;
     }).join('');
   }
@@ -478,11 +494,18 @@
     toggleSwitch('phone-req', C.phoneRequired);
     toggleSwitch('req-consent', C.requireConsent); document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent);
     document.getElementById('tz-input').value = C.timezone;
+    document.getElementById('buf-before').value = String(C.bufferBefore || 0);
+    document.getElementById('buf-after').value = String(C.bufferAfter || 0);
     renderEvents(); renderQuestions(); renderAvailability(); renderBlackouts();
   }
 
-  // Fill timezone select once
+  // Fill timezone + buffer selects once
   document.getElementById('tz-input').innerHTML = TZ_LIST.map(z => `<option value="${z[1]}">${esc(z[0])}</option>`).join('');
+  (function fillBuffers() {
+    const html = [[0, 'None'], [5, '5 min'], [10, '10 min'], [15, '15 min'], [20, '20 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']].map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
+    document.getElementById('buf-before').innerHTML = html;
+    document.getElementById('buf-after').innerHTML = html;
+  })();
 
   // ── Text inputs ──
   function wireText(id, key) { document.getElementById(id).addEventListener('input', (e) => { C[key] = e.target.value; shell.markDirty(); render(); }); }
@@ -491,6 +514,8 @@
   wireText('location-input','location'); wireText('consent-input','consentText');
   document.getElementById('submit-url').addEventListener('input', (e) => { C.submitUrl = e.target.value.trim(); shell.markDirty(); });
   document.getElementById('tz-input').addEventListener('change', (e) => { C.timezone = e.target.value; shell.markDirty(); render(); });
+  document.getElementById('buf-before').addEventListener('change', (e) => { C.bufferBefore = parseInt(e.target.value, 10) || 0; shell.markDirty(); render(); });
+  document.getElementById('buf-after').addEventListener('change', (e) => { C.bufferAfter = parseInt(e.target.value, 10) || 0; shell.markDirty(); render(); });
 
   // ── Event list ──
   document.getElementById('event-list').addEventListener('input', (e) => {
@@ -535,19 +560,41 @@
     renderQuestions(); shell.markDirty(); render();
   });
 
-  // ── Availability ──
+  // ── Availability (multiple ranges per weekday) ──
+  function readDayRanges(block) {
+    return [...block.querySelectorAll('.av-times[data-range]')].map(rw => {
+      const s = rw.querySelectorAll('[data-av-f]'); return [s[0].value, s[1].value];
+    });
+  }
   document.getElementById('avail-list').addEventListener('click', (e) => {
-    const t = e.target.closest('[data-av-toggle]'); if (!t) return;
-    const k = t.getAttribute('data-av-toggle');
-    if (C.availability[k] || C.availability[Number(k)]) { delete C.availability[k]; delete C.availability[Number(k)]; }
-    else C.availability[k] = [['09:00', '17:00']];
-    renderAvailability(); shell.markDirty(); render();
+    const tog = e.target.closest('[data-av-toggle]');
+    const add = e.target.closest('[data-add-range]');
+    const del = e.target.closest('[data-del-range]');
+    if (tog) {
+      const k = tog.getAttribute('data-av-toggle');
+      if (C.availability[k] || C.availability[Number(k)]) { delete C.availability[k]; delete C.availability[Number(k)]; }
+      else C.availability[k] = [['09:00', '17:00']];
+      renderAvailability(); shell.markDirty(); render(); return;
+    }
+    if (add) {
+      const k = add.getAttribute('data-add-range');
+      const cur = C.availability[k] || C.availability[Number(k)] || [];
+      C.availability[k] = cur.concat([['13:00', '17:00']]); delete C.availability[Number(k)];
+      renderAvailability(); shell.markDirty(); render(); return;
+    }
+    if (del) {
+      const block = del.closest('[data-wd]'); const k = block.getAttribute('data-wd');
+      const ri = +del.getAttribute('data-del-range');
+      const cur = (C.availability[k] || C.availability[Number(k)] || []).slice();
+      cur.splice(ri, 1);
+      if (cur.length) C.availability[k] = cur; else { delete C.availability[k]; delete C.availability[Number(k)]; }
+      renderAvailability(); shell.markDirty(); render();
+    }
   });
   document.getElementById('avail-list').addEventListener('change', (e) => {
-    const row = e.target.closest('[data-wd]'); if (!row) return;
-    const k = row.getAttribute('data-wd'); const sels = row.querySelectorAll('[data-av-f]');
-    const start = sels[0].value, end = sels[1].value;
-    C.availability[k] = [[start, end]]; delete C.availability[Number(k)];
+    const block = e.target.closest('[data-wd]'); if (!block || !e.target.getAttribute('data-av-f')) return;
+    const k = block.getAttribute('data-wd');
+    C.availability[k] = readDayRanges(block); delete C.availability[Number(k)];
     shell.markDirty(); render();
   });
 

@@ -79,12 +79,18 @@ export function generateSlots(config, ev, opts) {
   return out;
 }
 
-/** Remove slots that overlap any busy interval [{start,end} ISO]. */
-export function subtractBusy(slots, busy) {
+/**
+ * Remove slots that overlap any busy interval [{start,end} ISO]. Optional
+ * buffers (minutes) keep a gap before/after each meeting: the candidate slot is
+ * widened by the buffers before testing the overlap.
+ */
+export function subtractBusy(slots, busy, buffers) {
   if (!Array.isArray(busy) || !busy.length) return slots;
+  const before = Math.max(0, (buffers && Number(buffers.before)) || 0) * 60000;
+  const after = Math.max(0, (buffers && Number(buffers.after)) || 0) * 60000;
   const intervals = busy.map(b => [Date.parse(b.start), Date.parse(b.end)]).filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]));
   return slots.filter(s => {
-    const a = Date.parse(s.startISO), b = Date.parse(s.endISO);
+    const a = Date.parse(s.startISO) - before, b = Date.parse(s.endISO) + after;
     return !intervals.some(([bs, be]) => a < be && b > bs);   // overlap test
   });
 }
