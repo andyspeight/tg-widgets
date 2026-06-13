@@ -86,6 +86,23 @@ ok(/DTSTART:\d{8}T\d{6}Z/.test(ics) && /DTEND:\d{8}T\d{6}Z/.test(ics), 'ics UTC 
 ok(/METHOD:CANCEL/.test(buildICS(booking, 'CANCEL')), 'cancel ics method');
 ok(/ at /.test(whenString(slots[0].startISO, 'America/New_York')), 'whenString format');
 
+// ── provider registry + Microsoft translation ──
+const { getProvider, configuredProviders, isProvider } = await import('../api/_lib/calendar/providers.js');
+const ms = await import('../api/_lib/calendar/microsoft.js');
+ok(getProvider('google').PROVIDER === 'google', 'registry resolves google');
+ok(getProvider('microsoft').PROVIDER === 'microsoft', 'registry resolves microsoft');
+ok(getProvider('nope').PROVIDER === 'google', 'registry defaults to google');
+ok(isProvider('microsoft') === true && isProvider('nope') === false, 'isProvider');
+ok(Array.isArray(configuredProviders()), 'configuredProviders returns a list');
+const gdt = ms.toGraphDateTime('2026-07-15T13:00:00.000Z');
+ok(gdt.dateTime === '2026-07-15T13:00:00' && gdt.timeZone === 'UTC', 'toGraphDateTime is zone-less UTC');
+const ge = ms.toGraphEvent({ summary: 'Consult', description: 'hi', start: { dateTime: '2026-07-15T13:00:00Z' }, end: { dateTime: '2026-07-15T13:30:00Z' }, location: 'Phone call', attendees: [{ email: 'a@b.com', displayName: 'A B' }] });
+ok(ge.subject === 'Consult' && ge.body.content === 'hi', 'toGraphEvent subject + body');
+ok(ge.location.displayName === 'Phone call', 'toGraphEvent location');
+ok(ge.attendees[0].emailAddress.address === 'a@b.com' && ge.attendees[0].type === 'required', 'toGraphEvent attendee');
+ok(ge.start.dateTime === '2026-07-15T13:00:00' && ge.end.dateTime === '2026-07-15T13:30:00', 'toGraphEvent start/end');
+ok(getProvider('microsoft').SCOPES.includes('Calendars.ReadWrite'), 'microsoft scope present');
+
 // ── store graceful without redis ──
 ok(storageReady() === false, 'storageReady false without redis');
 ok((await getConnection('recX')) === null, 'getConnection null without redis');

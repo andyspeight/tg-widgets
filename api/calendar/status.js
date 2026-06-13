@@ -1,10 +1,11 @@
 /**
  * GET /api/calendar/status
- * Tells the editor whether the signed-in client has a connected calendar.
- * Returns { connected, email, provider, configured, storage }.
+ * Tells the editor whether the signed-in client has a connected calendar and
+ * which providers can be connected. Returns { connected, email, provider,
+ * providers: [ids], storage }.
  */
 import { requireAuth } from '../_lib/auth/middleware.js';
-import * as google from '../_lib/calendar/google.js';
+import { configuredProviders } from '../_lib/calendar/providers.js';
 import { getConnection, storageReady } from '../_lib/calendar/store.js';
 
 export default async function handler(req, res) {
@@ -18,9 +19,11 @@ export default async function handler(req, res) {
     if (conn) { connected = true; email = conn.email || ''; provider = conn.provider || 'google'; }
   } catch (e) { /* treat as not connected */ }
 
+  const providers = configuredProviders();
   return res.status(200).json({
     connected, email, provider,
-    configured: google.configured(),
+    providers,                       // which can be connected
+    configured: providers.length > 0,
     storage: storageReady(),
   });
 }

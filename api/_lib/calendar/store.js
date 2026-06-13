@@ -17,7 +17,7 @@
 
 import { setJson, getJson, setString, getString, zadd, zrangebyscore, incr, decr, configured as redisConfigured } from '../../_redis.js';
 import { encrypt, decrypt } from '../../_crypto.js';
-import * as google from './google.js';
+import { getProvider } from './providers.js';
 
 export function storageReady() { return redisConfigured(); }
 
@@ -33,7 +33,7 @@ const dayCountKey = (clientId, dayKey) => 'apt:count:' + clientId + ':' + dayKey
 export async function saveConnection(clientId, conn) {
   if (!clientId) return false;
   const rec = {
-    provider: conn.provider || google.PROVIDER,
+    provider: conn.provider || 'google',
     email: conn.email || '',
     calendarId: conn.calendarId || 'primary',
     refreshTokenEnc: conn.refreshToken ? encrypt(conn.refreshToken) : (conn.refreshTokenEnc || ''),
@@ -70,9 +70,10 @@ export async function getAccessToken(clientId) {
   let refreshToken;
   try { refreshToken = decrypt(conn.refreshTokenEnc); } catch (e) { return null; }
   try {
-    const tok = await google.refresh(refreshToken);
+    const provider = getProvider(conn.provider);
+    const tok = await provider.refresh(refreshToken);
     if (!tok || !tok.access_token) return null;
-    return { accessToken: tok.access_token, calendarId: conn.calendarId, email: conn.email, provider: conn.provider };
+    return { accessToken: tok.access_token, calendarId: conn.calendarId, email: conn.email, provider: conn.provider || 'google' };
   } catch (e) { return null; }
 }
 

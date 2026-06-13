@@ -647,15 +647,21 @@
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 
   // ── Calendar connection (OAuth) ──
+  var PROVIDER_LABELS = { google: 'Google Calendar', microsoft: 'Outlook' };
   function renderCalStatus(s) {
     const el = document.getElementById('cal-status'); if (!el) return;
     if (!s) { el.textContent = 'Could not check calendar status.'; return; }
     if (!s.configured) { el.innerHTML = '<span style="opacity:.7">Calendar connecting is not switched on for this account yet. The scheduler still works without it.</span>'; return; }
     if (!s.storage) { el.innerHTML = '<span style="opacity:.7">Booking storage is not configured yet, so connecting is unavailable.</span>'; return; }
     if (s.connected) {
-      el.innerHTML = '<span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:999px;background:#10B981;display:inline-block"></span> Connected' + (s.email ? (' as <strong>' + esc(s.email) + '</strong>') : '') + '</span> · <button type="button" data-cal="disconnect" style="background:none;border:0;color:var(--tgse-brand);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline">Disconnect</button>';
+      const label = PROVIDER_LABELS[s.provider] || 'your calendar';
+      el.innerHTML = '<span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:999px;background:#10B981;display:inline-block"></span> Connected to <strong>' + esc(label) + '</strong>' + (s.email ? (' as ' + esc(s.email)) : '') + '</span> · <button type="button" data-cal="disconnect" style="background:none;border:0;color:var(--tgse-brand);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline">Disconnect</button>';
     } else {
-      el.innerHTML = '<button type="button" class="tgse-btn tgse-btn--primary tgse-btn--sm" data-cal="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Connect Google Calendar</button>';
+      const provs = (s.providers && s.providers.length) ? s.providers : ['google'];
+      const btns = provs.map(function (p) {
+        return '<button type="button" class="tgse-btn tgse-btn--sm" data-cal="connect" data-provider="' + esc(p) + '" style="margin:0 8px 8px 0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Connect ' + esc(PROVIDER_LABELS[p] || p) + '</button>';
+      }).join('');
+      el.innerHTML = btns;
     }
   }
   function refreshCalStatus() {
@@ -664,7 +670,10 @@
   document.getElementById('cal-status').addEventListener('click', (e) => {
     const b = e.target.closest('[data-cal]'); if (!b) return;
     const act = b.getAttribute('data-cal');
-    if (act === 'connect') { location.href = '/api/calendar/connect?ret=' + encodeURIComponent(location.pathname + location.search); }
+    if (act === 'connect') {
+      const provider = b.getAttribute('data-provider') || 'google';
+      location.href = '/api/calendar/connect?provider=' + encodeURIComponent(provider) + '&ret=' + encodeURIComponent(location.pathname + location.search);
+    }
     else if (act === 'disconnect') { fetch('/api/calendar/disconnect', { method: 'POST' }).then(() => { tgse.toast('Calendar disconnected', 'ok'); refreshCalStatus(); }); }
   });
   (function calReturnFlag() {

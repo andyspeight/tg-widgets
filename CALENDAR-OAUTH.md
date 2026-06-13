@@ -34,8 +34,10 @@ visitor's reschedule/cancel page.
 
 | Var | Purpose | Notes |
 |-----|---------|-------|
-| `GOOGLE_CLIENT_ID` | OAuth client id | from Google Cloud console |
-| `GOOGLE_CLIENT_SECRET` | OAuth client secret | same |
+| `GOOGLE_CLIENT_ID` | Google OAuth client id | from Google Cloud console |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | same |
+| `MS_CLIENT_ID` | Outlook/Microsoft app id | from Azure AD (optional, enables Outlook) |
+| `MS_CLIENT_SECRET` | Outlook/Microsoft client secret | same |
 | `TG_ENCRYPTION_KEY` | AES key for refresh tokens | 64 hex chars. Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. May already be set (shared with client-integrations). |
 | `UPSTASH_REDIS_REST_URL` | booking + connection store | already used by the world map cache |
 | `UPSTASH_REDIS_REST_TOKEN` | "" | "" |
@@ -58,6 +60,26 @@ double-booking guard. Set Redis for the full suite.
    - `https://tg-widgets.vercel.app/api/calendar/callback`
    - the current Vercel preview URL's `/api/calendar/callback`
 5. Copy the client id and secret into the Vercel env vars above.
+
+## Outlook / Microsoft 365 setup (optional second provider)
+
+Both providers share one callback and one connection store; the editor shows a
+Connect button for each provider whose credentials are set.
+
+1. Azure Portal → App registrations → New registration. Supported account
+   types: "Accounts in any organizational directory and personal Microsoft
+   accounts" (so work and personal both connect).
+2. Redirect URI (Web): `https://<your-host>/api/calendar/callback` — add one
+   per host, same as Google.
+3. API permissions → Microsoft Graph → Delegated → `Calendars.ReadWrite`
+   (and `offline_access`, `openid`, `email`). Grant admin consent if required.
+4. Certificates & secrets → new client secret. Copy the value.
+5. Set `MS_CLIENT_ID` (the Application/client id) and `MS_CLIENT_SECRET` in
+   Vercel.
+
+Microsoft free/busy uses Graph `calendarView` (events shown as busy, tentative
+or out-of-office block a slot); events are created on the user's default
+calendar and Graph emails the invitee.
 
 ## Monday test pass
 
@@ -93,7 +115,8 @@ These all rely on `UPSTASH_*`. Without Redis they no-op cleanly.
 
 ## Honest limits (post-Monday)
 
-- Google only for now. Outlook/Microsoft is the same shape via Microsoft Graph
-  and would slot in behind the provider abstraction in `api/_lib/calendar/`.
+- Google and Outlook/Microsoft are both supported (behind the provider
+  registry in `api/_lib/calendar/providers.js`). A client connects one
+  calendar; the connection records which provider.
 - One availability schedule per client (the widget config), not per calendar.
 - Reminders use the calendar's own defaults; no separate reminder emails yet.

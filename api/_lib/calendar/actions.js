@@ -9,7 +9,7 @@
 import { resolveWidget, pickEvent } from './state.js';
 import { isValidSlot, hostDateKey } from './slots.js';
 import { getAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount, decDayCount } from './store.js';
-import * as google from './google.js';
+import { getProvider } from './providers.js';
 import { sendCancelled, sendRescheduled } from './mail.js';
 
 export async function cancelBooking(booking) {
@@ -17,7 +17,7 @@ export async function cancelBooking(booking) {
   try {
     if (booking.providerEventId) {
       const tok = await getAccessToken(booking.clientRecordId);
-      if (tok) await google.deleteEvent(tok.accessToken, tok.calendarId, booking.providerEventId);
+      if (tok) await getProvider(tok.provider).deleteEvent(tok.accessToken, tok.calendarId, booking.providerEventId);
     }
   } catch (e) { console.error('[actions.cancel]', e.message); }
   await releaseHold(booking.clientRecordId, booking.startISO);
@@ -56,11 +56,12 @@ export async function rescheduleBooking(booking, newStart, opts) {
   try {
     const tok = await getAccessToken(booking.clientRecordId);
     if (tok) {
-      const busy = await google.freeBusy(tok.accessToken, tok.calendarId, newStart, endISO);
+      const provider = getProvider(tok.provider);
+      const busy = await provider.freeBusy(tok.accessToken, tok.calendarId, newStart, endISO);
       const clash = busy.some(b => Date.parse(b.start) < endMs && Date.parse(b.end) > startMs);
       if (clash) { await releaseHold(booking.clientRecordId, newStart); return { ok: false, status: 409, error: 'That time was just booked. Please pick another.' }; }
       if (booking.providerEventId) {
-        await google.patchEvent(tok.accessToken, tok.calendarId, booking.providerEventId, {
+        await provider.patchEvent(tok.accessToken, tok.calendarId, booking.providerEventId, {
           start: { dateTime: newStart, timeZone: booking.hostTimezone || 'UTC' },
           end: { dateTime: endISO, timeZone: booking.hostTimezone || 'UTC' },
         });

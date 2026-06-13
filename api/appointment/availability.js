@@ -11,7 +11,7 @@
 import { resolveWidget, pickEvent } from '../_lib/calendar/state.js';
 import { generateSlots, subtractBusy, hostDateKey } from '../_lib/calendar/slots.js';
 import { getAccessToken, getDayCount } from '../_lib/calendar/store.js';
-import * as google from '../_lib/calendar/google.js';
+import { getProvider } from '../_lib/calendar/providers.js';
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
         const after = Math.max(0, Number(config.bufferAfter) || 0);
         const timeMin = new Date(Date.parse(slots[0].startISO) - before * 60000).toISOString();
         const timeMax = new Date(Date.parse(slots[slots.length - 1].endISO) + after * 60000).toISOString();
-        const busy = await google.freeBusy(tok.accessToken, tok.calendarId, timeMin, timeMax);
+        const busy = await getProvider(tok.provider).freeBusy(tok.accessToken, tok.calendarId, timeMin, timeMax);
         slots = subtractBusy(slots, busy, { before, after });
       }
     }

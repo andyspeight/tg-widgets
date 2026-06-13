@@ -4,7 +4,7 @@
  * the code for tokens, stores the encrypted refresh token against the client,
  * then bounces the user back to the editor with a status flag.
  */
-import * as google from '../_lib/calendar/google.js';
+import { getProvider } from '../_lib/calendar/providers.js';
 import { verifyState } from '../_lib/calendar/state.js';
 import { saveConnection, storageReady } from '../_lib/calendar/store.js';
 
@@ -24,16 +24,16 @@ export default async function handler(req, res) {
   if (!storageReady()) { console.error('[calendar/callback] storage (Redis) not configured'); return back(res, ret, 'nostore'); }
 
   try {
-    const tok = await google.exchangeCode(q.code, st.redirectUri);
+    const provider = getProvider(st.provider);
+    const tok = await provider.exchangeCode(q.code, st.redirectUri);
     if (!tok || !tok.refresh_token) {
-      // Google only returns a refresh token on first consent. prompt=consent
-      // forces it, but if it is still missing the user must remove the app's
-      // access and reconnect.
+      // A refresh token is only issued with offline access on first consent.
+      // If it is missing the user must remove the app's access and reconnect.
       return back(res, ret, 'norefresh');
     }
-    const email = await google.userEmail(tok.access_token);
+    const email = await provider.userEmail(tok.access_token);
     const ok = await saveConnection(st.clientRecordId, {
-      provider: 'google', email, calendarId: 'primary',
+      provider: st.provider || 'google', email, calendarId: 'primary',
       refreshToken: tok.refresh_token, scope: tok.scope || '',
     });
     return back(res, ret, ok ? 'connected' : 'error');

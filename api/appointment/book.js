@@ -14,7 +14,7 @@
 import { resolveWidget, pickEvent, bookingRef, manageToken } from '../_lib/calendar/state.js';
 import { isValidSlot, hostDateKey } from '../_lib/calendar/slots.js';
 import { getAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount } from '../_lib/calendar/store.js';
-import * as google from '../_lib/calendar/google.js';
+import { getProvider } from '../_lib/calendar/providers.js';
 import { sendNewBooking } from '../_lib/calendar/mail.js';
 
 function cors(res) {
@@ -80,19 +80,20 @@ export default async function handler(req, res) {
     const tok = await getAccessToken(w.clientRecordId);
     if (tok) {
       connected = true;
+      const provider = getProvider(tok.provider);
       // Respect before/after buffers: the slot plus its buffers must be clear.
       const before = Math.max(0, Number(config.bufferBefore) || 0) * 60000;
       const after = Math.max(0, Number(config.bufferAfter) || 0) * 60000;
       const guardMin = new Date(startMs - before).toISOString();
       const guardMax = new Date(endMs + after).toISOString();
-      const busy = await google.freeBusy(tok.accessToken, tok.calendarId, guardMin, guardMax);
+      const busy = await provider.freeBusy(tok.accessToken, tok.calendarId, guardMin, guardMax);
       const clash = busy.some(b => Date.parse(b.start) < (endMs + after) && Date.parse(b.end) > (startMs - before));
       if (clash) { await releaseHold(w.clientRecordId, startISO); return res.status(409).json({ error: 'That time was just booked. Please pick another.' }); }
 
       const answers = (body.appointment && body.appointment.answers) || body.answers || {};
       const descLines = ['Booked via the website scheduler.', 'Visitor: ' + name + ' <' + email + '>' + (phone ? ', ' + phone : '')];
       Object.keys(answers || {}).forEach(k => { if (answers[k]) descLines.push(k + ': ' + answers[k]); });
-      const created = await google.insertEvent(tok.accessToken, tok.calendarId, {
+      const created = await provider.insertEvent(tok.accessToken, tok.calendarId, {
         summary: (ev.label || 'Appointment') + ' with ' + name,
         description: descLines.join('\n'),
         start: { dateTime: startISO, timeZone: config.timezone || 'UTC' },
