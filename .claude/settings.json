@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "permissions": {
+    "allow": [
+      "mcp__Airtable__search_bases",
+      "mcp__Airtable__list_bases",
+      "mcp__Airtable__list_tables_for_base",
+      "mcp__Airtable__get_table_schema",
+      "mcp__Airtable__list_records_for_table",
+      "mcp__Airtable__search_records",
+      "mcp__Airtable__list_pages_for_base",
+      "mcp__Airtable__list_records_for_page",
+      "mcp__Airtable__get_record_for_page",
+      "mcp__Airtable__list_record_comments",
+      "mcp__Airtable__ping"
+    ]
+  }
+}
