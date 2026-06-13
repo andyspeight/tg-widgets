@@ -29,7 +29,13 @@
   .cancel-btn{appearance:none;border:1px solid rgba(220,38,38,.4);background:transparent;color:#B91C1C;font:inherit;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer}
   .cancel-btn:hover:not(:disabled){background:rgba(220,38,38,.08)}
   .cancel-btn:disabled{opacity:.5;cursor:not-allowed}
+  .resched-btn{appearance:none;border:1px solid #E2E8F0;background:#fff;color:#475569;font:inherit;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;margin-right:6px}
+  .resched-btn:hover{background:#F1F5F9}
   .act-cell{text-align:right;white-space:nowrap}
+  .modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:50}
+  .modal.open{display:flex}
+  .modal-panel{background:transparent;width:100%;max-width:900px;position:relative}
+  .modal-close{position:absolute;right:-6px;top:-34px;background:#fff;border:0;width:30px;height:30px;border-radius:999px;cursor:pointer;font-size:16px;line-height:1}
 </style>
 </head>
 <body>
@@ -42,6 +48,15 @@
     </div>
     <div class="card"><div id="list"><div class="empty">Loading…</div></div></div>
   </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-panel">
+      <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      <div id="modal-mount"></div>
+    </div>
+  </div>
+
+  <script src="/widget-appointment.js"></script>
   <script>
     var listEl = document.getElementById('list');
     var range = 'upcoming';
@@ -53,17 +68,45 @@
       bookings.sort(function(a,b){return a.startISO<b.startISO?-1:1;});
       var rows = bookings.map(function(b){
         var cancelled = b.status==='cancelled';
-        return '<tr data-ref="'+esc(b.ref)+'">'+
+        var acts = cancelled ? '' : ((b.widgetId?'<button class="resched-btn" data-resched>Reschedule</button>':'')+'<button class="cancel-btn" data-cancel>Cancel</button>');
+        return '<tr data-ref="'+esc(b.ref)+'" data-widget="'+esc(b.widgetId||'')+'" data-event="'+esc(b.eventId||'')+'">'+
           '<td><div class="who">'+esc(whenText(b))+'</div><div class="meta">'+esc(b.eventLabel||'')+' · '+esc(b.durationMins)+' min</div></td>'+
           '<td><div class="who">'+esc(b.name)+'</div><div class="meta">'+esc(b.email)+(b.phone?(' · '+esc(b.phone)):'')+'</div></td>'+
           '<td class="status-cell"><span class="pill '+(cancelled?'cancel':'ok')+'">'+(cancelled?'Cancelled':'Confirmed')+'</span></td>'+
-          '<td class="act-cell">'+(cancelled?'':'<button class="cancel-btn" data-cancel>Cancel</button>')+'</td>'+
+          '<td class="act-cell">'+acts+'</td>'+
         '</tr>';
       }).join('');
       listEl.innerHTML='<table><thead><tr><th>When</th><th>Who</th><th>Status</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
     }
 
+    // ── Reschedule (agency, in a modal) ──
+    var modal = document.getElementById('modal'), modalMount = document.getElementById('modal-mount');
+    var reschedInst = null;
+    function closeModal(){ modal.classList.remove('open'); if(reschedInst){try{reschedInst.destroy();}catch(e){} reschedInst=null;} modalMount.innerHTML=''; load(); }
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){ if(e.target===modal) closeModal(); });
+
     listEl.addEventListener('click', function(e){
+      var rb = e.target.closest('[data-resched]');
+      if(rb){
+        var row = rb.closest('tr[data-ref]'); if(!row) return;
+        var ref = row.getAttribute('data-ref'), widgetId = row.getAttribute('data-widget'), eventId = row.getAttribute('data-event');
+        if(!widgetId){ alert('This booking has no scheduler to reschedule from.'); return; }
+        rb.disabled = true; rb.textContent = 'Opening…';
+        fetch('/api/widget-config?id='+encodeURIComponent(widgetId))
+          .then(function(r){return r.ok?r.json():null;})
+          .then(function(d){
+            rb.disabled=false; rb.textContent='Reschedule';
+            var config=(d&&d.config)||{};
+            config.widgetId=widgetId; config.adminRescheduleRef=ref; config.rescheduleEventId=eventId;
+            modalMount.innerHTML='<div data-tg-widget="appointment" id="resched-w"></div>';
+            modal.classList.add('open');
+            try{ reschedInst=new window.TGAppointmentWidget(document.getElementById('resched-w'), config); }
+            catch(err){ alert('Could not load the scheduler.'); closeModal(); }
+          })
+          .catch(function(){ rb.disabled=false; rb.textContent='Reschedule'; alert('Could not load the scheduler.'); });
+        return;
+      }
       var btn = e.target.closest('[data-cancel]'); if(!btn) return;
       var row = btn.closest('tr[data-ref]'); if(!row) return;
       var ref = row.getAttribute('data-ref');

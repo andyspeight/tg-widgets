@@ -83,8 +83,11 @@ double-booking guard. Set Redis for the full suite.
   `vercel.json`) emails a reminder ~24h before each booking, once. Needs
   `CRON_SECRET` set (same secret the map cron uses). Optional `APP_BASE_URL`
   for the manage link in reminder emails (otherwise derived from the host).
-- **Agency view**: `/bookings` page and `GET /api/appointment/list` (auth)
-  show the client's upcoming and recent bookings.
+- **Agency view + actions**: `/bookings` page and `GET /api/appointment/list`
+  (auth) show the client's upcoming and recent bookings, and let the agency
+  cancel or reschedule one (`POST /api/appointment/admin-action`, ownership
+  checked). Reschedule reuses the scheduler in an admin mode; cancel/reschedule
+  share one code path with the visitor flow (`_lib/calendar/actions.js`).
 
 These all rely on `UPSTASH_*`. Without Redis they no-op cleanly.
 

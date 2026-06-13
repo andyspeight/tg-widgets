@@ -337,6 +337,8 @@
       this.hour12 = this.cfg.timeFormat !== '24';
       this.widgetId = (container.getAttribute && container.getAttribute('data-tg-id')) || this.cfg.widgetId || '';
       this.rescheduleToken = this.cfg.rescheduleToken || '';
+      this.adminRescheduleRef = this.cfg.adminRescheduleRef || '';
+      this.rescheduleMode = !!(this.rescheduleToken || this.adminRescheduleRef);
       this.backend = !!this.widgetId && !this.cfg.previewMode;
       this.eventIdx = this._initialEventIdx();
       this.viewMonth = null;          // {y, m0}
@@ -346,7 +348,7 @@
     }
 
     _initialEventIdx() {
-      if (this.rescheduleToken) {
+      if (this.rescheduleToken || this.adminRescheduleRef) {
         const i = this.cfg.eventTypes.findIndex(e => e.id === this.cfg.rescheduleEventId);
         return i >= 0 ? i : 0;
       }
@@ -703,9 +705,15 @@
       const startMs = this.selectedSlot.inst.getTime();
       if (this.cfg.previewMode) { this._showSuccess(when, startMs, startMs + this._event().mins * 60000); return; }
       btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Moving…';
-      fetch((SCRIPT_ORIGIN || '') + '/api/appointment/manage', {
+      const admin = !!this.adminRescheduleRef;
+      const url = (SCRIPT_ORIGIN || '') + (admin ? '/api/appointment/admin-action' : '/api/appointment/manage');
+      const payload = admin
+        ? { ref: this.adminRescheduleRef, action: 'reschedule', startISO: this.selectedSlot.inst.toISOString() }
+        : { token: this.rescheduleToken, action: 'reschedule', startISO: this.selectedSlot.inst.toISOString() };
+      fetch(url, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: this.rescheduleToken, action: 'reschedule', startISO: this.selectedSlot.inst.toISOString() }),
+        credentials: admin ? 'include' : 'omit',
+        body: JSON.stringify(payload),
       }).then(r => r.json().then(b => ({ ok: r.ok, body: b })).catch(() => ({ ok: r.ok, body: {} })))
         .then(res => {
           if (res.ok && res.body.ok) this._showSuccess(when, startMs, startMs + this._event().mins * 60000, { title: 'Your booking has been moved', body: 'We have updated your appointment to the new time.' });
@@ -716,7 +724,7 @@
 
     // ── Step 3: details ──
     _renderConfirm() {
-      if (this.rescheduleToken) return this._renderRescheduleConfirm();
+      if (this.rescheduleMode) return this._renderRescheduleConfirm();
       const c = this.cfg, ev = this._event();
       const when = this._whenLines();
       const qFields = (Array.isArray(c.questions) ? c.questions : []).map((q, i) => {
@@ -876,7 +884,7 @@
       const title = (override && override.title) || c.successTitle;
       const bodyText = (override && override.body) || c.successBody;
       let cal = '';
-      if (c.addToCalendar && !this.rescheduleToken) {
+      if (c.addToCalendar && !this.rescheduleMode) {
         const g = safeUrl(this._googleUrl(startMs, endMs));
         const ics = this._icsUrl(startMs, endMs);
         cal = `<div class="tga-cal-actions">
@@ -888,7 +896,7 @@
       let foot = '';
       const manageUrl = serverBody && safeUrl(serverBody.manageUrl);
       if (manageUrl) foot = `<div class="tga-change"><a href="${esc(manageUrl)}" style="color:var(--tga-accent,#0891B2);font-weight:600;text-decoration:underline;font-size:13px">Manage or cancel this booking</a></div>`;
-      else if (!this.rescheduleToken && !this.backend) foot = `<div class="tga-change"><button type="button" id="tga-again">Need a different time?</button></div>`;
+      else if (!this.rescheduleMode && !this.backend) foot = `<div class="tga-change"><button type="button" id="tga-again">Need a different time?</button></div>`;
 
       this.root.innerHTML = `<div class="tga-success" role="status" aria-live="polite">
         <span class="tga-success-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -908,6 +916,8 @@
       this.hour12 = this.cfg.timeFormat !== '24';
       this.widgetId = (this.el.getAttribute && this.el.getAttribute('data-tg-id')) || this.cfg.widgetId || '';
       this.rescheduleToken = this.cfg.rescheduleToken || '';
+      this.adminRescheduleRef = this.cfg.adminRescheduleRef || '';
+      this.rescheduleMode = !!(this.rescheduleToken || this.adminRescheduleRef);
       this.backend = !!this.widgetId && !this.cfg.previewMode;
       this.eventIdx = this._initialEventIdx();
       this._serverLoaded = false;
