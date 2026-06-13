@@ -12,6 +12,7 @@
  */
 import { getBookingByToken } from '../_lib/calendar/store.js';
 import { cancelBooking, rescheduleBooking } from '../_lib/calendar/actions.js';
+import { checkRateLimit } from '../_lib/auth/ratelimit.js';
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -45,6 +46,14 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') return res.status(200).json({ ok: true, booking: publicView(booking) });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Rate limit the mutating actions by token, so a single leaked manage link
+  // can't be used to spam cancel/reschedule emails. Fail-open.
+  const rl = await checkRateLimit({ bucket: 'aptManage', key: String(token).slice(0, 64), max: 12, windowSeconds: 600, failClosed: false });
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(rl.retryAfterSeconds || 600));
+    return res.status(429).json({ error: 'Too many changes in a short time. Please try again shortly.' });
+  }
 
   const action = body && body.action;
   const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];

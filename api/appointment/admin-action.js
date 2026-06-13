@@ -9,6 +9,7 @@
 import { requireAuth } from '../_lib/auth/middleware.js';
 import { getBooking } from '../_lib/calendar/store.js';
 import { cancelBooking, rescheduleBooking } from '../_lib/calendar/actions.js';
+import { checkRateLimit } from '../_lib/auth/ratelimit.js';
 
 function view(b) {
   return { ref: b.ref, status: b.status, startISO: b.startISO, endISO: b.endISO, eventLabel: b.eventLabel, timezone: b.hostTimezone };
@@ -18,6 +19,14 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const ctx = await requireAuth(req, res);
   if (!ctx) return;
+
+  // Generous per-user limit: this is authed, but it still mutates calendars and
+  // sends mail, so cap a runaway loop. Fail-open.
+  const rl = await checkRateLimit({ bucket: 'aptAdmin', key: ctx.userRecordId || ctx.clientRecordId || 'unknown', max: 60, windowSeconds: 600, failClosed: false });
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(rl.retryAfterSeconds || 600));
+    return res.status(429).json({ error: 'Too many actions in a short time. Please try again shortly.' });
+  }
 
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }

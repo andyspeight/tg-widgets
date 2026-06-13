@@ -81,6 +81,25 @@ Microsoft free/busy uses Graph `calendarView` (events shown as busy, tentative
 or out-of-office block a slot); events are created on the user's default
 calendar and Graph emails the invitee.
 
+## Hardening (public endpoint defences)
+
+The scheduler's public endpoints are rate limited via the existing Upstash
+limiter (`api/_lib/auth/ratelimit.js`), all fail-open so a Redis blip never
+blocks a real booking on the stand:
+
+- `book` — 8 per 10 min per IP (it creates calendar events + sends mail).
+- `manage` POST — 12 per 10 min per manage token (a leaked link can't spam
+  cancel/reschedule emails).
+- `admin-action` — 60 per 10 min per signed-in user.
+
+Other defences already in place: honeypot + time-trap on `book`; visitor
+answers bounded (≤20 fields, ≤80-char keys, ≤500-char values, control
+characters stripped); all single-line fields stripped of control characters
+(no CR/LF into emails, .ics or logs); HMAC-signed, timing-safe, TTL'd OAuth
+state and unguessable 192-bit manage tokens; server-side slot revalidation on
+every booking; Airtable formula inputs escaped; agency list scoped to the
+caller's own client and `admin-action` ownership-checked.
+
 ## Monday test pass
 
 1. Open `/editor-appointment`, Settings → Your calendar → Connect Google

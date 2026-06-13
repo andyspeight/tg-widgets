@@ -16,14 +16,35 @@ import { isValidSlot, hostDateKey } from '../_lib/calendar/slots.js';
 import { getAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount } from '../_lib/calendar/store.js';
 import { getProvider } from '../_lib/calendar/providers.js';
 import { sendNewBooking } from '../_lib/calendar/mail.js';
+import { checkRateLimit } from '../_lib/auth/ratelimit.js';
+import { getRequestIp } from '../_lib/auth/http.js';
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
-const clean = (v) => String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim();
+export const clean = (v) => String(v == null ? '' : v).replace(/[\u0000-\u001F\u007F]/g, '').trim();
 const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 150;
+
+// Bound visitor-supplied custom answers: cap the number of fields and the
+// length of each key and value so a booking payload can't bloat storage or
+// emails. Keys and values are cleaned of control characters.
+export function cleanAnswers(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const out = {};
+  let n = 0;
+  for (const k of Object.keys(raw)) {
+    if (n >= 20) break;
+    const key = clean(k).slice(0, 80);
+    if (!key) continue;
+    const val = clean(raw[k]).slice(0, 500);
+    if (!val) continue;
+    out[key] = val;
+    n++;
+  }
+  return out;
+}
 
 export default async function handler(req, res) {
   cors(res);
@@ -39,9 +60,20 @@ export default async function handler(req, res) {
   const ts = Number(body.ts);
   if (ts && Date.now() - ts < 2500) return res.status(200).json({ ok: true, ref: 'skipped' });
 
+  // Per-IP rate limit. Fail-open: this endpoint creates calendar events and
+  // sends mail, so we cap abuse, but a Redis blip must never block a real
+  // booking (especially live on the demo stand).
+  const ip = getRequestIp(req) || 'unknown';
+  const rl = await checkRateLimit({ bucket: 'aptBook', key: ip, max: 8, windowSeconds: 600, failClosed: false });
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(rl.retryAfterSeconds || 600));
+    return res.status(429).json({ error: 'Too many booking attempts. Please try again in a few minutes.' });
+  }
+
   const name = clean(body.name).slice(0, 100);
   const email = clean(body.email).slice(0, 150);
   const phone = clean(body.phone).slice(0, 40);
+  const answers = cleanAnswers((body.appointment && body.appointment.answers) || body.answers);
   const startISO = clean(body.startISO);
   if (!name) return res.status(400).json({ error: 'Name is required' });
   if (!emailOk(email)) return res.status(400).json({ error: 'A valid email is required' });
@@ -75,11 +107,12 @@ export default async function handler(req, res) {
   if (!held) return res.status(409).json({ error: 'Someone just took that time. Please pick another.' });
 
   // If connected, re-check free/busy then create the event.
-  let providerEventId = '', calendarLink = '', connected = false;
+  let providerEventId = '', calendarLink = '', connected = false, providerName = '';
   try {
     const tok = await getAccessToken(w.clientRecordId);
     if (tok) {
       connected = true;
+      providerName = tok.provider || 'google';
       const provider = getProvider(tok.provider);
       // Respect before/after buffers: the slot plus its buffers must be clear.
       const before = Math.max(0, Number(config.bufferBefore) || 0) * 60000;
@@ -90,9 +123,8 @@ export default async function handler(req, res) {
       const clash = busy.some(b => Date.parse(b.start) < (endMs + after) && Date.parse(b.end) > (startMs - before));
       if (clash) { await releaseHold(w.clientRecordId, startISO); return res.status(409).json({ error: 'That time was just booked. Please pick another.' }); }
 
-      const answers = (body.appointment && body.appointment.answers) || body.answers || {};
       const descLines = ['Booked via the website scheduler.', 'Visitor: ' + name + ' <' + email + '>' + (phone ? ', ' + phone : '')];
-      Object.keys(answers || {}).forEach(k => { if (answers[k]) descLines.push(k + ': ' + answers[k]); });
+      Object.keys(answers).forEach(k => { descLines.push(k + ': ' + answers[k]); });
       const created = await provider.insertEvent(tok.accessToken, tok.calendarId, {
         summary: (ev.label || 'Appointment') + ' with ' + name,
         description: descLines.join('\n'),
@@ -116,8 +148,8 @@ export default async function handler(req, res) {
     eventId: ev.id, eventLabel: ev.label, durationMins: ev.mins, mode: ev.mode,
     startISO, endISO, visitorTimezone: clean(body.visitorTimezone) || (config.timezone || 'Europe/London'),
     hostTimezone: config.timezone || 'Europe/London',
-    invitee: { name, email, phone, answers: (body.appointment && body.appointment.answers) || body.answers || {} },
-    provider: connected ? 'google' : '', providerEventId, calendarLink,
+    invitee: { name, email, phone, answers },
+    provider: providerName, providerEventId, calendarLink,
     dayCounted: cap > 0,
     sourceUrl: clean(body.sourceUrl).slice(0, 300), createdAt: new Date().toISOString(),
   };
