@@ -144,5 +144,34 @@ async function mount(scriptFile, configAttr, { stubFetch = true } = {}) {
   dom.window.close();
 }
 
+// ── 8. Stats Counter renders formatted final figures ──
+{
+  // animate:false so the final values render synchronously (deterministic).
+  const cfg = JSON.stringify({
+    stats: [
+      { value: 12000, label: 'Customers', prefix: '', suffix: '+', decimals: 0 },
+      { value: 4.9, label: 'Rating', prefix: '', suffix: '/5', decimals: 1 },
+      { value: 2.4, label: 'Raised', prefix: '£', suffix: 'M', decimals: 1 },
+    ],
+    columns: 3, animate: false,
+  }).replace(/'/g, '&#39;');
+  const dom = new JSDOM(`<!doctype html><html><body><div data-tg-widget="statscounter" data-tg-config='${cfg}'></div></body></html>`, { runScripts: 'dangerously', url: 'https://x.example/' });
+  const s = dom.window.document.createElement('script');
+  s.textContent = readFileSync(new URL('../public/widget-statscounter.js', import.meta.url), 'utf8');
+  dom.window.document.body.appendChild(s);
+  await sleep(40);
+  const host = dom.window.document.querySelector('[data-tg-widget="statscounter"]');
+  ok(!!host.shadowRoot, 'stats: shadow root attached');
+  const nums = [...host.shadowRoot.querySelectorAll('[data-role="n"]')].map(n => n.textContent);
+  ok(nums.length === 3, 'stats: one number per stat (got ' + nums.length + ')');
+  ok(nums[0] === '12,000', 'stats: thousands separator on final value (got ' + nums[0] + ')');
+  ok(nums[1] === '4.9', 'stats: respects 1 decimal place (got ' + nums[1] + ')');
+  // prefix/suffix render around the number in accent spans
+  const affixes = [...host.shadowRoot.querySelectorAll('.sc-affix')].map(a => a.textContent);
+  ok(affixes.includes('£') && affixes.includes('M') && affixes.includes('/5'), 'stats: prefixes and suffixes render');
+  ok(typeof dom.window.TGStatsCounterWidget === 'function', 'stats: exposes window.TGStatsCounterWidget');
+  dom.window.close();
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 assert.strictEqual(failed, 0, 'DOM smoke failures');

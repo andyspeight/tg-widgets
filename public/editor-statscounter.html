@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stats Counter — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .select { width:100%; padding:8px 10px; font:inherit; font-size:13px; border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm); background:var(--tgse-panel); color:var(--tgse-ink); transition:border-color 160ms ease, box-shadow 160ms ease; }
+  .input:focus, .select:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .pick-grid.two { grid-template-columns:1fr 1fr; }
+  .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel); padding:10px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center; transition:border-color 160ms ease, background 160ms ease; }
+  .pick-btn:hover { background:var(--tgse-hover); }
+  .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .pick-label { font-size:12px; font-weight:600; color:var(--tgse-ink); }
+  .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
+
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  .slider-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+  .slider-row input[type="range"] { width:100%; accent-color:var(--tgse-brand); }
+  .slider-val { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; min-width:54px; text-align:right; }
+
+  /* Stat rows */
+  .stat-row { border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm); padding:10px; margin-bottom:10px; background:var(--tgse-panel); }
+  .sr-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .sr-title { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--tgse-ink-3); }
+  .sr-del { border:0; background:transparent; color:var(--tgse-ink-3); cursor:pointer; padding:2px; border-radius:4px; display:flex; }
+  .sr-del:hover { color:#ef4444; background:var(--tgse-hover); }
+  .sr-del svg { width:15px; height:15px; }
+  .sr-grid { display:grid; grid-template-columns:1.2fr .9fr .9fr 1fr; gap:6px; margin-top:6px; }
+  .sr-grid .input, .sr-grid .select { font-size:12px; padding:7px 8px; }
+  .add-stat { width:100%; border:1.5px dashed var(--tgse-border); background:transparent; color:var(--tgse-ink-2); padding:9px; border-radius:var(--tgse-radius-sm); cursor:pointer; font:inherit; font-size:13px; font-weight:600; }
+  .add-stat:hover { border-color:var(--tgse-brand); color:var(--tgse-brand-dark); background:var(--tgse-brand-tint); }
+  .add-stat[disabled] { opacity:.5; cursor:not-allowed; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Stats Counter</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled stats counter" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- CONTENT -->
+      <div class="tgse-panel is-active" data-tab="content">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Heading</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Title (optional)</label>
+              <input type="text" class="input" id="heading-input" maxlength="60" placeholder="e.g. Why clients choose us">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span class="tgse-section-label">Stats</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div id="stat-rows"></div>
+            <button type="button" class="add-stat" id="add-stat">+ Add stat</button>
+            <span class="field-hint">Up to 6. Prefix sits before the number (£, $), suffix after (+, %, /5).</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESIGN -->
+      <div class="tgse-panel" data-tab="design">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18"/><rect x="14" y="3" width="7" height="18"/></svg>
+            <span class="tgse-section-label">Columns</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid" id="cols-picker">
+                <button type="button" class="pick-btn" data-cols="2"><span class="pick-label">2</span></button>
+                <button type="button" class="pick-btn" data-cols="3"><span class="pick-label">3</span></button>
+                <button type="button" class="pick-btn" data-cols="4"><span class="pick-label">4</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Layout</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid two" id="layout-picker">
+                <button type="button" class="pick-btn" data-layout="inline"><span class="pick-label">Plain</span></button>
+                <button type="button" class="pick-btn" data-layout="card"><span class="pick-label">Card</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Accent colour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
+              </div>
+              <span class="field-hint">Used for the prefix and suffix on each number.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Font</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="tgse-panel" data-tab="settings">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="tgse-section-label">Animation</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Count up on scroll</span><button type="button" class="switch is-on" id="sw-animate" aria-pressed="true"></button></div>
+              <span class="field-hint">Numbers animate from zero when they scroll into view. Respects reduced-motion settings.</span>
+            </div>
+            <div class="field" id="duration-field">
+              <label class="field-label">Count duration</label>
+              <div class="slider-row">
+                <input type="range" id="duration-input" min="600" max="4000" step="100" value="1800">
+                <span class="slider-val" id="duration-val">1.8s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            <span class="tgse-section-label">Appearance</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Alignment</label>
+              <div class="pick-grid two" id="align-picker">
+                <button type="button" class="pick-btn" data-align="left"><span class="pick-label">Left</span></button>
+                <button type="button" class="pick-btn" data-align="center"><span class="pick-label">Centre</span></button>
+              </div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Divider lines</span><button type="button" class="switch is-on" id="sw-dividers" aria-pressed="true"></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-statscounter.js"></script>
+<style>
+  .pv-faux { width:100%; max-width:760px; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); padding:40px; }
+  .pv-faux[data-bg="dark"] { background:#0B1220; }
+  #widget-mount { width:100%; }
+</style>
+<script>
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+  const MAX = 6;
+
+  let C = {
+    heading: '',
+    stats: [
+      { value: 12000, label: 'Happy customers', prefix: '', suffix: '+', decimals: 0 },
+      { value: 98, label: 'Would recommend', prefix: '', suffix: '%', decimals: 0 },
+      { value: 25, label: 'Years of experience', prefix: '', suffix: '', decimals: 0 },
+      { value: 4.9, label: 'Average rating', prefix: '', suffix: '/5', decimals: 1 }
+    ],
+    columns: 4, duration: 1800, accent: '#0891B2', layout: 'inline',
+    dividers: true, align: 'center', animate: true, theme: 'light', fontFamily: 'Inter',
+  };
+
+  let widgetInst = null;
+
+  const shell = tgse.init({
+    widgetType: 'Stats Counter',
+    widgetTag: 'statscounter',
+    scriptFile: 'widget-statscounter.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); normalise(); buildStatRows(); syncUIFromState(); remount(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for Stats Counter', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for Stats Counter', 'ok'),
+    onThemeToggle: (isDark) => { C.theme = isDark ? 'dark' : 'light'; render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); },
+  });
+
+  function normalise() {
+    if (!Array.isArray(C.stats)) C.stats = [];
+    C.stats = C.stats.slice(0, MAX);
+    if (!C.stats.length) C.stats = [{ value: 100, label: 'Stat', prefix: '', suffix: '', decimals: 0 }];
+  }
+
+  // Render the preview, reusing the instance (so edits don't replay the count-up).
+  function render() {
+    const frame = document.getElementById('pv-frame');
+    if (!frame) return;
+    let faux = document.getElementById('pv-faux');
+    if (!faux) {
+      frame.innerHTML = '<div class="pv-faux" id="pv-faux"><div data-tg-widget="statscounter" id="widget-mount"></div></div>';
+      faux = document.getElementById('pv-faux');
+    }
+    faux.setAttribute('data-bg', C.theme === 'dark' ? 'dark' : 'light');
+    if (!window.TGStatsCounterWidget) return;
+    if (widgetInst) {
+      try { widgetInst.update(Object.assign({}, C, { previewMode: true })); } catch (e) { console.error(e); }
+    } else {
+      const host = document.getElementById('widget-mount');
+      requestAnimationFrame(() => { try { widgetInst = new window.TGStatsCounterWidget(host, Object.assign({}, C, { previewMode: true })); } catch (e) { console.error(e); } });
+    }
+  }
+  // Force a fresh mount (replays the count-up) — used when a whole config loads.
+  function remount() {
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    const frame = document.getElementById('pv-frame');
+    if (frame) frame.innerHTML = '';
+    render();
+  }
+
+  function buildStatRows() {
+    const wrap = document.getElementById('stat-rows');
+    wrap.innerHTML = C.stats.map((s, i) =>
+      '<div class="stat-row" data-i="' + i + '">' +
+        '<div class="sr-head"><span class="sr-title">Stat ' + (i + 1) + '</span>' +
+          '<button type="button" class="sr-del" data-act="del" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>' +
+        '<input class="input" data-k="label" placeholder="Label e.g. Happy customers" maxlength="60" value="' + esc(s.label) + '">' +
+        '<div class="sr-grid">' +
+          '<input class="input" data-k="value" inputmode="decimal" placeholder="Value" value="' + esc(s.value) + '">' +
+          '<input class="input" data-k="prefix" placeholder="Prefix" maxlength="6" value="' + esc(s.prefix) + '">' +
+          '<input class="input" data-k="suffix" placeholder="Suffix" maxlength="6" value="' + esc(s.suffix) + '">' +
+          '<select class="select" data-k="decimals">' +
+            '<option value="0"' + (s.decimals === 0 ? ' selected' : '') + '>0 dp</option>' +
+            '<option value="1"' + (s.decimals === 1 ? ' selected' : '') + '>1 dp</option>' +
+            '<option value="2"' + (s.decimals === 2 ? ' selected' : '') + '>2 dp</option>' +
+          '</select>' +
+        '</div>' +
+      '</div>').join('');
+    document.getElementById('add-stat').disabled = C.stats.length >= MAX;
+  }
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  function toggleSwitch(id, on) { const el = document.getElementById(id); if (!el) return; el.classList.toggle('is-on', !!on); el.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+
+  function syncUIFromState() {
+    document.getElementById('heading-input').value = C.heading || '';
+    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2';
+    document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
+    document.querySelectorAll('#cols-picker [data-cols]').forEach(b => b.classList.toggle('is-on', +b.getAttribute('data-cols') === C.columns));
+    document.querySelectorAll('#layout-picker [data-layout]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-layout') === C.layout));
+    document.querySelectorAll('#align-picker [data-align]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-align') === C.align));
+    document.getElementById('duration-input').value = C.duration;
+    document.getElementById('duration-val').textContent = (C.duration / 1000).toFixed(1) + 's';
+    document.getElementById('duration-field').style.opacity = C.animate ? '1' : '.45';
+    toggleSwitch('sw-animate', C.animate);
+    toggleSwitch('sw-dividers', C.dividers);
+  }
+
+  // ── Stat rows wiring (delegated) ──
+  document.getElementById('stat-rows').addEventListener('input', e => {
+    const row = e.target.closest('.stat-row'); if (!row) return;
+    const i = +row.getAttribute('data-i'); const k = e.target.getAttribute('data-k'); if (k == null) return;
+    if (k === 'value') C.stats[i].value = Number(e.target.value) || 0;
+    else C.stats[i][k] = e.target.value;
+    shell.markDirty(); render();
+  });
+  document.getElementById('stat-rows').addEventListener('change', e => {
+    const row = e.target.closest('.stat-row'); if (!row) return;
+    const i = +row.getAttribute('data-i'); const k = e.target.getAttribute('data-k');
+    if (k === 'decimals') { C.stats[i].decimals = parseInt(e.target.value, 10) || 0; shell.markDirty(); render(); }
+  });
+  document.getElementById('stat-rows').addEventListener('click', e => {
+    const del = e.target.closest('[data-act="del"]'); if (!del) return;
+    const row = del.closest('.stat-row'); const i = +row.getAttribute('data-i');
+    if (C.stats.length <= 1) { tgse.toast('Keep at least one stat', 'ok'); return; }
+    C.stats.splice(i, 1); normalise(); buildStatRows(); shell.markDirty(); render();
+  });
+  document.getElementById('add-stat').addEventListener('click', () => {
+    if (C.stats.length >= MAX) return;
+    C.stats.push({ value: 100, label: 'New stat', prefix: '', suffix: '', decimals: 0 });
+    buildStatRows(); shell.markDirty(); render();
+  });
+
+  document.getElementById('heading-input').addEventListener('input', e => { C.heading = e.target.value; shell.markDirty(); render(); });
+
+  document.getElementById('cols-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-cols]'); if (!b) return;
+    C.columns = +b.getAttribute('data-cols');
+    document.querySelectorAll('#cols-picker [data-cols]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+  document.getElementById('layout-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-layout]'); if (!b) return;
+    C.layout = b.getAttribute('data-layout');
+    document.querySelectorAll('#layout-picker [data-layout]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+  document.getElementById('align-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-align]'); if (!b) return;
+    C.align = b.getAttribute('data-align');
+    document.querySelectorAll('#align-picker [data-align]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+
+  (function wireColour() {
+    const col = document.getElementById('accent-col'), hex = document.getElementById('accent-hex');
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); render(); } });
+  })();
+
+  document.getElementById('duration-input').addEventListener('input', e => { C.duration = parseInt(e.target.value, 10) || 1800; document.getElementById('duration-val').textContent = (C.duration / 1000).toFixed(1) + 's'; shell.markDirty(); });
+  document.getElementById('duration-input').addEventListener('change', () => remount());
+
+  document.getElementById('sw-animate').addEventListener('click', () => { C.animate = !C.animate; toggleSwitch('sw-animate', C.animate); document.getElementById('duration-field').style.opacity = C.animate ? '1' : '.45'; shell.markDirty(); remount(); });
+  document.getElementById('sw-dividers').addEventListener('click', () => { C.dividers = !C.dividers; toggleSwitch('sw-dividers', C.dividers); shell.markDirty(); render(); });
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { normalise(); buildStatRows(); syncUIFromState(); remount(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        normalise(); buildStatRows(); syncUIFromState(); remount();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    normalise(); buildStatRows(); syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); else remount(); });
+    } else { if (tgse.isLoggedIn()) loadFromUrl(); else remount(); }
+  });
+</script>
+</body>
+</html>

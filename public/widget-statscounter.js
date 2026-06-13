@@ -1,0 +1,240 @@
+/**
+ * Travelgenix Stats Counter Widget v1.0.0
+ * Self-contained, embeddable animated statistics. Big numbers that count up
+ * when they scroll into view. Zero dependencies, Shadow DOM isolation, no API.
+ * Respects prefers-reduced-motion (shows the final figures with no animation).
+ *
+ * Usage (remote config, default):
+ *   <div data-tg-widget="statscounter" data-tg-id="YOUR_WIDGET_ID"></div>
+ *   <script src="https://tg-widgets.vercel.app/widget-statscounter.js"></script>
+ *
+ * Usage (inline config, editor preview):
+ *   <div data-tg-widget="statscounter" data-tg-config='{...}'></div>
+ *   <script src="https://tg-widgets.vercel.app/widget-statscounter.js"></script>
+ */
+(function () {
+  'use strict';
+
+  const VERSION = '1.0.0';
+
+  function resolveConfigApi() {
+    if (typeof window === 'undefined') return '/api/widget-config';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      const me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/widget-config';
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-statscounter\.js(\?|$|#)/.test(s)) return new URL(s).origin + '/api/widget-config';
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/widget-config';
+  }
+  const CONFIG_API = resolveConfigApi();
+
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const hexOk = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim());
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+  function fmtNumber(n, decimals) {
+    const d = Math.max(0, Math.min(2, decimals | 0));
+    const fixed = d > 0 ? n.toFixed(d) : String(Math.round(n));
+    const parts = fixed.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+  }
+
+  const reducedMotion = () => {
+    try { return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+    catch (e) { return false; }
+  };
+
+  class TGStatsCounterWidget {
+    constructor(el, config) {
+      this.el = el;
+      this.cfg = this._defaults(config || {});
+      this._raf = null;
+      this._io = null;
+      this._done = false;
+      this.shadow = el.attachShadow ? el.attachShadow({ mode: 'open' }) : el;
+      el.setAttribute('data-tg-initialised', '1');
+      this._build();
+      this._arm();
+    }
+
+    _defaults(c) {
+      let stats = Array.isArray(c.stats) ? c.stats : null;
+      if (stats) {
+        stats = stats
+          .filter(s => s && (s.value != null && s.value !== ''))
+          .map(s => ({
+            value: Number(s.value) || 0,
+            label: String(s.label || '').slice(0, 60),
+            prefix: String(s.prefix || '').slice(0, 6),
+            suffix: String(s.suffix || '').slice(0, 6),
+            decimals: Math.max(0, Math.min(2, Number(s.decimals) || 0)),
+          }))
+          .slice(0, 6);
+      }
+      if (!stats || !stats.length) stats = [
+        { value: 12000, label: 'Happy customers', prefix: '', suffix: '+', decimals: 0 },
+        { value: 98, label: 'Would recommend', prefix: '', suffix: '%', decimals: 0 },
+        { value: 25, label: 'Years of experience', prefix: '', suffix: '', decimals: 0 },
+        { value: 4.9, label: 'Average rating', prefix: '', suffix: '/5', decimals: 1 },
+      ];
+      let cols = Number(c.columns);
+      if (![2, 3, 4].includes(cols)) cols = Math.min(stats.length, 4) || 1;
+      return {
+        heading: typeof c.heading === 'string' ? c.heading : '',
+        stats,
+        columns: cols,
+        duration: Math.max(300, Math.min(5000, Number(c.duration) || 1800)),
+        accent: hexOk(c.accent) ? c.accent : '#0891B2',
+        layout: c.layout === 'card' ? 'card' : 'inline',
+        dividers: c.dividers !== false,
+        align: c.align === 'left' ? 'left' : 'center',
+        animate: c.animate !== false,
+        theme: c.theme === 'dark' ? 'dark' : 'light',
+        fontFamily: typeof c.fontFamily === 'string' && c.fontFamily ? c.fontFamily : 'Inter, system-ui, sans-serif',
+        previewMode: !!c.previewMode,
+      };
+    }
+
+    _build() {
+      const c = this.cfg;
+      const dark = c.theme === 'dark';
+      const ink = dark ? '#F1F5F9' : '#0F172A';
+      const ink2 = dark ? '#94A3B8' : '#64748B';
+      const panel = dark ? '#0B1220' : '#FFFFFF';
+      const border = dark ? '#1E293B' : '#E2E8F0';
+      const card = c.layout === 'card';
+      const cols = Math.min(c.columns, c.stats.length) || 1;
+
+      this.shadow.innerHTML = `
+        <style>
+          :host { all: initial; }
+          * { box-sizing: border-box; }
+          .sc { font-family: ${c.fontFamily}; color: ${ink}; ${card ? `background:${panel};border:1px solid ${border};border-radius:16px;padding:28px 22px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 10px 30px rgba(15,23,42,.04);` : ''} }
+          .sc-head { font-size: 18px; font-weight: 700; margin: 0 0 18px; letter-spacing: -.01em; text-align: ${c.align}; }
+          .sc-grid { display: grid; grid-template-columns: repeat(${cols}, 1fr); gap: 8px 12px; }
+          .sc-item { padding: 10px 14px; text-align: ${c.align}; ${c.dividers ? `border-left: 1px solid ${border};` : ''} }
+          .sc-item:first-child { border-left: 0; }
+          .sc-num { font-size: 38px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; color: ${ink}; font-variant-numeric: tabular-nums; }
+          .sc-num .sc-affix { color: ${c.accent}; }
+          .sc-label { margin-top: 6px; font-size: 13px; color: ${ink2}; font-weight: 500; }
+          @media (max-width: 560px){ .sc-grid { grid-template-columns: repeat(${cols >= 2 ? 2 : 1}, 1fr); } .sc-item { border-left: 0; } }
+          @media (max-width: 360px){ .sc-grid { grid-template-columns: 1fr; } }
+        </style>
+        <div class="sc">
+          ${c.heading ? `<h3 class="sc-head">${esc(c.heading)}</h3>` : ''}
+          <div class="sc-grid" id="grid"></div>
+        </div>`;
+
+      const grid = this.shadow.getElementById('grid');
+      this.nums = c.stats.map(s => {
+        const item = document.createElement('div');
+        item.className = 'sc-item';
+        item.innerHTML = `<div class="sc-num"><span class="sc-affix">${esc(s.prefix)}</span><span data-role="n">0</span><span class="sc-affix">${esc(s.suffix)}</span></div>${s.label ? `<div class="sc-label">${esc(s.label)}</div>` : ''}`;
+        grid.appendChild(item);
+        return item.querySelector('[data-role="n"]');
+      });
+      this._render(c.animate ? 0 : 1);
+    }
+
+    _render(progress) {
+      const e = easeOutCubic(Math.max(0, Math.min(1, progress)));
+      this.cfg.stats.forEach((s, i) => {
+        if (this.nums[i]) this.nums[i].textContent = fmtNumber(s.value * e, s.decimals);
+      });
+    }
+
+    _arm() {
+      const c = this.cfg;
+      if (!c.animate || reducedMotion()) { this._render(1); this._done = true; return; }
+      // Animate when scrolled into view; if IO is unavailable, animate now.
+      if (typeof IntersectionObserver === 'function') {
+        this._io = new IntersectionObserver((entries) => {
+          for (const en of entries) {
+            if (en.isIntersecting && !this._done) { this._done = true; this._play(); this._io.disconnect(); }
+          }
+        }, { threshold: 0.3 });
+        this._io.observe(this.el);
+      } else {
+        this._done = true; this._play();
+      }
+    }
+
+    _play() {
+      const start = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const dur = this.cfg.duration;
+      const step = (now) => {
+        const t = (now - start) / dur;
+        this._render(t);
+        if (t < 1) this._raf = requestAnimationFrame(step);
+        else this._render(1);
+      };
+      this._raf = requestAnimationFrame(step);
+    }
+
+    update(config) {
+      if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
+      if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
+      this.cfg = this._defaults(config || {});
+      this._done = true;        // editor updates show finals, no re-animation
+      this._build();
+      this._render(1);
+    }
+
+    destroy() {
+      if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
+      if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
+      try { this.shadow.innerHTML = ''; } catch (e) {}
+      try { this.el.removeAttribute('data-tg-initialised'); } catch (e) {}
+    }
+  }
+
+  async function init() {
+    if (typeof document === 'undefined') return;
+    const nodes = document.querySelectorAll('[data-tg-widget="statscounter"]:not([data-tg-initialised])');
+    for (const el of nodes) {
+      try {
+        const inline = el.getAttribute('data-tg-config');
+        if (inline) { let cfg = {}; try { cfg = JSON.parse(inline); } catch { cfg = {}; } new TGStatsCounterWidget(el, cfg); continue; }
+        const id = el.getAttribute('data-tg-id');
+        if (id) {
+          const res = await fetch(CONFIG_API + '?id=' + encodeURIComponent(id), { credentials: 'omit' });
+          if (!res.ok) throw new Error('config ' + res.status);
+          const data = await res.json();
+          const cfg = (data && (data.config || data)) || {};
+          cfg.widgetId = id;
+          new TGStatsCounterWidget(el, cfg);
+          continue;
+        }
+        console.warn('[TG Stats] Container has neither data-tg-id nor data-tg-config');
+      } catch (err) {
+        console.error('[TG Stats] Failed to initialise:', err);
+        try { el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">Unable to load Stats widget</p>'; } catch (e) {}
+      }
+    }
+  }
+
+  if (typeof window !== 'undefined') { window.TGStatsCounterWidget = TGStatsCounterWidget; window.__TG_STATSCOUNTER_VERSION__ = VERSION; }
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+    if (typeof MutationObserver !== 'undefined') {
+      try {
+        let scheduled = false;
+        const schedule = () => { if (scheduled) return; scheduled = true; setTimeout(() => { scheduled = false; init(); }, 120); };
+        const mo = new MutationObserver((records) => {
+          for (const r of records) for (const node of r.addedNodes) {
+            if (node.nodeType !== 1) continue;
+            if ((node.matches && node.matches('[data-tg-widget="statscounter"]:not([data-tg-initialised])')) ||
+                (node.querySelector && node.querySelector('[data-tg-widget="statscounter"]:not([data-tg-initialised])'))) { schedule(); return; }
+          }
+        });
+        mo.observe(document.body || document.documentElement, { childList: true, subtree: true });
+      } catch (e) { /* noop */ }
+    }
+  }
+})();

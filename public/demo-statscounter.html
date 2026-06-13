@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Stats Counter Demo · Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F8FAFC; color: #0F172A; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body[data-theme="dark"] { background: #0B1222; color: #F8FAFC; }
+
+    .site-header { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 16px 32px; display: flex; align-items: center; gap: 20px; }
+    body[data-theme="dark"] .site-header { background: #121A2F; border-bottom-color: #1E293B; }
+    .brand { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+    .brand-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0891B2; margin-right: 10px; vertical-align: 2px; }
+    .nav-links { display: flex; gap: 20px; font-size: 13px; color: #475569; }
+    body[data-theme="dark"] .nav-links { color: #CBD5E1; }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .header-spacer { flex: 1; }
+    .controls { display: inline-flex; gap: 6px; padding: 3px; background: #F1F5F9; border-radius: 999px; }
+    body[data-theme="dark"] .controls { background: #1E293B; }
+    .controls button { border: 0; background: transparent; font: inherit; font-size: 12px; font-weight: 600; color: #475569; padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: background 150ms ease, color 150ms ease; min-height: 28px; }
+    body[data-theme="dark"] .controls button { color: #CBD5E1; }
+    .controls button[aria-pressed="true"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    body[data-theme="dark"] .controls button[aria-pressed="true"] { background: #0F172A; color: #F8FAFC; }
+
+    .hero { max-width: 1000px; margin: 0 auto; padding: 48px 32px 12px; text-align: center; }
+    .hero h1 { margin: 0 0 8px; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+    .hero p { margin: 0 auto; font-size: 16px; color: #475569; max-width: 620px; }
+    body[data-theme="dark"] .hero p { color: #CBD5E1; }
+
+    .band { max-width: 1000px; margin: 32px auto; padding: 36px 32px; }
+    .scroll-spacer { height: 70vh; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-size: 13px; }
+
+    .section-label { max-width: 1000px; margin: 0 auto; padding: 0 32px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #64748B; }
+
+    footer { border-top: 1px solid #E2E8F0; padding: 24px 32px; text-align: center; font-size: 12px; color: #64748B; margin-top: 40px; }
+    body[data-theme="dark"] footer { border-top-color: #1E293B; }
+    footer a { color: #0891B2; }
+    code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand"><span class="brand-dot"></span>Meridian &amp; Co</div>
+    <nav class="nav-links">
+      <a href="#">Services</a>
+      <a href="#">Work</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+    <div class="header-spacer"></div>
+    <div class="controls" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+      <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>The numbers behind the work</h1>
+    <p>Drop a row of key figures anywhere on the page. They count up the moment they scroll into view. Scroll down to see the second block animate.</p>
+  </section>
+
+  <div class="section-label" style="margin-bottom:10px">Hero band (plain layout)</div>
+  <div class="band"><div id="band1"></div></div>
+
+  <div class="scroll-spacer">↓ keep scrolling — the next block animates when it comes into view ↓</div>
+
+  <div class="section-label" style="margin-bottom:10px">Card layout, left aligned</div>
+  <div class="band"><div id="band2"></div></div>
+
+  <footer>
+    Demo site — the Stats Counter is embeddable via a single <code>&lt;script&gt;</code> tag, no API key. <a href="/">Back to dashboard</a>
+  </footer>
+
+  <script src="/widget-statscounter.js"></script>
+  <script>
+    const isDark = () => document.body.dataset.theme === 'dark';
+
+    function renderBand1() {
+      const host = document.getElementById('band1');
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'statscounter');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        stats: [
+          { value: 12000, label: 'Happy clients', prefix: '', suffix: '+', decimals: 0 },
+          { value: 98, label: 'Would recommend', prefix: '', suffix: '%', decimals: 0 },
+          { value: 25, label: 'Years in business', prefix: '', suffix: '', decimals: 0 },
+          { value: 4.9, label: 'Average rating', prefix: '', suffix: '/5', decimals: 1 }
+        ],
+        columns: 4, layout: 'inline', align: 'center', dividers: true, animate: true,
+        duration: 1800, accent: '#0891B2', theme: isDark() ? 'dark' : 'light'
+      }));
+      host.appendChild(div);
+    }
+
+    function renderBand2() {
+      const host = document.getElementById('band2');
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'statscounter');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        heading: 'By the numbers',
+        stats: [
+          { value: 2.4, label: 'Raised for clients', prefix: '£', suffix: 'M', decimals: 1 },
+          { value: 340, label: 'Projects delivered', prefix: '', suffix: '', decimals: 0 },
+          { value: 17, label: 'Countries served', prefix: '', suffix: '', decimals: 0 }
+        ],
+        columns: 3, layout: 'card', align: 'left', dividers: false, animate: true,
+        duration: 2200, accent: '#7C3AED', theme: isDark() ? 'dark' : 'light'
+      }));
+      host.appendChild(div);
+    }
+
+    function renderAll() { renderBand1(); renderBand2(); }
+
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        document.body.dataset.theme = btn.dataset.themeBtn;
+        renderAll();
+      });
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>

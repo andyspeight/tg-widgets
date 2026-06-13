@@ -493,6 +493,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'statscounter',
+    name: 'Stats Counter',
+    airtableType: 'Stats Counter',  // matches Airtable WidgetType singleSelect option
+    description: 'Big headline numbers that count up the moment they scroll into view. Show customers served, years in business, ratings or money raised, with prefixes and suffixes (£, +, %, /5). Two, three or four columns, card or plain layout, your accent colour. No API, and it respects reduced-motion.',
+    category: 'Engagement',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-statscounter',
+    demoUrl: '/demo-statscounter',
+    widgetTag: 'statscounter',
+    scriptFile: 'widget-statscounter.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'maps',
     name: 'Maps',
     airtableType: 'Maps',
