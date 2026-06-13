@@ -64,6 +64,10 @@
       "destination": "/demo-weather.html"
     },
     {
+      "source": "/demo-currency",
+      "destination": "/demo-currency.html"
+    },
+    {
       "source": "/demo-maps",
       "destination": "/demo-maps.html"
     },

@@ -8,7 +8,9 @@
  *   - In-memory per-IP rate limiting (anonymous, public endpoint)
  *   - 1-hour edge cache via CDN headers (ECB publishes once per working day, so
  *     this is plenty fresh and cuts upstream load to almost nothing)
- *   - Locked CORS to approved origins (+ Duda previews + env extras)
+ *   - Open CORS. The endpoint is ours and the data is public and non-sensitive,
+ *     so the widget works on any embedding site with no per-client setup. The
+ *     per-IP rate limit and edge cache are the abuse controls, not the origin.
  *   - Fixed upstream parameter set — the caller never shapes the upstream URL
  *     beyond the validated base/symbols (SSRF guard)
  *   - Opinionated, stable response shape
@@ -28,18 +30,6 @@
  */
 
 'use strict';
-
-// ─── CORS allowlist (mirrors weather-current.js) ───
-const ALLOWED_ORIGINS = [
-  'https://tg-widgets.vercel.app',
-  'https://www.travelgenix.io',
-  'https://travelgenix.io',
-  'https://www.traveldemo.site',
-  'https://traveldemo.site',
-];
-const ALLOW_DUDA_PREVIEWS = true;
-const EXTRA_ORIGINS = (process.env.TG_ALLOWED_ORIGINS || '')
-  .split(',').map(s => s.trim()).filter(Boolean);
 
 // ─── Rate limit (per-IP, in-memory, resets on cold start) ───
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -69,25 +59,11 @@ export const CURRENCIES = {
   THB: 'Thai Baht', TRY: 'Turkish Lira', USD: 'US Dollar', ZAR: 'South African Rand',
 };
 
-function isOriginAllowed(origin) {
-  if (!origin) return false;
-  if (ALLOWED_ORIGINS.includes(origin)) return true;
-  if (EXTRA_ORIGINS.includes(origin)) return true;
-  if (ALLOW_DUDA_PREVIEWS) {
-    try {
-      const u = new URL(origin);
-      if (u.hostname.endsWith('.duda.co') || u.hostname.endsWith('.multiscreensite.com')) return true;
-    } catch { /* fall through */ }
-  }
-  return false;
-}
-
-function applyCors(req, res) {
-  const origin = req.headers.origin || '';
-  if (isOriginAllowed(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-  }
+function applyCors(res) {
+  // Public, non-sensitive data served from our origin. Allow any embedding site
+  // so clients never have to register a domain to use the widget. A constant
+  // wildcard also keeps the edge cache simple (one cached response for all).
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');
@@ -139,7 +115,7 @@ function fail(res, status, reason) {
 }
 
 export default async function handler(req, res) {
-  applyCors(req, res);
+  applyCors(res);
   if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   if (req.method !== 'GET') { res.setHeader('Allow', 'GET, OPTIONS'); return fail(res, 405, 'Method not allowed'); }
 
@@ -176,7 +152,7 @@ export default async function handler(req, res) {
   }
 
   res.setHeader('Cache-Control', `public, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`);
-  res.setHeader('Vary', 'Origin, Accept-Encoding');
+  res.setHeader('Vary', 'Accept-Encoding');
   res.status(200).json({
     ok: true,
     base,
