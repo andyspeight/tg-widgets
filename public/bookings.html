@@ -26,6 +26,10 @@
   .filters{display:flex;gap:8px;margin-bottom:16px}
   .filters button{appearance:none;border:1px solid #E2E8F0;background:#fff;color:#475569;font:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer}
   .filters button.on{background:#0F172A;color:#fff;border-color:#0F172A}
+  .cancel-btn{appearance:none;border:1px solid rgba(220,38,38,.4);background:transparent;color:#B91C1C;font:inherit;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer}
+  .cancel-btn:hover:not(:disabled){background:rgba(220,38,38,.08)}
+  .cancel-btn:disabled{opacity:.5;cursor:not-allowed}
+  .act-cell{text-align:right;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -49,14 +53,30 @@
       bookings.sort(function(a,b){return a.startISO<b.startISO?-1:1;});
       var rows = bookings.map(function(b){
         var cancelled = b.status==='cancelled';
-        return '<tr>'+
+        return '<tr data-ref="'+esc(b.ref)+'">'+
           '<td><div class="who">'+esc(whenText(b))+'</div><div class="meta">'+esc(b.eventLabel||'')+' · '+esc(b.durationMins)+' min</div></td>'+
           '<td><div class="who">'+esc(b.name)+'</div><div class="meta">'+esc(b.email)+(b.phone?(' · '+esc(b.phone)):'')+'</div></td>'+
-          '<td><span class="pill '+(cancelled?'cancel':'ok')+'">'+(cancelled?'Cancelled':'Confirmed')+'</span></td>'+
+          '<td class="status-cell"><span class="pill '+(cancelled?'cancel':'ok')+'">'+(cancelled?'Cancelled':'Confirmed')+'</span></td>'+
+          '<td class="act-cell">'+(cancelled?'':'<button class="cancel-btn" data-cancel>Cancel</button>')+'</td>'+
         '</tr>';
       }).join('');
-      listEl.innerHTML='<table><thead><tr><th>When</th><th>Who</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
+      listEl.innerHTML='<table><thead><tr><th>When</th><th>Who</th><th>Status</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
     }
+
+    listEl.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-cancel]'); if(!btn) return;
+      var row = btn.closest('tr[data-ref]'); if(!row) return;
+      var ref = row.getAttribute('data-ref');
+      if(!confirm('Cancel this booking? The visitor will be emailed.')) return;
+      btn.disabled = true; btn.textContent = 'Cancelling…';
+      fetch('/api/appointment/admin-action',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({ref:ref,action:'cancel'})})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d&&d.ok){ row.querySelector('.status-cell').innerHTML='<span class="pill cancel">Cancelled</span>'; row.querySelector('.act-cell').innerHTML=''; }
+          else { btn.disabled=false; btn.textContent='Cancel'; alert((d&&d.error)||'Could not cancel.'); }
+        })
+        .catch(function(){ btn.disabled=false; btn.textContent='Cancel'; alert('Network error.'); });
+    });
 
     function load(){
       listEl.innerHTML='<div class="empty">Loading…</div>';
