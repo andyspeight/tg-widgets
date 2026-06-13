@@ -25,16 +25,16 @@
       },
       {
         tab: 'content',
-        target: '#mode-picker',
-        title: 'How will you meet?',
-        body: 'Callback, a phone call, a video call or in person. This sets the icon and the wording so it reads right.',
+        target: '#events-section',
+        title: 'Set up your meetings',
+        body: 'Each meeting type has its own length and format, callback, phone, video or in person. Add more than one and visitors pick the meeting first, just like Calendly.',
         placement: 'right'
       },
       {
         tab: 'settings',
         target: '#avail-section',
         title: 'Set your availability',
-        body: 'This is the heart of it. Choose your working days, the hours you take calls, how long each slot is and how far ahead people can book. The widget builds the times for you.',
+        body: 'The heart of it. Your timezone, the days and hours you take calls, how far ahead people can book and any blackout dates. The calendar builds the real times for you and shows them in each visitor’s own timezone.',
         placement: 'right'
       },
       {

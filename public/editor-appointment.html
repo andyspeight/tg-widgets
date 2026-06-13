@@ -17,50 +17,60 @@
     background:var(--tgse-panel); color:var(--tgse-ink);
     transition:border-color 160ms ease, box-shadow 160ms ease;
   }
-  textarea.input { resize:vertical; min-height:58px; line-height:1.5; }
+  textarea.input { resize:vertical; min-height:54px; line-height:1.5; }
   .input:focus, .select:focus, textarea.input:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
   .row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .row-2 .field-label { margin-bottom:4px; }
 
-  .pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .pick-grid.cols-4 { grid-template-columns:repeat(4,1fr); }
+  .pick-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
   .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
-    padding:9px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center;
-    transition:border-color 160ms ease, background 160ms ease; display:flex; flex-direction:column; gap:6px; align-items:center; }
-  .pick-btn:hover { background:var(--tgse-hover); }
+    padding:8px 4px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center;
+    transition:border-color 160ms ease, background 160ms ease; display:flex; flex-direction:column; gap:5px; align-items:center; }
   .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
-  .pick-btn svg { width:18px; height:18px; fill:none; stroke:var(--tgse-ink-2); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .pick-btn svg { width:16px; height:16px; fill:none; stroke:var(--tgse-ink-2); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   .pick-btn.is-on svg { stroke:var(--tgse-brand-dark); }
-  .pick-label { font-size:11px; font-weight:600; color:var(--tgse-ink); }
+  .pick-label { font-size:10.5px; font-weight:600; color:var(--tgse-ink); }
   .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
 
-  /* Weekday chips */
-  .wd-row { display:flex; gap:5px; }
-  .wd-chip { flex:1; appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
-    padding:8px 0; border-radius:9px; cursor:pointer; font:inherit; font-size:12px; font-weight:700; color:var(--tgse-ink-2);
-    transition:border-color 160ms ease, background 160ms ease; }
-  .wd-chip.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); color:var(--tgse-brand-dark); }
-
-  /* Segmented */
-  .seg { display:flex; gap:6px; }
-  .seg button { flex:1; appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
-    padding:8px 0; border-radius:9px; cursor:pointer; font:inherit; font-size:12px; font-weight:600; color:var(--tgse-ink-2); }
-  .seg button.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); color:var(--tgse-brand-dark); }
+  /* List editor (event types, questions) */
+  .le-item { border:1px solid var(--tgse-border); border-radius:10px; padding:11px; margin-bottom:9px; background:var(--tgse-panel); }
+  .le-item-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .le-item-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--tgse-ink-3); }
+  .le-del { appearance:none; border:0; background:transparent; color:var(--tgse-ink-3); cursor:pointer; padding:2px; border-radius:6px; }
+  .le-del:hover { color:#DC2626; background:rgba(220,38,38,.08); }
+  .le-del svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+  .le-add { width:100%; appearance:none; border:1.5px dashed var(--tgse-border); background:transparent; color:var(--tgse-ink-2);
+    padding:9px; border-radius:9px; cursor:pointer; font:inherit; font-size:12.5px; font-weight:600; }
+  .le-add:hover { border-color:var(--tgse-brand); color:var(--tgse-brand-dark); }
+  .mini-label { font-size:11px; font-weight:600; color:var(--tgse-ink-3); margin:6px 0 3px; display:block; }
 
   .colour-row { display:flex; align-items:center; gap:8px; }
-  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap { position:relative; width:34px; height:34px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
   .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
   .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
 
-  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:5px 0; }
   .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
   .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
   .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
   .switch.is-on { background:var(--tgse-brand); }
   .switch.is-on::after { transform:translateX(16px); }
 
+  .seg { display:flex; gap:6px; }
+  .seg button { flex:1; appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:7px 0; border-radius:9px; cursor:pointer; font:inherit; font-size:12px; font-weight:600; color:var(--tgse-ink-2); }
+  .seg button.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); color:var(--tgse-brand-dark); }
+
   .slider-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
   .slider-row input[type="range"] { width:100%; accent-color:var(--tgse-brand); }
   .slider-val { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; min-width:52px; text-align:right; }
+
+  /* Availability weekday rows */
+  .av-row { display:grid; grid-template-columns:30px 1fr auto auto; gap:8px; align-items:center; padding:5px 0; }
+  .av-day { font-size:12px; font-weight:700; color:var(--tgse-ink-2); }
+  .av-times { display:flex; gap:5px; align-items:center; font-size:12px; color:var(--tgse-ink-3); }
+  .av-times select { padding:5px 6px; font:inherit; font-size:12px; border:1px solid var(--tgse-border); border-radius:7px; background:var(--tgse-panel); color:var(--tgse-ink); }
+  .av-row.is-off .av-times { opacity:.35; pointer-events:none; }
 
   .is-hidden { display:none !important; }
   [hidden] { display:none !important; }
@@ -125,43 +135,20 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="field">
-              <label class="field-label">Accent</label>
-              <div class="colour-row">
-                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
-                <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
-              </div>
-            </div>
-            <div class="field">
-              <label class="field-label">Card background</label>
-              <div class="colour-row">
-                <div class="colour-swatch-wrap"><input type="color" id="bg-col" value="#FFFFFF"></div>
-                <input class="input colour-hex" id="bg-hex" value="#FFFFFF" maxlength="9">
-              </div>
-            </div>
-            <div class="field">
-              <label class="field-label">Text</label>
-              <div class="colour-row">
-                <div class="colour-swatch-wrap"><input type="color" id="ink-col" value="#0F172A"></div>
-                <input class="input colour-hex" id="ink-hex" value="#0F172A" maxlength="9">
-              </div>
-            </div>
+            <div class="field"><label class="field-label">Accent</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div><input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9"></div></div>
+            <div class="field"><label class="field-label">Card background</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="bg-col" value="#FFFFFF"></div><input class="input colour-hex" id="bg-hex" value="#FFFFFF" maxlength="9"></div></div>
+            <div class="field"><label class="field-label">Text</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="ink-col" value="#0F172A"></div><input class="input colour-hex" id="ink-hex" value="#0F172A" maxlength="9"></div></div>
           </div>
         </div>
 
-        <div class="tgse-section is-open">
+        <div class="tgse-section">
           <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
             <span class="tgse-section-label">Corner radius</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="field">
-              <div class="slider-row">
-                <input type="range" id="radius-input" min="0" max="28" step="1" value="16">
-                <span class="slider-val" id="radius-val">16px</span>
-              </div>
-            </div>
+            <div class="field"><div class="slider-row"><input type="range" id="radius-input" min="0" max="28" step="1" value="16"><span class="slider-val" id="radius-val">16px</span></div></div>
           </div>
         </div>
 
@@ -172,10 +159,7 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="field">
-              <label class="field-label">Font family</label>
-              <div id="fontPickerMount"></div>
-            </div>
+            <div class="field"><label class="field-label">Font family</label><div id="fontPickerMount"></div></div>
           </div>
         </div>
 
@@ -191,71 +175,37 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="field">
-              <label class="field-label">Title</label>
-              <input type="text" class="input" id="heading-input" maxlength="80" placeholder="Book a free consultation">
-            </div>
-            <div class="field">
-              <label class="field-label">Subtitle</label>
-              <textarea class="input" id="subheading-input" maxlength="180" placeholder="Pick a time that suits you and one of our travel experts will be in touch."></textarea>
-            </div>
+            <div class="field"><label class="field-label">Title</label><input type="text" class="input" id="heading-input" maxlength="80" placeholder="Book a free consultation"></div>
+            <div class="field"><label class="field-label">Subtitle</label><textarea class="input" id="subheading-input" maxlength="180" placeholder="Pick a time that suits you…"></textarea></div>
+            <div class="field"><label class="field-label">Your name or company</label><input type="text" class="input" id="company-input" maxlength="60" placeholder="our travel team"></div>
           </div>
         </div>
 
-        <div class="tgse-section is-open">
+        <div class="tgse-section is-open" id="events-section">
           <div class="tgse-section-head">
-            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span class="tgse-section-label">Appointment type</span>
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span class="tgse-section-label">Meeting types</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="field">
-              <div class="pick-grid cols-4" id="mode-picker">
-                <button type="button" class="pick-btn" data-mode="callback"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg><span class="pick-label">Callback</span></button>
-                <button type="button" class="pick-btn" data-mode="phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg><span class="pick-label">Phone</span></button>
-                <button type="button" class="pick-btn" data-mode="video"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span class="pick-label">Video</span></button>
-                <button type="button" class="pick-btn" data-mode="inperson"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="pick-label">In person</span></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="tgse-section">
-          <div class="tgse-section-head">
-            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-            <span class="tgse-section-label">Topic list</span>
-            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="tgse-section-body">
-            <div class="field">
-              <div class="switch-row"><span class="switch-row-label">Ask what it is about</span><button type="button" class="switch is-on" id="ask-topic" aria-pressed="true"></button></div>
-            </div>
-            <div class="field" id="topics-field">
-              <label class="field-label">Topics, one per line</label>
-              <textarea class="input" id="topics-input" style="min-height:96px" placeholder="Tailor-made holiday&#10;Cruise&#10;Honeymoon&#10;Family holiday&#10;Something else"></textarea>
-            </div>
+            <div id="event-list"></div>
+            <button type="button" class="le-add" id="add-event">+ Add a meeting type</button>
+            <span class="field-hint">More than one and visitors pick the meeting first, just like Calendly.</span>
           </div>
         </div>
 
         <div class="tgse-section">
           <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            <span class="tgse-section-label">Button &amp; confirmation</span>
+            <span class="tgse-section-label">Confirmation</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="field">
-              <label class="field-label">Submit button label</label>
-              <input type="text" class="input" id="btnlabel-input" maxlength="40" placeholder="Request this time">
-            </div>
-            <div class="field">
-              <label class="field-label">Confirmation title</label>
-              <input type="text" class="input" id="success-title" maxlength="80" placeholder="Thank you, that is booked in">
-            </div>
-            <div class="field">
-              <label class="field-label">Confirmation message</label>
-              <textarea class="input" id="success-body" maxlength="200" placeholder="We have your preferred time and will confirm by email shortly."></textarea>
-            </div>
+            <div class="field"><label class="field-label">Submit button label</label><input type="text" class="input" id="btnlabel-input" maxlength="40" placeholder="Confirm booking"></div>
+            <div class="field"><label class="field-label">Confirmation title</label><input type="text" class="input" id="success-title" maxlength="80" placeholder="You are booked in"></div>
+            <div class="field"><label class="field-label">Confirmation message</label><textarea class="input" id="success-body" maxlength="220" placeholder="We have your time and will be in touch to confirm."></textarea></div>
+            <div class="field"><label class="field-label">Meeting location / link (optional)</label><input type="text" class="input" id="location-input" maxlength="120" placeholder="Phone call, video link or address"></div>
+            <div class="field"><div class="switch-row"><span class="switch-row-label">Show Add to Calendar buttons</span><button type="button" class="switch is-on" id="add-cal" aria-pressed="true"></button></div></div>
           </div>
         </div>
 
@@ -266,61 +216,35 @@
 
         <div class="tgse-section is-open" id="avail-section">
           <div class="tgse-section-head">
-            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span class="tgse-section-label">Availability</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
             <div class="field">
-              <label class="field-label">Working days</label>
-              <div class="wd-row" id="days-picker">
-                <button type="button" class="wd-chip" data-wd="1">M</button>
-                <button type="button" class="wd-chip" data-wd="2">T</button>
-                <button type="button" class="wd-chip" data-wd="3">W</button>
-                <button type="button" class="wd-chip" data-wd="4">T</button>
-                <button type="button" class="wd-chip" data-wd="5">F</button>
-                <button type="button" class="wd-chip" data-wd="6">S</button>
-                <button type="button" class="wd-chip" data-wd="0">S</button>
-              </div>
+              <label class="field-label">Your timezone</label>
+              <select class="select" id="tz-input"></select>
             </div>
             <div class="field">
-              <div class="row-2">
-                <div>
-                  <label class="field-label">Day starts</label>
-                  <select class="select" id="start-hour"></select>
-                </div>
-                <div>
-                  <label class="field-label">Day ends</label>
-                  <select class="select" id="end-hour"></select>
-                </div>
-              </div>
+              <label class="field-label">Weekly hours</label>
+              <div id="avail-list"></div>
             </div>
             <div class="field">
-              <label class="field-label">Slot length</label>
-              <div class="seg" id="slot-seg">
-                <button type="button" data-slot="15">15 min</button>
-                <button type="button" data-slot="30">30 min</button>
-                <button type="button" data-slot="45">45 min</button>
-                <button type="button" data-slot="60">60 min</button>
-              </div>
+              <label class="field-label">Time display</label>
+              <div class="seg" id="fmt-seg"><button type="button" data-fmt="12">12 hour</button><button type="button" data-fmt="24">24 hour</button></div>
             </div>
             <div class="field">
               <label class="field-label">Earliest booking from now</label>
-              <div class="slider-row">
-                <input type="range" id="lead-input" min="0" max="96" step="2" value="24">
-                <span class="slider-val" id="lead-val">24 hrs</span>
-              </div>
+              <div class="slider-row"><input type="range" id="lead-input" min="0" max="72" step="1" value="4"><span class="slider-val" id="lead-val">4 hrs</span></div>
             </div>
             <div class="field">
               <label class="field-label">How far ahead to offer</label>
-              <div class="slider-row">
-                <input type="range" id="days-input" min="3" max="60" step="1" value="14">
-                <span class="slider-val" id="days-val">14 days</span>
-              </div>
+              <div class="slider-row"><input type="range" id="days-input" min="7" max="90" step="1" value="30"><span class="slider-val" id="days-val">30 days</span></div>
             </div>
             <div class="field">
-              <label class="field-label">Timezone note</label>
-              <input type="text" class="input" id="tz-input" maxlength="80" placeholder="All times shown are UK time.">
+              <label class="field-label">Blackout dates</label>
+              <div class="row-2"><input type="date" class="input" id="blackout-date"><button type="button" class="le-add" id="add-blackout" style="border-style:solid">Add date</button></div>
+              <div id="blackout-list" style="margin-top:8px"></div>
             </div>
           </div>
         </div>
@@ -328,23 +252,19 @@
         <div class="tgse-section is-open" id="fields-section">
           <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
-            <span class="tgse-section-label">Fields &amp; consent</span>
+            <span class="tgse-section-label">Questions &amp; consent</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
+            <div class="field"><div class="switch-row"><span class="switch-row-label">Ask for a phone number</span><button type="button" class="switch is-on" id="ask-phone" aria-pressed="true"></button></div></div>
+            <div class="field" id="phone-req-field"><div class="switch-row"><span class="switch-row-label">Make phone required</span><button type="button" class="switch" id="phone-req" aria-pressed="false"></button></div></div>
             <div class="field">
-              <div class="switch-row"><span class="switch-row-label">Ask for a phone number</span><button type="button" class="switch is-on" id="ask-phone" aria-pressed="true"></button></div>
+              <label class="field-label">Custom questions</label>
+              <div id="q-list"></div>
+              <button type="button" class="le-add" id="add-q">+ Add a question</button>
             </div>
-            <div class="field">
-              <div class="switch-row"><span class="switch-row-label">Ask for notes</span><button type="button" class="switch is-on" id="ask-notes" aria-pressed="true"></button></div>
-            </div>
-            <div class="field">
-              <div class="switch-row"><span class="switch-row-label">Require a consent tick</span><button type="button" class="switch is-on" id="req-consent" aria-pressed="true"></button></div>
-            </div>
-            <div class="field" id="consent-text-field">
-              <label class="field-label">Consent wording</label>
-              <input type="text" class="input" id="consent-input" maxlength="160" placeholder="I am happy to be contacted about my enquiry.">
-            </div>
+            <div class="field"><div class="switch-row"><span class="switch-row-label">Require a consent tick</span><button type="button" class="switch is-on" id="req-consent" aria-pressed="true"></button></div></div>
+            <div class="field" id="consent-text-field"><label class="field-label">Consent wording</label><input type="text" class="input" id="consent-input" maxlength="160" placeholder="I am happy to be contacted about my enquiry."></div>
           </div>
         </div>
 
@@ -355,11 +275,7 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="field">
-              <label class="field-label">Submit endpoint (advanced)</label>
-              <input type="text" class="input" id="submit-url" maxlength="300" placeholder="Leave blank to use the Travelgenix default">
-              <span class="field-hint">Requests post to the Travelgenix contact endpoint by default. Set a full https URL to route them through your own enquiry handler.</span>
-            </div>
+            <div class="field"><label class="field-label">Submit endpoint (advanced)</label><input type="text" class="input" id="submit-url" maxlength="300" placeholder="Leave blank to use the Travelgenix default"><span class="field-hint">Requests post to the Travelgenix contact endpoint by default. Set a full https URL to route them through your own enquiry handler.</span></div>
           </div>
         </div>
 
@@ -378,7 +294,6 @@
         <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
       </div>
       <div class="tgse-divider"></div>
-      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
       <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
     </div>
     <div class="tgse-canvas">
@@ -392,39 +307,46 @@
 <script src="/widget-appointment.js"></script>
 <script src="/editor-tour.js"></script>
 <script src="/tour-appointment.js"></script>
-<style>
-  .pv-wrap { width:100%; max-width:600px; padding:24px; }
-</style>
+<style> .pv-wrap { width:100%; max-width:880px; padding:24px; } </style>
 <script>
   function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
-  function fmtHour(h) { const ap = h < 12 ? 'am' : 'pm'; let hh = h % 12; if (hh === 0) hh = 12; return hh + ' ' + ap; }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  const WD = [['1','Mon'],['2','Tue'],['3','Wed'],['4','Thu'],['5','Fri'],['6','Sat'],['0','Sun']];
+  const TZ_LIST = [
+    ['UK · London','Europe/London'],['Ireland · Dublin','Europe/Dublin'],['Western Europe · Paris','Europe/Paris'],
+    ['Central Europe · Berlin','Europe/Berlin'],['Eastern Europe · Athens','Europe/Athens'],['UAE · Dubai','Asia/Dubai'],
+    ['India · Mumbai','Asia/Kolkata'],['Singapore','Asia/Singapore'],['Hong Kong','Asia/Hong_Kong'],['Japan · Tokyo','Asia/Tokyo'],
+    ['Australia · Sydney','Australia/Sydney'],['US Eastern · New York','America/New_York'],['US Central · Chicago','America/Chicago'],
+    ['US Mountain · Denver','America/Denver'],['US Pacific · Los Angeles','America/Los_Angeles'],['Brazil · São Paulo','America/Sao_Paulo'],['UTC','UTC'],
+  ];
+  function hourOpts(sel) { let o=''; for (let h=0; h<=23; h++){ const v=String(h).padStart(2,'0')+':00'; o+=`<option value="${v}"${v===sel?' selected':''}>${v}</option>`; } return o; }
 
   let C = {
     heading: 'Book a free consultation',
     subheading: 'Pick a time that suits you and one of our travel experts will be in touch.',
-    mode: 'callback',
-    daysAhead: 14,
-    workingDays: [1, 2, 3, 4, 5],
-    startHour: 9,
-    endHour: 17,
-    slotMins: 30,
-    leadTimeHours: 24,
-    timezoneNote: 'All times shown are UK time.',
+    company: 'our travel team',
+    eventTypes: [{ id: 'consult', label: 'Travel consultation', mins: 30, mode: 'callback', description: 'A friendly chat about where you fancy going.' }],
+    timezone: 'Europe/London',
+    availability: { 1:[['09:00','17:00']],2:[['09:00','17:00']],3:[['09:00','17:00']],4:[['09:00','17:00']],5:[['09:00','17:00']] },
+    blackoutDates: [],
+    dateRangeDays: 30,
+    minNoticeHours: 4,
+    timeFormat: '12',
     askPhone: true,
-    askNotes: true,
-    askTopic: true,
-    topics: ['Tailor-made holiday', 'Cruise', 'Honeymoon', 'Family holiday', 'Something else'],
+    phoneRequired: false,
+    questions: [
+      { id:'topic', label:'What is it about?', type:'select', required:false, options:['Tailor-made holiday','Cruise','Honeymoon','Family holiday','Something else'] },
+      { id:'notes', label:'Anything we should know? (optional)', type:'textarea', required:false },
+    ],
     requireConsent: true,
     consentText: 'I am happy to be contacted about my enquiry.',
-    accent: '#0891B2',
-    bg: '#FFFFFF',
-    textColor: '#0F172A',
-    radius: 16,
-    buttonLabel: 'Request this time',
-    successTitle: 'Thank you, that is booked in',
-    successBody: 'We have your preferred time and will confirm by email shortly.',
+    buttonLabel: 'Confirm booking',
+    successTitle: 'You are booked in',
+    successBody: 'We have your time and will be in touch to confirm. A calendar invite is below.',
+    addToCalendar: true,
+    location: '',
     submitUrl: '',
-    fontFamily: 'DM Sans',
+    accent: '#0891B2', bg: '#FFFFFF', textColor: '#0F172A', radius: 16, fontFamily: 'DM Sans',
   };
 
   let widgetInst = null;
@@ -439,8 +361,6 @@
     onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
     onAIBuild: () => tgse.toast('AI builder coming soon for the Scheduler', 'ok'),
     onTemplates: () => tgse.toast('Templates coming soon for the Scheduler', 'ok'),
-    onThemeToggle: () => {},
-    onDesignMode: () => {},
     onLoginSuccess: () => { loadFromUrl(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); },
   });
 
@@ -453,7 +373,7 @@
     if (!host) return;
     requestAnimationFrame(() => {
       if (window.TGAppointmentWidget) {
-        try { widgetInst = new window.TGAppointmentWidget(host, Object.assign({}, C, { font: C.fontFamily, previewMode: true })); }
+        try { widgetInst = new window.TGAppointmentWidget(host, Object.assign({}, JSON.parse(JSON.stringify(C)), { font: C.fontFamily, previewMode: true })); }
         catch (e) { console.error(e); }
       }
     });
@@ -464,136 +384,207 @@
     if (!wId) { render(); return; }
     fetch('/api/widget-config?id=' + encodeURIComponent(wId))
       .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if (!d) return;
-        if (d.config) C = Object.assign({}, C, d.config);
-        if (d.name) document.getElementById('name-input').value = d.name;
-        syncUIFromState();
-        render();
-      })
+      .then(d => { if (!d) return; if (d.config) C = Object.assign({}, C, d.config); if (d.name) document.getElementById('name-input').value = d.name; syncUIFromState(); render(); })
       .catch(() => tgse.toast('Failed to load widget', 'err'));
   }
 
-  function toggleSwitch(id, on) {
-    const el = document.getElementById(id); if (!el) return;
-    el.classList.toggle('is-on', !!on);
-    el.setAttribute('aria-pressed', on ? 'true' : 'false');
-  }
+  function toggleSwitch(id, on) { const el = document.getElementById(id); if (!el) return; el.classList.toggle('is-on', !!on); el.setAttribute('aria-pressed', on ? 'true' : 'false'); }
 
-  // Populate hour selects once
-  (function fillHours() {
-    const s = document.getElementById('start-hour'), e = document.getElementById('end-hour');
-    for (let h = 6; h <= 22; h++) s.insertAdjacentHTML('beforeend', `<option value="${h}">${fmtHour(h)}</option>`);
-    for (let h = 7; h <= 23; h++) e.insertAdjacentHTML('beforeend', `<option value="${h}">${fmtHour(h)}</option>`);
-  })();
+  // ── Dynamic list renderers ──
+  function renderEvents() {
+    const wrap = document.getElementById('event-list');
+    wrap.innerHTML = C.eventTypes.map((ev, i) => `
+      <div class="le-item" data-ev="${i}">
+        <div class="le-item-head"><span class="le-item-title">Meeting ${i + 1}</span>
+          ${C.eventTypes.length > 1 ? `<button type="button" class="le-del" data-del-ev="${i}" aria-label="Remove"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>` : ''}
+        </div>
+        <input class="input" data-ev-f="label" value="${esc(ev.label)}" placeholder="Meeting name" maxlength="60">
+        <div class="row-2" style="margin-top:7px">
+          <div><span class="mini-label">Minutes</span>
+            <select class="select" data-ev-f="mins">${[15,20,30,45,60,90].map(m=>`<option value="${m}"${m===ev.mins?' selected':''}>${m} min</option>`).join('')}</select></div>
+          <div><span class="mini-label">Type</span>
+            <select class="select" data-ev-f="mode">${[['callback','Callback'],['phone','Phone'],['video','Video'],['inperson','In person']].map(o=>`<option value="${o[0]}"${o[0]===ev.mode?' selected':''}>${o[1]}</option>`).join('')}</select></div>
+        </div>
+        <input class="input" data-ev-f="description" value="${esc(ev.description||'')}" placeholder="Short description (optional)" maxlength="120" style="margin-top:7px">
+      </div>`).join('');
+  }
+  function renderQuestions() {
+    const wrap = document.getElementById('q-list');
+    wrap.innerHTML = (C.questions||[]).map((q, i) => `
+      <div class="le-item" data-q="${i}">
+        <div class="le-item-head"><span class="le-item-title">Question ${i + 1}</span>
+          <button type="button" class="le-del" data-del-q="${i}" aria-label="Remove"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+        </div>
+        <input class="input" data-q-f="label" value="${esc(q.label)}" placeholder="Question label" maxlength="120">
+        <div class="row-2" style="margin-top:7px">
+          <div><span class="mini-label">Type</span>
+            <select class="select" data-q-f="type">${[['text','Short text'],['textarea','Long text'],['select','Dropdown']].map(o=>`<option value="${o[0]}"${o[0]===q.type?' selected':''}>${o[1]}</option>`).join('')}</select></div>
+          <div><span class="mini-label">Required</span>
+            <select class="select" data-q-f="required"><option value="0"${!q.required?' selected':''}>No</option><option value="1"${q.required?' selected':''}>Yes</option></select></div>
+        </div>
+        <div data-q-opts="${i}" class="${q.type==='select'?'':'is-hidden'}"><span class="mini-label">Options, one per line</span>
+          <textarea class="input" data-q-f="options" style="min-height:64px">${esc((q.options||[]).join('\n'))}</textarea></div>
+      </div>`).join('');
+  }
+  function renderBlackouts() {
+    const wrap = document.getElementById('blackout-list');
+    wrap.innerHTML = (C.blackoutDates||[]).map((d, i) => `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--tgse-hover);border:1px solid var(--tgse-border);border-radius:999px;padding:3px 6px 3px 10px;font-size:12px;margin:0 6px 6px 0;">${esc(d)}<button type="button" class="le-del" data-del-bo="${i}" aria-label="Remove" style="padding:0"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></span>`).join('') || '<span class="field-hint">None. Add holidays or days off above.</span>';
+  }
+  function renderAvailability() {
+    const wrap = document.getElementById('avail-list');
+    wrap.innerHTML = WD.map(([k, label]) => {
+      const ranges = C.availability[k] || C.availability[Number(k)] || [];
+      const on = ranges.length > 0;
+      const r = on ? ranges[0] : ['09:00','17:00'];
+      return `<div class="av-row${on?'':' is-off'}" data-wd="${k}">
+        <button type="button" class="switch${on?' is-on':''}" data-av-toggle="${k}" aria-pressed="${on}"></button>
+        <span class="av-day">${label}</span>
+        <span class="av-times"><select data-av-f="start">${hourOpts(r[0])}</select> to <select data-av-f="end">${hourOpts(r[1])}</select></span>
+      </div>`;
+    }).join('');
+  }
 
   function syncUIFromState() {
     document.getElementById('heading-input').value = C.heading || '';
     document.getElementById('subheading-input').value = C.subheading || '';
+    document.getElementById('company-input').value = C.company || '';
     document.getElementById('btnlabel-input').value = C.buttonLabel || '';
     document.getElementById('success-title').value = C.successTitle || '';
     document.getElementById('success-body').value = C.successBody || '';
-    document.getElementById('topics-input').value = (C.topics || []).join('\n');
+    document.getElementById('location-input').value = C.location || '';
     document.getElementById('consent-input').value = C.consentText || '';
-    document.getElementById('tz-input').value = C.timezoneNote || '';
     document.getElementById('submit-url').value = C.submitUrl || '';
-    document.getElementById('start-hour').value = String(C.startHour);
-    document.getElementById('end-hour').value = String(C.endHour);
-    document.getElementById('lead-input').value = C.leadTimeHours; document.getElementById('lead-val').textContent = C.leadTimeHours + ' hrs';
-    document.getElementById('days-input').value = C.daysAhead; document.getElementById('days-val').textContent = C.daysAhead + ' days';
+    document.getElementById('lead-input').value = C.minNoticeHours; document.getElementById('lead-val').textContent = C.minNoticeHours + ' hrs';
+    document.getElementById('days-input').value = C.dateRangeDays; document.getElementById('days-val').textContent = C.dateRangeDays + ' days';
     document.getElementById('radius-input').value = C.radius; document.getElementById('radius-val').textContent = C.radius + 'px';
-    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2'; document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
-    document.getElementById('bg-col').value = hexOk(C.bg) ? C.bg : '#FFFFFF'; document.getElementById('bg-hex').value = (C.bg || '#FFFFFF').toUpperCase();
-    document.getElementById('ink-col').value = hexOk(C.textColor) ? C.textColor : '#0F172A'; document.getElementById('ink-hex').value = (C.textColor || '#0F172A').toUpperCase();
-    document.querySelectorAll('#mode-picker [data-mode]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-mode') === C.mode));
-    document.querySelectorAll('#days-picker [data-wd]').forEach(b => b.classList.toggle('is-on', (C.workingDays || []).includes(parseInt(b.getAttribute('data-wd'), 10))));
-    document.querySelectorAll('#slot-seg [data-slot]').forEach(b => b.classList.toggle('is-on', parseInt(b.getAttribute('data-slot'), 10) === C.slotMins));
-    toggleSwitch('ask-topic', C.askTopic); document.getElementById('topics-field').classList.toggle('is-hidden', !C.askTopic);
-    toggleSwitch('ask-phone', C.askPhone);
-    toggleSwitch('ask-notes', C.askNotes);
+    document.getElementById('accent-col').value = hexOk(C.accent)?C.accent:'#0891B2'; document.getElementById('accent-hex').value = (C.accent||'#0891B2').toUpperCase();
+    document.getElementById('bg-col').value = hexOk(C.bg)?C.bg:'#FFFFFF'; document.getElementById('bg-hex').value = (C.bg||'#FFFFFF').toUpperCase();
+    document.getElementById('ink-col').value = hexOk(C.textColor)?C.textColor:'#0F172A'; document.getElementById('ink-hex').value = (C.textColor||'#0F172A').toUpperCase();
+    document.querySelectorAll('#fmt-seg [data-fmt]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-fmt') === C.timeFormat));
+    toggleSwitch('add-cal', C.addToCalendar);
+    toggleSwitch('ask-phone', C.askPhone); document.getElementById('phone-req-field').classList.toggle('is-hidden', !C.askPhone);
+    toggleSwitch('phone-req', C.phoneRequired);
     toggleSwitch('req-consent', C.requireConsent); document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent);
+    document.getElementById('tz-input').value = C.timezone;
+    renderEvents(); renderQuestions(); renderAvailability(); renderBlackouts();
   }
 
-  // ─── Text inputs ───
+  // Fill timezone select once
+  document.getElementById('tz-input').innerHTML = TZ_LIST.map(z => `<option value="${z[1]}">${esc(z[0])}</option>`).join('');
+
+  // ── Text inputs ──
   function wireText(id, key) { document.getElementById(id).addEventListener('input', (e) => { C[key] = e.target.value; shell.markDirty(); render(); }); }
-  wireText('heading-input', 'heading');
-  wireText('subheading-input', 'subheading');
-  wireText('btnlabel-input', 'buttonLabel');
-  wireText('success-title', 'successTitle');
-  wireText('success-body', 'successBody');
-  wireText('consent-input', 'consentText');
-  wireText('tz-input', 'timezoneNote');
+  wireText('heading-input','heading'); wireText('subheading-input','subheading'); wireText('company-input','company');
+  wireText('btnlabel-input','buttonLabel'); wireText('success-title','successTitle'); wireText('success-body','successBody');
+  wireText('location-input','location'); wireText('consent-input','consentText');
   document.getElementById('submit-url').addEventListener('input', (e) => { C.submitUrl = e.target.value.trim(); shell.markDirty(); });
-  document.getElementById('topics-input').addEventListener('input', (e) => {
-    C.topics = e.target.value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 20); shell.markDirty(); render();
+  document.getElementById('tz-input').addEventListener('change', (e) => { C.timezone = e.target.value; shell.markDirty(); render(); });
+
+  // ── Event list ──
+  document.getElementById('event-list').addEventListener('input', (e) => {
+    const item = e.target.closest('[data-ev]'); if (!item) return;
+    const i = +item.getAttribute('data-ev'); const f = e.target.getAttribute('data-ev-f'); if (!f) return;
+    if (f === 'mins') C.eventTypes[i].mins = parseInt(e.target.value, 10);
+    else C.eventTypes[i][f] = e.target.value;
+    shell.markDirty(); render();
+  });
+  document.getElementById('event-list').addEventListener('change', (e) => {
+    const item = e.target.closest('[data-ev]'); if (!item) return;
+    const f = e.target.getAttribute('data-ev-f'); if (f === 'mins' || f === 'mode') render();
+  });
+  document.getElementById('event-list').addEventListener('click', (e) => {
+    const del = e.target.closest('[data-del-ev]'); if (!del) return;
+    C.eventTypes.splice(+del.getAttribute('data-del-ev'), 1); renderEvents(); shell.markDirty(); render();
+  });
+  document.getElementById('add-event').addEventListener('click', () => {
+    C.eventTypes.push({ id: 'ev' + Date.now().toString(36), label: 'New meeting', mins: 30, mode: 'callback', description: '' });
+    renderEvents(); shell.markDirty(); render();
   });
 
-  // ─── Mode ───
-  document.getElementById('mode-picker').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-mode]'); if (!b) return;
-    C.mode = b.getAttribute('data-mode');
-    document.querySelectorAll('#mode-picker [data-mode]').forEach(x => x.classList.toggle('is-on', x === b));
+  // ── Questions ──
+  document.getElementById('q-list').addEventListener('input', (e) => {
+    const item = e.target.closest('[data-q]'); if (!item) return;
+    const i = +item.getAttribute('data-q'); const f = e.target.getAttribute('data-q-f'); if (!f) return;
+    const q = C.questions[i];
+    if (f === 'required') q.required = e.target.value === '1';
+    else if (f === 'options') q.options = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+    else if (f === 'type') { q.type = e.target.value; item.querySelector('[data-q-opts]').classList.toggle('is-hidden', q.type !== 'select'); }
+    else q[f] = e.target.value;
+    if (!q.id) q.id = 'q' + i;
+    shell.markDirty(); render();
+  });
+  document.getElementById('q-list').addEventListener('change', (e) => { if (e.target.getAttribute('data-q-f') === 'type') render(); });
+  document.getElementById('q-list').addEventListener('click', (e) => {
+    const del = e.target.closest('[data-del-q]'); if (!del) return;
+    C.questions.splice(+del.getAttribute('data-del-q'), 1); renderQuestions(); shell.markDirty(); render();
+  });
+  document.getElementById('add-q').addEventListener('click', () => {
+    C.questions = C.questions || []; C.questions.push({ id: 'q' + Date.now().toString(36), label: 'New question', type: 'text', required: false });
+    renderQuestions(); shell.markDirty(); render();
+  });
+
+  // ── Availability ──
+  document.getElementById('avail-list').addEventListener('click', (e) => {
+    const t = e.target.closest('[data-av-toggle]'); if (!t) return;
+    const k = t.getAttribute('data-av-toggle');
+    if (C.availability[k] || C.availability[Number(k)]) { delete C.availability[k]; delete C.availability[Number(k)]; }
+    else C.availability[k] = [['09:00', '17:00']];
+    renderAvailability(); shell.markDirty(); render();
+  });
+  document.getElementById('avail-list').addEventListener('change', (e) => {
+    const row = e.target.closest('[data-wd]'); if (!row) return;
+    const k = row.getAttribute('data-wd'); const sels = row.querySelectorAll('[data-av-f]');
+    const start = sels[0].value, end = sels[1].value;
+    C.availability[k] = [[start, end]]; delete C.availability[Number(k)];
     shell.markDirty(); render();
   });
 
-  // ─── Working days ───
-  document.getElementById('days-picker').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-wd]'); if (!b) return;
-    const wd = parseInt(b.getAttribute('data-wd'), 10);
-    const set = new Set(C.workingDays || []);
-    if (set.has(wd)) set.delete(wd); else set.add(wd);
-    C.workingDays = [...set].sort();
-    b.classList.toggle('is-on', set.has(wd));
+  // ── Blackouts ──
+  document.getElementById('add-blackout').addEventListener('click', () => {
+    const v = document.getElementById('blackout-date').value; if (!v) return;
+    C.blackoutDates = C.blackoutDates || []; if (!C.blackoutDates.includes(v)) C.blackoutDates.push(v);
+    C.blackoutDates.sort(); renderBlackouts(); shell.markDirty(); render();
+  });
+  document.getElementById('blackout-list').addEventListener('click', (e) => {
+    const del = e.target.closest('[data-del-bo]'); if (!del) return;
+    C.blackoutDates.splice(+del.getAttribute('data-del-bo'), 1); renderBlackouts(); shell.markDirty(); render();
+  });
+
+  // ── Format ──
+  document.getElementById('fmt-seg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-fmt]'); if (!b) return;
+    C.timeFormat = b.getAttribute('data-fmt');
+    document.querySelectorAll('#fmt-seg [data-fmt]').forEach(x => x.classList.toggle('is-on', x === b));
     shell.markDirty(); render();
   });
 
-  // ─── Slot length ───
-  document.getElementById('slot-seg').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-slot]'); if (!b) return;
-    C.slotMins = parseInt(b.getAttribute('data-slot'), 10);
-    document.querySelectorAll('#slot-seg [data-slot]').forEach(x => x.classList.toggle('is-on', x === b));
-    shell.markDirty(); render();
-  });
-
-  // ─── Hour selects ───
-  document.getElementById('start-hour').addEventListener('change', (e) => { C.startHour = parseInt(e.target.value, 10); shell.markDirty(); render(); });
-  document.getElementById('end-hour').addEventListener('change', (e) => { C.endHour = parseInt(e.target.value, 10); shell.markDirty(); render(); });
-
-  // ─── Sliders ───
-  document.getElementById('lead-input').addEventListener('input', (e) => { C.leadTimeHours = parseInt(e.target.value, 10) || 0; document.getElementById('lead-val').textContent = C.leadTimeHours + ' hrs'; shell.markDirty(); render(); });
-  document.getElementById('days-input').addEventListener('input', (e) => { C.daysAhead = parseInt(e.target.value, 10) || 14; document.getElementById('days-val').textContent = C.daysAhead + ' days'; shell.markDirty(); render(); });
+  // ── Sliders ──
+  document.getElementById('lead-input').addEventListener('input', (e) => { C.minNoticeHours = parseInt(e.target.value, 10) || 0; document.getElementById('lead-val').textContent = C.minNoticeHours + ' hrs'; shell.markDirty(); render(); });
+  document.getElementById('days-input').addEventListener('input', (e) => { C.dateRangeDays = parseInt(e.target.value, 10) || 30; document.getElementById('days-val').textContent = C.dateRangeDays + ' days'; shell.markDirty(); render(); });
   document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); render(); });
 
-  // ─── Colours ───
+  // ── Colours ──
   function wireColour(colId, hexId, key, fb) {
     const col = document.getElementById(colId), hex = document.getElementById(hexId);
     col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C[key] = v; shell.markDirty(); render(); });
-    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C[key] = v; shell.markDirty(); render(); } });
+    hex.addEventListener('input', () => { const v = (hex.value||'').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C[key] = v; shell.markDirty(); render(); } });
   }
-  wireColour('accent-col', 'accent-hex', 'accent', '#0891B2');
-  wireColour('bg-col', 'bg-hex', 'bg', '#FFFFFF');
-  wireColour('ink-col', 'ink-hex', 'textColor', '#0F172A');
+  wireColour('accent-col','accent-hex','accent'); wireColour('bg-col','bg-hex','bg'); wireColour('ink-col','ink-hex','textColor');
 
-  // ─── Switches ───
-  function wireSwitch(id, key, after) { const el = document.getElementById(id); el.addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); if (after) after(); shell.markDirty(); render(); }); }
-  wireSwitch('ask-topic', 'askTopic', () => document.getElementById('topics-field').classList.toggle('is-hidden', !C.askTopic));
-  wireSwitch('ask-phone', 'askPhone');
-  wireSwitch('ask-notes', 'askNotes');
-  wireSwitch('req-consent', 'requireConsent', () => document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent));
+  // ── Switches ──
+  function wireSwitch(id, key, after) { document.getElementById(id).addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); if (after) after(); shell.markDirty(); render(); }); }
+  wireSwitch('add-cal','addToCalendar');
+  wireSwitch('ask-phone','askPhone', () => document.getElementById('phone-req-field').classList.toggle('is-hidden', !C.askPhone));
+  wireSwitch('phone-req','phoneRequired');
+  wireSwitch('req-consent','requireConsent', () => document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent));
 
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 
-  // Boot
   document.addEventListener('DOMContentLoaded', () => {
     syncUIFromState();
     if (window.tgse && typeof window.tgse.onReady === 'function') {
-      window.tgse.onReady(() => {
-        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); }
-        else render();
-      });
-    } else {
-      if (tgse.isLoggedIn()) loadFromUrl(); else render();
-    }
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); } else render(); });
+    } else { if (tgse.isLoggedIn()) loadFromUrl(); else render(); }
   });
 </script>
 

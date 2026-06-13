@@ -49,6 +49,7 @@
           <button class="demo-pill" data-mode="callback" aria-pressed="true">Callback</button>
           <button class="demo-pill" data-mode="video" aria-pressed="false">Video</button>
           <button class="demo-pill" data-mode="inperson" aria-pressed="false">In person</button>
+          <button class="demo-pill" data-mode="multi" aria-pressed="false">Multiple</button>
         </div>
         <button class="demo-pill" id="darkToggle" aria-pressed="false">Dark</button>
       </div>
@@ -76,12 +77,24 @@
     function rebuild() {
       if (inst) { try { inst.destroy(); } catch (e) {} }
       inst = new window.TGAppointmentWidget(mount, {
-        mode: state.mode,
-        heading: state.mode === 'inperson' ? 'Pop in and see us' : 'Book a free consultation',
+        heading: 'Book a free consultation',
         subheading: 'Pick a time that suits you and one of our travel experts will be in touch.',
+        company: 'Sunshine Holidays',
         accent: '#0891B2', font: 'DM Sans',
-        workingDays: [1, 2, 3, 4, 5, 6], startHour: 9, endHour: 17, slotMins: 30, leadTimeHours: 4, daysAhead: 14,
-        topics: ['Tailor-made holiday', 'Cruise', 'Honeymoon', 'Family holiday', 'Something else'],
+        timezone: 'Europe/London',
+        eventTypes: state.mode === 'multi'
+          ? [
+              { id: 'quick', label: 'Quick callback', mins: 15, mode: 'callback', description: 'A fast call to point you in the right direction.' },
+              { id: 'consult', label: 'Travel consultation', mins: 45, mode: 'video', description: 'A proper plan for a tailor-made trip.' },
+              { id: 'instore', label: 'Pop in and see us', mins: 30, mode: 'inperson', description: 'Visit the shop for a face to face chat.' },
+            ]
+          : [{ id: 'consult', label: 'Travel consultation', mins: state.mode === 'video' ? 45 : 30, mode: state.mode, description: 'A friendly chat about where you fancy going.' }],
+        availability: { 1:[['09:00','17:00']],2:[['09:00','17:00']],3:[['09:00','17:00']],4:[['09:00','17:00']],5:[['09:00','17:00']],6:[['10:00','14:00']] },
+        minNoticeHours: 4, dateRangeDays: 30, timeFormat: '12',
+        questions: [
+          { id: 'topic', label: 'What is it about?', type: 'select', required: false, options: ['Tailor-made holiday', 'Cruise', 'Honeymoon', 'Family holiday', 'Something else'] },
+          { id: 'notes', label: 'Anything we should know? (optional)', type: 'textarea', required: false },
+        ],
         previewMode: true,
       });
     }
