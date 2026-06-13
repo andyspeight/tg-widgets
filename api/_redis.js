@@ -81,3 +81,23 @@ export async function setString(key, value) {
 export async function getString(key) {
   return await callRedis('get', key);
 }
+
+// ── Sorted sets + counters (used by the appointment booking index) ──
+export async function zadd(key, score, member) {
+  return await callRedis('zadd', key, String(score), member);
+}
+export async function zrangebyscore(key, min, max) {
+  const r = await callRedis('zrangebyscore', key, String(min), String(max));
+  return Array.isArray(r) ? r : [];
+}
+export async function zrem(key, member) {
+  return await callRedis('zrem', key, member);
+}
+export async function incr(key) {
+  const r = await callRedis('incr', key);
+  return Number.isFinite(+r) ? +r : null;
+}
+export async function decr(key) {
+  const r = await callRedis('decr', key);
+  return Number.isFinite(+r) ? +r : null;
+}

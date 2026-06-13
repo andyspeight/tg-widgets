@@ -70,6 +70,24 @@ double-booking guard. Set Redis for the full suite.
    invite, the agency gets the email, the confirmation shows a manage link.
 4. Open the manage link: cancel removes the calendar event; reschedule moves it.
 
+## Added after the first build (same weekend)
+
+- **Email lifecycle**: visitor confirmation, reschedule and cancellation
+  emails, each with a proper `.ics` attachment, plus an agency notification.
+  Works with or without a connected calendar (uses `SENDGRID_API_KEY`).
+- **Buffers**: before/after gaps kept clear around each booking.
+- **Split daily hours**: multiple time ranges per weekday (e.g. a lunch gap).
+- **Daily booking cap**: max bookings per day, enforced in availability and
+  at book time, decremented on cancel and moved on reschedule.
+- **Reminders cron**: `/api/cron/appointment-reminders` (hourly in
+  `vercel.json`) emails a reminder ~24h before each booking, once. Needs
+  `CRON_SECRET` set (same secret the map cron uses). Optional `APP_BASE_URL`
+  for the manage link in reminder emails (otherwise derived from the host).
+- **Agency view**: `/bookings` page and `GET /api/appointment/list` (auth)
+  show the client's upcoming and recent bookings.
+
+These all rely on `UPSTASH_*`. Without Redis they no-op cleanly.
+
 ## Honest limits (post-Monday)
 
 - Google only for now. Outlook/Microsoft is the same shape via Microsoft Graph

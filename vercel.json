@@ -24,6 +24,10 @@
     {
       "path": "/api/cron/refresh-map-offers",
       "schedule": "*/45 * * * *"
+    },
+    {
+      "path": "/api/cron/appointment-reminders",
+      "schedule": "0 * * * *"
     }
   ],
   "rewrites": [
@@ -214,6 +218,10 @@
     {
       "source": "/manage-booking",
       "destination": "/manage-booking.html"
+    },
+    {
+      "source": "/bookings",
+      "destination": "/bookings.html"
     },
     {
       "source": "/editor-carousel",

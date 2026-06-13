@@ -9,8 +9,8 @@
  * Response: { connected, timezone, eventId, slots: [{ startISO, endISO }] }
  */
 import { resolveWidget, pickEvent } from '../_lib/calendar/state.js';
-import { generateSlots, subtractBusy } from '../_lib/calendar/slots.js';
-import { getAccessToken } from '../_lib/calendar/store.js';
+import { generateSlots, subtractBusy, hostDateKey } from '../_lib/calendar/slots.js';
+import { getAccessToken, getDayCount } from '../_lib/calendar/store.js';
 import * as google from '../_lib/calendar/google.js';
 
 function cors(res) {
@@ -53,6 +53,19 @@ export default async function handler(req, res) {
   } catch (e) {
     console.error('[availability] freebusy failed:', e.message);
     // fall back to the unfiltered (client-side-equivalent) slots
+  }
+
+  // Daily booking cap: drop any host date already at its limit.
+  const cap = Math.max(0, Number(config.dailyCap) || 0);
+  if (cap > 0 && slots.length) {
+    const hostTz = config.timezone || 'Europe/London';
+    const days = [...new Set(slots.map(s => hostDateKey(s.startISO, hostTz)))];
+    const full = new Set();
+    for (const day of days) {
+      const c = await getDayCount(w.clientRecordId, day);
+      if (c >= cap) full.add(day);
+    }
+    if (full.size) slots = slots.filter(s => !full.has(hostDateKey(s.startISO, hostTz)));
   }
 
   return res.status(200).json({

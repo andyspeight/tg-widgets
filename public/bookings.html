@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your bookings — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F1F5F9;color:#0F172A;line-height:1.5;padding:40px 18px}
+  .wrap{max-width:920px;margin:0 auto}
+  h1{font-size:24px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+  .sub{font-size:14px;opacity:.65;margin-bottom:22px}
+  .card{background:#fff;border:1px solid rgba(15,23,42,.1);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 30px rgba(15,23,42,.05)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid #EEF2F7;vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#94A3B8;font-weight:700;background:#F8FAFC}
+  tr:last-child td{border-bottom:0}
+  .who{font-weight:600}
+  .meta{font-size:12px;color:#64748B}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px}
+  .pill.ok{background:rgba(16,185,129,.14);color:#047857}
+  .pill.cancel{background:rgba(220,38,38,.12);color:#B91C1C}
+  .empty,.gate{padding:40px;text-align:center;color:#64748B}
+  .gate a{color:#0891B2;font-weight:600}
+  .filters{display:flex;gap:8px;margin-bottom:16px}
+  .filters button{appearance:none;border:1px solid #E2E8F0;background:#fff;color:#475569;font:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer}
+  .filters button.on{background:#0F172A;color:#fff;border-color:#0F172A}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Your bookings</h1>
+    <p class="sub">Appointments booked through your scheduler widgets.</p>
+    <div class="filters" id="filters">
+      <button data-range="upcoming" class="on">Upcoming</button>
+      <button data-range="past">Recent past</button>
+    </div>
+    <div class="card"><div id="list"><div class="empty">Loading…</div></div></div>
+  </div>
+  <script>
+    var listEl = document.getElementById('list');
+    var range = 'upcoming';
+    function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
+    function whenText(b){try{var d=new Date(b.startISO);var ds=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,weekday:'short',day:'numeric',month:'short'}).format(d);var ts=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,hour:'numeric',minute:'2-digit',hour12:true}).format(d).replace(/[ \s]/g,'').toLowerCase();return ds+' · '+ts;}catch(e){return b.startISO;}}
+
+    function render(bookings){
+      if(!bookings.length){ listEl.innerHTML='<div class="empty">No bookings in this window.</div>'; return; }
+      bookings.sort(function(a,b){return a.startISO<b.startISO?-1:1;});
+      var rows = bookings.map(function(b){
+        var cancelled = b.status==='cancelled';
+        return '<tr>'+
+          '<td><div class="who">'+esc(whenText(b))+'</div><div class="meta">'+esc(b.eventLabel||'')+' · '+esc(b.durationMins)+' min</div></td>'+
+          '<td><div class="who">'+esc(b.name)+'</div><div class="meta">'+esc(b.email)+(b.phone?(' · '+esc(b.phone)):'')+'</div></td>'+
+          '<td><span class="pill '+(cancelled?'cancel':'ok')+'">'+(cancelled?'Cancelled':'Confirmed')+'</span></td>'+
+        '</tr>';
+      }).join('');
+      listEl.innerHTML='<table><thead><tr><th>When</th><th>Who</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    }
+
+    function load(){
+      listEl.innerHTML='<div class="empty">Loading…</div>';
+      var qs = range==='past' ? ('from='+encodeURIComponent(new Date(Date.now()-60*86400000).toISOString())+'&to='+encodeURIComponent(new Date().toISOString())) : 'days=60';
+      fetch('/api/appointment/list?'+qs,{credentials:'include'})
+        .then(function(r){ if(r.status===401){ throw 'auth'; } return r.json(); })
+        .then(function(d){ if(d&&d.storage===false){ listEl.innerHTML='<div class="empty">Booking storage is not set up yet.</div>'; return; } render((d&&d.bookings)||[]); })
+        .catch(function(e){ if(e==='auth'){ listEl.innerHTML='<div class="gate">Please <a href="/signin.html?next=/bookings">sign in</a> to see your bookings.</div>'; } else { listEl.innerHTML='<div class="empty">Could not load bookings.</div>'; } });
+    }
+    document.getElementById('filters').addEventListener('click', function(e){
+      var b=e.target.closest('[data-range]'); if(!b)return;
+      range=b.getAttribute('data-range');
+      [].forEach.call(document.querySelectorAll('#filters button'),function(x){x.classList.toggle('on',x===b);});
+      load();
+    });
+    load();
+  </script>
+</body>
+</html>

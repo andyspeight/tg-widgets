@@ -262,6 +262,10 @@
               <span class="field-hint">Keeps a gap clear around each booking. Applies when your calendar is connected.</span>
             </div>
             <div class="field">
+              <label class="field-label">Maximum bookings per day</label>
+              <div class="slider-row"><input type="range" id="cap-input" min="0" max="20" step="1" value="0"><span class="slider-val" id="cap-val">Off</span></div>
+            </div>
+            <div class="field">
               <label class="field-label">Blackout dates</label>
               <div class="row-2"><input type="date" class="input" id="blackout-date"><button type="button" class="le-add" id="add-blackout" style="border-style:solid">Add date</button></div>
               <div id="blackout-list" style="margin-top:8px"></div>
@@ -353,6 +357,7 @@
     minNoticeHours: 4,
     bufferBefore: 0,
     bufferAfter: 0,
+    dailyCap: 0,
     timeFormat: '12',
     askPhone: true,
     phoneRequired: false,
@@ -484,6 +489,7 @@
     document.getElementById('submit-url').value = C.submitUrl || '';
     document.getElementById('lead-input').value = C.minNoticeHours; document.getElementById('lead-val').textContent = C.minNoticeHours + ' hrs';
     document.getElementById('days-input').value = C.dateRangeDays; document.getElementById('days-val').textContent = C.dateRangeDays + ' days';
+    document.getElementById('cap-input').value = C.dailyCap || 0; document.getElementById('cap-val').textContent = C.dailyCap ? (C.dailyCap + '/day') : 'Off';
     document.getElementById('radius-input').value = C.radius; document.getElementById('radius-val').textContent = C.radius + 'px';
     document.getElementById('accent-col').value = hexOk(C.accent)?C.accent:'#0891B2'; document.getElementById('accent-hex').value = (C.accent||'#0891B2').toUpperCase();
     document.getElementById('bg-col').value = hexOk(C.bg)?C.bg:'#FFFFFF'; document.getElementById('bg-hex').value = (C.bg||'#FFFFFF').toUpperCase();
@@ -620,6 +626,7 @@
   // ── Sliders ──
   document.getElementById('lead-input').addEventListener('input', (e) => { C.minNoticeHours = parseInt(e.target.value, 10) || 0; document.getElementById('lead-val').textContent = C.minNoticeHours + ' hrs'; shell.markDirty(); render(); });
   document.getElementById('days-input').addEventListener('input', (e) => { C.dateRangeDays = parseInt(e.target.value, 10) || 30; document.getElementById('days-val').textContent = C.dateRangeDays + ' days'; shell.markDirty(); render(); });
+  document.getElementById('cap-input').addEventListener('input', (e) => { C.dailyCap = parseInt(e.target.value, 10) || 0; document.getElementById('cap-val').textContent = C.dailyCap ? (C.dailyCap + '/day') : 'Off'; shell.markDirty(); render(); });
   document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); render(); });
 
   // ── Colours ──

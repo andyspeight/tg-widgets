@@ -146,6 +146,7 @@
     slotInterval: 0,            // 0 = step by event duration; else minutes
     bufferBefore: 0,            // minutes kept clear before a meeting (connected calendars)
     bufferAfter: 0,             // minutes kept clear after a meeting
+    dailyCap: 0,                // max bookings per day (0 = unlimited)
     timeFormat: '12',           // '12' | '24'
     // Intake
     askPhone: true,

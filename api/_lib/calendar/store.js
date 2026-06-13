@@ -15,7 +15,7 @@
  * client-side, no-backend path).
  */
 
-import { setJson, getJson, setString, getString, configured as redisConfigured } from '../../_redis.js';
+import { setJson, getJson, setString, getString, zadd, zrangebyscore, incr, decr, configured as redisConfigured } from '../../_redis.js';
 import { encrypt, decrypt } from '../../_crypto.js';
 import * as google from './google.js';
 
@@ -25,6 +25,9 @@ const connKey = (clientId) => 'apt:cal:' + clientId;
 const bookingKey = (ref) => 'apt:booking:' + ref;
 const manageKey = (token) => 'apt:manage:' + token;
 const holdKey = (clientId, startISO) => 'apt:hold:' + clientId + ':' + startISO;
+const indexKey = (clientId) => 'apt:index:' + clientId;
+const ALL_INDEX = 'apt:index:all';
+const dayCountKey = (clientId, dayKey) => 'apt:count:' + clientId + ':' + dayKey;
 
 // ── Connections ────────────────────────────────────────────
 export async function saveConnection(clientId, conn) {
@@ -78,7 +81,44 @@ export async function saveBooking(b) {
   if (!b || !b.ref) return false;
   const ok = await setJson(bookingKey(b.ref), b);
   if (b.manageToken) await setString(manageKey(b.manageToken), b.ref);
+  // Keep the time indexes in sync (zadd updates the score on reschedule).
+  if (b.startISO) {
+    const ms = Date.parse(b.startISO);
+    if (Number.isFinite(ms)) {
+      if (b.clientRecordId) await zadd(indexKey(b.clientRecordId), ms, b.ref);
+      await zadd(ALL_INDEX, ms, b.ref);
+    }
+  }
   return ok;
+}
+
+/** Confirmed bookings across all clients between two epoch-ms bounds. */
+export async function listAllBookings(fromMs, toMs) {
+  const refs = await zrangebyscore(ALL_INDEX, fromMs, toMs);
+  const out = [];
+  for (const ref of refs) { const b = await getBooking(ref); if (b) out.push(b); }
+  return out;
+}
+
+/** Confirmed bookings for a client between two epoch-ms bounds (inclusive). */
+export async function listBookings(clientId, fromMs, toMs) {
+  if (!clientId) return [];
+  const refs = await zrangebyscore(indexKey(clientId), fromMs, toMs);
+  const out = [];
+  for (const ref of refs) {
+    const b = await getBooking(ref);
+    if (b) out.push(b);
+  }
+  return out;
+}
+
+// ── Daily booking cap counters ─────────────────────────────
+export async function incDayCount(clientId, dayKey) { if (!clientId || !dayKey) return null; return incr(dayCountKey(clientId, dayKey)); }
+export async function decDayCount(clientId, dayKey) { if (!clientId || !dayKey) return null; return decr(dayCountKey(clientId, dayKey)); }
+export async function getDayCount(clientId, dayKey) {
+  if (!clientId || !dayKey) return 0;
+  const v = await getString(dayCountKey(clientId, dayKey));
+  return Number.isFinite(+v) ? +v : 0;
 }
 
 export async function getBooking(ref) {

@@ -12,8 +12,8 @@
  * Response: { ok, ref, manageUrl, calendarLink }
  */
 import { resolveWidget, pickEvent, bookingRef, manageToken } from '../_lib/calendar/state.js';
-import { isValidSlot } from '../_lib/calendar/slots.js';
-import { getAccessToken, saveBooking, placeHold, releaseHold } from '../_lib/calendar/store.js';
+import { isValidSlot, hostDateKey } from '../_lib/calendar/slots.js';
+import { getAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount } from '../_lib/calendar/store.js';
 import * as google from '../_lib/calendar/google.js';
 import { sendNewBooking } from '../_lib/calendar/mail.js';
 
@@ -62,6 +62,13 @@ export default async function handler(req, res) {
   const endISO = new Date(endMs).toISOString();
   const ref = bookingRef(startMs);
   const token = manageToken();
+  const dayKey = hostDateKey(startISO, config.timezone || 'Europe/London');
+
+  // Daily booking cap.
+  const cap = Math.max(0, Number(config.dailyCap) || 0);
+  if (cap > 0 && (await getDayCount(w.clientRecordId, dayKey)) >= cap) {
+    return res.status(409).json({ error: 'That day is fully booked. Please pick another.' });
+  }
 
   // Double-booking hold (works even without a connected calendar).
   const held = await placeHold(w.clientRecordId, startISO, ref);
@@ -110,9 +117,11 @@ export default async function handler(req, res) {
     hostTimezone: config.timezone || 'Europe/London',
     invitee: { name, email, phone, answers: (body.appointment && body.appointment.answers) || body.answers || {} },
     provider: connected ? 'google' : '', providerEventId, calendarLink,
+    dayCounted: cap > 0,
     sourceUrl: clean(body.sourceUrl).slice(0, 300), createdAt: new Date().toISOString(),
   };
   const saved = await saveBooking(booking);
+  if (saved && cap > 0) await incDayCount(w.clientRecordId, dayKey);
 
   // Manage URL on our own origin — only offered if the booking persisted,
   // so we never hand out a dead link when storage is unconfigured.

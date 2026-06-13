@@ -142,6 +142,21 @@ export async function sendRescheduled(booking, opts) {
   });
 }
 
+export async function sendReminder(booking, opts) {
+  opts = opts || {};
+  const v = booking.invitee || {};
+  if (!v.email) return false;
+  const manage = opts.manageUrl ? '<p style="margin:14px 0 0"><a href="' + esc(opts.manageUrl) + '" style="color:#0891b2;font-weight:bold">Reschedule or cancel</a></p>' : '';
+  return sgSend({
+    personalizations: [{ to: [{ email: v.email, name: v.name }] }],
+    from: { email: FROM_EMAIL, name: 'Travelgenix' },
+    reply_to: booking.clientEmail ? { email: booking.clientEmail } : undefined,
+    subject: 'Reminder: ' + (booking.eventLabel || 'your appointment') + ' on ' + whenString(booking.startISO, booking.visitorTimezone || booking.hostTimezone),
+    content: [{ type: 'text/html', value: shell('A quick reminder', '<p>Hi ' + esc(firstName(booking)) + ', this is a reminder of your upcoming appointment.</p>' + detailTable(visitorRows(booking)) + '<p>We look forward to speaking with you.</p>' + manage) }],
+    attachments: [icsAttachment(booking, 'REQUEST')],
+  });
+}
+
 export async function sendCancelled(booking) {
   const v = booking.invitee || {};
   if (v.email) {

@@ -95,6 +95,12 @@ export function subtractBusy(slots, busy, buffers) {
   });
 }
 
+/** The host-timezone calendar date (YYYY-MM-DD) of an instant. */
+export function hostDateKey(iso, tz) {
+  try { return new Intl.DateTimeFormat('en-CA', { timeZone: tz || 'UTC', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)); }
+  catch (e) { return ''; }
+}
+
 /** True if `startISO` (for `ev`) is a legitimate generatable slot. */
 export function isValidSlot(config, ev, startISO) {
   const ms = Date.parse(startISO);
