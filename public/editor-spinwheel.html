@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spin the Wheel — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .select { width:100%; padding:8px 10px; font:inherit; font-size:13px; border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm); background:var(--tgse-panel); color:var(--tgse-ink); transition:border-color 160ms ease, box-shadow 160ms ease; }
+  .input:focus, .select:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel); padding:10px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center; transition:border-color 160ms ease, background 160ms ease; }
+  .pick-btn:hover { background:var(--tgse-hover); }
+  .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .pick-label { font-size:12px; font-weight:600; color:var(--tgse-ink); }
+  .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
+
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  .slider-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+  .slider-row input[type="range"] { width:100%; accent-color:var(--tgse-brand); }
+  .slider-val { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; min-width:48px; text-align:right; }
+
+  .seg-row { display:grid; grid-template-columns:1fr 64px 30px; gap:6px; align-items:center; margin-bottom:7px; }
+  .seg-row .input { font-size:12px; padding:7px 8px; }
+  .seg-del { border:0; background:transparent; color:var(--tgse-ink-3); cursor:pointer; padding:4px; border-radius:4px; display:flex; align-items:center; justify-content:center; }
+  .seg-del:hover { color:#ef4444; background:var(--tgse-hover); }
+  .seg-del svg { width:14px; height:14px; }
+  .add-seg { width:100%; border:1.5px dashed var(--tgse-border); background:transparent; color:var(--tgse-ink-2); padding:9px; border-radius:var(--tgse-radius-sm); cursor:pointer; font:inherit; font-size:13px; font-weight:600; margin-top:4px; }
+  .add-seg:hover { border-color:var(--tgse-brand); color:var(--tgse-brand-dark); background:var(--tgse-brand-tint); }
+  .add-seg[disabled] { opacity:.5; cursor:not-allowed; }
+  .seg-head { display:grid; grid-template-columns:1fr 64px 30px; gap:6px; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--tgse-ink-3); margin-bottom:5px; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="12"/><line x1="12" y1="12" x2="18" y2="15"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Spin the Wheel</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled spin the wheel" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- CONTENT -->
+      <div class="tgse-panel is-active" data-tab="content">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Heading &amp; button</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input type="text" class="input" id="heading-input" maxlength="60" placeholder="Spin to win your next trip">
+            </div>
+            <div class="field">
+              <label class="field-label">Spin button text</label>
+              <input type="text" class="input" id="button-input" maxlength="18" placeholder="Spin">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="12"/></svg>
+            <span class="tgse-section-label">Wheel segments</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="seg-head"><span>Label</span><span>Chance</span><span></span></div>
+            <div id="seg-rows"></div>
+            <button type="button" class="add-seg" id="add-seg">+ Add segment</button>
+            <span class="field-hint">2 to 12 segments. Chance is the relative weight, so a higher number wins more often.</span>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span class="tgse-section-label">Result &amp; call to action</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Result title</label>
+              <input type="text" class="input" id="restitle-input" maxlength="80" placeholder="Your destination: {prize}">
+              <span class="field-hint">Use {prize} where the winning segment should appear.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Result message</label>
+              <input type="text" class="input" id="restext-input" maxlength="160" placeholder="Quote this when you enquire.">
+            </div>
+            <div class="field">
+              <label class="field-label">Button text</label>
+              <input type="text" class="input" id="ctatext-input" maxlength="24" placeholder="Enquire now">
+            </div>
+            <div class="field">
+              <label class="field-label">Button link</label>
+              <input type="text" class="input" id="ctaurl-input" placeholder="https://your-site.com/enquire">
+              <span class="field-hint">Leave blank to hide the button. Use https://, mailto: or tel:.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESIGN -->
+      <div class="tgse-panel" data-tab="design">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Accent colour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
+              </div>
+              <span class="field-hint">Seeds the wheel colours, the pointer, the hub and the button.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Layout</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid" id="layout-picker">
+                <button type="button" class="pick-btn" data-layout="card"><span class="pick-label">Card</span></button>
+                <button type="button" class="pick-btn" data-layout="inline"><span class="pick-label">Plain</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Font</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="tgse-panel" data-tab="settings">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+            <span class="tgse-section-label">Spin behaviour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Spin length</label>
+              <div class="slider-row">
+                <input type="range" id="dur-input" min="2000" max="7000" step="250" value="4500">
+                <span class="slider-val" id="dur-val">4.5s</span>
+              </div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">One spin per visitor</span><button type="button" class="switch" id="sw-once" aria-pressed="false"></button></div>
+              <span class="field-hint">Remembers the result in the visitor's browser so they cannot keep spinning.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-spinwheel.js"></script>
+<style>
+  .pv-faux { width:100%; max-width:620px; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); padding:40px; display:flex; justify-content:center; }
+  .pv-faux[data-bg="dark"] { background:#0B1220; }
+  #widget-mount { width:100%; display:flex; justify-content:center; }
+</style>
+<script>
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  const MAX = 12;
+
+  let C = {
+    heading: 'Spin to win your next trip',
+    segments: [
+      { label: 'Bali', weight: 1 }, { label: 'Maldives', weight: 1 },
+      { label: 'Dubai', weight: 1 }, { label: 'New York', weight: 1 },
+      { label: 'Barbados', weight: 1 }, { label: 'Rome', weight: 1 }
+    ],
+    buttonText: 'Spin',
+    resultTitle: 'Your destination: {prize}',
+    resultText: 'Quote this when you enquire and we will build it around you.',
+    ctaText: 'Enquire now', ctaUrl: '',
+    oncePerVisitor: false, spinDuration: 4500,
+    accent: '#0891B2', layout: 'card', theme: 'light', fontFamily: 'Inter',
+  };
+
+  let widgetInst = null;
+
+  const shell = tgse.init({
+    widgetType: 'Spin Wheel',
+    widgetTag: 'spinwheel',
+    scriptFile: 'widget-spinwheel.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); normalise(); buildSegRows(); syncUIFromState(); remount(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for Spin the Wheel', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for Spin the Wheel', 'ok'),
+    onThemeToggle: (isDark) => { C.theme = isDark ? 'dark' : 'light'; render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); },
+  });
+
+  function normalise() {
+    if (!Array.isArray(C.segments)) C.segments = [];
+    C.segments = C.segments.filter(s => s).slice(0, MAX);
+    while (C.segments.length < 2) C.segments.push({ label: 'Prize ' + (C.segments.length + 1), weight: 1 });
+  }
+
+  function render() {
+    const frame = document.getElementById('pv-frame');
+    if (!frame) return;
+    let faux = document.getElementById('pv-faux');
+    if (!faux) {
+      frame.innerHTML = '<div class="pv-faux" id="pv-faux"><div data-tg-widget="spinwheel" id="widget-mount"></div></div>';
+      faux = document.getElementById('pv-faux');
+    }
+    faux.setAttribute('data-bg', C.theme === 'dark' ? 'dark' : 'light');
+    if (!window.TGSpinWheelWidget) return;
+    if (widgetInst) { try { widgetInst.update(Object.assign({}, C, { previewMode: true })); } catch (e) { console.error(e); } }
+    else { const host = document.getElementById('widget-mount'); requestAnimationFrame(() => { try { widgetInst = new window.TGSpinWheelWidget(host, Object.assign({}, C, { previewMode: true })); } catch (e) { console.error(e); } }); }
+  }
+  function remount() {
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    const frame = document.getElementById('pv-frame'); if (frame) frame.innerHTML = '';
+    render();
+  }
+
+  function buildSegRows() {
+    const wrap = document.getElementById('seg-rows');
+    wrap.innerHTML = C.segments.map((s, i) =>
+      '<div class="seg-row" data-i="' + i + '">' +
+        '<input class="input" data-k="label" placeholder="Prize / destination" maxlength="28" value="' + esc(s.label) + '">' +
+        '<input class="input" data-k="weight" type="number" min="0" step="1" value="' + (s.weight == null ? 1 : s.weight) + '">' +
+        '<button type="button" class="seg-del" data-act="del" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+      '</div>').join('');
+    document.getElementById('add-seg').disabled = C.segments.length >= MAX;
+  }
+
+  function toggleSwitch(id, on) { const el = document.getElementById(id); if (!el) return; el.classList.toggle('is-on', !!on); el.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+
+  function syncUIFromState() {
+    document.getElementById('heading-input').value = C.heading || '';
+    document.getElementById('button-input').value = C.buttonText || '';
+    document.getElementById('restitle-input').value = C.resultTitle || '';
+    document.getElementById('restext-input').value = C.resultText || '';
+    document.getElementById('ctatext-input').value = C.ctaText || '';
+    document.getElementById('ctaurl-input').value = C.ctaUrl || '';
+    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2';
+    document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
+    document.querySelectorAll('#layout-picker [data-layout]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-layout') === C.layout));
+    document.getElementById('dur-input').value = C.spinDuration;
+    document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's';
+    toggleSwitch('sw-once', C.oncePerVisitor);
+  }
+
+  // ── Segment rows ──
+  document.getElementById('seg-rows').addEventListener('input', e => {
+    const row = e.target.closest('.seg-row'); if (!row) return;
+    const i = +row.getAttribute('data-i'); const k = e.target.getAttribute('data-k');
+    if (k === 'weight') C.segments[i].weight = Math.max(0, Number(e.target.value) || 0);
+    else C.segments[i].label = e.target.value;
+    shell.markDirty(); render();
+  });
+  document.getElementById('seg-rows').addEventListener('click', e => {
+    const del = e.target.closest('[data-act="del"]'); if (!del) return;
+    const i = +del.closest('.seg-row').getAttribute('data-i');
+    if (C.segments.length <= 2) { tgse.toast('Keep at least two segments', 'ok'); return; }
+    C.segments.splice(i, 1); buildSegRows(); shell.markDirty(); remount();
+  });
+  document.getElementById('add-seg').addEventListener('click', () => {
+    if (C.segments.length >= MAX) return;
+    C.segments.push({ label: 'New prize', weight: 1 });
+    buildSegRows(); shell.markDirty(); remount();
+  });
+
+  function wireText(id, key) { document.getElementById(id).addEventListener('input', e => { C[key] = e.target.value; shell.markDirty(); render(); }); }
+  wireText('heading-input', 'heading');
+  wireText('button-input', 'buttonText');
+  wireText('restitle-input', 'resultTitle');
+  wireText('restext-input', 'resultText');
+  wireText('ctatext-input', 'ctaText');
+  wireText('ctaurl-input', 'ctaUrl');
+
+  document.getElementById('layout-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-layout]'); if (!b) return;
+    C.layout = b.getAttribute('data-layout');
+    document.querySelectorAll('#layout-picker [data-layout]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+
+  (function wireColour() {
+    const col = document.getElementById('accent-col'), hex = document.getElementById('accent-hex');
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); render(); } });
+  })();
+
+  document.getElementById('dur-input').addEventListener('input', e => { C.spinDuration = parseInt(e.target.value, 10) || 4500; document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's'; shell.markDirty(); });
+  document.getElementById('sw-once').addEventListener('click', () => { C.oncePerVisitor = !C.oncePerVisitor; toggleSwitch('sw-once', C.oncePerVisitor); shell.markDirty(); });
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { normalise(); buildSegRows(); syncUIFromState(); remount(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        normalise(); buildSegRows(); syncUIFromState(); remount();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    normalise(); buildSegRows(); syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); else remount(); });
+    } else { if (tgse.isLoggedIn()) loadFromUrl(); else remount(); }
+  });
+</script>
+</body>
+</html>

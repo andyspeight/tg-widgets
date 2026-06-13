@@ -80,6 +80,10 @@
       "destination": "/demo-statscounter.html"
     },
     {
+      "source": "/demo-spinwheel",
+      "destination": "/demo-spinwheel.html"
+    },
+    {
       "source": "/demo-maps",
       "destination": "/demo-maps.html"
     },
@@ -214,6 +218,10 @@
     {
       "source": "/editor-statscounter",
       "destination": "/editor-statscounter.html"
+    },
+    {
+      "source": "/editor-spinwheel",
+      "destination": "/editor-spinwheel.html"
     },
     {
       "source": "/editor-maps",
@@ -541,6 +549,23 @@
     },
     {
       "source": "/widget-statscounter.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-spinwheel.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

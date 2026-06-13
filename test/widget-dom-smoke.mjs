@@ -173,5 +173,34 @@ async function mount(scriptFile, configAttr, { stubFetch = true } = {}) {
   dom.window.close();
 }
 
+// ── 9. Spin the Wheel builds segments and reveals a result on spin ──
+{
+  const cfg = JSON.stringify({
+    heading: 'Spin', segments: [
+      { label: 'Bali', weight: 1 }, { label: 'Rome', weight: 1 }, { label: 'Dubai', weight: 1 }, { label: 'Tokyo', weight: 1 },
+    ], resultTitle: 'You won {prize}', ctaText: 'Go', ctaUrl: 'https://example.com/x', spinDuration: 2000, previewMode: true,
+  }).replace(/'/g, '&#39;');
+  const dom = new JSDOM(`<!doctype html><html><body><div data-tg-widget="spinwheel" data-tg-config='${cfg}'></div></body></html>`, { runScripts: 'dangerously', url: 'https://x.example/', pretendToBeVisual: true });
+  // No IntersectionObserver needed here; ensure matchMedia reports reduced motion
+  // so the spin resolves synchronously for the test.
+  dom.window.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {} });
+  const s = dom.window.document.createElement('script');
+  s.textContent = readFileSync(new URL('../public/widget-spinwheel.js', import.meta.url), 'utf8');
+  dom.window.document.body.appendChild(s);
+  await sleep(30);
+  const host = dom.window.document.querySelector('[data-tg-widget="spinwheel"]');
+  ok(!!host.shadowRoot, 'spinwheel: shadow root attached');
+  ok(host.shadowRoot.querySelectorAll('.sw-rot path').length === 4, 'spinwheel: one slice per segment (got ' + host.shadowRoot.querySelectorAll('.sw-rot path').length + ')');
+  host.shadowRoot.getElementById('spin').click();
+  await sleep(80); // reduced-motion path resolves on a short timeout
+  const result = host.shadowRoot.getElementById('result');
+  ok(result && !result.hidden, 'spinwheel: a result is revealed after spinning');
+  ok(/^You won (Bali|Rome|Dubai|Tokyo)$/.test(host.shadowRoot.getElementById('res-title').textContent), 'spinwheel: result names a real segment (got ' + host.shadowRoot.getElementById('res-title').textContent + ')');
+  const cta = host.shadowRoot.getElementById('cta');
+  ok(!cta.hidden && cta.getAttribute('href') === 'https://example.com/x', 'spinwheel: CTA renders with the configured link');
+  ok(typeof dom.window.TGSpinWheelWidget === 'function', 'spinwheel: exposes window.TGSpinWheelWidget');
+  dom.window.close();
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 assert.strictEqual(failed, 0, 'DOM smoke failures');

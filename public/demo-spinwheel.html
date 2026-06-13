@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Spin the Wheel Demo · Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F8FAFC; color: #0F172A; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body[data-theme="dark"] { background: #0B1222; color: #F8FAFC; }
+
+    .site-header { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 16px 32px; display: flex; align-items: center; gap: 20px; }
+    body[data-theme="dark"] .site-header { background: #121A2F; border-bottom-color: #1E293B; }
+    .brand { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+    .brand-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0891B2; margin-right: 10px; vertical-align: 2px; }
+    .nav-links { display: flex; gap: 20px; font-size: 13px; color: #475569; }
+    body[data-theme="dark"] .nav-links { color: #CBD5E1; }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .header-spacer { flex: 1; }
+    .controls { display: inline-flex; gap: 6px; padding: 3px; background: #F1F5F9; border-radius: 999px; }
+    body[data-theme="dark"] .controls { background: #1E293B; }
+    .controls button { border: 0; background: transparent; font: inherit; font-size: 12px; font-weight: 600; color: #475569; padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: background 150ms ease, color 150ms ease; min-height: 28px; }
+    body[data-theme="dark"] .controls button { color: #CBD5E1; }
+    .controls button[aria-pressed="true"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    body[data-theme="dark"] .controls button[aria-pressed="true"] { background: #0F172A; color: #F8FAFC; }
+
+    .hero { max-width: 1000px; margin: 0 auto; padding: 44px 32px 8px; text-align: center; }
+    .hero h1 { margin: 0 0 8px; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+    .hero p { margin: 0 auto; font-size: 16px; color: #475569; max-width: 620px; }
+    body[data-theme="dark"] .hero p { color: #CBD5E1; }
+
+    .stage { max-width: 1000px; margin: 24px auto 50px; padding: 0 32px; display: grid; grid-template-columns: auto 1fr; gap: 48px; align-items: center; }
+    @media (max-width: 760px){ .stage { grid-template-columns: 1fr; gap: 28px; justify-items:center; text-align:center; } }
+    .pitch h2 { margin: 0 0 10px; font-size: 22px; font-weight: 700; }
+    .pitch p { margin: 0 0 12px; font-size: 15px; line-height: 1.65; color: #334155; }
+    body[data-theme="dark"] .pitch p { color: #CBD5E1; }
+    .pitch ul { margin: 0; padding-left: 18px; color: #475569; font-size: 14px; line-height: 1.8; }
+    body[data-theme="dark"] .pitch ul { color: #CBD5E1; }
+
+    footer { border-top: 1px solid #E2E8F0; padding: 24px 32px; text-align: center; font-size: 12px; color: #64748B; }
+    body[data-theme="dark"] footer { border-top-color: #1E293B; }
+    footer a { color: #0891B2; }
+    code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand"><span class="brand-dot"></span>Sunrise Holidays</div>
+    <nav class="nav-links">
+      <a href="#">Destinations</a>
+      <a href="#">Holidays</a>
+      <a href="#">Offers</a>
+      <a href="#">About</a>
+    </nav>
+    <div class="header-spacer"></div>
+    <div class="controls" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+      <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Not sure where to go? Give it a spin.</h1>
+    <p>A fun little nudge that turns a browsing visitor into an enquiry. Land on a destination, then enquire with one tap. Try it.</p>
+  </section>
+
+  <div class="stage">
+    <div id="wheel"></div>
+    <div class="pitch">
+      <h2>Why it works</h2>
+      <p>People love a game. The wheel gives an undecided visitor a playful reason to pick a destination, and a warm prompt to get in touch while they are excited.</p>
+      <ul>
+        <li>Weight the segments so popular trips come up more often</li>
+        <li>Land on a destination, a discount or a freebie</li>
+        <li>One spin per visitor option, remembered in their browser</li>
+        <li>Your colours, your call to action, no API key</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    Demo site — Spin the Wheel is embeddable via a single <code>&lt;script&gt;</code> tag, no API key. <a href="/">Back to dashboard</a>
+  </footer>
+
+  <script src="/widget-spinwheel.js"></script>
+  <script>
+    const isDark = () => document.body.dataset.theme === 'dark';
+
+    function renderWheel() {
+      const host = document.getElementById('wheel');
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'spinwheel');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        heading: 'Spin to find your next trip',
+        segments: [
+          { label: 'Bali', weight: 2 }, { label: 'Maldives', weight: 1 },
+          { label: 'Dubai', weight: 2 }, { label: 'New York', weight: 2 },
+          { label: 'Barbados', weight: 1 }, { label: 'Rome', weight: 2 },
+          { label: 'Tokyo', weight: 1 }, { label: 'Cape Town', weight: 1 }
+        ],
+        buttonText: 'Spin',
+        resultTitle: 'Your destination: {prize}',
+        resultText: 'Love it? Tell us and we will price it up for your dates.',
+        ctaText: 'Enquire about this trip', ctaUrl: 'https://example.com/enquire',
+        oncePerVisitor: false, spinDuration: 4500,
+        accent: '#0891B2', layout: 'card', theme: isDark() ? 'dark' : 'light'
+      }));
+      host.appendChild(div);
+    }
+
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        document.body.dataset.theme = btn.dataset.themeBtn;
+        renderWheel();
+      });
+    });
+
+    renderWheel();
+  </script>
+</body>
+</html>
