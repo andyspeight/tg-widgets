@@ -463,6 +463,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'worldclock',
+    name: 'World Clock',
+    airtableType: 'World Clock',  // matches Airtable WidgetType singleSelect option
+    description: 'Live local time for any set of destinations. Accurate timezones straight from the browser with no API and no key, ticking in real time, with a day or night marker, dates and country flags. List, grid or card layout. Pairs with the weather and currency widgets.',
+    category: 'Information',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-worldclock',
+    demoUrl: '/demo-worldclock',
+    widgetTag: 'worldclock',
+    scriptFile: 'widget-worldclock.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'maps',
     name: 'Maps',
     airtableType: 'Maps',

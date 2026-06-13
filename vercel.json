@@ -68,6 +68,10 @@
       "destination": "/demo-currency.html"
     },
     {
+      "source": "/demo-worldclock",
+      "destination": "/demo-worldclock.html"
+    },
+    {
       "source": "/demo-maps",
       "destination": "/demo-maps.html"
     },
@@ -190,6 +194,10 @@
     {
       "source": "/editor-currency",
       "destination": "/editor-currency.html"
+    },
+    {
+      "source": "/editor-worldclock",
+      "destination": "/editor-worldclock.html"
     },
     {
       "source": "/editor-maps",
@@ -466,6 +474,40 @@
     },
     {
       "source": "/widget-currency.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-worldclock.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-quote-pdf.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

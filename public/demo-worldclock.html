@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>World Clock Widget Demo · Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F8FAFC; color: #0F172A; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body[data-theme="dark"] { background: #0B1222; color: #F8FAFC; }
+
+    .site-header { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 16px 32px; display: flex; align-items: center; gap: 20px; }
+    body[data-theme="dark"] .site-header { background: #121A2F; border-bottom-color: #1E293B; }
+    .brand { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+    .brand-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0891B2; margin-right: 10px; vertical-align: 2px; }
+    .nav-links { display: flex; gap: 20px; font-size: 13px; color: #475569; }
+    body[data-theme="dark"] .nav-links { color: #CBD5E1; }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .header-spacer { flex: 1; }
+    .controls { display: inline-flex; gap: 6px; padding: 3px; background: #F1F5F9; border-radius: 999px; }
+    body[data-theme="dark"] .controls { background: #1E293B; }
+    .controls button { border: 0; background: transparent; font: inherit; font-size: 12px; font-weight: 600; color: #475569; padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: background 150ms ease, color 150ms ease; min-height: 28px; }
+    body[data-theme="dark"] .controls button { color: #CBD5E1; }
+    .controls button[aria-pressed="true"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    body[data-theme="dark"] .controls button[aria-pressed="true"] { background: #0F172A; color: #F8FAFC; }
+
+    .hero { max-width: 1200px; margin: 0 auto; padding: 40px 32px 24px; }
+    .hero h1 { margin: 0 0 8px; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+    .hero p { margin: 0; font-size: 16px; color: #475569; max-width: 660px; }
+    body[data-theme="dark"] .hero p { color: #CBD5E1; }
+
+    .layout-showcase { max-width: 1200px; margin: 0 auto; padding: 20px 32px 40px; }
+    .layout-showcase h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+    .layout-showcase p { margin: 0 0 20px; font-size: 13px; color: #64748B; }
+    .layout-stage { display: flex; justify-content: center; padding: 40px 24px; background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; min-height: 320px; }
+    body[data-theme="dark"] .layout-stage { background: #121A2F; border-color: #1E293B; }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 0 32px 60px; display: grid; grid-template-columns: 1fr 360px; gap: 40px; align-items: start; }
+    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    article h2 { margin: 32px 0 12px; font-size: 22px; font-weight: 700; }
+    article p { margin: 0 0 14px; font-size: 15px; line-height: 1.65; color: #334155; }
+    body[data-theme="dark"] article p { color: #CBD5E1; }
+    aside { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
+    aside h3 { margin: 0 0 10px; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #64748B; }
+    .section-label { margin: 20px 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #64748B; }
+
+    footer { border-top: 1px solid #E2E8F0; padding: 24px 32px; text-align: center; font-size: 12px; color: #64748B; }
+    body[data-theme="dark"] footer { border-top-color: #1E293B; }
+    footer a { color: #0891B2; }
+    code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand"><span class="brand-dot"></span>Sunrise Holidays</div>
+    <nav class="nav-links">
+      <a href="#">Destinations</a>
+      <a href="#">Holidays</a>
+      <a href="#">Cruises</a>
+      <a href="#">About</a>
+    </nav>
+    <div class="header-spacer"></div>
+    <div class="controls" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+      <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>What's the time there now?</h1>
+    <p>A live clock for any set of destinations. Accurate timezones straight from the browser, no API and no key, and it ticks in real time. Pairs perfectly with the weather and currency widgets.</p>
+  </section>
+
+  <section class="layout-showcase">
+    <h2>Layout preview</h2>
+    <p>The same clocks in each layout. Switch to see how they sit.</p>
+    <div class="controls" role="group" aria-label="Layout" style="margin-bottom:20px">
+      <button type="button" data-layout-btn="list" aria-pressed="true">List</button>
+      <button type="button" data-layout-btn="grid" aria-pressed="false">Grid</button>
+      <button type="button" data-layout-btn="card" aria-pressed="false">Card</button>
+    </div>
+    <div class="layout-stage">
+      <div id="demoWidget"></div>
+    </div>
+  </section>
+
+  <main>
+    <article>
+      <div class="section-label">Mid-article placement</div>
+      <h2>Best time to call our resorts</h2>
+      <p>If you want to speak to a property directly, it helps to know what time it is on the ground. Late afternoon their time usually catches the front desk before the evening rush.</p>
+      <p>These clocks update live, so they are always right, even across daylight-saving changes.</p>
+      <div style="margin:0 0 20px"><div id="midWidget"></div></div>
+      <p>For a callback from our team, anywhere in the world, just leave your number and the best time and we will fit around your day.</p>
+    </article>
+
+    <aside>
+      <h3>Our offices</h3>
+      <div id="sidebarWidget"></div>
+    </aside>
+  </main>
+
+  <footer>
+    Demo site — the World Clock is embeddable via a single <code>&lt;script&gt;</code> tag, with no API key. <a href="/">Back to dashboard</a>
+  </footer>
+
+  <script src="/widget-worldclock.js"></script>
+  <script>
+    const isDark = () => document.body.dataset.theme === 'dark';
+
+    function renderDemoWidget(layout) {
+      const host = document.getElementById('demoWidget');
+      if (!host) return;
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'worldclock');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        heading: 'Destination times',
+        destinations: [
+          { label:'London', tz:'Europe/London', cc:'GB' },
+          { label:'New York', tz:'America/New_York', cc:'US' },
+          { label:'Dubai', tz:'Asia/Dubai', cc:'AE' },
+          { label:'Bali', tz:'Asia/Makassar', cc:'ID' },
+          { label:'Sydney', tz:'Australia/Sydney', cc:'AU' },
+          { label:'Barbados', tz:'America/Barbados', cc:'BB' }
+        ],
+        layout: layout, showDate: true, showDayNight: true, showFlags: true,
+        accent: '#0891B2', theme: isDark() ? 'dark' : 'light'
+      }));
+      host.appendChild(div);
+    }
+
+    function renderMidWidget() {
+      const host = document.getElementById('midWidget');
+      if (!host) return;
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'worldclock');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        heading: '',
+        destinations: [
+          { label:'Maldives', tz:'Indian/Maldives', cc:'MV' },
+          { label:'Mauritius', tz:'Indian/Mauritius', cc:'MU' },
+          { label:'Cape Town', tz:'Africa/Johannesburg', cc:'ZA' }
+        ],
+        layout: 'list', showDate: false, showOffset: true, showDayNight: true,
+        accent: '#0891B2', theme: isDark() ? 'dark' : 'light'
+      }));
+      host.appendChild(div);
+    }
+
+    function renderSidebarWidget() {
+      const host = document.getElementById('sidebarWidget');
+      if (!host) return;
+      host.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'worldclock');
+      div.setAttribute('data-tg-config', JSON.stringify({
+        heading: '',
+        destinations: [
+          { label:'London', tz:'Europe/London', cc:'GB' },
+          { label:'Dubai', tz:'Asia/Dubai', cc:'AE' },
+          { label:'Singapore', tz:'Asia/Singapore', cc:'SG' }
+        ],
+        layout: 'card', use24h: true, showDate: true, showSeconds: true, showDayNight: true,
+        accent: '#0891B2', theme: isDark() ? 'dark' : 'light'
+      }));
+      host.appendChild(div);
+    }
+
+    function renderAll() {
+      const btn = document.querySelector('[data-layout-btn][aria-pressed="true"]');
+      renderDemoWidget(btn ? btn.dataset.layoutBtn : 'list');
+      renderMidWidget();
+      renderSidebarWidget();
+    }
+
+    document.querySelectorAll('[data-layout-btn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-layout-btn]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        renderDemoWidget(btn.dataset.layoutBtn);
+      });
+    });
+
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        document.body.dataset.theme = btn.dataset.themeBtn;
+        renderAll();
+      });
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>

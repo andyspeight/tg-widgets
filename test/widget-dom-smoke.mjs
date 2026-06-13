@@ -96,5 +96,31 @@ async function mount(scriptFile, configAttr, { stubFetch = true } = {}) {
   dom.window.close();
 }
 
+// ── 6. World Clock renders live times for multiple zones ──
+{
+  const cfg = JSON.stringify({
+    heading: 'Times',
+    destinations: [
+      { label: 'London', tz: 'Europe/London', cc: 'GB' },
+      { label: 'Tokyo', tz: 'Asia/Tokyo', cc: 'JP' },
+    ],
+    use24h: true, showSeconds: false, showDayNight: true,
+  }).replace(/'/g, '&#39;');
+  const dom = new JSDOM(`<!doctype html><html><body><div data-tg-widget="worldclock" data-tg-config='${cfg}'></div></body></html>`, { runScripts: 'dangerously', url: 'https://x.example/' });
+  const s = dom.window.document.createElement('script');
+  s.textContent = readFileSync(new URL('../public/widget-worldclock.js', import.meta.url), 'utf8');
+  dom.window.document.body.appendChild(s);
+  await sleep(40);
+  const host = dom.window.document.querySelector('[data-tg-widget="worldclock"]');
+  ok(!!host.shadowRoot, 'worldclock: shadow root attached');
+  const times = [...host.shadowRoot.querySelectorAll('[data-role="time"]')];
+  ok(times.length === 2, 'worldclock: one clock per destination (got ' + times.length + ')');
+  ok(times.every(t => /^\d{1,2}:\d{2}$/.test(t.textContent)), 'worldclock: 24h times render as HH:MM (got: ' + times.map(t => t.textContent).join(', ') + ')');
+  ok(times[0].textContent !== times[1].textContent, 'worldclock: London and Tokyo show different times');
+  ok(host.shadowRoot.querySelectorAll('[data-role="dn"] svg').length === 2, 'worldclock: day/night marker rendered per row');
+  ok(typeof dom.window.TGWorldClockWidget === 'function', 'worldclock: exposes window.TGWorldClockWidget');
+  dom.window.close(); // stops the tick interval
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 assert.strictEqual(failed, 0, 'DOM smoke failures');

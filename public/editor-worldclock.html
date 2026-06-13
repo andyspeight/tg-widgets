@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Clock — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input { width:100%; padding:8px 10px; font:inherit; font-size:13px; border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm); background:var(--tgse-panel); color:var(--tgse-ink); transition:border-color 160ms ease, box-shadow 160ms ease; }
+  .input:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel); padding:10px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center; transition:border-color 160ms ease, background 160ms ease; }
+  .pick-btn:hover { background:var(--tgse-hover); }
+  .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .pick-label { font-size:12px; font-weight:600; color:var(--tgse-ink); }
+  .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
+
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  .city-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; max-height:300px; overflow:auto; padding:2px; }
+  .city-chip { display:flex; align-items:center; gap:7px; padding:7px 9px; border:1.5px solid var(--tgse-border); border-radius:var(--tgse-radius-sm); cursor:pointer; font-size:12px; background:var(--tgse-panel); user-select:none; }
+  .city-chip:hover { background:var(--tgse-hover); }
+  .city-chip.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .city-chip .nm { font-weight:600; }
+  .city-count { font-size:11px; color:var(--tgse-ink-3); margin-bottom:8px; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">World Clock</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled world clock" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- CONTENT -->
+      <div class="tgse-panel is-active" data-tab="content">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Heading</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input type="text" class="input" id="heading-input" maxlength="60" placeholder="Destination times">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="tgse-section-label">Destinations</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="city-count" id="city-count"></div>
+            <div class="field">
+              <div class="city-grid" id="city-grid"></div>
+              <span class="field-hint">Pick up to 12. Shown in the order they appear here.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESIGN -->
+      <div class="tgse-panel" data-tab="design">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Layout</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="pick-grid" id="layout-picker">
+                <button type="button" class="pick-btn" data-layout="list"><span class="pick-label">List</span></button>
+                <button type="button" class="pick-btn" data-layout="grid"><span class="pick-label">Grid</span></button>
+                <button type="button" class="pick-btn" data-layout="card"><span class="pick-label">Card</span></button>
+              </div>
+              <span class="field-hint">Card wraps the list in a bordered panel.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Accent colour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
+              </div>
+              <span class="field-hint">Used for the day/night marker.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">Font</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="tgse-panel" data-tab="settings">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+            <span class="tgse-section-label">Display</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">24-hour clock</span><button type="button" class="switch" id="sw-24h" aria-pressed="false"></button></div>
+              <div class="switch-row"><span class="switch-row-label">Show the date</span><button type="button" class="switch is-on" id="sw-date" aria-pressed="true"></button></div>
+              <div class="switch-row"><span class="switch-row-label">Show seconds</span><button type="button" class="switch" id="sw-seconds" aria-pressed="false"></button></div>
+              <div class="switch-row"><span class="switch-row-label">Day / night marker</span><button type="button" class="switch is-on" id="sw-daynight" aria-pressed="true"></button></div>
+              <div class="switch-row"><span class="switch-row-label">Offset from your time</span><button type="button" class="switch" id="sw-offset" aria-pressed="false"></button></div>
+              <div class="switch-row"><span class="switch-row-label">Country flags</span><button type="button" class="switch is-on" id="sw-flags" aria-pressed="true"></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-worldclock.js"></script>
+<style>
+  .pv-faux { width:100%; max-width:620px; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); padding:40px; display:flex; justify-content:center; }
+  .pv-faux[data-bg="dark"] { background:#0B1220; }
+  #widget-mount { width:100%; }
+</style>
+<script>
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+  function flagFor(cc){ var c=String(cc||'').slice(0,2).toUpperCase(); if(!/^[A-Z]{2}$/.test(c)) return ''; return String.fromCodePoint.apply(String,[].map.call(c,function(ch){return 0x1F1E6+ch.charCodeAt(0)-65;})); }
+
+  // Curated travel destinations.
+  const CITIES = [
+    { label:'London', tz:'Europe/London', cc:'GB' },
+    { label:'Paris', tz:'Europe/Paris', cc:'FR' },
+    { label:'Rome', tz:'Europe/Rome', cc:'IT' },
+    { label:'Lisbon', tz:'Europe/Lisbon', cc:'PT' },
+    { label:'Athens', tz:'Europe/Athens', cc:'GR' },
+    { label:'Reykjavik', tz:'Atlantic/Reykjavik', cc:'IS' },
+    { label:'Istanbul', tz:'Europe/Istanbul', cc:'TR' },
+    { label:'New York', tz:'America/New_York', cc:'US' },
+    { label:'Los Angeles', tz:'America/Los_Angeles', cc:'US' },
+    { label:'Cancun', tz:'America/Cancun', cc:'MX' },
+    { label:'Barbados', tz:'America/Barbados', cc:'BB' },
+    { label:'Rio de Janeiro', tz:'America/Sao_Paulo', cc:'BR' },
+    { label:'Dubai', tz:'Asia/Dubai', cc:'AE' },
+    { label:'Maldives', tz:'Indian/Maldives', cc:'MV' },
+    { label:'Mauritius', tz:'Indian/Mauritius', cc:'MU' },
+    { label:'Cape Town', tz:'Africa/Johannesburg', cc:'ZA' },
+    { label:'Marrakech', tz:'Africa/Casablanca', cc:'MA' },
+    { label:'Nairobi', tz:'Africa/Nairobi', cc:'KE' },
+    { label:'Delhi', tz:'Asia/Kolkata', cc:'IN' },
+    { label:'Bangkok', tz:'Asia/Bangkok', cc:'TH' },
+    { label:'Bali', tz:'Asia/Makassar', cc:'ID' },
+    { label:'Singapore', tz:'Asia/Singapore', cc:'SG' },
+    { label:'Hong Kong', tz:'Asia/Hong_Kong', cc:'HK' },
+    { label:'Tokyo', tz:'Asia/Tokyo', cc:'JP' },
+    { label:'Sydney', tz:'Australia/Sydney', cc:'AU' },
+    { label:'Auckland', tz:'Pacific/Auckland', cc:'NZ' },
+    { label:'Fiji', tz:'Pacific/Fiji', cc:'FJ' },
+    { label:'Honolulu', tz:'Pacific/Honolulu', cc:'US' }
+  ];
+  const keyOf = (d) => d.tz + '|' + d.label;
+  const MAX = 12;
+
+  let C = {
+    heading: 'Destination times',
+    destinations: [
+      { label:'London', tz:'Europe/London', cc:'GB' },
+      { label:'New York', tz:'America/New_York', cc:'US' },
+      { label:'Dubai', tz:'Asia/Dubai', cc:'AE' },
+      { label:'Sydney', tz:'Australia/Sydney', cc:'AU' }
+    ],
+    use24h: false, showDate: true, showSeconds: false, showDayNight: true, showOffset: false, showFlags: true,
+    layout: 'list', accent: '#0891B2', theme: 'light', fontFamily: 'Inter',
+  };
+
+  let widgetInst = null;
+
+  const shell = tgse.init({
+    widgetType: 'World Clock',
+    widgetTag: 'worldclock',
+    scriptFile: 'widget-worldclock.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); normalise(); syncUIFromState(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
+    onAIBuild: () => tgse.toast('AI builder coming soon for World Clock', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for World Clock', 'ok'),
+    onThemeToggle: (isDark) => { C.theme = isDark ? 'dark' : 'light'; render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => { loadFromUrl(); },
+  });
+
+  function normalise() {
+    if (!Array.isArray(C.destinations)) C.destinations = [];
+    C.destinations = C.destinations.filter(d => d && d.tz).slice(0, MAX);
+    if (!C.destinations.length) C.destinations = CITIES.slice(0, 3).map(c => Object.assign({}, c));
+  }
+
+  function buildFauxPage() {
+    return '<div class="pv-faux" data-bg="' + (C.theme === 'dark' ? 'dark' : 'light') + '"><div data-tg-widget="worldclock" id="widget-mount"></div></div>';
+  }
+
+  function render() {
+    const frame = document.getElementById('pv-frame');
+    if (!frame) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    frame.innerHTML = buildFauxPage();
+    const host = document.getElementById('widget-mount');
+    if (!host) return;
+    requestAnimationFrame(() => {
+      if (window.TGWorldClockWidget) {
+        try { widgetInst = new window.TGWorldClockWidget(host, Object.assign({}, C, { previewMode: true })); }
+        catch (e) { console.error(e); }
+      }
+    });
+  }
+
+  function isSelected(city) { return C.destinations.some(d => keyOf(d) === keyOf(city)); }
+
+  function buildCityGrid() {
+    const grid = document.getElementById('city-grid');
+    grid.innerHTML = CITIES.map(city =>
+      '<label class="city-chip' + (isSelected(city) ? ' is-on' : '') + '" data-key="' + keyOf(city) + '">' +
+        '<span>' + flagFor(city.cc) + '</span><span class="nm">' + city.label + '</span>' +
+      '</label>').join('');
+    document.getElementById('city-count').textContent = C.destinations.length + ' of ' + MAX + ' selected';
+  }
+
+  function toggleSwitch(id, on) { const el = document.getElementById(id); if (!el) return; el.classList.toggle('is-on', !!on); el.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+
+  function syncUIFromState() {
+    document.getElementById('heading-input').value = C.heading || '';
+    document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2';
+    document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
+    document.querySelectorAll('#layout-picker [data-layout]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-layout') === C.layout));
+    toggleSwitch('sw-24h', C.use24h);
+    toggleSwitch('sw-date', C.showDate);
+    toggleSwitch('sw-seconds', C.showSeconds);
+    toggleSwitch('sw-daynight', C.showDayNight);
+    toggleSwitch('sw-offset', C.showOffset);
+    toggleSwitch('sw-flags', C.showFlags);
+    buildCityGrid();
+  }
+
+  // Wiring
+  document.getElementById('heading-input').addEventListener('input', e => { C.heading = e.target.value; shell.markDirty(); render(); });
+
+  document.getElementById('city-grid').addEventListener('click', e => {
+    const chip = e.target.closest('[data-key]'); if (!chip) return;
+    e.preventDefault();
+    const k = chip.getAttribute('data-key');
+    const city = CITIES.find(c => keyOf(c) === k); if (!city) return;
+    const i = C.destinations.findIndex(d => keyOf(d) === k);
+    if (i >= 0) {
+      if (C.destinations.length <= 1) { tgse.toast('Keep at least one destination', 'ok'); return; }
+      C.destinations.splice(i, 1);
+    } else {
+      if (C.destinations.length >= MAX) { tgse.toast('Up to ' + MAX + ' destinations', 'ok'); return; }
+      C.destinations.push(Object.assign({}, city));
+    }
+    // Keep the display order matching the curated list for predictability.
+    C.destinations.sort((a, b) => CITIES.findIndex(c => keyOf(c) === keyOf(a)) - CITIES.findIndex(c => keyOf(c) === keyOf(b)));
+    syncUIFromState(); shell.markDirty(); render();
+  });
+
+  document.getElementById('layout-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-layout]'); if (!b) return;
+    C.layout = b.getAttribute('data-layout');
+    document.querySelectorAll('#layout-picker [data-layout]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+
+  (function wireColour() {
+    const col = document.getElementById('accent-col'), hex = document.getElementById('accent-hex');
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); render(); } });
+  })();
+
+  function wireSwitch(id, key) { const el = document.getElementById(id); el.addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); shell.markDirty(); render(); }); }
+  wireSwitch('sw-24h', 'use24h');
+  wireSwitch('sw-date', 'showDate');
+  wireSwitch('sw-seconds', 'showSeconds');
+  wireSwitch('sw-daynight', 'showDayNight');
+  wireSwitch('sw-offset', 'showOffset');
+  wireSwitch('sw-flags', 'showFlags');
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { normalise(); render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        normalise(); syncUIFromState(); render();
+      })
+      .catch(() => tgse.toast('Failed to load widget', 'err'));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    normalise(); syncUIFromState();
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); else render(); });
+    } else { if (tgse.isLoggedIn()) loadFromUrl(); else render(); }
+  });
+</script>
+</body>
+</html>
