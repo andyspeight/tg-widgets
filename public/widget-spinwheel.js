@@ -121,29 +121,75 @@
     _segColor(i) {
       const s = this.cfg.segments[i];
       if (s.color) return s.color;
-      const n = this.cfg.segments.length;
-      const hue = (hexToHue(this.cfg.accent) + Math.round(i * 360 / n)) % 360;
-      return `hsl(${hue}, 66%, ${i % 2 ? 52 : 58}%)`;
+      // Premium two-tone: the vivid brand accent alternating with a deep tinted
+      // dark. High contrast, white labels read on both, never a rainbow mess.
+      const h = hexToHue(this.cfg.accent);
+      return (i % 2 === 0) ? this.cfg.accent : `hsl(${h}, 38%, 17%)`;
     }
 
     _wheelSvg() {
       const segs = this.cfg.segments;
       const n = segs.length;
       const seg = 360 / n;
-      let paths = '', labels = '';
+      const R = 0.86;
+      let paths = '', dividers = '', labels = '';
       for (let i = 0; i < n; i++) {
         const a0 = i * seg, a1 = (i + 1) * seg;
-        const [x0, y0] = pt(a0, 1), [x1, y1] = pt(a1, 1);
+        const [x0, y0] = pt(a0, R), [x1, y1] = pt(a1, R);
         const large = seg > 180 ? 1 : 0;
-        paths += `<path d="M50,50 L${x0.toFixed(2)},${y0.toFixed(2)} A50,50 0 ${large},1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${this._segColor(i)}" stroke="rgba(255,255,255,.55)" stroke-width="0.5"/>`;
+        paths += `<path d="M50,50 L${x0.toFixed(2)},${y0.toFixed(2)} A43,43 0 ${large},1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${this._segColor(i)}"/>`;
+        dividers += `<line x1="50" y1="50" x2="${x0.toFixed(2)}" y2="${y0.toFixed(2)}" stroke="rgba(255,255,255,.5)" stroke-width="0.45"/>`;
         const mid = a0 + seg / 2;
-        const [lx, ly] = pt(mid, 0.62);
+        const [lx, ly] = pt(mid, 0.55);
         let rot = mid;
         if (mid > 90 && mid < 270) rot = mid + 180;
-        const label = segs[i].label.length > 14 ? segs[i].label.slice(0, 13) + '…' : segs[i].label;
-        labels += `<text x="${lx.toFixed(2)}" y="${ly.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${lx.toFixed(2)} ${ly.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="4.6" font-weight="700" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.18);stroke-width:.4px">${esc(label)}</text>`;
+        const label = segs[i].label.length > 16 ? segs[i].label.slice(0, 15) + '…' : segs[i].label;
+        labels += `<text x="${lx.toFixed(2)}" y="${ly.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${lx.toFixed(2)} ${ly.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="4.3" font-weight="700" letter-spacing="0.08" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.30);stroke-width:.62px">${esc(label)}</text>`;
       }
-      return `<g class="sw-rot">${paths}${labels}</g><circle cx="50" cy="50" r="50" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="1"/>`;
+      let bulbs = ''; const NB = 24;
+      for (let i = 0; i < NB; i++) { const [bx, by] = pt(i * (360 / NB), 0.935); bulbs += `<circle cx="${bx.toFixed(2)}" cy="${by.toFixed(2)}" r="1.15" fill="url(#swBulb)"/>`; }
+      return `
+        <defs>
+          <radialGradient id="swDome" cx="50%" cy="33%" r="62%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+            <stop offset="40%" stop-color="#ffffff" stop-opacity="0.06"/>
+            <stop offset="70%" stop-color="#000000" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0.20"/>
+          </radialGradient>
+          <linearGradient id="swRim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#243149"/>
+            <stop offset="52%" stop-color="#101a2c"/>
+            <stop offset="100%" stop-color="#070b14"/>
+          </linearGradient>
+          <radialGradient id="swBulb" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#fff7da"/>
+            <stop offset="55%" stop-color="#ffdd84"/>
+            <stop offset="100%" stop-color="#bd8b2c"/>
+          </radialGradient>
+          <linearGradient id="swPin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffe6a0"/>
+            <stop offset="45%" stop-color="#F4C95D"/>
+            <stop offset="100%" stop-color="#d89a2f"/>
+          </linearGradient>
+          <filter id="swDrop" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="1.6" stdDeviation="2.4" flood-color="#0b1220" flood-opacity="0.38"/>
+          </filter>
+        </defs>
+        <circle cx="50" cy="50" r="50" fill="url(#swRim)" filter="url(#swDrop)"/>
+        <circle cx="50" cy="50" r="49.3" fill="none" stroke="#3c4d6b" stroke-width="0.5"/>
+        ${bulbs}
+        <g class="sw-rot">
+          ${paths}
+          ${dividers}
+          ${labels}
+        </g>
+        <circle cx="50" cy="50" r="43" fill="url(#swDome)" pointer-events="none"/>
+        <circle cx="50" cy="50" r="43.2" fill="none" stroke="url(#swPin)" stroke-width="1.1"/>
+        <g filter="url(#swDrop)">
+          <path d="M50 9 L44.6 2.8 Q50 0.4 55.4 2.8 Z" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5" stroke-linejoin="round"/>
+          <circle cx="50" cy="3.4" r="2.3" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5"/>
+          <circle cx="49.2" cy="2.7" r="0.65" fill="#fff8e2" opacity="0.85"/>
+        </g>`;
     }
 
     _build() {
@@ -160,31 +206,44 @@
         <style>
           :host { all: initial; }
           * { box-sizing: border-box; }
-          .sw { font-family: ${c.fontFamily}; color: ${ink}; ${card ? `background:${panel};border:1px solid ${border};border-radius:16px;padding:24px 22px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 10px 30px rgba(15,23,42,.04);` : ''} max-width: 380px; text-align:center; }
-          .sw-head { font-size: 18px; font-weight: 800; margin: 0 0 16px; letter-spacing: -.01em; }
+          .sw { font-family: ${c.fontFamily}; color: ${ink}; ${card ? `background:${panel};border:1px solid ${border};border-radius:18px;padding:26px 22px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 18px 42px rgba(15,23,42,.10);` : ''} max-width: 380px; text-align:center; }
+          .sw-head { font-size: 19px; font-weight: 800; margin: 0 0 18px; letter-spacing: -.015em; }
           .sw-stage { position: relative; width: 300px; max-width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
-          .sw-wheel { width: 100%; height: 100%; display: block; filter: drop-shadow(0 6px 16px rgba(15,23,42,.18)); border-radius: 50%; }
+          .sw-wheel { width: 100%; height: 100%; display: block; }
           .sw-rot { transform-box: fill-box; transform-origin: 50% 50%; }
-          .sw-pointer { position:absolute; top:-4px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:11px solid transparent; border-right:11px solid transparent; border-top:18px solid ${c.accent}; z-index:3; filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
-          .sw-hub { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:74px; height:74px; border-radius:50%; border:4px solid #fff; background:${c.accent}; color:#fff; font:inherit; font-weight:800; font-size:15px; cursor:pointer; z-index:2; box-shadow:0 3px 10px rgba(15,23,42,.25); transition: transform .12s ease; }
-          .sw-hub:hover { transform:translate(-50%,-50%) scale(1.05); }
-          .sw-hub:disabled { cursor:not-allowed; opacity:.85; }
-          .sw-result { margin-top:18px; padding:16px; background:${res}; border:1px solid ${border}; border-radius:12px; }
+          .sw-hub { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:86px; height:86px; border-radius:50%; border:0; padding:0; cursor:pointer; z-index:3;
+            background:${c.accent};
+            background:radial-gradient(circle at 50% 32%, color-mix(in srgb, ${c.accent} 70%, #ffffff 30%), ${c.accent} 58%, color-mix(in srgb, ${c.accent} 62%, #000000 38%));
+            box-shadow:0 0 0 4px #ffffff, 0 0 0 7px #E9B949, 0 8px 18px rgba(11,18,32,.42), inset 0 2px 6px rgba(255,255,255,.5), inset 0 -4px 8px rgba(0,0,0,.28);
+            color:#fff; font:inherit; font-weight:800; font-size:15px; letter-spacing:.1em; text-transform:uppercase;
+            display:flex; align-items:center; justify-content:center; transition: transform .14s ease; }
+          .sw-hub:hover:not(:disabled) { transform:translate(-50%,-50%) scale(1.06); }
+          .sw-hub:active:not(:disabled) { transform:translate(-50%,-50%) scale(.96); }
+          .sw-hub:disabled { cursor:default; }
+          .sw-hub::before { content:''; position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 3px ${c.accent}; opacity:0; animation: swPing 2.4s ease-out infinite; pointer-events:none; }
+          .sw-hub:disabled::before { display:none; }
+          @keyframes swPing { 0% { transform:scale(1); opacity:.5 } 70% { transform:scale(1.5); opacity:0 } 100% { opacity:0 } }
+          .sw-result { margin-top:20px; padding:18px 16px; border:1px solid ${border}; border-radius:14px; background:${res}; background:linear-gradient(180deg, ${dark ? '#0f1a2e' : '#FBFCFE'}, ${res}); }
           .sw-result[hidden] { display:none; }
-          .sw-res-title { font-size:17px; font-weight:800; letter-spacing:-.01em; }
+          .sw-result:not([hidden]) { animation: swReveal .45s cubic-bezier(.2,.9,.3,1.2) both; }
+          @keyframes swReveal { from { opacity:0; transform:translateY(10px) scale(.95) } to { opacity:1; transform:none } }
+          .sw-res-badge { width:42px; height:42px; margin:0 auto 9px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:${ink2}22; background:color-mix(in srgb, ${c.accent} 16%, transparent); }
+          .sw-res-badge svg { width:22px; height:22px; stroke:${c.accent}; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+          .sw-res-title { font-size:19px; font-weight:800; letter-spacing:-.01em; line-height:1.2; }
           .sw-res-text { font-size:13px; color:${ink2}; margin-top:6px; line-height:1.5; }
-          .sw-cta { display:inline-block; margin-top:12px; background:${c.accent}; color:#fff; text-decoration:none; font-weight:700; font-size:14px; padding:10px 18px; border-radius:10px; }
-          .sw-cta:hover { filter:brightness(1.05); }
+          .sw-cta { display:inline-block; margin-top:14px; background:${c.accent}; color:#fff; text-decoration:none; font-weight:700; font-size:14px; padding:11px 20px; border-radius:11px; box-shadow:0 6px 16px rgba(15,23,42,.16); transition:transform .14s ease, box-shadow .14s ease; }
+          .sw-cta:hover { transform:translateY(-1px); box-shadow:0 9px 22px rgba(15,23,42,.22); }
           .sw-cta[hidden] { display:none; }
+          @media (prefers-reduced-motion: reduce) { .sw-hub::before { animation:none; display:none } .sw-result:not([hidden]) { animation:none } }
         </style>
         <div class="sw">
           ${c.heading ? `<h3 class="sw-head">${esc(c.heading)}</h3>` : ''}
           <div class="sw-stage">
-            <div class="sw-pointer" aria-hidden="true"></div>
             <svg class="sw-wheel" viewBox="0 0 100 100" role="img" aria-label="Prize wheel">${this._wheelSvg()}</svg>
             <button class="sw-hub" id="spin" type="button">${esc(c.buttonText)}</button>
           </div>
           <div class="sw-result" id="result" hidden>
+            <div class="sw-res-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.6 7 22l5-3 5 3-1.5-8.4"/></svg></div>
             <div class="sw-res-title" id="res-title"></div>
             <div class="sw-res-text" id="res-text"></div>
             <a class="sw-cta" id="cta" rel="noopener" hidden></a>
