@@ -159,6 +159,71 @@
     return typeof s === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
   }
 
+  // ── Audience conditions ─────────────────────────────────────────────
+  // Memoised per page load so every popup on the page agrees on whether the
+  // visitor was already known when the page opened, and we only mark once.
+  let _returningMemo = null;
+  function isReturningVisitor() {
+    if (_returningMemo !== null) return _returningMemo;
+    const seen = !!readKey('visitor_seen', 'local');
+    _returningMemo = seen;
+    if (!seen) { try { writeKey('visitor_seen', Date.now(), 'local'); } catch (e) { /* ignore */ } }
+    return seen;
+  }
+
+  // Capture the entry referrer + UTM params once per session, so source
+  // conditions keep working after the visitor navigates deeper into the site
+  // (UTM params usually only sit on the landing URL).
+  function getEntrySource() {
+    let src = readKey('entry_src', 'session');
+    if (!src) {
+      let params = null;
+      try { params = new URLSearchParams(window.location.search); } catch (e) { /* noop */ }
+      const g = (k) => { try { return (params && params.get(k)) || ''; } catch (e) { return ''; } };
+      src = {
+        ref: String(document.referrer || '').toLowerCase(),
+        source: g('utm_source').toLowerCase(),
+        medium: g('utm_medium').toLowerCase(),
+        campaign: g('utm_campaign').toLowerCase()
+      };
+      writeKey('entry_src', src, 'session');
+    }
+    return src;
+  }
+
+  function sourceMatches(sc) {
+    if (!sc || !sc.enabled) return true;
+    const src = getEntrySource();
+    const refs = Array.isArray(sc.referrers) ? sc.referrers.map(r => String(r).trim().toLowerCase()).filter(Boolean) : [];
+    if (refs.length && !refs.some(r => src.ref.indexOf(r) !== -1)) return false;
+    const u = (v) => String(v || '').trim().toLowerCase();
+    if (u(sc.utmSource) && src.source !== u(sc.utmSource)) return false;
+    if (u(sc.utmMedium) && src.medium !== u(sc.utmMedium)) return false;
+    if (u(sc.utmCampaign) && src.campaign !== u(sc.utmCampaign)) return false;
+    return true;
+  }
+
+  // Date / weekday / time-of-day window in the visitor's local time.
+  function scheduleMatches(sch) {
+    if (!sch || !sch.enabled) return true;
+    const now = new Date();
+    const ymd = (s) => { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? [+m[1], +m[2], +m[3]] : null; };
+    const start = ymd(sch.startDate);
+    if (start && now < new Date(start[0], start[1] - 1, start[2], 0, 0, 0, 0)) return false;
+    const end = ymd(sch.endDate);
+    if (end && now > new Date(end[0], end[1] - 1, end[2], 23, 59, 59, 999)) return false;
+    const days = Array.isArray(sch.days) ? sch.days.map(Number).filter(n => n >= 0 && n <= 6) : [];
+    if (days.length && days.length < 7 && days.indexOf(now.getDay()) === -1) return false;
+    const toMin = (s) => { const m = String(s || '').match(/^(\d{1,2}):(\d{2})$/); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+    const ts = toMin(sch.timeStart), te = toMin(sch.timeEnd);
+    if (ts !== null && te !== null) {
+      const cur = now.getHours() * 60 + now.getMinutes();
+      if (ts <= te) { if (cur < ts || cur > te) return false; }
+      else { if (cur < ts && cur > te) return false; } // overnight window (e.g. 22:00–02:00)
+    }
+    return true;
+  }
+
   // ---------- Inline SVG icons (no external deps) ----------
   const IC = {
     close: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M6 18L18 6"/>',
@@ -242,6 +307,11 @@
 
     // Device targeting
     devices: { desktop: true, tablet: true, mobile: true },
+
+    // Audience conditions
+    visitorType: 'all', // all | new | returning
+    sourceCondition: { enabled: false, referrers: [], utmSource: '', utmMedium: '', utmCampaign: '' },
+    schedule: { enabled: false, startDate: '', endDate: '', days: [], timeStart: '', timeEnd: '' },
 
     // Behaviour
     closeOnEscape: true,
@@ -365,6 +435,9 @@
 
   // ---------- Eligibility check ----------
   function shouldShow(cfg) {
+    // Editor preview bypasses every gate so the design always renders.
+    if (cfg.previewMode) return { show: true };
+
     // Page targeting
     const path = window.location.pathname + window.location.search;
     if (Array.isArray(cfg.pageInclude) && cfg.pageInclude.length > 0) {
@@ -380,6 +453,19 @@
     const dev = getDeviceType();
     const dt = cfg.devices || {};
     if (dt[dev] === false) return { show: false, reason: 'device-excluded' };
+
+    // Visitor type (new vs returning). Always touch the marker so 'returning'
+    // works on later visits even when this popup targets everyone.
+    const vt = cfg.visitorType || 'all';
+    const returning = isReturningVisitor();
+    if (vt === 'new' && returning) return { show: false, reason: 'not-new-visitor' };
+    if (vt === 'returning' && !returning) return { show: false, reason: 'not-returning-visitor' };
+
+    // Traffic source (referrer / UTM)
+    if (!sourceMatches(cfg.sourceCondition)) return { show: false, reason: 'source-mismatch' };
+
+    // Schedule (dates / weekdays / time of day)
+    if (!scheduleMatches(cfg.schedule)) return { show: false, reason: 'out-of-schedule' };
 
     // Frequency
     const id = cfg.widgetId || 'default';

@@ -202,5 +202,32 @@ async function mount(scriptFile, configAttr, { stubFetch = true } = {}) {
   dom.window.close();
 }
 
+// ── 10. Popup audience / schedule conditions gate the display ──
+{
+  const popupJs = readFileSync(new URL('../public/widget-popup.js', import.meta.url), 'utf8');
+  const mountPopup = async (cfg, opts = {}) => {
+    const base = { trigger: 'load', triggerDelay: 0, frequency: 'every-visit', contentType: 'announcement', title: 'Hi', body: 'Yo' };
+    const attr = JSON.stringify(Object.assign(base, cfg)).replace(/'/g, '&#39;');
+    const dom = new JSDOM(`<!doctype html><html><body><div data-tg-widget="popup" data-tg-config='${attr}'></div></body></html>`,
+      { runScripts: 'dangerously', pretendToBeVisual: true, url: opts.url || 'https://x.example/', referrer: opts.referrer });
+    const s = dom.window.document.createElement('script');
+    s.textContent = popupJs;
+    dom.window.document.body.appendChild(s);
+    await sleep(70);
+    return dom;
+  };
+  const shown = (dom) => { const el = dom.window.document.querySelector('[data-tg-widget="popup"]'); return !!(el && el.shadowRoot && el.shadowRoot.innerHTML.trim().length > 30); };
+
+  let d;
+  d = await mountPopup({}); ok(shown(d), 'popup: shows with no conditions (sanity)'); d.window.close();
+  d = await mountPopup({ visitorType: 'new' }); ok(shown(d), 'popup: new-visitor condition shows on a first visit'); d.window.close();
+  d = await mountPopup({ visitorType: 'returning' }); ok(!shown(d), 'popup: returning-only is hidden for a first-time visitor'); d.window.close();
+  d = await mountPopup({ schedule: { enabled: true, endDate: '2000-01-01' } }); ok(!shown(d), 'popup: schedule with a past end date hides it'); d.window.close();
+  d = await mountPopup({ schedule: { enabled: true, startDate: '2000-01-01', endDate: '2999-12-31' } }); ok(shown(d), 'popup: schedule covering today shows it'); d.window.close();
+  d = await mountPopup({ sourceCondition: { enabled: true, utmSource: 'google' } }); ok(!shown(d), 'popup: UTM condition hides it when the param is absent'); d.window.close();
+  d = await mountPopup({ sourceCondition: { enabled: true, utmSource: 'google' } }, { url: 'https://x.example/?utm_source=google' }); ok(shown(d), 'popup: UTM condition shows it when the param matches'); d.window.close();
+  d = await mountPopup({ sourceCondition: { enabled: true, referrers: ['google.com'] } }, { referrer: 'https://www.google.com/search' }); ok(shown(d), 'popup: referrer condition shows it for a matching referrer'); d.window.close();
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 assert.strictEqual(failed, 0, 'DOM smoke failures');

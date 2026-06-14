@@ -443,6 +443,14 @@
             <div class="sec-body" id="sb-devices"></div>
           </div>
 
+          <div class="sec">
+            <button class="sec-head" type="button">
+              <span class="sec-title">Audience &amp; schedule</span>
+              <svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sec-body" id="sb-conditions"></div>
+          </div>
+
         </div>
 
       </div>
@@ -549,6 +557,9 @@
     pageInclude: [],
     pageExclude: [],
     devices: { desktop: true, tablet: true, mobile: true },
+    visitorType: 'all',
+    sourceCondition: { enabled: false, referrers: [], utmSource: '', utmMedium: '', utmCampaign: '' },
+    schedule: { enabled: false, startDate: '', endDate: '', days: [], timeStart: '', timeEnd: '' },
     closeOnEscape: true,
     closeOnBackdropClick: true,
     showCloseButton: true,
@@ -1028,6 +1039,7 @@
       trigger: 'load',
       triggerDelay: 0,
       widgetId: '__preview__',
+      previewMode: true, // bypass all audience/schedule/targeting gates in preview
     });
 
     const hostId = C.layout === 'inline' ? 'pv-host-inline' : 'pv-host-overlay';
@@ -1076,6 +1088,97 @@
       });
   }
 
+  /* ── Audience & schedule conditions ──────────────────── */
+  function renderConditionsSection() {
+    const host = $('#sb-conditions');
+    if (!host) return;
+
+    const sc = C.sourceCondition || (C.sourceCondition = { enabled: false, referrers: [], utmSource: '', utmMedium: '', utmCampaign: '' });
+    if (!Array.isArray(sc.referrers)) sc.referrers = [];
+    const sch = C.schedule || (C.schedule = { enabled: false, startDate: '', endDate: '', days: [], timeStart: '', timeEnd: '' });
+    if (!Array.isArray(sch.days)) sch.days = [];
+    const vt = C.visitorType || 'all';
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayOn = (i) => (!sch.days.length || sch.days.indexOf(i) !== -1);
+
+    host.innerHTML = `
+      <div class="field">
+        <label class="field-label">Visitor</label>
+        <select class="select" id="cond-visitor">
+          <option value="all"${vt === 'all' ? ' selected' : ''}>Everyone</option>
+          <option value="new"${vt === 'new' ? ' selected' : ''}>First-time visitors only</option>
+          <option value="returning"${vt === 'returning' ? ' selected' : ''}>Returning visitors only</option>
+        </select>
+        <div class="field-hint">"First-time" means their first ever visit to your site, remembered in their browser.</div>
+      </div>
+
+      <div class="switch-row" style="margin-top:4px">
+        <div class="switch-text">
+          <div class="switch-text-title">Traffic source</div>
+          <div class="switch-text-sub">Only show to visitors from a given referrer or campaign.</div>
+        </div>
+        <button class="switch ${sc.enabled ? 'is-on' : ''}" type="button" id="cond-src-toggle" aria-label="Toggle traffic source"></button>
+      </div>
+      <div id="cond-src-body" style="${sc.enabled ? '' : 'opacity:.45;pointer-events:none'}">
+        <div class="field">
+          <label class="field-label">Referrer contains (one per line)</label>
+          <textarea class="textarea" id="cond-referrers" rows="2" placeholder="e.g. google.com&#10;facebook.com">${escHtml(sc.referrers.join('\n'))}</textarea>
+          <div class="field-hint">Matches the site the visitor came from. Any one line matching is enough.</div>
+        </div>
+        <div class="field"><label class="field-label">UTM source</label><input class="input" id="cond-utm-source" placeholder="e.g. google" value="${escHtml(sc.utmSource || '')}"></div>
+        <div class="field"><label class="field-label">UTM medium</label><input class="input" id="cond-utm-medium" placeholder="e.g. cpc" value="${escHtml(sc.utmMedium || '')}"></div>
+        <div class="field"><label class="field-label">UTM campaign</label><input class="input" id="cond-utm-campaign" placeholder="e.g. summer-sale" value="${escHtml(sc.utmCampaign || '')}"></div>
+        <div class="field-hint">UTM values are read from the link the visitor first arrived on and remembered for their session. Blank fields are ignored.</div>
+      </div>
+
+      <div class="switch-row" style="margin-top:6px">
+        <div class="switch-text">
+          <div class="switch-text-title">Schedule</div>
+          <div class="switch-text-sub">Only run between dates, on chosen days and times.</div>
+        </div>
+        <button class="switch ${sch.enabled ? 'is-on' : ''}" type="button" id="cond-sch-toggle" aria-label="Toggle schedule"></button>
+      </div>
+      <div id="cond-sch-body" style="${sch.enabled ? '' : 'opacity:.45;pointer-events:none'}">
+        <div class="field" style="display:flex;gap:8px">
+          <div style="flex:1"><label class="field-label">Start date</label><input type="date" class="input" id="cond-start" value="${escHtml(sch.startDate || '')}"></div>
+          <div style="flex:1"><label class="field-label">End date</label><input type="date" class="input" id="cond-end" value="${escHtml(sch.endDate || '')}"></div>
+        </div>
+        <div class="field">
+          <label class="field-label">Days of week</label>
+          <div style="display:flex;gap:4px">${dayNames.map((d, i) => `<button type="button" data-day="${i}" style="flex:1;padding:6px 0;border:1px solid var(--tgse-border);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:${dayOn(i) ? 'var(--tgse-brand)' : 'var(--tgse-panel)'};color:${dayOn(i) ? '#fff' : 'var(--tgse-ink)'}">${d}</button>`).join('')}</div>
+          <div class="field-hint">All on = every day.</div>
+        </div>
+        <div class="field" style="display:flex;gap:8px">
+          <div style="flex:1"><label class="field-label">From time</label><input type="time" class="input" id="cond-tstart" value="${escHtml(sch.timeStart || '')}"></div>
+          <div style="flex:1"><label class="field-label">To time</label><input type="time" class="input" id="cond-tend" value="${escHtml(sch.timeEnd || '')}"></div>
+        </div>
+        <div class="field-hint">Uses the visitor's local time. Leave times blank for all day.</div>
+      </div>
+    `;
+
+    $('#cond-visitor').addEventListener('change', e => { C.visitorType = e.target.value; shell.markDirty(); });
+    $('#cond-src-toggle').addEventListener('click', () => { sc.enabled = !sc.enabled; shell.markDirty(); renderConditionsSection(); });
+    $('#cond-referrers').addEventListener('input', e => { sc.referrers = String(e.target.value || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, 30); shell.markDirty(); });
+    $('#cond-utm-source').addEventListener('input', e => { sc.utmSource = e.target.value.trim(); shell.markDirty(); });
+    $('#cond-utm-medium').addEventListener('input', e => { sc.utmMedium = e.target.value.trim(); shell.markDirty(); });
+    $('#cond-utm-campaign').addEventListener('input', e => { sc.utmCampaign = e.target.value.trim(); shell.markDirty(); });
+    $('#cond-sch-toggle').addEventListener('click', () => { sch.enabled = !sch.enabled; shell.markDirty(); renderConditionsSection(); });
+    $('#cond-start').addEventListener('change', e => { sch.startDate = e.target.value; shell.markDirty(); });
+    $('#cond-end').addEventListener('change', e => { sch.endDate = e.target.value; shell.markDirty(); });
+    $('#cond-tstart').addEventListener('change', e => { sch.timeStart = e.target.value; shell.markDirty(); });
+    $('#cond-tend').addEventListener('change', e => { sch.timeEnd = e.target.value; shell.markDirty(); });
+    $$('[data-day]', host).forEach(b => {
+      b.addEventListener('click', () => {
+        let days = sch.days.length ? sch.days.slice() : [0, 1, 2, 3, 4, 5, 6];
+        const i = +b.getAttribute('data-day');
+        const at = days.indexOf(i);
+        if (at === -1) days.push(i); else days.splice(at, 1);
+        sch.days = days.sort((a, b) => a - b);
+        shell.markDirty(); renderConditionsSection();
+      });
+    });
+  }
+
   function renderAll() {
     renderLayoutPicker();
     renderTriggerPicker();
@@ -1087,6 +1190,7 @@
     renderFrequencySection();
     renderPagesSection();
     renderDevicesSection();
+    renderConditionsSection();
     render();
   }
 
