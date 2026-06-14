@@ -3414,6 +3414,65 @@ function loadMiniPreview(w) {
       </div>
     `;
   }
+
+  if (w.id === 'currency' && window.TGCurrencyWidget) {
+    el.style.cssText = 'width:100%;display:flex;justify-content:center';
+    new window.TGCurrencyWidget(el, {
+      heading:'Currency converter', baseCurrency:'GBP',
+      currencies:['GBP','EUR','USD','AUD'], defaultFrom:'GBP', defaultTo:'EUR',
+      defaultAmount:100, decimals:2, accent:w.color, layout:'card', theme:'light',
+      fxData:{ ok:true, base:'GBP', date:'2026-06-13', rates:{ GBP:1, EUR:1.17, USD:1.27, AUD:1.93 } }
+    });
+  }
+
+  if (w.id === 'worldclock' && window.TGWorldClockWidget) {
+    el.style.cssText = 'width:100%;display:flex;justify-content:center';
+    new window.TGWorldClockWidget(el, {
+      heading:'Destination times',
+      destinations:[
+        {label:'London',tz:'Europe/London',cc:'GB'},{label:'New York',tz:'America/New_York',cc:'US'},
+        {label:'Dubai',tz:'Asia/Dubai',cc:'AE'},{label:'Sydney',tz:'Australia/Sydney',cc:'AU'}
+      ],
+      layout:'card', accent:w.color, theme:'light'
+    });
+  }
+
+  if (w.id === 'flighttime' && window.TGFlightTimeWidget) {
+    el.style.cssText = 'width:100%;display:flex;justify-content:center';
+    new window.TGFlightTimeWidget(el, {
+      heading:'Flight time & distance', defaultFrom:'LHR', defaultTo:'JFK',
+      units:'both', accent:w.color, layout:'card', theme:'light'
+    });
+  }
+
+  if (w.id === 'statscounter' && window.TGStatsCounterWidget) {
+    el.style.cssText = 'width:100%;display:flex;justify-content:center';
+    new window.TGStatsCounterWidget(el, {
+      heading:'Why clients choose us',
+      stats:[
+        {value:12000,label:'Happy clients',suffix:'+'},{value:98,label:'Would recommend',suffix:'%'},
+        {value:25,label:'Years',suffix:''},{value:4.9,label:'Rating',suffix:'/5',decimals:1}
+      ],
+      columns:4, layout:'card', align:'center', accent:w.color, theme:'light', animate:false
+    });
+  }
+
+  if (w.id === 'spinwheel' && window.TGSpinWheelWidget) {
+    el.style.cssText = 'width:100%;display:flex;justify-content:center';
+    new window.TGSpinWheelWidget(el, {
+      heading:'Spin to win your next trip',
+      segments:[{label:'Bali'},{label:'Maldives'},{label:'Dubai'},{label:'New York'},{label:'Barbados'},{label:'Rome'}],
+      accent:w.color, layout:'card', theme:'light', previewMode:true
+    });
+  }
+
+  if (w.id === 'loader' && window.TGLoaderWidget) {
+    el.style.cssText = 'width:100%;display:flex;justify-content:center;padding:24px 0';
+    new window.TGLoaderWidget(el, {
+      template:'plane-path', size:150, theme:'light',
+      colors:{ primary:w.color, secondary:'#1B2B5B', track:'#E2E8F0' }
+    });
+  }
 }
 
 /* ═══ AUTH ═══ */
@@ -3618,6 +3677,12 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-newsletter.js"></script>
 <script src="/widget-contact.js"></script>
 <script src="/widget-team.js"></script>
+<script src="/widget-currency.js"></script>
+<script src="/widget-worldclock.js"></script>
+<script src="/widget-flighttime.js"></script>
+<script src="/widget-statscounter.js"></script>
+<script src="/widget-spinwheel.js"></script>
+<script src="/widget-loader.js"></script>
 
 <!-- Staff act-as-client switcher (self-gating: only renders for Travelgenix staff) -->
 <script defer src="/staff-switcher.js"></script>
