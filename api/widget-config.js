@@ -194,11 +194,15 @@ function canModifyWidget(record, { sessionClientId, userEmail }) {
 
 // Allowed widget type names. Canonical casing — must match the Airtable
 // singleSelect "WidgetType" option names exactly (the field is case-sensitive).
-// If you add a new widget type, update THREE places:
+// If you add a new widget type, update FIVE places:
 //   1. This constant
 //   2. PLAN_WIDGET_LIMITS below
-//   3. The WidgetType singleSelect options in Airtable
-//   4. The WIDGETS array in public/index.html
+//   3. The WidgetType singleSelect options in Airtable (lets configs save)
+//   4. The WIDGETS array in public/index.html (the client dashboard)
+//   5. A record in the Airtable CATALOGUE table (the admin catalogue page),
+//      added via the "New product" drawer on /admin/catalogue.html, category
+//      "Widget". Without this the widget will not appear in the admin catalogue.
+// Also: editor + demo rewrites and a widget-*.js headers block in vercel.json.
 const ALLOWED_WIDGET_TYPES = [
   'Pricing Table',
   'FAQ',
