@@ -237,6 +237,9 @@ const ALLOWED_WIDGET_TYPES = [
   'Back to Top',
   'Announcement Bar',
   'Appointment',
+  'Carousel',
+  'Team Showcase',
+  'World Map',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -279,6 +282,9 @@ const PLAN_WIDGET_LIMITS = {
   'Back to Top':           { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Announcement Bar':      { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Appointment':           { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Carousel':              { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Team Showcase':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'World Map':             { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
