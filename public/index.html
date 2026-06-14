@@ -3473,6 +3473,35 @@ function loadMiniPreview(w) {
       colors:{ primary:w.color, secondary:'#1B2B5B', track:'#E2E8F0' }
     });
   }
+
+  if (w.id === 'appointment' && window.TGAppointmentWidget) {
+    el.style.cssText = 'width:100%;display:flex;justify-content:center';
+    new window.TGAppointmentWidget(el, {
+      heading:'Book a free consultation',
+      subheading:'Pick a time that suits you and a travel expert will be in touch.',
+      accent:w.color, theme:'light', previewMode:true
+    });
+  }
+
+  // Deal Bar pins to the top of the window, so a live mount is awkward in a card.
+  // Use a faithful static mockup instead (same approach as Back to Top).
+  if (w.id === 'dealbar') {
+    container.innerHTML = `
+      <div style="position:relative;width:100%;height:100%;min-height:150px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.06);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;background:${w.color};color:#fff;padding:11px 16px;font-size:13px;font-weight:600;">
+          <span>✈️ Late deals out now. Save up to 40% on selected summer breaks.</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:99px;font-variant-numeric:tabular-nums;font-size:12px;">Ends in 02 : 14 : 39</span>
+          <span style="background:#fff;color:#0F172A;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;">See the deals ›</span>
+        </div>
+        <div style="padding:20px 22px;">
+          <div style="height:14px;width:52%;background:#E2E8F0;border-radius:4px;margin-bottom:14px;"></div>
+          <div style="height:9px;width:100%;background:#EEF2F6;border-radius:4px;margin-bottom:8px;"></div>
+          <div style="height:9px;width:94%;background:#EEF2F6;border-radius:4px;margin-bottom:8px;"></div>
+          <div style="height:9px;width:88%;background:#EEF2F6;border-radius:4px;"></div>
+        </div>
+      </div>`;
+    return;
+  }
 }
 
 /* ═══ AUTH ═══ */
@@ -3683,6 +3712,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-statscounter.js"></script>
 <script src="/widget-spinwheel.js"></script>
 <script src="/widget-loader.js"></script>
+<script src="/widget-appointment.js"></script>
 
 <!-- Staff act-as-client switcher (self-gating: only renders for Travelgenix staff) -->
 <script defer src="/staff-switcher.js"></script>
