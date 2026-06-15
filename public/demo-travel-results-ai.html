@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Results AI — Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#1B2B5B;--ink:#0F172A;--sub:#64748B;--bd:#E2E8F0;--bg:#EEF2F7}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+  header .brand{font-weight:800;letter-spacing:-.01em}
+  header nav{display:flex;gap:20px;font-size:13px;opacity:.85}
+  .bar{max-width:1040px;margin:22px auto 8px;padding:0 24px;display:flex;align-items:baseline;justify-content:space-between}
+  .bar h1{font-size:20px;margin:0}
+  .bar .meta{color:var(--sub);font-size:13px}
+  .results{max-width:1040px;margin:0 auto;padding:14px 24px 80px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:#fff;border:1px solid var(--bd);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .card .img{height:150px;background:linear-gradient(135deg,#94a3b8,#cbd5e1)}
+  .card .body{padding:14px 16px}
+  .card h3{margin:0 0 4px;font-size:16px}
+  .card .loc{color:var(--sub);font-size:12px;margin-bottom:10px}
+  .card .price{font-weight:800;color:var(--navy);font-size:18px}
+  .note{max-width:1040px;margin:0 auto 18px;padding:0 24px;color:var(--sub);font-size:13px}
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">Sunshine Holidays</div>
+    <nav><span>Destinations</span><span>Cruises</span><span>Late Deals</span><span>About</span></nav>
+  </header>
+
+  <div class="bar">
+    <h1>Costa del Sol, Spain</h1>
+    <div class="meta">6 of 361 properties &middot; 12–19 Aug &middot; 2 adults</div>
+  </div>
+  <div class="note">Demo of a results page. The AI trip assistant appears automatically (bottom right) and runs on sample data — try asking it for “a pool”, “more central” or “cheaper”.</div>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    // Render a faux results grid from the same sample the assistant reads.
+    var SAMPLE = {
+      version: 4, searchSession: 'demo-session',
+      criteria: { locationName: 'Costa del Sol, Spain', checkinDate: '2026-08-12', checkoutDate: '2026-08-19', nights: 7, passengers: { total: 2, adults: 2 }, rooms: 1, currency: 'GBP', latitude: 36.51, longitude: -4.88 },
+      results: [
+        { rid: 'p1', name: 'Hotel Marbella Bay', starRating: 4, address: 'Paseo Maritimo, Marbella, Spain', latitude: 36.509, longitude: -4.886, description: 'Seafront hotel with outdoor pool and spa, a short walk to the old town.', goodFor: ['Couples','Beach'], amenities: ['Pool','Spa','Beachfront','Wi-Fi'], tripadvisor: { rating: 4.5, reviewCount: 1820 }, units: [{ name: 'Double Room', rates: [{ board: 'Bed & Breakfast', price: 1190, currency: 'GBP', refundability: 'Refundable' }] }] },
+        { rid: 'p2', name: 'Sol Playa Apartments', starRating: 3, address: 'Avenida del Mar, Fuengirola, Spain', latitude: 36.539, longitude: -4.624, description: 'Self-catering apartments 200m from the beach, ideal for families.', goodFor: ['Families'], amenities: ['Kitchen','Pool','Parking','Wi-Fi'], tripadvisor: { rating: 4.1, reviewCount: 640 }, units: [{ name: 'One-Bedroom Apartment', rates: [{ board: 'Room Only', price: 720, currency: 'GBP', refundability: 'NonRefundable' }] }] },
+        { rid: 'p3', name: 'Gran Hotel Miramar', starRating: 5, address: 'Paseo de Reding, Malaga, Spain', latitude: 36.722, longitude: -4.408, description: 'Five-star grand hotel with sea views, spa and fine dining.', goodFor: ['Luxury','Couples'], amenities: ['Spa','Pool','Restaurant','Wi-Fi'], tripadvisor: { rating: 4.7, reviewCount: 2950 }, units: [{ name: 'Deluxe Sea View', rates: [{ board: 'Bed & Breakfast', price: 2380, currency: 'GBP', refundability: 'Refundable' }] }] },
+        { rid: 'p4', name: 'Torremolinos Central Inn', starRating: 3, address: 'Calle San Miguel, Torremolinos, Spain', latitude: 36.622, longitude: -4.499, description: 'Budget-friendly stay in the heart of town, steps from shops and bars.', goodFor: ['City Break','Budget'], amenities: ['Wi-Fi','Bar'], tripadvisor: { rating: 3.9, reviewCount: 410 }, units: [{ name: 'Standard Double', rates: [{ board: 'Room Only', price: 540, currency: 'GBP', refundability: 'NonRefundable' }] }] },
+        { rid: 'p5', name: 'Estepona Beach Resort', starRating: 4, address: 'Playa del Cristo, Estepona, Spain', latitude: 36.418, longitude: -5.165, description: 'Large beach resort with several pools and an all-inclusive option.', goodFor: ['Families','Beach'], amenities: ['Pool','Beachfront','Kids Club','Wi-Fi'], tripadvisor: { rating: 4.3, reviewCount: 1510 }, units: [{ name: 'Family Room', rates: [{ board: 'All Inclusive', price: 1980, currency: 'GBP', refundability: 'Refundable' }] }] },
+        { rid: 'p6', name: 'Benalmadena Marina Suites', starRating: 4, address: 'Puerto Marina, Benalmadena, Spain', latitude: 36.598, longitude: -4.516, description: 'Stylish suites overlooking the marina with a rooftop pool.', goodFor: ['Couples'], amenities: ['Pool','Rooftop','Wi-Fi','Parking'], tripadvisor: { rating: 4.4, reviewCount: 980 }, units: [{ name: 'Junior Suite', rates: [{ board: 'Bed & Breakfast', price: 1340, currency: 'GBP', refundability: 'Refundable' }] }] }
+      ]
+    };
+    var grid = document.getElementById('results');
+    SAMPLE.results.forEach(function (r) {
+      var price = r.units[0].rates[0].price;
+      var el = document.createElement('div'); el.className = 'card';
+      var img = document.createElement('div'); img.className = 'img'; el.appendChild(img);
+      var body = document.createElement('div'); body.className = 'body';
+      var h = document.createElement('h3'); h.textContent = r.name; body.appendChild(h);
+      var loc = document.createElement('div'); loc.className = 'loc'; loc.textContent = r.address; body.appendChild(loc);
+      var p = document.createElement('div'); p.className = 'price'; p.textContent = '\u00A3' + price.toLocaleString('en-GB') + ' total'; body.appendChild(p);
+      el.appendChild(body); grid.appendChild(el);
+    });
+
+    // Preview mode = the assistant uses its local engine (no API cost) for the demo.
+    window.__TG_TRAI_PREVIEW__ = true;
+  </script>
+
+  <script src="/widget-travel-results-ai.js"></script>
+
+  <script>
+    // Simulate the Travelify results-ready event so the assistant populates.
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        window.dispatchEvent(new CustomEvent('tg:travel-results-v4:accommodation-results-ready', { detail: SAMPLE }));
+      }, 200);
+    });
+  </script>
+</body>
+</html>
