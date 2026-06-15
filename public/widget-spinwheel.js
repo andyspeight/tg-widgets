@@ -66,6 +66,24 @@
     return [50 + r * Math.cos(rad), 50 + r * Math.sin(rad)];
   }
 
+  function hexToRgb(hex) {
+    let h = String(hex || '').replace('#', '');
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    if (!/^[0-9a-f]{6}$/i.test(h)) return null;
+    const n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  // Relative luminance (0..1). Handles hex and hsl() (lightness proxy).
+  function lumOf(color) {
+    const rgb = hexToRgb(color);
+    if (rgb) { const a = rgb.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]; }
+    const m = String(color).match(/hsl\(\s*[\d.]+\s*,\s*[\d.]+%\s*,\s*([\d.]+)%/i);
+    if (m) return (+m[1]) / 100;
+    return 0.5;
+  }
+  // Text colour that reads on a given fill.
+  function textColorOn(fill) { return lumOf(fill) > 0.55 ? '#111418' : '#ffffff'; }
+
   class TGSpinWheelWidget {
     constructor(el, config) {
       this.el = el;
@@ -90,7 +108,7 @@
       if (segs) {
         segs = segs
           .filter(s => s && String(s.label || '').trim())
-          .map(s => ({ label: String(s.label).slice(0, 28), weight: Math.max(0, Number(s.weight) || 1), color: hexOk(s.color) ? s.color : '' }))
+          .map(s => ({ label: String(s.label).slice(0, 28), description: String(s.description || '').slice(0, 40), weight: Math.max(0, Number(s.weight) || 1), color: hexOk(s.color) ? s.color : '' }))
           .slice(0, 12);
       }
       if (!segs || segs.length < 2) segs = [
@@ -101,15 +119,21 @@
       if (segs.every(s => s.weight === 0)) segs.forEach(s => s.weight = 1);
       return {
         heading: typeof c.heading === 'string' ? c.heading : 'Spin to win your next trip',
+        subheading: typeof c.subheading === 'string' ? c.subheading : '',
+        logo: safeUrl(c.logo) || '',
         segments: segs,
         buttonText: String(c.buttonText || 'Spin').slice(0, 18),
+        buttonPlacement: c.buttonPlacement === 'top' ? 'top' : 'hub',
         resultTitle: typeof c.resultTitle === 'string' ? c.resultTitle : 'Your destination: {prize}',
         resultText: typeof c.resultText === 'string' ? c.resultText : 'Quote this when you enquire and we will build it around you.',
         ctaText: String(c.ctaText || 'Enquire now').slice(0, 24),
         ctaUrl: safeUrl(c.ctaUrl) || '',
         oncePerVisitor: !!c.oncePerVisitor,
         spinDuration: Math.max(1500, Math.min(8000, Number(c.spinDuration) || 4500)),
+        style: c.style === 'flat' ? 'flat' : 'premium',
         accent: hexOk(c.accent) ? c.accent : '#0891B2',
+        segment2: hexOk(c.segment2) ? c.segment2 : '',
+        pointerColor: hexOk(c.pointerColor) ? c.pointerColor : '',
         layout: c.layout === 'inline' ? 'inline' : 'card',
         theme: c.theme === 'dark' ? 'dark' : 'light',
         fontFamily: typeof c.fontFamily === 'string' && c.fontFamily ? c.fontFamily : 'Inter, system-ui, sans-serif',
@@ -121,75 +145,76 @@
     _segColor(i) {
       const s = this.cfg.segments[i];
       if (s.color) return s.color;
-      // Premium two-tone: the vivid brand accent alternating with a deep tinted
-      // dark. High contrast, white labels read on both, never a rainbow mess.
+      if (i % 2 === 0) return this.cfg.accent;
+      if (this.cfg.segment2) return this.cfg.segment2;
+      // Default odd tone: a deep tint of the accent (premium two-tone).
       const h = hexToHue(this.cfg.accent);
-      return (i % 2 === 0) ? this.cfg.accent : `hsl(${h}, 38%, 17%)`;
+      return `hsl(${h}, 38%, 17%)`;
     }
 
     _wheelSvg() {
-      const segs = this.cfg.segments;
-      const n = segs.length;
-      const seg = 360 / n;
-      const R = 0.86;
+      const c = this.cfg, segs = c.segments, n = segs.length, seg = 360 / n;
+      const flat = c.style === 'flat';
+      const R = flat ? 0.92 : 0.86;
+      const arcR = (R * 50).toFixed(2);
       let paths = '', dividers = '', labels = '';
       for (let i = 0; i < n; i++) {
         const a0 = i * seg, a1 = (i + 1) * seg;
         const [x0, y0] = pt(a0, R), [x1, y1] = pt(a1, R);
         const large = seg > 180 ? 1 : 0;
-        paths += `<path d="M50,50 L${x0.toFixed(2)},${y0.toFixed(2)} A43,43 0 ${large},1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${this._segColor(i)}"/>`;
-        dividers += `<line x1="50" y1="50" x2="${x0.toFixed(2)}" y2="${y0.toFixed(2)}" stroke="rgba(255,255,255,.5)" stroke-width="0.45"/>`;
+        const fill = this._segColor(i);
+        paths += `<path d="M50,50 L${x0.toFixed(2)},${y0.toFixed(2)} A${arcR},${arcR} 0 ${large},1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${fill}"/>`;
+        dividers += `<line x1="50" y1="50" x2="${x0.toFixed(2)}" y2="${y0.toFixed(2)}" stroke="${flat ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.5)'}" stroke-width="${flat ? 0.5 : 0.45}"/>`;
+        // Label colour adapts to the slice so black-on-white and white-on-black both read.
+        const tcol = textColorOn(fill);
+        const tstroke = tcol === '#ffffff' ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.4)';
         const mid = a0 + seg / 2;
-        const [lx, ly] = pt(mid, 0.55);
-        let rot = mid;
-        if (mid > 90 && mid < 270) rot = mid + 180;
+        let rot = mid; if (mid > 90 && mid < 270) rot = mid + 180;
+        const hasSub = !!segs[i].description;
+        const [mx, my] = pt(mid, hasSub ? 0.63 : 0.55);
         const label = segs[i].label.length > 16 ? segs[i].label.slice(0, 15) + '…' : segs[i].label;
-        labels += `<text x="${lx.toFixed(2)}" y="${ly.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${lx.toFixed(2)} ${ly.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="4.3" font-weight="700" letter-spacing="0.08" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.30);stroke-width:.62px">${esc(label)}</text>`;
+        labels += `<text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(2)} ${my.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="4.6" font-weight="800" letter-spacing="0.03" fill="${tcol}" style="paint-order:stroke;stroke:${tstroke};stroke-width:.55px">${esc(label)}</text>`;
+        if (hasSub) {
+          const [sx, sy] = pt(mid, 0.45);
+          const sub = segs[i].description.length > 24 ? segs[i].description.slice(0, 23) + '…' : segs[i].description;
+          labels += `<text x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${sx.toFixed(2)} ${sy.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="2.4" font-weight="600" fill="${tcol}" opacity="0.8">${esc(sub)}</text>`;
+        }
       }
+
+      const pcol = c.pointerColor || (flat ? '#E11D2A' : '');
+      const dropDefs = '<filter id="swDrop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.6" stdDeviation="2.4" flood-color="#0b1220" flood-opacity="0.34"/></filter>';
+      const pinDefs = '<linearGradient id="swPin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffe6a0"/><stop offset="45%" stop-color="#F4C95D"/><stop offset="100%" stop-color="#d89a2f"/></linearGradient>';
+      const pointer = pcol
+        ? `<g filter="url(#swDrop)"><path d="M50 12 L43.4 1.6 L56.6 1.6 Z" fill="${pcol}" stroke="rgba(0,0,0,.16)" stroke-width="0.4" stroke-linejoin="round"/></g>`
+        : `<g filter="url(#swDrop)"><path d="M50 9 L44.6 2.8 Q50 0.4 55.4 2.8 Z" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5" stroke-linejoin="round"/><circle cx="50" cy="3.4" r="2.3" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5"/><circle cx="49.2" cy="2.7" r="0.65" fill="#fff8e2" opacity="0.85"/></g>`;
+
+      if (flat) {
+        const cap = c.buttonPlacement === 'top' ? '<circle cx="50" cy="50" r="6.5" fill="#fff" stroke="rgba(15,23,42,.12)" stroke-width="0.6"/>' : '';
+        return `
+          <defs>${dropDefs}${pcol ? '' : pinDefs}</defs>
+          <circle cx="50" cy="50" r="47.5" fill="#ffffff" filter="url(#swDrop)"/>
+          <g class="sw-rot">${paths}${dividers}${labels}</g>
+          <circle cx="50" cy="50" r="46.4" fill="none" stroke="#ffffff" stroke-width="2.6"/>
+          <circle cx="50" cy="50" r="47.7" fill="none" stroke="rgba(15,23,42,.12)" stroke-width="0.7"/>
+          ${cap}${pointer}`;
+      }
+
       let bulbs = ''; const NB = 24;
       for (let i = 0; i < NB; i++) { const [bx, by] = pt(i * (360 / NB), 0.935); bulbs += `<circle cx="${bx.toFixed(2)}" cy="${by.toFixed(2)}" r="1.15" fill="url(#swBulb)"/>`; }
       return `
         <defs>
-          <radialGradient id="swDome" cx="50%" cy="33%" r="62%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
-            <stop offset="40%" stop-color="#ffffff" stop-opacity="0.06"/>
-            <stop offset="70%" stop-color="#000000" stop-opacity="0"/>
-            <stop offset="100%" stop-color="#000000" stop-opacity="0.20"/>
-          </radialGradient>
-          <linearGradient id="swRim" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#243149"/>
-            <stop offset="52%" stop-color="#101a2c"/>
-            <stop offset="100%" stop-color="#070b14"/>
-          </linearGradient>
-          <radialGradient id="swBulb" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stop-color="#fff7da"/>
-            <stop offset="55%" stop-color="#ffdd84"/>
-            <stop offset="100%" stop-color="#bd8b2c"/>
-          </radialGradient>
-          <linearGradient id="swPin" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#ffe6a0"/>
-            <stop offset="45%" stop-color="#F4C95D"/>
-            <stop offset="100%" stop-color="#d89a2f"/>
-          </linearGradient>
-          <filter id="swDrop" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="1.6" stdDeviation="2.4" flood-color="#0b1220" flood-opacity="0.38"/>
-          </filter>
+          ${dropDefs}${pcol ? '' : pinDefs}
+          <radialGradient id="swDome" cx="50%" cy="33%" r="62%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/><stop offset="40%" stop-color="#ffffff" stop-opacity="0.06"/><stop offset="70%" stop-color="#000000" stop-opacity="0"/><stop offset="100%" stop-color="#000000" stop-opacity="0.20"/></radialGradient>
+          <linearGradient id="swRim" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#243149"/><stop offset="52%" stop-color="#101a2c"/><stop offset="100%" stop-color="#070b14"/></linearGradient>
+          <radialGradient id="swBulb" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#fff7da"/><stop offset="55%" stop-color="#ffdd84"/><stop offset="100%" stop-color="#bd8b2c"/></radialGradient>
         </defs>
         <circle cx="50" cy="50" r="50" fill="url(#swRim)" filter="url(#swDrop)"/>
         <circle cx="50" cy="50" r="49.3" fill="none" stroke="#3c4d6b" stroke-width="0.5"/>
         ${bulbs}
-        <g class="sw-rot">
-          ${paths}
-          ${dividers}
-          ${labels}
-        </g>
+        <g class="sw-rot">${paths}${dividers}${labels}</g>
         <circle cx="50" cy="50" r="43" fill="url(#swDome)" pointer-events="none"/>
-        <circle cx="50" cy="50" r="43.2" fill="none" stroke="url(#swPin)" stroke-width="1.1"/>
-        <g filter="url(#swDrop)">
-          <path d="M50 9 L44.6 2.8 Q50 0.4 55.4 2.8 Z" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5" stroke-linejoin="round"/>
-          <circle cx="50" cy="3.4" r="2.3" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5"/>
-          <circle cx="49.2" cy="2.7" r="0.65" fill="#fff8e2" opacity="0.85"/>
-        </g>`;
+        <circle cx="50" cy="50" r="43.2" fill="none" stroke="${pcol ? '#cbd5e1' : 'url(#swPin)'}" stroke-width="1.1"/>
+        ${pointer}`;
     }
 
     _build() {
@@ -201,46 +226,60 @@
       const border = dark ? '#1E293B' : '#E2E8F0';
       const res = dark ? '#0F172A' : '#F8FAFC';
       const card = c.layout === 'card';
+      // The accent doubles as segment colour 1. When it is very light (e.g. a
+      // black/white wheel uses white), the hub / badge / CTA need a readable
+      // stand-in so they are not white-on-white.
+      const act = lumOf(c.accent) > 0.7 ? (c.pointerColor || '#111418') : c.accent;
 
       this.shadow.innerHTML = `
         <style>
           :host { all: initial; }
           * { box-sizing: border-box; }
           .sw { font-family: ${c.fontFamily}; color: ${ink}; ${card ? `background:${panel};border:1px solid ${border};border-radius:18px;padding:26px 22px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 18px 42px rgba(15,23,42,.10);` : ''} max-width: 380px; text-align:center; }
-          .sw-head { font-size: 19px; font-weight: 800; margin: 0 0 18px; letter-spacing: -.015em; }
+          .sw-head { font-size: 19px; font-weight: 800; margin: 0 0 ${c.subheading ? '4px' : '18px'}; letter-spacing: -.015em; }
+          .sw-logo { display:block; max-height:44px; max-width:72%; margin:0 auto 14px; object-fit:contain; }
+          .sw-sub { font-size: 14px; color: ${ink2}; margin: 0 0 16px; line-height: 1.45; }
+          .sw-topbtn { display:inline-block; margin:0 auto 16px; border:1.6px solid ${ink}; background:transparent; color:${ink}; font:inherit; font-weight:700; font-size:15px; padding:11px 26px; border-radius:999px; cursor:pointer; transition: background .15s ease, color .15s ease, transform .12s ease; }
+          .sw-topbtn:hover:not(:disabled) { background:${ink}; color:${panel}; }
+          .sw-topbtn:active:not(:disabled) { transform: scale(.97); }
+          .sw-topbtn:disabled { opacity:.55; cursor:default; }
+          .sw-hubcap { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:54px; height:54px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px #E9B949, 0 4px 10px rgba(11,18,32,.3); z-index:2; }
           .sw-stage { position: relative; width: 300px; max-width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
           .sw-wheel { width: 100%; height: 100%; display: block; }
           .sw-rot { transform-box: fill-box; transform-origin: 50% 50%; }
           .sw-hub { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:86px; height:86px; border-radius:50%; border:0; padding:0; cursor:pointer; z-index:3;
-            background:${c.accent};
-            background:radial-gradient(circle at 50% 32%, color-mix(in srgb, ${c.accent} 70%, #ffffff 30%), ${c.accent} 58%, color-mix(in srgb, ${c.accent} 62%, #000000 38%));
+            background:${act};
+            background:radial-gradient(circle at 50% 32%, color-mix(in srgb, ${act} 70%, #ffffff 30%), ${act} 58%, color-mix(in srgb, ${act} 62%, #000000 38%));
             box-shadow:0 0 0 4px #ffffff, 0 0 0 7px #E9B949, 0 8px 18px rgba(11,18,32,.42), inset 0 2px 6px rgba(255,255,255,.5), inset 0 -4px 8px rgba(0,0,0,.28);
             color:#fff; font:inherit; font-weight:800; font-size:15px; letter-spacing:.1em; text-transform:uppercase;
             display:flex; align-items:center; justify-content:center; transition: transform .14s ease; }
           .sw-hub:hover:not(:disabled) { transform:translate(-50%,-50%) scale(1.06); }
           .sw-hub:active:not(:disabled) { transform:translate(-50%,-50%) scale(.96); }
           .sw-hub:disabled { cursor:default; }
-          .sw-hub::before { content:''; position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 3px ${c.accent}; opacity:0; animation: swPing 2.4s ease-out infinite; pointer-events:none; }
+          .sw-hub::before { content:''; position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 3px ${act}; opacity:0; animation: swPing 2.4s ease-out infinite; pointer-events:none; }
           .sw-hub:disabled::before { display:none; }
           @keyframes swPing { 0% { transform:scale(1); opacity:.5 } 70% { transform:scale(1.5); opacity:0 } 100% { opacity:0 } }
           .sw-result { margin-top:20px; padding:18px 16px; border:1px solid ${border}; border-radius:14px; background:${res}; background:linear-gradient(180deg, ${dark ? '#0f1a2e' : '#FBFCFE'}, ${res}); }
           .sw-result[hidden] { display:none; }
           .sw-result:not([hidden]) { animation: swReveal .45s cubic-bezier(.2,.9,.3,1.2) both; }
           @keyframes swReveal { from { opacity:0; transform:translateY(10px) scale(.95) } to { opacity:1; transform:none } }
-          .sw-res-badge { width:42px; height:42px; margin:0 auto 9px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:${ink2}22; background:color-mix(in srgb, ${c.accent} 16%, transparent); }
-          .sw-res-badge svg { width:22px; height:22px; stroke:${c.accent}; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+          .sw-res-badge { width:42px; height:42px; margin:0 auto 9px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:${ink2}22; background:color-mix(in srgb, ${act} 16%, transparent); }
+          .sw-res-badge svg { width:22px; height:22px; stroke:${act}; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
           .sw-res-title { font-size:19px; font-weight:800; letter-spacing:-.01em; line-height:1.2; }
           .sw-res-text { font-size:13px; color:${ink2}; margin-top:6px; line-height:1.5; }
-          .sw-cta { display:inline-block; margin-top:14px; background:${c.accent}; color:#fff; text-decoration:none; font-weight:700; font-size:14px; padding:11px 20px; border-radius:11px; box-shadow:0 6px 16px rgba(15,23,42,.16); transition:transform .14s ease, box-shadow .14s ease; }
+          .sw-cta { display:inline-block; margin-top:14px; background:${act}; color:#fff; text-decoration:none; font-weight:700; font-size:14px; padding:11px 20px; border-radius:11px; box-shadow:0 6px 16px rgba(15,23,42,.16); transition:transform .14s ease, box-shadow .14s ease; }
           .sw-cta:hover { transform:translateY(-1px); box-shadow:0 9px 22px rgba(15,23,42,.22); }
           .sw-cta[hidden] { display:none; }
           @media (prefers-reduced-motion: reduce) { .sw-hub::before { animation:none; display:none } .sw-result:not([hidden]) { animation:none } }
         </style>
         <div class="sw">
+          ${c.logo ? `<img class="sw-logo" src="${esc(c.logo)}" alt="">` : ''}
           ${c.heading ? `<h3 class="sw-head">${esc(c.heading)}</h3>` : ''}
+          ${c.subheading ? `<p class="sw-sub">${esc(c.subheading)}</p>` : ''}
+          ${c.buttonPlacement === 'top' ? `<button class="sw-topbtn" id="spin" type="button">${esc(c.buttonText)}</button>` : ''}
           <div class="sw-stage">
             <svg class="sw-wheel" viewBox="0 0 100 100" role="img" aria-label="Prize wheel">${this._wheelSvg()}</svg>
-            <button class="sw-hub" id="spin" type="button">${esc(c.buttonText)}</button>
+            ${c.buttonPlacement === 'top' ? (c.style === 'flat' ? '' : '<div class="sw-hubcap" aria-hidden="true"></div>') : `<button class="sw-hub" id="spin" type="button">${esc(c.buttonText)}</button>`}
           </div>
           <div class="sw-result" id="result" hidden>
             <div class="sw-res-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.6 7 22l5-3 5 3-1.5-8.4"/></svg></div>

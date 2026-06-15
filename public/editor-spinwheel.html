@@ -110,8 +110,24 @@
               <input type="text" class="input" id="heading-input" maxlength="60" placeholder="Spin to win your next trip">
             </div>
             <div class="field">
+              <label class="field-label">Subheading (optional)</label>
+              <input type="text" class="input" id="subheading-input" maxlength="90" placeholder="Spin now to unlock a special discount!">
+            </div>
+            <div class="field">
+              <label class="field-label">Logo image URL (optional)</label>
+              <input type="text" class="input" id="logo-input" placeholder="https://your-site.com/logo.png">
+              <span class="field-hint">Shown above the heading.</span>
+            </div>
+            <div class="field">
               <label class="field-label">Spin button text</label>
               <input type="text" class="input" id="button-input" maxlength="18" placeholder="Spin">
+            </div>
+            <div class="field">
+              <label class="field-label">Button position</label>
+              <div class="pick-grid" id="btnpos-picker">
+                <button type="button" class="pick-btn" data-btnpos="hub"><span class="pick-label">Centre hub</span></button>
+                <button type="button" class="pick-btn" data-btnpos="top"><span class="pick-label">Above wheel</span></button>
+              </div>
             </div>
           </div>
         </div>
@@ -164,16 +180,39 @@
         <div class="tgse-section is-open">
           <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
-            <span class="tgse-section-label">Accent colour</span>
+            <span class="tgse-section-label">Colours &amp; style</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
             <div class="field">
+              <label class="field-label">Wheel style</label>
+              <div class="pick-grid" id="style-picker">
+                <button type="button" class="pick-btn" data-style="premium"><span class="pick-label">Premium</span></button>
+                <button type="button" class="pick-btn" data-style="flat"><span class="pick-label">Flat / discount</span></button>
+              </div>
+              <span class="field-hint">Premium is the glossy gold-rim wheel. Flat is a clean two-colour wheel like a discount popup.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Segment colour 1</label>
               <div class="colour-row">
                 <div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div>
                 <input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9">
               </div>
-              <span class="field-hint">Seeds the wheel colours, the pointer, the hub and the button.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Segment colour 2 (optional)</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="seg2-col" value="#111418"></div>
+                <input class="input colour-hex" id="seg2-hex" value="" maxlength="9" placeholder="auto (dark)">
+              </div>
+              <span class="field-hint">Alternates with colour 1. For a black/white wheel use #111418 and set colour 1 to #FFFFFF (labels flip automatically). Leave blank for the default deep tint.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Pointer colour (optional)</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="pointer-col" value="#E11D2A"></div>
+                <input class="input colour-hex" id="pointer-hex" value="" maxlength="9" placeholder="auto (gold)">
+              </div>
             </div>
           </div>
         </div>
@@ -269,17 +308,19 @@
 
   let C = {
     heading: 'Spin to win your next trip',
+    subheading: '', logo: '',
     segments: [
       { label: 'Bali', weight: 1 }, { label: 'Maldives', weight: 1 },
       { label: 'Dubai', weight: 1 }, { label: 'New York', weight: 1 },
       { label: 'Barbados', weight: 1 }, { label: 'Rome', weight: 1 }
     ],
-    buttonText: 'Spin',
+    buttonText: 'Spin', buttonPlacement: 'hub',
     resultTitle: 'Your destination: {prize}',
     resultText: 'Quote this when you enquire and we will build it around you.',
     ctaText: 'Enquire now', ctaUrl: '',
     oncePerVisitor: false, spinDuration: 4500,
-    accent: '#0891B2', layout: 'card', theme: 'light', fontFamily: 'Inter',
+    style: 'premium', accent: '#0891B2', segment2: '', pointerColor: '',
+    layout: 'card', theme: 'light', fontFamily: 'Inter',
   };
 
   let widgetInst = null;
@@ -327,10 +368,13 @@
   function buildSegRows() {
     const wrap = document.getElementById('seg-rows');
     wrap.innerHTML = C.segments.map((s, i) =>
-      '<div class="seg-row" data-i="' + i + '">' +
-        '<input class="input" data-k="label" placeholder="Prize / destination" maxlength="28" value="' + esc(s.label) + '">' +
-        '<input class="input" data-k="weight" type="number" min="0" step="1" value="' + (s.weight == null ? 1 : s.weight) + '">' +
-        '<button type="button" class="seg-del" data-act="del" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+      '<div class="seg-block" data-i="' + i + '" style="margin-bottom:9px">' +
+        '<div class="seg-row">' +
+          '<input class="input" data-k="label" placeholder="Prize / destination" maxlength="28" value="' + esc(s.label) + '">' +
+          '<input class="input" data-k="weight" type="number" min="0" step="1" value="' + (s.weight == null ? 1 : s.weight) + '">' +
+          '<button type="button" class="seg-del" data-act="del" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+        '</div>' +
+        '<input class="input" data-k="description" placeholder="Sub-line e.g. 15% off your next order (optional)" maxlength="40" value="' + esc(s.description || '') + '" style="font-size:12px;padding:6px 8px;margin-top:5px">' +
       '</div>').join('');
     document.getElementById('add-seg').disabled = C.segments.length >= MAX;
   }
@@ -339,6 +383,8 @@
 
   function syncUIFromState() {
     document.getElementById('heading-input').value = C.heading || '';
+    document.getElementById('subheading-input').value = C.subheading || '';
+    document.getElementById('logo-input').value = C.logo || '';
     document.getElementById('button-input').value = C.buttonText || '';
     document.getElementById('restitle-input').value = C.resultTitle || '';
     document.getElementById('restext-input').value = C.resultText || '';
@@ -346,7 +392,13 @@
     document.getElementById('ctaurl-input').value = C.ctaUrl || '';
     document.getElementById('accent-col').value = hexOk(C.accent) ? C.accent : '#0891B2';
     document.getElementById('accent-hex').value = (C.accent || '#0891B2').toUpperCase();
+    document.getElementById('seg2-col').value = hexOk(C.segment2) ? C.segment2 : '#111418';
+    document.getElementById('seg2-hex').value = C.segment2 ? C.segment2.toUpperCase() : '';
+    document.getElementById('pointer-col').value = hexOk(C.pointerColor) ? C.pointerColor : '#E11D2A';
+    document.getElementById('pointer-hex').value = C.pointerColor ? C.pointerColor.toUpperCase() : '';
     document.querySelectorAll('#layout-picker [data-layout]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-layout') === C.layout));
+    document.querySelectorAll('#style-picker [data-style]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-style') === (C.style || 'premium')));
+    document.querySelectorAll('#btnpos-picker [data-btnpos]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-btnpos') === (C.buttonPlacement || 'hub')));
     document.getElementById('dur-input').value = C.spinDuration;
     document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's';
     toggleSwitch('sw-once', C.oncePerVisitor);
@@ -354,15 +406,16 @@
 
   // ── Segment rows ──
   document.getElementById('seg-rows').addEventListener('input', e => {
-    const row = e.target.closest('.seg-row'); if (!row) return;
-    const i = +row.getAttribute('data-i'); const k = e.target.getAttribute('data-k');
+    const block = e.target.closest('[data-i]'); if (!block) return;
+    const i = +block.getAttribute('data-i'); const k = e.target.getAttribute('data-k');
     if (k === 'weight') C.segments[i].weight = Math.max(0, Number(e.target.value) || 0);
+    else if (k === 'description') C.segments[i].description = e.target.value;
     else C.segments[i].label = e.target.value;
     shell.markDirty(); render();
   });
   document.getElementById('seg-rows').addEventListener('click', e => {
     const del = e.target.closest('[data-act="del"]'); if (!del) return;
-    const i = +del.closest('.seg-row').getAttribute('data-i');
+    const i = +del.closest('[data-i]').getAttribute('data-i');
     if (C.segments.length <= 2) { tgse.toast('Keep at least two segments', 'ok'); return; }
     C.segments.splice(i, 1); buildSegRows(); shell.markDirty(); remount();
   });
@@ -374,6 +427,8 @@
 
   function wireText(id, key) { document.getElementById(id).addEventListener('input', e => { C[key] = e.target.value; shell.markDirty(); render(); }); }
   wireText('heading-input', 'heading');
+  wireText('subheading-input', 'subheading');
+  wireText('logo-input', 'logo');
   wireText('button-input', 'buttonText');
   wireText('restitle-input', 'resultTitle');
   wireText('restext-input', 'resultText');
@@ -386,12 +441,31 @@
     document.querySelectorAll('#layout-picker [data-layout]').forEach(x => x.classList.toggle('is-on', x === b));
     shell.markDirty(); render();
   });
+  document.getElementById('style-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-style]'); if (!b) return;
+    C.style = b.getAttribute('data-style');
+    document.querySelectorAll('#style-picker [data-style]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+  document.getElementById('btnpos-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-btnpos]'); if (!b) return;
+    C.buttonPlacement = b.getAttribute('data-btnpos');
+    document.querySelectorAll('#btnpos-picker [data-btnpos]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
 
-  (function wireColour() {
-    const col = document.getElementById('accent-col'), hex = document.getElementById('accent-hex');
-    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); render(); });
-    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); render(); } });
-  })();
+  function wireColourTo(colId, hexId, key, fallback, optional) {
+    const col = document.getElementById(colId), hex = document.getElementById(hexId);
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C[key] = v; shell.markDirty(); render(); });
+    hex.addEventListener('input', () => {
+      const v = (hex.value || '').trim().toUpperCase();
+      if (!v && optional) { C[key] = ''; shell.markDirty(); render(); }
+      else if (hexOk(v)) { col.value = v; C[key] = v; shell.markDirty(); render(); }
+    });
+  }
+  wireColourTo('accent-col', 'accent-hex', 'accent', '#0891B2', false);
+  wireColourTo('seg2-col', 'seg2-hex', 'segment2', '#111418', true);
+  wireColourTo('pointer-col', 'pointer-hex', 'pointerColor', '#E11D2A', true);
 
   document.getElementById('dur-input').addEventListener('input', e => { C.spinDuration = parseInt(e.target.value, 10) || 4500; document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's'; shell.markDirty(); });
   document.getElementById('sw-once').addEventListener('click', () => { C.oncePerVisitor = !C.oncePerVisitor; toggleSwitch('sw-once', C.oncePerVisitor); shell.markDirty(); });
