@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
 
   function resolveConfigApi() {
     if (typeof window === 'undefined') return '/api/widget-config';
@@ -172,13 +172,15 @@
         const mid = a0 + seg / 2;
         let rot = mid; if (mid > 90 && mid < 270) rot = mid + 180;
         const hasSub = !!segs[i].description;
-        const mainR = hasSub ? (flat ? 0.66 : 0.63) : (flat ? 0.6 : 0.55);
+        // Push labels outward into the wide part of each slice so long words
+        // (e.g. "Cape Town", "Welcome drinks") clear the centre hub and stop merging.
+        const mainR = hasSub ? (flat ? 0.69 : 0.66) : (flat ? 0.64 : 0.6);
         const [mx, my] = pt(mid, mainR);
         const mainFs = flat ? 5.4 : 4.6;
         const label = segs[i].label.length > 16 ? segs[i].label.slice(0, 15) + '…' : segs[i].label;
         labels += `<text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(2)} ${my.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${mainFs}" font-weight="800" letter-spacing="${flat ? '-0.02' : '0.03'}" fill="${tcol}" style="paint-order:stroke;stroke:${tstroke};stroke-width:.55px">${esc(label)}</text>`;
         if (hasSub) {
-          const [sx, sy] = pt(mid, flat ? 0.5 : 0.45);
+          const [sx, sy] = pt(mid, flat ? 0.54 : 0.49);
           const subFs = flat ? 2.7 : 2.4;
           const sub = segs[i].description.length > 26 ? segs[i].description.slice(0, 25) + '…' : segs[i].description;
           labels += `<text x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${sx.toFixed(2)} ${sy.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${subFs}" font-weight="600" fill="${tcol}" opacity="0.78">${esc(sub)}</text>`;
@@ -241,7 +243,7 @@
         <style>
           :host { all: initial; }
           * { box-sizing: border-box; }
-          .sw { font-family: ${c.fontFamily}; color: ${ink}; ${card ? `background:${panel};border:1px solid ${border};border-radius:18px;padding:26px 22px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 18px 42px rgba(15,23,42,.10);` : ''} max-width: 380px; text-align:center; }
+          .sw { font-family: ${c.fontFamily}; color: ${ink}; ${card ? `background:${panel};border:1px solid ${border};border-radius:18px;padding:26px 22px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 18px 42px rgba(15,23,42,.10);` : ''} max-width: 440px; text-align:center; }
           .sw-head { font-size: 19px; font-weight: 800; margin: 0 0 ${c.subheading ? '4px' : '18px'}; letter-spacing: -.015em; }
           .sw-logo { display:block; max-height:44px; max-width:72%; margin:0 auto 14px; object-fit:contain; }
           .sw-sub { font-size: 14px; color: ${ink2}; margin: 0 0 16px; line-height: 1.45; }
@@ -250,7 +252,7 @@
           .sw-topbtn:active:not(:disabled) { transform: scale(.97); }
           .sw-topbtn:disabled { opacity:.55; cursor:default; }
           .sw-hubcap { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:54px; height:54px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px #E9B949, 0 4px 10px rgba(11,18,32,.3); z-index:2; }
-          .sw-stage { position: relative; width: 300px; max-width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
+          .sw-stage { position: relative; width: 360px; max-width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
           .sw-wheel { width: 100%; height: 100%; display: block; }
           .sw-rot { transform-box: fill-box; transform-origin: 50% 50%; }
           .sw.is-peek .sw-stage { aspect-ratio: auto; height: 0; padding-bottom: 60%; overflow: hidden; }
