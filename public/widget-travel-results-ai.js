@@ -23,7 +23,7 @@
   window.TravelgenixWidgets = window.TravelgenixWidgets || {};
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.2.1';
   var EV_READY = 'tg:travel-results-v4:accommodation-results-ready';
   var EV_VIEW = 'tg:travel-results-v4:accommodation-airesults-view';
   var API_BASE = (typeof window !== 'undefined' && window.__TG_TRAI_API__) ||
@@ -48,7 +48,7 @@
     accent: '#00B4D8',
     theme: 'auto',                                      // 'auto' | 'light' | 'dark'
     font: '',                                           // '' = Inter default stack
-    position: 'br',                                     // 'br' | 'bl'
+    position: 'br',                                     // 'br' | 'bl' | 'mr' | 'ml' | 'float'
     maxRecs: 6
   };
   var CFG = Object.assign({}, DEFAULTS);
@@ -76,7 +76,7 @@
     if (c.theme === 'auto' || c.theme === 'light' || c.theme === 'dark') o.theme = c.theme;
     if ((v = str(c.font, 120)) == null) v = str(c.fontFamily, 120);
     if (v != null) o.font = v;
-    if (c.position === 'br' || c.position === 'bl') o.position = c.position;
+    if (['br', 'bl', 'mr', 'ml', 'float'].indexOf(c.position) !== -1) o.position = c.position;
     v = parseInt(c.maxRecs, 10); if (!isNaN(v)) o.maxRecs = Math.max(1, Math.min(6, v));
     return o;
   }
@@ -279,17 +279,28 @@
     els.send = root.getElementById('send');
     els.min = root.getElementById('min');
     els.panel = root.getElementById('panel');
+    els.head = root.querySelector('.hd');
     els.title = root.getElementById('title');
-    els.min.addEventListener('click', function () { els.panel.classList.toggle('is-min'); });
+    els.min.addEventListener('click', function () {
+      var willMin = !els.panel.classList.contains('is-min');
+      els.panel.classList.toggle('is-min');
+      // In float mode, collapsing docks the panel to the right-middle edge.
+      if (CFG.position === 'float' && willMin) {
+        els._docked = true; els._dragged = false; els._fx = els._fy = null;
+        var s = host.style;
+        s.left = 'auto'; s.bottom = 'auto'; s.right = '18px'; s.top = '50%'; s.transform = 'translateY(-50%)';
+      }
+    });
     els.send.addEventListener('click', sendMessage);
     els.input.addEventListener('keydown', function (e) { if (e.key === 'Enter') sendMessage(); });
+    setupDrag();
     applyConfig();
     setFootEnabled(false);
   }
   function applyConfig() {
     if (!host || !els.panel) return;
-    host.style.right = CFG.position === 'bl' ? 'auto' : '18px';
-    host.style.left = CFG.position === 'bl' ? '18px' : 'auto';
+    positionHost();
+    els.panel.setAttribute('data-pos', CFG.position);
     var p = els.panel.style;
     p.setProperty('--navy', CFG.headerColor);
     p.setProperty('--navy-d', shade(CFG.headerColor, -0.4));
@@ -304,6 +315,79 @@
     if (els.input) els.input.setAttribute('placeholder', CFG.placeholder);
     if (els.send) els.send.textContent = CFG.sendLabel;
   }
+  // Anchor the fixed host wrapper per CFG.position. Resets every anchor each
+  // call so switching positions (incl. live preview) never leaves stale values.
+  function positionHost() {
+    if (!host) return;
+    var s = host.style;
+    s.left = s.right = s.top = s.bottom = 'auto';
+    s.transform = 'none';
+    switch (CFG.position) {
+      case 'bl': s.left = '18px'; s.bottom = '18px'; break;
+      case 'mr': s.right = '18px'; s.top = '50%'; s.transform = 'translateY(-50%)'; break;
+      case 'ml': s.left = '18px'; s.top = '50%'; s.transform = 'translateY(-50%)'; break;
+      case 'float':
+        if (els._dragged && els._fx != null) { s.left = els._fx + 'px'; s.top = els._fy + 'px'; }
+        else if (els._docked) { s.right = '18px'; s.top = '50%'; s.transform = 'translateY(-50%)'; }
+        else {
+          // floating, offset toward the right and vertically centred
+          var pw = host.offsetWidth || 380;
+          var gap = Math.max(18, Math.min(Math.round(window.innerWidth * 0.08), window.innerWidth - pw - 18));
+          s.right = gap + 'px'; s.top = '50%'; s.transform = 'translateY(-50%)';
+        }
+        break;
+      default: s.right = '18px'; s.bottom = '18px'; // 'br'
+    }
+  }
+
+  // Drag the panel by its header — only active in 'float' position. Pointer
+  // events cover mouse + touch; the minimise button stays clickable; the panel
+  // is clamped inside the viewport and re-clamped on resize.
+  function setupDrag() {
+    var head = els.head; if (!head) return;
+    var dragging = false, ox = 0, oy = 0;
+    function clamp(x, y) {
+      var w = host.offsetWidth, h = host.offsetHeight;
+      var maxX = Math.max(4, window.innerWidth - w - 4);
+      var maxY = Math.max(4, window.innerHeight - h - 4);
+      return [Math.min(maxX, Math.max(4, x)), Math.min(maxY, Math.max(4, y))];
+    }
+    head.addEventListener('pointerdown', function (e) {
+      if (CFG.position !== 'float') return;            // only float is draggable
+      if (e.target.closest && e.target.closest('.mn')) return; // keep minimise clickable
+      if (e.button != null && e.button !== 0) return;  // primary / touch only
+      var rect = host.getBoundingClientRect();
+      host.style.transform = 'none';
+      host.style.right = 'auto'; host.style.bottom = 'auto';
+      host.style.left = rect.left + 'px'; host.style.top = rect.top + 'px';
+      ox = e.clientX - rect.left; oy = e.clientY - rect.top;
+      dragging = true; els._dragged = true;
+      head.classList.add('tg-grabbing');
+      try { head.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+    });
+    head.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var c = clamp(e.clientX - ox, e.clientY - oy);
+      els._fx = c[0]; els._fy = c[1];
+      host.style.left = els._fx + 'px'; host.style.top = els._fy + 'px';
+      e.preventDefault();
+    });
+    function end(e) {
+      if (!dragging) return;
+      dragging = false; head.classList.remove('tg-grabbing');
+      try { head.releasePointerCapture(e.pointerId); } catch (_) {}
+    }
+    head.addEventListener('pointerup', end);
+    head.addEventListener('pointercancel', end);
+    window.addEventListener('resize', function () {
+      if (CFG.position !== 'float' || !els._dragged || els._fx == null) return;
+      var c = clamp(els._fx, els._fy);
+      els._fx = c[0]; els._fy = c[1];
+      host.style.left = els._fx + 'px'; host.style.top = els._fy + 'px';
+    });
+  }
+
   function setSub(t) { if (els.sub) els.sub.textContent = t; }
   function setFootEnabled(on) { if (els.foot) els.foot.style.display = on ? 'flex' : 'none'; }
   function clearBody() { if (els.body) els.body.textContent = ''; }
@@ -486,6 +570,8 @@
     '.mn{margin-left:auto;cursor:pointer;display:grid;place-items:center;width:30px;height:30px;color:#bcd3e6;background:none;border:none;border-radius:7px}' +
     '.mn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}' +
     '.mn:hover{color:#fff;background:rgba(255,255,255,.1)}.mn:focus-visible{outline:2px solid #85b6ee;outline-offset:2px}' +
+    '#panel[data-pos="float"] .hd{cursor:grab;touch-action:none;user-select:none}' +
+    '#panel[data-pos="float"] .hd.tg-grabbing{cursor:grabbing}' +
     '#body{padding:14px 15px;overflow:auto;background:var(--bg);display:flex;flex-direction:column;gap:9px;min-height:120px}' +
     '.st{display:flex;align-items:center;gap:9px;color:var(--ink-2);font-size:.85rem;padding:4px 0}' +
     '.dot{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none}' +
