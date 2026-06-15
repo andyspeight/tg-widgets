@@ -23,13 +23,94 @@
   window.TravelgenixWidgets = window.TravelgenixWidgets || {};
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   var EV_READY = 'tg:travel-results-v4:accommodation-results-ready';
   var EV_VIEW = 'tg:travel-results-v4:accommodation-airesults-view';
   var API_BASE = (typeof window !== 'undefined' && window.__TG_TRAI_API__) ||
                  'https://tg-widgets.vercel.app/api/travel-results-ai';
   var AUTO = (typeof window !== 'undefined' && window.__TG_TRAI_AUTO__ === false) ? false : true;
+  var PREVIEW = !!(typeof window !== 'undefined' && window.__TG_TRAI_PREVIEW__);
   var SHORTLIST_CAP = 18;
+
+  // ---- config -------------------------------------------------------------
+  // Backward-compatible: with no data-tg-id / data-tg-config the DEFAULTS below
+  // reproduce the original look and copy exactly, so anything already embedded
+  // keeps working unchanged. An editor-issued embed carries data-tg-id and the
+  // widget fetches its saved config from /api/widget-config.
+  var DEFAULTS = {
+    enabled: true,
+    title: 'AI trip assistant',
+    greeting: '',                                       // '' = dynamic intro line
+    placeholder: 'Ask: more central, with a pool, cheaper\u2026',
+    sendLabel: 'Send',
+    viewLabel: 'Show these in results',
+    headerColor: '#1B2B5B',
+    accent: '#00B4D8',
+    theme: 'auto',                                      // 'auto' | 'light' | 'dark'
+    font: '',                                           // '' = Inter default stack
+    position: 'br',                                     // 'br' | 'bl'
+    maxRecs: 6
+  };
+  var CFG = Object.assign({}, DEFAULTS);
+
+  var SELF = document.currentScript || (function () {
+    var s = document.querySelectorAll('script[src*="widget-travel-results-ai"]');
+    return s[s.length - 1] || null;
+  })();
+  function configApi() {
+    try { if (SELF && SELF.src) return new URL(SELF.src).origin + '/api/widget-config'; } catch (e) {}
+    return 'https://tg-widgets.vercel.app/api/widget-config';
+  }
+  function isHex(c) { return typeof c === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(c); }
+  function str(v, max) { return typeof v === 'string' ? v.slice(0, max || 80) : undefined; }
+  function sanitiseCfg(c) {
+    c = c || {}; var o = {}, v;
+    if (typeof c.enabled === 'boolean') o.enabled = c.enabled;
+    if ((v = str(c.title, 60)) != null) o.title = v;
+    if ((v = str(c.greeting, 200)) != null) o.greeting = v;
+    if ((v = str(c.placeholder, 120)) != null) o.placeholder = v;
+    if ((v = str(c.sendLabel, 24)) != null) o.sendLabel = v;
+    if ((v = str(c.viewLabel, 40)) != null) o.viewLabel = v;
+    if (isHex(c.headerColor)) o.headerColor = c.headerColor;
+    if (isHex(c.accent)) o.accent = c.accent;
+    if (c.theme === 'auto' || c.theme === 'light' || c.theme === 'dark') o.theme = c.theme;
+    if ((v = str(c.font, 120)) == null) v = str(c.fontFamily, 120);
+    if (v != null) o.font = v;
+    if (c.position === 'br' || c.position === 'bl') o.position = c.position;
+    v = parseInt(c.maxRecs, 10); if (!isNaN(v)) o.maxRecs = Math.max(1, Math.min(6, v));
+    return o;
+  }
+  function findContainer() {
+    try { return document.querySelector('[data-tg-widget="travel-results-ai"][data-tg-id]'); } catch (e) { return null; }
+  }
+  (function resolveConfig() {
+    if (window.__TG_TRAI_CONFIG__) Object.assign(CFG, sanitiseCfg(window.__TG_TRAI_CONFIG__));
+    var src = (SELF && SELF.getAttribute) ? SELF : null;
+    var inline = src && src.getAttribute('data-tg-config');
+    if (inline) { try { Object.assign(CFG, sanitiseCfg(JSON.parse(inline))); } catch (e) { console.warn('[trai] bad data-tg-config', e); } }
+    // id can arrive on the script tag (header install) or on a standard
+    // [data-tg-widget="travel-results-ai"] container (shell default embed).
+    var id = (src && src.getAttribute('data-tg-id')) || null;
+    if (!id) {
+      var c = findContainer();
+      if (c) {
+        id = c.getAttribute('data-tg-id');
+        var ci = c.getAttribute('data-tg-config');
+        if (ci && !inline) { try { Object.assign(CFG, sanitiseCfg(JSON.parse(ci))); } catch (e) {} }
+      }
+    }
+    if (id) {
+      fetch(configApi() + '?id=' + encodeURIComponent(id))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { if (d && d.config) { Object.assign(CFG, sanitiseCfg(d.config)); applyConfig(); } })
+        .catch(function (e) { console.warn('[trai] config load failed', e); });
+    }
+  })();
+
+  // hex shade: amt>0 lightens toward white, amt<0 darkens toward black
+  function hexToRgb(h) { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join(''); var n = parseInt(h.slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function rgbToHex(r) { return '#' + r.map(function (v) { var s = Math.max(0, Math.min(255, Math.round(v))).toString(16); return s.length < 2 ? '0' + s : s; }).join(''); }
+  function shade(hex, amt) { try { return rgbToHex(hexToRgb(hex).map(function (v) { return amt < 0 ? v * (1 + amt) : v + (255 - v) * amt; })); } catch (e) { return hex; } }
 
   // ---- state ----
   var activeSession = null;
@@ -144,7 +225,7 @@
   }
 
   // ---- rule-based fallback (used only if the AI endpoint is unavailable) ----
-  function fallbackRecs(cands) {
+  function fallbackRecs(cands, max) {
     var byRid = {}; cands.forEach(function (s) { byRid[s.rid] = s; });
     var picks = [];
     var add = function (cat, s) { if (s && !picks.some(function (p) { return p.rid === s.rid; })) picks.push({ rid: s.rid, category: cat, reason: ruleReason(cat, s), s: s }); };
@@ -153,7 +234,7 @@
     add('Most central', cands.slice().filter(function (s) { return s.distKm != null; }).sort(function (a, b) { return a.distKm - b.distKm; })[0]);
     add('Best refundable', cands.slice().filter(function (s) { return s.loRef; }).sort(function (a, b) { return a.loRef.price - b.loRef.price; })[0]);
     add('Premium pick', cands.slice().sort(function (a, b) { return b.star - a.star; })[0]);
-    return picks.slice(0, 5);
+    return picks.slice(0, max || 5);
   }
   function ruleReason(cat, s) {
     var bits = [];
@@ -198,10 +279,30 @@
     els.send = root.getElementById('send');
     els.min = root.getElementById('min');
     els.panel = root.getElementById('panel');
+    els.title = root.getElementById('title');
     els.min.addEventListener('click', function () { els.panel.classList.toggle('is-min'); });
     els.send.addEventListener('click', sendMessage);
     els.input.addEventListener('keydown', function (e) { if (e.key === 'Enter') sendMessage(); });
+    applyConfig();
     setFootEnabled(false);
+  }
+  function applyConfig() {
+    if (!host || !els.panel) return;
+    host.style.right = CFG.position === 'bl' ? 'auto' : '18px';
+    host.style.left = CFG.position === 'bl' ? '18px' : 'auto';
+    var p = els.panel.style;
+    p.setProperty('--navy', CFG.headerColor);
+    p.setProperty('--navy-d', shade(CFG.headerColor, -0.4));
+    p.setProperty('--navy-l', shade(CFG.headerColor, 0.14));
+    p.setProperty('--teal', CFG.accent);
+    p.setProperty('--teal-d', shade(CFG.accent, -0.16));
+    p.setProperty('--teal-l', shade(CFG.accent, 0.28));
+    if (CFG.font) p.setProperty('--trai-font', CFG.font);
+    els.panel.setAttribute('data-theme', CFG.theme);
+    if (els.title) els.title.textContent = CFG.title;
+    els.panel.setAttribute('aria-label', CFG.title);
+    if (els.input) els.input.setAttribute('placeholder', CFG.placeholder);
+    if (els.send) els.send.textContent = CFG.sendLabel;
   }
   function setSub(t) { if (els.sub) els.sub.textContent = t; }
   function setFootEnabled(on) { if (els.foot) els.foot.style.display = on ? 'flex' : 'none'; }
@@ -244,7 +345,7 @@
       els.body.appendChild(card);
     });
     var act = document.createElement('button'); act.className = 'go'; act.type = 'button';
-    act.textContent = 'Show these in results';
+    act.textContent = CFG.viewLabel;
     act.addEventListener('click', function () { dispatchView(recs.map(function (r) { return r.rid; })); });
     els.body.appendChild(act);
     setFootEnabled(true);
@@ -270,17 +371,23 @@
     setFootEnabled(false);
 
     var cands = candidatesFor('');
+    if (PREVIEW) {
+      var precs = fallbackRecs(cands, CFG.maxRecs); currentRecs = precs;
+      setSub('Suggested ' + precs.length + ' option' + (precs.length === 1 ? '' : 's') + '.');
+      renderRecs(introLine(), precs);
+      return;
+    }
     callEndpoint('', cands).then(function (data) {
       if (payload.searchSession !== activeSession) return; // stale guard
-      var recs = mapRecs(data.recommendations, cands);
-      if (!recs.length) { recs = fallbackRecs(cands); data = { reply: '' }; }
+      var recs = mapRecs(data.recommendations, cands, CFG.maxRecs);
+      if (!recs.length) { recs = fallbackRecs(cands, CFG.maxRecs); data = { reply: '' }; }
       setSub('Suggested ' + recs.length + ' option' + (recs.length === 1 ? '' : 's') + '.');
       currentRecs = recs;
       renderRecs(data.reply || introLine(), recs);
     }).catch(function (e) {
       if (payload.searchSession !== activeSession) return;
       console.warn('[trai] endpoint failed, using fallback', e);
-      var recs = fallbackRecs(cands); currentRecs = recs;
+      var recs = fallbackRecs(cands, CFG.maxRecs); currentRecs = recs;
       setSub('Suggested ' + recs.length + ' option' + (recs.length === 1 ? '' : 's') + '.');
       renderRecs(introLine(), recs);
     });
@@ -294,30 +401,38 @@
     history.push({ role: 'user', content: msg });
     var thinking = stateLine('Thinking\u2026', true); els.body.appendChild(thinking); scroll();
     var cands = candidatesFor(msg);
+    if (PREVIEW) {
+      if (els.body.contains(thinking)) els.body.removeChild(thinking);
+      var precs = fallbackRecs(cands, CFG.maxRecs); currentRecs = precs;
+      history.push({ role: 'assistant', content: 'preview' });
+      renderRecs('Here are the closest matches I can see:', precs, true);
+      return;
+    }
     callEndpoint(msg, cands).then(function (data) {
       if (!els.body.contains(thinking)) return;
       els.body.removeChild(thinking);
-      var recs = mapRecs(data.recommendations, cands);
-      if (!recs.length) recs = fallbackRecs(cands);
+      var recs = mapRecs(data.recommendations, cands, CFG.maxRecs);
+      if (!recs.length) recs = fallbackRecs(cands, CFG.maxRecs);
       currentRecs = recs;
       history.push({ role: 'assistant', content: data.reply || 'Here are some options.' });
       renderRecs(data.reply || 'Here are some options that match that:', recs, true);
     }).catch(function (e) {
       if (els.body.contains(thinking)) els.body.removeChild(thinking);
       console.warn('[trai] refine failed, using fallback', e);
-      var recs = fallbackRecs(cands); currentRecs = recs;
+      var recs = fallbackRecs(cands, CFG.maxRecs); currentRecs = recs;
       renderRecs('Here are the closest matches I can see:', recs, true);
     });
   }
 
-  function mapRecs(list, cands) {
+  function mapRecs(list, cands, max) {
     var byRid = {}; cands.forEach(function (s) { byRid[s.rid] = s; });
     // also allow any summary (in case the model picked from the broader set is prevented server-side; here cands only)
-    return (list || []).filter(function (r) { return r && byRid[r.rid]; }).slice(0, 6)
+    return (list || []).filter(function (r) { return r && byRid[r.rid]; }).slice(0, max || 6)
       .map(function (r) { return { rid: r.rid, category: r.category || 'Suggested', reason: r.reason || '', s: byRid[r.rid] }; });
   }
   function introLine() {
     var place = criteria && criteria.locationName ? String(criteria.locationName).split(',')[0] : 'your search';
+    if (CFG.greeting) return CFG.greeting.replace(/\{place\}/g, place).replace(/\{count\}/g, String(summaries.length));
     return 'From ' + summaries.length + ' properties, here are the ones worth a look for ' + place + ':';
   }
 
@@ -330,6 +445,7 @@
 
   // ---- event wiring ----
   function onReady(ev) {
+    if (CFG.enabled === false) return;
     var p = ev && ev.detail;
     if (!p || typeof p !== 'object' || !Array.isArray(p.results) || !p.criteria) return;
     mount();
@@ -354,7 +470,7 @@
   // ===================== styles + markup =====================
   var STYLES = '<style>' +
     ':host{all:initial}' +
-    '*{box-sizing:border-box;font-family:Inter,-apple-system,"Segoe UI",sans-serif}' +
+    '*{box-sizing:border-box;font-family:var(--trai-font,Inter,-apple-system,"Segoe UI",sans-serif)}' +
     '#panel{' +
       '--navy:#1B2B5B;--navy-l:#2A3F7A;--teal:#00B4D8;--teal-d:#0096B7;--teal-l:#48CAE4;--ok:#10B981;' +
       '--warnbg:#FEF6E7;--warnbd:#FCD9A6;--warnink:#B45309;' +
@@ -363,7 +479,7 @@
       'width:min(380px,calc(100vw - 24px));max-height:min(78vh,640px);display:flex;flex-direction:column;overflow:hidden;' +
       'border-radius:14px;background:var(--card);color:var(--ink);border:1px solid var(--bd);box-shadow:0 20px 44px -16px rgba(27,43,91,.34)}' +
     '#panel.is-min #body,#panel.is-min #foot{display:none}' +
-    '.hd{display:flex;align-items:center;gap:11px;padding:13px 15px;background:linear-gradient(135deg,var(--navy),#111D3E);color:#fff}' +
+    '.hd{display:flex;align-items:center;gap:11px;padding:13px 15px;background:linear-gradient(135deg,var(--navy),var(--navy-d,#111D3E));color:#fff}' +
     '.spark{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.13);display:grid;place-items:center;flex:none}' +
     '.spark svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linejoin:round}' +
     '.hd h2{margin:0;font-size:.96rem;font-weight:800}.hd p{margin:1px 0 0;font-size:.74rem;color:#bcd3e6}' +
@@ -374,35 +490,34 @@
     '.st{display:flex;align-items:center;gap:9px;color:var(--ink-2);font-size:.85rem;padding:4px 0}' +
     '.dot{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none}' +
     '.dot.think{animation:tgp 1.4s infinite}' +
-    '@keyframes tgp{0%{box-shadow:0 0 0 0 rgba(0,180,216,.5)}70%{box-shadow:0 0 0 9px rgba(0,180,216,0)}100%{box-shadow:0 0 0 0 rgba(0,180,216,0)}}' +
+    '@keyframes tgp{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--teal) 50%,transparent)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}' +
     '@media(prefers-reduced-motion:reduce){.dot.think{animation:none}}' +
     '.bub{max-width:92%;padding:9px 12px;border-radius:11px;font-size:.86rem;line-height:1.45;border:1px solid var(--bd);background:var(--card)}' +
     '.bub.a{color:var(--ink-2);background:var(--bub-a-bg);border-color:var(--bub-a-bd);align-self:flex-start}' +
     '.bub.u{color:#fff;background:var(--navy);border-color:var(--navy);align-self:flex-end}' +
     '.rec{border:1px solid var(--bd);border-radius:12px;padding:11px 12px;background:var(--card)}' +
-    '.cat{display:inline-block;font-size:.64rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--teal-d);background:rgba(0,180,216,.14);border-radius:6px;padding:3px 7px;margin-bottom:6px}' +
+    '.cat{display:inline-block;font-size:.64rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--teal-d);background:color-mix(in srgb,var(--teal) 14%,transparent);border-radius:6px;padding:3px 7px;margin-bottom:6px}' +
     '.nm{font-weight:800;font-size:.94rem;line-height:1.25;color:var(--ink)}' +
     '.facts{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0}' +
     '.f{font-size:.71rem;font-weight:600;color:var(--ink-2);background:var(--well);border:1px solid var(--bd-l);border-radius:6px;padding:2px 7px}' +
     '.f.price{color:var(--navy);font-weight:800}.f.warn{color:var(--warnink);border-color:var(--warnbd);background:var(--warnbg)}' +
     '.why{font-size:.82rem;line-height:1.5;color:var(--ink-2);margin:5px 0 0}' +
-    '.go{margin-top:2px;min-height:44px;border:none;border-radius:10px;background:var(--ok);color:#fff;font:inherit;font-weight:800;font-size:.86rem;padding:11px;cursor:pointer}' +
+    '.go{margin-top:2px;min-height:44px;border:none;border-radius:10px;background:var(--teal);color:#fff;font:inherit;font-weight:800;font-size:.86rem;padding:11px;cursor:pointer}' +
     '.go:hover{filter:brightness(.96)}.go:focus-visible{outline:2px solid var(--teal);outline-offset:2px}' +
     '#foot{display:flex;gap:8px;padding:11px 13px;border-top:1px solid var(--bd);background:var(--card)}' +
     '#input{flex:1;min-height:44px;border:1px solid var(--bd);border-radius:9px;padding:9px 11px;font:inherit;font-size:.86rem;color:var(--ink);background:var(--card);outline:none}' +
-    '#input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,180,216,.15)}' +
+    '#input:focus{border-color:var(--teal);box-shadow:0 0 0 3px color-mix(in srgb,var(--teal) 18%,transparent)}' +
     '#send{min-height:44px;border:none;border-radius:9px;background:var(--navy);color:#fff;font:inherit;font-weight:800;font-size:.84rem;padding:0 14px;cursor:pointer}' +
     '#send:hover{background:var(--navy-l)}#send:focus-visible{outline:2px solid var(--teal);outline-offset:2px}' +
-    '@media(prefers-color-scheme:dark){#panel{' +
-      '--bg:#0F1828;--card:#141E33;--well:#0F1828;--bd:#243049;--bd-l:#243049;' +
-      '--ink:#E8EDF5;--ink-2:#A9B6CC;--ink-3:#697892;--bub-a-bg:#14233F;--bub-a-bd:#243049;--navy:#00B4D8}}' +
+    '#panel[data-theme="dark"]{--bg:#0F1828;--card:#141E33;--well:#0F1828;--bd:#243049;--bd-l:#243049;--ink:#E8EDF5;--ink-2:#A9B6CC;--ink-3:#697892;--bub-a-bg:#14233F;--bub-a-bd:#243049}' +
+    '@media(prefers-color-scheme:dark){#panel[data-theme="auto"]{--bg:#0F1828;--card:#141E33;--well:#0F1828;--bd:#243049;--bd-l:#243049;--ink:#E8EDF5;--ink-2:#A9B6CC;--ink-3:#697892;--bub-a-bg:#14233F;--bub-a-bd:#243049}}' +
     '</style>';
 
   var MARKUP =
-    '<section id="panel" role="complementary" aria-label="AI trip assistant" aria-live="polite">' +
+    '<section id="panel" data-theme="auto" role="complementary" aria-label="AI trip assistant" aria-live="polite">' +
       '<header class="hd">' +
         '<span class="spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3L3.5 11l6.3-2.2z"/></svg></span>' +
-        '<div><h2>AI trip assistant</h2><p id="sub">Waiting for results\u2026</p></div>' +
+        '<div><h2 id="title">AI trip assistant</h2><p id="sub">Waiting for results\u2026</p></div>' +
         '<button class="mn" id="min" type="button" aria-label="Minimise assistant"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>' +
       '</header>' +
       '<div id="body"></div>' +
