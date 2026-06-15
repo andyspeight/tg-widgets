@@ -60,6 +60,14 @@
       "destination": "/demo-spotlight.html"
     },
     {
+      "source": "/demo-travel-results-ai",
+      "destination": "/demo-travel-results-ai.html"
+    },
+    {
+      "source": "/editor-travel-results-ai",
+      "destination": "/editor-travel-results-ai.html"
+    },
+    {
       "source": "/demo-weather",
       "destination": "/demo-weather.html"
     },
@@ -404,6 +412,23 @@
     },
     {
       "source": "/widget-airport.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-travel-results-ai.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
