@@ -142,19 +142,42 @@ export async function sendRescheduled(booking, opts) {
   });
 }
 
+/** Reminder before the appointment — sent to BOTH the visitor and the agency. */
 export async function sendReminder(booking, opts) {
   opts = opts || {};
   const v = booking.invitee || {};
-  if (!v.email) return false;
   const manage = opts.manageUrl ? '<p style="margin:14px 0 0"><a href="' + esc(opts.manageUrl) + '" style="color:#0891b2;font-weight:bold">Reschedule or cancel</a></p>' : '';
-  return sgSend({
-    personalizations: [{ to: [{ email: v.email, name: v.name }] }],
-    from: { email: FROM_EMAIL, name: 'Travelgenix' },
-    reply_to: booking.clientEmail ? { email: booking.clientEmail } : undefined,
-    subject: 'Reminder: ' + (booking.eventLabel || 'your appointment') + ' on ' + whenString(booking.startISO, booking.visitorTimezone || booking.hostTimezone),
-    content: [{ type: 'text/html', value: shell('A quick reminder', '<p>Hi ' + esc(firstName(booking)) + ', this is a reminder of your upcoming appointment.</p>' + detailTable(visitorRows(booking)) + '<p>We look forward to speaking with you.</p>' + manage) }],
-    attachments: [icsAttachment(booking, 'REQUEST')],
+
+  // Visitor reminder (with the .ics + manage link)
+  let visitorOk = false;
+  if (v.email) {
+    visitorOk = await sgSend({
+      personalizations: [{ to: [{ email: v.email, name: v.name }] }],
+      from: { email: FROM_EMAIL, name: 'Travelgenix' },
+      reply_to: booking.clientEmail ? { email: booking.clientEmail } : undefined,
+      subject: 'Reminder: ' + (booking.eventLabel || 'your appointment') + ' on ' + whenString(booking.startISO, booking.visitorTimezone || booking.hostTimezone),
+      content: [{ type: 'text/html', value: shell('A quick reminder', '<p>Hi ' + esc(firstName(booking)) + ', this is a reminder of your upcoming appointment.</p>' + detailTable(visitorRows(booking)) + '<p>We look forward to speaking with you.</p>' + manage) }],
+      attachments: [icsAttachment(booking, 'REQUEST')],
+    });
+  }
+
+  // Owner / agency reminder (booking details in the host timezone)
+  const to = booking.clientEmail || process.env.CONTACT_TO || 'info@travelgenix.io';
+  const rows = [
+    ['Meeting', (booking.eventLabel || 'Appointment') + ' (' + (booking.durationMins || 30) + ' min)'],
+    ['When', whenString(booking.startISO, booking.hostTimezone) + ' · ' + (booking.hostTimezone || '')],
+    ['Name', v.name || ''], ['Email', v.email || ''], ['Phone', v.phone || '—'],
+  ];
+  const ownerOk = await sgSend({
+    personalizations: [{ to: [{ email: to }] }],
+    from: { email: FROM_EMAIL, name: 'Travelgenix Scheduler' },
+    reply_to: v.email ? { email: v.email, name: v.name } : undefined,
+    subject: 'Reminder: ' + (booking.eventLabel || 'appointment') + ' with ' + (v.name || '') + ' — ' + whenString(booking.startISO, booking.hostTimezone),
+    content: [{ type: 'text/html', value: shell('Upcoming appointment reminder', '<p>A reminder of your upcoming appointment.</p>' + detailTable(rows) + manage + '<p style="font-size:13px;color:#64748b">Reference ' + esc(booking.ref) + '</p>') }],
   });
+
+  // Reminded if either party was reached, so the cron marks it done.
+  return visitorOk || ownerOk;
 }
 
 export async function sendCancelled(booking) {
