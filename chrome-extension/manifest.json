@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Travelgenix — Send Time Options",
+  "version": "1.0.0",
+  "description": "Pick available appointment times from your scheduler and drop bookable links straight into an email. Each link lets your client book that exact slot.",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://widgets.travelify.io/*",
+    "https://tg-widgets.vercel.app/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Send time options",
+    "default_icon": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+  },
+  "options_page": "options.html",
+  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+}

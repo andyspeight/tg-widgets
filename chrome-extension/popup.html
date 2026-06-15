@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    :root { --accent: #0891B2; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { width: 380px; max-height: 580px; overflow-y: auto; background: #F8FAFC; color: #0F172A;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    .wrap { padding: 14px 14px 12px; }
+    header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    header svg { flex: 0 0 auto; }
+    header h1 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
+    .muted { color: #64748B; font-size: 12px; line-height: 1.45; }
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: auto; }
+    .pill.on { background: #DCFCE7; color: #166534; }
+    .pill.off { background: #F1F5F9; color: #64748B; }
+    .state { text-align: center; color: #94A3B8; font-size: 13px; padding: 26px 8px; }
+    .day { margin: 0 0 10px; }
+    .day-h { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 6px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { border: 1.5px solid #E2E8F0; background: #fff; color: #0F172A; font: inherit; font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+    .chip:hover { background: #F1F5F9; }
+    .chip.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, #fff); color: color-mix(in srgb, var(--accent) 60%, #0F172A); }
+    .compose { background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px; margin: 10px 0; }
+    label.lbl { display: block; font-size: 11px; font-weight: 600; color: #475569; margin: 0 0 4px; }
+    textarea, input { width: 100%; font: inherit; font-size: 12px; padding: 7px 9px; border: 1px solid #E2E8F0; border-radius: 7px; resize: vertical; }
+    textarea:focus, input:focus { outline: none; border-color: var(--accent); }
+    .bar { position: sticky; bottom: 0; background: #F8FAFC; padding-top: 8px; display: flex; align-items: center; gap: 8px; }
+    .count { font-size: 12px; font-weight: 600; }
+    .spacer { flex: 1; }
+    button.btn { border: 0; border-radius: 8px; font: inherit; font-size: 12px; font-weight: 700; padding: 8px 12px; cursor: pointer; }
+    button.btn.primary { background: var(--accent); color: #fff; }
+    button.btn.primary:disabled { opacity: .5; cursor: not-allowed; }
+    button.btn.ghost { background: #fff; border: 1px solid #E2E8F0; color: #334155; }
+    .foot { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+    .link { background: none; border: 0; color: var(--accent); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0; }
+    .toast { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%) translateY(16px); background: #0F172A; color: #fff; font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 8px; opacity: 0; transition: all .22s ease; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .setup { padding: 8px 2px; }
+    .setup p { font-size: 13px; color: #475569; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="root">
+    <header>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0891B2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+      <h1>Send time options</h1>
+      <span class="pill off" id="conn"></span>
+    </header>
+    <div id="content"><div class="state">Loading…</div></div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

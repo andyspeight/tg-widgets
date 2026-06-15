@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Send Time Options — settings</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #F1F5F9; color: #0F172A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 520px; margin: 40px auto; padding: 26px 24px; background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 10px 30px rgba(15,23,42,.06); }
+    h1 { margin: 0 0 4px; font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+    .sub { margin: 0 0 20px; color: #64748B; font-size: 13px; line-height: 1.5; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin: 0 0 6px; }
+    .field { margin-bottom: 16px; }
+    input { width: 100%; font: inherit; font-size: 14px; padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 9px; }
+    input:focus { outline: none; border-color: #0891B2; box-shadow: 0 0 0 3px rgba(8,145,178,.18); }
+    .hint { font-size: 12px; color: #64748B; margin-top: 6px; line-height: 1.45; }
+    .hint code { background: #F1F5F9; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+    button { border: 0; border-radius: 10px; background: #0891B2; color: #fff; font: inherit; font-size: 14px; font-weight: 700; padding: 11px 20px; cursor: pointer; }
+    .saved { display: inline-block; margin-left: 12px; color: #166534; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity .2s; }
+    .saved.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Send Time Options</h1>
+    <p class="sub">Connect the extension to your appointment scheduler. You only need to do this once.</p>
+
+    <div class="field">
+      <label for="widget">Scheduler ID (or paste the editor link)</label>
+      <input id="widget" placeholder="e.g. wgt_ab12cd34  or  https://widgets.travelify.io/editor-appointment?id=wgt_ab12cd34">
+      <div class="hint">Find it in the Appointment editor URL after <code>?id=</code>. Paste the whole link and we'll pull the ID out.</div>
+    </div>
+
+    <div class="field">
+      <label for="base">Widgets address</label>
+      <input id="base" placeholder="https://widgets.travelify.io">
+      <div class="hint">Leave as the default unless your widgets are hosted on another domain.</div>
+    </div>
+
+    <button id="save">Save</button><span class="saved" id="saved">Saved ✓</span>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>
