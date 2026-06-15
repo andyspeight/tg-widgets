@@ -214,6 +214,27 @@
                 <input class="input colour-hex" id="pointer-hex" value="" maxlength="9" placeholder="auto (gold)">
               </div>
             </div>
+            <div class="field">
+              <label class="field-label">Spin button colour (optional)</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="spin-col" value="#0891B2"></div>
+                <input class="input colour-hex" id="spin-hex" value="" maxlength="9" placeholder="auto (matches wheel)">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Spin button text colour</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="spintext-col" value="#FFFFFF"></div>
+                <input class="input colour-hex" id="spintext-hex" value="" maxlength="9" placeholder="auto (white)">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Heading text colour (optional)</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="head-col" value="#0F172A"></div>
+                <input class="input colour-hex" id="head-hex" value="" maxlength="9" placeholder="auto (theme)">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -229,6 +250,24 @@
                 <button type="button" class="pick-btn" data-layout="card"><span class="pick-label">Card</span></button>
                 <button type="button" class="pick-btn" data-layout="inline"><span class="pick-label">Plain</span></button>
               </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Wheel size</label>
+              <div class="slider-row">
+                <input type="range" id="size-input" min="240" max="560" step="10" value="360">
+                <span class="slider-val" id="size-val">360px</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Card background colour</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="cardbg-col" value="#FFFFFF"></div>
+                <input class="input colour-hex" id="cardbg-hex" value="" maxlength="9" placeholder="auto (theme)">
+              </div>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Transparent card</span><button type="button" class="switch" id="sw-transparent" aria-pressed="false"></button></div>
+              <span class="field-hint">Drops the card background, border and shadow so the wheel sits flush on the page behind it.</span>
             </div>
           </div>
         </div>
@@ -299,7 +338,7 @@
 </div>
 
 <script src="/editor-shell.js"></script>
-<script src="/widget-spinwheel.js?v=1.1.0"></script>
+<script src="/widget-spinwheel.js?v=1.2.0"></script>
 <style>
   .pv-faux { width:100%; max-width:620px; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); padding:40px; display:flex; justify-content:center; }
   .pv-faux[data-bg="dark"] { background:#0B1220; }
@@ -322,8 +361,9 @@
     resultTitle: 'Your destination: {prize}',
     resultText: 'Quote this when you enquire and we will build it around you.',
     ctaText: 'Enquire now', ctaUrl: '',
-    oncePerVisitor: false, spinDuration: 4500,
+    oncePerVisitor: false, spinDuration: 4500, size: 360,
     style: 'premium', accent: '#0891B2', segment2: '', pointerColor: '', peek: false,
+    spinColor: '', spinTextColor: '', headingColor: '', cardBg: '', cardTransparent: false,
     layout: 'card', theme: 'light', fontFamily: 'Inter',
   };
 
@@ -400,6 +440,17 @@
     document.getElementById('seg2-hex').value = C.segment2 ? C.segment2.toUpperCase() : '';
     document.getElementById('pointer-col').value = hexOk(C.pointerColor) ? C.pointerColor : '#E11D2A';
     document.getElementById('pointer-hex').value = C.pointerColor ? C.pointerColor.toUpperCase() : '';
+    document.getElementById('spin-col').value = hexOk(C.spinColor) ? C.spinColor : '#0891B2';
+    document.getElementById('spin-hex').value = C.spinColor ? C.spinColor.toUpperCase() : '';
+    document.getElementById('spintext-col').value = hexOk(C.spinTextColor) ? C.spinTextColor : '#FFFFFF';
+    document.getElementById('spintext-hex').value = C.spinTextColor ? C.spinTextColor.toUpperCase() : '';
+    document.getElementById('head-col').value = hexOk(C.headingColor) ? C.headingColor : '#0F172A';
+    document.getElementById('head-hex').value = C.headingColor ? C.headingColor.toUpperCase() : '';
+    document.getElementById('cardbg-col').value = hexOk(C.cardBg) ? C.cardBg : '#FFFFFF';
+    document.getElementById('cardbg-hex').value = C.cardBg ? C.cardBg.toUpperCase() : '';
+    document.getElementById('size-input').value = C.size || 360;
+    document.getElementById('size-val').textContent = (C.size || 360) + 'px';
+    toggleSwitch('sw-transparent', C.cardTransparent);
     document.querySelectorAll('#layout-picker [data-layout]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-layout') === C.layout));
     document.querySelectorAll('#style-picker [data-style]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-style') === (C.style || 'premium')));
     document.querySelectorAll('#btnpos-picker [data-btnpos]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-btnpos') === (C.buttonPlacement || 'hub')));
@@ -471,6 +522,13 @@
   wireColourTo('accent-col', 'accent-hex', 'accent', '#0891B2', false);
   wireColourTo('seg2-col', 'seg2-hex', 'segment2', '#111418', true);
   wireColourTo('pointer-col', 'pointer-hex', 'pointerColor', '#E11D2A', true);
+  wireColourTo('spin-col', 'spin-hex', 'spinColor', '#0891B2', true);
+  wireColourTo('spintext-col', 'spintext-hex', 'spinTextColor', '#FFFFFF', true);
+  wireColourTo('head-col', 'head-hex', 'headingColor', '#0F172A', true);
+  wireColourTo('cardbg-col', 'cardbg-hex', 'cardBg', '#FFFFFF', true);
+
+  document.getElementById('size-input').addEventListener('input', e => { C.size = parseInt(e.target.value, 10) || 360; document.getElementById('size-val').textContent = C.size + 'px'; shell.markDirty(); render(); });
+  document.getElementById('sw-transparent').addEventListener('click', () => { C.cardTransparent = !C.cardTransparent; toggleSwitch('sw-transparent', C.cardTransparent); shell.markDirty(); render(); });
 
   document.getElementById('dur-input').addEventListener('input', e => { C.spinDuration = parseInt(e.target.value, 10) || 4500; document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's'; shell.markDirty(); });
   document.getElementById('sw-once').addEventListener('click', () => { C.oncePerVisitor = !C.oncePerVisitor; toggleSwitch('sw-once', C.oncePerVisitor); shell.markDirty(); });

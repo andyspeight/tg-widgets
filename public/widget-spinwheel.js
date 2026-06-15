@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
 
   function resolveConfigApi() {
     if (typeof window === 'undefined') return '/api/widget-config';
@@ -130,8 +130,14 @@
         ctaUrl: safeUrl(c.ctaUrl) || '',
         oncePerVisitor: !!c.oncePerVisitor,
         spinDuration: Math.max(1500, Math.min(8000, Number(c.spinDuration) || 4500)),
+        size: Math.max(240, Math.min(560, Math.round(Number(c.size) || 360))),
         style: c.style === 'flat' ? 'flat' : 'premium',
         accent: hexOk(c.accent) ? c.accent : '#0891B2',
+        spinColor: hexOk(c.spinColor) ? c.spinColor : '',
+        spinTextColor: hexOk(c.spinTextColor) ? c.spinTextColor : '',
+        headingColor: hexOk(c.headingColor) ? c.headingColor : '',
+        cardBg: hexOk(c.cardBg) ? c.cardBg : '',
+        cardTransparent: !!c.cardTransparent,
         segment2: hexOk(c.segment2) ? c.segment2 : '',
         pointerColor: hexOk(c.pointerColor) ? c.pointerColor : '',
         peek: !!c.peek,
@@ -228,7 +234,7 @@
       const dark = c.theme === 'dark';
       const ink = dark ? '#F1F5F9' : '#0F172A';
       const ink2 = dark ? '#94A3B8' : '#64748B';
-      const panel = dark ? '#0B1220' : '#FFFFFF';
+      const panel = c.cardBg || (dark ? '#0B1220' : '#FFFFFF');
       const border = dark ? '#1E293B' : '#E2E8F0';
       const res = dark ? '#0F172A' : '#F8FAFC';
       const card = c.layout === 'card';
@@ -236,6 +242,18 @@
       // black/white wheel uses white), the hub / badge / CTA need a readable
       // stand-in so they are not white-on-white.
       const act = lumOf(c.accent) > 0.7 ? (c.pointerColor || '#111418') : c.accent;
+      // Spin-button colours: explicit overrides, else the accent-derived action
+      // colour with white text. Heading colour: explicit override, else the ink.
+      const spinBg = c.spinColor || act;
+      const spinInk = c.spinTextColor || '#ffffff';
+      const headInk = c.headingColor || ink;
+      // Card chrome. Transparent drops the panel, border and shadow so the
+      // widget sits flush on whatever is behind it.
+      const cardCss = card
+        ? (c.cardTransparent
+            ? 'padding:8px 0;'
+            : `background:${panel};border:1px solid ${border};border-radius:18px;padding:26px 22px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 18px 42px rgba(15,23,42,.10);`)
+        : '';
       // Peek crops the wheel at the bottom; the spin button must sit above it.
       const topPlacement = c.buttonPlacement === 'top' || c.peek;
 
@@ -243,30 +261,30 @@
         <style>
           :host { all: initial; }
           * { box-sizing: border-box; }
-          .sw { font-family: ${c.fontFamily}; color: ${ink}; ${card ? `background:${panel};border:1px solid ${border};border-radius:18px;padding:26px 22px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 18px 42px rgba(15,23,42,.10);` : ''} max-width: 440px; text-align:center; }
-          .sw-head { font-size: 19px; font-weight: 800; margin: 0 0 ${c.subheading ? '4px' : '18px'}; letter-spacing: -.015em; }
+          .sw { font-family: ${c.fontFamily}; color: ${ink}; ${cardCss} max-width: ${c.size + 80}px; text-align:center; }
+          .sw-head { font-size: 19px; font-weight: 800; color: ${headInk}; margin: 0 0 ${c.subheading ? '4px' : '18px'}; letter-spacing: -.015em; }
           .sw-logo { display:block; max-height:44px; max-width:72%; margin:0 auto 14px; object-fit:contain; }
           .sw-sub { font-size: 14px; color: ${ink2}; margin: 0 0 16px; line-height: 1.45; }
-          .sw-topbtn { display:inline-block; margin:0 auto 16px; border:1.6px solid ${ink}; background:transparent; color:${ink}; font:inherit; font-weight:700; font-size:15px; padding:11px 26px; border-radius:999px; cursor:pointer; transition: background .15s ease, color .15s ease, transform .12s ease; }
-          .sw-topbtn:hover:not(:disabled) { background:${ink}; color:${panel}; }
+          .sw-topbtn { display:inline-block; margin:0 auto 16px; ${c.spinColor ? `border:1.6px solid ${spinBg}; background:${spinBg}; color:${spinInk};` : `border:1.6px solid ${ink}; background:transparent; color:${ink};`} font:inherit; font-weight:700; font-size:15px; padding:11px 26px; border-radius:999px; cursor:pointer; transition: filter .15s ease, background .15s ease, color .15s ease, transform .12s ease; }
+          .sw-topbtn:hover:not(:disabled) { ${c.spinColor ? 'filter:brightness(1.08);' : `background:${ink}; color:${panel};`} }
           .sw-topbtn:active:not(:disabled) { transform: scale(.97); }
           .sw-topbtn:disabled { opacity:.55; cursor:default; }
           .sw-hubcap { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:54px; height:54px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px #E9B949, 0 4px 10px rgba(11,18,32,.3); z-index:2; }
-          .sw-stage { position: relative; width: 360px; max-width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
+          .sw-stage { position: relative; width: ${c.size}px; max-width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
           .sw-wheel { width: 100%; height: 100%; display: block; }
           .sw-rot { transform-box: fill-box; transform-origin: 50% 50%; }
           .sw.is-peek .sw-stage { aspect-ratio: auto; height: 0; padding-bottom: 60%; overflow: hidden; }
           .sw.is-peek .sw-wheel { position: absolute; top: 0; left: 0; width: 100%; height: auto; }
           .sw-hub { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:86px; height:86px; border-radius:50%; border:0; padding:0; cursor:pointer; z-index:3;
-            background:${act};
-            background:radial-gradient(circle at 50% 32%, color-mix(in srgb, ${act} 70%, #ffffff 30%), ${act} 58%, color-mix(in srgb, ${act} 62%, #000000 38%));
+            background:${spinBg};
+            background:radial-gradient(circle at 50% 32%, color-mix(in srgb, ${spinBg} 70%, #ffffff 30%), ${spinBg} 58%, color-mix(in srgb, ${spinBg} 62%, #000000 38%));
             box-shadow:0 0 0 4px #ffffff, 0 0 0 7px #E9B949, 0 8px 18px rgba(11,18,32,.42), inset 0 2px 6px rgba(255,255,255,.5), inset 0 -4px 8px rgba(0,0,0,.28);
-            color:#fff; font:inherit; font-weight:800; font-size:15px; letter-spacing:.1em; text-transform:uppercase;
+            color:${spinInk}; font:inherit; font-weight:800; font-size:15px; letter-spacing:.1em; text-transform:uppercase;
             display:flex; align-items:center; justify-content:center; transition: transform .14s ease; }
           .sw-hub:hover:not(:disabled) { transform:translate(-50%,-50%) scale(1.06); }
           .sw-hub:active:not(:disabled) { transform:translate(-50%,-50%) scale(.96); }
           .sw-hub:disabled { cursor:default; }
-          .sw-hub::before { content:''; position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 3px ${act}; opacity:0; animation: swPing 2.4s ease-out infinite; pointer-events:none; }
+          .sw-hub::before { content:''; position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 3px ${spinBg}; opacity:0; animation: swPing 2.4s ease-out infinite; pointer-events:none; }
           .sw-hub:disabled::before { display:none; }
           @keyframes swPing { 0% { transform:scale(1); opacity:.5 } 70% { transform:scale(1.5); opacity:0 } 100% { opacity:0 } }
           .sw-result { margin-top:20px; padding:18px 16px; border:1px solid ${border}; border-radius:14px; background:${res}; background:linear-gradient(180deg, ${dark ? '#0f1a2e' : '#FBFCFE'}, ${res}); }
