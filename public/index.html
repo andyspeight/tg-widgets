@@ -897,6 +897,21 @@ const WIDGETS = [
     scriptFile: 'widget-newsletter.js',
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
+  {
+    id: 'travel-results-ai',
+    name: 'Travel Results AI',
+    airtableType: 'Travel Results AI',
+    description: 'AI concierge for your search results page. It reads the live accommodation results, recommends the best matches with plain-English reasons, and takes conversational follow-ups ("more central", "with a pool") — then filters the results to the chosen properties. Installs as a single script tag and works alongside the Travelify results widget.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3L3.5 11l6.3-2.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'},
+    color: '#00B4D8',
+    editorUrl: '/editor-travel-results-ai',
+    demoUrl: '/demo-travel-results-ai',
+    widgetTag: 'travel-results-ai',
+    scriptFile: 'widget-travel-results-ai.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
 ];
 
 const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
@@ -2754,6 +2769,47 @@ function loadMiniPreview(w) {
       </div>
     `;
   }
+  if (w.id === 'travel-results-ai') {
+    container.innerHTML = `
+      <div style="width:700px;height:340px;background:#EEF2F7;border-radius:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;position:relative;overflow:hidden;box-sizing:border-box;">
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+          <div style="background:#1B2B5B;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;font-size:13px;flex-shrink:0;">
+            <div style="font-weight:700;">Sunshine Holidays</div>
+            <div style="opacity:.85;font-size:11px;">361 properties &middot; Costa del Sol</div>
+          </div>
+          <div style="flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+            ${[0,1,2].map(() => `<div style="background:#fff;border:1px solid #E2E8F0;border-radius:10px;height:64px;display:flex;align-items:center;gap:12px;padding:0 14px;">
+              <div style="width:84px;height:46px;border-radius:7px;background:linear-gradient(135deg,#cbd5e1,#e2e8f0);flex:none;"></div>
+              <div style="flex:1;"><div style="height:10px;width:42%;background:#cbd5e1;border-radius:4px;margin-bottom:7px;"></div><div style="height:8px;width:28%;background:#e2e8f0;border-radius:4px;"></div></div>
+              <div style="font-weight:800;color:#1B2B5B;font-size:13px;">&pound;1,190</div>
+            </div>`).join('')}
+          </div>
+        </div>
+        <div style="position:absolute;right:16px;bottom:16px;width:300px;background:#fff;border:1px solid #E2E8F0;border-radius:14px;box-shadow:0 20px 44px -16px rgba(27,43,91,.34);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:9px;padding:11px 13px;background:linear-gradient(135deg,#1B2B5B,#111D3E);color:#fff;">
+            <span style="width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3L3.5 11l6.3-2.2z"/></svg>
+            </span>
+            <div><div style="font-weight:800;font-size:13px;">AI trip assistant</div><div style="font-size:10px;color:#bcd3e6;">Suggested 3 options.</div></div>
+          </div>
+          <div style="padding:11px 12px;display:flex;flex-direction:column;gap:8px;background:#F5F8FB;">
+            <div style="background:#EDF4FA;border:1px solid #D4E3EF;border-radius:10px;padding:8px 10px;font-size:11px;color:#475569;line-height:1.4;">Here are the ones worth a look for Costa del Sol:</div>
+            <div style="border:1px solid #E2E8F0;border-radius:10px;padding:9px 10px;background:#fff;">
+              <span style="display:inline-block;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#0096B7;background:rgba(0,180,216,.14);border-radius:5px;padding:2px 6px;margin-bottom:5px;">Best value</span>
+              <div style="font-weight:800;font-size:12px;color:#0F172A;">Hotel Marbella Bay</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+                <span style="font-size:9px;font-weight:700;color:#1B2B5B;background:#F1F5F9;border:1px solid #EEF2F7;border-radius:5px;padding:2px 6px;">&pound;1,190 total</span>
+                <span style="font-size:9px;font-weight:600;color:#475569;background:#F1F5F9;border:1px solid #EEF2F7;border-radius:5px;padding:2px 6px;">4-star</span>
+                <span style="font-size:9px;font-weight:600;color:#475569;background:#F1F5F9;border:1px solid #EEF2F7;border-radius:5px;padding:2px 6px;">TA 4.5</span>
+              </div>
+            </div>
+            <button style="height:36px;border:none;border-radius:9px;background:${w.color};color:#fff;font-family:inherit;font-weight:800;font-size:12px;cursor:pointer;">Show these in results</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   if (w.id === 'popup') {
     container.innerHTML = `
       <div style="
