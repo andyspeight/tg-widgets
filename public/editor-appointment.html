@@ -318,6 +318,7 @@
         <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
       </div>
       <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm" id="btn-share" title="Select times and email them to a client"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg> Send time options</button>
       <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
     </div>
     <div class="tgse-canvas">
@@ -693,6 +694,17 @@
     const map = { connected: ['Calendar connected', 'ok'], error: ['Could not connect the calendar', 'err'], denied: ['Calendar connection cancelled', 'err'], norefresh: ['Please remove access in Google then reconnect', 'err'], nostore: ['Booking storage is not configured', 'err'] };
     const m = map[cal]; if (m && window.tgse) tgse.toast(m[0], m[1]);
     const u = new URL(location); u.searchParams.delete('calendar'); history.replaceState(null, '', u);
+  })();
+
+  // "Send time options" — open the share pop-out for this saved scheduler.
+  (function () {
+    const b = document.getElementById('btn-share');
+    if (!b) return;
+    b.addEventListener('click', () => {
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) { if (window.tgse && tgse.toast) tgse.toast('Save the scheduler first, then you can send time options.', 'ok'); return; }
+      window.open('/appointment-share?widget=' + encodeURIComponent(id), 'tgshare', 'width=600,height=780,noopener');
+    });
   })();
 
   document.addEventListener('DOMContentLoaded', () => {

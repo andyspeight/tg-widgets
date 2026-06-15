@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Confirm your appointment · Travelgenix</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --accent: #0891B2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #F1F5F9; font-family: 'Inter', system-ui, sans-serif; color: #0F172A; display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; -webkit-font-smoothing: antialiased; }
+    .card { width: 100%; max-width: 460px; background: #fff; border: 1px solid #E2E8F0; border-radius: 18px; box-shadow: 0 1px 3px rgba(15,23,42,.06), 0 18px 42px rgba(15,23,42,.10); padding: 28px 26px; }
+    .badge { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--accent) 14%, transparent); margin-bottom: 14px; }
+    .badge svg { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    h1 { margin: 0 0 4px; font-size: 21px; font-weight: 800; letter-spacing: -.02em; }
+    .sub { margin: 0 0 18px; font-size: 14px; color: #64748B; line-height: 1.5; }
+    .slot { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid #E2E8F0; border-radius: 12px; background: #F8FAFC; margin-bottom: 18px; }
+    .slot svg { width: 20px; height: 20px; flex: 0 0 auto; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .slot-when { font-weight: 700; font-size: 15px; }
+    .slot-tz { font-size: 12px; color: #64748B; margin-top: 2px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin: 0 0 5px; letter-spacing: .01em; }
+    .field { margin-bottom: 12px; }
+    input { width: 100%; font: inherit; font-size: 14px; padding: 11px 12px; border: 1px solid #E2E8F0; border-radius: 10px; background: #fff; color: #0F172A; }
+    input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+    button.cta { width: 100%; margin-top: 6px; border: 0; border-radius: 11px; background: var(--accent); color: #fff; font: inherit; font-size: 15px; font-weight: 700; padding: 13px; cursor: pointer; box-shadow: 0 6px 16px rgba(15,23,42,.16); }
+    button.cta:disabled { opacity: .6; cursor: progress; }
+    .err { color: #DC2626; font-size: 13px; margin: 8px 0 0; min-height: 16px; }
+    .foot { margin-top: 16px; font-size: 11px; color: #94A3B8; text-align: center; }
+    .success svg { width: 26px; height: 26px; }
+    .manage { display: inline-block; margin-top: 14px; color: var(--accent); font-weight: 600; font-size: 14px; }
+    #scheduler-mount { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div style="text-align:center;color:#94A3B8;font-size:14px;padding:20px 0">Loading…</div>
+  </div>
+
+  <script src="/widget-appointment.js"></script>
+  <script>
+    var $ = function (id) { return document.getElementById(id); };
+    var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
+    var P = new URLSearchParams(location.search);
+    var widgetId = P.get('widget') || P.get('id') || '';
+    var startISO = P.get('start') || '';
+    var eventId = P.get('event') || '';
+    var cfg = null, tz = 'Europe/London', ev = null;
+
+    function fmtWhen(iso, zone) {
+      try {
+        return new Intl.DateTimeFormat('en-GB', { timeZone: zone, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso));
+      } catch (e) { return iso; }
+    }
+    function fail(msg) { $('card').innerHTML = '<h1>Sorry</h1><p class="sub">' + esc(msg) + '</p>'; }
+
+    function pickEvent() {
+      var list = (cfg && Array.isArray(cfg.eventTypes)) ? cfg.eventTypes : [];
+      return list.filter(function (e) { return e && e.id === eventId; })[0] || list[0] || { id: eventId || 'consult', label: cfg && cfg.heading || 'Appointment', mins: 30 };
+    }
+
+    function render() {
+      var when = fmtWhen(startISO, tz);
+      $('card').innerHTML =
+        '<div class="badge"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>' +
+        '<h1>Confirm your appointment</h1>' +
+        '<p class="sub">' + esc(ev.label || 'Appointment') + (ev.mins ? ' · ' + ev.mins + ' min' : '') + '. Just confirm your details below.</p>' +
+        '<div class="slot"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><div><div class="slot-when">' + esc(when) + '</div><div class="slot-tz">Times shown in ' + esc(tz) + '</div></div></div>' +
+        '<div class="field"><label for="f-name">Your name</label><input id="f-name" autocomplete="name" placeholder="Sarah Smith"></div>' +
+        '<div class="field"><label for="f-email">Email address</label><input id="f-email" type="email" autocomplete="email" placeholder="you@example.com"></div>' +
+        '<div class="field"><label for="f-phone">Phone (optional)</label><input id="f-phone" type="tel" autocomplete="tel" placeholder="07123 456789"></div>' +
+        '<button class="cta" id="f-go">Confirm booking</button>' +
+        '<p class="err" id="f-err"></p>' +
+        '<div class="foot">Powered by Travelgenix</div>';
+      $('f-go').addEventListener('click', submit);
+    }
+
+    function submit() {
+      var name = $('f-name').value.trim(), email = $('f-email').value.trim(), phone = $('f-phone').value.trim();
+      var err = $('f-err');
+      if (name.length < 2) { err.textContent = 'Please enter your name.'; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Please enter a valid email address.'; return; }
+      err.textContent = '';
+      var btn = $('f-go'); btn.disabled = true; btn.textContent = 'Confirming…';
+      fetch('/api/appointment/book', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ widgetId: widgetId, eventId: ev.id, startISO: startISO, name: name, email: email, phone: phone })
+      }).then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+        .then(function (res) {
+          if (res.status === 200 && res.d.ok) { success(res.d); return; }
+          if (res.status === 409) { taken(); return; }
+          btn.disabled = false; btn.textContent = 'Confirm booking';
+          err.textContent = (res.d && res.d.error) || 'Something went wrong. Please try again.';
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = 'Confirm booking'; err.textContent = 'Network error. Please try again.'; });
+    }
+
+    function success(d) {
+      var when = fmtWhen(startISO, tz);
+      $('card').innerHTML =
+        '<div class="badge success"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>' +
+        '<h1>You\'re booked in</h1>' +
+        '<p class="sub">Your ' + esc(ev.label || 'appointment') + ' is confirmed for <strong>' + esc(when) + '</strong>. A confirmation email and calendar invite are on the way.</p>' +
+        (d.manageUrl ? '<a class="manage" href="' + esc(d.manageUrl) + '">Reschedule or cancel</a>' : '') +
+        '<div class="foot">Powered by Travelgenix</div>';
+    }
+
+    function taken() {
+      $('card').innerHTML =
+        '<h1>That time was just taken</h1>' +
+        '<p class="sub">Sorry, someone grabbed that slot first. Please pick another time below.</p>' +
+        '<div id="scheduler-mount"><div data-tg-widget="appointment" data-tg-id="' + esc(widgetId) + '"></div></div>';
+    }
+
+    // Boot
+    (function () {
+      if (!widgetId || !startISO || !Number.isFinite(Date.parse(startISO))) { fail('This booking link is missing or invalid. Please use the link from your email, or contact us directly.'); return; }
+      fetch('/api/widget-config?id=' + encodeURIComponent(widgetId))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          cfg = (data && (data.config || data)) || {};
+          tz = cfg.timezone || 'Europe/London';
+          ev = pickEvent();
+          if (cfg.accent && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(cfg.accent)) document.documentElement.style.setProperty('--accent', cfg.accent);
+          render();
+        })
+        .catch(function () { fail('We could not load this scheduler. Please try again or contact us directly.'); });
+    })();
+  </script>
+</body>
+</html>

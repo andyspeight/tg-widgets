@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Send time options · Travelgenix</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --accent: #0891B2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #F1F5F9; font-family: 'Inter', system-ui, sans-serif; color: #0F172A; -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 20px 18px 40px; }
+    header.top { display: flex; align-items: center; gap: 10px; margin: 4px 0 6px; }
+    header.top h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+    .muted { color: #64748B; font-size: 13px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+    select, .input, textarea { font: inherit; font-size: 14px; padding: 9px 11px; border: 1px solid #E2E8F0; border-radius: 9px; background: #fff; color: #0F172A; }
+    select:focus, .input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
+    .pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+    .pill.on { background: #DCFCE7; color: #166534; }
+    .pill.off { background: #F1F5F9; color: #64748B; }
+    .card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px; margin: 12px 0; }
+    .day { margin: 0 0 14px; }
+    .day:last-child { margin-bottom: 0; }
+    .day-h { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 8px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip { border: 1.5px solid #E2E8F0; background: #fff; color: #0F172A; font: inherit; font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 9px; cursor: pointer; transition: border-color .12s, background .12s; }
+    .chip:hover { background: #F8FAFC; }
+    .chip.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, #fff); color: color-mix(in srgb, var(--accent) 65%, #0F172A); }
+    .bar { position: sticky; bottom: 0; background: #F1F5F9; padding: 12px 0 4px; }
+    .count { font-size: 13px; font-weight: 600; }
+    label.lbl { display: block; font-size: 12px; font-weight: 600; color: #475569; margin: 0 0 5px; }
+    textarea { width: 100%; resize: vertical; }
+    .preview { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; font-size: 14px; line-height: 1.6; }
+    .preview a { color: var(--accent); font-weight: 600; }
+    .preview ul { margin: 8px 0; padding-left: 20px; }
+    .btn { border: 0; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 700; padding: 11px 18px; cursor: pointer; }
+    .btn.primary { background: var(--accent); color: #fff; box-shadow: 0 6px 16px rgba(15,23,42,.16); }
+    .btn.primary:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+    .btn.ghost { background: #fff; border: 1px solid #E2E8F0; color: #334155; }
+    .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(20px); background: #0F172A; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: 10px; opacity: 0; transition: all .25s ease; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .state { text-align: center; color: #94A3B8; font-size: 14px; padding: 30px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+      <h1>Send time options</h1>
+    </header>
+    <p class="muted" id="sub">Pick the times you want to offer, then copy them into an email. Each one is a link the client clicks to book.</p>
+
+    <div class="row" id="schedRow" style="display:none">
+      <label class="lbl" style="margin:0">Scheduler</label>
+      <select id="sched"></select>
+      <span class="pill off" id="conn">checking…</span>
+    </div>
+
+    <div id="slots"><div class="state">Loading your availability…</div></div>
+
+    <div class="card" id="composer" style="display:none">
+      <label class="lbl" for="intro">Intro line</label>
+      <textarea id="intro" rows="2">Here are a few times that suit — click whichever works and it will confirm your appointment:</textarea>
+      <label class="lbl" for="outro" style="margin-top:10px">Closing line</label>
+      <input class="input" id="outro" style="width:100%" value="If none of these work, just reply and we'll find another.">
+      <div style="margin-top:14px"><label class="lbl">Email preview</label><div class="preview" id="preview"></div></div>
+    </div>
+
+    <div class="bar" id="bar" style="display:none">
+      <div class="row" style="justify-content:space-between;margin:0">
+        <span class="count" id="count">0 selected</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" id="clear">Clear</button>
+          <button class="btn primary" id="copy" disabled>Copy for email</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var $ = function (id) { return document.getElementById(id); };
+    var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
+    var P = new URLSearchParams(location.search);
+    var ORIGIN = location.origin;
+    var schedulers = [];
+    (function () {
+      var one = P.get('widget') || P.get('id');
+      if (one) schedulers = [{ id: one }];
+      else (P.get('widgets') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (id) { schedulers.push({ id: id }); });
+    })();
+
+    var current = schedulers[0] ? schedulers[0].id : '';
+    var tz = 'Europe/London', eventId = '', selected = []; // array of startISO
+
+    function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(function () { t.classList.remove('show'); }, 1900); }
+
+    function dayKey(iso) { try { return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)); } catch (e) { return iso.slice(0, 10); } }
+    function dayLabel(iso) { try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(iso)); } catch (e) { return iso; } }
+    function timeLabel(iso) { try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso)).replace(/\s/g, ''); } catch (e) { return iso; } }
+    function fullLabel(iso) { try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso)); } catch (e) { return iso; } }
+    function bookLink(iso) { return ORIGIN + '/book-appointment?widget=' + encodeURIComponent(current) + '&start=' + encodeURIComponent(iso) + (eventId ? '&event=' + encodeURIComponent(eventId) : ''); }
+
+    function loadSchedulerNames() {
+      schedulers.forEach(function (s) {
+        fetch('/api/widget-config?id=' + encodeURIComponent(s.id)).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          var cfg = d && (d.config || d) || {};
+          s.name = (d && d.name) || cfg.heading || s.id;
+          if (cfg.accent && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(cfg.accent) && s.id === current) document.documentElement.style.setProperty('--accent', cfg.accent);
+          paintSchedulers();
+        }).catch(function () {});
+      });
+    }
+    function paintSchedulers() {
+      if (schedulers.length <= 1) { return; }
+      $('schedRow').style.display = '';
+      $('sched').innerHTML = schedulers.map(function (s) { return '<option value="' + esc(s.id) + '"' + (s.id === current ? ' selected' : '') + '>' + esc(s.name || s.id) + '</option>'; }).join('');
+    }
+
+    function loadAvailability() {
+      if (!current) { $('slots').innerHTML = '<div class="state">No scheduler specified. Open this from a scheduler\'s editor.</div>'; return; }
+      $('slots').innerHTML = '<div class="state">Loading your availability…</div>';
+      var from = new Date().toISOString();
+      var to = new Date(Date.now() + 14 * 86400000).toISOString();
+      fetch('/api/appointment/availability?widgetId=' + encodeURIComponent(current) + '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d) { $('slots').innerHTML = '<div class="state">Could not load availability for this scheduler.</div>'; return; }
+          tz = d.timezone || tz; eventId = d.eventId || eventId;
+          $('conn').className = 'pill ' + (d.connected ? 'on' : 'off');
+          $('conn').textContent = d.connected ? 'Calendar connected' : 'Not calendar-connected';
+          renderSlots(d.slots || []);
+        })
+        .catch(function () { $('slots').innerHTML = '<div class="state">Could not load availability.</div>'; });
+    }
+
+    function renderSlots(slots) {
+      if (!slots.length) { $('slots').innerHTML = '<div class="state">No available times in the next two weeks. Check the scheduler\'s availability and connected calendar.</div>'; $('bar').style.display = 'none'; $('composer').style.display = 'none'; return; }
+      var byDay = {};
+      slots.forEach(function (s) { var k = dayKey(s.startISO); (byDay[k] || (byDay[k] = [])).push(s.startISO); });
+      var html = '<div class="card">';
+      Object.keys(byDay).sort().forEach(function (k) {
+        html += '<div class="day"><div class="day-h">' + esc(dayLabel(byDay[k][0])) + '</div><div class="chips">';
+        byDay[k].forEach(function (iso) {
+          html += '<button type="button" class="chip' + (selected.indexOf(iso) !== -1 ? ' sel' : '') + '" data-iso="' + esc(iso) + '">' + esc(timeLabel(iso)) + '</button>';
+        });
+        html += '</div></div>';
+      });
+      html += '</div>';
+      $('slots').innerHTML = html;
+      Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (b) {
+        b.addEventListener('click', function () {
+          var iso = b.getAttribute('data-iso');
+          var at = selected.indexOf(iso);
+          if (at !== -1) { selected.splice(at, 1); b.classList.remove('sel'); }
+          else { if (selected.length >= 12) { toast('Up to 12 options'); return; } selected.push(iso); b.classList.add('sel'); }
+          update();
+        });
+      });
+      $('bar').style.display = '';
+      update();
+    }
+
+    function buildHtml() {
+      var intro = esc($('intro').value.trim());
+      var outro = esc($('outro').value.trim());
+      var items = selected.slice().sort().map(function (iso) { return '<li><a href="' + esc(bookLink(iso)) + '">' + esc(fullLabel(iso)) + '</a></li>'; }).join('');
+      return '<div>' + (intro ? '<p>' + intro + '</p>' : '') + '<ul>' + items + '</ul>' + (outro ? '<p>' + outro + '</p>' : '') + '</div>';
+    }
+    function buildText() {
+      var intro = $('intro').value.trim(), outro = $('outro').value.trim();
+      var lines = selected.slice().sort().map(function (iso) { return '• ' + fullLabel(iso) + ': ' + bookLink(iso); }).join('\n');
+      return (intro ? intro + '\n\n' : '') + lines + (outro ? '\n\n' + outro : '');
+    }
+
+    function update() {
+      $('count').textContent = selected.length + ' selected';
+      $('copy').disabled = selected.length === 0;
+      var show = selected.length > 0;
+      $('composer').style.display = show ? '' : 'none';
+      if (show) $('preview').innerHTML = buildHtml();
+    }
+
+    function copyBlock() {
+      var html = buildHtml(), text = buildText();
+      function done() { toast('Copied — paste into your email'); }
+      if (navigator.clipboard && window.ClipboardItem) {
+        navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })]).then(done).catch(function () {
+          navigator.clipboard.writeText(text).then(function () { toast('Copied (plain text)'); }).catch(function () { toast('Press Ctrl/Cmd+C to copy'); });
+        });
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function () { toast('Copied (plain text)'); }).catch(function () {});
+      }
+    }
+
+    // Wire
+    $('copy').addEventListener('click', copyBlock);
+    $('clear').addEventListener('click', function () { selected = []; Array.prototype.forEach.call(document.querySelectorAll('.chip.sel'), function (b) { b.classList.remove('sel'); }); update(); });
+    $('intro').addEventListener('input', update);
+    $('outro').addEventListener('input', update);
+    $('sched').addEventListener('change', function (e) { current = e.target.value; selected = []; loadAvailability(); });
+
+    // Boot
+    paintSchedulers();
+    loadSchedulerNames();
+    loadAvailability();
+  </script>
+</body>
+</html>

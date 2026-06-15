@@ -264,6 +264,14 @@
       "destination": "/bookings.html"
     },
     {
+      "source": "/appointment-share",
+      "destination": "/appointment-share.html"
+    },
+    {
+      "source": "/book-appointment",
+      "destination": "/book-appointment.html"
+    },
+    {
       "source": "/editor-carousel",
       "destination": "/editor-carousel.html"
     },
