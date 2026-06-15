@@ -268,6 +268,10 @@
               <div class="switch-row"><span class="switch-row-label">One spin per visitor</span><button type="button" class="switch" id="sw-once" aria-pressed="false"></button></div>
               <span class="field-hint">Remembers the result in the visitor's browser so they cannot keep spinning.</span>
             </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Peek (crop the wheel)</span><button type="button" class="switch" id="sw-peek" aria-pressed="false"></button></div>
+              <span class="field-hint">Shows the top of an oversized wheel peeking up from the bottom, like a discount popup. The Spin button moves above the wheel automatically.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -319,7 +323,7 @@
     resultText: 'Quote this when you enquire and we will build it around you.',
     ctaText: 'Enquire now', ctaUrl: '',
     oncePerVisitor: false, spinDuration: 4500,
-    style: 'premium', accent: '#0891B2', segment2: '', pointerColor: '',
+    style: 'premium', accent: '#0891B2', segment2: '', pointerColor: '', peek: false,
     layout: 'card', theme: 'light', fontFamily: 'Inter',
   };
 
@@ -402,6 +406,7 @@
     document.getElementById('dur-input').value = C.spinDuration;
     document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's';
     toggleSwitch('sw-once', C.oncePerVisitor);
+    toggleSwitch('sw-peek', C.peek);
   }
 
   // ── Segment rows ──
@@ -469,6 +474,7 @@
 
   document.getElementById('dur-input').addEventListener('input', e => { C.spinDuration = parseInt(e.target.value, 10) || 4500; document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's'; shell.markDirty(); });
   document.getElementById('sw-once').addEventListener('click', () => { C.oncePerVisitor = !C.oncePerVisitor; toggleSwitch('sw-once', C.oncePerVisitor); shell.markDirty(); });
+  document.getElementById('sw-peek').addEventListener('click', () => { C.peek = !C.peek; toggleSwitch('sw-peek', C.peek); shell.markDirty(); remount(); });
 
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 

@@ -134,6 +134,7 @@
         accent: hexOk(c.accent) ? c.accent : '#0891B2',
         segment2: hexOk(c.segment2) ? c.segment2 : '',
         pointerColor: hexOk(c.pointerColor) ? c.pointerColor : '',
+        peek: !!c.peek,
         layout: c.layout === 'inline' ? 'inline' : 'card',
         theme: c.theme === 'dark' ? 'dark' : 'light',
         fontFamily: typeof c.fontFamily === 'string' && c.fontFamily ? c.fontFamily : 'Inter, system-ui, sans-serif',
@@ -192,7 +193,7 @@
         : `<g filter="url(#swDrop)"><path d="M50 9 L44.6 2.8 Q50 0.4 55.4 2.8 Z" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5" stroke-linejoin="round"/><circle cx="50" cy="3.4" r="2.3" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5"/><circle cx="49.2" cy="2.7" r="0.65" fill="#fff8e2" opacity="0.85"/></g>`;
 
       if (flat) {
-        const cap = c.buttonPlacement === 'top' ? '<circle cx="50" cy="50" r="6" fill="#fff" stroke="rgba(15,23,42,.2)" stroke-width="0.7"/>' : '';
+        const cap = (c.buttonPlacement === 'top' || c.peek) ? '<circle cx="50" cy="50" r="6" fill="#fff" stroke="rgba(15,23,42,.2)" stroke-width="0.7"/>' : '';
         return `
           <defs>${dropDefs}${pcol ? '' : pinDefs}</defs>
           <circle cx="50" cy="50" r="48" fill="#ffffff" filter="url(#swDrop)"/>
@@ -233,6 +234,8 @@
       // black/white wheel uses white), the hub / badge / CTA need a readable
       // stand-in so they are not white-on-white.
       const act = lumOf(c.accent) > 0.7 ? (c.pointerColor || '#111418') : c.accent;
+      // Peek crops the wheel at the bottom; the spin button must sit above it.
+      const topPlacement = c.buttonPlacement === 'top' || c.peek;
 
       this.shadow.innerHTML = `
         <style>
@@ -250,6 +253,8 @@
           .sw-stage { position: relative; width: 300px; max-width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
           .sw-wheel { width: 100%; height: 100%; display: block; }
           .sw-rot { transform-box: fill-box; transform-origin: 50% 50%; }
+          .sw.is-peek .sw-stage { aspect-ratio: auto; height: 0; padding-bottom: 60%; overflow: hidden; }
+          .sw.is-peek .sw-wheel { position: absolute; top: 0; left: 0; width: 100%; height: auto; }
           .sw-hub { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:86px; height:86px; border-radius:50%; border:0; padding:0; cursor:pointer; z-index:3;
             background:${act};
             background:radial-gradient(circle at 50% 32%, color-mix(in srgb, ${act} 70%, #ffffff 30%), ${act} 58%, color-mix(in srgb, ${act} 62%, #000000 38%));
@@ -275,14 +280,14 @@
           .sw-cta[hidden] { display:none; }
           @media (prefers-reduced-motion: reduce) { .sw-hub::before { animation:none; display:none } .sw-result:not([hidden]) { animation:none } }
         </style>
-        <div class="sw">
+        <div class="sw${c.peek ? ' is-peek' : ''}">
           ${c.logo ? `<img class="sw-logo" src="${esc(c.logo)}" alt="">` : ''}
           ${c.heading ? `<h3 class="sw-head">${esc(c.heading)}</h3>` : ''}
           ${c.subheading ? `<p class="sw-sub">${esc(c.subheading)}</p>` : ''}
-          ${c.buttonPlacement === 'top' ? `<button class="sw-topbtn" id="spin" type="button">${esc(c.buttonText)}</button>` : ''}
+          ${topPlacement ? `<button class="sw-topbtn" id="spin" type="button">${esc(c.buttonText)}</button>` : ''}
           <div class="sw-stage">
             <svg class="sw-wheel" viewBox="0 0 100 100" role="img" aria-label="Prize wheel">${this._wheelSvg()}</svg>
-            ${c.buttonPlacement === 'top' ? (c.style === 'flat' ? '' : '<div class="sw-hubcap" aria-hidden="true"></div>') : `<button class="sw-hub" id="spin" type="button">${esc(c.buttonText)}</button>`}
+            ${topPlacement ? ((c.style !== 'flat' && !c.peek) ? '<div class="sw-hubcap" aria-hidden="true"></div>' : '') : `<button class="sw-hub" id="spin" type="button">${esc(c.buttonText)}</button>`}
           </div>
           <div class="sw-result" id="result" hidden>
             <div class="sw-res-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.6 7 22l5-3 5 3-1.5-8.4"/></svg></div>
