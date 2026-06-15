@@ -110,7 +110,7 @@ function safeJson(text) {
 }
 
 // ---- Handler ----------------------------------------------------------------
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   const origin = resolveOrigin(req.headers.origin);
 
   if (req.method === 'OPTIONS') { setCors(res, origin); return res.status(204).end(); }
