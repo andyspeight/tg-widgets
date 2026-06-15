@@ -29,18 +29,17 @@
     .controls button[aria-pressed="true"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
     body[data-theme="dark"] .controls button[aria-pressed="true"] { background: #0F172A; color: #F8FAFC; }
 
-    .hero { max-width: 1000px; margin: 0 auto; padding: 44px 32px 8px; text-align: center; }
+    .hero { max-width: 1100px; margin: 0 auto; padding: 44px 32px 8px; text-align: center; }
     .hero h1 { margin: 0 0 8px; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
-    .hero p { margin: 0 auto; font-size: 16px; color: #475569; max-width: 620px; }
+    .hero p { margin: 0 auto; font-size: 16px; color: #475569; max-width: 640px; }
     body[data-theme="dark"] .hero p { color: #CBD5E1; }
 
-    .stage { max-width: 1000px; margin: 24px auto 50px; padding: 0 32px; display: grid; grid-template-columns: auto 1fr; gap: 48px; align-items: center; }
-    @media (max-width: 760px){ .stage { grid-template-columns: 1fr; gap: 28px; justify-items:center; text-align:center; } }
-    .pitch h2 { margin: 0 0 10px; font-size: 22px; font-weight: 700; }
-    .pitch p { margin: 0 0 12px; font-size: 15px; line-height: 1.65; color: #334155; }
-    body[data-theme="dark"] .pitch p { color: #CBD5E1; }
-    .pitch ul { margin: 0; padding-left: 18px; color: #475569; font-size: 14px; line-height: 1.8; }
-    body[data-theme="dark"] .pitch ul { color: #CBD5E1; }
+    .gallery { max-width: 1180px; margin: 28px auto 50px; padding: 0 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+    @media (max-width: 920px){ .gallery { grid-template-columns: 1fr; max-width: 460px; } }
+    .variant { display: flex; flex-direction: column; align-items: center; }
+    .variant-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #64748B; margin: 0 0 4px; }
+    .variant-name { font-size: 16px; font-weight: 700; margin: 0 0 14px; }
+    .variant-mount { width: 100%; display: flex; justify-content: center; }
 
     footer { border-top: 1px solid #E2E8F0; padding: 24px 32px; text-align: center; font-size: 12px; color: #64748B; }
     body[data-theme="dark"] footer { border-top-color: #1E293B; }
@@ -66,21 +65,25 @@
   </header>
 
   <section class="hero">
-    <h1>Not sure where to go? Give it a spin.</h1>
-    <p>A fun little nudge that turns a browsing visitor into an enquiry. Land on a destination, then enquire with one tap. Try it.</p>
+    <h1>One wheel, three looks. Give them a spin.</h1>
+    <p>A playful nudge that turns a browsing visitor into an enquiry or an order. Same widget, three styles — pick the one that fits your brand. Try each.</p>
   </section>
 
-  <div class="stage">
-    <div id="wheel"></div>
-    <div class="pitch">
-      <h2>Why it works</h2>
-      <p>People love a game. The wheel gives an undecided visitor a playful reason to pick a destination, and a warm prompt to get in touch while they are excited.</p>
-      <ul>
-        <li>Weight the segments so popular trips come up more often</li>
-        <li>Land on a destination, a discount or a freebie</li>
-        <li>One spin per visitor option, remembered in their browser</li>
-        <li>Your colours, your call to action, no API key</li>
-      </ul>
+  <div class="gallery">
+    <div class="variant">
+      <p class="variant-tag">Premium</p>
+      <p class="variant-name">Travel prize wheel</p>
+      <div class="variant-mount" id="w-premium"></div>
+    </div>
+    <div class="variant">
+      <p class="variant-tag">Flat · discount</p>
+      <p class="variant-name">Shark-style discount</p>
+      <div class="variant-mount" id="w-discount"></div>
+    </div>
+    <div class="variant">
+      <p class="variant-tag">Flat · colour</p>
+      <p class="variant-name">Brand-colour wheel</p>
+      <div class="variant-mount" id="w-colour"></div>
     </div>
   </div>
 
@@ -92,27 +95,57 @@
   <script>
     const isDark = () => document.body.dataset.theme === 'dark';
 
-    function renderWheel() {
-      const host = document.getElementById('wheel');
+    function mk(hostId, cfg) {
+      const host = document.getElementById(hostId);
       host.innerHTML = '';
       const div = document.createElement('div');
       div.setAttribute('data-tg-widget', 'spinwheel');
-      div.setAttribute('data-tg-config', JSON.stringify({
+      div.setAttribute('data-tg-config', JSON.stringify(Object.assign({ theme: isDark() ? 'dark' : 'light', layout: 'card' }, cfg)));
+      host.appendChild(div);
+    }
+
+    function renderAll() {
+      // 1 · Premium travel prize wheel (glossy, gold rim)
+      mk('w-premium', {
         heading: 'Spin to find your next trip',
         segments: [
-          { label: 'Bali', weight: 2 }, { label: 'Maldives', weight: 1 },
-          { label: 'Dubai', weight: 2 }, { label: 'New York', weight: 2 },
-          { label: 'Barbados', weight: 1 }, { label: 'Rome', weight: 2 },
+          { label: 'Bali', weight: 2 }, { label: 'Maldives', weight: 1 }, { label: 'Dubai', weight: 2 },
+          { label: 'New York', weight: 2 }, { label: 'Barbados', weight: 1 }, { label: 'Rome', weight: 2 },
           { label: 'Tokyo', weight: 1 }, { label: 'Cape Town', weight: 1 }
         ],
-        buttonText: 'Spin',
-        resultTitle: 'Your destination: {prize}',
+        buttonText: 'Spin', resultTitle: 'Your destination: {prize}',
         resultText: 'Love it? Tell us and we will price it up for your dates.',
-        ctaText: 'Enquire about this trip', ctaUrl: 'https://example.com/enquire',
-        oncePerVisitor: false, spinDuration: 4500,
-        accent: '#0891B2', layout: 'card', theme: isDark() ? 'dark' : 'light'
-      }));
-      host.appendChild(div);
+        ctaText: 'Enquire', ctaUrl: 'https://example.com/enquire', accent: '#0891B2'
+      });
+      // 2 · Flat discount — black/white, button above, sub-lines, red pointer
+      mk('w-discount', {
+        style: 'flat', buttonPlacement: 'top',
+        heading: 'Your next holiday, for less', subheading: 'Spin now to unlock a discount!',
+        buttonText: 'Spin the wheel',
+        accent: '#FFFFFF', segment2: '#111418', pointerColor: '#E11D2A',
+        resultTitle: 'You won {prize}', resultText: 'Quote this when you book with us.',
+        ctaText: 'See holidays', ctaUrl: 'https://example.com',
+        segments: [
+          { label: '15% OFF', description: 'off your next booking' },
+          { label: '10% OFF', description: 'off your next booking' },
+          { label: 'FREE UPGRADE', description: 'room upgrade' },
+          { label: '5% OFF', description: 'off your next booking' },
+          { label: 'NO LUCK', description: 'try again tomorrow' },
+          { label: '20% OFF', description: 'off your next booking' }
+        ]
+      });
+      // 3 · Flat colour — brand colours, centre hub, amber pointer
+      mk('w-colour', {
+        style: 'flat',
+        heading: 'Win a treat for your trip', buttonText: 'Spin',
+        accent: '#0891B2', segment2: '#0B2545', pointerColor: '#F59E0B',
+        resultTitle: 'You got: {prize}', resultText: 'We will add it to your booking.',
+        ctaText: 'Plan my trip', ctaUrl: 'https://example.com',
+        segments: [
+          { label: 'Lounge pass' }, { label: 'Free transfer' }, { label: 'Spa credit' },
+          { label: 'Late checkout' }, { label: 'Welcome drinks' }, { label: 'City guide' }
+        ]
+      });
     }
 
     document.querySelectorAll('[data-theme-btn]').forEach(btn => {
@@ -120,11 +153,11 @@
         document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', 'false'));
         btn.setAttribute('aria-pressed', 'true');
         document.body.dataset.theme = btn.dataset.themeBtn;
-        renderWheel();
+        renderAll();
       });
     });
 
-    renderWheel();
+    renderAll();
   </script>
 </body>
 </html>

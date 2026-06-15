@@ -171,13 +171,16 @@
         const mid = a0 + seg / 2;
         let rot = mid; if (mid > 90 && mid < 270) rot = mid + 180;
         const hasSub = !!segs[i].description;
-        const [mx, my] = pt(mid, hasSub ? 0.63 : 0.55);
+        const mainR = hasSub ? (flat ? 0.66 : 0.63) : (flat ? 0.6 : 0.55);
+        const [mx, my] = pt(mid, mainR);
+        const mainFs = flat ? 5.4 : 4.6;
         const label = segs[i].label.length > 16 ? segs[i].label.slice(0, 15) + '…' : segs[i].label;
-        labels += `<text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(2)} ${my.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="4.6" font-weight="800" letter-spacing="0.03" fill="${tcol}" style="paint-order:stroke;stroke:${tstroke};stroke-width:.55px">${esc(label)}</text>`;
+        labels += `<text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(2)} ${my.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${mainFs}" font-weight="800" letter-spacing="${flat ? '-0.02' : '0.03'}" fill="${tcol}" style="paint-order:stroke;stroke:${tstroke};stroke-width:.55px">${esc(label)}</text>`;
         if (hasSub) {
-          const [sx, sy] = pt(mid, 0.45);
-          const sub = segs[i].description.length > 24 ? segs[i].description.slice(0, 23) + '…' : segs[i].description;
-          labels += `<text x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${sx.toFixed(2)} ${sy.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="2.4" font-weight="600" fill="${tcol}" opacity="0.8">${esc(sub)}</text>`;
+          const [sx, sy] = pt(mid, flat ? 0.5 : 0.45);
+          const subFs = flat ? 2.7 : 2.4;
+          const sub = segs[i].description.length > 26 ? segs[i].description.slice(0, 25) + '…' : segs[i].description;
+          labels += `<text x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${sx.toFixed(2)} ${sy.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${subFs}" font-weight="600" fill="${tcol}" opacity="0.78">${esc(sub)}</text>`;
         }
       }
 
@@ -185,17 +188,17 @@
       const dropDefs = '<filter id="swDrop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.6" stdDeviation="2.4" flood-color="#0b1220" flood-opacity="0.34"/></filter>';
       const pinDefs = '<linearGradient id="swPin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffe6a0"/><stop offset="45%" stop-color="#F4C95D"/><stop offset="100%" stop-color="#d89a2f"/></linearGradient>';
       const pointer = pcol
-        ? `<g filter="url(#swDrop)"><path d="M50 12 L43.4 1.6 L56.6 1.6 Z" fill="${pcol}" stroke="rgba(0,0,0,.16)" stroke-width="0.4" stroke-linejoin="round"/></g>`
+        ? `<g filter="url(#swDrop)"><path d="M50 13.6 L42.6 0.7 Q50 -0.3 57.4 0.7 Z" fill="${pcol}" stroke="rgba(0,0,0,.18)" stroke-width="0.4" stroke-linejoin="round"/></g>`
         : `<g filter="url(#swDrop)"><path d="M50 9 L44.6 2.8 Q50 0.4 55.4 2.8 Z" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5" stroke-linejoin="round"/><circle cx="50" cy="3.4" r="2.3" fill="url(#swPin)" stroke="#8a6516" stroke-width="0.5"/><circle cx="49.2" cy="2.7" r="0.65" fill="#fff8e2" opacity="0.85"/></g>`;
 
       if (flat) {
-        const cap = c.buttonPlacement === 'top' ? '<circle cx="50" cy="50" r="6.5" fill="#fff" stroke="rgba(15,23,42,.12)" stroke-width="0.6"/>' : '';
+        const cap = c.buttonPlacement === 'top' ? '<circle cx="50" cy="50" r="6" fill="#fff" stroke="rgba(15,23,42,.2)" stroke-width="0.7"/>' : '';
         return `
           <defs>${dropDefs}${pcol ? '' : pinDefs}</defs>
-          <circle cx="50" cy="50" r="47.5" fill="#ffffff" filter="url(#swDrop)"/>
+          <circle cx="50" cy="50" r="48" fill="#ffffff" filter="url(#swDrop)"/>
+          <circle cx="50" cy="50" r="47.6" fill="none" stroke="rgba(15,23,42,.45)" stroke-width="0.9"/>
           <g class="sw-rot">${paths}${dividers}${labels}</g>
-          <circle cx="50" cy="50" r="46.4" fill="none" stroke="#ffffff" stroke-width="2.6"/>
-          <circle cx="50" cy="50" r="47.7" fill="none" stroke="rgba(15,23,42,.12)" stroke-width="0.7"/>
+          <circle cx="50" cy="50" r="46.4" fill="none" stroke="#ffffff" stroke-width="2.4"/>
           ${cap}${pointer}`;
       }
 
