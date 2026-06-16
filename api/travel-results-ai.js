@@ -83,6 +83,8 @@ function buildSystem() {
     'Rules:',
     '- Only use rid values that appear in the shortlist. Never invent properties or rids.',
     '- Every reason must cite ONLY evidence present in the data (price, board, ref, star, ta, km, gf, am, w). Do not invent facts, availability, savings, or quality claims.',
+    '- Never claim a feature or amenity unless it appears in that property\'s own am (amenities) or gf (goodFor) list. If a property does not list "pool", "spa", "beach", "parking", "wifi", etc., do NOT mention it for that property — describe only what is actually present, or speak generally about price/rating/location.',
+    '- Do not state distances, ratings, prices or board types that are not in that item\'s data. When unsure, stay general rather than guessing.',
     '- A higher price is not automatically worse; balance price against star, reviews, distance, refundability and fit for the party.',
     '- Flag genuine watch-outs from w (e.g. shared bathroom, dormitory, non-refundable only) where relevant.',
     '- Keep each reason to one sentence. Keep "reply" to one or two short sentences in a warm, plain, helpful voice.',
