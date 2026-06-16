@@ -23,7 +23,7 @@
   window.TravelgenixWidgets = window.TravelgenixWidgets || {};
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.2.1';
+  var VERSION = '1.7.0';
   var EV_READY = 'tg:travel-results-v4:accommodation-results-ready';
   var EV_VIEW = 'tg:travel-results-v4:accommodation-airesults-view';
   var API_BASE = (typeof window !== 'undefined' && window.__TG_TRAI_API__) ||
@@ -49,7 +49,21 @@
     theme: 'auto',                                      // 'auto' | 'light' | 'dark'
     font: '',                                           // '' = Inter default stack
     position: 'br',                                     // 'br' | 'bl' | 'mr' | 'ml' | 'float'
-    maxRecs: 6
+    maxRecs: 6,
+    width: 380,
+    height: 640,
+    appearMode: 'ready',                                // 'ready' | 'delay'
+    appearDelay: 3,                                      // seconds, used when appearMode==='delay'
+    startMode: 'open',                                   // 'open' (full panel) | 'launcher' (collapsed pill)
+    launcherText: 'Ask AI to pick your best matches',
+    deferAnalysis: true,                                 // launcher: analyse on open (true) vs pre-warm (false)
+    cacheResults: true,                                  // cache the analysis per search (sessionStorage)
+    rememberState: true,                                 // remember open/min/dragged state for the visit
+    chips: true,                                         // one-tap refine chips
+    cardClick: true,                                     // click a card to show that property in results
+    mobileSheet: true,                                   // bottom-sheet layout on small screens
+    analytics: true,                                     // emit engagement events to dataLayer + hook
+    verifyClaims: true                                   // drop rec reasons citing amenities not in the data
   };
   var CFG = Object.assign({}, DEFAULTS);
 
@@ -78,6 +92,20 @@
     if (v != null) o.font = v;
     if (['br', 'bl', 'mr', 'ml', 'float'].indexOf(c.position) !== -1) o.position = c.position;
     v = parseInt(c.maxRecs, 10); if (!isNaN(v)) o.maxRecs = Math.max(1, Math.min(6, v));
+    v = parseInt(c.width, 10); if (!isNaN(v)) o.width = Math.max(300, Math.min(520, v));
+    v = parseInt(c.height, 10); if (!isNaN(v)) o.height = Math.max(360, Math.min(820, v));
+    if (c.appearMode === 'ready' || c.appearMode === 'delay') o.appearMode = c.appearMode;
+    v = parseInt(c.appearDelay, 10); if (!isNaN(v)) o.appearDelay = Math.max(1, Math.min(30, v));
+    if (c.startMode === 'launcher' || c.startMode === 'open') o.startMode = c.startMode;
+    if ((v = str(c.launcherText, 60)) != null) o.launcherText = v;
+    if (typeof c.deferAnalysis === 'boolean') o.deferAnalysis = c.deferAnalysis;
+    if (typeof c.cacheResults === 'boolean') o.cacheResults = c.cacheResults;
+    if (typeof c.rememberState === 'boolean') o.rememberState = c.rememberState;
+    if (typeof c.chips === 'boolean') o.chips = c.chips;
+    if (typeof c.cardClick === 'boolean') o.cardClick = c.cardClick;
+    if (typeof c.mobileSheet === 'boolean') o.mobileSheet = c.mobileSheet;
+    if (typeof c.analytics === 'boolean') o.analytics = c.analytics;
+    if (typeof c.verifyClaims === 'boolean') o.verifyClaims = c.verifyClaims;
     return o;
   }
   function findContainer() {
@@ -120,6 +148,7 @@
   var history = [];        // conversational history
   var currency = 'GBP';
   var booted = false;
+  var opened = false, analysed = false, lastPayload = null;
 
   // ---- helpers ----
   function money(n) {
@@ -281,26 +310,36 @@
     els.panel = root.getElementById('panel');
     els.head = root.querySelector('.hd');
     els.title = root.getElementById('title');
-    els.min.addEventListener('click', function () {
-      var willMin = !els.panel.classList.contains('is-min');
-      els.panel.classList.toggle('is-min');
-      // In float mode, collapsing docks the panel to the right-middle edge.
-      if (CFG.position === 'float' && willMin) {
-        els._docked = true; els._dragged = false; els._fx = els._fy = null;
-        var s = host.style;
-        s.left = 'auto'; s.bottom = 'auto'; s.right = '18px'; s.top = '50%'; s.transform = 'translateY(-50%)';
-      }
-    });
+    els.launcher = root.getElementById('launcher');
+    els.launcherText = root.getElementById('launcher-text');
+    els.chips = root.getElementById('chips');
+    els.live = root.getElementById('live');
+    els.launcher.addEventListener('click', openPanel);
+    els.min.addEventListener('click', minimise);
     els.send.addEventListener('click', sendMessage);
     els.input.addEventListener('keydown', function (e) { if (e.key === 'Enter') sendMessage(); });
+    els.panel.addEventListener('keydown', function (e) { if (e.key === 'Escape') minimise(); });
     setupDrag();
+    window.addEventListener('resize', layout);
     applyConfig();
     setFootEnabled(false);
   }
+  // Collapse: in launcher mode return to the pill; otherwise minimise to the
+  // header bar (and, in float, dock to the right-middle edge).
+  function minimise() {
+    if (CFG.startMode === 'launcher' && !PREVIEW) { collapseToLauncher(); return; }
+    var willMin = !els.panel.classList.contains('is-min');
+    els.panel.classList.toggle('is-min');
+    if (CFG.position === 'float' && willMin) {
+      els._docked = true; els._dragged = false; els._fx = els._fy = null;
+      var s = host.style;
+      s.left = 'auto'; s.bottom = 'auto'; s.right = '18px'; s.top = '50%'; s.transform = 'translateY(-50%)';
+    }
+    persistUI();
+  }
   function applyConfig() {
     if (!host || !els.panel) return;
-    positionHost();
-    els.panel.setAttribute('data-pos', CFG.position);
+    layout();
     var p = els.panel.style;
     p.setProperty('--navy', CFG.headerColor);
     p.setProperty('--navy-d', shade(CFG.headerColor, -0.4));
@@ -314,7 +353,25 @@
     els.panel.setAttribute('aria-label', CFG.title);
     if (els.input) els.input.setAttribute('placeholder', CFG.placeholder);
     if (els.send) els.send.textContent = CFG.sendLabel;
+    if (els.launcher) {
+      var l = els.launcher.style;
+      l.setProperty('--l-navy', CFG.headerColor);
+      l.setProperty('--l-navy-d', shade(CFG.headerColor, -0.4));
+      l.setProperty('--l-teal', CFG.accent);
+      if (CFG.font) l.setProperty('--trai-font', CFG.font);
+    }
+    if (els.launcherText) els.launcherText.textContent = CFG.launcherText;
   }
+  // Panel width + max-height from config, clamped to the viewport. Recomputed
+  // on resize so it stays responsive on rotation / window changes.
+  function applySize() {
+    if (!els.panel) return;
+    var w = Math.min(CFG.width, window.innerWidth - 24);
+    var h = Math.min(CFG.height, window.innerHeight - 32);
+    els.panel.style.width = Math.max(280, w) + 'px';
+    els.panel.style.maxHeight = Math.max(320, h) + 'px';
+  }
+
   // Anchor the fixed host wrapper per CFG.position. Resets every anchor each
   // call so switching positions (incl. live preview) never leaves stale values.
   function positionHost() {
@@ -354,6 +411,7 @@
     }
     head.addEventListener('pointerdown', function (e) {
       if (CFG.position !== 'float') return;            // only float is draggable
+      if (isSheet()) return;                           // not while docked as a bottom sheet
       if (e.target.closest && e.target.closest('.mn')) return; // keep minimise clickable
       if (e.button != null && e.button !== 0) return;  // primary / touch only
       var rect = host.getBoundingClientRect();
@@ -377,6 +435,7 @@
       if (!dragging) return;
       dragging = false; head.classList.remove('tg-grabbing');
       try { head.releasePointerCapture(e.pointerId); } catch (_) {}
+      persistUI();
     }
     head.addEventListener('pointerup', end);
     head.addEventListener('pointercancel', end);
@@ -400,19 +459,28 @@
   function addBubble(role, text) {
     var b = document.createElement('div'); b.className = 'bub ' + (role === 'user' ? 'u' : 'a');
     b.textContent = text; els.body.appendChild(b); scroll();
+    return b;
   }
   function scroll() { if (els.body) els.body.scrollTop = els.body.scrollHeight; }
+  // Bring a node to the top of the scroll area, so a fresh result set starts at
+  // the assistant's summary + first card rather than scrolled down to the last.
+  function scrollToTopOf(node) {
+    if (!els.body) return;
+    els.body.scrollTop = node ? Math.max(0, node.offsetTop - 14) : 0;
+  }
 
   function renderRecs(reply, recs, append) {
     if (!append) clearBody();
-    if (reply) addBubble('assistant', reply);
+    var startNode = reply ? addBubble('assistant', reply) : null;
     if (!recs.length) {
-      els.body.appendChild(stateLine('No clear matches for that \u2014 try a different ask.'));
-      setFootEnabled(true); scroll(); return;
+      var sl = stateLine('No clear matches for that \u2014 try a different ask.');
+      els.body.appendChild(sl);
+      setFootEnabled(true); scrollToTopOf(startNode || sl); return;
     }
     recs.forEach(function (r) {
       var s = r.s;
       var card = document.createElement('div'); card.className = 'rec';
+      if (!startNode) startNode = card;
       var cat = document.createElement('span'); cat.className = 'cat'; cat.textContent = r.category; card.appendChild(cat);
       var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = s.name; card.appendChild(nm);
       var facts = document.createElement('div'); facts.className = 'facts';
@@ -426,14 +494,61 @@
       (s.warns || []).forEach(function (w) { fact(w, 'warn'); });
       card.appendChild(facts);
       var why = document.createElement('p'); why.className = 'why'; why.textContent = r.reason; card.appendChild(why);
+      if (CFG.cardClick) {
+        card.classList.add('clickable');
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', 'Show ' + s.name + ' in the results');
+        var hint = document.createElement('span'); hint.className = 'rec-view'; hint.textContent = (CFG.viewLabel || 'Show in results') + ' \u203a'; card.appendChild(hint);
+        var showOne = function () {
+          track('card_view', { rid: r.rid });
+          dispatchView([r.rid]);
+          els.body.querySelectorAll('.rec.is-shown').forEach(function (n) { n.classList.remove('is-shown'); });
+          card.classList.add('is-shown');
+        };
+        card.addEventListener('click', showOne);
+        card.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showOne(); } });
+      }
       els.body.appendChild(card);
     });
     var act = document.createElement('button'); act.className = 'go'; act.type = 'button';
     act.textContent = CFG.viewLabel;
-    act.addEventListener('click', function () { dispatchView(recs.map(function (r) { return r.rid; })); });
+    act.addEventListener('click', function () { track('view_all', { count: recs.length }); dispatchView(recs.map(function (r) { return r.rid; })); });
     els.body.appendChild(act);
     setFootEnabled(true);
-    scroll();
+    if (!append) renderChips();
+    track('recommendations', { count: recs.length, refine: !!append });
+    announce(recs.length + ' suggestion' + (recs.length === 1 ? '' : 's') + ' ready.');
+    scrollToTopOf(startNode);
+  }
+
+  // ---- refine chips ----
+  function buildChips() {
+    var n = summaries.length; if (!n) return [];
+    var hay = summaries.map(function (s) { return ((s.amen || []).join(' ') + ' ' + (s.goodFor || []).join(' ')).toLowerCase(); });
+    function frac(kw) { var c = 0; hay.forEach(function (h) { if (h.indexOf(kw) > -1) c++; }); return c / n; }
+    var out = [];
+    function add(label, kw) { var f = frac(kw); if (f >= 0.15 && f < 0.95) out.push(label); }
+    add('Near the beach', 'beach'); add('With a pool', 'pool'); add('With a spa', 'spa');
+    if (summaries.some(function (s) { return (s.goodFor || []).indexOf('Families') > -1; })) out.push('Good for families');
+    out.push('Cheaper');
+    if (summaries.some(function (s) { return s.ta; })) out.push('Top rated');
+    if (summaries.some(function (s) { return s.distKm != null; })) out.push('More central');
+    var seen = {}, res = []; out.forEach(function (x) { if (!seen[x]) { seen[x] = 1; res.push(x); } });
+    return res.slice(0, 5);
+  }
+  function renderChips() {
+    if (!els.chips) return;
+    els.chips.innerHTML = '';
+    if (!CFG.chips) { els.chips.style.display = 'none'; return; }
+    var chips = buildChips();
+    if (!chips.length) { els.chips.style.display = 'none'; return; }
+    els.chips.style.display = 'flex';
+    chips.forEach(function (label) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = label;
+      b.addEventListener('click', function () { track('chip', { text: label }); els.input.value = label; sendMessage(); });
+      els.chips.appendChild(b);
+    });
   }
   function renderError() {
     clearBody();
@@ -442,7 +557,17 @@
   }
 
   // ---- flows ----
+  function recCacheKey(session) { return 'tgtrai:rec:' + session; }
+  function readRecCache(session) {
+    if (!CFG.cacheResults) return null;
+    try { return JSON.parse(sessionStorage.getItem(recCacheKey(session)) || 'null'); } catch (e) { return null; }
+  }
+  function writeRecCache(session, reply, recommendations) {
+    if (!CFG.cacheResults) return;
+    try { sessionStorage.setItem(recCacheKey(session), JSON.stringify({ reply: reply || '', recommendations: recommendations || [] })); } catch (e) {}
+  }
   function processInitial(payload) {
+    analysed = true;
     activeSession = payload.searchSession;
     criteria = payload.criteria || {};
     currency = criteria.currency || 'GBP';
@@ -454,6 +579,24 @@
     els.body.appendChild(stateLine('Reading ' + (payload.results || []).length + ' results, finding the best for your trip\u2026', true));
     setFootEnabled(false);
 
+    // Edge cases: nothing comparable, or a single option — handle without an API call.
+    if (!summaries.length) {
+      setSub('Nothing to compare yet.');
+      clearBody();
+      els.body.appendChild(stateLine('I can\u2019t see any properties to compare for this search \u2014 try adjusting your filters or dates.'));
+      setFootEnabled(false);
+      announce('No properties to compare.');
+      return;
+    }
+    if (summaries.length === 1) {
+      var only = summaries[0];
+      var single = [{ rid: only.rid, category: 'Your option', reason: safeReason(only), s: only }];
+      currentRecs = single;
+      setSub('One option for this search.');
+      renderRecs('There\u2019s just one option for this search:', single);
+      return;
+    }
+
     var cands = candidatesFor('');
     if (PREVIEW) {
       var precs = fallbackRecs(cands, CFG.maxRecs); currentRecs = precs;
@@ -461,10 +604,22 @@
       renderRecs(introLine(), precs);
       return;
     }
+    // Cached analysis for this search? Render without spending another call.
+    var cached = readRecCache(payload.searchSession);
+    if (cached) {
+      var crecs = mapRecs(cached.recommendations, cands, CFG.maxRecs);
+      if (crecs.length) {
+        currentRecs = crecs;
+        setSub('Suggested ' + crecs.length + ' option' + (crecs.length === 1 ? '' : 's') + '.');
+        renderRecs(cached.reply || introLine(), crecs);
+        return;
+      }
+    }
     callEndpoint('', cands).then(function (data) {
       if (payload.searchSession !== activeSession) return; // stale guard
       var recs = mapRecs(data.recommendations, cands, CFG.maxRecs);
       if (!recs.length) { recs = fallbackRecs(cands, CFG.maxRecs); data = { reply: '' }; }
+      else { writeRecCache(payload.searchSession, data.reply, data.recommendations); }
       setSub('Suggested ' + recs.length + ' option' + (recs.length === 1 ? '' : 's') + '.');
       currentRecs = recs;
       renderRecs(data.reply || introLine(), recs);
@@ -482,6 +637,7 @@
     if (!msg || !activeSession) return;
     els.input.value = '';
     addBubble('user', msg);
+    track('message', { text: msg });
     history.push({ role: 'user', content: msg });
     var thinking = stateLine('Thinking\u2026', true); els.body.appendChild(thinking); scroll();
     var cands = candidatesFor(msg);
@@ -510,9 +666,51 @@
 
   function mapRecs(list, cands, max) {
     var byRid = {}; cands.forEach(function (s) { byRid[s.rid] = s; });
-    // also allow any summary (in case the model picked from the broader set is prevented server-side; here cands only)
     return (list || []).filter(function (r) { return r && byRid[r.rid]; }).slice(0, max || 6)
-      .map(function (r) { return { rid: r.rid, category: r.category || 'Suggested', reason: r.reason || '', s: byRid[r.rid] }; });
+      .map(function (r) {
+        var s = byRid[r.rid];
+        var reason = r.reason || '';
+        if (CFG.verifyClaims) reason = cleanReason(reason, s);
+        return { rid: r.rid, category: r.category || 'Suggested', reason: reason, s: s };
+      });
+  }
+
+  // ---- claim verification (drop reason sentences that cite features not in the data) ----
+  function amenHas(s, k) { return (s.amen || []).join(' ').toLowerCase().indexOf(k) > -1; }
+  function gfHas(s, k) { return (s.goodFor || []).join(' ').toLowerCase().indexOf(k) > -1; }
+  function boardHas(s, k) { return !!(s.lo && (s.lo.board || '').toLowerCase().indexOf(k) > -1); }
+  var CLAIM_RULES = [
+    { kw: ['swimming pool', 'pool'], ok: function (s) { return amenHas(s, 'pool'); } },
+    { kw: ['spa'], ok: function (s) { return amenHas(s, 'spa'); } },
+    { kw: ['beachfront', 'seafront', 'beach', 'seaside', 'sea view'], ok: function (s) { return amenHas(s, 'beach') || gfHas(s, 'beach'); } },
+    { kw: ['wi-fi', 'wifi', 'wi fi'], ok: function (s) { return amenHas(s, 'wifi') || amenHas(s, 'wi-fi'); } },
+    { kw: ['parking'], ok: function (s) { return amenHas(s, 'parking'); } },
+    { kw: ['fitness', 'gym'], ok: function (s) { return amenHas(s, 'gym') || amenHas(s, 'fitness'); } },
+    { kw: ['self-catering', 'self catering', 'kitchenette', 'kitchen'], ok: function (s) { return amenHas(s, 'kitchen'); } },
+    { kw: ['all-inclusive', 'all inclusive'], ok: function (s) { return boardHas(s, 'all inclusive') || amenHas(s, 'all inclusive'); } },
+    { kw: ['families', 'family', 'children', 'child', 'kids', 'kid'], ok: function (s) { return gfHas(s, 'famil') || amenHas(s, 'kitchen'); } }
+  ];
+  function safeReason(s) {
+    if (s.ta && s.ta.rating >= 4) return 'Well rated by previous guests for a trip like yours.';
+    if (s.star >= 4) return 'A higher-rated option that fits your search.';
+    return 'A solid match for your search.';
+  }
+  function cleanReason(reason, s) {
+    if (!reason) return reason;
+    var sentences = reason.match(/[^.!?;]+[.!?;]*/g) || [reason];
+    var kept = sentences.filter(function (sent) {
+      var lc = sent.toLowerCase();
+      if (/\brefundable\b/.test(lc) && !/non-?\s*refundable|not\s+refundable/.test(lc) && !s.loRef) return false;
+      for (var i = 0; i < CLAIM_RULES.length; i++) {
+        var rule = CLAIM_RULES[i];
+        var hit = false;
+        for (var j = 0; j < rule.kw.length; j++) { if (lc.indexOf(rule.kw[j]) > -1) { hit = true; break; } }
+        if (hit && !rule.ok(s)) return false;
+      }
+      return true;
+    });
+    var out = kept.join(' ').replace(/\s+/g, ' ').trim();
+    return out || safeReason(s);
   }
   function introLine() {
     var place = criteria && criteria.locationName ? String(criteria.locationName).split(',')[0] : 'your search';
@@ -527,14 +725,115 @@
     window.dispatchEvent(new CustomEvent(EV_VIEW, { detail: { version: 1, searchSession: activeSession, rids: ids } }));
   }
 
+  // Engagement analytics: push to window.dataLayer (GTM/GA-friendly) and an
+  // optional TravelgenixWidgets.onTravelResultsAiEvent(name, detail) hook.
+  function track(name, detail) {
+    if (!CFG.analytics) return;
+    detail = detail || {};
+    try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'tg_trai_' + name, tgTraiWidget: 'travel-results-ai', tgTrai: detail }); } catch (e) {}
+    try { var ns = window.TravelgenixWidgets; if (ns && typeof ns.onTravelResultsAiEvent === 'function') ns.onTravelResultsAiEvent(name, detail); } catch (e) {}
+  }
+
+  // Mobile bottom-sheet vs anchored panel.
+  function isSheet() { return CFG.mobileSheet && (window.innerWidth || 9999) <= 560; }
+  function layout() {
+    if (!host || !els.panel) return;
+    var panelVisible = els.panel.style.display !== 'none';
+    if (isSheet() && panelVisible) {
+      els.panel.setAttribute('data-pos', 'sheet');
+      var s = host.style;
+      s.left = '0'; s.right = '0'; s.bottom = '0'; s.top = 'auto'; s.transform = 'none';
+      els.panel.style.width = '100%';
+      els.panel.style.maxHeight = Math.min(CFG.height, Math.round((window.innerHeight || 640) * 0.85)) + 'px';
+    } else {
+      els.panel.setAttribute('data-pos', CFG.position);
+      positionHost();
+      applySize();
+    }
+  }
+
   // ---- event wiring ----
+  var pendingAppear = null;
   function onReady(ev) {
     if (CFG.enabled === false) return;
     var p = ev && ev.detail;
     if (!p || typeof p !== 'object' || !Array.isArray(p.results) || !p.criteria) return;
+    // Appearance timing: show as soon as the results are ready, or hold back for
+    // a configured number of seconds. A fresh results event cancels a pending one.
+    if (pendingAppear) { clearTimeout(pendingAppear); pendingAppear = null; }
+    if (CFG.appearMode === 'delay' && CFG.appearDelay > 0 && !PREVIEW) {
+      pendingAppear = setTimeout(function () { pendingAppear = null; startWith(p); }, CFG.appearDelay * 1000);
+    } else {
+      startWith(p);
+    }
+  }
+  function prepNonAuto(p) {
+    setSub('Results ready — ask me anything.'); clearBody();
+    criteria = p.criteria; currency = p.criteria.currency || 'GBP'; activeSession = p.searchSession;
+    summaries = p.results.filter(function (r) { return r && r.rid && Array.isArray(r.units); }).map(summarise);
+    setFootEnabled(true);
+  }
+  function startWith(p) {
+    lastPayload = p; analysed = false; opened = false;
     mount();
-    if (!AUTO) { setSub('Results ready — ask me anything.'); clearBody(); criteria = p.criteria; currency = p.criteria.currency || 'GBP'; activeSession = p.searchSession; summaries = p.results.filter(function (r) { return r && r.rid && Array.isArray(r.units); }).map(summarise); setFootEnabled(true); return; }
-    processInitial(p);
+    var saved = restoreUI();
+    var launcher = CFG.startMode === 'launcher' && !PREVIEW;
+    track('appear', { mode: launcher ? 'launcher' : 'open' });
+    if (launcher) {
+      showLauncher();
+      if (!AUTO) prepNonAuto(p);
+      else if (!CFG.deferAnalysis) processInitial(p);   // pre-warm into the hidden panel
+      if (saved) applySavedState(saved);
+      if (saved && saved.opened) openPanel();
+    } else {
+      showPanel(); opened = true; track('open', {});
+      if (!AUTO) prepNonAuto(p);
+      else processInitial(p);
+      if (saved) applySavedState(saved);
+    }
+  }
+
+  // ---- launcher / open-state helpers ----
+  function announce(msg) { if (els.live) { els.live.textContent = ''; els.live.textContent = msg; } }
+  function showPanel() { if (els.launcher) els.launcher.style.display = 'none'; if (els.panel) els.panel.style.display = 'flex'; layout(); }
+  function showLauncher() { if (els.panel) els.panel.style.display = 'none'; if (els.launcher) els.launcher.style.display = 'inline-flex'; layout(); }
+  function openPanel() {
+    opened = true; showPanel();
+    if (els.launcher) els.launcher.setAttribute('aria-expanded', 'true');
+    if (AUTO && !analysed && lastPayload) processInitial(lastPayload);
+    if (els.input) { try { els.input.focus(); } catch (e) {} }
+    track('open', {}); persistUI();
+  }
+  function collapseToLauncher() {
+    opened = false; showLauncher();
+    if (els.launcher) { els.launcher.setAttribute('aria-expanded', 'false'); try { els.launcher.focus(); } catch (e) {} }
+    persistUI();
+  }
+  function uiKey() { return 'tgtrai:ui'; }
+  function persistUI() {
+    if (!CFG.rememberState) return;
+    try {
+      sessionStorage.setItem(uiKey(), JSON.stringify({
+        opened: opened,
+        min: !!(els.panel && els.panel.classList.contains('is-min')),
+        docked: !!els._docked,
+        fx: els._fx == null ? null : els._fx,
+        fy: els._fy == null ? null : els._fy
+      }));
+    } catch (e) {}
+  }
+  function restoreUI() {
+    if (!CFG.rememberState) return null;
+    try { return JSON.parse(sessionStorage.getItem(uiKey()) || 'null'); } catch (e) { return null; }
+  }
+  function applySavedState(s) {
+    if (!s) return;
+    if (CFG.position === 'float') {
+      if (s.fx != null && s.fy != null) { els._dragged = true; els._fx = s.fx; els._fy = s.fy; }
+      else if (s.docked) { els._docked = true; }
+      positionHost();
+    }
+    if (s.min && els.panel) els.panel.classList.add('is-min');
   }
 
   function boot() {
@@ -554,6 +853,7 @@
   // ===================== styles + markup =====================
   var STYLES = '<style>' +
     ':host{all:initial}' +
+    '.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}' +
     '*{box-sizing:border-box;font-family:var(--trai-font,Inter,-apple-system,"Segoe UI",sans-serif)}' +
     '#panel{' +
       '--navy:#1B2B5B;--navy-l:#2A3F7A;--teal:#00B4D8;--teal-d:#0096B7;--teal-l:#48CAE4;--ok:#10B981;' +
@@ -572,7 +872,13 @@
     '.mn:hover{color:#fff;background:rgba(255,255,255,.1)}.mn:focus-visible{outline:2px solid #85b6ee;outline-offset:2px}' +
     '#panel[data-pos="float"] .hd{cursor:grab;touch-action:none;user-select:none}' +
     '#panel[data-pos="float"] .hd.tg-grabbing{cursor:grabbing}' +
-    '#body{padding:14px 15px;overflow:auto;background:var(--bg);display:flex;flex-direction:column;gap:9px;min-height:120px}' +
+    '#launcher{display:none;align-items:center;gap:9px;border:none;cursor:pointer;font:inherit;font-weight:700;font-size:.9rem;color:#fff;background:linear-gradient(135deg,var(--l-navy,#1B2B5B),var(--l-navy-d,#111D3E));padding:11px 16px 11px 12px;border-radius:999px;box-shadow:0 16px 36px -12px rgba(27,43,91,.42);max-width:min(320px,calc(100vw - 28px));transition:transform .12s ease,box-shadow .12s ease}' +
+    '#launcher:hover{transform:translateY(-1px);box-shadow:0 22px 42px -12px rgba(27,43,91,.5)}' +
+    '#launcher:focus-visible{outline:2px solid var(--l-teal,#00B4D8);outline-offset:3px}' +
+    '#launcher .spark{width:28px;height:28px;background:rgba(255,255,255,.16)}' +
+    '#launcher #launcher-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+    '@media(prefers-reduced-motion:reduce){#launcher{transition:none}#launcher:hover{transform:none}}' +
+    '#body{position:relative;padding:14px 15px;overflow:auto;background:var(--bg);display:flex;flex-direction:column;gap:9px;min-height:120px}' +
     '.st{display:flex;align-items:center;gap:9px;color:var(--ink-2);font-size:.85rem;padding:4px 0}' +
     '.dot{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none}' +
     '.dot.think{animation:tgp 1.4s infinite}' +
@@ -590,7 +896,19 @@
     '.why{font-size:.82rem;line-height:1.5;color:var(--ink-2);margin:5px 0 0}' +
     '.go{margin-top:2px;min-height:44px;border:none;border-radius:10px;background:var(--teal);color:#fff;font:inherit;font-weight:800;font-size:.86rem;padding:11px;cursor:pointer}' +
     '.go:hover{filter:brightness(.96)}.go:focus-visible{outline:2px solid var(--teal);outline-offset:2px}' +
-    '#foot{display:flex;gap:8px;padding:11px 13px;border-top:1px solid var(--bd);background:var(--card)}' +
+    '#foot{display:flex;flex-direction:column;gap:8px;padding:11px 13px;border-top:1px solid var(--bd);background:var(--card)}' +
+    '#inrow{display:flex;gap:8px}' +
+    '#chips{display:none;flex-wrap:wrap;gap:6px}' +
+    '.chip{border:1px solid var(--bd);background:var(--well);color:var(--ink-2);border-radius:999px;padding:6px 11px;font:inherit;font-size:.76rem;font-weight:600;cursor:pointer;white-space:nowrap}' +
+    '.chip:hover{border-color:var(--teal);color:var(--teal-d)}' +
+    '.chip:focus-visible{outline:2px solid var(--teal);outline-offset:2px}' +
+    '.rec.clickable{cursor:pointer;transition:border-color .12s ease,box-shadow .12s ease}' +
+    '.rec.clickable:hover{border-color:var(--teal);box-shadow:0 6px 18px -10px rgba(27,43,91,.4)}' +
+    '.rec.clickable:focus-visible{outline:2px solid var(--teal);outline-offset:2px}' +
+    '.rec.is-shown{border-color:var(--teal)}' +
+    '.rec-view{display:inline-flex;align-items:center;gap:3px;margin-top:8px;font-size:.74rem;font-weight:800;color:var(--teal-d)}' +
+    '#panel[data-pos="sheet"]{width:100%;border-radius:16px 16px 0 0}' +
+    '@media(prefers-reduced-motion:reduce){.rec.clickable{transition:none}}' +
     '#input{flex:1;min-height:44px;border:1px solid var(--bd);border-radius:9px;padding:9px 11px;font:inherit;font-size:.86rem;color:var(--ink);background:var(--card);outline:none}' +
     '#input:focus{border-color:var(--teal);box-shadow:0 0 0 3px color-mix(in srgb,var(--teal) 18%,transparent)}' +
     '#send{min-height:44px;border:none;border-radius:9px;background:var(--navy);color:#fff;font:inherit;font-weight:800;font-size:.84rem;padding:0 14px;cursor:pointer}' +
@@ -600,7 +918,12 @@
     '</style>';
 
   var MARKUP =
-    '<section id="panel" data-theme="auto" role="complementary" aria-label="AI trip assistant" aria-live="polite">' +
+    '<button id="launcher" type="button" aria-label="Open the AI trip assistant" aria-haspopup="dialog" aria-controls="panel" aria-expanded="false">' +
+      '<span class="spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3L3.5 11l6.3-2.2z"/></svg></span>' +
+      '<span id="launcher-text">Ask AI to pick your best matches</span>' +
+    '</button>' +
+    '<section id="panel" data-theme="auto" role="complementary" aria-label="AI trip assistant">' +
+      '<div id="live" class="sr" aria-live="polite"></div>' +
       '<header class="hd">' +
         '<span class="spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3L3.5 11l6.3-2.2z"/></svg></span>' +
         '<div><h2 id="title">AI trip assistant</h2><p id="sub">Waiting for results\u2026</p></div>' +
@@ -608,8 +931,11 @@
       '</header>' +
       '<div id="body"></div>' +
       '<div id="foot">' +
-        '<input id="input" type="text" aria-label="Ask the assistant for something different" placeholder="Ask: more central, with a pool, cheaper\u2026" maxlength="200" autocomplete="off" />' +
-        '<button id="send" type="button">Send</button>' +
+        '<div id="chips" role="group" aria-label="Quick refinements"></div>' +
+        '<div id="inrow">' +
+          '<input id="input" type="text" aria-label="Ask the assistant for something different" placeholder="Ask: more central, with a pool, cheaper\u2026" maxlength="200" autocomplete="off" />' +
+          '<button id="send" type="button">Send</button>' +
+        '</div>' +
       '</div>' +
     '</section>';
 })();
