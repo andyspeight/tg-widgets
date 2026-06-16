@@ -163,6 +163,23 @@
                 <div class="trai-help">Edge options pin the panel vertically centred to one side. <b>Floating</b> opens to the right of centre, can be dragged anywhere by its header, and docks to the right edge when the visitor minimises it.</div>
               </div>
             </div>
+            <div class="trai-row2">
+              <div class="tgse-field">
+                <label class="trai-field-label">Width</label>
+                <div class="trai-range">
+                  <input type="range" id="f-width" min="300" max="520" step="10">
+                  <output id="f-width-out">380px</output>
+                </div>
+              </div>
+              <div class="tgse-field">
+                <label class="trai-field-label">Height</label>
+                <div class="trai-range">
+                  <input type="range" id="f-height" min="360" max="820" step="20">
+                  <output id="f-height-out">640px</output>
+                </div>
+              </div>
+            </div>
+            <div class="trai-help">Maximum panel size in pixels — the panel grows with its content up to this height, then scrolls (a taller panel shows more results before scrolling). It always shrinks to fit smaller screens.</div>
           </div>
         </div>
 
@@ -214,6 +231,41 @@
           </div>
           <div class="tgse-section-body">
             <div class="tgse-field">
+              <label class="trai-field-label">When to appear</label>
+              <select class="trai-select" id="f-appearMode">
+                <option value="ready">As soon as results are ready</option>
+                <option value="delay">After a delay</option>
+              </select>
+              <div class="trai-help">Choose whether the assistant shows the moment results load, or waits a few seconds first.</div>
+            </div>
+            <div class="tgse-field" id="appearDelayField">
+              <label class="trai-field-label">Delay after results load</label>
+              <div class="trai-range">
+                <input type="range" id="f-appearDelay" min="1" max="30" step="1">
+                <output id="f-appearDelay-out">3s</output>
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="trai-field-label">Start state</label>
+              <select class="trai-select" id="f-startMode">
+                <option value="open">Open panel</option>
+                <option value="launcher">Collapsed launcher button</option>
+              </select>
+              <div class="trai-help">Show the full assistant straight away, or a small button the visitor taps to open it.</div>
+            </div>
+            <div class="tgse-field" id="launcherTextField">
+              <label class="trai-field-label">Launcher button text</label>
+              <input class="trai-input" id="f-launcherText" type="text" maxlength="60">
+            </div>
+            <div class="tgse-field" id="deferField">
+              <label class="trai-field-label">When to analyse</label>
+              <select class="trai-select" id="f-deferAnalysis">
+                <option value="true">When the visitor opens it (saves cost)</option>
+                <option value="false">As soon as results load (instant on open)</option>
+              </select>
+              <div class="trai-help">Launcher only. Analysing on open avoids spending on visitors who never open the assistant.</div>
+            </div>
+            <div class="tgse-field">
               <label class="trai-field-label">Maximum recommendations</label>
               <div class="trai-range">
                 <input type="range" id="f-maxRecs" min="1" max="6" step="1">
@@ -226,6 +278,55 @@
                 <span>Widget enabled</span>
               </button>
               <div class="trai-help">When off, the assistant never appears, even where the script is installed.</div>
+            </div>
+            <div class="tgse-field">
+              <button type="button" class="trai-switch is-on" id="sw-cacheResults" aria-pressed="true">
+                <span class="track"><span class="thumb"></span></span>
+                <span>Cache results per search</span>
+              </button>
+              <div class="trai-help">Avoids re-analysing (and re-charging) if the visitor reopens the assistant for the same search.</div>
+            </div>
+            <div class="tgse-field">
+              <button type="button" class="trai-switch is-on" id="sw-rememberState" aria-pressed="true">
+                <span class="track"><span class="thumb"></span></span>
+                <span>Remember position &amp; open state</span>
+              </button>
+              <div class="trai-help">Keeps where the visitor dragged or minimised it during their visit.</div>
+            </div>
+            <div class="tgse-field">
+              <button type="button" class="trai-switch is-on" id="sw-chips" aria-pressed="true">
+                <span class="track"><span class="thumb"></span></span>
+                <span>Quick refine chips</span>
+              </button>
+              <div class="trai-help">One-tap suggestions (e.g. &ldquo;With a pool&rdquo;, &ldquo;Cheaper&rdquo;) under the input, generated from the live results.</div>
+            </div>
+            <div class="tgse-field">
+              <button type="button" class="trai-switch is-on" id="sw-cardClick" aria-pressed="true">
+                <span class="track"><span class="thumb"></span></span>
+                <span>Tap a card to show that property</span>
+              </button>
+              <div class="trai-help">Clicking a recommendation filters the results page to just that property.</div>
+            </div>
+            <div class="tgse-field">
+              <button type="button" class="trai-switch is-on" id="sw-mobileSheet" aria-pressed="true">
+                <span class="track"><span class="thumb"></span></span>
+                <span>Mobile bottom-sheet</span>
+              </button>
+              <div class="trai-help">On small screens the panel docks to the bottom edge, full width, instead of floating.</div>
+            </div>
+            <div class="tgse-field">
+              <button type="button" class="trai-switch is-on" id="sw-analytics" aria-pressed="true">
+                <span class="track"><span class="thumb"></span></span>
+                <span>Engagement analytics</span>
+              </button>
+              <div class="trai-help">Sends events (appeared, opened, recommendations, refinements, views) to your dataLayer / GTM.</div>
+            </div>
+            <div class="tgse-field">
+              <button type="button" class="trai-switch is-on" id="sw-verifyClaims" aria-pressed="true">
+                <span class="track"><span class="thumb"></span></span>
+                <span>Verify claims</span>
+              </button>
+              <div class="trai-help">Removes any wording in a recommendation that mentions a feature (pool, spa, beach, parking&hellip;) the property doesn&rsquo;t actually list &mdash; a safety net against AI overstatement.</div>
             </div>
           </div>
         </div>
@@ -312,7 +413,21 @@
     theme: 'auto',
     fontFamily: 'Inter',
     position: 'br',
-    maxRecs: 6
+    maxRecs: 6,
+    width: 380,
+    height: 640,
+    appearMode: 'ready',
+    appearDelay: 3,
+    startMode: 'open',
+    launcherText: 'Ask AI to pick your best matches',
+    deferAnalysis: true,
+    cacheResults: true,
+    rememberState: true,
+    chips: true,
+    cardClick: true,
+    mobileSheet: true,
+    analytics: true,
+    verifyClaims: true
   };
   var C = Object.assign({}, DEFAULTS);
 
@@ -390,6 +505,29 @@
 
   var maxR = document.getElementById('f-maxRecs');
   maxR.addEventListener('input', function () { C.maxRecs = parseInt(maxR.value, 10); document.getElementById('f-maxRecs-out').textContent = maxR.value; onEdit(); });
+  var widthR = document.getElementById('f-width');
+  widthR.addEventListener('input', function () { C.width = parseInt(widthR.value, 10); document.getElementById('f-width-out').textContent = widthR.value + 'px'; onEdit(); });
+  var heightR = document.getElementById('f-height');
+  heightR.addEventListener('input', function () { C.height = parseInt(heightR.value, 10); document.getElementById('f-height-out').textContent = heightR.value + 'px'; onEdit(); });
+  function updateAppearVis() { document.getElementById('appearDelayField').style.display = (C.appearMode === 'delay') ? '' : 'none'; }
+  var appM = document.getElementById('f-appearMode');
+  appM.addEventListener('change', function () { C.appearMode = appM.value; updateAppearVis(); onEdit(); });
+  var appD = document.getElementById('f-appearDelay');
+  appD.addEventListener('input', function () { C.appearDelay = parseInt(appD.value, 10); document.getElementById('f-appearDelay-out').textContent = appD.value + 's'; onEdit(); });
+  bindText('f-launcherText', 'launcherText');
+  function updateStartVis() { var on = C.startMode === 'launcher'; document.getElementById('launcherTextField').style.display = on ? '' : 'none'; document.getElementById('deferField').style.display = on ? '' : 'none'; }
+  var startM = document.getElementById('f-startMode');
+  startM.addEventListener('change', function () { C.startMode = startM.value; updateStartVis(); onEdit(); });
+  var defA = document.getElementById('f-deferAnalysis');
+  defA.addEventListener('change', function () { C.deferAnalysis = (defA.value === 'true'); onEdit(); });
+  function bindSwitch(id, key) { var b = document.getElementById(id); if (!b) return; b.addEventListener('click', function () { C[key] = !C[key]; b.classList.toggle('is-on', C[key]); b.setAttribute('aria-pressed', C[key] ? 'true' : 'false'); onEdit(); }); }
+  bindSwitch('sw-cacheResults', 'cacheResults');
+  bindSwitch('sw-rememberState', 'rememberState');
+  bindSwitch('sw-chips', 'chips');
+  bindSwitch('sw-cardClick', 'cardClick');
+  bindSwitch('sw-mobileSheet', 'mobileSheet');
+  bindSwitch('sw-analytics', 'analytics');
+  bindSwitch('sw-verifyClaims', 'verifyClaims');
 
   var sw = document.getElementById('sw-enabled');
   sw.addEventListener('click', function () { C.enabled = !C.enabled; sw.classList.toggle('is-on', C.enabled); sw.setAttribute('aria-pressed', C.enabled ? 'true' : 'false'); onEdit(); });
@@ -411,6 +549,25 @@
     document.getElementById('f-viewLabel').value = C.viewLabel;
     document.getElementById('f-maxRecs').value = C.maxRecs;
     document.getElementById('f-maxRecs-out').textContent = String(C.maxRecs);
+    document.getElementById('f-width').value = C.width;
+    document.getElementById('f-width-out').textContent = String(C.width) + 'px';
+    document.getElementById('f-height').value = C.height;
+    document.getElementById('f-height-out').textContent = String(C.height) + 'px';
+    document.getElementById('f-appearMode').value = C.appearMode;
+    document.getElementById('f-appearDelay').value = C.appearDelay;
+    document.getElementById('f-appearDelay-out').textContent = String(C.appearDelay) + 's';
+    updateAppearVis();
+    document.getElementById('f-startMode').value = C.startMode;
+    document.getElementById('f-launcherText').value = C.launcherText || '';
+    document.getElementById('f-deferAnalysis').value = C.deferAnalysis ? 'true' : 'false';
+    updateStartVis();
+    var swC = document.getElementById('sw-cacheResults'); swC.classList.toggle('is-on', C.cacheResults !== false); swC.setAttribute('aria-pressed', C.cacheResults !== false ? 'true' : 'false');
+    var swR = document.getElementById('sw-rememberState'); swR.classList.toggle('is-on', C.rememberState !== false); swR.setAttribute('aria-pressed', C.rememberState !== false ? 'true' : 'false');
+    var swCh = document.getElementById('sw-chips'); swCh.classList.toggle('is-on', C.chips !== false); swCh.setAttribute('aria-pressed', C.chips !== false ? 'true' : 'false');
+    var swCk = document.getElementById('sw-cardClick'); swCk.classList.toggle('is-on', C.cardClick !== false); swCk.setAttribute('aria-pressed', C.cardClick !== false ? 'true' : 'false');
+    var swMs = document.getElementById('sw-mobileSheet'); swMs.classList.toggle('is-on', C.mobileSheet !== false); swMs.setAttribute('aria-pressed', C.mobileSheet !== false ? 'true' : 'false');
+    var swAn = document.getElementById('sw-analytics'); swAn.classList.toggle('is-on', C.analytics !== false); swAn.setAttribute('aria-pressed', C.analytics !== false ? 'true' : 'false');
+    var swV = document.getElementById('sw-verifyClaims'); swV.classList.toggle('is-on', C.verifyClaims !== false); swV.setAttribute('aria-pressed', C.verifyClaims !== false ? 'true' : 'false');
     sw.classList.toggle('is-on', C.enabled !== false);
     sw.setAttribute('aria-pressed', C.enabled !== false ? 'true' : 'false');
     if (tgse.mountFontPicker) tgse.mountFontPicker('#fontPickerMount', C.fontFamily || 'Inter', function (f) { C.fontFamily = f; shell.markDirty(); schedulePreview(); });
