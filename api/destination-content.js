@@ -39,7 +39,9 @@
  *     highlights: [{icon,title,description}],
  *     bestForTags: string[],
  *     events: [{month,name,description}],
- *     factsInherited: { fact: 'city' | 'country' }   // present-only-if inherited
+ *     planning: { priceBand, bookingLead, tripDuration[], visaStatus, visaAdvisory, healthNotes },
+ *     factsInherited: { fact: 'city' | 'country' },     // present-only-if inherited
+ *     planningInherited: { field: 'city' | 'country' }  // present-only-if inherited
  *   }
  *
  *   On slug-mode no-match:
@@ -83,6 +85,14 @@ const LEVEL_MAP = {
       highlightsJson: 'fldOFmB8E9rDvgQEZ',
       bestForTags:    'fldC5ZvX1hitoxWY6',
       eventsJson:     'fldylxHJYE7PtQ86s',
+      // Planning / "Good to know" panel. The country is the source of truth for
+      // these; resort and city Spotlights inherit them when blank (see below).
+      priceBand:      'fldJOZeflKobE2o9g',
+      bookingLead:    'fld3JLyT3MsMGWVT4',
+      tripDuration:   'flduOcMEuPq3cnVG5',
+      visaStatus:     'fldmKvRkDDRjj7PT2',
+      visaAdvisory:   'fldecKeSnkZ6ABZfd',
+      healthNotes:    'fldOGSgbbH3BIoU6A',
     },
   },
   city: {
@@ -107,6 +117,9 @@ const LEVEL_MAP = {
       highlightsJson: 'fld1moM61DARrsBwr',
       bestForTags:    'fldZQTVNuqRXHileW',
       eventsJson:     'fldxze1iXQRrJ0UZW',
+      // City can carry its own Trip Duration; price band / booking / visa / health
+      // are not held at city level and inherit from the parent country.
+      tripDuration:   'fldPSVfkYVAIhtNDp',
     },
   },
   resort: {
@@ -142,6 +155,15 @@ const LEVEL_MAP = {
 // completeness pills can flag it.
 const INHERITABLE_FACTS = ['flightTime', 'timeZone', 'currency', 'language', 'voltage'];
 
+// Planning values that also walk up the hierarchy when blank. Visa, health, price
+// band and booking lead are country-level realities, so a resort or city Spotlight
+// inherits them from its country. Trip duration can be set per city, and inherits
+// only when the city/resort leaves it blank.
+const INHERITABLE_PLANNING = ['priceBand', 'bookingLead', 'tripDuration', 'visaStatus', 'visaAdvisory', 'healthNotes'];
+
+// The full set walked by inheritCountryFacts (quick facts plus planning).
+const INHERITABLE_KEYS = INHERITABLE_FACTS.concat(INHERITABLE_PLANNING);
+
 const ICON_VOCAB = new Set([
   'mountain','sunset','wine','water','palm','city','temple','beach','food',
   'star','camera','heart','building','map','compass','sun','snowflake',
@@ -170,6 +192,30 @@ const DEFAULT_LOOKUP_ORDER = ['resort', 'city', 'country'];
 function txt(value, maxLen = 500) {
   if (typeof value !== 'string') return '';
   return value.replace(/<[^>]*>/g, '').trim().slice(0, maxLen);
+}
+
+// Treat null/undefined, blank/whitespace strings and empty arrays as "blank" so
+// inheritance fills them from a parent level. Non-empty values pass through.
+function isBlankVal(v) {
+  if (v == null) return true;
+  if (typeof v === 'string') return !v.trim();
+  if (Array.isArray(v)) return v.length === 0;
+  return false;
+}
+
+// Normalise a singleSelect value to its option name. Airtable's REST API returns
+// select values as plain name strings; we also tolerate the {id,name} object
+// shape as belt-and-braces (same posture as parseBestForTags).
+function selName(v) {
+  if (typeof v === 'string') return v;
+  if (v && typeof v === 'object' && typeof v.name === 'string') return v.name;
+  return '';
+}
+
+// Normalise a multipleSelects value to a clean array of option-name strings.
+function selList(value, max = 6) {
+  if (!Array.isArray(value)) return [];
+  return value.map(selName).map(s => txt(s, 30)).filter(Boolean).slice(0, max);
 }
 
 function parseCsvInts(str, expectedLen = 12) {
@@ -358,11 +404,7 @@ async function inheritCountryFacts(level, fields, pat) {
   const map = LEVEL_MAP[level];
   if (!map.parentLink) return { values: {}, sources: {} };
 
-  const blanks = INHERITABLE_FACTS.filter(key => {
-    const fid = map.fields[key];
-    const val = fields[fid];
-    return !val || (typeof val === 'string' && !val.trim());
-  });
+  const blanks = INHERITABLE_KEYS.filter(key => isBlankVal(fields[map.fields[key]]));
   if (blanks.length === 0) return { values: {}, sources: {} };
 
   const parentLinks = fields[map.parentLink];
@@ -390,7 +432,7 @@ async function inheritCountryFacts(level, fields, pat) {
 
   for (const key of blanks) {
     const pVal = parentFields[parentMap.fields[key]];
-    if (pVal && (typeof pVal !== 'string' || pVal.trim())) {
+    if (!isBlankVal(pVal)) {
       values[key] = pVal;
       sources[key] = parentLevel;
     } else {
@@ -414,7 +456,7 @@ async function inheritCountryFacts(level, fields, pat) {
         if (grandFields) {
           for (const key of stillBlank) {
             const gVal = grandFields[LEVEL_MAP.country.fields[key]];
-            if (gVal && (typeof gVal !== 'string' || gVal.trim())) {
+            if (!isBlankVal(gVal)) {
               values[key] = gVal;
               sources[key] = 'country';
             }
@@ -443,6 +485,16 @@ function shapePayload(level, fields, inherited) {
     if (inherited.sources[key]) factsInherited[key] = inherited.sources[key];
   }
 
+  // Planning panel: own value when present, else the value inherited from a parent.
+  const planVal = (key) => {
+    const own = f[map.fields[key]];
+    return isBlankVal(own) ? inherited.values[key] : own;
+  };
+  const planningInherited = {};
+  for (const key of INHERITABLE_PLANNING) {
+    if (inherited.sources[key]) planningInherited[key] = inherited.sources[key];
+  }
+
   return {
     level,
     name: txt(f[map.fields.name], 120),
@@ -466,6 +518,15 @@ function shapePayload(level, fields, inherited) {
     highlights: parseHighlights(f[map.fields.highlightsJson]),
     bestForTags: parseBestForTags(f[map.fields.bestForTags]),
     events: parseEvents(f[map.fields.eventsJson]),
+    planning: {
+      priceBand:    txt(selName(planVal('priceBand')), 16),
+      bookingLead:  txt(selName(planVal('bookingLead')), 60),
+      tripDuration: selList(planVal('tripDuration'), 6),
+      visaStatus:   txt(selName(planVal('visaStatus')), 60),
+      visaAdvisory: txt(planVal('visaAdvisory'), 1500),
+      healthNotes:  txt(planVal('healthNotes'), 1500),
+    },
+    planningInherited,
     factsInherited,
   };
 }

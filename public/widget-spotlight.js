@@ -11,11 +11,13 @@
  *  - 12-month climate chart, colour-coded by season, with rainfall strip and
  *    best-time-to-visit callout (the "nobody else does this" hook)
  *  - Quick facts bar (flight time, time zone, currency, language, voltage)
+ *  - "Good to know" planning panel (price band, when to book, ideal length, UK
+ *    visa status, plus expandable visa and health guidance; inherits to country)
  *  - Highlights grid (3-6 cards with 17-icon vocabulary)
  *  - Best For tags (pill row with icons, 20-option vocabulary)
  *  - Events / "What's on" section (optional)
  *  - Agent-brandable CTA (protocol-validated URL)
- *  - 7 sections, each individually toggleable
+ *  - 8 sections, each individually toggleable
  *  - Light default + full dark mode
  *  - Responsive 320px → 1440px
  *  - ARIA-labelled, focus-visible, prefers-reduced-motion honoured
@@ -89,7 +91,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
 
   /* ------------------------------------------------------------------
    * Icon library — inline SVG path strings (Lucide-style).
@@ -125,6 +127,8 @@
     calendar:    '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
     info:        '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
     alert:       '<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    passport:    '<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="9" r="2.5"/><path d="M8.5 16.5a3.5 3.5 0 0 1 7 0"/>',
+    chevron:     '<path d="m6 9 6 6 6-6"/>',
   };
 
   function icon(name, size) {
@@ -624,6 +628,46 @@
       word-break: break-word;
     }
 
+    /* ─── GOOD TO KNOW (planning) ─────────────────────── */
+    .tgs-plan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .tgs-plan-details {
+      margin-top: 16px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .tgs-plan-detail {
+      background: var(--tgs-card);
+      border: 1px solid var(--tgs-border);
+      border-radius: var(--tgs-radius-sm);
+      overflow: hidden;
+    }
+    .tgs-plan-summary {
+      display: flex; align-items: center; gap: 10px;
+      padding: 15px 18px;
+      cursor: pointer;
+      font-size: 14px; font-weight: 600; color: var(--tgs-text);
+      list-style: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tgs-plan-summary::-webkit-details-marker { display: none; }
+    .tgs-plan-summary:focus-visible { outline: 2px solid var(--tgs-accent); outline-offset: -2px; }
+    .tgs-plan-summary > svg { color: var(--tgs-brand); flex: 0 0 auto; }
+    .tgs-plan-chevron {
+      margin-left: auto; color: var(--tgs-muted);
+      display: inline-flex;
+      transition: transform 200ms ease;
+    }
+    .tgs-plan-detail[open] .tgs-plan-chevron { transform: rotate(180deg); }
+    .tgs-plan-detail-body {
+      padding: 0 18px 16px;
+      font-size: 14px; color: var(--tgs-sub); line-height: 1.6;
+    }
+    .tgs-plan-detail-body p { margin: 0 0 10px; }
+    .tgs-plan-detail-body p:last-child { margin: 0; }
+
     /* ─── HIGHLIGHTS GRID ─────────────────────────────── */
     .tgs-highlights {
       display: grid;
@@ -978,7 +1022,7 @@
         fontFamily: '',          // optional override
         temperatureUnit: 'C',    // 'C' | 'F' — default for climate chart; readers can flip
         sections: {
-          hero: true, climate: true, facts: true, highlights: true,
+          hero: true, climate: true, facts: true, planning: true, highlights: true,
           tags: true, events: true, cta: true,
         },
         showAttribution: true,
@@ -988,6 +1032,7 @@
         tagsHeading: 'Best for',
         climateHeading: 'Climate',
         factsHeading: 'At a glance',
+        planningHeading: 'Good to know',
         cta: {
           title: 'Speak to our destination specialist',
           subtitle: '',
@@ -1115,12 +1160,14 @@
       const s = this.c.sections;
       const html = [];
 
-      // Section order (v1.1): hero → tags → climate → facts → highlights → events → cta
+      // Section order: hero → tags → climate → facts → planning → highlights → events → cta
       // Tags moved up because they're the most scannable "at a glance" read for agents' visitors.
+      // Planning sits next to the quick facts: both are practical trip-planning reads.
       if (s.hero) html.push(this._renderHero(d));
       if (s.tags) html.push(this._renderTags(d));
       if (s.climate) html.push(this._renderClimate(d));
       if (s.facts) html.push(this._renderFacts(d));
+      if (s.planning) html.push(this._renderPlanning(d));
       if (s.highlights) html.push(this._renderHighlights(d));
       if (s.events) html.push(this._renderEvents(d));
       if (s.cta) html.push(this._renderCta(d));
@@ -1277,6 +1324,76 @@
             '<h2 class="tgs-section-title" id="tgs-facts-heading">' + esc(this.c.factsHeading) + '</h2>' +
           '</div>' +
           '<div class="tgs-facts">' + cards + '</div>' +
+        '</section>'
+      );
+    }
+
+    // "Good to know" — practical trip-planning panel. Structured chips (price band,
+    // when to book, ideal length, UK visa status) plus optional expandable detail
+    // for the longer visa and health guidance. All values may be inherited from a
+    // parent level by the API (a resort shows its country's visa rules, etc).
+    _renderPlanning(d) {
+      const p = d.planning || {};
+      const durationText = Array.isArray(p.tripDuration) && p.tripDuration.length
+        ? p.tripDuration.join(' · ') : '';
+
+      const items = [
+        { kind: 'price',    label: 'Price band',   value: p.priceBand },
+        { kind: 'booking',  label: 'When to book', value: p.bookingLead },
+        { kind: 'duration', label: 'Ideal length', value: durationText },
+        { kind: 'visa',     label: 'UK visa',      value: p.visaStatus },
+      ].filter(it => it.value && String(it.value).trim());
+
+      const advisory = (p.visaAdvisory && String(p.visaAdvisory).trim()) ? String(p.visaAdvisory).trim() : '';
+      const health   = (p.healthNotes && String(p.healthNotes).trim()) ? String(p.healthNotes).trim() : '';
+
+      // Nothing to show — hide the whole section.
+      if (items.length === 0 && !advisory && !health) return '';
+
+      const planIcon = (kind) =>
+        kind === 'price'    ? 'coin' :
+        kind === 'booking'  ? 'calendar' :
+        kind === 'duration' ? 'clock' :
+        kind === 'visa'     ? 'passport' : 'info';
+
+      const cards = items.map(it => (
+        '<div class="tgs-fact">' +
+          '<div class="tgs-fact-icon">' + icon(planIcon(it.kind), 20) + '</div>' +
+          '<div class="tgs-fact-body">' +
+            '<div class="tgs-fact-label">' + esc(it.label) + '</div>' +
+            '<p class="tgs-fact-value">' + esc(it.value) + '</p>' +
+          '</div>' +
+        '</div>'
+      )).join('');
+
+      // Long advisory text: split on blank lines into paragraphs, single newlines
+      // become <br>. Escaped throughout — this is editorial content off the API.
+      const toParas = (text) => String(text).split(/\n{2,}/).map(s => s.trim()).filter(Boolean)
+        .map(s => '<p>' + esc(s).replace(/\n/g, '<br>') + '</p>').join('');
+
+      const detail = (ic, title, text) => (
+        '<details class="tgs-plan-detail">' +
+          '<summary class="tgs-plan-summary">' +
+            icon(ic, 16) + '<span>' + esc(title) + '</span>' +
+            '<span class="tgs-plan-chevron">' + icon('chevron', 16) + '</span>' +
+          '</summary>' +
+          '<div class="tgs-plan-detail-body">' + toParas(text) + '</div>' +
+        '</details>'
+      );
+
+      const details = [];
+      if (advisory) details.push(detail('passport', 'Visa and entry', advisory));
+      if (health)   details.push(detail('heart', 'Health and vaccinations', health));
+
+      const grid = items.length ? '<div class="tgs-plan-grid">' + cards + '</div>' : '';
+      const det  = details.length ? '<div class="tgs-plan-details">' + details.join('') + '</div>' : '';
+
+      return (
+        '<section class="tgs-section" aria-labelledby="tgs-planning-heading">' +
+          '<div class="tgs-section-head">' +
+            '<h2 class="tgs-section-title" id="tgs-planning-heading">' + esc(this.c.planningHeading) + '</h2>' +
+          '</div>' +
+          grid + det +
         '</section>'
       );
     }
