@@ -350,6 +350,7 @@ async function buildAirportPayload(airportRec) {
     gettingThereByCoach: txt(fld(airportRec, AF.byCoach)),
     taxiAndRideshare:    txt(fld(airportRec, AF.taxiRide)),
     parking:             txt(fld(airportRec, AF.parking)),
+    dropOffInfo:         txt(fld(airportRec, AF.dropOff)),
 
     // Destination-mode tabs
     transferInfo: txt(fld(airportRec, AF.transferInfo)),
@@ -359,12 +360,14 @@ async function buildAirportPayload(airportRec) {
 
     // Facility cards
     loungesInfo: txt(fld(airportRec, AF.lounges)),
+    eatShopInfo: txt(fld(airportRec, AF.eatShop)),
     familyInfo:  txt(fld(airportRec, AF.family)),
     assistInfo:  txt(fld(airportRec, AF.assist)),
     hotelsInfo:  txt(fld(airportRec, AF.hotels)),
 
     // Tips & sources
     tips:            txt(fld(airportRec, AF.quirks)),
+    usefulTips:      txt(fld(airportRec, AF.tips)),
     officialWebsite: safeUrl(fld(airportRec, AF.officialUrl)),
 
     // Linked content

@@ -1,5 +1,5 @@
 /**
- * Travelgenix Airport Spotlight Widget v1.0.0
+ * Travelgenix Airport Spotlight Widget v1.1.0
  * Self-contained, embeddable airport information showcase.
  * Zero hard dependencies (Leaflet loaded on-demand for the map only,
  * with SRI-pinned hashes from unpkg).
@@ -84,7 +84,7 @@
     } catch (e) { /* fall through */ }
     return '/api/airport-content';
   })();
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
 
   const LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
   const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
@@ -116,6 +116,8 @@
     check:    '<path d="M20 6 9 17l-5-5"/>',
     star:     '<path d="M11.48 3.5a.55.55 0 0 1 1 0l2.14 6.58h6.92a.55.55 0 0 1 .32.99l-5.6 4.07 2.14 6.58a.55.55 0 0 1-.85.61L12 17.27l-5.6 4.06a.55.55 0 0 1-.85-.61l2.14-6.58-5.6-4.07a.55.55 0 0 1 .32-.99h6.92z"/>',
     speed:    '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    shop:     '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+    users:    '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   };
 
   function icon(name, size) {
@@ -616,6 +618,11 @@
   border-radius: 2px;
 }
 .tga-tips strong { color: #FFFFFF; }
+.tga-tips-sublabel {
+  margin: 18px 0 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--tga-sub);
+}
 
 .tga-cta {
   display: flex; align-items: center; justify-content: space-between;
@@ -977,6 +984,7 @@
         T('taxi',    'taxi',    'Taxi',    d.taxiAndRideshare),
         T('coach',   'coach',   'Coach',   d.gettingThereByCoach),
         T('parking', 'parking', 'Parking', d.parking),
+        T('dropoff', 'users',   'Drop-off & pick-up', d.dropOffInfo),
       ];
       return t.filter(Boolean);
     }
@@ -1008,6 +1016,7 @@
     _renderFacilities(d) {
       const cards = [];
       if (d.loungesInfo) cards.push(this._card('lounge', 'Lounges', d.loungesInfo));
+      if (d.eatShopInfo) cards.push(this._card('shop', 'Eating and shopping', d.eatShopInfo));
       if (d.familyInfo)  cards.push(this._card('family', 'Family facilities', d.familyInfo));
       if (d.assistInfo)  cards.push(this._card('assist', 'Special assistance', d.assistInfo));
       if (d.hotelsInfo)  cards.push(this._card('building', 'Airport hotels', d.hotelsInfo));
@@ -1040,9 +1049,13 @@
     }
 
     _renderTips(d) {
-      if (!d.tips) return '';
+      const quirks = d.tips ? '<div class="tga-tips">' + esc(d.tips) + '</div>' : '';
+      const useful = d.usefulTips ? '<div class="tga-tips">' + esc(d.usefulTips) + '</div>' : '';
+      if (!quirks && !useful) return '';
+      // When both are present, label the second so the two reads stay distinct.
+      const sub = (quirks && useful) ? '<p class="tga-tips-sublabel">Useful to know</p>' : '';
       return this._section('alert', 'Quirks & insider tips', 'Things that catch first-timers out',
-        '<div class="tga-tips">' + esc(d.tips) + '</div>');
+        quirks + sub + useful);
     }
 
     _renderCta(d, role) {
