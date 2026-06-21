@@ -89,7 +89,8 @@ function buildSystem() {
     '- When pkg=1 these are package prices that already include flights: present them as packages (not hotel-only), and you may cite op (operator), fl (flight) and inc (inclusions like ATOL) where present. Still never invent operator, flight, inclusions, distances, ratings or prices.',
     '- A higher price is not automatically worse; balance price against star, reviews, distance, refundability and fit for the party.',
     '- Flag genuine watch-outs from w (e.g. shared bathroom, dormitory, non-refundable only) where relevant.',
-    '- Keep each reason to one sentence. Keep "reply" to one or two short sentences in a warm, plain, helpful voice.',
+    '- Keep each reason to one sentence (about 12-18 words). Keep "reply" to one or two short sentences in a warm, plain, helpful voice.',
+    '- Each reason must give a SPECIFIC, comparative reason this option suits THIS search (e.g. "Closest to the centre of your shortlist", "Best-reviewed option under your budget", "Only refundable 5-star here"). Do NOT restate the property name, and do NOT just repeat the star rating, price or review score on their own — those are already shown to the customer; add the insight behind them.',
     '',
     'Respond with ONLY a JSON object, no markdown, no preamble:',
     '{"reply":"...","recommendations":[{"rid":"...","category":"Best value|Best for families|Most central|Top reviewed|Premium pick|Best refundable|...","reason":"..."}]}'
