@@ -23,9 +23,16 @@
   window.TravelgenixWidgets = window.TravelgenixWidgets || {};
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.7.0';
-  var EV_READY = 'tg:travel-results-v4:accommodation-results-ready';
-  var EV_VIEW = 'tg:travel-results-v4:accommodation-airesults-view';
+  var VERSION = '1.8.0';
+  // The results widget emits a different ready/view pair per search type. The
+  // result shape is shared; packages add flight / operator / inclusions data.
+  var SEARCH_TYPES = [
+    { kind: 'accommodation', ready: 'tg:travel-results-v4:accommodation-results-ready', view: 'tg:travel-results-v4:accommodation-airesults-view' },
+    { kind: 'dynpack', ready: 'tg:travel-results-v4:dynpack-results-ready', view: 'tg:travel-results-v4:dynpack-airesults-view' },
+    { kind: 'package', ready: 'tg:travel-results-v4:package-results-ready', view: 'tg:travel-results-v4:package-airesults-view' }
+  ];
+  var EV_VIEW = SEARCH_TYPES[0].view;            // default until a search arrives
+  var activeView = EV_VIEW, activeKind = 'accommodation', sharedFlight = null;
   var API_BASE = (typeof window !== 'undefined' && window.__TG_TRAI_API__) ||
                  'https://tg-widgets.vercel.app/api/travel-results-ai';
   var AUTO = (typeof window !== 'undefined' && window.__TG_TRAI_AUTO__ === false) ? false : true;
@@ -184,17 +191,28 @@
   }
   function nightly(p) { var n = (criteria && criteria.nights) || 1; return n > 0 ? p / n : p; }
 
+  function flightSummary(f) {
+    if (!f) return null;
+    var carrier = f.carrier || (f.routes && f.routes[0] && f.routes[0].carrier) || '';
+    var direct = /direct/i.test(f.stops || '') || (Array.isArray(f.routes) && f.routes.length && f.routes.every(function (r) { return (r.stops || 0) === 0; }));
+    var stopTxt = direct ? 'Direct' : (f.stops || 'Connecting');
+    return (carrier ? carrier + ' \u00b7 ' : '') + stopTxt;
+  }
   function summarise(r) {
     var rs = ratesOf(r);
     var lo = lowest(rs);
     var loRef = lowest(rs.filter(function (x) { return x.refundability === 'Refundable'; }));
+    var ownFlight = !!r.flight;
+    var fl = r.flight || (activeKind === 'dynpack' ? sharedFlight : null);
     return {
       rid: String(r.rid), name: r.name || 'Property', star: r.starRating || 0,
       address: r.address || '', city: cityOf(r.address),
       lo: lo, loRef: loRef,
       distKm: distKm(criteria && criteria.latitude, criteria && criteria.longitude, r.latitude, r.longitude),
       goodFor: r.goodFor || [], amen: r.amenities || [], ta: r.tripadvisor || null,
-      desc: r.description || '', warns: warningsOf(r, rs)
+      desc: r.description || '', warns: warningsOf(r, rs),
+      op: r.operatorName || null, incl: r.inclusions || [],
+      ownFlight: ownFlight, flSummary: flightSummary(fl), pkg: activeKind !== 'accommodation'
     };
   }
   function score(s) {
@@ -209,21 +227,30 @@
     return v;
   }
   function compact(s) {
-    return {
+    var o = {
       rid: s.rid, n: s.name, star: s.star, p: s.lo ? Math.round(s.lo.price) : null,
       board: s.lo ? s.lo.board : null, ref: !!s.loRef, city: s.city,
       km: s.distKm != null ? Math.round(s.distKm) : null,
       gf: s.goodFor, am: (s.amen || []).slice(0, 4),
       ta: s.ta ? [s.ta.rating, s.ta.reviewCount] : null, w: s.warns, d: (s.desc || '').slice(0, 110)
     };
+    if (s.pkg) o.pkg = 1;
+    if (s.op) o.op = s.op;
+    if (s.ownFlight && s.flSummary) o.fl = s.flSummary;     // per-result flight (package); dynpack flight is in criteria
+    if (s.incl && s.incl.length) o.inc = s.incl.slice(0, 4);
+    return o;
   }
   function trimCriteria() {
-    return {
+    var c = {
       locationName: criteria.locationName, checkinDate: criteria.checkinDate, checkoutDate: criteria.checkoutDate,
+      departDate: criteria.departDate, originName: criteria.originName,
       nights: criteria.nights, passengers: criteria.passengers, rooms: criteria.rooms,
       boardBasis: criteria.boardBasis, refundableOnly: criteria.refundableOnly,
       minStarRating: criteria.minStarRating, currency: currency
     };
+    if (activeKind !== 'accommodation') { c.searchType = activeKind; c.packagePrices = true; }
+    if (activeKind === 'dynpack' && sharedFlight) c.flight = flightSummary(sharedFlight);
+    return c;
   }
 
   // Conversational pre-filter: bias the candidate shortlist towards the request,
@@ -491,6 +518,9 @@
       if (s.ta && s.ta.rating) fact('TA ' + s.ta.rating + ' (' + s.ta.reviewCount + ')');
       if (s.distKm != null) fact(Math.round(s.distKm) + ' km');
       if (s.loRef) fact('refundable');
+      if (s.op) fact(s.op);
+      if (s.flSummary) fact(s.flSummary);
+      (s.incl || []).forEach(function (i) { if (/atol/i.test(i)) fact('ATOL', 'ok'); });
       (s.warns || []).forEach(function (w) { fact(w, 'warn'); });
       card.appendChild(facts);
       var why = document.createElement('p'); why.className = 'why'; why.textContent = r.reason; card.appendChild(why);
@@ -569,6 +599,7 @@
   function processInitial(payload) {
     analysed = true;
     activeSession = payload.searchSession;
+    sharedFlight = payload.flight || sharedFlight || null;
     criteria = payload.criteria || {};
     currency = criteria.currency || 'GBP';
     history = [];
@@ -688,7 +719,10 @@
     { kw: ['fitness', 'gym'], ok: function (s) { return amenHas(s, 'gym') || amenHas(s, 'fitness'); } },
     { kw: ['self-catering', 'self catering', 'kitchenette', 'kitchen'], ok: function (s) { return amenHas(s, 'kitchen'); } },
     { kw: ['all-inclusive', 'all inclusive'], ok: function (s) { return boardHas(s, 'all inclusive') || amenHas(s, 'all inclusive'); } },
-    { kw: ['families', 'family', 'children', 'child', 'kids', 'kid'], ok: function (s) { return gfHas(s, 'famil') || amenHas(s, 'kitchen'); } }
+    { kw: ['families', 'family', 'children', 'child', 'kids', 'kid'], ok: function (s) { return gfHas(s, 'famil') || amenHas(s, 'kitchen'); } },
+    { kw: ['atol'], ok: function (s) { return (s.incl || []).join(' ').toLowerCase().indexOf('atol') > -1; } },
+    { kw: ['transfers', 'transfer'], ok: function (s) { return (s.incl || []).join(' ').toLowerCase().indexOf('transfer') > -1; } },
+    { kw: ['direct flight', 'direct flights'], ok: function (s) { return /direct/i.test(s.flSummary || ''); } }
   ];
   function safeReason(s) {
     if (s.ta && s.ta.rating >= 4) return 'Well rated by previous guests for a trip like yours.';
@@ -722,7 +756,7 @@
   function dispatchView(rids) {
     var ids = (rids || []).map(function (x) { return String(x).trim(); }).filter(Boolean);
     if (!activeSession || !ids.length) return;
-    window.dispatchEvent(new CustomEvent(EV_VIEW, { detail: { version: 1, searchSession: activeSession, rids: ids } }));
+    window.dispatchEvent(new CustomEvent(activeView, { detail: { version: 1, searchSession: activeSession, rids: ids } }));
   }
 
   // Engagement analytics: push to window.dataLayer (GTM/GA-friendly) and an
@@ -754,10 +788,11 @@
 
   // ---- event wiring ----
   var pendingAppear = null;
-  function onReady(ev) {
+  function onReady(ev, t) {
     if (CFG.enabled === false) return;
     var p = ev && ev.detail;
     if (!p || typeof p !== 'object' || !Array.isArray(p.results) || !p.criteria) return;
+    if (t) { activeKind = t.kind; activeView = t.view; }
     // Appearance timing: show as soon as the results are ready, or hold back for
     // a configured number of seconds. A fresh results event cancels a pending one.
     if (pendingAppear) { clearTimeout(pendingAppear); pendingAppear = null; }
@@ -775,6 +810,7 @@
   }
   function startWith(p) {
     lastPayload = p; analysed = false; opened = false;
+    sharedFlight = p.flight || null;
     mount();
     var saved = restoreUI();
     var launcher = CFG.startMode === 'launcher' && !PREVIEW;
@@ -838,7 +874,9 @@
 
   function boot() {
     if (booted) return; booted = true;
-    window.addEventListener(EV_READY, onReady);
+    SEARCH_TYPES.forEach(function (t) {
+      window.addEventListener(t.ready, function (ev) { onReady(ev, t); });
+    });
   }
   // Register immediately — the presence flag and the results-ready listener must
   // be live as early as possible (the results event can arrive any time after).
@@ -893,6 +931,7 @@
     '.facts{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0}' +
     '.f{font-size:.71rem;font-weight:600;color:var(--ink-2);background:var(--well);border:1px solid var(--bd-l);border-radius:6px;padding:2px 7px}' +
     '.f.price{color:var(--navy);font-weight:800}.f.warn{color:var(--warnink);border-color:var(--warnbd);background:var(--warnbg)}' +
+    '.f.ok{color:#047857;border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.12);font-weight:700}' +
     '.why{font-size:.82rem;line-height:1.5;color:var(--ink-2);margin:5px 0 0}' +
     '.go{margin-top:2px;min-height:44px;border:none;border-radius:10px;background:var(--teal);color:#fff;font:inherit;font-weight:800;font-size:.86rem;padding:11px;cursor:pointer}' +
     '.go:hover{filter:brightness(.96)}.go:focus-visible{outline:2px solid var(--teal);outline-offset:2px}' +
