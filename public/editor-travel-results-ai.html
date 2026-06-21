@@ -233,10 +233,11 @@
             <div class="tgse-field">
               <label class="trai-field-label">When to appear</label>
               <select class="trai-select" id="f-appearMode">
+                <option value="suggestions">When suggestions are ready (recommended)</option>
                 <option value="ready">As soon as results are ready</option>
                 <option value="delay">After a delay</option>
               </select>
-              <div class="trai-help">Choose whether the assistant shows the moment results load, or waits a few seconds first.</div>
+              <div class="trai-help">&ldquo;When suggestions are ready&rdquo; keeps it hidden until results are rendered and it has picks to show &mdash; no empty loading panel. It won&rsquo;t appear at all if there are no suggestions.</div>
             </div>
             <div class="tgse-field" id="appearDelayField">
               <label class="trai-field-label">Delay after results load</label>
@@ -416,7 +417,7 @@
     maxRecs: 6,
     width: 380,
     height: 640,
-    appearMode: 'ready',
+    appearMode: 'suggestions',
     appearDelay: 3,
     startMode: 'open',
     launcherText: 'Ask AI to pick your best matches',
