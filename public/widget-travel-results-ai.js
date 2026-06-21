@@ -23,7 +23,7 @@
   window.TravelgenixWidgets = window.TravelgenixWidgets || {};
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.8.0';
+  var VERSION = '1.9.0';
   // The results widget emits a different ready/view pair per search type. The
   // result shape is shared; packages add flight / operator / inclusions data.
   var SEARCH_TYPES = [
@@ -59,7 +59,7 @@
     maxRecs: 6,
     width: 380,
     height: 640,
-    appearMode: 'ready',                                // 'ready' | 'delay'
+    appearMode: 'suggestions',                           // 'ready' | 'delay' | 'suggestions'
     appearDelay: 3,                                      // seconds, used when appearMode==='delay'
     startMode: 'open',                                   // 'open' (full panel) | 'launcher' (collapsed pill)
     launcherText: 'Ask AI to pick your best matches',
@@ -101,7 +101,7 @@
     v = parseInt(c.maxRecs, 10); if (!isNaN(v)) o.maxRecs = Math.max(1, Math.min(6, v));
     v = parseInt(c.width, 10); if (!isNaN(v)) o.width = Math.max(300, Math.min(520, v));
     v = parseInt(c.height, 10); if (!isNaN(v)) o.height = Math.max(360, Math.min(820, v));
-    if (c.appearMode === 'ready' || c.appearMode === 'delay') o.appearMode = c.appearMode;
+    if (c.appearMode === 'ready' || c.appearMode === 'delay' || c.appearMode === 'suggestions') o.appearMode = c.appearMode;
     v = parseInt(c.appearDelay, 10); if (!isNaN(v)) o.appearDelay = Math.max(1, Math.min(30, v));
     if (c.startMode === 'launcher' || c.startMode === 'open') o.startMode = c.startMode;
     if ((v = str(c.launcherText, 60)) != null) o.launcherText = v;
@@ -155,7 +155,7 @@
   var history = [];        // conversational history
   var currency = 'GBP';
   var booted = false;
-  var opened = false, analysed = false, lastPayload = null;
+  var opened = false, analysed = false, lastPayload = null, awaitingReveal = false;
 
   // ---- helpers ----
   function money(n) {
@@ -546,7 +546,7 @@
     act.addEventListener('click', function () { track('view_all', { count: recs.length }); dispatchView(recs.map(function (r) { return r.rid; })); });
     els.body.appendChild(act);
     setFootEnabled(true);
-    if (!append) renderChips();
+    if (!append) { renderChips(); revealNow(); }
     track('recommendations', { count: recs.length, refine: !!append });
     announce(recs.length + ' suggestion' + (recs.length === 1 ? '' : 's') + ' ready.');
     scrollToTopOf(startNode);
@@ -731,9 +731,12 @@
   }
   function cleanReason(reason, s) {
     if (!reason) return reason;
-    var sentences = reason.match(/[^.!?;]+[.!?;]*/g) || [reason];
-    var kept = sentences.filter(function (sent) {
-      var lc = sent.toLowerCase();
+    // Protect decimals (e.g. "4.5" ratings, "29.50" prices) so the sentence
+    // splitter never breaks mid-number and leaves a dangling "...with a 4.".
+    var prot = reason.replace(/(\d)\.(\d)/g, '$1\u0001$2');
+    var sentences = prot.match(/[^.!?;]+[.!?;]*/g) || [prot];
+    var kept = sentences.filter(function (sentP) {
+      var lc = sentP.replace(/\u0001/g, '.').toLowerCase();
       if (/\brefundable\b/.test(lc) && !/non-?\s*refundable|not\s+refundable/.test(lc) && !s.loRef) return false;
       for (var i = 0; i < CLAIM_RULES.length; i++) {
         var rule = CLAIM_RULES[i];
@@ -743,7 +746,9 @@
       }
       return true;
     });
-    var out = kept.join(' ').replace(/\s+/g, ' ').trim();
+    var out = kept.join(' ').replace(/\u0001/g, '.').replace(/\s+/g, ' ').trim();
+    // Belt-and-braces: never show a clause that ends on a hanging word/number.
+    if (out.length < 8 || /\b(a|an|the|with|of|and|to|at|for|in|on)\s*\d*[.,]?$/i.test(out)) out = safeReason(s);
     return out || safeReason(s);
   }
   function introLine() {
@@ -809,11 +814,24 @@
     setFootEnabled(true);
   }
   function startWith(p) {
-    lastPayload = p; analysed = false; opened = false;
+    lastPayload = p; analysed = false; opened = false; awaitingReveal = false;
     sharedFlight = p.flight || null;
     mount();
     var saved = restoreUI();
     var launcher = CFG.startMode === 'launcher' && !PREVIEW;
+
+    // "Appear when suggestions are ready": stay hidden, analyse in the
+    // background, and let renderRecs reveal the widget once it has picks.
+    // (Nothing shows for an empty/no-suggestion result.)
+    if (CFG.appearMode === 'suggestions' && CFG.startMode === 'open' && AUTO && !PREVIEW) {
+      awaitingReveal = true;
+      if (els.panel) els.panel.style.display = 'none';
+      if (els.launcher) els.launcher.style.display = 'none';
+      if (saved) applySavedState(saved);
+      processInitial(p);
+      return;
+    }
+
     track('appear', { mode: launcher ? 'launcher' : 'open' });
     if (launcher) {
       showLauncher();
@@ -827,6 +845,15 @@
       else processInitial(p);
       if (saved) applySavedState(saved);
     }
+  }
+  // Reveal the widget once suggestions are ready (appearMode='suggestions').
+  function revealNow() {
+    if (!awaitingReveal) return;
+    awaitingReveal = false;
+    var launcher = CFG.startMode === 'launcher' && !PREVIEW;
+    track('appear', { mode: launcher ? 'launcher' : 'open', when: 'suggestions' });
+    if (launcher) { showLauncher(); }
+    else { showPanel(); opened = true; track('open', {}); }
   }
 
   // ---- launcher / open-state helpers ----
