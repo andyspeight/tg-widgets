@@ -63,6 +63,10 @@ const PRODUCT_URLS = {
   [PRODUCTS.slugs.LUNA_QA]:        'https://qa.travelify.io/',
   [PRODUCTS.slugs.TOOL_HUB]:       '/admin/',
   [PRODUCTS.slugs.CONTRACT_LOADER]: 'https://contracts.travelify.io',
+  [PRODUCTS.slugs.LUNA_TRAVEL]:    'https://lunatravel.travelify.io',
+  // Onboarding, CRM, Support Desk and Back Office are still in build (status
+  // "coming soon" in Control). They render as non-clickable tiles until they
+  // go live, so they intentionally have no URL here yet.
 };
 
 // Products that are Travelgenix staff only. The launchpad renders a small
@@ -101,18 +105,23 @@ export default async function handler(req, res) {
       getRecord(USERS.tableId, ctx.userRecordId).catch(() => null),
     ]);
 
-    // Build slug → product tile, for ACTIVE products only.
+    // Build slug → product tile. Include live (active) and in-build (coming
+    // soon) products; deprecated and unknown statuses are skipped. Coming-soon
+    // tiles carry a flag so the launchpad can badge them and not link them yet.
     const productBySlug = new Map();
     for (const p of allProducts) {
       const slug = p.fields[PRODUCTS.fields.productId] || '';
       const status = p.fields[PRODUCTS.fields.status] || '';
-      if (!slug || status !== PRODUCTS.statuses.ACTIVE) continue;
+      if (!slug) continue;
+      if (status !== PRODUCTS.statuses.ACTIVE && status !== PRODUCTS.statuses.COMING_SOON) continue;
+      const comingSoon = status === PRODUCTS.statuses.COMING_SOON;
       productBySlug.set(slug, {
         slug,
         name: p.fields[PRODUCTS.fields.displayName] || slug,
         description: p.fields[PRODUCTS.fields.description] || '',
-        url: PRODUCT_URLS[slug] || '/',
+        url: comingSoon ? '' : (PRODUCT_URLS[slug] || '/'),
         staff: STAFF_SLUGS.has(slug),
+        comingSoon,
       });
     }
 
@@ -202,6 +211,8 @@ export default async function handler(req, res) {
       .sort((a, b) => {
         if (a.slug === PRODUCTS.slugs.WIDGET_SUITE) return -1;
         if (b.slug === PRODUCTS.slugs.WIDGET_SUITE) return 1;
+        // Live products first, in-build (coming soon) ones after.
+        if (!!a.comingSoon !== !!b.comingSoon) return a.comingSoon ? 1 : -1;
         return a.name.localeCompare(b.name);
       });
 

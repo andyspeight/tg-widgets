@@ -200,11 +200,16 @@ export const PRODUCTS = {
     LUNA_TRENDS:    'luna_trends',
     LUNA_QA:        'luna_qa',
     TOOL_HUB:       'tool_hub',
-    CONTRACT_LOADER: 'contract_loader'
+    CONTRACT_LOADER: 'contract_loader',
+    LUNA_TRAVEL:    'luna_travel',
+    ONBOARDING:     'onboarding',
+    CRM:            'crm',
+    SUPPORT_DESK:   'support_desk',
+    BACK_OFFICE:    'back_office'
   },
   statuses: {
     ACTIVE:      'active',
-    COMING_SOON: 'coming_soon',
+    COMING_SOON: 'coming soon',
     DEPRECATED:  'deprecated'
   }
 };

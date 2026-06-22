@@ -176,6 +176,7 @@
     .check-row input { width: 18px; height: 18px; accent-color: var(--tg-primary); cursor: pointer; flex-shrink: 0; }
     .check-row .name { font-size: 14px; font-weight: 500; color: var(--tg-text-primary); }
     .check-row .slug { font-size: 12px; color: var(--tg-text-tertiary); font-family: 'SF Mono', Menlo, Consolas, monospace; margin-left: auto; }
+    .check-row .soon-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: rgba(0,180,216,0.12); color: var(--tg-accent-dark); }
 
     .form-error { padding: var(--space-3) var(--space-4); background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-md); color: var(--tg-error); font-size: 13px; margin-bottom: var(--space-4); display: none; }
     .form-error.is-on { display: block; }
@@ -428,6 +429,10 @@
     { slug: 'tool_hub',        name: 'TG Control' },
     { slug: 'contract_loader', name: 'Contract Loader' },
     { slug: 'luna_travel',     name: 'Luna Travel' },
+    { slug: 'onboarding',      name: 'Onboarding',   comingSoon: true },
+    { slug: 'crm',             name: 'CRM',          comingSoon: true },
+    { slug: 'support_desk',    name: 'Support Desk', comingSoon: true },
+    { slug: 'back_office',     name: 'Back Office',  comingSoon: true },
   ];
 
   let users = [];
@@ -648,7 +653,7 @@
     $('#products').innerHTML = ALL_PRODUCTS.map((p) => `
       <label class="check-row">
         <input type="checkbox" value="${esc(p.slug)}" checked>
-        <span class="name">${esc(p.name)}</span>
+        <span class="name">${esc(p.name)}</span>${p.comingSoon ? '<span class="soon-tag">Coming soon</span>' : ''}
         <span class="slug">${esc(p.slug)}</span>
       </label>
     `).join('');
@@ -728,7 +733,7 @@
     $('#e-products').innerHTML = ALL_PRODUCTS.map((p) => `
       <label class="check-row">
         <input type="checkbox" value="${esc(p.slug)}"${checkedSlugs.has(p.slug) ? ' checked' : ''}>
-        <span class="name">${esc(p.name)}</span>
+        <span class="name">${esc(p.name)}</span>${p.comingSoon ? '<span class="soon-tag">Coming soon</span>' : ''}
         <span class="slug">${esc(p.slug)}</span>
       </label>
     `).join('');

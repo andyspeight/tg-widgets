@@ -132,20 +132,26 @@ async function handleList(req, res, ctx) {
         return (a.fullName || a.email || '').localeCompare(b.fullName || b.email || '');
       });
 
-    // Full product catalogue from Control (active products only), so the staff
-    // admin UI can offer EVERY product for allocation rather than a hardcoded
-    // list that silently drifts out of sync with Control. widget_suite first,
-    // then alphabetical — same order the launchpad uses.
+    // Full product catalogue from Control, so the staff admin UI can offer
+    // EVERY product for allocation rather than a hardcoded list that silently
+    // drifts out of sync with Control. Live (active) and in-build (coming soon)
+    // products are both allocatable; deprecated ones are not. widget_suite
+    // first, then live before coming soon, then alphabetical.
     const products = allProducts
-      .filter((p) => (p.fields[PRODUCTS.fields.status] || '') === PRODUCTS.statuses.ACTIVE)
+      .filter((p) => {
+        const s = p.fields[PRODUCTS.fields.status] || '';
+        return s === PRODUCTS.statuses.ACTIVE || s === PRODUCTS.statuses.COMING_SOON;
+      })
       .map((p) => ({
         slug: p.fields[PRODUCTS.fields.productId] || '',
         name: p.fields[PRODUCTS.fields.displayName] || p.fields[PRODUCTS.fields.productId] || '',
+        comingSoon: (p.fields[PRODUCTS.fields.status] || '') === PRODUCTS.statuses.COMING_SOON,
       }))
       .filter((p) => p.slug)
       .sort((a, b) => {
         if (a.slug === PRODUCTS.slugs.WIDGET_SUITE) return -1;
         if (b.slug === PRODUCTS.slugs.WIDGET_SUITE) return 1;
+        if (!!a.comingSoon !== !!b.comingSoon) return a.comingSoon ? 1 : -1;
         return a.name.localeCompare(b.name);
       });
 
