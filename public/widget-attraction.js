@@ -35,7 +35,7 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
 
   /* ===== Icons (Lucide-style inline SVG paths) ===================== */
   const IC = {
@@ -65,6 +65,10 @@
     arrow_out:'<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
     compass:  '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
     shield:   '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    coaster:  '<path d="M6 19V5"/><path d="M10 19V6.8"/><path d="M14 19v-7.8"/><path d="M18 5v4"/><path d="M18 19v-6"/><path d="M22 19V9"/><path d="M2 19V9a8 8 0 0 1 8-8c4 0 5 2 8 2"/>',
+    sparkles: '<path d="M9.5 2.5 11 6.8l4.3 1.5L11 9.8l-1.5 4.3L8 9.8 3.7 8.3 8 6.8z"/><path d="M18 3.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/><path d="M18.5 15l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6z"/>',
+    ferris:   '<circle cx="12" cy="12" r="2"/><path d="M12 2v4"/><path d="m6.8 15-3.5 2"/><path d="m20.7 7-3.5 2"/><path d="M6.8 9 3.3 7"/><path d="m20.7 17-3.5-2"/><path d="m9 22 3-8 3 8"/><path d="M8 22h8"/><path d="M18 18.7a9 9 0 1 0-12 0"/>',
+    rocket:   '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
   };
   function icon(name, size) {
     const path = IC[name] || IC.info;
@@ -138,7 +142,7 @@
         sections: {
           hero: true, facts: true, bestfor: true, overview: true, star: true,
           guides: true, tickets: true, located: true, stay: true, food: true,
-          tips: true, combine: true, operators: true, cta: true,
+          tips: true, combine: true, cta: true,
         },
         cta: {
           title: 'Plan your visit to {{name}}',
@@ -212,7 +216,6 @@
       if (s.food)      html.push(this._renderFood(d));
       if (s.tips)      html.push(this._renderTips(d));
       if (s.combine)   html.push(this._renderCombine(d));
-      if (s.operators) html.push(this._renderOperators(d));
       if (s.cta)       html.push(this._renderCta(d));
       this._root.innerHTML = html.filter(Boolean).join('');
     }
@@ -281,19 +284,19 @@
 
     _renderStar(d) {
       if (!d.starAttractions) return '';
-      return this._section('star', 'Star attractions', 'What not to miss', this._prose(d.starAttractions, 10));
+      return this._section('sparkles', 'Star attractions', 'What not to miss', this._prose(d.starAttractions, 10));
     }
 
     _renderGuides(d) {
       const cards = [
         this._card('users', 'Families', d.familyGuide),
-        this._card('zap', 'Thrill-seekers', d.thrillGuide),
+        this._card('coaster', 'Thrill-seekers', d.thrillGuide),
         this._card('ruler', 'Height restrictions', d.heightRestrict),
         this._card('access', 'Accessibility', d.accessibility),
         this._card('forward', 'Skip the queue', d.fastTrack),
       ].filter(Boolean);
       if (!cards.length) return '';
-      return this._section('shield', 'Good to know', 'Plan around your group', '<div class="tgx-cards">' + cards.join('') + '</div>');
+      return this._section('ferris', 'Good to know', 'Plan around your group', '<div class="tgx-cards">' + cards.join('') + '</div>');
     }
 
     _renderTickets(d) {
@@ -341,11 +344,6 @@
     _renderCombine(d) {
       if (!d.combineWith) return '';
       return this._section('link', 'Combine your trip', 'Other attractions nearby', this._prose(d.combineWith, 3));
-    }
-
-    _renderOperators(d) {
-      if (!d.tourOperators) return '';
-      return this._section('briefcase', 'For travel agents', 'Who packages this', this._prose(d.tourOperators, 2));
     }
 
     _renderCta(d) {
@@ -407,12 +405,12 @@
   .tgx-root {
     --tgx-brand: #1B2B5B; --tgx-accent: #00B4D8;
     --tgx-brand-soft: rgba(27,43,91,0.10); --tgx-accent-soft: rgba(0,180,216,0.14);
-    --tgx-radius: 16px; --tgx-radius-sm: 10px;
+    --tgx-radius: 16px; --tgx-radius-sm: 10px; --tgx-pad: 30px;
     --tgx-bg: #FFFFFF; --tgx-card: #FFFFFF; --tgx-border: #E2E8F0; --tgx-border-soft: #F1F5F9;
     --tgx-text: #0F172A; --tgx-sub: #475569; --tgx-muted: #94A3B8;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--tgx-text); background: var(--tgx-bg); display: block; line-height: 1.55;
-    max-width: 1000px; margin: 0 auto; padding: 4px;
+    max-width: 1000px; margin: 0 auto; padding: 0 0 12px;
     -webkit-font-smoothing: antialiased;
   }
   .tgx-root[data-theme="dark"] {
@@ -425,7 +423,7 @@
   @keyframes tgxsh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
   /* Hero */
-  .tgx-hero { position: relative; border-radius: var(--tgx-radius); padding: 40px 36px; color: #fff;
+  .tgx-hero { position: relative; border-radius: var(--tgx-radius); padding: 40px var(--tgx-pad); color: #fff;
     background: var(--tgx-brand);
     background: linear-gradient(135deg, var(--tgx-brand), var(--tgx-accent)); overflow: hidden; }
   .tgx-hero.has-img::before { content:""; position:absolute; inset:0; background-image: var(--tgx-hero-img); background-size: cover; background-position: center; }
@@ -440,9 +438,9 @@
   .tgx-badge.is-on { background: rgba(255,255,255,0.22); }
 
   /* Sections */
-  .tgx-section { margin: 36px 4px; }
+  .tgx-section { margin: 34px 0; padding: 0 var(--tgx-pad); }
   .tgx-section-head { display:flex; align-items:center; gap:10px; }
-  .tgx-section-icon { width:34px; height:34px; flex:0 0 34px; border-radius:9px; background: var(--tgx-brand-soft); color: var(--tgx-brand); display:flex; align-items:center; justify-content:center; }
+  .tgx-section-icon { width:36px; height:36px; flex:0 0 36px; border-radius:10px; background: var(--tgx-accent); color: #fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px -3px var(--tgx-accent-soft); }
   .tgx-kicker { font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color: var(--tgx-muted); }
   .tgx-h2 { margin:14px 0 16px; font-size:22px; font-weight:700; letter-spacing:-0.015em; color: var(--tgx-text); }
   .tgx-subh { margin:18px 0 8px; font-size:15px; font-weight:700; color: var(--tgx-text); }
@@ -450,10 +448,10 @@
   .tgx-prose p { margin:0 0 12px; } .tgx-prose p:last-child { margin:0; }
 
   /* Facts */
-  .tgx-facts { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin: 24px 4px; }
+  .tgx-facts { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin: 22px 0; padding: 0 var(--tgx-pad); }
   .tgx-facts[data-count="1"]{grid-template-columns:1fr} .tgx-facts[data-count="2"]{grid-template-columns:repeat(2,1fr)} .tgx-facts[data-count="3"]{grid-template-columns:repeat(3,1fr)}
   .tgx-fact { display:flex; gap:12px; align-items:flex-start; padding:16px; background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius-sm); }
-  .tgx-fact-icon { width:38px; height:38px; flex:0 0 38px; border-radius:9px; background: var(--tgx-brand-soft); color: var(--tgx-brand); display:flex; align-items:center; justify-content:center; }
+  .tgx-fact-icon { width:38px; height:38px; flex:0 0 38px; border-radius:10px; background: var(--tgx-accent-soft); color: var(--tgx-accent); display:flex; align-items:center; justify-content:center; }
   .tgx-fact-label { font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--tgx-muted); margin-bottom:3px; }
   .tgx-fact-value { font-size:15px; font-weight:700; color: var(--tgx-text); line-height:1.3; }
 
@@ -487,7 +485,7 @@
   .tgx-tips p { margin:0 0 10px; } .tgx-tips p:last-child { margin:0; }
 
   /* CTA */
-  .tgx-cta { margin: 40px 4px 8px; display:flex; align-items:center; justify-content:space-between; gap:28px; flex-wrap:wrap; padding:30px 34px; border-radius: var(--tgx-radius); background: var(--tgx-brand); background: linear-gradient(135deg, var(--tgx-brand), var(--tgx-accent)); color:#fff; }
+  .tgx-cta { margin: 42px 0 0; display:flex; align-items:center; justify-content:space-between; gap:28px; flex-wrap:wrap; padding:30px var(--tgx-pad); border-radius: var(--tgx-radius); background: var(--tgx-brand); background: linear-gradient(135deg, var(--tgx-brand), var(--tgx-accent)); color:#fff; }
   .tgx-cta-text { flex:1; min-width:240px; }
   .tgx-cta-title { margin:0 0 4px; font-size:20px; font-weight:700; }
   .tgx-cta-sub { margin:0; font-size:14px; opacity:0.88; }
@@ -504,10 +502,11 @@
   .tgx-notice-body { margin:0; font-size:14px; color: var(--tgx-sub); }
 
   @media (max-width: 760px) {
-    .tgx-hero { padding:30px 24px; } .tgx-name { font-size:27px; }
+    .tgx-root { --tgx-pad: 20px; }
+    .tgx-hero { padding:30px var(--tgx-pad); } .tgx-name { font-size:27px; }
     .tgx-facts, .tgx-facts[data-count] { grid-template-columns: repeat(2, 1fr); }
     .tgx-cards { grid-template-columns: 1fr; }
-    .tgx-cta { padding:24px; }
+    .tgx-cta { padding:26px var(--tgx-pad); }
   }
   @media (max-width: 420px) { .tgx-facts, .tgx-facts[data-count] { grid-template-columns: 1fr; } }
   @media (prefers-reduced-motion: reduce) { .tgx-skel { animation: none; } }

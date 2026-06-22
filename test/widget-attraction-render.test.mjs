@@ -91,7 +91,7 @@ assert(html.includes('Where to stay') && html.includes('Disneyland Hotel'), 'sta
 assert(html.includes('Food and drink') && html.includes('Character dining'), 'food');
 assert(html.includes('Insider tips') && html.includes('separate entrances'), 'tips');
 assert(html.includes('Combine your trip') && html.includes('Val d'), 'combine with');
-assert(html.includes('For travel agents') && html.includes('easyJet holidays'), 'tour operators');
+assert(!html.includes('For travel agents'), 'travel-agents section removed');
 assert(html.includes('Plan your visit to Disneyland Paris'), 'CTA title templated with name');
 assert(html.includes('Official website') && html.includes('disneylandparis.com'), 'official website link');
 assert(html.includes('Verified 2026-05-12'), 'verified date trust line');
