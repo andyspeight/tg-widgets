@@ -1,5 +1,5 @@
 /**
- * Travelgenix Attraction Spotlight Widget v1.0.0
+ * Travelgenix Attraction Spotlight Widget v1.1.0
  * Self-contained, embeddable showcase for a theme park, resort complex,
  * water park, aquarium or cultural attraction.
  *
@@ -35,7 +35,32 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.0.1';
+  const VERSION = '1.1.0';
+
+  /* ===== Leaflet loader (same free CARTO/OSM tiles as the other widgets) === */
+  const LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  const LEAFLET_JS_SRI  = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+  const LEAFLET_CSS_SRI = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+  let _leafletPromise = null;
+  function loadLeaflet() {
+    if (typeof window !== 'undefined' && window.L && window.L.map) return Promise.resolve(window.L);
+    if (_leafletPromise) return _leafletPromise;
+    _leafletPromise = new Promise((resolve, reject) => {
+      if (!document.querySelector('link[data-tgx-leaflet]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet'; link.href = LEAFLET_CSS; link.integrity = LEAFLET_CSS_SRI;
+        link.crossOrigin = ''; link.setAttribute('data-tgx-leaflet', '1');
+        document.head.appendChild(link);
+      }
+      const s = document.createElement('script');
+      s.src = LEAFLET_JS; s.integrity = LEAFLET_JS_SRI; s.crossOrigin = ''; s.async = true;
+      s.onload = () => resolve(window.L);
+      s.onerror = () => reject(new Error('Failed to load Leaflet'));
+      document.head.appendChild(s);
+    });
+    return _leafletPromise;
+  }
 
   /* ===== Icons (Lucide-style inline SVG paths) ===================== */
   const IC = {
@@ -117,6 +142,7 @@
       } else {
         this.shadow = container;
       }
+      this._mapInst = null;
       this._renderShell();
       if (this.c.attractionData && typeof this.c.attractionData === 'object') {
         this._data = this.c.attractionData;
@@ -138,6 +164,7 @@
         radius: 16,
         fontFamily: '',
         heroImageUrl: '',
+        showMap: true,
         recordId: null,
         sections: {
           hero: true, facts: true, bestfor: true, overview: true, star: true,
@@ -218,6 +245,37 @@
       if (s.combine)   html.push(this._renderCombine(d));
       if (s.cta)       html.push(this._renderCta(d));
       this._root.innerHTML = html.filter(Boolean).join('');
+      if (s.located && this.c.showMap !== false && typeof d.lat === 'number' && typeof d.lng === 'number') {
+        this._initMap(d);
+      }
+    }
+
+    _initMap(d) {
+      const host = this.shadow.querySelector('[data-tgx-map]');
+      if (!host) return;
+      // Shadow DOM is style-encapsulated, so the Leaflet stylesheet must also be
+      // added inside the shadow root or tiles render as broken images.
+      if (!this.shadow.querySelector('link[data-tgx-leaflet-shadow]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet'; link.href = LEAFLET_CSS; link.integrity = LEAFLET_CSS_SRI;
+        link.crossOrigin = ''; link.setAttribute('data-tgx-leaflet-shadow', '1');
+        this.shadow.appendChild(link);
+      }
+      loadLeaflet().then(L => {
+        if (this._mapInst) { try { this._mapInst.remove(); } catch (e) {} this._mapInst = null; }
+        const map = L.map(host, { zoomControl: true, scrollWheelZoom: false });
+        this._mapInst = map;
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: 'abcd', maxZoom: 19,
+        }).addTo(map);
+        const pin = L.divIcon({ className: '', html: '<div class="tgx-pin"></div>', iconSize: [28, 28], iconAnchor: [14, 28] });
+        L.marker([d.lat, d.lng], { icon: pin }).addTo(map)
+          .bindPopup('<strong>' + esc(d.name) + '</strong>' + (d.location ? '<br>' + esc(d.location) : ''));
+        map.setView([d.lat, d.lng], 12);
+        map.on('click', () => map.scrollWheelZoom.enable());
+        map.on('mouseout', () => map.scrollWheelZoom.disable());
+      }).catch(() => { /* silent: the text directions still show */ });
     }
 
     _section(ico, kicker, h2, inner) {
@@ -293,33 +351,29 @@
         this._card('coaster', 'Thrill-seekers', d.thrillGuide),
         this._card('ruler', 'Height restrictions', d.heightRestrict),
         this._card('access', 'Accessibility', d.accessibility),
-        this._card('forward', 'Skip the queue', d.fastTrack),
       ].filter(Boolean);
       if (!cards.length) return '';
       return this._section('ferris', 'Good to know', 'Plan around your group', '<div class="tgx-cards">' + cards.join('') + '</div>');
     }
 
     _renderTickets(d) {
-      if (!d.tickets) return '';
-      return this._section('ticket', 'Tickets and prices', '', '<div class="tgx-callout">' + paras(d.tickets, 5) + '</div>');
+      const main = d.tickets ? '<div class="tgx-callout">' + paras(d.tickets, 5) + '</div>' : '';
+      const fast = d.fastTrack
+        ? '<h3 class="tgx-subh">Fast-track and skip-the-queue</h3>' + this._prose(d.fastTrack, 3) : '';
+      if (!main && !fast) return '';
+      return this._section('ticket', 'Tickets and prices', 'Ticket types and passes', main + fast);
     }
 
     _renderLocated(d) {
       const blocks = [];
-      if (d.nearestAirport) blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('plane', 15) + ' Nearest airports</div>' + this._prose(d.nearestAirport, 3) + '</div>');
-      if (d.gettingThere)   blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('car', 15) + ' Getting there</div>' + this._prose(d.gettingThere, 3) + '</div>');
-      if (d.nearestTown)    blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('pin', 15) + ' Nearest town</div>' + this._prose(d.nearestTown, 2) + '</div>');
-      const ll = (typeof d.lat === 'number' && typeof d.lng === 'number') ? [d.lat, d.lng] : null;
-      let mapLinks = '';
-      if (ll) {
-        const g = 'https://www.google.com/maps/?q=' + ll[0] + ',' + ll[1];
-        const a = 'https://maps.apple.com/?ll=' + ll[0] + ',' + ll[1] + '&q=' + encodeURIComponent(d.name || '');
-        mapLinks = '<div class="tgx-maplinks">' +
-          '<a class="tgx-maplink" href="' + esc(g) + '" target="_blank" rel="noopener noreferrer">Google Maps' + icon('arrow_out', 11) + '</a>' +
-          '<a class="tgx-maplink" href="' + esc(a) + '" target="_blank" rel="noopener noreferrer">Apple Maps' + icon('arrow_out', 11) + '</a></div>';
-      }
-      if (!blocks.length && !mapLinks) return '';
-      return this._section('compass', 'Getting there', '', blocks.join('') + mapLinks);
+      if (d.nearestAirport) blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('plane', 15) + '<span>Nearest airports</span></div>' + this._prose(d.nearestAirport, 3) + '</div>');
+      if (d.gettingThere)   blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('car', 15) + '<span>Getting there</span></div>' + this._prose(d.gettingThere, 3) + '</div>');
+      if (d.nearestTown)    blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('pin', 15) + '<span>Nearest town</span></div>' + this._prose(d.nearestTown, 2) + '</div>');
+      const hasLL = typeof d.lat === 'number' && typeof d.lng === 'number';
+      const mapEl = (hasLL && this.c.showMap !== false)
+        ? '<div class="tgx-map" data-tgx-map role="region" aria-label="Map showing ' + esc(d.name) + '"></div>' : '';
+      if (!blocks.length && !mapEl) return '';
+      return this._section('compass', 'Getting there', '', mapEl + blocks.join(''));
     }
 
     _renderStay(d) {
@@ -352,18 +406,17 @@
       const title = renderTemplate(cta.title || '', vars);
       const sub = renderTemplate(cta.subtitle || '', vars);
       const url = safeUrl(cta.buttonUrl, true);
-      const official = safeUrl(d.officialWebsite);
-      const verified = d.verifiedDate ? '<p class="tgx-verified">' + icon('check', 12) + ' Verified ' + esc(d.verifiedDate) + '</p>' : '';
-      if (!title && !sub && !url && !official) return verified;
+      // No official-website link by design: agents do not want to send their
+      // visitors off to book direct. The CTA drives the enquiry to the agent.
+      const verified = d.verifiedDate ? '<p class="tgx-verified">' + icon('check', 12) + '<span>Verified ' + esc(d.verifiedDate) + '</span></p>' : '';
+      if (!title && !sub && !url) return verified;
       return '<div class="tgx-cta">' +
         '<div class="tgx-cta-text">' +
           (title ? '<h3 class="tgx-cta-title">' + esc(title) + '</h3>' : '') +
           (sub ? '<p class="tgx-cta-sub">' + esc(sub) + '</p>' : '') +
         '</div>' +
-        '<div class="tgx-cta-actions">' +
-          (official ? '<a href="' + esc(official) + '" target="_blank" rel="noopener noreferrer" class="tgx-btn tgx-btn-ghost">Official website' + icon('arrow_out', 13) + '</a>' : '') +
-          (url ? '<a href="' + esc(url) + '" class="tgx-btn tgx-btn-primary">' + esc(cta.buttonLabel || 'Enquire') + icon('arrow', 14) + '</a>' : '') +
-        '</div>' + verified + '</div>';
+        (url ? '<div class="tgx-cta-actions"><a href="' + esc(url) + '" class="tgx-btn tgx-btn-primary">' + esc(cta.buttonLabel || 'Enquire') + icon('arrow', 14) + '</a></div>' : '') +
+        verified + '</div>';
     }
 
     _renderNotFound() {
@@ -386,6 +439,7 @@
       else { this._renderNotFound(); }
     }
     destroy() {
+      if (this._mapInst) { try { this._mapInst.remove(); } catch (e) {} this._mapInst = null; }
       try { while (this.shadow.firstChild) this.shadow.removeChild(this.shadow.firstChild); } catch (e) {}
       this.el.removeAttribute('data-tg-initialised');
       this.el.__tgAttraction = null;
@@ -439,7 +493,7 @@
 
   /* Sections */
   .tgx-section { margin: 34px 0; padding: 0 var(--tgx-pad); }
-  .tgx-section-head { display:flex; align-items:center; gap:10px; }
+  .tgx-section-head { display:flex; align-items:center; gap:12px; }
   .tgx-section-icon { width:36px; height:36px; flex:0 0 36px; border-radius:10px; background: var(--tgx-accent); color: #fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px -3px var(--tgx-accent-soft); }
   .tgx-kicker { font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color: var(--tgx-muted); }
   .tgx-h2 { margin:14px 0 16px; font-size:22px; font-weight:700; letter-spacing:-0.015em; color: var(--tgx-text); }
@@ -450,7 +504,7 @@
   /* Facts */
   .tgx-facts { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin: 22px 0; padding: 0 var(--tgx-pad); }
   .tgx-facts[data-count="1"]{grid-template-columns:1fr} .tgx-facts[data-count="2"]{grid-template-columns:repeat(2,1fr)} .tgx-facts[data-count="3"]{grid-template-columns:repeat(3,1fr)}
-  .tgx-fact { display:flex; gap:12px; align-items:flex-start; padding:16px; background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius-sm); }
+  .tgx-fact { display:flex; gap:14px; align-items:flex-start; padding:16px; background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius-sm); }
   .tgx-fact-icon { width:38px; height:38px; flex:0 0 38px; border-radius:10px; background: var(--tgx-accent-soft); color: var(--tgx-accent); display:flex; align-items:center; justify-content:center; }
   .tgx-fact-label { font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--tgx-muted); margin-bottom:3px; }
   .tgx-fact-value { font-size:15px; font-weight:700; color: var(--tgx-text); line-height:1.3; }
@@ -463,19 +517,20 @@
   /* Cards */
   .tgx-cards { display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; }
   .tgx-card { background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius); padding:20px 22px; }
-  .tgx-card-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .tgx-card-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
   .tgx-card-icon { width:34px; height:34px; flex:0 0 34px; border-radius:9px; background: var(--tgx-accent-soft); color: var(--tgx-accent); display:flex; align-items:center; justify-content:center; }
   .tgx-card-title { margin:0; font-size:15px; font-weight:700; color: var(--tgx-text); }
   .tgx-card-body { font-size:14px; color: var(--tgx-sub); line-height:1.6; }
   .tgx-card-body p { margin:0 0 10px; } .tgx-card-body p:last-child { margin:0; }
 
-  /* Blocks (getting there) */
-  .tgx-block { padding:16px 0; border-top:1px solid var(--tgx-border-soft); }
-  .tgx-block:first-child { border-top:0; padding-top:0; }
-  .tgx-block-label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color: var(--tgx-text); margin-bottom:8px; }
-  .tgx-block-label svg { color: var(--tgx-brand); }
-  .tgx-maplinks { display:flex; gap:14px; margin-top:6px; }
-  .tgx-maplink { display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:600; color: var(--tgx-accent); text-decoration:none; }
+  /* Getting there: embedded map + text blocks */
+  .tgx-map { height:300px; border-radius: var(--tgx-radius-sm); overflow:hidden; border:1px solid var(--tgx-border); margin-bottom:18px; background: var(--tgx-border-soft); }
+  .tgx-map .leaflet-container { height:100%; width:100%; font: inherit; background: var(--tgx-border-soft); }
+  .tgx-pin { width:26px; height:26px; border-radius:50% 50% 50% 0; background: var(--tgx-accent); border:3px solid #fff; box-shadow:0 3px 8px rgba(15,23,42,0.35); transform: rotate(-45deg); }
+  .tgx-block { padding:14px 0; }
+  .tgx-block + .tgx-block { border-top:1px solid var(--tgx-border-soft); }
+  .tgx-block-label { display:flex; align-items:center; gap:9px; font-size:13px; font-weight:700; color: var(--tgx-text); margin-bottom:8px; }
+  .tgx-block-label svg { color: var(--tgx-brand); flex-shrink:0; }
 
   /* Callout / tips */
   .tgx-callout { background: var(--tgx-accent-soft); border-radius: var(--tgx-radius-sm); padding:20px 24px; font-size:15px; color: var(--tgx-text); line-height:1.6; }

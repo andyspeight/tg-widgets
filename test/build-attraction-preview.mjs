@@ -55,7 +55,7 @@ const page = `<!DOCTYPE html>
 </style></head>
 <body><div class="wrap">
   <h1>Attraction Spotlight &mdash; QA preview</h1>
-  <p class="lead">Theme-park icons (roller coaster, sparkles, ferris wheel), aligned spacing, and the "For travel agents" section removed. Real Disneyland Paris content.</p>
+  <p class="lead">Now with a real embedded map in "Getting there", an expanded tickets section, wider icon-to-text spacing, and no book-direct link (agents keep the booking). Real Disneyland Paris content.</p>
   <div class="controls">
     <button id="b-light" class="on" type="button">Light</button>
     <button id="b-dark" type="button">Dark</button>
