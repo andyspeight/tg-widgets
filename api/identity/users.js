@@ -132,7 +132,24 @@ async function handleList(req, res, ctx) {
         return (a.fullName || a.email || '').localeCompare(b.fullName || b.email || '');
       });
 
-    return res.status(200).json({ ok: true, users });
+    // Full product catalogue from Control (active products only), so the staff
+    // admin UI can offer EVERY product for allocation rather than a hardcoded
+    // list that silently drifts out of sync with Control. widget_suite first,
+    // then alphabetical — same order the launchpad uses.
+    const products = allProducts
+      .filter((p) => (p.fields[PRODUCTS.fields.status] || '') === PRODUCTS.statuses.ACTIVE)
+      .map((p) => ({
+        slug: p.fields[PRODUCTS.fields.productId] || '',
+        name: p.fields[PRODUCTS.fields.displayName] || p.fields[PRODUCTS.fields.productId] || '',
+      }))
+      .filter((p) => p.slug)
+      .sort((a, b) => {
+        if (a.slug === PRODUCTS.slugs.WIDGET_SUITE) return -1;
+        if (b.slug === PRODUCTS.slugs.WIDGET_SUITE) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+    return res.status(200).json({ ok: true, users, products });
   } catch (err) {
     console.error('[identity/users GET]', err);
     return jsonError(res, 500, 'list_failed', 'Failed to load users');

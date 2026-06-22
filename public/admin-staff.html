@@ -414,14 +414,20 @@
     changePassword: '/api/auth/password/change',
   };
 
-  const ALL_PRODUCTS = [
-    { slug: 'widget_suite',    name: 'TG Widget Suite' },
+  // The live product list comes from Control via GET /api/identity/users
+  // (res.products). This array is only a fallback for the brief moment before
+  // that loads, or if the catalogue can't be fetched — keep it in step with
+  // the Products table in Control.
+  let ALL_PRODUCTS = [
+    { slug: 'widget_suite',    name: 'Widget Suite' },
     { slug: 'luna_chat',       name: 'Luna Chat' },
     { slug: 'luna_marketing',  name: 'Luna Marketing' },
     { slug: 'luna_brain',      name: 'Luna Brain' },
     { slug: 'luna_trends',     name: 'Luna Trends' },
     { slug: 'luna_qa',         name: 'Luna QA' },
-    { slug: 'tool_hub',        name: 'Tool Hub' },
+    { slug: 'tool_hub',        name: 'TG Control' },
+    { slug: 'contract_loader', name: 'Contract Loader' },
+    { slug: 'luna_travel',     name: 'Luna Travel' },
   ];
 
   let users = [];
@@ -918,6 +924,9 @@
     try {
       const res = await api(API.users);
       users = res.users || [];
+      // Drive the product allocation checkboxes from Control's live catalogue
+      // so every active product can be granted, not a stale hardcoded set.
+      if (Array.isArray(res.products) && res.products.length) ALL_PRODUCTS = res.products;
       applyFilter();
     } catch (err) {
       if (err.status === 401 || err.status === 403 || err.status === 500) {
