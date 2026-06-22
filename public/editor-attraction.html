@@ -292,6 +292,10 @@
 <script src="/editor-shell.js"></script>
 <script src="/widget-attraction.js"></script>
 
+<!-- Guided setup tour (reusable engine + step list) -->
+<script src="/editor-tour.js"></script>
+<script src="/tour-attraction.js"></script>
+
 <script>
 (function () {
   'use strict';
@@ -506,6 +510,14 @@
   function boot() {
     const wId = new URLSearchParams(location.search).get('id');
     if (wId) loadExisting(wId);
+
+    // Guided setup tour — only once authenticated. boot() also runs pre-login
+    // via onReady(boot); onLoginSuccess re-runs boot() after sign-in. The
+    // _booted guard inside initAttractionTour keeps it idempotent.
+    if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn() &&
+        typeof window.initAttractionTour === 'function') {
+      window.initAttractionTour();
+    }
   }
 
   setTimeout(renderPreview, 100);
