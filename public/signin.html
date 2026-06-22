@@ -365,7 +365,15 @@
       // After successful sign-in, where do we send them?
       // Priority: ?next=... (legacy) → ?redirect=... (dashboard convention) → /dashboard.html (the launchpad)
       const params = new URLSearchParams(location.search);
-      const next = params.get('next') || params.get('redirect') || '/dashboard.html';
+      let next = params.get('next') || params.get('redirect') || '/dashboard.html';
+      // If the only destination is this app's own root (the Widget Suite
+      // landing), send the user to the launchpad instead so they always land
+      // on their Travelgenix product cards. Genuine deep links and other
+      // products (absolute URLs) are left untouched.
+      if (next.startsWith('/') && !next.startsWith('//')) {
+        const path = next.split('#')[0].split('?')[0];
+        if (path === '' || path === '/' || path === '/index.html') next = '/dashboard.html';
+      }
       location.href = next;
     } catch (err) {
       showMsg('Network error. Please try again.', 'error');
