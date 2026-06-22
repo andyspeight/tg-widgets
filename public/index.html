@@ -1912,6 +1912,67 @@ function loadMiniPreview(w) {
     `;
   }
 
+  if (w.id === 'attraction') {
+    container.innerHTML = `
+      <div style="
+        width: 700px;
+        height: 340px;
+        background: #FFFFFF;
+        border-radius: 16px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+        box-sizing: border-box;
+      ">
+        <div style="
+          height: 150px;
+          padding: 16px 22px;
+          background: linear-gradient(135deg, #1B2B5B 0%, #00B4D8 100%);
+          color: #FFFFFF;
+          display: flex; flex-direction: column; justify-content: flex-end;
+        ">
+          <div style="font-size: 11px; letter-spacing: 0.12em; opacity: 0.85; margin-bottom: 6px; text-transform: uppercase; font-weight: 600;">Marne-la-Vallée · France</div>
+          <div style="display: flex; align-items: flex-end; gap: 12px;">
+            <div style="font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1;">Disneyland Paris</div>
+            <div style="background: #FFFFFF; color: #1B2B5B; padding: 4px 10px; border-radius: 7px; font-size: 12px; font-weight: 800; letter-spacing: 0.02em;">Resort Complex</div>
+          </div>
+          <div style="font-size: 13px; opacity: 0.92; margin-top: 6px; font-style: italic;">Europe's most-visited theme park</div>
+        </div>
+
+        <div style="background: #1B2B5B; color: #FFFFFF; padding: 10px 22px; display: flex; gap: 8px; align-items: center; font-size: 11px;">
+          <span style="opacity: 0.65; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">Best for</span>
+          <span style="background: rgba(255,255,255,0.14); padding: 3px 10px; border-radius: 999px; font-weight: 500;">Families</span>
+          <span style="background: ${w.color}; padding: 3px 10px; border-radius: 999px; font-weight: 600;">Disney Fans</span>
+          <span style="background: rgba(255,255,255,0.14); padding: 3px 10px; border-radius: 999px; font-weight: 500;">First-timers</span>
+          <span style="background: rgba(255,255,255,0.14); padding: 3px 10px; border-radius: 999px; font-weight: 500;">Couples</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); background: #F8FAFC; flex: 1;">
+          <div style="padding: 14px 16px; border-right: 1px solid #E2E8F0;">
+            <div style="font-size: 9px; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px;">Time needed</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">2-4 days</div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px;">A short break</div>
+          </div>
+          <div style="padding: 14px 16px; border-right: 1px solid #E2E8F0;">
+            <div style="font-size: 9px; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px;">Typical cost</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">Premium</div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px;">£200-£400</div>
+          </div>
+          <div style="padding: 14px 16px; border-right: 1px solid #E2E8F0;">
+            <div style="font-size: 9px; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px;">Season</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">Year-round</div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px;">Parks open daily</div>
+          </div>
+          <div style="padding: 14px 16px;">
+            <div style="font-size: 9px; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px;">On-site hotels</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">7 hotels</div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px;">Stay on-site</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   if (w.id === 'weather' && window.TGWeatherWidget) {
     new window.TGWeatherWidget(el, {
       theme: 'light',
