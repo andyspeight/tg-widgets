@@ -44,6 +44,10 @@
       "destination": "/demo-airport.html"
     },
     {
+      "source": "/demo-attraction",
+      "destination": "/demo-attraction.html"
+    },
+    {
       "source": "/demo-reviews",
       "destination": "/demo-reviews.html"
     },
@@ -190,6 +194,10 @@
     {
       "source": "/editor-airport",
       "destination": "/editor-airport.html"
+    },
+    {
+      "source": "/editor-attraction",
+      "destination": "/editor-attraction.html"
     },
     {
       "source": "/editor-reviews",
@@ -412,6 +420,23 @@
     },
     {
       "source": "/widget-airport.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-attraction.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

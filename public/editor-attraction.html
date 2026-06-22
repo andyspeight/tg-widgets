@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attraction Spotlight Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Per-editor styles — attraction-specific UI inside the sidebar */
+  .field-hint { font-size: 11px; color: var(--tgse-muted); margin-top: 4px; }
+  .input, .textarea {
+    width: 100%; padding: 8px 10px; height: 34px;
+    border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm, 6px);
+    background: var(--tgse-panel); color: var(--tgse-ink); font-family: inherit; font-size: 13px;
+    outline: none; transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input:focus { border-color: var(--tgse-brand); box-shadow: 0 0 0 3px var(--tgse-brand-tint); }
+  .input::placeholder { color: var(--tgse-muted); }
+  .at-help { font-size: 12px; line-height: 1.5; color: var(--tgse-ink-2); }
+  .at-help code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--tgse-bg-card); padding: 1px 5px; border-radius: 4px; }
+
+  .at-picker { position: relative; }
+  .at-picker-icon { position: absolute; left: 12px; top: 11px; color: var(--tgse-muted); pointer-events: none; }
+  .at-picker-search { width: 100%; height: 38px; padding: 0 12px 0 36px; border: 1px solid var(--tgse-border); border-radius: 8px; background: var(--tgse-bg-input); font-family: inherit; font-size: 14px; color: var(--tgse-text); }
+  .at-picker-search:focus { outline: none; border-color: var(--tgse-accent); box-shadow: 0 0 0 3px rgba(0,180,216,0.15); }
+  .at-results { display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; margin-top: 8px; }
+  .at-result { appearance: none; width: 100%; text-align: left; padding: 10px 12px; border: 1px solid var(--tgse-border); background: var(--tgse-bg-card); border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+  .at-result:hover { border-color: var(--tgse-accent); }
+  .at-result-icon { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 7px; background: var(--tgse-bg-input); color: var(--tgse-accent); display: flex; align-items: center; justify-content: center; }
+  .at-result-meta { flex: 1; min-width: 0; }
+  .at-result-name { font-size: 13px; font-weight: 600; color: var(--tgse-ink); }
+  .at-result-sub { font-size: 11px; color: var(--tgse-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .at-chip { font-size: 10px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; padding: 3px 7px; border-radius: 5px; background: var(--tgse-bg-input); color: var(--tgse-ink-2); }
+  .at-chip.status-published { background: rgba(34,197,94,0.15); color: #16A34A; }
+
+  .at-selected { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--tgse-border); border-radius: 10px; background: var(--tgse-bg-card); }
+  .at-selected-icon { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 9px; background: var(--tgse-brand); color: #fff; display: flex; align-items: center; justify-content: center; }
+  .at-selected-meta { flex: 1; min-width: 0; }
+  .at-selected-name { font-size: 14px; font-weight: 700; color: var(--tgse-ink); }
+  .at-selected-sub { font-size: 12px; color: var(--tgse-muted); }
+  .at-selected-clear { appearance: none; border: 0; background: transparent; color: var(--tgse-muted); cursor: pointer; padding: 4px; }
+  .at-selected-clear:hover { color: var(--tgse-ink); }
+
+  .at-toggles { display: flex; flex-direction: column; gap: 2px; }
+  .at-toggle { display: flex; align-items: center; justify-content: space-between; padding: 8px 4px; }
+  .at-toggle-label { font-size: 13px; color: var(--tgse-ink); }
+  .at-toggle input[type="checkbox"] { position: relative; appearance: none; width: 36px; height: 20px; border-radius: 999px; background: var(--tgse-border); cursor: pointer; transition: background .15s ease; flex: 0 0 36px; }
+  .at-toggle input[type="checkbox"]::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s ease; }
+  .at-toggle input[type="checkbox"]:checked { background: var(--tgse-accent); }
+  .at-toggle input[type="checkbox"]:checked::after { transform: translateX(16px); }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Attraction Spotlight</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design"  role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== CONTENT TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="content">
+
+        <!-- Attraction picker -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg>
+            <span class="tgse-section-label">Attraction</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+
+            <div id="at-selected" class="at-selected" style="display: none;">
+              <div class="at-selected-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg></div>
+              <div class="at-selected-meta">
+                <div id="at-selected-name" class="at-selected-name">—</div>
+                <div id="at-selected-sub"  class="at-selected-sub">—</div>
+              </div>
+              <button class="at-selected-clear" id="at-clear" title="Change attraction" aria-label="Change attraction">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
+            <div id="at-picker-wrap">
+              <div class="at-picker">
+                <span class="at-picker-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" class="at-picker-search" id="at-search" placeholder="Search a park or attraction..." autocomplete="off">
+              </div>
+              <div class="at-results" id="at-results">
+                <div style="font-size:12px;color:var(--tgse-muted);padding:12px;text-align:center;">Start typing to search attractions</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+            <span class="tgse-section-label">Call-to-action</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="at-help">Use placeholders <code>{{name}}</code> · <code>{{location}}</code> · <code>{{country}}</code>.</div>
+            <div class="tgse-field" style="margin-top:12px;">
+              <label class="tgse-field-label">Title</label>
+              <input type="text" id="cta-title" class="input" maxlength="120" placeholder="Plan your visit to {{name}}">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Subtitle</label>
+              <input type="text" id="cta-sub" class="input" maxlength="180" placeholder="Speak to us about packaging tickets, hotels and transfers.">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Button label</label>
+              <input type="text" id="cta-label" class="input" maxlength="40" placeholder="Start your enquiry">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Button URL</label>
+              <input type="url" id="cta-url" class="input" placeholder="https://...">
+              <div class="field-hint">Where the button sends the visitor. Leave blank to hide the button.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== DESIGN TAB ===== -->
+      <div class="tgse-panel" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Brand colour</label>
+              <input type="color" id="brand-color" class="tgse-color-input" value="#1B2B5B">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Accent colour</label>
+              <input type="color" id="accent-color" class="tgse-color-input" value="#00B4D8">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+            <span class="tgse-section-label">Hero image</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Image URL (optional)</label>
+              <input type="url" id="hero-url" class="input" placeholder="https://images.unsplash.com/...">
+              <div class="at-help" style="margin-top:6px;">The attractions database has no image field, so the hero is a brand-coloured gradient by default. Add an image URL here to use a photo. Unsplash, your own CDN or a Duda asset all work.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="tgse-section-label">Sections to show</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="at-toggles">
+              <label class="at-toggle"><span class="at-toggle-label">Hero</span><input type="checkbox" data-section="hero" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Quick facts</span><input type="checkbox" data-section="facts" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Best for</span><input type="checkbox" data-section="bestfor" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Overview</span><input type="checkbox" data-section="overview" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Star attractions</span><input type="checkbox" data-section="star" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Good to know (guides)</span><input type="checkbox" data-section="guides" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Tickets and prices</span><input type="checkbox" data-section="tickets" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Getting there</span><input type="checkbox" data-section="located" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Where to stay</span><input type="checkbox" data-section="stay" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Food and drink</span><input type="checkbox" data-section="food" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Insider tips</span><input type="checkbox" data-section="tips" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Combine with</span><input type="checkbox" data-section="combine" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">For travel agents</span><input type="checkbox" data-section="operators" checked></label>
+              <label class="at-toggle"><span class="at-toggle-label">Call-to-action</span><input type="checkbox" data-section="cta" checked></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- Preview -->
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div data-tg-widget="attraction" id="widget-mount" data-tg-no-autoinit></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-attraction.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  let selectedAttraction = null;  // { recordId, name, type, operator, location, country }
+  let attractionContent = null;   // full payload from /api/attraction-content for preview
+  const searchInput  = document.getElementById('at-search');
+  const resultsEl    = document.getElementById('at-results');
+  const selectedWrap = document.getElementById('at-selected');
+  const pickerWrap   = document.getElementById('at-picker-wrap');
+  let searchTimer = null;
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // ---- Build config (for save + preview) ----
+  function buildConfig() {
+    const sections = {};
+    document.querySelectorAll('[data-section]').forEach(cb => {
+      sections[cb.getAttribute('data-section')] = cb.checked;
+    });
+    return {
+      attraction: selectedAttraction ? { recordId: selectedAttraction.recordId || '' } : null,
+      brandColor: document.getElementById('brand-color').value,
+      accentColor: document.getElementById('accent-color').value,
+      heroImageUrl: document.getElementById('hero-url').value.trim(),
+      sections,
+      cta: {
+        title:       document.getElementById('cta-title').value,
+        subtitle:    document.getElementById('cta-sub').value,
+        buttonLabel: document.getElementById('cta-label').value,
+        buttonUrl:   document.getElementById('cta-url').value,
+      },
+    };
+  }
+
+  // ---- Restore config ----
+  function setConfig(cfg) {
+    if (!cfg) return;
+    if (cfg.brandColor)  document.getElementById('brand-color').value = cfg.brandColor;
+    if (cfg.accentColor) document.getElementById('accent-color').value = cfg.accentColor;
+    document.getElementById('hero-url').value = cfg.heroImageUrl || '';
+    const s = cfg.sections || {};
+    document.querySelectorAll('[data-section]').forEach(cb => {
+      cb.checked = s[cb.getAttribute('data-section')] !== false;
+    });
+    const c = cfg.cta || {};
+    document.getElementById('cta-title').value = c.title       || 'Plan your visit to {{name}}';
+    document.getElementById('cta-sub').value   = c.subtitle    || 'Speak to us about packaging tickets, hotels and transfers.';
+    document.getElementById('cta-label').value = c.buttonLabel || 'Start your enquiry';
+    document.getElementById('cta-url').value   = c.buttonUrl   || '';
+
+    if (cfg.attraction && cfg.attraction.recordId) {
+      hydrateSelected(cfg.attraction.recordId).then(() => renderPreview());
+    } else {
+      renderPreview();
+    }
+  }
+
+  // ---- Hydrate selection from the content API ----
+  async function hydrateSelected(recordId) {
+    try {
+      const r = await fetch('/api/attraction-content?recordId=' + encodeURIComponent(recordId));
+      if (!r.ok) return;
+      const d = await r.json();
+      if (!d || !d.attraction) return;
+      const a = d.attraction;
+      selectedAttraction = {
+        recordId: recordId,
+        name: a.name, type: a.type, operator: a.operator,
+        location: a.location, country: a.country,
+      };
+      attractionContent = a;
+      paintSelected();
+    } catch (e) { /* noop */ }
+  }
+
+  // ---- Search ----
+  async function runSearch(q) {
+    if (!q || q.length < 2) {
+      resultsEl.innerHTML = '<div style="font-size:12px;color:var(--tgse-muted);padding:12px;text-align:center;">Start typing to search attractions</div>';
+      return;
+    }
+    resultsEl.innerHTML = '<div style="font-size:12px;color:var(--tgse-muted);padding:12px;text-align:center;">Searching...</div>';
+    try {
+      const r = await fetch('/api/attraction-search?q=' + encodeURIComponent(q));
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      const list = Array.isArray(d.results) ? d.results : [];
+      if (!list.length) {
+        resultsEl.innerHTML = '<div style="font-size:12px;color:var(--tgse-muted);padding:12px;text-align:center;">No matches found</div>';
+        return;
+      }
+      resultsEl.innerHTML = list.map(renderResult).join('');
+      resultsEl.querySelectorAll('.at-result').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const recId = btn.getAttribute('data-record-id');
+          const match = list.find(x => x.recordId === recId);
+          if (match) selectAttraction(match);
+        });
+      });
+    } catch (e) {
+      resultsEl.innerHTML = '<div style="font-size:12px;color:var(--tgse-error,#EF4444);padding:12px;text-align:center;">Search failed. Try again in a moment.</div>';
+    }
+  }
+
+  function renderResult(a) {
+    const status = (a.status || '').toLowerCase();
+    const sub = [a.type, a.location].filter(Boolean).join(' · ');
+    return '' +
+      '<button class="at-result" data-record-id="' + esc(a.recordId) + '">' +
+        '<span class="at-result-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg></span>' +
+        '<span class="at-result-meta">' +
+          '<div class="at-result-name">' + esc(a.name) + '</div>' +
+          '<div class="at-result-sub">' + esc(sub) + '</div>' +
+        '</span>' +
+        (status ? '<span class="at-chip status-' + esc(status) + '">' + esc(status) + '</span>' : '') +
+      '</button>';
+  }
+
+  function selectAttraction(a) {
+    selectedAttraction = a;
+    paintSelected();
+    hydrateSelected(a.recordId).then(() => renderPreview());
+  }
+
+  function paintSelected() {
+    if (!selectedAttraction) {
+      selectedWrap.style.display = 'none';
+      pickerWrap.style.display = 'block';
+      return;
+    }
+    selectedWrap.style.display = 'flex';
+    pickerWrap.style.display = 'none';
+    document.getElementById('at-selected-name').textContent = selectedAttraction.name || '—';
+    document.getElementById('at-selected-sub').textContent =
+      [selectedAttraction.type, selectedAttraction.location].filter(Boolean).join(' · ');
+  }
+
+  // ---- Live preview ----
+  function renderPreview() {
+    const mount = document.getElementById('widget-mount');
+    if (!mount) return;
+    if (mount.__tgInstance && typeof mount.__tgInstance.destroy === 'function') mount.__tgInstance.destroy();
+    while (mount.firstChild) mount.removeChild(mount.firstChild);
+    mount.removeAttribute('data-tg-initialised');
+    if (!window.TGAttractionWidget) { setTimeout(renderPreview, 60); return; }
+
+    const cfg = buildConfig();
+    cfg.attractionData = attractionContent || null;
+    cfg.theme = (window.tgse && window.tgse.previewTheme) ? window.tgse.previewTheme : 'light';
+    cfg.fontFamily = (window.tgse && window.tgse.currentFont) ? window.tgse.currentFont : '';
+    mount.__tgInstance = new window.TGAttractionWidget(mount, cfg);
+  }
+
+  // ---- Wire inputs ----
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    searchTimer = setTimeout(() => runSearch(q), 250);
+  });
+  document.getElementById('at-clear').addEventListener('click', () => {
+    selectedAttraction = null;
+    attractionContent = null;
+    paintSelected();
+    renderPreview();
+  });
+
+  let previewTimer = null;
+  function debouncedPreview() { clearTimeout(previewTimer); previewTimer = setTimeout(renderPreview, 120); }
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('input', debouncedPreview);
+    el.addEventListener('change', debouncedPreview);
+  });
+
+  // ---- Initialise shell ----
+  if (window.tgse && typeof window.tgse.init === 'function') {
+    window.tgse.init({
+      widgetType:  'Attraction Spotlight',
+      widgetTag:   'attraction',
+      scriptFile:  'widget-attraction.js',
+      getConfig:   buildConfig,
+      setConfig:   setConfig,
+      onFontChange: () => renderPreview(),
+      onThemeChange: () => renderPreview(),
+      onAfterSave: () => { renderPreview(); },
+      onLoginSuccess: () => boot(),
+    });
+  } else {
+    setConfig({});
+  }
+
+  async function loadExisting(id) {
+    try {
+      const r = await fetch('/api/widget-config?id=' + encodeURIComponent(id) + '&_=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      const data = await r.json();
+      const cfg = (data && data.config && typeof data.config === 'object') ? data.config : data;
+      setConfig(cfg);
+      if (data && typeof data.name === 'string') {
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) nameInput.value = data.name;
+      }
+    } catch (err) {
+      console.warn('[attraction-editor] load existing failed:', err && err.message);
+    }
+  }
+
+  function boot() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (wId) loadExisting(wId);
+  }
+
+  setTimeout(renderPreview, 100);
+  if (window.tgse && typeof window.tgse.onReady === 'function') window.tgse.onReady(boot);
+  else boot();
+
+})();
+</script>
+
+</body>
+</html>

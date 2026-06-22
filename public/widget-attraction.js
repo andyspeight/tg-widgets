@@ -517,6 +517,7 @@
     const nodes = document.querySelectorAll('[data-tg-widget="attraction"]:not([data-tg-initialised])');
     nodes.forEach(el => {
       try {
+        if (el.hasAttribute('data-tg-no-autoinit')) return;
         const inline = el.getAttribute('data-tg-config');
         if (inline) {
           let cfg = {}; try { cfg = JSON.parse(inline); } catch (e) { cfg = {}; }
