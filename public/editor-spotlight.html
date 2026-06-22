@@ -712,6 +712,10 @@
                 <label class="field-label">Events</label>
                 <input class="input" id="hEvents" maxlength="40" placeholder="What's on" />
               </div>
+              <div class="field">
+                <label class="field-label">Pairs well with</label>
+                <input class="input" id="hPaired" maxlength="40" placeholder="Pairs well with" />
+              </div>
             </div>
           </div>
         </div>
@@ -874,7 +878,7 @@
         temperatureUnit: 'C',
         sections: {
           hero: true, climate: true, facts: true, planning: true, highlights: true,
-          tags: true, events: true, cta: true,
+          tags: true, events: true, paired: true, cta: true,
         },
         showAttribution: true,
         showBestTimeCallout: true,
@@ -884,6 +888,7 @@
         climateHeading: 'Climate',
         factsHeading: 'At a glance',
         planningHeading: 'Good to know',
+        pairedHeading: 'Pairs well with',
         cta: {
           title: 'Speak to our destination specialist',
           subtitle: '',
@@ -1077,6 +1082,7 @@
       { key: 'planning',   label: 'Good to know',    help: 'Price band, when to book, ideal length, UK visa status, plus visa and health detail.' },
       { key: 'highlights', label: 'Highlights grid', help: 'Cards describing the top things to see or do.' },
       { key: 'events',     label: 'Events',          help: 'Festivals, religious holidays, seasonal experiences.' },
+      { key: 'paired',     label: 'Pairs well with', help: 'Sibling destinations to combine, from the Best Paired With links.' },
       { key: 'cta',        label: 'Call to action',  help: 'Your brandable enquire button at the bottom.' },
     ];
     function renderSectionToggles() {
@@ -1421,6 +1427,7 @@
       document.getElementById('hHighlights').value = c.highlightsHeading || '';
       document.getElementById('hTags').value = c.tagsHeading || '';
       document.getElementById('hEvents').value = c.eventsHeading || '';
+      document.getElementById('hPaired').value = c.pairedHeading || '';
       // Auto-detect
       const ad = c.autoDetect || {};
       const adEnabled = !!ad.enabled;
@@ -1528,6 +1535,7 @@
     document.getElementById('hHighlights').addEventListener('input', e => { state.config.highlightsHeading = e.target.value; onConfigChange(); });
     document.getElementById('hTags').addEventListener('input', e => { state.config.tagsHeading = e.target.value; onConfigChange(); });
     document.getElementById('hEvents').addEventListener('input', e => { state.config.eventsHeading = e.target.value; onConfigChange(); });
+    document.getElementById('hPaired').addEventListener('input', e => { state.config.pairedHeading = e.target.value; onConfigChange(); });
 
     // Auto-detect
     document.getElementById('togAutoDetect').addEventListener('click', e => {

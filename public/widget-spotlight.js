@@ -16,8 +16,9 @@
  *  - Highlights grid (3-6 cards with 17-icon vocabulary)
  *  - Best For tags (pill row with icons, 20-option vocabulary)
  *  - Events / "What's on" section (optional)
+ *  - "Pairs well with" sibling destinations (from the Best Paired With links)
  *  - Agent-brandable CTA (protocol-validated URL)
- *  - 8 sections, each individually toggleable
+ *  - 9 sections, each individually toggleable
  *  - Light default + full dark mode
  *  - Responsive 320px → 1440px
  *  - ARIA-labelled, focus-visible, prefers-reduced-motion honoured
@@ -91,7 +92,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
 
   /* ------------------------------------------------------------------
    * Icon library — inline SVG path strings (Lucide-style).
@@ -765,6 +766,41 @@
     }
     .tgs-tag svg { color: var(--tgs-accent); flex-shrink: 0; }
 
+    /* ─── PAIRS WELL WITH ────────────────────────────── */
+    .tgs-pairs { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tgs-pair {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 15px;
+      background: var(--tgs-card);
+      border: 1px solid var(--tgs-border);
+      border-radius: 999px;
+      font-size: 14px; font-weight: 600;
+      color: var(--tgs-text);
+      text-decoration: none;
+    }
+    .tgs-pair > svg { color: var(--tgs-accent); flex-shrink: 0; }
+    a.tgs-pair {
+      transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    }
+    a.tgs-pair:hover, a.tgs-pair:focus-visible {
+      border-color: var(--tgs-brand);
+      box-shadow: 0 6px 16px -8px rgba(15,23,42,0.18);
+      transform: translateY(-1px);
+      outline: none;
+    }
+    .tgs-pair-arrow {
+      display: inline-flex; color: var(--tgs-muted); flex-shrink: 0;
+      opacity: 0; transform: translateX(-4px);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+    a.tgs-pair:hover .tgs-pair-arrow, a.tgs-pair:focus-visible .tgs-pair-arrow {
+      opacity: 1; transform: translateX(0);
+    }
+    .tgs-root[data-theme="dark"] a.tgs-pair:hover,
+    .tgs-root[data-theme="dark"] a.tgs-pair:focus-visible {
+      box-shadow: 0 8px 18px -8px rgba(0,0,0,0.5);
+    }
+
     /* ─── EVENTS ─────────────────────────────────────── */
     .tgs-events { display: flex; flex-direction: column; gap: 12px; }
     .tgs-event {
@@ -1023,7 +1059,7 @@
         temperatureUnit: 'C',    // 'C' | 'F' — default for climate chart; readers can flip
         sections: {
           hero: true, climate: true, facts: true, planning: true, highlights: true,
-          tags: true, events: true, cta: true,
+          tags: true, events: true, paired: true, cta: true,
         },
         showAttribution: true,
         showBestTimeCallout: true,
@@ -1033,6 +1069,7 @@
         climateHeading: 'Climate',
         factsHeading: 'At a glance',
         planningHeading: 'Good to know',
+        pairedHeading: 'Pairs well with',
         cta: {
           title: 'Speak to our destination specialist',
           subtitle: '',
@@ -1160,9 +1197,10 @@
       const s = this.c.sections;
       const html = [];
 
-      // Section order: hero → tags → climate → facts → planning → highlights → events → cta
+      // Section order: hero → tags → climate → facts → planning → highlights → events → paired → cta
       // Tags moved up because they're the most scannable "at a glance" read for agents' visitors.
       // Planning sits next to the quick facts: both are practical trip-planning reads.
+      // Paired sits just before the CTA as a "where next" prompt.
       if (s.hero) html.push(this._renderHero(d));
       if (s.tags) html.push(this._renderTags(d));
       if (s.climate) html.push(this._renderClimate(d));
@@ -1170,6 +1208,7 @@
       if (s.planning) html.push(this._renderPlanning(d));
       if (s.highlights) html.push(this._renderHighlights(d));
       if (s.events) html.push(this._renderEvents(d));
+      if (s.paired) html.push(this._renderPaired(d));
       if (s.cta) html.push(this._renderCta(d));
 
       this.root.innerHTML = html.filter(Boolean).join('');
@@ -1470,6 +1509,37 @@
             '<h2 class="tgs-section-title" id="tgs-events-heading">' + esc(this.c.eventsHeading) + '</h2>' +
           '</div>' +
           '<div class="tgs-events">' + rows + '</div>' +
+        '</section>'
+      );
+    }
+
+    // "Pairs well with" — sibling destinations from the Best Paired With links,
+    // resolved by the API into { name, slug, url }. Each is a link to the matching
+    // destination page when a slug is present, otherwise a plain pill.
+    _renderPaired(d) {
+      const list = Array.isArray(d.pairedWith) ? d.pairedWith : [];
+      const items = list.filter(p => p && p.name).slice(0, 6);
+      if (items.length === 0) return '';
+
+      // The API hands us root-relative destination paths (/destinations/cities/...).
+      // Accept those but reject anything protocol-relative (//host) or with a scheme
+      // so a bad value can never become an off-site or javascript: link.
+      const isSafeRel = (u) => typeof u === 'string' && /^\/(?!\/)[A-Za-z0-9/_%.\-]*$/.test(u);
+
+      const pills = items.map(p => {
+        const inner = icon('compass', 14) + '<span>' + esc(p.name) + '</span>';
+        const url = isSafeRel(p.url) ? p.url : '';
+        return url
+          ? '<a class="tgs-pair" href="' + esc(url) + '">' + inner + '<span class="tgs-pair-arrow">' + icon('arrow', 13) + '</span></a>'
+          : '<span class="tgs-pair">' + inner + '</span>';
+      }).join('');
+
+      return (
+        '<section class="tgs-section" aria-labelledby="tgs-paired-heading">' +
+          '<div class="tgs-section-head">' +
+            '<h2 class="tgs-section-title" id="tgs-paired-heading">' + esc(this.c.pairedHeading) + '</h2>' +
+          '</div>' +
+          '<div class="tgs-pairs">' + pills + '</div>' +
         '</section>'
       );
     }

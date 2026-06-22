@@ -40,6 +40,7 @@
  *     bestForTags: string[],
  *     events: [{month,name,description}],
  *     planning: { priceBand, bookingLead, tripDuration[], visaStatus, visaAdvisory, healthNotes },
+ *     pairedWith: [{ name, slug, url }],                // "Pairs well with" sibling destinations
  *     factsInherited: { fact: 'city' | 'country' },     // present-only-if inherited
  *     planningInherited: { field: 'city' | 'country' }  // present-only-if inherited
  *   }
@@ -93,6 +94,7 @@ const LEVEL_MAP = {
       visaStatus:     'fldmKvRkDDRjj7PT2',
       visaAdvisory:   'fldecKeSnkZ6ABZfd',
       healthNotes:    'fldOGSgbbH3BIoU6A',
+      bestPaired:     'fldgP3ncmDU6LNOS4', // Best Paired With (Countries)
     },
   },
   city: {
@@ -120,6 +122,7 @@ const LEVEL_MAP = {
       // City can carry its own Trip Duration; price band / booking / visa / health
       // are not held at city level and inherit from the parent country.
       tripDuration:   'fldPSVfkYVAIhtNDp',
+      bestPaired:     'fldNVIjyXYu8R7Fbk', // Best Paired With (Cities)
     },
   },
   resort: {
@@ -144,6 +147,7 @@ const LEVEL_MAP = {
       highlightsJson: 'fldUyjDhtoA43hdHv',
       bestForTags:    'fldTmH3gT1wT48PLn',
       eventsJson:     'fldWRl0d0z1MY6DMq',
+      bestPaired:     'fldQflINufhsgS6so', // Best Paired With (Resorts)
     },
   },
 };
@@ -469,8 +473,55 @@ async function inheritCountryFacts(level, fields, pat) {
   return { values, sources };
 }
 
+// Plural URL segment per level, matching the destination-page convention used by
+// the airport widget (/destinations/cities/<slug>, /destinations/resorts/<slug>).
+const LEVEL_PLURAL = { country: 'countries', city: 'cities', resort: 'resorts' };
+
+// Resolve the "Best paired with" links into a small list of sibling destinations
+// for the "Pairs well with" section. Best Paired With always links to the same
+// level (country->countries, city->cities, resort->resorts), so one batched
+// fetch against the same table returns every pair's name and slug.
+async function resolvePaired(level, fields, pat) {
+  const map = LEVEL_MAP[level];
+  const raw = fields[map.fields.bestPaired];
+  const ids = (Array.isArray(raw) ? raw : [])
+    .filter(id => typeof id === 'string' && /^rec[A-Za-z0-9]{14}$/.test(id))
+    .slice(0, 6);
+  if (ids.length === 0) return [];
+
+  const nameId = map.fields.name;
+  const slugId = map.fields.slug;
+  const plural = LEVEL_PLURAL[level] || '';
+
+  const qs = new URLSearchParams();
+  qs.append('filterByFormula', `OR(${ids.map(id => `RECORD_ID()='${id}'`).join(',')})`);
+  qs.append('maxRecords', String(ids.length));
+  qs.append('fields[]', nameId);
+  qs.append('fields[]', slugId);
+  qs.append('returnFieldsByFieldId', 'true');
+  const url = `${AIRTABLE_API}/${DESTINATION_BASE_ID}/${map.tableId}?${qs.toString()}`;
+
+  let data;
+  try { data = await airtableFetch(url, pat); }
+  catch (err) { console.error('[destination-content] paired resolve error:', err?.message || err); return []; }
+
+  const byId = {};
+  for (const r of (data.records || [])) byId[r.id] = r.fields || {};
+
+  // Preserve the order the links were stored in.
+  return ids.map(id => {
+    const f = byId[id];
+    if (!f) return null;
+    const name = txt(f[nameId], 80);
+    if (!name) return null;
+    const slug = txt(f[slugId], 100);
+    const href = (slug && plural) ? `/destinations/${plural}/${encodeURIComponent(slug)}` : '';
+    return { name, slug, url: href };
+  }).filter(Boolean);
+}
+
 // Build the public response payload from raw Airtable fields.
-function shapePayload(level, fields, inherited) {
+function shapePayload(level, fields, inherited, paired) {
   const map = LEVEL_MAP[level];
   const f = fields || {};
 
@@ -528,6 +579,7 @@ function shapePayload(level, fields, inherited) {
     },
     planningInherited,
     factsInherited,
+    pairedWith: Array.isArray(paired) ? paired : [],
   };
 }
 
@@ -662,7 +714,13 @@ export default async function handler(req, res) {
       } catch (err) {
         console.error('[destination-content] inheritance error:', err?.message || err);
       }
-      const payload = { found: true, ...shapePayload(resolved.level, resolved.fields, inherited) };
+      let paired = [];
+      try {
+        paired = await resolvePaired(resolved.level, resolved.fields, AIRTABLE_DESTINATION_CONTENT_PAT);
+      } catch (err) {
+        console.error('[destination-content] paired error:', err?.message || err);
+      }
+      const payload = { found: true, ...shapePayload(resolved.level, resolved.fields, inherited, paired) };
       memSet(slugCacheKey, payload);
       res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
       res.setHeader('X-Cache', 'MISS');
@@ -707,7 +765,14 @@ export default async function handler(req, res) {
       console.error('[destination-content] inheritance error:', err?.message || err);
     }
 
-    const payload = shapePayload(level, fields, inherited);
+    let paired = [];
+    try {
+      paired = await resolvePaired(level, fields, AIRTABLE_DESTINATION_CONTENT_PAT);
+    } catch (err) {
+      console.error('[destination-content] paired error:', err?.message || err);
+    }
+
+    const payload = shapePayload(level, fields, inherited, paired);
     memSet(cacheKey, payload);
 
     res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');

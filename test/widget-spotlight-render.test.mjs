@@ -88,6 +88,10 @@ const greece = {
     healthNotes: 'No vaccinations required. Tap water is generally safe in Athens and main resort areas.',
   },
   planningInherited: {}, factsInherited: {},
+  pairedWith: [
+    { name: 'Turkey', slug: 'turkey', url: '/destinations/countries/turkey' },
+    { name: 'Italy', slug: 'italy', url: '/destinations/countries/italy' },
+  ],
 };
 
 function render(data) {
@@ -134,5 +138,29 @@ console.log('Case 3: planning toggled off');
 const container3 = makeEl('div');
 const w3 = new TGSpotlightWidget(container3, { destinationData: greece, sections: { planning: false } });
 assert(!w3.root.innerHTML.includes('tgs-planning-heading'), 'planning hidden when sections.planning=false');
+
+// ---- Case 4: "Pairs well with" ------------------------------------------
+console.log('Case 4: pairs well with');
+assert(html.includes('id="tgs-paired-heading"'), 'paired section rendered');
+assert(html.includes('Pairs well with'), 'default heading "Pairs well with" present');
+assert(html.includes('>Turkey<') && html.includes('>Italy<'), 'paired destination names present');
+assert(html.includes('href="/destinations/countries/turkey"'), 'paired link uses the destination url');
+assert(html.includes('class="tgs-pair"'), 'paired pill class present');
+const iEvents = html.indexOf('tgs-events-heading');
+const iPaired = html.indexOf('tgs-paired-heading');
+const iCta = html.indexOf('tgs-cta-heading');
+assert(iEvents > -1 && iPaired > iEvents, 'paired comes after events');
+assert(iCta > -1 && iPaired < iCta, 'paired comes before the CTA');
+
+// empty + safety
+console.log('Case 5: paired empty and unsafe url');
+const noPair = JSON.parse(JSON.stringify(greece));
+noPair.pairedWith = [];
+assert(!render(noPair).includes('tgs-paired-heading'), 'paired section omitted when no pairs');
+const badPair = JSON.parse(JSON.stringify(greece));
+badPair.pairedWith = [{ name: 'Sketchy', slug: '', url: '//evil.example.com' }];
+const htmlBad = render(badPair);
+assert(htmlBad.includes('>Sketchy<'), 'unsafe-url pair still shows the name');
+assert(!htmlBad.includes('evil.example.com'), 'protocol-relative url is rejected, rendered as plain pill');
 
 console.log(process.exitCode ? '\nRESULT: FAILURES' : '\nRESULT: ALL PASS');
