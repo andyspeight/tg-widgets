@@ -26,6 +26,7 @@ import {
   USERS,
 } from '../_lib/auth/schema.js';
 import { invalidateUserPermissions } from '../_lib/auth/permissions.js';
+import { isStaffEmail, STAFF_ONLY_PRODUCTS } from '../_lib/auth/staff.js';
 
 export default async function handler(req, res) {
   if (setCors(req, res)) return;
@@ -82,6 +83,17 @@ async function handleGrant(req, res, ctx) {
     const products = await listAllRecords(PRODUCTS.tableId);
     const product = products.find((p) => p.fields[PRODUCTS.fields.productId] === productSlug);
     if (!product) return jsonError(res, 400, 'unknown_product', `Unknown product: ${productSlug}`);
+
+    // Staff-only products (internal and in-build tools) may only be granted to
+    // a Travelgenix staff member, and only by a staff admin.
+    if (STAFF_ONLY_PRODUCTS.has(productSlug)) {
+      if (!isStaffEmail(ctx.email)) {
+        return jsonError(res, 403, 'staff_only', 'Only Travelgenix staff can grant this product');
+      }
+      if (!isStaffEmail(user.fields[USERS.fields.email] || '')) {
+        return jsonError(res, 400, 'staff_only_recipient', 'This product can only be given to a Travelgenix staff email');
+      }
+    }
 
     // Check for duplicate
     const allPerms = await listAllRecords(PERMISSIONS.tableId);

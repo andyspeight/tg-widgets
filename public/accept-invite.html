@@ -125,7 +125,7 @@
         if (data.client) localStorage.setItem('tg_client', JSON.stringify(data.client));
       } catch {}
       showMsg('Welcome aboard. Taking you to your dashboard…', 'success');
-      setTimeout(() => { location.href = '/'; }, 800);
+      setTimeout(() => { location.href = '/dashboard.html'; }, 800);
     } catch {
       showMsg('Network error. Please try again.', 'error');
       submitBtn.disabled = false;

@@ -42,6 +42,7 @@ import { sendInviteEmail } from '../_lib/auth/email.js';
 import { logAuthEvent } from '../_lib/auth/audit.js';
 import { limiters } from '../_lib/auth/ratelimit.js';
 import { invalidateUserPermissions } from '../_lib/auth/permissions.js';
+import { isStaffEmail, STAFF_ONLY_PRODUCTS } from '../_lib/auth/staff.js';
 
 const INVITE_LIFETIME_DAYS = 7;
 const ALLOWED_NEW_USER_ROLES = [USERS.roles.ADMIN, USERS.roles.MEMBER];
@@ -132,7 +133,34 @@ async function handleList(req, res, ctx) {
         return (a.fullName || a.email || '').localeCompare(b.fullName || b.email || '');
       });
 
-    return res.status(200).json({ ok: true, users });
+    // Full product catalogue from Control, so the staff admin UI can offer
+    // EVERY product for allocation rather than a hardcoded list that silently
+    // drifts out of sync with Control. Live (active) and in-build (coming soon)
+    // products are both allocatable; deprecated ones are not. widget_suite
+    // first, then live before coming soon, then alphabetical.
+    const products = allProducts
+      .filter((p) => {
+        const s = p.fields[PRODUCTS.fields.status] || '';
+        return s === PRODUCTS.statuses.ACTIVE || s === PRODUCTS.statuses.COMING_SOON;
+      })
+      .map((p) => ({
+        slug: p.fields[PRODUCTS.fields.productId] || '',
+        name: p.fields[PRODUCTS.fields.displayName] || p.fields[PRODUCTS.fields.productId] || '',
+        comingSoon: (p.fields[PRODUCTS.fields.status] || '') === PRODUCTS.statuses.COMING_SOON,
+        staffOnly: STAFF_ONLY_PRODUCTS.has(p.fields[PRODUCTS.fields.productId] || ''),
+      }))
+      .filter((p) => p.slug)
+      // Staff-only products are offered for allocation only to Travelgenix
+      // staff admins. A client admin never sees them in the picker.
+      .filter((p) => isStaffEmail(ctx.email) || !p.staffOnly)
+      .sort((a, b) => {
+        if (a.slug === PRODUCTS.slugs.WIDGET_SUITE) return -1;
+        if (b.slug === PRODUCTS.slugs.WIDGET_SUITE) return 1;
+        if (!!a.comingSoon !== !!b.comingSoon) return a.comingSoon ? 1 : -1;
+        return a.name.localeCompare(b.name);
+      });
+
+    return res.status(200).json({ ok: true, users, products });
   } catch (err) {
     console.error('[identity/users GET]', err);
     return jsonError(res, 500, 'list_failed', 'Failed to load users');
@@ -160,6 +188,19 @@ async function handleInvite(req, res, ctx) {
   }
   if (productSlugs.length === 0) {
     return jsonError(res, 400, 'no_products', 'Select at least one product');
+  }
+
+  // Staff-only products (internal and in-build tools) may only be granted to
+  // Travelgenix staff, and only by a staff admin. Block both directions so a
+  // client admin can neither see nor assign them.
+  const staffOnlyRequested = productSlugs.filter((s) => STAFF_ONLY_PRODUCTS.has(s));
+  if (staffOnlyRequested.length > 0) {
+    if (!isStaffEmail(ctx.email)) {
+      return jsonError(res, 403, 'staff_only', `Only Travelgenix staff can grant these products: ${staffOnlyRequested.join(', ')}`);
+    }
+    if (!isStaffEmail(email)) {
+      return jsonError(res, 400, 'staff_only_recipient', `These products can only be given to a Travelgenix staff email: ${staffOnlyRequested.join(', ')}`);
+    }
   }
 
   // Rate limit per inviter to prevent abuse

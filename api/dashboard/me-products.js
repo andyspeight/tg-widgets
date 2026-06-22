@@ -42,7 +42,7 @@
 import { requireAuth } from '../_lib/auth/middleware.js';
 import { listAllRecords, getRecord } from '../_lib/auth/airtable.js';
 import { jsonError } from '../_lib/auth/http.js';
-import { isStaffEmail } from '../_lib/auth/staff.js';
+import { isStaffEmail, STAFF_ONLY_PRODUCTS } from '../_lib/auth/staff.js';
 import {
   PRODUCTS,
   PERMISSIONS,
@@ -63,15 +63,21 @@ const PRODUCT_URLS = {
   [PRODUCTS.slugs.LUNA_QA]:        'https://qa.travelify.io/',
   [PRODUCTS.slugs.TOOL_HUB]:       '/admin/',
   [PRODUCTS.slugs.CONTRACT_LOADER]: 'https://contracts.travelify.io',
+  [PRODUCTS.slugs.LUNA_TRAVEL]:    'https://lunatravel.travelify.io',
+  // In-build products (status "coming soon" in Control). These are TEMPORARY
+  // preview deployments so staff can test them, and WILL change on go-live.
+  // When each ships, flip it to "active" in Control and swap the URL here for
+  // its real address. Back Office has no preview yet, so it stays a
+  // non-clickable "Coming soon" tile until a URL is added.
+  [PRODUCTS.slugs.ONBOARDING]:     'https://tg-onboarding-gamma.vercel.app/',
+  [PRODUCTS.slugs.CRM]:            'https://travelgenix-crm.vercel.app/',
+  [PRODUCTS.slugs.SUPPORT_DESK]:   'https://tg-support-desk-git-preview-agendasgroup.vercel.app/dashboard',
 };
 
 // Products that are Travelgenix staff only. The launchpad renders a small
-// "Staff" pill on these tiles. Staff slugs gate visual treatment; the
-// entitlement/permission resolution still decides who sees the tile at all.
-const STAFF_SLUGS = new Set([
-  PRODUCTS.slugs.TOOL_HUB,
-  PRODUCTS.slugs.LUNA_QA,
-]);
+// "Staff" pill on these tiles, and they are stripped from any client view
+// below. Single source of truth lives in staff.js so the rule can't drift.
+const STAFF_SLUGS = STAFF_ONLY_PRODUCTS;
 
 const ROLE_LABELS = {
   owner:        'Owner',
@@ -101,18 +107,30 @@ export default async function handler(req, res) {
       getRecord(USERS.tableId, ctx.userRecordId).catch(() => null),
     ]);
 
-    // Build slug → product tile, for ACTIVE products only.
+    // Build slug → product tile. Include live (active) and in-build (coming
+    // soon) products; deprecated and unknown statuses are skipped. Coming-soon
+    // tiles carry a flag so the launchpad can badge them and not link them yet.
     const productBySlug = new Map();
     for (const p of allProducts) {
       const slug = p.fields[PRODUCTS.fields.productId] || '';
       const status = p.fields[PRODUCTS.fields.status] || '';
-      if (!slug || status !== PRODUCTS.statuses.ACTIVE) continue;
+      if (!slug) continue;
+      if (status !== PRODUCTS.statuses.ACTIVE && status !== PRODUCTS.statuses.COMING_SOON) continue;
+      const comingSoon = status === PRODUCTS.statuses.COMING_SOON;
+      // A "Launch URL" set in Control wins, so staff can update a temporary
+      // preview address (or a go-live URL) without a code change. Otherwise
+      // fall back to the built-in default: the slug's PRODUCT_URLS entry, or
+      // "/" for a live product with no mapping, or "" (non-clickable) for an
+      // in-build product with nowhere to go yet.
+      const controlUrl = (p.fields[PRODUCTS.fields.launchUrl] || '').trim();
+      const defaultUrl = comingSoon ? (PRODUCT_URLS[slug] || '') : (PRODUCT_URLS[slug] || '/');
       productBySlug.set(slug, {
         slug,
         name: p.fields[PRODUCTS.fields.displayName] || slug,
         description: p.fields[PRODUCTS.fields.description] || '',
-        url: PRODUCT_URLS[slug] || '/',
+        url: controlUrl || defaultUrl,
         staff: STAFF_SLUGS.has(slug),
+        comingSoon,
       });
     }
 
@@ -187,6 +205,16 @@ export default async function handler(req, res) {
       }
     }
 
+    // Defence in depth: staff-only products must never surface in a client
+    // view (a real client user, or a staff member previewing a client), even
+    // if one were mistakenly entitled or granted. Staff in their own account
+    // keep the full internal view resolved above.
+    if (!(staff && !impersonating)) {
+      for (const slug of [...visibleSlugs]) {
+        if (STAFF_ONLY_PRODUCTS.has(slug)) visibleSlugs.delete(slug);
+      }
+    }
+
     // Role label comes from the user's client role (we no longer carry a
     // per-product role in the entitlement model).
     const role = ctx.role || 'member';
@@ -202,6 +230,8 @@ export default async function handler(req, res) {
       .sort((a, b) => {
         if (a.slug === PRODUCTS.slugs.WIDGET_SUITE) return -1;
         if (b.slug === PRODUCTS.slugs.WIDGET_SUITE) return 1;
+        // Live products first, in-build (coming soon) ones after.
+        if (!!a.comingSoon !== !!b.comingSoon) return a.comingSoon ? 1 : -1;
         return a.name.localeCompare(b.name);
       });
 
