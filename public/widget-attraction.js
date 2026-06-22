@@ -524,7 +524,20 @@
           return;
         }
         const id = el.getAttribute('data-tg-id');
-        if (id) { el.__tgAttraction = new TGAttractionWidget(el, { widgetId: id }); return; }
+        if (id) {
+          // Two-step embed (matches the other widgets): fetch the saved display
+          // config (colours, sections, CTA, hero image) from /api/widget-config,
+          // then the widget fetches its content from /api/attraction-content?id=.
+          fetch(CONFIG_API + '?id=' + encodeURIComponent(id), { credentials: 'omit' })
+            .then(r => (r.ok ? r.json() : null))
+            .then(data => {
+              const cfg = (data && (data.config || data)) || {};
+              cfg.widgetId = id;
+              el.__tgAttraction = new TGAttractionWidget(el, cfg);
+            })
+            .catch(() => { el.__tgAttraction = new TGAttractionWidget(el, { widgetId: id }); });
+          return;
+        }
         const rec = el.getAttribute('data-tg-record');
         if (rec) { el.__tgAttraction = new TGAttractionWidget(el, { recordId: rec }); return; }
         console.warn('[TG Attraction] container has no data-tg-id, data-tg-record or data-tg-config');
