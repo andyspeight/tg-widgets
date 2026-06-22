@@ -117,11 +117,18 @@ export default async function handler(req, res) {
       if (!slug) continue;
       if (status !== PRODUCTS.statuses.ACTIVE && status !== PRODUCTS.statuses.COMING_SOON) continue;
       const comingSoon = status === PRODUCTS.statuses.COMING_SOON;
+      // A "Launch URL" set in Control wins, so staff can update a temporary
+      // preview address (or a go-live URL) without a code change. Otherwise
+      // fall back to the built-in default: the slug's PRODUCT_URLS entry, or
+      // "/" for a live product with no mapping, or "" (non-clickable) for an
+      // in-build product with nowhere to go yet.
+      const controlUrl = (p.fields[PRODUCTS.fields.launchUrl] || '').trim();
+      const defaultUrl = comingSoon ? (PRODUCT_URLS[slug] || '') : (PRODUCT_URLS[slug] || '/');
       productBySlug.set(slug, {
         slug,
         name: p.fields[PRODUCTS.fields.displayName] || slug,
         description: p.fields[PRODUCTS.fields.description] || '',
-        url: comingSoon ? (PRODUCT_URLS[slug] || '') : (PRODUCT_URLS[slug] || '/'),
+        url: controlUrl || defaultUrl,
         staff: STAFF_SLUGS.has(slug),
         comingSoon,
       });

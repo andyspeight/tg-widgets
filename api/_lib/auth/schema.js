@@ -189,6 +189,7 @@ export const PRODUCTS = {
     description:    'fldhruACLHECYknxG',
     availableRoles: 'fldaczn0DWeoDui8D',
     status:         'fldo7iE9GYRXRXY1c',
+    launchUrl:      'fldbdTZKUeNNHVC0K', // optional URL override for the launchpad
     created:        'fldWl7dKanrCvi12w',
     permissions:    'fld0IitvokkAZoon9'
   },
