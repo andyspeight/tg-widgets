@@ -493,10 +493,10 @@
 
   /* Sections */
   .tgx-section { margin: 34px 0; padding: 0 var(--tgx-pad); }
-  .tgx-section-head { display:flex; align-items:center; gap:12px; }
+  .tgx-section-head { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
   .tgx-section-icon { width:36px; height:36px; flex:0 0 36px; border-radius:10px; background: var(--tgx-accent); color: #fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px -3px var(--tgx-accent-soft); }
   .tgx-kicker { font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color: var(--tgx-muted); }
-  .tgx-h2 { margin:14px 0 16px; font-size:22px; font-weight:700; letter-spacing:-0.015em; color: var(--tgx-text); }
+  .tgx-h2 { margin:0 0 16px; font-size:22px; font-weight:700; letter-spacing:-0.015em; color: var(--tgx-text); }
   .tgx-subh { margin:18px 0 8px; font-size:15px; font-weight:700; color: var(--tgx-text); }
   .tgx-prose { font-size:15px; color: var(--tgx-sub); line-height:1.65; }
   .tgx-prose p { margin:0 0 12px; } .tgx-prose p:last-child { margin:0; }
