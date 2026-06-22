@@ -438,20 +438,30 @@
           ? `<span class="staff-pill" title="Travelgenix staff only">${STAFF_PILL_ICON}Staff</span>`
           : '';
         const soon = !!p.comingSoon;
-        // Coming-soon tiles are in build, so they render as a plain container
-        // (no href) with a badge instead of the Open arrow.
-        const tag = soon ? 'div' : 'a';
-        const hrefAttr = soon ? '' : ` href="${escapeHtml(p.url)}"`;
-        const footer = soon
-          ? `<div class="product-footer"><span class="soon-pill">Coming soon</span></div>`
-          : `<div class="product-footer">
-              <span class="role-pill">${escapeHtml(p.roleLabel)}</span>
-              <span class="open-arrow">Open
+        const hasUrl = !!p.url;
+        // A tile is clickable when it has a URL. In-build (coming soon)
+        // products with a temporary preview URL open for staff in a new tab
+        // with a "Preview" badge; those with no URL yet stay non-clickable
+        // with a "Coming soon" badge.
+        const tag = hasUrl ? 'a' : 'div';
+        const hrefAttr = hasUrl ? ` href="${escapeHtml(p.url)}"` : '';
+        const targetAttr = (soon && hasUrl) ? ' target="_blank" rel="noopener noreferrer"' : '';
+        const openArrow = `<span class="open-arrow">Open
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </span>
+              </span>`;
+        let footer;
+        if (soon) {
+          footer = hasUrl
+            ? `<div class="product-footer"><span class="soon-pill">Preview</span>${openArrow}</div>`
+            : `<div class="product-footer"><span class="soon-pill">Coming soon</span></div>`;
+        } else {
+          footer = `<div class="product-footer">
+              <span class="role-pill">${escapeHtml(p.roleLabel)}</span>
+              ${openArrow}
             </div>`;
+        }
         return `
-          <${tag} class="product-tile${soon ? ' is-coming-soon' : ''}"${hrefAttr} data-slug="${escapeHtml(p.slug)}" data-staff="${p.staff ? 'true' : 'false'}">
+          <${tag} class="product-tile${soon && !hasUrl ? ' is-coming-soon' : ''}"${hrefAttr}${targetAttr} data-slug="${escapeHtml(p.slug)}" data-staff="${p.staff ? 'true' : 'false'}">
             <div class="tile-header">
               <div class="product-icon" data-slug="${escapeHtml(p.slug)}">${ICONS[p.slug] || ICONS.tool_hub}</div>
               <div class="tile-header-body">

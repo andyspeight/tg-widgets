@@ -64,9 +64,14 @@ const PRODUCT_URLS = {
   [PRODUCTS.slugs.TOOL_HUB]:       '/admin/',
   [PRODUCTS.slugs.CONTRACT_LOADER]: 'https://contracts.travelify.io',
   [PRODUCTS.slugs.LUNA_TRAVEL]:    'https://lunatravel.travelify.io',
-  // Onboarding, CRM, Support Desk and Back Office are still in build (status
-  // "coming soon" in Control). They render as non-clickable tiles until they
-  // go live, so they intentionally have no URL here yet.
+  // In-build products (status "coming soon" in Control). These are TEMPORARY
+  // preview deployments so staff can test them, and WILL change on go-live.
+  // When each ships, flip it to "active" in Control and swap the URL here for
+  // its real address. Back Office has no preview yet, so it stays a
+  // non-clickable "Coming soon" tile until a URL is added.
+  [PRODUCTS.slugs.ONBOARDING]:     'https://tg-onboarding-gamma.vercel.app/',
+  [PRODUCTS.slugs.CRM]:            'https://travelgenix-crm.vercel.app/',
+  [PRODUCTS.slugs.SUPPORT_DESK]:   'https://tg-support-desk-git-preview-agendasgroup.vercel.app/dashboard',
 };
 
 // Products that are Travelgenix staff only. The launchpad renders a small
@@ -116,7 +121,7 @@ export default async function handler(req, res) {
         slug,
         name: p.fields[PRODUCTS.fields.displayName] || slug,
         description: p.fields[PRODUCTS.fields.description] || '',
-        url: comingSoon ? '' : (PRODUCT_URLS[slug] || '/'),
+        url: comingSoon ? (PRODUCT_URLS[slug] || '') : (PRODUCT_URLS[slug] || '/'),
         staff: STAFF_SLUGS.has(slug),
         comingSoon,
       });
