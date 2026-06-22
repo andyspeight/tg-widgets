@@ -47,3 +47,27 @@ export function isStaffEmail(email) {
 export function isTravelgenixStaff(ctx) {
   return isStaffEmail(ctx && ctx.email);
 }
+
+/**
+ * Products only Travelgenix staff may ever be shown or granted. These are
+ * internal tools (the staff console and QA harness) plus products still in
+ * build (Onboarding, CRM, Support Desk, Back Office). A client user must never
+ * see one on their launchpad or be granted one, even by a client admin.
+ *
+ * Kept here, next to isStaffEmail, so the staff-only rule lives in one place
+ * and can never drift between the launchpad, the staff admin and the grant
+ * endpoints. Slugs match the productId values in the Control Products table.
+ */
+export const STAFF_ONLY_PRODUCTS = new Set([
+  'tool_hub',
+  'luna_qa',
+  'onboarding',
+  'crm',
+  'support_desk',
+  'back_office',
+]);
+
+/** True if the given product slug is Travelgenix staff only. */
+export function isStaffOnlyProduct(slug) {
+  return STAFF_ONLY_PRODUCTS.has(String(slug || ''));
+}

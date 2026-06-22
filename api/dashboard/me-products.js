@@ -42,7 +42,7 @@
 import { requireAuth } from '../_lib/auth/middleware.js';
 import { listAllRecords, getRecord } from '../_lib/auth/airtable.js';
 import { jsonError } from '../_lib/auth/http.js';
-import { isStaffEmail } from '../_lib/auth/staff.js';
+import { isStaffEmail, STAFF_ONLY_PRODUCTS } from '../_lib/auth/staff.js';
 import {
   PRODUCTS,
   PERMISSIONS,
@@ -70,12 +70,9 @@ const PRODUCT_URLS = {
 };
 
 // Products that are Travelgenix staff only. The launchpad renders a small
-// "Staff" pill on these tiles. Staff slugs gate visual treatment; the
-// entitlement/permission resolution still decides who sees the tile at all.
-const STAFF_SLUGS = new Set([
-  PRODUCTS.slugs.TOOL_HUB,
-  PRODUCTS.slugs.LUNA_QA,
-]);
+// "Staff" pill on these tiles, and they are stripped from any client view
+// below. Single source of truth lives in staff.js so the rule can't drift.
+const STAFF_SLUGS = STAFF_ONLY_PRODUCTS;
 
 const ROLE_LABELS = {
   owner:        'Owner',
@@ -193,6 +190,16 @@ export default async function handler(req, res) {
           `(user ${ctx.userRecordId}) — fell back to ${fallback.size} permission tile(s). ` +
           `Seed entitlements in Control to fix.`
         );
+      }
+    }
+
+    // Defence in depth: staff-only products must never surface in a client
+    // view (a real client user, or a staff member previewing a client), even
+    // if one were mistakenly entitled or granted. Staff in their own account
+    // keep the full internal view resolved above.
+    if (!(staff && !impersonating)) {
+      for (const slug of [...visibleSlugs]) {
+        if (STAFF_ONLY_PRODUCTS.has(slug)) visibleSlugs.delete(slug);
       }
     }
 

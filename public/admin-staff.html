@@ -291,7 +291,7 @@
           <div class="field">
             <label class="field-label">Product access</label>
             <div class="checklist" id="products"></div>
-            <span class="field-hint">All products are selected by default. Uncheck any you don't want them to have.</span>
+            <span class="field-hint">Client products are ticked by default. Staff-only tools are left unticked, tick any this person should have. Staff-only products can only go to Travelgenix staff emails.</span>
           </div>
         </div>
       </div>
@@ -425,14 +425,14 @@
     { slug: 'luna_marketing',  name: 'Luna Marketing' },
     { slug: 'luna_brain',      name: 'Luna Brain' },
     { slug: 'luna_trends',     name: 'Luna Trends' },
-    { slug: 'luna_qa',         name: 'Luna QA' },
-    { slug: 'tool_hub',        name: 'TG Control' },
+    { slug: 'luna_qa',         name: 'Luna QA',      staffOnly: true },
+    { slug: 'tool_hub',        name: 'TG Control',   staffOnly: true },
     { slug: 'contract_loader', name: 'Contract Loader' },
     { slug: 'luna_travel',     name: 'Luna Travel' },
-    { slug: 'onboarding',      name: 'Onboarding',   comingSoon: true },
-    { slug: 'crm',             name: 'CRM',          comingSoon: true },
-    { slug: 'support_desk',    name: 'Support Desk', comingSoon: true },
-    { slug: 'back_office',     name: 'Back Office',  comingSoon: true },
+    { slug: 'onboarding',      name: 'Onboarding',   comingSoon: true, staffOnly: true },
+    { slug: 'crm',             name: 'CRM',          comingSoon: true, staffOnly: true },
+    { slug: 'support_desk',    name: 'Support Desk', comingSoon: true, staffOnly: true },
+    { slug: 'back_office',     name: 'Back Office',  comingSoon: true, staffOnly: true },
   ];
 
   let users = [];
@@ -650,10 +650,12 @@
 
   // ----- Add Staff -----
   function renderProductChecklist() {
+    // Staff-only tools are left unticked by default so a normal user isn't
+    // accidentally given them. Tick them deliberately when setting up staff.
     $('#products').innerHTML = ALL_PRODUCTS.map((p) => `
       <label class="check-row">
-        <input type="checkbox" value="${esc(p.slug)}" checked>
-        <span class="name">${esc(p.name)}</span>${p.comingSoon ? '<span class="soon-tag">Coming soon</span>' : ''}
+        <input type="checkbox" value="${esc(p.slug)}"${p.staffOnly ? '' : ' checked'}>
+        <span class="name">${esc(p.name)}</span>${p.comingSoon ? '<span class="soon-tag">Coming soon</span>' : (p.staffOnly ? '<span class="soon-tag">Staff only</span>' : '')}
         <span class="slug">${esc(p.slug)}</span>
       </label>
     `).join('');
@@ -733,7 +735,7 @@
     $('#e-products').innerHTML = ALL_PRODUCTS.map((p) => `
       <label class="check-row">
         <input type="checkbox" value="${esc(p.slug)}"${checkedSlugs.has(p.slug) ? ' checked' : ''}>
-        <span class="name">${esc(p.name)}</span>${p.comingSoon ? '<span class="soon-tag">Coming soon</span>' : ''}
+        <span class="name">${esc(p.name)}</span>${p.comingSoon ? '<span class="soon-tag">Coming soon</span>' : (p.staffOnly ? '<span class="soon-tag">Staff only</span>' : '')}
         <span class="slug">${esc(p.slug)}</span>
       </label>
     `).join('');
