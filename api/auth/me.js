@@ -16,7 +16,7 @@ import { setCors, requireMethod, jsonOk } from '../_lib/auth/http.js';
 import { requireAuth, loadClientForCtx } from '../_lib/auth/middleware.js';
 import { getRecord, listAllRecords } from '../_lib/auth/airtable.js';
 import {
-  USERS, CLIENTS, PACKAGES, PRODUCTS, CATALOGUE, CLIENT_ENTITLEMENTS,
+  USERS, CLIENTS, PACKAGES, PRODUCTS, CATALOGUE, CLIENT_ENTITLEMENTS, PACKAGE_CATALOGUE,
 } from '../_lib/auth/schema.js';
 import { isStaffEmail } from '../_lib/auth/staff.js';
 
@@ -80,10 +80,11 @@ export default async function handler(req, res) {
       }
 
       // Compute accessibleProducts = permissions ∩ client entitlements
-      const [catalogue, products, entitlements] = await Promise.all([
+      const [catalogue, products, entitlements, packageCatalogue] = await Promise.all([
         listAllRecords(CATALOGUE.tableId),
         listAllRecords(PRODUCTS.tableId),
         listAllRecords(CLIENT_ENTITLEMENTS.tableId),
+        listAllRecords(PACKAGE_CATALOGUE.tableId),
       ]);
 
       // Product slug → { slug, name }, and the set of ACTIVE product slugs.
@@ -137,8 +138,39 @@ export default async function handler(req, res) {
         }
       }
 
-      entitledWidgetCodes = Array.from(entitledCodeSet);
+      // Widget create-access follows the client's PLAN via the Package
+      // Catalogue (the catalogue toggles), so Control is the single source of
+      // truth and staff can change it live. A widget is available when the
+      // client's package includes it (includedByDefault) and the catalogue
+      // item is active. Staff get every active widget — full access, including
+      // while acting as a client. On any error we fall back to the client's own
+      // entitlement rows so a hiccup never strips access.
       activeWidgetCodes = Array.from(activeCodeSet);
+      if (isStaffEmail(ctx.email || '')) {
+        entitledWidgetCodes = Array.from(activeCodeSet);
+      } else {
+        try {
+          const clientPkgId = (clientRec.fields[CLIENTS.fields.package] || [])[0] || null;
+          if (clientPkgId) {
+            const planCodes = new Set();
+            for (const row of packageCatalogue) {
+              if (!row.fields[PACKAGE_CATALOGUE.fields.includedByDefault]) continue;
+              const pkgs = row.fields[PACKAGE_CATALOGUE.fields.package] || [];
+              if (!pkgs.includes(clientPkgId)) continue;
+              for (const cId of (row.fields[PACKAGE_CATALOGUE.fields.catalogueItem] || [])) {
+                const code = codeByCatalogueId.get(cId); // active items only
+                if (code) planCodes.add(code);
+              }
+            }
+            entitledWidgetCodes = Array.from(planCodes);
+          } else {
+            entitledWidgetCodes = Array.from(entitledCodeSet);
+          }
+        } catch (e) {
+          console.error('[auth/me] plan widget codes failed, using entitlements:', e.message);
+          entitledWidgetCodes = Array.from(entitledCodeSet);
+        }
+      }
 
       // Travelgenix staff in their OWN account see every active product. Staff
       // ACTING AS a client (the active client is not one of their linked

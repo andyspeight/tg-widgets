@@ -13,7 +13,7 @@ import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimi
 // session has been re-issued under the new auth/signin + auth/sso flow
 // (which now embed email + plan natively), this fallback becomes a no-op.
 import { getRecord, listAllRecords } from './_lib/auth/airtable.js';
-import { USERS, CLIENTS, CATALOGUE, CLIENT_ENTITLEMENTS } from './_lib/auth/schema.js';
+import { USERS, CLIENTS, CATALOGUE, CLIENT_ENTITLEMENTS, PACKAGE_CATALOGUE } from './_lib/auth/schema.js';
 import { normalisePlanValue } from './_lib/auth/plan.js';
 
 /**
@@ -740,27 +740,33 @@ export default async function handler(req, res) {
           : null;
 
         if (!isStaff && clientId) {
-          const [catalogue, entitlements] = await Promise.all([
+          // Access follows the client's PLAN via the Package Catalogue (the
+          // catalogue toggles), so Control is the single source of truth and
+          // staff change it live. A create is blocked only when the widget maps
+          // to an ACTIVE catalogue item that the client's package does not
+          // include. No package resolved, no match, or any lookup failure
+          // FAILS OPEN (handled by the surrounding catch).
+          const [catalogue, packageCatalogue, clientRec] = await Promise.all([
             listAllRecords(CATALOGUE.tableId),
-            listAllRecords(CLIENT_ENTITLEMENTS.tableId),
+            listAllRecords(PACKAGE_CATALOGUE.tableId),
+            getRecord(CLIENTS.tableId, clientId).catch(() => null),
           ]);
           const typeLc = safeType.toLowerCase();
           const catItem = catalogue.find(
             (c) => String(c.fields[CATALOGUE.fields.productName] || '').toLowerCase() === typeLc
           );
-          // Enforce only when we matched an ACTIVE catalogue item.
-          if (catItem && !!catItem.fields[CATALOGUE.fields.active]) {
-            const entitled = entitlements.some((e) => {
-              const clients = e.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
-              const cats = e.fields[CLIENT_ENTITLEMENTS.fields.catalogueItem] || [];
-              return e.fields[CLIENT_ENTITLEMENTS.fields.enabled]
-                && clients.includes(clientId)
-                && cats.includes(catItem.id);
+          const clientPkgId = clientRec ? (clientRec.fields[CLIENTS.fields.package] || [])[0] : null;
+          if (catItem && !!catItem.fields[CATALOGUE.fields.active] && clientPkgId) {
+            const includedInPlan = packageCatalogue.some((row) => {
+              if (!row.fields[PACKAGE_CATALOGUE.fields.includedByDefault]) return false;
+              const pkgs = row.fields[PACKAGE_CATALOGUE.fields.package] || [];
+              const cats = row.fields[PACKAGE_CATALOGUE.fields.catalogueItem] || [];
+              return pkgs.includes(clientPkgId) && cats.includes(catItem.id);
             });
-            if (!entitled) {
-              console.warn(`[widget-config] create blocked (not entitled) type=${safeType} client=${clientId}`);
+            if (!includedInPlan) {
+              console.warn(`[widget-config] create blocked (not in plan) type=${safeType} client=${clientId} pkg=${clientPkgId}`);
               return res.status(403).json({
-                error: `${safeType} isn't enabled on your account yet. Request it from your dashboard and we'll switch it on for you.`,
+                error: `${safeType} isn't on your plan yet. Ask Travelgenix to add it, or upgrade your plan.`,
                 code: 'not_entitled',
               });
             }
