@@ -57,6 +57,9 @@ export default async function handler(req, res) {
   // The dashboard locks only ACTIVE catalogue widgets the client lacks.
   let entitledWidgetCodes = [];
   let activeWidgetCodes = [];
+  // All ACTIVE product slugs (populated below). Used to grant staff full
+  // access to every product through the shared auth gate.
+  let allActiveSlugs = [];
 
   let userRec = null;
   try {
@@ -97,6 +100,7 @@ export default async function handler(req, res) {
         productInfoBySlug.set(slug, { slug, name });
         if (p.fields[PRODUCTS.fields.status] === 'active') activeSlugs.add(slug);
       }
+      allActiveSlugs = Array.from(activeSlugs);
 
       // Map catalogueId → product slug (the Control → launchpad bridge).
       // Skip INACTIVE catalogue items. A client can carry a stale enabled
@@ -212,6 +216,16 @@ export default async function handler(req, res) {
     }
   }
 
+  // Staff (Travelgenix domains) get full access to every product. Surface that
+  // as an admin permission for every ACTIVE product, so the shared auth gate
+  // lets them into any tool (Contracting, TG Control, etc.) — matching the
+  // launchpad, which already shows staff everything. Email-based, so it holds
+  // even while acting as a client. Clients are unchanged.
+  const isStaff = isStaffEmail(ctx.email || '');
+  const responsePermissions = (isStaff && allActiveSlugs.length)
+    ? allActiveSlugs.map((slug) => ({ product: slug, role: 'admin', expiresAt: null }))
+    : (ctx.permissions || []).map((p) => ({ product: p.product, role: p.role, expiresAt: p.expiresAt || null }));
+
   return jsonOk(res, {
     user: {
       email: ctx.email,
@@ -225,11 +239,8 @@ export default async function handler(req, res) {
       packageName,
       packageCode,
     } : null,
-    permissions: (ctx.permissions || []).map(p => ({
-      product: p.product,
-      role: p.role,
-      expiresAt: p.expiresAt || null
-    })),
+    permissions: responsePermissions,
+    isStaff,
     accessibleProducts,
     entitledWidgetCodes,
     activeWidgetCodes,
