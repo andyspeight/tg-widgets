@@ -1,0 +1,243 @@
+/**
+ * Reference breadth auto-fill (two-independent-source model).
+ *
+ * For an airport the content references but has no record for, the AI verifies
+ * its identity against TWO independent, machine-readable sources keyed on the
+ * IATA code:
+ *   - OurAirports open dataset (CSV)        -> name, municipality, country, lat/lon
+ *   - Wikidata (SPARQL by IATA property)    -> label, country, coordinates
+ * If the two agree (name corroborates and coordinates are close) the record is
+ * identity-verified and can be created as a Draft carrying both source URLs and
+ * today's date. If they disagree, or one can't be found, it is flagged for a
+ * human — never guessed.
+ *
+ * IMPORTANT scope: two structured sources can verify an airport's IDENTITY
+ * (what/where it is). They cannot supply the rich narrative (lounges, parking
+ * prices, transfer detail) the existing records carry, so auto-created records
+ * are Draft skeletons for content enrichment, never Live.
+ *
+ * Network note: the build sandbox blocks outbound fetch, so the fetch adapters
+ * below are validated on a deploy, not here. The decision logic and parsers
+ * are pure and unit-tested. Writes are OFF unless `create:true` is passed.
+ */
+
+import { listAll, AIRPORTS_TBL, AF, AIRPORT_STATUS } from './_ref.js';
+import { runBreadth } from './_breadth.js';
+
+const OURAIRPORTS_CSV = 'https://davidmegginson.github.io/ourairports-data/airports.csv';
+const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
+const COORD_TOLERANCE_KM = 50;
+
+// ---- pure: normalisation + cross-verification -----------------------------
+export function normalizeName(s) {
+  return String(s || '').toLowerCase()
+    .replace(/\b(airport|international|intl|regional|the)\b/g, ' ')
+    .replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function nameOverlap(a, b) {
+  const ta = new Set(normalizeName(a).split(' ').filter(w => w.length > 2));
+  const tb = new Set(normalizeName(b).split(' ').filter(w => w.length > 2));
+  if (!ta.size || !tb.size) return 0;
+  let inter = 0; for (const w of ta) if (tb.has(w)) inter++;
+  return inter / Math.min(ta.size, tb.size);
+}
+
+export function haversineKm(aLat, aLon, bLat, bLon) {
+  if ([aLat, aLon, bLat, bLon].some(v => typeof v !== 'number' || isNaN(v))) return null;
+  const R = 6371, toRad = d => d * Math.PI / 180;
+  const dLat = toRad(bLat - aLat), dLon = toRad(bLon - aLon);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+
+/**
+ * Decide whether two independent source records describe the same airport.
+ * Pure. Both: { iata, name, city, country, lat, lon }.
+ */
+export function crossVerify(a, b) {
+  const conflicts = [];
+  if (!a || !b) return { verified: false, conflicts: ['a source was missing'] };
+  if (a.iata && b.iata && a.iata.toUpperCase() !== b.iata.toUpperCase()) conflicts.push('IATA codes differ');
+
+  const overlap = nameOverlap(a.name, b.name);
+  const dist = haversineKm(a.lat, a.lon, b.lat, b.lon);
+  const nameOk = overlap >= 0.5;
+  const coordOk = dist == null ? null : dist <= COORD_TOLERANCE_KM;
+
+  if (coordOk === false) conflicts.push(`coordinates ${Math.round(dist)}km apart`);
+  // Need positive corroboration: matching name, OR close coordinates.
+  const corroborated = nameOk || coordOk === true;
+  if (!corroborated) conflicts.push('neither name nor coordinates corroborate');
+
+  return {
+    verified: conflicts.length === 0 && corroborated,
+    nameOverlap: Number(overlap.toFixed(2)),
+    distanceKm: dist == null ? null : Math.round(dist),
+    conflicts,
+  };
+}
+
+// ---- pure: source parsers -------------------------------------------------
+/** Parse the OurAirports CSV for one IATA. Pure. Returns normalized record or null. */
+export function parseOurAirports(csvText, iata) {
+  const lines = String(csvText || '').split('\n');
+  if (lines.length < 2) return null;
+  const header = splitCsvLine(lines[0]);
+  const col = name => header.indexOf(name);
+  const ciIata = col('iata_code');
+  if (ciIata === -1) return null;
+  const want = String(iata).toUpperCase();
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i]) continue;
+    const cells = splitCsvLine(lines[i]);
+    if ((cells[ciIata] || '').toUpperCase() !== want) continue;
+    return {
+      iata: want,
+      name: cells[col('name')] || '',
+      city: cells[col('municipality')] || '',
+      country: cells[col('iso_country')] || '',
+      lat: parseFloat(cells[col('latitude_deg')]),
+      lon: parseFloat(cells[col('longitude_deg')]),
+      source: OURAIRPORTS_CSV,
+    };
+  }
+  return null;
+}
+
+/** Minimal CSV line splitter handling quoted fields. Pure. */
+export function splitCsvLine(line) {
+  const out = []; let cur = '', q = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (q) {
+      if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      else if (c === '"') q = false;
+      else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { out.push(cur); cur = ''; }
+    else cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+
+/** Parse a Wikidata SPARQL JSON result (by IATA) into a normalized record. Pure. */
+export function parseWikidataSparql(json, iata) {
+  const b = json && json.results && json.results.bindings && json.results.bindings[0];
+  if (!b) return null;
+  let lat, lon;
+  const coord = b.coord && b.coord.value; // "Point(lon lat)"
+  if (coord) {
+    const m = /Point\(([-\d.]+)\s+([-\d.]+)\)/.exec(coord);
+    if (m) { lon = parseFloat(m[1]); lat = parseFloat(m[2]); }
+  }
+  return {
+    iata: String(iata).toUpperCase(),
+    name: (b.airportLabel && b.airportLabel.value) || '',
+    city: '',
+    country: (b.countryLabel && b.countryLabel.value) || '',
+    lat, lon,
+    source: b.airport && b.airport.value ? b.airport.value : 'https://www.wikidata.org/',
+  };
+}
+
+// ---- network adapters (validated on deploy, not in sandbox) ---------------
+async function getJson(url) {
+  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 20000);
+  try {
+    const r = await fetch(url, { signal: ctrl.signal, headers: { 'User-Agent': 'LunaBrain/1.0 (+https://travelify.io)', Accept: 'application/json' } });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; } finally { clearTimeout(t); }
+}
+
+async function fetchWikidata(iata) {
+  const q = `SELECT ?airport ?airportLabel ?countryLabel ?coord WHERE { ?airport wdt:P238 "${iata}". OPTIONAL { ?airport wdt:P17 ?country. } OPTIONAL { ?airport wdt:P625 ?coord. } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 1`;
+  const json = await getJson(`${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(q)}`);
+  return json ? parseWikidataSparql(json, iata) : null;
+}
+
+let _ourAirportsCache = null;
+async function fetchOurAirports(iata) {
+  if (!_ourAirportsCache) {
+    const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 30000);
+    try {
+      const r = await fetch(OURAIRPORTS_CSV, { signal: ctrl.signal, headers: { 'User-Agent': 'LunaBrain/1.0 (+https://travelify.io)' } });
+      _ourAirportsCache = r.ok ? await r.text() : '';
+    } catch { _ourAirportsCache = ''; } finally { clearTimeout(t); }
+  }
+  return _ourAirportsCache ? parseOurAirports(_ourAirportsCache, iata) : null;
+}
+
+// ---- orchestrator ---------------------------------------------------------
+/**
+ * @param opts.limit   max missing airports to process
+ * @param opts.create  if true, create Draft skeletons for verified ones (default false: dry run)
+ * @param opts.fetchers test seam: { ourAirports, wikidata } override the live adapters
+ * @returns { missing, processed, verified, conflict, unverifiable, created, items[] }
+ */
+export async function runBreadthFill({ limit = 10, create = false, nowIso, fetchers } = {}) {
+  const today = (nowIso || new Date().toISOString()).slice(0, 10);
+  const getOA = (fetchers && fetchers.ourAirports) || fetchOurAirports;
+  const getWD = (fetchers && fetchers.wikidata) || fetchWikidata;
+
+  const breadth = await runBreadth();
+  const targets = breadth.missing.slice(0, limit);
+
+  const items = [];
+  let created = 0;
+  for (const t of targets) {
+    const [oa, wd] = await Promise.all([getOA(t.iata), getWD(t.iata)]);
+    if (!oa || !wd) {
+      items.push({ iata: t.iata, verdict: 'unverifiable', reason: !oa && !wd ? 'neither source found' : !oa ? 'not in OurAirports' : 'not in Wikidata' });
+      continue;
+    }
+    const cv = crossVerify(oa, wd);
+    if (!cv.verified) {
+      items.push({ iata: t.iata, verdict: 'conflict', conflicts: cv.conflicts, oa: oa.name, wd: wd.name });
+      continue;
+    }
+    const record = {
+      iata: t.iata, name: oa.name, city: oa.city, country: oa.country,
+      lat: Number.isFinite(oa.lat) ? oa.lat : undefined, lon: Number.isFinite(oa.lon) ? oa.lon : undefined,
+      source1: oa.source, source2: wd.source, verifiedDate: today,
+    };
+    let didCreate = false;
+    if (create) { await createSkeleton(record).catch(() => {}); didCreate = true; created++; }
+    items.push({ iata: t.iata, verdict: 'verified', name: oa.name, distanceKm: cv.distanceKm, created: didCreate });
+  }
+
+  const summary = { missing: breadth.missingCount, processed: items.length, verified: 0, conflict: 0, unverifiable: 0, created, items };
+  for (const it of items) summary[it.verdict === 'verified' ? 'verified' : it.verdict === 'conflict' ? 'conflict' : 'unverifiable']++;
+  return summary;
+}
+
+async function createSkeleton(rec) {
+  const fields = {
+    [AF.iata]: rec.iata,
+    [AF.name]: rec.name,
+    [AF.cityServed]: rec.city,
+    [AF.countryText]: rec.country,
+    [AF.status]: AIRPORT_STATUS.IN_PROGRESS,
+    [AF.source1]: rec.source1,
+    [AF.source2]: rec.source2,
+    [AF.verifiedDate]: rec.verifiedDate,
+  };
+  if (rec.lat != null) fields[AF.latitude] = rec.lat;
+  if (rec.lon != null) fields[AF.longitude] = rec.lon;
+  return createAirport(fields);
+}
+
+// Thin write (kept here so the table id stays with the reference helpers).
+async function createAirport(fields) {
+  const PAT = process.env.AIRTABLE_DESTINATION_CONTENT_PAT || process.env.AIRTABLE_PAT;
+  const BASE = process.env.DESTINATION_CONTENT_BASE_ID || 'appuZdlMJ7HKUt6qS';
+  const r = await fetch(`https://api.airtable.com/v0/${BASE}/${AIRPORTS_TBL}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${PAT}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ records: [{ fields }], typecast: true }),
+  });
+  if (!r.ok) throw new Error(`airtable ${r.status}`);
+  return r.json();
+}
