@@ -25,6 +25,9 @@
     "api/brain/coverage.js": {
       "maxDuration": 300
     },
+    "api/brain/crawl.js": {
+      "maxDuration": 300
+    },
     "api/cron/brain-verify.js": {
       "maxDuration": 300
     }

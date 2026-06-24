@@ -80,8 +80,9 @@ function parseJson(text) {
 }
 
 // ---- evidence -------------------------------------------------------------
-function evidenceBlock({ transcripts, verifiedPeers, trusted, scanned }) {
+function evidenceBlock({ transcripts, verifiedPeers, trusted, scanned, cited }) {
   const parts = [];
+  if (cited) parts.push(`CITED SOURCE this fact was taken from (the page it came from):\n${clamp(cited, 3500)}`);
   if (verifiedPeers && verifiedPeers.length) {
     parts.push('VERIFIED KNOWLEDGE already approved for this business (trusted):');
     verifiedPeers.slice(0, 25).forEach(k => parts.push(`- Q: ${clamp(k.q, 200)}\n  A: ${clamp(k.a, 400)}`));
@@ -223,7 +224,7 @@ function indexVerified(records) {
 
 // The whole per-item gate: deterministic reject, gather evidence, two
 // independent verifiers, decide, apply. Shared by every caller.
-async function runItem(item, { verifiedByClient, scannedCache, excludeSelf = false }) {
+async function runItem(item, { verifiedByClient, scannedCache, excludeSelf = false, extraEvidence = '' }) {
   if (!item.question.trim() || !item.answer.trim()) {
     await applyDecision(item,
       { outcome: 'escalate', spotCheck: false, reason: 'empty question or answer' },
@@ -242,7 +243,7 @@ async function runItem(item, { verifiedByClient, scannedCache, excludeSelf = fal
   }
   const transcripts = item.convIds.length ? await getConversationTranscripts(item.convIds).catch(() => '') : '';
 
-  const a = await verifyGrounding(item, evidenceBlock({ transcripts, verifiedPeers, trusted: profile.trusted, scanned: profile.scanned }));
+  const a = await verifyGrounding(item, evidenceBlock({ transcripts, verifiedPeers, trusted: profile.trusted, scanned: profile.scanned, cited: extraEvidence }));
   const b = await verifyAdversarial(item, verifiedPeers);
   const d = decide(a, b);
   await applyDecision(item, d, a, b);
@@ -326,12 +327,12 @@ export async function recheckStale({ limit = 15 } = {}) {
  * Run the gate on a single record by id (used right after ingest / edit so a
  * new fact can auto-publish on the spot). Returns the per-item result.
  */
-export async function gateOne(recordId) {
+export async function gateOne(recordId, { extraEvidence = '' } = {}) {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set');
   const rec = await getKnowledge(recordId);
   const item = toItem(rec);
   const verifiedByClient = indexVerified(await listVerified({ maxRecords: 400 }).catch(() => []));
-  return runItem(item, { verifiedByClient, scannedCache: new Map(), excludeSelf: true });
+  return runItem(item, { verifiedByClient, scannedCache: new Map(), excludeSelf: true, extraEvidence });
 }
 
 export const _internals = { GATE_MARK, SPOT_MARK };

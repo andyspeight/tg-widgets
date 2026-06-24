@@ -79,6 +79,7 @@
     <div class="spacer"></div>
     <button class="addbtn" id="add">Add knowledge</button>
     <button class="runbtn" id="cov">Check coverage</button>
+    <button class="runbtn" id="crawl">Scan sources</button>
     <button class="runbtn" id="run">Run verification now</button>
     <a class="back" href="https://id.travelify.io">Dashboard</a>
   </header>
@@ -127,6 +128,20 @@
       <div class="form-actions">
         <button class="act btn-verify" id="cov-submit">Check coverage</button>
         <button class="act btn-ghost" id="cov-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan sources modal -->
+  <div class="overlay" id="crawl-overlay">
+    <div class="modal">
+      <h2>Scan sources</h2>
+      <p class="sub">Luna reads this business's website and its configured sources, pulls out candidate facts grounded only in each page, and runs every one through the gate. Clean facts publish, the rest wait in the queue.</p>
+      <label for="crawl-client">Business</label>
+      <select id="crawl-client" class="client-select"><option value="">Loading businesses…</option></select>
+      <div class="form-actions">
+        <button class="act btn-verify" id="crawl-submit">Scan now</button>
+        <button class="act btn-ghost" id="crawl-cancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -471,6 +486,33 @@
         })
         .catch(function () { toast('The coverage check could not finish. Please try again.'); })
         .finally(function () { submit.disabled = false; submit.textContent = 'Check coverage'; });
+    });
+
+    // ---- scan sources modal ----
+    var crawlOverlay = document.getElementById('crawl-overlay');
+    function openCrawl() { crawlOverlay.classList.add('show'); loadClients(); }
+    function closeCrawl() { crawlOverlay.classList.remove('show'); }
+    document.getElementById('crawl').addEventListener('click', openCrawl);
+    document.getElementById('crawl-cancel').addEventListener('click', closeCrawl);
+    crawlOverlay.addEventListener('click', function (e) { if (e.target === crawlOverlay) closeCrawl(); });
+
+    document.getElementById('crawl-submit').addEventListener('click', function () {
+      var clientId = document.getElementById('crawl-client').value;
+      if (!clientId) { toast('Pick a business first.'); return; }
+      var submit = document.getElementById('crawl-submit');
+      submit.disabled = true; submit.textContent = 'Scanning…';
+      postJson('/api/brain/crawl', { clientId: clientId })
+        .then(function (res) {
+          if (!res.ok || !res.d.ok) throw new Error((res.d && res.d.error) || 'failed');
+          var s = res.d;
+          if (!s.scanned) toast('No readable sources found for that business.');
+          else toast(s.scanned + ' pages scanned · ' + s.autoPublished + ' auto-published, ' + s.escalated + ' kept for you' + (s.skipped ? ', ' + s.skipped + ' duplicates skipped' : '') + '.');
+          closeCrawl();
+          loadView('queue');
+          document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-view') === 'queue'); });
+        })
+        .catch(function () { toast('The scan could not finish. Please try again.'); })
+        .finally(function () { submit.disabled = false; submit.textContent = 'Scan now'; });
     });
 
     window.addEventListener('tg-auth-ready', function () { loadView('queue'); });

@@ -134,7 +134,25 @@ const CLIENT_F = {
   customQA:     'flduXXL9wFgwMfTi1',
   attachSummary:'fldfEIoenLEgmI9uu',
   scanned:      'fld56L15X31pTrzfD',
+  website:      'fldYTr8q9yxI0crBe',
+  scannedUrls:  'fldEleg4uUBkAhwrV',
+  discoverSrc:  'fld83AGMe8wZWC03N',
 };
+
+/** The URLs Luna may crawl for a client: their website + configured sources. */
+export async function getClientSources(clientId) {
+  if (!clientId) return { website: '', urls: [] };
+  const rec = await lunaFetch(`/${CLIENTS_TBL}/${clientId}?returnFieldsByFieldId=true`).catch(() => null);
+  if (!rec) return { website: '', urls: [] };
+  const f = rec.fields;
+  const lines = (v) => String(v || '').split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+  const urls = [...new Set([
+    ...lines(f[CLIENT_F.website]),
+    ...lines(f[CLIENT_F.scannedUrls]),
+    ...lines(f[CLIENT_F.discoverSrc]),
+  ])];
+  return { website: String(f[CLIENT_F.website] || ''), urls };
+}
 
 // aiText fields come back as an object { state, value }. Normalise to a string.
 function aiText(v) {
