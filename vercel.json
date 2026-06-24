@@ -22,6 +22,9 @@
     "api/brain/run-gate.js": {
       "maxDuration": 300
     },
+    "api/brain/coverage.js": {
+      "maxDuration": 300
+    },
     "api/cron/brain-verify.js": {
       "maxDuration": 300
     }

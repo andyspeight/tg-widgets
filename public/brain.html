@@ -78,6 +78,7 @@
     </div>
     <div class="spacer"></div>
     <button class="addbtn" id="add">Add knowledge</button>
+    <button class="runbtn" id="cov">Check coverage</button>
     <button class="runbtn" id="run">Run verification now</button>
     <a class="back" href="https://id.travelify.io">Dashboard</a>
   </header>
@@ -98,7 +99,7 @@
       <h2>Add knowledge</h2>
       <p class="sub">It lands as a draft and runs through the gate. Nothing goes live until it passes or you verify it.</p>
       <label for="f-client">Business</label>
-      <select id="f-client"><option value="">Loading businesses…</option></select>
+      <select id="f-client" class="client-select"><option value="">Loading businesses…</option></select>
       <label for="f-type">Type</label>
       <select id="f-type">
         <option>FAQ</option><option>Policy</option><option>Preference</option>
@@ -112,6 +113,20 @@
       <div class="form-actions">
         <button class="act btn-verify" id="f-submit">Add and check</button>
         <button class="act btn-ghost" id="f-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Check coverage modal -->
+  <div class="overlay" id="cov-overlay">
+    <div class="modal">
+      <h2>Check coverage</h2>
+      <p class="sub">Luna finds the essential travel topics this business has no verified answer for. It drafts the ones the business's own profile and website support (through the gate) and raises the rest as owner-questions in the Gaps tab.</p>
+      <label for="cov-client">Business</label>
+      <select id="cov-client" class="client-select"><option value="">Loading businesses…</option></select>
+      <div class="form-actions">
+        <button class="act btn-verify" id="cov-submit">Check coverage</button>
+        <button class="act btn-ghost" id="cov-cancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -390,10 +405,11 @@
       fetch('/api/brain/clients', { credentials: 'include', cache: 'no-store' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
-          var sel = document.getElementById('f-client');
-          if (!data || !data.ok) { sel.innerHTML = '<option value="">Could not load businesses</option>'; return; }
-          sel.innerHTML = '<option value="">Choose a business…</option>' +
+          var sels = document.querySelectorAll('.client-select');
+          if (!data || !data.ok) { sels.forEach(function (s) { s.innerHTML = '<option value="">Could not load businesses</option>'; }); return; }
+          var opts = '<option value="">Choose a business…</option>' +
             data.clients.map(function (c) { return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>'; }).join('');
+          sels.forEach(function (s) { s.innerHTML = opts; });
           clientsLoaded = true;
         })
         .catch(function () {});
@@ -428,6 +444,33 @@
         })
         .catch(function () { toast('Could not add that. Please try again.'); })
         .finally(function () { submit.disabled = false; submit.textContent = 'Add and check'; });
+    });
+
+    // ---- check coverage modal ----
+    var covOverlay = document.getElementById('cov-overlay');
+    function openCov() { covOverlay.classList.add('show'); loadClients(); }
+    function closeCov() { covOverlay.classList.remove('show'); }
+    document.getElementById('cov').addEventListener('click', openCov);
+    document.getElementById('cov-cancel').addEventListener('click', closeCov);
+    covOverlay.addEventListener('click', function (e) { if (e.target === covOverlay) closeCov(); });
+
+    document.getElementById('cov-submit').addEventListener('click', function () {
+      var clientId = document.getElementById('cov-client').value;
+      if (!clientId) { toast('Pick a business first.'); return; }
+      var submit = document.getElementById('cov-submit');
+      submit.disabled = true; submit.textContent = 'Checking…';
+      postJson('/api/brain/coverage', { clientId: clientId })
+        .then(function (res) {
+          if (!res.ok || !res.d.ok) throw new Error((res.d && res.d.error) || 'failed');
+          var s = res.d;
+          toast(s.drafted + ' drafted (' + s.autoPublished + ' auto-published), ' + s.ownerQuestions + ' owner-questions raised.');
+          closeCov();
+          // Show the new owner-questions.
+          loadView('gaps');
+          document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-view') === 'gaps'); });
+        })
+        .catch(function () { toast('The coverage check could not finish. Please try again.'); })
+        .finally(function () { submit.disabled = false; submit.textContent = 'Check coverage'; });
     });
 
     window.addEventListener('tg-auth-ready', function () { loadView('queue'); });

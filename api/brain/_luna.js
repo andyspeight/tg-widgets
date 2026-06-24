@@ -122,6 +122,53 @@ export async function getKnowledge(id) {
   return lunaFetch(`/${KNOWLEDGE_TBL}/${id}?returnFieldsByFieldId=true`);
 }
 
+// Field ids on the Clients table used as trusted, owner-supplied evidence.
+const CLIENT_F = {
+  name:         'fldT257oW3qssqUcZ',
+  description:  'fldP7NFdPSc5KWbhb',
+  specialisms:  'fld7KJfXjfWIhbK5F',
+  destinations: 'fldux8qJdzGEzgegX',
+  bonding:      'fldUzssM6hbrDMRDe',
+  openingHours: 'fldNgMJIHkzAsZwyi',
+  phone:        'fldLY9zNfKqpbWHao',
+  customQA:     'flduXXL9wFgwMfTi1',
+  attachSummary:'fldfEIoenLEgmI9uu',
+  scanned:      'fld56L15X31pTrzfD',
+};
+
+// aiText fields come back as an object { state, value }. Normalise to a string.
+function aiText(v) {
+  if (v && typeof v === 'object') return String(v.value || '');
+  return String(v || '');
+}
+
+/**
+ * Fetch a client's trusted profile (owner-supplied facts) and its scraped
+ * website text, as evidence for grounding. Returns { trusted, scanned, name }.
+ */
+export async function getClientProfile(clientId) {
+  if (!clientId) return { trusted: '', scanned: '', name: '' };
+  const rec = await lunaFetch(`/${CLIENTS_TBL}/${clientId}?returnFieldsByFieldId=true`).catch(() => null);
+  if (!rec) return { trusted: '', scanned: '', name: '' };
+  const f = rec.fields;
+  const lines = [];
+  const push = (label, val) => { const s = String(val || '').trim(); if (s) lines.push(`${label}: ${s}`); };
+  push('Business name', f[CLIENT_F.name]);
+  push('About', f[CLIENT_F.description]);
+  push('Specialisms', f[CLIENT_F.specialisms]);
+  push('Destinations sold', f[CLIENT_F.destinations]);
+  push('Bonding / protection', f[CLIENT_F.bonding]);
+  push('Opening hours', f[CLIENT_F.openingHours]);
+  push('Phone', f[CLIENT_F.phone]);
+  push('Custom Q&A', f[CLIENT_F.customQA]);
+  push('Attachment summary', aiText(f[CLIENT_F.attachSummary]));
+  return {
+    trusted: lines.join('\n'),
+    scanned: String(f[CLIENT_F.scanned] || ''),
+    name: String(f[CLIENT_F.name] || ''),
+  };
+}
+
 /** Create one Knowledge record. `fields` keyed by field ID. */
 export async function createKnowledge(fields) {
   const data = await lunaFetch(`/${KNOWLEDGE_TBL}`, {
@@ -191,6 +238,14 @@ export async function listGaps({ formula, maxRecords = 200, sortField, sortDir =
 
 export async function getGap(id) {
   return lunaFetch(`/${GAPS_TBL}/${id}?returnFieldsByFieldId=true`);
+}
+
+export async function createGap(fields) {
+  const data = await lunaFetch(`/${GAPS_TBL}`, {
+    method: 'POST',
+    body: JSON.stringify({ records: [{ fields }], typecast: true, returnFieldsByFieldId: true }),
+  });
+  return data.records[0];
 }
 
 export async function updateGap(id, fields) {
