@@ -14,6 +14,7 @@ import { decide } from '../api/brain/_gate.js';
 import { similarity, tokens } from '../api/brain/_text.js';
 import { safeUrl, htmlToText } from '../api/_lib/webfetch.js';
 import { matchEntities, formatContext, shapeMatches } from '../api/reference/_index.js';
+import { extractIatas, missingCodes } from '../api/reference/_breadth.js';
 
 let pass = 0, fail = 0;
 const fails = [];
@@ -105,6 +106,20 @@ console.log('reference.matchEntities + format');
   ok('empty match -> empty context', formatContext({ countries: [], airports: [] }) === '');
   const shaped = shapeMatches(m1);
   ok('shape has visaStatusUK', shaped.countries[0].visaStatusUK === 'Not required');
+}
+
+// ---------------------------------------------------------------- breadth detector
+console.log('reference.extractIatas + missingCodes');
+{
+  const codes = extractIatas('Nearest: Orlando International (MCO), 25 mins. Budget option Sanford (SFB).');
+  ok('extracts parenthesised IATAs', codes.includes('MCO') && codes.includes('SFB'));
+  ok('ignores stop-words like (THE)', !extractIatas('see (THE) airport').includes('THE'));
+  ok('ignores non-parenthesised triples', extractIatas('the BIG red bus to LHR').length === 0);
+  ok('empty in -> empty out', extractIatas('').length === 0 && extractIatas(null).length === 0);
+  const miss = missingCodes(['MCO', 'SFB', 'LHR'], new Set(['LHR', 'LGW']));
+  ok('missingCodes finds the gap', miss.length === 2 && miss.includes('MCO') && miss.includes('SFB'));
+  ok('missingCodes sorted', JSON.stringify(miss) === JSON.stringify(['MCO', 'SFB']));
+  ok('nothing missing when all present', missingCodes(['LHR'], new Set(['LHR'])).length === 0);
 }
 
 // ---------------------------------------------------------------- summary
