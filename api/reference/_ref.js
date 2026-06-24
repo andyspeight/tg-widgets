@@ -32,7 +32,44 @@ export const AF = {
   terminals:   'fldoJm0H4vTRLuJlL',
   parking:     'fldoKcDvovYdGvxqy',
   lounges:     'fldkq66823wiLYMoK',
+  train:       'fld9lb4Zzp40PsVmq',
+  coach:       'fldv9urpL8JP6PmCw',
+  taxi:        'flduHqBj7hcAvIVjs',
+  arrival:     'fldIPVLmhkvQR39Dz',
 };
+
+// Countries table — the other half of the reference layer.
+export const COUNTRIES_TBL = 'tblsxbqbyhTDoWhbo';
+export const CF = {
+  name:        'flddJJrpwcXOwWIow',
+  continent:   'fldeVnkZXLiy8qCcl',
+  status:      'fldCpclokepeFkQZ2',
+  practical:   'fldvarabAjjpOUKFG',
+  visaStatus:  'fldmKvRkDDRjj7PT2',
+  visaAdvisory:'fldecKeSnkZ6ABZfd',
+  health:      'fldOGSgbbH3BIoU6A',
+  currency:    'fldoe2LemU2kZS3EP',
+  language:    'fldypaRO1PZgwom22',
+  timezone:    'fldOqkxbOYfxL1Qxt',
+  flightTime:  'fldGPxNRuf9xao0He',
+  bestTime:    'fldwBjpooWzPoJ35H',
+};
+
+/** Read every record from a reference table (selected fields), paginated. */
+export async function listAll(tableId, fieldIds = [], { filterByFormula } = {}) {
+  const params = new URLSearchParams({ returnFieldsByFieldId: 'true', pageSize: '100' });
+  fieldIds.forEach(f => params.append('fields[]', f));
+  if (filterByFormula) params.set('filterByFormula', filterByFormula);
+  const out = [];
+  let offset;
+  do {
+    if (offset) params.set('offset', offset);
+    const data = await refFetch(`/${tableId}?${params}`);
+    out.push(...data.records);
+    offset = data.offset;
+  } while (offset);
+  return out;
+}
 
 // Status choices that exist on the table (no dedicated "stale" option).
 export const AIRPORT_STATUS = { DONE: 'Done', LIVE: 'Live', IN_PROGRESS: 'In progress', TODO: 'Todo', DRAFT: 'Draft' };
