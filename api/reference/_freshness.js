@@ -1,21 +1,24 @@
 /**
- * Reference freshness re-verify engine.
+ * Reference freshness re-verify engine (two-independent-source model).
  *
- * For airports whose Verified Date has lapsed, re-check the record's volatile
- * facts (terminals, transport, prices, status) against a cited source
- * (Wikipedia first, official site as fallback) and classify:
- *   - holds        : source still supports the record
- *   - drifted      : the source shows a likely factual change
- *   - unverifiable : source could not be fetched or did not cover it
+ * For airports whose Verified Date has lapsed, the AI re-checks the record
+ * against TWO independent sources (the stored Source 1 / Source 2, falling back
+ * to Wikipedia / official site to make two) and classifies:
+ *   - verified     : two independent sources each still support the record
+ *   - drifted      : a source shows a likely factual change
+ *   - unverifiable : fewer than two sources reachable, or none confirm it
  *
- * Disposition is conservative and OFF by default. The engine writes nothing
- * unless told to: `restampValid` re-stamps Verified Date on a clean hold,
- * `flagDrift` moves a drifted record to "In progress" for a human. Default is
- * a pure report, so a wrong AI call can never silently refresh stale data or
- * pull good data offline.
+ * A fact is only auto-confirmed when TWO independent sources agree. Anything
+ * the AI cannot verify that way (one source, conflicting sources, nothing
+ * reachable) is escalated to a human rather than guessed — the human is the
+ * fallback, not the default reviewer.
  *
- * Source-grounded: the verifier only compares against the fetched page, never
- * its own world knowledge.
+ * Disposition is OFF by default (pure report). `restampValid` re-stamps the
+ * Verified Date on a clean two-source confirmation; `flagForHuman` moves a
+ * drifted or unverifiable record to "In progress" for you.
+ *
+ * Source-grounded: each per-source check compares only against that fetched
+ * page, never the model's own world knowledge.
  */
 
 import {
@@ -83,6 +86,25 @@ async function verifyAirport(rec, sourceText) {
   };
 }
 
+/**
+ * Combine per-source verdicts into one. Pure and unit-tested.
+ * A record is "verified" only when at least two independent sources hold and
+ * none contradicts. Any conflict -> drifted. Otherwise -> unverifiable (human).
+ */
+export function combineVerdicts(perSource) {
+  if (perSource.some(v => v === 'drifted')) return 'drifted';
+  if (perSource.filter(v => v === 'holds').length >= 2) return 'verified';
+  return 'unverifiable';
+}
+
+// Distinct source URLs to try, in priority order, deduped.
+function sourceUrls(f) {
+  const seen = new Set();
+  return [f[AF.source1], f[AF.source2], f[AF.wikipedia], f[AF.official]]
+    .filter(Boolean)
+    .filter(u => { const k = String(u).toLowerCase().trim(); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+
 async function runPool(items, worker, size = 3) {
   const out = new Array(items.length); let i = 0;
   async function next() {
@@ -98,29 +120,44 @@ async function runPool(items, worker, size = 3) {
  * @returns { ttlDays, due, checked, holds, drifted, unverifiable, errors,
  *            restamped, flagged, items[] }
  */
-export async function runFreshness({ ttlDays = 30, limit = 15, restampValid = false, flagDrift = false, nowIso } = {}) {
+export async function runFreshness({ ttlDays = 30, limit = 15, restampValid = false, flagForHuman = false, nowIso } = {}) {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set');
   const today = (nowIso || new Date().toISOString()).slice(0, 10);
 
   const due = await listDueAirports({ ttlDays, limit });
-  if (!due.length) return { ttlDays, due: 0, checked: 0, holds: 0, drifted: 0, unverifiable: 0, errors: 0, restamped: 0, flagged: 0, items: [] };
+  if (!due.length) return { ttlDays, due: 0, checked: 0, verified: 0, drifted: 0, unverifiable: 0, errors: 0, restamped: 0, flagged: 0, items: [] };
 
   const items = await runPool(due, async (rec) => {
     const f = rec.fields;
-    const src = (await fetchText(f[AF.wikipedia])) || (await fetchText(f[AF.official]));
-    if (!src || src.length < 200) {
-      return { id: rec.id, airport: `${f[AF.name]} (${f[AF.iata]})`, verdict: 'unverifiable', changes: [], notes: 'source could not be fetched' };
+    const label = `${f[AF.name]} (${f[AF.iata]})`;
+
+    // Fetch up to two independent, reachable sources.
+    const fetched = [];
+    for (const url of sourceUrls(f)) {
+      if (fetched.length >= 2) break;
+      const txt = await fetchText(url);
+      if (txt && txt.length >= 200) fetched.push({ url, txt });
     }
-    const v = await verifyAirport(rec, src);
+
+    // Need two independent sources to auto-confirm; otherwise it's for a human.
+    if (fetched.length < 2) {
+      return { id: rec.id, airport: label, verdict: 'unverifiable', sourcesChecked: fetched.length, changes: [], notes: 'fewer than two sources reachable' };
+    }
+
+    const perSource = await Promise.all(fetched.map(s => verifyAirport(rec, s.txt)));
+    const verdict = combineVerdicts(perSource.map(v => v.verdict));
+    const changes = perSource.flatMap(v => v.changes).slice(0, 8);
+
     let action = 'none';
-    if (v.verdict === 'holds' && restampValid) { await restampVerified(rec.id, today).catch(() => {}); action = 'restamped'; }
-    if (v.verdict === 'drifted' && flagDrift) { await setAirportStatus(rec.id, AIRPORT_STATUS.IN_PROGRESS).catch(() => {}); action = 'flagged'; }
-    return { id: rec.id, airport: `${f[AF.name]} (${f[AF.iata]})`, verdict: v.verdict, changes: v.changes, notes: v.notes, action };
+    if (verdict === 'verified' && restampValid) { await restampVerified(rec.id, today).catch(() => {}); action = 'restamped'; }
+    else if (verdict !== 'verified' && flagForHuman) { await setAirportStatus(rec.id, AIRPORT_STATUS.IN_PROGRESS).catch(() => {}); action = 'flagged'; }
+
+    return { id: rec.id, airport: label, verdict, sourcesChecked: fetched.length, sources: fetched.map(s => s.url), changes, action };
   });
 
-  const summary = { ttlDays, due: due.length, checked: items.length, holds: 0, drifted: 0, unverifiable: 0, errors: 0, restamped: 0, flagged: 0, items };
+  const summary = { ttlDays, due: due.length, checked: items.length, verified: 0, drifted: 0, unverifiable: 0, errors: 0, restamped: 0, flagged: 0, items };
   for (const it of items) {
-    if (it.verdict === 'holds') summary.holds++;
+    if (it.verdict === 'verified') summary.verified++;
     else if (it.verdict === 'drifted') summary.drifted++;
     else if (it.verdict === 'error') summary.errors++;
     else summary.unverifiable++;

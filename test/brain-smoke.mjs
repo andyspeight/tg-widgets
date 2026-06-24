@@ -15,6 +15,7 @@ import { similarity, tokens } from '../api/brain/_text.js';
 import { safeUrl, htmlToText } from '../api/_lib/webfetch.js';
 import { matchEntities, formatContext, shapeMatches } from '../api/reference/_index.js';
 import { extractIatas, missingCodes } from '../api/reference/_breadth.js';
+import { combineVerdicts } from '../api/reference/_freshness.js';
 
 let pass = 0, fail = 0;
 const fails = [];
@@ -120,6 +121,18 @@ console.log('reference.extractIatas + missingCodes');
   ok('missingCodes finds the gap', miss.length === 2 && miss.includes('MCO') && miss.includes('SFB'));
   ok('missingCodes sorted', JSON.stringify(miss) === JSON.stringify(['MCO', 'SFB']));
   ok('nothing missing when all present', missingCodes(['LHR'], new Set(['LHR'])).length === 0);
+}
+
+// ---------------------------------------------------------------- two-source verdict
+console.log('freshness.combineVerdicts (two-source rule)');
+{
+  eq('two holds -> verified', combineVerdicts(['holds', 'holds']), 'verified');
+  eq('three holds -> verified', combineVerdicts(['holds', 'holds', 'holds']), 'verified');
+  eq('one hold only -> unverifiable (needs two)', combineVerdicts(['holds', 'unverifiable']), 'unverifiable');
+  eq('any drift -> drifted', combineVerdicts(['holds', 'drifted']), 'drifted');
+  eq('drift beats two holds -> drifted', combineVerdicts(['holds', 'holds', 'drifted']), 'drifted');
+  eq('none confirm -> unverifiable', combineVerdicts(['unverifiable', 'unverifiable']), 'unverifiable');
+  eq('empty -> unverifiable', combineVerdicts([]), 'unverifiable');
 }
 
 // ---------------------------------------------------------------- summary

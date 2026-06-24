@@ -2,10 +2,14 @@
  * POST /api/reference/refresh
  *
  * Run the reference freshness re-verify engine on demand. Defaults to a pure
- * report (writes nothing). Pass restampValid / flagDrift to enable the
+ * report (writes nothing). Pass restampValid / flagForHuman to enable the
  * conservative writes once you trust it.
  *
- * Body: { ttlDays?: 1-365, limit?: 1-30, restampValid?: bool, flagDrift?: bool }
+ * Each airport is re-verified against two independent sources; only a clean
+ * two-source confirmation can re-stamp. Anything that can't be verified that
+ * way is escalated to a human (flagForHuman), never guessed.
+ *
+ * Body: { ttlDays?: 1-365, limit?: 1-30, restampValid?: bool, flagForHuman?: bool }
  * Auth: Luna Brain access or Travelgenix staff.
  */
 
@@ -52,7 +56,7 @@ export default async function handler(req, res) {
     const summary = await runFreshness({
       ttlDays, limit,
       restampValid: body.restampValid === true,
-      flagDrift: body.flagDrift === true,
+      flagForHuman: body.flagForHuman === true,
     });
     return res.status(200).json({ ok: true, ...summary });
   } catch (err) {
