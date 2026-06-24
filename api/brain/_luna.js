@@ -1,0 +1,130 @@
+/**
+ * Thin Airtable REST client for the Luna Chat base (app6Ot3eOb3DangkB), where
+ * the Luna Brain Knowledge table lives.
+ *
+ * Why a separate client: the shared _lib/auth/airtable.js helper is hard-wired
+ * to the Control base (appAYzWZxvK6qlwXK) used for SSO and entitlements. Luna
+ * Brain reads and writes a DIFFERENT base, so it needs its own thin client.
+ * This mirrors what api/api/luna-copilot.js already does against the same base.
+ *
+ * Server-side only. Uses AIRTABLE_PAT (scoped to both bases); AIRTABLE_KEY is
+ * accepted as a fallback to match the copilot endpoint.
+ */
+
+const AIRTABLE_API = 'https://api.airtable.com/v0';
+const LUNA_BASE_ID = process.env.LUNA_BASE_ID || 'app6Ot3eOb3DangkB';
+const PAT = process.env.AIRTABLE_PAT || process.env.AIRTABLE_KEY;
+
+export const KNOWLEDGE_TBL = 'tblstATJ3BSqtuTDU';
+export const CLIENTS_TBL = 'tbl6CZ7aVzq1wHF2v';
+
+// Stable field IDs on the Knowledge table.
+export const KF = {
+  question:       'fldEm65vQmagn5WfR',
+  variants:       'fldHytgAlS9MvoHRb',
+  answer:         'fldAVVG7qfl8mlMPe',
+  client:         'fldj3YnhyNZhvRaj1',
+  type:           'fldQQ4us6LUFCNznB',
+  status:         'fldV7EF0zOrMQNnkX',
+  source:         'fldfOrjAdGsOGJUb0',
+  confidence:     'fldWpz8NFGiPtOhEG',
+  keywords:       'fldgfrOwdHSyH6vdG',
+  timesUsed:      'fld6T7FgQD7KkE3IC',
+  lastUsedAt:     'fldA6cYYHcRz9q66w',
+  createdAt:      'fldzpn7RAyPRFOXTk',
+  notes:          'fldJV5ayvh34P3fXE',
+  lastVerifiedAt: 'fldkNk8hEuZJXiK5p',
+};
+
+// Field id for ClientName on the Luna Clients table.
+export const CF = { name: 'fldT257oW3qssqUcZ' };
+
+// The set of values the gate may write. Kept here so both endpoints agree.
+export const STATUS   = { ACTIVE: 'Active', DRAFT: 'Draft', ARCHIVED: 'Archived' };
+export const CONFIDENCE = { VERIFIED: 'Verified', NEEDS_REVIEW: 'Needs Review' };
+
+export function lunaConfigured() {
+  return !!PAT;
+}
+
+async function lunaFetch(path, options = {}, attempt = 1) {
+  const url = `${AIRTABLE_API}/${LUNA_BASE_ID}${path}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${PAT}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+
+  // Airtable rate limit (5 req/sec) — back off 1s, 2s, 4s.
+  if (res.status === 429 && attempt <= 3) {
+    await new Promise(r => setTimeout(r, 1000 * 2 ** (attempt - 1)));
+    return lunaFetch(path, options, attempt + 1);
+  }
+  if (res.status >= 500 && res.status < 600 && attempt <= 2) {
+    await new Promise(r => setTimeout(r, 500 * attempt));
+    return lunaFetch(path, options, attempt + 1);
+  }
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    const err = new Error(`Airtable ${res.status}: ${body.slice(0, 300)}`);
+    err.status = res.status;
+    throw err;
+  }
+  return res.json();
+}
+
+/**
+ * List Knowledge records by a filterByFormula. Caller supplies the formula
+ * (built from constants here, never from raw user input). Fields come back
+ * keyed by field ID so the KF map resolves them.
+ */
+export async function listKnowledge({ formula, maxRecords = 200, sortField, sortDir = 'asc' } = {}) {
+  const params = new URLSearchParams({
+    returnFieldsByFieldId: 'true',
+    pageSize: '100',
+  });
+  if (formula) params.set('filterByFormula', formula);
+  if (sortField) {
+    params.append('sort[0][field]', sortField);
+    params.append('sort[0][direction]', sortDir);
+  }
+  const out = [];
+  let offset;
+  do {
+    if (offset) params.set('offset', offset);
+    const data = await lunaFetch(`/${KNOWLEDGE_TBL}?${params}`);
+    out.push(...data.records);
+    offset = data.offset;
+  } while (offset && out.length < maxRecords);
+  return out.slice(0, maxRecords);
+}
+
+export async function getKnowledge(id) {
+  return lunaFetch(`/${KNOWLEDGE_TBL}/${id}?returnFieldsByFieldId=true`);
+}
+
+/** Update one Knowledge record. `fields` keyed by field ID. typecast resolves select names. */
+export async function updateKnowledge(id, fields) {
+  return lunaFetch(`/${KNOWLEDGE_TBL}/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ fields, typecast: true, returnFieldsByFieldId: true }),
+  });
+}
+
+/** Build a recordId -> ClientName map for the linked clients we actually need. */
+export async function clientNameMap() {
+  const params = new URLSearchParams({ returnFieldsByFieldId: 'true', pageSize: '100' });
+  params.append('fields[]', CF.name);
+  const out = new Map();
+  let offset;
+  do {
+    if (offset) params.set('offset', offset);
+    const data = await lunaFetch(`/${CLIENTS_TBL}?${params}`);
+    for (const r of data.records) out.set(r.id, r.fields[CF.name] || '');
+    offset = data.offset;
+  } while (offset);
+  return out;
+}

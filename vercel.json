@@ -36,6 +36,10 @@
       "destination": "/admin.html"
     },
     {
+      "source": "/brain",
+      "destination": "/brain.html"
+    },
+    {
       "source": "/demo",
       "destination": "/demo.html"
     },
