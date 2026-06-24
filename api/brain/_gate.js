@@ -31,7 +31,7 @@
  */
 
 import {
-  listKnowledge, updateKnowledge, getConversationTranscripts,
+  listKnowledge, getKnowledge, updateKnowledge, getConversationTranscripts,
   getClientScanned, listVerified,
   KF, STATUS, CONFIDENCE,
 } from './_luna.js';
@@ -220,6 +220,34 @@ function indexVerified(records) {
   return byClient;
 }
 
+// The whole per-item gate: deterministic reject, gather evidence, two
+// independent verifiers, decide, apply. Shared by every caller.
+async function runItem(item, { verifiedByClient, scannedCache, excludeSelf = false }) {
+  if (!item.question.trim() || !item.answer.trim()) {
+    await applyDecision(item,
+      { outcome: 'escalate', spotCheck: false, reason: 'empty question or answer' },
+      { supported: false, hasCheckableClaims: true }, { pass: false, risk: 'low' });
+    return { id: item.id, outcome: 'escalate', reason: 'empty' };
+  }
+
+  const clientId = item.clientIds[0] || null;
+  let verifiedPeers = clientId ? (verifiedByClient.get(clientId) || []) : [];
+  if (excludeSelf) verifiedPeers = verifiedPeers.filter(k => k.q !== item.question);
+
+  let scanned = '';
+  if (clientId) {
+    if (!scannedCache.has(clientId)) scannedCache.set(clientId, await getClientScanned(clientId).catch(() => ''));
+    scanned = scannedCache.get(clientId);
+  }
+  const transcripts = item.convIds.length ? await getConversationTranscripts(item.convIds).catch(() => '') : '';
+
+  const a = await verifyGrounding(item, evidenceBlock({ transcripts, verifiedPeers, scanned }));
+  const b = await verifyAdversarial(item, verifiedPeers);
+  const d = decide(a, b);
+  await applyDecision(item, d, a, b);
+  return { id: item.id, question: clamp(item.question, 120), outcome: d.outcome, spotCheck: d.spotCheck, reason: d.reason };
+}
+
 async function runPool(items, worker, size = CONCURRENCY) {
   const out = new Array(items.length);
   let i = 0;
@@ -253,33 +281,7 @@ export async function processPending({ limit = 20, force = false } = {}) {
   const verifiedByClient = indexVerified(await listVerified({ maxRecords: 400 }).catch(() => []));
   const scannedCache = new Map();
 
-  const results = await runPool(items, async (item) => {
-    // Layer 0: deterministic reject of broken records.
-    if (!item.question.trim() || !item.answer.trim()) {
-      await applyDecision(item,
-        { outcome: 'escalate', spotCheck: false, reason: 'empty question or answer' },
-        { supported: false, hasCheckableClaims: true }, { pass: false, risk: 'low' });
-      return { id: item.id, outcome: 'escalate', reason: 'empty' };
-    }
-
-    const clientId = item.clientIds[0] || null;
-    const verifiedPeers = clientId ? (verifiedByClient.get(clientId) || []) : [];
-
-    let scanned = '';
-    if (clientId) {
-      if (!scannedCache.has(clientId)) scannedCache.set(clientId, await getClientScanned(clientId).catch(() => ''));
-      scanned = scannedCache.get(clientId);
-    }
-    const transcripts = item.convIds.length ? await getConversationTranscripts(item.convIds).catch(() => '') : '';
-    const evidence = evidenceBlock({ transcripts, verifiedPeers, scanned });
-
-    // Two independent verifiers.
-    const a = await verifyGrounding(item, evidence);
-    const b = await verifyAdversarial(item, verifiedPeers);
-    const d = decide(a, b);
-    await applyDecision(item, d, a, b);
-    return { id: item.id, question: clamp(item.question, 120), outcome: d.outcome, spotCheck: d.spotCheck, reason: d.reason };
-  });
+  const results = await runPool(items, (item) => runItem(item, { verifiedByClient, scannedCache }));
 
   const summary = { processed: results.length, published: 0, spotCheck: 0, escalated: 0, errors: 0, results };
   for (const r of results) {
@@ -313,23 +315,22 @@ export async function recheckStale({ limit = 15 } = {}) {
   const verifiedByClient = indexVerified(verified);
   const scannedCache = new Map();
 
-  const results = await runPool(due.map(toItem), async (item) => {
-    const clientId = item.clientIds[0] || null;
-    const verifiedPeers = clientId ? (verifiedByClient.get(clientId) || []).filter(k => k.q !== item.question) : [];
-    let scanned = '';
-    if (clientId) {
-      if (!scannedCache.has(clientId)) scannedCache.set(clientId, await getClientScanned(clientId).catch(() => ''));
-      scanned = scannedCache.get(clientId);
-    }
-    const transcripts = item.convIds.length ? await getConversationTranscripts(item.convIds).catch(() => '') : '';
-    const a = await verifyGrounding(item, evidenceBlock({ transcripts, verifiedPeers, scanned }));
-    const b = await verifyAdversarial(item, verifiedPeers);
-    const d = decide(a, b);
-    await applyDecision(item, d, a, b);
-    return { id: item.id, outcome: d.outcome === 'publish' ? 're-stamped' : 'sent back for review' };
-  });
+  const raw = await runPool(due.map(toItem), (item) => runItem(item, { verifiedByClient, scannedCache, excludeSelf: true }));
+  const results = raw.map(r => ({ id: r.id, outcome: r.outcome === 'publish' ? 're-stamped' : 'sent back for review' }));
 
   return { due: due.length, results };
+}
+
+/**
+ * Run the gate on a single record by id (used right after ingest / edit so a
+ * new fact can auto-publish on the spot). Returns the per-item result.
+ */
+export async function gateOne(recordId) {
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set');
+  const rec = await getKnowledge(recordId);
+  const item = toItem(rec);
+  const verifiedByClient = indexVerified(await listVerified({ maxRecords: 400 }).catch(() => []));
+  return runItem(item, { verifiedByClient, scannedCache: new Map(), excludeSelf: true });
 }
 
 export const _internals = { GATE_MARK, SPOT_MARK };

@@ -107,6 +107,15 @@ export async function getKnowledge(id) {
   return lunaFetch(`/${KNOWLEDGE_TBL}/${id}?returnFieldsByFieldId=true`);
 }
 
+/** Create one Knowledge record. `fields` keyed by field ID. */
+export async function createKnowledge(fields) {
+  const data = await lunaFetch(`/${KNOWLEDGE_TBL}`, {
+    method: 'POST',
+    body: JSON.stringify({ records: [{ fields }], typecast: true, returnFieldsByFieldId: true }),
+  });
+  return data.records[0];
+}
+
 /** Update one Knowledge record. `fields` keyed by field ID. typecast resolves select names. */
 export async function updateKnowledge(id, fields) {
   return lunaFetch(`/${KNOWLEDGE_TBL}/${id}`, {
