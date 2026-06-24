@@ -80,6 +80,7 @@
     <button class="addbtn" id="add">Add knowledge</button>
     <button class="runbtn" id="cov">Check coverage</button>
     <button class="runbtn" id="crawl">Scan sources</button>
+    <button class="runbtn" id="freshness">Reference freshness</button>
     <button class="runbtn" id="run">Run verification now</button>
     <a class="back" href="https://id.travelify.io">Dashboard</a>
   </header>
@@ -143,6 +144,16 @@
         <button class="act btn-verify" id="crawl-submit">Scan now</button>
         <button class="act btn-ghost" id="crawl-cancel">Cancel</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Reference freshness results modal -->
+  <div class="overlay" id="fresh-overlay">
+    <div class="modal">
+      <h2>Reference freshness</h2>
+      <p class="sub">Re-checks shared airport data whose verification has lapsed against its cited sources. Report only — it changes nothing.</p>
+      <div id="fresh-body"><p class="gate">Checking…</p></div>
+      <div class="form-actions"><button class="act btn-ghost" id="fresh-close">Close</button></div>
     </div>
   </div>
 
@@ -513,6 +524,36 @@
         })
         .catch(function () { toast('The scan could not finish. Please try again.'); })
         .finally(function () { submit.disabled = false; submit.textContent = 'Scan now'; });
+    });
+
+    // ---- reference freshness ----
+    var freshOverlay = document.getElementById('fresh-overlay');
+    document.getElementById('fresh-close').addEventListener('click', function () { freshOverlay.classList.remove('show'); });
+    freshOverlay.addEventListener('click', function (e) { if (e.target === freshOverlay) freshOverlay.classList.remove('show'); });
+
+    document.getElementById('freshness').addEventListener('click', function () {
+      var body = document.getElementById('fresh-body');
+      body.innerHTML = '<p class="gate">Checking shared reference data…</p>';
+      freshOverlay.classList.add('show');
+      postJson('/api/reference/refresh', { ttlDays: 30, limit: 15 })
+        .then(function (res) {
+          if (!res.ok || !res.d.ok) throw new Error((res.d && res.d.error) || 'failed');
+          var s = res.d;
+          if (!s.due) { body.innerHTML = '<p>Nothing overdue. All reference data is within its freshness window.</p>'; return; }
+          var html = '<p><strong>' + s.checked + '</strong> of ' + s.due + ' overdue airports checked · ' +
+            s.holds + ' still hold · <strong>' + s.drifted + '</strong> drifted · ' + s.unverifiable + ' unverifiable.</p>';
+          var drifted = (s.items || []).filter(function (i) { return i.verdict === 'drifted'; });
+          if (drifted.length) {
+            html += '<p style="margin-top:12px;font-weight:600">Likely changed — worth a look:</p>';
+            html += drifted.map(function (i) {
+              return '<div class="card" style="margin:8px 0"><p class="q">' + esc(i.airport) + '</p>' +
+                (i.changes && i.changes.length ? '<p class="a">' + i.changes.map(esc).join('<br>') + '</p>' : '') +
+                (i.notes ? '<p class="gate">' + esc(i.notes) + '</p>' : '') + '</div>';
+            }).join('');
+          }
+          body.innerHTML = html;
+        })
+        .catch(function () { body.innerHTML = '<p>The freshness check could not finish. Please try again.</p>'; });
     });
 
     window.addEventListener('tg-auth-ready', function () { loadView('queue'); });

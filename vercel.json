@@ -28,6 +28,12 @@
     "api/brain/crawl.js": {
       "maxDuration": 300
     },
+    "api/reference/refresh.js": {
+      "maxDuration": 300
+    },
+    "api/cron/reference-freshness.js": {
+      "maxDuration": 300
+    },
     "api/cron/brain-verify.js": {
       "maxDuration": 300
     }
@@ -44,6 +50,10 @@
     {
       "path": "/api/cron/brain-verify",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/reference-freshness",
+      "schedule": "0 4 * * 1"
     }
   ],
   "rewrites": [
