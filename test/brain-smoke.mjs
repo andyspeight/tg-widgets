@@ -16,6 +16,7 @@ import { safeUrl, htmlToText } from '../api/_lib/webfetch.js';
 import { matchEntities, formatContext, shapeMatches } from '../api/reference/_index.js';
 import { extractIatas, missingCodes } from '../api/reference/_breadth.js';
 import { combineVerdicts } from '../api/reference/_freshness.js';
+import { crossVerify, haversineKm, parseOurAirports, parseWikidataSparql, splitCsvLine, normalizeName } from '../api/reference/_breadth_fill.js';
 
 let pass = 0, fail = 0;
 const fails = [];
@@ -133,6 +134,45 @@ console.log('freshness.combineVerdicts (two-source rule)');
   eq('drift beats two holds -> drifted', combineVerdicts(['holds', 'holds', 'drifted']), 'drifted');
   eq('none confirm -> unverifiable', combineVerdicts(['unverifiable', 'unverifiable']), 'unverifiable');
   eq('empty -> unverifiable', combineVerdicts([]), 'unverifiable');
+}
+
+// ---------------------------------------------------------------- breadth-fill two-source
+console.log('breadth-fill.crossVerify + parsers (two-source identity)');
+{
+  // haversine sanity: Verona airport (~45.396,10.888) vs Verona centre (~45.438,10.992) ~ <12km
+  const d = haversineKm(45.3957, 10.8885, 45.4384, 10.9916);
+  ok('haversine plausible (<15km)', d > 0 && d < 15);
+  ok('haversine null on bad input', haversineKm(1, 2, NaN, 4) === null);
+
+  const oa = { iata: 'VRN', name: 'Verona Villafranca Airport', city: 'Verona', country: 'IT', lat: 45.3957, lon: 10.8885 };
+  const wd = { iata: 'VRN', name: 'Verona Valerio Catullo Airport', country: 'Italy', lat: 45.3956, lon: 10.8884 };
+  const v = crossVerify(oa, wd);
+  ok('two sources agree -> verified', v.verified === true && v.conflicts.length === 0);
+
+  const far = crossVerify(oa, { iata: 'VRN', name: 'Somewhere Else', lat: 10, lon: 10 });
+  ok('coords far apart -> not verified', far.verified === false && far.conflicts.length > 0);
+  ok('IATA mismatch -> conflict', crossVerify(oa, { ...wd, iata: 'XXX' }).verified === false);
+  ok('missing source -> not verified', crossVerify(oa, null).verified === false);
+  // name corroboration alone (no coords on one side) still verifies
+  ok('name match without coords -> verified', crossVerify({ iata: 'DLM', name: 'Dalaman Airport' }, { iata: 'DLM', name: 'Dalaman Airport' }).verified === true);
+
+  ok('normalizeName drops noise words', normalizeName('London Heathrow International Airport') === 'london heathrow');
+
+  // CSV parse
+  const csv = 'id,ident,type,name,latitude_deg,longitude_deg,iso_country,municipality,iata_code\n1,LTBO,large_airport,"Verona Villafranca, Airport",45.3957,10.8885,IT,Verona,VRN';
+  const parsed = parseOurAirports(csv, 'VRN');
+  ok('parseOurAirports finds row', parsed && parsed.iata === 'VRN' && parsed.city === 'Verona' && parsed.country === 'IT');
+  ok('parseOurAirports handles quoted comma', parsed && parsed.name === 'Verona Villafranca, Airport');
+  ok('parseOurAirports lat parsed', parsed && Math.abs(parsed.lat - 45.3957) < 0.001);
+  ok('parseOurAirports miss -> null', parseOurAirports(csv, 'ZZZ') === null);
+  ok('splitCsvLine quoted', JSON.stringify(splitCsvLine('a,"b,c",d')) === JSON.stringify(['a', 'b,c', 'd']));
+
+  // Wikidata SPARQL parse
+  const wdJson = { results: { bindings: [{ airport: { value: 'http://www.wikidata.org/entity/Q666' }, airportLabel: { value: 'Verona Villafranca Airport' }, countryLabel: { value: 'Italy' }, coord: { value: 'Point(10.8885 45.3957)' } }] } };
+  const wp = parseWikidataSparql(wdJson, 'VRN');
+  ok('parseWikidataSparql name+country', wp && wp.name.includes('Verona') && wp.country === 'Italy');
+  ok('parseWikidataSparql coord lon/lat order', wp && Math.abs(wp.lon - 10.8885) < 0.001 && Math.abs(wp.lat - 45.3957) < 0.001);
+  ok('parseWikidataSparql empty -> null', parseWikidataSparql({ results: { bindings: [] } }, 'VRN') === null);
 }
 
 // ---------------------------------------------------------------- summary

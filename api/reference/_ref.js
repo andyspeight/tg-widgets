@@ -22,6 +22,8 @@ export const AF = {
   status:      'fldjvujj14Q9QNLLq',
   cityServed:  'fldgrJ2uFjzPcAxUx',
   countryText: 'fldjARk52dZi7TGGc',
+  latitude:    'fldXZKuycZOgJScSj',
+  longitude:   'fldRG7pc5iPJPzhEI',
   verifiedDate:'fldRCo83Wz1AFZXwP',
   wikipedia:   'fldRqtt44nsacJCwq',
   official:    'fldkrScmky7HhnD0r',
