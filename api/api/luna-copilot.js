@@ -174,7 +174,14 @@ async function getClientById(id) {
 async function getKnowledge(ids) {
   if (!ids || !ids.length) return [];
   const picked = ids.slice(0, MAX_KNOWLEDGE);
-  const formula = `OR(${picked.map(id => `RECORD_ID()="${id}"`).join(',')})`;
+  // SINGLE SOURCE OF TRUTH CONTRACT.
+  // Only ever serve knowledge a human has published (Status = Active) AND
+  // confirmed (Confidence = Verified). Draft, Archived or "Needs Review" items
+  // must never reach the model, or an unapproved or stale fact could be stated
+  // to a customer. The link list alone is not enough — it can contain items in
+  // any state — so we gate on Status + Confidence here.
+  const idMatch = `OR(${picked.map(id => `RECORD_ID()="${id}"`).join(',')})`;
+  const formula = `AND(${idMatch},{Status}="Active",{Confidence}="Verified")`;
   const data = await airtable(KNOWLEDGE_TBL, {
     filterByFormula: formula,
     maxRecords: MAX_KNOWLEDGE,
@@ -221,10 +228,14 @@ function buildContext(client, knowledge) {
   if (f[F.phone])        lines.push(`Business phone: ${clamp(f[F.phone], 60)}`);
   if (f[F.customQA])     lines.push(`Custom Q&A:\n${clamp(f[F.customQA], 2000)}`);
   if (knowledge.length) {
-    lines.push('Knowledge base entries the business has approved:');
+    lines.push('VERIFIED KNOWLEDGE (published and human-verified — you may rely on these as fact):');
     knowledge.forEach(k => lines.push(`- Q: ${k.q}\n  A: ${k.a}`));
   }
-  if (f[F.scanned]) lines.push(`Extra context from the business website:\n${clamp(f[F.scanned], MAX_SCANNED_CHARS)}`);
+  // Raw text scraped from the business website. It has NOT been reviewed, so it
+  // is fenced off as untrusted: usable for tone and general context, never as a
+  // source of a hard fact. Anything stated as fact must come from the verified
+  // knowledge above or the conversation.
+  if (f[F.scanned]) lines.push(`UNVERIFIED WEBSITE BACKGROUND (raw, unchecked text scraped from the business site). Use only for tone and general context. Do NOT state anything from here as a fact, price, date, reference or policy unless it also appears in the verified knowledge above:\n${clamp(f[F.scanned], MAX_SCANNED_CHARS)}`);
   return { botName, context: lines.join('\n') };
 }
 
@@ -244,7 +255,7 @@ function systemPrompt(botName) {
     'YOUR JOB: help the agent reply faster and better. You never speak to the customer directly. Your output is only ever seen by the agent, who decides whether to use it.',
     '',
     'HARD RULES (breaking any one means your output is wrong):',
-    '1. Ground everything in the SUPPLIED knowledge and the conversation. Never invent facts. Do NOT state prices, availability, dates, booking references, discounts, offers, or specific ATOL/ABTA/bonding detail unless they appear in the supplied context or the conversation. If a fact is needed but missing, write the reply so the agent fills it in, using a clearly bracketed placeholder like [check price] or [confirm dates]. Never guess a number.',
+    '1. Ground everything in the SUPPLIED knowledge and the conversation. Never invent facts. Treat anything labelled VERIFIED KNOWLEDGE as trusted and quotable; treat UNVERIFIED WEBSITE BACKGROUND as a hint for tone only and never quote a fact, price, date, reference or policy from it. Do NOT state prices, availability, dates, booking references, discounts, offers, or specific ATOL/ABTA/bonding detail unless they appear in the verified context or the conversation. If a fact is needed but missing, write the reply so the agent fills it in, using a clearly bracketed placeholder like [check price] or [confirm dates]. Never guess a number.',
     '2. Voice: warm, direct, like a knowledgeable friend. UK English (colour, favourite, organise, travelling). Short, natural sentences. Contractions are fine. Confident, never robotic, never grovelling, never defensive. Do not tell the customer what they "actually need".',
     '3. Never use an em dash. Use commas, full stops or a rewrite instead. Do not use the Oxford comma.',
     '4. Banned words and phrases: leverage, utilise, synergy, game-changer, innovative, cutting-edge, delve, seamless, robust, elevate, supercharge, unlock, transform your, best-in-class, world-class, next-generation, revolutionary, "in today\'s", "I genuinely", "let me be clear", "rest assured".',
