@@ -34,6 +34,7 @@ export const KF = {
   createdAt:      'fldzpn7RAyPRFOXTk',
   notes:          'fldJV5ayvh34P3fXE',
   lastVerifiedAt: 'fldkNk8hEuZJXiK5p',
+  conversations:  'fldokH6yAztrIxElG',
 };
 
 // Field id for ClientName on the Luna Clients table.
@@ -112,6 +113,40 @@ export async function updateKnowledge(id, fields) {
     method: 'PATCH',
     body: JSON.stringify({ fields, typecast: true, returnFieldsByFieldId: true }),
   });
+}
+
+// Conversations table — source of grounding evidence for escalation-derived facts.
+export const CONV_TBL = 'tblyin27D2J9ejHvf';
+const CONV_TRANSCRIPT = 'fld8fMjyXWmKcacoB';
+// scannedKnowledge on the Clients table — the business's own website text.
+const CLIENT_SCANNED = 'fld56L15X31pTrzfD';
+
+/** Fetch transcript text for up to a few linked conversations (bounded). */
+export async function getConversationTranscripts(ids, max = 3) {
+  if (!ids || !ids.length) return '';
+  const picked = ids.slice(0, max);
+  const formula = `OR(${picked.map(id => `RECORD_ID()="${id}"`).join(',')})`;
+  const params = new URLSearchParams({ returnFieldsByFieldId: 'true', maxRecords: String(max) });
+  params.set('filterByFormula', formula);
+  params.append('fields[]', CONV_TRANSCRIPT);
+  const data = await lunaFetch(`/${CONV_TBL}?${params}`).catch(() => ({ records: [] }));
+  return (data.records || [])
+    .map(r => String(r.fields[CONV_TRANSCRIPT] || '').slice(0, 4000))
+    .filter(Boolean)
+    .join('\n---\n');
+}
+
+/** The business's scraped website text for a client (untrusted background). */
+export async function getClientScanned(clientId) {
+  if (!clientId) return '';
+  const rec = await lunaFetch(`/${CLIENTS_TBL}/${clientId}?returnFieldsByFieldId=true`).catch(() => null);
+  return rec ? String(rec.fields?.[CLIENT_SCANNED] || '') : '';
+}
+
+/** All Active + Verified knowledge (bounded), for the consistency corpus. */
+export async function listVerified({ maxRecords = 400 } = {}) {
+  const formula = `AND({Status}="${STATUS.ACTIVE}",{Confidence}="${CONFIDENCE.VERIFIED}")`;
+  return listKnowledge({ formula, maxRecords });
 }
 
 /** Build a recordId -> ClientName map for the linked clients we actually need. */

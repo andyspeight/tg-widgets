@@ -26,7 +26,8 @@ import {
 } from './_luna.js';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
-const ACTIONS = new Set(['verify', 'archive', 'reactivate', 'needs_review']);
+const ACTIONS = new Set(['verify', 'archive', 'reactivate', 'needs_review', 'clear_spotcheck']);
+const SPOT_MARK = '[spot-check]';
 
 async function readBody(req) {
   if (req.body) {
@@ -82,6 +83,10 @@ export default async function handler(req, res) {
       fields[KF.status] = STATUS.ARCHIVED;
     } else if (action === 'needs_review') {
       fields[KF.confidence] = CONFIDENCE.NEEDS_REVIEW;
+    } else if (action === 'clear_spotcheck') {
+      // Spot-check done: strip the marker from Notes, leave it Active+Verified.
+      const notes = String(existing.fields?.[KF.notes] || '').split(SPOT_MARK).join('').trimEnd();
+      fields[KF.notes] = notes;
     }
 
     const updated = await updateKnowledge(id, fields);
