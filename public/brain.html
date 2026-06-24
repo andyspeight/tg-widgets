@@ -86,6 +86,7 @@
     <div class="tabs">
       <button class="tab active" data-view="queue">To verify<span class="pill" id="pill-queue"></span></button>
       <button class="tab" data-view="spotcheck">Spot-check<span class="pill" id="pill-spotcheck"></span></button>
+      <button class="tab" data-view="gaps">Gaps<span class="pill" id="pill-gaps"></span></button>
     </div>
     <div id="list"></div>
     <div class="state" id="loading">Loading…</div>
@@ -164,8 +165,30 @@
         return '<div class="state empty"><div class="big">Nothing to spot-check</div>' +
           '<div>High-risk facts the gate auto-published will show here for a quick eyeball.</div></div>';
       }
+      if (view === 'gaps') {
+        return '<div class="state empty"><div class="big">No open gaps</div>' +
+          '<div>When Luna cannot answer a visitor question, it lands here so you can draft an answer.</div></div>';
+      }
       return '<div class="state empty"><div class="big">Queue clear</div>' +
         '<div>Every fact is verified and live. Add knowledge or run the gate to bring more in.</div></div>';
+    }
+
+    function gapCardHtml(it) {
+      var tags = [];
+      if (it.occurrences) tags.push('<span class="tag review">Asked ' + it.occurrences + (it.occurrences === 1 ? ' time' : ' times') + '</span>');
+      if (it.topic) tags.push('<span class="tag">' + esc(it.topic) + '</span>');
+      if (it.clientName) tags.push('<span class="tag">' + esc(it.clientName) + '</span>');
+      var meta = it.lastSeenAt ? 'Last asked ' + fmtDate(it.lastSeenAt) : '';
+      return '' +
+        '<div class="card" data-id="' + esc(it.id) + '" data-suggested="' + esc(it.suggestedAnswer || '') + '">' +
+          '<div class="view">' +
+            '<p class="q">' + esc(it.question || '(no question)') + '</p>' +
+            (it.suggestedAnswer ? '<p class="a">Luna suggests: ' + esc(it.suggestedAnswer) + '</p>' : '<p class="gate">No suggested answer yet — you write it.</p>') +
+            '<div class="tags">' + tags.join('') + '</div>' +
+            '<div class="actions"><button class="act btn-verify" data-action="draft-gap">Draft an answer</button></div>' +
+            (meta ? '<div class="note">' + esc(meta) + '</div>' : '') +
+          '</div>' +
+        '</div>';
     }
 
     function typeOptions(sel) {
@@ -211,17 +234,21 @@
     function render(view, items) {
       loadingEl.style.display = 'none';
       setPill(view, items.length);
-      listEl.innerHTML = items.length ? items.map(function (it) { return cardHtml(it, view); }).join('') : emptyHtml(view);
+      if (!items.length) { listEl.innerHTML = emptyHtml(view); return; }
+      listEl.innerHTML = items.map(function (it) {
+        return view === 'gaps' ? gapCardHtml(it) : cardHtml(it, view);
+      }).join('');
     }
 
     function loadView(view) {
       currentView = view;
       loadingEl.style.display = ''; loadingEl.textContent = 'Loading…';
       listEl.innerHTML = '';
-      fetch('/api/brain/queue?view=' + encodeURIComponent(view), { credentials: 'include', cache: 'no-store' })
+      var url = view === 'gaps' ? '/api/brain/gaps' : '/api/brain/queue?view=' + encodeURIComponent(view);
+      fetch(url, { credentials: 'include', cache: 'no-store' })
         .then(function (r) {
           if (r.status === 401) { window.location.reload(); return null; }
-          if (!r.ok) throw new Error('queue_' + r.status);
+          if (!r.ok) throw new Error('load_' + r.status);
           return r.json();
         })
         .then(function (data) { if (data && data.ok) render(view, data.items || []); })
@@ -250,6 +277,19 @@
       var ed = card.querySelector('.editor'); if (ed) ed.remove();
       var v = card.querySelector('.view'); if (v) v.style.display = '';
     }
+    function openGapEditor(card) {
+      var suggested = card.getAttribute('data-suggested') || '';
+      var html =
+        '<label>Type</label><select class="g-type">' + typeOptions('FAQ') + '</select>' +
+        '<label>Answer</label><textarea class="g-a" maxlength="4000" placeholder="Write the trusted answer">' + esc(suggested) + '</textarea>' +
+        '<div class="form-actions">' +
+          '<button class="act btn-verify" data-action="promote-gap">Draft and check</button>' +
+          '<button class="act btn-ghost" data-action="cancel-gap">Cancel</button>' +
+        '</div>';
+      var editor = document.createElement('div'); editor.className = 'editor'; editor.innerHTML = html;
+      card.querySelector('.view').style.display = 'none';
+      card.appendChild(editor);
+    }
 
     // Item + edit actions
     listEl.addEventListener('click', function (e) {
@@ -258,7 +298,27 @@
       var action = btn.getAttribute('data-action');
 
       if (action === 'edit') { openEditor(card); return; }
-      if (action === 'cancel-edit') { closeEditor(card); return; }
+      if (action === 'cancel-edit' || action === 'cancel-gap') { closeEditor(card); return; }
+      if (action === 'draft-gap') { openGapEditor(card); return; }
+
+      if (action === 'promote-gap') {
+        var ga = card.querySelector('.g-a').value.trim();
+        var gtype = card.querySelector('.g-type').value;
+        if (!ga) { toast('Write an answer first.'); return; }
+        card.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+        postJson('/api/brain/promote-gap', { gapId: id, answer: ga, type: gtype })
+          .then(function (res) {
+            if (!res.ok || !res.d.ok) throw new Error();
+            var g = res.d.gate;
+            toast(g && g.outcome === 'publish' ? 'Drafted and auto-published' : 'Drafted, waiting in the queue for you');
+            loadView('gaps');
+          })
+          .catch(function () {
+            card.querySelectorAll('button').forEach(function (b) { b.disabled = false; });
+            toast('Could not draft that. Please try again.');
+          });
+        return;
+      }
 
       if (action === 'save-edit') {
         var q = card.querySelector('.e-q').value.trim();

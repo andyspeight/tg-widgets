@@ -44,6 +44,21 @@ export const CF = { name: 'fldT257oW3qssqUcZ' };
 export const STATUS   = { ACTIVE: 'Active', DRAFT: 'Draft', ARCHIVED: 'Archived' };
 export const CONFIDENCE = { VERIFIED: 'Verified', NEEDS_REVIEW: 'Needs Review' };
 
+// Knowledge Gaps table — questions Luna could not answer, logged from live chats.
+export const GAPS_TBL = 'tblLkRcdcMIgmHPFj';
+export const GF = {
+  question:        'fldVuEp4b2Ik4nZme',
+  client:          'fldD6aP3yiY23c6d2',
+  occurrences:     'fld15dDIWU8z5c664',
+  lastSeenAt:      'fldAX39WnQCZGBfWT',
+  status:          'fld8dVJjF6nL6oCBR',   // Open / In Progress / Resolved / WontFix
+  topic:           'fldTZJUuMC9uIjaq5',
+  suggestedAnswer: 'fldPVaZzBbY3mV0P3',
+  linkedKnowledge: 'fldo9ZCeRgs93HJXc',
+  notes:           'fldROUxJMd4J8WIpA',
+};
+export const GAP_STATUS = { OPEN: 'Open', IN_PROGRESS: 'In Progress', RESOLVED: 'Resolved', WONTFIX: 'WontFix' };
+
 export function lunaConfigured() {
   return !!PAT;
 }
@@ -156,6 +171,33 @@ export async function getClientScanned(clientId) {
 export async function listVerified({ maxRecords = 400 } = {}) {
   const formula = `AND({Status}="${STATUS.ACTIVE}",{Confidence}="${CONFIDENCE.VERIFIED}")`;
   return listKnowledge({ formula, maxRecords });
+}
+
+// ---- Knowledge Gaps -------------------------------------------------------
+export async function listGaps({ formula, maxRecords = 200, sortField, sortDir = 'desc' } = {}) {
+  const params = new URLSearchParams({ returnFieldsByFieldId: 'true', pageSize: '100' });
+  if (formula) params.set('filterByFormula', formula);
+  if (sortField) { params.append('sort[0][field]', sortField); params.append('sort[0][direction]', sortDir); }
+  const out = [];
+  let offset;
+  do {
+    if (offset) params.set('offset', offset);
+    const data = await lunaFetch(`/${GAPS_TBL}?${params}`);
+    out.push(...data.records);
+    offset = data.offset;
+  } while (offset && out.length < maxRecords);
+  return out.slice(0, maxRecords);
+}
+
+export async function getGap(id) {
+  return lunaFetch(`/${GAPS_TBL}/${id}?returnFieldsByFieldId=true`);
+}
+
+export async function updateGap(id, fields) {
+  return lunaFetch(`/${GAPS_TBL}/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ fields, typecast: true, returnFieldsByFieldId: true }),
+  });
 }
 
 /** Build a recordId -> ClientName map for the linked clients we actually need. */
