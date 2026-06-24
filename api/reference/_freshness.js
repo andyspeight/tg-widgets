@@ -22,42 +22,14 @@ import {
   listDueAirports, restampVerified, setAirportStatus,
   AF, AIRPORT_STATUS,
 } from './_ref.js';
+import { fetchText } from '../_lib/webfetch.js';
 
 const MODEL = process.env.BRAIN_GATE_MODEL_B || process.env.BRAIN_GATE_MODEL || 'claude-sonnet-4-6';
 const SOURCE_CHARS = 8000;
 
 function clamp(s, n) { s = (s == null ? '' : String(s)); return s.length > n ? s.slice(0, n) : s; }
 
-// ---- web fetch (SSRF-guarded) ---------------------------------------------
-function safeUrl(u) {
-  let url; try { url = new URL(u); } catch { return null; }
-  if (!/^https?:$/.test(url.protocol)) return null;
-  const h = url.hostname.toLowerCase();
-  if (h === 'localhost' || h.endsWith('.local') || h.endsWith('.internal')) return null;
-  if (h === '169.254.169.254' || h === 'metadata.google.internal') return null;
-  if (/^(127\.|10\.|0\.|169\.254\.|192\.168\.)/.test(h)) return null;
-  if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return null;
-  if (h === '::1' || /^\[?(fc|fd|fe80)/.test(h)) return null;
-  return url.toString();
-}
-function htmlToText(html) {
-  return String(html)
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
-}
-async function fetchText(u) {
-  const safe = safeUrl(u); if (!safe) return '';
-  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 12000);
-  try {
-    const r = await fetch(safe, { signal: ctrl.signal, redirect: 'follow', headers: { 'User-Agent': 'LunaBrain/1.0 (+https://travelify.io)' } });
-    if (!r.ok) return '';
-    const ct = (r.headers.get('content-type') || '').toLowerCase();
-    if (ct && !/text|html|xml/.test(ct)) return '';
-    return htmlToText((await r.text()).slice(0, 200000));
-  } catch { return ''; } finally { clearTimeout(t); }
-}
+// SSRF guard, fetchText and htmlToText now live in ../_lib/webfetch.js.
 
 // ---- verifier -------------------------------------------------------------
 async function callAnthropic({ system, user, temperature = 0.1, maxTokens = 700 }) {

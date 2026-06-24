@@ -19,6 +19,8 @@ import {
   KF, STATUS, CONFIDENCE,
 } from './_luna.js';
 import { gateOne } from './_gate.js';
+import { fetchText as fetchUrlText, safeUrl } from '../_lib/webfetch.js';
+import { similarity } from './_text.js';
 
 const MODEL = process.env.BRAIN_GATE_MODEL_A || process.env.BRAIN_GATE_MODEL || 'claude-sonnet-4-6';
 const MAX_PAGES = 5;
@@ -28,47 +30,7 @@ const SOURCE_CHARS = 8000; // page text fed to the extractor / gate
 
 function clamp(s, n) { s = (s == null ? '' : String(s)); return s.length > n ? s.slice(0, n) : s; }
 
-// ---- SSRF guard -----------------------------------------------------------
-function safeUrl(u) {
-  let url;
-  try { url = new URL(u); } catch { return null; }
-  if (!/^https?:$/.test(url.protocol)) return null;
-  const host = url.hostname.toLowerCase();
-  if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal')) return null;
-  if (host === '169.254.169.254' || host === 'metadata.google.internal') return null;
-  if (/^(127\.|10\.|0\.|169\.254\.|192\.168\.)/.test(host)) return null;
-  if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) return null;
-  if (host === '::1' || /^\[?(fc|fd|fe80)/.test(host)) return null;
-  return url.toString();
-}
-
-async function fetchText(u) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 12000);
-  try {
-    const r = await fetch(u, {
-      signal: ctrl.signal, redirect: 'follow',
-      headers: { 'User-Agent': 'LunaBrain/1.0 (+https://travelify.io)' },
-    });
-    if (!r.ok) return '';
-    const ct = (r.headers.get('content-type') || '').toLowerCase();
-    if (ct && !/text|html|xml/.test(ct)) return '';
-    const body = await r.text();
-    return htmlToText(body.slice(0, PAGE_BYTES));
-  } catch { return ''; } finally { clearTimeout(t); }
-}
-
-function htmlToText(html) {
-  return String(html)
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+// SSRF guard, fetchText and htmlToText now live in ../_lib/webfetch.js.
 
 // ---- extraction (source-grounded only) ------------------------------------
 async function callAnthropic({ system, user, temperature = 0.2, maxTokens = 1200 }) {
@@ -110,15 +72,6 @@ async function extractCandidates(pageText) {
     .map(i => ({ question: clamp(i.question, 300).trim(), answer: clamp(i.answer, 2000).trim() }));
 }
 
-// token-overlap similarity for dedupe
-function tokens(s) { return new Set(String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 2)); }
-function similarity(a, b) {
-  const ta = tokens(a), tb = tokens(b);
-  if (!ta.size || !tb.size) return 0;
-  let inter = 0; for (const w of ta) if (tb.has(w)) inter++;
-  return inter / (ta.size + tb.size - inter);
-}
-
 async function runPool(items, worker, size = 3) {
   const out = new Array(items.length); let i = 0;
   async function next() {
@@ -153,7 +106,7 @@ export async function runCrawl(clientId, { maxPages = MAX_PAGES } = {}) {
   const allResults = [];
 
   for (const url of safe) {
-    const text = await fetchText(url);
+    const text = await fetchUrlText(url);
     if (!text || text.length < 200) { allResults.push({ url, outcome: 'empty' }); continue; }
     scanned++;
     const host = (() => { try { return new URL(url).hostname; } catch { return 'source'; } })();

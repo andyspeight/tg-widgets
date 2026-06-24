@@ -41,6 +41,7 @@ import {
   KF, STATUS, CONFIDENCE,
 } from './_luna.js';
 import { gateOne } from './_gate.js';
+import { similarity } from './_text.js';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 const TYPES = new Set(['FAQ', 'Policy', 'Preference', 'Supplier Rule', 'Destination Note', 'Pricing', 'Booking Process', 'Other']);
@@ -59,18 +60,6 @@ async function readBody(req) {
     req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch { resolve({}); } });
     req.on('error', () => resolve({}));
   });
-}
-
-// Normalised token set for cheap question similarity (Jaccard).
-function tokens(s) {
-  return new Set(String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 2));
-}
-function similarity(a, b) {
-  const ta = tokens(a), tb = tokens(b);
-  if (!ta.size || !tb.size) return 0;
-  let inter = 0;
-  for (const w of ta) if (tb.has(w)) inter++;
-  return inter / (ta.size + tb.size - inter);
 }
 
 function timingSafeEq(a, b) {
