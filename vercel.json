@@ -174,6 +174,10 @@
       "destination": "/demo-offer-builder.html"
     },
     {
+      "source": "/demo-offer-card",
+      "destination": "/demo-offer-card.html"
+    },
+    {
       "source": "/editor-offer-builder",
       "destination": "/editor-offer-builder.html"
     },
