@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Special Offer Builder Editor · Travelgenix</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/editor-shell.css">
+
+  <style>
+    :root {
+      --bg: #F8FAFC; --panel: #FFFFFF; --panel-2: #F8FAFC;
+      --ink: #0F172A; --sub: #475569; --muted: #94A3B8;
+      --border: #E2E8F0; --border-strong: #CBD5E1; --hover: #F1F5F9;
+      --brand: #1B2B5B; --accent: #00B4D8; --accent-soft: rgba(0,180,216,.12);
+      --success: #10B981; --danger: #EF4444;
+      --radius-sm: 6px; --radius: 8px; --radius-lg: 12px;
+      --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--panel-2); color: var(--ink); font-size: 14px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+
+    .sidebar-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .section { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; }
+    .section-head {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; background: var(--panel); border: 0; font-size: 13px; font-weight: 600;
+      color: var(--ink); cursor: pointer; text-align: left;
+    }
+    .section-head:hover { background: var(--hover); }
+    .section-head-chev { transition: transform 0.15s ease; color: var(--muted); }
+    .section[data-open="false"] .section-head-chev { transform: rotate(-90deg); }
+    .section[data-open="false"] .section-body { display: none; }
+    .section-body { padding: 4px 14px 14px; border-top: 1px solid var(--border); }
+
+    .field { margin-top: 12px; }
+    .field:first-child { margin-top: 0; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 6px; }
+    .field-help { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .field input[type=text], .field input[type=email], .field input[type=tel], .field select, .field textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--panel); color: var(--ink);
+    }
+    .field textarea { resize: vertical; min-height: 64px; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+    .field input[type=color] { width: 100%; height: 38px; padding: 3px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-child { border-bottom: 0; }
+    .toggle-row span { font-size: 13px; font-weight: 500; }
+    .toggle { appearance: none; -webkit-appearance: none; width: 38px; height: 22px; background: var(--border); border-radius: 999px; position: relative; cursor: pointer; transition: background 0.15s ease; flex-shrink: 0; }
+    .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.18); }
+    .toggle:checked { background: var(--accent); }
+    .toggle:checked::after { transform: translateX(16px); }
+
+    .embed-code { background: #0F172A; color: #E2E8F0; border-radius: var(--radius); padding: 14px 16px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; line-height: 1.7; position: relative; word-break: break-all; white-space: pre-wrap; }
+    .embed-copy { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.12); color: #fff; border: 0; border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+    .embed-copy:hover { background: rgba(255,255,255,0.22); }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: flex; align-items: center; justify-content: center; z-index: 200; }
+    .modal { background: var(--panel); border-radius: var(--radius-lg); width: min(560px, 92vw); max-height: 86vh; overflow: auto; box-shadow: 0 20px 50px rgba(15,23,42,.3); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-weight: 700; font-size: 15px; }
+    .modal-close { background: none; border: 0; cursor: pointer; color: var(--muted); }
+    .modal-body { padding: 18px; }
+  </style>
+</head>
+<body>
+
+  <div class="tgse-app" id="editor" hidden>
+
+    <aside class="tgse-sidebar">
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
+        </a>
+      </div>
+
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 7.3 12 2 3.4 7.3 12 12.6z"/><path d="M3.4 7.3V16.7L12 22l8.6-5.3V7.3"/><path d="M12 12.6V22"/></svg>
+        </span>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Special Offer Builder</div>
+          <div class="tgse-id-type" id="topbarSub">New widget</div>
+        </div>
+      </div>
+
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Widget name" maxlength="100">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="save-label">Save</span>
+        </button>
+      </div>
+
+      <nav class="tgse-tabs" role="tablist">
+        <button id="tabContent" data-tab="content" role="tab" aria-selected="true">Content</button>
+        <button id="tabDesign" data-tab="design" role="tab" aria-selected="false">Design</button>
+        <button id="tabSettings" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
+
+      <div class="sidebar-body">
+
+        <!-- ============ CONTENT ============ -->
+        <div id="panelContent">
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Heading &amp; copy
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Form heading</label><input type="text" id="cfgTitle"></div>
+              <div class="field"><label class="field-label">Intro line</label><textarea id="cfgIntro"></textarea></div>
+              <div class="field"><label class="field-label">Save button label</label><input type="text" id="cfgSubmitLabel"></div>
+              <div class="field"><label class="field-label">Success heading</label><input type="text" id="cfgSuccessHeading"></div>
+              <div class="field"><label class="field-label">Success message</label><textarea id="cfgSuccessBody"></textarea></div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>AI assist
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row"><span>Show the AI draft box</span><input type="checkbox" class="toggle" id="cfgAIEnabled"></div>
+              <div class="field"><label class="field-label">Prompt placeholder</label><textarea id="cfgAIPlaceholder"></textarea></div>
+              <div class="field-help">The form posts the description to the AI endpoint set under Settings. The preview here uses a canned draft so you can see the behaviour without a backend.</div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Sections shown
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row"><span>Where &amp; from where</span><input type="checkbox" class="toggle" id="cfgShowDestination"></div>
+              <div class="toggle-row"><span>Stay &amp; travel</span><input type="checkbox" class="toggle" id="cfgShowStayTravel"></div>
+              <div class="toggle-row"><span>Price</span><input type="checkbox" class="toggle" id="cfgShowPrice"></div>
+              <div class="toggle-row"><span>What's included</span><input type="checkbox" class="toggle" id="cfgShowIncludes"></div>
+              <div class="toggle-row"><span>Tags &amp; promo badge</span><input type="checkbox" class="toggle" id="cfgShowTags"></div>
+              <div class="toggle-row"><span>Validity &amp; availability</span><input type="checkbox" class="toggle" id="cfgShowValidity"></div>
+              <div class="toggle-row"><span>Photos</span><input type="checkbox" class="toggle" id="cfgShowImages"></div>
+              <div class="toggle-row"><span>Full description</span><input type="checkbox" class="toggle" id="cfgShowDescription"></div>
+              <div class="toggle-row"><span>Where enquiries go</span><input type="checkbox" class="toggle" id="cfgShowEnquiry"></div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Required fields
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row"><span>Offer title required</span><input type="checkbox" class="toggle" id="cfgRequireTitle"></div>
+              <div class="toggle-row"><span>Price required</span><input type="checkbox" class="toggle" id="cfgRequirePrice"></div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Tag &amp; include options
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Tag options</label><textarea id="cfgTagOptions" rows="4"></textarea><div class="field-help">One per line.</div></div>
+              <div class="field"><label class="field-label">Include options</label><textarea id="cfgIncludeOptions" rows="4"></textarea><div class="field-help">One per line.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ DESIGN ============ -->
+        <div id="panelDesign" hidden>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Colours
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Accent colour</label><input type="color" id="cfgAccent"></div>
+              <div class="field"><label class="field-label">Brand colour</label><input type="color" id="cfgBrand"></div>
+              <div class="field-help">Theme (light/dark) is toggled from the preview toolbar.</div>
+            </div>
+          </div>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Shape
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Corner radius (px)</label><input type="text" id="cfgRadius" inputmode="numeric"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ SETTINGS ============ -->
+        <div id="panelSettings" hidden>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Currency &amp; AI
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Currency</label><select id="cfgCurrency"><option value="GBP">£ GBP</option><option value="EUR">€ EUR</option><option value="USD">$ USD</option></select></div>
+              <div class="field"><label class="field-label">AI draft endpoint</label><input type="text" id="cfgAIEndpoint" placeholder="/api/offer-draft"><div class="field-help">Left blank for now. The endpoint that turns a description into form fields is built in the next step.</div></div>
+            </div>
+          </div>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Enquiry routing
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Enquiry email</label><input type="email" id="cfgEnquiryEmail" placeholder="sales@youragency.co.uk"></div>
+              <div class="field"><label class="field-label">Phone shown on page</label><input type="tel" id="cfgEnquiryPhone" placeholder="0161 123 4567"></div>
+              <div class="field"><label class="field-label">Financial protection</label><select id="cfgProtection"><option>ATOL protected</option><option>ABTA member</option><option>Both</option><option>Neither</option></select></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
+        </button>
+      </div>
+      <div class="tgse-canvas">
+        <div class="preview-stage" id="previewStage" data-vp="desktop">
+          <div id="previewMount"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Embed Modal -->
+  <div class="modal-backdrop" id="embedModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Embed code</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:12px;">Paste this into any HTML page on your site. Save the widget first if you haven't already.</div>
+        <div class="embed-code" id="embedCode">Save the widget first to generate the embed code.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/widget-offer-builder.js"></script>
+  <script src="/editor-shell.js"></script>
+
+  <script>
+    const WIDGET_TYPE = 'Special Offer Builder';
+    function $(id) { return document.getElementById(id); }
+
+    const state = {
+      name: '',
+      widgetId: '',
+      dirty: false,
+      config: {
+        title: 'Create a special offer',
+        intro: 'Fill the form yourself, or describe the deal in a sentence and let AI draft it for you. Every AI suggestion is editable before you publish.',
+        submitLabel: 'Save offer',
+        successHeading: 'Offer captured',
+        successBody: 'Your special offer is ready. The card and offer page come next.',
+        aiEnabled: true,
+        aiEndpoint: '',
+        aiPlaceholder: 'e.g. 7 nights all inclusive at the Riu Palace in Cancun, flying from Gatwick, was 1299 now from 899pp, kids stay free, book by end of July',
+        currency: 'GBP',
+        accentColor: '#00B4D8',
+        brandColor: '#1B2B5B',
+        radius: 14,
+        theme: 'light',
+        showDestination: true, showStayTravel: true, showPrice: true, showIncludes: true,
+        showTags: true, showValidity: true, showImages: true, showDescription: true, showEnquiry: true,
+        requireTitle: true, requirePrice: true,
+        tagOptions: ['Family friendly','Adults only','Beachfront','Honeymoon','Last minute','Early bird','Spa','Kids club','Swim-up rooms'],
+        includeOptions: ['Return flights','Airport transfers','23kg luggage','All meals & drinks','ABTA / ATOL protection','Rep service','Kids stay free','Free cancellation'],
+        enquiryEmail: '', enquiryPhone: '', protection: 'ATOL protected'
+      }
+    };
+
+    /* ---- Tabs ---- */
+    function setTab(name) {
+      const tabs = { content: 'tabContent', design: 'tabDesign', settings: 'tabSettings' };
+      const panels = { content: 'panelContent', design: 'panelDesign', settings: 'panelSettings' };
+      Object.entries(tabs).forEach(([k, id]) => { const b = $(id); if (b) b.setAttribute('aria-selected', k === name ? 'true' : 'false'); });
+      Object.entries(panels).forEach(([k, id]) => { const p = $(id); if (p) p.hidden = k !== name; });
+    }
+    document.querySelectorAll('.tgse-tabs button').forEach(b =>
+      b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+    /* ---- Section collapse ---- */
+    document.addEventListener('click', (e) => {
+      const head = e.target.closest('[data-section]');
+      if (!head) return;
+      const section = head.closest('.section');
+      section.setAttribute('data-open', section.getAttribute('data-open') === 'true' ? 'false' : 'true');
+    });
+
+    /* ---- Modals ---- */
+    function openModal(id) { $(id).hidden = false; }
+    function closeModal(id) { $(id).hidden = true; }
+    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('.modal-backdrop').hidden = true));
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.addEventListener('click', (e) => { if (e.target === m) m.hidden = true; }));
+
+    /* ---- Preview ---- */
+    let previewWidget = null;
+    function renderPreview() {
+      const mount = $('previewMount');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const cfg = JSON.parse(JSON.stringify(state.config));
+      cfg.aiMock = true;   // preview uses the canned draft, no backend needed
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'offer-builder');
+      mount.appendChild(div);
+      previewWidget = new window.TGOfferBuilderWidget(div, cfg);
+    }
+
+    function markDirtyAndPreview() {
+      state.dirty = true;
+      if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+      renderPreview();
+    }
+
+    /* ---- Hydrate UI from state.config ---- */
+    function hydrateUI() {
+      const c = state.config;
+      $('name-input').value = state.name || '';
+      $('cfgTitle').value = c.title;
+      $('cfgIntro').value = c.intro;
+      $('cfgSubmitLabel').value = c.submitLabel;
+      $('cfgSuccessHeading').value = c.successHeading;
+      $('cfgSuccessBody').value = c.successBody;
+      $('cfgAIEnabled').checked = c.aiEnabled;
+      $('cfgAIPlaceholder').value = c.aiPlaceholder;
+      $('cfgAIEndpoint').value = c.aiEndpoint;
+      $('cfgCurrency').value = c.currency;
+      $('cfgAccent').value = c.accentColor;
+      $('cfgBrand').value = c.brandColor;
+      $('cfgRadius').value = c.radius;
+      $('cfgShowDestination').checked = c.showDestination;
+      $('cfgShowStayTravel').checked = c.showStayTravel;
+      $('cfgShowPrice').checked = c.showPrice;
+      $('cfgShowIncludes').checked = c.showIncludes;
+      $('cfgShowTags').checked = c.showTags;
+      $('cfgShowValidity').checked = c.showValidity;
+      $('cfgShowImages').checked = c.showImages;
+      $('cfgShowDescription').checked = c.showDescription;
+      $('cfgShowEnquiry').checked = c.showEnquiry;
+      $('cfgRequireTitle').checked = c.requireTitle;
+      $('cfgRequirePrice').checked = c.requirePrice;
+      $('cfgTagOptions').value = (c.tagOptions || []).join('\n');
+      $('cfgIncludeOptions').value = (c.includeOptions || []).join('\n');
+      $('cfgEnquiryEmail').value = c.enquiryEmail;
+      $('cfgEnquiryPhone').value = c.enquiryPhone;
+      $('cfgProtection').value = c.protection;
+    }
+
+    /* ---- Wire inputs → state.config ---- */
+    function lines(v) { return v.split('\n').map(s => s.trim()).filter(Boolean); }
+    function wireInputs() {
+      $('name-input').addEventListener('input', (e) => { state.name = e.target.value; markDirtyAndPreview(); });
+
+      const text = {
+        cfgTitle: 'title', cfgIntro: 'intro', cfgSubmitLabel: 'submitLabel',
+        cfgSuccessHeading: 'successHeading', cfgSuccessBody: 'successBody',
+        cfgAIPlaceholder: 'aiPlaceholder', cfgAIEndpoint: 'aiEndpoint',
+        cfgEnquiryEmail: 'enquiryEmail', cfgEnquiryPhone: 'enquiryPhone'
+      };
+      Object.entries(text).forEach(([id, key]) =>
+        $(id).addEventListener('input', (e) => { state.config[key] = e.target.value; markDirtyAndPreview(); }));
+
+      const selects = { cfgCurrency: 'currency', cfgProtection: 'protection' };
+      Object.entries(selects).forEach(([id, key]) =>
+        $(id).addEventListener('change', (e) => { state.config[key] = e.target.value; markDirtyAndPreview(); }));
+
+      const colors = { cfgAccent: 'accentColor', cfgBrand: 'brandColor' };
+      Object.entries(colors).forEach(([id, key]) =>
+        $(id).addEventListener('input', (e) => { state.config[key] = e.target.value; markDirtyAndPreview(); }));
+
+      $('cfgRadius').addEventListener('input', (e) => {
+        const n = parseInt(e.target.value, 10);
+        state.config.radius = isNaN(n) ? 14 : Math.max(0, Math.min(40, n));
+        markDirtyAndPreview();
+      });
+
+      const toggles = {
+        cfgAIEnabled: 'aiEnabled', cfgShowDestination: 'showDestination', cfgShowStayTravel: 'showStayTravel',
+        cfgShowPrice: 'showPrice', cfgShowIncludes: 'showIncludes', cfgShowTags: 'showTags',
+        cfgShowValidity: 'showValidity', cfgShowImages: 'showImages', cfgShowDescription: 'showDescription',
+        cfgShowEnquiry: 'showEnquiry', cfgRequireTitle: 'requireTitle', cfgRequirePrice: 'requirePrice'
+      };
+      Object.entries(toggles).forEach(([id, key]) =>
+        $(id).addEventListener('change', (e) => { state.config[key] = e.target.checked; markDirtyAndPreview(); }));
+
+      $('cfgTagOptions').addEventListener('input', (e) => { state.config.tagOptions = lines(e.target.value); markDirtyAndPreview(); });
+      $('cfgIncludeOptions').addEventListener('input', (e) => { state.config.includeOptions = lines(e.target.value); markDirtyAndPreview(); });
+
+      $('btn-theme').addEventListener('click', () => {
+        state.config.theme = state.config.theme === 'dark' ? 'light' : 'dark';
+        markDirtyAndPreview();
+      });
+      $('btn-embed').addEventListener('click', (e) => { e.preventDefault(); renderEmbed(); openModal('embedModal'); });
+    }
+
+    /* ---- Embed ---- */
+    function renderEmbed() {
+      const box = $('embedCode');
+      if (!state.widgetId) { box.textContent = 'Save the widget first to generate the embed code.'; return; }
+      const code = '<div data-tg-widget="offer-builder" data-tg-id="' + state.widgetId + '"></div>\n'
+        + '<script src="https://tg-widgets.vercel.app/widget-offer-builder.js"><\/script>';
+      box.innerHTML = '';
+      const span = document.createElement('span'); span.textContent = code; box.appendChild(span);
+      const btn = document.createElement('button'); btn.className = 'embed-copy'; btn.textContent = 'Copy';
+      btn.onclick = () => navigator.clipboard.writeText(code).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); });
+      box.appendChild(btn);
+    }
+
+    /* ---- Boot ---- */
+    function boot() {
+      $('editor').hidden = false;
+      hydrateUI();
+      wireInputs();
+      setTab('content');
+      renderPreview();
+    }
+
+    window.tgse.init({
+      widgetType: WIDGET_TYPE,
+      widgetTag: 'offer-builder',
+      scriptFile: 'widget-offer-builder.js',
+      getConfig: () => JSON.parse(JSON.stringify(state.config)),
+      setConfig: (c) => { if (c && typeof c === 'object') Object.assign(state.config, c); hydrateUI(); renderPreview(); },
+      onTabChange: (t) => setTab(t),
+      onThemeToggle: () => { state.config.theme = state.config.theme === 'dark' ? 'light' : 'dark'; markDirtyAndPreview(); },
+      onLoginSuccess: () => boot(),
+      onAfterSave: (d) => {
+        state.dirty = false;
+        if (d && d.widgetId) state.widgetId = d.widgetId;
+        $('topbarSub').textContent = state.widgetId || 'Saved';
+        renderEmbed();
+      }
+    });
+
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (window.tgse.isLoggedIn()) boot(); });
+    } else if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+      boot();
+    }
+  </script>
+</body>
+</html>
