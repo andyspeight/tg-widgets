@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Special Offer Page · Travelgenix Widget Suite</title>
+<style>
+  :root {
+    --tg-bg: #F7F9FB; --tg-surface: #FFFFFF; --tg-border: #E2E8F0;
+    --tg-text: #0F172A; --tg-sub: #475569; --tg-muted: #94A3B8;
+    --tg-brand: #1B2B5B; --tg-accent: #00B4D8; --tg-accent-soft: #E0F4FA;
+  }
+  [data-theme="dark"] { --tg-bg: #0B1220; --tg-surface: #111B2E; --tg-border: #1E293B; --tg-text: #F1F5F9; --tg-sub: #94A3B8; --tg-muted: #64748B; --tg-accent: #38BDF8; --tg-accent-soft: rgba(56,189,248,0.12); }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--tg-bg); color: var(--tg-text); }
+  /* Slim demo control strip — clearly the demo chrome, the page below is the real thing */
+  .demobar { position: sticky; top: 0; z-index: 100; background: var(--tg-surface); border-bottom: 1px solid var(--tg-border); padding: 10px 20px; display: flex; align-items: center; gap: 14px; }
+  .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; color: var(--tg-text); font-weight: 700; font-size: 15px; }
+  .brand-mark { width: 24px; height: 24px; background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent)); border-radius: 7px; }
+  .pill { padding: 3px 9px; background: var(--tg-accent-soft); color: var(--tg-accent); border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .spacer { flex: 1; }
+  .demobar label { font-size: 11px; color: var(--tg-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .demobar select, .demobar input[type=color] { padding: 6px 8px; border: 1px solid var(--tg-border); border-radius: 7px; font-size: 13px; background: var(--tg-surface); color: var(--tg-text); font-family: inherit; }
+  .demobar input[type=color] { padding: 3px; width: 38px; height: 32px; cursor: pointer; }
+  .ctl { display: flex; align-items: center; gap: 7px; }
+  .tlink { color: var(--tg-sub); text-decoration: none; font-size: 13px; }
+  .tlink:hover { color: var(--tg-text); }
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(140%); z-index: 200; background: #0F172A; color: #fff; padding: 14px 20px; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.3); font-size: 14px; max-width: 90vw; transition: transform 0.4s cubic-bezier(.2,.8,.2,1); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast b { color: #7DD3FC; }
+</style>
+</head>
+<body>
+  <div class="demobar">
+    <a class="brand" href="/"><span class="brand-mark"></span>Travelgenix</a>
+    <span class="pill">Offer Page · Demo</span>
+    <span class="spacer"></span>
+    <div class="ctl"><label for="ctrlOffer">Offer</label>
+      <select id="ctrlOffer">
+        <option value="cancun" selected>Cancun · all inclusive</option>
+        <option value="maldives">Maldives · luxury honeymoon</option>
+        <option value="sparse">Minimal · few details</option>
+      </select>
+    </div>
+    <div class="ctl"><label for="ctrlAccent">Accent</label><input id="ctrlAccent" type="color" value="#00B4D8" /></div>
+    <a class="tlink" href="#" id="themeLink">Dark</a>
+    <a class="tlink" href="/demo-offer-card">Cards →</a>
+  </div>
+
+  <div id="pageMount"></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="/widget-offer-page.js"></script>
+  <script>
+    function $(id) { return document.getElementById(id); }
+    const mount = $('pageMount');
+
+    const OFFERS = {
+      cancun: {
+        currency: 'GBP',
+        images: [
+          'https://images.unsplash.com/photo-1510097467424-192d713fd8b2?w=1600&q=80',
+          'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=75',
+          'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800&q=75',
+          'https://images.unsplash.com/photo-1455587734955-081b22074882?w=800&q=75',
+          'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=75'
+        ],
+        fields: {
+          title: '7 nights all inclusive in Cancun',
+          teaser: 'Beachfront five star on the white sands of Costa Mujeres.',
+          type: 'Package holiday (flight + hotel)', style: 'All inclusive',
+          country: 'Mexico', region: 'Riviera Maya', resort: 'Costa Mujeres',
+          property: 'Riu Palace Costa Mujeres', stars: '5 star', board: 'All inclusive',
+          nights: '7', datemode: 'Selected dates in a period', period: 'Sep 2026 to Apr 2027',
+          airline: 'TUI Airways', flighttype: 'Direct', origin: 'London Gatwick',
+          price: '899', was: '1299', basis: 'per person', deposit: '60',
+          badge: 'Save', badgeAmount: '400', urgency: 'Only 4 left at this price',
+          bookby: '31 July 2026', avail: 'Limited rooms at this price', reference: 'TG-CUN-0926',
+          protection: 'Both', enquiryEmail: 'sales@youragency.co.uk', enquiryPhone: '0161 123 4567',
+          description: 'Wake up to white sand and turquoise sea at the Riu Palace Costa Mujeres, a five star beachfront resort on one of the quietest stretches of the Mexican Caribbean. This all inclusive deal covers your direct flights from Gatwick plus every meal, drink and snack once you arrive.\nWith four pools, a spa, a kids club and a string of restaurants, it suits couples and families alike. Children stay free on selected dates. Book by 31 July to lock in the saving.'
+        },
+        includes: ['Return direct flights from Gatwick', 'Private airport transfers', '23kg luggage per person', 'All meals, snacks & drinks', '7 nights at the Riu Palace 5★', 'Kids stay free on selected dates', 'ABTA & ATOL protection', 'UK rep service throughout'],
+        tags: ['Family friendly', 'Beachfront', 'Kids club', 'Swim-up rooms']
+      },
+      maldives: {
+        currency: 'GBP',
+        images: [
+          'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1600&q=80',
+          'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800&q=75',
+          'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&q=75',
+          'https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?w=800&q=75'
+        ],
+        fields: {
+          title: 'Maldives overwater honeymoon', teaser: 'Ten nights in an overwater villa with your own slice of lagoon.',
+          type: 'Package holiday (flight + hotel)', style: 'Honeymoon',
+          country: 'Maldives', region: 'North Malé Atoll', resort: 'North Malé Atoll',
+          property: 'Velassaru Maldives', stars: '5 star', board: 'Half board',
+          nights: '10', period: 'Nov 2026 to Mar 2027', airline: 'Emirates', flighttype: 'Connecting', origin: 'London Heathrow',
+          price: '3200', was: '3950', basis: 'per person', deposit: '150',
+          badge: 'Save', badgeAmount: '750', urgency: 'Honeymoon perks included',
+          bookby: '30 September 2026', reference: 'TG-MLE-1126', protection: 'ATOL protected',
+          enquiryEmail: 'luxury@youragency.co.uk', enquiryPhone: '0161 123 4567',
+          description: 'Slip into barefoot luxury at Velassaru, where your overwater villa opens straight onto a warm turquoise lagoon. Ten nights of sunrise swims, candlelit dinners on the sand and a spa over the water.\nFlights with Emirates via Dubai, speedboat transfer on arrival, and honeymoon touches laid on by the resort.'
+        },
+        includes: ['Return flights with Emirates', 'Speedboat transfers', 'Overwater villa, 10 nights', 'Daily breakfast & dinner', 'Honeymoon perks', 'ATOL protection'],
+        tags: ['Adults only', 'Overwater villa', 'Spa', 'Honeymoon']
+      },
+      sparse: {
+        currency: 'GBP',
+        fields: {
+          title: 'Lapland Santa break', type: 'City break', country: 'Finland', resort: 'Rovaniemi',
+          nights: '3', price: '799', basis: 'per person', bookby: '', protection: 'ABTA member',
+          enquiryPhone: '0161 123 4567',
+          description: 'A short magical break to meet Father Christmas in the Arctic Circle.'
+        },
+        includes: ['Return flights', 'Coach transfers'],
+        tags: ['Family friendly']
+      }
+    };
+
+    let theme = 'light';
+    $('themeLink').addEventListener('click', (e) => { e.preventDefault(); theme = theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', theme); $('themeLink').textContent = theme === 'dark' ? 'Light' : 'Dark'; render(); });
+
+    let widget = null;
+    function render() {
+      if (widget && widget.destroy) widget.destroy();
+      mount.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'offer-page');
+      mount.appendChild(div);
+      widget = new window.TGOfferPageWidget(div, {
+        theme: theme,
+        accentColor: $('ctrlAccent').value,
+        agencyName: 'Your Travel Co.',
+        offer: OFFERS[$('ctrlOffer').value]
+      });
+      window.scrollTo(0, 0);
+    }
+
+    // Show the captured enquiry as a toast so you can see the event payload
+    mount.addEventListener('tg-offer-enquiry', (e) => {
+      const t = $('toast');
+      t.innerHTML = 'Enquiry captured for <b>' + (e.detail.enquiry.name || 'visitor') + '</b> · routed to ' + (e.detail.to || 'the agency');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4500);
+    });
+
+    document.querySelectorAll('.demobar select, .demobar input').forEach(el => el.addEventListener('change', render));
+    render();
+  </script>
+</body>
+</html>

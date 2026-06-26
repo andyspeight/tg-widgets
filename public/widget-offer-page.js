@@ -1,0 +1,776 @@
+/* ============================================================================
+ * widget-offer-page.js  ·  Travelgenix Widget Suite
+ * Special Offer Page — the cinematic landing page for a hand-built offer (v0.1.0)
+ *
+ * The page a visitor lands on after clicking an offer card. Renders the full
+ * offer object the Special Offer Builder emits into a premium, conversion-led
+ * page with a built-in enquiry form. Layout + capture only at this stage: the
+ * enquiry form validates and fires a `tg-offer-enquiry` event (no backend yet).
+ *
+ * WOW, all CSP-clean and dependency-free:
+ *   - full-bleed hero with a slow Ken Burns zoom and layered gradient
+ *   - glass sticky booking bar that slides in once the hero scrolls away
+ *   - quick-facts tiles overlapping the hero
+ *   - reveal-on-scroll sections (IntersectionObserver)
+ *   - photo gallery with a keyboard-navigable lightbox
+ *   - live "book by" countdown
+ *   - sticky enquiry card with inline validation and success state
+ *   - honours prefers-reduced-motion
+ *
+ * Embed:
+ *   <div data-tg-widget="offer-page" data-tg-id="YOUR_WIDGET_ID"></div>
+ * or inline:
+ *   <div data-tg-widget="offer-page" data-tg-config='{"offer":{...}}'></div>
+ *
+ * Offer shape = the builder output ({fields, includes, tags, currency}); flat
+ * objects accepted. Gallery images come from offer.images[] (array), with
+ * offer.fields.image as the hero fallback.
+ * ========================================================================== */
+(function () {
+  'use strict';
+
+  const VERSION = '0.1.0';
+  const API_BASE = '/api/widget-config';
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function currencySymbol(code) {
+    return { GBP: '£', EUR: '€', USD: '$', AUD: '$', CAD: '$' }[code] || '£';
+  }
+  function num(val) {
+    if (val == null || val === '') return 0;
+    const n = Number(String(val).replace(/[^0-9.]/g, ''));
+    return isFinite(n) ? n : 0;
+  }
+  function money(sym, val) {
+    const n = num(val);
+    if (!n) return '';
+    return sym + n.toLocaleString('en-GB');
+  }
+  function parseStars(s) {
+    const m = String(s || '').match(/\d/);
+    return m ? Math.min(5, parseInt(m[0], 10)) : 0;
+  }
+  function shortType(t) {
+    if (!t) return '';
+    return String(t).split('(')[0].split('/')[0].replace(/\s+only$/i, '').trim();
+  }
+  function safeUrl(u) {
+    if (!u) return '';
+    const s = String(u).trim();
+    if (/^(https?:)?\/\//i.test(s) || s.startsWith('/') || s.startsWith('#')) return s;
+    return '';
+  }
+  function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim()); }
+
+  // Small inline icon set (stroke icons, currentColor)
+  const I = {
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    plate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18"/><path d="M12 3a8 8 0 0 0-8 8 8 8 0 0 0 16 0 8 8 0 0 0-8-8z"/></svg>',
+    plane: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5a2.12 2.12 0 0 0-3-3L13 8 4.8 6.2a1 1 0 0 0-.9.3l-.5.5a1 1 0 0 0 .1 1.5L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 4.2 5.4a1 1 0 0 0 1.5.1l.5-.5a1 1 0 0 0 .3-.9z"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    hotel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3M9 9v.01M9 12v.01M9 15v.01"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+    chevDown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+  };
+
+  // ── Styles ───────────────────────────────────────────────────────────────
+  const STYLES = `
+    :host { all: initial; display: block; }
+    * { box-sizing: border-box; }
+    .tgop {
+      --tgo-brand: #1B2B5B; --tgo-accent: #00B4D8; --tgo-accent-hover: #0096B7;
+      --tgo-ink: #0F172A; --tgo-sub: #475569; --tgo-muted: #94A3B8;
+      --tgo-bg: #FFFFFF; --tgo-surface: #FFFFFF; --tgo-alt: #F7F9FB; --tgo-border: #E8EDF3;
+      --tgo-success: #10B981; --tgo-success-soft: #D1FAE5; --tgo-warn: #E8893A;
+      --tgo-strike: #94A3B8; --tgo-gold: #FFB703; --tgo-radius: 18px;
+      --tgo-shadow: 0 1px 2px rgba(15,23,42,0.05);
+      --tgo-shadow-md: 0 10px 30px rgba(15,23,42,0.10);
+      --tgo-shadow-lg: 0 30px 70px rgba(15,23,42,0.20);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--tgo-ink); line-height: 1.6; background: var(--tgo-bg);
+      -webkit-font-smoothing: antialiased; display: block;
+    }
+    .tgop[data-theme="dark"] {
+      --tgo-ink: #F1F5F9; --tgo-sub: #B6C2D4; --tgo-muted: #7C8AA0;
+      --tgo-bg: #0B1220; --tgo-surface: #111B2E; --tgo-alt: #0E1626; --tgo-border: #243043;
+      --tgo-success-soft: rgba(16,185,129,0.16);
+      --tgo-shadow-md: 0 10px 30px rgba(0,0,0,0.5); --tgo-shadow-lg: 0 30px 70px rgba(0,0,0,0.6);
+    }
+    a { color: inherit; }
+    .tgop-wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Sticky booking bar ── */
+    .tgop-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+      background: color-mix(in srgb, var(--tgo-surface) 82%, transparent);
+      backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px);
+      border-bottom: 1px solid var(--tgo-border);
+      transform: translateY(-105%); transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+      box-shadow: var(--tgo-shadow);
+    }
+    .tgop-bar.show { transform: translateY(0); }
+    .tgop-bar-inner { max-width: 1180px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 16px; }
+    .tgop-bar-title { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tgop-bar-spacer { flex: 1; }
+    .tgop-bar-price { font-weight: 800; font-size: 18px; white-space: nowrap; }
+    .tgop-bar-price small { font-weight: 500; font-size: 12px; color: var(--tgo-sub); }
+
+    /* ── Hero ── */
+    .tgop-hero { position: relative; height: min(88vh, 760px); min-height: 520px; overflow: hidden; }
+    .tgop-hero-img {
+      position: absolute; inset: -4%; background-size: cover; background-position: center;
+      animation: tgop-kenburns 26s ease-in-out infinite alternate; will-change: transform;
+    }
+    .tgop-hero-img.ph { background: linear-gradient(135deg, var(--tgo-brand), var(--tgo-accent)); animation: none; }
+    @keyframes tgop-kenburns { from { transform: scale(1); } to { transform: scale(1.12); } }
+    .tgop-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(7,12,24,0.30) 0%, rgba(7,12,24,0.05) 32%, rgba(7,12,24,0.20) 60%, rgba(7,12,24,0.86) 100%);
+    }
+    .tgop-hero-inner {
+      position: absolute; inset: 0; z-index: 2; max-width: 1180px; margin: 0 auto; padding: 0 24px 120px;
+      display: flex; flex-direction: column; justify-content: flex-end; color: #fff;
+    }
+    .tgop-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tgop-badge {
+      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px;
+      padding: 6px 13px; border-radius: 999px; color: #fff; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .tgop-badge svg { width: 13px; height: 13px; }
+    .tgop-badge.save { background: linear-gradient(120deg, #F97316, #E8893A); box-shadow: 0 6px 18px rgba(232,137,58,0.45); }
+    .tgop-badge.glass { background: rgba(255,255,255,0.16); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.25); }
+    .tgop-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 8px; }
+    .tgop-h1 {
+      font-size: clamp(34px, 5.4vw, 60px); font-weight: 800; line-height: 1.04; letter-spacing: -1px;
+      margin: 0 0 14px; max-width: 16ch; text-shadow: 0 2px 30px rgba(0,0,0,0.35);
+    }
+    .tgop-hero-meta { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 16px; }
+    .tgop-hero-loc { display: inline-flex; align-items: center; gap: 7px; }
+    .tgop-hero-loc svg { width: 17px; height: 17px; opacity: 0.9; }
+    .tgop-hero-stars { color: var(--tgo-gold); letter-spacing: 2px; font-size: 17px; }
+    .tgop-scroll-cue {
+      position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 3;
+      color: rgba(255,255,255,0.8); animation: tgop-bob 2s ease-in-out infinite;
+    }
+    .tgop-scroll-cue svg { width: 26px; height: 26px; }
+    @keyframes tgop-bob { 0%,100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 7px); } }
+
+    /* ── Quick facts (overlap the hero) ── */
+    .tgop-facts-wrap { position: relative; z-index: 5; margin-top: -64px; }
+    .tgop-facts {
+      background: var(--tgo-surface); border: 1px solid var(--tgo-border); border-radius: var(--tgo-radius);
+      box-shadow: var(--tgo-shadow-lg); padding: 8px;
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+    }
+    .tgop-fact { text-align: center; padding: 16px 10px; border-radius: 12px; transition: background 0.15s ease; }
+    .tgop-fact:hover { background: var(--tgo-alt); }
+    .tgop-fact-ic { width: 26px; height: 26px; margin: 0 auto 8px; color: var(--tgo-accent); }
+    .tgop-fact-ic svg { width: 100%; height: 100%; }
+    .tgop-fact-lab { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--tgo-muted); font-weight: 700; }
+    .tgop-fact-val { font-size: 15px; font-weight: 700; margin-top: 3px; }
+
+    /* ── Body grid ── */
+    .tgop-body { display: grid; grid-template-columns: 1fr 380px; gap: 44px; align-items: start; padding: 52px 0 70px; }
+    .tgop-main { min-width: 0; }
+    .tgop-section { margin-bottom: 46px; }
+    .tgop-h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 16px; }
+    .tgop-prose p { font-size: 16.5px; color: var(--tgo-sub); line-height: 1.8; margin: 0 0 14px; }
+
+    .tgop-incl { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 20px; }
+    .tgop-incl li { display: flex; align-items: center; gap: 12px; font-size: 15.5px; font-weight: 500; }
+    .tgop-incl .tick {
+      flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--tgo-success-soft);
+      color: var(--tgo-success); display: flex; align-items: center; justify-content: center;
+    }
+    .tgop-incl .tick svg { width: 14px; height: 14px; }
+
+    /* Gallery */
+    .tgop-gallery { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px; gap: 10px; }
+    .tgop-gallery .g {
+      border-radius: 14px; background-size: cover; background-position: center; cursor: pointer;
+      position: relative; overflow: hidden; transition: transform 0.3s ease; border: 0; padding: 0;
+    }
+    .tgop-gallery .g:hover { transform: scale(1.02); }
+    .tgop-gallery .g:first-child { grid-column: span 2; grid-row: span 2; }
+    .tgop-gallery .g::after { content: ''; position: absolute; inset: 0; background: rgba(15,23,42,0); transition: background 0.2s ease; }
+    .tgop-gallery .g:hover::after { background: rgba(15,23,42,0.12); }
+
+    /* Detail table */
+    .tgop-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .tgop-table td { padding: 13px 0; border-bottom: 1px solid var(--tgo-border); }
+    .tgop-table td:first-child { color: var(--tgo-muted); font-weight: 600; width: 40%; }
+    .tgop-table td:last-child { font-weight: 600; }
+
+    /* Tag chips */
+    .tgop-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .tgop-tag { font-size: 12px; font-weight: 600; background: var(--tgo-alt); border: 1px solid var(--tgo-border); color: var(--tgo-sub); padding: 6px 12px; border-radius: 999px; }
+
+    /* ── Booking / enquiry card ── */
+    .tgop-aside { position: sticky; top: 84px; }
+    .tgop-book {
+      background: var(--tgo-surface); border: 1px solid var(--tgo-border); border-radius: var(--tgo-radius);
+      box-shadow: var(--tgo-shadow-md); overflow: hidden;
+    }
+    .tgop-book-top { padding: 22px 24px 20px; border-bottom: 1px solid var(--tgo-border); }
+    .tgop-book-from { font-size: 12px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--tgo-muted); font-weight: 700; }
+    .tgop-price-row { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 2px; }
+    .tgop-price { font-size: 42px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+    .tgop-was { font-size: 17px; color: var(--tgo-strike); text-decoration: line-through; }
+    .tgop-save { display: inline-block; margin-top: 8px; background: var(--tgo-success-soft); color: var(--tgo-success); font-weight: 800; font-size: 13px; padding: 5px 12px; border-radius: 999px; }
+    .tgop-basis { font-size: 13.5px; color: var(--tgo-sub); margin-top: 10px; }
+    .tgop-deposit { margin-top: 14px; font-size: 13.5px; color: var(--tgo-ink); background: color-mix(in srgb, var(--tgo-accent) 10%, transparent); border: 1px solid color-mix(in srgb, var(--tgo-accent) 22%, transparent); border-radius: 12px; padding: 11px 14px; display: flex; gap: 9px; align-items: center; }
+    .tgop-deposit svg { width: 17px; height: 17px; color: var(--tgo-accent); flex-shrink: 0; }
+    .tgop-countdown { margin-top: 12px; text-align: center; font-size: 13px; color: var(--tgo-warn); font-weight: 700; }
+    .tgop-countdown b { font-variant-numeric: tabular-nums; }
+
+    .tgop-form { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 11px; }
+    .tgop-form-h { font-weight: 800; font-size: 17px; }
+    .tgop-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .tgop-field { display: flex; flex-direction: column; gap: 5px; }
+    .tgop-input {
+      width: 100%; padding: 11px 13px; border: 1px solid var(--tgo-border); border-radius: 11px;
+      font: inherit; font-size: 14.5px; background: var(--tgo-bg); color: var(--tgo-ink); transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .tgop-input:focus { outline: none; border-color: var(--tgo-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgo-accent) 18%, transparent); }
+    textarea.tgop-input { resize: vertical; min-height: 72px; }
+    .tgop-field.bad .tgop-input { border-color: #DC2626; }
+    .tgop-field-err { font-size: 11px; color: #DC2626; font-weight: 600; display: none; }
+    .tgop-field.bad .tgop-field-err { display: block; }
+    .tgop-submit {
+      margin-top: 4px; border: 0; border-radius: 12px; padding: 15px; cursor: pointer; font: inherit;
+      font-weight: 800; font-size: 15.5px; color: #fff;
+      background: linear-gradient(120deg, var(--tgo-accent), var(--tgo-brand));
+      background-size: 160% 100%; transition: background-position 0.4s ease, transform 0.1s ease;
+      box-shadow: 0 10px 24px color-mix(in srgb, var(--tgo-accent) 35%, transparent);
+    }
+    .tgop-submit:hover { background-position: 100% 0; }
+    .tgop-submit:active { transform: translateY(1px); }
+    .tgop-trust { font-size: 11.5px; color: var(--tgo-muted); text-align: center; margin-top: 4px; line-height: 1.6; }
+    .tgop-trust b { color: var(--tgo-sub); }
+    .tgop-enq-success { padding: 36px 24px; text-align: center; }
+    .tgop-enq-success .tick { width: 60px; height: 60px; border-radius: 50%; background: var(--tgo-success-soft); color: var(--tgo-success); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+    .tgop-enq-success .tick svg { width: 28px; height: 28px; }
+    .tgop-enq-success h4 { margin: 0 0 6px; font-size: 18px; font-weight: 800; }
+    .tgop-enq-success p { margin: 0; color: var(--tgo-sub); font-size: 14px; }
+
+    /* ── Final CTA band ── */
+    .tgop-cta-band { background: linear-gradient(120deg, var(--tgo-brand), color-mix(in srgb, var(--tgo-brand) 60%, var(--tgo-accent))); color: #fff; }
+    .tgop-cta-inner { max-width: 1180px; margin: 0 auto; padding: 48px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .tgop-cta-inner h3 { font-size: 26px; font-weight: 800; margin: 0 0 4px; }
+    .tgop-cta-inner p { margin: 0; color: rgba(255,255,255,0.85); }
+    .tgop-cta-spacer { flex: 1; }
+    .tgop-btn {
+      display: inline-flex; align-items: center; gap: 9px; border: 0; border-radius: 12px; cursor: pointer;
+      font: inherit; font-weight: 800; font-size: 15px; padding: 14px 24px; text-decoration: none; white-space: nowrap;
+    }
+    .tgop-btn.primary { background: #fff; color: var(--tgo-brand); }
+    .tgop-btn.primary svg { width: 17px; height: 17px; }
+    .tgop-btn.ghost { background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+    .tgop-btn.sm { padding: 9px 16px; font-size: 14px; }
+    .tgop-btn.accent { background: var(--tgo-accent); color: #fff; }
+    .tgop-btn.accent:hover { background: var(--tgo-accent-hover); }
+
+    /* Footer trust */
+    .tgop-foot { background: var(--tgo-alt); border-top: 1px solid var(--tgo-border); }
+    .tgop-foot-inner { max-width: 1180px; margin: 0 auto; padding: 26px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--tgo-muted); }
+    .tgop-foot-inner svg { width: 16px; height: 16px; color: var(--tgo-success); }
+    .tgop-foot-trust { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--tgo-sub); }
+
+    /* ── Lightbox ── */
+    .tgop-lb { position: fixed; inset: 0; z-index: 90; background: rgba(7,12,24,0.94); display: none; align-items: center; justify-content: center; }
+    .tgop-lb.open { display: flex; }
+    .tgop-lb-img { max-width: 92vw; max-height: 86vh; border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+    .tgop-lb-btn { position: absolute; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .tgop-lb-btn svg { width: 22px; height: 22px; }
+    .tgop-lb-btn.close { top: 22px; right: 22px; }
+    .tgop-lb-btn.prev { left: 18px; top: 50%; transform: translateY(-50%); }
+    .tgop-lb-btn.next { right: 18px; top: 50%; transform: translateY(-50%); }
+
+    /* Reveal on scroll — gated by [data-anim] so content is visible if JS or
+       IntersectionObserver is unavailable (progressive enhancement). */
+    .tgop[data-anim="1"] .tgop-reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1); }
+    .tgop[data-anim="1"] .tgop-reveal.in { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      .tgop-body { grid-template-columns: 1fr; gap: 8px; }
+      .tgop-aside { position: static; margin-top: 8px; }
+      .tgop-facts { grid-template-columns: repeat(3, 1fr); }
+      .tgop-facts .tgop-fact:nth-child(4), .tgop-facts .tgop-fact:nth-child(5) { display: none; }
+    }
+    @media (max-width: 600px) {
+      .tgop-incl { grid-template-columns: 1fr; }
+      .tgop-gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 120px; }
+      .tgop-gallery .g:first-child { grid-column: span 2; grid-row: span 1; }
+      .tgop-facts-wrap { margin-top: -36px; }
+      .tgop-form-row { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tgop-hero-img { animation: none; }
+      .tgop-scroll-cue { animation: none; }
+      .tgop-reveal { opacity: 1; transform: none; transition: none; }
+    }
+  `;
+
+  // ── Widget ─────────────────────────────────────────────────────────────────
+  class TGOfferPageWidget {
+    constructor(container, config) {
+      this.el = container;
+      container._tgInitialised = true;
+      this.cfg = this._defaults(config);
+      this.shadow = container.attachShadow({ mode: 'open' });
+      this._timers = [];
+      this._io = null;
+      this._render();
+    }
+
+    _defaults(c) {
+      c = c || {};
+      const o = c.offer && typeof c.offer === 'object' ? c.offer : {};
+      return {
+        theme: c.theme === 'dark' ? 'dark' : 'light',
+        brandColor: c.brandColor || '',
+        accentColor: c.accentColor || '',
+        radius: typeof c.radius === 'number' ? c.radius : 18,
+        currency: c.currency || '',
+        agencyName: c.agencyName || '',
+        offer: o
+      };
+    }
+
+    _f(key) {
+      const o = this.cfg.offer || {};
+      if (o.fields && o.fields[key] != null && o.fields[key] !== '') return o.fields[key];
+      if (o[key] != null && o[key] !== '') return o[key];
+      return '';
+    }
+
+    _images() {
+      const o = this.cfg.offer || {};
+      let imgs = [];
+      if (Array.isArray(o.images)) imgs = o.images.slice();
+      const hero = this._f('image');
+      if (hero && imgs.indexOf(hero) === -1) imgs.unshift(hero);
+      return imgs.map(safeUrl).filter(Boolean);
+    }
+
+    _derive() {
+      const o = this.cfg.offer || {};
+      const sym = currencySymbol(this.cfg.currency || o.currency || 'GBP');
+      const imgs = this._images();
+      const priceN = num(this._f('price'));
+      const wasN = num(this._f('was'));
+      const save = wasN && priceN && wasN > priceN ? wasN - priceN : 0;
+      const savePct = save ? Math.round((save / wasN) * 100) : 0;
+      const protection = this._f('protection');
+      return {
+        sym: sym, images: imgs,
+        eyebrow: [this._f('style'), shortType(this._f('type'))].filter(Boolean).join('  ·  '),
+        title: this._f('title') || 'Your next great escape',
+        stars: parseStars(this._f('stars')),
+        loc: [this._f('resort'), this._f('region'), this._f('country')].filter(Boolean).join(', '),
+        teaser: this._f('teaser'),
+        description: this._f('description') || this._f('teaser'),
+        nights: this._f('nights'),
+        board: this._f('board'),
+        flighttype: this._f('flighttype'),
+        airline: this._f('airline'),
+        period: this._f('period'),
+        property: this._f('property'),
+        price: money(sym, priceN), priceN: priceN,
+        was: money(sym, wasN),
+        save: money(sym, save), savePct: savePct,
+        basis: this._f('basis'),
+        deposit: money(sym, this._f('deposit')),
+        badge: this._f('badge'), badgeAmount: this._f('badgeAmount'),
+        urgency: this._f('urgency'),
+        bookby: this._f('bookby'),
+        avail: this._f('avail'),
+        reference: this._f('reference'),
+        protection: protection,
+        atol: /atol|both/i.test(protection),
+        abta: /abta|both/i.test(protection),
+        includes: Array.isArray(o.includes) ? o.includes : [],
+        tags: Array.isArray(o.tags) ? o.tags : [],
+        enquiryEmail: this._f('enquiryEmail') || this.cfg.offer.enquiryEmail || '',
+        enquiryPhone: this._f('enquiryPhone'),
+        currency: sym
+      };
+    }
+
+    _heroBadges(d) {
+      const out = [];
+      if (d.save) out.push('<span class="tgop-badge save">Save ' + esc(d.save) + (d.savePct ? ' (' + d.savePct + '%)' : '') + '</span>');
+      else if (d.badge && d.badge !== 'No badge') out.push('<span class="tgop-badge save">' + esc(d.badge) + '</span>');
+      if (d.atol) out.push('<span class="tgop-badge glass">' + I.shield + ' ATOL protected</span>');
+      else if (d.abta) out.push('<span class="tgop-badge glass">' + I.shield + ' ABTA member</span>');
+      return out.length ? '<div class="tgop-badges">' + out.join('') + '</div>' : '';
+    }
+
+    _facts(d) {
+      const items = [];
+      if (d.nights) items.push([I.moon, 'Duration', esc(d.nights) + ' nights']);
+      if (d.board) items.push([I.plate, 'Board', esc(d.board)]);
+      if (d.flighttype && d.flighttype !== 'Not included') items.push([I.plane, 'Flights', esc(d.flighttype)]);
+      if (d.period) items.push([I.calendar, 'Travel', esc(d.period)]);
+      if (d.stars) items.push([I.hotel, 'Hotel', d.stars + ' star']);
+      // Pad to 5 if we can, but never show empties
+      return items.slice(0, 5).map(function (f) {
+        return '<div class="tgop-fact"><div class="tgop-fact-ic">' + f[0] + '</div>'
+          + '<div class="tgop-fact-lab">' + f[1] + '</div><div class="tgop-fact-val">' + f[2] + '</div></div>';
+      }).join('');
+    }
+
+    _detailTable(d) {
+      const rows = [
+        ['Resort', [d.property, this._f('resort')].filter(Boolean).join(', ')],
+        ['Destination', d.loc],
+        ['Departs from', this._f('origin')],
+        ['Airline', [d.airline, d.flighttype].filter(Boolean).join(', ')],
+        ['Board basis', d.board],
+        ['Travel period', d.period],
+        ['Book by', d.bookby],
+        ['Offer reference', d.reference]
+      ].filter(function (r) { return r[1]; });
+      return rows.map(function (r) {
+        return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>';
+      }).join('');
+    }
+
+    _bookCard(d) {
+      const was = d.was ? '<span class="tgop-was">' + esc(d.was) + '</span>' : '';
+      const save = d.save ? '<div><span class="tgop-save">You save ' + esc(d.save) + (d.savePct ? ' · ' + d.savePct + '%' : '') + '</span></div>' : '';
+      const basis = d.basis ? '<div class="tgop-basis">' + esc(d.basis) + (d.nights ? ' · based on the lead price' : '') + '</div>' : '';
+      const deposit = d.deposit ? '<div class="tgop-deposit">' + I.shield + '<span>Secure it today with a ' + esc(d.deposit) + ' deposit</span></div>' : '';
+      const countdown = '<div class="tgop-countdown" data-countdown hidden></div>';
+      const trustBits = [];
+      if (d.atol) trustBits.push('ATOL protected');
+      if (d.abta) trustBits.push('ABTA member');
+      const trust = '<p class="tgop-trust">No payment taken now. A travel expert replies within one working hour.'
+        + (trustBits.length ? '<br>🔒 <b>' + esc(trustBits.join(' · ')) + '</b>' : '') + '</p>';
+
+      return '<div class="tgop-book">'
+        + '<div class="tgop-book-top">'
+          + '<div class="tgop-book-from">From</div>'
+          + '<div class="tgop-price-row"><div class="tgop-price">' + (d.price || 'POA') + '</div>' + was + '</div>'
+          + save + basis + deposit + countdown
+        + '</div>'
+        + '<form class="tgop-form" novalidate>'
+          + '<div class="tgop-form-h">Enquire about this offer</div>'
+          + '<div class="tgop-field" data-req="name"><input class="tgop-input" name="name" placeholder="Full name" autocomplete="name"><span class="tgop-field-err">Please add your name</span></div>'
+          + '<div class="tgop-form-row">'
+            + '<div class="tgop-field" data-req="email"><input class="tgop-input" name="email" type="email" placeholder="Email" autocomplete="email"><span class="tgop-field-err">Valid email please</span></div>'
+            + '<div class="tgop-field"><input class="tgop-input" name="phone" type="tel" placeholder="Phone" autocomplete="tel"></div>'
+          + '</div>'
+          + '<div class="tgop-form-row">'
+            + '<div class="tgop-field"><input class="tgop-input" name="month" placeholder="Preferred month"></div>'
+            + '<div class="tgop-field"><select class="tgop-input" name="travellers"><option value="">Travellers</option><option>1 traveller</option><option selected>2 travellers</option><option>2 adults + children</option><option>3+ travellers</option></select></div>'
+          + '</div>'
+          + '<div class="tgop-field"><textarea class="tgop-input" name="message" placeholder="Anything else we should know? (dates, room type, questions)"></textarea></div>'
+          + '<button type="submit" class="tgop-submit">Send my enquiry</button>'
+          + trust
+        + '</form>'
+      + '</div>';
+    }
+
+    _render() {
+      this._timers.forEach(clearInterval); this._timers = [];
+      if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
+
+      const cfg = this.cfg;
+      const d = this._derive();
+
+      const root = document.createElement('div');
+      root.className = 'tgop';
+      root.setAttribute('data-theme', cfg.theme);
+      if (cfg.brandColor) root.style.setProperty('--tgo-brand', cfg.brandColor);
+      if (cfg.accentColor) { root.style.setProperty('--tgo-accent', cfg.accentColor); root.style.setProperty('--tgo-accent-hover', cfg.accentColor); }
+      if (cfg.radius) root.style.setProperty('--tgo-radius', cfg.radius + 'px');
+
+      const hero = d.images[0];
+      const heroBg = hero ? ' style="background-image:url(' + esc(hero) + ')"' : '';
+      const heroCls = hero ? '' : ' ph';
+      const starsStr = d.stars ? '<span class="tgop-hero-stars">' + '★'.repeat(d.stars) + '</span>' : '';
+
+      // Gallery: up to 5 thumbs (the rest still open in the lightbox via index)
+      const gallery = d.images.length > 1
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">Photos</h2><div class="tgop-gallery" data-gallery>'
+          + d.images.slice(0, 5).map(function (src, i) { return '<button type="button" class="g" data-idx="' + i + '" style="background-image:url(' + esc(src) + ')" aria-label="Open photo ' + (i + 1) + '"></button>'; }).join('')
+          + '</div></div>'
+        : '';
+
+      const includes = d.includes.length
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">What\'s included</h2><ul class="tgop-incl">'
+          + d.includes.map(function (x) { return '<li><span class="tick">' + I.check + '</span>' + esc(x) + '</li>'; }).join('')
+          + '</ul></div>'
+        : '';
+
+      const tags = d.tags.length
+        ? '<div class="tgop-tags">' + d.tags.map(function (t) { return '<span class="tgop-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
+        : '';
+
+      const descParas = String(d.description || '').split(/\n+/).filter(Boolean)
+        .map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') || '<p>' + esc(d.teaser) + '</p>';
+
+      const footTrust = [];
+      if (d.atol) footTrust.push('ATOL protected');
+      if (d.abta) footTrust.push('ABTA member');
+
+      root.innerHTML =
+        // Sticky bar
+        '<div class="tgop-bar" data-bar><div class="tgop-bar-inner">'
+          + '<span class="tgop-bar-title">' + esc(d.title) + '</span><span class="tgop-bar-spacer"></span>'
+          + (d.price ? '<span class="tgop-bar-price">' + d.price + ' <small>' + esc(d.basis || '') + '</small></span>' : '')
+          + '<button type="button" class="tgop-btn accent sm" data-enquire>Enquire now</button>'
+        + '</div></div>'
+
+        // Hero
+        + '<div class="tgop-hero">'
+          + '<div class="tgop-hero-img' + heroCls + '"' + heroBg + '></div>'
+          + '<div class="tgop-hero-inner"><div>'
+            + this._heroBadges(d)
+            + (d.eyebrow ? '<div class="tgop-eyebrow">' + esc(d.eyebrow) + '</div>' : '')
+            + '<h1 class="tgop-h1">' + esc(d.title) + '</h1>'
+            + '<div class="tgop-hero-meta">'
+              + (d.loc ? '<span class="tgop-hero-loc">' + I.pin + esc(d.loc) + '</span>' : '')
+              + starsStr
+            + '</div>'
+          + '</div></div>'
+          + '<div class="tgop-scroll-cue">' + I.chevDown + '</div>'
+        + '</div>'
+
+        // Quick facts
+        + '<div class="tgop-wrap tgop-facts-wrap"><div class="tgop-facts">' + this._facts(d) + '</div></div>'
+
+        // Body
+        + '<div class="tgop-wrap"><div class="tgop-body">'
+          + '<div class="tgop-main">'
+            + '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">About this holiday</h2><div class="tgop-prose">' + descParas + '</div>' + tags + '</div>'
+            + includes
+            + gallery
+            + '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">The detail</h2><table class="tgop-table"><tbody>' + this._detailTable(d) + '</tbody></table></div>'
+          + '</div>'
+          + '<aside class="tgop-aside">' + this._bookCard(d) + '</aside>'
+        + '</div></div>'
+
+        // Final CTA band
+        + '<div class="tgop-cta-band"><div class="tgop-cta-inner">'
+          + '<div><h3>Ready when you are</h3><p>Talk to a travel expert and we will hold this price while you decide.</p></div>'
+          + '<span class="tgop-cta-spacer"></span>'
+          + '<button type="button" class="tgop-btn primary" data-enquire>Enquire now ' + I.arrow + '</button>'
+          + (d.enquiryPhone ? '<a class="tgop-btn ghost" href="tel:' + esc(d.enquiryPhone.replace(/\s/g, '')) + '">' + I.phone + ' ' + esc(d.enquiryPhone) + '</a>' : '')
+        + '</div></div>'
+
+        // Footer trust
+        + '<div class="tgop-foot"><div class="tgop-foot-inner">'
+          + (footTrust.length ? '<span class="tgop-foot-trust">' + I.shield + esc(footTrust.join(' · ')) + '</span>' : '')
+          + (d.reference ? '<span>Offer ref ' + esc(d.reference) + '</span>' : '')
+          + (this.cfg.agencyName ? '<span>' + esc(this.cfg.agencyName) + '</span>' : '')
+          + '<span class="tgop-bar-spacer"></span><span>Powered by Travelgenix</span>'
+        + '</div></div>'
+
+        // Lightbox
+        + '<div class="tgop-lb" data-lb><button type="button" class="tgop-lb-btn close" data-lb-close>' + I.x + '</button>'
+          + '<button type="button" class="tgop-lb-btn prev" data-lb-prev>' + I.chevDown + '</button>'
+          + '<img class="tgop-lb-img" data-lb-img alt="">'
+          + '<button type="button" class="tgop-lb-btn next" data-lb-next>' + I.chevDown + '</button></div>';
+
+      this.shadow.innerHTML = '<style>' + STYLES + '</style>';
+      this.shadow.appendChild(root);
+      this.root = root;
+      this._bind(d);
+    }
+
+    _bind(d) {
+      const root = this.root;
+
+      // Sticky bar: show once hero is mostly scrolled past
+      const hero = root.querySelector('.tgop-hero');
+      const bar = root.querySelector('[data-bar]');
+      const onScroll = function () {
+        const past = hero.getBoundingClientRect().bottom < 80;
+        bar.classList.toggle('show', past);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      this._onScroll = onScroll;
+      onScroll();
+
+      // Reveal on scroll — only animate when supported and motion is allowed.
+      // Without data-anim the sections render fully visible (no hidden content).
+      const reveals = root.querySelectorAll('.tgop-reveal');
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if ('IntersectionObserver' in window && !reduce) {
+        root.setAttribute('data-anim', '1');
+        this._io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); } });
+        }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+        reveals.forEach((el) => this._io.observe(el));
+      }
+
+      // Enquire buttons → scroll to form, focus first field
+      const form = root.querySelector('.tgop-form');
+      root.querySelectorAll('[data-enquire]').forEach((b) => b.addEventListener('click', function () {
+        const aside = root.querySelector('.tgop-aside');
+        (aside || form).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const first = form && form.querySelector('input[name="name"]');
+        if (first) setTimeout(function () { first.focus(); }, 420);
+      }));
+
+      // Countdown to book-by
+      this._initCountdown(d);
+
+      // Gallery lightbox
+      this._initLightbox(d);
+
+      // Enquiry submit
+      if (form) form.addEventListener('submit', (e) => { e.preventDefault(); this._submitEnquiry(form, d); });
+    }
+
+    _initCountdown(d) {
+      const el = this.root.querySelector('[data-countdown]');
+      if (!el || !d.bookby) return;
+      const target = new Date(d.bookby);
+      if (isNaN(target.getTime())) {
+        el.hidden = false;
+        el.textContent = 'Book by ' + d.bookby;
+        return;
+      }
+      const tick = function () {
+        const diff = target.getTime() - Date.now();
+        if (diff <= 0) { el.textContent = 'Offer ends today'; return; }
+        const days = Math.floor(diff / 86400000);
+        const hrs = Math.floor((diff % 86400000) / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        el.innerHTML = '⏳ Offer ends in <b>' + days + 'd ' + hrs + 'h ' + mins + 'm</b>';
+      };
+      el.hidden = false;
+      tick();
+      this._timers.push(setInterval(tick, 60000));
+    }
+
+    _initLightbox(d) {
+      const root = this.root;
+      const lb = root.querySelector('[data-lb]');
+      const img = root.querySelector('[data-lb-img]');
+      const gallery = root.querySelector('[data-gallery]');
+      if (!lb || !gallery) return;
+      const imgs = d.images;
+      let idx = 0;
+      const show = function (i) { idx = (i + imgs.length) % imgs.length; img.src = imgs[idx]; };
+      const open = function (i) { show(i); lb.classList.add('open'); };
+      const close = function () { lb.classList.remove('open'); img.src = ''; };
+      gallery.querySelectorAll('.g').forEach((g) => g.addEventListener('click', function () { open(parseInt(g.dataset.idx, 10) || 0); }));
+      root.querySelector('[data-lb-close]').addEventListener('click', close);
+      root.querySelector('[data-lb-prev]').addEventListener('click', function () { show(idx - 1); });
+      root.querySelector('[data-lb-next]').addEventListener('click', function () { show(idx + 1); });
+      lb.addEventListener('click', function (e) { if (e.target === lb) close(); });
+      const onKey = function (e) {
+        if (!lb.classList.contains('open')) return;
+        if (e.key === 'Escape') close();
+        else if (e.key === 'ArrowLeft') show(idx - 1);
+        else if (e.key === 'ArrowRight') show(idx + 1);
+      };
+      window.addEventListener('keydown', onKey);
+      this._onKey = onKey;
+      // rotate the prev arrow to point left, next stays as down-rotated-right
+      root.querySelector('[data-lb-prev]').style.transform = 'translateY(-50%) rotate(90deg)';
+      root.querySelector('[data-lb-next]').style.transform = 'translateY(-50%) rotate(-90deg)';
+    }
+
+    _submitEnquiry(form, d) {
+      let ok = true;
+      form.querySelectorAll('.tgop-field').forEach(function (f) { f.classList.remove('bad'); });
+      const nameF = form.querySelector('[data-req="name"]');
+      const emailF = form.querySelector('[data-req="email"]');
+      if (!form.name.value.trim()) { nameF.classList.add('bad'); ok = false; }
+      if (!isEmail(form.email.value)) { emailF.classList.add('bad'); ok = false; }
+      if (!ok) {
+        const bad = form.querySelector('.tgop-field.bad input');
+        if (bad) bad.focus();
+        return;
+      }
+      const detail = {
+        offerTitle: d.title,
+        offerReference: d.reference || '',
+        to: d.enquiryEmail || '',
+        enquiry: {
+          name: form.name.value.trim(),
+          email: form.email.value.trim(),
+          phone: form.phone.value.trim(),
+          month: form.month.value.trim(),
+          travellers: form.travellers.value,
+          message: form.message.value.trim()
+        }
+      };
+      this.el.dispatchEvent(new CustomEvent('tg-offer-enquiry', { bubbles: true, composed: true, detail: detail }));
+
+      const card = form.closest('.tgop-book');
+      form.outerHTML =
+        '<div class="tgop-enq-success"><div class="tick">' + I.check + '</div>'
+        + '<h4>Enquiry sent</h4><p>Thanks ' + esc(detail.enquiry.name.split(' ')[0]) + '. A travel expert will be in touch within one working hour.</p></div>';
+      void card;
+    }
+
+    update(config) {
+      this.destroy();
+      this.cfg = this._defaults(Object.assign({}, this.cfg, config));
+      this._render();
+    }
+
+    destroy() {
+      this._timers.forEach(clearInterval); this._timers = [];
+      if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
+      if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
+      if (this._onKey) window.removeEventListener('keydown', this._onKey);
+    }
+  }
+
+  // ── Auto-init ───────────────────────────────────────────────────────────────
+  async function loadConfigFromApi(widgetId) {
+    try {
+      const res = await fetch(API_BASE + '?id=' + encodeURIComponent(widgetId));
+      if (!res.ok) throw new Error('Config load failed: ' + res.status);
+      const data = await res.json();
+      if (data && data.config) return Object.assign({}, data.config, { _widgetId: widgetId });
+      throw new Error('No config returned');
+    } catch (err) { console.error('[TGOfferPage] Config load error:', err); return null; }
+  }
+
+  async function init() {
+    const containers = document.querySelectorAll('[data-tg-widget="offer-page"]');
+    for (const el of containers) {
+      if (el._tgInitialised || el.shadowRoot) continue;
+      el._tgInitialised = true;
+      let config = null;
+      const inline = el.getAttribute('data-tg-config');
+      const offerAttr = el.getAttribute('data-tg-offer');
+      const widgetId = el.getAttribute('data-tg-id');
+      if (inline) {
+        try { config = JSON.parse(inline); } catch (e) { console.error('[TGOfferPage] Invalid inline config:', e); continue; }
+      } else if (widgetId) {
+        config = await loadConfigFromApi(widgetId);
+        if (!config) continue;
+      } else { config = {}; }
+      if (offerAttr && !config.offer) {
+        try { config.offer = JSON.parse(offerAttr); } catch (e) { console.error('[TGOfferPage] Invalid data-tg-offer:', e); }
+      }
+      new TGOfferPageWidget(el, config);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    window.TGOfferPageWidget = TGOfferPageWidget;
+    window.TGOfferPageWidget.version = VERSION;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  }
+})();
