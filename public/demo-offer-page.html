@@ -39,7 +39,16 @@
       <select id="ctrlOffer">
         <option value="cancun" selected>Cancun · all inclusive</option>
         <option value="maldives">Maldives · luxury honeymoon</option>
+        <option value="algarve">Algarve · family villa</option>
+        <option value="kruger">Kruger · safari escape</option>
         <option value="sparse">Minimal · few details</option>
+      </select>
+    </div>
+    <div class="ctl"><label for="ctrlTemplate">Template</label>
+      <select id="ctrlTemplate">
+        <option value="classic" selected>Classic</option>
+        <option value="editorial">Editorial</option>
+        <option value="immersive">Immersive</option>
       </select>
     </div>
     <div class="ctl"><label for="ctrlAccent">Accent</label><input id="ctrlAccent" type="color" value="#00B4D8" /></div>
@@ -50,6 +59,7 @@
   <div id="pageMount"></div>
   <div class="toast" id="toast"></div>
 
+  <script src="/widget-maps.js"></script>
   <script src="/widget-offer-page.js"></script>
   <script>
     function $(id) { return document.getElementById(id); }
@@ -77,6 +87,8 @@
           badge: 'Save', badgeAmount: '400', urgency: 'Only 4 left at this price',
           bookby: '31 July 2026', avail: 'Limited rooms at this price', reference: 'TG-CUN-0926',
           protection: 'Both', enquiryEmail: 'sales@youragency.co.uk', enquiryPhone: '0161 123 4567',
+          mapAddress: 'Costa Mujeres, Cancun, Mexico', mapLat: '21.0419', mapLng: '-86.8126', mapStyle: 'satellite',
+          video: 'https://www.youtube.com/watch?v=Scxs7L0vhZ4',
           description: 'Wake up to white sand and turquoise sea at the Riu Palace Costa Mujeres, a five star beachfront resort on one of the quietest stretches of the Mexican Caribbean. This all inclusive deal covers your direct flights from Gatwick plus every meal, drink and snack once you arrive.\nWith four pools, a spa, a kids club and a string of restaurants, it suits couples and families alike. Children stay free on selected dates. Book by 31 July to lock in the saving.'
         },
         includes: ['Return direct flights from Gatwick', 'Private airport transfers', '23kg luggage per person', 'All meals, snacks & drinks', '7 nights at the Riu Palace 5★', 'Kids stay free on selected dates', 'ABTA & ATOL protection', 'UK rep service throughout'],
@@ -100,10 +112,62 @@
           badge: 'Save', badgeAmount: '750', urgency: 'Honeymoon perks included',
           bookby: '30 September 2026', reference: 'TG-MLE-1126', protection: 'ATOL protected',
           enquiryEmail: 'luxury@youragency.co.uk', enquiryPhone: '0161 123 4567',
+          mapAddress: 'Velassaru, South Malé Atoll, Maldives', mapLat: '4.1755', mapLng: '73.4595', mapStyle: 'satellite',
+          video: 'https://vimeo.com/174002812',
           description: 'Slip into barefoot luxury at Velassaru, where your overwater villa opens straight onto a warm turquoise lagoon. Ten nights of sunrise swims, candlelit dinners on the sand and a spa over the water.\nFlights with Emirates via Dubai, speedboat transfer on arrival, and honeymoon touches laid on by the resort.'
         },
         includes: ['Return flights with Emirates', 'Speedboat transfers', 'Overwater villa, 10 nights', 'Daily breakfast & dinner', 'Honeymoon perks', 'ATOL protection'],
         tags: ['Adults only', 'Overwater villa', 'Spa', 'Honeymoon']
+      },
+      algarve: {
+        currency: 'GBP',
+        images: [
+          'https://images.unsplash.com/photo-1591608971362-f08b2a75731a?w=1600&q=80',
+          'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=800&q=75',
+          'https://images.unsplash.com/photo-1504457047772-27faf1c00561?w=800&q=75',
+          'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=75'
+        ],
+        fields: {
+          title: 'Private villa week in the Algarve', teaser: 'Your own pool and a short stroll to the old town of Albufeira.',
+          type: 'Hotel / accommodation only', style: 'Family',
+          country: 'Portugal', region: 'Algarve', resort: 'Albufeira', property: 'Villa Oura',
+          stars: '4 star', board: 'Self catering', nights: '7', period: 'May to Oct 2026',
+          flighttype: 'Not included', origin: '',
+          price: '465', basis: 'per person', deposit: '50',
+          badge: 'Best seller', urgency: 'Three villas left for August',
+          bookby: '', reference: 'TG-FAO-0526', protection: 'ABTA member',
+          enquiryEmail: 'villas@youragency.co.uk', enquiryPhone: '0161 123 4567',
+          mapAddress: 'Albufeira, Algarve, Portugal', mapLat: '37.0891', mapLng: '-8.2475', mapStyle: 'streets',
+          video: 'https://www.youtube.com/watch?v=Scxs7L0vhZ4',
+          description: 'A bright three bedroom villa with a private pool, a five minute walk from the bars and restaurants of Albufeira old town and ten minutes from the beach.\nAdd flights from your local airport and we will sort car hire and transfers too.'
+        },
+        includes: ['Private 3 bed villa', 'Own pool', 'Welcome pack', 'Weekly clean', 'Car hire on request'],
+        tags: ['Family friendly', 'Private pool', 'Near the beach']
+      },
+      kruger: {
+        currency: 'GBP',
+        images: [
+          'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1600&q=80',
+          'https://images.unsplash.com/photo-1547970810-dc1eac37d174?w=800&q=75',
+          'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?w=800&q=75',
+          'https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&q=75'
+        ],
+        fields: {
+          title: 'Kruger safari & Cape Town', teaser: 'Big five game drives then table mountain and the waterfront.',
+          type: 'Multi-centre', style: 'Adventure',
+          country: 'South Africa', region: 'Mpumalanga & Western Cape', resort: 'Kruger & Cape Town',
+          property: 'Sabi Sands Lodge + V&A Hotel', stars: '5 star', board: 'Full board',
+          nights: '10', period: 'Mar to Nov 2026', airline: 'British Airways', flighttype: 'Connecting', origin: 'London Heathrow',
+          price: '2750', was: '3200', basis: 'per person', deposit: '200',
+          badge: 'Save', badgeAmount: '450', urgency: 'Small group, limited space',
+          bookby: '15 August 2026', reference: 'TG-JNB-0326', protection: 'Both',
+          enquiryEmail: 'safari@youragency.co.uk', enquiryPhone: '0161 123 4567',
+          mapAddress: 'Sabi Sand Game Reserve, South Africa', mapLat: '-24.8000', mapLng: '31.5000', mapStyle: 'satellite',
+          video: 'https://www.youtube.com/watch?v=Scxs7L0vhZ4',
+          description: 'Four nights of dawn and dusk game drives in the private Sabi Sands, where leopard sightings are among the best in Africa, then fly to Cape Town for five nights at the V&A Waterfront.\nGuided drives, a Table Mountain trip and a Cape winelands day are all included.'
+        },
+        includes: ['Return flights with BA', 'All internal flights', 'Game drives twice daily', 'Full board on safari', 'B&B in Cape Town', 'Table Mountain & winelands tours', 'ABTA & ATOL protection'],
+        tags: ['Adventure', 'Big five', 'Once in a lifetime']
       },
       sparse: {
         currency: 'GBP',
@@ -130,6 +194,7 @@
       mount.appendChild(div);
       widget = new window.TGOfferPageWidget(div, {
         theme: theme,
+        template: $('ctrlTemplate').value,
         accentColor: $('ctrlAccent').value,
         agencyName: 'Your Travel Co.',
         offer: OFFERS[$('ctrlOffer').value]

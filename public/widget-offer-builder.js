@@ -82,6 +82,8 @@
       price: '899', basis: 'per person', was: '1299', deposit: '60',
       badge: 'Save', urgency: 'Only 4 left at this price',
       bookby: '31 July 2026', avail: 'Limited rooms at this price',
+      mapAddress: 'Costa Mujeres, Cancun, Mexico', mapLat: '21.0419', mapLng: '-86.8126', mapStyle: 'streets',
+      video: 'https://www.youtube.com/watch?v=Scxs7L0vhZ4',
       description: 'Wake up to white sand and turquoise sea at the Riu Palace Costa Mujeres, a five star beachfront resort on one of the quietest stretches of the Mexican Caribbean. This all inclusive deal covers your direct flights from Gatwick plus every meal, drink and snack once you arrive.\n\nWith four pools, a spa, a kids club and a string of restaurants, it suits couples and families alike. Children stay free on selected dates. Book by 31 July to lock in the saving.'
     },
     includes: ['Return flights', 'Airport transfers', '23kg luggage', 'All meals & drinks', 'ABTA / ATOL protection', 'Rep service', 'Kids stay free'],
@@ -286,6 +288,7 @@
         showTags: bool(c.showTags, true),
         showValidity: bool(c.showValidity, true),
         showImages: bool(c.showImages, true),
+        showMap: bool(c.showMap, true),
         showDescription: bool(c.showDescription, true),
         showEnquiry: bool(c.showEnquiry, true),
 
@@ -418,13 +421,23 @@
           + '<div class="ob-upload">🖼️ Drag photos here, paste a hotel link, or <b>let AI suggest stock imagery</b> for the destination</div></div>';
       }
 
+      if (cfg.showMap) {
+        html += '<div class="ob-fs"><h4>9 · Map &amp; video</h4><p class="hint">Show the resort on a map and add a video tour. Both appear on the offer page.</p><div class="ob-grid">'
+          + field('mapAddress', 'Map location', input('mapAddress', 'Costa Mujeres, Cancun, Mexico'), '(shown above the map)', true)
+          + field('mapLat', 'Latitude', input('mapLat', 'e.g. 21.0419', 'text'), '(from Google Maps)')
+          + field('mapLng', 'Longitude', input('mapLng', 'e.g. -86.8126', 'text'), '(from Google Maps)')
+          + field('mapStyle', 'Map style', select('mapStyle', ['streets', 'minimal', 'muted', 'dark', 'satellite'], 'streets'))
+          + field('video', 'Video link', input('video', 'YouTube, Vimeo or MP4 URL', 'text'), '(optional)', true)
+          + '</div><p class="hint" style="margin-top:10px">Tip: in Google Maps, right-click the resort and click the coordinates to copy them. Leave the map blank to hide it.</p></div>';
+      }
+
       if (cfg.showDescription) {
-        html += '<div class="ob-fs"><h4>9 · Full description</h4><p class="hint">The longer write-up for the offer page. AI drafts it in your brand voice, then you edit.</p>'
+        html += '<div class="ob-fs"><h4>10 · Full description</h4><p class="hint">The longer write-up for the offer page. AI drafts it in your brand voice, then you edit.</p>'
           + '<div class="ob-field wide" data-field="description"><textarea data-key="description" rows="5" placeholder="A few warm, plain paragraphs about the resort, the location and why this deal is worth booking."></textarea></div></div>';
       }
 
       if (cfg.showEnquiry) {
-        html += '<div class="ob-fs"><h4>10 · Where enquiries go</h4><p class="hint">Each offer page carries an enquiry form. Tell us who picks it up.</p><div class="ob-grid">'
+        html += '<div class="ob-fs"><h4>11 · Where enquiries go</h4><p class="hint">Each offer page carries an enquiry form. Tell us who picks it up.</p><div class="ob-grid">'
           + field('enquiryEmail', 'Enquiry email', input('enquiryEmail', 'sales@youragency.co.uk', 'email'))
           + field('enquiryPhone', 'Phone shown on page', input('enquiryPhone', '0161 123 4567', 'tel'))
           + field('reference', 'Offer reference', input('reference', 'TG-CUN-0926'))

@@ -151,6 +151,7 @@
               <div class="toggle-row"><span>Tags &amp; promo badge</span><input type="checkbox" class="toggle" id="cfgShowTags"></div>
               <div class="toggle-row"><span>Validity &amp; availability</span><input type="checkbox" class="toggle" id="cfgShowValidity"></div>
               <div class="toggle-row"><span>Photos</span><input type="checkbox" class="toggle" id="cfgShowImages"></div>
+              <div class="toggle-row"><span>Map &amp; video</span><input type="checkbox" class="toggle" id="cfgShowMap"></div>
               <div class="toggle-row"><span>Full description</span><input type="checkbox" class="toggle" id="cfgShowDescription"></div>
               <div class="toggle-row"><span>Where enquiries go</span><input type="checkbox" class="toggle" id="cfgShowEnquiry"></div>
             </div>
@@ -288,7 +289,7 @@
         radius: 14,
         theme: 'light',
         showDestination: true, showStayTravel: true, showPrice: true, showIncludes: true,
-        showTags: true, showValidity: true, showImages: true, showDescription: true, showEnquiry: true,
+        showTags: true, showValidity: true, showImages: true, showMap: true, showDescription: true, showEnquiry: true,
         requireTitle: true, requirePrice: true,
         tagOptions: ['Family friendly','Adults only','Beachfront','Honeymoon','Last minute','Early bird','Spa','Kids club','Swim-up rooms'],
         includeOptions: ['Return flights','Airport transfers','23kg luggage','All meals & drinks','ABTA / ATOL protection','Rep service','Kids stay free','Free cancellation'],
@@ -363,6 +364,7 @@
       $('cfgShowTags').checked = c.showTags;
       $('cfgShowValidity').checked = c.showValidity;
       $('cfgShowImages').checked = c.showImages;
+      $('cfgShowMap').checked = c.showMap;
       $('cfgShowDescription').checked = c.showDescription;
       $('cfgShowEnquiry').checked = c.showEnquiry;
       $('cfgRequireTitle').checked = c.requireTitle;
@@ -405,7 +407,7 @@
       const toggles = {
         cfgAIEnabled: 'aiEnabled', cfgShowDestination: 'showDestination', cfgShowStayTravel: 'showStayTravel',
         cfgShowPrice: 'showPrice', cfgShowIncludes: 'showIncludes', cfgShowTags: 'showTags',
-        cfgShowValidity: 'showValidity', cfgShowImages: 'showImages', cfgShowDescription: 'showDescription',
+        cfgShowValidity: 'showValidity', cfgShowImages: 'showImages', cfgShowMap: 'showMap', cfgShowDescription: 'showDescription',
         cfgShowEnquiry: 'showEnquiry', cfgRequireTitle: 'requireTitle', cfgRequirePrice: 'requirePrice'
       };
       Object.entries(toggles).forEach(([id, key]) =>

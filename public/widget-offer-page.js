@@ -32,6 +32,32 @@
   const VERSION = '0.1.0';
   const API_BASE = '/api/widget-config';
 
+  // Base URL this script was served from, so we can load sibling widgets
+  // (widget-maps.js) from the same origin whether on tg-widgets or a client site.
+  const SCRIPT_BASE = (function () {
+    try {
+      const s = document.currentScript && document.currentScript.src;
+      if (s) return s.replace(/[^/]+$/, '');
+    } catch (e) {}
+    return '/';
+  })();
+
+  // Reuse the suite's map widget (Leaflet + MapTiler). Loaded on demand, once.
+  let _mapsPromise = null;
+  function ensureMaps() {
+    if (typeof window !== 'undefined' && window.TGMapsWidget) return Promise.resolve();
+    if (_mapsPromise) return _mapsPromise;
+    _mapsPromise = new Promise(function (resolve, reject) {
+      const s = document.createElement('script');
+      s.src = SCRIPT_BASE + 'widget-maps.js';
+      s.async = true;
+      s.onload = resolve;
+      s.onerror = function () { reject(new Error('maps-load-failed')); };
+      document.head.appendChild(s);
+    });
+    return _mapsPromise;
+  }
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   function esc(s) {
     return String(s == null ? '' : s)
@@ -66,6 +92,29 @@
     return '';
   }
   function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim()); }
+
+  // Parse a video URL into something embeddable (YouTube, Vimeo or a direct file).
+  function parseVideo(url) {
+    if (!url) return null;
+    const u = String(url).trim();
+    let m;
+    if ((m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([\w-]{6,})/i))) return { type: 'youtube', id: m[1] };
+    if ((m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/i))) return { type: 'vimeo', id: m[1] };
+    if (/\.(mp4|webm|ogg)(\?|#|$)/i.test(u) && safeUrl(u)) return { type: 'file', url: safeUrl(u) };
+    return null;
+  }
+  function videoEmbed(v) {
+    if (!v) return '';
+    if (v.type === 'youtube') return '<iframe src="https://www.youtube-nocookie.com/embed/' + esc(v.id) + '?rel=0" title="Video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+    if (v.type === 'vimeo') return '<iframe src="https://player.vimeo.com/video/' + esc(v.id) + '" title="Video" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+    if (v.type === 'file') return '<video controls preload="metadata" src="' + esc(v.url) + '"></video>';
+    return '';
+  }
+  function fnum(v) {
+    if (v == null || v === '') return null;
+    const n = Number(String(v).replace(/[^0-9.\-]/g, ''));
+    return isFinite(n) ? n : null;
+  }
 
   // Small inline icon set (stroke icons, currentColor)
   const I = {
@@ -296,6 +345,55 @@
     .tgop-lb-btn.prev { left: 18px; top: 50%; transform: translateY(-50%); }
     .tgop-lb-btn.next { right: 18px; top: 50%; transform: translateY(-50%); }
 
+    /* ── Video ── */
+    .tgop-video { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #000; box-shadow: var(--tgo-shadow-md); }
+    .tgop-video iframe, .tgop-video video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; object-fit: cover; }
+
+    /* ── Map ── */
+    .tgop-map-addr { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--tgo-sub); margin: 0 0 14px; }
+    .tgop-map-addr svg { width: 16px; height: 16px; color: var(--tgo-accent); }
+    .tgop-map { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: var(--tgo-shadow-md); min-height: 120px; }
+    .tgop-map.tgop-map-failed { display: none; }
+
+    /* ── Split hero (immersive template) ── */
+    .tgop-hero--split { display: grid; grid-template-columns: 1.05fr 1fr; height: min(82vh, 680px); min-height: 500px; }
+    .tgop-hero--split::after { display: none; }
+    .tgop-hsplit-img { position: relative; inset: auto; background-size: cover; background-position: center; animation: none; }
+    .tgop-hsplit-img.ph { background: linear-gradient(135deg, var(--tgo-brand), var(--tgo-accent)); }
+    .tgop-hsplit-panel { background: var(--tgo-surface); display: flex; align-items: center; padding: 0 clamp(28px, 5vw, 72px); }
+    .tgop-hsplit-inner { max-width: 460px; }
+    .tgop-eyebrow.alt { color: var(--tgo-accent); }
+    .tgop-h1.alt { color: var(--tgo-ink); text-shadow: none; font-size: clamp(30px, 3.6vw, 46px); }
+    .tgop-hero-meta.alt { color: var(--tgo-sub); }
+    .tgop-hsplit-panel .tgop-hero-loc { color: var(--tgo-sub); }
+    .tgop-hsplit-panel .tgop-hero-loc svg { color: var(--tgo-muted); }
+    .tgop-hsplit-teaser { font-size: 16px; color: var(--tgo-sub); line-height: 1.7; margin: 16px 0 0; }
+    .tgop-hsplit-buy { display: flex; align-items: center; gap: 18px; margin-top: 26px; flex-wrap: wrap; }
+    .tgop-hsplit-price { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+    .tgop-hsplit-price span { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--tgo-muted); display: block; }
+    .tgop-hsplit-price small { font-size: 13px; font-weight: 500; color: var(--tgo-sub); }
+    .tgop-badge.glass.light { background: var(--tgo-alt); border: 1px solid var(--tgo-border); color: var(--tgo-sub); }
+    @media (max-width: 820px) {
+      .tgop-hero--split { grid-template-columns: 1fr; height: auto; min-height: 0; }
+      .tgop-hsplit-img { min-height: 300px; }
+      .tgop-hsplit-panel { padding: 32px 24px 38px; }
+      .tgop-hsplit-inner { max-width: none; }
+    }
+
+    /* ── Editorial template ── */
+    .tgop-editorial { max-width: 780px; padding-top: 52px; padding-bottom: 10px; }
+    .tgop[data-template="editorial"] .tgop-h2 { font-size: 30px; }
+    .tgop[data-template="editorial"] .tgop-prose p { font-size: 18px; line-height: 1.85; }
+    .tgop[data-template="editorial"] .tgop-section { margin-bottom: 52px; }
+    .tgop-enqband { background: var(--tgo-alt); border-top: 1px solid var(--tgo-border); border-bottom: 1px solid var(--tgo-border); }
+    .tgop-enqband-inner { display: grid; grid-template-columns: 1fr 420px; gap: 44px; align-items: center; padding-top: 56px; padding-bottom: 56px; }
+    .tgop-enqband-copy h2 { margin: 0 0 10px; }
+    .tgop-enqband-copy p { font-size: 17px; color: var(--tgo-sub); margin: 0; max-width: 42ch; }
+    .tgop-enqband-card .tgop-aside, .tgop-enqband-card { position: static; }
+    @media (max-width: 820px) {
+      .tgop-enqband-inner { grid-template-columns: 1fr; gap: 24px; }
+    }
+
     /* Reveal on scroll — gated by [data-anim] so content is visible if JS or
        IntersectionObserver is unavailable (progressive enhancement). */
     .tgop[data-anim="1"] .tgop-reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1); }
@@ -336,7 +434,9 @@
     _defaults(c) {
       c = c || {};
       const o = c.offer && typeof c.offer === 'object' ? c.offer : {};
+      const templates = ['classic', 'editorial', 'immersive'];
       return {
+        template: templates.indexOf(c.template) !== -1 ? c.template : 'classic',
         theme: c.theme === 'dark' ? 'dark' : 'light',
         brandColor: c.brandColor || '',
         accentColor: c.accentColor || '',
@@ -372,6 +472,14 @@
       const save = wasN && priceN && wasN > priceN ? wasN - priceN : 0;
       const savePct = save ? Math.round((save / wasN) * 100) : 0;
       const protection = this._f('protection');
+
+      // Map — only when we have valid coordinates (mirrors the maps widget,
+      // which needs lat/lng; the address is display text).
+      const lat = fnum(this._f('mapLat')), lng = fnum(this._f('mapLng'));
+      const map = (lat !== null && lng !== null && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)
+        ? { lat: lat, lng: lng, address: this._f('mapAddress'), style: this._f('mapStyle') || 'streets' }
+        : null;
+
       return {
         sym: sym, images: imgs,
         eyebrow: [this._f('style'), shortType(this._f('type'))].filter(Boolean).join('  ·  '),
@@ -403,16 +511,19 @@
         tags: Array.isArray(o.tags) ? o.tags : [],
         enquiryEmail: this._f('enquiryEmail') || this.cfg.offer.enquiryEmail || '',
         enquiryPhone: this._f('enquiryPhone'),
+        video: parseVideo(this._f('video')),
+        map: map,
         currency: sym
       };
     }
 
-    _heroBadges(d) {
+    _heroBadges(d, onLight) {
+      const glass = onLight ? 'glass light' : 'glass';
       const out = [];
       if (d.save) out.push('<span class="tgop-badge save">Save ' + esc(d.save) + (d.savePct ? ' (' + d.savePct + '%)' : '') + '</span>');
       else if (d.badge && d.badge !== 'No badge') out.push('<span class="tgop-badge save">' + esc(d.badge) + '</span>');
-      if (d.atol) out.push('<span class="tgop-badge glass">' + I.shield + ' ATOL protected</span>');
-      else if (d.abta) out.push('<span class="tgop-badge glass">' + I.shield + ' ABTA member</span>');
+      if (d.atol) out.push('<span class="tgop-badge ' + glass + '">' + I.shield + ' ATOL protected</span>');
+      else if (d.abta) out.push('<span class="tgop-badge ' + glass + '">' + I.shield + ' ABTA member</span>');
       return out.length ? '<div class="tgop-badges">' + out.join('') + '</div>' : '';
     }
 
@@ -501,88 +612,134 @@
       const heroCls = hero ? '' : ' ph';
       const starsStr = d.stars ? '<span class="tgop-hero-stars">' + '★'.repeat(d.stars) + '</span>' : '';
 
-      // Gallery: up to 5 thumbs (the rest still open in the lightbox via index)
-      const gallery = d.images.length > 1
-        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">Photos</h2><div class="tgop-gallery" data-gallery>'
-          + d.images.slice(0, 5).map(function (src, i) { return '<button type="button" class="g" data-idx="' + i + '" style="background-image:url(' + esc(src) + ')" aria-label="Open photo ' + (i + 1) + '"></button>'; }).join('')
-          + '</div></div>'
+      // ── Section fragments (assembled differently per template) ──
+      const tags = d.tags.length
+        ? '<div class="tgop-tags">' + d.tags.map(function (t) { return '<span class="tgop-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
         : '';
+      const descParas = String(d.description || '').split(/\n+/).filter(Boolean)
+        .map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') || '<p>' + esc(d.teaser) + '</p>';
 
-      const includes = d.includes.length
+      const fAbout = '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">About this holiday</h2><div class="tgop-prose">' + descParas + '</div>' + tags + '</div>';
+
+      const fIncludes = d.includes.length
         ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">What\'s included</h2><ul class="tgop-incl">'
           + d.includes.map(function (x) { return '<li><span class="tick">' + I.check + '</span>' + esc(x) + '</li>'; }).join('')
           + '</ul></div>'
         : '';
 
-      const tags = d.tags.length
-        ? '<div class="tgop-tags">' + d.tags.map(function (t) { return '<span class="tgop-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
+      const fGallery = d.images.length > 1
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">Photos</h2><div class="tgop-gallery" data-gallery>'
+          + d.images.slice(0, 5).map(function (src, i) { return '<button type="button" class="g" data-idx="' + i + '" style="background-image:url(' + esc(src) + ')" aria-label="Open photo ' + (i + 1) + '"></button>'; }).join('')
+          + '</div></div>'
         : '';
 
-      const descParas = String(d.description || '').split(/\n+/).filter(Boolean)
-        .map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') || '<p>' + esc(d.teaser) + '</p>';
+      const fVideo = d.video
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">Take a look</h2><div class="tgop-video">' + videoEmbed(d.video) + '</div></div>'
+        : '';
+
+      // Map placeholder — TGMapsWidget is mounted into [data-map] in _bind().
+      const fMap = d.map
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">Where you\'ll be</h2>'
+          + (d.map.address ? '<p class="tgop-map-addr">' + I.pin + esc(d.map.address) + '</p>' : '')
+          + '<div class="tgop-map" data-map></div></div>'
+        : '';
+
+      const fDetail = '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">The detail</h2><table class="tgop-table"><tbody>' + this._detailTable(d) + '</tbody></table></div>';
+
+      const fBar = '<div class="tgop-bar" data-bar><div class="tgop-bar-inner">'
+        + '<span class="tgop-bar-title">' + esc(d.title) + '</span><span class="tgop-bar-spacer"></span>'
+        + (d.price ? '<span class="tgop-bar-price">' + d.price + ' <small>' + esc(d.basis || '') + '</small></span>' : '')
+        + '<button type="button" class="tgop-btn accent sm" data-enquire>Enquire now</button>'
+      + '</div></div>';
+
+      // Overlay hero (classic + editorial)
+      const fHero = '<div class="tgop-hero">'
+        + '<div class="tgop-hero-img' + heroCls + '"' + heroBg + '></div>'
+        + '<div class="tgop-hero-inner"><div>'
+          + this._heroBadges(d)
+          + (d.eyebrow ? '<div class="tgop-eyebrow">' + esc(d.eyebrow) + '</div>' : '')
+          + '<h1 class="tgop-h1">' + esc(d.title) + '</h1>'
+          + '<div class="tgop-hero-meta">'
+            + (d.loc ? '<span class="tgop-hero-loc">' + I.pin + esc(d.loc) + '</span>' : '') + starsStr
+          + '</div>'
+        + '</div></div>'
+        + '<div class="tgop-scroll-cue">' + I.chevDown + '</div>'
+      + '</div>';
+
+      // Split hero (immersive): image one side, content panel the other
+      const fHeroSplit = '<div class="tgop-hero tgop-hero--split">'
+        + '<div class="tgop-hsplit-img' + heroCls + '"' + heroBg + '></div>'
+        + '<div class="tgop-hsplit-panel"><div class="tgop-hsplit-inner">'
+          + this._heroBadges(d, true)
+          + (d.eyebrow ? '<div class="tgop-eyebrow alt">' + esc(d.eyebrow) + '</div>' : '')
+          + '<h1 class="tgop-h1 alt">' + esc(d.title) + '</h1>'
+          + '<div class="tgop-hero-meta alt">'
+            + (d.loc ? '<span class="tgop-hero-loc">' + I.pin + esc(d.loc) + '</span>' : '') + starsStr
+          + '</div>'
+          + (d.teaser ? '<p class="tgop-hsplit-teaser">' + esc(d.teaser) + '</p>' : '')
+          + '<div class="tgop-hsplit-buy">'
+            + (d.price ? '<div class="tgop-hsplit-price"><span>From</span> ' + d.price + (d.basis ? ' <small>' + esc(d.basis) + '</small>' : '') + '</div>' : '')
+            + '<button type="button" class="tgop-btn accent" data-enquire>Enquire now ' + I.arrow + '</button>'
+          + '</div>'
+        + '</div></div>'
+      + '</div>';
+
+      const fFacts = '<div class="tgop-wrap tgop-facts-wrap"><div class="tgop-facts">' + this._facts(d) + '</div></div>';
 
       const footTrust = [];
       if (d.atol) footTrust.push('ATOL protected');
       if (d.abta) footTrust.push('ABTA member');
 
-      root.innerHTML =
-        // Sticky bar
-        '<div class="tgop-bar" data-bar><div class="tgop-bar-inner">'
-          + '<span class="tgop-bar-title">' + esc(d.title) + '</span><span class="tgop-bar-spacer"></span>'
-          + (d.price ? '<span class="tgop-bar-price">' + d.price + ' <small>' + esc(d.basis || '') + '</small></span>' : '')
-          + '<button type="button" class="tgop-btn accent sm" data-enquire>Enquire now</button>'
-        + '</div></div>'
+      const fCta = '<div class="tgop-cta-band"><div class="tgop-cta-inner">'
+        + '<div><h3>Ready when you are</h3><p>Talk to a travel expert and we will hold this price while you decide.</p></div>'
+        + '<span class="tgop-cta-spacer"></span>'
+        + '<button type="button" class="tgop-btn primary" data-enquire>Enquire now ' + I.arrow + '</button>'
+        + (d.enquiryPhone ? '<a class="tgop-btn ghost" href="tel:' + esc(d.enquiryPhone.replace(/\s/g, '')) + '">' + I.phone + ' ' + esc(d.enquiryPhone) + '</a>' : '')
+      + '</div></div>';
 
-        // Hero
-        + '<div class="tgop-hero">'
-          + '<div class="tgop-hero-img' + heroCls + '"' + heroBg + '></div>'
-          + '<div class="tgop-hero-inner"><div>'
-            + this._heroBadges(d)
-            + (d.eyebrow ? '<div class="tgop-eyebrow">' + esc(d.eyebrow) + '</div>' : '')
-            + '<h1 class="tgop-h1">' + esc(d.title) + '</h1>'
-            + '<div class="tgop-hero-meta">'
-              + (d.loc ? '<span class="tgop-hero-loc">' + I.pin + esc(d.loc) + '</span>' : '')
-              + starsStr
-            + '</div>'
+      const fFooter = '<div class="tgop-foot"><div class="tgop-foot-inner">'
+        + (footTrust.length ? '<span class="tgop-foot-trust">' + I.shield + esc(footTrust.join(' · ')) + '</span>' : '')
+        + (d.reference ? '<span>Offer ref ' + esc(d.reference) + '</span>' : '')
+        + (this.cfg.agencyName ? '<span>' + esc(this.cfg.agencyName) + '</span>' : '')
+        + '<span class="tgop-bar-spacer"></span><span>Powered by Travelgenix</span>'
+      + '</div></div>';
+
+      const fLightbox = '<div class="tgop-lb" data-lb><button type="button" class="tgop-lb-btn close" data-lb-close>' + I.x + '</button>'
+        + '<button type="button" class="tgop-lb-btn prev" data-lb-prev>' + I.chevDown + '</button>'
+        + '<img class="tgop-lb-img" data-lb-img alt="">'
+        + '<button type="button" class="tgop-lb-btn next" data-lb-next>' + I.chevDown + '</button></div>';
+
+      // Main column content order (shared by classic + immersive)
+      const mainCol = fAbout + fIncludes + fVideo + fGallery + fMap + fDetail;
+
+      // ── Assemble by template ──
+      let html;
+      if (cfg.template === 'editorial') {
+        html = fBar + fHero + fFacts
+          + '<div class="tgop-wrap tgop-editorial">' + fAbout + fIncludes + fGallery + fVideo + fMap + fDetail + '</div>'
+          + '<div class="tgop-enqband"><div class="tgop-wrap tgop-enqband-inner">'
+            + '<div class="tgop-enqband-copy"><h2 class="tgop-h2">Like the look of it?</h2><p>Send us a quick enquiry and a travel expert will be in touch within one working hour. No payment now.</p></div>'
+            + '<div class="tgop-enqband-card">' + this._bookCard(d) + '</div>'
           + '</div></div>'
-          + '<div class="tgop-scroll-cue">' + I.chevDown + '</div>'
-        + '</div>'
+          + fCta + fFooter + fLightbox;
+      } else if (cfg.template === 'immersive') {
+        html = fBar + fHeroSplit + fFacts
+          + '<div class="tgop-wrap"><div class="tgop-body">'
+            + '<div class="tgop-main">' + mainCol + '</div>'
+            + '<aside class="tgop-aside">' + this._bookCard(d) + '</aside>'
+          + '</div></div>'
+          + fCta + fFooter + fLightbox;
+      } else { // classic
+        html = fBar + fHero + fFacts
+          + '<div class="tgop-wrap"><div class="tgop-body">'
+            + '<div class="tgop-main">' + mainCol + '</div>'
+            + '<aside class="tgop-aside">' + this._bookCard(d) + '</aside>'
+          + '</div></div>'
+          + fCta + fFooter + fLightbox;
+      }
 
-        // Quick facts
-        + '<div class="tgop-wrap tgop-facts-wrap"><div class="tgop-facts">' + this._facts(d) + '</div></div>'
-
-        // Body
-        + '<div class="tgop-wrap"><div class="tgop-body">'
-          + '<div class="tgop-main">'
-            + '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">About this holiday</h2><div class="tgop-prose">' + descParas + '</div>' + tags + '</div>'
-            + includes
-            + gallery
-            + '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">The detail</h2><table class="tgop-table"><tbody>' + this._detailTable(d) + '</tbody></table></div>'
-          + '</div>'
-          + '<aside class="tgop-aside">' + this._bookCard(d) + '</aside>'
-        + '</div></div>'
-
-        // Final CTA band
-        + '<div class="tgop-cta-band"><div class="tgop-cta-inner">'
-          + '<div><h3>Ready when you are</h3><p>Talk to a travel expert and we will hold this price while you decide.</p></div>'
-          + '<span class="tgop-cta-spacer"></span>'
-          + '<button type="button" class="tgop-btn primary" data-enquire>Enquire now ' + I.arrow + '</button>'
-          + (d.enquiryPhone ? '<a class="tgop-btn ghost" href="tel:' + esc(d.enquiryPhone.replace(/\s/g, '')) + '">' + I.phone + ' ' + esc(d.enquiryPhone) + '</a>' : '')
-        + '</div></div>'
-
-        // Footer trust
-        + '<div class="tgop-foot"><div class="tgop-foot-inner">'
-          + (footTrust.length ? '<span class="tgop-foot-trust">' + I.shield + esc(footTrust.join(' · ')) + '</span>' : '')
-          + (d.reference ? '<span>Offer ref ' + esc(d.reference) + '</span>' : '')
-          + (this.cfg.agencyName ? '<span>' + esc(this.cfg.agencyName) + '</span>' : '')
-          + '<span class="tgop-bar-spacer"></span><span>Powered by Travelgenix</span>'
-        + '</div></div>'
-
-        // Lightbox
-        + '<div class="tgop-lb" data-lb><button type="button" class="tgop-lb-btn close" data-lb-close>' + I.x + '</button>'
-          + '<button type="button" class="tgop-lb-btn prev" data-lb-prev>' + I.chevDown + '</button>'
-          + '<img class="tgop-lb-img" data-lb-img alt="">'
-          + '<button type="button" class="tgop-lb-btn next" data-lb-next>' + I.chevDown + '</button></div>';
+      root.setAttribute('data-template', cfg.template);
+      root.innerHTML = html;
 
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(root);
@@ -631,8 +788,49 @@
       // Gallery lightbox
       this._initLightbox(d);
 
+      // Map (delegates to the shared TGMapsWidget)
+      this._mountMap(d);
+
       // Enquiry submit
       if (form) form.addEventListener('submit', (e) => { e.preventDefault(); this._submitEnquiry(form, d); });
+    }
+
+    _mountMap(d) {
+      if (!d.map) return;
+      const holder = this.root.querySelector('[data-map]');
+      if (!holder) return;
+      const accent = this.cfg.accentColor || '#0891B2';
+      const mapCfg = {
+        mapStyle: d.map.style || 'streets',
+        zoom: 13,
+        autoFit: false,
+        center: { lat: d.map.lat, lng: d.map.lng },
+        height: 360,
+        accent: accent,
+        theme: this.cfg.theme,
+        showList: 'never',
+        scrollWheel: false,
+        directionsButton: true,
+        showInfoCard: false,
+        locations: [{
+          title: d.property || d.title,
+          address: d.map.address || d.loc,
+          lat: d.map.lat,
+          lng: d.map.lng,
+          color: accent
+        }]
+      };
+      const mount = function (W) {
+        try {
+          const div = document.createElement('div');
+          holder.innerHTML = '';
+          holder.appendChild(div);
+          new W(div, mapCfg);
+        } catch (e) { /* leave the address text as the fallback */ }
+      };
+      if (window.TGMapsWidget) { mount(window.TGMapsWidget); return; }
+      ensureMaps().then(function () { if (window.TGMapsWidget) mount(window.TGMapsWidget); })
+        .catch(function () { holder.classList.add('tgop-map-failed'); });
     }
 
     _initCountdown(d) {
