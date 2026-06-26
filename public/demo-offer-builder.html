@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Special Offer Builder · Travelgenix Widget Suite</title>
+<style>
+  :root {
+    --tg-bg: #F7F9FB;
+    --tg-surface: #FFFFFF;
+    --tg-card-alt: #FAFBFC;
+    --tg-border: #E2E8F0;
+    --tg-text: #0F172A;
+    --tg-sub: #475569;
+    --tg-muted: #94A3B8;
+    --tg-brand: #1B2B5B;
+    --tg-accent: #00B4D8;
+    --tg-accent-hover: #0096B7;
+    --tg-accent-soft: #E0F4FA;
+    --tg-success: #10B981;
+    --tg-success-soft: #D1FAE5;
+    --tg-warn: #D97706;
+    --tg-warn-soft: #FEF3C7;
+    --tg-strike: #94A3B8;
+    --tg-ai: #7C3AED;
+    --tg-ai-soft: #F3E8FF;
+    --tg-radius: 14px;
+    --tg-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --tg-shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --tg-shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.16);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--tg-bg);
+    color: var(--tg-text);
+    line-height: 1.5;
+  }
+
+  /* ─── Topbar ─────────────────────────────────────────────── */
+  .topbar {
+    background: var(--tg-surface);
+    border-bottom: 1px solid var(--tg-border);
+    padding: 12px 24px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-inner {
+    max-width: 1180px; margin: 0 auto; width: 100%;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: var(--tg-text); font-weight: 700;
+  }
+  .brand-mark {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent));
+    border-radius: 8px;
+  }
+  .pill {
+    padding: 4px 10px; background: var(--tg-accent-soft); color: var(--tg-accent);
+    border-radius: 999px; font-size: 12px; font-weight: 600;
+  }
+  .topbar-spacer { flex: 1; }
+
+  /* ─── Step tabs ──────────────────────────────────────────── */
+  .steps {
+    max-width: 1180px; margin: 24px auto 0; padding: 0 24px;
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .step-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--tg-surface); border: 1px solid var(--tg-border);
+    color: var(--tg-sub); font-weight: 600; font-size: 14px;
+    padding: 10px 16px; border-radius: 999px; cursor: pointer;
+    font-family: inherit; transition: all 0.15s ease;
+  }
+  .step-btn:hover { border-color: var(--tg-accent); color: var(--tg-text); }
+  .step-btn.active {
+    background: var(--tg-brand); border-color: var(--tg-brand); color: #fff;
+  }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--tg-accent-soft); color: var(--tg-accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .step-btn.active .step-num { background: rgba(255,255,255,0.2); color: #fff; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  h1 { font-size: 28px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.4px; }
+  .lede { color: var(--tg-sub); font-size: 15px; max-width: 720px; margin: 0 0 24px; }
+  .section-eyebrow {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--tg-accent); font-weight: 700; margin: 0 0 4px;
+  }
+
+  /* ─── AI prompt box ──────────────────────────────────────── */
+  .ai-box {
+    background: linear-gradient(135deg, #faf5ff 0%, #f0f9ff 100%);
+    border: 1px solid #e9d5ff;
+    border-radius: var(--tg-radius);
+    padding: 20px; margin-bottom: 24px;
+  }
+  .ai-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .ai-spark {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--tg-ai), var(--tg-accent));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px;
+  }
+  .ai-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+  .ai-sub { font-size: 13px; color: var(--tg-sub); margin: 0 0 14px 40px; }
+  .ai-input-row { display: flex; gap: 10px; align-items: stretch; }
+  .ai-input-row textarea {
+    flex: 1; resize: vertical; min-height: 58px;
+    border: 1px solid var(--tg-border); border-radius: 10px;
+    padding: 12px 14px; font-family: inherit; font-size: 14px;
+    background: #fff; color: var(--tg-text);
+  }
+  .ai-input-row textarea:focus { outline: 2px solid var(--tg-ai); border-color: var(--tg-ai); }
+  .ai-go {
+    background: var(--tg-ai); color: #fff; border: 0; border-radius: 10px;
+    padding: 0 22px; font-weight: 700; font-size: 14px; cursor: pointer;
+    font-family: inherit; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background 0.15s ease;
+  }
+  .ai-go:hover { background: #6d28d9; }
+  .ai-status {
+    font-size: 13px; color: var(--tg-ai); font-weight: 600;
+    margin: 12px 0 0 40px; display: none; align-items: center; gap: 8px;
+  }
+  .ai-status.show { display: flex; }
+  .ai-examples { font-size: 12px; color: var(--tg-muted); margin: 12px 0 0 40px; }
+  .ai-examples b { color: var(--tg-sub); font-weight: 600; }
+
+  /* ─── Form ───────────────────────────────────────────────── */
+  .form-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  .fieldset {
+    background: var(--tg-surface); border: 1px solid var(--tg-border);
+    border-radius: var(--tg-radius); padding: 20px; box-shadow: var(--tg-shadow);
+  }
+  .fieldset > h2 {
+    font-size: 15px; font-weight: 700; margin: 0 0 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .fieldset > .fs-hint { font-size: 12px; color: var(--tg-muted); margin: 0 0 16px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; position: relative; }
+  .field.wide { grid-column: 1 / -1; }
+  label {
+    font-size: 11px; color: var(--tg-sub); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  input[type=text], input[type=number], input[type=date], input[type=email],
+  input[type=tel], select, textarea {
+    padding: 9px 11px; border: 1px solid var(--tg-border); border-radius: 9px;
+    font-size: 14px; background: var(--tg-surface); color: var(--tg-text);
+    font-family: inherit; width: 100%;
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--tg-accent); outline-offset: 1px; border-color: var(--tg-accent);
+  }
+  .ai-chip {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.4px;
+    background: var(--tg-ai-soft); color: var(--tg-ai);
+    padding: 2px 6px; border-radius: 999px; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  /* AI-filled fields get a subtle violet left edge */
+  .field.ai-filled input, .field.ai-filled select, .field.ai-filled textarea {
+    border-left: 3px solid var(--tg-ai); background: #fdfbff;
+  }
+  .prefix-input { position: relative; }
+  .prefix-input .prefix {
+    position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    color: var(--tg-muted); font-size: 14px; pointer-events: none;
+  }
+  .prefix-input input { padding-left: 24px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip-toggle {
+    border: 1px solid var(--tg-border); background: var(--tg-surface);
+    color: var(--tg-sub); border-radius: 999px; padding: 7px 14px;
+    font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;
+    transition: all 0.12s ease;
+  }
+  .chip-toggle:hover { border-color: var(--tg-accent); }
+  .chip-toggle.on { background: var(--tg-accent-soft); border-color: var(--tg-accent); color: var(--tg-accent-hover); font-weight: 600; }
+  .chip-toggle.on::before { content: '✓ '; }
+
+  .incl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .incl-item {
+    display: flex; align-items: center; gap: 9px; font-size: 14px;
+    padding: 9px 12px; border: 1px solid var(--tg-border); border-radius: 9px;
+    background: var(--tg-card-alt); cursor: pointer;
+  }
+  .incl-item input { width: auto; }
+  .incl-item.on { background: var(--tg-success-soft); border-color: var(--tg-success); }
+
+  .upload {
+    border: 2px dashed var(--tg-border); border-radius: 10px; padding: 22px;
+    text-align: center; color: var(--tg-muted); font-size: 13px; cursor: pointer;
+    background: var(--tg-card-alt);
+  }
+  .upload .ph { display: block; font-size: 22px; margin-bottom: 6px; }
+  .thumbrow { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .thumbrow .t {
+    width: 72px; height: 54px; border-radius: 7px; background-size: cover;
+    background-position: center; border: 1px solid var(--tg-border);
+  }
+
+  .form-actions {
+    display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    border-radius: 10px; padding: 12px 22px; font-weight: 700; font-size: 14px;
+    cursor: pointer; font-family: inherit; border: 1px solid var(--tg-border);
+    background: var(--tg-surface); color: var(--tg-sub);
+  }
+  .btn:hover { border-color: var(--tg-accent); color: var(--tg-text); }
+  .btn.primary { background: var(--tg-accent); border-color: var(--tg-accent); color: #fff; }
+  .btn.primary:hover { background: var(--tg-accent-hover); }
+
+  /* ─── Card output view ───────────────────────────────────── */
+  .stage {
+    background: var(--tg-card-alt); border: 1px solid var(--tg-border);
+    border-radius: 16px; padding: 36px;
+  }
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px; max-width: 760px; margin: 0 auto;
+  }
+  .ocard {
+    background: var(--tg-surface); border: 1px solid var(--tg-border);
+    border-radius: var(--tg-radius); overflow: hidden; display: flex;
+    flex-direction: column; box-shadow: var(--tg-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease; cursor: pointer;
+  }
+  .ocard:hover { transform: translateY(-3px); box-shadow: var(--tg-shadow-hover); }
+  .ocard-img { aspect-ratio: 16 / 10; position: relative; background-size: cover; background-position: center; }
+  .ocard-stars {
+    position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7);
+    color: #FFD166; padding: 4px 10px; border-radius: 6px; font-size: 12px;
+    font-weight: 600; backdrop-filter: blur(4px);
+  }
+  .ocard-badge {
+    position: absolute; top: 10px; right: 10px; background: var(--tg-warn);
+    color: #fff; padding: 4px 11px; border-radius: 6px; font-size: 11px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .ocard-pill {
+    position: absolute; bottom: 10px; left: 10px; background: var(--tg-success);
+    color: #fff; padding: 4px 11px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  }
+  .ocard-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .ocard-type { font-size: 10px; color: var(--tg-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+  .ocard-name { font-weight: 700; font-size: 17px; line-height: 1.3; margin: 0; }
+  .ocard-loc { font-size: 13px; color: var(--tg-sub); display: inline-flex; align-items: center; gap: 5px; }
+  .ocard-sum { font-size: 12px; color: var(--tg-sub); line-height: 1.5; margin-top: 2px; }
+  .ocard-meta-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .ocard-tag {
+    font-size: 10px; font-weight: 600; background: var(--tg-card-alt);
+    border: 1px solid var(--tg-border); color: var(--tg-sub);
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .ocard-foot {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 12px; padding: 12px 16px 16px; margin-top: auto;
+  }
+  .ocard-price { font-weight: 800; font-size: 23px; line-height: 1; }
+  .ocard-was { font-size: 12px; color: var(--tg-strike); text-decoration: line-through; }
+  .ocard-psub { font-size: 11px; color: var(--tg-sub); }
+  .ocard-cta {
+    background: var(--tg-accent); color: #fff; border: 0; border-radius: 9px;
+    padding: 10px 16px; font-weight: 700; font-size: 13px; cursor: pointer;
+    font-family: inherit; white-space: nowrap;
+  }
+  .ocard-cta:hover { background: var(--tg-accent-hover); }
+  .view-note {
+    text-align: center; font-size: 13px; color: var(--tg-muted);
+    margin: 18px auto 0; max-width: 520px;
+  }
+
+  /* ─── Offer detail page view ─────────────────────────────── */
+  .browser {
+    background: var(--tg-surface); border: 1px solid var(--tg-border);
+    border-radius: 16px; overflow: hidden; box-shadow: var(--tg-shadow-hover);
+  }
+  .browser-bar {
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    background: var(--tg-card-alt); border-bottom: 1px solid var(--tg-border);
+  }
+  .browser-bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .browser-url {
+    flex: 1; background: var(--tg-surface); border: 1px solid var(--tg-border);
+    border-radius: 7px; padding: 5px 12px; font-size: 12px; color: var(--tg-muted);
+    margin-left: 8px;
+  }
+
+  .dp-hero { position: relative; height: 380px; background-size: cover; background-position: center; }
+  .dp-hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.78) 100%);
+  }
+  .dp-hero-content {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+    padding: 32px 40px; color: #fff;
+  }
+  .dp-hero-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .dp-badge {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 5px 12px; border-radius: 999px; color: #fff;
+  }
+  .dp-badge.save { background: var(--tg-warn); }
+  .dp-badge.ai { background: var(--tg-success); }
+  .dp-badge.atol { background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); }
+  .dp-hero h1 { font-size: 38px; font-weight: 800; margin: 0 0 8px; letter-spacing: -0.6px; color: #fff; }
+  .dp-hero-loc { font-size: 16px; opacity: 0.95; display: inline-flex; align-items: center; gap: 7px; }
+  .dp-hero-stars { color: #FFD166; margin-left: 6px; }
+
+  .dp-body { display: grid; grid-template-columns: 1fr 360px; gap: 0; }
+  .dp-main { padding: 36px 40px; min-width: 0; }
+  .dp-aside { padding: 28px; border-left: 1px solid var(--tg-border); background: var(--tg-card-alt); }
+  @media (max-width: 880px) { .dp-body { grid-template-columns: 1fr; } .dp-aside { border-left: 0; border-top: 1px solid var(--tg-border); } }
+
+  .dp-quickfacts {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 14px; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid var(--tg-border);
+  }
+  .qf { text-align: center; }
+  .qf .ic { font-size: 20px; }
+  .qf .lab { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--tg-muted); font-weight: 700; margin-top: 4px; }
+  .qf .val { font-size: 14px; font-weight: 700; margin-top: 2px; }
+
+  .dp-h2 { font-size: 20px; font-weight: 700; margin: 0 0 12px; }
+  .dp-section { margin-bottom: 32px; }
+  .dp-section p { color: var(--tg-sub); font-size: 15px; line-height: 1.7; margin: 0 0 12px; }
+
+  .incl-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .incl-list li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--tg-text); }
+  .incl-list .tick { width: 22px; height: 22px; border-radius: 50%; background: var(--tg-success-soft); color: var(--tg-success); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+
+  .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .gallery .g { aspect-ratio: 1; border-radius: 9px; background-size: cover; background-position: center; }
+  @media (max-width: 600px) { .gallery { grid-template-columns: repeat(2, 1fr); } }
+
+  .detail-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .detail-table td { padding: 10px 0; border-bottom: 1px solid var(--tg-border); }
+  .detail-table td:first-child { color: var(--tg-muted); font-weight: 600; width: 42%; }
+  .detail-table td:last-child { color: var(--tg-text); font-weight: 500; }
+
+  /* Sticky price + enquiry box */
+  .price-box {
+    background: var(--tg-surface); border: 1px solid var(--tg-border);
+    border-radius: 14px; padding: 22px; box-shadow: var(--tg-shadow); position: sticky; top: 80px;
+  }
+  .pb-from { font-size: 12px; color: var(--tg-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
+  .pb-price { font-size: 38px; font-weight: 800; line-height: 1; margin: 2px 0; }
+  .pb-was { font-size: 15px; color: var(--tg-strike); text-decoration: line-through; }
+  .pb-save { color: var(--tg-success); font-weight: 700; font-size: 14px; margin-left: 6px; }
+  .pb-basis { font-size: 13px; color: var(--tg-sub); margin-top: 4px; }
+  .pb-deposit { font-size: 13px; color: var(--tg-sub); margin-top: 10px; padding: 8px 12px; background: var(--tg-accent-soft); border-radius: 8px; }
+  .pb-form { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .pb-form input, .pb-form select, .pb-form textarea { font-size: 14px; }
+  .pb-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pb-submit {
+    background: var(--tg-accent); color: #fff; border: 0; border-radius: 10px;
+    padding: 14px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit;
+  }
+  .pb-submit:hover { background: var(--tg-accent-hover); }
+  .pb-trust { font-size: 11px; color: var(--tg-muted); text-align: center; margin-top: 10px; line-height: 1.5; }
+
+  .foot { max-width: 1180px; margin: 0 auto; padding: 28px 24px; text-align: center; font-size: 13px; color: var(--tg-muted); }
+  .foot a { color: inherit; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark"></span><span>Travelgenix</span></a>
+    <span class="pill">Special Offer Builder · Mock-up</span>
+    <div class="topbar-spacer"></div>
+    <span style="font-size:13px;color:var(--tg-muted)">v0.1 concept · 26 Jun 2026</span>
+  </div>
+</header>
+
+<nav class="steps">
+  <button class="step-btn active" data-view="build"><span class="step-num">1</span> Create the offer</button>
+  <button class="step-btn" data-view="card"><span class="step-num">2</span> Card on your site</button>
+  <button class="step-btn" data-view="page"><span class="step-num">3</span> Offer page &amp; enquiry</button>
+</nav>
+
+<main class="wrap">
+
+  <!-- ════════ VIEW 1 · BUILDER FORM ════════ -->
+  <section class="view build active" id="view-build">
+    <h1>Create a special offer</h1>
+    <p class="lede">Fill the form yourself, or describe the deal in a sentence and let AI draft the whole thing for you. You stay in control, every AI suggestion is editable before you publish.</p>
+
+    <!-- AI assist -->
+    <div class="ai-box">
+      <div class="ai-head">
+        <span class="ai-spark">✨</span>
+        <h3>Describe your offer, we will fill in the rest</h3>
+      </div>
+      <p class="ai-sub">Type it the way you would say it to a customer. AI works out the destination, board basis, sensible price basis, highlights and a polished description, then fills the form below for you to check.</p>
+      <div class="ai-input-row">
+        <textarea id="aiInput">7 nights all inclusive at the Riu Palace Costa Mujeres in Cancun, flying from Gatwick, was 1299 now from 899 per person, save 400, kids stay free, book by end of July</textarea>
+        <button class="ai-go" id="aiGo">✨ Generate</button>
+      </div>
+      <div class="ai-status" id="aiStatus"><span class="spinner">⏳</span> Reading your offer and filling the form…</div>
+      <p class="ai-examples"><b>Other things you can type:</b> "Last minute Tenerife half board, 4 star, £549pp" · "Luxury Maldives honeymoon 10 nights overwater villa from £3,200" · "3 night Lapland Santa break for families, December departures"</p>
+    </div>
+
+    <form class="form-grid" id="offerForm" onsubmit="return false">
+
+      <!-- The basics -->
+      <div class="fieldset">
+        <h2>1 · The basics</h2>
+        <p class="fs-hint">What the offer is and the headline that grabs attention.</p>
+        <div class="grid2">
+          <div class="field wide" data-ai>
+            <label>Offer title <span class="ai-hint"></span></label>
+            <input type="text" data-key="title" placeholder="e.g. 7 nights all inclusive in Cancun" />
+          </div>
+          <div class="field" data-ai>
+            <label>Offer type</label>
+            <select data-key="type">
+              <option>Package holiday (flight + hotel)</option>
+              <option>Hotel / accommodation only</option>
+              <option>Flight only</option>
+              <option>City break</option>
+              <option>Cruise</option>
+              <option>Escorted tour</option>
+              <option>Multi-centre</option>
+              <option>Ski holiday</option>
+              <option>Rail holiday</option>
+              <option>Excursion / day trip</option>
+            </select>
+          </div>
+          <div class="field" data-ai>
+            <label>Holiday style</label>
+            <select data-key="style">
+              <option>All inclusive</option>
+              <option>Beach &amp; resort</option>
+              <option>Family</option>
+              <option>Adults only</option>
+              <option>Luxury</option>
+              <option>Honeymoon</option>
+              <option>Adventure</option>
+              <option>Culture &amp; sightseeing</option>
+            </select>
+          </div>
+          <div class="field wide" data-ai>
+            <label>Card teaser <span style="text-transform:none;color:var(--tg-muted);font-weight:500">(one line shown on the card)</span></label>
+            <input type="text" data-key="teaser" placeholder="e.g. Beachfront five star on the white sands of Costa Mujeres" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Destination -->
+      <div class="fieldset">
+        <h2>2 · Where &amp; from where</h2>
+        <p class="fs-hint">Destination plus the departure points this price is valid from.</p>
+        <div class="grid2">
+          <div class="field" data-ai><label>Country</label><input type="text" data-key="country" placeholder="Mexico" /></div>
+          <div class="field" data-ai><label>Region / area</label><input type="text" data-key="region" placeholder="Riviera Maya" /></div>
+          <div class="field" data-ai><label>Resort / city</label><input type="text" data-key="resort" placeholder="Costa Mujeres, Cancun" /></div>
+          <div class="field" data-ai><label>Departure airport(s)</label><input type="text" data-key="origin" placeholder="London Gatwick, Manchester" /></div>
+        </div>
+      </div>
+
+      <!-- Stay & travel -->
+      <div class="fieldset">
+        <h2>3 · Stay &amp; travel</h2>
+        <p class="fs-hint">The property, the flights and how long the holiday is.</p>
+        <div class="grid2">
+          <div class="field" data-ai><label>Property name</label><input type="text" data-key="property" placeholder="Riu Palace Costa Mujeres" /></div>
+          <div class="field" data-ai>
+            <label>Star rating</label>
+            <select data-key="stars"><option>5 star</option><option>4 star</option><option>3 star</option><option>Unrated / villa</option></select>
+          </div>
+          <div class="field" data-ai>
+            <label>Board basis</label>
+            <select data-key="board"><option>All inclusive</option><option>Full board</option><option>Half board</option><option>Bed &amp; breakfast</option><option>Room only</option><option>Self catering</option></select>
+          </div>
+          <div class="field" data-ai>
+            <label>Duration</label>
+            <div class="prefix-input"><input type="number" data-key="nights" value="7" /><span class="prefix" style="left:auto;right:11px">nights</span></div>
+          </div>
+          <div class="field" data-ai>
+            <label>Travel dates</label>
+            <select data-key="datemode"><option>Selected dates in a period</option><option>Fixed departure date</option><option>Flexible / call for dates</option></select>
+          </div>
+          <div class="field" data-ai><label>Travel period</label><input type="text" data-key="period" placeholder="Sep 2026 to Apr 2027" /></div>
+          <div class="field" data-ai><label>Airline</label><input type="text" data-key="airline" placeholder="TUI Airways" /></div>
+          <div class="field" data-ai>
+            <label>Flights</label>
+            <select data-key="flighttype"><option>Direct</option><option>Connecting</option><option>Not included</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="fieldset">
+        <h2>4 · Price</h2>
+        <p class="fs-hint">The lead-in price and the saving you want to shout about.</p>
+        <div class="grid2">
+          <div class="field" data-ai>
+            <label>Price from</label>
+            <div class="prefix-input"><span class="prefix">£</span><input type="number" data-key="price" placeholder="899" /></div>
+          </div>
+          <div class="field" data-ai>
+            <label>Price basis</label>
+            <select data-key="basis"><option>per person</option><option>per couple</option><option>per night</option><option>total holiday price</option></select>
+          </div>
+          <div class="field" data-ai>
+            <label>Was price <span style="text-transform:none;color:var(--tg-muted);font-weight:500">(optional)</span></label>
+            <div class="prefix-input"><span class="prefix">£</span><input type="number" data-key="was" placeholder="1299" /></div>
+          </div>
+          <div class="field" data-ai>
+            <label>Deposit from <span style="text-transform:none;color:var(--tg-muted);font-weight:500">(optional)</span></label>
+            <div class="prefix-input"><span class="prefix">£</span><input type="number" data-key="deposit" placeholder="60" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Whats included -->
+      <div class="fieldset">
+        <h2>5 · What's included</h2>
+        <p class="fs-hint">Tick what the price covers. AI pre-ticks the obvious ones for the offer type.</p>
+        <div class="incl-grid" id="inclGrid">
+          <label class="incl-item"><input type="checkbox" data-incl="Return flights" /> Return flights</label>
+          <label class="incl-item"><input type="checkbox" data-incl="Airport transfers" /> Airport transfers</label>
+          <label class="incl-item"><input type="checkbox" data-incl="23kg luggage" /> 23kg luggage</label>
+          <label class="incl-item"><input type="checkbox" data-incl="All meals & drinks" /> All meals &amp; drinks</label>
+          <label class="incl-item"><input type="checkbox" data-incl="ABTA / ATOL protection" /> ABTA / ATOL protection</label>
+          <label class="incl-item"><input type="checkbox" data-incl="Rep service" /> Rep service</label>
+          <label class="incl-item"><input type="checkbox" data-incl="Kids stay free" /> Kids stay free</label>
+          <label class="incl-item"><input type="checkbox" data-incl="Free cancellation" /> Free cancellation</label>
+        </div>
+      </div>
+
+      <!-- Tags & badges -->
+      <div class="fieldset">
+        <h2>6 · Tags &amp; promo badge</h2>
+        <p class="fs-hint">Tags help people filter. The badge is the coloured flash on the card.</p>
+        <div class="field" style="margin-bottom:16px">
+          <label>Tags</label>
+          <div class="chips" id="tagChips">
+            <button type="button" class="chip-toggle">Family friendly</button>
+            <button type="button" class="chip-toggle">Adults only</button>
+            <button type="button" class="chip-toggle">Beachfront</button>
+            <button type="button" class="chip-toggle">Honeymoon</button>
+            <button type="button" class="chip-toggle">Last minute</button>
+            <button type="button" class="chip-toggle">Early bird</button>
+            <button type="button" class="chip-toggle">Spa</button>
+            <button type="button" class="chip-toggle">Kids club</button>
+            <button type="button" class="chip-toggle">Swim-up rooms</button>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field" data-ai>
+            <label>Promo badge</label>
+            <select data-key="badge"><option>Save £400</option><option>Last minute</option><option>Exclusive</option><option>Best seller</option><option>Selling fast</option><option>Free child place</option><option>No badge</option></select>
+          </div>
+          <div class="field" data-ai>
+            <label>Urgency pill <span style="text-transform:none;color:var(--tg-muted);font-weight:500">(green flash)</span></label>
+            <input type="text" data-key="urgency" placeholder="Only 4 left at this price" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Validity & media -->
+      <div class="fieldset">
+        <h2>7 · Validity, availability &amp; photos</h2>
+        <p class="fs-hint">When the deal expires and the images people will see.</p>
+        <div class="grid2">
+          <div class="field" data-ai><label>Book by</label><input type="text" data-key="bookby" placeholder="31 July 2026" /></div>
+          <div class="field" data-ai><label>Availability note</label><input type="text" data-key="avail" placeholder="Limited rooms at this price" /></div>
+        </div>
+        <div style="margin-top:16px">
+          <label style="margin-bottom:8px;display:block">Photos</label>
+          <div class="upload"><span class="ph">🖼️</span> Drag photos here, paste a hotel link, or <b style="color:var(--tg-accent)">let AI suggest stock imagery</b> for the destination</div>
+          <div class="thumbrow">
+            <div class="t" style="background-image:url('https://images.unsplash.com/photo-1510097467424-192d713fd8b2?w=200&q=70')"></div>
+            <div class="t" style="background-image:url('https://images.unsplash.com/photo-1582719508461-905c673771fd?w=200&q=70')"></div>
+            <div class="t" style="background-image:url('https://images.unsplash.com/photo-1540541338287-41700207dee6?w=200&q=70')"></div>
+            <div class="t" style="background-image:url('https://images.unsplash.com/photo-1455587734955-081b22074882?w=200&q=70')"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full description -->
+      <div class="fieldset">
+        <h2>8 · Full description</h2>
+        <p class="fs-hint">The longer write-up for the offer page. AI drafts this in your brand voice, then you edit.</p>
+        <div class="field wide" data-ai>
+          <textarea data-key="description" rows="5" placeholder="A few warm, plain paragraphs about the resort, the location and why this deal is worth booking."></textarea>
+        </div>
+      </div>
+
+      <!-- Enquiry routing -->
+      <div class="fieldset">
+        <h2>9 · Where enquiries go</h2>
+        <p class="fs-hint">Each offer page carries an enquiry form. Tell us who picks it up.</p>
+        <div class="grid2">
+          <div class="field"><label>Enquiry email</label><input type="email" placeholder="sales@youragency.co.uk" /></div>
+          <div class="field"><label>Phone shown on page</label><input type="tel" placeholder="0161 123 4567" /></div>
+          <div class="field"><label>Offer reference</label><input type="text" placeholder="TG-CUN-0926" /></div>
+          <div class="field"><label>Holiday type protection</label><select><option>ATOL protected</option><option>ABTA member</option><option>Both</option><option>Neither</option></select></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" type="button" onclick="go('card')">Preview the card →</button>
+        <button class="btn primary" type="button" onclick="go('page')">Preview offer page →</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ════════ VIEW 2 · CARD OUTPUT ════════ -->
+  <section class="view card" id="view-card">
+    <p class="section-eyebrow">Step 2</p>
+    <h1>How the offer shows on your website</h1>
+    <p class="lede">This is the card a visitor sees in your offers section. It matches the existing Travelgenix offers widget exactly, so hand-built offers sit happily alongside your live cached deals. Clicking it opens the full offer page.</p>
+    <div class="stage">
+      <div class="card-grid">
+
+        <article class="ocard" onclick="go('page')">
+          <div class="ocard-img" style="background-image:url('https://images.unsplash.com/photo-1510097467424-192d713fd8b2?w=700&q=75')">
+            <span class="ocard-stars">★★★★★</span>
+            <span class="ocard-badge">Save £400</span>
+            <span class="ocard-pill">Only 4 left</span>
+          </div>
+          <div class="ocard-body">
+            <span class="ocard-type">All Inclusive · Package</span>
+            <h3 class="ocard-name">7 nights all inclusive in Cancun</h3>
+            <span class="ocard-loc">📍 Costa Mujeres, Mexico</span>
+            <p class="ocard-sum">Beachfront five star on the white sands of Costa Mujeres, flying direct from Gatwick.</p>
+            <div class="ocard-meta-row">
+              <span class="ocard-tag">Family friendly</span>
+              <span class="ocard-tag">Beachfront</span>
+              <span class="ocard-tag">Kids stay free</span>
+            </div>
+          </div>
+          <div class="ocard-foot">
+            <div>
+              <span class="ocard-was">£1,299</span>
+              <div class="ocard-price">£899</div>
+              <span class="ocard-psub">per person · 7 nights</span>
+            </div>
+            <button class="ocard-cta" onclick="event.stopPropagation();go('page')">View deal</button>
+          </div>
+        </article>
+
+        <!-- A second card so the grid reads as a real offers section -->
+        <article class="ocard" onclick="go('page')">
+          <div class="ocard-img" style="background-image:url('https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=700&q=75')">
+            <span class="ocard-stars">★★★★</span>
+            <span class="ocard-badge" style="background:var(--tg-accent)">Last minute</span>
+          </div>
+          <div class="ocard-body">
+            <span class="ocard-type">Half Board · Package</span>
+            <h3 class="ocard-name">Tenerife sunshine escape</h3>
+            <span class="ocard-loc">📍 Costa Adeje, Canary Islands</span>
+            <p class="ocard-sum">Adults-only half board minutes from the beach, perfect for a late getaway.</p>
+            <div class="ocard-meta-row">
+              <span class="ocard-tag">Adults only</span>
+              <span class="ocard-tag">Spa</span>
+            </div>
+          </div>
+          <div class="ocard-foot">
+            <div>
+              <div class="ocard-price">£549</div>
+              <span class="ocard-psub">per person · 7 nights</span>
+            </div>
+            <button class="ocard-cta" onclick="event.stopPropagation();go('page')">View deal</button>
+          </div>
+        </article>
+
+      </div>
+      <p class="view-note">Same card system, layouts and themes as the live offers widget (grid, carousel, list, magazine). The only difference is the data comes from your form, not the Travelify cache.</p>
+    </div>
+    <div class="form-actions" style="margin-top:20px">
+      <button class="btn" type="button" onclick="go('build')">← Back to the form</button>
+      <button class="btn primary" type="button" onclick="go('page')">See the offer page →</button>
+    </div>
+  </section>
+
+  <!-- ════════ VIEW 3 · OFFER DETAIL PAGE ════════ -->
+  <section class="view page" id="view-page">
+    <p class="section-eyebrow">Step 3</p>
+    <h1>The offer page people land on</h1>
+    <p class="lede">Click a card and the visitor arrives here, a beautifully laid out page with the full detail and an enquiry form built in. Shown below inside a browser frame so you can picture it live.</p>
+
+    <div class="browser">
+      <div class="browser-bar">
+        <span class="dot" style="background:#FF5F57"></span>
+        <span class="dot" style="background:#FEBC2E"></span>
+        <span class="dot" style="background:#28C840"></span>
+        <span class="browser-url">youragency.co.uk/offers/cancun-all-inclusive-7nt</span>
+      </div>
+
+      <!-- Hero -->
+      <div class="dp-hero" style="background-image:url('https://images.unsplash.com/photo-1510097467424-192d713fd8b2?w=1400&q=80')">
+        <div class="dp-hero-content">
+          <div class="dp-hero-badges">
+            <span class="dp-badge save">Save £400</span>
+            <span class="dp-badge atol">✓ ATOL protected</span>
+          </div>
+          <h1>7 nights all inclusive in Cancun</h1>
+          <span class="dp-hero-loc">📍 Costa Mujeres, Mexico <span class="dp-hero-stars">★★★★★</span></span>
+        </div>
+      </div>
+
+      <div class="dp-body">
+        <!-- Main column -->
+        <div class="dp-main">
+          <div class="dp-quickfacts">
+            <div class="qf"><div class="ic">🌙</div><div class="lab">Duration</div><div class="val">7 nights</div></div>
+            <div class="qf"><div class="ic">🍽️</div><div class="lab">Board</div><div class="val">All inclusive</div></div>
+            <div class="qf"><div class="ic">✈️</div><div class="lab">Flights</div><div class="val">Direct from LGW</div></div>
+            <div class="qf"><div class="ic">📅</div><div class="lab">Travel</div><div class="val">Sep 26 – Apr 27</div></div>
+            <div class="qf"><div class="ic">🏨</div><div class="lab">Hotel</div><div class="val">5 star</div></div>
+          </div>
+
+          <div class="dp-section">
+            <h2 class="dp-h2">About this holiday</h2>
+            <p>Wake up to white sand and turquoise sea at the Riu Palace Costa Mujeres, a five star beachfront resort on one of the quietest stretches of the Mexican Caribbean. This all inclusive deal covers everything from your direct flights out of Gatwick to every meal, drink and snack once you arrive.</p>
+            <p>With four pools, a spa, a kids club and a string of à la carte restaurants, it suits couples and families alike. Children stay free on selected dates, and our team will hold the price for you while you decide. Book by 31 July to lock in the saving.</p>
+          </div>
+
+          <div class="dp-section">
+            <h2 class="dp-h2">What's included</h2>
+            <ul class="incl-list">
+              <li><span class="tick">✓</span> Return direct flights from Gatwick</li>
+              <li><span class="tick">✓</span> Private airport transfers</li>
+              <li><span class="tick">✓</span> 23kg luggage per person</li>
+              <li><span class="tick">✓</span> All meals, snacks &amp; drinks</li>
+              <li><span class="tick">✓</span> 7 nights at the Riu Palace 5★</li>
+              <li><span class="tick">✓</span> Kids stay free on selected dates</li>
+              <li><span class="tick">✓</span> ABTA &amp; ATOL financial protection</li>
+              <li><span class="tick">✓</span> UK rep service throughout</li>
+            </ul>
+          </div>
+
+          <div class="dp-section">
+            <h2 class="dp-h2">Photos</h2>
+            <div class="gallery">
+              <div class="g" style="background-image:url('https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&q=70')"></div>
+              <div class="g" style="background-image:url('https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400&q=70')"></div>
+              <div class="g" style="background-image:url('https://images.unsplash.com/photo-1455587734955-081b22074882?w=400&q=70')"></div>
+              <div class="g" style="background-image:url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&q=70')"></div>
+            </div>
+          </div>
+
+          <div class="dp-section">
+            <h2 class="dp-h2">The detail</h2>
+            <table class="detail-table">
+              <tr><td>Resort</td><td>Riu Palace Costa Mujeres, Costa Mujeres</td></tr>
+              <tr><td>Destination</td><td>Cancun, Riviera Maya, Mexico</td></tr>
+              <tr><td>Departs from</td><td>London Gatwick (Manchester on request)</td></tr>
+              <tr><td>Airline</td><td>TUI Airways, direct</td></tr>
+              <tr><td>Board basis</td><td>All inclusive</td></tr>
+              <tr><td>Travel period</td><td>September 2026 to April 2027</td></tr>
+              <tr><td>Book by</td><td>31 July 2026</td></tr>
+              <tr><td>Offer reference</td><td>TG-CUN-0926</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sticky price + enquiry -->
+        <aside class="dp-aside">
+          <div class="price-box">
+            <div class="pb-from">From</div>
+            <div class="pb-price">£899</div>
+            <div><span class="pb-was">£1,299</span><span class="pb-save">Save £400</span></div>
+            <div class="pb-basis">per person · based on 2 sharing, 7 nights all inclusive</div>
+            <div class="pb-deposit">💳 Secure it today with a £60 deposit</div>
+
+            <form class="pb-form" onsubmit="return false">
+              <div style="font-weight:700;font-size:15px;margin-bottom:2px">Enquire about this offer</div>
+              <input type="text" placeholder="Full name" />
+              <div class="row2">
+                <input type="email" placeholder="Email" />
+                <input type="tel" placeholder="Phone" />
+              </div>
+              <div class="row2">
+                <input type="text" placeholder="Preferred month" />
+                <select><option>2 travellers</option><option>1 traveller</option><option>2 adults + children</option><option>3+ travellers</option></select>
+              </div>
+              <textarea rows="3" placeholder="Anything else we should know? (dates, room type, questions)"></textarea>
+              <button class="pb-submit" type="button">Send my enquiry</button>
+              <p class="pb-trust">No payment taken now. A travel expert replies within one working hour.<br>🔒 ATOL protected · ABTA member</p>
+            </form>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top:20px">
+      <button class="btn" type="button" onclick="go('build')">← Back to the form</button>
+      <button class="btn" type="button" onclick="go('card')">← Back to the card</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">Travelgenix Widget Suite · Special Offer Builder concept · <a href="/">All widgets</a></footer>
+
+<script>
+  // ─── View switching ───────────────────────────────────────
+  function go(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll('.step-btn').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('.step-btn').forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
+
+  // ─── Tag chips toggle ─────────────────────────────────────
+  document.querySelectorAll('#tagChips .chip-toggle').forEach(c =>
+    c.addEventListener('click', () => c.classList.toggle('on')));
+  document.querySelectorAll('.incl-item input').forEach(i =>
+    i.addEventListener('change', () => i.closest('.incl-item').classList.toggle('on', i.checked)));
+
+  // ─── AI "generate" simulation ─────────────────────────────
+  // Mock-up only: this fills the form from a canned result so Andy can see the
+  // AI-assist behaviour. The real build would call the AI endpoint.
+  const AI_FILL = {
+    title: '7 nights all inclusive in Cancun',
+    type: 'Package holiday (flight + hotel)',
+    style: 'All inclusive',
+    teaser: 'Beachfront five star on the white sands of Costa Mujeres',
+    country: 'Mexico', region: 'Riviera Maya', resort: 'Costa Mujeres, Cancun',
+    origin: 'London Gatwick', property: 'Riu Palace Costa Mujeres', stars: '5 star',
+    board: 'All inclusive', nights: '7', datemode: 'Selected dates in a period',
+    period: 'Sep 2026 to Apr 2027', airline: 'TUI Airways', flighttype: 'Direct',
+    price: '899', basis: 'per person', was: '1299', deposit: '60',
+    badge: 'Save £400', urgency: 'Only 4 left at this price',
+    bookby: '31 July 2026', avail: 'Limited rooms at this price',
+    description: 'Wake up to white sand and turquoise sea at the Riu Palace Costa Mujeres, a five star beachfront resort on one of the quietest stretches of the Mexican Caribbean. This all inclusive deal covers everything from your direct flights out of Gatwick to every meal, drink and snack once you arrive.\n\nWith four pools, a spa, a kids club and a string of restaurants, it suits couples and families alike. Children stay free on selected dates. Book by 31 July to lock in the saving.'
+  };
+  const AI_INCL = ['Return flights','Airport transfers','23kg luggage','All meals & drinks','ABTA / ATOL protection','Rep service','Kids stay free'];
+  const AI_TAGS = ['Family friendly','Beachfront','Kids club'];
+
+  document.getElementById('aiGo').addEventListener('click', () => {
+    const status = document.getElementById('aiStatus');
+    status.classList.add('show');
+    setTimeout(() => {
+      // Fill keyed fields and flag them as AI-filled
+      Object.entries(AI_FILL).forEach(([k, v]) => {
+        const el = document.querySelector('[data-key="' + k + '"]');
+        if (!el) return;
+        el.value = v;
+        const field = el.closest('.field');
+        if (field) field.classList.add('ai-filled');
+      });
+      // Add a small AI chip to each filled label once
+      document.querySelectorAll('.field.ai-filled label').forEach(l => {
+        if (!l.querySelector('.ai-chip')) {
+          const chip = document.createElement('span');
+          chip.className = 'ai-chip';
+          chip.textContent = '✨ AI';
+          l.appendChild(chip);
+        }
+      });
+      // Tick included items
+      document.querySelectorAll('.incl-item input').forEach(i => {
+        if (AI_INCL.includes(i.dataset.incl)) { i.checked = true; i.closest('.incl-item').classList.add('on'); }
+      });
+      // Switch on tags
+      document.querySelectorAll('#tagChips .chip-toggle').forEach(c => {
+        if (AI_TAGS.includes(c.textContent.trim())) c.classList.add('on');
+      });
+      status.innerHTML = '✓ Done. Filled 22 fields and ticked the obvious inclusions. Check anything marked <span class="ai-chip" style="margin:0 2px">✨ AI</span> before publishing.';
+    }, 1100);
+  });
+</script>
+</body>
+</html>
