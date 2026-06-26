@@ -92,8 +92,17 @@
   <div class="stage-label">Vertical · drops into an offers grid</div>
   <div class="stage grid" id="stageVertical"></div>
 
-  <div class="stage-label">Horizontal · list or banner row</div>
+  <div class="stage-label">Horizontal · compact list row</div>
   <div class="stage" id="stageHorizontal"></div>
+
+  <div class="stage-label">Banner · full-bleed image, offer overlaid</div>
+  <div class="stage" id="stageBanner"></div>
+
+  <div class="stage-label">Split · editorial feature, big price (image left)</div>
+  <div class="stage" id="stageSplit"></div>
+
+  <div class="stage-label">Split · image right (flip)</div>
+  <div class="stage" id="stageSplitFlip"></div>
 </main>
 
 <footer class="foot">Travelgenix Widget Suite · <a href="/">All widgets</a></footer>
@@ -148,29 +157,32 @@
   });
   applyTheme('light');
 
-  function mountCard(stage, layout, offer) {
+  function mountCard(stage, layout, offer, extra) {
     const div = document.createElement('div');
     div.setAttribute('data-tg-widget', 'offer-card');
     stage.appendChild(div);
-    new window.TGOfferCardWidget(div, {
+    new window.TGOfferCardWidget(div, Object.assign({
       layout: layout,
       theme: document.documentElement.getAttribute('data-theme'),
       accentColor: $('ctrlAccent').value,
       ctaText: 'View deal',
       ctaHref: '#',                 // points to the offer page once that is built
       offer: offer
-    });
+    }, extra || {}));
   }
 
   function render() {
     const offer = OFFERS[$('ctrlOffer').value];
-    const v = $('stageVertical'); const h = $('stageHorizontal');
-    v.innerHTML = ''; h.innerHTML = '';
-    // Vertical: show the chosen offer plus the other two so the grid reads true
+    const v = $('stageVertical');
+    ['stageVertical', 'stageHorizontal', 'stageBanner', 'stageSplit', 'stageSplitFlip'].forEach(id => $(id).innerHTML = '');
+    // Vertical: chosen offer plus the others so the grid reads true
     mountCard(v, 'vertical', offer);
     Object.keys(OFFERS).filter(k => OFFERS[k] !== offer).forEach(k => mountCard(v, 'vertical', OFFERS[k]));
-    // Horizontal: the chosen offer as a banner row
-    mountCard(h, 'horizontal', offer);
+    // Full-width layouts, all from the chosen offer
+    mountCard($('stageHorizontal'), 'horizontal', offer);
+    mountCard($('stageBanner'), 'banner', offer);
+    mountCard($('stageSplit'), 'split', offer);
+    mountCard($('stageSplitFlip'), 'split', offer, { imageSide: 'right' });
   }
 
   document.querySelectorAll('.controls select, .controls input').forEach(el => el.addEventListener('change', render));

@@ -177,6 +177,74 @@
       }
       .tgoc-card--horizontal .tgoc-rail .tgoc-cta { width: auto; }
     }
+
+    /* ── Banner layout — full-bleed image, offer overlaid ── */
+    .tgoc-card--banner { position: relative; flex-direction: column; justify-content: flex-end; width: 100%; min-height: 300px; color: #fff; overflow: hidden; }
+    .tgoc-card--banner .tgoc-bimg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.4s ease; }
+    .tgoc-card--banner:hover .tgoc-bimg { transform: scale(1.04); }
+    .tgoc-card--banner .tgoc-bimg.ph { background: linear-gradient(135deg, var(--tgo-brand), var(--tgo-accent)); }
+    .tgoc-card--banner::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(90deg, rgba(7,12,24,0.82) 0%, rgba(7,12,24,0.5) 42%, rgba(7,12,24,0.12) 100%),
+                  linear-gradient(0deg, rgba(7,12,24,0.55) 0%, rgba(7,12,24,0) 55%);
+    }
+    .tgoc-card--banner.tgoc-flip::after {
+      background: linear-gradient(270deg, rgba(7,12,24,0.82) 0%, rgba(7,12,24,0.5) 42%, rgba(7,12,24,0.12) 100%),
+                  linear-gradient(0deg, rgba(7,12,24,0.55) 0%, rgba(7,12,24,0) 55%);
+    }
+    .tgoc-card--banner .tgoc-badge, .tgoc-card--banner .tgoc-pill { z-index: 3; }
+    .tgoc-card--banner .tgoc-bwrap {
+      position: relative; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between;
+      gap: 28px; padding: 26px 30px; width: 100%;
+    }
+    .tgoc-card--banner.tgoc-flip .tgoc-bwrap { flex-direction: row-reverse; text-align: right; }
+    .tgoc-card--banner.tgoc-flip .tgoc-b-meta, .tgoc-card--banner.tgoc-flip .tgoc-tags { justify-content: flex-end; }
+    .tgoc-b-text { min-width: 0; }
+    .tgoc-b-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.85); }
+    .tgoc-b-title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; line-height: 1.15; letter-spacing: -0.5px; margin: 6px 0 8px; text-shadow: 0 2px 18px rgba(0,0,0,0.4); }
+    .tgoc-b-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 14px; }
+    .tgoc-b-meta .tgoc-loc { color: rgba(255,255,255,0.92); }
+    .tgoc-b-meta .tgoc-loc svg { color: rgba(255,255,255,0.8); }
+    .tgoc-b-stars { color: var(--tgo-gold, #FFD166); letter-spacing: 1px; }
+    .tgoc-card--banner .tgoc-tags { margin-top: 10px; }
+    .tgoc-card--banner .tgoc-tag { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.28); color: #fff; }
+    .tgoc-b-buy { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; text-align: right; }
+    .tgoc-card--banner .tgoc-price { color: #fff; font-size: 30px; }
+    .tgoc-card--banner .tgoc-was { color: rgba(255,255,255,0.72); }
+    .tgoc-card--banner .tgoc-price-sub { color: rgba(255,255,255,0.82); }
+    .tgoc-card--banner .tgoc-price-block { align-items: flex-end; }
+    .tgoc-card--banner .tgoc-cta { padding: 12px 22px; font-size: 14px; box-shadow: 0 8px 22px rgba(0,0,0,0.3); }
+
+    @media (max-width: 600px) {
+      .tgoc-card--banner { min-height: 0; }
+      .tgoc-card--banner .tgoc-bwrap, .tgoc-card--banner.tgoc-flip .tgoc-bwrap {
+        flex-direction: column; align-items: flex-start; text-align: left; gap: 16px; padding: 20px;
+      }
+      .tgoc-card--banner .tgoc-b-buy { align-items: flex-start; text-align: left; flex-direction: row; align-items: center; gap: 16px; }
+      .tgoc-card--banner .tgoc-price-block { align-items: flex-start; }
+    }
+
+    /* ── Split layout — editorial 50/50 with a big price ── */
+    .tgoc-card--split { flex-direction: row; width: 100%; min-height: 320px; }
+    .tgoc-card--split.tgoc-flip { flex-direction: row-reverse; }
+    .tgoc-card--split .tgoc-img { width: 46%; min-height: 320px; align-self: stretch; }
+    .tgoc-card--split .tgoc-sbody { flex: 1; padding: 30px 36px; display: flex; flex-direction: column; justify-content: center; gap: 8px; min-width: 0; }
+    .tgoc-card--split .tgoc-eyebrow { font-size: 11px; }
+    .tgoc-s-title { font-size: clamp(22px, 2.4vw, 28px); font-weight: 800; line-height: 1.2; letter-spacing: -0.5px; margin: 4px 0 2px; }
+    .tgoc-s-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .tgoc-s-meta .tgoc-loc { font-size: 14px; }
+    .tgoc-s-stars { color: var(--tgo-gold, #FFB703); letter-spacing: 1px; }
+    .tgoc-s-teaser { font-size: 14.5px; color: var(--tgo-sub); line-height: 1.6; margin: 8px 0 0; max-width: 60ch; }
+    .tgoc-card--split .tgoc-tags { margin-top: 12px; }
+    .tgoc-sfoot { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--tgo-border); }
+    .tgoc-card--split .tgoc-price { font-size: 30px; }
+    .tgoc-card--split .tgoc-cta { padding: 12px 24px; font-size: 14px; }
+
+    @media (max-width: 620px) {
+      .tgoc-card--split, .tgoc-card--split.tgoc-flip { flex-direction: column; }
+      .tgoc-card--split .tgoc-img { width: 100%; aspect-ratio: 16 / 10; min-height: 0; }
+      .tgoc-card--split .tgoc-sbody { padding: 22px; }
+    }
   `;
 
   // ── Widget class ──────────────────────────────────────────────────────────
@@ -191,8 +259,10 @@
 
     _defaults(c) {
       c = c || {};
+      const layouts = ['vertical', 'horizontal', 'banner', 'split'];
       return {
-        layout: c.layout === 'horizontal' ? 'horizontal' : 'vertical',
+        layout: layouts.indexOf(c.layout) !== -1 ? c.layout : 'vertical',
+        imageSide: c.imageSide === 'right' ? 'right' : 'left',  // split + banner text alignment
         theme: c.theme === 'dark' ? 'dark' : 'light',
         brandColor: c.brandColor || '',
         accentColor: c.accentColor || '',
@@ -248,13 +318,19 @@
       };
     }
 
-    _imageBlock(d) {
-      const bg = d.image ? ' style="background-image:url(' + esc(d.image) + ')"' : '';
-      const ph = d.image ? '' : '<div class="tgoc-img-ph">' + esc(d.loc || d.title) + '</div>';
+    // Absolutely-positioned overlay chips (stars, promo badge, urgency pill),
+    // shared by the image block and the banner layout.
+    _chips(d) {
       const stars = d.stars ? '<span class="tgoc-stars">' + '★'.repeat(d.stars) + '</span>' : '';
       const badge = d.badgeText ? '<span class="tgoc-badge">' + esc(d.badgeText) + '</span>' : '';
       const pill = d.urgency ? '<span class="tgoc-pill">' + esc(d.urgency) + '</span>' : '';
-      return '<div class="tgoc-img"' + bg + '>' + ph + stars + badge + pill + '</div>';
+      return stars + badge + pill;
+    }
+
+    _imageBlock(d) {
+      const bg = d.image ? ' style="background-image:url(' + esc(d.image) + ')"' : '';
+      const ph = d.image ? '' : '<div class="tgoc-img-ph">' + esc(d.loc || d.title) + '</div>';
+      return '<div class="tgoc-img"' + bg + '>' + ph + this._chips(d) + '</div>';
     }
 
     _bodyBlock(d) {
@@ -281,6 +357,46 @@
       return '<a class="tgoc-cta" href="' + esc(href) + '">' + esc(this.cfg.ctaText) + '</a>';
     }
 
+    // Banner: full-bleed image with the offer overlaid. Punchy and promotional.
+    _bannerCard(d) {
+      const bg = d.image ? ' style="background-image:url(' + esc(d.image) + ')"' : '';
+      const phCls = d.image ? '' : ' ph';
+      const eyebrow = d.eyebrow ? '<span class="tgoc-b-eyebrow">' + esc(d.eyebrow) + '</span>' : '';
+      const loc = d.loc ? '<span class="tgoc-loc">' + PIN + esc(d.loc) + '</span>' : '';
+      const stars = d.stars ? '<span class="tgoc-b-stars">' + '★'.repeat(d.stars) + '</span>' : '';
+      const tags = d.tags.length
+        ? '<div class="tgoc-tags">' + d.tags.map(function (t) { return '<span class="tgoc-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
+        : '';
+      const badge = d.badgeText ? '<span class="tgoc-badge">' + esc(d.badgeText) + '</span>' : '';
+      const pill = d.urgency ? '<span class="tgoc-pill">' + esc(d.urgency) + '</span>' : '';
+      return '<div class="tgoc-bimg' + phCls + '"' + bg + '></div>' + badge + pill
+        + '<div class="tgoc-bwrap">'
+          + '<div class="tgoc-b-text">' + eyebrow
+            + '<h3 class="tgoc-b-title">' + esc(d.title) + '</h3>'
+            + '<div class="tgoc-b-meta">' + loc + stars + '</div>' + tags
+          + '</div>'
+          + '<div class="tgoc-b-buy">' + this._priceBlock(d) + this._cta() + '</div>'
+        + '</div>';
+    }
+
+    // Split: editorial 50/50 with a big price. For a featured deal.
+    _splitCard(d) {
+      const eyebrow = d.eyebrow ? '<span class="tgoc-eyebrow">' + esc(d.eyebrow) + '</span>' : '';
+      const loc = d.loc ? '<span class="tgoc-loc">' + PIN + esc(d.loc) + '</span>' : '';
+      const stars = d.stars ? '<span class="tgoc-s-stars">' + '★'.repeat(d.stars) + '</span>' : '';
+      const teaser = d.teaser ? '<p class="tgoc-s-teaser">' + esc(d.teaser) + '</p>' : '';
+      const tags = d.tags.length
+        ? '<div class="tgoc-tags">' + d.tags.map(function (t) { return '<span class="tgoc-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
+        : '';
+      return this._imageBlock(d)
+        + '<div class="tgoc-sbody">' + eyebrow
+          + '<h3 class="tgoc-s-title">' + esc(d.title) + '</h3>'
+          + '<div class="tgoc-s-meta">' + loc + stars + '</div>'
+          + teaser + tags
+          + '<div class="tgoc-sfoot">' + this._priceBlock(d) + this._cta() + '</div>'
+        + '</div>';
+    }
+
     _render() {
       const cfg = this.cfg;
       const d = this._derive();
@@ -296,7 +412,11 @@
       if (cfg.radius) this.root.style.setProperty('--tgo-radius', cfg.radius + 'px');
 
       let inner;
-      if (cfg.layout === 'horizontal') {
+      if (cfg.layout === 'banner') {
+        inner = this._bannerCard(d);
+      } else if (cfg.layout === 'split') {
+        inner = this._splitCard(d);
+      } else if (cfg.layout === 'horizontal') {
         inner = this._imageBlock(d) + this._bodyBlock(d)
           + '<div class="tgoc-rail">' + this._priceBlock(d) + this._cta() + '</div>';
       } else {
@@ -307,7 +427,8 @@
       // The whole card is an <a> when a destination is set, else a div.
       const tag = cfg.ctaHref ? 'a' : 'div';
       const card = document.createElement(tag);
-      card.className = 'tgoc-card tgoc-card--' + cfg.layout;
+      card.className = 'tgoc-card tgoc-card--' + cfg.layout
+        + (cfg.imageSide === 'right' ? ' tgoc-flip' : '');
       if (cfg.ctaHref) card.setAttribute('href', cfg.ctaHref);
       card.innerHTML = inner;
       this.root.appendChild(card);
