@@ -170,6 +170,14 @@
       "destination": "/demo-offers.html"
     },
     {
+      "source": "/demo-offer-builder",
+      "destination": "/demo-offer-builder.html"
+    },
+    {
+      "source": "/editor-offer-builder",
+      "destination": "/editor-offer-builder.html"
+    },
+    {
       "source": "/demo-logos",
       "destination": "/demo-logos.html"
     },
