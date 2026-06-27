@@ -616,10 +616,15 @@
       const tags = d.tags.length
         ? '<div class="tgop-tags">' + d.tags.map(function (t) { return '<span class="tgop-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
         : '';
-      const descParas = String(d.description || '').split(/\n+/).filter(Boolean)
-        .map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') || '<p>' + esc(d.teaser) + '</p>';
-
-      const fAbout = '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">About this holiday</h2><div class="tgop-prose">' + descParas + '</div>' + tags + '</div>';
+      // About prose comes from the description, falling back to the teaser.
+      const descParas = String(d.description || d.teaser || '').split(/\n+/).filter(Boolean)
+        .map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+      // Only show the About section when there is prose or at least some tags.
+      const fAbout = (descParas || tags)
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">About this holiday</h2>'
+          + (descParas ? '<div class="tgop-prose">' + descParas + '</div>' : '')
+          + tags + '</div>'
+        : '';
 
       const fIncludes = d.includes.length
         ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">What\'s included</h2><ul class="tgop-incl">'
@@ -644,7 +649,10 @@
           + '<div class="tgop-map" data-map></div></div>'
         : '';
 
-      const fDetail = '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">The detail</h2><table class="tgop-table"><tbody>' + this._detailTable(d) + '</tbody></table></div>';
+      const detailRows = this._detailTable(d);
+      const fDetail = detailRows
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">The detail</h2><table class="tgop-table"><tbody>' + detailRows + '</tbody></table></div>'
+        : '';
 
       const fBar = '<div class="tgop-bar" data-bar><div class="tgop-bar-inner">'
         + '<span class="tgop-bar-title">' + esc(d.title) + '</span><span class="tgop-bar-spacer"></span>'
@@ -684,7 +692,8 @@
         + '</div></div>'
       + '</div>';
 
-      const fFacts = '<div class="tgop-wrap tgop-facts-wrap"><div class="tgop-facts">' + this._facts(d) + '</div></div>';
+      const factsHtml = this._facts(d);
+      const fFacts = factsHtml ? '<div class="tgop-wrap tgop-facts-wrap"><div class="tgop-facts">' + factsHtml + '</div></div>' : '';
 
       const footTrust = [];
       if (d.atol) footTrust.push('ATOL protected');
