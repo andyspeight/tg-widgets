@@ -209,6 +209,15 @@
               <div class="field-help">Defaults applied to new offers. You can still set them per offer.</div>
             </div>
           </div>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Offer page web address
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Your domain</label><input type="text" id="cfgOfferBase" placeholder="offers.youragency.co.uk"></div>
+              <div class="field-help">Optional. Share offers on your own web address instead of tg-widgets.vercel.app. Point the domain at this app first (your account manager sets this up), then your share links and embed code use it automatically. Leave blank to use the default.</div>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
@@ -321,9 +330,21 @@
       config: {
         cardLayout: 'vertical', columns: 'auto', template: 'classic',
         theme: 'light', accentColor: '#00B4D8', brandColor: '#1B2B5B', radius: 14,
-        currency: 'GBP', enquiryEmail: '', enquiryPhone: '', protection: 'ATOL protected'
+        currency: 'GBP', enquiryEmail: '', enquiryPhone: '', protection: 'ATOL protected',
+        offerBaseUrl: ''
       }
     };
+
+    // White-label: normalise a typed domain to a clean https origin (or '').
+    // A bare "offers.youragency.co.uk" is accepted and assumed https. We keep
+    // only the origin so the '/offer?id=' we append can never double up a path.
+    function normBase(u) {
+      u = String(u == null ? '' : u).trim();
+      if (!u) return '';
+      if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+      try { const p = new URL(u); if (!p.host) return ''; return 'https://' + p.host; }
+      catch (e) { return ''; }
+    }
 
     const SAMPLE = { currency:'GBP', fields:{ title:'7 nights all inclusive in Cancun', teaser:'Beachfront five star on the white sands of Costa Mujeres.', type:'Package holiday (flight + hotel)', style:'All inclusive', country:'Mexico', resort:'Costa Mujeres', stars:'5 star', board:'All inclusive', nights:'7', price:'899', was:'1299', basis:'per person', badge:'Save', badgeAmount:'400', urgency:'Only 4 left' }, tags:['Family friendly','Beachfront'] };
 
@@ -365,7 +386,7 @@
 
     /* ---- Offer-page link for an id, carrying the design choices ---- */
     function pageLink(id) {
-      const c = state.config; let q = '/offer?id=' + encodeURIComponent(id);
+      const c = state.config; let q = normBase(c.offerBaseUrl) + '/offer?id=' + encodeURIComponent(id);
       if (c.template && c.template !== 'classic') q += '&template=' + c.template;
       if (c.theme === 'dark') q += '&theme=dark';
       if (c.accentColor) q += '&accent=' + encodeURIComponent(c.accentColor);
@@ -435,6 +456,7 @@
         save: true, saveEndpoint: OFFERS_API,
         aiEndpoint: '/api/offer-draft',
         uploadEndpoint: '/api/upload-photo',
+        offerBaseUrl: normBase(c.offerBaseUrl),
         theme: c.theme, accentColor: c.accentColor, currency: c.currency,
         enquiryEmail: c.enquiryEmail, enquiryPhone: c.enquiryPhone, protection: c.protection,
         offer: offer || null, offerId: (offer && offer.id) || '',
@@ -461,6 +483,7 @@
       $('cfgCurrency').value = c.currency;
       $('cfgEnquiryEmail').value = c.enquiryEmail;
       $('cfgEnquiryPhone').value = c.enquiryPhone;
+      $('cfgOfferBase').value = c.offerBaseUrl || '';
       $('cfgProtection').value = c.protection;
     }
     function dirty(){ if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty'); }
@@ -477,7 +500,7 @@
       const col = { cfgAccent:'accentColor', cfgBrand:'brandColor' };
       Object.entries(col).forEach(([id,k]) => $(id).addEventListener('input', e => { state.config[k]=e.target.value; renderCardPreview(); dirty(); }));
       $('cfgRadius').addEventListener('input', e => { const n=parseInt(e.target.value,10); state.config.radius=isNaN(n)?14:Math.max(0,Math.min(40,n)); renderCardPreview(); dirty(); });
-      const txt = { cfgEnquiryEmail:'enquiryEmail', cfgEnquiryPhone:'enquiryPhone' };
+      const txt = { cfgEnquiryEmail:'enquiryEmail', cfgEnquiryPhone:'enquiryPhone', cfgOfferBase:'offerBaseUrl' };
       Object.entries(txt).forEach(([id,k]) => $(id).addEventListener('input', e => { state.config[k]=e.target.value; dirty(); }));
       $('btn-theme').addEventListener('click', () => { state.config.theme = state.config.theme==='dark'?'light':'dark'; renderCardPreview(); dirty(); });
       $('btn-embed').addEventListener('click', (e) => { e.preventDefault(); renderEmbed(); openModal('embedModal'); });
@@ -493,8 +516,12 @@
       }
       const c = state.config;
       const conf = { client: state.feedKey, layout: c.cardLayout, columns: c.columns, template: c.template, theme: c.theme, accent: c.accentColor, brand: c.brandColor, radius: c.radius, currency: c.currency };
+      // Loading the grid script from the white-label origin makes the grid's
+      // offer links resolve to that domain too (it derives its base from its own
+      // script src), so no extra config is needed for full white-labelling.
+      const scriptOrigin = normBase(c.offerBaseUrl) || 'https://tg-widgets.vercel.app';
       const code = '<div data-tg-widget="offers-grid" data-tg-config=\'' + JSON.stringify(conf) + '\'></div>\n'
-        + '<script src="https://tg-widgets.vercel.app/widget-offers-grid.js"><\/script>';
+        + '<script src="' + scriptOrigin + '/widget-offers-grid.js"><\/script>';
       const span = document.createElement('span'); span.textContent = code; box.appendChild(span);
       const btn = document.createElement('button');
       btn.style.cssText = 'position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.14);color:#fff;border:0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;';
