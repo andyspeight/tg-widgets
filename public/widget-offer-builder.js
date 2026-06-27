@@ -41,6 +41,28 @@
     }).join('');
   }
 
+  // Lazy-load the Vercel Blob client SDK (ESM from CDN — widgets have no
+  // bundler). Cached after first load. Mirrors editor-quote-pdf.html.
+  let _blobClient = null;
+  function getBlobClient() {
+    if (_blobClient) return Promise.resolve(_blobClient);
+    return import('https://esm.sh/@vercel/blob@0.27.0/client').then(function (m) { _blobClient = m; return m; });
+  }
+  // Accept only plain http(s) image URLs with no characters that could break out
+  // of a CSS url('…') context. Uploaded Blob URLs and pasted links both pass here
+  // before we ever interpolate them into a style attribute.
+  function safePhotoUrl(u) {
+    u = String(u == null ? '' : u).trim();
+    if (!/^https?:\/\//i.test(u)) return '';
+    if (/[\s"'()<>\\]/.test(u)) return '';
+    if (u.length > 600) return '';
+    return u;
+  }
+  function safeFileName(name) {
+    const base = String(name || 'photo').replace(/[^a-zA-Z0-9._ -]/g, '').trim().slice(0, 80) || 'photo';
+    return base;
+  }
+
   // ── Default option lists (host-overridable via config) ────────────────────
   const OFFER_TYPES = [
     'Package holiday (flight + hotel)', 'Hotel / accommodation only', 'Flight only',
@@ -206,12 +228,44 @@
     .ob-incl label.on { background: var(--tgo-success-soft); border-color: var(--tgo-success); }
     .ob-incl input { width: auto; }
 
-    /* Images (stub at this stage) */
+    /* Photos */
     .ob-upload {
-      border: 2px dashed var(--tgo-border); border-radius: 10px; padding: 20px; text-align: center;
+      border: 2px dashed var(--tgo-border); border-radius: 10px; padding: 22px 20px; text-align: center;
       color: var(--tgo-muted); font-size: 13px; background: var(--tgo-card-alt); cursor: pointer;
+      transition: border-color .15s, background .15s;
     }
     .ob-upload b { color: var(--tgo-accent); }
+    .ob-upload span { display: block; margin-top: 4px; font-size: 12px; }
+    .ob-upload.drag { border-color: var(--tgo-accent); background: var(--tgo-accent-soft); color: var(--tgo-text); }
+    .ob-upload.busy { opacity: 0.7; pointer-events: none; }
+    .ob-url-row { display: flex; gap: 8px; margin-top: 12px; }
+    .ob-url-row input { flex: 1; padding: 9px 11px; border: 1px solid var(--tgo-border); border-radius: 9px; font: inherit; font-size: 14px; background: var(--tgo-card); color: var(--tgo-text); }
+    .ob-url-row input:focus { outline: 2px solid var(--tgo-accent); border-color: var(--tgo-accent); }
+    .ob-url-add { white-space: nowrap; padding: 9px 18px; }
+    .ob-photo-err { font-size: 12px; color: var(--tgo-error); font-weight: 600; margin: 8px 0 0; display: none; }
+    .ob-photo-err.show { display: block; }
+    .ob-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .ob-thumb {
+      position: relative; width: 104px; height: 78px; border-radius: 9px; overflow: hidden;
+      border: 1px solid var(--tgo-border); background: var(--tgo-card-alt) center/cover no-repeat;
+    }
+    .ob-thumb.cover { border: 2px solid var(--tgo-accent); }
+    .ob-thumb-tag {
+      position: absolute; left: 0; bottom: 0; font-size: 9px; font-weight: 700; letter-spacing: 0.4px;
+      text-transform: uppercase; background: var(--tgo-accent); color: #fff; padding: 2px 7px; border-top-right-radius: 7px;
+    }
+    .ob-thumb-x {
+      position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border: 0; border-radius: 50%;
+      background: rgba(15,23,42,0.72); color: #fff; font-size: 13px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ob-thumb-x:hover { background: var(--tgo-error); }
+    .ob-thumb-cover-btn {
+      position: absolute; top: 4px; left: 4px; border: 0; border-radius: 6px; cursor: pointer;
+      background: rgba(15,23,42,0.72); color: #fff; font-size: 10px; font-weight: 600; padding: 3px 7px;
+    }
+    .ob-thumb-cover-btn:hover { background: var(--tgo-accent); }
+    .ob-thumb.cover .ob-thumb-cover-btn { display: none; }
 
     /* Actions */
     .ob-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; margin-top: 4px; }
@@ -257,6 +311,7 @@
       this.cfg = this._defaults(config);
       this.shadow = container.attachShadow({ mode: 'open' });
       this.root = null;
+      this._images = []; // offer photo URLs, first is the cover
       this._render();
     }
 
@@ -290,6 +345,11 @@
         saveEndpoint: c.saveEndpoint || '/api/saved-offers',
         offerId: c.offerId || '',                 // set when editing an existing saved offer
         offerBaseUrl: c.offerBaseUrl || '',        // optional absolute base for the shareable link
+
+        // Photo upload: when set, the Photos section gets a real uploader that
+        // streams files straight to Vercel Blob via this token route. Without it
+        // only URL-paste is offered (so the unauthenticated demo still works).
+        uploadEndpoint: c.uploadEndpoint || '',
 
         // Currency
         currency: c.currency || 'GBP',
@@ -343,6 +403,8 @@
       this.root.querySelectorAll('.ob-toggle').forEach((c) => {
         if (tags.indexOf(c.dataset.tag) !== -1) c.classList.add('on');
       });
+      this._images = (Array.isArray(offer.images) ? offer.images : []).map(safePhotoUrl).filter(Boolean);
+      this._renderThumbs();
     }
 
     _render() {
@@ -454,8 +516,17 @@
       }
 
       if (cfg.showImages) {
-        html += '<div class="ob-fs"><h4>8 · Photos</h4><p class="hint">The images people will see. Upload handling comes in the next step.</p>'
-          + '<div class="ob-upload">🖼️ Drag photos here, paste a hotel link, or <b>let AI suggest stock imagery</b> for the destination</div></div>';
+        const canUpload = !!cfg.uploadEndpoint;
+        html += '<div class="ob-fs"><h4>8 · Photos</h4><p class="hint">The images people will see on the card and offer page. The first photo is the cover.</p>'
+          + '<div class="ob-photos">'
+          + (canUpload
+              ? '<div class="ob-upload" tabindex="0" role="button">🖼️ <b>Click to choose photos</b> or drag them here<span>JPG, PNG, WebP or GIF, up to 8MB each</span></div>'
+                + '<input type="file" class="ob-file" accept="image/*" multiple hidden />'
+              : '')
+          + '<div class="ob-url-row"><input type="url" class="ob-url-input" placeholder="Paste an image URL (https://…)" /><button type="button" class="ob-btn ob-url-add">Add photo</button></div>'
+          + '<p class="ob-photo-err"></p>'
+          + '<div class="ob-thumbs"></div>'
+          + '</div></div>';
       }
 
       if (cfg.showMap) {
@@ -498,6 +569,7 @@
       this._prefill();
       this._bind();
       if (this.cfg.offer) this._prefillOffer(this.cfg.offer);
+      this._renderThumbs();
     }
 
     _prefill() {
@@ -524,7 +596,114 @@
       if (aiGo) aiGo.addEventListener('click', () => this._runAI());
 
       root.querySelector('.ob-submit').addEventListener('click', () => this._submit());
-      root.querySelector('.ob-reset').addEventListener('click', () => this._render());
+      root.querySelector('.ob-reset').addEventListener('click', () => { this._images = []; this._render(); });
+
+      this._bindPhotos();
+    }
+
+    // ── Photos ───────────────────────────────────────────────────────────────
+    _bindPhotos() {
+      const root = this.root;
+      const drop = root.querySelector('.ob-upload');
+      const fileInput = root.querySelector('.ob-file');
+      const urlInput = root.querySelector('.ob-url-input');
+      const addBtn = root.querySelector('.ob-url-add');
+
+      // Upload-from-disk (only present when an upload endpoint is configured).
+      if (drop && fileInput) {
+        const openPicker = () => fileInput.click();
+        drop.addEventListener('click', openPicker);
+        drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); } });
+        fileInput.addEventListener('change', (e) => {
+          const files = Array.from(e.target.files || []);
+          e.target.value = '';
+          this._uploadFiles(files);
+        });
+        ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('drag'); }));
+        ['dragleave', 'dragend'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('drag')));
+        drop.addEventListener('drop', (e) => {
+          e.preventDefault(); drop.classList.remove('drag');
+          this._uploadFiles(Array.from((e.dataTransfer && e.dataTransfer.files) || []));
+        });
+      }
+
+      // Paste an image URL (works with no backend, so the demo can use it too).
+      if (addBtn && urlInput) {
+        const add = () => {
+          const safe = safePhotoUrl(urlInput.value);
+          if (!safe) { this._photoError('That does not look like a valid image URL. It should start with https://'); return; }
+          this._images.push(safe);
+          urlInput.value = '';
+          this._photoError('');
+          this._renderThumbs();
+        };
+        addBtn.addEventListener('click', add);
+        urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+      }
+    }
+
+    _photoError(msg) {
+      const el = this.root.querySelector('.ob-photo-err');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.classList.toggle('show', !!msg);
+    }
+
+    async _uploadFiles(files) {
+      const imgs = files.filter((f) => f && /^image\//.test(f.type));
+      if (!imgs.length) return;
+      if (!this.cfg.uploadEndpoint) { this._photoError('Photo upload is not available here. Paste an image URL instead.'); return; }
+      const drop = this.root.querySelector('.ob-upload');
+      const original = drop ? drop.innerHTML : '';
+      if (drop) { drop.classList.add('busy'); drop.textContent = 'Uploading…'; }
+      this._photoError('');
+      let added = 0;
+      for (const f of imgs) {
+        if (f.size > 8 * 1024 * 1024) { this._photoError(safeFileName(f.name) + ' is over 8MB. Please use a smaller image.'); continue; }
+        const url = await this._uploadOne(f);
+        if (url) { this._images.push(url); added++; this._renderThumbs(); }
+      }
+      if (drop) { drop.classList.remove('busy'); drop.innerHTML = original; }
+      if (!added && !this.root.querySelector('.ob-photo-err.show')) {
+        this._photoError('Could not upload those photos. If you are signed out, sign in and try again, or paste an image URL.');
+      }
+    }
+
+    async _uploadOne(file) {
+      try {
+        const mod = await getBlobClient();
+        const pathname = 'offer-photos/' + Date.now() + '-' + safeFileName(file.name);
+        const blob = await mod.upload(pathname, file, {
+          access: 'public',
+          contentType: file.type,
+          handleUploadUrl: this.cfg.uploadEndpoint
+        });
+        return safePhotoUrl(blob && blob.url);
+      } catch (err) {
+        console.warn('[TGOfferBuilder] photo upload failed:', err && err.message);
+        return '';
+      }
+    }
+
+    _renderThumbs() {
+      const wrap = this.root && this.root.querySelector('.ob-thumbs');
+      if (!wrap) return;
+      this._images = (this._images || []).map(safePhotoUrl).filter(Boolean);
+      wrap.innerHTML = this._images.map((url, i) =>
+        '<div class="ob-thumb' + (i === 0 ? ' cover' : '') + '" style="background-image:url(\'' + url + '\')">'
+        + (i === 0 ? '<span class="ob-thumb-tag">Cover</span>' : '<button type="button" class="ob-thumb-cover-btn" data-i="' + i + '">Make cover</button>')
+        + '<button type="button" class="ob-thumb-x" data-i="' + i + '" aria-label="Remove photo">✕</button>'
+        + '</div>'
+      ).join('');
+      wrap.querySelectorAll('.ob-thumb-x').forEach((b) =>
+        b.addEventListener('click', () => { this._images.splice(Number(b.dataset.i), 1); this._renderThumbs(); }));
+      wrap.querySelectorAll('.ob-thumb-cover-btn').forEach((b) =>
+        b.addEventListener('click', () => {
+          const i = Number(b.dataset.i);
+          const [chosen] = this._images.splice(i, 1);
+          this._images.unshift(chosen);
+          this._renderThumbs();
+        }));
     }
 
     // ── AI assist ────────────────────────────────────────────────────────────
@@ -615,6 +794,8 @@
       });
       root.querySelectorAll('.ob-incl input:checked').forEach((i) => offer.includes.push(i.dataset.incl));
       root.querySelectorAll('.ob-toggle.on').forEach((c) => offer.tags.push(c.dataset.tag));
+      const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
+      if (imgs.length) offer.images = imgs;
       return offer;
     }
 

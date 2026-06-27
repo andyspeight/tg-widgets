@@ -434,6 +434,7 @@
       builder = new window.TGOfferBuilderWidget(div, {
         save: true, saveEndpoint: OFFERS_API,
         aiEndpoint: '/api/offer-draft',
+        uploadEndpoint: '/api/upload-photo',
         theme: c.theme, accentColor: c.accentColor, currency: c.currency,
         enquiryEmail: c.enquiryEmail, enquiryPhone: c.enquiryPhone, protection: c.protection,
         offer: offer || null, offerId: (offer && offer.id) || '',
