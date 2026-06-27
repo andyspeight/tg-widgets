@@ -101,3 +101,7 @@ export async function decr(key) {
   const r = await callRedis('decr', key);
   return Number.isFinite(+r) ? +r : null;
 }
+/** DEL key — returns the number of keys removed (0/1), or null if unconfigured. */
+export async function del(key) {
+  return await callRedis('del', key);
+}

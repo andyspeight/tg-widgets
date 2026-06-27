@@ -238,7 +238,13 @@
       font-size: 13px; color: var(--tgo-sub); max-height: 220px; overflow: auto;
       white-space: pre-wrap; font-family: ui-monospace, 'JetBrains Mono', monospace;
     }
-    @media (max-width: 560px) { .ob-ai-row { flex-direction: column; } .ob-ai-go { padding: 12px; } }
+    /* Saved-offer link block on the success panel */
+    .ob-saved { max-width: 560px; margin: 0 auto 16px; text-align: left; }
+    .ob-saved-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--tgo-muted); margin-bottom: 6px; }
+    .ob-saved-row { display: flex; gap: 8px; }
+    .ob-saved-link { flex: 1; min-width: 0; padding: 9px 11px; border: 1px solid var(--tgo-border); border-radius: 9px; font-size: 13px; background: var(--tgo-card-alt); color: var(--tgo-text); font-family: ui-monospace, 'JetBrains Mono', monospace; }
+    .ob-saved.err { background: color-mix(in srgb, var(--tgo-error) 8%, transparent); border: 1px solid color-mix(in srgb, var(--tgo-error) 30%, transparent); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--tgo-text); }
+    @media (max-width: 560px) { .ob-ai-row { flex-direction: column; } .ob-ai-go { padding: 12px; } .ob-saved-row { flex-wrap: wrap; } }
   `;
 
   // ── Widget class ──────────────────────────────────────────────────────────
@@ -276,6 +282,14 @@
         aiEndpoint: c.aiEndpoint || '',           // POST { description } → { fields, includes, tags }
         aiMock: bool(c.aiMock, false),            // preview/demo only: use the canned draft
         aiPlaceholder: c.aiPlaceholder || 'e.g. 7 nights all inclusive at the Riu Palace in Cancun, flying from Gatwick, was 1299 now from 899pp, kids stay free, book by end of July',
+
+        // Saving: when on, submit persists the offer (needs a signed-in session)
+        // and shows a shareable /offer page link. Off by default (fires the
+        // tg-offer-created event only).
+        save: bool(c.save, false),
+        saveEndpoint: c.saveEndpoint || '/api/saved-offers',
+        offerId: c.offerId || '',                 // set when editing an existing saved offer
+        offerBaseUrl: c.offerBaseUrl || '',        // optional absolute base for the shareable link
 
         // Currency
         currency: c.currency || 'GBP',
@@ -604,23 +618,63 @@
       const offer = this._collect();
       if (!this._validate(offer)) return;
 
-      // Fire the event the host (or a future card/page renderer) listens for.
+      // Fire the event the host (or a card/page renderer) listens for.
       this.el.dispatchEvent(new CustomEvent('tg-offer-created', {
         bubbles: true, composed: true, detail: offer
       }));
 
-      this._success(offer);
+      if (this.cfg.save) this._saveOffer(offer);
+      else this._success(offer);
     }
 
-    _success(offer) {
+    // Persist the offer to the account and get back a shareable id + URL.
+    _saveOffer(offer) {
+      const btn = this.root.querySelector('.ob-submit');
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+      fetch(this.cfg.saveEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id: this.cfg.offerId || undefined, offer: offer })
+      })
+        .then((r) => r.json().then((j) => ({ ok: r.ok, j: j })))
+        .then((res) => {
+          if (!res.ok) throw new Error((res.j && res.j.error) || 'Save failed');
+          this.cfg.offerId = res.j.id;
+          this.el.dispatchEvent(new CustomEvent('tg-offer-saved', { bubbles: true, composed: true, detail: { id: res.j.id, url: res.j.url, offer: offer } }));
+          this._success(offer, res.j);
+        })
+        .catch((err) => { this._success(offer, null, String(err && err.message || err)); });
+    }
+
+    _success(offer, saved, err) {
       const cfg = this.cfg;
+      let extra = '';
+      if (saved && saved.id) {
+        const link = (cfg.offerBaseUrl || '') + (saved.url || ('/offer?id=' + saved.id));
+        extra = '<div class="ob-saved"><div class="ob-saved-label">Shareable offer page</div>'
+          + '<div class="ob-saved-row"><input class="ob-saved-link" type="text" readonly value="' + esc(link) + '" />'
+          + '<button type="button" class="ob-btn ob-copy">Copy</button>'
+          + '<a class="ob-btn primary" href="' + esc(link) + '" target="_blank" rel="noopener">Open</a></div></div>';
+      } else if (err) {
+        extra = '<div class="ob-saved err">Could not save the offer (' + esc(err) + '). You can still copy the details below.</div>';
+      }
       this.root.innerHTML =
         '<div class="ob-success"><div class="tick">✓</div>'
         + '<h3>' + esc(cfg.successHeading) + '</h3>'
         + '<p>' + esc(cfg.successBody) + '</p>'
+        + extra
         + '<div class="ob-summary">' + esc(JSON.stringify(offer, null, 2)) + '</div>'
         + '<button type="button" class="ob-btn primary ob-again">Create another offer</button></div>';
       this.root.querySelector('.ob-again').addEventListener('click', () => this._render());
+      const copy = this.root.querySelector('.ob-copy');
+      if (copy) copy.addEventListener('click', () => {
+        const inp = this.root.querySelector('.ob-saved-link');
+        inp.select();
+        try { navigator.clipboard.writeText(inp.value); } catch (e) { document.execCommand('copy'); }
+        copy.textContent = 'Copied';
+        setTimeout(() => { copy.textContent = 'Copy'; }, 1500);
+      });
     }
   }
 

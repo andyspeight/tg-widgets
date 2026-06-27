@@ -72,16 +72,20 @@
       }
 
       if (idParam) {
-        // Saved-offer path. Offer storage is not wired yet, so the widget will
-        // try /api/widget-config and, if there is nothing there, render nothing.
-        var d2 = document.createElement('div');
-        d2.setAttribute('data-tg-widget', 'offer-page');
-        d2.setAttribute('data-tg-id', idParam);
-        mount.appendChild(d2);
-        setTimeout(function () {
-          var rendered = d2.shadowRoot && d2.shadowRoot.querySelector('.tgop');
-          if (!rendered || d2.getAttribute('data-tg-hidden')) fallback('Offer not available', 'We could not find this offer. It may have ended or been removed.');
-        }, 2000);
+        // Saved-offer path: load the stored offer by id and render it.
+        fetch('/api/saved-offers?id=' + encodeURIComponent(idParam))
+          .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+          .then(function (d) {
+            if (!d || !d.offer || typeof d.offer !== 'object') { fallback('Offer not found', 'We could not find this offer.'); return; }
+            cfg.offer = d.offer;
+            var t = (d.offer.fields && d.offer.fields.title) || d.offer.title;
+            if (t) document.title = t + ' · Travelgenix';
+            var div = document.createElement('div');
+            mount.appendChild(div);
+            new window.TGOfferPageWidget(div, cfg);
+            if (div.getAttribute('data-tg-hidden')) fallback('Offer not available', 'This offer is not currently available. Please check back later.');
+          })
+          .catch(function () { fallback('Offer not available', 'We could not find this offer. It may have ended or been removed.'); });
         return;
       }
 

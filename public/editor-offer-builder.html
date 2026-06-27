@@ -209,6 +209,8 @@
             <div class="section-body">
               <div class="field"><label class="field-label">Currency</label><select id="cfgCurrency"><option value="GBP">£ GBP</option><option value="EUR">€ EUR</option><option value="USD">$ USD</option></select></div>
               <div class="field"><label class="field-label">AI draft endpoint</label><input type="text" id="cfgAIEndpoint" placeholder="/api/offer-draft"><div class="field-help">Left blank for now. The endpoint that turns a description into form fields is built in the next step.</div></div>
+              <div class="toggle-row" style="margin-top:12px"><span>Save offers to my account</span><input type="checkbox" class="toggle" id="cfgSave"></div>
+              <div class="field-help">When on, saving an offer stores it and shows a shareable offer-page link. Needs you to be signed in.</div>
             </div>
           </div>
           <div class="section" data-open="true">
@@ -282,6 +284,7 @@
         successBody: 'Your special offer is ready. The card and offer page come next.',
         aiEnabled: true,
         aiEndpoint: '',
+        save: false,
         aiPlaceholder: 'e.g. 7 nights all inclusive at the Riu Palace in Cancun, flying from Gatwick, was 1299 now from 899pp, kids stay free, book by end of July',
         currency: 'GBP',
         accentColor: '#00B4D8',
@@ -353,6 +356,7 @@
       $('cfgAIEnabled').checked = c.aiEnabled;
       $('cfgAIPlaceholder').value = c.aiPlaceholder;
       $('cfgAIEndpoint').value = c.aiEndpoint;
+      $('cfgSave').checked = c.save;
       $('cfgCurrency').value = c.currency;
       $('cfgAccent').value = c.accentColor;
       $('cfgBrand').value = c.brandColor;
@@ -408,7 +412,8 @@
         cfgAIEnabled: 'aiEnabled', cfgShowDestination: 'showDestination', cfgShowStayTravel: 'showStayTravel',
         cfgShowPrice: 'showPrice', cfgShowIncludes: 'showIncludes', cfgShowTags: 'showTags',
         cfgShowValidity: 'showValidity', cfgShowImages: 'showImages', cfgShowMap: 'showMap', cfgShowDescription: 'showDescription',
-        cfgShowEnquiry: 'showEnquiry', cfgRequireTitle: 'requireTitle', cfgRequirePrice: 'requirePrice'
+        cfgShowEnquiry: 'showEnquiry', cfgRequireTitle: 'requireTitle', cfgRequirePrice: 'requirePrice',
+        cfgSave: 'save'
       };
       Object.entries(toggles).forEach(([id, key]) =>
         $(id).addEventListener('change', (e) => { state.config[key] = e.target.checked; markDirtyAndPreview(); }));
