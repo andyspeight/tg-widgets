@@ -166,7 +166,8 @@
       theme: document.documentElement.getAttribute('data-theme'),
       accentColor: $('ctrlAccent').value,
       ctaText: 'View deal',
-      ctaHref: '#',                 // points to the offer page once that is built
+      offerPage: '/offer',          // card links to the real offer page
+      ctaTarget: '_blank',          // open in a new tab so the demo stays put
       offer: offer
     }, extra || {}));
   }

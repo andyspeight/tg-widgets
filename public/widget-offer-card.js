@@ -77,6 +77,13 @@
     return { live: true, state: 'live', from: from, until: until };
   }
 
+  // URL-safe base64 of a (possibly unicode) string — used to carry a whole
+  // offer to the /offer page when there is no saved id yet.
+  function b64urlEncode(str) {
+    const utf8 = unescape(encodeURIComponent(str));
+    return btoa(utf8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
   // Only allow http(s) / relative URLs through to href + background-image.
   function safeUrl(u) {
     if (!u) return '';
@@ -291,8 +298,27 @@
         currency: c.currency || '',
         ctaText: c.ctaText || 'View deal',
         ctaHref: safeUrl(c.ctaHref) || '',
+        // Offer-page linking. When ctaHref is not set explicitly, the card links
+        // to offerPage, carrying the offer's saved id when there is one, else the
+        // whole offer encoded in the URL so it works before offers are stored.
+        offerPage: c.offerPage || '',
+        offerId: c.offerId || '',
+        ctaTarget: c.ctaTarget === '_blank' ? '_blank' : '',
         offer: c.offer && typeof c.offer === 'object' ? c.offer : {}
       };
+    }
+
+    // Resolve the destination for the card + its CTA.
+    _href() {
+      if (this.cfg.ctaHref) return this.cfg.ctaHref;
+      const base = this.cfg.offerPage;
+      if (!base) return '';
+      const o = this.cfg.offer || {};
+      const id = this.cfg.offerId || o.id || (o.fields && o.fields.id) || '';
+      const sep = base.indexOf('?') >= 0 ? '&' : '?';
+      if (id) return base + sep + 'id=' + encodeURIComponent(id);
+      try { return base + sep + 'data=' + b64urlEncode(JSON.stringify(o)); }
+      catch (e) { return base; }
     }
 
     // Pull a value from the offer, whether it is wrapped in `fields` or flat.
@@ -374,8 +400,9 @@
     }
 
     _cta() {
-      const href = this.cfg.ctaHref || '#';
-      return '<a class="tgoc-cta" href="' + esc(href) + '">' + esc(this.cfg.ctaText) + '</a>';
+      const href = this._linkHref || '#';
+      const tgt = this.cfg.ctaTarget ? ' target="_blank" rel="noopener"' : '';
+      return '<a class="tgoc-cta" href="' + esc(href) + '"' + tgt + '>' + esc(this.cfg.ctaText) + '</a>';
     }
 
     // Banner: full-bleed image with the offer overlaid. Punchy and promotional.
@@ -443,6 +470,8 @@
       }
       if (cfg.radius) this.root.style.setProperty('--tgo-radius', cfg.radius + 'px');
 
+      this._linkHref = this._href();
+
       let inner;
       if (cfg.layout === 'banner') {
         inner = this._bannerCard(d);
@@ -457,11 +486,14 @@
       }
 
       // The whole card is an <a> when a destination is set, else a div.
-      const tag = cfg.ctaHref ? 'a' : 'div';
+      const tag = this._linkHref ? 'a' : 'div';
       const card = document.createElement(tag);
       card.className = 'tgoc-card tgoc-card--' + cfg.layout
         + (cfg.imageSide === 'right' ? ' tgoc-flip' : '');
-      if (cfg.ctaHref) card.setAttribute('href', cfg.ctaHref);
+      if (this._linkHref) {
+        card.setAttribute('href', this._linkHref);
+        if (cfg.ctaTarget) { card.setAttribute('target', '_blank'); card.setAttribute('rel', 'noopener'); }
+      }
       card.innerHTML = inner;
       this.root.appendChild(card);
 

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Special offer · Travelgenix</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #0F172A; }
+  /* Fallback state — shown when there is no offer to render */
+  .of-fallback {
+    min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 40px 24px; gap: 8px;
+  }
+  .of-fallback .ic {
+    width: 64px; height: 64px; border-radius: 50%; background: #F1F5F9; color: #94A3B8;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+  }
+  .of-fallback h1 { font-size: 24px; font-weight: 800; margin: 0; }
+  .of-fallback p { color: #64748B; font-size: 15px; margin: 0; max-width: 40ch; }
+  .of-fallback a { margin-top: 14px; color: #0096B7; font-weight: 600; text-decoration: none; }
+</style>
+</head>
+<body>
+  <div id="mount"></div>
+
+  <script src="/widget-maps.js"></script>
+  <script src="/widget-offer-page.js"></script>
+  <script>
+    (function () {
+      var mount = document.getElementById('mount');
+
+      function b64urlDecode(b) {
+        b = String(b).replace(/-/g, '+').replace(/_/g, '/');
+        while (b.length % 4) b += '=';
+        return decodeURIComponent(escape(atob(b)));
+      }
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+      function fallback(title, msg) {
+        mount.innerHTML =
+          '<div class="of-fallback"><div class="ic">'
+          + '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>'
+          + '</div><h1>' + esc(title) + '</h1><p>' + esc(msg) + '</p></div>';
+      }
+
+      var params = new URLSearchParams(location.search);
+      var cfg = {
+        template: params.get('template') || 'classic',
+        theme: params.get('theme') === 'dark' ? 'dark' : 'light',
+        accentColor: params.get('accent') || '',
+        agencyName: params.get('agency') || ''
+      };
+
+      var dataParam = params.get('data');
+      var idParam = params.get('id');
+
+      if (dataParam) {
+        var offer = null;
+        try { offer = JSON.parse(b64urlDecode(dataParam)); } catch (e) { offer = null; }
+        if (!offer || typeof offer !== 'object') { fallback('Offer not found', 'This offer link looks broken or incomplete.'); return; }
+        cfg.offer = offer;
+        var title = (offer.fields && offer.fields.title) || offer.title;
+        if (title) document.title = title + ' · Travelgenix';
+        var div = document.createElement('div');
+        mount.appendChild(div);
+        new window.TGOfferPageWidget(div, cfg);
+        // Out of its show window → the widget renders nothing; show a notice.
+        if (div.getAttribute('data-tg-hidden')) fallback('Offer not available', 'This offer is not currently available. Please check back later.');
+        return;
+      }
+
+      if (idParam) {
+        // Saved-offer path. Offer storage is not wired yet, so the widget will
+        // try /api/widget-config and, if there is nothing there, render nothing.
+        var d2 = document.createElement('div');
+        d2.setAttribute('data-tg-widget', 'offer-page');
+        d2.setAttribute('data-tg-id', idParam);
+        mount.appendChild(d2);
+        setTimeout(function () {
+          var rendered = d2.shadowRoot && d2.shadowRoot.querySelector('.tgop');
+          if (!rendered || d2.getAttribute('data-tg-hidden')) fallback('Offer not available', 'We could not find this offer. It may have ended or been removed.');
+        }, 2000);
+        return;
+      }
+
+      fallback('Offer not found', 'No offer was specified in the link.');
+    })();
+  </script>
+</body>
+</html>
