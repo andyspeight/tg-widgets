@@ -320,8 +320,29 @@
         enquiryPhone: c.enquiryPhone || '',
         protection: c.protection || 'ATOL protected',
 
+        // An existing offer to edit (prefills the form). Shape = builder output.
+        offer: c.offer && typeof c.offer === 'object' ? c.offer : null,
+
         _widgetId: c._widgetId || ''
       };
+    }
+
+    // Populate the form from an existing offer (edit mode).
+    _prefillOffer(offer) {
+      if (!offer) return;
+      const fields = (offer.fields && typeof offer.fields === 'object') ? offer.fields : offer;
+      this.root.querySelectorAll('[data-key]').forEach((el) => {
+        const v = fields[el.dataset.key];
+        if (v != null && v !== '') el.value = v;
+      });
+      const inc = Array.isArray(offer.includes) ? offer.includes : [];
+      this.root.querySelectorAll('.ob-incl input').forEach((i) => {
+        if (inc.indexOf(i.dataset.incl) !== -1) { i.checked = true; i.closest('label').classList.add('on'); }
+      });
+      const tags = Array.isArray(offer.tags) ? offer.tags : [];
+      this.root.querySelectorAll('.ob-toggle').forEach((c) => {
+        if (tags.indexOf(c.dataset.tag) !== -1) c.classList.add('on');
+      });
     }
 
     _render() {
@@ -476,6 +497,7 @@
       this.shadow.appendChild(this.root);
       this._prefill();
       this._bind();
+      if (this.cfg.offer) this._prefillOffer(this.cfg.offer);
     }
 
     _prefill() {
