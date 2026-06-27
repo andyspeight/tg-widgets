@@ -179,6 +179,30 @@ export default async function handler(req, res) {
 
       const body = readBody(req);
       if (!body) return res.status(400).json({ error: 'Body is not valid JSON.' });
+
+      // ── Bulk import: { offers: [ ... ] } (spreadsheet upload) ──
+      if (Array.isArray(body.offers)) {
+        const MAX_BULK = 200;
+        const batch = body.offers.slice(0, MAX_BULK);
+        const now = Date.now();
+        const ids = [];
+        let skipped = 0;
+        for (let i = 0; i < batch.length; i++) {
+          const cleaned = cleanOffer(batch[i]);
+          if (!cleaned || !cleaned.fields || !Object.keys(cleaned.fields).length || JSON.stringify(cleaned).length > MAX_OFFER_BYTES) { skipped++; continue; }
+          const id = genId();
+          const ts = now + i; // distinct scores keep import order in the index
+          const ok = await setJson('offer:' + id, {
+            id: id, offer: cleaned, ownerKey: ck, ownerEmail: user.email || '',
+            clientId: user.clientId || '', createdAt: ts, updatedAt: ts
+          });
+          if (!ok) { skipped++; continue; }
+          await zadd('offers:idx:' + ck, ts, id);
+          ids.push(id);
+        }
+        return res.status(200).json({ saved: ids.length, skipped: skipped, ids: ids });
+      }
+
       const offer = cleanOffer(body.offer);
       if (!offer || !offer.fields || !Object.keys(offer.fields).length) {
         return res.status(400).json({ error: 'Offer is missing or empty.' });

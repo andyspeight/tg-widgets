@@ -235,6 +235,10 @@
               <h1>My offers</h1>
               <span class="ws-count" id="offerCount">0</span>
               <span class="ws-spacer"></span>
+              <button class="btn" id="btn-import">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Import
+              </button>
               <button class="btn primary" id="btn-new">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                 New offer
@@ -273,8 +277,34 @@
     </div>
   </div>
 
+  <!-- Import Modal -->
+  <div class="modal-backdrop" id="importModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Import offers from a spreadsheet</div>
+        <button class="modal-close" data-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">Download the template, fill in one row per offer (Title is required), then upload the CSV. You can export a CSV from Excel, Numbers or Google Sheets. Up to 200 offers at a time.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="btn" id="btn-template">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download template
+          </button>
+          <label class="btn primary" style="cursor:pointer;">Choose CSV file<input type="file" id="importFile" accept=".csv,text/csv" hidden></label>
+        </div>
+        <div id="importSummary" class="field-help" style="font-size:13px;"></div>
+        <div id="importIssues" style="margin-top:8px;font-size:12px;color:var(--danger);"></div>
+        <div style="margin-top:16px;text-align:right;">
+          <button class="btn primary" id="btn-do-import" disabled>Import offers</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/widget-offer-card.js"></script>
   <script src="/widget-offer-builder.js"></script>
+  <script src="/offer-import.js"></script>
   <script src="/editor-shell.js"></script>
 
   <script>
@@ -472,10 +502,62 @@
       box.appendChild(btn);
     }
 
+    /* ---- Spreadsheet import ---- */
+    let importReady = [];
+    function download(name, text, type) {
+      const blob = new Blob([text], { type: type || 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function resetImport() {
+      importReady = [];
+      $('importSummary').textContent = '';
+      $('importIssues').innerHTML = '';
+      $('importFile').value = '';
+      $('btn-do-import').disabled = true;
+    }
+    function handleCsv(text) {
+      const rows = window.TGOfferImport.parseCsv(text);
+      const mapped = window.TGOfferImport.rowsToOffers(rows);
+      importReady = mapped.filter(m => !m.errors.length).map(m => m.offer);
+      const bad = mapped.filter(m => m.errors.length);
+      $('importSummary').innerHTML = '<b>' + mapped.length + '</b> rows found · <b>' + importReady.length + '</b> ready to import'
+        + (bad.length ? ' · <b>' + bad.length + '</b> need attention' : '');
+      $('importIssues').innerHTML = bad.slice(0, 12).map(m => 'Row ' + m.rowNumber + ': ' + esc(m.errors.join(', '))).join('<br>')
+        + (bad.length > 12 ? '<br>…and ' + (bad.length - 12) + ' more' : '');
+      $('btn-do-import').disabled = importReady.length === 0;
+      $('btn-do-import').textContent = 'Import ' + importReady.length + ' offer' + (importReady.length === 1 ? '' : 's');
+    }
+    function wireImport() {
+      $('btn-import').addEventListener('click', () => { resetImport(); openModal('importModal'); });
+      $('btn-template').addEventListener('click', () => download('travel-offers-template.csv', window.TGOfferImport.templateCsv()));
+      $('importFile').addEventListener('change', (e) => {
+        const f = e.target.files && e.target.files[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => { try { handleCsv(String(reader.result)); } catch (err) { $('importSummary').textContent = 'Could not read that file. Please upload a CSV.'; } };
+        reader.readAsText(f);
+      });
+      $('btn-do-import').addEventListener('click', () => {
+        if (!importReady.length) return;
+        const btn = $('btn-do-import'); btn.disabled = true; btn.textContent = 'Importing…';
+        fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ offers: importReady }) })
+          .then(r => r.json().then(j => ({ ok: r.ok, j })))
+          .then(({ ok, j }) => {
+            if (!ok) throw new Error((j && j.error) || 'Import failed');
+            $('importModal').hidden = true;
+            loadOffers();
+            alert('Imported ' + j.saved + ' offer' + (j.saved === 1 ? '' : 's') + (j.skipped ? ' (' + j.skipped + ' skipped)' : '') + '.');
+          })
+          .catch(err => { btn.disabled = false; btn.textContent = 'Import offers'; $('importSummary').textContent = 'Import failed: ' + (err.message || err); });
+      });
+    }
+
     /* ---- Boot ---- */
     function boot() {
       $('editor').hidden = false;
-      hydrateUI(); wireInputs(); setTab('design'); renderCardPreview(); loadOffers();
+      hydrateUI(); wireInputs(); wireImport(); setTab('design'); renderCardPreview(); loadOffers();
     }
 
     window.tgse.init({
