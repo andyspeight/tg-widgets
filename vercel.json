@@ -175,7 +175,7 @@
     },
     {
       "source": "/offer",
-      "destination": "/offer.html"
+      "destination": "/api/offer-page"
     },
     {
       "source": "/demo-offer-card",
