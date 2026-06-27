@@ -413,7 +413,9 @@
         html += '<div class="ob-fs"><h4>7 · Validity &amp; availability</h4><p class="hint">When the deal expires and how tight availability is.</p><div class="ob-grid">'
           + field('bookby', 'Book by', input('bookby', '31 July 2026'))
           + field('avail', 'Availability note', input('avail', 'Limited rooms at this price'))
-          + '</div></div>';
+          + field('showFrom', 'Show from', input('showFrom', '', 'date'), '(optional)')
+          + field('showUntil', 'Show until', input('showUntil', '', 'date'), '(optional)')
+          + '</div><p class="hint" style="margin-top:10px">Show from / until control when the offer appears. Set either, neither or both. With no dates the offer always shows. "Show until" includes that whole day.</p></div>';
       }
 
       if (cfg.showImages) {

@@ -56,6 +56,27 @@
     if (!t) return '';
     return String(t).split('(')[0].split('/')[0].replace(/\s+only$/i, '').trim();
   }
+  // ── Scheduling: an offer shows only within its [showFrom, showUntil] window.
+  // Either bound may be absent. Dates are compared at day granularity in the
+  // viewer's local time, so a "show until" date is inclusive of that whole day.
+  function parseDay(s) {
+    if (!s) return null;
+    const m = String(s).trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+    const t = Date.parse(s);
+    if (!isFinite(t)) return null;
+    const dt = new Date(t);
+    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+  }
+  function offerWindow(fromStr, untilStr) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const from = parseDay(fromStr), until = parseDay(untilStr);
+    if (from !== null && today < from) return { live: false, state: 'upcoming', from: from, until: until };
+    if (until !== null && today > until) return { live: false, state: 'ended', from: from, until: until };
+    return { live: true, state: 'live', from: from, until: until };
+  }
+
   // Only allow http(s) / relative URLs through to href + background-image.
   function safeUrl(u) {
     if (!u) return '';
@@ -399,6 +420,17 @@
 
     _render() {
       const cfg = this.cfg;
+
+      // Scheduling: outside its show window the card renders nothing, so it
+      // simply disappears from a listing until (and only while) it is live.
+      this._window = offerWindow(this._f('showFrom'), this._f('showUntil'));
+      if (!this._window.live) {
+        this.shadow.innerHTML = '';
+        this.el.setAttribute('data-tg-hidden', this._window.state);
+        return;
+      }
+      this.el.removeAttribute('data-tg-hidden');
+
       const d = this._derive();
 
       this.root = document.createElement('div');

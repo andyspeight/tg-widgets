@@ -116,6 +116,31 @@
     return isFinite(n) ? n : null;
   }
 
+  // Scheduling window — see widget-offer-card.js for the matching logic. The
+  // page still renders outside the window but shows a status banner.
+  function parseDay(s) {
+    if (!s) return null;
+    const m = String(s).trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+    const t = Date.parse(s);
+    if (!isFinite(t)) return null;
+    const dt = new Date(t);
+    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+  }
+  function offerWindow(fromStr, untilStr) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const from = parseDay(fromStr), until = parseDay(untilStr);
+    if (from !== null && today < from) return { live: false, state: 'upcoming', from: from, until: until };
+    if (until !== null && today > until) return { live: false, state: 'ended', from: from, until: until };
+    return { live: true, state: 'live', from: from, until: until };
+  }
+  function fmtDay(ms) {
+    if (ms == null) return '';
+    try { return new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); }
+    catch (e) { return ''; }
+  }
+
   // Small inline icon set (stroke icons, currentColor)
   const I = {
     pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
@@ -344,6 +369,12 @@
     .tgop-lb-btn.close { top: 22px; right: 22px; }
     .tgop-lb-btn.prev { left: 18px; top: 50%; transform: translateY(-50%); }
     .tgop-lb-btn.next { right: 18px; top: 50%; transform: translateY(-50%); }
+
+    /* ── Scheduling status banner ── */
+    .tgop-status { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 20px; font-size: 14px; font-weight: 700; text-align: center; position: relative; z-index: 40; }
+    .tgop-status svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .tgop-status--upcoming { background: var(--tgo-accent); color: #fff; }
+    .tgop-status--ended { background: #475569; color: #fff; }
 
     /* ── Video ── */
     .tgop-video { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #000; box-shadow: var(--tgo-shadow-md); }
@@ -721,6 +752,17 @@
       // Main column content order (shared by classic + immersive)
       const mainCol = fAbout + fIncludes + fVideo + fGallery + fMap + fDetail;
 
+      // Scheduling status banner — the page still renders outside the window,
+      // but tells a direct visitor the offer is not currently live.
+      const win = offerWindow(this._f('showFrom'), this._f('showUntil'));
+      let fStatus = '';
+      if (!win.live) {
+        const msg = win.state === 'upcoming'
+          ? 'This offer opens on ' + esc(fmtDay(win.from))
+          : 'This offer has now ended' + (win.until != null ? ' (' + esc(fmtDay(win.until)) + ')' : '');
+        fStatus = '<div class="tgop-status tgop-status--' + win.state + '">' + I.shield + ' ' + msg + '</div>';
+      }
+
       // ── Assemble by template ──
       let html;
       if (cfg.template === 'editorial') {
@@ -748,7 +790,7 @@
       }
 
       root.setAttribute('data-template', cfg.template);
-      root.innerHTML = html;
+      root.innerHTML = fStatus + html;
 
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(root);
