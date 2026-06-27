@@ -35,8 +35,32 @@ const ID_RE = /^[A-Za-z0-9_-]{6,40}$/;
 const MAX_OFFER_BYTES = 48 * 1024;
 const MAX_LIST = 300;
 
+const ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 function genId() {
-  return crypto.randomBytes(9).toString('base64url'); // 12 url-safe chars
+  // Hyphen/underscore-free (base62) so the id can sit at the end of a readable
+  // slug URL (/offer/<slug>-<id>) and be recovered as the final '-' token.
+  const bytes = crypto.randomBytes(12);
+  let out = '';
+  for (let i = 0; i < bytes.length; i++) out += ID_ALPHABET[bytes[i] % 62];
+  return out; // 12 chars, [A-Za-z0-9]
+}
+
+// Cosmetic slug from the offer title. Lowercase ascii words joined by hyphens.
+function slugify(s) {
+  return String(s == null ? '' : s)
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60).replace(/-+$/, '');
+}
+
+// The shareable path for a saved offer: /offer/<slug>-<id>, or /offer/<id> when
+// the title yields no slug. Lookups use the id only, so the link survives an
+// edit to the title.
+function offerUrl(id, title) {
+  const slug = slugify(title);
+  return '/offer/' + (slug ? slug + '-' : '') + id;
 }
 function clientKeyOf(user) {
   if (user.clientId) return 'c:' + user.clientId;
@@ -240,7 +264,7 @@ export default async function handler(req, res) {
       if (!ok) return res.status(502).json({ error: 'Could not save the offer. Please try again.' });
       await zadd('offers:idx:' + ck, now, id);
 
-      return res.status(200).json({ id: id, url: '/offer?id=' + id });
+      return res.status(200).json({ id: id, url: offerUrl(id, offer.fields && offer.fields.title) });
     }
 
     // ── Delete ────────────────────────────────────────────────
@@ -267,4 +291,4 @@ export default async function handler(req, res) {
 }
 
 // Exported for unit tests.
-export const _test = { cleanOffer, genId, ID_RE, clientKeyOf, isStaff, summarise, isLiveOffer };
+export const _test = { cleanOffer, genId, ID_RE, clientKeyOf, isStaff, summarise, isLiveOffer, slugify, offerUrl };

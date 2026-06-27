@@ -46,6 +46,25 @@ function safeImg(u) {
   return u;
 }
 
+// Cosmetic slug from a title (matches saved-offers.slugify) — used for og:url.
+function slugify(s) {
+  return String(s == null ? '' : s)
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60).replace(/-+$/, '');
+}
+
+// Recover the offer id from a /offer/<slug>-<id> path segment. New ids are
+// hyphen-free, so the final '-' token is the id; we also try the whole segment
+// (covers an id pasted directly with no slug prefix).
+function idsFromSlugid(slugid) {
+  const s = String(slugid || '');
+  const out = [];
+  const tail = s.split('-').pop();
+  if (ID_RE.test(tail)) out.push(tail);
+  if (s !== tail && ID_RE.test(s)) out.push(s);
+  return out;
+}
+
 function decodeData(data) {
   try {
     const json = Buffer.from(String(data).replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
@@ -157,7 +176,7 @@ ${imgTags}
 
       // Fallbacks (storage hiccup, or a ?data= link the server did not resolve).
       var dataParam = params.get('data');
-      var idParam = params.get('id');
+      var idParam = params.get('id') || (boot && boot.offerId) || '';
       if (dataParam) {
         var offer = null;
         try { offer = JSON.parse(b64urlDecode(dataParam)); } catch (e) { offer = null; }
@@ -197,12 +216,21 @@ export default async function handler(req, res) {
   let notAvailable = false;
 
   try {
-    if (q.id && ID_RE.test(String(q.id)) && configured()) {
-      const rec = await getJson('offer:' + String(q.id));
-      if (rec && rec.offer) {
-        offerId = String(q.id);
-        if (inWindow(rec.offer)) offer = rec.offer;
-        else notAvailable = true; // exists but outside its show window
+    // Candidate ids: an explicit ?id=, or recovered from the readable
+    // /offer/<slug>-<id> path (passed through as ?slugid= by the rewrite).
+    let candidates = [];
+    if (q.id && ID_RE.test(String(q.id))) candidates = [String(q.id)];
+    else if (q.slugid) candidates = idsFromSlugid(q.slugid);
+
+    if (candidates.length && configured()) {
+      for (const cand of candidates) {
+        const rec = await getJson('offer:' + cand);
+        if (rec && rec.offer) {
+          offerId = cand;
+          if (inWindow(rec.offer)) offer = rec.offer;
+          else notAvailable = true; // exists but outside its show window
+          break;
+        }
       }
     } else if (q.data) {
       const decoded = decodeData(q.data);
@@ -217,10 +245,15 @@ export default async function handler(req, res) {
 
   const meta = offer ? metaFrom(offer) : { title: 'Special offer', desc: 'A handpicked travel offer from Travelgenix.', image: '' };
 
-  // Build og:url from the configured base or the request host.
+  // Build a canonical og:url from the configured base or the request host, using
+  // the readable slug path. When the offer is unavailable we have no title, so it
+  // degrades to /offer/<id> (and never leaks an ended offer's title).
   let ogUrl = '';
   const base = process.env.OFFER_PAGE_BASE_URL || (req.headers.host ? 'https://' + req.headers.host : '');
-  if (base && (offerId || q.id)) ogUrl = base.replace(/\/$/, '') + '/offer?id=' + encodeURIComponent(offerId || String(q.id));
+  if (base && offerId) {
+    const slug = offer ? slugify(offer.fields && offer.fields.title) : '';
+    ogUrl = base.replace(/\/$/, '') + '/offer/' + (slug ? slug + '-' : '') + encodeURIComponent(offerId);
+  }
 
   const bootstrap = escJson({ offer: offer || null, offerId, notAvailable });
   const html = pageHtml({ meta, ogUrl, bootstrap, cfg });
@@ -232,4 +265,4 @@ export default async function handler(req, res) {
 }
 
 // Test surface — pure helpers, no network.
-export const _test = { metaFrom, inWindow, safeImg, decodeData, escJson, escAttr };
+export const _test = { metaFrom, inWindow, safeImg, decodeData, escJson, escAttr, slugify, idsFromSlugid };

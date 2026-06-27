@@ -84,6 +84,14 @@
     return btoa(utf8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 
+  // Cosmetic slug from the offer title (matches the server's slugify), used to
+  // build the readable /offer/<slug>-<id> link.
+  function slugify(s) {
+    return String(s == null ? '' : s)
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60).replace(/-+$/, '');
+  }
+
   // Only allow http(s) / relative URLs through to href + background-image.
   function safeUrl(u) {
     if (!u) return '';
@@ -315,8 +323,16 @@
       if (!base) return '';
       const o = this.cfg.offer || {};
       const id = this.cfg.offerId || o.id || (o.fields && o.fields.id) || '';
-      const sep = base.indexOf('?') >= 0 ? '&' : '?';
-      if (id) return base + sep + 'id=' + encodeURIComponent(id);
+      // Split the base into path + query so a saved offer becomes the readable
+      // /offer/<slug>-<id> path while any template/theme query is preserved.
+      const qi = base.indexOf('?');
+      const path = qi >= 0 ? base.slice(0, qi) : base;
+      const query = qi >= 0 ? base.slice(qi) : '';
+      if (id) {
+        const slug = slugify(this._f('title'));
+        return path.replace(/\/$/, '') + '/' + (slug ? slug + '-' : '') + encodeURIComponent(id) + query;
+      }
+      const sep = query ? '&' : '?';
       try { return base + sep + 'data=' + b64urlEncode(JSON.stringify(o)); }
       catch (e) { return base; }
     }

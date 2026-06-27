@@ -178,6 +178,10 @@
       "destination": "/api/offer-page"
     },
     {
+      "source": "/offer/:slug",
+      "destination": "/api/offer-page?slugid=:slug"
+    },
+    {
       "source": "/demo-offer-card",
       "destination": "/demo-offer-card.html"
     },

@@ -385,11 +385,21 @@
     }
 
     /* ---- Offer-page link for an id, carrying the design choices ---- */
-    function pageLink(id) {
-      const c = state.config; let q = normBase(c.offerBaseUrl) + '/offer?id=' + encodeURIComponent(id);
-      if (c.template && c.template !== 'classic') q += '&template=' + c.template;
-      if (c.theme === 'dark') q += '&theme=dark';
-      if (c.accentColor) q += '&accent=' + encodeURIComponent(c.accentColor);
+    function slugify(s) {
+      return String(s == null ? '' : s)
+        .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60).replace(/-+$/, '');
+    }
+    function pageLink(o) {
+      const c = state.config;
+      const id = (o && o.id) || '';
+      const slug = slugify(o && o.title);
+      let q = normBase(c.offerBaseUrl) + '/offer/' + (slug ? slug + '-' : '') + encodeURIComponent(id);
+      const params = [];
+      if (c.template && c.template !== 'classic') params.push('template=' + c.template);
+      if (c.theme === 'dark') params.push('theme=dark');
+      if (c.accentColor) params.push('accent=' + encodeURIComponent(c.accentColor));
+      if (params.length) q += '?' + params.join('&');
       return q;
     }
 
