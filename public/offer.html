@@ -78,6 +78,7 @@
           .then(function (d) {
             if (!d || !d.offer || typeof d.offer !== 'object') { fallback('Offer not found', 'We could not find this offer.'); return; }
             cfg.offer = d.offer;
+            cfg.offerId = idParam;
             var t = (d.offer.fields && d.offer.fields.title) || d.offer.title;
             if (t) document.title = t + ' · Travelgenix';
             var div = document.createElement('div');

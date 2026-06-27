@@ -419,6 +419,9 @@
     .tgop[data-anim="1"] .tgop-reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1); }
     .tgop[data-anim="1"] .tgop-reveal.in { opacity: 1; transform: none; }
 
+    /* Honeypot — offscreen, never seen by a real visitor */
+    .tgop-hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
+
     @media (max-width: 900px) {
       .tgop-body { grid-template-columns: 1fr; gap: 8px; }
       .tgop-aside { position: static; margin-top: 8px; }
@@ -463,6 +466,8 @@
         radius: typeof c.radius === 'number' ? c.radius : 18,
         currency: c.currency || '',
         agencyName: c.agencyName || '',
+        offerId: c.offerId || '',                    // stored offer id, for routing the enquiry
+        enquiryEndpoint: c.enquiryEndpoint || (SCRIPT_BASE + 'api/offer-enquiry'),
         offer: o
       };
     }
@@ -607,6 +612,7 @@
             + '<div class="tgop-field"><select class="tgop-input" name="travellers"><option value="">Travellers</option><option>1 traveller</option><option selected>2 travellers</option><option>2 adults + children</option><option>3+ travellers</option></select></div>'
           + '</div>'
           + '<div class="tgop-field"><textarea class="tgop-input" name="message" placeholder="Anything else we should know? (dates, room type, questions)"></textarea></div>'
+          + '<input class="tgop-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">'
           + '<button type="submit" class="tgop-submit">Send my enquiry</button>'
           + trust
         + '</form>'
@@ -627,6 +633,7 @@
         return;
       }
       this.el.removeAttribute('data-tg-hidden');
+      this._renderedAt = Date.now();   // used by the enquiry time-trap
 
       const cfg = this.cfg;
       const d = this._derive();
@@ -950,6 +957,22 @@
         }
       };
       this.el.dispatchEvent(new CustomEvent('tg-offer-enquiry', { bubbles: true, composed: true, detail: detail }));
+
+      // Send the enquiry to the agency (resolved server-side from the offer).
+      try {
+        fetch(this.cfg.enquiryEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            offerId: this.cfg.offerId,
+            name: detail.enquiry.name, email: detail.enquiry.email, phone: detail.enquiry.phone,
+            month: detail.enquiry.month, travellers: detail.enquiry.travellers, message: detail.enquiry.message,
+            offerTitle: d.title, offerReference: d.reference || '',
+            website: (form.website && form.website.value) || '',
+            ts: this._renderedAt || 0
+          })
+        }).catch(function () {});
+      } catch (e) { /* never block the thank-you on the network */ }
 
       const card = form.closest('.tgop-book');
       form.outerHTML =
