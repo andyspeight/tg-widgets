@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Offers Grid · Travelgenix Widget Suite</title>
+<style>
+  :root { --tg-bg:#F7F9FB; --tg-surface:#FFFFFF; --tg-border:#E2E8F0; --tg-text:#0F172A; --tg-sub:#475569; --tg-muted:#94A3B8; --tg-brand:#1B2B5B; --tg-accent:#00B4D8; --tg-accent-soft:#E0F4FA; }
+  [data-theme="dark"] { --tg-bg:#0B1220; --tg-surface:#111B2E; --tg-border:#1E293B; --tg-text:#F1F5F9; --tg-sub:#94A3B8; --tg-muted:#64748B; --tg-accent:#38BDF8; --tg-accent-soft:rgba(56,189,248,0.12); }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--tg-bg); color:var(--tg-text); line-height:1.5; }
+  .topbar { background:var(--tg-surface); border-bottom:1px solid var(--tg-border); padding:12px 24px; }
+  .topbar-inner { max-width:1280px; margin:0 auto; display:flex; align-items:center; gap:16px; }
+  .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--tg-text); font-weight:700; }
+  .brand-mark { width:28px; height:28px; background:linear-gradient(135deg,var(--tg-brand),var(--tg-accent)); border-radius:8px; }
+  .pill { padding:4px 10px; background:var(--tg-accent-soft); color:var(--tg-accent); border-radius:999px; font-size:12px; font-weight:600; }
+  .spacer { flex:1; }
+  .tlink { color:var(--tg-sub); text-decoration:none; font-size:14px; }
+  .theme-toggle { background:none; border:1px solid var(--tg-border); color:var(--tg-text); width:36px; height:36px; border-radius:8px; cursor:pointer; font-size:16px; }
+  .wrap { max-width:1280px; margin:0 auto; padding:32px 24px; }
+  h1 { font-size:32px; font-weight:800; margin:0 0 8px; letter-spacing:-0.5px; }
+  .lede { color:var(--tg-sub); font-size:16px; max-width:760px; margin:0 0 24px; line-height:1.6; }
+  .controls { background:var(--tg-surface); border:1px solid var(--tg-border); border-radius:12px; padding:16px; margin-bottom:24px; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; align-items:end; }
+  .field { display:flex; flex-direction:column; gap:4px; }
+  label { font-size:11px; color:var(--tg-sub); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+  select, input[type=color] { padding:8px 10px; border:1px solid var(--tg-border); border-radius:8px; font-size:14px; background:var(--tg-surface); color:var(--tg-text); font-family:inherit; }
+  input[type=color] { padding:4px; height:36px; cursor:pointer; }
+  .stage { background:var(--tg-bg); border:1px solid var(--tg-border); border-radius:16px; padding:32px; }
+  [data-theme="dark"] .stage { background:#050B17; }
+  .foot { max-width:1280px; margin:0 auto; padding:20px 24px; text-align:center; font-size:13px; color:var(--tg-muted); }
+  .foot a { color:inherit; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark"></span><span>Travelgenix</span></a>
+    <span class="pill">Offers Grid · Demo</span>
+    <span class="spacer"></span>
+    <a class="tlink" href="/editor-offer-builder">Open editor →</a>
+    <button class="theme-toggle" id="themeBtn" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Offers Grid</h1>
+  <p class="lede">
+    The embed that shows a client's live offers on their own website. It pulls every offer currently in its
+    show window and renders them in the chosen card style, each linking to its own offer page. This demo uses
+    a few sample offers so it works with no backend; the real embed reads from your saved offers.
+  </p>
+
+  <div class="controls">
+    <div class="field"><label for="ctrlLayout">Card style</label>
+      <select id="ctrlLayout"><option value="vertical" selected>Vertical (grid)</option><option value="horizontal">Horizontal</option><option value="banner">Banner</option><option value="split">Split</option></select>
+    </div>
+    <div class="field" id="colsWrap"><label for="ctrlCols">Columns</label>
+      <select id="ctrlCols"><option value="auto" selected>Auto-fit</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+    </div>
+    <div class="field"><label for="ctrlAccent">Accent</label><input id="ctrlAccent" type="color" value="#00B4D8" /></div>
+  </div>
+
+  <div class="stage"><div id="gridMount"></div></div>
+</main>
+
+<footer class="foot">Travelgenix Widget Suite · <a href="/">All widgets</a></footer>
+
+<script src="/widget-offer-card.js"></script>
+<script src="/widget-offers-grid.js"></script>
+<script>
+  function $(id){ return document.getElementById(id); }
+  const mount = $('gridMount');
+
+  // Sample offers in the public-feed shape ({ id, offer }).
+  function img(u){ return 'https://images.unsplash.com/' + u; }
+  const SAMPLE = [
+    { id: 'demo-cancun', offer: { currency:'GBP', images:[img('photo-1510097467424-192d713fd8b2?w=800&q=75')], fields:{ title:'7 nights all inclusive in Cancun', teaser:'Beachfront five star on the white sands of Costa Mujeres.', type:'Package holiday (flight + hotel)', style:'All inclusive', country:'Mexico', resort:'Costa Mujeres', stars:'5 star', board:'All inclusive', nights:'7', price:'899', was:'1299', basis:'per person', badge:'Save', badgeAmount:'400', urgency:'Only 4 left' }, tags:['Family friendly','Beachfront'] } },
+    { id: 'demo-tenerife', offer: { currency:'GBP', images:[img('photo-1573843981267-be1999ff37cd?w=800&q=75')], fields:{ title:'Tenerife sunshine escape', teaser:'Adults-only half board minutes from the beach.', type:'Package holiday (flight + hotel)', style:'Adults only', country:'Canary Islands', resort:'Costa Adeje', stars:'4 star', board:'Half board', nights:'7', price:'549', basis:'per person', badge:'Last minute' }, tags:['Adults only','Spa'] } },
+    { id: 'demo-algarve', offer: { currency:'GBP', images:[img('photo-1591608971362-f08b2a75731a?w=800&q=75')], fields:{ title:'Private villa week in the Algarve', teaser:'Your own pool, a short stroll to Albufeira old town.', type:'Hotel / accommodation only', style:'Family', country:'Portugal', resort:'Albufeira', stars:'4 star', board:'Self catering', nights:'7', price:'465', basis:'per person', badge:'Best seller' }, tags:['Family friendly','Private pool'] } },
+    { id: 'demo-maldives', offer: { currency:'GBP', images:[img('photo-1514282401047-d79a71a590e8?w=800&q=75')], fields:{ title:'Maldives overwater honeymoon', teaser:'Ten nights in an overwater villa on a warm lagoon.', type:'Package holiday (flight + hotel)', style:'Honeymoon', country:'Maldives', resort:'North Malé Atoll', stars:'5 star', board:'Half board', nights:'10', price:'3200', was:'3950', basis:'per person', badge:'Save', badgeAmount:'750' }, tags:['Adults only','Overwater villa'] } }
+  ];
+
+  const themeBtn = $('themeBtn');
+  function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); themeBtn.textContent = t==='dark'?'☀️':'🌙'; }
+  themeBtn.addEventListener('click', () => { const n = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'; applyTheme(n); render(); });
+  applyTheme('light');
+
+  function render(){
+    const layout = $('ctrlLayout').value;
+    $('colsWrap').style.visibility = layout==='vertical' ? 'visible' : 'hidden';
+    mount.innerHTML = '';
+    const div = document.createElement('div');
+    mount.appendChild(div);
+    new window.TGOffersGridWidget(div, {
+      layout: layout,
+      columns: $('ctrlCols').value,
+      theme: document.documentElement.getAttribute('data-theme'),
+      accentColor: $('ctrlAccent').value,
+      currency: 'GBP',
+      heading: 'Our latest offers',
+      subheading: 'Hand-picked deals, updated weekly.',
+      offers: SAMPLE
+    });
+  }
+  document.querySelectorAll('.controls select, .controls input').forEach(el => el.addEventListener('change', render));
+  render();
+</script>
+</body>
+</html>

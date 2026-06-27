@@ -79,6 +79,26 @@ function cleanOffer(raw) {
   };
 }
 
+// Is an offer within its show window? (UTC day granularity; the card/page also
+// re-check in the viewer's local time and self-hide, so this is the gate that
+// keeps scheduled/ended offers out of the public feed.)
+function isLiveOffer(offer) {
+  const f = (offer && offer.fields) || {};
+  const day = (s) => {
+    if (!s) return null;
+    const m = String(s).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return Date.UTC(+m[1], +m[2] - 1, +m[3]);
+    const t = Date.parse(s);
+    return isFinite(t) ? t : null;
+  };
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const from = day(f.showFrom), until = day(f.showUntil);
+  if (from !== null && today < from) return false;
+  if (until !== null && today > until) return false;
+  return true;
+}
+
 function summarise(rec) {
   const f = (rec.offer && rec.offer.fields) || {};
   return {
@@ -114,6 +134,22 @@ export default async function handler(req, res) {
       return res.status(200).json({ id: id, offer: rec.offer });
     }
 
+    // ── Public feed: a client's live offers (powers the offers grid embed) ──
+    if (req.method === 'GET' && req.query && req.query.client) {
+      const client = String(req.query.client);
+      if (!/^[A-Za-z0-9_-]{1,64}$/.test(client)) return res.status(400).json({ error: 'Bad client.' });
+      res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=120');
+      if (!configured()) return res.status(200).json({ offers: [] });
+      const ids = await zrangebyscore('offers:idx:c:' + client, '-inf', '+inf');
+      const recent = (ids || []).reverse().slice(0, 100);
+      const out = [];
+      for (const id of recent) {
+        const rec = await getJson('offer:' + id);
+        if (rec && rec.offer && isLiveOffer(rec.offer)) out.push({ id: id, offer: rec.offer });
+      }
+      return res.status(200).json({ offers: out });
+    }
+
     // ── Everything else needs a session ───────────────────────
     const auth = requireAuth(req);
     if (auth.error) return res.status(auth.status || 401).json({ error: auth.error });
@@ -132,7 +168,8 @@ export default async function handler(req, res) {
         const rec = await getJson('offer:' + id);
         if (rec && rec.offer) offers.push(summarise(rec));
       }
-      return res.status(200).json({ offers: offers });
+      // feedKey is the public client id the offers-grid embed uses (when present).
+      return res.status(200).json({ offers: offers, feedKey: user.clientId || '' });
     }
 
     // ── Create or update ──────────────────────────────────────
@@ -206,4 +243,4 @@ export default async function handler(req, res) {
 }
 
 // Exported for unit tests.
-export const _test = { cleanOffer, genId, ID_RE, clientKeyOf, isStaff, summarise };
+export const _test = { cleanOffer, genId, ID_RE, clientKeyOf, isStaff, summarise, isLiveOffer };
