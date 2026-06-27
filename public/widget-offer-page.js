@@ -135,11 +135,6 @@
     if (until !== null && today > until) return { live: false, state: 'ended', from: from, until: until };
     return { live: true, state: 'live', from: from, until: until };
   }
-  function fmtDay(ms) {
-    if (ms == null) return '';
-    try { return new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); }
-    catch (e) { return ''; }
-  }
 
   // Small inline icon set (stroke icons, currentColor)
   const I = {
@@ -369,12 +364,6 @@
     .tgop-lb-btn.close { top: 22px; right: 22px; }
     .tgop-lb-btn.prev { left: 18px; top: 50%; transform: translateY(-50%); }
     .tgop-lb-btn.next { right: 18px; top: 50%; transform: translateY(-50%); }
-
-    /* ── Scheduling status banner ── */
-    .tgop-status { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 20px; font-size: 14px; font-weight: 700; text-align: center; position: relative; z-index: 40; }
-    .tgop-status svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .tgop-status--upcoming { background: var(--tgo-accent); color: #fff; }
-    .tgop-status--ended { background: #475569; color: #fff; }
 
     /* ── Video ── */
     .tgop-video { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #000; box-shadow: var(--tgo-shadow-md); }
@@ -628,6 +617,17 @@
       this._timers.forEach(clearInterval); this._timers = [];
       if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
 
+      // Scheduling: outside its show window the page renders nothing at all, so
+      // a stale or early link shows no offer rather than an expired one.
+      this._window = offerWindow(this._f('showFrom'), this._f('showUntil'));
+      if (!this._window.live) {
+        this.shadow.innerHTML = '';
+        this.el.setAttribute('data-tg-hidden', this._window.state);
+        this.root = null;
+        return;
+      }
+      this.el.removeAttribute('data-tg-hidden');
+
       const cfg = this.cfg;
       const d = this._derive();
 
@@ -752,17 +752,6 @@
       // Main column content order (shared by classic + immersive)
       const mainCol = fAbout + fIncludes + fVideo + fGallery + fMap + fDetail;
 
-      // Scheduling status banner — the page still renders outside the window,
-      // but tells a direct visitor the offer is not currently live.
-      const win = offerWindow(this._f('showFrom'), this._f('showUntil'));
-      let fStatus = '';
-      if (!win.live) {
-        const msg = win.state === 'upcoming'
-          ? 'This offer opens on ' + esc(fmtDay(win.from))
-          : 'This offer has now ended' + (win.until != null ? ' (' + esc(fmtDay(win.until)) + ')' : '');
-        fStatus = '<div class="tgop-status tgop-status--' + win.state + '">' + I.shield + ' ' + msg + '</div>';
-      }
-
       // ── Assemble by template ──
       let html;
       if (cfg.template === 'editorial') {
@@ -790,7 +779,7 @@
       }
 
       root.setAttribute('data-template', cfg.template);
-      root.innerHTML = fStatus + html;
+      root.innerHTML = html;
 
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(root);
