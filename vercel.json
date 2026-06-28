@@ -194,6 +194,10 @@
       "destination": "/demo-offers-grid.html"
     },
     {
+      "source": "/demo-offer-suite",
+      "destination": "/demo-offer-suite.html"
+    },
+    {
       "source": "/editor-offer-builder",
       "destination": "/editor-offer-builder.html"
     },
