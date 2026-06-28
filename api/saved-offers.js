@@ -290,6 +290,27 @@ export default async function handler(req, res) {
     if (req.method === 'DELETE') {
       if (!applyRateLimit(res, 'offers:write:' + ck, RATE_LIMITS.widgetWrite)) return;
       if (!configured()) return res.status(503).json({ error: 'Offer storage is not configured.' });
+
+      // ── Bulk delete: ?ids=id1,id2,… (the offers list multi-select) ──
+      // Each id is independently validated and ownership-checked; ones the
+      // client does not own (or that no longer exist) are skipped, never the
+      // whole request failing. Query param (not a body) so it parses reliably.
+      if (req.query && req.query.ids) {
+        const MAX_BULK_DEL = 200;
+        const ids = [...new Set(String(req.query.ids).split(',').map((s) => s.trim()).filter(Boolean))].slice(0, MAX_BULK_DEL);
+        let deleted = 0, skipped = 0;
+        for (const did of ids) {
+          if (!ID_RE.test(did)) { skipped++; continue; }
+          const rec = await getJson('offer:' + did);
+          if (!rec) { skipped++; continue; }
+          if (rec.ownerKey !== ck && !isStaff(user)) { skipped++; continue; }
+          await del('offer:' + did);
+          await zrem('offers:idx:' + (rec.ownerKey || ck), did);
+          deleted++;
+        }
+        return res.status(200).json({ ok: true, deleted, skipped });
+      }
+
       const id = req.query && req.query.id ? String(req.query.id) : '';
       if (!ID_RE.test(id)) return res.status(400).json({ error: 'Bad offer id.' });
       const existing = await getJson('offer:' + id);
@@ -298,7 +319,7 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'You do not own this offer.' });
       }
       await del('offer:' + id);
-      await zrem('offers:idx:' + ck, id);
+      await zrem('offers:idx:' + (existing.ownerKey || ck), id);
       return res.status(200).json({ ok: true });
     }
 

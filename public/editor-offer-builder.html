@@ -75,6 +75,15 @@
 
     .offers-list { display: flex; flex-direction: column; gap: 10px; max-width: 980px; }
     .offer-row { display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; box-shadow: var(--shadow-xs); }
+    .offer-row.is-selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow-xs); }
+    .offer-check { display: flex; align-items: center; flex-shrink: 0; }
+    .offer-check input, .selall input { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; margin: 0; }
+    /* Selection toolbar above the list */
+    .offers-toolbar { display: flex; align-items: center; gap: 14px; max-width: 980px; margin-bottom: 12px; min-height: 30px; }
+    .selall { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--sub); cursor: pointer; user-select: none; }
+    .sel-actions { display: inline-flex; align-items: center; gap: 10px; }
+    .sel-count { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .sel-spacer { flex: 1; }
     .offer-thumb { width: 76px; height: 56px; border-radius: 8px; background-size: cover; background-position: center; flex-shrink: 0; background-color: var(--hover); }
     .offer-thumb.ph { background: linear-gradient(135deg, var(--brand), var(--accent)); }
     .offer-main { min-width: 0; flex: 1; }
@@ -330,6 +339,7 @@
       widgetId: '',
       feedKey: '',
       offers: [],
+      selected: new Set(),
       config: {
         cardLayout: 'vertical', columns: 'auto', template: 'classic',
         theme: 'light', accentColor: '#00B4D8', brandColor: '#1B2B5B', radius: 14,
@@ -416,6 +426,7 @@
         .catch(() => setState('<div class="state"><h2>Couldn\'t load your offers</h2><p>Please refresh the page. If it keeps happening, your session may have expired.</p></div>'));
     }
     function renderOffers() {
+      state.selected.clear(); // a fresh list always starts unselected
       $('offerCount').textContent = state.offers.length;
       if (!state.offers.length) {
         setState('<div class="state"><div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 7.3 12 2 3.4 7.3 12 12.6z"/><path d="M3.4 7.3V16.7L12 22l8.6-5.3V7.3"/></svg></div><h2>No offers yet</h2><p>Create your first special offer. It only takes a minute with the AI assist.</p><button class="btn primary" onclick="document.getElementById(\'btn-new\').click()">Create your first offer</button></div>');
@@ -428,20 +439,84 @@
         const price = o.price ? sym + esc(o.price) : '';
         const dates = (o.showFrom || o.showUntil) ? (esc(o.showFrom||'…') + ' → ' + esc(o.showUntil||'…')) : 'Always showing';
         return '<div class="offer-row" data-id="' + esc(o.id) + '">'
+          + '<label class="offer-check"><input type="checkbox" data-check="' + esc(o.id) + '" aria-label="Select offer" /></label>'
           + '<div class="offer-thumb ph"></div>'
           + '<div class="offer-main"><div class="offer-title">' + (esc(o.title) || 'Untitled offer') + chip + '</div>'
           + '<div class="offer-meta">' + (price ? '<b>' + price + '</b> · ' : '') + esc(dates) + '</div></div>'
           + '<div class="offer-actions">'
-          + '<a class="btn sm" href="' + esc(pageLink(o.id)) + '" target="_blank" rel="noopener">Open</a>'
+          + '<a class="btn sm" href="' + esc(pageLink(o)) + '" target="_blank" rel="noopener">Open</a>'
           + '<button class="btn sm" data-act="edit">Edit</button>'
           + '<button class="btn sm danger" data-act="delete">Delete</button>'
           + '</div></div>';
       }).join('');
-      setState('<div class="offers-list">' + rows + '</div>');
+      const toolbar = '<div class="offers-toolbar">'
+        + '<label class="selall"><input type="checkbox" id="selAll" /> Select all</label>'
+        + '<span class="sel-spacer"></span>'
+        + '<span class="sel-actions" id="selActions" hidden>'
+        + '<span class="sel-count" id="selCount">0 selected</span>'
+        + '<button class="btn sm danger" id="btn-bulk-delete">Delete selected</button>'
+        + '<button class="btn sm" id="btn-sel-clear">Clear</button>'
+        + '</span></div>';
+      setState(toolbar + '<div class="offers-list">' + rows + '</div>');
+      updateSelUI();
     }
 
-    /* ---- Row actions ---- */
+    /* ---- Multi-select + bulk delete ---- */
+    function updateSelUI() {
+      const n = state.selected.size;
+      const total = state.offers.length;
+      const actions = $('selActions'); if (actions) actions.hidden = n === 0;
+      const count = $('selCount'); if (count) count.textContent = n + ' selected';
+      const all = $('selAll');
+      if (all) { all.checked = total > 0 && n === total; all.indeterminate = n > 0 && n < total; }
+      $('offersList').querySelectorAll('.offer-row').forEach(function (row) {
+        row.classList.toggle('is-selected', state.selected.has(row.dataset.id));
+      });
+    }
+    function clearSelection() {
+      state.selected.clear();
+      $('offersList').querySelectorAll('[data-check]').forEach(function (c) { c.checked = false; });
+      updateSelUI();
+    }
+    async function bulkDelete() {
+      const ids = [...state.selected];
+      if (!ids.length) return;
+      if (!confirm('Delete ' + ids.length + ' offer' + (ids.length > 1 ? 's' : '') + '? This cannot be undone.')) return;
+      const btn = $('btn-bulk-delete');
+      btn.disabled = true; const label = btn.textContent; btn.textContent = 'Deleting…';
+      try {
+        // Chunk so the query string stays well within limits.
+        for (let i = 0; i < ids.length; i += 100) {
+          const chunk = ids.slice(i, i + 100);
+          const r = await fetch(OFFERS_API + '?ids=' + encodeURIComponent(chunk.join(',')), { method: 'DELETE', credentials: 'include' });
+          if (!r.ok) throw new Error(String(r.status));
+        }
+        state.selected.clear();
+        loadOffers();
+      } catch (e) {
+        btn.disabled = false; btn.textContent = label;
+        alert('Could not delete the selected offers. Please try again.');
+      }
+    }
+
+    /* ---- Selection (checkboxes + select all) ---- */
+    $('offersList').addEventListener('change', function (e) {
+      const t = e.target;
+      if (t.id === 'selAll') {
+        state.selected.clear();
+        if (t.checked) state.offers.forEach(function (o) { state.selected.add(o.id); });
+        $('offersList').querySelectorAll('[data-check]').forEach(function (c) { c.checked = t.checked; });
+        updateSelUI();
+      } else if (t.dataset && t.dataset.check) {
+        if (t.checked) state.selected.add(t.dataset.check); else state.selected.delete(t.dataset.check);
+        updateSelUI();
+      }
+    });
+
+    /* ---- Row actions + bulk actions ---- */
     $('offersList').addEventListener('click', function (e) {
+      if (e.target.closest('#btn-bulk-delete')) { bulkDelete(); return; }
+      if (e.target.closest('#btn-sel-clear')) { clearSelection(); return; }
       const btn = e.target.closest('[data-act]'); if (!btn) return;
       const id = btn.closest('.offer-row').dataset.id;
       if (btn.dataset.act === 'delete') {
