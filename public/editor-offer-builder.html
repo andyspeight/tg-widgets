@@ -339,7 +339,7 @@
   <script src="/tour-special-offers.js"></script>
 
   <script>
-    const WIDGET_TYPE = 'Special Offer Builder';
+    const WIDGET_TYPE = 'Special Offers';
     const OFFERS_API = '/api/saved-offers';
     function $(id) { return document.getElementById(id); }
     function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -503,7 +503,7 @@
           + '<button class="btn sm danger" id="btn-bulk-purge">Delete forever</button>'
         : '<button class="btn sm danger" id="btn-bulk-delete">Delete selected</button>';
       const banner = trash
-        ? '<div class="trash-banner"><span>Offers here are kept for <b>' + state.retentionDays + ' days</b>, then removed for good. Restore any of them before then.</span><span class="ts-spacer"></span><button class="btn sm" id="btn-back-offers">Back to offers</button></div>'
+        ? '<div class="trash-banner"><span>Offers here are kept for <b>' + state.retentionDays + ' days</b>, then removed for good. Restore any of them before then.</span><span class="ts-spacer"></span><button class="btn sm danger" id="btn-empty-bin">Empty bin now</button><button class="btn sm" id="btn-back-offers">Back to offers</button></div>'
         : '';
       const toolbar = '<div class="offers-toolbar">'
         + '<label class="selall"><input type="checkbox" id="selAll" /> Select all</label>'
@@ -570,6 +570,19 @@
       if (!confirm('Permanently delete ' + n + ' offer' + (n > 1 ? 's' : '') + '? This cannot be undone.')) return;
       return bulkRun('btn-bulk-purge', 'Deleting…', (chunk) => delReq(chunk, true), loadTrash);
     }
+    async function emptyBin() {
+      const ids = state.offers.map(function (o) { return o.id; });
+      if (!ids.length) return;
+      if (!confirm('Permanently delete all ' + ids.length + ' offer' + (ids.length > 1 ? 's' : '') + ' in the bin? This cannot be undone.')) return;
+      const btn = $('btn-empty-bin'); btn.disabled = true; const label = btn.textContent; btn.textContent = 'Emptying…';
+      try {
+        for (let i = 0; i < ids.length; i += 100) { await delReq(ids.slice(i, i + 100), true); }
+        loadTrash();
+      } catch (e) {
+        btn.disabled = false; btn.textContent = label;
+        alert('Could not empty the bin. Please try again.');
+      }
+    }
 
     /* ---- Selection (checkboxes + select all) ---- */
     $('offersList').addEventListener('change', function (e) {
@@ -591,6 +604,7 @@
       if (e.target.closest('#btn-bulk-restore')) { bulkRestore(); return; }
       if (e.target.closest('#btn-bulk-purge')) { bulkPurge(); return; }
       if (e.target.closest('#btn-sel-clear')) { clearSelection(); return; }
+      if (e.target.closest('#btn-empty-bin')) { emptyBin(); return; }
       if (e.target.closest('#btn-back-offers')) { loadOffers(); return; }
       const btn = e.target.closest('[data-act]'); if (!btn) return;
       const id = btn.closest('.offer-row').dataset.id;

@@ -242,6 +242,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Team Showcase',
   'World Map',
   'Travel Results AI',
+  'Special Offers',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -289,6 +290,7 @@ const PLAN_WIDGET_LIMITS = {
   'Team Showcase':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'World Map':             { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Travel Results AI':     { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Special Offers':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -424,6 +426,14 @@ const WIDGET_TYPE_ALIASES = {
   'callback':          'Appointment',
   'booking-scheduler': 'Appointment',
   'consultation':      'Appointment',
+  // Special Offers (the offer builder workspace; embed widget is offers-grid).
+  // NB 'offers' / 'travel-offers' map to the separate Travel Offers widget.
+  'special-offers':        'Special Offers',
+  'special offers':        'Special Offers',
+  'special-offer-builder': 'Special Offers',
+  'special offer builder': 'Special Offers',
+  'offers-grid':           'Special Offers',
+  'offer-builder':         'Special Offers',
 };
 
 function canonicaliseWidgetType(raw) {
