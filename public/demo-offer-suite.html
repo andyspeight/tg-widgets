@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Special Offers · Travelgenix Widget Suite</title>
+<style>
+  :root {
+    --tg-bg: #F7F9FB; --tg-surface: #FFFFFF; --tg-border: #E2E8F0;
+    --tg-text: #0F172A; --tg-sub: #475569; --tg-muted: #94A3B8;
+    --tg-brand: #1B2B5B; --tg-accent: #00B4D8; --tg-accent-hover: #0096B7; --tg-accent-soft: #E0F4FA;
+    --tg-ai: #7C3AED; --tg-ai-soft: #F3E8FF;
+  }
+  [data-theme="dark"] {
+    --tg-bg: #0B1220; --tg-surface: #111B2E; --tg-border: #1E293B;
+    --tg-text: #F1F5F9; --tg-sub: #94A3B8; --tg-muted: #64748B;
+    --tg-brand: #4A6FE0; --tg-accent: #38BDF8; --tg-accent-soft: rgba(56,189,248,0.12);
+    --tg-ai: #A78BFA; --tg-ai-soft: rgba(167,139,250,0.16);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--tg-bg); color: var(--tg-text); line-height: 1.5; transition: background 0.2s, color 0.2s;
+  }
+  .topbar { background: var(--tg-surface); border-bottom: 1px solid var(--tg-border); padding: 12px 24px; position: sticky; top: 0; z-index: 20; }
+  .topbar-inner { max-width: 1280px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--tg-text); font-weight: 700; }
+  .brand-mark { width: 28px; height: 28px; background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent)); border-radius: 8px; }
+  .pill { padding: 4px 10px; background: var(--tg-accent-soft); color: var(--tg-accent); border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .topbar-spacer { flex: 1; }
+  .topbar-link { color: var(--tg-sub); text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: 6px; }
+  .topbar-link:hover { background: var(--tg-bg); color: var(--tg-text); }
+  .btn-primary { background: var(--tg-accent); color: #fff; border: 0; border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 700; font-size: 14px; text-decoration: none; cursor: pointer; }
+  .btn-primary:hover { background: var(--tg-accent-hover); }
+  .theme-toggle { background: none; border: 1px solid var(--tg-border); color: var(--tg-text); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+  .theme-toggle:hover { background: var(--tg-bg); }
+
+  .hero { max-width: 1280px; margin: 0 auto; padding: 48px 24px 8px; }
+  .hero h1 { font-size: 40px; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.6px; }
+  .hero .lede { color: var(--tg-sub); font-size: 18px; max-width: 760px; margin: 0 0 22px; line-height: 1.6; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+  .chip { font-size: 13px; font-weight: 600; color: var(--tg-sub); background: var(--tg-surface); border: 1px solid var(--tg-border); border-radius: 999px; padding: 6px 13px; }
+  .chip b { color: var(--tg-accent); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
+  .section { margin: 40px 0; }
+  .section-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  .step { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--tg-accent); }
+  .section h2 { font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.3px; }
+  .section p.sub { color: var(--tg-sub); font-size: 15px; margin: 6px 0 18px; max-width: 720px; }
+  .section .more { color: var(--tg-accent); text-decoration: none; font-weight: 600; font-size: 14px; }
+
+  .stage { background: var(--tg-bg); border: 1px solid var(--tg-border); border-radius: 16px; padding: 28px; }
+  [data-theme="dark"] .stage { background: #050B17; }
+  .stage.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 340px)); gap: 20px; justify-content: center; }
+
+  .frame { border: 1px solid var(--tg-border); border-radius: 16px; overflow: hidden; background: var(--tg-surface); }
+  .frame-bar { display: flex; align-items: center; gap: 7px; padding: 10px 14px; border-bottom: 1px solid var(--tg-border); background: var(--tg-bg); }
+  .frame-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--tg-border); }
+  .frame-url { margin-left: 10px; font-size: 12px; color: var(--tg-muted); font-family: ui-monospace, 'JetBrains Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .frame iframe { width: 100%; height: 620px; border: 0; display: block; background: #fff; }
+
+  .embed { position: relative; background: #0F172A; color: #E2E8F0; border-radius: 12px; padding: 16px 18px; font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7; word-break: break-all; white-space: pre-wrap; margin-top: 16px; }
+  .embed button { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.14); color: #fff; border: 0; border-radius: 6px; padding: 5px 11px; font-size: 12px; cursor: pointer; }
+  .embed button:hover { background: rgba(255,255,255,0.24); }
+
+  .cta { margin: 56px 0 8px; background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent)); border-radius: 20px; padding: 40px; text-align: center; color: #fff; }
+  .cta h2 { font-size: 26px; font-weight: 800; margin: 0 0 8px; }
+  .cta p { margin: 0 0 20px; opacity: 0.92; font-size: 16px; }
+  .cta .btn-primary { background: #fff; color: var(--tg-brand); }
+  .cta .btn-primary:hover { background: #f1f5f9; }
+
+  .foot { max-width: 1280px; margin: 0 auto; padding: 24px; text-align: center; font-size: 13px; color: var(--tg-muted); }
+  .foot a { color: inherit; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark"></span><span>Travelgenix</span></a>
+    <span class="pill">Special Offers · Demo</span>
+    <div class="topbar-spacer"></div>
+    <a class="topbar-link" href="/editor-offer-builder">Open the editor →</a>
+    <button class="theme-toggle" id="themeBtn" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Special Offers</h1>
+  <p class="lede">
+    Build a beautiful holiday offer in a minute, with no developer. Describe the deal in plain English and AI
+    fills the form, add your photos, then publish it as a card, a cinematic offer page with its own enquiry
+    form, and a live grid for your website. Every offer gets a clean, shareable link that looks right on
+    WhatsApp, Facebook and search.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="/editor-offer-builder">Create your first offer</a>
+    <a class="topbar-link" href="#build" style="border:1px solid var(--tg-border)">See how it works</a>
+  </div>
+  <div class="chips">
+    <span class="chip"><b>✨</b> AI drafts the offer</span>
+    <span class="chip"><b>4</b> card styles</span>
+    <span class="chip"><b>3</b> page templates</span>
+    <span class="chip">Map &amp; video</span>
+    <span class="chip">Photo upload</span>
+    <span class="chip">Built-in enquiry form</span>
+    <span class="chip">Scheduling</span>
+    <span class="chip">Spreadsheet import</span>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <!-- 1 · Build -->
+  <section class="section" id="build">
+    <div class="section-head"><span class="step">Step 1</span><h2>Describe it, and AI builds it</h2></div>
+    <p class="sub">
+      Type the deal the way you would say it to a customer and press Generate. AI works out the destination,
+      board basis, price basis, highlights and a polished description, then fills the form for you to check.
+      Everything stays editable. (This demo uses a canned draft so it works without signing in.)
+    </p>
+    <div class="stage"><div id="builderMount"></div></div>
+  </section>
+
+  <!-- 2 · Cards -->
+  <section class="section">
+    <div class="section-head"><span class="step">Step 2</span><h2>Show it anywhere as a card</h2></div>
+    <p class="sub">
+      The same offer renders as a card in four styles — vertical, horizontal, banner and split. Drop them on
+      any page. <a class="more" href="/demo-offer-card">See every card style →</a>
+    </p>
+    <div class="stage cards" id="cardsMount"></div>
+  </section>
+
+  <!-- 3 · Offer page -->
+  <section class="section">
+    <div class="section-head"><span class="step">Step 3</span><h2>A cinematic offer page</h2></div>
+    <p class="sub">
+      Click any card and it opens a full offer page — a full-bleed hero, the facts, what is included, a gallery,
+      a map, a video and a built-in enquiry form that emails the lead straight to you.
+      <a class="more" id="openPage" href="#" target="_blank" rel="noopener">Open a sample offer page →</a>
+    </p>
+    <div class="frame">
+      <div class="frame-bar">
+        <span class="frame-dot"></span><span class="frame-dot"></span><span class="frame-dot"></span>
+        <span class="frame-url" id="pageUrl">/offer</span>
+      </div>
+      <iframe id="pageFrame" title="Sample offer page" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <!-- 4 · Grid -->
+  <section class="section">
+    <div class="section-head"><span class="step">Step 4</span><h2>Drop a live grid on your website</h2></div>
+    <p class="sub">
+      One snippet shows all your live offers and keeps itself up to date as you add, schedule or retire them.
+      Paste it once and forget it. <a class="more" href="/demo-offers-grid">See the grid demo →</a>
+    </p>
+    <div class="stage"><div id="gridMount"></div></div>
+    <div class="embed" id="embedBox"></div>
+  </section>
+
+  <div class="cta">
+    <h2>Ready to build your first offer?</h2>
+    <p>It takes about a minute. AI does the heavy lifting and you stay in control.</p>
+    <a class="btn-primary" href="/editor-offer-builder">Open the offers editor</a>
+  </div>
+</main>
+
+<footer class="foot">Travelgenix Widget Suite · <a href="/">All widgets</a></footer>
+
+<script src="/widget-maps.js"></script>
+<script src="/widget-offer-card.js"></script>
+<script src="/widget-offer-builder.js"></script>
+<script src="/widget-offers-grid.js"></script>
+<script>
+  function $(id) { return document.getElementById(id); }
+
+  function b64urlEncode(str) {
+    const utf8 = unescape(encodeURIComponent(str));
+    return btoa(utf8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  // Sample offers in the exact shape the builder emits.
+  const SAMPLE = {
+    currency: 'GBP',
+    fields: {
+      title: '7 nights all inclusive in Cancun',
+      teaser: 'Beachfront five star on the white sands of Costa Mujeres, flying direct from Gatwick.',
+      type: 'Package holiday (flight + hotel)', style: 'All inclusive',
+      country: 'Mexico', region: 'Riviera Maya', resort: 'Costa Mujeres',
+      property: 'Riu Palace Costa Mujeres', stars: '5 star', board: 'All inclusive',
+      nights: '7', period: 'Sep 2026 to Apr 2027', origin: 'London Gatwick', airline: 'TUI Airways', flighttype: 'Direct',
+      price: '899', was: '1299', basis: 'per person', deposit: '60',
+      badge: 'Save', badgeAmount: '400', urgency: 'Only 4 left at this price',
+      bookby: '31 July 2026', avail: 'Limited rooms at this price',
+      mapAddress: 'Costa Mujeres, Cancun, Mexico', mapLat: '21.0419', mapLng: '-86.8126', mapStyle: 'streets',
+      video: 'https://www.youtube.com/watch?v=Scxs7L0vhZ4',
+      description: 'Wake up to white sand and turquoise sea at the Riu Palace Costa Mujeres, a five star beachfront resort on one of the quietest stretches of the Mexican Caribbean. This all inclusive deal covers your direct flights from Gatwick plus every meal, drink and snack once you arrive.\n\nWith four pools, a spa, a kids club and a string of restaurants, it suits couples and families alike. Children stay free on selected dates. Book by 31 July to lock in the saving.'
+    },
+    includes: ['Return flights', 'Airport transfers', '23kg luggage', 'All meals & drinks', 'ABTA / ATOL protection', 'Kids stay free'],
+    tags: ['Family friendly', 'Beachfront', 'Kids club'],
+    images: ['https://images.unsplash.com/photo-1510097467424-192d713fd8b2?w=1200&q=75']
+  };
+  const TENERIFE = {
+    currency: 'GBP',
+    fields: {
+      title: 'Tenerife sunshine escape', teaser: 'Adults-only half board minutes from the beach, perfect for a late getaway.',
+      type: 'Package holiday (flight + hotel)', style: 'Adults only',
+      country: 'Canary Islands', resort: 'Costa Adeje', stars: '4 star', board: 'Half board',
+      nights: '7', price: '549', basis: 'per person', badge: 'Last minute', bookby: '30 June 2026',
+      images: ['https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=1200&q=75']
+    },
+    tags: ['Adults only', 'Spa']
+  };
+  const LAPLAND = {
+    currency: 'GBP',
+    fields: {
+      title: 'Lapland Santa break', teaser: 'Three magical nights in the Arctic Circle with a private visit to Santa.',
+      type: 'City break', country: 'Finland', resort: 'Rovaniemi', stars: '4 star',
+      nights: '3', price: '799', basis: 'per person', badge: 'Best seller',
+      images: ['https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=1200&q=75']
+    },
+    tags: ['Family friendly']
+  };
+  const GRID_OFFERS = [SAMPLE, TENERIFE, LAPLAND];
+
+  function theme() { return document.documentElement.getAttribute('data-theme') || 'light'; }
+
+  // ── Theme toggle ──
+  const themeBtn = $('themeBtn');
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); themeBtn.textContent = t === 'dark' ? '☀️' : '🌙'; }
+  applyTheme('light');
+
+  // ── 1 · Builder (canned AI draft so it works signed-out) ──
+  function mountBuilder() {
+    const host = $('builderMount'); host.innerHTML = '';
+    const div = document.createElement('div'); host.appendChild(div);
+    new window.TGOfferBuilderWidget(div, {
+      theme: theme(), aiMock: true,
+      successHeading: 'That is your offer', successBody: 'In the real editor this saves and gives you a shareable page. Try the AI draft above.'
+    });
+  }
+
+  // ── 2 · Cards ──
+  function mountCards() {
+    const host = $('cardsMount'); host.innerHTML = '';
+    GRID_OFFERS.forEach(function (o) {
+      const div = document.createElement('div'); host.appendChild(div);
+      new window.TGOfferCardWidget(div, {
+        layout: 'vertical', theme: theme(), ctaText: 'View deal',
+        offerPage: '/offer', ctaTarget: '_blank', offer: o
+      });
+    });
+  }
+
+  // ── 3 · Offer page preview (carried inline via ?data=, no storage needed) ──
+  function buildPageLink() {
+    return '/offer?data=' + b64urlEncode(JSON.stringify(SAMPLE)) + (theme() === 'dark' ? '&theme=dark' : '');
+  }
+  function mountPage() {
+    const link = buildPageLink();
+    $('pageFrame').src = link;
+    $('openPage').href = link;
+    $('pageUrl').textContent = '/offer/7-nights-all-inclusive-in-cancun';
+  }
+
+  // ── 4 · Grid (inline offers so it renders without a backend) ──
+  function mountGrid() {
+    const host = $('gridMount'); host.innerHTML = '';
+    const div = document.createElement('div'); host.appendChild(div);
+    new window.TGOffersGridWidget(div, {
+      theme: theme(), columns: '3', offerPage: '/offer', offers: GRID_OFFERS
+    });
+  }
+  function renderEmbed() {
+    const code = '<div data-tg-widget="offers-grid" data-tg-config=\'{"client":"YOUR_CLIENT_ID","layout":"vertical","columns":3}\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-offers-grid.js"><\/script>';
+    const box = $('embedBox'); box.textContent = '';
+    const span = document.createElement('span'); span.textContent = code; box.appendChild(span);
+    const btn = document.createElement('button'); btn.textContent = 'Copy';
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(code).then(function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); });
+    });
+    box.appendChild(btn);
+  }
+
+  function renderAll() { mountBuilder(); mountCards(); mountPage(); mountGrid(); }
+
+  themeBtn.addEventListener('click', function () {
+    applyTheme(theme() === 'dark' ? 'light' : 'dark');
+    renderAll();
+  });
+
+  renderEmbed();
+  renderAll();
+</script>
+</body>
+</html>

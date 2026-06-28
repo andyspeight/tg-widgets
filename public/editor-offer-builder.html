@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Special Offers Editor · Travelgenix</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/editor-shell.css">
+
+  <style>
+    :root {
+      --bg: #F8FAFC; --panel: #FFFFFF; --panel-2: #F8FAFC;
+      --ink: #0F172A; --sub: #475569; --muted: #94A3B8;
+      --border: #E2E8F0; --border-strong: #CBD5E1; --hover: #F1F5F9;
+      --brand: #1B2B5B; --accent: #00B4D8; --accent-soft: rgba(0,180,216,.12);
+      --success: #10B981; --danger: #EF4444; --warn: #E8893A;
+      --radius-sm: 6px; --radius: 8px; --radius-lg: 12px;
+      --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
+      --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--panel-2); color: var(--ink); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+
+    .sidebar-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .section { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; }
+    .section-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--panel); border: 0; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: left; }
+    .section-head:hover { background: var(--hover); }
+    .section-head-chev { transition: transform 0.15s ease; color: var(--muted); }
+    .section[data-open="false"] .section-head-chev { transform: rotate(-90deg); }
+    .section[data-open="false"] .section-body { display: none; }
+    .section-body { padding: 4px 14px 14px; border-top: 1px solid var(--border); }
+
+    .field { margin-top: 12px; }
+    .field:first-child { margin-top: 0; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 6px; }
+    .field-help { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .field input[type=text], .field input[type=email], .field input[type=tel], .field select {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); color: var(--ink);
+    }
+    .field input:focus, .field select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+    .field input[type=color] { width: 100%; height: 38px; padding: 3px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* Card-style chooser */
+    .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .layout-opt { border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; cursor: pointer; text-align: center; font-size: 12px; font-weight: 600; color: var(--sub); background: var(--panel); }
+    .layout-opt:hover { border-color: var(--accent); }
+    .layout-opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+    .layout-opt .mini { height: 30px; border-radius: 4px; background: var(--hover); margin-bottom: 6px; display: block; }
+
+    .preview-card-wrap { margin-top: 12px; }
+
+    /* ── Offers workspace (main area) ── */
+    .ws { height: 100%; display: flex; flex-direction: column; background: var(--panel-2); }
+    .ws-top { display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--border); background: var(--panel); }
+    .ws-top h1 { font-size: 17px; font-weight: 700; margin: 0; }
+    .ws-count { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--hover); padding: 2px 9px; border-radius: 999px; }
+    .ws-spacer { flex: 1; }
+    .ws-body { flex: 1; overflow-y: auto; padding: 22px; }
+
+    .btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--sub); border-radius: var(--radius); padding: 9px 14px; font-weight: 600; font-size: 13px; cursor: pointer; text-decoration: none; }
+    .btn:hover { border-color: var(--accent); color: var(--ink); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: #0096B7; }
+    .btn.sm { padding: 6px 11px; font-size: 12px; }
+    .btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+    .btn svg { width: 15px; height: 15px; }
+
+    .offers-list { display: flex; flex-direction: column; gap: 10px; max-width: 980px; }
+    .offer-row { display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; box-shadow: var(--shadow-xs); }
+    .offer-row.is-selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow-xs); }
+    .offer-check { display: flex; align-items: center; flex-shrink: 0; }
+    .offer-check input, .selall input { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; margin: 0; }
+    /* Selection toolbar above the list */
+    .offers-toolbar { display: flex; align-items: center; gap: 14px; max-width: 980px; margin-bottom: 12px; min-height: 30px; }
+    .selall { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--sub); cursor: pointer; user-select: none; }
+    .sel-actions { display: inline-flex; align-items: center; gap: 10px; }
+    .sel-count { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .sel-spacer { flex: 1; }
+    /* Recently deleted bin */
+    .trash-banner { max-width: 980px; display: flex; align-items: center; gap: 12px; background: var(--accent-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: var(--sub); }
+    .trash-banner b { color: var(--ink); }
+    .trash-banner .ts-spacer { flex: 1; }
+    .offer-row.trashed .offer-thumb.ph { background: linear-gradient(135deg, #94A3B8, #CBD5E1); }
+    .offer-purge-note { font-size: 11px; color: var(--warn); font-weight: 600; }
+    .offer-thumb { width: 76px; height: 56px; border-radius: 8px; background-size: cover; background-position: center; flex-shrink: 0; background-color: var(--hover); }
+    .offer-thumb.ph { background: linear-gradient(135deg, var(--brand), var(--accent)); }
+    .offer-main { min-width: 0; flex: 1; }
+    .offer-title { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .offer-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .offer-meta b { color: var(--ink); font-weight: 600; }
+    .chip { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+    .chip.live { background: #DCFCE7; color: #15803D; }
+    .chip.upcoming { background: var(--accent-soft); color: #0E7490; }
+    .chip.ended { background: #F1F5F9; color: #64748B; }
+    .offer-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .state { text-align: center; padding: 60px 24px; color: var(--muted); max-width: 480px; margin: 0 auto; }
+    .state .ic { width: 60px; height: 60px; border-radius: 50%; background: var(--hover); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; color: var(--muted); }
+    .state h2 { font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
+    .state p { margin: 0 0 16px; font-size: 14px; }
+
+    /* Create/edit form panel */
+    .form-panel { max-width: 980px; }
+    .form-panel-top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .form-panel-top h2 { font-size: 18px; font-weight: 700; margin: 0; }
+
+    .embed-code { background: #0F172A; color: #E2E8F0; border-radius: var(--radius); padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; word-break: break-all; white-space: pre-wrap; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: flex; align-items: center; justify-content: center; z-index: 200; }
+    .modal { background: var(--panel); border-radius: var(--radius-lg); width: min(560px, 92vw); max-height: 86vh; overflow: auto; box-shadow: 0 20px 50px rgba(15,23,42,.3); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-weight: 700; font-size: 15px; }
+    .modal-close { background: none; border: 0; cursor: pointer; color: var(--muted); }
+    .modal-body { padding: 18px; }
+  </style>
+</head>
+<body>
+
+  <div class="tgse-app" id="editor" hidden>
+
+    <aside class="tgse-sidebar">
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
+        </a>
+      </div>
+
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 7.3 12 2 3.4 7.3 12 12.6z"/><path d="M3.4 7.3V16.7L12 22l8.6-5.3V7.3"/><path d="M12 12.6V22"/></svg>
+        </span>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Special Offers</div>
+          <div class="tgse-id-type" id="topbarSub">Create &amp; manage offers</div>
+        </div>
+      </div>
+
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Widget name" maxlength="100">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="save-label">Save</span>
+        </button>
+      </div>
+
+      <nav class="tgse-tabs" role="tablist">
+        <button id="tabDesign" data-tab="design" role="tab" aria-selected="true">Design</button>
+        <button id="tabSettings" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
+
+      <div class="sidebar-body">
+        <!-- ===== DESIGN ===== -->
+        <div id="panelDesign">
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Card style
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="layout-grid" id="layoutGrid">
+                <button type="button" class="layout-opt" data-layout="vertical"><span class="mini"></span>Vertical</button>
+                <button type="button" class="layout-opt" data-layout="horizontal"><span class="mini"></span>Horizontal</button>
+                <button type="button" class="layout-opt" data-layout="banner"><span class="mini"></span>Banner</button>
+                <button type="button" class="layout-opt" data-layout="split"><span class="mini"></span>Split</button>
+              </div>
+              <div class="field" id="colsField"><label class="field-label">Grid columns</label>
+                <select id="cfgColumns"><option value="auto">Auto-fit</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+              </div>
+              <div class="preview-card-wrap"><div class="field-label">Preview</div><div id="cardPreview"></div></div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Offer page
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Page template</label>
+                <select id="cfgTemplate"><option value="classic">Classic</option><option value="editorial">Editorial</option><option value="immersive">Immersive</option></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Brand
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="row2">
+                <div class="field"><label class="field-label">Accent</label><input type="color" id="cfgAccent"></div>
+                <div class="field"><label class="field-label">Brand</label><input type="color" id="cfgBrand"></div>
+              </div>
+              <div class="field"><label class="field-label">Corner radius (px)</label><input type="text" id="cfgRadius" inputmode="numeric"></div>
+              <div class="field-help">Theme (light/dark) is toggled from the preview toolbar.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SETTINGS ===== -->
+        <div id="panelSettings" hidden>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Currency
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><select id="cfgCurrency"><option value="GBP">£ GBP</option><option value="EUR">€ EUR</option><option value="USD">$ USD</option></select></div>
+            </div>
+          </div>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Enquiry routing
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Enquiry email</label><input type="email" id="cfgEnquiryEmail" placeholder="sales@youragency.co.uk"></div>
+              <div class="field"><label class="field-label">Phone shown on pages</label><input type="tel" id="cfgEnquiryPhone" placeholder="0161 123 4567"></div>
+              <div class="field"><label class="field-label">Financial protection</label><select id="cfgProtection"><option>ATOL protected</option><option>ABTA member</option><option>Both</option><option>Neither</option></select></div>
+              <div class="field-help">Defaults applied to new offers. You can still set them per offer.</div>
+            </div>
+          </div>
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Offer page web address
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field"><label class="field-label">Your domain</label><input type="text" id="cfgOfferBase" placeholder="offers.youragency.co.uk"></div>
+              <div class="field-help">Optional. Share offers on your own web address instead of tg-widgets.vercel.app. Point the domain at this app first (your account manager sets this up), then your share links and embed code use it automatically. Leave blank to use the default.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Special Offers</span>
+        <span class="tgse-spacer"></span>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
+        </button>
+      </div>
+
+      <div class="tgse-canvas" style="padding:0">
+        <div class="ws">
+          <!-- LIST VIEW -->
+          <div id="listView">
+            <div class="ws-top">
+              <h1 id="wsTitle">My offers</h1>
+              <span class="ws-count" id="offerCount">0</span>
+              <span class="ws-spacer"></span>
+              <button class="btn" id="btn-trash" title="Recently deleted">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Recently deleted
+              </button>
+              <button class="btn" id="btn-import">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Import
+              </button>
+              <button class="btn primary" id="btn-new">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                New offer
+              </button>
+            </div>
+            <div class="ws-body"><div id="offersList"></div></div>
+          </div>
+
+          <!-- CREATE / EDIT VIEW -->
+          <div id="formView" hidden>
+            <div class="ws-top">
+              <button class="btn sm" id="btn-back-list">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                Offers
+              </button>
+              <h1 id="formTitle">New offer</h1>
+            </div>
+            <div class="ws-body"><div class="form-panel"><div id="builderMount"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Embed Modal -->
+  <div class="modal-backdrop" id="embedModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Share &amp; embed</div>
+        <button class="modal-close" data-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:12px;">Paste this where you want your live offers to appear. The grid shows every offer that is currently in its show window, in your chosen card style, and each card links to its own offer page. It updates automatically as you add, edit or schedule offers.</div>
+        <div class="embed-code" id="embedCode">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-backdrop" id="importModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Import offers from a spreadsheet</div>
+        <button class="modal-close" data-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">Download the template, fill in one row per offer (Title is required), then upload the CSV. You can export a CSV from Excel, Numbers or Google Sheets. Up to 200 offers at a time.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="btn" id="btn-template">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download template
+          </button>
+          <label class="btn primary" style="cursor:pointer;">Choose CSV file<input type="file" id="importFile" accept=".csv,text/csv" hidden></label>
+        </div>
+        <div id="importSummary" class="field-help" style="font-size:13px;"></div>
+        <div id="importIssues" style="margin-top:8px;font-size:12px;color:var(--danger);"></div>
+        <div style="margin-top:16px;text-align:right;">
+          <button class="btn primary" id="btn-do-import" disabled>Import offers</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/widget-offer-card.js"></script>
+  <script src="/widget-offer-builder.js"></script>
+  <script src="/offer-import.js"></script>
+  <script src="/editor-shell.js"></script>
+  <!-- Guided setup tour (reusable engine + step list) -->
+  <script src="/editor-tour.js"></script>
+  <script src="/tour-special-offers.js"></script>
+
+  <script>
+    const WIDGET_TYPE = 'Special Offers';
+    const OFFERS_API = '/api/saved-offers';
+    function $(id) { return document.getElementById(id); }
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+    const state = {
+      name: '',
+      widgetId: '',
+      feedKey: '',
+      offers: [],
+      selected: new Set(),
+      trashMode: false,
+      retentionDays: 30,
+      config: {
+        cardLayout: 'vertical', columns: 'auto', template: 'classic',
+        theme: 'light', accentColor: '#00B4D8', brandColor: '#1B2B5B', radius: 14,
+        currency: 'GBP', enquiryEmail: '', enquiryPhone: '', protection: 'ATOL protected',
+        offerBaseUrl: ''
+      }
+    };
+
+    // White-label: normalise a typed domain to a clean https origin (or '').
+    // A bare "offers.youragency.co.uk" is accepted and assumed https. We keep
+    // only the origin so the '/offer?id=' we append can never double up a path.
+    function normBase(u) {
+      u = String(u == null ? '' : u).trim();
+      if (!u) return '';
+      if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+      try { const p = new URL(u); if (!p.host) return ''; return 'https://' + p.host; }
+      catch (e) { return ''; }
+    }
+
+    const SAMPLE = { currency:'GBP', fields:{ title:'7 nights all inclusive in Cancun', teaser:'Beachfront five star on the white sands of Costa Mujeres.', type:'Package holiday (flight + hotel)', style:'All inclusive', country:'Mexico', resort:'Costa Mujeres', stars:'5 star', board:'All inclusive', nights:'7', price:'899', was:'1299', basis:'per person', badge:'Save', badgeAmount:'400', urgency:'Only 4 left' }, tags:['Family friendly','Beachfront'] };
+
+    /* ---- Tabs ---- */
+    function setTab(name) {
+      [['design','tabDesign','panelDesign'],['settings','tabSettings','panelSettings']].forEach(([k,t,p])=>{
+        $(t).setAttribute('aria-selected', k===name?'true':'false'); $(p).hidden = k!==name;
+      });
+    }
+    document.querySelectorAll('.tgse-tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+    document.addEventListener('click', (e) => { const h=e.target.closest('[data-section]'); if(!h) return; const s=h.closest('.section'); s.setAttribute('data-open', s.getAttribute('data-open')==='true'?'false':'true'); });
+
+    /* ---- Modals ---- */
+    function openModal(id){ $(id).hidden=false; }
+    document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('.modal-backdrop').hidden=true));
+    document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',(e)=>{ if(e.target===m) m.hidden=true; }));
+
+    /* ---- Card-style preview ---- */
+    function renderCardPreview() {
+      const mount = $('cardPreview'); mount.innerHTML='';
+      const div = document.createElement('div'); mount.appendChild(div);
+      new window.TGOfferCardWidget(div, {
+        layout: state.config.cardLayout, theme: state.config.theme,
+        accentColor: state.config.accentColor, radius: state.config.radius,
+        currency: state.config.currency, ctaText: 'View deal', offer: SAMPLE
+      });
+    }
+
+    /* ---- Offer scheduling status ---- */
+    function statusOf(o) {
+      function day(s){ if(!s) return null; const m=String(s).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(m) return new Date(+m[1],+m[2]-1,+m[3]).getTime(); const t=Date.parse(s); return isFinite(t)?new Date(t).setHours(0,0,0,0):null; }
+      const now=new Date(); const today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+      const from=day(o.showFrom), until=day(o.showUntil);
+      if(from!==null && today<from) return 'upcoming';
+      if(until!==null && today>until) return 'ended';
+      if(from===null && until===null) return '';
+      return 'live';
+    }
+
+    /* ---- Offer-page link for an id, carrying the design choices ---- */
+    function slugify(s) {
+      return String(s == null ? '' : s)
+        .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60).replace(/-+$/, '');
+    }
+    function pageLink(o) {
+      const c = state.config;
+      const id = (o && o.id) || '';
+      const slug = slugify(o && o.title);
+      let q = normBase(c.offerBaseUrl) + '/offer/' + (slug ? slug + '-' : '') + encodeURIComponent(id);
+      const params = [];
+      if (c.template && c.template !== 'classic') params.push('template=' + c.template);
+      if (c.theme === 'dark') params.push('theme=dark');
+      if (c.accentColor) params.push('accent=' + encodeURIComponent(c.accentColor));
+      if (params.length) q += '?' + params.join('&');
+      return q;
+    }
+
+    /* ---- Load + render the offers list ---- */
+    function setState(html){ $('offersList').innerHTML = html; }
+    function setTopbar() {
+      $('wsTitle').textContent = state.trashMode ? 'Recently deleted' : 'My offers';
+      $('btn-new').hidden = state.trashMode;
+      $('btn-import').hidden = state.trashMode;
+      const tb = $('btn-trash');
+      tb.classList.toggle('primary', state.trashMode);
+      tb.lastChild.textContent = state.trashMode ? ' Back to offers' : ' Recently deleted';
+    }
+    function loadOffers() {
+      state.trashMode = false; setTopbar();
+      setState('<div class="state"><p>Loading your offers…</p></div>');
+      fetch(OFFERS_API, { credentials: 'include' })
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(d => { state.offers = (d && d.offers) || []; state.feedKey = (d && d.feedKey) || ''; renderOffers(); })
+        .catch(() => setState('<div class="state"><h2>Couldn\'t load your offers</h2><p>Please refresh the page. If it keeps happening, your session may have expired.</p></div>'));
+    }
+    function loadTrash() {
+      state.trashMode = true; setTopbar();
+      setState('<div class="state"><p>Loading recently deleted…</p></div>');
+      fetch(OFFERS_API + '?trash=1', { credentials: 'include' })
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(d => { state.offers = (d && d.offers) || []; state.retentionDays = (d && d.retentionDays) || 30; renderOffers(); })
+        .catch(() => setState('<div class="state"><h2>Couldn\'t load the bin</h2><p>Please try again in a moment.</p></div>'));
+    }
+    // "deleted 2 days ago · removed for good in 28 days"
+    function trashAge(deletedAt) {
+      const day = 24 * 60 * 60 * 1000;
+      const ageDays = Math.max(0, Math.floor((Date.now() - deletedAt) / day));
+      const leftDays = Math.max(0, state.retentionDays - ageDays);
+      const ago = ageDays === 0 ? 'today' : (ageDays === 1 ? '1 day ago' : ageDays + ' days ago');
+      return 'Deleted ' + ago + ' · <span class="offer-purge-note">removed for good in ' + leftDays + ' day' + (leftDays === 1 ? '' : 's') + '</span>';
+    }
+    function renderOffers() {
+      state.selected.clear(); // a fresh list always starts unselected
+      $('offerCount').textContent = state.offers.length;
+      const trash = state.trashMode;
+      if (!state.offers.length) {
+        if (trash) {
+          setState('<div class="state"><div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></div><h2>Recently deleted is empty</h2><p>Deleted offers wait here for ' + state.retentionDays + ' days before they are removed for good.</p><button class="btn primary" id="btn-back-offers">Back to offers</button></div>');
+        } else {
+          setState('<div class="state"><div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 7.3 12 2 3.4 7.3 12 12.6z"/><path d="M3.4 7.3V16.7L12 22l8.6-5.3V7.3"/></svg></div><h2>No offers yet</h2><p>Create your first special offer. It only takes a minute with the AI assist.</p><button class="btn primary" onclick="document.getElementById(\'btn-new\').click()">Create your first offer</button></div>');
+        }
+        return;
+      }
+      const sym = { GBP:'£', EUR:'€', USD:'$' }[state.config.currency] || '£';
+      const rows = state.offers.map(function (o) {
+        const price = o.price ? sym + esc(o.price) : '';
+        const meta = trash
+          ? trashAge(o.deletedAt || 0)
+          : (function () {
+              const dates = (o.showFrom || o.showUntil) ? (esc(o.showFrom||'…') + ' → ' + esc(o.showUntil||'…')) : 'Always showing';
+              return (price ? '<b>' + price + '</b> · ' : '') + esc(dates);
+            })();
+        const st = trash ? '' : statusOf(o);
+        const chip = st ? '<span class="chip ' + st + '">' + (st==='live'?'Live':st==='upcoming'?'Scheduled':'Ended') + '</span>' : '';
+        const actions = trash
+          ? '<button class="btn sm" data-act="restore">Restore</button>'
+            + '<button class="btn sm danger" data-act="purge">Delete forever</button>'
+          : '<a class="btn sm" href="' + esc(pageLink(o)) + '" target="_blank" rel="noopener">Open</a>'
+            + '<button class="btn sm" data-act="edit">Edit</button>'
+            + '<button class="btn sm danger" data-act="delete">Delete</button>';
+        return '<div class="offer-row' + (trash ? ' trashed' : '') + '" data-id="' + esc(o.id) + '">'
+          + '<label class="offer-check"><input type="checkbox" data-check="' + esc(o.id) + '" aria-label="Select offer" /></label>'
+          + '<div class="offer-thumb ph"></div>'
+          + '<div class="offer-main"><div class="offer-title">' + (esc(o.title) || 'Untitled offer') + chip + '</div>'
+          + '<div class="offer-meta">' + meta + '</div></div>'
+          + '<div class="offer-actions">' + actions + '</div></div>';
+      }).join('');
+      const bulkBtns = trash
+        ? '<button class="btn sm" id="btn-bulk-restore">Restore selected</button>'
+          + '<button class="btn sm danger" id="btn-bulk-purge">Delete forever</button>'
+        : '<button class="btn sm danger" id="btn-bulk-delete">Delete selected</button>';
+      const banner = trash
+        ? '<div class="trash-banner"><span>Offers here are kept for <b>' + state.retentionDays + ' days</b>, then removed for good. Restore any of them before then.</span><span class="ts-spacer"></span><button class="btn sm danger" id="btn-empty-bin">Empty bin now</button><button class="btn sm" id="btn-back-offers">Back to offers</button></div>'
+        : '';
+      const toolbar = '<div class="offers-toolbar">'
+        + '<label class="selall"><input type="checkbox" id="selAll" /> Select all</label>'
+        + '<span class="sel-spacer"></span>'
+        + '<span class="sel-actions" id="selActions" hidden>'
+        + '<span class="sel-count" id="selCount">0 selected</span>'
+        + bulkBtns
+        + '<button class="btn sm" id="btn-sel-clear">Clear</button>'
+        + '</span></div>';
+      setState(banner + toolbar + '<div class="offers-list">' + rows + '</div>');
+      updateSelUI();
+    }
+
+    /* ---- Multi-select + bulk delete ---- */
+    function updateSelUI() {
+      const n = state.selected.size;
+      const total = state.offers.length;
+      const actions = $('selActions'); if (actions) actions.hidden = n === 0;
+      const count = $('selCount'); if (count) count.textContent = n + ' selected';
+      const all = $('selAll');
+      if (all) { all.checked = total > 0 && n === total; all.indeterminate = n > 0 && n < total; }
+      $('offersList').querySelectorAll('.offer-row').forEach(function (row) {
+        row.classList.toggle('is-selected', state.selected.has(row.dataset.id));
+      });
+    }
+    function clearSelection() {
+      state.selected.clear();
+      $('offersList').querySelectorAll('[data-check]').forEach(function (c) { c.checked = false; });
+      updateSelUI();
+    }
+    // Run an async action over the current selection in chunks, with a busy
+    // button, then reload. `run(chunk)` does the work for one chunk of ids.
+    async function bulkRun(btnId, busyLabel, run, reload) {
+      const ids = [...state.selected];
+      if (!ids.length) return;
+      const btn = $(btnId);
+      btn.disabled = true; const label = btn.textContent; btn.textContent = busyLabel;
+      try {
+        for (let i = 0; i < ids.length; i += 100) { await run(ids.slice(i, i + 100)); }
+        state.selected.clear();
+        reload();
+      } catch (e) {
+        btn.disabled = false; btn.textContent = label;
+        alert('Sorry, that did not work. Please try again.');
+      }
+    }
+    function delReq(chunk, permanent) {
+      return fetch(OFFERS_API + '?ids=' + encodeURIComponent(chunk.join(',')) + (permanent ? '&permanent=1' : ''), { method: 'DELETE', credentials: 'include' })
+        .then(r => { if (!r.ok) throw new Error(String(r.status)); });
+    }
+    function bulkDelete() {
+      const n = state.selected.size; if (!n) return;
+      if (!confirm('Move ' + n + ' offer' + (n > 1 ? 's' : '') + ' to Recently deleted? You can restore ' + (n > 1 ? 'them' : 'it') + ' for ' + state.retentionDays + ' days.')) return;
+      return bulkRun('btn-bulk-delete', 'Deleting…', (chunk) => delReq(chunk, false), loadOffers);
+    }
+    function bulkRestore() {
+      if (!state.selected.size) return;
+      return bulkRun('btn-bulk-restore', 'Restoring…', (chunk) =>
+        fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ restore: chunk }) })
+          .then(r => { if (!r.ok) throw new Error(String(r.status)); }), loadTrash);
+    }
+    function bulkPurge() {
+      const n = state.selected.size; if (!n) return;
+      if (!confirm('Permanently delete ' + n + ' offer' + (n > 1 ? 's' : '') + '? This cannot be undone.')) return;
+      return bulkRun('btn-bulk-purge', 'Deleting…', (chunk) => delReq(chunk, true), loadTrash);
+    }
+    async function emptyBin() {
+      const ids = state.offers.map(function (o) { return o.id; });
+      if (!ids.length) return;
+      if (!confirm('Permanently delete all ' + ids.length + ' offer' + (ids.length > 1 ? 's' : '') + ' in the bin? This cannot be undone.')) return;
+      const btn = $('btn-empty-bin'); btn.disabled = true; const label = btn.textContent; btn.textContent = 'Emptying…';
+      try {
+        for (let i = 0; i < ids.length; i += 100) { await delReq(ids.slice(i, i + 100), true); }
+        loadTrash();
+      } catch (e) {
+        btn.disabled = false; btn.textContent = label;
+        alert('Could not empty the bin. Please try again.');
+      }
+    }
+
+    /* ---- Selection (checkboxes + select all) ---- */
+    $('offersList').addEventListener('change', function (e) {
+      const t = e.target;
+      if (t.id === 'selAll') {
+        state.selected.clear();
+        if (t.checked) state.offers.forEach(function (o) { state.selected.add(o.id); });
+        $('offersList').querySelectorAll('[data-check]').forEach(function (c) { c.checked = t.checked; });
+        updateSelUI();
+      } else if (t.dataset && t.dataset.check) {
+        if (t.checked) state.selected.add(t.dataset.check); else state.selected.delete(t.dataset.check);
+        updateSelUI();
+      }
+    });
+
+    /* ---- Row actions + bulk actions ---- */
+    $('offersList').addEventListener('click', function (e) {
+      if (e.target.closest('#btn-bulk-delete')) { bulkDelete(); return; }
+      if (e.target.closest('#btn-bulk-restore')) { bulkRestore(); return; }
+      if (e.target.closest('#btn-bulk-purge')) { bulkPurge(); return; }
+      if (e.target.closest('#btn-sel-clear')) { clearSelection(); return; }
+      if (e.target.closest('#btn-empty-bin')) { emptyBin(); return; }
+      if (e.target.closest('#btn-back-offers')) { loadOffers(); return; }
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const id = btn.closest('.offer-row').dataset.id;
+      if (btn.dataset.act === 'delete') {
+        fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { method: 'DELETE', credentials: 'include' })
+          .then(r => { if (!r.ok) throw new Error(r.status); loadOffers(); })
+          .catch(() => alert('Could not delete the offer. Please try again.'));
+      } else if (btn.dataset.act === 'restore') {
+        fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ restore: [id] }) })
+          .then(r => { if (!r.ok) throw new Error(r.status); loadTrash(); })
+          .catch(() => alert('Could not restore the offer. Please try again.'));
+      } else if (btn.dataset.act === 'purge') {
+        if (!confirm('Permanently delete this offer? This cannot be undone.')) return;
+        fetch(OFFERS_API + '?id=' + encodeURIComponent(id) + '&permanent=1', { method: 'DELETE', credentials: 'include' })
+          .then(r => { if (!r.ok) throw new Error(r.status); loadTrash(); })
+          .catch(() => alert('Could not delete the offer. Please try again.'));
+      } else if (btn.dataset.act === 'edit') {
+        fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include' })
+          .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(d => openForm(Object.assign({ id: id }, d.offer)))
+          .catch(() => alert('Could not open the offer. Please try again.'));
+      }
+    });
+
+    /* ---- Recently deleted toggle ---- */
+    $('btn-trash').addEventListener('click', function () {
+      if (state.trashMode) loadOffers(); else loadTrash();
+    });
+
+    /* ---- Create / edit form ---- */
+    let builder = null;
+    function openForm(offer) {
+      $('formTitle').textContent = offer ? 'Edit offer' : 'New offer';
+      $('listView').hidden = true; $('formView').hidden = false;
+      const mount = $('builderMount'); mount.innerHTML = '';
+      const div = document.createElement('div'); mount.appendChild(div);
+      const c = state.config;
+      builder = new window.TGOfferBuilderWidget(div, {
+        save: true, saveEndpoint: OFFERS_API,
+        aiEndpoint: '/api/offer-draft',
+        uploadEndpoint: '/api/upload-photo',
+        offerBaseUrl: normBase(c.offerBaseUrl),
+        theme: c.theme, accentColor: c.accentColor, currency: c.currency,
+        enquiryEmail: c.enquiryEmail, enquiryPhone: c.enquiryPhone, protection: c.protection,
+        offer: offer || null, offerId: (offer && offer.id) || '',
+        successHeading: offer ? 'Offer updated' : 'Offer saved',
+        successBody: 'It is live in your offers list with its own shareable page.'
+      });
+      div.addEventListener('tg-offer-saved', function () { setTimeout(closeForm, 1200); });
+    }
+    function closeForm() { $('formView').hidden = true; $('listView').hidden = false; loadOffers(); }
+    $('btn-new').addEventListener('click', () => openForm(null));
+    $('btn-back-list').addEventListener('click', closeForm);
+
+    /* ---- Hydrate + wire sidebar ---- */
+    function hydrateUI() {
+      const c = state.config;
+      $('name-input').value = state.name || '';
+      document.querySelectorAll('#layoutGrid .layout-opt').forEach(b => b.setAttribute('aria-pressed', b.dataset.layout === c.cardLayout ? 'true' : 'false'));
+      $('colsField').hidden = c.cardLayout !== 'vertical';
+      $('cfgColumns').value = c.columns;
+      $('cfgTemplate').value = c.template;
+      $('cfgAccent').value = c.accentColor;
+      $('cfgBrand').value = c.brandColor;
+      $('cfgRadius').value = c.radius;
+      $('cfgCurrency').value = c.currency;
+      $('cfgEnquiryEmail').value = c.enquiryEmail;
+      $('cfgEnquiryPhone').value = c.enquiryPhone;
+      $('cfgOfferBase').value = c.offerBaseUrl || '';
+      $('cfgProtection').value = c.protection;
+    }
+    function dirty(){ if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty'); }
+    function wireInputs() {
+      $('name-input').addEventListener('input', e => { state.name = e.target.value; dirty(); });
+      document.querySelectorAll('#layoutGrid .layout-opt').forEach(b => b.addEventListener('click', () => {
+        state.config.cardLayout = b.dataset.layout;
+        document.querySelectorAll('#layoutGrid .layout-opt').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+        $('colsField').hidden = state.config.cardLayout !== 'vertical';
+        renderCardPreview(); dirty();
+      }));
+      const sel = { cfgColumns:'columns', cfgTemplate:'template', cfgCurrency:'currency', cfgProtection:'protection' };
+      Object.entries(sel).forEach(([id,k]) => $(id).addEventListener('change', e => { state.config[k]=e.target.value; renderCardPreview(); dirty(); }));
+      const col = { cfgAccent:'accentColor', cfgBrand:'brandColor' };
+      Object.entries(col).forEach(([id,k]) => $(id).addEventListener('input', e => { state.config[k]=e.target.value; renderCardPreview(); dirty(); }));
+      $('cfgRadius').addEventListener('input', e => { const n=parseInt(e.target.value,10); state.config.radius=isNaN(n)?14:Math.max(0,Math.min(40,n)); renderCardPreview(); dirty(); });
+      const txt = { cfgEnquiryEmail:'enquiryEmail', cfgEnquiryPhone:'enquiryPhone', cfgOfferBase:'offerBaseUrl' };
+      Object.entries(txt).forEach(([id,k]) => $(id).addEventListener('input', e => { state.config[k]=e.target.value; dirty(); }));
+      $('btn-theme').addEventListener('click', () => { state.config.theme = state.config.theme==='dark'?'light':'dark'; renderCardPreview(); dirty(); });
+      $('btn-embed').addEventListener('click', (e) => { e.preventDefault(); renderEmbed(); openModal('embedModal'); });
+    }
+
+    /* ---- Embed code for the offers grid ---- */
+    function renderEmbed() {
+      const box = $('embedCode');
+      box.innerHTML = '';
+      if (!state.feedKey) {
+        box.textContent = 'Save your first offer to switch on the grid embed. If you have offers but still see this, your account is missing a client id — please contact support.';
+        return;
+      }
+      const c = state.config;
+      const conf = { client: state.feedKey, layout: c.cardLayout, columns: c.columns, template: c.template, theme: c.theme, accent: c.accentColor, brand: c.brandColor, radius: c.radius, currency: c.currency };
+      // Loading the grid script from the white-label origin makes the grid's
+      // offer links resolve to that domain too (it derives its base from its own
+      // script src), so no extra config is needed for full white-labelling.
+      const scriptOrigin = normBase(c.offerBaseUrl) || 'https://tg-widgets.vercel.app';
+      const code = '<div data-tg-widget="offers-grid" data-tg-config=\'' + JSON.stringify(conf) + '\'></div>\n'
+        + '<script src="' + scriptOrigin + '/widget-offers-grid.js"><\/script>';
+      const span = document.createElement('span'); span.textContent = code; box.appendChild(span);
+      const btn = document.createElement('button');
+      btn.style.cssText = 'position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.14);color:#fff;border:0;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;';
+      btn.textContent = 'Copy';
+      btn.onclick = () => { navigator.clipboard.writeText(code).then(() => { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1500); }); };
+      box.style.position = 'relative';
+      box.appendChild(btn);
+    }
+
+    /* ---- Spreadsheet import ---- */
+    let importReady = [];
+    function download(name, text, type) {
+      const blob = new Blob([text], { type: type || 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function resetImport() {
+      importReady = [];
+      $('importSummary').textContent = '';
+      $('importIssues').innerHTML = '';
+      $('importFile').value = '';
+      $('btn-do-import').disabled = true;
+    }
+    function handleCsv(text) {
+      const rows = window.TGOfferImport.parseCsv(text);
+      const mapped = window.TGOfferImport.rowsToOffers(rows);
+      importReady = mapped.filter(m => !m.errors.length).map(m => m.offer);
+      const bad = mapped.filter(m => m.errors.length);
+      $('importSummary').innerHTML = '<b>' + mapped.length + '</b> rows found · <b>' + importReady.length + '</b> ready to import'
+        + (bad.length ? ' · <b>' + bad.length + '</b> need attention' : '');
+      $('importIssues').innerHTML = bad.slice(0, 12).map(m => 'Row ' + m.rowNumber + ': ' + esc(m.errors.join(', '))).join('<br>')
+        + (bad.length > 12 ? '<br>…and ' + (bad.length - 12) + ' more' : '');
+      $('btn-do-import').disabled = importReady.length === 0;
+      $('btn-do-import').textContent = 'Import ' + importReady.length + ' offer' + (importReady.length === 1 ? '' : 's');
+    }
+    function wireImport() {
+      $('btn-import').addEventListener('click', () => { resetImport(); openModal('importModal'); });
+      $('btn-template').addEventListener('click', () => download('travel-offers-template.csv', window.TGOfferImport.templateCsv()));
+      $('importFile').addEventListener('change', (e) => {
+        const f = e.target.files && e.target.files[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => { try { handleCsv(String(reader.result)); } catch (err) { $('importSummary').textContent = 'Could not read that file. Please upload a CSV.'; } };
+        reader.readAsText(f);
+      });
+      $('btn-do-import').addEventListener('click', () => {
+        if (!importReady.length) return;
+        const btn = $('btn-do-import'); btn.disabled = true; btn.textContent = 'Importing…';
+        fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ offers: importReady }) })
+          .then(r => r.json().then(j => ({ ok: r.ok, j })))
+          .then(({ ok, j }) => {
+            if (!ok) throw new Error((j && j.error) || 'Import failed');
+            $('importModal').hidden = true;
+            loadOffers();
+            alert('Imported ' + j.saved + ' offer' + (j.saved === 1 ? '' : 's') + (j.skipped ? ' (' + j.skipped + ' skipped)' : '') + '.');
+          })
+          .catch(err => { btn.disabled = false; btn.textContent = 'Import offers'; $('importSummary').textContent = 'Import failed: ' + (err.message || err); });
+      });
+    }
+
+    /* ---- Boot ---- */
+    function boot() {
+      $('editor').hidden = false;
+      hydrateUI(); wireInputs(); wireImport(); setTab('design'); renderCardPreview(); loadOffers();
+      // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
+      // launcher stays in the corner for later. Start on the workspace, so point
+      // the first steps at the create + import controls (not the form).
+      if (typeof window.initSpecialOffersTour === 'function') window.initSpecialOffersTour();
+    }
+
+    window.tgse.init({
+      widgetType: WIDGET_TYPE,
+      widgetTag: 'offers-grid',
+      scriptFile: 'widget-offers-grid.js',
+      getConfig: () => JSON.parse(JSON.stringify(state.config)),
+      setConfig: (c) => { if (c && typeof c === 'object') Object.assign(state.config, c); hydrateUI(); renderCardPreview(); },
+      onTabChange: (t) => setTab(t),
+      onThemeToggle: () => { state.config.theme = state.config.theme==='dark'?'light':'dark'; renderCardPreview(); dirty(); },
+      onLoginSuccess: () => boot(),
+      onAfterSave: (d) => { if (d && d.widgetId) state.widgetId = d.widgetId; $('topbarSub').textContent = 'Create & manage offers'; }
+    });
+
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (window.tgse.isLoggedIn()) boot(); });
+    } else if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+      boot();
+    }
+  </script>
+</body>
+</html>

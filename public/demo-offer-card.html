@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Special Offer Card · Travelgenix Widget Suite</title>
+<style>
+  :root {
+    --tg-bg: #F7F9FB; --tg-surface: #FFFFFF; --tg-border: #E2E8F0;
+    --tg-text: #0F172A; --tg-sub: #475569; --tg-muted: #94A3B8;
+    --tg-brand: #1B2B5B; --tg-accent: #00B4D8; --tg-accent-hover: #0096B7; --tg-accent-soft: #E0F4FA;
+  }
+  [data-theme="dark"] {
+    --tg-bg: #0B1220; --tg-surface: #111B2E; --tg-border: #1E293B;
+    --tg-text: #F1F5F9; --tg-sub: #94A3B8; --tg-muted: #64748B;
+    --tg-brand: #4A6FE0; --tg-accent: #38BDF8; --tg-accent-soft: rgba(56,189,248,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--tg-bg); color: var(--tg-text); line-height: 1.5; transition: background 0.2s, color 0.2s;
+  }
+  .topbar { background: var(--tg-surface); border-bottom: 1px solid var(--tg-border); padding: 12px 24px; }
+  .topbar-inner { max-width: 1280px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--tg-text); font-weight: 700; }
+  .brand-mark { width: 28px; height: 28px; background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent)); border-radius: 8px; }
+  .pill { padding: 4px 10px; background: var(--tg-accent-soft); color: var(--tg-accent); border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .topbar-spacer { flex: 1; }
+  .topbar-link { color: var(--tg-sub); text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: 6px; }
+  .topbar-link:hover { background: var(--tg-bg); color: var(--tg-text); }
+  .theme-toggle { background: none; border: 1px solid var(--tg-border); color: var(--tg-text); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+  .theme-toggle:hover { background: var(--tg-bg); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+  h1 { font-size: 32px; font-weight: 800; margin: 0 0 8px; letter-spacing: -0.5px; }
+  .lede { color: var(--tg-sub); font-size: 16px; max-width: 760px; margin: 0 0 24px; line-height: 1.6; }
+
+  .controls {
+    background: var(--tg-surface); border: 1px solid var(--tg-border); border-radius: 12px;
+    padding: 16px; margin-bottom: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: end;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 11px; color: var(--tg-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  select, input[type=color] { padding: 8px 10px; border: 1px solid var(--tg-border); border-radius: 8px; font-size: 14px; background: var(--tg-surface); color: var(--tg-text); font-family: inherit; }
+  input[type=color] { padding: 4px; height: 36px; cursor: pointer; }
+
+  .stage-label { font-size: 11px; color: var(--tg-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin: 28px 0 12px; }
+  .stage { background: var(--tg-bg); border: 1px solid var(--tg-border); border-radius: 16px; padding: 32px; }
+  [data-theme="dark"] .stage { background: #050B17; }
+  .stage.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 360px)); gap: 20px; justify-content: center; }
+
+  .foot { max-width: 1280px; margin: 0 auto; padding: 20px 24px; text-align: center; font-size: 13px; color: var(--tg-muted); }
+  .foot a { color: inherit; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark"></span><span>Travelgenix</span></a>
+    <span class="pill">Special Offer Card · Demo</span>
+    <div class="topbar-spacer"></div>
+    <a class="topbar-link" href="/demo-offer-builder">Open the builder →</a>
+    <button class="theme-toggle" id="themeBtn" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Special Offer Card</h1>
+  <p class="lede">
+    The display card for a hand-built offer, in two layouts. <b>Vertical</b> drops into an offers grid;
+    <b>horizontal</b> suits a list or a banner row. Both read the same offer object the builder produces
+    and match the existing offers widget, so hand-built cards sit beside your live cached deals. Clicking a
+    card will open the offer page once that is built.
+  </p>
+
+  <div class="controls">
+    <div class="field">
+      <label for="ctrlAccent">Accent colour</label>
+      <input id="ctrlAccent" type="color" value="#00B4D8" />
+    </div>
+    <div class="field">
+      <label for="ctrlOffer">Sample offer</label>
+      <select id="ctrlOffer">
+        <option value="cancun" selected>Cancun · all inclusive (full)</option>
+        <option value="tenerife">Tenerife · half board (last minute)</option>
+        <option value="sparse">Minimal · price only (no extras)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stage-label">Vertical · drops into an offers grid</div>
+  <div class="stage grid" id="stageVertical"></div>
+
+  <div class="stage-label">Horizontal · compact list row</div>
+  <div class="stage" id="stageHorizontal"></div>
+
+  <div class="stage-label">Banner · full-bleed image, offer overlaid</div>
+  <div class="stage" id="stageBanner"></div>
+
+  <div class="stage-label">Split · editorial feature, big price (image left)</div>
+  <div class="stage" id="stageSplit"></div>
+
+  <div class="stage-label">Split · image right (flip)</div>
+  <div class="stage" id="stageSplitFlip"></div>
+</main>
+
+<footer class="foot">Travelgenix Widget Suite · <a href="/">All widgets</a></footer>
+
+<script src="/widget-offer-card.js"></script>
+<script>
+  function $(id) { return document.getElementById(id); }
+
+  // Sample offers in the exact shape the builder emits.
+  const OFFERS = {
+    cancun: {
+      currency: 'GBP',
+      fields: {
+        title: '7 nights all inclusive in Cancun', teaser: 'Beachfront five star on the white sands of Costa Mujeres, flying direct from Gatwick.',
+        type: 'Package holiday (flight + hotel)', style: 'All inclusive',
+        country: 'Mexico', region: 'Riviera Maya', resort: 'Costa Mujeres',
+        property: 'Riu Palace Costa Mujeres', stars: '5 star', board: 'All inclusive',
+        nights: '7', price: '899', was: '1299', basis: 'per person',
+        badge: 'Save', badgeAmount: '400', urgency: 'Only 4 left',
+        image: 'https://images.unsplash.com/photo-1510097467424-192d713fd8b2?w=800&q=75'
+      },
+      includes: ['Return flights', 'Airport transfers', 'All meals & drinks'],
+      tags: ['Family friendly', 'Beachfront', 'Kids stay free']
+    },
+    tenerife: {
+      currency: 'GBP',
+      fields: {
+        title: 'Tenerife sunshine escape', teaser: 'Adults-only half board minutes from the beach, perfect for a late getaway.',
+        type: 'Package holiday (flight + hotel)', style: 'Adults only',
+        country: 'Canary Islands', resort: 'Costa Adeje', stars: '4 star', board: 'Half board',
+        nights: '7', price: '549', basis: 'per person',
+        badge: 'Last minute', urgency: '',
+        image: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800&q=75'
+      },
+      tags: ['Adults only', 'Spa']
+    },
+    sparse: {
+      currency: 'GBP',
+      fields: {
+        title: 'Lapland Santa break', type: 'City break', country: 'Finland',
+        nights: '3', price: '799', basis: 'per person', badge: 'No badge'
+      },
+      tags: []
+    }
+  };
+
+  const themeBtn = $('themeBtn');
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); themeBtn.textContent = t === 'dark' ? '☀️' : '🌙'; }
+  themeBtn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next); render();
+  });
+  applyTheme('light');
+
+  function mountCard(stage, layout, offer, extra) {
+    const div = document.createElement('div');
+    div.setAttribute('data-tg-widget', 'offer-card');
+    stage.appendChild(div);
+    new window.TGOfferCardWidget(div, Object.assign({
+      layout: layout,
+      theme: document.documentElement.getAttribute('data-theme'),
+      accentColor: $('ctrlAccent').value,
+      ctaText: 'View deal',
+      offerPage: '/offer',          // card links to the real offer page
+      ctaTarget: '_blank',          // open in a new tab so the demo stays put
+      offer: offer
+    }, extra || {}));
+  }
+
+  function render() {
+    const offer = OFFERS[$('ctrlOffer').value];
+    const v = $('stageVertical');
+    ['stageVertical', 'stageHorizontal', 'stageBanner', 'stageSplit', 'stageSplitFlip'].forEach(id => $(id).innerHTML = '');
+    // Vertical: chosen offer plus the others so the grid reads true
+    mountCard(v, 'vertical', offer);
+    Object.keys(OFFERS).filter(k => OFFERS[k] !== offer).forEach(k => mountCard(v, 'vertical', OFFERS[k]));
+    // Full-width layouts, all from the chosen offer
+    mountCard($('stageHorizontal'), 'horizontal', offer);
+    mountCard($('stageBanner'), 'banner', offer);
+    mountCard($('stageSplit'), 'split', offer);
+    mountCard($('stageSplitFlip'), 'split', offer, { imageSide: 'right' });
+  }
+
+  document.querySelectorAll('.controls select, .controls input').forEach(el => el.addEventListener('change', render));
+  render();
+</script>
+</body>
+</html>

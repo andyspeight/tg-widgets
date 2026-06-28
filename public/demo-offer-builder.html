@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Special Offer Builder · Travelgenix Widget Suite</title>
+<style>
+  :root {
+    --tg-bg: #F7F9FB; --tg-surface: #FFFFFF; --tg-border: #E2E8F0;
+    --tg-text: #0F172A; --tg-sub: #475569; --tg-muted: #94A3B8;
+    --tg-brand: #1B2B5B; --tg-accent: #00B4D8; --tg-accent-hover: #0096B7; --tg-accent-soft: #E0F4FA;
+  }
+  [data-theme="dark"] {
+    --tg-bg: #0B1220; --tg-surface: #111B2E; --tg-border: #1E293B;
+    --tg-text: #F1F5F9; --tg-sub: #94A3B8; --tg-muted: #64748B;
+    --tg-brand: #4A6FE0; --tg-accent: #38BDF8; --tg-accent-soft: rgba(56,189,248,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--tg-bg); color: var(--tg-text); line-height: 1.5; transition: background 0.2s, color 0.2s;
+  }
+  .topbar { background: var(--tg-surface); border-bottom: 1px solid var(--tg-border); padding: 12px 24px; }
+  .topbar-inner { max-width: 1280px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--tg-text); font-weight: 700; }
+  .brand-mark { width: 28px; height: 28px; background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent)); border-radius: 8px; }
+  .pill { padding: 4px 10px; background: var(--tg-accent-soft); color: var(--tg-accent); border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .topbar-spacer { flex: 1; }
+  .topbar-link { color: var(--tg-sub); text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: 6px; }
+  .topbar-link:hover { background: var(--tg-bg); color: var(--tg-text); }
+  .theme-toggle { background: none; border: 1px solid var(--tg-border); color: var(--tg-text); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+  .theme-toggle:hover { background: var(--tg-bg); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+  h1 { font-size: 32px; font-weight: 800; margin: 0 0 8px; letter-spacing: -0.5px; }
+  .lede { color: var(--tg-sub); font-size: 16px; max-width: 760px; margin: 0 0 24px; line-height: 1.6; }
+
+  .controls {
+    background: var(--tg-surface); border: 1px solid var(--tg-border); border-radius: 12px;
+    padding: 16px; margin-bottom: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: end;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 11px; color: var(--tg-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  select, input[type=text], input[type=color] {
+    padding: 8px 10px; border: 1px solid var(--tg-border); border-radius: 8px; font-size: 14px;
+    background: var(--tg-surface); color: var(--tg-text); font-family: inherit;
+  }
+  input[type=color] { padding: 4px; height: 36px; cursor: pointer; }
+  .toggle-label-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; }
+  .toggle-label-row label { margin: 0; }
+  .toggle {
+    appearance: none; -webkit-appearance: none; width: 38px; height: 22px; background: var(--tg-border);
+    border-radius: 999px; position: relative; cursor: pointer; transition: background 0.15s ease; flex-shrink: 0;
+  }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.18); }
+  .toggle:checked { background: var(--tg-accent); }
+  .toggle:checked::after { transform: translateX(16px); }
+
+  .stage-label { font-size: 11px; color: var(--tg-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 12px; }
+  .stage { background: var(--tg-bg); border: 1px solid var(--tg-border); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+  [data-theme="dark"] .stage { background: #050B17; }
+
+  .event-log { background: var(--tg-surface); border: 1px solid var(--tg-border); border-radius: 12px; padding: 16px; margin-bottom: 32px; }
+  .event-log h3 { margin: 0 0 8px; font-size: 14px; }
+  .event-log pre { margin: 0; font-size: 12px; color: var(--tg-sub); white-space: pre-wrap; max-height: 240px; overflow: auto; font-family: ui-monospace, 'JetBrains Mono', monospace; }
+  .event-log .empty { color: var(--tg-muted); font-size: 13px; }
+
+  .foot { max-width: 1280px; margin: 0 auto; padding: 20px 24px; text-align: center; font-size: 13px; color: var(--tg-muted); }
+  .foot a { color: inherit; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark"></span><span>Travelgenix</span></a>
+    <span class="pill">Special Offer Builder · Demo</span>
+    <div class="topbar-spacer"></div>
+    <a class="topbar-link" href="/editor-offer-builder">Open editor →</a>
+    <button class="theme-toggle" id="themeBtn" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Special Offer Builder</h1>
+  <p class="lede">
+    The creation form for hand-built special offers. Fill it in, or press <b>✨ Generate</b> and let AI draft
+    the whole thing from a sentence (the demo uses a canned draft so it works with no backend). On save the
+    widget fires a <code>tg-offer-created</code> event with the structured offer, shown in the log below. The
+    card output and the public offer page come next.
+  </p>
+
+  <div class="controls">
+    <div class="field">
+      <label for="ctrlAccent">Accent colour</label>
+      <input id="ctrlAccent" type="color" value="#00B4D8" />
+    </div>
+    <div class="field">
+      <label for="ctrlCurrency">Currency</label>
+      <select id="ctrlCurrency">
+        <option value="GBP" selected>£ GBP</option>
+        <option value="EUR">€ EUR</option>
+        <option value="USD">$ USD</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row"><label for="ctrlAI">AI assist</label><input class="toggle" type="checkbox" id="ctrlAI" checked /></div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row"><label for="ctrlIncludes">Includes section</label><input class="toggle" type="checkbox" id="ctrlIncludes" checked /></div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row"><label for="ctrlTags">Tags section</label><input class="toggle" type="checkbox" id="ctrlTags" checked /></div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row"><label for="ctrlEnquiry">Enquiry section</label><input class="toggle" type="checkbox" id="ctrlEnquiry" checked /></div>
+    </div>
+  </div>
+
+  <div class="stage-label">Live preview · the widget renders in shadow DOM</div>
+  <div class="stage">
+    <div id="widgetMount"></div>
+  </div>
+
+  <div class="event-log">
+    <h3>Last <code>tg-offer-created</code> event</h3>
+    <pre id="eventOut"><span class="empty">Fill the form and press Save offer to see the captured offer object here.</span></pre>
+  </div>
+</main>
+
+<footer class="foot">Travelgenix Widget Suite · <a href="/">All widgets</a></footer>
+
+<script src="/widget-offer-builder.js"></script>
+<script>
+  function $(id) { return document.getElementById(id); }
+  const mount = $('widgetMount');
+
+  const themeBtn = $('themeBtn');
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); themeBtn.textContent = t === 'dark' ? '☀️' : '🌙'; }
+  themeBtn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next); rebuild();
+  });
+  applyTheme('light');
+
+  function buildConfig() {
+    return {
+      theme: document.documentElement.getAttribute('data-theme'),
+      accentColor: $('ctrlAccent').value,
+      currency: $('ctrlCurrency').value,
+      aiEnabled: $('ctrlAI').checked,
+      aiMock: true,                 // demo only: use the canned AI draft (no backend)
+      showIncludes: $('ctrlIncludes').checked,
+      showTags: $('ctrlTags').checked,
+      showEnquiry: $('ctrlEnquiry').checked,
+      enquiryEmail: 'sales@youragency.co.uk',
+      enquiryPhone: '0161 123 4567'
+    };
+  }
+
+  function rebuild() {
+    mount.innerHTML = '';
+    const div = document.createElement('div');
+    div.setAttribute('data-tg-widget', 'offer-builder');
+    div.setAttribute('data-tg-config', JSON.stringify(buildConfig()));
+    mount.appendChild(div);
+    new window.TGOfferBuilderWidget(div, buildConfig());
+  }
+
+  // Capture the offer the widget emits
+  mount.addEventListener('tg-offer-created', (e) => {
+    $('eventOut').textContent = JSON.stringify(e.detail, null, 2);
+  });
+
+  document.querySelectorAll('.controls select, .controls input').forEach((el) =>
+    el.addEventListener('change', rebuild));
+
+  rebuild();
+</script>
+</body>
+</html>
