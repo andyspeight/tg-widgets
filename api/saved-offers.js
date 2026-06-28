@@ -45,6 +45,20 @@ function genId() {
   return out; // 12 chars, [A-Za-z0-9]
 }
 
+// Reserve a brand-new id that is not already in use. genId() is random base62
+// (collision odds are astronomically small), but import must NEVER overwrite an
+// existing offer, so we make the guarantee explicit: try a few ids and only
+// return one that maps to no stored record. Returns '' if none is free (never
+// happens in practice) so the caller skips rather than risking an overwrite.
+async function reserveNewId(maxTries = 6) {
+  for (let i = 0; i < maxTries; i++) {
+    const id = genId();
+    const existing = await getJson('offer:' + id);
+    if (!existing) return id;
+  }
+  return '';
+}
+
 // Cosmetic slug from the offer title. Lowercase ascii words joined by hyphens.
 function slugify(s) {
   return String(s == null ? '' : s)
@@ -214,7 +228,11 @@ export default async function handler(req, res) {
         for (let i = 0; i < batch.length; i++) {
           const cleaned = cleanOffer(batch[i]);
           if (!cleaned || !cleaned.fields || !Object.keys(cleaned.fields).length || JSON.stringify(cleaned).length > MAX_OFFER_BYTES) { skipped++; continue; }
-          const id = genId();
+          // Import only ever CREATES offers — a fresh, guaranteed-unused id per
+          // row — so it can never overwrite an existing offer. Any id on the
+          // incoming row is ignored by design.
+          const id = await reserveNewId();
+          if (!id) { skipped++; continue; }
           const ts = now + i; // distinct scores keep import order in the index
           const ok = await setJson('offer:' + id, {
             id: id, offer: cleaned, ownerKey: ck, ownerEmail: user.email || '',
@@ -248,7 +266,8 @@ export default async function handler(req, res) {
         }
         createdAt = existing.createdAt || now;
       } else {
-        id = genId();
+        id = await reserveNewId();
+        if (!id) return res.status(503).json({ error: 'Could not allocate an offer id. Please try again.' });
       }
 
       const record = {
