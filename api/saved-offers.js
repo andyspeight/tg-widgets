@@ -156,6 +156,67 @@ function readBody(req) {
   return (b && typeof b === 'object') ? b : null;
 }
 
+// ── Soft delete (Recently deleted bin) ──────────────────────────
+// Deleting an offer does not destroy it: we stamp `deletedAt`, drop it from the
+// owner's live index and add it to a trash index. It then disappears from the
+// list, the public feed and its own page, but can be restored for 30 days. After
+// that it is purged (lazily, when the trash is next listed, or on an explicit
+// "delete forever"). Index keys: live = offers:idx:<ownerKey>, trash =
+// offers:trash:<ownerKey>.
+const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const TRASH_RETENTION_DAYS = 30;
+
+function summariseTrash(rec) {
+  const s = summarise(rec);
+  s.deletedAt = rec.deletedAt || 0;
+  return s;
+}
+
+async function softDeleteOffer(id, ck, user) {
+  const rec = await getJson('offer:' + id);
+  if (!rec) return 'missing';
+  if (rec.ownerKey !== ck && !isStaff(user)) return 'forbidden';
+  const ok = rec.ownerKey || ck;
+  if (!rec.deletedAt) {
+    rec.deletedAt = Date.now();
+    await setJson('offer:' + id, rec);
+    await zadd('offers:trash:' + ok, rec.deletedAt, id);
+  }
+  await zrem('offers:idx:' + ok, id); // out of the live list either way
+  return 'ok';
+}
+
+async function restoreOffer(id, ck, user) {
+  const rec = await getJson('offer:' + id);
+  if (!rec) return 'missing';
+  if (rec.ownerKey !== ck && !isStaff(user)) return 'forbidden';
+  const ok = rec.ownerKey || ck;
+  if (rec.deletedAt) {
+    delete rec.deletedAt;
+    if (!rec.updatedAt) rec.updatedAt = Date.now();
+    await setJson('offer:' + id, rec);
+  }
+  await zrem('offers:trash:' + ok, id);
+  await zadd('offers:idx:' + ok, rec.updatedAt || Date.now(), id);
+  return 'ok';
+}
+
+async function purgeOffer(id, ck, user) {
+  const rec = await getJson('offer:' + id);
+  if (!rec) return 'ok'; // already gone — idempotent
+  if (rec.ownerKey !== ck && !isStaff(user)) return 'forbidden';
+  const ok = rec.ownerKey || ck;
+  await del('offer:' + id);
+  await zrem('offers:trash:' + ok, id);
+  await zrem('offers:idx:' + ok, id);
+  return 'ok';
+}
+
+// Parse + dedupe + cap a comma list of ids from the query string.
+function idsFromQuery(raw, cap = 200) {
+  return [...new Set(String(raw || '').split(',').map((s) => s.trim()).filter(Boolean))].slice(0, cap);
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -167,7 +228,7 @@ export default async function handler(req, res) {
       if (!ID_RE.test(id)) return res.status(400).json({ error: 'Bad offer id.' });
       if (!configured()) return res.status(404).json({ error: 'Offer not found.' });
       const rec = await getJson('offer:' + id);
-      if (!rec || !rec.offer) return res.status(404).json({ error: 'Offer not found.' });
+      if (!rec || !rec.offer || rec.deletedAt) return res.status(404).json({ error: 'Offer not found.' });
       res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=300');
       return res.status(200).json({ id: id, offer: rec.offer });
     }
@@ -183,7 +244,7 @@ export default async function handler(req, res) {
       const out = [];
       for (const id of recent) {
         const rec = await getJson('offer:' + id);
-        if (rec && rec.offer && isLiveOffer(rec.offer)) out.push({ id: id, offer: rec.offer });
+        if (rec && rec.offer && !rec.deletedAt && isLiveOffer(rec.offer)) out.push({ id: id, offer: rec.offer });
       }
       return res.status(200).json({ offers: out });
     }
@@ -195,6 +256,23 @@ export default async function handler(req, res) {
     const ck = clientKeyOf(user);
     if (!ck) return res.status(403).json({ error: 'No client on this session.' });
 
+    // ── Recently deleted bin (lazy-purges entries older than 30 days) ──
+    if (req.method === 'GET' && req.query && req.query.trash) {
+      if (!applyRateLimit(res, 'offers:trash:' + ck, RATE_LIMITS.widgetRead)) return;
+      if (!configured()) return res.status(200).json({ offers: [], retentionDays: TRASH_RETENTION_DAYS });
+      const ids = await zrangebyscore('offers:trash:' + ck, '-inf', '+inf');
+      const recent = (ids || []).reverse().slice(0, MAX_LIST);
+      const now = Date.now();
+      const offers = [];
+      for (const id of recent) {
+        const rec = await getJson('offer:' + id);
+        if (!rec || !rec.offer || !rec.deletedAt) { await zrem('offers:trash:' + ck, id); continue; }
+        if (now - rec.deletedAt > TRASH_RETENTION_MS) { await del('offer:' + id); await zrem('offers:trash:' + ck, id); continue; }
+        offers.push(summariseTrash(rec));
+      }
+      return res.status(200).json({ offers: offers, retentionDays: TRASH_RETENTION_DAYS });
+    }
+
     // ── List this client's offers ─────────────────────────────
     if (req.method === 'GET') {
       if (!applyRateLimit(res, 'offers:list:' + ck, RATE_LIMITS.widgetRead)) return;
@@ -204,7 +282,7 @@ export default async function handler(req, res) {
       const offers = [];
       for (const id of recent) {
         const rec = await getJson('offer:' + id);
-        if (rec && rec.offer) offers.push(summarise(rec));
+        if (rec && rec.offer && !rec.deletedAt) offers.push(summarise(rec));
       }
       // feedKey is the public client id the offers-grid embed uses (when present).
       return res.status(200).json({ offers: offers, feedKey: user.clientId || '' });
@@ -217,6 +295,18 @@ export default async function handler(req, res) {
 
       const body = readBody(req);
       if (!body) return res.status(400).json({ error: 'Body is not valid JSON.' });
+
+      // ── Restore from the Recently deleted bin: { restore: [ids] } ──
+      if (Array.isArray(body.restore)) {
+        const ids = [...new Set(body.restore.filter((x) => typeof x === 'string').map((s) => s.trim()).filter(Boolean))].slice(0, 200);
+        let restored = 0, skipped = 0;
+        for (const rid of ids) {
+          if (!ID_RE.test(rid)) { skipped++; continue; }
+          const r = await restoreOffer(rid, ck, user);
+          if (r === 'ok') restored++; else skipped++;
+        }
+        return res.status(200).json({ ok: true, restored, skipped });
+      }
 
       // ── Bulk import: { offers: [ ... ] } (spreadsheet upload) ──
       if (Array.isArray(body.offers)) {
@@ -287,40 +377,31 @@ export default async function handler(req, res) {
     }
 
     // ── Delete ────────────────────────────────────────────────
+    // Default is a SOFT delete: the offer moves to the Recently deleted bin and
+    // can be restored for 30 days. ?permanent=1 hard-deletes (used by the bin's
+    // "delete forever" / "empty bin"). Accepts ?id= (one) or ?ids=a,b (bulk).
+    // Each id is independently ownership-checked; ids not owned or already gone
+    // are skipped rather than failing the whole request.
     if (req.method === 'DELETE') {
       if (!applyRateLimit(res, 'offers:write:' + ck, RATE_LIMITS.widgetWrite)) return;
       if (!configured()) return res.status(503).json({ error: 'Offer storage is not configured.' });
 
-      // ── Bulk delete: ?ids=id1,id2,… (the offers list multi-select) ──
-      // Each id is independently validated and ownership-checked; ones the
-      // client does not own (or that no longer exist) are skipped, never the
-      // whole request failing. Query param (not a body) so it parses reliably.
-      if (req.query && req.query.ids) {
-        const MAX_BULK_DEL = 200;
-        const ids = [...new Set(String(req.query.ids).split(',').map((s) => s.trim()).filter(Boolean))].slice(0, MAX_BULK_DEL);
-        let deleted = 0, skipped = 0;
-        for (const did of ids) {
-          if (!ID_RE.test(did)) { skipped++; continue; }
-          const rec = await getJson('offer:' + did);
-          if (!rec) { skipped++; continue; }
-          if (rec.ownerKey !== ck && !isStaff(user)) { skipped++; continue; }
-          await del('offer:' + did);
-          await zrem('offers:idx:' + (rec.ownerKey || ck), did);
-          deleted++;
-        }
-        return res.status(200).json({ ok: true, deleted, skipped });
-      }
+      const permanent = !!(req.query && (req.query.permanent === '1' || req.query.permanent === 'true'));
+      let ids;
+      if (req.query && req.query.ids) ids = idsFromQuery(req.query.ids);
+      else if (req.query && req.query.id) ids = idsFromQuery(req.query.id, 1);
+      else return res.status(400).json({ error: 'No offer id given.' });
+      if (!ids.length) return res.status(400).json({ error: 'No valid offer id given.' });
 
-      const id = req.query && req.query.id ? String(req.query.id) : '';
-      if (!ID_RE.test(id)) return res.status(400).json({ error: 'Bad offer id.' });
-      const existing = await getJson('offer:' + id);
-      if (!existing) return res.status(404).json({ error: 'Offer not found.' });
-      if (existing.ownerKey !== ck && !isStaff(user)) {
-        return res.status(403).json({ error: 'You do not own this offer.' });
+      let done = 0, skipped = 0;
+      for (const did of ids) {
+        if (!ID_RE.test(did)) { skipped++; continue; }
+        const r = permanent ? await purgeOffer(did, ck, user) : await softDeleteOffer(did, ck, user);
+        if (r === 'ok') done++; else skipped++;
       }
-      await del('offer:' + id);
-      await zrem('offers:idx:' + (existing.ownerKey || ck), id);
-      return res.status(200).json({ ok: true });
+      return res.status(200).json(permanent
+        ? { ok: true, purged: done, skipped }
+        : { ok: true, trashed: done, skipped });
     }
 
     return res.status(405).json({ error: 'Method not allowed.' });
@@ -331,4 +412,4 @@ export default async function handler(req, res) {
 }
 
 // Exported for unit tests.
-export const _test = { cleanOffer, genId, ID_RE, clientKeyOf, isStaff, summarise, isLiveOffer, slugify, offerUrl };
+export const _test = { cleanOffer, genId, ID_RE, clientKeyOf, isStaff, summarise, summariseTrash, isLiveOffer, slugify, offerUrl, idsFromQuery, TRASH_RETENTION_MS, TRASH_RETENTION_DAYS };

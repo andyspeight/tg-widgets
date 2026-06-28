@@ -84,6 +84,12 @@
     .sel-actions { display: inline-flex; align-items: center; gap: 10px; }
     .sel-count { font-size: 13px; font-weight: 700; color: var(--ink); }
     .sel-spacer { flex: 1; }
+    /* Recently deleted bin */
+    .trash-banner { max-width: 980px; display: flex; align-items: center; gap: 12px; background: var(--accent-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: var(--sub); }
+    .trash-banner b { color: var(--ink); }
+    .trash-banner .ts-spacer { flex: 1; }
+    .offer-row.trashed .offer-thumb.ph { background: linear-gradient(135deg, #94A3B8, #CBD5E1); }
+    .offer-purge-note { font-size: 11px; color: var(--warn); font-weight: 600; }
     .offer-thumb { width: 76px; height: 56px; border-radius: 8px; background-size: cover; background-position: center; flex-shrink: 0; background-color: var(--hover); }
     .offer-thumb.ph { background: linear-gradient(135deg, var(--brand), var(--accent)); }
     .offer-main { min-width: 0; flex: 1; }
@@ -250,9 +256,13 @@
           <!-- LIST VIEW -->
           <div id="listView">
             <div class="ws-top">
-              <h1>My offers</h1>
+              <h1 id="wsTitle">My offers</h1>
               <span class="ws-count" id="offerCount">0</span>
               <span class="ws-spacer"></span>
+              <button class="btn" id="btn-trash" title="Recently deleted">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Recently deleted
+              </button>
               <button class="btn" id="btn-import">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Import
@@ -340,6 +350,8 @@
       feedKey: '',
       offers: [],
       selected: new Set(),
+      trashMode: false,
+      retentionDays: 30,
       config: {
         cardLayout: 'vertical', columns: 'auto', template: 'classic',
         theme: 'light', accentColor: '#00B4D8', brandColor: '#1B2B5B', radius: 14,
@@ -418,46 +430,90 @@
 
     /* ---- Load + render the offers list ---- */
     function setState(html){ $('offersList').innerHTML = html; }
+    function setTopbar() {
+      $('wsTitle').textContent = state.trashMode ? 'Recently deleted' : 'My offers';
+      $('btn-new').hidden = state.trashMode;
+      $('btn-import').hidden = state.trashMode;
+      const tb = $('btn-trash');
+      tb.classList.toggle('primary', state.trashMode);
+      tb.lastChild.textContent = state.trashMode ? ' Back to offers' : ' Recently deleted';
+    }
     function loadOffers() {
+      state.trashMode = false; setTopbar();
       setState('<div class="state"><p>Loading your offers…</p></div>');
       fetch(OFFERS_API, { credentials: 'include' })
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(d => { state.offers = (d && d.offers) || []; state.feedKey = (d && d.feedKey) || ''; renderOffers(); })
         .catch(() => setState('<div class="state"><h2>Couldn\'t load your offers</h2><p>Please refresh the page. If it keeps happening, your session may have expired.</p></div>'));
     }
+    function loadTrash() {
+      state.trashMode = true; setTopbar();
+      setState('<div class="state"><p>Loading recently deleted…</p></div>');
+      fetch(OFFERS_API + '?trash=1', { credentials: 'include' })
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(d => { state.offers = (d && d.offers) || []; state.retentionDays = (d && d.retentionDays) || 30; renderOffers(); })
+        .catch(() => setState('<div class="state"><h2>Couldn\'t load the bin</h2><p>Please try again in a moment.</p></div>'));
+    }
+    // "deleted 2 days ago · removed for good in 28 days"
+    function trashAge(deletedAt) {
+      const day = 24 * 60 * 60 * 1000;
+      const ageDays = Math.max(0, Math.floor((Date.now() - deletedAt) / day));
+      const leftDays = Math.max(0, state.retentionDays - ageDays);
+      const ago = ageDays === 0 ? 'today' : (ageDays === 1 ? '1 day ago' : ageDays + ' days ago');
+      return 'Deleted ' + ago + ' · <span class="offer-purge-note">removed for good in ' + leftDays + ' day' + (leftDays === 1 ? '' : 's') + '</span>';
+    }
     function renderOffers() {
       state.selected.clear(); // a fresh list always starts unselected
       $('offerCount').textContent = state.offers.length;
+      const trash = state.trashMode;
       if (!state.offers.length) {
-        setState('<div class="state"><div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 7.3 12 2 3.4 7.3 12 12.6z"/><path d="M3.4 7.3V16.7L12 22l8.6-5.3V7.3"/></svg></div><h2>No offers yet</h2><p>Create your first special offer. It only takes a minute with the AI assist.</p><button class="btn primary" onclick="document.getElementById(\'btn-new\').click()">Create your first offer</button></div>');
+        if (trash) {
+          setState('<div class="state"><div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></div><h2>Recently deleted is empty</h2><p>Deleted offers wait here for ' + state.retentionDays + ' days before they are removed for good.</p><button class="btn primary" id="btn-back-offers">Back to offers</button></div>');
+        } else {
+          setState('<div class="state"><div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 7.3 12 2 3.4 7.3 12 12.6z"/><path d="M3.4 7.3V16.7L12 22l8.6-5.3V7.3"/></svg></div><h2>No offers yet</h2><p>Create your first special offer. It only takes a minute with the AI assist.</p><button class="btn primary" onclick="document.getElementById(\'btn-new\').click()">Create your first offer</button></div>');
+        }
         return;
       }
       const sym = { GBP:'£', EUR:'€', USD:'$' }[state.config.currency] || '£';
       const rows = state.offers.map(function (o) {
-        const st = statusOf(o);
-        const chip = st ? '<span class="chip ' + st + '">' + (st==='live'?'Live':st==='upcoming'?'Scheduled':'Ended') + '</span>' : '';
         const price = o.price ? sym + esc(o.price) : '';
-        const dates = (o.showFrom || o.showUntil) ? (esc(o.showFrom||'…') + ' → ' + esc(o.showUntil||'…')) : 'Always showing';
-        return '<div class="offer-row" data-id="' + esc(o.id) + '">'
+        const meta = trash
+          ? trashAge(o.deletedAt || 0)
+          : (function () {
+              const dates = (o.showFrom || o.showUntil) ? (esc(o.showFrom||'…') + ' → ' + esc(o.showUntil||'…')) : 'Always showing';
+              return (price ? '<b>' + price + '</b> · ' : '') + esc(dates);
+            })();
+        const st = trash ? '' : statusOf(o);
+        const chip = st ? '<span class="chip ' + st + '">' + (st==='live'?'Live':st==='upcoming'?'Scheduled':'Ended') + '</span>' : '';
+        const actions = trash
+          ? '<button class="btn sm" data-act="restore">Restore</button>'
+            + '<button class="btn sm danger" data-act="purge">Delete forever</button>'
+          : '<a class="btn sm" href="' + esc(pageLink(o)) + '" target="_blank" rel="noopener">Open</a>'
+            + '<button class="btn sm" data-act="edit">Edit</button>'
+            + '<button class="btn sm danger" data-act="delete">Delete</button>';
+        return '<div class="offer-row' + (trash ? ' trashed' : '') + '" data-id="' + esc(o.id) + '">'
           + '<label class="offer-check"><input type="checkbox" data-check="' + esc(o.id) + '" aria-label="Select offer" /></label>'
           + '<div class="offer-thumb ph"></div>'
           + '<div class="offer-main"><div class="offer-title">' + (esc(o.title) || 'Untitled offer') + chip + '</div>'
-          + '<div class="offer-meta">' + (price ? '<b>' + price + '</b> · ' : '') + esc(dates) + '</div></div>'
-          + '<div class="offer-actions">'
-          + '<a class="btn sm" href="' + esc(pageLink(o)) + '" target="_blank" rel="noopener">Open</a>'
-          + '<button class="btn sm" data-act="edit">Edit</button>'
-          + '<button class="btn sm danger" data-act="delete">Delete</button>'
-          + '</div></div>';
+          + '<div class="offer-meta">' + meta + '</div></div>'
+          + '<div class="offer-actions">' + actions + '</div></div>';
       }).join('');
+      const bulkBtns = trash
+        ? '<button class="btn sm" id="btn-bulk-restore">Restore selected</button>'
+          + '<button class="btn sm danger" id="btn-bulk-purge">Delete forever</button>'
+        : '<button class="btn sm danger" id="btn-bulk-delete">Delete selected</button>';
+      const banner = trash
+        ? '<div class="trash-banner"><span>Offers here are kept for <b>' + state.retentionDays + ' days</b>, then removed for good. Restore any of them before then.</span><span class="ts-spacer"></span><button class="btn sm" id="btn-back-offers">Back to offers</button></div>'
+        : '';
       const toolbar = '<div class="offers-toolbar">'
         + '<label class="selall"><input type="checkbox" id="selAll" /> Select all</label>'
         + '<span class="sel-spacer"></span>'
         + '<span class="sel-actions" id="selActions" hidden>'
         + '<span class="sel-count" id="selCount">0 selected</span>'
-        + '<button class="btn sm danger" id="btn-bulk-delete">Delete selected</button>'
+        + bulkBtns
         + '<button class="btn sm" id="btn-sel-clear">Clear</button>'
         + '</span></div>';
-      setState(toolbar + '<div class="offers-list">' + rows + '</div>');
+      setState(banner + toolbar + '<div class="offers-list">' + rows + '</div>');
       updateSelUI();
     }
 
@@ -478,25 +534,41 @@
       $('offersList').querySelectorAll('[data-check]').forEach(function (c) { c.checked = false; });
       updateSelUI();
     }
-    async function bulkDelete() {
+    // Run an async action over the current selection in chunks, with a busy
+    // button, then reload. `run(chunk)` does the work for one chunk of ids.
+    async function bulkRun(btnId, busyLabel, run, reload) {
       const ids = [...state.selected];
       if (!ids.length) return;
-      if (!confirm('Delete ' + ids.length + ' offer' + (ids.length > 1 ? 's' : '') + '? This cannot be undone.')) return;
-      const btn = $('btn-bulk-delete');
-      btn.disabled = true; const label = btn.textContent; btn.textContent = 'Deleting…';
+      const btn = $(btnId);
+      btn.disabled = true; const label = btn.textContent; btn.textContent = busyLabel;
       try {
-        // Chunk so the query string stays well within limits.
-        for (let i = 0; i < ids.length; i += 100) {
-          const chunk = ids.slice(i, i + 100);
-          const r = await fetch(OFFERS_API + '?ids=' + encodeURIComponent(chunk.join(',')), { method: 'DELETE', credentials: 'include' });
-          if (!r.ok) throw new Error(String(r.status));
-        }
+        for (let i = 0; i < ids.length; i += 100) { await run(ids.slice(i, i + 100)); }
         state.selected.clear();
-        loadOffers();
+        reload();
       } catch (e) {
         btn.disabled = false; btn.textContent = label;
-        alert('Could not delete the selected offers. Please try again.');
+        alert('Sorry, that did not work. Please try again.');
       }
+    }
+    function delReq(chunk, permanent) {
+      return fetch(OFFERS_API + '?ids=' + encodeURIComponent(chunk.join(',')) + (permanent ? '&permanent=1' : ''), { method: 'DELETE', credentials: 'include' })
+        .then(r => { if (!r.ok) throw new Error(String(r.status)); });
+    }
+    function bulkDelete() {
+      const n = state.selected.size; if (!n) return;
+      if (!confirm('Move ' + n + ' offer' + (n > 1 ? 's' : '') + ' to Recently deleted? You can restore ' + (n > 1 ? 'them' : 'it') + ' for ' + state.retentionDays + ' days.')) return;
+      return bulkRun('btn-bulk-delete', 'Deleting…', (chunk) => delReq(chunk, false), loadOffers);
+    }
+    function bulkRestore() {
+      if (!state.selected.size) return;
+      return bulkRun('btn-bulk-restore', 'Restoring…', (chunk) =>
+        fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ restore: chunk }) })
+          .then(r => { if (!r.ok) throw new Error(String(r.status)); }), loadTrash);
+    }
+    function bulkPurge() {
+      const n = state.selected.size; if (!n) return;
+      if (!confirm('Permanently delete ' + n + ' offer' + (n > 1 ? 's' : '') + '? This cannot be undone.')) return;
+      return bulkRun('btn-bulk-purge', 'Deleting…', (chunk) => delReq(chunk, true), loadTrash);
     }
 
     /* ---- Selection (checkboxes + select all) ---- */
@@ -516,13 +588,24 @@
     /* ---- Row actions + bulk actions ---- */
     $('offersList').addEventListener('click', function (e) {
       if (e.target.closest('#btn-bulk-delete')) { bulkDelete(); return; }
+      if (e.target.closest('#btn-bulk-restore')) { bulkRestore(); return; }
+      if (e.target.closest('#btn-bulk-purge')) { bulkPurge(); return; }
       if (e.target.closest('#btn-sel-clear')) { clearSelection(); return; }
+      if (e.target.closest('#btn-back-offers')) { loadOffers(); return; }
       const btn = e.target.closest('[data-act]'); if (!btn) return;
       const id = btn.closest('.offer-row').dataset.id;
       if (btn.dataset.act === 'delete') {
-        if (!confirm('Delete this offer? This cannot be undone.')) return;
         fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { method: 'DELETE', credentials: 'include' })
           .then(r => { if (!r.ok) throw new Error(r.status); loadOffers(); })
+          .catch(() => alert('Could not delete the offer. Please try again.'));
+      } else if (btn.dataset.act === 'restore') {
+        fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ restore: [id] }) })
+          .then(r => { if (!r.ok) throw new Error(r.status); loadTrash(); })
+          .catch(() => alert('Could not restore the offer. Please try again.'));
+      } else if (btn.dataset.act === 'purge') {
+        if (!confirm('Permanently delete this offer? This cannot be undone.')) return;
+        fetch(OFFERS_API + '?id=' + encodeURIComponent(id) + '&permanent=1', { method: 'DELETE', credentials: 'include' })
+          .then(r => { if (!r.ok) throw new Error(r.status); loadTrash(); })
           .catch(() => alert('Could not delete the offer. Please try again.'));
       } else if (btn.dataset.act === 'edit') {
         fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include' })
@@ -530,6 +613,11 @@
           .then(d => openForm(Object.assign({ id: id }, d.offer)))
           .catch(() => alert('Could not open the offer. Please try again.'));
       }
+    });
+
+    /* ---- Recently deleted toggle ---- */
+    $('btn-trash').addEventListener('click', function () {
+      if (state.trashMode) loadOffers(); else loadTrash();
     });
 
     /* ---- Create / edit form ---- */

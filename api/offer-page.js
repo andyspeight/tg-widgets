@@ -225,7 +225,8 @@ export default async function handler(req, res) {
     if (candidates.length && configured()) {
       for (const cand of candidates) {
         const rec = await getJson('offer:' + cand);
-        if (rec && rec.offer) {
+        // A trashed (soft-deleted) offer is treated as not found, not matched.
+        if (rec && rec.offer && !rec.deletedAt) {
           offerId = cand;
           if (inWindow(rec.offer)) offer = rec.offer;
           else notAvailable = true; // exists but outside its show window
