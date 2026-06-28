@@ -315,6 +315,9 @@
   <script src="/widget-offer-builder.js"></script>
   <script src="/offer-import.js"></script>
   <script src="/editor-shell.js"></script>
+  <!-- Guided setup tour (reusable engine + step list) -->
+  <script src="/editor-tour.js"></script>
+  <script src="/tour-special-offers.js"></script>
 
   <script>
     const WIDGET_TYPE = 'Special Offer Builder';
@@ -597,6 +600,10 @@
     function boot() {
       $('editor').hidden = false;
       hydrateUI(); wireInputs(); wireImport(); setTab('design'); renderCardPreview(); loadOffers();
+      // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
+      // launcher stays in the corner for later. Start on the workspace, so point
+      // the first steps at the create + import controls (not the form).
+      if (typeof window.initSpecialOffersTour === 'function') window.initSpecialOffersTour();
     }
 
     window.tgse.init({
