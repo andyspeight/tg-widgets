@@ -93,8 +93,312 @@
   // on Travelgenix's own demo site (no client setup), the appId is empty or
   // '250' and the proxy falls through to demo credentials.
   const OFFERS_PROXY = API_BASE.replace('/widget-config', '/offers');
-  const VERSION = '1.6.0';
+  const VERSION = '1.6.1';
   const CACHE_PREFIX = 'tgo_cache_';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only — CTAs, price context, fact labels, filter/board
+  // controls, status pills, empty/loading/error states and aria-labels. Offer
+  // DATA (hotel names, destinations, prices, dates, supplier identifiers, ATOL
+  // and ABTA wording) is never translated. English is the source + fallback.
+  const MESSAGES = {
+    en: {
+      viewDeal: 'View deal', viewDealArrow: 'View deal →', viewThisDealArrow: 'View this deal →',
+      bookNowArrow: 'Book now →', book: 'Book', reserveTrip: 'Reserve this trip', enquire: 'Enquire',
+      from: 'From', total: 'total', perPerson: 'per person', perNight: 'per night',
+      perPersonPerNight: 'per person, per night',
+      basedOn: 'Based on {parts}', basedOnSharing: 'Based on {parts} sharing',
+      adult: '{n} adult', adults: '{n} adults', child: '{n} child', children: '{n} children',
+      infant: '{n} infant', infants: '{n} infants',
+      night: '{n} night', nightsN: '{n} nights', nt: '{n} nt', nts: '{n} nts',
+      nightsLabel: 'Nights', board: 'Board', flights: 'Flights', departs: 'Departs {date}',
+      returns: 'Returns {date}', checkin: 'Check-in', checkinDate: 'Check-in {date}',
+      outbound: 'Outbound', returnLabel: 'Return', oneWay: 'One-way', travelling: 'Travelling',
+      travellers: 'Travellers', stayDetails: 'Stay details', schedule: 'Schedule',
+      amenities: 'Amenities', operator: 'Operator', refundability: 'Refundability',
+      duration: 'Duration', date: 'Date', depart: 'Depart', arrive: 'Arrive', fare: 'Fare',
+      direct: 'Direct', directCaps: 'DIRECT', stop: '{n} stop', stops: '{n} stops',
+      stopCaps: '1 STOP', stopsCaps: '{n} STOPS',
+      hotel: 'Hotel', flight: 'Flight', package: 'Package', packageHoliday: 'Package Holiday',
+      flightHotel: 'Flight + Hotel', leadInPrice: 'Lead-in price', carrier: 'Carrier',
+      economy: 'Economy', business: 'Business', firstClass: 'First class',
+      moreCount: '+{n} more', offerFallback: 'Offer', unknownType: 'Unknown type',
+      withOperator: 'with {name}', featuredStay: 'Featured stay', featuredFlight: 'Featured flight',
+      featuredPackage: 'Featured package', featuredOffer: 'Featured offer', featured: 'Featured',
+      flightToDest: '{carrier} to {dest}', moreOffers: 'More offers',
+      // Board basis
+      boardRoomOnly: 'Room only', boardBreakfast: 'Breakfast', boardHalfBoard: 'Half board',
+      boardFullBoard: 'Full board', boardAllInclusive: 'All inclusive', boardSelfCatering: 'Self catering',
+      // Departure board
+      departuresFrom: 'Departures from', cheapestFares: 'Cheapest fares · next {n} days',
+      live: 'Live', time: 'Time', route: 'Route', carrierCol: 'Carrier', stopsCol: 'Stops',
+      dateCol: 'Date', status: 'Status', fareCol: 'Fare', refresh: 'Refresh',
+      noFlights: 'No flights found', noFlightsHint: 'Try widening the date range or changing the departure airport.',
+      pillCheapest: '★ Cheapest', pillToday: 'Today', pillTomorrow: 'Tomorrow',
+      pillThisWeek: 'This week', pillGoingSoon: 'Going soon',
+      // Popup / generic
+      liveDeals: 'Live deals', offersEndIn: 'Offers end in', days: 'days', hrs: 'hrs',
+      min: 'min', sec: 'sec', cancel: 'Cancel', close: 'Close',
+      paxIntro: 'Set your group for this enquiry. We\'ll pass it through to the search.',
+      adultsLabel: 'Adults', childrenLabel: 'Children', infantsLabel: 'Infants',
+      adultsHelp: '16+ years', childrenHelp: '2 to 15 years', infantsHelp: 'Under 2',
+      decrease: 'Decrease {label}', increase: 'Increase {label}',
+      // Carousel / aria
+      previousOffers: 'Previous offers', moreOffersAria: 'More offers', travelOffers: 'Travel offers',
+      carouselPages: 'Carousel pages', pageOf: 'Page {n} of {total}', previousOffer: 'Previous offer',
+      nextOffer: 'Next offer', goToOffer: 'Go to offer {n}', showOffer: 'Show offer {n}',
+      // States
+      emptyHeading: 'No offers available right now',
+      emptyBody: 'We couldn\'t find any matching offers in the current cache. Try our search to find more deals.',
+      couldNotLoad: 'Could not load offers.', poweredBy: 'Powered by Travelgenix',
+    },
+    fr: {
+      viewDeal: 'Voir l\'offre', viewDealArrow: 'Voir l\'offre →', viewThisDealArrow: 'Voir cette offre →',
+      bookNowArrow: 'Réserver →', book: 'Réserver', reserveTrip: 'Réserver ce voyage', enquire: 'Demander un devis',
+      from: 'À partir de', total: 'total', perPerson: 'par personne', perNight: 'par nuit',
+      perPersonPerNight: 'par personne, par nuit',
+      basedOn: 'Sur la base de {parts}', basedOnSharing: 'Sur la base de {parts} en partage',
+      adult: '{n} adulte', adults: '{n} adultes', child: '{n} enfant', children: '{n} enfants',
+      infant: '{n} bébé', infants: '{n} bébés',
+      night: '{n} nuit', nightsN: '{n} nuits', nt: '{n} nt', nts: '{n} nts',
+      nightsLabel: 'Nuits', board: 'Pension', flights: 'Vols', departs: 'Départ {date}',
+      returns: 'Retour {date}', checkin: 'Arrivée', checkinDate: 'Arrivée {date}',
+      outbound: 'Aller', returnLabel: 'Retour', oneWay: 'Aller simple', travelling: 'Voyageurs',
+      travellers: 'Voyageurs', stayDetails: 'Détails du séjour', schedule: 'Horaires',
+      amenities: 'Équipements', operator: 'Opérateur', refundability: 'Remboursement',
+      duration: 'Durée', date: 'Date', depart: 'Départ', arrive: 'Arrivée', fare: 'Tarif',
+      direct: 'Direct', directCaps: 'DIRECT', stop: '{n} escale', stops: '{n} escales',
+      stopCaps: '1 ESCALE', stopsCaps: '{n} ESCALES',
+      hotel: 'Hôtel', flight: 'Vol', package: 'Forfait', packageHoliday: 'Forfait vacances',
+      flightHotel: 'Vol + Hôtel', leadInPrice: 'Prix d\'appel', carrier: 'Compagnie',
+      economy: 'Économique', business: 'Affaires', firstClass: 'Première classe',
+      moreCount: '+{n} de plus', offerFallback: 'Offre', unknownType: 'Type inconnu',
+      withOperator: 'avec {name}', featuredStay: 'Séjour en vedette', featuredFlight: 'Vol en vedette',
+      featuredPackage: 'Forfait en vedette', featuredOffer: 'Offre en vedette', featured: 'En vedette',
+      flightToDest: '{carrier} vers {dest}', moreOffers: 'Plus d\'offres',
+      boardRoomOnly: 'Sans repas', boardBreakfast: 'Petit-déjeuner', boardHalfBoard: 'Demi-pension',
+      boardFullBoard: 'Pension complète', boardAllInclusive: 'Tout compris', boardSelfCatering: 'Logement avec cuisine',
+      departuresFrom: 'Départs de', cheapestFares: 'Tarifs les moins chers · {n} prochains jours',
+      live: 'En direct', time: 'Heure', route: 'Trajet', carrierCol: 'Compagnie', stopsCol: 'Escales',
+      dateCol: 'Date', status: 'Statut', fareCol: 'Tarif', refresh: 'Actualiser',
+      noFlights: 'Aucun vol trouvé', noFlightsHint: 'Essayez d\'élargir la plage de dates ou de changer d\'aéroport de départ.',
+      pillCheapest: '★ Le moins cher', pillToday: 'Aujourd\'hui', pillTomorrow: 'Demain',
+      pillThisWeek: 'Cette semaine', pillGoingSoon: 'Bientôt complet',
+      liveDeals: 'Offres en direct', offersEndIn: 'Les offres se terminent dans', days: 'jours', hrs: 'h',
+      min: 'min', sec: 'sec', cancel: 'Annuler', close: 'Fermer',
+      paxIntro: 'Indiquez votre groupe pour cette demande. Nous le transmettrons à la recherche.',
+      adultsLabel: 'Adultes', childrenLabel: 'Enfants', infantsLabel: 'Bébés',
+      adultsHelp: '16 ans et plus', childrenHelp: '2 à 15 ans', infantsHelp: 'Moins de 2 ans',
+      decrease: 'Diminuer {label}', increase: 'Augmenter {label}',
+      previousOffers: 'Offres précédentes', moreOffersAria: 'Plus d\'offres', travelOffers: 'Offres de voyage',
+      carouselPages: 'Pages du carrousel', pageOf: 'Page {n} sur {total}', previousOffer: 'Offre précédente',
+      nextOffer: 'Offre suivante', goToOffer: 'Aller à l\'offre {n}', showOffer: 'Afficher l\'offre {n}',
+      emptyHeading: 'Aucune offre disponible pour le moment',
+      emptyBody: 'Nous n\'avons trouvé aucune offre correspondante dans le cache actuel. Essayez notre recherche pour trouver plus d\'offres.',
+      couldNotLoad: 'Impossible de charger les offres.', poweredBy: 'Propulsé par Travelgenix',
+    },
+    de: {
+      viewDeal: 'Angebot ansehen', viewDealArrow: 'Angebot ansehen →', viewThisDealArrow: 'Dieses Angebot ansehen →',
+      bookNowArrow: 'Jetzt buchen →', book: 'Buchen', reserveTrip: 'Diese Reise buchen', enquire: 'Anfragen',
+      from: 'Ab', total: 'gesamt', perPerson: 'pro Person', perNight: 'pro Nacht',
+      perPersonPerNight: 'pro Person, pro Nacht',
+      basedOn: 'Auf Basis von {parts}', basedOnSharing: 'Auf Basis von {parts} im Doppelzimmer',
+      adult: '{n} Erwachsener', adults: '{n} Erwachsene', child: '{n} Kind', children: '{n} Kinder',
+      infant: '{n} Kleinkind', infants: '{n} Kleinkinder',
+      night: '{n} Nacht', nightsN: '{n} Nächte', nt: '{n} Nt', nts: '{n} Nt',
+      nightsLabel: 'Nächte', board: 'Verpflegung', flights: 'Flüge', departs: 'Abflug {date}',
+      returns: 'Rückflug {date}', checkin: 'Anreise', checkinDate: 'Anreise {date}',
+      outbound: 'Hinflug', returnLabel: 'Rückflug', oneWay: 'Einfach', travelling: 'Reisende',
+      travellers: 'Reisende', stayDetails: 'Aufenthaltsdetails', schedule: 'Flugplan',
+      amenities: 'Ausstattung', operator: 'Veranstalter', refundability: 'Stornierung',
+      duration: 'Dauer', date: 'Datum', depart: 'Abflug', arrive: 'Ankunft', fare: 'Preis',
+      direct: 'Direkt', directCaps: 'DIREKT', stop: '{n} Stopp', stops: '{n} Stopps',
+      stopCaps: '1 STOPP', stopsCaps: '{n} STOPPS',
+      hotel: 'Hotel', flight: 'Flug', package: 'Paket', packageHoliday: 'Pauschalreise',
+      flightHotel: 'Flug + Hotel', leadInPrice: 'Einstiegspreis', carrier: 'Fluggesellschaft',
+      economy: 'Economy', business: 'Business', firstClass: 'Erste Klasse',
+      moreCount: '+{n} weitere', offerFallback: 'Angebot', unknownType: 'Unbekannter Typ',
+      withOperator: 'mit {name}', featuredStay: 'Empfohlener Aufenthalt', featuredFlight: 'Empfohlener Flug',
+      featuredPackage: 'Empfohlenes Paket', featuredOffer: 'Empfohlenes Angebot', featured: 'Empfohlen',
+      flightToDest: '{carrier} nach {dest}', moreOffers: 'Weitere Angebote',
+      boardRoomOnly: 'Nur Übernachtung', boardBreakfast: 'Frühstück', boardHalfBoard: 'Halbpension',
+      boardFullBoard: 'Vollpension', boardAllInclusive: 'All-Inclusive', boardSelfCatering: 'Selbstverpflegung',
+      departuresFrom: 'Abflüge ab', cheapestFares: 'Günstigste Preise · nächste {n} Tage',
+      live: 'Live', time: 'Zeit', route: 'Strecke', carrierCol: 'Fluggesellschaft', stopsCol: 'Stopps',
+      dateCol: 'Datum', status: 'Status', fareCol: 'Preis', refresh: 'Aktualisieren',
+      noFlights: 'Keine Flüge gefunden', noFlightsHint: 'Erweitern Sie den Datumsbereich oder ändern Sie den Abflughafen.',
+      pillCheapest: '★ Günstigster', pillToday: 'Heute', pillTomorrow: 'Morgen',
+      pillThisWeek: 'Diese Woche', pillGoingSoon: 'Bald ausgebucht',
+      liveDeals: 'Live-Angebote', offersEndIn: 'Angebote enden in', days: 'Tage', hrs: 'Std',
+      min: 'Min', sec: 'Sek', cancel: 'Abbrechen', close: 'Schließen',
+      paxIntro: 'Geben Sie Ihre Gruppe für diese Anfrage an. Wir leiten sie an die Suche weiter.',
+      adultsLabel: 'Erwachsene', childrenLabel: 'Kinder', infantsLabel: 'Kleinkinder',
+      adultsHelp: 'Ab 16 Jahren', childrenHelp: '2 bis 15 Jahre', infantsHelp: 'Unter 2',
+      decrease: '{label} verringern', increase: '{label} erhöhen',
+      previousOffers: 'Vorherige Angebote', moreOffersAria: 'Weitere Angebote', travelOffers: 'Reiseangebote',
+      carouselPages: 'Karussell-Seiten', pageOf: 'Seite {n} von {total}', previousOffer: 'Vorheriges Angebot',
+      nextOffer: 'Nächstes Angebot', goToOffer: 'Zu Angebot {n}', showOffer: 'Angebot {n} anzeigen',
+      emptyHeading: 'Derzeit keine Angebote verfügbar',
+      emptyBody: 'Wir konnten im aktuellen Cache keine passenden Angebote finden. Versuchen Sie unsere Suche für weitere Angebote.',
+      couldNotLoad: 'Angebote konnten nicht geladen werden.', poweredBy: 'Bereitgestellt von Travelgenix',
+    },
+    es: {
+      viewDeal: 'Ver oferta', viewDealArrow: 'Ver oferta →', viewThisDealArrow: 'Ver esta oferta →',
+      bookNowArrow: 'Reservar ahora →', book: 'Reservar', reserveTrip: 'Reservar este viaje', enquire: 'Consultar',
+      from: 'Desde', total: 'total', perPerson: 'por persona', perNight: 'por noche',
+      perPersonPerNight: 'por persona, por noche',
+      basedOn: 'Según {parts}', basedOnSharing: 'Según {parts} compartiendo',
+      adult: '{n} adulto', adults: '{n} adultos', child: '{n} niño', children: '{n} niños',
+      infant: '{n} bebé', infants: '{n} bebés',
+      night: '{n} noche', nightsN: '{n} noches', nt: '{n} n', nts: '{n} n',
+      nightsLabel: 'Noches', board: 'Régimen', flights: 'Vuelos', departs: 'Salida {date}',
+      returns: 'Regreso {date}', checkin: 'Entrada', checkinDate: 'Entrada {date}',
+      outbound: 'Ida', returnLabel: 'Vuelta', oneWay: 'Solo ida', travelling: 'Viajeros',
+      travellers: 'Viajeros', stayDetails: 'Detalles de la estancia', schedule: 'Horario',
+      amenities: 'Servicios', operator: 'Operador', refundability: 'Reembolso',
+      duration: 'Duración', date: 'Fecha', depart: 'Salida', arrive: 'Llegada', fare: 'Tarifa',
+      direct: 'Directo', directCaps: 'DIRECTO', stop: '{n} escala', stops: '{n} escalas',
+      stopCaps: '1 ESCALA', stopsCaps: '{n} ESCALAS',
+      hotel: 'Hotel', flight: 'Vuelo', package: 'Paquete', packageHoliday: 'Paquete vacacional',
+      flightHotel: 'Vuelo + Hotel', leadInPrice: 'Precio de entrada', carrier: 'Aerolínea',
+      economy: 'Turista', business: 'Business', firstClass: 'Primera clase',
+      moreCount: '+{n} más', offerFallback: 'Oferta', unknownType: 'Tipo desconocido',
+      withOperator: 'con {name}', featuredStay: 'Estancia destacada', featuredFlight: 'Vuelo destacado',
+      featuredPackage: 'Paquete destacado', featuredOffer: 'Oferta destacada', featured: 'Destacado',
+      flightToDest: '{carrier} a {dest}', moreOffers: 'Más ofertas',
+      boardRoomOnly: 'Solo alojamiento', boardBreakfast: 'Desayuno', boardHalfBoard: 'Media pensión',
+      boardFullBoard: 'Pensión completa', boardAllInclusive: 'Todo incluido', boardSelfCatering: 'Apartamento con cocina',
+      departuresFrom: 'Salidas desde', cheapestFares: 'Tarifas más baratas · próximos {n} días',
+      live: 'En directo', time: 'Hora', route: 'Ruta', carrierCol: 'Aerolínea', stopsCol: 'Escalas',
+      dateCol: 'Fecha', status: 'Estado', fareCol: 'Tarifa', refresh: 'Actualizar',
+      noFlights: 'No se encontraron vuelos', noFlightsHint: 'Pruebe a ampliar el rango de fechas o cambiar el aeropuerto de salida.',
+      pillCheapest: '★ Más barato', pillToday: 'Hoy', pillTomorrow: 'Mañana',
+      pillThisWeek: 'Esta semana', pillGoingSoon: 'Se agota pronto',
+      liveDeals: 'Ofertas en directo', offersEndIn: 'Las ofertas terminan en', days: 'días', hrs: 'h',
+      min: 'min', sec: 'seg', cancel: 'Cancelar', close: 'Cerrar',
+      paxIntro: 'Indique su grupo para esta consulta. Lo pasaremos a la búsqueda.',
+      adultsLabel: 'Adultos', childrenLabel: 'Niños', infantsLabel: 'Bebés',
+      adultsHelp: '16+ años', childrenHelp: '2 a 15 años', infantsHelp: 'Menores de 2',
+      decrease: 'Reducir {label}', increase: 'Aumentar {label}',
+      previousOffers: 'Ofertas anteriores', moreOffersAria: 'Más ofertas', travelOffers: 'Ofertas de viaje',
+      carouselPages: 'Páginas del carrusel', pageOf: 'Página {n} de {total}', previousOffer: 'Oferta anterior',
+      nextOffer: 'Oferta siguiente', goToOffer: 'Ir a la oferta {n}', showOffer: 'Mostrar oferta {n}',
+      emptyHeading: 'No hay ofertas disponibles ahora mismo',
+      emptyBody: 'No hemos encontrado ofertas que coincidan en el caché actual. Pruebe nuestra búsqueda para encontrar más ofertas.',
+      couldNotLoad: 'No se pudieron cargar las ofertas.', poweredBy: 'Con tecnología de Travelgenix',
+    },
+    it: {
+      viewDeal: 'Vedi offerta', viewDealArrow: 'Vedi offerta →', viewThisDealArrow: 'Vedi questa offerta →',
+      bookNowArrow: 'Prenota ora →', book: 'Prenota', reserveTrip: 'Prenota questo viaggio', enquire: 'Richiedi info',
+      from: 'Da', total: 'totale', perPerson: 'a persona', perNight: 'a notte',
+      perPersonPerNight: 'a persona, a notte',
+      basedOn: 'In base a {parts}', basedOnSharing: 'In base a {parts} in camera condivisa',
+      adult: '{n} adulto', adults: '{n} adulti', child: '{n} bambino', children: '{n} bambini',
+      infant: '{n} neonato', infants: '{n} neonati',
+      night: '{n} notte', nightsN: '{n} notti', nt: '{n} nt', nts: '{n} nt',
+      nightsLabel: 'Notti', board: 'Trattamento', flights: 'Voli', departs: 'Partenza {date}',
+      returns: 'Ritorno {date}', checkin: 'Check-in', checkinDate: 'Check-in {date}',
+      outbound: 'Andata', returnLabel: 'Ritorno', oneWay: 'Solo andata', travelling: 'Viaggiatori',
+      travellers: 'Viaggiatori', stayDetails: 'Dettagli del soggiorno', schedule: 'Orari',
+      amenities: 'Servizi', operator: 'Operatore', refundability: 'Rimborso',
+      duration: 'Durata', date: 'Data', depart: 'Partenza', arrive: 'Arrivo', fare: 'Tariffa',
+      direct: 'Diretto', directCaps: 'DIRETTO', stop: '{n} scalo', stops: '{n} scali',
+      stopCaps: '1 SCALO', stopsCaps: '{n} SCALI',
+      hotel: 'Hotel', flight: 'Volo', package: 'Pacchetto', packageHoliday: 'Pacchetto vacanza',
+      flightHotel: 'Volo + Hotel', leadInPrice: 'Prezzo di partenza', carrier: 'Compagnia',
+      economy: 'Economy', business: 'Business', firstClass: 'Prima classe',
+      moreCount: '+{n} altri', offerFallback: 'Offerta', unknownType: 'Tipo sconosciuto',
+      withOperator: 'con {name}', featuredStay: 'Soggiorno in evidenza', featuredFlight: 'Volo in evidenza',
+      featuredPackage: 'Pacchetto in evidenza', featuredOffer: 'Offerta in evidenza', featured: 'In evidenza',
+      flightToDest: '{carrier} per {dest}', moreOffers: 'Altre offerte',
+      boardRoomOnly: 'Solo pernottamento', boardBreakfast: 'Prima colazione', boardHalfBoard: 'Mezza pensione',
+      boardFullBoard: 'Pensione completa', boardAllInclusive: 'Tutto incluso', boardSelfCatering: 'Appartamento con angolo cottura',
+      departuresFrom: 'Partenze da', cheapestFares: 'Tariffe più basse · prossimi {n} giorni',
+      live: 'Live', time: 'Ora', route: 'Tratta', carrierCol: 'Compagnia', stopsCol: 'Scali',
+      dateCol: 'Data', status: 'Stato', fareCol: 'Tariffa', refresh: 'Aggiorna',
+      noFlights: 'Nessun volo trovato', noFlightsHint: 'Prova ad ampliare l\'intervallo di date o a cambiare l\'aeroporto di partenza.',
+      pillCheapest: '★ Più economico', pillToday: 'Oggi', pillTomorrow: 'Domani',
+      pillThisWeek: 'Questa settimana', pillGoingSoon: 'In esaurimento',
+      liveDeals: 'Offerte live', offersEndIn: 'Le offerte terminano tra', days: 'giorni', hrs: 'h',
+      min: 'min', sec: 'sec', cancel: 'Annulla', close: 'Chiudi',
+      paxIntro: 'Indica il tuo gruppo per questa richiesta. Lo trasmetteremo alla ricerca.',
+      adultsLabel: 'Adulti', childrenLabel: 'Bambini', infantsLabel: 'Neonati',
+      adultsHelp: '16+ anni', childrenHelp: '2 a 15 anni', infantsHelp: 'Sotto i 2 anni',
+      decrease: 'Riduci {label}', increase: 'Aumenta {label}',
+      previousOffers: 'Offerte precedenti', moreOffersAria: 'Altre offerte', travelOffers: 'Offerte di viaggio',
+      carouselPages: 'Pagine del carosello', pageOf: 'Pagina {n} di {total}', previousOffer: 'Offerta precedente',
+      nextOffer: 'Offerta successiva', goToOffer: 'Vai all\'offerta {n}', showOffer: 'Mostra offerta {n}',
+      emptyHeading: 'Nessuna offerta disponibile al momento',
+      emptyBody: 'Non abbiamo trovato offerte corrispondenti nella cache attuale. Prova la nostra ricerca per trovare altre offerte.',
+      couldNotLoad: 'Impossibile caricare le offerte.', poweredBy: 'Offerto da Travelgenix',
+    },
+    ro: {
+      viewDeal: 'Vezi oferta', viewDealArrow: 'Vezi oferta →', viewThisDealArrow: 'Vezi această ofertă →',
+      bookNowArrow: 'Rezervă acum →', book: 'Rezervă', reserveTrip: 'Rezervă această călătorie', enquire: 'Solicită ofertă',
+      from: 'De la', total: 'total', perPerson: 'de persoană', perNight: 'pe noapte',
+      perPersonPerNight: 'de persoană, pe noapte',
+      basedOn: 'Pe baza a {parts}', basedOnSharing: 'Pe baza a {parts} în cameră comună',
+      adult: '{n} adult', adults: '{n} adulți', child: '{n} copil', children: '{n} copii',
+      infant: '{n} bebeluș', infants: '{n} bebeluși',
+      night: '{n} noapte', nightsN: '{n} nopți', nt: '{n} nopți', nts: '{n} nopți',
+      nightsLabel: 'Nopți', board: 'Masă', flights: 'Zboruri', departs: 'Plecare {date}',
+      returns: 'Întoarcere {date}', checkin: 'Check-in', checkinDate: 'Check-in {date}',
+      outbound: 'Tur', returnLabel: 'Retur', oneWay: 'Doar dus', travelling: 'Călători',
+      travellers: 'Călători', stayDetails: 'Detalii sejur', schedule: 'Program',
+      amenities: 'Facilități', operator: 'Operator', refundability: 'Rambursare',
+      duration: 'Durată', date: 'Dată', depart: 'Plecare', arrive: 'Sosire', fare: 'Tarif',
+      direct: 'Direct', directCaps: 'DIRECT', stop: '{n} escală', stops: '{n} escale',
+      stopCaps: '1 ESCALĂ', stopsCaps: '{n} ESCALE',
+      hotel: 'Hotel', flight: 'Zbor', package: 'Pachet', packageHoliday: 'Pachet de vacanță',
+      flightHotel: 'Zbor + Hotel', leadInPrice: 'Preț de pornire', carrier: 'Companie',
+      economy: 'Economic', business: 'Business', firstClass: 'Clasa întâi',
+      moreCount: '+{n} în plus', offerFallback: 'Ofertă', unknownType: 'Tip necunoscut',
+      withOperator: 'cu {name}', featuredStay: 'Sejur recomandat', featuredFlight: 'Zbor recomandat',
+      featuredPackage: 'Pachet recomandat', featuredOffer: 'Ofertă recomandată', featured: 'Recomandat',
+      flightToDest: '{carrier} spre {dest}', moreOffers: 'Mai multe oferte',
+      boardRoomOnly: 'Doar cazare', boardBreakfast: 'Mic dejun', boardHalfBoard: 'Demipensiune',
+      boardFullBoard: 'Pensiune completă', boardAllInclusive: 'All inclusive', boardSelfCatering: 'Cazare cu bucătărie',
+      departuresFrom: 'Plecări din', cheapestFares: 'Cele mai mici tarife · următoarele {n} zile',
+      live: 'Live', time: 'Oră', route: 'Rută', carrierCol: 'Companie', stopsCol: 'Escale',
+      dateCol: 'Dată', status: 'Stare', fareCol: 'Tarif', refresh: 'Reîmprospătează',
+      noFlights: 'Niciun zbor găsit', noFlightsHint: 'Încercați să extindeți intervalul de date sau să schimbați aeroportul de plecare.',
+      pillCheapest: '★ Cel mai ieftin', pillToday: 'Astăzi', pillTomorrow: 'Mâine',
+      pillThisWeek: 'Săptămâna aceasta', pillGoingSoon: 'Se epuizează curând',
+      liveDeals: 'Oferte live', offersEndIn: 'Ofertele se încheie în', days: 'zile', hrs: 'h',
+      min: 'min', sec: 'sec', cancel: 'Anulează', close: 'Închide',
+      paxIntro: 'Indicați grupul dvs. pentru această solicitare. Îl vom transmite căutării.',
+      adultsLabel: 'Adulți', childrenLabel: 'Copii', infantsLabel: 'Bebeluși',
+      adultsHelp: 'Peste 16 ani', childrenHelp: '2 până la 15 ani', infantsHelp: 'Sub 2 ani',
+      decrease: 'Scade {label}', increase: 'Crește {label}',
+      previousOffers: 'Oferte anterioare', moreOffersAria: 'Mai multe oferte', travelOffers: 'Oferte de călătorie',
+      carouselPages: 'Pagini carusel', pageOf: 'Pagina {n} din {total}', previousOffer: 'Oferta anterioară',
+      nextOffer: 'Oferta următoare', goToOffer: 'Mergi la oferta {n}', showOffer: 'Arată oferta {n}',
+      emptyHeading: 'Nicio ofertă disponibilă momentan',
+      emptyBody: 'Nu am găsit oferte care să corespundă în cache-ul actual. Încercați căutarea noastră pentru a găsi mai multe oferte.',
+      couldNotLoad: 'Ofertele nu au putut fi încărcate.', poweredBy: 'Susținut de Travelgenix',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ── XSS-safe helpers ──────────────────────────────────────────────
 
@@ -166,15 +470,52 @@
     return m + 'm';
   }
 
-  function paxString(o) {
+  // Localised pluralised pax phrase. `t` is required for translated output;
+  // when absent (defensive) it falls back to a neutral English form.
+  function paxParts(o, t) {
     const a = o.adults || 0;
     const c = o.children || 0;
     const i = o.infants || 0;
     const parts = [];
-    if (a) parts.push(a + ' adult' + (a === 1 ? '' : 's'));
-    if (c) parts.push(c + ' child' + (c === 1 ? '' : 'ren'));
-    if (i) parts.push(i + ' infant' + (i === 1 ? '' : 's'));
-    return parts.join(', ');
+    if (t) {
+      if (a) parts.push(t(a === 1 ? 'adult' : 'adults', { n: a }));
+      if (c) parts.push(t(c === 1 ? 'child' : 'children', { n: c }));
+      if (i) parts.push(t(i === 1 ? 'infant' : 'infants', { n: i }));
+    } else {
+      if (a) parts.push(a + ' adult' + (a === 1 ? '' : 's'));
+      if (c) parts.push(c + ' child' + (c === 1 ? '' : 'ren'));
+      if (i) parts.push(i + ' infant' + (i === 1 ? '' : 's'));
+    }
+    return parts;
+  }
+
+  function paxString(o, t) {
+    return paxParts(o, t).join(', ');
+  }
+
+  // Localised "N nights" — `key` is 'nightsN' (long) or 'nt'/'nts' (short).
+  function nightsPhrase(n, t, shortForm) {
+    if (!t) return n + (shortForm ? ' nt' + (n === 1 ? '' : 's') : ' night' + (n === 1 ? '' : 's'));
+    if (shortForm) return t(n === 1 ? 'nt' : 'nts', { n: n });
+    return t(n === 1 ? 'night' : 'nightsN', { n: n });
+  }
+
+  // Localised board-basis label. Maps the API enum to a fixed glossary term;
+  // unrecognised values fall back to the prettified enum (treated as data).
+  function boardBasisLabel(s, t) {
+    if (!s) return '';
+    if (!t) return formatEnum(s);
+    const k = String(s).toLowerCase().replace(/[^a-z]/g, '');
+    const map = {
+      roomonly: 'boardRoomOnly',
+      bedandbreakfast: 'boardBreakfast', bedbreakfast: 'boardBreakfast', breakfast: 'boardBreakfast',
+      breakfastincluded: 'boardBreakfast',
+      halfboard: 'boardHalfBoard',
+      fullboard: 'boardFullBoard',
+      allinclusive: 'boardAllInclusive',
+      selfcatering: 'boardSelfCatering',
+    };
+    return map[k] ? t(map[k]) : formatEnum(s);
   }
 
   function getNumericPrice(o) {
@@ -219,7 +560,8 @@
   // sub is the small label underneath (e.g. "per person", "per night").
   // Auto mode preserves the existing behaviour: formattedPPPrice if available,
   // otherwise formattedPrice. Other modes derive from raw numeric where possible.
-  function computeDisplayPrice(o, mode) {
+  function computeDisplayPrice(o, mode, t) {
+    const sub = (k) => (t ? t(k) : ({ total: 'total', perPerson: 'per person', perNight: 'per night', perPersonPerNight: 'per person, per night' })[k] || k);
     const totalStr = o.formattedPrice || '';
     const ppStr = o.formattedPPPrice || '';
     const sym = currencySymbol(totalStr || ppStr);
@@ -251,42 +593,37 @@
     // Per-night requires nights > 0 — fall back gracefully when absent (e.g. flight-only)
     if ((m === 'pernight' || m === 'perpersonpernight') && !nights) {
       // Fall through to perperson or total
-      if (m === 'perpersonpernight' && perPerson != null) return { primary: formatMoney(perPerson, sym), sub: 'per person' };
-      if (total != null) return { primary: formatMoney(total, sym), sub: 'total' };
+      if (m === 'perpersonpernight' && perPerson != null) return { primary: formatMoney(perPerson, sym), sub: sub('perPerson') };
+      if (total != null) return { primary: formatMoney(total, sym), sub: sub('total') };
     }
 
     if (m === 'total') {
-      return { primary: total != null ? formatMoney(total, sym) : (totalStr || ppStr), sub: 'total' };
+      return { primary: total != null ? formatMoney(total, sym) : (totalStr || ppStr), sub: sub('total') };
     }
     if (m === 'perperson') {
-      return { primary: perPerson != null ? formatMoney(perPerson, sym) : (ppStr || totalStr), sub: 'per person' };
+      return { primary: perPerson != null ? formatMoney(perPerson, sym) : (ppStr || totalStr), sub: sub('perPerson') };
     }
     if (m === 'pernight') {
       const v = total != null && nights ? total / nights : null;
-      return { primary: v != null ? formatMoney(v, sym) : (totalStr || ppStr), sub: 'per night' };
+      return { primary: v != null ? formatMoney(v, sym) : (totalStr || ppStr), sub: sub('perNight') };
     }
     if (m === 'perpersonpernight') {
       const v = perPerson != null && nights ? perPerson / nights : null;
-      return { primary: v != null ? formatMoney(v, sym) : (ppStr || totalStr), sub: 'per person, per night' };
+      return { primary: v != null ? formatMoney(v, sym) : (ppStr || totalStr), sub: sub('perPersonPerNight') };
     }
     // auto
     return {
       primary: ppStr || totalStr,
-      sub: ppStr ? 'per person' : (totalStr ? 'total' : ''),
+      sub: ppStr ? sub('perPerson') : (totalStr ? sub('total') : ''),
     };
   }
 
-  function paxBasisLabel(o) {
-    const a = o.adults || 0;
-    const c = o.children || 0;
-    const i = o.infants || 0;
-    const parts = [];
-    if (a) parts.push(a + ' adult' + (a === 1 ? '' : 's'));
-    if (c) parts.push(c + ' child' + (c === 1 ? '' : 'ren'));
-    if (i) parts.push(i + ' infant' + (i === 1 ? '' : 's'));
+  function paxBasisLabel(o, t) {
+    const parts = paxParts(o, t);
     if (!parts.length) return '';
     // Only say "sharing" when there's a hotel involved (more than 1 person stays in a room)
-    const sharing = (o.accommodation && (a + c) > 1);
+    const sharing = (o.accommodation && ((o.adults || 0) + (o.children || 0)) > 1);
+    if (t) return t(sharing ? 'basedOnSharing' : 'basedOn', { parts: parts.join(', ') });
     return 'Based on ' + parts.join(', ') + (sharing ? ' sharing' : '');
   }
 
@@ -4853,10 +5190,26 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = this._defaults(config);
+      // UI language: honour an explicit author `language`/`lang`/`locale`, else
+      // fall back to the viewer's browser locale. The cfg.language default of
+      // 'en' (used for the data request) must NOT pin the UI to English, so we
+      // only pass a language hint when the author actually supplied one.
+      this.t = makeT(this._uiLangHint(config));
       this.shadow = container.attachShadow({ mode: 'open' });
       this.root = null;
       this.rawOffers = [];
       this._render();
+    }
+
+    // Build the language hint object for makeT. Returns the author's explicit
+    // language/lang/locale when present (a real choice), otherwise null so the
+    // resolver falls through to the document/browser locale.
+    _uiLangHint(rawConfig) {
+      const c = rawConfig || {};
+      if (c.lang || c.language || c.locale) {
+        return { lang: c.lang, language: c.language, locale: c.locale };
+      }
+      return null;
     }
 
     _defaults(c) {
@@ -4959,7 +5312,7 @@
         // Two visual styles: pills (discrete cards) or ribbon (continuous strip).
         tickerStyle: c.tickerStyle === 'ribbon' ? 'ribbon' : 'pills',
         tickerSpeed: ['slow', 'medium', 'fast'].includes(c.tickerSpeed) ? c.tickerSpeed : 'medium',
-        tickerLabel: typeof c.tickerLabel === 'string' && c.tickerLabel.length ? c.tickerLabel : 'Live deals',
+        tickerLabel: typeof c.tickerLabel === 'string' && c.tickerLabel.length ? c.tickerLabel : '',
         tickerShowLabel: c.tickerShowLabel !== false,
         tickerPauseOnHover: c.tickerPauseOnHover !== false,
 
@@ -4987,7 +5340,7 @@
         popupShowCloseButton: c.popupShowCloseButton !== false,
         popupOverlay: c.popupOverlay !== false,
         popupOverlayOpacity: typeof c.popupOverlayOpacity === 'number' ? c.popupOverlayOpacity : 60,
-        popupHeading: typeof c.popupHeading === 'string' && c.popupHeading.length ? c.popupHeading : 'Live deals',
+        popupHeading: typeof c.popupHeading === 'string' && c.popupHeading.length ? c.popupHeading : '',
         popupShowPulse: c.popupShowPulse !== false,
         popupFooterText: typeof c.popupFooterText === 'string' ? c.popupFooterText : '',
         popupFooterCtaText: typeof c.popupFooterCtaText === 'string' ? c.popupFooterCtaText : '',
@@ -5028,8 +5381,9 @@
         dedupeStrategy: c.dedupeStrategy || 'hotel',
         cacheMinutes: typeof c.cacheMinutes === 'number' ? c.cacheMinutes : 15,
         emptyBehaviour: c.emptyBehaviour || 'show',
-        emptyHeading: c.emptyHeading || 'No offers available right now',
-        emptyBody: c.emptyBody || 'We couldn\'t find any matching offers in the current cache. Try our search to find more deals.',
+        // Author-configurable; blank falls back to the localised default at render.
+        emptyHeading: c.emptyHeading || '',
+        emptyBody: c.emptyBody || '',
         emptyCtaText: c.emptyCtaText || '',
         emptyCtaUrl: c.emptyCtaUrl || '',
 
@@ -5112,14 +5466,14 @@
       layer.className = 'tgo-popover-layer';
       layer.innerHTML = '<div class="tgo-popover-clickaway"></div>'
         + '<div class="tgo-popover" role="dialog" aria-modal="false" aria-labelledby="tgoPaxTitle">'
-        + '<h3 class="tgo-popover-title" id="tgoPaxTitle">Travellers</h3>'
-        + '<p class="tgo-popover-sub">Set your group for this enquiry. We\'ll pass it through to the search.</p>'
-        + this._paxRow('adults', 'Adults', '16+ years', adults, 1, 9)
-        + this._paxRow('children', 'Children', '2 to 15 years', children, 0, 8)
-        + this._paxRow('infants', 'Infants', 'Under 2', infants, 0, 4)
+        + '<h3 class="tgo-popover-title" id="tgoPaxTitle">' + esc(this.t('travellers')) + '</h3>'
+        + '<p class="tgo-popover-sub">' + esc(this.t('paxIntro')) + '</p>'
+        + this._paxRow('adults', this.t('adultsLabel'), this.t('adultsHelp'), adults, 1, 9)
+        + this._paxRow('children', this.t('childrenLabel'), this.t('childrenHelp'), children, 0, 8)
+        + this._paxRow('infants', this.t('infantsLabel'), this.t('infantsHelp'), infants, 0, 4)
         + '<div class="tgo-popover-actions">'
-        + '<button type="button" class="tgo-popover-btn" data-tgo-popover-cancel>Cancel</button>'
-        + '<button type="button" class="tgo-popover-btn tgo-popover-btn--primary" data-tgo-popover-confirm>View deal</button>'
+        + '<button type="button" class="tgo-popover-btn" data-tgo-popover-cancel>' + esc(this.t('cancel')) + '</button>'
+        + '<button type="button" class="tgo-popover-btn tgo-popover-btn--primary" data-tgo-popover-confirm>' + esc(this.t('viewDeal')) + '</button>'
         + '</div>'
         + '</div>';
 
@@ -5253,9 +5607,9 @@
         + '<small class="tgo-pax-row-help">' + esc(help) + '</small>'
         + '</div>'
         + '<div class="tgo-pax-stepper">'
-        + '<button type="button" data-tgo-pax-btn="' + kind + ':minus" aria-label="Decrease ' + label + '">−</button>'
+        + '<button type="button" data-tgo-pax-btn="' + kind + ':minus" aria-label="' + esc(this.t('decrease', { label: label })) + '">−</button>'
         + '<span class="tgo-pax-stepper-value" data-tgo-pax-val="' + kind + '">' + value + '</span>'
-        + '<button type="button" data-tgo-pax-btn="' + kind + ':plus" aria-label="Increase ' + label + '">+</button>'
+        + '<button type="button" data-tgo-pax-btn="' + kind + ':plus" aria-label="' + esc(this.t('increase', { label: label })) + '">+</button>'
         + '</div>'
         + '</div>';
     }
@@ -5280,7 +5634,7 @@
 
     _showError(msg) {
       this.root.innerHTML = '<div class="tgo-error">'
-        + '<strong>Could not load offers.</strong> ' + esc(msg)
+        + '<strong>' + esc(this.t('couldNotLoad')) + '</strong> ' + esc(msg)
         + '</div>';
     }
 
@@ -5295,8 +5649,8 @@
         : '';
       this.root.innerHTML = '<div class="tgo-empty">'
         + '<div class="tgo-empty-icon">' + icon('badge', 24) + '</div>'
-        + '<h3 class="tgo-empty-heading">' + esc(this.cfg.emptyHeading) + '</h3>'
-        + '<p class="tgo-empty-body">' + esc(this.cfg.emptyBody) + '</p>'
+        + '<h3 class="tgo-empty-heading">' + esc(this.cfg.emptyHeading || this.t('emptyHeading')) + '</h3>'
+        + '<p class="tgo-empty-body">' + esc(this.cfg.emptyBody || this.t('emptyBody')) + '</p>'
         + cta
         + '</div>';
     }
@@ -5493,7 +5847,7 @@
       }
 
       if (this.cfg.show.poweredBy) {
-        html += '<div class="tgo-powered">Powered by Travelgenix</div>';
+        html += '<div class="tgo-powered">' + esc(this.t('poweredBy')) + '</div>';
       }
       this.root.innerHTML = html;
 
@@ -5520,18 +5874,18 @@
     // the viewport recalculates pages correctly.
     _renderCarousel(offers) {
       let html = '<div class="tgo-carousel" data-tgo-carousel>';
-      html += '<button type="button" class="tgo-carousel-arrow" data-dir="prev" aria-label="Previous offers">'
+      html += '<button type="button" class="tgo-carousel-arrow" data-dir="prev" aria-label="' + esc(this.t('previousOffers')) + '">'
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
         + '</button>';
-      html += '<div class="tgo-carousel-track" data-tgo-track tabindex="0" aria-label="Travel offers">';
+      html += '<div class="tgo-carousel-track" data-tgo-track tabindex="0" aria-label="' + esc(this.t('travelOffers')) + '">';
       for (const o of offers) html += this._renderOfferCard(o);
       html += '</div>';
-      html += '<button type="button" class="tgo-carousel-arrow" data-dir="next" aria-label="More offers">'
+      html += '<button type="button" class="tgo-carousel-arrow" data-dir="next" aria-label="' + esc(this.t('moreOffersAria')) + '">'
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
         + '</button>';
       // Dot rail rendered as empty container; populated in _wireCarousel
       // because the page count depends on cards-per-view.
-      html += '<ul class="tgo-carousel-dots" data-tgo-dots role="tablist" aria-label="Carousel pages"></ul>';
+      html += '<ul class="tgo-carousel-dots" data-tgo-dots role="tablist" aria-label="' + esc(this.t('carouselPages')) + '"></ul>';
       html += '</div>';
       return html;
     }
@@ -5605,7 +5959,7 @@
           html += '<li><button type="button" class="tgo-carousel-dot"'
             + ' data-tgo-dot="' + i + '"'
             + ' role="tab"'
-            + ' aria-label="Page ' + (i + 1) + ' of ' + pageCount + '"'
+            + ' aria-label="' + esc(this.t('pageOf', { n: (i + 1), total: pageCount })) + '"'
             + (i === 0 ? ' aria-current="true"' : '')
             + '></button></li>';
         }
@@ -5757,7 +6111,7 @@
     _variantBadge(o) {
       if (!this.cfg.show.variantCount) return '';
       if (!o._variantCount || o._variantCount <= 1) return '';
-      return '<div class="tgo-card-variants">+' + (o._variantCount - 1) + ' more</div>';
+      return '<div class="tgo-card-variants">' + esc(this.t('moreCount', { n: (o._variantCount - 1) })) + '</div>';
     }
 
     _starsBadge(rating) {
@@ -5802,13 +6156,13 @@
       const cls = isGood ? 'success' : (/non/i.test(refundability) ? 'warn' : '');
       return '<div class="tgo-data-row">'
         + icon('shield', 12)
-        + '<span class="tgo-data-label">Refundability</span>'
+        + '<span class="tgo-data-label">' + esc(this.t('refundability')) + '</span>'
         + '<span class="tgo-data-value ' + cls + '">' + esc(pretty) + '</span>'
         + '</div>';
     }
 
     _renderPriceFooter(o, wasPrice) {
-      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
       const url = safeUrl(o.url || '#');
       const wasHtml = (this.cfg.show.wasPrice && wasPrice) ? '<div class="tgo-price-was">' + esc(wasPrice) + '</div>' : '';
 
@@ -5817,7 +6171,7 @@
       // hint that it's interactive.
       let basisHtml = '';
       if (this.cfg.show.paxBasis) {
-        const label = paxBasisLabel(o);
+        const label = paxBasisLabel(o, this.t);
         if (label) {
           // Encode the offer's pax + URL into data attributes so the popover opens
           // with the right values preloaded and can rewrite the click-through URL
@@ -5840,7 +6194,7 @@
         + (display.sub ? '<div class="tgo-price-sub">' + esc(display.sub) + '</div>' : '')
         + basisHtml
         + '</div>'
-        + '<a class="tgo-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">View deal</a>'
+        + '<a class="tgo-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(this.t('viewDeal')) + '</a>'
         + '</div>';
     }
 
@@ -5858,10 +6212,10 @@
       const imgStyle = cssBgUrl(img);
       html += '<div class="tgo-card-image" ' + imgStyle + '>';
       if (acc.rating) html += this._starsBadge(acc.rating);
-      html += '<div class="tgo-card-type-badge">Hotel</div>';
+      html += '<div class="tgo-card-type-badge">' + esc(this.t('hotel')) + '</div>';
       html += this._variantBadge(o);
       if (this.cfg.show.leadInPill && isLeadIn) {
-        html += ('<div class="tgo-card-pill">Lead-in price</div>');
+        html += ('<div class="tgo-card-pill">' + esc(this.t('leadInPrice')) + '</div>');
       }
       const trip = this._renderTripAdvisorChip(acc);
       if (trip) html += (trip);
@@ -5872,7 +6226,7 @@
       if (this.cfg.show.propertyType && acc.propertyType) {
         html += ('<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>');
       }
-      html += '<h3 class="tgo-card-name">' + esc(acc.name || 'Hotel') + '</h3>';
+      html += '<h3 class="tgo-card-name">' + esc(acc.name || this.t('hotel')) + '</h3>';
       if (this.cfg.show.chain && acc.chain) {
         html += ('<div class="tgo-card-chain">' + esc(acc.chain) + '</div>');
       }
@@ -5888,11 +6242,11 @@
       // Stay details
       if (this.cfg.show.stayDetails) {
         html += ('<div class="tgo-section">'
-          + '<div class="tgo-section-title">Stay details</div>'
-          + this._row('calendar', 'Check-in', formatDate(acc.checkinDate))
-          + this._row('moon', 'Nights', acc.nights ? String(acc.nights) : '')
-          + this._row('utensils', 'Board', formatEnum(acc.boardBasis))
-          + this._row('users', 'Travelling', paxString(o))
+          + '<div class="tgo-section-title">' + esc(this.t('stayDetails')) + '</div>'
+          + this._row('calendar', this.t('checkin'), formatDate(acc.checkinDate))
+          + this._row('moon', this.t('nightsLabel'), acc.nights ? String(acc.nights) : '')
+          + this._row('utensils', this.t('board'), boardBasisLabel(acc.boardBasis, this.t))
+          + this._row('users', this.t('travelling'), paxString(o, this.t))
           + this._renderRefundability(pricing.refundability)
           + '</div>');
       }
@@ -5901,7 +6255,7 @@
       if (this.cfg.show.amenities && amenities.length) {
         const visible = amenities.slice(0, 10);
         const extras = amenities.length - visible.length;
-        let amenHtml = '<div class="tgo-section"><div class="tgo-section-title">Amenities</div><div class="tgo-amenities">';
+        let amenHtml = '<div class="tgo-section"><div class="tgo-section-title">' + esc(this.t('amenities')) + '</div><div class="tgo-amenities">';
         for (const a of visible) amenHtml += '<span class="tgo-amenity">' + esc(formatEnum(a)) + '</span>';
         if (extras > 0) amenHtml += '<span class="tgo-amenity">+' + extras + '</span>';
         amenHtml += '</div></div>';
@@ -5923,8 +6277,8 @@
       const img = safeImgUrl((f.image && f.image.url) || '');
       const isDirect = f.direct === true;
       const stops = f.stops || 0;
-      const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : stops + ' stops');
-      const tripType = f.returnDate ? 'Return' : 'One-way';
+      const stopsLabel = isDirect ? this.t('direct') : this.t(stops === 1 ? 'stop' : 'stops', { n: stops });
+      const tripType = f.returnDate ? this.t('returnLabel') : this.t('oneWay');
       const priceChanged = pricing.priceChanged === true && pricing.priceBeforeChange;
       const isLeadIn = pricing.isLeadIn === true;
 
@@ -5933,10 +6287,10 @@
       // Hero image (destination shot)
       if (this.cfg.show.flightImage && img) {
         let imgInner = '<div class="tgo-card-image flight" ' + cssBgUrl(img) + '>'
-          + '<div class="tgo-card-type-badge">Flight</div>'
+          + '<div class="tgo-card-type-badge">' + esc(this.t('flight')) + '</div>'
           + this._variantBadge(o);
         if (this.cfg.show.leadInPill && isLeadIn) {
-          imgInner += ('<div class="tgo-card-pill">Lead-in price</div>');
+          imgInner += ('<div class="tgo-card-pill">' + esc(this.t('leadInPrice')) + '</div>');
         }
         imgInner += '</div>';
         html += (imgInner);
@@ -5972,16 +6326,16 @@
       // Carrier row (core)
       html += '<div class="tgo-carrier-row">'
         + (carrier.code ? '<span class="tgo-carrier-code">' + esc(carrier.code) + '</span>' : '')
-        + '<span class="tgo-carrier-name">' + esc(carrier.name || 'Carrier') + '</span>'
-        + '<span class="tgo-pax">' + icon('users', 12) + esc(paxString(o)) + '</span>'
+        + '<span class="tgo-carrier-name">' + esc(carrier.name || this.t('carrier')) + '</span>'
+        + '<span class="tgo-pax">' + icon('users', 12) + esc(paxString(o, this.t)) + '</span>'
         + '</div>';
 
       // Schedule
       if (this.cfg.show.flightSchedule) {
         html += ('<div class="tgo-section">'
-          + '<div class="tgo-section-title">Schedule</div>'
-          + this._row('calendar', 'Outbound', formatDateTime(f.outboundDate))
-          + (f.returnDate ? this._row('calendar', 'Return', formatDateTime(f.returnDate)) : '')
+          + '<div class="tgo-section-title">' + esc(this.t('schedule')) + '</div>'
+          + this._row('calendar', this.t('outbound'), formatDateTime(f.outboundDate))
+          + (f.returnDate ? this._row('calendar', this.t('returnLabel'), formatDateTime(f.returnDate)) : '')
           + this._renderRefundability(pricing.refundability)
           + '</div>');
       }
@@ -6006,7 +6360,7 @@
       const carrierName = (f.carrier && f.carrier.name) || '';
       const isDirect = f.direct === true;
       const stops = (f.stops != null) ? f.stops : null;
-      const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : (stops > 0 ? stops + ' stops' : ''));
+      const stopsLabel = isDirect ? this.t('direct') : (stops === 1 ? this.t('stop', { n: 1 }) : (stops > 0 ? this.t('stops', { n: stops }) : ''));
 
       // PackageHoliday operator lives at acc.operator
       const operator = acc.operator || null;
@@ -6023,7 +6377,7 @@
       const wasPrice = priceChanged ? '£' + Math.round(flightPricing.priceBeforeChange) : null;
       const isLeadIn = (accPricing.isLeadIn === true) || (flightPricing.isLeadIn === true);
 
-      const badgeText = isHoliday ? 'Package Holiday' : (isDynamic ? 'Flight + Hotel' : 'Package');
+      const badgeText = isHoliday ? this.t('packageHoliday') : (isDynamic ? this.t('flightHotel') : this.t('package'));
       const badgeClass = isHoliday ? 'package-holiday' : (isDynamic ? 'package-dynamic' : '');
 
       let html = '<div class="tgo-card">';
@@ -6035,7 +6389,7 @@
       html += '<div class="tgo-card-type-badge ' + badgeClass + '">' + esc(badgeText) + '</div>';
       html += this._variantBadge(o);
       if (this.cfg.show.leadInPill && isLeadIn) {
-        html += ('<div class="tgo-card-pill">Lead-in price</div>');
+        html += ('<div class="tgo-card-pill">' + esc(this.t('leadInPrice')) + '</div>');
       }
       const trip = this._renderTripAdvisorChip(acc);
       if (trip) html += (trip);
@@ -6044,7 +6398,7 @@
       // Operator strip — PackageHoliday only
       if (this.cfg.show.packageOperator && isHoliday && operatorName) {
         let opHtml = '<div class="tgo-package-operator">'
-          + '<span class="tgo-operator-label">Operator</span>'
+          + '<span class="tgo-operator-label">' + esc(this.t('operator')) + '</span>'
           + '<span class="tgo-operator-name">' + esc(operatorName) + '</span>';
         if (atol) opHtml += '<span class="tgo-operator-atol">ATOL</span>';
         opHtml += '</div>';
@@ -6056,7 +6410,7 @@
       if (this.cfg.show.propertyType && acc.propertyType) {
         html += ('<div class="tgo-card-property-type">' + esc(formatEnum(acc.propertyType)) + '</div>');
       }
-      html += '<h3 class="tgo-card-name">' + esc(acc.name || 'Package holiday') + '</h3>';
+      html += '<h3 class="tgo-card-name">' + esc(acc.name || this.t('packageHoliday')) + '</h3>';
       if (this.cfg.show.chain && acc.chain) {
         html += ('<div class="tgo-card-chain">' + esc(acc.chain) + '</div>');
       }
@@ -6078,8 +6432,8 @@
         const flightLine = flightLineParts.join(' · ');
 
         const hotelLineParts = [];
-        if (acc.nights) hotelLineParts.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
-        if (acc.boardBasis) hotelLineParts.push(formatEnum(acc.boardBasis));
+        if (acc.nights) hotelLineParts.push(nightsPhrase(acc.nights, this.t));
+        if (acc.boardBasis) hotelLineParts.push(boardBasisLabel(acc.boardBasis, this.t));
         const hotelLine = hotelLineParts.join(' · ');
 
         if (flightLine || hotelLine) {
@@ -6089,8 +6443,8 @@
               + '<span class="tgo-package-icon">' + icon('plane', 16) + '</span>'
               + '<span><strong>' + esc(flightLine) + '</strong>';
             if (f.outboundDate) {
-              psHtml += '<div class="tgo-package-line-detail">Departs ' + esc(formatDate(f.outboundDate));
-              if (f.returnDate) psHtml += ' · Returns ' + esc(formatDate(f.returnDate));
+              psHtml += '<div class="tgo-package-line-detail">' + esc(this.t('departs', { date: formatDate(f.outboundDate) }));
+              if (f.returnDate) psHtml += ' · ' + esc(this.t('returns', { date: formatDate(f.returnDate) }));
               if (f.duration) psHtml += ' · ' + esc(formatDuration(f.duration));
               if (this.cfg.show.cabinClass && f.cabinClass) psHtml += ' · ' + esc(formatEnum(f.cabinClass));
               psHtml += '</div>';
@@ -6101,12 +6455,12 @@
             psHtml += '<div class="tgo-package-line">'
               + '<span class="tgo-package-icon">' + icon('hotel', 16) + '</span>'
               + '<span><strong>' + esc(hotelLine) + '</strong>';
-            if (acc.checkinDate) psHtml += '<div class="tgo-package-line-detail">Check-in ' + esc(formatDate(acc.checkinDate)) + '</div>';
+            if (acc.checkinDate) psHtml += '<div class="tgo-package-line-detail">' + esc(this.t('checkinDate', { date: formatDate(acc.checkinDate) })) + '</div>';
             psHtml += '</span></div>';
           }
           psHtml += '<div class="tgo-package-line">'
             + '<span class="tgo-package-icon">' + icon('users', 16) + '</span>'
-            + '<span>' + esc(paxString(o) || 'Travellers') + '</span></div>';
+            + '<span>' + esc(paxString(o, this.t) || this.t('travellers')) + '</span></div>';
           psHtml += '</div>';
           html += (psHtml);
         }
@@ -6122,7 +6476,7 @@
       if (this.cfg.show.amenities && amenities.length) {
         const visible = amenities.slice(0, 10);
         const extras = amenities.length - visible.length;
-        let amenHtml = '<div class="tgo-section"><div class="tgo-section-title">Amenities</div><div class="tgo-amenities">';
+        let amenHtml = '<div class="tgo-section"><div class="tgo-section-title">' + esc(this.t('amenities')) + '</div><div class="tgo-amenities">';
         for (const a of visible) amenHtml += '<span class="tgo-amenity">' + esc(formatEnum(a)) + '</span>';
         if (extras > 0) amenHtml += '<span class="tgo-amenity">+' + extras + '</span>';
         amenHtml += '</div></div>';
@@ -6136,8 +6490,8 @@
 
     _renderUnknown(o) {
       return '<div class="tgo-card"><div class="tgo-card-body">'
-        + '<h3 class="tgo-card-name">Offer</h3>'
-        + '<div class="tgo-card-meta">' + esc(o.type || 'Unknown type') + '</div>'
+        + '<h3 class="tgo-card-name">' + esc(this.t('offerFallback')) + '</h3>'
+        + '<div class="tgo-card-meta">' + esc(o.type || this.t('unknownType')) + '</div>'
         + '</div>' + this._renderPriceFooter(o) + '</div>';
     }
 
@@ -6190,13 +6544,13 @@
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
       if (this.cfg.show.leadInPill && isLeadIn) {
-        html += '<span class="tgo-list-img-badge lead-in">Lead-in price</span>';
+        html += '<span class="tgo-list-img-badge lead-in">' + esc(this.t('leadInPrice')) + '</span>';
       }
       html += '</div>';
 
       html += '<div class="tgo-list-body">';
       html += '<div>';
-      html += '<h3 class="tgo-list-title">' + esc(acc.name || 'Hotel') + '</h3>';
+      html += '<h3 class="tgo-list-title">' + esc(acc.name || this.t('hotel')) + '</h3>';
 
       if (this.cfg.listShowMeta) {
         html += '<div class="tgo-list-meta">';
@@ -6212,10 +6566,10 @@
             + '</span>';
         }
         if (acc.nights) {
-          html += '<span>' + icon('moon', 12) + acc.nights + ' night' + (acc.nights === 1 ? '' : 's') + '</span>';
+          html += '<span>' + icon('moon', 12) + esc(nightsPhrase(acc.nights, this.t)) + '</span>';
         }
         if (acc.boardBasis) {
-          html += '<span>' + icon('utensils', 12) + esc(formatEnum(acc.boardBasis)) + '</span>';
+          html += '<span>' + icon('utensils', 12) + esc(boardBasisLabel(acc.boardBasis, this.t)) + '</span>';
         }
         html += '</div>';
       }
@@ -6245,17 +6599,17 @@
       const img = safeImgUrl((f.image && f.image.url) || '');
       const isDirect = f.direct === true;
       const stops = f.stops || 0;
-      const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : stops + ' stops');
-      const tripType = f.returnDate ? 'Return' : 'One-way';
+      const stopsLabel = isDirect ? this.t('direct') : this.t(stops === 1 ? 'stop' : 'stops', { n: stops });
+      const tripType = f.returnDate ? this.t('returnLabel') : this.t('oneWay');
       const isLeadIn = pricing.isLeadIn === true;
       const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? '£' + Math.round(pricing.priceBeforeChange) : null;
 
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
       if (this.cfg.show.leadInPill && isLeadIn) {
-        html += '<span class="tgo-list-img-badge lead-in">Lead-in price</span>';
+        html += '<span class="tgo-list-img-badge lead-in">' + esc(this.t('leadInPrice')) + '</span>';
       } else if (isDirect) {
-        html += '<span class="tgo-list-img-badge">Direct</span>';
+        html += '<span class="tgo-list-img-badge">' + esc(this.t('direct')) + '</span>';
       }
       html += '</div>';
 
@@ -6314,13 +6668,13 @@
       if (operatorName && this.cfg.show.packageOperator) {
         html += '<span class="tgo-list-img-badge">' + esc(operatorName) + '</span>';
       } else if (this.cfg.show.leadInPill && isLeadIn) {
-        html += '<span class="tgo-list-img-badge lead-in">Lead-in price</span>';
+        html += '<span class="tgo-list-img-badge lead-in">' + esc(this.t('leadInPrice')) + '</span>';
       }
       html += '</div>';
 
       html += '<div class="tgo-list-body">';
       html += '<div>';
-      html += '<h3 class="tgo-list-title">' + esc(acc.name || 'Package holiday') + '</h3>';
+      html += '<h3 class="tgo-list-title">' + esc(acc.name || this.t('packageHoliday')) + '</h3>';
 
       if (this.cfg.listShowMeta) {
         html += '<div class="tgo-list-meta">';
@@ -6339,10 +6693,10 @@
           html += '<span>' + icon('plane', 12) + esc(fromCode + ' → ' + toCode) + '</span>';
         }
         if (acc.nights) {
-          html += '<span>' + icon('moon', 12) + acc.nights + ' nt' + '</span>';
+          html += '<span>' + icon('moon', 12) + esc(this.t('nt', { n: acc.nights })) + '</span>';
         }
         if (acc.boardBasis) {
-          html += '<span>' + icon('utensils', 12) + esc(formatEnum(acc.boardBasis)) + '</span>';
+          html += '<span>' + icon('utensils', 12) + esc(boardBasisLabel(acc.boardBasis, this.t)) + '</span>';
         }
         html += '</div>';
       }
@@ -6351,8 +6705,8 @@
       if (this.cfg.listShowAmenities) {
         const tags = [];
         if (atol && isHoliday) tags.push('ATOL');
-        if (isHoliday) tags.push('Package');
-        else tags.push('Flight + Hotel');
+        if (isHoliday) tags.push(this.t('package'));
+        else tags.push(this.t('flightHotel'));
         if (tags.length) {
           html += '<div class="tgo-list-tags">';
           for (const t of tags) html += '<span class="tgo-list-tag">' + esc(t) + '</span>';
@@ -6370,8 +6724,8 @@
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img"></div>';
       html += '<div class="tgo-list-body"><div>';
-      html += '<h3 class="tgo-list-title">Offer</h3>';
-      html += '<div class="tgo-list-meta"><span>' + esc(o.type || 'Unknown type') + '</span></div>';
+      html += '<h3 class="tgo-list-title">' + esc(this.t('offerFallback')) + '</h3>';
+      html += '<div class="tgo-list-meta"><span>' + esc(o.type || this.t('unknownType')) + '</span></div>';
       html += '</div></div>';
       html += this._renderListPrice(o, null);
       html += '</article>';
@@ -6381,14 +6735,14 @@
     // Price column for the list layout. Same logic as _renderPriceFooter but
     // restyled for a vertical right-side column.
     _renderListPrice(o, wasPrice) {
-      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
       const url = safeUrl(o.url || '#');
       const wasHtml = (this.cfg.show.wasPrice && wasPrice)
         ? '<span class="tgo-list-was">' + esc(wasPrice) + '</span>' : '';
 
       let basisHtml = '';
       if (this.cfg.show.paxBasis) {
-        const label = paxBasisLabel(o);
+        const label = paxBasisLabel(o, this.t);
         if (label) {
           const paxData = JSON.stringify({
             adults: o.adults || 0,
@@ -6406,7 +6760,7 @@
         + '<span class="tgo-list-now">' + esc(display.primary) + '</span>'
         + (display.sub ? '<span class="tgo-list-sub">' + esc(display.sub) + '</span>' : '')
         + basisHtml
-        + '<a class="tgo-list-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">View deal</a>'
+        + '<a class="tgo-list-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(this.t('viewDeal')) + '</a>'
         + '</div>';
     }
     /* ═══════════════════════════════════════════════════════════════════
@@ -6477,7 +6831,7 @@
       html += '</div>';  // /tgo-mag
 
       if (this.cfg.show.poweredBy) {
-        html += '<div class="tgo-powered">Powered by Travelgenix</div>';
+        html += '<div class="tgo-powered">' + esc(this.t('poweredBy')) + '</div>';
       }
       this.root.innerHTML = html;
     }
@@ -6540,40 +6894,40 @@
       if (isAcc) {
         const bits = [];
         if (dest.name) bits.push(dest.name);
-        if (acc.nights) bits.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
-        if (acc.boardBasis) bits.push(formatEnum(acc.boardBasis));
+        if (acc.nights) bits.push(nightsPhrase(acc.nights, this.t));
+        if (acc.boardBasis) bits.push(boardBasisLabel(acc.boardBasis, this.t));
         kicker = bits.join(' · ');
-        headline = acc.name || 'Featured stay';
+        headline = acc.name || this.t('featuredStay');
         summary = acc.summary || '';
       } else if (isFlight) {
         const og = f.origin || {};
         const fd = f.destination || {};
         const bits = [];
         if (og.iataCode && fd.iataCode) bits.push(og.iataCode + ' → ' + fd.iataCode);
-        if (f.direct) bits.push('Direct');
+        if (f.direct) bits.push(this.t('direct'));
         if (f.duration) bits.push(formatDuration(f.duration));
         kicker = bits.join(' · ');
-        headline = (f.carrier && f.carrier.name) ? f.carrier.name + ' to ' + (fd.name || fd.iataCode || 'destination') : 'Featured flight';
+        headline = (f.carrier && f.carrier.name) ? this.t('flightToDest', { carrier: f.carrier.name, dest: (fd.name || fd.iataCode || '') }) : this.t('featuredFlight');
         summary = '';
       } else if (isPkg) {
         const pkgType = getPackageType(o);
         const isHoliday = pkgType === 'PackageHolidays';
         const bits = [];
         if (dest.name) bits.push(dest.name);
-        if (acc.nights) bits.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
-        if (acc.boardBasis) bits.push(formatEnum(acc.boardBasis));
-        if (isHoliday && acc.operator && acc.operator.name) bits.push('with ' + acc.operator.name);
+        if (acc.nights) bits.push(nightsPhrase(acc.nights, this.t));
+        if (acc.boardBasis) bits.push(boardBasisLabel(acc.boardBasis, this.t));
+        if (isHoliday && acc.operator && acc.operator.name) bits.push(this.t('withOperator', { name: acc.operator.name }));
         kicker = bits.join(' · ');
-        headline = acc.name || 'Featured package';
+        headline = acc.name || this.t('featuredPackage');
         summary = acc.summary || '';
       } else {
         kicker = '';
-        headline = 'Featured offer';
+        headline = this.t('featuredOffer');
         summary = '';
       }
 
       // Price block on the right of the hero
-      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
       const url = safeUrl(o.url || '#');
       const accPricing = acc.pricing || {};
       const flightPricing = f.pricing || {};
@@ -6584,7 +6938,7 @@
           : null;
 
       let html = '<article class="tgo-mag-hero" ' + cssBgUrl(img) + '>';
-      html += '<span class="tgo-mag-hero-badge">Featured</span>';
+      html += '<span class="tgo-mag-hero-badge">' + esc(this.t('featured')) + '</span>';
       html += '<div class="tgo-mag-hero-content">';
       html += '<div>';
       if (kicker) html += '<div class="tgo-mag-hero-kicker">' + esc(kicker) + '</div>';
@@ -6597,13 +6951,13 @@
       html += '</div>';
 
       html += '<div class="tgo-mag-hero-price">';
-      html += '<span class="tgo-mag-hero-from">From</span>';
+      html += '<span class="tgo-mag-hero-from">' + esc(this.t('from')) + '</span>';
       if (this.cfg.show.wasPrice && wasPrice) {
         html += '<span class="tgo-mag-hero-was">' + esc(wasPrice) + '</span>';
       }
       html += '<span class="tgo-mag-hero-now">' + esc(display.primary) + '</span>';
       if (display.sub) html += '<span class="tgo-mag-hero-sub">' + esc(display.sub) + '</span>';
-      html += '<a class="tgo-mag-hero-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Reserve this trip</a>';
+      html += '<a class="tgo-mag-hero-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(this.t('reserveTrip')) + '</a>';
       html += '</div>';
       html += '</div>'; // /tgo-mag-hero-content
       html += '</article>';
@@ -6635,7 +6989,7 @@
       if (isPkg && acc.operator && acc.operator.name) {
         overlay = acc.operator.name;
       } else if (isFlight && f.direct) {
-        overlay = 'Direct';
+        overlay = this.t('direct');
       } else if (isAcc && acc.rating >= 5) {
         overlay = '5★';
       }
@@ -6647,10 +7001,10 @@
       if (isAcc) {
         const bits = [];
         if (dest.name) bits.push(dest.name);
-        if (acc.nights) bits.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
-        if (acc.boardBasis) bits.push(formatEnum(acc.boardBasis));
+        if (acc.nights) bits.push(nightsPhrase(acc.nights, this.t));
+        if (acc.boardBasis) bits.push(boardBasisLabel(acc.boardBasis, this.t));
         kicker = bits.join(' · ');
-        headline = acc.name || 'Featured stay';
+        headline = acc.name || this.t('featuredStay');
         summary = acc.summary || '';
       } else if (isFlight) {
         const og = f.origin || {};
@@ -6660,21 +7014,21 @@
         if (f.duration) bits.push(formatDuration(f.duration));
         if ((f.carrier || {}).name) bits.push(f.carrier.name);
         kicker = bits.join(' · ');
-        headline = ((fd.name || fd.iataCode || '') + (f.direct ? ' direct' : '')).trim() || 'Featured flight';
+        headline = ((fd.name || fd.iataCode || '') + (f.direct ? ' ' + this.t('direct').toLowerCase() : '')).trim() || this.t('featuredFlight');
         summary = '';
       } else if (isPkg) {
         const bits = [];
         if (dest.name) bits.push(dest.name);
-        if (acc.nights) bits.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
-        if (acc.boardBasis) bits.push(formatEnum(acc.boardBasis));
+        if (acc.nights) bits.push(nightsPhrase(acc.nights, this.t));
+        if (acc.boardBasis) bits.push(boardBasisLabel(acc.boardBasis, this.t));
         kicker = bits.join(' · ');
-        headline = acc.name || 'Featured package';
+        headline = acc.name || this.t('featuredPackage');
         summary = acc.summary || '';
       } else {
-        headline = 'Featured offer';
+        headline = this.t('featuredOffer');
       }
 
-      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
       const url = safeUrl(o.url || '#');
 
       const sideAttr = ' data-side="' + esc(side) + '"';
@@ -6699,7 +7053,7 @@
       html += '<span class="price">' + esc(display.primary)
         + (display.sub ? '<small>' + esc(display.sub) + '</small>' : '')
         + '</span>';
-      html += '<span class="cta">View deal →</span>';
+      html += '<span class="cta">' + esc(this.t('viewDealArrow')) + '</span>';
       html += '</div>';
       html += '</div>';  // /tgo-mag-banner-body
       html += '</a>';
@@ -6732,8 +7086,8 @@
       const isDirect = f.direct === true;
       const stops = f.stops;
       const stopsLabel = isDirect
-        ? 'Direct'
-        : (stops === 1 ? '1 stop' : (stops > 1 ? stops + ' stops' : ''));
+        ? this.t('direct')
+        : (stops === 1 ? this.t('stop', { n: 1 }) : (stops > 1 ? this.t('stops', { n: stops }) : ''));
       const departLabel = f.outboundDate ? formatDate(f.outboundDate) : '';
 
       // Defensive — if we have absolutely nothing useful, render nothing
@@ -6741,7 +7095,7 @@
       if (fromCode && toCode) parts.push(esc(fromCode + ' → ' + toCode));
       if (carrier) parts.push(esc(carrier));
       if (stopsLabel) parts.push(esc(stopsLabel));
-      if (departLabel) parts.push(esc('Departs ' + departLabel));
+      if (departLabel) parts.push(esc(this.t('departs', { date: departLabel })));
       if (!parts.length) return '';
 
       // Join with styled separator so the whitespace doesn't fight the mono font
@@ -6785,7 +7139,7 @@
       const speed = this.cfg.tickerSpeed || 'medium';
       const showLabel = this.cfg.tickerShowLabel !== false;
       const pauseOnHover = this.cfg.tickerPauseOnHover !== false;
-      const labelText = this.cfg.tickerLabel || 'Live deals';
+      const labelText = this.cfg.tickerLabel || this.t('liveDeals');
 
       let html = '<div class="tgt-ticker"'
         + ' data-style="' + esc(style) + '"'
@@ -6810,7 +7164,7 @@
       html += '</div>';
 
       if (this.cfg.show.poweredBy) {
-        html += '<div class="tgo-powered">Powered by Travelgenix</div>';
+        html += '<div class="tgo-powered">' + esc(this.t('poweredBy')) + '</div>';
       }
       this.root.innerHTML = html;
     }
@@ -6827,7 +7181,7 @@
       const isFlight = o.type === 'Flight' || o.type === 'Flights';
       const isPkg = o.type === 'Package' || o.type === 'Packages';
 
-      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
       const url = safeUrl(o.url || '#');
 
       // Compose the content based on offer type
@@ -6848,25 +7202,25 @@
         const metaParts = [];
         if (f.carrier && f.carrier.code) metaParts.push('<strong>' + esc(f.carrier.code) + '</strong>');
         if (f.outboundDate) metaParts.push(esc(formatDate(f.outboundDate)));
-        if (f.direct) metaParts.push('Direct');
+        if (f.direct) metaParts.push(esc(this.t('direct')));
         if (metaParts.length) {
           inner += '<span class="tgt-pill-meta">' + metaParts.join(' · ') + '</span>';
         }
       } else if (isAcc) {
         // Hotels: 🏨 Atlantis The Royal · Dubai · 7 nts · HB · £2,449
         inner += '<span class="tgt-pill-icon">' + icon('hotel', 14) + '</span>';
-        inner += '<span class="tgt-pill-name">' + esc(acc.name || 'Featured stay') + '</span>';
+        inner += '<span class="tgt-pill-name">' + esc(acc.name || this.t('featuredStay')) + '</span>';
         const metaParts = [];
         if (dest.name) metaParts.push(esc(dest.name));
-        if (acc.nights) metaParts.push('<strong>' + acc.nights + ' nt' + (acc.nights === 1 ? '' : 's') + '</strong>');
-        if (acc.boardBasis) metaParts.push(esc(formatEnum(acc.boardBasis)));
+        if (acc.nights) metaParts.push('<strong>' + esc(nightsPhrase(acc.nights, this.t, true)) + '</strong>');
+        if (acc.boardBasis) metaParts.push(esc(boardBasisLabel(acc.boardBasis, this.t)));
         if (metaParts.length) {
           inner += '<span class="tgt-pill-meta">' + metaParts.join(' · ') + '</span>';
         }
       } else if (isPkg) {
         // Packages: 🏨 Costa Adeje · MAN→TFS · Jet2 · 7 nts · AI · £1,189
         inner += '<span class="tgt-pill-icon">' + icon('hotel', 14) + '</span>';
-        inner += '<span class="tgt-pill-name">' + esc(acc.name || 'Featured package') + '</span>';
+        inner += '<span class="tgt-pill-name">' + esc(acc.name || this.t('featuredPackage')) + '</span>';
         const metaParts = [];
         const og = f.origin || {};
         const fd = f.destination || dest;
@@ -6876,14 +7230,14 @@
           metaParts.push(esc(dest.name));
         }
         if (f.carrier && f.carrier.code) metaParts.push('<strong>' + esc(f.carrier.code) + '</strong>');
-        if (acc.nights) metaParts.push(acc.nights + ' nt' + (acc.nights === 1 ? '' : 's'));
-        if (acc.boardBasis) metaParts.push(esc(formatEnum(acc.boardBasis)));
+        if (acc.nights) metaParts.push(esc(nightsPhrase(acc.nights, this.t, true)));
+        if (acc.boardBasis) metaParts.push(esc(boardBasisLabel(acc.boardBasis, this.t)));
         if (metaParts.length) {
           inner += '<span class="tgt-pill-meta">' + metaParts.join(' · ') + '</span>';
         }
       } else {
         // Unknown type — minimal fallback
-        inner += '<span class="tgt-pill-name">Featured offer</span>';
+        inner += '<span class="tgt-pill-name">' + esc(this.t('featuredOffer')) + '</span>';
       }
 
       // Price always last
@@ -6944,13 +7298,13 @@
       const parts = [];
       if (isAcc || isPkg) {
         if (dest.name) parts.push(dest.name);
-        if (acc.nights) parts.push(acc.nights + ' night' + (acc.nights === 1 ? '' : 's'));
-        if (acc.boardBasis) parts.push(formatEnum(acc.boardBasis));
+        if (acc.nights) parts.push(nightsPhrase(acc.nights, this.t));
+        if (acc.boardBasis) parts.push(boardBasisLabel(acc.boardBasis, this.t));
       } else if (isFlight) {
         if (f.origin && f.origin.iataCode && f.destination && f.destination.iataCode) {
           parts.push(f.origin.iataCode + ' → ' + f.destination.iataCode);
         }
-        if (f.direct === true) parts.push('Direct');
+        if (f.direct === true) parts.push(this.t('direct'));
         if (f.carrier && f.carrier.name) parts.push(f.carrier.name);
       }
       return parts.join(' · ');
@@ -6983,8 +7337,8 @@
       const parts = [];
       if (og.iataCode && dest.iataCode) parts.push(og.iataCode + ' → ' + dest.iataCode);
       if (f.carrier && f.carrier.name) parts.push(f.carrier.name);
-      if (f.direct === true) parts.push('Direct');
-      if (f.outboundDate) parts.push('Departs ' + formatDate(f.outboundDate));
+      if (f.direct === true) parts.push(this.t('direct'));
+      if (f.outboundDate) parts.push(this.t('departs', { date: formatDate(f.outboundDate) }));
       return parts.join(' · ');
     }
 
@@ -7031,7 +7385,7 @@
     // is contextual (e.g. "2 adults · 1 night" or "per person").
     _popupPriceContext(o) {
       const cfg = this.cfg;
-      const display = computeDisplayPrice(o, cfg.priceDisplay || 'auto');
+      const display = computeDisplayPrice(o, cfg.priceDisplay || 'auto', this.t);
       if (!display.primary) return { primary: '', sub: '' };
 
       // For Accommodation-only offers the user genuinely needs context — a
@@ -7042,13 +7396,11 @@
       if (!isAcc) return display;
 
       // Build a context line for accommodation
-      const parts = [];
       const a = o.adults || 0;
       const c = o.children || 0;
       const nights = (o.accommodation && o.accommodation.nights) || 0;
-      if (a) parts.push(a + ' adult' + (a === 1 ? '' : 's'));
-      if (c) parts.push(c + ' child' + (c === 1 ? '' : 'ren'));
-      if (nights) parts.push(nights + ' night' + (nights === 1 ? '' : 's'));
+      const parts = paxParts({ adults: a, children: c, infants: 0 }, this.t);
+      if (nights) parts.push(nightsPhrase(nights, this.t));
 
       // For accommodation we want to display TOTAL by default in popup, since
       // the per-person framing is misleading for short hotel-only stays.
@@ -7058,14 +7410,14 @@
 
       return {
         primary: primary,
-        sub: parts.length ? parts.join(' · ') : 'total'
+        sub: parts.length ? parts.join(' · ') : this.t('total')
       };
     }
 
     // Close button shared across all three render modes
     _popupCloseBtn() {
       if (!this.cfg.popupShowCloseButton) return '';
-      return '<button class="tgop-close" data-tgop-close aria-label="Close">'
+      return '<button class="tgop-close" data-tgop-close aria-label="' + esc(this.t('close')) + '">'
         + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">'
         + '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
         + '</svg></button>';
@@ -7073,7 +7425,7 @@
 
     _popupHeader() {
       const cfg = this.cfg;
-      const heading = cfg.popupHeading || '';
+      const heading = cfg.popupHeading || this.t('liveDeals');
       const showPulse = cfg.popupShowPulse !== false;
       if (!heading && !showPulse) return '';
       let html = '<div class="tgop-header">';
@@ -7206,7 +7558,7 @@
         if (display.sub) html += '<span class="tgop-hero-sub">' + esc(display.sub) + '</span>';
       }
       html += '</div>';
-      html += '<span class="tgop-hero-cta">View deal →</span>';
+      html += '<span class="tgop-hero-cta">' + esc(this.t('viewDealArrow')) + '</span>';
       html += '</div>';
       html += '</div>';
       html += '</a>';
@@ -7296,7 +7648,7 @@
         html += '<div class="tgop-rot">';
         for (let i = 0; i < offers.length; i++) {
           const active = (i === idx % offers.length) ? ' tgop-rot-active' : '';
-          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="Show offer ' + (i + 1) + '"></button>';
+          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="' + esc(this.t('showOffer', { n: (i + 1) })) + '"></button>';
         }
         html += '</div>';
       }
@@ -7332,7 +7684,7 @@
         html += '</span>';
       }
       html += '</div>';
-      html += '<a class="tgop-single-cta" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>View deal</a>';
+      html += '<a class="tgop-single-cta" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>' + esc(this.t('viewDeal')) + '</a>';
       html += '</div>';
       html += '</div>';
 
@@ -7367,10 +7719,10 @@
 
       // Prev/next arrows
       if (offers.length > 1) {
-        html += '<button type="button" class="tgop-carousel-nav tgop-carousel-prev" data-tgop-carousel-prev aria-label="Previous offer">';
+        html += '<button type="button" class="tgop-carousel-nav tgop-carousel-prev" data-tgop-carousel-prev aria-label="' + esc(this.t('previousOffer')) + '">';
         html += '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
         html += '</button>';
-        html += '<button type="button" class="tgop-carousel-nav tgop-carousel-next" data-tgop-carousel-next aria-label="Next offer">';
+        html += '<button type="button" class="tgop-carousel-nav tgop-carousel-next" data-tgop-carousel-next aria-label="' + esc(this.t('nextOffer')) + '">';
         html += '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
         html += '</button>';
       }
@@ -7381,7 +7733,7 @@
         html += '<div class="tgop-carousel-dots">';
         for (let i = 0; i < offers.length; i++) {
           const active = (i === idx) ? ' tgop-rot-active' : '';
-          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="Go to offer ' + (i + 1) + '"></button>';
+          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="' + esc(this.t('goToOffer', { n: (i + 1) })) + '"></button>';
         }
         html += '</div>';
       }
@@ -7432,7 +7784,7 @@
         if (display.sub) html += '<span class="tgop-carousel-sub">' + esc(display.sub) + '</span>';
       }
       html += '</div>';
-      html += '<span class="tgop-carousel-cta">View deal →</span>';
+      html += '<span class="tgop-carousel-cta">' + esc(this.t('viewDealArrow')) + '</span>';
       html += '</div>';
       html += '</div>';
       html += '</a>';
@@ -7482,7 +7834,7 @@
       // Header
       html += '<div class="tgop-split-header">';
       if (cfg.popupShowPulse !== false) html += '<span class="tgop-pulse"></span>';
-      html += '<span>' + esc(cfg.popupHeading || 'Live deals') + '</span>';
+      html += '<span>' + esc(cfg.popupHeading || this.t('liveDeals')) + '</span>';
       html += '</div>';
       // Featured offer body
       if (kicker) html += '<div class="tgop-split-kicker">' + esc(kicker) + '</div>';
@@ -7493,11 +7845,11 @@
       html += '<span class="tgop-split-now">' + esc(display.primary || '') + '</span>';
       if (display.sub) html += '<span class="tgop-split-sub">' + esc(display.sub) + '</span>';
       html += '</div>';
-      html += '<a class="tgop-split-cta" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>View this deal →</a>';
+      html += '<a class="tgop-split-cta" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>' + esc(this.t('viewThisDealArrow')) + '</a>';
 
       // Alternative offers list (small rows)
       if (offers.length > 1) {
-        html += '<div class="tgop-split-alts-label">More offers</div>';
+        html += '<div class="tgop-split-alts-label">' + esc(this.t('moreOffers')) + '</div>';
         html += '<div class="tgop-split-alts">';
         for (let i = 0; i < offers.length; i++) {
           if (i === idx) continue;
@@ -7565,21 +7917,21 @@
       // Stamp at top
       html += '<div class="tgop-countdown-stamp">';
       if (cfg.popupShowPulse !== false) html += '<span class="tgop-pulse"></span>';
-      html += '<span>' + esc(cfg.popupHeading || 'Live deals') + '</span>';
+      html += '<span>' + esc(cfg.popupHeading || this.t('liveDeals')) + '</span>';
       html += '</div>';
 
       // Countdown timer
-      const caption = cfg.popupCountdownCaption || 'Offers end in';
+      const caption = cfg.popupCountdownCaption || this.t('offersEndIn');
       html += '<div class="tgop-countdown-timer-wrap">';
       html += '<div class="tgop-countdown-caption">' + esc(caption) + '</div>';
       html += '<div class="tgop-countdown-timer" data-tgop-countdown-end="' + esc(endIso) + '">';
-      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-d>' + days + '</span><span class="tgop-countdown-lbl">days</span></div>';
+      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-d>' + days + '</span><span class="tgop-countdown-lbl">' + esc(this.t('days')) + '</span></div>';
       html += '<div class="tgop-countdown-sep">:</div>';
-      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-h>' + String(hours).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">hrs</span></div>';
+      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-h>' + String(hours).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">' + esc(this.t('hrs')) + '</span></div>';
       html += '<div class="tgop-countdown-sep">:</div>';
-      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-m>' + String(mins).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">min</span></div>';
+      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-m>' + String(mins).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">' + esc(this.t('min')) + '</span></div>';
       html += '<div class="tgop-countdown-sep">:</div>';
-      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-s>' + String(secs).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">sec</span></div>';
+      html += '<div class="tgop-countdown-cell"><span class="tgop-countdown-num" data-tgop-cd-s>' + String(secs).padStart(2,'0') + '</span><span class="tgop-countdown-lbl">' + esc(this.t('sec')) + '</span></div>';
       html += '</div>';
       html += '</div>';
 
@@ -7604,7 +7956,7 @@
         if (display.sub) html += '<span class="tgop-countdown-sub">' + esc(display.sub) + '</span>';
       }
       html += '</div>';
-      html += '<span class="tgop-countdown-cta">Book now →</span>';
+      html += '<span class="tgop-countdown-cta">' + esc(this.t('bookNowArrow')) + '</span>';
       html += '</div>';
       html += '</div>';
       html += '</a>';
@@ -7614,7 +7966,7 @@
         html += '<div class="tgop-rot tgop-rot-countdown">';
         for (let i = 0; i < offers.length; i++) {
           const active = (i === idx) ? ' tgop-rot-active' : '';
-          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="Show offer ' + (i + 1) + '"></button>';
+          html += '<button type="button" class="tgop-rot-dot' + active + '" data-tgop-rot-dot="' + i + '" aria-label="' + esc(this.t('showOffer', { n: (i + 1) })) + '"></button>';
         }
         html += '</div>';
       }
@@ -7630,7 +7982,7 @@
       let html = '<div class="tgop-content tgop-content-mini">';
       html += '<div class="tgop-mini-stamp">';
       if (cfg.popupShowPulse !== false) html += '<span class="tgop-pulse"></span>';
-      html += '<span>' + esc(cfg.popupHeading || 'Live deals') + '</span>';
+      html += '<span>' + esc(cfg.popupHeading || this.t('liveDeals')) + '</span>';
       html += '</div>';
       html += '<div class="tgop-mini-list">';
       for (const o of offers) {
@@ -7642,7 +7994,7 @@
           + esc(cfg.popupFooterCtaText) + '</a>';
       }
       if (cfg.popupShowCloseButton) {
-        html += '<button type="button" class="tgop-mini-close" data-tgop-close aria-label="Close">'
+        html += '<button type="button" class="tgop-mini-close" data-tgop-close aria-label="' + esc(this.t('close')) + '">'
           + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
           + '</button>';
       }
@@ -7677,7 +8029,7 @@
         html += '<span class="tgop-mini-pill-name">' + esc(headline) + '</span>';
         const acc = o.accommodation || {};
         const dest = (acc.destination && acc.destination.name) || '';
-        const nights = acc.nights ? acc.nights + ' nt' + (acc.nights === 1 ? '' : 's') : '';
+        const nights = acc.nights ? nightsPhrase(acc.nights, this.t, true) : '';
         const metaParts = [];
         if (isPkg) {
           const f = o.flight || {};
@@ -7724,7 +8076,7 @@
       let html = '';
       html += '<div class="tgop-root ' + layoutClass + '" style="--tgop-overlay-opacity:' + opacity + '">';
       if (showBackdrop) html += '<div class="tgop-backdrop" data-tgop-backdrop></div>';
-      html += '<div class="tgop-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(cfg.popupHeading || 'Live deals') + '">';
+      html += '<div class="tgop-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(cfg.popupHeading || this.t('liveDeals')) + '">';
       html += '<div class="tgop-card tgop-card-mode-' + mode + '" data-tgop-card>';
       html += content;
       html += '</div></div></div>';
@@ -8019,7 +8371,7 @@
       html += '</div>';
 
       if (this.cfg.show.poweredBy) {
-        html += '<div class="tgo-powered">Powered by Travelgenix</div>';
+        html += '<div class="tgo-powered">' + esc(this.t('poweredBy')) + '</div>';
       }
       this.root.innerHTML = html;
     }
@@ -8033,12 +8385,12 @@
 
       const url = safeUrl(o.url || '#');
       const carrierCode = (carrier.code || '').slice(0, 2).toUpperCase() || 'XX';
-      const carrierName = carrier.name || 'Carrier';
+      const carrierName = carrier.name || this.t('carrier');
       const flightNumber = (carrier.code && f.flightNumber) ? carrier.code + ' ' + f.flightNumber : (carrier.code || '');
-      const cabinClass = f.cabinClass ? formatEnum(f.cabinClass) : 'Economy';
+      const cabinClass = f.cabinClass ? formatEnum(f.cabinClass) : this.t('economy');
       const isDirect = f.direct === true;
       const stops = f.stops || 0;
-      const stopsLabel = isDirect ? 'Direct' : (stops === 1 ? '1 stop' : (stops > 0 ? stops + ' stops' : 'Direct'));
+      const stopsLabel = isDirect ? this.t('direct') : (stops === 1 ? this.t('stop', { n: 1 }) : (stops > 0 ? this.t('stops', { n: stops }) : this.t('direct')));
 
       // Format depart/arrive times
       const depart = formatBoardTime(f.outboundDate);
@@ -8047,7 +8399,7 @@
       const duration = f.duration ? formatDuration(f.duration) : '';
 
       // Price
-      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto');
+      const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
       const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange)
         ? '£' + Math.round(pricing.priceBeforeChange) : null;
 
@@ -8092,10 +8444,10 @@
 
       // Detail row: date / depart / arrive / duration
       html += '<div class="tgbp-detail-row">';
-      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">Date</span><span class="tgbp-detail-value">' + esc(date || '—') + '</span></div>';
-      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">Depart</span><span class="tgbp-detail-value">' + esc(depart) + '</span></div>';
-      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">Arrive</span><span class="tgbp-detail-value">' + esc(arrive) + '</span></div>';
-      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">Duration</span><span class="tgbp-detail-value">' + esc(duration || '—') + '</span></div>';
+      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">' + esc(this.t('date')) + '</span><span class="tgbp-detail-value">' + esc(date || '—') + '</span></div>';
+      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">' + esc(this.t('depart')) + '</span><span class="tgbp-detail-value">' + esc(depart) + '</span></div>';
+      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">' + esc(this.t('arrive')) + '</span><span class="tgbp-detail-value">' + esc(arrive) + '</span></div>';
+      html += '<div class="tgbp-detail"><span class="tgbp-detail-label">' + esc(this.t('duration')) + '</span><span class="tgbp-detail-value">' + esc(duration || '—') + '</span></div>';
       html += '</div>';
 
       html += '</div>'; // /tgbp-main
@@ -8103,7 +8455,7 @@
       // Stub
       html += '<div class="tgbp-stub">';
       html += '<div class="tgbp-stub-top">';
-      html += '<span class="tgbp-stub-label">Fare</span>';
+      html += '<span class="tgbp-stub-label">' + esc(this.t('fare')) + '</span>';
       if (this.cfg.show.wasPrice && wasPrice) {
         html += '<span class="tgbp-stub-was">' + esc(wasPrice) + '</span>';
       }
@@ -8117,7 +8469,7 @@
         html += '</div>';
       }
 
-      html += '<a class="tgbp-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Book</a>';
+      html += '<a class="tgbp-cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(this.t('book')) + '</a>';
       html += '</div>'; // /tgbp-stub
 
       html += '</article>';
@@ -8212,7 +8564,7 @@
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>'
         + '</div>'
         + '<div class="tdb-title-block">'
-        + '<div class="tdb-title">Departures from '
+        + '<div class="tdb-title">' + esc(this.t('departuresFrom')) + ' '
         + (this.cfg.boardAllowSwitcher
           ? '<span class="tdb-switcher">'
           + '<button type="button" class="tdb-airport-pick" data-tdb-switcher aria-haspopup="listbox" aria-expanded="false">'
@@ -8223,23 +8575,23 @@
           + '</span>'
           : '<span>' + esc(a.city + ' (' + a.code + ')') + '</span>')
         + '</div>'
-        + '<div class="tdb-subtitle">Cheapest fares · next ' + (this.cfg.boardDateRange || 30) + ' days</div>'
+        + '<div class="tdb-subtitle">' + esc(this.t('cheapestFares', { n: (this.cfg.boardDateRange || 30) })) + '</div>'
         + '</div></div>'
         + '<div class="tdb-now">'
         + '<span class="tdb-live-dot" aria-hidden="true"></span>'
-        + 'Live · <span data-tdb-clock>' + formatBoardNow() + '</span>'
+        + esc(this.t('live')) + ' · <span data-tdb-clock>' + formatBoardNow() + '</span>'
         + '</div>'
         + '</div>';
 
       html += '<div class="tdb-table">'
         + '<div class="tdb-row tdb-head">'
-        + '<span>Time</span>'
-        + '<span>Route</span>'
-        + '<span class="tdb-carrier">Carrier</span>'
-        + '<span class="tdb-stops">Stops</span>'
-        + '<span class="tdb-date">Date</span>'
-        + '<span class="tdb-status">Status</span>'
-        + '<span class="tdb-fare" style="text-align:right;">Fare</span>'
+        + '<span>' + esc(this.t('time')) + '</span>'
+        + '<span>' + esc(this.t('route')) + '</span>'
+        + '<span class="tdb-carrier">' + esc(this.t('carrierCol')) + '</span>'
+        + '<span class="tdb-stops">' + esc(this.t('stopsCol')) + '</span>'
+        + '<span class="tdb-date">' + esc(this.t('dateCol')) + '</span>'
+        + '<span class="tdb-status">' + esc(this.t('status')) + '</span>'
+        + '<span class="tdb-fare" style="text-align:right;">' + esc(this.t('fareCol')) + '</span>'
         + '</div>'
         + '<div data-tdb-rows></div>'
         + '</div>';
@@ -8248,7 +8600,7 @@
         + '<div class="tdb-footer-meta" data-tdb-meta>—</div>'
         + '<button type="button" class="tdb-refresh" data-tdb-refresh>'
         + refreshIcon
-        + '<span>Refresh</span>'
+        + '<span>' + esc(this.t('refresh')) + '</span>'
         + '</button>'
         + '</div>';
 
@@ -8275,8 +8627,8 @@
 
       if (!flights.length) {
         rowsEl.innerHTML = '<div class="tdb-empty">'
-          + '<div class="tdb-empty-title">No flights found</div>'
-          + 'Try widening the date range or changing the departure airport.'
+          + '<div class="tdb-empty-title">' + esc(this.t('noFlights')) + '</div>'
+          + esc(this.t('noFlightsHint'))
           + '</div>';
         this._updateBoardMeta(0);
         // No rows to animate — make sure any prior flap registry is cleared
@@ -8310,8 +8662,8 @@
         const toIata = (dest.iataCode || '???').toUpperCase();
         const fareText = o.formattedPrice || o.formattedPPPrice || '—';
         const stops = f.direct || f.stops === 0
-          ? '<span class="tdb-direct">DIRECT</span>'
-          : (f.stops === 1 ? '1 STOP' : (f.stops || 1) + ' STOPS');
+          ? '<span class="tdb-direct">' + esc(this.t('directCaps')) + '</span>'
+          : (f.stops === 1 ? this.t('stopCaps') : this.t('stopsCaps', { n: (f.stops || 1) }));
         const isCheapest = (o.id === cheapestId);
         const pillHtml = this._pickBoardPill(o, isCheapest);
 
@@ -8375,30 +8727,30 @@
 
       // 1. Cheapest — always wins
       if (isCheapest) {
-        return '<span class="tdb-pill" data-kind="cheapest">★ Cheapest</span>';
+        return '<span class="tdb-pill" data-kind="cheapest">' + esc(this.t('pillCheapest')) + '</span>';
       }
 
       // 2. Premium cabin — opt-in. Beats date proximity because cabin is a
       // quality signal that's relevant regardless of when the flight is.
       if (this.cfg.boardShowPremiumCabin
           && (cabin === 'business' || cabin === 'first' || cabin === 'businessclass' || cabin === 'firstclass')) {
-        const label = (cabin === 'first' || cabin === 'firstclass') ? 'First class' : 'Business';
+        const label = (cabin === 'first' || cabin === 'firstclass') ? this.t('firstClass') : this.t('business');
         return '<span class="tdb-pill" data-kind="premium">' + esc(label) + '</span>';
       }
 
       // 3. Today — always-on. Departing in less than 24 hours.
       if (proximity.category === 'today') {
-        return '<span class="tdb-pill" data-kind="today">Today</span>';
+        return '<span class="tdb-pill" data-kind="today">' + esc(this.t('pillToday')) + '</span>';
       }
 
       // 4. Tomorrow — opt-in. 24-48 hours from now.
       if (this.cfg.boardShowTomorrow && proximity.category === 'tomorrow') {
-        return '<span class="tdb-pill" data-kind="tomorrow">Tomorrow</span>';
+        return '<span class="tdb-pill" data-kind="tomorrow">' + esc(this.t('pillTomorrow')) + '</span>';
       }
 
       // 5. This week — always-on. 2-7 days from now.
       if (proximity.category === 'thisWeek') {
-        return '<span class="tdb-pill" data-kind="week">This week</span>';
+        return '<span class="tdb-pill" data-kind="week">' + esc(this.t('pillThisWeek')) + '</span>';
       }
 
       // 6. Going soon — opt-in, configurable threshold (default 14 days).
@@ -8407,7 +8759,7 @@
       if (this.cfg.boardShowGoingSoon) {
         const threshold = this.cfg.boardGoingSoonDays || 14;
         if (days >= 7 && days <= threshold) {
-          return '<span class="tdb-pill" data-kind="soon">Going soon</span>';
+          return '<span class="tdb-pill" data-kind="soon">' + esc(this.t('pillGoingSoon')) + '</span>';
         }
       }
 
@@ -8657,6 +9009,7 @@
       // Detect template change so we know whether to reset board state
       const prevTemplate = this.cfg && this.cfg.template;
       this.cfg = this._defaults(Object.assign({}, this.cfg, newConfig));
+      this.t = makeT(this._uiLangHint(newConfig));
       // If template changed away from or to departure-board, drop the cached
       // airport so detection happens fresh next time
       if (prevTemplate !== this.cfg.template) {
