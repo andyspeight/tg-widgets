@@ -50,7 +50,42 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (the "Unnamed" fallback, contact aria-labels and the
+  // localised-default heading/subheading). Member names, roles, bios and
+  // locations are author content, translated separately. English is the source
+  // + fallback. {token} placeholders interpolate at call time.
+  const MESSAGES = {
+    en: { ourTeam: 'Our Team', meetExperts: 'Meet the experts behind your trip', unnamed: 'Unnamed', emailName: 'Email {name}', callName: 'Call {name}', linkedinName: '{name} on LinkedIn', whatsappName: 'WhatsApp {name}', instagramName: '{name} on Instagram', facebookName: '{name} on Facebook', all: 'All', filterByDepartment: 'Filter by department', noMembers: 'No team members to display.', previous: 'Previous', next: 'Next', goToSlide: 'Go to slide {n}', slideIndicators: 'Slide indicators' },
+    fr: { ourTeam: 'Notre équipe', meetExperts: 'Rencontrez les experts derrière votre voyage', unnamed: 'Sans nom', emailName: 'E-mail {name}', callName: 'Appeler {name}', linkedinName: '{name} sur LinkedIn', whatsappName: 'WhatsApp {name}', instagramName: '{name} sur Instagram', facebookName: '{name} sur Facebook', all: 'Tous', filterByDepartment: 'Filtrer par département', noMembers: "Aucun membre de l'équipe à afficher.", previous: 'Précédent', next: 'Suivant', goToSlide: 'Aller à la diapositive {n}', slideIndicators: 'Indicateurs de diapositive' },
+    de: { ourTeam: 'Unser Team', meetExperts: 'Lernen Sie die Experten hinter Ihrer Reise kennen', unnamed: 'Ohne Namen', emailName: 'E-Mail an {name}', callName: '{name} anrufen', linkedinName: '{name} auf LinkedIn', whatsappName: 'WhatsApp {name}', instagramName: '{name} auf Instagram', facebookName: '{name} auf Facebook', all: 'Alle', filterByDepartment: 'Nach Abteilung filtern', noMembers: 'Keine Teammitglieder vorhanden.', previous: 'Zurück', next: 'Weiter', goToSlide: 'Zu Folie {n}', slideIndicators: 'Folienindikatoren' },
+    es: { ourTeam: 'Nuestro equipo', meetExperts: 'Conoce a los expertos detrás de tu viaje', unnamed: 'Sin nombre', emailName: 'Correo a {name}', callName: 'Llamar a {name}', linkedinName: '{name} en LinkedIn', whatsappName: 'WhatsApp {name}', instagramName: '{name} en Instagram', facebookName: '{name} en Facebook', all: 'Todos', filterByDepartment: 'Filtrar por departamento', noMembers: 'No hay miembros del equipo para mostrar.', previous: 'Anterior', next: 'Siguiente', goToSlide: 'Ir a la diapositiva {n}', slideIndicators: 'Indicadores de diapositiva' },
+    it: { ourTeam: 'Il nostro team', meetExperts: 'Incontra gli esperti dietro il tuo viaggio', unnamed: 'Senza nome', emailName: 'Email a {name}', callName: 'Chiama {name}', linkedinName: '{name} su LinkedIn', whatsappName: 'WhatsApp {name}', instagramName: '{name} su Instagram', facebookName: '{name} su Facebook', all: 'Tutti', filterByDepartment: 'Filtra per reparto', noMembers: 'Nessun membro del team da mostrare.', previous: 'Precedente', next: 'Successivo', goToSlide: 'Vai alla diapositiva {n}', slideIndicators: 'Indicatori diapositiva' },
+    ro: { ourTeam: 'Echipa noastră', meetExperts: 'Cunoaște experții din spatele călătoriei tale', unnamed: 'Fără nume', emailName: 'E-mail {name}', callName: 'Sună {name}', linkedinName: '{name} pe LinkedIn', whatsappName: 'WhatsApp {name}', instagramName: '{name} pe Instagram', facebookName: '{name} pe Facebook', all: 'Toate', filterByDepartment: 'Filtrează după departament', noMembers: 'Niciun membru al echipei de afișat.', previous: 'Anterior', next: 'Următorul', goToSlide: 'Mergi la diapozitivul {n}', slideIndicators: 'Indicatori de diapozitiv' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ═══════════════════════════════════════════════════════════
   // Utilities
@@ -169,8 +204,8 @@
 
     // Heading block
     showHeading: true,
-    eyebrow: 'Our Team',
-    title: 'Meet the experts behind your trip',
+    eyebrow: '',   // localised default 'Our Team' applied at render via this.t
+    title: '',     // localised default 'Meet the experts behind your trip' applied at render via this.t
     subtitle: 'Decades of travel experience, ready to plan your perfect getaway.',
 
     // Department filter
@@ -748,6 +783,7 @@
       if (!container) throw new Error('[TGTeam] no container');
       this.el = container;
       this.cfg = this._mergeConfig(config);
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.activeDept = '__all__';
       this.activeIdx = 0;
       this._autoplayTimer = null;
@@ -764,6 +800,7 @@
 
     update(newConfig) {
       this.cfg = this._mergeConfig(Object.assign({}, this.cfg, newConfig));
+      this.t = makeT(this.cfg);
       this.activeDept = '__all__';
       this.activeIdx = 0;
       this._stopAutoplay();
@@ -810,8 +847,10 @@
 
     _renderHeading() {
       const c = this.cfg;
-      const eyebrow = c.eyebrow ? `<div class="tgt-eyebrow">${esc(c.eyebrow)}</div>` : '';
-      const title = c.title ? `<h2 class="tgt-title">${esc(c.title)}</h2>` : '';
+      const eyebrowText = c.eyebrow || this.t('ourTeam');
+      const titleText = c.title || this.t('meetExperts');
+      const eyebrow = eyebrowText ? `<div class="tgt-eyebrow">${esc(eyebrowText)}</div>` : '';
+      const title = titleText ? `<h2 class="tgt-title">${esc(titleText)}</h2>` : '';
       const sub = c.subtitle ? `<p class="tgt-subtitle">${esc(c.subtitle)}</p>` : '';
       if (!eyebrow && !title && !sub) return '';
       return `<div class="tgt-heading">${eyebrow}${title}${sub}</div>`;
@@ -831,10 +870,10 @@
       const depts = this._departments();
       const chips = ['__all__'].concat(depts).map(d => {
         const isOn = this.activeDept === d;
-        const label = d === '__all__' ? 'All' : esc(d);
+        const label = d === '__all__' ? esc(this.t('all')) : esc(d);
         return `<button class="tgt-chip ${isOn ? 'is-on' : ''}" data-dept="${esc(d)}" type="button">${label}</button>`;
       }).join('');
-      return `<div class="tgt-filter" role="group" aria-label="Filter by department">${chips}</div>`;
+      return `<div class="tgt-filter" role="group" aria-label="${esc(this.t('filterByDepartment'))}">${chips}</div>`;
     }
 
     _visibleMembers() {
@@ -848,7 +887,7 @@
     _renderLayout(layout) {
       const members = this._visibleMembers();
       if (members.length === 0) {
-        return `<div class="tgt-empty">No team members to display.</div>`;
+        return `<div class="tgt-empty">${esc(this.t('noMembers'))}</div>`;
       }
       if (layout === 'compact')   return this._renderCompact(members);
       if (layout === 'carousel')  return this._renderCarousel(members);
@@ -869,15 +908,15 @@
     _renderCarousel(members) {
       const cards = members.map(m => this._renderCard(m)).join('');
       const dots = members.map((_, i) =>
-        `<button class="tgt-dot ${i === 0 ? 'is-on' : ''}" data-idx="${i}" aria-label="Go to slide ${i + 1}" type="button"></button>`
+        `<button class="tgt-dot ${i === 0 ? 'is-on' : ''}" data-idx="${i}" aria-label="${esc(this.t('goToSlide', { n: i + 1 }))}" type="button"></button>`
       ).join('');
       return `
         <div class="tgt-carousel-wrap">
-          <button class="tgt-arrow tgt-arrow--prev" type="button" aria-label="Previous">${IC.chevronLeft}</button>
+          <button class="tgt-arrow tgt-arrow--prev" type="button" aria-label="${esc(this.t('previous'))}">${IC.chevronLeft}</button>
           <div class="tgt-carousel" role="list">${cards}</div>
-          <button class="tgt-arrow tgt-arrow--next" type="button" aria-label="Next">${IC.chevronRight}</button>
+          <button class="tgt-arrow tgt-arrow--next" type="button" aria-label="${esc(this.t('next'))}">${IC.chevronRight}</button>
         </div>
-        <div class="tgt-dots" role="tablist" aria-label="Slide indicators">${dots}</div>
+        <div class="tgt-dots" role="tablist" aria-label="${esc(this.t('slideIndicators'))}">${dots}</div>
       `;
     }
 
@@ -899,7 +938,7 @@
     _renderSpotlightFeature(m) {
       if (!m) return '';
       const photo = this._renderSpotlightPhoto(m);
-      const name = `<h3 class="tgt-spotlight-name">${esc(m.name || 'Unnamed')}</h3>`;
+      const name = `<h3 class="tgt-spotlight-name">${esc(m.name || this.t('unnamed'))}</h3>`;
       const role = m.role ? `<p class="tgt-spotlight-role">${esc(m.role)}</p>` : '';
       const bio = m.bio ? `<p class="tgt-spotlight-bio">${esc(m.bio)}</p>` : '';
       const badges = this._renderBadges(m);
@@ -935,7 +974,7 @@
         <button type="button" class="tgt-spotlight-item ${isOn ? 'is-on' : ''}" data-spotlight-idx="${i}" role="listitem">
           ${photoHtml}
           <div class="tgt-spotlight-item-body">
-            <div class="tgt-spotlight-item-name">${esc(m.name || 'Unnamed')}</div>
+            <div class="tgt-spotlight-item-name">${esc(m.name || this.t('unnamed'))}</div>
             <div class="tgt-spotlight-item-role">${esc(m.role || '')}</div>
           </div>
         </button>
@@ -948,7 +987,7 @@
       const photoHtml = photo
         ? `<div class="tgt-photo"><img src="${esc(photo)}" alt="${esc(m.name || '')}" loading="lazy"></div>`
         : `<div class="tgt-photo tgt-photo--fallback" style="background:${esc(avatarColor(m.name))}">${esc(initials(m.name))}</div>`;
-      const name = `<h3 class="tgt-name">${esc(m.name || 'Unnamed')}</h3>`;
+      const name = `<h3 class="tgt-name">${esc(m.name || this.t('unnamed'))}</h3>`;
       const role = m.role ? `<p class="tgt-role">${esc(m.role)}</p>` : '';
       const bio = m.bio ? `<p class="tgt-bio">${esc(m.bio)}</p>` : '';
       const badges = this._renderBadges(m);
@@ -975,7 +1014,7 @@
         <div class="tgt-compact-card" role="listitem">
           ${photoHtml}
           <div class="tgt-compact-body">
-            <p class="tgt-compact-name">${esc(m.name || 'Unnamed')}</p>
+            <p class="tgt-compact-name">${esc(m.name || this.t('unnamed'))}</p>
             <p class="tgt-compact-role">${esc(m.role || '')}</p>
           </div>
         </div>
@@ -1023,29 +1062,30 @@
 
     _renderSocials(m) {
       const out = [];
+      const nm = m.name || '';
       if (m.linkedin) {
         const u = safeUrl(m.linkedin);
-        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(m.name || '')} on LinkedIn">${IC.linkedin}</a>`);
+        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(this.t('linkedinName', { name: nm }))}">${IC.linkedin}</a>`);
       }
       if (m.email) {
         const u = mailtoUrl(m.email);
-        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" aria-label="Email ${esc(m.name || '')}">${IC.mail}</a>`);
+        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" aria-label="${esc(this.t('emailName', { name: nm }))}">${IC.mail}</a>`);
       }
       if (m.phone) {
         const u = telUrl(m.phone);
-        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" aria-label="Call ${esc(m.name || '')}">${IC.phone}</a>`);
+        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" aria-label="${esc(this.t('callName', { name: nm }))}">${IC.phone}</a>`);
       }
       if (m.whatsapp) {
         const u = whatsappUrl(m.whatsapp);
-        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp ${esc(m.name || '')}">${IC.whatsapp}</a>`);
+        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(this.t('whatsappName', { name: nm }))}">${IC.whatsapp}</a>`);
       }
       if (m.instagram) {
         const u = safeUrl(m.instagram);
-        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(m.name || '')} on Instagram">${IC.instagram}</a>`);
+        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(this.t('instagramName', { name: nm }))}">${IC.instagram}</a>`);
       }
       if (m.facebook) {
         const u = safeUrl(m.facebook);
-        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(m.name || '')} on Facebook">${IC.facebook}</a>`);
+        if (u) out.push(`<a class="tgt-social" href="${esc(u)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(this.t('facebookName', { name: nm }))}">${IC.facebook}</a>`);
       }
       if (!out.length) return '';
       return `<div class="tgt-socials">${out.join('')}</div>`;
