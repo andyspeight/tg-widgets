@@ -678,6 +678,7 @@
       container._tgInitialised = true;
       this.cfg = this._defaults(config);
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
+      this.lo = this._localizedOffer(this.cfg.offer);   // content localised for that language
       this.shadow = container.attachShadow({ mode: 'open' });
       this._timers = [];
       this._io = null;
@@ -702,15 +703,55 @@
       };
     }
 
+    /**
+     * Layer-2 content overlay. The author writes the offer once in the source
+     * language (English); offer.i18n holds per-language overlays produced on save
+     * by the editor's translation step. Here we lay the overlay for the viewer's
+     * language over the source so a missing translation always falls back to the
+     * original, never a blank.
+     *
+     * Only the translatable copy is overlaid — title, teaser, description, urgency
+     * and avail in `fields`, plus the includes and tags arrays. Everything else
+     * (price, currency, country, region, resort, property, dates, references,
+     * board, stars, airline and the rest) comes straight from the source offer
+     * untouched. Localising a price or place would be wrong, so it never happens.
+     */
+    _localizedOffer(offer) {
+      const o = offer && typeof offer === 'object' ? offer : {};
+      const lang = this.t && this.t.lang;
+      if (!lang || lang === 'en' || !o.i18n || typeof o.i18n !== 'object') return o;
+      const tr = o.i18n[lang];
+      if (!tr || typeof tr !== 'object') return o;
+
+      const out = Object.assign({}, o);
+
+      // Overlay only the translatable text fields; keep every other field source.
+      if (tr.fields && typeof tr.fields === 'object') {
+        const pick = (base, over) => (typeof over === 'string' && over.trim()) ? over : base;
+        const baseFields = (o.fields && typeof o.fields === 'object') ? o.fields : {};
+        const overlaid = Object.assign({}, baseFields);
+        ['title', 'teaser', 'description', 'urgency', 'avail'].forEach((k) => {
+          overlaid[k] = pick(baseFields[k], tr.fields[k]);
+        });
+        out.fields = overlaid;
+      }
+
+      // Replace the includes / tags arrays only when a non-empty translation exists.
+      if (Array.isArray(tr.includes) && tr.includes.length) out.includes = tr.includes;
+      if (Array.isArray(tr.tags) && tr.tags.length) out.tags = tr.tags;
+
+      return out;
+    }
+
     _f(key) {
-      const o = this.cfg.offer || {};
+      const o = this.lo || this.cfg.offer || {};
       if (o.fields && o.fields[key] != null && o.fields[key] !== '') return o.fields[key];
       if (o[key] != null && o[key] !== '') return o[key];
       return '';
     }
 
     _images() {
-      const o = this.cfg.offer || {};
+      const o = this.lo || this.cfg.offer || {};
       let imgs = [];
       if (Array.isArray(o.images)) imgs = o.images.slice();
       const hero = this._f('image');
@@ -719,7 +760,7 @@
     }
 
     _derive() {
-      const o = this.cfg.offer || {};
+      const o = this.lo || this.cfg.offer || {};
       const sym = currencySymbol(this.cfg.currency || o.currency || 'GBP');
       const imgs = this._images();
       const priceN = num(this._f('price'));
@@ -1220,6 +1261,7 @@
       this.destroy();
       this.cfg = this._defaults(Object.assign({}, this.cfg, config));
       this.t = makeT(this.cfg);
+      this.lo = this._localizedOffer(this.cfg.offer);
       this._render();
     }
 
