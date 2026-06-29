@@ -21,7 +21,199 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.6.0';
+  const VERSION = '3.6.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
+  // empty/loading/error states, aria-labels). Destination/country/resort/airport
+  // names, hotel names, prices, currency codes and dates are data, never
+  // translated. English is the source + fallback.
+  const MESSAGES = {
+    en: {
+      title: 'Where will you go next?', subtitle: 'Browse our latest offers from around the world',
+      viewFullscreen: 'View fullscreen', viewMapFullscreen: 'View map in fullscreen',
+      closeFullscreen: 'Close fullscreen map', fullscreenSuffix: 'fullscreen', destinationMap: 'Destination map',
+      destination: 'Destination', loadingMap: 'Loading map…',
+      mapUnavailable: 'Map unavailable. Please try again later.',
+      noDestinations: 'No destinations available right now. Please try again later.',
+      latestDeals: 'Latest deals', tapDestination: 'Tap any destination on the map to see its deals.',
+      pickDestination: 'Pick a destination to see live deals — tap a price on the map.',
+      rating: 'Rating', maxBudget: 'Max budget',
+      filterByRating: 'Filter by star rating', filterByBudget: 'Filter by maximum budget', filterByRegion: 'Filter the map by region',
+      from: 'from', perPerson: 'per person', tapToView: 'tap to view', worldwide: 'Worldwide', any: 'Any',
+      findingDeals: 'Finding the best deals…', findingResortDeals: 'Finding {resort} deals…',
+      noDealsFiltered: 'No deals match your filters',
+      noDealsFilteredLong: 'No deals match these filters. Try widening your budget or rating.',
+      noDealsNow: 'No deals to show right now.',
+      noDealsCountry: 'No deals available for {name} right now. Try another destination.',
+      dealsLoadError: "Couldn't load deals just now. Please try again in a moment.",
+      dealsInResort: '{n} deals in {resort}', showAll: 'Show all {country}',
+      dealsMatch: '{n} of {total} deals match · cheapest first',
+      dealsCount: '{n} of {total} deals · cheapest first',
+      hotel: 'Hotel', direct: 'Direct', viewDeal: 'View deal', pp: 'pp', total: 'total',
+      night: 'night', nights: 'nights',
+      boardRoomOnly: 'Room only', boardSelfCatering: 'Self catering', boardBedAndBreakfast: 'B&B',
+      boardHalfBoard: 'Half board', boardFullBoard: 'Full board', boardAllInclusive: 'All inclusive',
+      boardAllInclusivePlus: 'All inclusive+',
+    },
+    fr: {
+      title: 'Où irez-vous ensuite ?', subtitle: 'Parcourez nos dernières offres du monde entier',
+      viewFullscreen: 'Plein écran', viewMapFullscreen: 'Voir la carte en plein écran',
+      closeFullscreen: 'Fermer la carte plein écran', fullscreenSuffix: 'plein écran', destinationMap: 'Carte des destinations',
+      destination: 'Destination', loadingMap: 'Chargement de la carte…',
+      mapUnavailable: 'Carte indisponible. Veuillez réessayer plus tard.',
+      noDestinations: 'Aucune destination disponible pour le moment. Veuillez réessayer plus tard.',
+      latestDeals: 'Dernières offres', tapDestination: 'Touchez une destination sur la carte pour voir ses offres.',
+      pickDestination: 'Choisissez une destination pour voir les offres en direct — touchez un prix sur la carte.',
+      rating: 'Catégorie', maxBudget: 'Budget max.',
+      filterByRating: 'Filtrer par nombre d’étoiles', filterByBudget: 'Filtrer par budget maximum', filterByRegion: 'Filtrer la carte par région',
+      from: 'à partir de', perPerson: 'par personne', tapToView: 'touchez pour voir', worldwide: 'Monde entier', any: 'Tous',
+      findingDeals: 'Recherche des meilleures offres…', findingResortDeals: 'Recherche des offres à {resort}…',
+      noDealsFiltered: 'Aucune offre ne correspond à vos filtres',
+      noDealsFilteredLong: 'Aucune offre ne correspond à ces filtres. Essayez d’élargir votre budget ou votre catégorie.',
+      noDealsNow: 'Aucune offre à afficher pour le moment.',
+      noDealsCountry: 'Aucune offre disponible pour {name} pour le moment. Essayez une autre destination.',
+      dealsLoadError: 'Impossible de charger les offres pour le moment. Veuillez réessayer dans un instant.',
+      dealsInResort: '{n} offres à {resort}', showAll: 'Voir tout {country}',
+      dealsMatch: '{n} offres sur {total} correspondent · les moins chères d’abord',
+      dealsCount: '{n} offres sur {total} · les moins chères d’abord',
+      hotel: 'Hôtel', direct: 'Direct', viewDeal: 'Voir l’offre', pp: 'p.p.', total: 'au total',
+      night: 'nuit', nights: 'nuits',
+      boardRoomOnly: 'Sans repas', boardSelfCatering: 'Logement avec cuisine', boardBedAndBreakfast: 'B&B',
+      boardHalfBoard: 'Demi-pension', boardFullBoard: 'Pension complète', boardAllInclusive: 'Tout compris',
+      boardAllInclusivePlus: 'Tout compris+',
+    },
+    de: {
+      title: 'Wohin geht die Reise als Nächstes?', subtitle: 'Entdecken Sie unsere neuesten Angebote aus aller Welt',
+      viewFullscreen: 'Vollbild', viewMapFullscreen: 'Karte im Vollbild ansehen',
+      closeFullscreen: 'Vollbildkarte schließen', fullscreenSuffix: 'Vollbild', destinationMap: 'Reisezielkarte',
+      destination: 'Reiseziel', loadingMap: 'Karte wird geladen…',
+      mapUnavailable: 'Karte nicht verfügbar. Bitte versuchen Sie es später erneut.',
+      noDestinations: 'Derzeit keine Reiseziele verfügbar. Bitte versuchen Sie es später erneut.',
+      latestDeals: 'Aktuelle Angebote', tapDestination: 'Tippen Sie auf ein Reiseziel auf der Karte, um die Angebote zu sehen.',
+      pickDestination: 'Wählen Sie ein Reiseziel für Live-Angebote — tippen Sie auf einen Preis auf der Karte.',
+      rating: 'Kategorie', maxBudget: 'Max. Budget',
+      filterByRating: 'Nach Sternebewertung filtern', filterByBudget: 'Nach Höchstbudget filtern', filterByRegion: 'Karte nach Region filtern',
+      from: 'ab', perPerson: 'pro Person', tapToView: 'zum Anzeigen tippen', worldwide: 'Weltweit', any: 'Alle',
+      findingDeals: 'Die besten Angebote werden gesucht…', findingResortDeals: 'Angebote für {resort} werden gesucht…',
+      noDealsFiltered: 'Keine Angebote entsprechen Ihren Filtern',
+      noDealsFilteredLong: 'Keine Angebote entsprechen diesen Filtern. Erweitern Sie Ihr Budget oder Ihre Kategorie.',
+      noDealsNow: 'Derzeit keine Angebote verfügbar.',
+      noDealsCountry: 'Derzeit keine Angebote für {name} verfügbar. Probieren Sie ein anderes Reiseziel.',
+      dealsLoadError: 'Angebote konnten gerade nicht geladen werden. Bitte versuchen Sie es gleich noch einmal.',
+      dealsInResort: '{n} Angebote in {resort}', showAll: 'Alle {country} anzeigen',
+      dealsMatch: '{n} von {total} Angeboten passen · günstigste zuerst',
+      dealsCount: '{n} von {total} Angeboten · günstigste zuerst',
+      hotel: 'Hotel', direct: 'Direkt', viewDeal: 'Angebot ansehen', pp: 'p.P.', total: 'gesamt',
+      night: 'Nacht', nights: 'Nächte',
+      boardRoomOnly: 'Nur Übernachtung', boardSelfCatering: 'Selbstverpflegung', boardBedAndBreakfast: 'Ü/F',
+      boardHalfBoard: 'Halbpension', boardFullBoard: 'Vollpension', boardAllInclusive: 'All-Inclusive',
+      boardAllInclusivePlus: 'All-Inclusive+',
+    },
+    es: {
+      title: '¿A dónde irás después?', subtitle: 'Explora nuestras últimas ofertas de todo el mundo',
+      viewFullscreen: 'Pantalla completa', viewMapFullscreen: 'Ver el mapa en pantalla completa',
+      closeFullscreen: 'Cerrar el mapa en pantalla completa', fullscreenSuffix: 'pantalla completa', destinationMap: 'Mapa de destinos',
+      destination: 'Destino', loadingMap: 'Cargando el mapa…',
+      mapUnavailable: 'Mapa no disponible. Inténtalo de nuevo más tarde.',
+      noDestinations: 'No hay destinos disponibles en este momento. Inténtalo de nuevo más tarde.',
+      latestDeals: 'Últimas ofertas', tapDestination: 'Toca un destino en el mapa para ver sus ofertas.',
+      pickDestination: 'Elige un destino para ver ofertas en directo — toca un precio en el mapa.',
+      rating: 'Categoría', maxBudget: 'Presupuesto máx.',
+      filterByRating: 'Filtrar por estrellas', filterByBudget: 'Filtrar por presupuesto máximo', filterByRegion: 'Filtrar el mapa por región',
+      from: 'desde', perPerson: 'por persona', tapToView: 'toca para ver', worldwide: 'Todo el mundo', any: 'Todos',
+      findingDeals: 'Buscando las mejores ofertas…', findingResortDeals: 'Buscando ofertas en {resort}…',
+      noDealsFiltered: 'Ninguna oferta coincide con tus filtros',
+      noDealsFilteredLong: 'Ninguna oferta coincide con estos filtros. Prueba a ampliar tu presupuesto o tu categoría.',
+      noDealsNow: 'No hay ofertas para mostrar ahora mismo.',
+      noDealsCountry: 'No hay ofertas disponibles para {name} ahora mismo. Prueba otro destino.',
+      dealsLoadError: 'No se han podido cargar las ofertas ahora mismo. Inténtalo de nuevo en un momento.',
+      dealsInResort: '{n} ofertas en {resort}', showAll: 'Ver todo {country}',
+      dealsMatch: '{n} de {total} ofertas coinciden · las más baratas primero',
+      dealsCount: '{n} de {total} ofertas · las más baratas primero',
+      hotel: 'Hotel', direct: 'Directo', viewDeal: 'Ver oferta', pp: 'p.p.', total: 'total',
+      night: 'noche', nights: 'noches',
+      boardRoomOnly: 'Solo alojamiento', boardSelfCatering: 'Apartamento con cocina', boardBedAndBreakfast: 'Aloj. y desayuno',
+      boardHalfBoard: 'Media pensión', boardFullBoard: 'Pensión completa', boardAllInclusive: 'Todo incluido',
+      boardAllInclusivePlus: 'Todo incluido+',
+    },
+    it: {
+      title: 'Dove andrai la prossima volta?', subtitle: 'Sfoglia le nostre ultime offerte da tutto il mondo',
+      viewFullscreen: 'Schermo intero', viewMapFullscreen: 'Vedi la mappa a schermo intero',
+      closeFullscreen: 'Chiudi la mappa a schermo intero', fullscreenSuffix: 'schermo intero', destinationMap: 'Mappa delle destinazioni',
+      destination: 'Destinazione', loadingMap: 'Caricamento della mappa…',
+      mapUnavailable: 'Mappa non disponibile. Riprova più tardi.',
+      noDestinations: 'Nessuna destinazione disponibile al momento. Riprova più tardi.',
+      latestDeals: 'Ultime offerte', tapDestination: 'Tocca una destinazione sulla mappa per vedere le sue offerte.',
+      pickDestination: 'Scegli una destinazione per vedere le offerte in tempo reale — tocca un prezzo sulla mappa.',
+      rating: 'Categoria', maxBudget: 'Budget max.',
+      filterByRating: 'Filtra per stelle', filterByBudget: 'Filtra per budget massimo', filterByRegion: 'Filtra la mappa per regione',
+      from: 'da', perPerson: 'a persona', tapToView: 'tocca per vedere', worldwide: 'Tutto il mondo', any: 'Tutte',
+      findingDeals: 'Ricerca delle migliori offerte…', findingResortDeals: 'Ricerca delle offerte a {resort}…',
+      noDealsFiltered: 'Nessuna offerta corrisponde ai tuoi filtri',
+      noDealsFilteredLong: 'Nessuna offerta corrisponde a questi filtri. Prova ad ampliare il budget o la categoria.',
+      noDealsNow: 'Nessuna offerta da mostrare al momento.',
+      noDealsCountry: 'Nessuna offerta disponibile per {name} al momento. Prova un’altra destinazione.',
+      dealsLoadError: 'Impossibile caricare le offerte in questo momento. Riprova tra un attimo.',
+      dealsInResort: '{n} offerte a {resort}', showAll: 'Mostra tutte {country}',
+      dealsMatch: '{n} di {total} offerte corrispondono · le più economiche prima',
+      dealsCount: '{n} di {total} offerte · le più economiche prima',
+      hotel: 'Hotel', direct: 'Diretto', viewDeal: 'Vedi offerta', pp: 'p.p.', total: 'totale',
+      night: 'notte', nights: 'notti',
+      boardRoomOnly: 'Solo pernottamento', boardSelfCatering: 'Appartamento con angolo cottura', boardBedAndBreakfast: 'B&B',
+      boardHalfBoard: 'Mezza pensione', boardFullBoard: 'Pensione completa', boardAllInclusive: 'Tutto incluso',
+      boardAllInclusivePlus: 'Tutto incluso+',
+    },
+    ro: {
+      title: 'Unde vei merge data viitoare?', subtitle: 'Răsfoiește cele mai noi oferte din întreaga lume',
+      viewFullscreen: 'Ecran complet', viewMapFullscreen: 'Vezi harta pe ecran complet',
+      closeFullscreen: 'Închide harta pe ecran complet', fullscreenSuffix: 'ecran complet', destinationMap: 'Harta destinațiilor',
+      destination: 'Destinație', loadingMap: 'Se încarcă harta…',
+      mapUnavailable: 'Harta este indisponibilă. Te rugăm să încerci din nou mai târziu.',
+      noDestinations: 'Nicio destinație disponibilă momentan. Te rugăm să încerci din nou mai târziu.',
+      latestDeals: 'Cele mai noi oferte', tapDestination: 'Atinge o destinație pe hartă pentru a-i vedea ofertele.',
+      pickDestination: 'Alege o destinație pentru a vedea ofertele live — atinge un preț pe hartă.',
+      rating: 'Categorie', maxBudget: 'Buget max.',
+      filterByRating: 'Filtrează după stele', filterByBudget: 'Filtrează după bugetul maxim', filterByRegion: 'Filtrează harta după regiune',
+      from: 'de la', perPerson: 'de persoană', tapToView: 'atinge pentru a vedea', worldwide: 'În toată lumea', any: 'Toate',
+      findingDeals: 'Se caută cele mai bune oferte…', findingResortDeals: 'Se caută ofertele din {resort}…',
+      noDealsFiltered: 'Nicio ofertă nu corespunde filtrelor tale',
+      noDealsFilteredLong: 'Nicio ofertă nu corespunde acestor filtre. Încearcă să mărești bugetul sau categoria.',
+      noDealsNow: 'Nicio ofertă de afișat momentan.',
+      noDealsCountry: 'Nicio ofertă disponibilă pentru {name} momentan. Încearcă altă destinație.',
+      dealsLoadError: 'Ofertele nu au putut fi încărcate momentan. Te rugăm să încerci din nou imediat.',
+      dealsInResort: '{n} oferte în {resort}', showAll: 'Arată toate {country}',
+      dealsMatch: '{n} din {total} oferte corespund · cele mai ieftine întâi',
+      dealsCount: '{n} din {total} oferte · cele mai ieftine întâi',
+      hotel: 'Hotel', direct: 'Direct', viewDeal: 'Vezi oferta', pp: 'pers.', total: 'total',
+      night: 'noapte', nights: 'nopți',
+      boardRoomOnly: 'Doar cazare', boardSelfCatering: 'Cazare cu bucătărie', boardBedAndBreakfast: 'Mic dejun inclus',
+      boardHalfBoard: 'Demipensiune', boardFullBoard: 'Pensiune completă', boardAllInclusive: 'All inclusive',
+      boardAllInclusivePlus: 'All inclusive+',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
+
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '';
   const OFFERS_URL = API_BASE + '/api/destination-map-offers';
   const DEALS_URL = API_BASE + '/api/destination-map-deals';
@@ -100,19 +292,21 @@
     return sym + Math.round(p).toLocaleString('en-GB');
   }
 
-  // Travelify boardBasis comes camelCase ("AllInclusivePlus"); humanise for display.
-  const BOARD_LABELS = {
-    RoomOnly: 'Room only',
-    SelfCatering: 'Self catering',
-    BedAndBreakfast: 'B&B',
-    HalfBoard: 'Half board',
-    FullBoard: 'Full board',
-    AllInclusive: 'All inclusive',
-    AllInclusivePlus: 'All inclusive+',
+  // Travelify boardBasis comes camelCase ("AllInclusivePlus"); humanise + localise
+  // for display. Each known basis maps to a translation key (the strings live in
+  // MESSAGES); t is threaded in from the widget so the viewer's language wins.
+  const BOARD_KEYS = {
+    RoomOnly: 'boardRoomOnly',
+    SelfCatering: 'boardSelfCatering',
+    BedAndBreakfast: 'boardBedAndBreakfast',
+    HalfBoard: 'boardHalfBoard',
+    FullBoard: 'boardFullBoard',
+    AllInclusive: 'boardAllInclusive',
+    AllInclusivePlus: 'boardAllInclusivePlus',
   };
-  function boardLabel(b) {
+  function boardLabel(b, t) {
     if (!b) return '';
-    if (BOARD_LABELS[b]) return BOARD_LABELS[b];
+    if (BOARD_KEYS[b] && t) return t(BOARD_KEYS[b]);
     // Fallback: split camelCase into words.
     return String(b).replace(/([a-z])([A-Z])/g, '$1 $2');
   }
@@ -147,8 +341,10 @@
     US: 'USA', DO: 'Dominican Republic', JM: 'Jamaica', BB: 'Barbados',
     AG: 'Antigua', LC: 'Saint Lucia', CU: 'Cuba', AU: 'Australia',
   };
-  function resolveCountryName(c) {
-    return c.country || COUNTRY_NAMES[c.countryCode] || c.countryCode || 'Destination';
+  function resolveCountryName(c, t) {
+    // Country names themselves are data and never translated; only the generic
+    // last-resort fallback ("Destination") is chrome.
+    return c.country || COUNTRY_NAMES[c.countryCode] || c.countryCode || (t ? t('destination') : 'Destination');
   }
 
   // UK (and Ireland) departure airports → [lat, lng] + short label. Used to draw
@@ -1696,9 +1892,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
   const DEFAULTS = {
     theme: 'light',
-    title: 'Where will you go next?',
-    subtitle: 'Browse our latest offers from around the world',
-    ctaLabel: 'View fullscreen',
+    // Author-configurable copy. Left empty so the localised default is used
+    // (see makeT / MESSAGES) unless the author sets their own text.
+    title: '',
+    subtitle: '',
+    ctaLabel: '',
     showFullscreenButton: true,
     // Brand colours (editor-driven). Empty = use the built-in navy/teal tokens.
     // accent  → the active/highlight colour (default teal #00B4D8)
@@ -1729,6 +1927,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       if (!container) return;
       this.host = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this.data = null;
       this.map = null;
@@ -1776,7 +1975,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this._hideLoading();
       } catch (e) {
         console.warn('[tgwm v3] init failed:', e.message);
-        this._showError('Map unavailable. Please try again later.');
+        this._showError(this.t('mapUnavailable'));
       }
     }
 
@@ -1803,28 +2002,29 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     _render() {
       const c = this.cfg;
+      const t = this.t;
       const brand = brandStyleAttr(c);
       const html = `
         <style>${LEAFLET_CSS}${STYLES}</style>
         <div class="tgwm-root" data-theme="${esc(c.theme)}"${brand ? ` style="${brand}"` : ''}>
           <div class="tgwm-header">
-            <h2 class="tgwm-title">${esc(c.title)}</h2>
-            <p class="tgwm-subtitle">${esc(c.subtitle)}</p>
+            <h2 class="tgwm-title">${esc(c.title || t('title'))}</h2>
+            <p class="tgwm-subtitle">${esc(c.subtitle || t('subtitle'))}</p>
           </div>
           <div class="tgwm-map-wrap">
             <div class="tgwm-map" data-map></div>
             <div class="tgwm-loading" data-loading>
               <div class="tgwm-spinner" aria-hidden="true"></div>
-              <span data-loading-text>Loading map…</span>
+              <span data-loading-text>${esc(t('loadingMap'))}</span>
             </div>
-            <button class="tgwm-fs-btn" data-fs-btn aria-label="View map in fullscreen">
+            <button class="tgwm-fs-btn" data-fs-btn aria-label="${esc(t('viewMapFullscreen'))}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 3 21 3 21 9"/>
                 <polyline points="9 21 3 21 3 15"/>
                 <line x1="21" y1="3" x2="14" y2="10"/>
                 <line x1="3" y1="21" x2="10" y2="14"/>
               </svg>
-              <span>${esc(c.ctaLabel || 'View fullscreen')}</span>
+              <span>${esc(c.ctaLabel || t('viewFullscreen'))}</span>
             </button>
           </div>
         </div>
@@ -1927,7 +2127,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._hideOverlayLoading();
       const empty = this.overlayEl && this.overlayEl.querySelector('[data-ov-empty]');
       const col = this.overlayEl && this.overlayEl.querySelector('[data-ov-mapcol]');
-      if (empty) { empty.hidden = false; empty.querySelector('p').textContent = 'Map unavailable. Please try again later.'; }
+      if (empty) { empty.hidden = false; empty.querySelector('p').textContent = this.t('mapUnavailable'); }
       if (col) col.hidden = true;
     }
 
@@ -1978,11 +2178,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
     /** Construct the overlay DOM inside the Shadow root (built once, reused). */
     _buildOverlay() {
       const c = this.cfg;
+      const t = this.t;
       const wrap = document.createElement('div');
       wrap.className = 'tgwm-overlay';
       wrap.setAttribute('role', 'dialog');
       wrap.setAttribute('aria-modal', 'true');
-      wrap.setAttribute('aria-label', (c.title || 'Destination map') + ' — fullscreen');
+      wrap.setAttribute('aria-label', (c.title || t('destinationMap')) + ' — ' + t('fullscreenSuffix'));
       wrap.setAttribute('data-theme', esc(c.theme));
       // Brand colour overrides (validated hex only) — mirror the compact root so
       // the fullscreen overlay carries the agency's accent/primary too.
@@ -1994,10 +2195,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <div class="tgwm-overlay-backdrop" data-ov-backdrop></div>
         <header class="tgwm-overlay-header">
           <div class="tgwm-overlay-titles">
-            <h2 class="tgwm-overlay-title">${esc(c.title)}</h2>
-            <p class="tgwm-overlay-sub">${esc(c.subtitle)}</p>
+            <h2 class="tgwm-overlay-title">${esc(c.title || t('title'))}</h2>
+            <p class="tgwm-overlay-sub">${esc(c.subtitle || t('subtitle'))}</p>
           </div>
-          <button class="tgwm-overlay-close" data-ov-close type="button" aria-label="Close fullscreen map">
+          <button class="tgwm-overlay-close" data-ov-close type="button" aria-label="${esc(t('closeFullscreen'))}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
@@ -2007,16 +2208,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <div class="tgwm-overlay-body" data-ov-body data-cards-hidden>
           <aside class="tgwm-ov-cards" data-ov-cards>
             <div class="tgwm-ov-cards-head">
-              <h3 class="tgwm-ov-cards-title" data-ov-cards-title>Latest deals</h3>
-              <p class="tgwm-ov-cards-meta" data-ov-cards-meta>Tap any destination on the map to see its deals.</p>
+              <h3 class="tgwm-ov-cards-title" data-ov-cards-title>${esc(t('latestDeals'))}</h3>
+              <p class="tgwm-ov-cards-meta" data-ov-cards-meta>${esc(t('tapDestination'))}</p>
               <div class="tgwm-ov-filters" data-ov-filters hidden>
                 <div class="tgwm-filter-group" data-ov-filter-rating>
-                  <span class="tgwm-filter-label">Rating</span>
-                  <div class="tgwm-seg" role="group" aria-label="Filter by star rating" data-ov-rating-seg></div>
+                  <span class="tgwm-filter-label">${esc(t('rating'))}</span>
+                  <div class="tgwm-seg" role="group" aria-label="${esc(t('filterByRating'))}" data-ov-rating-seg></div>
                 </div>
                 <div class="tgwm-filter-group" data-ov-filter-budget>
-                  <span class="tgwm-filter-label">Max budget</span>
-                  <div class="tgwm-seg" role="group" aria-label="Filter by maximum budget" data-ov-budget-seg></div>
+                  <span class="tgwm-filter-label">${esc(t('maxBudget'))}</span>
+                  <div class="tgwm-seg" role="group" aria-label="${esc(t('filterByBudget'))}" data-ov-budget-seg></div>
                 </div>
               </div>
             </div>
@@ -2026,17 +2227,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                   <circle cx="12" cy="10" r="3"/>
                 </svg>
-                <p>Pick a destination to see live deals — tap a price on the map.</p>
+                <p>${esc(t('pickDestination'))}</p>
               </div>
             </div>
           </aside>
           <div class="tgwm-ov-mapcol" data-ov-mapcol>
             <div class="tgwm-ov-map" data-ov-map></div>
             <div class="tgwm-ov-edges" data-ov-edges aria-hidden="true"></div>
-            <div class="tgwm-ov-regions" data-ov-regions role="group" aria-label="Filter the map by region" hidden></div>
+            <div class="tgwm-ov-regions" data-ov-regions role="group" aria-label="${esc(t('filterByRegion'))}" hidden></div>
             <div class="tgwm-ov-loading" data-ov-loading>
               <div class="tgwm-spinner" aria-hidden="true"></div>
-              <span>Loading map…</span>
+              <span>${esc(t('loadingMap'))}</span>
             </div>
           </div>
           <div class="tgwm-overlay-empty" data-ov-empty hidden>
@@ -2045,7 +2246,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
               <line x1="2" y1="12" x2="22" y2="12"/>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
-            <p>No destinations available right now. Please try again later.</p>
+            <p>${esc(t('noDestinations'))}</p>
           </div>
         </div>
       `;
@@ -2147,11 +2348,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
           this.ovMarkers = [];
           for (const c of sorted) {
-            const name = resolveCountryName(c);
+            const name = resolveCountryName(c, this.t);
             const priceLabel = formatPrice(c.fromPricePP || c.fromPrice, c.currency);
             const html = `
               <div class="tg-pin-wrap" data-country="${esc(name)}">
-                <div class="tg-price-tag" title="${esc(name)} — from ${esc(priceLabel)} per person">
+                <div class="tg-price-tag" title="${esc(name)} — ${esc(this.t('from'))} ${esc(priceLabel)} ${esc(this.t('perPerson'))}">
                   <span class="tg-tag-country">${esc(name)}</span>
                   <span class="tg-tag-price">${esc(priceLabel)}</span>
                 </div>
@@ -2268,7 +2469,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         const active = this._activeResort === r.resort;
         const html = `
           <div class="tg-pin-wrap${active ? ' is-active' : ''}" data-resort="${esc(r.resort)}">
-            <div class="tg-price-tag" title="${esc(r.resort)} — from ${esc(priceLabel)} per person">
+            <div class="tg-price-tag" title="${esc(r.resort)} — ${esc(this.t('from'))} ${esc(priceLabel)} ${esc(this.t('perPerson'))}">
               <span class="tg-tag-country">${esc(r.resort)}</span>
               <span class="tg-tag-price">${esc(priceLabel)}</span>
             </div>
@@ -2591,7 +2792,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 
     _edgeChip(country, x, y, dir, edge) {
-      const name = resolveCountryName(country);
+      const name = resolveCountryName(country, this.t);
       const price = formatPrice(country.fromPricePP || country.fromPrice, country.currency);
       const ARROWS = {
         left:  '<polyline points="15 18 9 12 15 6"/>',
@@ -2614,7 +2815,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         bottom: 'translate(-50%, -100%)',
       };
       chip.style.transform = T[edge] || 'translate(-50%, -50%)';
-      chip.title = name + ' — from ' + price + ', tap to view';
+      chip.title = name + ' — ' + this.t('from') + ' ' + price + ', ' + this.t('tapToView');
       // Arrow on the leading side: left/up arrows before the label, right/down after.
       const label = `<span class="tgwm-edge-name">${esc(name)}</span><span class="tgwm-edge-price">${esc(price)}</span>`;
       chip.innerHTML = (dir === 'left' || dir === 'up') ? (arrow + label) : (label + arrow);
@@ -2737,7 +2938,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
       bar.innerHTML = '';
       // Worldwide reset pill first.
-      bar.appendChild(this._regionPill('Worldwide', null, this._activeRegion == null));
+      bar.appendChild(this._regionPill(this.t('worldwide'), null, this._activeRegion == null));
       for (const r of present) {
         bar.appendChild(this._regionPill(r, r, this._activeRegion === r, counts.get(r)));
       }
@@ -2799,15 +3000,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
       const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
-      if (titleEl) titleEl.textContent = 'Latest deals';
-      if (metaEl) metaEl.textContent = 'Tap any destination on the map to see its deals.';
+      if (titleEl) titleEl.textContent = this.t('latestDeals');
+      if (metaEl) metaEl.textContent = this.t('tapDestination');
       if (scroll) {
         scroll.innerHTML = `
           <div class="tgwm-ov-cards-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
             </svg>
-            <p>Pick a destination to see live deals — tap a price on the map.</p>
+            <p>${esc(this.t('pickDestination'))}</p>
           </div>`;
       }
     }
@@ -2851,7 +3052,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     _loadDeals(country) {
       if (!this.overlayEl || !country) return;
       const cc = country.countryCode;
-      const name = resolveCountryName(country);
+      const name = resolveCountryName(country, this.t);
       const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
       const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
@@ -2872,7 +3073,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
 
       if (titleEl) titleEl.textContent = name;
-      if (metaEl) metaEl.textContent = 'Finding the best deals…';
+      if (metaEl) metaEl.textContent = this.t('findingDeals');
 
       // Token to discard stale responses if another country is picked mid-fetch.
       const token = (this._dealsToken = (this._dealsToken || 0) + 1);
@@ -2935,7 +3136,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
       // Rating options: Any, 3★+, 4★+, 5★. Disable any with no matching offers.
       const ratingOpts = [
-        { label: 'Any', val: null },
+        { label: this.t('any'), val: null },
         { label: '3★+', val: 3 },
         { label: '4★+', val: 4 },
         { label: '5★', val: 5 },
@@ -2950,7 +3151,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
 
       // Budget options: Any + up to three round thresholds spanning the spread.
-      const budgetOpts = [{ label: 'Any', val: null }];
+      const budgetOpts = [{ label: this.t('any'), val: null }];
       if (maxPrice > minPrice) {
         const span = maxPrice - minPrice;
         const round = n => {
@@ -3038,13 +3239,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Zero matches (usually from an over-tight filter) → friendly empty state.
       if (!offers.length) {
         const filtered = (this._filterMaxPrice != null || this._filterMinRating != null);
-        if (metaEl) metaEl.textContent = filtered ? 'No deals match your filters' : '';
+        if (metaEl) metaEl.textContent = filtered ? this.t('noDealsFiltered') : '';
         scroll.innerHTML = `
           <div class="tgwm-ov-cards-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <p>${filtered ? 'No deals match these filters. Try widening your budget or rating.' : 'No deals to show right now.'}</p>
+            <p>${esc(filtered ? this.t('noDealsFilteredLong') : this.t('noDealsNow'))}</p>
           </div>`;
         return;
       }
@@ -3056,14 +3257,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const filterActive = (this._filterMaxPrice != null || this._filterMinRating != null);
       if (metaEl) {
         if (resortName) {
-          metaEl.innerHTML = sorted.length + ' deals in ' + esc(resortName) +
-            ' · <button type="button" class="tgwm-clear-resort" data-ov-clear-resort>Show all ' + esc(countryName) + '</button>';
+          metaEl.innerHTML = esc(this.t('dealsInResort', { n: sorted.length, resort: resortName })) +
+            ' · <button type="button" class="tgwm-clear-resort" data-ov-clear-resort>' + esc(this.t('showAll', { country: countryName })) + '</button>';
           const clr = metaEl.querySelector('[data-ov-clear-resort]');
           if (clr) clr.addEventListener('click', () => this._clearResortFilter());
         } else if (filterActive) {
-          metaEl.textContent = sorted.length + ' of ' + (total || offers.length).toLocaleString('en-GB') + ' deals match · cheapest first';
+          metaEl.textContent = this.t('dealsMatch', { n: sorted.length, total: (total || offers.length).toLocaleString('en-GB') });
         } else {
-          metaEl.textContent = sorted.length + ' of ' + (total || offers.length).toLocaleString('en-GB') + ' deals · cheapest first';
+          metaEl.textContent = this.t('dealsCount', { n: sorted.length, total: (total || offers.length).toLocaleString('en-GB') });
         }
       }
       scroll.innerHTML = sorted.map(o => this._cardHtml(o)).join('');
@@ -3104,7 +3305,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const titleEl = this.overlayEl && this.overlayEl.querySelector('[data-ov-cards-title]');
       const metaEl = this.overlayEl && this.overlayEl.querySelector('[data-ov-cards-meta]');
       if (titleEl) titleEl.textContent = resort + ', ' + country;
-      if (metaEl) metaEl.textContent = 'Finding ' + resort + ' deals…';
+      if (metaEl) metaEl.textContent = this.t('findingResortDeals', { resort: resort });
       if (scroll) scroll.innerHTML = this._skeletonsHtml(3);
 
       const token = (this._resortDealsToken = (this._resortDealsToken || 0) + 1);
@@ -3155,7 +3356,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <p>No deals available for ${esc(name)} right now. Try another destination.</p>
+          <p>${esc(this.t('noDealsCountry', { name: name }))}</p>
         </div>`;
     }
 
@@ -3166,7 +3367,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
-          <p>Couldn't load deals just now. Please try again in a moment.</p>
+          <p>${esc(this.t('dealsLoadError'))}</p>
         </div>`;
     }
 
@@ -3174,19 +3375,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
     _cardHtml(o) {
       const href = safeUrl(o.url);
       const img = safeUrl(o.image);
+      const t = this.t;
       const pp = formatPrice(o.pricePP || o.price, o.currency);
       const total = (o.price && o.pricePP && o.price !== o.pricePP)
-        ? formatPrice(o.price, o.currency) + ' total' : '';
-      const hotel = esc(o.hotel || 'Hotel');
+        ? formatPrice(o.price, o.currency) + ' ' + t('total') : '';
+      const hotel = esc(o.hotel || t('hotel'));
       const resort = esc([o.resort, o.airportName ? o.airportName.replace(/\s*\([^)]*\)\s*$/, '') : '']
         .filter(Boolean).join(' · '));
       const stars = starsSvg(o.rating);
       const facts = [];
-      if (o.boardBasis) facts.push(this._factHtml('board', boardLabel(o.boardBasis)));
-      if (o.nights) facts.push(this._factHtml('moon', o.nights + (o.nights === 1 ? ' night' : ' nights')));
+      if (o.boardBasis) facts.push(this._factHtml('board', boardLabel(o.boardBasis, t)));
+      if (o.nights) facts.push(this._factHtml('moon', o.nights + ' ' + (o.nights === 1 ? t('night') : t('nights'))));
       if (o.resort) facts.push(this._factHtml('pin', esc(o.resort)));
       const carrier = o.carrier ? esc(o.carrier) : '';
-      const directBadge = o.direct ? `<span class="tgwm-card-badge">Direct</span>` : '';
+      const directBadge = o.direct ? `<span class="tgwm-card-badge">${esc(t('direct'))}</span>` : '';
       const imgHtml = img !== '#'
         ? `<img src="${img}" alt="${hotel}" loading="lazy" onerror="this.style.display='none'">`
         : '';
@@ -3197,7 +3399,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
             ${imgHtml}
             ${directBadge}
             <div class="tgwm-card-price">
-              <span class="tgwm-card-price-pp">${esc(pp)}<span> pp</span></span>
+              <span class="tgwm-card-price-pp">${esc(pp)}<span> ${esc(t('pp'))}</span></span>
               ${total ? `<span class="tgwm-card-price-total">${esc(total)}</span>` : ''}
             </div>
           </div>
@@ -3207,7 +3409,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
             ${stars ? `<div class="tgwm-card-stars">${stars}</div>` : ''}
             <div class="tgwm-card-facts">${facts.join('')}</div>
             <div class="tgwm-card-cta">
-              <span class="tgwm-card-cta-label">View deal
+              <span class="tgwm-card-cta-label">${esc(t('viewDeal'))}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </span>
               ${carrier ? `<span class="tgwm-card-carrier">${carrier}</span>` : ''}
@@ -3343,12 +3545,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
       // Drop the pins
       for (const c of featured) {
-        const name = resolveCountryName(c);
+        const name = resolveCountryName(c, this.t);
         // Per-person price per the locked display rule (£460 total shows as £230).
         const priceLabel = formatPrice(c.fromPricePP || c.fromPrice, c.currency);
         const html = `
           <div class="tg-pin-wrap" data-country="${esc(name)}">
-            <div class="tg-price-tag" title="${esc(name)} — from ${esc(priceLabel)} per person">
+            <div class="tg-price-tag" title="${esc(name)} — ${esc(this.t('from'))} ${esc(priceLabel)} ${esc(this.t('perPerson'))}">
               <span class="tg-tag-country">${esc(name)}</span>
               <span class="tg-tag-price">${esc(priceLabel)}</span>
             </div>
@@ -3382,6 +3584,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      this.t = makeT(this.cfg);
       // _render() wipes shadow.innerHTML, which orphans the overlay node.
       // Reset its state so a fresh one is built on next open. Also undo any
       // live scroll lock so we don't strand the host page.
