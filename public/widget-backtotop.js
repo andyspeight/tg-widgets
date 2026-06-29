@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.1';
+  const VERSION = '1.1.0';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -56,6 +56,36 @@
     double: '<polyline points="6 17 12 11 18 17"/><polyline points="6 11 12 5 18 11"/>',
   };
 
+  // ─── i18n ───────────────────────────────────────────────────
+  // UI strings, per language. English is the source + fallback. The author can
+  // still override labelText / ariaLabel per widget; when they leave them blank
+  // the visitor sees the localized default for their language.
+  const MESSAGES = {
+    en: { top: 'Top', backToTop: 'Back to top' },
+    fr: { top: 'Haut', backToTop: 'Retour en haut' },
+    de: { top: 'Oben', backToTop: 'Nach oben' },
+    es: { top: 'Arriba', backToTop: 'Volver arriba' },
+    it: { top: 'Su', backToTop: 'Torna su' },
+  };
+  // Use the shared TGi18n core when it is present on the page; otherwise a tiny
+  // self-contained resolver keeps this widget dependency-free. Same logic either
+  // way, so the result is identical.
+  function makeT(cfg) {
+    if (window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k) => (Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k));
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
+
   const DEFAULTS = {
     showAfter: 25,                 // % scrolled before the button appears
     position: 'bottom-right',      // bottom-right | bottom-left | bottom-center
@@ -67,12 +97,13 @@
     iconColor: '',                 // '' = auto-contrast from accent
     icon: 'chevron',               // chevron | arrow | double
     showLabel: false,
-    labelText: 'Top',
+    labelText: '',                 // '' = localized default ("Top") for the viewer's language
     smoothScroll: true,
     shadow: true,
     theme: 'light',
     font: 'Inter',
-    ariaLabel: 'Back to top',
+    lang: '',                      // '' = auto-detect (page lang / browser); or force e.g. 'fr'
+    ariaLabel: '',                 // '' = localized default ("Back to top")
     previewMode: false,            // editor-only: force visible, no scroll/scroll-action
   };
 
@@ -137,6 +168,9 @@
 
     _build() {
       const c = this.cfg;
+      const t = makeT(c);                                  // resolve language + strings
+      const labelText = String(c.labelText || '').trim() || t('top');
+      const ariaLabel = String(c.ariaLabel || '').trim() || t('backToTop');
       const accent = safeColor(c.accent, '#0891B2');
       const ink = c.iconColor && safeColor(c.iconColor, '') ? safeColor(c.iconColor, '#fff') : inkFor(accent);
       const size = clampNum(c.size, 36, 80, 52);
@@ -146,7 +180,7 @@
       const pos = ['bottom-right', 'bottom-left', 'bottom-center'].includes(c.position) ? c.position : 'bottom-right';
       const icon = ICONS[c.icon] ? c.icon : 'chevron';
       const font = safeFont(c.font || c.fontFamily);
-      const showLabel = !!c.showLabel && !!String(c.labelText || '').trim();
+      const showLabel = !!c.showLabel && !!labelText;
       const shadow = c.shadow === false ? 'none' : '0 6px 20px rgba(15,23,42,.22)';
       const shadowHover = c.shadow === false ? 'none' : '0 10px 28px rgba(15,23,42,.3)';
 
@@ -161,14 +195,14 @@
         `font-family:'${font}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`,
       ].join(';');
 
-      const label = showLabel ? `<span class="tgbt-label">${esc(c.labelText)}</span>` : '';
+      const label = showLabel ? `<span class="tgbt-label">${esc(labelText)}</span>` : '';
 
       this.shadow.innerHTML = `<style>${styles()}</style>
         <button type="button" part="button"
           class="tgbt-btn pos-${pos}${showLabel ? ' has-label' : ''}"
           style="${vars}"
-          aria-label="${esc(c.ariaLabel || 'Back to top')}"
-          title="${esc(c.ariaLabel || 'Back to top')}"
+          aria-label="${esc(ariaLabel)}"
+          title="${esc(ariaLabel)}"
           aria-hidden="true" tabindex="-1">
           <svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[icon]}</svg>${label}
         </button>`;
