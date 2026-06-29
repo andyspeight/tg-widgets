@@ -2497,6 +2497,7 @@
     /* ================================ CONSTS ================================ */
     const API_AUTH        = '/api/widget-auth';
     const API_CONFIG      = '/api/enquiry-form-config';  // new endpoint
+    const API_TRANSLATE   = '/api/enquiry-translate';    // Layer-2 content translation
     const API_LIST        = '/api/widget-list';
     const WIDGET_TYPE     = 'Enquiry Form';
     // Enquiry Pro shares this editor and pipeline; only the embed output and a
@@ -3002,7 +3003,15 @@
           rateLimitTier: 'standard',
           turnstile: false,
           allowedOrigins: ''
-        }
+        },
+        // Layer-2 content translation (see api/enquiry-translate). audienceLanguages
+        // is the set the agent chose to translate into; i18n holds the per-language
+        // overlays the widget lays over the English source at render time; i18nMeta
+        // records the source signature each language was translated from so the
+        // editor can flag a translation as out of date when the source changes.
+        audienceLanguages: [],
+        i18n: {},
+        i18nMeta: {}
       };
     }
 
@@ -3172,7 +3181,12 @@
             ? data.stepsJSON
             : JSON.stringify(data.stepsJSON || []),
           routing: Object.assign(defaultConfig().routing, data.routing || {}),
-          security: Object.assign(defaultConfig().security, data.security || {})
+          security: Object.assign(defaultConfig().security, data.security || {}),
+          // Layer-2 content translation — keep them well-formed regardless of
+          // what the server returns (older forms have none of these).
+          audienceLanguages: Array.isArray(data.audienceLanguages) ? data.audienceLanguages : [],
+          i18n: (data.i18n && typeof data.i18n === 'object' && !Array.isArray(data.i18n)) ? data.i18n : {},
+          i18nMeta: (data.i18nMeta && typeof data.i18nMeta === 'object' && !Array.isArray(data.i18nMeta)) ? data.i18nMeta : {}
         });
         return true;
       } catch (err) {
@@ -3646,6 +3660,12 @@
         name: 'Reference format',
         desc: 'Customise the prefix on submission references.',
         icon: '<polyline points="8 3 21 3 21 16"/><polygon points="13 8 3 8 3 21 13 21 13 8"/>',
+      },
+      {
+        id: 'languages',
+        name: 'Audience languages',
+        desc: 'Translate the form into the languages your customers read.',
+        icon: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>',
       },
     ];
 
@@ -5785,6 +5805,7 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       else if (cat.id === 'branding')  renderBrandingInspector(body, save);
       else if (cat.id === 'security')  renderSecurityInspector(body, save);
       else if (cat.id === 'reference') renderReferenceInspector(body, save);
+      else if (cat.id === 'languages') renderLanguagesInspector(body, save);
     }
 
     // ── Status inspector ──
@@ -6395,6 +6416,336 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       previewInner.appendChild(val);
       previewSec.appendChild(previewInner);
       body.appendChild(previewSec);
+    }
+
+    /* ===================== AUDIENCE LANGUAGES (CONTENT LAYER) ===================== */
+    // Layer-2 content translation. The agent writes the form once in English, then
+    // translates the words it shows into the languages their customers read. The
+    // endpoint (api/enquiry-translate) only ever sees DISPLAY strings; field ids
+    // and option values never leave the editor. They are kept in a local parallel
+    // index so the positional response can be re-keyed back to the stable ids and
+    // values the widget overlays translations onto at render time.
+    //
+    // TO ADD A LANGUAGE (we add these as customers ask for them):
+    //   1. Add it here (code + English label) — this adds the editor toggle.
+    //   2. api/enquiry-translate.js → LANG_NAMES (lets the translator accept it).
+    //   3. public/widget-enquiry.js → MESSAGES   (translates the form's own fixed
+    //      chrome — buttons, validation; bump the widget VERSION).
+    const AUDIENCE_LANGS = [
+      { code: 'fr', label: 'French' },
+      { code: 'de', label: 'German' },
+      { code: 'es', label: 'Spanish' },
+      { code: 'it', label: 'Italian' },
+      { code: 'ro', label: 'Romanian' }
+    ];
+    const AUDIENCE_LANG_CODES = AUDIENCE_LANGS.map(l => l.code);
+
+    // The most recent parallel index built by collectTranslatableContent, mapping
+    // each sent field position to its stable id and ordered option values. Held in
+    // session memory only — never sent, never saved. Used to re-key the positional
+    // endpoint response back onto ids/values.
+    let _lastTranslateIndex = [];
+    // In-session record of the source signature each language was translated
+    // against, so the editor can flag "Source changed — re-translate" when the
+    // author edits the form after translating. Mirrors the offer builder; saved
+    // copies of i18nMeta carry the same on reload.
+    const _sessionSig = {};
+
+    // Pull a field's translatable display strings out of the editor's field shape.
+    // label/help sit at the top level; placeholder lives under options (object) or,
+    // for forward compatibility, at the top level; a genuine choice-list field
+    // keeps an options ARRAY of { value, label } we expose as ordered label strings.
+    function fieldDisplay(field) {
+      const out = { label: '', placeholder: '', help: '', options: [] };
+      out.label = (field && typeof field.label === 'string') ? field.label.trim() : '';
+      out.help  = (field && typeof field.help  === 'string') ? field.help.trim()  : '';
+      let ph = '';
+      if (field && typeof field.placeholder === 'string') ph = field.placeholder;
+      else if (field && field.options && !Array.isArray(field.options) && typeof field.options.placeholder === 'string') ph = field.options.placeholder;
+      out.placeholder = ph ? ph.trim() : '';
+      if (field && Array.isArray(field.options)) {
+        field.options.forEach((opt) => {
+          if (opt && opt.value != null && typeof opt.label === 'string') {
+            out.options.push({ value: String(opt.value), label: opt.label });
+          }
+        });
+      }
+      return out;
+    }
+
+    // Build the endpoint request `content` from the working config in the exact
+    // shape api/enquiry-translate expects (display strings only, empties omitted),
+    // and a PARALLEL INDEX of each field's stable id + ordered option values so the
+    // positional response can be re-keyed. Stashes the index in _lastTranslateIndex.
+    function collectTranslatableContent(c) {
+      const content = {};
+      const title = (c.headerTitle || '').trim();
+      const subtitle = (c.headerSubtitle || '').trim();
+      const header = {};
+      if (title) header.title = title;
+      if (subtitle) header.subtitle = subtitle;
+      if (Object.keys(header).length) content.header = header;
+      const submit = (c.submitButtonText || '').trim();
+      if (submit) content.submitButtonText = submit;
+      const thankYou = (c.thankYouMessage || '').trim();
+      if (thankYou) content.thankYouMessage = thankYou;
+
+      const fieldsArr = [];
+      const index = [];
+      parseFields(c.fieldsJSON).forEach((f) => {
+        if (!f || !f.id) return;
+        const d = fieldDisplay(f);
+        const entry = {};
+        if (d.label) entry.label = d.label;
+        if (d.placeholder) entry.placeholder = d.placeholder;
+        if (d.help) entry.help = d.help;
+        const optionValues = [];
+        if (d.options.length) {
+          entry.options = d.options.map((o) => o.label);
+          d.options.forEach((o) => optionValues.push(o.value));
+        }
+        // Only translate a field that actually shows some words.
+        if (Object.keys(entry).length) {
+          fieldsArr.push(entry);
+          index.push({ id: f.id, optionValues });
+        }
+      });
+      if (fieldsArr.length) content.fields = fieldsArr;
+      _lastTranslateIndex = index;
+      return content;
+    }
+
+    // A stable signature of the translatable source. When this changes after a
+    // language was translated, that language is flagged stale.
+    function contentSignature(c) {
+      try { return JSON.stringify(collectTranslatableContent(c)); } catch (e) { return ''; }
+    }
+
+    // Re-key one language's POSITIONAL endpoint response into a name/value-keyed
+    // overlay using the parallel index captured at collect time. Only non-empty
+    // translated strings are written. This is the array-by-position →
+    // keyed-by-stable-id/value step; the widget reads exactly this shape.
+    function rekeyTranslation(tr, index) {
+      if (!tr || typeof tr !== 'object') return null;
+      const str = (v) => (typeof v === 'string' && v.trim()) ? v : '';
+      const out = {};
+      if (tr.header && typeof tr.header === 'object') {
+        const h = {};
+        if (str(tr.header.title)) h.title = tr.header.title;
+        if (str(tr.header.subtitle)) h.subtitle = tr.header.subtitle;
+        if (Object.keys(h).length) out.header = h;
+      }
+      if (str(tr.submitButtonText)) out.submitButtonText = tr.submitButtonText;
+      if (str(tr.thankYouMessage)) out.thankYouMessage = tr.thankYouMessage;
+      if (Array.isArray(tr.fields) && index.length) {
+        const fields = {};
+        tr.fields.forEach((tf, i) => {
+          const ix = index[i];
+          if (!ix || !tf || typeof tf !== 'object') return;
+          const f = {};
+          if (str(tf.label)) f.label = tf.label;
+          if (str(tf.placeholder)) f.placeholder = tf.placeholder;
+          if (str(tf.help)) f.help = tf.help;
+          if (Array.isArray(tf.options) && ix.optionValues.length) {
+            const opts = {};
+            tf.options.forEach((lbl, j) => {
+              const val = ix.optionValues[j];
+              if (val != null && str(lbl)) opts[val] = lbl;
+            });
+            if (Object.keys(opts).length) f.options = opts;
+          }
+          if (Object.keys(f).length) fields[ix.id] = f;
+        });
+        if (Object.keys(fields).length) out.fields = fields;
+      }
+      return Object.keys(out).length ? out : null;
+    }
+
+    // Status of one audience language relative to the current source content.
+    // Staleness is in-session: we compare against the signature recorded when the
+    // language was last translated this session, falling back to the saved
+    // i18nMeta signature so a reopened form still flags edits made before reload.
+    function langStatus(c, code) {
+      const tr = c.i18n && c.i18n[code];
+      const has = tr && typeof tr === 'object' && Object.keys(tr).length;
+      if (!has) return { state: 'none', label: 'Not translated', tone: 'muted' };
+      const sig = _sessionSig[code] || (c.i18nMeta && c.i18nMeta[code] && c.i18nMeta[code].sig) || '';
+      if (sig && sig !== contentSignature(c)) return { state: 'stale', label: 'Source changed — re-translate', tone: 'warn' };
+      return { state: 'ok', label: 'Translated', tone: 'ok' };
+    }
+
+    // ── Audience languages inspector ──
+    // A toggle per language with its live status, plus the Translate button and an
+    // explanatory note on what is and is not translated. Re-rendered on toggle and
+    // after a translation so statuses and the button label stay live.
+    function renderLanguagesInspector(body, save) {
+      const c = state.config;
+      if (!Array.isArray(c.audienceLanguages)) c.audienceLanguages = [];
+      if (!c.i18n || typeof c.i18n !== 'object') c.i18n = {};
+      if (!c.i18nMeta || typeof c.i18nMeta !== 'object') c.i18nMeta = {};
+
+      // Intro note — warm, plain, and explicit about what we never translate.
+      const intro = document.createElement('div');
+      intro.style.cssText = 'padding: 12px; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 0 7px 7px 0; font-size: 12px; line-height: 1.6; color: var(--sub); margin-bottom: 4px;';
+      intro.textContent = 'Write your form once in English, then translate the words it shows into the languages your customers read. Each visitor sees their own language automatically, falling back to English for anything not yet translated.';
+      const introSec = document.createElement('div');
+      introSec.className = 'insp-section';
+      introSec.appendChild(intro);
+      body.appendChild(introSec);
+
+      // Language toggles, each with its status.
+      const rows = [];
+      AUDIENCE_LANGS.forEach((l) => {
+        const on = c.audienceLanguages.indexOf(l.code) !== -1;
+        const st = langStatus(c, l.code);
+        const sub = st.tone === 'ok' ? 'Translated'
+          : st.tone === 'warn' ? 'Source changed — re-translate'
+          : 'Not translated';
+        rows.push(toggleRow({
+          label: l.label,
+          sub: sub,
+          checked: on,
+          onChange: (v) => {
+            const i = c.audienceLanguages.indexOf(l.code);
+            if (v && i === -1) c.audienceLanguages.push(l.code);
+            else if (!v && i !== -1) c.audienceLanguages.splice(i, 1);
+            markDirtyAndSync();
+            renderInspector();   // refresh button enabled-state + statuses
+          }
+        }));
+      });
+      body.appendChild(section('Languages your customers read', rows));
+
+      // Translate button + live status line.
+      const anyTranslated = AUDIENCE_LANGS.some((l) => c.i18n[l.code] && Object.keys(c.i18n[l.code]).length);
+      const actionSec = document.createElement('div');
+      actionSec.className = 'insp-section';
+
+      const goBtn = document.createElement('button');
+      goBtn.type = 'button';
+      goBtn.id = 'lang-translate-go';
+      goBtn.style.cssText = 'width: 100%; height: 40px; border: 0; border-radius: 8px; background: var(--brand); color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; transition: all .15s ease;';
+      goBtn.textContent = anyTranslated ? 'Update translations' : 'Translate for my audience';
+      goBtn.disabled = !c.audienceLanguages.length;
+      if (goBtn.disabled) { goBtn.style.opacity = '.6'; goBtn.style.cursor = 'not-allowed'; }
+      goBtn.addEventListener('click', translateAudience);
+      actionSec.appendChild(goBtn);
+
+      const statusLine = document.createElement('p');
+      statusLine.id = 'lang-status';
+      statusLine.className = 'insp-note';
+      statusLine.style.cssText = 'margin-top: 8px; display: none;';
+      actionSec.appendChild(statusLine);
+      body.appendChild(actionSec);
+
+      // What we never translate — set expectations plainly.
+      const note = document.createElement('div');
+      note.style.cssText = 'padding: 12px; background: var(--hover); border-left: 3px solid var(--muted); border-radius: 0 7px 7px 0; font-size: 12px; line-height: 1.6; color: var(--sub);';
+      note.textContent = 'Prices, place and brand names, ATOL and ABTA wording, dates and the answers your visitors type are never translated. We only translate the words your form shows, so every enquiry still arrives the same whatever language it was sent in.';
+      const noteSec = document.createElement('div');
+      noteSec.className = 'insp-section';
+      noteSec.appendChild(note);
+      body.appendChild(noteSec);
+    }
+
+    // Run the translation: collect the source, POST to the endpoint with cookie
+    // auth, re-key the positional response onto stable ids/values, merge per
+    // language (never wiping other languages), then mark dirty and persist.
+    async function translateAudience() {
+      const c = state.config;
+      const targets = (c.audienceLanguages || []).filter((code) => AUDIENCE_LANG_CODES.indexOf(code) !== -1);
+      const btn = $('#lang-translate-go');
+      const status = $('#lang-status');
+      const setStatus = (msg) => { if (status) { status.style.display = msg ? '' : 'none'; status.textContent = msg || ''; } };
+
+      if (!targets.length) { showToast('Pick at least one language first', 'error'); return; }
+
+      // collectTranslatableContent also refreshes _lastTranslateIndex, which we
+      // snapshot now so the re-key uses the exact order we are about to send.
+      const content = collectTranslatableContent(c);
+      if (!content.header && !content.submitButtonText && !content.thankYouMessage && !content.fields) {
+        showToast('Add some form content to translate first', 'error');
+        return;
+      }
+      const sig = contentSignature(c);                 // note: rebuilds _lastTranslateIndex
+      const index = _lastTranslateIndex.slice();
+
+      const restoreBtn = () => {
+        if (btn) {
+          btn.disabled = !c.audienceLanguages.length;
+          btn.style.opacity = btn.disabled ? '.6' : '';
+          btn.style.cursor = btn.disabled ? 'not-allowed' : 'pointer';
+          btn.textContent = AUDIENCE_LANGS.some((l) => c.i18n[l.code] && Object.keys(c.i18n[l.code]).length)
+            ? 'Update translations' : 'Translate for my audience';
+        }
+      };
+
+      if (btn) { btn.disabled = true; btn.style.opacity = '.7'; btn.style.cursor = 'wait'; btn.textContent = 'Translating…'; }
+      setStatus('Translating — usually takes 10 to 20 seconds.');
+
+      try {
+        const res = await fetch(API_TRANSLATE, {
+          method: 'POST',
+          credentials: 'include',          // cookie auth, same as save()
+          headers: authHeaders(),
+          body: JSON.stringify({ content: content, targetLangs: targets, sourceLang: 'en' })
+        });
+
+        if (res.status === 401) {
+          showToast('Session expired — please sign in again', 'error');
+          setStatus('');
+          restoreBtn();
+          clearSession();
+          location.reload();
+          return;
+        }
+        if (res.status === 429) {
+          showToast('Too many translations just now. Please wait a moment and try again.', 'error');
+          setStatus('Too many translations just now. Please wait a moment and try again.');
+          restoreBtn();
+          return;
+        }
+        if (!res.ok) {
+          let msg = 'Translation failed. Please try again.';
+          try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (e) {}
+          throw new Error(msg);
+        }
+
+        const data = await res.json();
+        const i18n = data && data.i18n;
+        if (!i18n || typeof i18n !== 'object' || !Object.keys(i18n).length) {
+          throw new Error('No translations came back. Please try again.');
+        }
+
+        // Re-key each returned language and merge — other languages stay put.
+        if (!c.i18n || typeof c.i18n !== 'object') c.i18n = {};
+        if (!c.i18nMeta || typeof c.i18nMeta !== 'object') c.i18nMeta = {};
+        const done = [];
+        Object.keys(i18n).forEach((code) => {
+          if (AUDIENCE_LANG_CODES.indexOf(code) === -1) return;   // only fr/de/es/it/ro
+          const keyed = rekeyTranslation(i18n[code], index);
+          if (!keyed) return;
+          c.i18n[code] = keyed;
+          c.i18nMeta[code] = { sig: sig, at: new Date().toISOString() };
+          _sessionSig[code] = sig;
+          const l = AUDIENCE_LANGS.find((x) => x.code === code);
+          done.push(l ? l.label : code);
+        });
+
+        if (!done.length) throw new Error('No translations came back. Please try again.');
+
+        // Persist: anything on state.config is saved by save().
+        markDirtyAndSync();
+        save();
+
+        showToast('Translated into ' + done.join(', '), 'success');
+        renderInspector();   // refresh statuses + button label
+      } catch (err) {
+        console.warn('[translate] failed', err);
+        showToast(err.message || 'Translation failed', 'error');
+        setStatus(err.message || 'Translation failed.');
+        restoreBtn();
+      }
     }
 
     // ── Colour swatch row factory ──

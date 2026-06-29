@@ -409,6 +409,12 @@ function buildEnquiryFormFields(payload, userEmail, isCreate) {
 // Convert an Enquiry Forms record back into the editor's config object shape
 function readEnquiryFormRecord(record) {
   const f = record.fields;
+  // Parse + re-validate the stored translations once, so a hand-edited record can
+  // never inject junk into a render path. audienceLanguages is derived from the
+  // languages that actually have translations, so the editor's language toggles
+  // light up correctly on reload without needing a separate stored field.
+  let i18n = {};
+  try { i18n = cleanTranslations(JSON.parse(f[EF.i18nJSON] || '{}')); } catch (e) { i18n = {}; }
   return {
     recordId: record.id,
     widgetId: f[EF.widgetId] || '',
@@ -428,14 +434,10 @@ function readEnquiryFormRecord(record) {
     submitButtonText: f[EF.submitButtonText] || 'Send my enquiry',
     thankYouMode: f[EF.thankYouMode] || 'inline',
     thankYouMessage: f[EF.thankYouMessage] || '',
-    // Layer-2 translations as a parsed, re-validated object (empty when none).
-    // Parsed here so the editor and widget both receive a real object, and run
-    // back through cleanTranslations so a hand-edited record can never inject
-    // junk into a render path.
-    i18n: (function () {
-      try { return cleanTranslations(JSON.parse(f[EF.i18nJSON] || '{}')); }
-      catch (e) { return {}; }
-    })(),
+    // Layer-2 translations (parsed + re-validated above) plus the derived set of
+    // languages that carry translations, for the editor's language toggles.
+    i18n: i18n,
+    audienceLanguages: Object.keys(i18n),
     redirectUrl: f[EF.redirectUrl] || '',
     referencePrefix: f[EF.referencePrefix] || 'TG-',
     buttonColour: f[EF.buttonColour] || '#1B2B5B',
