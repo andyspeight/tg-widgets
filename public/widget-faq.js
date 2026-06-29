@@ -59,7 +59,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome, per language. English is the source + fallback. The author's
@@ -72,6 +72,7 @@
     de: { searchPlaceholder: 'Fragen durchsuchen…', searchAria: 'Fragen durchsuchen', clearSearch: 'Suche löschen', expandAll: 'Alle ausklappen', collapseAll: 'Alle einklappen', all: 'Alle', noResults: 'Keine Frage passt zu dieser Suche', popular: 'Beliebt', lastUpdated: 'Zuletzt aktualisiert am {date}' },
     es: { searchPlaceholder: 'Buscar preguntas…', searchAria: 'Buscar preguntas', clearSearch: 'Borrar búsqueda', expandAll: 'Expandir todo', collapseAll: 'Contraer todo', all: 'Todas', noResults: 'Ninguna pregunta coincide con esa búsqueda', popular: 'Popular', lastUpdated: 'Última actualización: {date}' },
     it: { searchPlaceholder: 'Cerca domande…', searchAria: 'Cerca domande', clearSearch: 'Cancella ricerca', expandAll: 'Espandi tutto', collapseAll: 'Comprimi tutto', all: 'Tutte', noResults: 'Nessuna domanda corrisponde alla ricerca', popular: 'Popolare', lastUpdated: 'Ultimo aggiornamento: {date}' },
+    ro: { searchPlaceholder: 'Caută întrebări…', searchAria: 'Caută întrebări', clearSearch: 'Șterge căutarea', expandAll: 'Extinde tot', collapseAll: 'Restrânge tot', all: 'Toate', noResults: 'Nicio întrebare nu corespunde căutării', popular: 'Popular', lastUpdated: 'Ultima actualizare {date}' },
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
   // resolver keeps the widget self-contained.

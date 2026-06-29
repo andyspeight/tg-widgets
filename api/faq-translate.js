@@ -53,7 +53,7 @@ const MAX_TOKENS = parseInt(process.env.FAQ_TRANSLATE_MAX_TOKENS || '8000', 10);
 // tg-i18n LOCALES. The pilot ships fr/de/es/it; the rest are ready when needed.
 const LANG_NAMES = {
   fr: 'French', de: 'German', es: 'Spanish', it: 'Italian',
-  nl: 'Dutch', pt: 'Portuguese', pl: 'Polish'
+  ro: 'Romanian', nl: 'Dutch', pt: 'Portuguese', pl: 'Polish'
 };
 
 // Per-field length caps (characters). Answers are the long markdown field.

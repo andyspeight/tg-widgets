@@ -27,7 +27,7 @@
   // Base language → a sensible default locale (so "en" means en-GB here, not US).
   var LOCALE = {
     en: 'en-GB', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', it: 'it-IT',
-    nl: 'nl-NL', pt: 'pt-PT', pl: 'pl-PL', ar: 'ar', he: 'he'
+    ro: 'ro-RO', nl: 'nl-NL', pt: 'pt-PT', pl: 'pl-PL', ar: 'ar', he: 'he'
   };
   var RTL = { ar: 1, he: 1, fa: 1, ur: 1 };
 
