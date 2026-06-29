@@ -79,7 +79,163 @@
     } catch (e) { /* fall through */ }
     return '/api/newsletter-submit';
   })();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only: validation / error / status messages, plus the
+  // author-overridable default labels (button, placeholders, success copy and
+  // so on) shown when the author has not supplied their own. English is the
+  // source + fallback. Author-supplied copy is never translated.
+  const MESSAGES = {
+    en: {
+      invalidEmail: 'Please enter a valid email address.',
+      consentRequired: 'Please tick the consent box to continue.',
+      genericError: 'Something went wrong. Please try again.',
+      alreadySubscribed: "You're already subscribed.",
+      ariaEmail: 'Email address',
+      ariaFirstName: 'First name',
+      ariaClose: 'Close',
+      ariaDismiss: 'Dismiss',
+      privacyPolicy: 'Privacy policy',
+      // Author-overridable defaults
+      title: 'Get travel inspiration in your inbox',
+      subtitle: 'Hand-picked destinations and exclusive offers. One thoughtful email a month.',
+      emailPlaceholder: 'your@email.com',
+      firstNamePlaceholder: 'First name',
+      buttonLabel: 'Subscribe',
+      successTitle: "You're in!",
+      successMessage: 'Check your inbox for a welcome email.',
+      consentLabel: 'I agree to receive travel inspiration emails.',
+      triggerLabel: 'Subscribe to our newsletter',
+      tabLabel: 'Newsletter',
+    },
+    fr: {
+      invalidEmail: 'Veuillez saisir une adresse e-mail valide.',
+      consentRequired: 'Veuillez cocher la case de consentement pour continuer.',
+      genericError: "Une erreur s'est produite. Veuillez réessayer.",
+      alreadySubscribed: 'Vous êtes déjà abonné.',
+      ariaEmail: 'Adresse e-mail',
+      ariaFirstName: 'Prénom',
+      ariaClose: 'Fermer',
+      ariaDismiss: 'Fermer',
+      privacyPolicy: 'Politique de confidentialité',
+      title: 'Recevez l\'inspiration voyage dans votre boîte mail',
+      subtitle: 'Des destinations triées sur le volet et des offres exclusives. Un e-mail soigné par mois.',
+      emailPlaceholder: 'votre@email.com',
+      firstNamePlaceholder: 'Prénom',
+      buttonLabel: "S'abonner",
+      successTitle: "C'est fait !",
+      successMessage: 'Consultez votre boîte mail pour un e-mail de bienvenue.',
+      consentLabel: "J'accepte de recevoir des e-mails d'inspiration voyage.",
+      triggerLabel: 'Abonnez-vous à notre newsletter',
+      tabLabel: 'Newsletter',
+    },
+    de: {
+      invalidEmail: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+      consentRequired: 'Bitte kreuzen Sie das Einwilligungskästchen an, um fortzufahren.',
+      genericError: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+      alreadySubscribed: 'Sie sind bereits abonniert.',
+      ariaEmail: 'E-Mail-Adresse',
+      ariaFirstName: 'Vorname',
+      ariaClose: 'Schließen',
+      ariaDismiss: 'Schließen',
+      privacyPolicy: 'Datenschutzerklärung',
+      title: 'Reiseinspiration in Ihrem Postfach',
+      subtitle: 'Handverlesene Reiseziele und exklusive Angebote. Eine durchdachte E-Mail pro Monat.',
+      emailPlaceholder: 'ihre@email.de',
+      firstNamePlaceholder: 'Vorname',
+      buttonLabel: 'Abonnieren',
+      successTitle: 'Geschafft!',
+      successMessage: 'Schauen Sie in Ihr Postfach für eine Willkommens-E-Mail.',
+      consentLabel: 'Ich bin damit einverstanden, Reiseinspirations-E-Mails zu erhalten.',
+      triggerLabel: 'Abonnieren Sie unseren Newsletter',
+      tabLabel: 'Newsletter',
+    },
+    es: {
+      invalidEmail: 'Introduce una dirección de correo electrónico válida.',
+      consentRequired: 'Marca la casilla de consentimiento para continuar.',
+      genericError: 'Algo salió mal. Inténtalo de nuevo.',
+      alreadySubscribed: 'Ya estás suscrito.',
+      ariaEmail: 'Correo electrónico',
+      ariaFirstName: 'Nombre',
+      ariaClose: 'Cerrar',
+      ariaDismiss: 'Cerrar',
+      privacyPolicy: 'Política de privacidad',
+      title: 'Recibe inspiración de viajes en tu bandeja de entrada',
+      subtitle: 'Destinos seleccionados y ofertas exclusivas. Un correo cuidado al mes.',
+      emailPlaceholder: 'tu@email.com',
+      firstNamePlaceholder: 'Nombre',
+      buttonLabel: 'Suscribirse',
+      successTitle: '¡Listo!',
+      successMessage: 'Revisa tu bandeja de entrada para ver el correo de bienvenida.',
+      consentLabel: 'Acepto recibir correos de inspiración de viajes.',
+      triggerLabel: 'Suscríbete a nuestra newsletter',
+      tabLabel: 'Newsletter',
+    },
+    it: {
+      invalidEmail: 'Inserisci un indirizzo email valido.',
+      consentRequired: 'Spunta la casella di consenso per continuare.',
+      genericError: 'Qualcosa è andato storto. Riprova.',
+      alreadySubscribed: 'Sei già iscritto.',
+      ariaEmail: 'Indirizzo email',
+      ariaFirstName: 'Nome',
+      ariaClose: 'Chiudi',
+      ariaDismiss: 'Chiudi',
+      privacyPolicy: 'Informativa sulla privacy',
+      title: 'Ricevi ispirazione di viaggio nella tua casella di posta',
+      subtitle: 'Destinazioni selezionate e offerte esclusive. Una email curata al mese.',
+      emailPlaceholder: 'tua@email.com',
+      firstNamePlaceholder: 'Nome',
+      buttonLabel: 'Iscriviti',
+      successTitle: 'Fatto!',
+      successMessage: 'Controlla la tua casella di posta per l\'email di benvenuto.',
+      consentLabel: 'Acconsento a ricevere email di ispirazione di viaggio.',
+      triggerLabel: 'Iscriviti alla nostra newsletter',
+      tabLabel: 'Newsletter',
+    },
+    ro: {
+      invalidEmail: 'Introduceți o adresă de e-mail validă.',
+      consentRequired: 'Bifați caseta de consimțământ pentru a continua.',
+      genericError: 'Ceva nu a funcționat. Încercați din nou.',
+      alreadySubscribed: 'Sunteți deja abonat.',
+      ariaEmail: 'Adresă de e-mail',
+      ariaFirstName: 'Prenume',
+      ariaClose: 'Închide',
+      ariaDismiss: 'Închide',
+      privacyPolicy: 'Politica de confidențialitate',
+      title: 'Primiți inspirație de călătorie în căsuța de e-mail',
+      subtitle: 'Destinații alese cu grijă și oferte exclusive. Un e-mail bine gândit pe lună.',
+      emailPlaceholder: 'tu@email.com',
+      firstNamePlaceholder: 'Prenume',
+      buttonLabel: 'Abonează-te',
+      successTitle: 'Gata!',
+      successMessage: 'Verificați căsuța de e-mail pentru un mesaj de bun venit.',
+      consentLabel: 'Sunt de acord să primesc e-mailuri cu inspirație de călătorie.',
+      triggerLabel: 'Abonați-vă la newsletterul nostru',
+      tabLabel: 'Newsletter',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -709,6 +865,7 @@
 
       this.el = container;
       this.c = this._defaults(config || {});
+      this.t = makeT(this.c);
       this.shadow = container.attachShadow({ mode: 'open' });
       this._open = false;
       this._submitting = false;
@@ -753,15 +910,17 @@
       return {
         widgetId: typeof c.widgetId === 'string' ? c.widgetId : '',
         layout,
-        // Content
-        title: typeof c.title === 'string' ? c.title : 'Get travel inspiration in your inbox',
-        subtitle: typeof c.subtitle === 'string' ? c.subtitle : 'Hand-picked destinations and exclusive offers. One thoughtful email a month.',
-        emailPlaceholder: c.emailPlaceholder || 'your@email.com',
-        firstNamePlaceholder: c.firstNamePlaceholder || 'First name',
-        buttonLabel: c.buttonLabel || 'Subscribe',
-        successTitle: c.successTitle || "You're in!",
-        successMessage: c.successMessage || 'Check your inbox for a welcome email.',
-        consentLabel: typeof c.consentLabel === 'string' ? c.consentLabel : 'I agree to receive travel inspiration emails.',
+        // Content — author-overridable. Localised defaults are filled at the
+        // use-site (this.c.X || this.t('key')) so the viewer's language shows
+        // when the author has not supplied their own copy.
+        title: typeof c.title === 'string' ? c.title : '',
+        subtitle: typeof c.subtitle === 'string' ? c.subtitle : '',
+        emailPlaceholder: c.emailPlaceholder || '',
+        firstNamePlaceholder: c.firstNamePlaceholder || '',
+        buttonLabel: c.buttonLabel || '',
+        successTitle: c.successTitle || '',
+        successMessage: c.successMessage || '',
+        consentLabel: typeof c.consentLabel === 'string' ? c.consentLabel : '',
         consentBlurb: typeof c.consentBlurb === 'string' ? c.consentBlurb : '',
         privacyUrl: typeof c.privacyUrl === 'string' ? c.privacyUrl : '',
 
@@ -773,7 +932,7 @@
         showConsentBlurb: !!c.consentBlurb,
 
         // Popup-specific
-        triggerLabel: c.triggerLabel || 'Subscribe to our newsletter',
+        triggerLabel: c.triggerLabel || '',
         triggerStyle,
 
         // Footer-specific
@@ -781,7 +940,7 @@
         footerRememberDismiss: c.footerRememberDismiss !== false, // default ON
 
         // Vertical-specific
-        tabLabel: c.tabLabel || 'Newsletter',
+        tabLabel: c.tabLabel || '',
         verticalSide: side,
 
         // Theming
@@ -851,12 +1010,12 @@
       const cfg = this.c;
       if (!cfg.showConsent) return '';
       const link = cfg.privacyUrl
-        ? ` <a href="${esc(cfg.privacyUrl)}" target="_blank" rel="noopener noreferrer">Privacy policy</a>`
+        ? ` <a href="${esc(cfg.privacyUrl)}" target="_blank" rel="noopener noreferrer">${esc(this.t('privacyPolicy'))}</a>`
         : '';
       return `
         <label class="tgnl-checkbox">
           <input type="checkbox" id="consent" ${cfg.consentRequired ? '' : 'checked'} />
-          <span>${esc(cfg.consentLabel)}${link}</span>
+          <span>${esc(cfg.consentLabel || this.t('consentLabel'))}${link}</span>
         </label>
       `;
     }
@@ -865,7 +1024,7 @@
       const cfg = this.c;
       if (!cfg.consentBlurb) return '';
       const link = cfg.privacyUrl
-        ? ` <a href="${esc(cfg.privacyUrl)}" target="_blank" rel="noopener noreferrer">Privacy policy</a>.`
+        ? ` <a href="${esc(cfg.privacyUrl)}" target="_blank" rel="noopener noreferrer">${esc(this.t('privacyPolicy'))}</a>.`
         : '';
       return `<p class="tgnl-consent-text">${esc(cfg.consentBlurb)}${link}</p>`;
     }
@@ -886,15 +1045,15 @@
         return `
           <div class="tgnl-inline-success" role="status" aria-live="polite">
             ${svgIcon('check', 20)}
-            <span><strong class="tgnl-inline-success-strong">${esc(cfg.successTitle)}</strong> ${esc(cfg.successMessage)}</span>
+            <span><strong class="tgnl-inline-success-strong">${esc(cfg.successTitle || this.t('successTitle'))}</strong> ${esc(cfg.successMessage || this.t('successMessage'))}</span>
           </div>
         `;
       }
       return `
         <form class="tgnl-inline-form" id="form" novalidate>
-          <input class="tgnl-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder)}" autocomplete="email" required aria-label="Email address" />
+          <input class="tgnl-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
           <button class="tgnl-btn" type="submit" id="submitBtn">
-            <span class="tgnl-btn-label">${esc(cfg.buttonLabel)}</span>
+            <span class="tgnl-btn-label">${esc(cfg.buttonLabel || this.t('buttonLabel'))}</span>
           </button>
         </form>
         ${this._renderErrorBlock()}
@@ -909,28 +1068,28 @@
           <div class="tgnl-card">
             <div class="tgnl-card-success" role="status" aria-live="polite">
               <div class="tgnl-card-success-icon">${svgIcon('check', 28)}</div>
-              <h3 class="tgnl-card-success-title">${esc(cfg.successTitle)}</h3>
-              <p class="tgnl-card-success-sub">${esc(cfg.successMessage)}</p>
+              <h3 class="tgnl-card-success-title">${esc(cfg.successTitle || this.t('successTitle'))}</h3>
+              <p class="tgnl-card-success-sub">${esc(cfg.successMessage || this.t('successMessage'))}</p>
             </div>
           </div>
         `;
       }
       const icon = cfg.showIcon ? `<div class="tgnl-card-icon">${svgIcon('mail', 22)}</div>` : '';
       const firstName = cfg.showFirstName
-        ? `<input class="tgnl-input" type="text" id="firstName" placeholder="${esc(cfg.firstNamePlaceholder)}" autocomplete="given-name" aria-label="First name" />`
+        ? `<input class="tgnl-input" type="text" id="firstName" placeholder="${esc(cfg.firstNamePlaceholder || this.t('firstNamePlaceholder'))}" autocomplete="given-name" aria-label="${esc(this.t('ariaFirstName'))}" />`
         : '';
       return `
         <div class="tgnl-card">
           ${icon}
-          <h3 class="tgnl-card-title">${esc(cfg.title)}</h3>
-          <p class="tgnl-card-sub">${esc(cfg.subtitle)}</p>
+          <h3 class="tgnl-card-title">${esc(cfg.title || this.t('title'))}</h3>
+          <p class="tgnl-card-sub">${esc(cfg.subtitle || this.t('subtitle'))}</p>
           <form class="tgnl-card-form" id="form" novalidate>
             ${firstName}
-            <input class="tgnl-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder)}" autocomplete="email" required aria-label="Email address" />
+            <input class="tgnl-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
             ${this._renderConsentBlock()}
             ${this._renderErrorBlock()}
             <button class="tgnl-btn" type="submit" id="submitBtn">
-              <span class="tgnl-btn-label">${esc(cfg.buttonLabel)}</span>
+              <span class="tgnl-btn-label">${esc(cfg.buttonLabel || this.t('buttonLabel'))}</span>
             </button>
           </form>
         </div>
@@ -940,14 +1099,15 @@
     _renderPopup() {
       const cfg = this.c;
       const triggerClass = cfg.triggerStyle === 'link' ? 'tgnl-popup-trigger is-link' : 'tgnl-popup-trigger';
+      const triggerLabel = cfg.triggerLabel || this.t('triggerLabel');
       const triggerInner = cfg.triggerStyle === 'link'
-        ? esc(cfg.triggerLabel)
-        : `${svgIcon('mail', 14)}<span>${esc(cfg.triggerLabel)}</span>`;
+        ? esc(triggerLabel)
+        : `${svgIcon('mail', 14)}<span>${esc(triggerLabel)}</span>`;
       return `
         <button class="${triggerClass}" type="button" id="trigger" aria-haspopup="dialog" aria-expanded="${this._open}">${triggerInner}</button>
-        <div class="tgnl-modal-overlay" id="overlay" data-open="${this._open}" role="dialog" aria-modal="true" aria-label="${esc(cfg.title)}" aria-hidden="${!this._open}">
+        <div class="tgnl-modal-overlay" id="overlay" data-open="${this._open}" role="dialog" aria-modal="true" aria-label="${esc(cfg.title || this.t('title'))}" aria-hidden="${!this._open}">
           <div class="tgnl-modal" id="modal">
-            <button class="tgnl-modal-close" type="button" id="modalClose" aria-label="Close">${svgIcon('close', 18)}</button>
+            <button class="tgnl-modal-close" type="button" id="modalClose" aria-label="${esc(this.t('ariaClose'))}">${svgIcon('close', 18)}</button>
             ${this._renderModalBody()}
           </div>
         </div>
@@ -960,24 +1120,24 @@
         return `
           <div class="tgnl-card-success" role="status" aria-live="polite">
             <div class="tgnl-card-success-icon">${svgIcon('check', 28)}</div>
-            <h3 class="tgnl-card-success-title">${esc(cfg.successTitle)}</h3>
-            <p class="tgnl-card-success-sub">${esc(cfg.successMessage)}</p>
+            <h3 class="tgnl-card-success-title">${esc(cfg.successTitle || this.t('successTitle'))}</h3>
+            <p class="tgnl-card-success-sub">${esc(cfg.successMessage || this.t('successMessage'))}</p>
           </div>
         `;
       }
       const firstName = cfg.showFirstName
-        ? `<input class="tgnl-input" type="text" id="firstName" placeholder="${esc(cfg.firstNamePlaceholder)}" autocomplete="given-name" aria-label="First name" />`
+        ? `<input class="tgnl-input" type="text" id="firstName" placeholder="${esc(cfg.firstNamePlaceholder || this.t('firstNamePlaceholder'))}" autocomplete="given-name" aria-label="${esc(this.t('ariaFirstName'))}" />`
         : '';
       return `
-        <h3 class="tgnl-card-title">${esc(cfg.title)}</h3>
-        <p class="tgnl-card-sub">${esc(cfg.subtitle)}</p>
+        <h3 class="tgnl-card-title">${esc(cfg.title || this.t('title'))}</h3>
+        <p class="tgnl-card-sub">${esc(cfg.subtitle || this.t('subtitle'))}</p>
         <form class="tgnl-card-form" id="form" novalidate>
           ${firstName}
-          <input class="tgnl-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder)}" autocomplete="email" required aria-label="Email address" />
+          <input class="tgnl-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
           ${this._renderConsentBlock()}
           ${this._renderErrorBlock()}
           <button class="tgnl-btn" type="submit" id="submitBtn">
-            <span class="tgnl-btn-label">${esc(cfg.buttonLabel)}</span>
+            <span class="tgnl-btn-label">${esc(cfg.buttonLabel || this.t('buttonLabel'))}</span>
           </button>
         </form>
       `;
@@ -988,44 +1148,45 @@
       if (this._dismissed) return '';
       if (this._succeeded) {
         return `
-          <div class="tgnl-footer" data-show="true" role="region" aria-label="${esc(cfg.title)}">
+          <div class="tgnl-footer" data-show="true" role="region" aria-label="${esc(cfg.title || this.t('title'))}">
             <div class="tgnl-footer-success" role="status" aria-live="polite">
               ${svgIcon('check', 18)}
-              <span><strong>${esc(cfg.successTitle)}</strong> ${esc(cfg.successMessage)}</span>
+              <span><strong>${esc(cfg.successTitle || this.t('successTitle'))}</strong> ${esc(cfg.successMessage || this.t('successMessage'))}</span>
             </div>
-            <button class="tgnl-footer-close" type="button" id="footerClose" aria-label="Dismiss">${svgIcon('close', 16)}</button>
+            <button class="tgnl-footer-close" type="button" id="footerClose" aria-label="${esc(this.t('ariaDismiss'))}">${svgIcon('close', 16)}</button>
           </div>
         `;
       }
       return `
-        <div class="tgnl-footer" data-show="false" role="region" aria-label="${esc(cfg.title)}">
+        <div class="tgnl-footer" data-show="false" role="region" aria-label="${esc(cfg.title || this.t('title'))}">
           <div class="tgnl-footer-text">
-            <p class="tgnl-footer-title">${esc(cfg.title)}</p>
-            <p class="tgnl-footer-sub">${esc(cfg.subtitle)}</p>
+            <p class="tgnl-footer-title">${esc(cfg.title || this.t('title'))}</p>
+            <p class="tgnl-footer-sub">${esc(cfg.subtitle || this.t('subtitle'))}</p>
           </div>
           <form class="tgnl-footer-form" id="form" novalidate>
-            <input class="tgnl-footer-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder)}" autocomplete="email" required aria-label="Email address" />
-            <button class="tgnl-footer-btn" type="submit" id="submitBtn">${esc(cfg.buttonLabel)}</button>
+            <input class="tgnl-footer-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
+            <button class="tgnl-footer-btn" type="submit" id="submitBtn">${esc(cfg.buttonLabel || this.t('buttonLabel'))}</button>
           </form>
           ${this._errorMsg ? `<div class="tgnl-error-msg" role="alert" style="position:absolute;bottom:100%;right:24px;margin-bottom:8px;background:#FEE2E2;color:#991B1B;border-color:#FCA5A5">${svgIcon('alert', 14)}<span>${esc(this._errorMsg)}</span></div>` : ''}
-          <button class="tgnl-footer-close" type="button" id="footerClose" aria-label="Dismiss">${svgIcon('close', 16)}</button>
+          <button class="tgnl-footer-close" type="button" id="footerClose" aria-label="${esc(this.t('ariaDismiss'))}">${svgIcon('close', 16)}</button>
         </div>
       `;
     }
 
     _renderVertical() {
       const cfg = this.c;
+      const tabLabel = cfg.tabLabel || this.t('tabLabel');
       const tabHTML = `
-        <button class="tgnl-tab" type="button" id="tab" aria-haspopup="dialog" aria-expanded="${this._open}" aria-label="${esc(cfg.tabLabel)}">
+        <button class="tgnl-tab" type="button" id="tab" aria-haspopup="dialog" aria-expanded="${this._open}" aria-label="${esc(tabLabel)}">
           ${svgIcon('mail', 22)}
-          <span class="tgnl-tab-label">${esc(cfg.tabLabel)}</span>
+          <span class="tgnl-tab-label">${esc(tabLabel)}</span>
         </button>
       `;
       return `
         <div class="tgnl-vertical" data-side="${cfg.verticalSide}">
           ${this._open ? `
-            <div class="tgnl-vertical-panel" role="dialog" aria-label="${esc(cfg.title)}">
-              <button class="tgnl-vertical-panel-close" type="button" id="panelClose" aria-label="Close">${svgIcon('close', 16)}</button>
+            <div class="tgnl-vertical-panel" role="dialog" aria-label="${esc(cfg.title || this.t('title'))}">
+              <button class="tgnl-vertical-panel-close" type="button" id="panelClose" aria-label="${esc(this.t('ariaClose'))}">${svgIcon('close', 16)}</button>
               ${this._renderModalBody()}
             </div>
           ` : ''}
@@ -1122,12 +1283,12 @@
       // Validation
       if (!isEmail(email)) {
         if (emailEl) emailEl.setAttribute('aria-invalid', 'true');
-        this._errorMsg = 'Please enter a valid email address.';
+        this._errorMsg = this.t('invalidEmail');
         this._render();
         return;
       }
       if (cfg.showConsent && cfg.consentRequired && !consent) {
-        this._errorMsg = 'Please tick the consent box to continue.';
+        this._errorMsg = this.t('consentRequired');
         this._render();
         return;
       }
@@ -1156,10 +1317,14 @@
         });
 
         if (!resp.ok) {
-          let errText = 'Sorry, something went wrong. Please try again.';
+          let errText = this.t('genericError');
           try {
             const data = await resp.json();
-            if (data && data.error) errText = data.error;
+            if (data && (data.alreadySubscribed || data.code === 'already_subscribed')) {
+              errText = this.t('alreadySubscribed');
+            } else if (data && data.error) {
+              errText = data.error;
+            }
           } catch (e) { /* ignore */ }
           throw new Error(errText);
         }
@@ -1169,7 +1334,7 @@
         this._render();
       } catch (err) {
         this._submitting = false;
-        this._errorMsg = (err && err.message) || 'Sorry, something went wrong. Please try again.';
+        this._errorMsg = (err && err.message) || this.t('genericError');
         this._render();
       }
     }
@@ -1248,6 +1413,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      this.t = makeT(this.c);
       this._open = false;
       this._succeeded = false;
       this._errorMsg = null;

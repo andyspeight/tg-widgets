@@ -56,7 +56,41 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (the unit labels and the dismiss control). The expiry
+  // message and any CTA text are author content, translated separately. English
+  // is the source + fallback.
+  const MESSAGES = {
+    en: { days: 'Days', hours: 'Hours', minutes: 'Minutes', seconds: 'Seconds', dismiss: 'Dismiss' },
+    fr: { days: 'Jours', hours: 'Heures', minutes: 'Minutes', seconds: 'Secondes', dismiss: 'Fermer' },
+    de: { days: 'Tage', hours: 'Stunden', minutes: 'Minuten', seconds: 'Sekunden', dismiss: 'Schließen' },
+    es: { days: 'Días', hours: 'Horas', minutes: 'Minutos', seconds: 'Segundos', dismiss: 'Cerrar' },
+    it: { days: 'Giorni', hours: 'Ore', minutes: 'Minuti', seconds: 'Secondi', dismiss: 'Chiudi' },
+    ro: { days: 'Zile', hours: 'Ore', minutes: 'Minute', seconds: 'Secunde', dismiss: 'Închide' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -707,6 +741,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = mergeConfig(defaults(), config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this._lastValues = {};
       this._timerId = null;
@@ -727,6 +762,7 @@
 
     update(newConfig) {
       this.c = mergeConfig(defaults(), newConfig);
+      this.t = makeT(this.c);
       this._lastValues = {};
       this._stop();
       this._render();
@@ -950,7 +986,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'tgcd-banner-close';
-        btn.setAttribute('aria-label', 'Dismiss');
+        btn.setAttribute('aria-label', this.t('dismiss'));
         btn.textContent = '\u00D7'; // ×
         btn.addEventListener('click', () => {
           this._dismissed = true;
@@ -1045,10 +1081,10 @@
       units.setAttribute('aria-atomic', 'true');
 
       const list = [];
-      if (c.display.showDays)    list.push(['days',    'Days',    remaining.days]);
-      if (c.display.showHours)   list.push(['hours',   'Hours',   remaining.hours]);
-      if (c.display.showMinutes) list.push(['minutes', 'Minutes', remaining.minutes]);
-      if (c.display.showSeconds) list.push(['seconds', 'Seconds', remaining.seconds]);
+      if (c.display.showDays)    list.push(['days',    this.t('days'),    remaining.days]);
+      if (c.display.showHours)   list.push(['hours',   this.t('hours'),   remaining.hours]);
+      if (c.display.showMinutes) list.push(['minutes', this.t('minutes'), remaining.minutes]);
+      if (c.display.showSeconds) list.push(['seconds', this.t('seconds'), remaining.seconds]);
 
       list.forEach((item, idx) => {
         const [key, label, val] = item;

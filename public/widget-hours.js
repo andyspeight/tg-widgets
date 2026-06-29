@@ -43,7 +43,77 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (day names, status words, opening-time phrases). The
+  // author-set title and timezone note are author content with a localised
+  // default. English is the source + fallback.
+  const MESSAGES = {
+    en: {
+      mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday',
+      monShort: 'Mon', tueShort: 'Tue', wedShort: 'Wed', thuShort: 'Thu', friShort: 'Fri', satShort: 'Sat', sunShort: 'Sun',
+      openNow: 'Open now', closed: 'Closed', closedToday: 'Closed today', open24: 'Open 24 hours',
+      hours: 'Hours', openingHours: 'Opening hours', holiday: 'Holiday', tomorrow: 'tomorrow',
+      openUntil: 'Open until {time}', opensTodayAt: 'Opens today at {time}', opensDayAt: 'Opens {day} at {time}',
+    },
+    fr: {
+      mon: 'Lundi', tue: 'Mardi', wed: 'Mercredi', thu: 'Jeudi', fri: 'Vendredi', sat: 'Samedi', sun: 'Dimanche',
+      monShort: 'Lun', tueShort: 'Mar', wedShort: 'Mer', thuShort: 'Jeu', friShort: 'Ven', satShort: 'Sam', sunShort: 'Dim',
+      openNow: 'Ouvert', closed: 'Fermé', closedToday: 'Fermé aujourd\'hui', open24: 'Ouvert 24h/24',
+      hours: 'Horaires', openingHours: 'Horaires d\'ouverture', holiday: 'Jour férié', tomorrow: 'demain',
+      openUntil: 'Ouvert jusqu\'à {time}', opensTodayAt: 'Ouvre aujourd\'hui à {time}', opensDayAt: 'Ouvre {day} à {time}',
+    },
+    de: {
+      mon: 'Montag', tue: 'Dienstag', wed: 'Mittwoch', thu: 'Donnerstag', fri: 'Freitag', sat: 'Samstag', sun: 'Sonntag',
+      monShort: 'Mo', tueShort: 'Di', wedShort: 'Mi', thuShort: 'Do', friShort: 'Fr', satShort: 'Sa', sunShort: 'So',
+      openNow: 'Jetzt geöffnet', closed: 'Geschlossen', closedToday: 'Heute geschlossen', open24: '24 Stunden geöffnet',
+      hours: 'Öffnungszeiten', openingHours: 'Öffnungszeiten', holiday: 'Feiertag', tomorrow: 'morgen',
+      openUntil: 'Geöffnet bis {time}', opensTodayAt: 'Öffnet heute um {time}', opensDayAt: 'Öffnet {day} um {time}',
+    },
+    es: {
+      mon: 'Lunes', tue: 'Martes', wed: 'Miércoles', thu: 'Jueves', fri: 'Viernes', sat: 'Sábado', sun: 'Domingo',
+      monShort: 'Lun', tueShort: 'Mar', wedShort: 'Mié', thuShort: 'Jue', friShort: 'Vie', satShort: 'Sáb', sunShort: 'Dom',
+      openNow: 'Abierto ahora', closed: 'Cerrado', closedToday: 'Cerrado hoy', open24: 'Abierto 24 horas',
+      hours: 'Horario', openingHours: 'Horario de apertura', holiday: 'Festivo', tomorrow: 'mañana',
+      openUntil: 'Abierto hasta las {time}', opensTodayAt: 'Abre hoy a las {time}', opensDayAt: 'Abre el {day} a las {time}',
+    },
+    it: {
+      mon: 'Lunedì', tue: 'Martedì', wed: 'Mercoledì', thu: 'Giovedì', fri: 'Venerdì', sat: 'Sabato', sun: 'Domenica',
+      monShort: 'Lun', tueShort: 'Mar', wedShort: 'Mer', thuShort: 'Gio', friShort: 'Ven', satShort: 'Sab', sunShort: 'Dom',
+      openNow: 'Aperto ora', closed: 'Chiuso', closedToday: 'Chiuso oggi', open24: 'Aperto 24 ore',
+      hours: 'Orari', openingHours: 'Orari di apertura', holiday: 'Festività', tomorrow: 'domani',
+      openUntil: 'Aperto fino alle {time}', opensTodayAt: 'Apre oggi alle {time}', opensDayAt: 'Apre {day} alle {time}',
+    },
+    ro: {
+      mon: 'Luni', tue: 'Marți', wed: 'Miercuri', thu: 'Joi', fri: 'Vineri', sat: 'Sâmbătă', sun: 'Duminică',
+      monShort: 'Lun', tueShort: 'Mar', wedShort: 'Mie', thuShort: 'Joi', friShort: 'Vin', satShort: 'Sâm', sunShort: 'Dum',
+      openNow: 'Deschis acum', closed: 'Închis', closedToday: 'Închis azi', open24: 'Deschis 24 de ore',
+      hours: 'Program', openingHours: 'Program de funcționare', holiday: 'Sărbătoare', tomorrow: 'mâine',
+      openUntil: 'Deschis până la {time}', opensTodayAt: 'Se deschide azi la {time}', opensDayAt: 'Se deschide {day} la {time}',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -136,8 +206,10 @@
     return { isHoliday: false, closed: !slots.length, slots };
   }
 
-  // Build the live status: {open, label, nextOpen}
-  function evalStatus(hours, holidays, now, fmt) {
+  // Build the live status: {open, nextOpen, label}
+  // `t` is the i18n resolver. `nextOpen` is true when the label is a future
+  // opening message (used by the render layer instead of string-comparing).
+  function evalStatus(hours, holidays, now, fmt, t) {
     const tf = (fmt === '24') ? '24' : '12';
     const d = now || new Date();
     const today = scheduleForDate(d, hours, holidays);
@@ -150,8 +222,9 @@
         if (a !== null && b !== null && minutesNow >= a && minutesNow < b) {
           return {
             open: true,
+            nextOpen: false,
             closingAt: b,
-            label: 'Open until ' + formatTime(b, tf),
+            label: t('openUntil', { time: formatTime(b, tf) }),
           };
         }
       }
@@ -163,8 +236,9 @@
       if (todayLater !== undefined) {
         return {
           open: false,
+          nextOpen: true,
           openingAt: todayLater,
-          label: 'Opens today at ' + formatTime(todayLater, tf),
+          label: t('opensTodayAt', { time: formatTime(todayLater, tf) }),
         };
       }
     }
@@ -180,16 +254,17 @@
         .sort((a, b) => a - b)[0];
       if (opens === undefined) continue;
       const isTomorrow = i === 1;
-      const dayLabel = isTomorrow ? 'tomorrow' : DAY_LABELS_FULL[DAY_KEYS[next.getDay()]];
+      const dayLabel = isTomorrow ? t('tomorrow') : t(DAY_KEYS[next.getDay()]);
       return {
         open: false,
+        nextOpen: true,
         openingAt: opens,
         nextDayOffset: i,
-        label: 'Opens ' + dayLabel + ' at ' + formatTime(opens, tf),
+        label: t('opensDayAt', { day: dayLabel, time: formatTime(opens, tf) }),
       };
     }
 
-    return { open: false, label: 'Closed' };
+    return { open: false, nextOpen: false, label: t('closed') };
   }
 
   // ---------- Icons ----------
@@ -550,6 +625,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this._tickTimer = null;
       this._compactOpen = false;
@@ -567,7 +643,8 @@
         layout: (layoutVal === 'list' || layoutVal === 'compact' || layoutVal === 'card') ? layoutVal : 'card',
         compactStyle: compactStyleVal === 'inline' ? 'inline' : 'pill',
         compactExpandable: cfg.compactExpandable !== false, // default ON
-        title: typeof cfg.title === 'string' ? cfg.title : 'Opening hours',
+        title: typeof cfg.title === 'string' ? cfg.title : '', // '' = use localised 'Opening hours' fallback at render
+
         showStatus: cfg.showStatus !== false,
         highlightToday: cfg.highlightToday !== false,
         timeFormat: cfg.timeFormat === '24' ? '24' : '12', // 12 | 24
@@ -622,7 +699,7 @@
 
     _render() {
       const cfg = this.c;
-      const status = cfg.showStatus ? evalStatus(cfg.hours, cfg.holidays, new Date(), cfg.timeFormat) : null;
+      const status = cfg.showStatus ? evalStatus(cfg.hours, cfg.holidays, new Date(), cfg.timeFormat, this.t) : null;
       const themeStyle = this._themeStyle();
 
       let inner = '';
@@ -726,7 +803,7 @@
       return `
         <span class="tgho-status" data-open="${status.open}">
           <span class="tgho-status-dot"></span>
-          <span>${esc(status.open ? 'Open now' : 'Closed')}</span>
+          <span>${esc(status.open ? this.t('openNow') : this.t('closed'))}</span>
         </span>
       `;
     }
@@ -736,7 +813,8 @@
       const today = new Date();
       const todayKey = DAY_KEYS[today.getDay()];
       const todayDateStr = ymd(today);
-      const labelMap = cfg.dayLabels === 'short' ? DAY_LABELS_SHORT : DAY_LABELS_FULL;
+      const useShort = cfg.dayLabels === 'short';
+      const dayLabel = (key) => useShort ? this.t(key + 'Short') : this.t(key);
 
       // Build a map of dayKey → next-7-days holiday override (for today's row primarily)
       const todayHoliday = (Array.isArray(cfg.holidays))
@@ -756,12 +834,12 @@
         }
 
         const closed = !slots.length;
-        const timeText = closed ? 'Closed' : formatSlots(slots, cfg.timeFormat);
+        const timeText = closed ? this.t('closed') : formatSlots(slots, cfg.timeFormat);
 
         return `
           <div class="tgho-row" data-today="${isToday}">
             <div class="tgho-row-day">
-              ${esc(labelMap[key])}${holidayLabel ? `<span class="tgho-row-holiday">· ${esc(holidayLabel)}</span>` : ''}
+              ${esc(dayLabel(key))}${holidayLabel ? `<span class="tgho-row-holiday">· ${esc(holidayLabel)}</span>` : ''}
             </div>
             <div class="tgho-row-time" data-closed="${closed}">${esc(timeText)}</div>
           </div>
@@ -798,12 +876,12 @@
           <div class="tgho-card-head">
             <div class="tgho-card-title">
               ${svg('clock', 16)}
-              <span>${esc(cfg.title)}</span>
+              <span>${esc(cfg.title || this.t('openingHours'))}</span>
             </div>
             ${cfg.showStatus ? this._renderStatus(status) : ''}
           </div>
           ${this._renderRows()}
-          ${cfg.showStatus && status && status.label && status.label !== 'Closed' && status.label !== 'Open' ? `
+          ${cfg.showStatus && status && status.nextOpen && status.label ? `
             <div style="margin-top:10px;font-size:12px;color:var(--tgho-sub);font-weight:500;letter-spacing:-0.005em;">
               ${esc(status.label)}
             </div>
@@ -819,7 +897,7 @@
         <div class="tgho-list">
           ${cfg.title || cfg.showStatus ? `
             <div class="tgho-list-head">
-              <div class="tgho-list-title">${esc(cfg.title || '')}</div>
+              <div class="tgho-list-title">${esc(cfg.title || this.t('openingHours'))}</div>
               ${cfg.showStatus ? this._renderStatus(status) : ''}
             </div>
           ` : ''}
@@ -837,7 +915,7 @@
         // Inline style is text-only — never expandable, no obvious affordance for it
         return `
           <div class="tgho-compact">
-            <span class="tgho-compact-label">${esc(cfg.title || 'Hours')}:</span>
+            <span class="tgho-compact-label">${esc(cfg.title || this.t('hours'))}:</span>
             <span class="tgho-compact-status" data-open="${open}">${esc(label)}</span>
           </div>
         `;
@@ -861,7 +939,7 @@
               <span class="tgho-compact-status" data-open="${open}">${esc(label)}</span>
               <svg class="tgho-compact-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-            <div class="tgho-compact-panel" id="compactPanel" role="region" aria-label="${esc(cfg.title || 'Opening hours')}" data-open="${panelOpen}">
+            <div class="tgho-compact-panel" id="compactPanel" role="region" aria-label="${esc(cfg.title || this.t('openingHours'))}" data-open="${panelOpen}">
               ${this._renderCompactPanel(status)}
             </div>
           </div>
@@ -882,7 +960,7 @@
       // Content of the popped-out card: schedule rows + next-open line if closed + phone/timezone foot.
       // Deliberately no title (the pill IS the title) and no status pill (already in the trigger).
       const cfg = this.c;
-      const showNextOpen = cfg.showStatus && status && status.label && status.label !== 'Closed' && status.label !== 'Open';
+      const showNextOpen = cfg.showStatus && status && status.nextOpen && status.label;
       return `
         ${this._renderRows()}
         ${showNextOpen ? `
@@ -906,6 +984,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      this.t = makeT(this.c);
       this._render();
     }
 
