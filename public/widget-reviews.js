@@ -44,7 +44,83 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (rating summary, section labels, controls). Platform
+  // and brand names (Google, Trustpilot, etc.), reviewer names and review text
+  // are data and are never translated. English is the source + fallback.
+  const MESSAGES = {
+    en: {
+      writeReview: 'Write a Review', poweredBy: 'Verified reviews powered by',
+      basedOn: 'Based on {n} reviews', reviewsNoun: 'reviews', onPlatform: 'on',
+      readMore: 'Read more', aiInsights: 'AI Insights',
+      mostPraised: 'Most praised', topStrength: 'Top strength', trendingUp: 'Trending up',
+      helpful: 'Helpful', ownerReplied: 'Owner replied', replied: 'replied',
+      seeAll: 'See all reviews', all: 'All', noSpotlight: 'No 5-star reviews to spotlight.',
+    },
+    fr: {
+      writeReview: 'Rédiger un avis', poweredBy: 'Avis vérifiés par',
+      basedOn: "d'après {n} avis", reviewsNoun: 'avis', onPlatform: 'sur',
+      readMore: 'Lire la suite', aiInsights: 'Analyses IA',
+      mostPraised: 'Le plus apprécié', topStrength: 'Point fort', trendingUp: 'En hausse',
+      helpful: 'Utile', ownerReplied: 'Réponse du propriétaire', replied: 'a répondu',
+      seeAll: 'Voir tous les avis', all: 'Tous', noSpotlight: 'Aucun avis 5 étoiles à mettre en avant.',
+    },
+    de: {
+      writeReview: 'Bewertung schreiben', poweredBy: 'Verifizierte Bewertungen von',
+      basedOn: 'basierend auf {n} Bewertungen', reviewsNoun: 'Bewertungen', onPlatform: 'auf',
+      readMore: 'Mehr lesen', aiInsights: 'KI-Einblicke',
+      mostPraised: 'Am meisten gelobt', topStrength: 'Top-Stärke', trendingUp: 'Im Aufwärtstrend',
+      helpful: 'Hilfreich', ownerReplied: 'Inhaber hat geantwortet', replied: 'hat geantwortet',
+      seeAll: 'Alle Bewertungen ansehen', all: 'Alle', noSpotlight: 'Keine 5-Sterne-Bewertungen zum Hervorheben.',
+    },
+    es: {
+      writeReview: 'Escribir una reseña', poweredBy: 'Reseñas verificadas por',
+      basedOn: 'según {n} reseñas', reviewsNoun: 'reseñas', onPlatform: 'en',
+      readMore: 'Leer más', aiInsights: 'Análisis de IA',
+      mostPraised: 'Lo más elogiado', topStrength: 'Punto fuerte', trendingUp: 'En aumento',
+      helpful: 'Útil', ownerReplied: 'El propietario respondió', replied: 'respondió',
+      seeAll: 'Ver todas las reseñas', all: 'Todas', noSpotlight: 'No hay reseñas de 5 estrellas para destacar.',
+    },
+    it: {
+      writeReview: 'Scrivi una recensione', poweredBy: 'Recensioni verificate da',
+      basedOn: 'in base a {n} recensioni', reviewsNoun: 'recensioni', onPlatform: 'su',
+      readMore: 'Leggi tutto', aiInsights: 'Analisi IA',
+      mostPraised: 'Più apprezzato', topStrength: 'Punto di forza', trendingUp: 'In crescita',
+      helpful: 'Utile', ownerReplied: 'Il titolare ha risposto', replied: 'ha risposto',
+      seeAll: 'Vedi tutte le recensioni', all: 'Tutte', noSpotlight: 'Nessuna recensione a 5 stelle da mettere in evidenza.',
+    },
+    ro: {
+      writeReview: 'Scrie o recenzie', poweredBy: 'Recenzii verificate de',
+      basedOn: 'pe baza a {n} recenzii', reviewsNoun: 'recenzii', onPlatform: 'pe',
+      readMore: 'Citește mai mult', aiInsights: 'Analize AI',
+      mostPraised: 'Cel mai apreciat', topStrength: 'Punct forte', trendingUp: 'În creștere',
+      helpful: 'Util', ownerReplied: 'Proprietarul a răspuns', replied: 'a răspuns',
+      seeAll: 'Vezi toate recenziile', all: 'Toate', noSpotlight: 'Nicio recenzie de 5 stele de evidențiat.',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   /* ━━━ SVG ICONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   const IC = {
@@ -289,6 +365,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this.activeTag = null;
       this.spotlightIdx = 0;
@@ -371,9 +448,16 @@
       let h = `<div class="tgr-header"><div class="tgr-header-left">`;
       h += `<div class="tgr-rating-box">${icon('star')}</div>`;
       h += `<div><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px"><span class="tgr-rating-num">${p.rating}</span>${stars(Math.round(p.rating),18,c.brandColor)}</div>`;
-      h += `<p class="tgr-rating-info">Based on <strong>${p.total} reviews</strong> on ${esc(srcName(c.source || 'google'))}</p></div></div>`;
+      // "Based on {n} reviews" is a complete localised phrase; the count is
+      // bolded for emphasis. " on {platform}" is appended (platform name is a
+      // brand and is never translated).
+      const basedOn = this.t('basedOn', { n: `<strong>${p.total}</strong>` });
+      h += `<p class="tgr-rating-info">${basedOn} ${esc(this.t('onPlatform'))} ${esc(srcName(c.source || 'google'))}</p></div></div>`;
       if (c.showCTA) {
-        h += `<a href="${esc(c.ctaUrl)}" class="tgr-cta" target="_blank" rel="noopener">${icon('msgSq')}${esc(c.ctaText)}${icon('extLink')}</a>`;
+        // ctaText is author content; when left at the English default, show the
+        // localised chrome string instead so a French viewer sees French.
+        const ctaText = (c.ctaText === 'Write a Review') ? this.t('writeReview') : c.ctaText;
+        h += `<a href="${esc(c.ctaUrl)}" class="tgr-cta" target="_blank" rel="noopener">${icon('msgSq')}${esc(ctaText)}${icon('extLink')}</a>`;
       }
       return h + `</div>`;
     }
@@ -382,9 +466,15 @@
     _ai() {
       const hl = this.c.aiHighlights;
       if (!hl || !hl.length) return '';
-      let h = `<div class="tgr-ai"><div class="tgr-ai-label"><div class="tgr-ai-icon">${icon('sparkles')}</div>AI Insights</div><div class="tgr-ai-grid">`;
+      let h = `<div class="tgr-ai"><div class="tgr-ai-label"><div class="tgr-ai-icon">${icon('sparkles')}</div>${esc(this.t('aiInsights'))}</div><div class="tgr-ai-grid">`;
+      // Insight LABELS are fixed UI chrome; the default English ones are mapped
+      // to localised strings. Insight VALUES are AI-derived/sample data and are
+      // shown verbatim (never translated).
+      const LABEL_KEYS = { 'Most praised': 'mostPraised', 'Top strength': 'topStrength', 'Trending up': 'trendingUp' };
       hl.forEach(a => {
-        h += `<div class="tgr-ai-card"><div class="tgr-ai-card-icon" style="background:${a.color}15">${icon(a.icon||'heart')}</div><div class="tgr-ai-card-label">${esc(a.label)}</div><div class="tgr-ai-card-value">${esc(a.value)}</div></div>`;
+        const labelKey = LABEL_KEYS[a.label];
+        const label = labelKey ? this.t(labelKey) : a.label;
+        h += `<div class="tgr-ai-card"><div class="tgr-ai-card-icon" style="background:${a.color}15">${icon(a.icon||'heart')}</div><div class="tgr-ai-card-label">${esc(label)}</div><div class="tgr-ai-card-value">${esc(a.value)}</div></div>`;
       });
       return h + `</div></div>`;
     }
@@ -394,7 +484,7 @@
       const tags = this._allTags();
       if (!tags.length) return '';
       let h = `<div class="tgr-tags"><span class="tgr-tags-icon">${icon('filter')}</span>`;
-      h += `<button class="tgr-tag${this.activeTag?'':' active'}" data-tag="">All</button>`;
+      h += `<button class="tgr-tag${this.activeTag?'':' active'}" data-tag="">${esc(this.t('all'))}</button>`;
       tags.forEach(t => { h += `<button class="tgr-tag${this.activeTag===t?' active':''}" data-tag="${esc(t)}">${esc(t)}</button>`; });
       return h + `</div>`;
     }
@@ -439,18 +529,18 @@
 
       const limit = variant === 'carousel' ? 120 : 200;
       const text = r.text || '';
-      h += `<p class="tgr-text">${esc(text.slice(0,limit))}${text.length>limit?`...<button class="tgr-readmore">Read more</button>`:''}</p>`;
+      h += `<p class="tgr-text">${esc(text.slice(0,limit))}${text.length>limit?`...<button class="tgr-readmore">${esc(this.t('readMore'))}</button>`:''}</p>`;
 
       if (r.tags) { h += `<div class="tgr-card-tags">${r.tags.map(t=>`<span class="tgr-card-tag">${esc(t)}</span>`).join('')}</div>`; }
 
       h += `<div class="tgr-card-foot">`;
-      if (c.showHelpful) h += `<button class="tgr-helpful">${icon('thumbsUp')}Helpful (${r.helpful||0})</button>`;
-      if (c.showReplies && r.reply) h += `<button class="tgr-reply-btn" data-reply="${r.id||''}">${icon('msgSq')}Owner replied</button>`;
+      if (c.showHelpful) h += `<button class="tgr-helpful">${icon('thumbsUp')}${esc(this.t('helpful'))} (${r.helpful||0})</button>`;
+      if (c.showReplies && r.reply) h += `<button class="tgr-reply-btn" data-reply="${r.id||''}">${icon('msgSq')}${esc(this.t('ownerReplied'))}</button>`;
       h += `</div>`;
 
       // Reply (shown by default for withReply variant)
       if (r.reply && (variant === 'withReply')) {
-        h += `<div class="tgr-reply"><p class="tgr-reply-author">${esc(r.reply.author)} replied</p><p class="tgr-reply-text">${esc(r.reply.text)}</p></div>`;
+        h += `<div class="tgr-reply"><p class="tgr-reply-author">${esc(r.reply.author)} ${esc(this.t('replied'))}</p><p class="tgr-reply-text">${esc(r.reply.text)}</p></div>`;
       }
 
       return h + `</div>`;
@@ -485,7 +575,7 @@
     /* ── Spotlight layout ── */
     _spotlight(reviews) {
       const fives = reviews.filter(r => r.rating === 5);
-      if (!fives.length) return '<p>No 5-star reviews to spotlight.</p>';
+      if (!fives.length) return `<p>${esc(this.t('noSpotlight'))}</p>`;
       const r = fives[this.spotlightIdx % fives.length] || fives[0];
       let h = `<div class="tgr-spotlight"><div class="tgr-quote-icon">${icon('quote')}</div>`;
       h += `<p class="tgr-text">"${esc(r.text)}"</p>`;
@@ -498,11 +588,11 @@
     _badge() {
       const c = this.c, p = c.place, reviews = c.reviews.slice(0, 3);
       let h = `<div class="tgr-badge-wrap"><div style="position:relative">`;
-      h += `<button class="tgr-badge tgr-badge-toggle"><div class="tgr-badge-star">${icon('star')}</div><span class="tgr-badge-num">${p.rating}</span>${stars(5,11,'#F59E0B')}<span class="tgr-badge-count">${p.total} reviews</span><span class="tgr-src">${srcMeta(c.source || 'google').mark}</span></button>`;
+      h += `<button class="tgr-badge tgr-badge-toggle"><div class="tgr-badge-star">${icon('star')}</div><span class="tgr-badge-num">${p.rating}</span>${stars(5,11,'#F59E0B')}<span class="tgr-badge-count">${p.total} ${esc(this.t('reviewsNoun'))}</span><span class="tgr-src">${srcMeta(c.source || 'google').mark}</span></button>`;
       h += `<div class="tgr-badge-popup${this.badgeOpen?' open':''}">`;
-      h += `<div class="tgr-badge-popup-head"><div><p class="tgr-author-name">${esc(p.name)}</p><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="tgr-rating-num" style="font-size:24px">${p.rating}</span><div>${stars(5,13,c.brandColor)}<p style="font-size:11px;color:var(--tgr-muted);margin-top:2px">${p.total} reviews</p></div></div></div><button class="tgr-badge-popup-close tgr-badge-close">${icon('x')}</button></div>`;
+      h += `<div class="tgr-badge-popup-head"><div><p class="tgr-author-name">${esc(p.name)}</p><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="tgr-rating-num" style="font-size:24px">${p.rating}</span><div>${stars(5,13,c.brandColor)}<p style="font-size:11px;color:var(--tgr-muted);margin-top:2px">${p.total} ${esc(this.t('reviewsNoun'))}</p></div></div></div><button class="tgr-badge-popup-close tgr-badge-close">${icon('x')}</button></div>`;
       h += `<div class="tgr-badge-reviews">${reviews.map(r=>`<div class="tgr-badge-review">${avatar(r.author,'tgr-avatar-xs')}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><p class="tgr-author-name" style="font-size:11px">${esc(r.author)}</p>${stars(r.rating,9,'#F59E0B')}</div><p class="tgr-badge-review-text">${esc(r.text).slice(0,80)}...</p></div></div>`).join('')}</div>`;
-      h += `<button class="tgr-badge-allbtn">See all reviews ${icon('arrowUp')}</button>`;
+      h += `<button class="tgr-badge-allbtn">${esc(this.t('seeAll'))} ${icon('arrowUp')}</button>`;
       return h + `</div></div></div>`;
     }
 
@@ -518,7 +608,7 @@
 
     /* ── Trust ── */
     _trust() {
-      const t = this.c.trustText || ('Verified reviews powered by ' + srcName(this.c.source || 'google'));
+      const t = this.c.trustText || (this.t('poweredBy') + ' ' + srcName(this.c.source || 'google'));
       return `<div class="tgr-trust">${icon('shield')}<span>${esc(t)}</span></div>`;
     }
 
@@ -575,7 +665,7 @@
           if (review && review.reply) {
             const div = document.createElement('div');
             div.className = 'tgr-reply';
-            div.innerHTML = `<p class="tgr-reply-author">${esc(review.reply.author)} replied</p><p class="tgr-reply-text">${esc(review.reply.text)}</p>`;
+            div.innerHTML = `<p class="tgr-reply-author">${esc(review.reply.author)} ${esc(this.t('replied'))}</p><p class="tgr-reply-text">${esc(review.reply.text)}</p>`;
             card.appendChild(div);
           }
         });
@@ -595,7 +685,7 @@
       });
     }
 
-    update(newConfig) { this.c = this._defaults(newConfig); this.activeTag = null; this.spotlightIdx = 0; this._render(); }
+    update(newConfig) { this.c = this._defaults(newConfig); this.t = makeT(this.c); this.activeTag = null; this.spotlightIdx = 0; this._render(); }
     destroy() { if (this._spotTimer) clearInterval(this._spotTimer); this.shadow.innerHTML = ''; }
   }
 
