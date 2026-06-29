@@ -108,13 +108,69 @@ function cleanOffer(raw) {
     else if (typeof v === 'number' && isFinite(v)) { fields[k] = String(v); n++; }
   }
 
-  return {
+  // i18n — saved per-language content translations (Layer 2). Whitelisted to
+  // known language codes and known field keys only, capped to the same lengths
+  // as the source fields, so saved translations survive a round-trip without
+  // letting unbounded data into the record. Omitted entirely when empty so
+  // existing offers are unchanged.
+  const I18N_FIELD_CAP = { title: 120, teaser: 220, description: 5000, urgency: 140, avail: 140 };
+  const i18n = {};
+  const rawI18n = (s.i18n && typeof s.i18n === 'object' && !Array.isArray(s.i18n)) ? s.i18n : {};
+  let langN = 0;
+  for (const lang of Object.keys(rawI18n)) {
+    if (langN >= 12) break;
+    if (!/^[a-z]{2}$/.test(lang)) continue;
+    const li = (rawI18n[lang] && typeof rawI18n[lang] === 'object' && !Array.isArray(rawI18n[lang])) ? rawI18n[lang] : {};
+    const lf = {};
+    const srcLf = (li.fields && typeof li.fields === 'object' && !Array.isArray(li.fields)) ? li.fields : {};
+    for (const k of Object.keys(I18N_FIELD_CAP)) {
+      if (typeof srcLf[k] === 'string' && srcLf[k]) lf[k] = srcLf[k].slice(0, I18N_FIELD_CAP[k]);
+    }
+    const entry = {};
+    if (Object.keys(lf).length) entry.fields = lf;
+    const inc = strArr(li.includes, 40, 200);
+    if (inc.length) entry.includes = inc;
+    const tg = strArr(li.tags, 30, 60);
+    if (tg.length) entry.tags = tg;
+    if (Object.keys(entry).length) { i18n[lang] = entry; langN++; }
+  }
+
+  // Editor round-trip aids. audienceLanguages = which language toggles the
+  // author chose; i18nMeta = the source signature each translation was made
+  // from (staleness tracking). Neither is read by the public card/page, but
+  // persisting them lets the builder reopen a saved offer with its language
+  // choices and "source changed" flags intact. Both bounded to the same 12
+  // two-letter codes as i18n.
+  const audienceLanguages = [];
+  const rawAL = Array.isArray(s.audienceLanguages) ? s.audienceLanguages : [];
+  for (const c of rawAL) {
+    if (audienceLanguages.length >= 12) break;
+    if (typeof c === 'string' && /^[a-z]{2}$/.test(c) && audienceLanguages.indexOf(c) === -1) audienceLanguages.push(c);
+  }
+  const i18nMeta = {};
+  const rawMeta = (s.i18nMeta && typeof s.i18nMeta === 'object' && !Array.isArray(s.i18nMeta)) ? s.i18nMeta : {};
+  let metaN = 0;
+  for (const lang of Object.keys(rawMeta)) {
+    if (metaN >= 12) break;
+    if (!/^[a-z]{2}$/.test(lang)) continue;
+    const m = (rawMeta[lang] && typeof rawMeta[lang] === 'object' && !Array.isArray(rawMeta[lang])) ? rawMeta[lang] : {};
+    const entry = {};
+    if (typeof m.sig === 'string' && m.sig) entry.sig = m.sig.slice(0, 4000);
+    if (typeof m.at === 'string' && m.at) entry.at = m.at.slice(0, 40);
+    if (Object.keys(entry).length) { i18nMeta[lang] = entry; metaN++; }
+  }
+
+  const out = {
     currency: cap(s.currency, 8),
     fields: fields,
     includes: strArr(s.includes, 40, 200),
     tags: strArr(s.tags, 30, 60),
     images: strArr(s.images, 20, 1000)
   };
+  if (Object.keys(i18n).length) out.i18n = i18n;
+  if (audienceLanguages.length) out.audienceLanguages = audienceLanguages;
+  if (Object.keys(i18nMeta).length) out.i18nMeta = i18nMeta;
+  return out;
 }
 
 // Is an offer within its show window? (UTC day granularity; the card/page also

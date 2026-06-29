@@ -19,6 +19,9 @@
     "api/faq-translate.js": {
       "maxDuration": 60
     },
+    "api/offer-translate.js": {
+      "maxDuration": 60
+    },
     "api/slice-emit.js": {
       "maxDuration": 300
     },

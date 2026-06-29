@@ -205,6 +205,9 @@
       font-size: 10px; font-weight: 600; background: var(--tgo-card-alt); border: 1px solid var(--tgo-border);
       color: var(--tgo-sub); padding: 3px 8px; border-radius: 999px;
     }
+    .tgoc-includes { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+    .tgoc-include { font-size: 12px; color: var(--tgo-sub); line-height: 1.4; padding-left: 16px; position: relative; }
+    .tgoc-include::before { content: '✓'; position: absolute; left: 0; color: var(--tgo-success); font-weight: 700; }
 
     /* Price block + CTA */
     .tgoc-price-block { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
@@ -348,6 +351,10 @@
         offerPage: c.offerPage || '',
         offerId: c.offerId || '',
         ctaTarget: c.ctaTarget === '_blank' ? '_blank' : '',
+        // Carry the viewer language through so a parent (e.g. the offers grid)
+        // can pin the card to the language it resolved. Falls back to
+        // <html lang>/navigator inside makeT when not set.
+        lang: c.lang || c.language || c.locale || '',
         offer: c.offer && typeof c.offer === 'object' ? c.offer : {}
       };
     }
@@ -365,7 +372,10 @@
       const path = qi >= 0 ? base.slice(0, qi) : base;
       const query = qi >= 0 ? base.slice(qi) : '';
       if (id) {
-        const slug = slugify(this._f('title'));
+        // Slug is built from the SOURCE title so the /offer link stays stable and
+        // matches the server's slug regardless of the viewer's language.
+        const srcTitle = (o.fields && o.fields.title) || o.title || '';
+        const slug = slugify(srcTitle);
         return path.replace(/\/$/, '') + '/' + (slug ? slug + '-' : '') + encodeURIComponent(id) + query;
       }
       const sep = query ? '&' : '?';
@@ -373,16 +383,60 @@
       catch (e) { return base; }
     }
 
+    // Build the language-localised VIEW of the offer for the resolved viewer
+    // language. The author writes the offer once in the source language (English);
+    // offer.i18n holds per-language overlays produced on save by /api/offer-translate.
+    // Here we lay the overlay for the viewer's language over the source, field by
+    // field, so a missing translation always falls back to the original — never a
+    // blank. Only the FIVE translatable copy fields plus the includes/tags lists are
+    // overlaid. Place names, price, dates and every other field come straight from
+    // the source untouched, so the offer is never mistranslated on a number or a town.
+    _localizedOffer(offer) {
+      if (!offer || typeof offer !== 'object') return offer;
+      const lang = this.t && this.t.lang;
+      if (!lang || lang === 'en') return offer;
+      const i18n = offer.i18n;
+      if (!i18n || typeof i18n !== 'object') return offer;
+      const tr = i18n[lang];
+      if (!tr || typeof tr !== 'object') return offer;
+
+      // Use the translated value only when it is a non-empty string, else keep source.
+      const pick = (base, over) => (typeof over === 'string' && over.trim()) ? over : base;
+      const out = Object.assign({}, offer);
+
+      // Only these five copy fields are ever translated. Everything else in
+      // `fields` (price, was, country, resort, dates, board, etc.) is left as the
+      // source value.
+      const TRANSLATABLE = ['title', 'teaser', 'description', 'urgency', 'avail'];
+      const srcFields = (offer.fields && typeof offer.fields === 'object') ? offer.fields : null;
+      if (srcFields) {
+        const trFields = (tr.fields && typeof tr.fields === 'object') ? tr.fields : {};
+        const fields = Object.assign({}, srcFields);
+        for (let i = 0; i < TRANSLATABLE.length; i++) {
+          const k = TRANSLATABLE[i];
+          fields[k] = pick(srcFields[k], trFields[k]);
+        }
+        out.fields = fields;
+      }
+
+      if (Array.isArray(tr.includes) && tr.includes.length) out.includes = tr.includes;
+      if (Array.isArray(tr.tags) && tr.tags.length) out.tags = tr.tags;
+
+      return out;
+    }
+
     // Pull a value from the offer, whether it is wrapped in `fields` or flat.
+    // Reads from the localised view (this.lo) so the viewer sees translated copy,
+    // falling back to the raw config offer before the first render resolves it.
     _f(key) {
-      const o = this.cfg.offer || {};
+      const o = this.lo || this.cfg.offer || {};
       if (o.fields && o.fields[key] != null && o.fields[key] !== '') return o.fields[key];
       if (o[key] != null && o[key] !== '') return o[key];
       return '';
     }
 
     _derive() {
-      const o = this.cfg.offer || {};
+      const o = this.lo || this.cfg.offer || {};
       const sym = currencySymbol(this.cfg.currency || o.currency || 'GBP');
       const stars = parseStars(this._f('stars'));
       const eyebrow = [this._f('style'), shortType(this._f('type'))].filter(Boolean).join(' · ');
@@ -399,6 +453,7 @@
       }
 
       const tags = Array.isArray(o.tags) ? o.tags.slice(0, 3) : [];
+      const includes = Array.isArray(o.includes) ? o.includes.filter(function (x) { return typeof x === 'string' && x.trim(); }) : [];
 
       return {
         sym: sym,
@@ -408,6 +463,7 @@
         loc: loc,
         teaser: this._f('teaser'),
         tags: tags,
+        includes: includes,
         price: money(sym, this._f('price')),
         was: money(sym, this._f('was')),
         priceSub: priceSub,
@@ -439,9 +495,19 @@
       const tags = d.tags.length
         ? '<div class="tgoc-tags">' + d.tags.map(function (t) { return '<span class="tgoc-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
         : '';
+      const includes = this._includesBlock(d);
       return '<div class="tgoc-body">' + eyebrow
         + '<h3 class="tgoc-title">' + esc(d.title) + '</h3>'
-        + loc + teaser + tags + '</div>';
+        + loc + teaser + includes + tags + '</div>';
+    }
+
+    // What's included list. Only rendered when the offer carries includes, so
+    // offers without them are unchanged.
+    _includesBlock(d) {
+      if (!d.includes || !d.includes.length) return '';
+      return '<ul class="tgoc-includes">'
+        + d.includes.map(function (t) { return '<li class="tgoc-include">' + esc(t) + '</li>'; }).join('')
+        + '</ul>';
     }
 
     _priceBlock(d) {
@@ -493,13 +559,19 @@
         + '<div class="tgoc-sbody">' + eyebrow
           + '<h3 class="tgoc-s-title">' + esc(d.title) + '</h3>'
           + '<div class="tgoc-s-meta">' + loc + stars + '</div>'
-          + teaser + tags
+          + teaser + this._includesBlock(d) + tags
           + '<div class="tgoc-sfoot">' + this._priceBlock(d) + this._cta() + '</div>'
         + '</div>';
     }
 
     _render() {
       const cfg = this.cfg;
+
+      // Resolve the language-localised view of the offer once per render, after
+      // this.t (and so this.t.lang) is known. The render path reads copy, includes
+      // and tags from this.lo via _f / _derive; price, place and dates are never
+      // overlaid, so they always come from the source offer.
+      this.lo = this._localizedOffer(cfg.offer);
 
       // Scheduling: outside its show window the card renders nothing, so it
       // simply disappears from a listing until (and only while) it is live.
