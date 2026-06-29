@@ -19,7 +19,42 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (the default heading and the "same time" offset label).
+  // City/place names and IANA timezone IDs are author content / identifiers and
+  // are never translated. Time and date formatting stays with Intl. English is
+  // the source + fallback.
+  const MESSAGES = {
+    en: { heading: 'Destination times', sameTime: 'same time' },
+    fr: { heading: 'Heures des destinations', sameTime: 'même heure' },
+    de: { heading: 'Zeiten der Reiseziele', sameTime: 'gleiche Zeit' },
+    es: { heading: 'Horas de los destinos', sameTime: 'misma hora' },
+    it: { heading: 'Orari delle destinazioni', sameTime: 'stessa ora' },
+    ro: { heading: 'Orele destinațiilor', sameTime: 'aceeași oră' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveConfigApi() {
     if (typeof window === 'undefined') return '/api/widget-config';
@@ -76,6 +111,7 @@
     constructor(el, config) {
       this.el = el;
       this.cfg = this._defaults(config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.rows = [];
       this._timer = null;
       this.shadow = el.attachShadow ? el.attachShadow({ mode: 'open' }) : el;
@@ -96,7 +132,7 @@
       }
       if (!dests || !dests.length) dests = DEFAULT_DESTS.slice();
       return {
-        heading: typeof c.heading === 'string' ? c.heading : 'Destination times',
+        heading: typeof c.heading === 'string' ? c.heading : '',
         destinations: dests,
         use24h: !!c.use24h,
         showDate: c.showDate !== false,
@@ -122,6 +158,7 @@
       const rowbg = dark ? '#0F172A' : '#F8FAFC';
       const grid = c.layout === 'grid';
       const card = c.layout === 'card';
+      const heading = c.heading || this.t('heading');
 
       this.shadow.innerHTML = `
         <style>
@@ -143,7 +180,7 @@
           .wc-off { font-size: 11px; color: ${ink2}; font-variant-numeric: tabular-nums; }
         </style>
         <div class="wc">
-          ${c.heading ? `<h3 class="wc-head">${esc(c.heading)}</h3>` : ''}
+          ${heading ? `<h3 class="wc-head">${esc(heading)}</h3>` : ''}
           <div class="wc-list" id="list"></div>
         </div>`;
 
@@ -191,7 +228,7 @@
           }
           if (r.off) {
             const diff = (tzOffsetMin(tz, now) - viewerOff) / 60;
-            r.off.textContent = Math.abs(diff) < 0.001 ? 'same time'
+            r.off.textContent = Math.abs(diff) < 0.001 ? this.t('sameTime')
               : (diff > 0 ? '+' : '') + (Number.isInteger(diff) ? diff : diff.toFixed(1)) + 'h';
           }
         } catch (e) { r.time.textContent = '--:--'; }
@@ -201,6 +238,7 @@
     update(config) {
       if (this._timer) { clearInterval(this._timer); this._timer = null; }
       this.cfg = this._defaults(config || {});
+      this.t = makeT(this.cfg);
       this._build();
       this._tick();
       this._timer = setInterval(() => this._tick(), this.cfg.showSeconds ? 1000 : 10000);
