@@ -876,6 +876,7 @@
     const API_CONFIG = '/api/widget-config';
     const API_LIST   = '/api/widget-list';
     const API_AI     = '/api/widget-ai';
+    const API_TRANSLATE = '/api/faq-translate';
     const WIDGET_TYPE = 'FAQ';
     const STORAGE_KEY = 'tgw_session';
 
@@ -1002,8 +1003,45 @@
           buttonText: 'Contact us',
           buttonUrl: '#contact'
         },
-        seo: { enableSchema: true }
+        seo: { enableSchema: true },
+        // Multi-lingual content layer (see api/faq-translate). audienceLanguages
+        // is the set the agent chose to translate into; i18n holds the per-language
+        // overlays the widget lays over the English source at render time; i18nMeta
+        // records the source signature each language was translated from so the
+        // editor can flag a translation as out of date when the source changes.
+        audienceLanguages: [],
+        i18n: {},
+        i18nMeta: {}
       };
+    }
+
+    /* ===================== MULTI-LINGUAL (CONTENT LAYER) ===================== */
+    // The pilot audience languages. English is always the source. Keep in step
+    // with widget-faq.js MESSAGES and api/faq-translate LANG_NAMES.
+    const AUDIENCE_LANGS = [
+      { code: 'fr', label: 'French' },
+      { code: 'de', label: 'German' },
+      { code: 'es', label: 'Spanish' },
+      { code: 'it', label: 'Italian' }
+    ];
+
+    // The translatable content the widget shows, pulled out of the config in the
+    // exact shape api/faq-translate expects. Operational/never-translate fields
+    // (urls, ids, flags, colours) are deliberately left out.
+    function collectTranslatableContent(c) {
+      return {
+        heading: { title: (c.heading && c.heading.title) || '', subtitle: (c.heading && c.heading.subtitle) || '' },
+        cta: { heading: (c.cta && c.cta.heading) || '', description: (c.cta && c.cta.description) || '', buttonText: (c.cta && c.cta.buttonText) || '' },
+        categories: (c.categories || []).map((cat) => ({ id: cat.id, label: cat.label || '' })),
+        questions: (c.questions || []).map((q) => ({ id: q.id, question: q.question || '', answer: q.answer || '' })),
+        search: { placeholder: (c.search && c.search.placeholder) || '', noResultsText: (c.search && c.search.noResultsText) || '' }
+      };
+    }
+
+    // A stable signature of the translatable source, so we can tell when a saved
+    // translation has gone stale (source edited after it was translated).
+    function contentSignature(c) {
+      try { return JSON.stringify(collectTranslatableContent(c)); } catch (e) { return ''; }
     }
 
     /* ============================ COLOUR PRESETS ============================ */
@@ -1179,10 +1217,11 @@
       sections: { // default-open sections per tab
         layout: true, theme: true, colours: true, shape: true, heading: true,  // design
         qs: true, cats: true, cta: true, import: false, // content
-        display: true, behaviour: true, seo: true, embed: true // settings
+        display: true, behaviour: true, languages: true, seo: true, embed: true // settings
       },
       dragId: null,
-      widget: null
+      widget: null,
+      previewLang: 'source'   // which language the live preview renders ('source' = English)
     };
 
     function pushHistory() {
@@ -1223,16 +1262,26 @@
     }
 
     /* ============================ PREVIEW MOUNT ============================ */
+    // Build the config the preview renders. When the agent is previewing a
+    // translated language we pin the widget's `lang` so it overlays that
+    // language's content (exactly what a visitor in that language would see).
+    function previewConfig() {
+      const cfg = deepClone(state.config);
+      if (state.previewLang && state.previewLang !== 'source') cfg.lang = state.previewLang;
+      else delete cfg.lang;
+      return cfg;
+    }
+
     function updatePreview() {
       const mount = $('#faq-mount');
       if (!mount) return;
       try {
         if (state.widget && typeof state.widget.update === 'function') {
-          state.widget.update(deepClone(state.config));
+          state.widget.update(previewConfig());
         } else if (window.TGFaqWidget) {
           try { mount.innerHTML = ''; } catch(e){}
           mount.removeAttribute('data-tg-initialised');
-          state.widget = new window.TGFaqWidget(mount, deepClone(state.config));
+          state.widget = new window.TGFaqWidget(mount, previewConfig());
           mount.setAttribute('data-tg-initialised', 'true');
         }
         // If Design mode active, refresh hotspots
@@ -1532,6 +1581,61 @@
     }
 
     /* =========================== SETTINGS TAB =========================== */
+    // Status of one audience language relative to the current source content.
+    function langStatus(c, code) {
+      const has = c.i18n && c.i18n[code] && Object.keys(c.i18n[code]).length;
+      if (!has) return { state: 'none', label: 'Not translated yet', tone: 'muted' };
+      const sig = (c.i18nMeta && c.i18nMeta[code] && c.i18nMeta[code].sig) || '';
+      if (sig && sig !== contentSignature(c)) return { state: 'stale', label: 'Source changed — re-translate', tone: 'warn' };
+      return { state: 'ok', label: 'Up to date', tone: 'ok' };
+    }
+
+    function renderLanguagesSection() {
+      const c = state.config;
+      const selected = Array.isArray(c.audienceLanguages) ? c.audienceLanguages : [];
+      const anyTranslated = AUDIENCE_LANGS.some((l) => c.i18n && c.i18n[l.code] && Object.keys(c.i18n[l.code]).length);
+
+      const rows = AUDIENCE_LANGS.map((l) => {
+        const on = selected.indexOf(l.code) !== -1;
+        const st = langStatus(c, l.code);
+        const dotColour = st.tone === 'ok' ? 'var(--ok, #16a34a)' : st.tone === 'warn' ? 'var(--warn, #d97706)' : 'var(--muted)';
+        return `
+          <div class="toggle-row">
+            <div class="toggle-row-main">
+              <div class="toggle-row-label">${esc(l.label)}</div>
+              <div class="toggle-row-hint" style="color:${dotColour}">${esc(st.label)}</div>
+            </div>
+            <button class="toggle" role="switch" data-lang-toggle="${l.code}" aria-pressed="${on}"></button>
+          </div>`;
+      }).join('');
+
+      // Preview-language pills — Source plus any language that has a translation.
+      const pills = [{ code: 'source', label: 'Source (EN)' }]
+        .concat(AUDIENCE_LANGS
+          .filter((l) => c.i18n && c.i18n[l.code] && Object.keys(c.i18n[l.code]).length)
+          .map((l) => ({ code: l.code, label: l.label })));
+      const previewPills = pills.length > 1 ? `
+        <div class="divider"></div>
+        <label class="field-label">Preview language</label>
+        <div class="btn-group" style="flex-wrap:wrap" id="lang-preview-group">
+          ${pills.map((p) => `<button data-lang-preview="${p.code}" aria-pressed="${state.previewLang === p.code}">${esc(p.label)}</button>`).join('')}
+        </div>
+        <p class="field-hint" style="margin-top:6px">This only changes the preview. Each visitor sees their own language automatically.</p>
+      ` : '';
+
+      return `
+        <p class="field-hint" style="margin-bottom:10px">Write your FAQ once in English, then translate it for the languages your customers read. Each visitor sees their own language automatically, falling back to English for anything not yet translated. Prices, ATOL and ABTA wording, booking references, brand and place names are never translated.</p>
+        ${rows}
+        <div style="margin-top:12px">
+          <button class="btn btn-primary btn-block" id="lang-translate-go" ${selected.length ? '' : 'disabled'}>
+            ${icn('sparkle', 14)}${anyTranslated ? 'Update translations' : 'Translate for my audience'}
+          </button>
+          <div id="lang-status" class="field-hint" style="display:none;margin-top:8px"></div>
+        </div>
+        ${previewPills}
+      `;
+    }
+
     function renderSettingsTab() {
       const c = state.config;
 
@@ -1619,6 +1723,7 @@
       return `
         ${section('display',   'Display options',  displayBody)}
         ${section('behaviour', 'Behaviour',        behaveBody)}
+        ${section('languages', 'Languages',        renderLanguagesSection())}
         ${section('seo',       'SEO',              seoBody)}
         ${section('embed',     'Embed code',       embedBody)}
       `;
@@ -1795,6 +1900,82 @@
         const snippet = `<div data-tg-widget="faq" data-tg-id="${state.widgetId}"></div>\n<script src="https://tg-widgets.vercel.app/widget-faq.js"><\/script>`;
         navigator.clipboard.writeText(snippet).then(() => showToast('Embed code copied', 'success'));
       }));
+
+      // ── Languages (content layer) ──────────────────────────────
+      // Toggle an audience language on/off.
+      $$('[data-lang-toggle]', body).forEach(el => el.addEventListener('click', () => {
+        const code = el.dataset.langToggle;
+        mutate(cfg => {
+          if (!Array.isArray(cfg.audienceLanguages)) cfg.audienceLanguages = [];
+          const i = cfg.audienceLanguages.indexOf(code);
+          if (i === -1) cfg.audienceLanguages.push(code); else cfg.audienceLanguages.splice(i, 1);
+        });
+        renderTabBody();   // refresh the section (button label, enabled state)
+      }));
+
+      // Run the translation.
+      const goBtn = $('#lang-translate-go', body);
+      if (goBtn) goBtn.addEventListener('click', translateAudience);
+
+      // Preview-language pills.
+      $$('[data-lang-preview]', body).forEach(el => el.addEventListener('click', () => {
+        state.previewLang = el.dataset.langPreview;
+        $$('[data-lang-preview]', body).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.langPreview === state.previewLang)));
+        updatePreview();
+      }));
+    }
+
+    /* ===================== TRANSLATE (CONTENT LAYER) ===================== */
+    async function translateAudience() {
+      const targets = (state.config.audienceLanguages || []).slice();
+      if (!targets.length) { showToast('Pick at least one language first', 'error'); return; }
+
+      const btn = $('#lang-translate-go');
+      const status = $('#lang-status');
+      const setStatus = (msg) => { if (status) { status.style.display = ''; status.textContent = msg; } };
+      if (btn) { btn.disabled = true; btn.innerHTML = `${icn('sparkle', 14).replace('>', ' class="spin">')}Translating…`; }
+      setStatus('Translating — usually takes 10 to 20 seconds…');
+
+      try {
+        const res = await fetch(API_TRANSLATE, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            content: collectTranslatableContent(state.config),
+            targetLangs: targets,
+            sourceLang: 'en'
+          })
+        });
+        if (res.status === 401) { showToast('Session expired — please sign in again', 'error'); clearSession(); if (window.tgse?.showLogin) window.tgse.showLogin(); else location.reload(); return; }
+        if (res.status === 429) { showToast('Too many translations just now. Please wait a moment and try again.', 'error'); setStatus(''); return; }
+        if (!res.ok) {
+          let msg = 'Translation failed. Please try again.';
+          try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (e) {}
+          throw new Error(msg);
+        }
+        const data = await res.json();
+        const i18n = data && data.i18n;
+        if (!i18n || !Object.keys(i18n).length) throw new Error('No translations came back. Please try again.');
+
+        const sig = contentSignature(state.config);
+        mutate(cfg => {
+          if (!cfg.i18n || typeof cfg.i18n !== 'object') cfg.i18n = {};
+          if (!cfg.i18nMeta || typeof cfg.i18nMeta !== 'object') cfg.i18nMeta = {};
+          for (const code of Object.keys(i18n)) {
+            cfg.i18n[code] = i18n[code];
+            cfg.i18nMeta[code] = { sig, at: new Date().toISOString() };
+          }
+        });
+
+        const done = Object.keys(i18n).map(c => (AUDIENCE_LANGS.find(l => l.code === c) || {}).label || c);
+        showToast('Translated into ' + done.join(', '), 'success');
+        renderTabBody();   // refresh statuses + preview pills
+      } catch (e) {
+        console.warn('[translate] failed', e);
+        showToast(e.message || 'Translation failed', 'error');
+        if (status) { status.style.display = ''; status.textContent = e.message || 'Translation failed.'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = `${icn('sparkle', 14)}Translate for my audience`; }
+      }
     }
 
     /* ============================ DEEP SET/GET ============================ */

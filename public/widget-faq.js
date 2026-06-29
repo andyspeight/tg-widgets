@@ -59,7 +59,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome, per language. English is the source + fallback. The author's
@@ -604,6 +604,10 @@
       this.widgetId = container.getAttribute('data-tg-id') ||
         ('faq_' + Math.random().toString(36).slice(2, 10));
       this.shadow = container.attachShadow({ mode: 'open' });
+      // `cl` is the language-localised view of the config the render reads from.
+      // It starts as the source config and is recomputed each render once the
+      // viewer's language is known (see _render + _localizedConfig).
+      this.cl = this.c;
       this.state = {
         query: '',
         activeCategory: 'all',
@@ -686,7 +690,8 @@
     }
 
     _visibleQuestions() {
-      return (this.c.questions || []).filter(q => !q.hidden);
+      // Read from the localised view (falls back to source before first render).
+      return ((this.cl || this.c).questions || []).filter(q => !q.hidden);
     }
 
     _filteredQuestions() {
@@ -716,7 +721,7 @@
     }
 
     _categoryIcon(catId) {
-      const cat = (this.c.categories || []).find(c => c.id === catId);
+      const cat = ((this.cl || this.c).categories || []).find(c => c.id === catId);
       return (cat && cat.icon) || null;
     }
 
@@ -747,8 +752,67 @@
       }`;
     }
 
+    /**
+     * Build the language-localised view of the config for the resolved viewer
+     * language. The author writes the FAQ once in the source language (English);
+     * config.i18n holds per-language overlays produced on save by the editor's
+     * "Translate for my audience" step (api/faq-translate). Here we lay the
+     * overlay for the viewer's language over the source, field by field, so a
+     * missing translation always falls back to the original — never a blank.
+     *
+     * Only CONTENT is overlaid (heading, CTA, category labels, question + answer
+     * text, the optional search-string overrides). Layout, colours, ids, flags
+     * and behaviour come straight from the source config untouched.
+     */
+    _localizedConfig(lang) {
+      const c = this.c;
+      if (!lang || lang === 'en' || !c.i18n || typeof c.i18n !== 'object') return c;
+      const tr = c.i18n[lang];
+      if (!tr || typeof tr !== 'object') return c;
+
+      // Use the translated value only when it is a non-empty string, else keep source.
+      const pick = (base, over) => (typeof over === 'string' && over.trim()) ? over : base;
+      const out = Object.assign({}, c);
+
+      if (tr.heading && typeof tr.heading === 'object') {
+        out.heading = Object.assign({}, c.heading, {
+          title: pick(c.heading && c.heading.title, tr.heading.title),
+          subtitle: pick(c.heading && c.heading.subtitle, tr.heading.subtitle)
+        });
+      }
+      if (tr.cta && typeof tr.cta === 'object') {
+        out.cta = Object.assign({}, c.cta, {
+          heading: pick(c.cta && c.cta.heading, tr.cta.heading),
+          description: pick(c.cta && c.cta.description, tr.cta.description),
+          buttonText: pick(c.cta && c.cta.buttonText, tr.cta.buttonText)
+        });
+      }
+      if (tr.search && typeof tr.search === 'object') {
+        out.search = Object.assign({}, c.search, {
+          placeholder: pick(c.search && c.search.placeholder, tr.search.placeholder),
+          noResultsText: pick(c.search && c.search.noResultsText, tr.search.noResultsText)
+        });
+      }
+      if (tr.categories && typeof tr.categories === 'object' && Array.isArray(c.categories)) {
+        out.categories = c.categories.map((cat) =>
+          Object.assign({}, cat, { label: pick(cat.label, tr.categories[cat.id]) }));
+      }
+      if (tr.questions && typeof tr.questions === 'object' && Array.isArray(c.questions)) {
+        out.questions = c.questions.map((q) => {
+          const tq = tr.questions[q.id];
+          if (!tq || typeof tq !== 'object') return q;
+          return Object.assign({}, q, {
+            question: pick(q.question, tq.question),
+            answer: pick(q.answer, tq.answer)
+          });
+        });
+      }
+      return out;
+    }
+
     _render() {
       this.t = makeT(this.c);   // resolve viewer language + UI strings each render
+      this.cl = this._localizedConfig(this.t.lang);   // content localised for that language
       const html = '<style>' + STYLES + this._customStyles() + '</style>' + this._renderRoot();
       this.shadow.innerHTML = html;
       this._bind();
@@ -766,7 +830,7 @@
     }
 
     _renderHeader() {
-      const h = this.c.heading;
+      const h = this.cl.heading;
       if (!h || !h.show) return '';
       const title = h.title ? `<h2 class="tgf-title">${esc(h.title)}</h2>` : '';
       const sub = h.subtitle ? `<p class="tgf-subtitle">${esc(h.subtitle)}</p>` : '';
@@ -789,7 +853,7 @@
     }
 
     _renderSearch() {
-      const placeholder = (this.c.search && this.c.search.placeholder) || this.t('searchPlaceholder');
+      const placeholder = (this.cl.search && this.cl.search.placeholder) || this.t('searchPlaceholder');
       const hasValue = this.state.query ? ' has-value' : '';
       return `<div class="tgf-search${hasValue}">
         <span class="tgf-search-icon">${icon('search', 18)}</span>
@@ -814,7 +878,7 @@
     }
 
     _renderTabs() {
-      const cats = this.c.categories || [];
+      const cats = this.cl.categories || [];
       if (!cats.length) return '';
       const visible = this._visibleQuestions();
       return `<div class="tgf-tabs" role="tablist">
@@ -828,7 +892,7 @@
     }
 
     _renderChips() {
-      const cats = this.c.categories || [];
+      const cats = this.cl.categories || [];
       if (!cats.length) return '';
       return `<div class="tgf-chips" role="group" aria-label="Filter by category">
         <button class="tgf-chip" type="button" data-cat="all" aria-pressed="${this.state.activeCategory === 'all'}">All</button>
@@ -844,7 +908,7 @@
       const listClass = this.c.layout === 'two-column' ? 'tgf-list tgf-list--two-col' : 'tgf-list';
 
       if (!qs.length) {
-        const noResultsText = (this.c.search && this.c.search.noResultsText) || this.t('noResults');
+        const noResultsText = (this.cl.search && this.cl.search.noResultsText) || this.t('noResults');
         return `<div class="tgf-empty">
           <div class="tgf-empty-icon">${icon('search', 28)}</div>
           <p class="tgf-empty-title">${esc(noResultsText)}</p>
@@ -903,7 +967,7 @@
     }
 
     _renderCTA() {
-      const cta = this.c.cta;
+      const cta = this.cl.cta;
       if (!cta || !cta.enabled) return '';
       const styleClass = cta.style === 'strip' ? ' tgf-cta--strip' :
                          cta.style === 'gradient' ? ' tgf-cta--gradient' : '';
