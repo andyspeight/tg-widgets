@@ -21,7 +21,43 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (field labels, the swap control, the rates status and
+  // updated prefix, and the load-failure message). Currency names and codes are
+  // a data list and stay in their canonical form. The author-set heading and
+  // note are content, translated separately, but fall back to a localised
+  // default when the author leaves them blank. English is the source + fallback.
+  const MESSAGES = {
+    en: { heading: 'Currency converter', amount: 'Amount', from: 'From', to: 'To', fromCurrency: 'From currency', toCurrency: 'To currency', swap: 'Swap currencies', liveRates: 'Live rates', indicativeRates: 'Indicative rates', ratesPrefix: 'ECB', note: 'Rates are indicative and for guidance only.', loadError: 'Unable to load Currency widget' },
+    fr: { heading: 'Convertisseur de devises', amount: 'Montant', from: 'De', to: 'À', fromCurrency: 'Devise de départ', toCurrency: 'Devise d’arrivée', swap: 'Inverser les devises', liveRates: 'Taux en direct', indicativeRates: 'Taux indicatifs', ratesPrefix: 'BCE', note: 'Les taux sont indicatifs et fournis à titre informatif uniquement.', loadError: 'Impossible de charger le convertisseur de devises' },
+    de: { heading: 'Währungsrechner', amount: 'Betrag', from: 'Von', to: 'Nach', fromCurrency: 'Ausgangswährung', toCurrency: 'Zielwährung', swap: 'Währungen tauschen', liveRates: 'Live-Kurse', indicativeRates: 'Indikative Kurse', ratesPrefix: 'EZB', note: 'Die Kurse sind indikativ und dienen nur zur Orientierung.', loadError: 'Währungsrechner konnte nicht geladen werden' },
+    es: { heading: 'Conversor de divisas', amount: 'Cantidad', from: 'De', to: 'A', fromCurrency: 'Divisa de origen', toCurrency: 'Divisa de destino', swap: 'Intercambiar monedas', liveRates: 'Tipos en directo', indicativeRates: 'Tipos indicativos', ratesPrefix: 'BCE', note: 'Los tipos son indicativos y solo a título orientativo.', loadError: 'No se pudo cargar el conversor de divisas' },
+    it: { heading: 'Convertitore di valuta', amount: 'Importo', from: 'Da', to: 'A', fromCurrency: 'Valuta di partenza', toCurrency: 'Valuta di arrivo', swap: 'Inverti valute', liveRates: 'Tassi in tempo reale', indicativeRates: 'Tassi indicativi', ratesPrefix: 'BCE', note: 'I tassi sono indicativi e forniti solo a scopo informativo.', loadError: 'Impossibile caricare il convertitore di valuta' },
+    ro: { heading: 'Convertor valutar', amount: 'Sumă', from: 'Din', to: 'În', fromCurrency: 'Valuta de plecare', toCurrency: 'Valuta de destinație', swap: 'Inversează valutele', liveRates: 'Cursuri în direct', indicativeRates: 'Cursuri indicative', ratesPrefix: 'BCE', note: 'Cursurile sunt indicative și au doar scop informativ.', loadError: 'Convertorul valutar nu a putut fi încărcat' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveBase(path) {
     if (typeof window === 'undefined') return path;
@@ -74,6 +110,7 @@
     constructor(el, config) {
       this.el = el;
       this.cfg = this._defaults(config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.rates = null;       // { base, rates:{...}, date }
       this.live = false;
       this.amount = Number(this.cfg.defaultAmount) || 0;
@@ -96,7 +133,7 @@
       const from = ensure(c.defaultFrom, base);
       const to = ensure(c.defaultTo, list.find(x => x !== from) || list[0]);
       return {
-        heading: typeof c.heading === 'string' ? c.heading : 'Currency converter',
+        heading: typeof c.heading === 'string' ? c.heading : '',
         baseCurrency: base,
         currencies: list,
         defaultFrom: from,
@@ -110,7 +147,7 @@
         showUpdated: c.showUpdated !== false,
         theme: c.theme === 'dark' ? 'dark' : 'light',
         fontFamily: typeof c.fontFamily === 'string' && c.fontFamily ? c.fontFamily : 'Inter, system-ui, sans-serif',
-        note: typeof c.note === 'string' ? c.note : 'Rates are indicative and for guidance only.',
+        note: typeof c.note === 'string' ? c.note : '',
         previewMode: !!c.previewMode,
         fxData: (c.fxData && typeof c.fxData === 'object') ? c.fxData : null,
       };
@@ -131,6 +168,10 @@
       const border = dark ? '#1E293B' : '#E2E8F0';
       const opts = c.currencies.map(code => ({ from: this._opt(this.from, code), to: this._opt(this.to, code) }));
       const card = c.layout === 'card';
+      const t = this.t;
+      // Author content with a localised default when left blank.
+      const heading = c.heading || t('heading');
+      const note = c.note || t('note');
       this.shadow.innerHTML = `
         <style>
           :host { all: initial; }
@@ -157,22 +198,22 @@
           @media (max-width: 380px){ .tgc-row { grid-template-columns:1fr; } .tgc-swap { width:100%; transform:rotate(90deg); margin:2px 0; } }
         </style>
         <div class="tgc">
-          ${c.heading ? `<h3 class="tgc-head">${esc(c.heading)}</h3>` : ''}
+          ${heading ? `<h3 class="tgc-head">${esc(heading)}</h3>` : ''}
           <div class="tgc-amtrow">
-            <label for="amt">Amount</label>
-            <input class="tgc-amt" id="amt" type="number" inputmode="decimal" min="0" step="any" value="${esc(this.amount)}" aria-label="Amount">
+            <label for="amt">${esc(t('amount'))}</label>
+            <input class="tgc-amt" id="amt" type="number" inputmode="decimal" min="0" step="any" value="${esc(this.amount)}" aria-label="${esc(t('amount'))}">
           </div>
           <div class="tgc-row">
-            <div class="tgc-cell"><label for="from">From</label><select class="tgc-sel" id="from" aria-label="From currency">${opts.map(o => o.from).join('')}</select></div>
-            <button class="tgc-swap" id="swap" title="Swap currencies" aria-label="Swap currencies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
-            <div class="tgc-cell"><label for="to">To</label><select class="tgc-sel" id="to" aria-label="To currency">${opts.map(o => o.to).join('')}</select></div>
+            <div class="tgc-cell"><label for="from">${esc(t('from'))}</label><select class="tgc-sel" id="from" aria-label="${esc(t('fromCurrency'))}">${opts.map(o => o.from).join('')}</select></div>
+            <button class="tgc-swap" id="swap" title="${esc(t('swap'))}" aria-label="${esc(t('swap'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+            <div class="tgc-cell"><label for="to">${esc(t('to'))}</label><select class="tgc-sel" id="to" aria-label="${esc(t('toCurrency'))}">${opts.map(o => o.to).join('')}</select></div>
           </div>
           <div class="tgc-out">
             <div class="tgc-result" id="result">—</div>
             ${c.showRate ? '<div class="tgc-rate" id="rate"></div>' : ''}
             ${(c.showUpdated) ? '<div class="tgc-foot"><span class="tgc-live" id="live"></span><span id="updated"></span></div>' : ''}
           </div>
-          ${c.note ? `<div class="tgc-note">${esc(c.note)}</div>` : ''}
+          ${note ? `<div class="tgc-note">${esc(note)}</div>` : ''}
         </div>`;
       this._wire();
     }
@@ -249,15 +290,15 @@
       if (rateEl) rateEl.textContent = '1 ' + this.from + ' = ' + this._fmt(factor, this.to);
       if (liveEl) {
         const stale = !this.live;
-        liveEl.innerHTML = '<span class="tgc-dot' + (stale ? ' is-stale' : '') + '"></span>' + (stale ? 'Indicative rates' : 'Live rates');
+        liveEl.innerHTML = '<span class="tgc-dot' + (stale ? ' is-stale' : '') + '"></span>' + esc(stale ? this.t('indicativeRates') : this.t('liveRates'));
       }
       if (updEl) {
         const d = this.rates && this.rates.date;
-        updEl.textContent = this.live && d ? ('ECB ' + d) : '';
+        updEl.textContent = this.live && d ? (this.t('ratesPrefix') + ' ' + d) : '';
       }
     }
 
-    update(config) { this.cfg = this._defaults(config || {}); this.from = this.cfg.defaultFrom; this.to = this.cfg.defaultTo; this.amount = Number(this.cfg.defaultAmount) || 0; this._build(); this._loadRates(); }
+    update(config) { this.cfg = this._defaults(config || {}); this.t = makeT(this.cfg); this.from = this.cfg.defaultFrom; this.to = this.cfg.defaultTo; this.amount = Number(this.cfg.defaultAmount) || 0; this._build(); this._loadRates(); }
 
     destroy() { try { this.shadow.innerHTML = ''; } catch (e) {} try { this.el.removeAttribute('data-tg-initialised'); } catch (e) {} }
   }
@@ -282,7 +323,10 @@
         console.warn('[TG Currency] Container has neither data-tg-id nor data-tg-config');
       } catch (err) {
         console.error('[TG Currency] Failed to initialise:', err);
-        try { el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">Unable to load Currency widget</p>'; } catch (e) {}
+        try {
+          const msg = makeT(null)('loadError');
+          el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">' + esc(msg) + '</p>';
+        } catch (e) {}
       }
     }
   }

@@ -68,7 +68,43 @@
 
   const API_BASE = resolveApiOrigin();
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (nav controls, badges, rating wording, the localised
+  // default heading/subheading and the "Direct" source label). Brand/platform
+  // names (Google, Facebook, Trustpilot, TripAdvisor) and all testimonial
+  // content (quotes, author names, roles, locations) are author content and
+  // are never translated. English is the source + fallback.
+  const MESSAGES = {
+    en: { readMore: 'Read more', readLess: 'Read less', verified: 'Verified', previous: 'Previous', next: 'Next', accept: 'Accept', direct: 'Direct', outOf5: 'out of 5', ratedOutOf5: 'Rated {n} out of 5', testimonials: 'Testimonials', lovedByTravellers: 'Loved by travellers', all: 'All', filterByTripType: 'Filter by trip type', testimonialSlide: 'Testimonial slide', showTestimonial: 'Show testimonial {n}', testimonialNavigation: 'Testimonial navigation', goToTestimonial: 'Go to testimonial {n}', testimonialsRegion: 'Testimonials', testimonialSelector: 'Testimonial selector', playVideoFrom: 'Play video testimonial from {author}', videoTestimonial: 'Video testimonial', noTestimonials: 'No testimonials to show', noTestimonialsHint: 'Testimonials will appear here once added.' },
+    fr: { readMore: 'Lire la suite', readLess: 'Réduire', verified: 'Vérifié', previous: 'Précédent', next: 'Suivant', accept: 'Accepter', direct: 'Direct', outOf5: 'sur 5', ratedOutOf5: 'Noté {n} sur 5', testimonials: 'Témoignages', lovedByTravellers: 'Apprécié des voyageurs', all: 'Tous', filterByTripType: 'Filtrer par type de voyage', testimonialSlide: 'Diapositive de témoignage', showTestimonial: 'Afficher le témoignage {n}', testimonialNavigation: 'Navigation des témoignages', goToTestimonial: 'Aller au témoignage {n}', testimonialsRegion: 'Témoignages', testimonialSelector: 'Sélecteur de témoignages', playVideoFrom: 'Lire la vidéo témoignage de {author}', videoTestimonial: 'Vidéo témoignage', noTestimonials: 'Aucun témoignage à afficher', noTestimonialsHint: 'Les témoignages apparaîtront ici une fois ajoutés.' },
+    de: { readMore: 'Mehr lesen', readLess: 'Weniger anzeigen', verified: 'Verifiziert', previous: 'Zurück', next: 'Weiter', accept: 'Akzeptieren', direct: 'Direkt', outOf5: 'von 5', ratedOutOf5: 'Bewertet mit {n} von 5', testimonials: 'Erfahrungsberichte', lovedByTravellers: 'Von Reisenden geliebt', all: 'Alle', filterByTripType: 'Nach Reiseart filtern', testimonialSlide: 'Erfahrungsbericht-Folie', showTestimonial: 'Erfahrungsbericht {n} anzeigen', testimonialNavigation: 'Navigation der Erfahrungsberichte', goToTestimonial: 'Zu Erfahrungsbericht {n}', testimonialsRegion: 'Erfahrungsberichte', testimonialSelector: 'Auswahl der Erfahrungsberichte', playVideoFrom: 'Video-Erfahrungsbericht von {author} abspielen', videoTestimonial: 'Video-Erfahrungsbericht', noTestimonials: 'Keine Erfahrungsberichte vorhanden', noTestimonialsHint: 'Erfahrungsberichte erscheinen hier, sobald sie hinzugefügt wurden.' },
+    es: { readMore: 'Leer más', readLess: 'Mostrar menos', verified: 'Verificado', previous: 'Anterior', next: 'Siguiente', accept: 'Aceptar', direct: 'Directo', outOf5: 'de 5', ratedOutOf5: 'Valorado con {n} de 5', testimonials: 'Testimonios', lovedByTravellers: 'Querido por los viajeros', all: 'Todos', filterByTripType: 'Filtrar por tipo de viaje', testimonialSlide: 'Diapositiva de testimonio', showTestimonial: 'Mostrar testimonio {n}', testimonialNavigation: 'Navegación de testimonios', goToTestimonial: 'Ir al testimonio {n}', testimonialsRegion: 'Testimonios', testimonialSelector: 'Selector de testimonios', playVideoFrom: 'Reproducir vídeo testimonio de {author}', videoTestimonial: 'Vídeo testimonio', noTestimonials: 'No hay testimonios para mostrar', noTestimonialsHint: 'Los testimonios aparecerán aquí una vez añadidos.' },
+    it: { readMore: 'Leggi tutto', readLess: 'Mostra meno', verified: 'Verificato', previous: 'Precedente', next: 'Successivo', accept: 'Accetta', direct: 'Diretto', outOf5: 'su 5', ratedOutOf5: 'Valutato {n} su 5', testimonials: 'Testimonianze', lovedByTravellers: 'Amato dai viaggiatori', all: 'Tutti', filterByTripType: 'Filtra per tipo di viaggio', testimonialSlide: 'Diapositiva della testimonianza', showTestimonial: 'Mostra testimonianza {n}', testimonialNavigation: 'Navigazione delle testimonianze', goToTestimonial: 'Vai alla testimonianza {n}', testimonialsRegion: 'Testimonianze', testimonialSelector: 'Selettore delle testimonianze', playVideoFrom: 'Riproduci video testimonianza di {author}', videoTestimonial: 'Video testimonianza', noTestimonials: 'Nessuna testimonianza da mostrare', noTestimonialsHint: 'Le testimonianze appariranno qui una volta aggiunte.' },
+    ro: { readMore: 'Citește mai mult', readLess: 'Arată mai puțin', verified: 'Verificat', previous: 'Anterior', next: 'Următorul', accept: 'Acceptă', direct: 'Direct', outOf5: 'din 5', ratedOutOf5: 'Evaluat cu {n} din 5', testimonials: 'Testimoniale', lovedByTravellers: 'Iubit de călători', all: 'Toate', filterByTripType: 'Filtrează după tipul de călătorie', testimonialSlide: 'Diapozitiv testimonial', showTestimonial: 'Afișează testimonialul {n}', testimonialNavigation: 'Navigare testimoniale', goToTestimonial: 'Mergi la testimonialul {n}', testimonialsRegion: 'Testimoniale', testimonialSelector: 'Selector testimoniale', playVideoFrom: 'Redă videoclipul testimonial de la {author}', videoTestimonial: 'Videoclip testimonial', noTestimonials: 'Niciun testimonial de afișat', noTestimonialsHint: 'Testimonialele vor apărea aici după ce sunt adăugate.' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // Canonical source labels (strict allowlist — anything else becomes 'Direct')
   const KNOWN_SOURCES = ['Google', 'Facebook', 'Trustpilot', 'TripAdvisor', 'Direct'];
@@ -215,8 +251,8 @@
     layout: 'grid',        // featured | grid | masonry | carousel | marquee | spotlight
     header: {
       show: true,
-      eyebrow: 'Testimonials',
-      title: 'Loved by travellers',
+      eyebrow: '',   // empty = localised default ('Testimonials')
+      title: '',     // empty = localised default ('Loved by travellers')
       subtitle: 'Real stories from customers who took the trip of a lifetime.',
     },
     testimonials: [],
@@ -662,6 +698,7 @@
     constructor(host, config) {
       this.host = host;
       this.c = this._mergeConfig(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.state = {
         activeFilter: 'all',    // trip-type chip filter
         featuredIndex: 0,        // featured layout rotation
@@ -752,8 +789,8 @@
       let body;
       if (!list.length) {
         body = `<div class="tgt-empty">
-          <p class="tgt-empty-title">No testimonials to show</p>
-          <p class="tgt-empty-text">Testimonials will appear here once added.</p>
+          <p class="tgt-empty-title">${esc(this.t('noTestimonials'))}</p>
+          <p class="tgt-empty-text">${esc(this.t('noTestimonialsHint'))}</p>
         </div>`;
       } else {
         switch (this.c.layout) {
@@ -804,9 +841,11 @@
     _renderHeader() {
       if (!this.c.header || !this.c.header.show) return '';
       const h = this.c.header;
+      const eyebrow = h.eyebrow || this.t('testimonials');
+      const title = h.title || this.t('lovedByTravellers');
       const parts = [];
-      if (h.eyebrow) parts.push(`<div class="tgt-eyebrow">${esc(h.eyebrow)}</div>`);
-      if (h.title)   parts.push(`<h2 class="tgt-title">${esc(h.title)}</h2>`);
+      if (eyebrow) parts.push(`<div class="tgt-eyebrow">${esc(eyebrow)}</div>`);
+      if (title)   parts.push(`<h2 class="tgt-title">${esc(title)}</h2>`);
       if (h.subtitle) parts.push(`<p class="tgt-subtitle">${esc(h.subtitle)}</p>`);
       if (!parts.length) return '';
       return `<div class="tgt-header">${parts.join('')}</div>`;
@@ -814,9 +853,9 @@
 
     _renderFilters() {
       const types = this._tripTypes();
-      const all = `<button class="tgt-chip" type="button" data-filter="all" aria-pressed="${this.state.activeFilter === 'all'}">All</button>`;
+      const all = `<button class="tgt-chip" type="button" data-filter="all" aria-pressed="${this.state.activeFilter === 'all'}">${esc(this.t('all'))}</button>`;
       const chips = types.map(t => `<button class="tgt-chip" type="button" data-filter="${esc(t)}" aria-pressed="${this.state.activeFilter === t}">${esc(t)}</button>`).join('');
-      return `<div class="tgt-filters" role="group" aria-label="Filter by trip type">${all}${chips}</div>`;
+      return `<div class="tgt-filters" role="group" aria-label="${esc(this.t('filterByTripType'))}">${all}${chips}</div>`;
     }
 
     // ── Shared card renderer ─────────────────────
@@ -840,7 +879,7 @@
 
     _ratingHTML(n) {
       const full = Math.round(Number(n) || 0);
-      let out = '<div class="tgt-rating" aria-label="Rated ' + full + ' out of 5">';
+      let out = '<div class="tgt-rating" aria-label="' + esc(this.t('ratedOutOf5', { n: full })) + '">';
       for (let i = 1; i <= 5; i++) {
         out += i <= full ? icon('star', 16) : `<span class="tgt-rating-empty">${icon('star', 16)}</span>`;
       }
@@ -870,13 +909,19 @@
       return `<div class="tgt-avatar" style="background:${avatarColor(t.author)};width:${s}px;height:${s}px">${esc(initials(t.author))}</div>`;
     }
 
+    // Display label for a source. Brand/platform names stay verbatim; only the
+    // generic 'Direct' source is localised.
+    _sourceLabel(source) {
+      return source === 'Direct' ? this.t('direct') : source;
+    }
+
     _footerHTML(t) {
       const avatar = this._avatarHTML(t);
       const nameBits = [esc(t.author)];
-      const verifiedTick = t.verified ? `<span class="tgt-verified-tick" title="Verified">${icon('verified', 14)}</span>` : '';
+      const verifiedTick = t.verified ? `<span class="tgt-verified-tick" title="${esc(this.t('verified'))}">${icon('verified', 14)}</span>` : '';
       const metaBits = [t.role, t.location].filter(Boolean).map(esc);
       const sourceEl = (this.c.showSource && t.source)
-        ? `<span class="tgt-source" title="${esc(t.source)}">${sourceLogo(t.source, 14)}</span>`
+        ? `<span class="tgt-source" title="${esc(this._sourceLabel(t.source))}">${sourceLogo(t.source, 14)}</span>`
         : '';
       return `<div class="tgt-footer">
         ${avatar}
@@ -892,7 +937,7 @@
       const v = parseVideo(t.video);
       if (!v.type) return '';
       const hasPoster = t.avatar && isSafeUrl(t.avatar);
-      return `<div class="tgt-video" data-video="${esc(t.video)}" role="button" tabindex="0" aria-label="Play video testimonial from ${esc(t.author)}">
+      return `<div class="tgt-video" data-video="${esc(t.video)}" role="button" tabindex="0" aria-label="${esc(this.t('playVideoFrom', { author: t.author }))}">
         ${hasPoster
           ? `<img class="tgt-video-poster" src="${esc(t.avatar)}" alt="">`
           : `<div class="tgt-video-placeholder"></div>`
@@ -912,15 +957,15 @@
       const t = list[i];
       const ratingEl = (this.c.showRating && t.rating > 0) ? `<div class="tgt-featured-rating">${this._ratingHTML(t.rating).replace('class="tgt-rating"', 'class="tgt-rating" style="font-size:18px"')}</div>` : '';
       const dotsEl = list.length > 1
-        ? `<div class="tgt-featured-dots" role="tablist" aria-label="Testimonial slide">
-            ${list.map((_, idx) => `<button class="tgt-featured-dot" type="button" role="tab" data-slide="${idx}" aria-current="${idx === i}" aria-label="Show testimonial ${idx + 1}"></button>`).join('')}
+        ? `<div class="tgt-featured-dots" role="tablist" aria-label="${esc(this.t('testimonialSlide'))}">
+            ${list.map((_, idx) => `<button class="tgt-featured-dot" type="button" role="tab" data-slide="${idx}" aria-current="${idx === i}" aria-label="${esc(this.t('showTestimonial', { n: idx + 1 }))}"></button>`).join('')}
           </div>`
         : '';
       const badges = this._badgesHTML(t);
       const verifiedTick = t.verified ? `<span class="tgt-verified-tick">${icon('verified', 16)}</span>` : '';
       const metaBits = [t.role, t.location, t.travelDate].filter(Boolean).map(esc);
       const sourceEl = (this.c.showSource && t.source)
-        ? `<span class="tgt-source">${sourceLogo(t.source, 14)} ${esc(t.source)}</span>`
+        ? `<span class="tgt-source">${sourceLogo(t.source, 14)} ${esc(this._sourceLabel(t.source))}</span>`
         : '';
 
       return `<section class="tgt-featured" aria-roledescription="testimonial">
@@ -953,17 +998,17 @@
       const showArrows = !!this.c.carousel.arrows && list.length > 1;
       const showDots = !!this.c.carousel.dots && list.length > 1;
       const dotsEl = showDots
-        ? `<div class="tgt-carousel-dots" role="tablist" aria-label="Testimonial navigation">
-            ${list.map((_, i) => `<button class="tgt-carousel-dot" type="button" role="tab" data-slide="${i}" aria-current="${i === 0}" aria-label="Go to testimonial ${i + 1}"></button>`).join('')}
+        ? `<div class="tgt-carousel-dots" role="tablist" aria-label="${esc(this.t('testimonialNavigation'))}">
+            ${list.map((_, i) => `<button class="tgt-carousel-dot" type="button" role="tab" data-slide="${i}" aria-current="${i === 0}" aria-label="${esc(this.t('goToTestimonial', { n: i + 1 }))}"></button>`).join('')}
           </div>`
         : '';
-      const prevBtn = showArrows ? `<button class="tgt-carousel-btn" type="button" data-dir="prev" aria-label="Previous">${icon('chevL', 18)}</button>` : '';
-      const nextBtn = showArrows ? `<button class="tgt-carousel-btn" type="button" data-dir="next" aria-label="Next">${icon('chevR', 18)}</button>` : '';
+      const prevBtn = showArrows ? `<button class="tgt-carousel-btn" type="button" data-dir="prev" aria-label="${esc(this.t('previous'))}">${icon('chevL', 18)}</button>` : '';
+      const nextBtn = showArrows ? `<button class="tgt-carousel-btn" type="button" data-dir="next" aria-label="${esc(this.t('next'))}">${icon('chevR', 18)}</button>` : '';
       const navEl = (showArrows || showDots)
         ? `<div class="tgt-carousel-nav">${prevBtn}${dotsEl}${nextBtn}</div>`
         : '';
       return `<div class="tgt-carousel">
-        <div class="tgt-carousel-track" role="region" aria-label="Testimonials">${cards}</div>
+        <div class="tgt-carousel-track" role="region" aria-label="${esc(this.t('testimonialsRegion'))}">${cards}</div>
         ${navEl}
       </div>`;
     }
@@ -997,7 +1042,7 @@
       const active = list[i];
       const main = `<div class="tgt-spotlight-main">${this._card(active)}</div>`;
       const thumbs = list.length > 1
-        ? `<div class="tgt-spotlight-thumbs" role="tablist" aria-label="Testimonial selector">
+        ? `<div class="tgt-spotlight-thumbs" role="tablist" aria-label="${esc(this.t('testimonialSelector'))}">
             ${list.map((t, idx) => `<button class="tgt-spotlight-thumb" type="button" role="tab" data-slide="${idx}" aria-pressed="${idx === i}">
               ${this._avatarHTML(t, 32)}
               <span class="tgt-spotlight-thumb-text">${esc(t.author)}</span>
@@ -1124,7 +1169,7 @@
       const v = parseVideo(url);
       if (!v.type) return;
       if (v.type === 'iframe') {
-        box.innerHTML = `<iframe src="${esc(v.src)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="Video testimonial"></iframe>`;
+        box.innerHTML = `<iframe src="${esc(v.src)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${esc(this.t('videoTestimonial'))}"></iframe>`;
       } else {
         box.innerHTML = `<video src="${esc(v.src)}" controls autoplay playsinline></video>`;
       }

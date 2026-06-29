@@ -18,7 +18,43 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.3.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (navigation controls and structural aria-labels).
+  // Slide titles, subtitles, body copy and CTA labels are author content and
+  // are never translated here. English is the source + fallback. The default
+  // region aria-label ('Destination carousel') is exposed via the localised
+  // default pattern below so an author-set ariaLabel always wins.
+  const MESSAGES = {
+    en: { prevSlide: 'Previous slide', nextSlide: 'Next slide', goToSlide: 'Go to slide {n}', chooseSlide: 'Choose slide', pause: 'Pause', play: 'Play', carouselLabel: 'Destination carousel' },
+    fr: { prevSlide: 'Diapositive précédente', nextSlide: 'Diapositive suivante', goToSlide: 'Aller à la diapositive {n}', chooseSlide: 'Choisir une diapositive', pause: 'Pause', play: 'Lecture', carouselLabel: 'Carrousel de destinations' },
+    de: { prevSlide: 'Vorherige Folie', nextSlide: 'Nächste Folie', goToSlide: 'Zu Folie {n}', chooseSlide: 'Folie auswählen', pause: 'Pause', play: 'Wiedergabe', carouselLabel: 'Reiseziel-Karussell' },
+    es: { prevSlide: 'Diapositiva anterior', nextSlide: 'Diapositiva siguiente', goToSlide: 'Ir a la diapositiva {n}', chooseSlide: 'Elegir diapositiva', pause: 'Pausar', play: 'Reproducir', carouselLabel: 'Carrusel de destinos' },
+    it: { prevSlide: 'Diapositiva precedente', nextSlide: 'Diapositiva successiva', goToSlide: 'Vai alla diapositiva {n}', chooseSlide: 'Scegli diapositiva', pause: 'Pausa', play: 'Riproduci', carouselLabel: 'Carosello di destinazioni' },
+    ro: { prevSlide: 'Diapozitivul anterior', nextSlide: 'Diapozitivul următor', goToSlide: 'Mergi la diapozitivul {n}', chooseSlide: 'Alege diapozitivul', pause: 'Pauză', play: 'Redare', carouselLabel: 'Carusel de destinații' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -122,7 +158,7 @@
     pauseOnHover: true,
     showArrows: true,
     showDots: true,
-    ariaLabel: 'Destination carousel',
+    ariaLabel: '',             // empty = localised default ('Destination carousel')
     fontFamily: '',           // legacy alias for headingFont (shell font picker)
   };
 
@@ -447,6 +483,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = this._sanitise(Object.assign({}, DEFAULTS, config || {}));
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.shadowRoot || (container.attachShadow ? container.attachShadow({ mode: 'open' }) : container);
       this.queue = [];
       this.timer = null;
@@ -512,17 +549,17 @@
       const multi = c.slides.length > 1;
 
       let html = '<style>' + styles(c) + '</style>';
-      html += '<section class="tgcar' + (c.autoplay && multi ? '' : ' no-autoplay') + '" aria-roledescription="carousel" aria-label="' + esc(c.ariaLabel) + '">';
+      html += '<section class="tgcar' + (c.autoplay && multi ? '' : ' no-autoplay') + '" aria-roledescription="carousel" aria-label="' + esc(c.ariaLabel || this.t('carouselLabel')) + '">';
       if (c.showDeco) html += PALM;
       if (c.showIntro && c.intro) html += '<p class="tgcar-intro">' + esc(c.intro) + '</p>';
       html += '<div class="tgcar-stage"></div>';
       if (multi && (c.showDots || c.showArrows)) {
         html += '<div class="tgcar-controls">';
-        html += c.showDots ? '<div class="tgcar-dots" role="tablist" aria-label="Choose slide"></div>' : '<span></span>';
+        html += c.showDots ? '<div class="tgcar-dots" role="tablist" aria-label="' + esc(this.t('chooseSlide')) + '"></div>' : '<span></span>';
         if (c.showArrows) {
           html += '<div class="tgcar-arrows">'
-            + '<button type="button" class="tgcar-arrow tgcar-prev" aria-label="Previous slide">' + ARROW_L + '</button>'
-            + '<button type="button" class="tgcar-arrow tgcar-next" aria-label="Next slide">' + ARROW_R + '</button>'
+            + '<button type="button" class="tgcar-arrow tgcar-prev" aria-label="' + esc(this.t('prevSlide')) + '">' + ARROW_L + '</button>'
+            + '<button type="button" class="tgcar-arrow tgcar-next" aria-label="' + esc(this.t('nextSlide')) + '">' + ARROW_R + '</button>'
             + '</div>';
         }
         html += '</div>';
@@ -561,7 +598,7 @@
           dot.className = 'tgcar-dot';
           dot.type = 'button';
           dot.setAttribute('role', 'tab');
-          dot.setAttribute('aria-label', 'Go to ' + s.title);
+          dot.setAttribute('aria-label', self.t('goToSlide', { n: i + 1 }));
           dot.innerHTML = '<span class="tgcar-dot-fill"></span>';
           self._on(dot, 'click', function () {
             const steps = self.queue.findIndex(function (x) { return +x.dataset.slide === i; });
@@ -721,6 +758,7 @@
     update(newConfig) {
       this.destroy(true);
       this.cfg = this._sanitise(Object.assign({}, this.cfg, newConfig || {}));
+      this.t = makeT(this.cfg);
       ensureFont(this.cfg.headingFont);
       ensureFont(this.cfg.subtitleFont);
       this._build();
