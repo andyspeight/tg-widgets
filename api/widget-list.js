@@ -2,24 +2,32 @@
  * Widget List API (Hardened)
  * GET /api/widget-list → AUTHENTICATED.
  *
- * Scope model (v2 — fixes the regression where staff stopped seeing their own
- * widgets after the active-client rewrite):
+ * Scope model (v3 — strict per-client scoping):
  *
- *   A user ALWAYS sees widgets they created under their own email. On top of
- *   that, when a session is inside a client workspace, the active client's
- *   widgets are included too:
+ *   When a session is inside a client workspace (active client), the list shows
+ *   ONLY that client's widgets. You never see your own personal widgets, or any
+ *   other client's, while working inside a client account:
  *       ClientRecordId === activeClientId            (authoritative, Stage 5+)
- *     OR LOWER(ClientEmail) === active client email   (legacy client widgets)
+ *     OR AND(ClientRecordId is blank,                 (legacy client widgets,
+ *            LOWER(ClientEmail) === active client email)  pre-ClientRecordId only)
  *
- *   Own-email rule: LOWER(ClientEmail) === the logged-in user's email. This is
- *   the original behaviour and is what guarantees no regression — your own
- *   widgets always show in your home workspace.
+ *   ClientRecordId is the AUTHORITATIVE owner — the same rule canModifyWidget()
+ *   uses to gate edits. ClientEmail is ONLY a legacy fallback for widgets that
+ *   predate ClientRecordId (blank owner), so it is never applied to a widget that
+ *   already has a ClientRecordId — two clients that share a contact/creator email
+ *   must never leak into each other's lists.
  *
- *   Clean impersonation: when a staff member is ACTING AS a client they are not
- *   a member of (activeClientId not in their Users.client[] links), the
- *   own-email rule is dropped, so they see ONLY that client's widgets, not their
- *   own. When the active client IS one of their linked clients (their home),
- *   the own-email rule applies as normal.
+ *   Shared-email guard: the ClientEmail fallback assumes an email identifies one
+ *   client. A user who owns several accounts set up under the same login email
+ *   (e.g. a Travelgenix staff member) breaks that assumption, so when the active
+ *   client's email is shared with another account the user belongs to, the email
+ *   fallback is dropped and we scope by ClientRecordId alone.
+ *
+ *   No own-email rule: previous versions also OR-ed in the logged-in user's own
+ *   email so staff saw their personal widgets. That smeared a staff member's
+ *   widgets across every client they work in, so it has been removed. A genuine
+ *   single-account client still sees their own legacy widgets — they are matched
+ *   as the ACTIVE CLIENT's widgets (their own email is the active client email).
  *
  *   Fallback: if the session carries no usable clientId (e.g. an old legacy
  *   Bearer token), we scope purely by the user's own email — the pre-existing
@@ -94,6 +102,37 @@ async function activeEmailIsShared(activeClientId, activeClientEmail, linkedClie
   return emails.some((e) => e && e === activeClientEmail);
 }
 
+// Pure Airtable filterByFormula builder for the scope. Kept side-effect-free and
+// exported for tests — this is the security-critical isolation logic.
+//   activeClientId    REC_ID_RE-validated id of the client being worked in, or null
+//   activeClientEmail the active client's login email (lowercased), or ''
+//   emailShared       true when that email is also a login for another account the
+//                     user belongs to (so it can't identify one client)
+//   userEmailLower    the logged-in user's own email, lowercased
+function buildScopeFormula({ activeClientId, activeClientEmail, emailShared, userEmailLower }) {
+  const LEGACY = `{ClientRecordId}=''`;
+  const clauses = new Set();
+
+  if (activeClientId) {
+    // Authoritative owner.
+    clauses.add(`{ClientRecordId}='${activeClientId}'`); // activeClientId is REC_ID_RE-validated
+    // The active client's own LEGACY (blank ClientRecordId) widgets, matched by
+    // their login email — but only when that email is unambiguous. The logged-in
+    // user's own widgets are deliberately NOT added: inside a client account only
+    // that client's widgets appear.
+    if (activeClientEmail && !emailShared) {
+      clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(activeClientEmail)}')`);
+    }
+  } else {
+    // No usable client context (e.g. an old legacy Bearer token): scope purely by
+    // the user's own email — the original pre-ClientRecordId behaviour.
+    clauses.add(`LOWER({ClientEmail})='${sanitiseForFormula(userEmailLower)}'`);
+  }
+
+  const parts = Array.from(clauses);
+  return parts.length === 1 ? parts[0] : `OR(${parts.join(', ')})`;
+}
+
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
@@ -127,50 +166,13 @@ export default async function handler(req, res) {
       ? user.clientId
       : null;
 
-  // Build the scope clauses (deduped before OR-ing).
-  //
-  // ClientRecordId is the AUTHORITATIVE owner. ClientEmail matching is a LEGACY
-  // fallback for widgets created before ClientRecordId existed, so it is only
-  // ever applied to widgets whose ClientRecordId is blank. A widget that HAS a
-  // ClientRecordId belongs to that client and must NEVER be matched by a
-  // colliding ClientEmail — otherwise two clients who share a contact/creator
-  // email (e.g. a staff member who set up both) leak into each other's lists.
-  // This mirrors canModifyWidget(), which already gates EDITS this way; the list
-  // must not surface widgets the edit gate would deny.
-  const LEGACY = `{ClientRecordId}=''`;
-  const clauses = new Set();
+  // Resolve the async inputs, then build the formula with the pure helper below.
+  const activeClientEmail = activeClientId ? await resolveActiveClientEmail(activeClientId) : '';
+  const emailShared = activeClientId
+    ? await activeEmailIsShared(activeClientId, activeClientEmail, linkedClientIds)
+    : false;
 
-  if (activeClientId) {
-    // Impersonating = the active client is NOT one of your linked clients.
-    const isHome = linkedClientIds.includes(activeClientId);
-
-    // ClientRecordId is always authoritative.
-    clauses.add(`{ClientRecordId}='${activeClientId}'`); // activeClientId is REC_ID_RE-validated
-
-    // The ClientEmail legacy fallback is only safe when the active client's login
-    // email uniquely identifies it. If another account the user belongs to shares
-    // that email, the email can't tell the accounts apart, so we drop it and scope
-    // by ClientRecordId alone — each account then shows only its own widgets.
-    const activeClientEmail = await resolveActiveClientEmail(activeClientId);
-    const emailShared = await activeEmailIsShared(activeClientId, activeClientEmail, linkedClientIds);
-    if (!emailShared) {
-      if (activeClientEmail) {
-        clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(activeClientEmail)}')`);
-      }
-      // Own legacy widgets show in your home workspace, but NOT when cleanly
-      // impersonating a client you are not a member of.
-      if (isHome) {
-        clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(userEmailLower)}')`);
-      }
-    }
-  } else {
-    // No usable client context (e.g. an old legacy Bearer token): scope purely by
-    // the user's own email — the original pre-ClientRecordId behaviour.
-    clauses.add(`LOWER({ClientEmail})='${sanitiseForFormula(userEmailLower)}'`);
-  }
-
-  const parts = Array.from(clauses);
-  const formula = parts.length === 1 ? parts[0] : `OR(${parts.join(', ')})`;
+  const formula = buildScopeFormula({ activeClientId, activeClientEmail, emailShared, userEmailLower });
 
   try {
     const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`
@@ -199,3 +201,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Service temporarily unavailable' });
   }
 }
+
+// Test surface — pure scope-formula logic, no network.
+export const _test = { buildScopeFormula };
