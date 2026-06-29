@@ -89,6 +89,21 @@
     'Early bird', 'Spa', 'Kids club', 'Swim-up rooms'
   ];
 
+  // ── Audience languages (content layer, Layer 2) ───────────────────────────
+  // English is always the source. The agent toggles the languages their
+  // customers read, then "Translate" sends the offer's author content to
+  // /api/offer-translate and stores the per-language overlay on offer.i18n.
+  // Keep this list in step with api/offer-translate.js LANG_NAMES and the
+  // offer widgets' MESSAGES. Prices, ATOL/ABTA wording, place and brand names
+  // are never translated (enforced server-side; the UI copy says so too).
+  const AUDIENCE_LANGS = [
+    { code: 'fr', label: 'French' },
+    { code: 'de', label: 'German' },
+    { code: 'es', label: 'Spanish' },
+    { code: 'it', label: 'Italian' },
+    { code: 'ro', label: 'Romanian' }
+  ];
+
   // Canned AI draft used for previews/demos when cfg.aiMock is true. The real
   // build posts the description to cfg.aiEndpoint and uses its response.
   const DEMO_DRAFT = {
@@ -169,6 +184,46 @@
     .ob-ai-status.ok { color: var(--tgo-success); }
     .ob-ai-status.err { color: var(--tgo-error); }
     .ob-ai-status.busy { color: var(--tgo-ai); }
+
+    /* Audience languages */
+    .ob-langs { display: flex; flex-direction: column; gap: 2px; }
+    .ob-lang-row {
+      display: flex; align-items: center; gap: 12px; padding: 9px 0;
+      border-bottom: 1px solid var(--tgo-border);
+    }
+    .ob-lang-row:last-child { border-bottom: 0; }
+    .ob-lang-main { flex: 1; min-width: 0; }
+    .ob-lang-name { font-size: 14px; font-weight: 600; }
+    .ob-lang-status { font-size: 12px; margin-top: 2px; }
+    .ob-lang-status.muted { color: var(--tgo-muted); }
+    .ob-lang-status.ok { color: var(--tgo-success); }
+    .ob-lang-status.warn { color: var(--tgo-warn); }
+    .ob-lang-toggle {
+      width: 40px; height: 22px; position: relative; flex-shrink: 0;
+      background: var(--tgo-border); border: 0; border-radius: 999px; padding: 0; cursor: pointer;
+      transition: background .15s ease;
+    }
+    .ob-lang-toggle::before {
+      content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+      border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,0.2);
+      transition: transform .2s ease;
+    }
+    .ob-lang-toggle[aria-pressed="true"] { background: var(--tgo-accent); }
+    .ob-lang-toggle[aria-pressed="true"]::before { transform: translateX(18px); }
+    .ob-lang-actions { margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .ob-lang-go {
+      background: var(--tgo-accent); color: #fff; border: 0; border-radius: 10px;
+      padding: 10px 18px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .ob-lang-go:hover { background: var(--tgo-accent-hover); }
+    .ob-lang-go:disabled { opacity: 0.55; cursor: default; }
+    .ob-lang-go-status { font-size: 13px; font-weight: 600; }
+    .ob-lang-go-status.busy { color: var(--tgo-accent-hover); }
+    .ob-lang-go-status.ok { color: var(--tgo-success); }
+    .ob-lang-go-status.err { color: var(--tgo-error); }
+    .ob-lang-spin { animation: ob-spin 1s linear infinite; display: inline-block; }
+    @keyframes ob-spin { to { transform: rotate(360deg); } }
 
     /* Fieldsets */
     .ob-fs {
@@ -312,6 +367,11 @@
       this.shadow = container.attachShadow({ mode: 'open' });
       this.root = null;
       this._images = []; // offer photo URLs, first is the cover
+      // Content-layer translation state (Layer 2). Seeded from an existing offer
+      // in _prefillOffer; carried into the save payload by _collect.
+      this._i18n = {};                 // { fr: { fields, includes, tags }, … }
+      this._i18nMeta = {};             // { fr: { sig, at } } — staleness tracking
+      this._audienceLanguages = [];    // chosen language codes
       this._render();
     }
 
@@ -365,6 +425,10 @@
         showMap: bool(c.showMap, true),
         showDescription: bool(c.showDescription, true),
         showEnquiry: bool(c.showEnquiry, true),
+        // Audience languages / translate. On by default; the host can hide it
+        // (e.g. the unauthenticated demo, where translate would 401).
+        showLanguages: bool(c.showLanguages, true),
+        translateEndpoint: c.translateEndpoint || '/api/offer-translate',
 
         // Required fields
         requireTitle: bool(c.requireTitle, true),
@@ -405,6 +469,16 @@
       });
       this._images = (Array.isArray(offer.images) ? offer.images : []).map(safePhotoUrl).filter(Boolean);
       this._renderThumbs();
+
+      // Content-layer translation state. i18n holds the per-language overlays;
+      // i18nMeta records the source signature each was translated from so a
+      // later source edit can be flagged "Source changed — re-translate".
+      this._i18n = (offer.i18n && typeof offer.i18n === 'object' && !Array.isArray(offer.i18n)) ? offer.i18n : {};
+      this._i18nMeta = (offer.i18nMeta && typeof offer.i18nMeta === 'object' && !Array.isArray(offer.i18nMeta)) ? offer.i18nMeta : {};
+      this._audienceLanguages = Array.isArray(offer.audienceLanguages)
+        ? offer.audienceLanguages.filter((c) => AUDIENCE_LANGS.some((l) => l.code === c))
+        : [];
+      this._renderLanguages();
     }
 
     _render() {
@@ -553,6 +627,12 @@
           + '</div></div>';
       }
 
+      if (cfg.showLanguages) {
+        html += '<div class="ob-fs ob-lang-fs"><h4>12 · Audience languages</h4>'
+          + '<p class="hint">Write the offer once in English, then translate it for the languages your customers read. Each visitor sees their own language automatically, falling back to English for anything not yet translated. Prices, ATOL and ABTA wording, place and brand names are never translated.</p>'
+          + '<div class="ob-lang-body"></div></div>';
+      }
+
       html += '<div class="ob-actions">'
         + '<button type="button" class="ob-btn ob-reset">Clear form</button>'
         + '<button type="button" class="ob-btn primary ob-submit">' + esc(cfg.submitLabel) + '</button>'
@@ -568,6 +648,7 @@
       this.shadow.appendChild(this.root);
       this._prefill();
       this._bind();
+      this._renderLanguages();
       if (this.cfg.offer) this._prefillOffer(this.cfg.offer);
       this._renderThumbs();
     }
@@ -596,7 +677,12 @@
       if (aiGo) aiGo.addEventListener('click', () => this._runAI());
 
       root.querySelector('.ob-submit').addEventListener('click', () => this._submit());
-      root.querySelector('.ob-reset').addEventListener('click', () => { this._images = []; this._render(); });
+      root.querySelector('.ob-reset').addEventListener('click', () => {
+        // A cleared form has no source content, so its translations no longer
+        // apply — drop them too rather than leaving orphaned overlays.
+        this._images = []; this._i18n = {}; this._i18nMeta = {}; this._audienceLanguages = [];
+        this._render();
+      });
 
       this._bindPhotos();
     }
@@ -784,6 +870,162 @@
       });
     }
 
+    // ── Audience languages / translate (content layer) ───────────────────────
+    // The translatable content pulled straight off the CURRENT form, in the
+    // exact shape /api/offer-translate expects. Empty keys are omitted so the
+    // signature and the request stay tight. Operational fields (prices, dates,
+    // map, video, enquiry, references) are deliberately never sent.
+    _collectTranslatable() {
+      const root = this.root;
+      const get = (k) => {
+        const el = root.querySelector('[data-key="' + k + '"]');
+        return el ? (el.value || '').trim() : '';
+      };
+      const fields = {};
+      ['title', 'teaser', 'description', 'urgency', 'avail'].forEach((k) => {
+        const v = get(k);
+        if (v) fields[k] = v;
+      });
+      const includes = [];
+      root.querySelectorAll('.ob-incl input:checked').forEach((i) => includes.push(i.dataset.incl));
+      const tags = [];
+      root.querySelectorAll('.ob-toggle.on').forEach((c) => tags.push(c.dataset.tag));
+      const out = {};
+      if (Object.keys(fields).length) out.fields = fields;
+      if (includes.length) out.includes = includes;
+      if (tags.length) out.tags = tags;
+      return out;
+    }
+
+    // A stable signature of the translatable source. When this changes after a
+    // language was translated, that language is flagged stale.
+    _contentSignature() {
+      try { return JSON.stringify(this._collectTranslatable()); } catch (e) { return ''; }
+    }
+
+    // Status of one audience language relative to the current source content.
+    _langStatus(code) {
+      const tr = this._i18n && this._i18n[code];
+      const has = tr && typeof tr === 'object' && Object.keys(tr).length;
+      if (!has) return { state: 'none', label: 'Not translated', tone: 'muted' };
+      const sig = (this._i18nMeta && this._i18nMeta[code] && this._i18nMeta[code].sig) || '';
+      if (sig && sig !== this._contentSignature()) {
+        return { state: 'stale', label: 'Source changed — re-translate', tone: 'warn' };
+      }
+      return { state: 'ok', label: 'Up to date', tone: 'ok' };
+    }
+
+    // Render (or re-render) the Languages section body: a toggle per language
+    // with its live status, plus the Translate button. Re-rendered on toggle,
+    // after a translation, and whenever the form is prefilled.
+    _renderLanguages() {
+      if (!this.root) return;
+      const body = this.root.querySelector('.ob-lang-body');
+      if (!body) return;
+      const selected = this._audienceLanguages || [];
+      const anyTranslated = AUDIENCE_LANGS.some((l) =>
+        this._i18n && this._i18n[l.code] && Object.keys(this._i18n[l.code]).length);
+
+      const rows = AUDIENCE_LANGS.map((l) => {
+        const on = selected.indexOf(l.code) !== -1;
+        const st = this._langStatus(l.code);
+        return '<div class="ob-lang-row">'
+          + '<div class="ob-lang-main"><div class="ob-lang-name">' + esc(l.label) + '</div>'
+          + '<div class="ob-lang-status ' + st.tone + '">' + esc(st.label) + '</div></div>'
+          + '<button type="button" class="ob-lang-toggle" role="switch" data-lang-toggle="'
+          + l.code + '" aria-pressed="' + (on ? 'true' : 'false') + '" aria-label="' + esc(l.label) + '"></button>'
+          + '</div>';
+      }).join('');
+
+      body.innerHTML = '<div class="ob-langs">' + rows + '</div>'
+        + '<div class="ob-lang-actions">'
+        + '<button type="button" class="ob-lang-go"' + (selected.length ? '' : ' disabled') + '>'
+        + '✨ ' + (anyTranslated ? 'Update translations' : 'Translate for my audience')
+        + '</button>'
+        + '<span class="ob-lang-go-status"></span>'
+        + '</div>';
+
+      body.querySelectorAll('[data-lang-toggle]').forEach((b) =>
+        b.addEventListener('click', () => {
+          const code = b.dataset.langToggle;
+          const i = this._audienceLanguages.indexOf(code);
+          if (i === -1) this._audienceLanguages.push(code); else this._audienceLanguages.splice(i, 1);
+          this._renderLanguages();
+        }));
+      const go = body.querySelector('.ob-lang-go');
+      if (go) go.addEventListener('click', () => this._translateAudience());
+    }
+
+    async _translateAudience() {
+      const body = this.root.querySelector('.ob-lang-body');
+      const btn = body && body.querySelector('.ob-lang-go');
+      const status = body && body.querySelector('.ob-lang-go-status');
+      const setStatus = (msg, tone) => { if (status) { status.className = 'ob-lang-go-status' + (tone ? ' ' + tone : ''); status.textContent = msg || ''; } };
+
+      const targets = (this._audienceLanguages || []).slice();
+      if (!targets.length) { setStatus('Pick at least one language first.', 'err'); return; }
+
+      const content = this._collectTranslatable();
+      if (!content.fields && !content.includes && !content.tags) {
+        setStatus('Add some offer content to translate first.', 'err');
+        return;
+      }
+
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="ob-lang-spin">✨</span> Translating…'; }
+      setStatus('Translating, usually 10 to 20 seconds…', 'busy');
+
+      try {
+        // Same auth the builder uses for /api/saved-offers: the session cookie,
+        // sent with credentials:'include'. requireAuth accepts the tg_session
+        // cookie, so no Bearer header is needed.
+        const res = await fetch(this.cfg.translateEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ content: content, targetLangs: targets, sourceLang: 'en' })
+        });
+
+        if (res.status === 401) { setStatus('Your session has expired. Please sign in again, then retry.', 'err'); return; }
+        if (res.status === 429) { setStatus('Too many translations just now. Please wait a moment and try again.', 'err'); return; }
+        if (!res.ok) {
+          let msg = 'Translation failed. Please try again.';
+          try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (e) {}
+          throw new Error(msg);
+        }
+
+        const data = await res.json();
+        const i18n = data && data.i18n;
+        if (!i18n || typeof i18n !== 'object' || !Object.keys(i18n).length) {
+          throw new Error('No translations came back. Please try again.');
+        }
+
+        // Merge per language and stamp each with the source signature it was
+        // translated from, so a later edit flags it stale.
+        const sig = this._contentSignature();
+        if (!this._i18n || typeof this._i18n !== 'object') this._i18n = {};
+        if (!this._i18nMeta || typeof this._i18nMeta !== 'object') this._i18nMeta = {};
+        const done = [];
+        Object.keys(i18n).forEach((code) => {
+          this._i18n[code] = i18n[code];
+          this._i18nMeta[code] = { sig: sig, at: new Date().toISOString() };
+          const l = AUDIENCE_LANGS.find((x) => x.code === code);
+          done.push(l ? l.label : code);
+        });
+
+        this._renderLanguages();
+        const st2 = this.root.querySelector('.ob-lang-go-status');
+        if (st2) { st2.className = 'ob-lang-go-status ok'; st2.textContent = 'Translated into ' + done.join(', ') + '. Save the offer to keep it.'; }
+      } catch (err) {
+        setStatus((err && err.message) || 'Translation failed.', 'err');
+        if (btn) { btn.disabled = false; }
+        this._renderLanguages();
+        const st3 = this.root.querySelector('.ob-lang-go-status');
+        if (st3) { st3.className = 'ob-lang-go-status err'; st3.textContent = (err && err.message) || 'Translation failed.'; }
+        // eslint-disable-next-line no-console
+        console.warn('[TGOfferBuilder] translate failed:', err && err.message);
+      }
+    }
+
     // ── Collect, validate, submit ────────────────────────────────────────────
     _collect() {
       const root = this.root;
@@ -796,6 +1038,16 @@
       root.querySelectorAll('.ob-toggle.on').forEach((c) => offer.tags.push(c.dataset.tag));
       const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
       if (imgs.length) offer.images = imgs;
+
+      // Content-layer translations. i18n is whitelisted by /api/saved-offers and
+      // read by the card/page at render time. audienceLanguages and i18nMeta ride
+      // along so the chosen set and staleness signatures round-trip while editing
+      // (the save API only persists i18n, which is all the public render needs).
+      if (this._audienceLanguages && this._audienceLanguages.length) {
+        offer.audienceLanguages = this._audienceLanguages.slice();
+      }
+      if (this._i18n && Object.keys(this._i18n).length) offer.i18n = this._i18n;
+      if (this._i18nMeta && Object.keys(this._i18nMeta).length) offer.i18nMeta = this._i18nMeta;
       return offer;
     }
 

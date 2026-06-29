@@ -135,6 +135,31 @@ function cleanOffer(raw) {
     if (Object.keys(entry).length) { i18n[lang] = entry; langN++; }
   }
 
+  // Editor round-trip aids. audienceLanguages = which language toggles the
+  // author chose; i18nMeta = the source signature each translation was made
+  // from (staleness tracking). Neither is read by the public card/page, but
+  // persisting them lets the builder reopen a saved offer with its language
+  // choices and "source changed" flags intact. Both bounded to the same 12
+  // two-letter codes as i18n.
+  const audienceLanguages = [];
+  const rawAL = Array.isArray(s.audienceLanguages) ? s.audienceLanguages : [];
+  for (const c of rawAL) {
+    if (audienceLanguages.length >= 12) break;
+    if (typeof c === 'string' && /^[a-z]{2}$/.test(c) && audienceLanguages.indexOf(c) === -1) audienceLanguages.push(c);
+  }
+  const i18nMeta = {};
+  const rawMeta = (s.i18nMeta && typeof s.i18nMeta === 'object' && !Array.isArray(s.i18nMeta)) ? s.i18nMeta : {};
+  let metaN = 0;
+  for (const lang of Object.keys(rawMeta)) {
+    if (metaN >= 12) break;
+    if (!/^[a-z]{2}$/.test(lang)) continue;
+    const m = (rawMeta[lang] && typeof rawMeta[lang] === 'object' && !Array.isArray(rawMeta[lang])) ? rawMeta[lang] : {};
+    const entry = {};
+    if (typeof m.sig === 'string' && m.sig) entry.sig = m.sig.slice(0, 4000);
+    if (typeof m.at === 'string' && m.at) entry.at = m.at.slice(0, 40);
+    if (Object.keys(entry).length) { i18nMeta[lang] = entry; metaN++; }
+  }
+
   const out = {
     currency: cap(s.currency, 8),
     fields: fields,
@@ -143,6 +168,8 @@ function cleanOffer(raw) {
     images: strArr(s.images, 20, 1000)
   };
   if (Object.keys(i18n).length) out.i18n = i18n;
+  if (audienceLanguages.length) out.audienceLanguages = audienceLanguages;
+  if (Object.keys(i18nMeta).length) out.i18nMeta = i18nMeta;
   return out;
 }
 
