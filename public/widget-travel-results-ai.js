@@ -23,7 +23,329 @@
   window.TravelgenixWidgets = window.TravelgenixWidgets || {};
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.10.0';
+  var VERSION = '1.10.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (header, controls, fact/board labels, fallback states).
+  // The AI's generated conversational replies arrive already in the viewer's
+  // language at runtime and are never translated here. Supplier/result data
+  // (names, prices, dates) and ATOL/ABTA wording are also left untouched.
+  // English is the source + fallback.
+  var MESSAGES = {
+    en: {
+      title: 'AI trip assistant', send: 'Send', viewLabel: 'Show these in results',
+      placeholder: 'Ask: more central, with a pool, cheaper…',
+      launcherText: 'Ask AI to pick your best matches',
+      openAssistant: 'Open the AI trip assistant', minimise: 'Minimise assistant',
+      quickRefinements: 'Quick refinements', askAria: 'Ask the assistant for something different',
+      waiting: 'Waiting for results…',
+      // launcher / states
+      searching: 'Searching…', thinking: 'Thinking…', noResults: 'No results',
+      noClearMatches: 'No clear matches for that — try a different ask.',
+      couldNotAnalyse: 'Could not analyse these results right now.',
+      analysing: 'Analysing {count} results…',
+      reading: 'Reading {count} results, finding the best for your trip…',
+      nothingToCompare: 'Nothing to compare yet.',
+      noPropertiesBody: 'I can’t see any properties to compare for this search — try adjusting your filters or dates.',
+      noPropertiesAnnounce: 'No properties to compare.',
+      oneOption: 'One option for this search.', yourOption: 'Your option',
+      justOne: 'There’s just one option for this search:',
+      resultsReady: 'Results ready — ask me anything.',
+      suggested: 'Suggested {count} option{plural}.',
+      suggestionsReady: '{count} suggestion{plural} ready.',
+      closestMatches: 'Here are the closest matches I can see:',
+      optionsMatch: 'Here are some options that match that:',
+      someOptions: 'Here are some options.',
+      introLine: 'From {count} properties, here are the ones worth a look for {place}:',
+      yourSearch: 'your search',
+      showInResults: 'Show in results', showInResultsAria: 'Show {name} in the results',
+      // categories (fallback rule-based picks + default refine category)
+      catBestValue: 'Best value', catTopReviewed: 'Top reviewed', catMostCentral: 'Most central',
+      catBestRefundable: 'Best refundable', catPremiumPick: 'Premium pick', catSuggested: 'Suggested',
+      // facts
+      factTotal: '{price} total', factNightly: '{price}/night', factStar: '{star}-star',
+      factTa: 'TA {rating} ({reviews})', factKm: '{km} km from centre', factRefundable: 'refundable',
+      // rule reason fragments
+      reasonTotal: '{total} total ({nightly}/night)', reasonRefundable: 'refundable rate available',
+      reasonTa: 'TripAdvisor {rating} from {reviews} reviews', reasonKm: '{km}km from the search centre',
+      reasonStar: '{star}-star',
+      // safe reasons
+      safeRefHighRated: 'A higher-rated option with a refundable rate.',
+      safeBetterReviewed: 'Among the better-reviewed options on your list.',
+      safeWellPlaced: 'A well-placed option close to the centre.',
+      safeRefundable: 'A solid pick that comes with a refundable rate.',
+      safeWellRated: 'Well rated by previous guests for a trip like yours.',
+      safeComfortable: 'A comfortable {star}-star choice for your dates.',
+      safeSolid: 'A solid match for your search.',
+      // warnings
+      warnSharedBathroom: 'shared bathroom', warnDormitory: 'dormitory', warnNonRefundable: 'non-refundable only',
+      // flight
+      flDirect: 'Direct', flConnecting: 'Connecting',
+      // chips
+      chipBeach: 'Near the beach', chipPool: 'With a pool', chipSpa: 'With a spa',
+      chipFamilies: 'Good for families', chipCheaper: 'Cheaper', chipTopRated: 'Top rated', chipCentral: 'More central',
+      // board basis (display labels for supplier board codes)
+      boardRoomOnly: 'Room only', boardBreakfast: 'Breakfast', boardHalfBoard: 'Half board',
+      boardFullBoard: 'Full board', boardAllInclusive: 'All-inclusive', boardSelfCatering: 'Self-catering'
+    },
+    fr: {
+      title: 'Assistant de voyage IA', send: 'Envoyer', viewLabel: 'Afficher dans les résultats',
+      placeholder: 'Posez-moi une question…',
+      launcherText: 'Demandez à l’IA de choisir vos meilleures options',
+      openAssistant: 'Ouvrir l’assistant de voyage IA', minimise: 'Réduire l’assistant',
+      quickRefinements: 'Affinages rapides', askAria: 'Demander autre chose à l’assistant',
+      waiting: 'En attente des résultats…',
+      searching: 'Recherche…', thinking: 'Réflexion…', noResults: 'Aucun résultat',
+      noClearMatches: 'Aucune correspondance claire — essayez une autre demande.',
+      couldNotAnalyse: 'Impossible d’analyser ces résultats pour le moment.',
+      analysing: 'Analyse de {count} résultats…',
+      reading: 'Lecture de {count} résultats, recherche des meilleurs pour votre voyage…',
+      nothingToCompare: 'Rien à comparer pour l’instant.',
+      noPropertiesBody: 'Je ne vois aucun hébergement à comparer pour cette recherche — ajustez vos filtres ou vos dates.',
+      noPropertiesAnnounce: 'Aucun hébergement à comparer.',
+      oneOption: 'Une option pour cette recherche.', yourOption: 'Votre option',
+      justOne: 'Il n’y a qu’une seule option pour cette recherche :',
+      resultsReady: 'Résultats prêts — posez-moi vos questions.',
+      suggested: '{count} option{plural} suggérée{plural}.',
+      suggestionsReady: '{count} suggestion{plural} prête{plural}.',
+      closestMatches: 'Voici les options les plus proches que je vois :',
+      optionsMatch: 'Voici des options qui correspondent :',
+      someOptions: 'Voici quelques options.',
+      introLine: 'Parmi {count} hébergements, voici ceux qui valent le coup pour {place} :',
+      yourSearch: 'votre recherche',
+      showInResults: 'Afficher dans les résultats', showInResultsAria: 'Afficher {name} dans les résultats',
+      catBestValue: 'Meilleur rapport qualité-prix', catTopReviewed: 'Mieux noté', catMostCentral: 'Plus central',
+      catBestRefundable: 'Meilleur remboursable', catPremiumPick: 'Choix premium', catSuggested: 'Suggéré',
+      factTotal: '{price} au total', factNightly: '{price}/nuit', factStar: '{star} étoiles',
+      factTa: 'TA {rating} ({reviews})', factKm: 'à {km} km du centre', factRefundable: 'remboursable',
+      reasonTotal: '{total} au total ({nightly}/nuit)', reasonRefundable: 'tarif remboursable disponible',
+      reasonTa: 'TripAdvisor {rating} sur {reviews} avis', reasonKm: 'à {km} km du centre de recherche',
+      reasonStar: '{star} étoiles',
+      safeRefHighRated: 'Une option mieux notée avec un tarif remboursable.',
+      safeBetterReviewed: 'Parmi les options les mieux notées de votre liste.',
+      safeWellPlaced: 'Une option bien située, proche du centre.',
+      safeRefundable: 'Un bon choix avec un tarif remboursable.',
+      safeWellRated: 'Bien noté par les clients précédents pour un voyage comme le vôtre.',
+      safeComfortable: 'Un choix {star} étoiles confortable pour vos dates.',
+      safeSolid: 'Une option solide pour votre recherche.',
+      warnSharedBathroom: 'salle de bain partagée', warnDormitory: 'dortoir', warnNonRefundable: 'non remboursable uniquement',
+      flDirect: 'Direct', flConnecting: 'Avec correspondance',
+      chipBeach: 'Près de la plage', chipPool: 'Avec piscine', chipSpa: 'Avec spa',
+      chipFamilies: 'Idéal en famille', chipCheaper: 'Moins cher', chipTopRated: 'Mieux noté', chipCentral: 'Plus central',
+      boardRoomOnly: 'Sans repas', boardBreakfast: 'Petit-déjeuner', boardHalfBoard: 'Demi-pension',
+      boardFullBoard: 'Pension complète', boardAllInclusive: 'Tout compris', boardSelfCatering: 'Logement avec cuisine'
+    },
+    de: {
+      title: 'KI-Reiseassistent', send: 'Senden', viewLabel: 'In den Ergebnissen anzeigen',
+      placeholder: 'Fragen Sie mich etwas…',
+      launcherText: 'Lassen Sie die KI Ihre besten Treffer auswählen',
+      openAssistant: 'KI-Reiseassistent öffnen', minimise: 'Assistent minimieren',
+      quickRefinements: 'Schnelle Verfeinerungen', askAria: 'Den Assistenten nach etwas anderem fragen',
+      waiting: 'Warten auf Ergebnisse…',
+      searching: 'Suche läuft…', thinking: 'Denkt nach…', noResults: 'Keine Ergebnisse',
+      noClearMatches: 'Keine klaren Treffer dafür — versuchen Sie eine andere Anfrage.',
+      couldNotAnalyse: 'Diese Ergebnisse können derzeit nicht analysiert werden.',
+      analysing: '{count} Ergebnisse werden analysiert…',
+      reading: '{count} Ergebnisse werden gelesen, die besten für Ihre Reise werden gesucht…',
+      nothingToCompare: 'Noch nichts zu vergleichen.',
+      noPropertiesBody: 'Ich sehe keine Unterkünfte zum Vergleichen für diese Suche — passen Sie Ihre Filter oder Daten an.',
+      noPropertiesAnnounce: 'Keine Unterkünfte zum Vergleichen.',
+      oneOption: 'Eine Option für diese Suche.', yourOption: 'Ihre Option',
+      justOne: 'Es gibt nur eine Option für diese Suche:',
+      resultsReady: 'Ergebnisse bereit — fragen Sie mich alles.',
+      suggested: '{count} Optionen vorgeschlagen.',
+      suggestionsReady: '{count} Vorschläge bereit.',
+      closestMatches: 'Hier sind die nächstgelegenen Treffer, die ich sehe:',
+      optionsMatch: 'Hier sind einige passende Optionen:',
+      someOptions: 'Hier sind einige Optionen.',
+      introLine: 'Aus {count} Unterkünften sind hier die sehenswerten für {place}:',
+      yourSearch: 'Ihre Suche',
+      showInResults: 'In den Ergebnissen anzeigen', showInResultsAria: '{name} in den Ergebnissen anzeigen',
+      catBestValue: 'Bestes Preis-Leistungs-Verhältnis', catTopReviewed: 'Bestbewertet', catMostCentral: 'Am zentralsten',
+      catBestRefundable: 'Beste erstattbare Option', catPremiumPick: 'Premium-Wahl', catSuggested: 'Vorgeschlagen',
+      factTotal: '{price} gesamt', factNightly: '{price}/Nacht', factStar: '{star} Sterne',
+      factTa: 'TA {rating} ({reviews})', factKm: '{km} km vom Zentrum', factRefundable: 'erstattbar',
+      reasonTotal: '{total} gesamt ({nightly}/Nacht)', reasonRefundable: 'erstattbarer Tarif verfügbar',
+      reasonTa: 'TripAdvisor {rating} aus {reviews} Bewertungen', reasonKm: '{km} km vom Suchzentrum',
+      reasonStar: '{star} Sterne',
+      safeRefHighRated: 'Eine besser bewertete Option mit erstattbarem Tarif.',
+      safeBetterReviewed: 'Unter den besser bewerteten Optionen Ihrer Liste.',
+      safeWellPlaced: 'Eine gut gelegene Option nahe dem Zentrum.',
+      safeRefundable: 'Eine solide Wahl mit erstattbarem Tarif.',
+      safeWellRated: 'Von früheren Gästen für eine Reise wie Ihre gut bewertet.',
+      safeComfortable: 'Eine komfortable {star}-Sterne-Wahl für Ihre Daten.',
+      safeSolid: 'Eine solide Wahl für Ihre Suche.',
+      warnSharedBathroom: 'Gemeinschaftsbad', warnDormitory: 'Schlafsaal', warnNonRefundable: 'nur nicht erstattbar',
+      flDirect: 'Direkt', flConnecting: 'Mit Umstieg',
+      chipBeach: 'In Strandnähe', chipPool: 'Mit Pool', chipSpa: 'Mit Spa',
+      chipFamilies: 'Gut für Familien', chipCheaper: 'Günstiger', chipTopRated: 'Bestbewertet', chipCentral: 'Zentraler',
+      boardRoomOnly: 'Nur Übernachtung', boardBreakfast: 'Frühstück', boardHalfBoard: 'Halbpension',
+      boardFullBoard: 'Vollpension', boardAllInclusive: 'All-Inclusive', boardSelfCatering: 'Selbstverpflegung'
+    },
+    es: {
+      title: 'Asistente de viaje con IA', send: 'Enviar', viewLabel: 'Mostrar en los resultados',
+      placeholder: 'Pregúntame lo que quieras…',
+      launcherText: 'Pide a la IA que elija tus mejores opciones',
+      openAssistant: 'Abrir el asistente de viaje con IA', minimise: 'Minimizar el asistente',
+      quickRefinements: 'Ajustes rápidos', askAria: 'Pedir otra cosa al asistente',
+      waiting: 'Esperando resultados…',
+      searching: 'Buscando…', thinking: 'Pensando…', noResults: 'Sin resultados',
+      noClearMatches: 'No hay coincidencias claras — prueba otra petición.',
+      couldNotAnalyse: 'No se han podido analizar estos resultados ahora mismo.',
+      analysing: 'Analizando {count} resultados…',
+      reading: 'Leyendo {count} resultados, buscando los mejores para tu viaje…',
+      nothingToCompare: 'Nada que comparar todavía.',
+      noPropertiesBody: 'No veo alojamientos que comparar para esta búsqueda — ajusta tus filtros o fechas.',
+      noPropertiesAnnounce: 'No hay alojamientos que comparar.',
+      oneOption: 'Una opción para esta búsqueda.', yourOption: 'Tu opción',
+      justOne: 'Solo hay una opción para esta búsqueda:',
+      resultsReady: 'Resultados listos — pregúntame lo que quieras.',
+      suggested: '{count} opción{plural} sugerida{plural}.',
+      suggestionsReady: '{count} sugerencia{plural} lista{plural}.',
+      closestMatches: 'Estas son las opciones más parecidas que veo:',
+      optionsMatch: 'Estas son algunas opciones que coinciden:',
+      someOptions: 'Estas son algunas opciones.',
+      introLine: 'De {count} alojamientos, estos son los que merecen un vistazo para {place}:',
+      yourSearch: 'tu búsqueda',
+      showInResults: 'Mostrar en los resultados', showInResultsAria: 'Mostrar {name} en los resultados',
+      catBestValue: 'Mejor relación calidad-precio', catTopReviewed: 'Mejor valorado', catMostCentral: 'Más céntrico',
+      catBestRefundable: 'Mejor reembolsable', catPremiumPick: 'Opción premium', catSuggested: 'Sugerido',
+      factTotal: '{price} total', factNightly: '{price}/noche', factStar: '{star} estrellas',
+      factTa: 'TA {rating} ({reviews})', factKm: 'a {km} km del centro', factRefundable: 'reembolsable',
+      reasonTotal: '{total} total ({nightly}/noche)', reasonRefundable: 'tarifa reembolsable disponible',
+      reasonTa: 'TripAdvisor {rating} de {reviews} opiniones', reasonKm: 'a {km} km del centro de búsqueda',
+      reasonStar: '{star} estrellas',
+      safeRefHighRated: 'Una opción mejor valorada con tarifa reembolsable.',
+      safeBetterReviewed: 'Entre las opciones mejor valoradas de tu lista.',
+      safeWellPlaced: 'Una opción bien situada, cerca del centro.',
+      safeRefundable: 'Una buena elección con tarifa reembolsable.',
+      safeWellRated: 'Bien valorada por huéspedes anteriores para un viaje como el tuyo.',
+      safeComfortable: 'Una cómoda opción de {star} estrellas para tus fechas.',
+      safeSolid: 'Una buena opción para tu búsqueda.',
+      warnSharedBathroom: 'baño compartido', warnDormitory: 'dormitorio compartido', warnNonRefundable: 'solo no reembolsable',
+      flDirect: 'Directo', flConnecting: 'Con escala',
+      chipBeach: 'Cerca de la playa', chipPool: 'Con piscina', chipSpa: 'Con spa',
+      chipFamilies: 'Ideal para familias', chipCheaper: 'Más barato', chipTopRated: 'Mejor valorado', chipCentral: 'Más céntrico',
+      boardRoomOnly: 'Solo alojamiento', boardBreakfast: 'Desayuno', boardHalfBoard: 'Media pensión',
+      boardFullBoard: 'Pensión completa', boardAllInclusive: 'Todo incluido', boardSelfCatering: 'Apartamento con cocina'
+    },
+    it: {
+      title: 'Assistente di viaggio IA', send: 'Invia', viewLabel: 'Mostra nei risultati',
+      placeholder: 'Chiedimi qualsiasi cosa…',
+      launcherText: 'Chiedi all’IA di scegliere le opzioni migliori',
+      openAssistant: 'Apri l’assistente di viaggio IA', minimise: 'Riduci l’assistente',
+      quickRefinements: 'Affinamenti rapidi', askAria: 'Chiedi qualcos’altro all’assistente',
+      waiting: 'In attesa dei risultati…',
+      searching: 'Ricerca…', thinking: 'Sto pensando…', noResults: 'Nessun risultato',
+      noClearMatches: 'Nessuna corrispondenza chiara — prova una richiesta diversa.',
+      couldNotAnalyse: 'Impossibile analizzare questi risultati al momento.',
+      analysing: 'Analisi di {count} risultati…',
+      reading: 'Lettura di {count} risultati, ricerca dei migliori per il tuo viaggio…',
+      nothingToCompare: 'Niente da confrontare per ora.',
+      noPropertiesBody: 'Non vedo alloggi da confrontare per questa ricerca — modifica i filtri o le date.',
+      noPropertiesAnnounce: 'Nessun alloggio da confrontare.',
+      oneOption: 'Un’opzione per questa ricerca.', yourOption: 'La tua opzione',
+      justOne: 'C’è una sola opzione per questa ricerca:',
+      resultsReady: 'Risultati pronti — chiedimi qualsiasi cosa.',
+      suggested: '{count} opzione{plural} suggerita{plural}.',
+      suggestionsReady: '{count} suggerimento{plural} pronto{plural}.',
+      closestMatches: 'Ecco le opzioni più simili che vedo:',
+      optionsMatch: 'Ecco alcune opzioni che corrispondono:',
+      someOptions: 'Ecco alcune opzioni.',
+      introLine: 'Tra {count} alloggi, ecco quelli che vale la pena vedere per {place}:',
+      yourSearch: 'la tua ricerca',
+      showInResults: 'Mostra nei risultati', showInResultsAria: 'Mostra {name} nei risultati',
+      catBestValue: 'Miglior rapporto qualità-prezzo', catTopReviewed: 'Più recensito', catMostCentral: 'Più centrale',
+      catBestRefundable: 'Miglior rimborsabile', catPremiumPick: 'Scelta premium', catSuggested: 'Suggerito',
+      factTotal: '{price} totale', factNightly: '{price}/notte', factStar: '{star} stelle',
+      factTa: 'TA {rating} ({reviews})', factKm: 'a {km} km dal centro', factRefundable: 'rimborsabile',
+      reasonTotal: '{total} totale ({nightly}/notte)', reasonRefundable: 'tariffa rimborsabile disponibile',
+      reasonTa: 'TripAdvisor {rating} su {reviews} recensioni', reasonKm: 'a {km} km dal centro di ricerca',
+      reasonStar: '{star} stelle',
+      safeRefHighRated: 'Un’opzione meglio valutata con tariffa rimborsabile.',
+      safeBetterReviewed: 'Tra le opzioni meglio recensite della tua lista.',
+      safeWellPlaced: 'Un’opzione ben posizionata, vicino al centro.',
+      safeRefundable: 'Una scelta solida con tariffa rimborsabile.',
+      safeWellRated: 'Ben valutata dagli ospiti precedenti per un viaggio come il tuo.',
+      safeComfortable: 'Una comoda scelta a {star} stelle per le tue date.',
+      safeSolid: 'Una buona opzione per la tua ricerca.',
+      warnSharedBathroom: 'bagno condiviso', warnDormitory: 'dormitorio', warnNonRefundable: 'solo non rimborsabile',
+      flDirect: 'Diretto', flConnecting: 'Con scalo',
+      chipBeach: 'Vicino alla spiaggia', chipPool: 'Con piscina', chipSpa: 'Con spa',
+      chipFamilies: 'Ideale per famiglie', chipCheaper: 'Più economico', chipTopRated: 'Più recensito', chipCentral: 'Più centrale',
+      boardRoomOnly: 'Solo pernottamento', boardBreakfast: 'Prima colazione', boardHalfBoard: 'Mezza pensione',
+      boardFullBoard: 'Pensione completa', boardAllInclusive: 'Tutto incluso', boardSelfCatering: 'Appartamento con angolo cottura'
+    },
+    ro: {
+      title: 'Asistent de călătorie AI', send: 'Trimite', viewLabel: 'Arată în rezultate',
+      placeholder: 'Întreabă-mă orice…',
+      launcherText: 'Roagă AI să aleagă cele mai bune potriviri',
+      openAssistant: 'Deschide asistentul de călătorie AI', minimise: 'Minimizează asistentul',
+      quickRefinements: 'Rafinări rapide', askAria: 'Cere asistentului altceva',
+      waiting: 'În aşteptarea rezultatelor…',
+      searching: 'Se caută…', thinking: 'Se gândeşte…', noResults: 'Niciun rezultat',
+      noClearMatches: 'Nicio potrivire clară — încearcă o altă cerere.',
+      couldNotAnalyse: 'Aceste rezultate nu pot fi analizate acum.',
+      analysing: 'Se analizează {count} rezultate…',
+      reading: 'Se citesc {count} rezultate, se caută cele mai bune pentru călătoria ta…',
+      nothingToCompare: 'Nimic de comparat încă.',
+      noPropertiesBody: 'Nu văd nicio cazare de comparat pentru această căutare — ajustează filtrele sau datele.',
+      noPropertiesAnnounce: 'Nicio cazare de comparat.',
+      oneOption: 'O singură opțiune pentru această căutare.', yourOption: 'Opțiunea ta',
+      justOne: 'Există o singură opțiune pentru această căutare:',
+      resultsReady: 'Rezultate gata — întreabă-mă orice.',
+      suggested: '{count} opțiune{plural} sugerată{plural}.',
+      suggestionsReady: '{count} sugestie{plural} gata.',
+      closestMatches: 'Iată cele mai apropiate opțiuni pe care le văd:',
+      optionsMatch: 'Iată câteva opțiuni care se potrivesc:',
+      someOptions: 'Iată câteva opțiuni.',
+      introLine: 'Din {count} cazări, iată cele care merită văzute pentru {place}:',
+      yourSearch: 'căutarea ta',
+      showInResults: 'Arată în rezultate', showInResultsAria: 'Arată {name} în rezultate',
+      catBestValue: 'Cel mai bun raport calitate-preț', catTopReviewed: 'Cel mai bine evaluat', catMostCentral: 'Cel mai central',
+      catBestRefundable: 'Cel mai bun rambursabil', catPremiumPick: 'Alegere premium', catSuggested: 'Sugerat',
+      factTotal: '{price} total', factNightly: '{price}/noapte', factStar: '{star} stele',
+      factTa: 'TA {rating} ({reviews})', factKm: 'la {km} km de centru', factRefundable: 'rambursabil',
+      reasonTotal: '{total} total ({nightly}/noapte)', reasonRefundable: 'tarif rambursabil disponibil',
+      reasonTa: 'TripAdvisor {rating} din {reviews} recenzii', reasonKm: 'la {km} km de centrul căutării',
+      reasonStar: '{star} stele',
+      safeRefHighRated: 'O opțiune mai bine evaluată cu tarif rambursabil.',
+      safeBetterReviewed: 'Printre opțiunile cel mai bine evaluate din lista ta.',
+      safeWellPlaced: 'O opțiune bine poziționată, aproape de centru.',
+      safeRefundable: 'O alegere solidă cu tarif rambursabil.',
+      safeWellRated: 'Bine evaluată de oaspeții anteriori pentru o călătorie ca a ta.',
+      safeComfortable: 'O alegere confortabilă de {star} stele pentru datele tale.',
+      safeSolid: 'O opțiune bună pentru căutarea ta.',
+      warnSharedBathroom: 'baie comună', warnDormitory: 'dormitor comun', warnNonRefundable: 'doar nerambursabil',
+      flDirect: 'Direct', flConnecting: 'Cu escală',
+      chipBeach: 'Aproape de plajă', chipPool: 'Cu piscină', chipSpa: 'Cu spa',
+      chipFamilies: 'Bun pentru familii', chipCheaper: 'Mai ieftin', chipTopRated: 'Cel mai bine evaluat', chipCentral: 'Mai central',
+      boardRoomOnly: 'Doar cazare', boardBreakfast: 'Mic dejun', boardHalfBoard: 'Demipensiune',
+      boardFullBoard: 'Pensiune completă', boardAllInclusive: 'All inclusive', boardSelfCatering: 'Cazare cu bucătărie'
+    }
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    var supported = Object.keys(MESSAGES);
+    var baseOf = function (r) { return r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : ''; };
+    var cands = [];
+    if (cfg) { cands.push(cfg.lang, cfg.language, cfg.locale); }
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) {}
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) {}
+    var lang = 'en';
+    for (var i = 0; i < cands.length; i++) { var b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    var dict = MESSAGES[lang] || MESSAGES.en;
+    var t = function (k, vars) {
+      var s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, function (m, n) { return vars[n] != null ? vars[n] : m; });
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
+  var T = makeT(null);
   // The results widget emits a different ready/view pair per search type. The
   // result shape is shared; packages add flight / operator / inclusions data.
   var SEARCH_TYPES = [
@@ -46,11 +368,11 @@
   // widget fetches its saved config from /api/widget-config.
   var DEFAULTS = {
     enabled: true,
-    title: 'AI trip assistant',
+    title: '',                                          // '' = localised 'AI trip assistant'
     greeting: '',                                       // '' = dynamic intro line
-    placeholder: 'Ask: more central, with a pool, cheaper\u2026',
-    sendLabel: 'Send',
-    viewLabel: 'Show these in results',
+    placeholder: '',                                    // '' = localised placeholder
+    sendLabel: '',                                      // '' = localised 'Send'
+    viewLabel: '',                                      // '' = localised 'Show these in results'
     headerColor: '#1B2B5B',
     accent: '#00B4D8',
     theme: 'auto',                                      // 'auto' | 'light' | 'dark'
@@ -62,7 +384,7 @@
     appearMode: 'suggestions',                           // 'ready' | 'delay' | 'suggestions'
     appearDelay: 3,                                      // seconds, used when appearMode==='delay'
     startMode: 'open',                                   // 'open' (full panel) | 'launcher' (collapsed pill)
-    launcherText: 'Ask AI to pick your best matches',
+    launcherText: '',                                    // '' = localised launcher text
     deferAnalysis: true,                                 // launcher: analyse on open (true) vs pre-warm (false)
     cacheResults: true,                                  // cache the analysis per search (sessionStorage)
     rememberState: true,                                 // remember open/min/dragged state for the visit
@@ -134,10 +456,11 @@
         if (ci && !inline) { try { Object.assign(CFG, sanitiseCfg(JSON.parse(ci))); } catch (e) {} }
       }
     }
+    T = makeT(CFG);
     if (id) {
       fetch(configApi() + '?id=' + encodeURIComponent(id))
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) { if (d && d.config) { Object.assign(CFG, sanitiseCfg(d.config)); applyConfig(); } })
+        .then(function (d) { if (d && d.config) { Object.assign(CFG, sanitiseCfg(d.config)); T = makeT(CFG); applyConfig(); } })
         .catch(function (e) { console.warn('[trai] config load failed', e); });
     }
   })();
@@ -184,21 +507,22 @@
   function warningsOf(r, rs) {
     var t = [r.name, r.description].concat((r.units || []).map(function (u) { return u.name; })).join(' ').toLowerCase();
     var w = [];
-    if (t.indexOf('shared bathroom') > -1) w.push('shared bathroom');
-    if (t.indexOf('dorm') > -1) w.push('dormitory');
-    if (rs.length && rs.every(function (x) { return x.refundability === 'NonRefundable'; })) w.push('non-refundable only');
+    if (t.indexOf('shared bathroom') > -1) w.push(T('warnSharedBathroom'));
+    if (t.indexOf('dorm') > -1) w.push(T('warnDormitory'));
+    if (rs.length && rs.every(function (x) { return x.refundability === 'NonRefundable'; })) w.push(T('warnNonRefundable'));
     return w;
   }
   function nightly(p) { var n = (criteria && criteria.nights) || 1; return n > 0 ? p / n : p; }
   function boardLabel(b) {
     if (!b) return '';
+    // Supplier board codes (data/enum) → fixed localised DISPLAY labels.
     var key = String(b).toLowerCase().replace(/[^a-z]/g, '');
     var map = {
-      roomonly: 'Room only', bedandbreakfast: 'B&B', breakfast: 'Breakfast', bb: 'B&B',
-      halfboard: 'Half board', fullboard: 'Full board', allinclusive: 'All-inclusive',
-      selfcatering: 'Self-catering', fullallinclusive: 'All-inclusive', any: ''
+      roomonly: 'boardRoomOnly', bedandbreakfast: 'boardBreakfast', breakfast: 'boardBreakfast', bb: 'boardBreakfast',
+      halfboard: 'boardHalfBoard', fullboard: 'boardFullBoard', allinclusive: 'boardAllInclusive',
+      selfcatering: 'boardSelfCatering', fullallinclusive: 'boardAllInclusive', any: ''
     };
-    if (map[key] != null) return map[key];
+    if (map[key] != null) return map[key] ? T(map[key]) : '';
     // Fallback: de-camel/underscore the raw enum, e.g. "HalfBoard" -> "Half board".
     var s = String(b).replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim().toLowerCase();
     return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -208,7 +532,7 @@
     if (!f) return null;
     var carrier = f.carrier || (f.routes && f.routes[0] && f.routes[0].carrier) || '';
     var direct = /direct/i.test(f.stops || '') || (Array.isArray(f.routes) && f.routes.length && f.routes.every(function (r) { return (r.stops || 0) === 0; }));
-    var stopTxt = direct ? 'Direct' : (f.stops || 'Connecting');
+    var stopTxt = direct ? T('flDirect') : (f.stops || T('flConnecting'));
     return (carrier ? carrier + ' \u00b7 ' : '') + stopTxt;
   }
   function summarise(r) {
@@ -298,20 +622,20 @@
     var byRid = {}; cands.forEach(function (s) { byRid[s.rid] = s; });
     var picks = [];
     var add = function (cat, s) { if (s && !picks.some(function (p) { return p.rid === s.rid; })) picks.push({ rid: s.rid, category: cat, reason: ruleReason(cat, s), s: s }); };
-    add('Best value', cands.slice().sort(function (a, b) { return score(b) - score(a); })[0]);
-    add('Top reviewed', cands.slice().filter(function (s) { return s.ta; }).sort(function (a, b) { return (b.ta.rating || 0) - (a.ta.rating || 0); })[0]);
-    add('Most central', cands.slice().filter(function (s) { return s.distKm != null; }).sort(function (a, b) { return a.distKm - b.distKm; })[0]);
-    add('Best refundable', cands.slice().filter(function (s) { return s.loRef; }).sort(function (a, b) { return a.loRef.price - b.loRef.price; })[0]);
-    add('Premium pick', cands.slice().sort(function (a, b) { return b.star - a.star; })[0]);
+    add(T('catBestValue'), cands.slice().sort(function (a, b) { return score(b) - score(a); })[0]);
+    add(T('catTopReviewed'), cands.slice().filter(function (s) { return s.ta; }).sort(function (a, b) { return (b.ta.rating || 0) - (a.ta.rating || 0); })[0]);
+    add(T('catMostCentral'), cands.slice().filter(function (s) { return s.distKm != null; }).sort(function (a, b) { return a.distKm - b.distKm; })[0]);
+    add(T('catBestRefundable'), cands.slice().filter(function (s) { return s.loRef; }).sort(function (a, b) { return a.loRef.price - b.loRef.price; })[0]);
+    add(T('catPremiumPick'), cands.slice().sort(function (a, b) { return b.star - a.star; })[0]);
     return picks.slice(0, max || 5);
   }
   function ruleReason(cat, s) {
     var bits = [];
-    if (s.lo) bits.push(money(s.lo.price) + ' total (' + money(nightly(s.lo.price)) + '/night)');
-    if (s.loRef) bits.push('refundable rate available');
-    if (s.ta && s.ta.rating) bits.push('TripAdvisor ' + s.ta.rating + ' from ' + s.ta.reviewCount + ' reviews');
-    if (s.distKm != null) bits.push(Math.round(s.distKm) + 'km from the search centre');
-    if (s.star) bits.push(s.star + '-star');
+    if (s.lo) bits.push(T('reasonTotal', { total: money(s.lo.price), nightly: money(nightly(s.lo.price)) }));
+    if (s.loRef) bits.push(T('reasonRefundable'));
+    if (s.ta && s.ta.rating) bits.push(T('reasonTa', { rating: s.ta.rating, reviews: s.ta.reviewCount }));
+    if (s.distKm != null) bits.push(T('reasonKm', { km: Math.round(s.distKm) }));
+    if (s.star) bits.push(T('reasonStar', { star: s.star }));
     return bits.slice(0, 3).join(', ') + '.';
   }
 
@@ -362,6 +686,7 @@
     setupDrag();
     window.addEventListener('resize', layout);
     applyConfig();
+    setSub(T('waiting'));
     setFootEnabled(false);
   }
   // Collapse: in launcher mode return to the pill; otherwise minimise to the
@@ -389,10 +714,15 @@
     p.setProperty('--teal-l', shade(CFG.accent, 0.28));
     if (CFG.font) p.setProperty('--trai-font', CFG.font);
     els.panel.setAttribute('data-theme', CFG.theme);
-    if (els.title) els.title.textContent = CFG.title;
-    els.panel.setAttribute('aria-label', CFG.title);
-    if (els.input) els.input.setAttribute('placeholder', CFG.placeholder);
-    if (els.send) els.send.textContent = CFG.sendLabel;
+    var title = CFG.title || T('title');
+    if (els.title) els.title.textContent = title;
+    els.panel.setAttribute('aria-label', title);
+    if (els.input) els.input.setAttribute('placeholder', CFG.placeholder || T('placeholder'));
+    if (els.send) els.send.textContent = CFG.sendLabel || T('send');
+    if (els.launcher) els.launcher.setAttribute('aria-label', T('openAssistant'));
+    if (els.min) els.min.setAttribute('aria-label', T('minimise'));
+    if (els.chips) els.chips.setAttribute('aria-label', T('quickRefinements'));
+    if (els.input) els.input.setAttribute('aria-label', T('askAria'));
     if (els.launcher) {
       var l = els.launcher.style;
       l.setProperty('--l-navy', CFG.headerColor);
@@ -400,7 +730,7 @@
       l.setProperty('--l-teal', CFG.accent);
       if (CFG.font) l.setProperty('--trai-font', CFG.font);
     }
-    if (els.launcherText) els.launcherText.textContent = CFG.launcherText;
+    if (els.launcherText) els.launcherText.textContent = CFG.launcherText || T('launcherText');
   }
   // Panel width + max-height from config, clamped to the viewport. Recomputed
   // on resize so it stays responsive on rotation / window changes.
@@ -513,7 +843,7 @@
     if (!append) clearBody();
     var startNode = reply ? addBubble('assistant', reply) : null;
     if (!recs.length) {
-      var sl = stateLine('No clear matches for that \u2014 try a different ask.');
+      var sl = stateLine(T('noClearMatches'));
       els.body.appendChild(sl);
       setFootEnabled(true); scrollToTopOf(startNode || sl); return;
     }
@@ -525,13 +855,13 @@
       var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = s.name; card.appendChild(nm);
       var facts = document.createElement('div'); facts.className = 'facts';
       function fact(t, cls) { var f = document.createElement('span'); f.className = 'f' + (cls ? ' ' + cls : ''); f.textContent = t; facts.appendChild(f); }
-      if (s.lo) fact(money(s.lo.price) + ' total', 'price');
-      if (s.lo) fact(money(nightly(s.lo.price)) + '/night');
-      if (s.star > 0) fact(s.star + '-star');
+      if (s.lo) fact(T('factTotal', { price: money(s.lo.price) }), 'price');
+      if (s.lo) fact(T('factNightly', { price: money(nightly(s.lo.price)) }));
+      if (s.star > 0) fact(T('factStar', { star: s.star }));
       if (s.lo && s.lo.board) { var bl = boardLabel(s.lo.board); if (bl) fact(bl); }
-      if (s.ta && s.ta.rating) fact('TA ' + s.ta.rating + ' (' + s.ta.reviewCount + ')');
-      if (s.distKm != null) fact(Math.round(s.distKm) + ' km from centre');
-      if (s.loRef) fact('refundable');
+      if (s.ta && s.ta.rating) fact(T('factTa', { rating: s.ta.rating, reviews: s.ta.reviewCount }));
+      if (s.distKm != null) fact(T('factKm', { km: Math.round(s.distKm) }));
+      if (s.loRef) fact(T('factRefundable'));
       if (s.op) fact(s.op);
       if (s.flSummary) fact(s.flSummary);
       (s.incl || []).forEach(function (i) { if (/atol/i.test(i)) fact('ATOL', 'ok'); });
@@ -542,8 +872,8 @@
         card.classList.add('clickable');
         card.setAttribute('role', 'button');
         card.setAttribute('tabindex', '0');
-        card.setAttribute('aria-label', 'Show ' + s.name + ' in the results');
-        var hint = document.createElement('span'); hint.className = 'rec-view'; hint.textContent = (CFG.viewLabel || 'Show in results') + ' \u203a'; card.appendChild(hint);
+        card.setAttribute('aria-label', T('showInResultsAria', { name: s.name }));
+        var hint = document.createElement('span'); hint.className = 'rec-view'; hint.textContent = (CFG.viewLabel || T('showInResults')) + ' \u203a'; card.appendChild(hint);
         var showOne = function () {
           track('card_view', { rid: r.rid });
           dispatchView([r.rid]);
@@ -556,13 +886,13 @@
       els.body.appendChild(card);
     });
     var act = document.createElement('button'); act.className = 'go'; act.type = 'button';
-    act.textContent = CFG.viewLabel;
+    act.textContent = CFG.viewLabel || T('viewLabel');
     act.addEventListener('click', function () { track('view_all', { count: recs.length }); dispatchView(recs.map(function (r) { return r.rid; })); });
     els.body.appendChild(act);
     setFootEnabled(true);
     if (!append) { renderChips(); revealNow(); }
     track('recommendations', { count: recs.length, refine: !!append });
-    announce(recs.length + ' suggestion' + (recs.length === 1 ? '' : 's') + ' ready.');
+    announce(T('suggestionsReady', { count: recs.length, plural: recs.length === 1 ? '' : 's' }));
     scrollToTopOf(startNode);
   }
 
@@ -573,11 +903,11 @@
     function frac(kw) { var c = 0; hay.forEach(function (h) { if (h.indexOf(kw) > -1) c++; }); return c / n; }
     var out = [];
     function add(label, kw) { var f = frac(kw); if (f >= 0.15 && f < 0.95) out.push(label); }
-    add('Near the beach', 'beach'); add('With a pool', 'pool'); add('With a spa', 'spa');
-    if (summaries.some(function (s) { return (s.goodFor || []).indexOf('Families') > -1; })) out.push('Good for families');
-    out.push('Cheaper');
-    if (summaries.some(function (s) { return s.ta; })) out.push('Top rated');
-    if (summaries.some(function (s) { return s.distKm != null; })) out.push('More central');
+    add(T('chipBeach'), 'beach'); add(T('chipPool'), 'pool'); add(T('chipSpa'), 'spa');
+    if (summaries.some(function (s) { return (s.goodFor || []).indexOf('Families') > -1; })) out.push(T('chipFamilies'));
+    out.push(T('chipCheaper'));
+    if (summaries.some(function (s) { return s.ta; })) out.push(T('chipTopRated'));
+    if (summaries.some(function (s) { return s.distKm != null; })) out.push(T('chipCentral'));
     var seen = {}, res = []; out.forEach(function (x) { if (!seen[x]) { seen[x] = 1; res.push(x); } });
     return res.slice(0, 5);
   }
@@ -596,7 +926,7 @@
   }
   function renderError() {
     clearBody();
-    els.body.appendChild(stateLine('Could not analyse these results right now.'));
+    els.body.appendChild(stateLine(T('couldNotAnalyse')));
     setFootEnabled(true);
   }
 
@@ -619,33 +949,33 @@
     history = [];
     summaries = (payload.results || []).filter(function (r) { return r && r.rid && Array.isArray(r.units); }).map(summarise);
 
-    setSub('Analysing ' + (payload.results || []).length + ' results\u2026');
+    setSub(T('analysing', { count: (payload.results || []).length }));
     clearBody();
-    els.body.appendChild(stateLine('Reading ' + (payload.results || []).length + ' results, finding the best for your trip\u2026', true));
+    els.body.appendChild(stateLine(T('reading', { count: (payload.results || []).length }), true));
     setFootEnabled(false);
 
     // Edge cases: nothing comparable, or a single option — handle without an API call.
     if (!summaries.length) {
-      setSub('Nothing to compare yet.');
+      setSub(T('nothingToCompare'));
       clearBody();
-      els.body.appendChild(stateLine('I can\u2019t see any properties to compare for this search \u2014 try adjusting your filters or dates.'));
+      els.body.appendChild(stateLine(T('noPropertiesBody')));
       setFootEnabled(false);
-      announce('No properties to compare.');
+      announce(T('noPropertiesAnnounce'));
       return;
     }
     if (summaries.length === 1) {
       var only = summaries[0];
-      var single = [{ rid: only.rid, category: 'Your option', reason: safeReason(only), s: only }];
+      var single = [{ rid: only.rid, category: T('yourOption'), reason: safeReason(only), s: only }];
       currentRecs = single;
-      setSub('One option for this search.');
-      renderRecs('There\u2019s just one option for this search:', single);
+      setSub(T('oneOption'));
+      renderRecs(T('justOne'), single);
       return;
     }
 
     var cands = candidatesFor('');
     if (PREVIEW) {
       var precs = fallbackRecs(cands, CFG.maxRecs); currentRecs = precs;
-      setSub('Suggested ' + precs.length + ' option' + (precs.length === 1 ? '' : 's') + '.');
+      setSub(T('suggested', { count: precs.length, plural: precs.length === 1 ? '' : 's' }));
       renderRecs(introLine(), precs);
       return;
     }
@@ -655,7 +985,7 @@
       var crecs = mapRecs(cached.recommendations, cands, CFG.maxRecs);
       if (crecs.length) {
         currentRecs = crecs;
-        setSub('Suggested ' + crecs.length + ' option' + (crecs.length === 1 ? '' : 's') + '.');
+        setSub(T('suggested', { count: crecs.length, plural: crecs.length === 1 ? '' : 's' }));
         renderRecs(cached.reply || introLine(), crecs);
         return;
       }
@@ -665,14 +995,14 @@
       var recs = mapRecs(data.recommendations, cands, CFG.maxRecs);
       if (!recs.length) { recs = fallbackRecs(cands, CFG.maxRecs); data = { reply: '' }; }
       else { writeRecCache(payload.searchSession, data.reply, data.recommendations); }
-      setSub('Suggested ' + recs.length + ' option' + (recs.length === 1 ? '' : 's') + '.');
+      setSub(T('suggested', { count: recs.length, plural: recs.length === 1 ? '' : 's' }));
       currentRecs = recs;
       renderRecs(data.reply || introLine(), recs);
     }).catch(function (e) {
       if (payload.searchSession !== activeSession) return;
       console.warn('[trai] endpoint failed, using fallback', e);
       var recs = fallbackRecs(cands, CFG.maxRecs); currentRecs = recs;
-      setSub('Suggested ' + recs.length + ' option' + (recs.length === 1 ? '' : 's') + '.');
+      setSub(T('suggested', { count: recs.length, plural: recs.length === 1 ? '' : 's' }));
       renderRecs(introLine(), recs);
     });
   }
@@ -684,13 +1014,13 @@
     addBubble('user', msg);
     track('message', { text: msg });
     history.push({ role: 'user', content: msg });
-    var thinking = stateLine('Thinking\u2026', true); els.body.appendChild(thinking); scroll();
+    var thinking = stateLine(T('thinking'), true); els.body.appendChild(thinking); scroll();
     var cands = candidatesFor(msg);
     if (PREVIEW) {
       if (els.body.contains(thinking)) els.body.removeChild(thinking);
       var precs = fallbackRecs(cands, CFG.maxRecs); currentRecs = precs;
       history.push({ role: 'assistant', content: 'preview' });
-      renderRecs('Here are the closest matches I can see:', precs, true);
+      renderRecs(T('closestMatches'), precs, true);
       return;
     }
     callEndpoint(msg, cands).then(function (data) {
@@ -699,13 +1029,13 @@
       var recs = mapRecs(data.recommendations, cands, CFG.maxRecs);
       if (!recs.length) recs = fallbackRecs(cands, CFG.maxRecs);
       currentRecs = recs;
-      history.push({ role: 'assistant', content: data.reply || 'Here are some options.' });
-      renderRecs(data.reply || 'Here are some options that match that:', recs, true);
+      history.push({ role: 'assistant', content: data.reply || T('someOptions') });
+      renderRecs(data.reply || T('optionsMatch'), recs, true);
     }).catch(function (e) {
       if (els.body.contains(thinking)) els.body.removeChild(thinking);
       console.warn('[trai] refine failed, using fallback', e);
       var recs = fallbackRecs(cands, CFG.maxRecs); currentRecs = recs;
-      renderRecs('Here are the closest matches I can see:', recs, true);
+      renderRecs(T('closestMatches'), recs, true);
     });
   }
 
@@ -716,7 +1046,7 @@
         var s = byRid[r.rid];
         var reason = r.reason || '';
         if (CFG.verifyClaims) reason = cleanReason(reason, s);
-        return { rid: r.rid, category: r.category || 'Suggested', reason: reason, s: s };
+        return { rid: r.rid, category: r.category || T('catSuggested'), reason: reason, s: s };
       });
   }
 
@@ -739,13 +1069,13 @@
     { kw: ['direct flight', 'direct flights'], ok: function (s) { return /direct/i.test(s.flSummary || ''); } }
   ];
   function safeReason(s) {
-    if (s.loRef && s.star >= 4) return 'A higher-rated option with a refundable rate.';
-    if (s.ta && s.ta.rating >= 4.5) return 'Among the better-reviewed options on your list.';
-    if (s.distKm != null && s.distKm <= 3) return 'A well-placed option close to the centre.';
-    if (s.loRef) return 'A solid pick that comes with a refundable rate.';
-    if (s.ta && s.ta.rating >= 4) return 'Well rated by previous guests for a trip like yours.';
-    if (s.star >= 4) return 'A comfortable ' + s.star + '-star choice for your dates.';
-    return 'A solid match for your search.';
+    if (s.loRef && s.star >= 4) return T('safeRefHighRated');
+    if (s.ta && s.ta.rating >= 4.5) return T('safeBetterReviewed');
+    if (s.distKm != null && s.distKm <= 3) return T('safeWellPlaced');
+    if (s.loRef) return T('safeRefundable');
+    if (s.ta && s.ta.rating >= 4) return T('safeWellRated');
+    if (s.star >= 4) return T('safeComfortable', { star: s.star });
+    return T('safeSolid');
   }
   // Belt-and-braces on top of the prompt: if a reason merely restates the
   // facts already shown as chips (name + star/rating/price, no real insight),
@@ -785,9 +1115,9 @@
     return out || safeReason(s);
   }
   function introLine() {
-    var place = criteria && criteria.locationName ? String(criteria.locationName).split(',')[0] : 'your search';
+    var place = criteria && criteria.locationName ? String(criteria.locationName).split(',')[0] : T('yourSearch');
     if (CFG.greeting) return CFG.greeting.replace(/\{place\}/g, place).replace(/\{count\}/g, String(summaries.length));
-    return 'From ' + summaries.length + ' properties, here are the ones worth a look for ' + place + ':';
+    return T('introLine', { count: summaries.length, place: place });
   }
 
   // Stage 3 of the contract: tell the results widget to show only these rids.
@@ -841,7 +1171,7 @@
     }
   }
   function prepNonAuto(p) {
-    setSub('Results ready — ask me anything.'); clearBody();
+    setSub(T('resultsReady')); clearBody();
     criteria = p.criteria; currency = p.criteria.currency || 'GBP'; activeSession = p.searchSession;
     summaries = p.results.filter(function (r) { return r && r.rid && Array.isArray(r.units); }).map(summarise);
     setFootEnabled(true);
