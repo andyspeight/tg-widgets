@@ -104,22 +104,35 @@ export default async function handler(req, res) {
       : null;
 
   // Build the scope clauses (deduped before OR-ing).
+  //
+  // ClientRecordId is the AUTHORITATIVE owner. ClientEmail matching is a LEGACY
+  // fallback for widgets created before ClientRecordId existed, so it is only
+  // ever applied to widgets whose ClientRecordId is blank. A widget that HAS a
+  // ClientRecordId belongs to that client and must NEVER be matched by a
+  // colliding ClientEmail — otherwise two clients who share a contact/creator
+  // email (e.g. a staff member who set up both) leak into each other's lists.
+  // This mirrors canModifyWidget(), which already gates EDITS this way; the list
+  // must not surface widgets the edit gate would deny.
+  const LEGACY = `{ClientRecordId}=''`;
   const clauses = new Set();
-  let includeOwnEmail = true; // default: always see your own widgets
 
   if (activeClientId) {
     // Impersonating = the active client is NOT one of your linked clients.
     const isHome = linkedClientIds.includes(activeClientId);
-    includeOwnEmail = isHome;
 
     clauses.add(`{ClientRecordId}='${activeClientId}'`); // activeClientId is REC_ID_RE-validated
     const activeClientEmail = await resolveActiveClientEmail(activeClientId);
     if (activeClientEmail) {
-      clauses.add(`LOWER({ClientEmail})='${sanitiseForFormula(activeClientEmail)}'`);
+      clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(activeClientEmail)}')`);
     }
-  }
-
-  if (includeOwnEmail) {
+    // Own legacy widgets show in your home workspace, but NOT when cleanly
+    // impersonating a client you are not a member of.
+    if (isHome) {
+      clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(userEmailLower)}')`);
+    }
+  } else {
+    // No usable client context (e.g. an old legacy Bearer token): scope purely by
+    // the user's own email — the original pre-ClientRecordId behaviour.
     clauses.add(`LOWER({ClientEmail})='${sanitiseForFormula(userEmailLower)}'`);
   }
 
