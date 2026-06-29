@@ -171,14 +171,29 @@ function buildSystem(langs) {
     '  "<lang>": {',
     '    "heading": { "title": "...", "subtitle": "..." },',
     '    "cta": { "heading": "...", "description": "...", "buttonText": "..." },',
-    '    "categories": { "<category id>": "translated label", ... },',
-    '    "questions": { "<question id>": { "question": "...", "answer": "..." }, ... },',
+    '    "categories": ["translated label", ...],',
+    '    "questions": [ { "q": "translated question", "a": "translated answer" }, ... ],',
     '    "search": { "placeholder": "...", "noResultsText": "..." }',
     '  }',
     '}',
-    'Only include a field if it is present in the source. Keep every id byte-for-byte identical',
-    'to the source so the answers can be matched back. Do not invent ids or fields.'
+    'The categories and questions arrays MUST stay in the EXACT same order and the same length as',
+    'the source arrays, so each item lines up by position. Do not add, remove, reorder, merge or',
+    'split items. Translate every item. Only include heading/cta/search fields that are present in',
+    'the source. Do not invent fields.'
   ].join('\n');
+}
+
+// The model sees a position-based view: categories and questions as plain arrays
+// (no opaque ids — models echo array order far more reliably than JSON-key ids).
+// shape() maps the returned arrays back to the source ids by position.
+function modelView(content) {
+  return {
+    heading: content.heading,
+    cta: content.cta,
+    search: content.search,
+    categories: (content.categories || []).map((c) => c.label),
+    questions: (content.questions || []).map((q) => ({ q: q.question, a: q.answer }))
+  };
 }
 
 function buildUser(content, langs) {
@@ -186,7 +201,7 @@ function buildUser(content, langs) {
     'Translate this FAQ content into: ' + langs.join(', ') + '. Return only the JSON object.',
     '',
     '<content>',
-    JSON.stringify(content),
+    JSON.stringify(modelView(content)),
     '</content>'
   ].join('\n');
 }
@@ -201,10 +216,15 @@ function extractJson(raw) {
 }
 
 // Whitelist the model output down to known langs / ids / fields, capped.
+// Categories and questions are matched back to their source ids BY POSITION
+// (the model returns plain arrays in source order). A legacy id-keyed object
+// response is still accepted as a fallback.
 function shape(parsed, source, langs) {
   const i18n = {};
-  const validCatIds = new Set((source.categories || []).map((c) => c.id));
-  const validQIds = new Set((source.questions || []).map((q) => q.id));
+  const srcCats = source.categories || [];
+  const srcQs = source.questions || [];
+  const validCatIds = new Set(srcCats.map((c) => c.id));
+  const validQIds = new Set(srcQs.map((q) => q.id));
 
   for (const lang of langs) {
     const inLang = parsed && typeof parsed[lang] === 'object' && parsed[lang];
@@ -224,7 +244,17 @@ function shape(parsed, source, langs) {
       if (source.cta.buttonText && inLang.cta.buttonText) ct.buttonText = cleanLine(inLang.cta.buttonText).slice(0, CAP.ctaButtonText);
       if (ct.heading || ct.description || ct.buttonText) o.cta = ct;
     }
-    if (inLang.categories && typeof inLang.categories === 'object') {
+    // Categories — array by position (preferred) or legacy id-keyed object.
+    if (Array.isArray(inLang.categories)) {
+      const cats = {};
+      inLang.categories.forEach((label, i) => {
+        const src = srcCats[i];
+        if (!src) return;
+        const l = cleanLine(label).slice(0, CAP.catLabel);
+        if (l) cats[src.id] = l;
+      });
+      if (Object.keys(cats).length) o.categories = cats;
+    } else if (inLang.categories && typeof inLang.categories === 'object') {
       const cats = {};
       for (const id of Object.keys(inLang.categories)) {
         if (!validCatIds.has(id)) continue;
@@ -233,16 +263,29 @@ function shape(parsed, source, langs) {
       }
       if (Object.keys(cats).length) o.categories = cats;
     }
-    if (inLang.questions && typeof inLang.questions === 'object') {
+    // Questions — array by position (preferred) or legacy id-keyed object.
+    // Accepts both {q,a} (array form) and {question,answer} (legacy) field names.
+    const takeQ = (tq, id, out) => {
+      if (!tq || typeof tq !== 'object') return;
+      const qv = tq.q != null ? tq.q : tq.question;
+      const av = tq.a != null ? tq.a : tq.answer;
+      const entry = {};
+      if (qv) entry.question = cleanLine(qv).slice(0, CAP.question);
+      if (av) entry.answer = cleanMulti(av).trim().slice(0, CAP.answer);
+      if (entry.question || entry.answer) out[id] = entry;
+    };
+    if (Array.isArray(inLang.questions)) {
+      const qs = {};
+      inLang.questions.forEach((tq, i) => {
+        const src = srcQs[i];
+        if (src) takeQ(tq, src.id, qs);
+      });
+      if (Object.keys(qs).length) o.questions = qs;
+    } else if (inLang.questions && typeof inLang.questions === 'object') {
       const qs = {};
       for (const id of Object.keys(inLang.questions)) {
         if (!validQIds.has(id)) continue;
-        const tq = inLang.questions[id];
-        if (!tq || typeof tq !== 'object') continue;
-        const entry = {};
-        if (tq.question) entry.question = cleanLine(tq.question).slice(0, CAP.question);
-        if (tq.answer) entry.answer = cleanMulti(tq.answer).trim().slice(0, CAP.answer);
-        if (entry.question || entry.answer) qs[id] = entry;
+        takeQ(inLang.questions[id], id, qs);
       }
       if (Object.keys(qs).length) o.questions = qs;
     }
@@ -350,4 +393,4 @@ async function handler(req, res) {
 
 export default handler;
 // Test surface — pure shaping logic, no network.
-export const _test = { normaliseContent, shape, extractJson, hasAnything, LANG_NAMES, CAP };
+export const _test = { normaliseContent, shape, extractJson, hasAnything, modelView, LANG_NAMES, CAP };
