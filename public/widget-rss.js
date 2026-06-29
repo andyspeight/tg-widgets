@@ -27,7 +27,49 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (default heading, empty/error states, the live-feed
+  // badge, "Read more", fallback title). Relative dates are rendered with
+  // Intl.RelativeTimeFormat, not these keys. Article titles, summaries, source
+  // names and dates are data and are never translated. English is the source
+  // and the fallback.
+  const MESSAGES = {
+    en: { justNow: 'Just now', latestNews: 'Latest travel news', untitled: 'Untitled', empty: 'No articles to show.', noArticles: 'Couldn’t load any articles right now.', loadFailed: 'Couldn’t load the feed right now.', addFeed: 'Add an RSS feed to show the latest articles.', readMore: 'Read more', liveFeed: 'Live feed' },
+    fr: { justNow: 'À l’instant', latestNews: 'Dernières actualités voyage', untitled: 'Sans titre', empty: 'Aucun article à afficher.', noArticles: 'Impossible de charger des articles pour le moment.', loadFailed: 'Impossible de charger le flux pour le moment.', addFeed: 'Ajoutez un flux RSS pour afficher les derniers articles.', readMore: 'Lire la suite', liveFeed: 'Flux en direct' },
+    de: { justNow: 'Gerade eben', latestNews: 'Neueste Reisenachrichten', untitled: 'Ohne Titel', empty: 'Keine Artikel vorhanden.', noArticles: 'Es konnten gerade keine Artikel geladen werden.', loadFailed: 'Der Feed konnte gerade nicht geladen werden.', addFeed: 'Fügen Sie einen RSS-Feed hinzu, um die neuesten Artikel anzuzeigen.', readMore: 'Mehr lesen', liveFeed: 'Live-Feed' },
+    es: { justNow: 'Ahora mismo', latestNews: 'Últimas noticias de viajes', untitled: 'Sin título', empty: 'No hay artículos para mostrar.', noArticles: 'No se pudieron cargar artículos ahora mismo.', loadFailed: 'No se pudo cargar el feed ahora mismo.', addFeed: 'Añade un feed RSS para mostrar los últimos artículos.', readMore: 'Leer más', liveFeed: 'Feed en directo' },
+    it: { justNow: 'Proprio ora', latestNews: 'Ultime notizie di viaggio', untitled: 'Senza titolo', empty: 'Nessun articolo da mostrare.', noArticles: 'Impossibile caricare articoli in questo momento.', loadFailed: 'Impossibile caricare il feed in questo momento.', addFeed: 'Aggiungi un feed RSS per mostrare gli ultimi articoli.', readMore: 'Leggi tutto', liveFeed: 'Feed live' },
+    ro: { justNow: 'Chiar acum', latestNews: 'Cele mai recente știri de călătorie', untitled: 'Fără titlu', empty: 'Niciun articol de afișat.', noArticles: 'Nu am putut încărca niciun articol acum.', loadFailed: 'Nu am putut încărca fluxul acum.', addFeed: 'Adaugă un flux RSS pentru a afișa cele mai recente articole.', readMore: 'Citește mai mult', liveFeed: 'Flux live' },
+  };
+  // BCP-47 locale per supported language, for Intl.RelativeTimeFormat / dates.
+  const LOCALES = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', it: 'it-IT', ro: 'ro-RO' };
+  function localeOf(lang) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.localeOf === 'function') return window.TGi18n.localeOf(lang);
+    return LOCALES[lang] || 'en-GB';
+  }
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -58,19 +100,33 @@
   function safeColor(c, fb) { return (typeof c === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(c.trim())) ? c.trim() : fb; }
   function safeFont(f) { return (typeof f === 'string' && /^[\w \-]{1,40}$/.test(f.trim())) ? f.trim() : 'Inter'; }
 
-  function fmtDate(iso) {
+  function fmtDate(iso, t) {
+    t = t || ((k) => MESSAGES.en[k] || k);
     if (!iso) return '';
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '';
+    const locale = localeOf(t.lang || 'en');
     const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-    if (days <= 0) {
+    // Relative time for anything under a week; absolute date beyond that.
+    // Intl.RelativeTimeFormat handles singular/plural and today/yesterday
+    // per locale automatically. Falls back to a plain English rendering.
+    if (days < 7) {
       const hrs = Math.floor((Date.now() - d.getTime()) / 3600000);
-      if (hrs <= 0) return 'Just now';
-      return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+      const mins = Math.floor((Date.now() - d.getTime()) / 60000);
+      if (mins < 1) return t('justNow');
+      try {
+        const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+        if (hrs < 1) return rtf.format(-mins, 'minute');
+        if (days < 1) return rtf.format(-hrs, 'hour');
+        return rtf.format(-days, 'day');
+      } catch (e) {
+        if (hrs < 1) return mins + (mins === 1 ? ' minute ago' : ' minutes ago');
+        if (days < 1) return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+        return days === 1 ? 'Yesterday' : days + ' days ago';
+      }
     }
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return days + ' days ago';
-    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    try { return d.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch (e) { return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); }
   }
   function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } }
 
@@ -177,6 +233,10 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
+      // Localise the default heading: if the author didn't set their own
+      // headerTitle, swap the English default for the viewer's language.
+      if (!config || config.headerTitle == null) this.cfg.headerTitle = this.t('latestNews');
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
       this.items = [];
       this._buildShell();
@@ -222,7 +282,7 @@
       const title = cfg.headerTitle ? `<h3 class="tgr-title">${esc(cfg.headerTitle)}</h3>` : '';
       const sub = cfg.headerSubtitle ? `<p class="tgr-sub">${esc(cfg.headerSubtitle)}</p>` : '';
       if (!title && !sub) return '';
-      return `<div class="tgr-head"><div>${title}${sub}</div><span class="tgr-badge">${ICONS.rss} Live feed</span></div>`;
+      return `<div class="tgr-head"><div>${title}${sub}</div><span class="tgr-badge">${ICONS.rss} ${esc(this.t('liveFeed'))}</span></div>`;
     }
 
     _layout() { return ['list', 'grid', 'compact'].includes(this.cfg.layout) ? this.cfg.layout : 'list'; }
@@ -242,7 +302,7 @@
         return;
       }
       const feeds = this._feedList();
-      if (!feeds.length) { this._renderEmpty('Add an RSS feed to show the latest articles.'); return; }
+      if (!feeds.length) { this._renderEmpty(this.t('addFeed')); return; }
       const max = Math.max(1, Math.min(30, parseInt(cfg.maxItems, 10) || 9));
       try {
         const results = await Promise.allSettled(feeds.map(u =>
@@ -263,17 +323,17 @@
         }
         merged.sort((a, b) => (b._ts || 0) - (a._ts || 0));
         this.items = merged.slice(0, max);
-        if (!this.items.length) { this._renderEmpty('Couldn’t load any articles right now.'); return; }
+        if (!this.items.length) { this._renderEmpty(this.t('noArticles')); return; }
         this._renderItems();
       } catch (e) {
-        this._renderEmpty('Couldn’t load the feed right now.');
+        this._renderEmpty(this.t('loadFailed'));
       }
     }
 
     _normItem(it) {
       const link = /^https?:\/\//i.test(String(it.link || '')) ? String(it.link).trim() : '';
       return {
-        title: it.title || 'Untitled',
+        title: it.title || '',
         link,
         published: it.published || '',
         _ts: it.published ? Date.parse(it.published) || 0 : 0,
@@ -286,21 +346,22 @@
     _cardHtml(it) {
       const cfg = this.cfg;
       const layout = this._layout();
+      const title = it.title || this.t('untitled');
       const target = cfg.openNewTab ? ' target="_blank" rel="noopener noreferrer"' : '';
       const showThumb = cfg.showImages && layout !== 'compact' && it.image;
       const thumb = showThumb ? `<span class="tgr-thumb" style="background-image:url('${esc(it.image)}')" role="img" aria-label=""></span>` : '';
       const meta = [];
       if (cfg.showSource && it.source) meta.push(`<span class="tgr-src">${esc(it.source)}</span>`);
-      if (cfg.showDate && it.published) meta.push(esc(fmtDate(it.published)));
+      if (cfg.showDate && it.published) meta.push(esc(fmtDate(it.published, this.t)));
       const metaHtml = meta.length ? `<div class="tgr-meta">${meta.map((m, i) => (i ? '<span class="dot"></span>' : '') + m).join('')}</div>` : '';
       const ex = (cfg.showExcerpt && layout !== 'compact' && it.summary)
         ? `<p class="tgr-ex">${esc(this._clip(it.summary, cfg.excerptLength))}</p>` : '';
       const extIcon = layout === 'compact' ? `<span class="tgr-ext">${ICONS.ext}</span>` : '';
-      return `<a class="tgr-card" href="${esc(it.link)}"${target} aria-label="${esc(it.title)}">
+      return `<a class="tgr-card" href="${esc(it.link)}"${target} aria-label="${esc(title)}">
         ${thumb}
         <span class="tgr-body">
           ${metaHtml}
-          <p class="tgr-itit">${esc(it.title)}</p>
+          <p class="tgr-itit">${esc(title)}</p>
           ${ex}
         </span>${extIcon}
       </a>`;
@@ -322,11 +383,15 @@
     }
 
     _renderEmpty(msg) {
-      this.contentEl.innerHTML = `<div class="tgr-empty">${ICONS.rss}<div>${esc(msg || 'No articles to show.')}</div></div>`;
+      this.contentEl.innerHTML = `<div class="tgr-empty">${ICONS.rss}<div>${esc(msg || this.t('empty'))}</div></div>`;
     }
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      this.t = makeT(this.cfg);
+      if (newConfig && newConfig.headerTitle == null && (!this.cfg.headerTitle || this.cfg.headerTitle === MESSAGES.en.latestNews)) {
+        this.cfg.headerTitle = this.t('latestNews');
+      }
       this._buildShell();
       this._load();
     }
