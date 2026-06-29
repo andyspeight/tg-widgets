@@ -18,8 +18,43 @@
   'use strict';
 
   var API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
-  var VERSION = '1.0.0';
+  var VERSION = '1.0.1';
   var TAU = Math.PI * 2;
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only: the accessible status label and the localised-default
+  // loading caption. The author-set label (cfg.label) is content and overrides
+  // the localised default. English is the source + fallback. The template names
+  // in TEMPLATES are config identifiers, not chrome, and are not translated.
+  var MESSAGES = {
+    en: { loading: 'Loading…', loadingShort: 'Loading' },
+    fr: { loading: 'Chargement…', loadingShort: 'Chargement' },
+    de: { loading: 'Wird geladen…', loadingShort: 'Wird geladen' },
+    es: { loading: 'Cargando…', loadingShort: 'Cargando' },
+    it: { loading: 'Caricamento…', loadingShort: 'Caricamento' },
+    ro: { loading: 'Se încarcă…', loadingShort: 'Se încarcă' }
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    var supported = Object.keys(MESSAGES);
+    var baseOf = function (r) { return (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : ''); };
+    var cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    var lang = 'en';
+    for (var i = 0; i < cands.length; i++) { var b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    var dict = MESSAGES[lang] || MESSAGES.en;
+    var t = function (k, vars) {
+      var s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, function (m, n) { return (vars[n] != null ? vars[n] : m); });
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   /* ---------------------------------------------------------------------- *
    * Defaults                                                                *
@@ -426,13 +461,15 @@
     "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,sans-serif;}" +
     '.tgld-canvas{display:block;}' +
     '.tgld-label{font-weight:500;letter-spacing:.01em;text-align:center;line-height:1.3;}' +
-    '.tgld-label[hidden]{display:none !important;}';
+    '.tgld-label[hidden]{display:none !important;}' +
+    '.tgld-sr{position:absolute !important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}';
 
   function TGLoaderWidget(container, config) {
     if (!container) return;
     this.el = container;
     this.cfg = sanitize(config || {});
     this.cfg.__clean = true;
+    this.t = makeT(this.cfg);   // resolve viewer language + UI chrome strings
     this.tpl = TEMPLATES[this.cfg.template];
     this._raf = 0;
     this._start = 0;
@@ -440,13 +477,15 @@
     this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
     this.shadow.innerHTML =
       '<style>' + STYLES + '</style>' +
-      '<div class="tgld-root" part="root">' +
-      '<canvas class="tgld-canvas"></canvas>' +
+      '<div class="tgld-root" part="root" role="status" aria-live="polite">' +
+      '<canvas class="tgld-canvas" aria-hidden="true"></canvas>' +
+      '<span class="tgld-sr"></span>' +
       '<div class="tgld-label" hidden></div>' +
       '</div>';
 
     this.root = this.shadow.querySelector('.tgld-root');
     this.canvas = this.shadow.querySelector('.tgld-canvas');
+    this.srEl = this.shadow.querySelector('.tgld-sr');
     this.labelEl = this.shadow.querySelector('.tgld-label');
     this.ctx = this.canvas.getContext('2d');
 
@@ -465,6 +504,12 @@
   TGLoaderWidget.prototype._apply = function () {
     var c = this.cfg;
     this.root.style.opacity = String(c.opacity);
+    // Accessible status text — always present so screen readers announce a
+    // loading state even when no visible caption is set. Uses the author's
+    // caption when given, otherwise the localised default.
+    var srText = c.label || this.t('loadingShort');
+    if (this.srEl) this.srEl.textContent = srText; // textContent — XSS-safe
+    this.root.setAttribute('aria-label', srText);
     if (c.label) {
       this.labelEl.textContent = c.label; // textContent — XSS-safe
       this.labelEl.hidden = false;
@@ -517,6 +562,7 @@
       }
     }
     this.cfg = sanitize(merged); this.cfg.__clean = true;
+    this.t = makeT(this.cfg);
     this.tpl = TEMPLATES[this.cfg.template];
     this._apply();
     this._run();
