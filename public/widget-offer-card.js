@@ -27,8 +27,43 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.0';
+  const VERSION = '0.1.1';
   const API_BASE = '/api/widget-config';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (the CTA label, the Save badge word, the nights label,
+  // the untitled fallback). The offer's own data — title, teaser, place names,
+  // prices, dates, board/type labels, ATOL/ABTA wording — is author content and
+  // is never translated here. English is the source + fallback.
+  const MESSAGES = {
+    en: { viewDeal: 'View deal', save: 'Save', nights: 'nights', untitled: 'Untitled offer' },
+    fr: { viewDeal: "Voir l'offre", save: 'Économisez', nights: 'nuits', untitled: 'Offre sans titre' },
+    de: { viewDeal: 'Angebot ansehen', save: 'Sparen', nights: 'Nächte', untitled: 'Angebot ohne Titel' },
+    es: { viewDeal: 'Ver oferta', save: 'Ahorra', nights: 'noches', untitled: 'Oferta sin título' },
+    it: { viewDeal: 'Vedi offerta', save: 'Risparmia', nights: 'notti', untitled: 'Offerta senza titolo' },
+    ro: { viewDeal: 'Vezi oferta', save: 'Economisește', nights: 'nopți', untitled: 'Ofertă fără titlu' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function esc(s) {
@@ -289,6 +324,7 @@
       this.el = container;
       container._tgInitialised = true;
       this.cfg = this._defaults(config);
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this._render();
     }
@@ -304,7 +340,7 @@
         accentColor: c.accentColor || '',
         radius: typeof c.radius === 'number' ? c.radius : 14,
         currency: c.currency || '',
-        ctaText: c.ctaText || 'View deal',
+        ctaText: c.ctaText || '',   // empty = use the localised default at render time
         ctaHref: safeUrl(c.ctaHref) || '',
         // Offer-page linking. When ctaHref is not set explicitly, the card links
         // to offerPage, carrying the offer's saved id when there is one, else the
@@ -352,14 +388,14 @@
       const eyebrow = [this._f('style'), shortType(this._f('type'))].filter(Boolean).join(' · ');
       const loc = [this._f('resort'), this._f('country')].filter(Boolean).join(', ') || this._f('region');
       const nights = this._f('nights');
-      const priceSub = [this._f('basis'), nights ? nights + ' nights' : ''].filter(Boolean).join(' · ');
+      const priceSub = [this._f('basis'), nights ? nights + ' ' + this.t('nights') : ''].filter(Boolean).join(' · ');
 
       // Promo badge — 'Save' uses the amount, others show their own label.
       const badge = this._f('badge');
       let badgeText = '';
       if (badge && badge !== 'No badge') {
         const amt = money(sym, this._f('badgeAmount'));
-        badgeText = (badge === 'Save' && amt) ? 'Save ' + amt : badge;
+        badgeText = (badge === 'Save' && amt) ? this.t('save') + ' ' + amt : badge;
       }
 
       const tags = Array.isArray(o.tags) ? o.tags.slice(0, 3) : [];
@@ -368,7 +404,7 @@
         sym: sym,
         stars: stars,
         eyebrow: eyebrow,
-        title: this._f('title') || 'Untitled offer',
+        title: this._f('title') || this.t('untitled'),
         loc: loc,
         teaser: this._f('teaser'),
         tags: tags,
@@ -418,7 +454,8 @@
     _cta() {
       const href = this._linkHref || '#';
       const tgt = this.cfg.ctaTarget ? ' target="_blank" rel="noopener"' : '';
-      return '<a class="tgoc-cta" href="' + esc(href) + '"' + tgt + '>' + esc(this.cfg.ctaText) + '</a>';
+      const label = this.cfg.ctaText || this.t('viewDeal');
+      return '<a class="tgoc-cta" href="' + esc(href) + '"' + tgt + '>' + esc(label) + '</a>';
     }
 
     // Banner: full-bleed image with the offer overlaid. Punchy and promotional.
@@ -520,6 +557,7 @@
     // Public: update the offer and/or card options and re-render in place.
     update(config) {
       this.cfg = this._defaults(Object.assign({}, this.cfg, config));
+      this.t = makeT(this.cfg);
       this._render();
     }
   }
