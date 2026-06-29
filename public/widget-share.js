@@ -63,7 +63,39 @@
     } catch (e) { /* fall through */ }
     return '/api/share-track';
   })();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only. Platform names (WhatsApp, Facebook, X…) are brand
+  // names and are never translated. English is the source + fallback.
+  const MESSAGES = {
+    en: { share: 'Share', copyLink: 'Copy link', copied: 'Copied!', shareOn: 'Share on {platform}', shareThisPage: 'Share this page', shareOptions: 'Share options', shareColon: 'Share:' },
+    fr: { share: 'Partager', copyLink: 'Copier le lien', copied: 'Copié !', shareOn: 'Partager sur {platform}', shareThisPage: 'Partager cette page', shareOptions: 'Options de partage', shareColon: 'Partager :' },
+    de: { share: 'Teilen', copyLink: 'Link kopieren', copied: 'Kopiert!', shareOn: 'Auf {platform} teilen', shareThisPage: 'Diese Seite teilen', shareOptions: 'Teilen-Optionen', shareColon: 'Teilen:' },
+    es: { share: 'Compartir', copyLink: 'Copiar enlace', copied: '¡Copiado!', shareOn: 'Compartir en {platform}', shareThisPage: 'Compartir esta página', shareOptions: 'Opciones para compartir', shareColon: 'Compartir:' },
+    it: { share: 'Condividi', copyLink: 'Copia link', copied: 'Copiato!', shareOn: 'Condividi su {platform}', shareThisPage: 'Condividi questa pagina', shareOptions: 'Opzioni di condivisione', shareColon: 'Condividi:' },
+    ro: { share: 'Distribuie', copyLink: 'Copiază linkul', copied: 'Copiat!', shareOn: 'Distribuie pe {platform}', shareThisPage: 'Distribuie această pagină', shareOptions: 'Opțiuni de distribuire', shareColon: 'Distribuie:' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline resolver.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -452,6 +484,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this._lastScrollY = (typeof window !== 'undefined') ? window.scrollY : 0;
       this._scrollHandler = null;
@@ -473,7 +506,7 @@
         iconSize: Number(cfg.iconSize) || 40,
         showLabels: cfg.showLabels === true,          // show platform name next to icon
         showTooltips: cfg.showTooltips !== false,
-        triggerLabel: cfg.triggerLabel || 'Share',    // compact mode trigger text
+        triggerLabel: cfg.triggerLabel || '',         // compact mode trigger text ('' = localized "Share")
         showAfterScroll: Number(cfg.showAfterScroll) || 0, // px scrolled before showing
         smartHide: cfg.smartHide === true,            // hide on scroll down, show on scroll up
         shareText: cfg.shareText || '',               // custom share copy override
@@ -508,7 +541,10 @@
 
     _renderButton(platform) {
       const meta = getPageMeta(this.c);
-      const label = PLATFORM_LABELS[platform] || platform;
+      // Platform names stay as brands; only copy/native are localizable chrome.
+      let label = PLATFORM_LABELS[platform] || platform;
+      if (platform === 'copy') label = this.t('copyLink');
+      else if (platform === 'native') label = this.t('share');
       const tooltip = (this.c.showTooltips && !this.c.showLabels) ? ` data-tooltip="${esc(label)}"` : '';
       const colour = BRAND_COLOURS[platform] || '#64748B';
       const styleVar = ` style="--btn-brand:${colour}"`;
@@ -531,7 +567,7 @@
           <button type="button" class="tgsh-btn" data-platform="copy" data-shape="${shape}"${tooltip}${styleVar} aria-label="${esc(label)}">
             ${svg('copy', 18)}
             ${labelHtml}
-            <span class="tgsh-copied" data-copied>Copied!</span>
+            <span class="tgsh-copied" data-copied>${esc(this.t('copied'))}</span>
           </button>
         `;
       }
@@ -540,7 +576,7 @@
       const href = buildShareLink(platform, meta);
       if (!href) return '';
       return `
-        <a class="tgsh-btn" href="${esc(href)}" target="_blank" rel="noopener noreferrer" data-platform="${esc(platform)}" data-shape="${shape}"${tooltip}${styleVar} aria-label="Share on ${esc(label)}">
+        <a class="tgsh-btn" href="${esc(href)}" target="_blank" rel="noopener noreferrer" data-platform="${esc(platform)}" data-shape="${shape}"${tooltip}${styleVar} aria-label="${esc(this.t('shareOn', { platform: label }))}">
           ${svg(platform, 18)}
           ${labelHtml}
         </a>
@@ -563,12 +599,12 @@
 
       switch (cfg.layout) {
         case 'dock':
-          inner = `<div class="tgsh-dock" role="group" aria-label="Share this page">${this._renderButtons()}</div>`;
+          inner = `<div class="tgsh-dock" role="group" aria-label="${esc(this.t('shareThisPage'))}">${this._renderButtons()}</div>`;
           break;
         case 'inline':
           inner = `
-            <div class="tgsh-inline" role="group" aria-label="Share this page">
-              ${cfg.showLabels ? '' : '<span class="tgsh-label">Share:</span>'}
+            <div class="tgsh-inline" role="group" aria-label="${esc(this.t('shareThisPage'))}">
+              ${cfg.showLabels ? '' : `<span class="tgsh-label">${esc(this.t('shareColon'))}</span>`}
               ${this._renderButtons()}
             </div>
           `;
@@ -578,9 +614,9 @@
             <div class="tgsh-compact-wrap">
               <button type="button" class="tgsh-compact-trigger" aria-haspopup="true" aria-expanded="false">
                 ${svg('share', 16)}
-                <span>${esc(cfg.triggerLabel)}</span>
+                <span>${esc(cfg.triggerLabel || this.t('share'))}</span>
               </button>
-              <div class="tgsh-compact-pop" role="menu" aria-label="Share options" data-open="false">
+              <div class="tgsh-compact-pop" role="menu" aria-label="${esc(this.t('shareOptions'))}" data-open="false">
                 ${this._renderButtons()}
               </div>
             </div>
@@ -588,7 +624,7 @@
           break;
         case 'rail':
         default:
-          inner = `<div class="tgsh-rail" data-side="${esc(cfg.side)}" role="group" aria-label="Share this page">${this._renderButtons()}</div>`;
+          inner = `<div class="tgsh-rail" data-side="${esc(cfg.side)}" role="group" aria-label="${esc(this.t('shareThisPage'))}">${this._renderButtons()}</div>`;
       }
 
       this.shadow.innerHTML = `
@@ -754,6 +790,7 @@
         this._scrollHandler = null;
       }
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      this.t = makeT(this.c);
       this._render();
     }
 

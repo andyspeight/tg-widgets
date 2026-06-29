@@ -17,7 +17,39 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome and localized defaults. The CTA label is author content and
+  // is left untranslated here. English is the source + fallback.
+  const MESSAGES = {
+    en: { endsIn: 'Ends in', offerEnded: 'Offer ended', dismissAnnouncement: 'Dismiss announcement', siteAnnouncement: 'Site announcement' },
+    fr: { endsIn: 'Se termine dans', offerEnded: 'Offre terminée', dismissAnnouncement: 'Fermer l\'annonce', siteAnnouncement: 'Annonce du site' },
+    de: { endsIn: 'Endet in', offerEnded: 'Angebot beendet', dismissAnnouncement: 'Ankündigung schließen', siteAnnouncement: 'Website-Ankündigung' },
+    es: { endsIn: 'Termina en', offerEnded: 'Oferta finalizada', dismissAnnouncement: 'Cerrar anuncio', siteAnnouncement: 'Anuncio del sitio' },
+    it: { endsIn: 'Termina tra', offerEnded: 'Offerta terminata', dismissAnnouncement: 'Chiudi annuncio', siteAnnouncement: 'Annuncio del sito' },
+    ro: { endsIn: 'Se termină în', offerEnded: 'Ofertă încheiată', dismissAnnouncement: 'Închide anunțul', siteAnnouncement: 'Anunț al site-ului' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline resolver.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -91,9 +123,9 @@
     // Countdown
     showCountdown: false,
     countdownTo: '',                   // ISO datetime, e.g. 2026-07-31T23:59:00
-    countdownLabel: 'Ends in',
+    countdownLabel: '',                // '' = localized "Ends in"
     hideOnExpire: false,
-    expiredText: 'Offer ended',
+    expiredText: '',                   // '' = localized "Offer ended"
     // Scheduling window (the bar only shows inside it)
     startAt: '',
     endAt: '',
@@ -165,6 +197,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.shadowRoot || (container.attachShadow ? container.attachShadow({ mode: 'open' }) : container);
       this._onResize = this._onResize.bind(this);
       this._tick = this._tick.bind(this);
@@ -226,7 +259,7 @@
       this._cdTo = c.showCountdown ? parseDate(c.countdownTo) : null;
       if (this._cdTo) {
         cdHtml = `<span class="tgdb-cd" role="timer" aria-live="off">
-          <span class="tgdb-cd-label">${esc(c.countdownLabel || '')}</span>
+          <span class="tgdb-cd-label">${esc(c.countdownLabel || this.t('endsIn'))}</span>
           <span class="tgdb-cd-clock" id="tgdb-clock"></span>
         </span>`;
       }
@@ -240,11 +273,11 @@
       }
 
       const closeHtml = c.dismissible
-        ? `<button class="tgdb-close" type="button" id="tgdb-close" aria-label="Dismiss announcement"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`
+        ? `<button class="tgdb-close" type="button" id="tgdb-close" aria-label="${esc(this.t('dismissAnnouncement'))}"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`
         : '';
 
       this.shadow.innerHTML = `<style>${styles()}</style>
-        <aside class="tgdb pos-${pos}${sticky ? '' : ' is-static'}" role="region" aria-label="Site announcement" style="${vars}">
+        <aside class="tgdb pos-${pos}${sticky ? '' : ' is-static'}" role="region" aria-label="${esc(this.t('siteAnnouncement'))}" style="${vars}">
           <div class="tgdb-inner">${msgHtml}${cdHtml}${ctaHtml}</div>
           ${closeHtml}
         </aside>`;
@@ -288,7 +321,7 @@
       let diff = this._cdTo - Date.now();
       if (diff <= 0) {
         if (c.hideOnExpire) { this.dismiss(true); return; }
-        this.clock.innerHTML = `<span class="tgdb-cd-num">${esc(c.expiredText || 'Ended')}</span>`;
+        this.clock.innerHTML = `<span class="tgdb-cd-num">${esc(c.expiredText || this.t('offerEnded'))}</span>`;
         if (this._timer) { clearInterval(this._timer); this._timer = null; }
         return;
       }
@@ -323,6 +356,7 @@
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      this.t = makeT(this.cfg);
       this.destroy(true);
       this._dismissed = false;
       this._boot();
