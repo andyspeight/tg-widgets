@@ -242,6 +242,7 @@
           const cell = document.createElement('div');
           holder.appendChild(cell);
           new window.TGOfferCardWidget(cell, {
+            lang: this.t.lang,   // forward the resolved viewer language so the card overlays offer.i18n for the same language
             layout: cfg.layout,
             theme: cfg.theme,
             accentColor: cfg.accentColor,

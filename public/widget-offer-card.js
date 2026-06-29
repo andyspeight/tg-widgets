@@ -351,6 +351,10 @@
         offerPage: c.offerPage || '',
         offerId: c.offerId || '',
         ctaTarget: c.ctaTarget === '_blank' ? '_blank' : '',
+        // Carry the viewer language through so a parent (e.g. the offers grid)
+        // can pin the card to the language it resolved. Falls back to
+        // <html lang>/navigator inside makeT when not set.
+        lang: c.lang || c.language || c.locale || '',
         offer: c.offer && typeof c.offer === 'object' ? c.offer : {}
       };
     }
