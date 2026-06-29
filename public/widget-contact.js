@@ -50,7 +50,42 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (the action labels and their aria-labels). Business
+  // name, phone, email, address, intro and headings are author content,
+  // translated separately. "WhatsApp" is a brand name and stays as-is. English
+  // is the source + fallback.
+  const MESSAGES = {
+    en: { call: 'Call', email: 'Email', visitUs: 'Visit us', website: 'Website', visitWebsite: 'Visit website', directions: 'Directions', getDirections: 'Get directions', getDirectionsTo: 'Get directions to {name}', openWhatsApp: 'Open WhatsApp chat', callName: 'Call {name}', emailName: 'Email {name}', saveToPhone: 'Save to phone' },
+    fr: { call: 'Appeler', email: 'E-mail', visitUs: 'Nous rendre visite', website: 'Site web', visitWebsite: 'Visiter le site', directions: 'Itinéraire', getDirections: 'Itinéraire', getDirectionsTo: 'Itinéraire vers {name}', openWhatsApp: 'Ouvrir le chat WhatsApp', callName: 'Appeler {name}', emailName: 'Envoyer un e-mail à {name}', saveToPhone: 'Enregistrer sur le téléphone' },
+    de: { call: 'Anrufen', email: 'E-Mail', visitUs: 'Besuchen Sie uns', website: 'Website', visitWebsite: 'Website besuchen', directions: 'Route', getDirections: 'Route', getDirectionsTo: 'Route nach {name}', openWhatsApp: 'WhatsApp-Chat öffnen', callName: '{name} anrufen', emailName: 'E-Mail an {name}', saveToPhone: 'Im Telefon speichern' },
+    es: { call: 'Llamar', email: 'Correo', visitUs: 'Visítanos', website: 'Sitio web', visitWebsite: 'Visitar el sitio', directions: 'Cómo llegar', getDirections: 'Cómo llegar', getDirectionsTo: 'Cómo llegar a {name}', openWhatsApp: 'Abrir chat de WhatsApp', callName: 'Llamar a {name}', emailName: 'Enviar correo a {name}', saveToPhone: 'Guardar en el teléfono' },
+    it: { call: 'Chiama', email: 'Email', visitUs: 'Vieni a trovarci', website: 'Sito web', visitWebsite: 'Visita il sito', directions: 'Indicazioni', getDirections: 'Indicazioni', getDirectionsTo: 'Indicazioni per {name}', openWhatsApp: 'Apri chat WhatsApp', callName: 'Chiama {name}', emailName: 'Invia email a {name}', saveToPhone: 'Salva sul telefono' },
+    ro: { call: 'Sună', email: 'E-mail', visitUs: 'Vizitează-ne', website: 'Site web', visitWebsite: 'Vizitează site-ul', directions: 'Indicații', getDirections: 'Indicații', getDirectionsTo: 'Indicații către {name}', openWhatsApp: 'Deschide chat WhatsApp', callName: 'Sună {name}', emailName: 'Trimite e-mail către {name}', saveToPhone: 'Salvează în telefon' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   /* ─────────────────────────────────────────────────────────────
      Helpers — escaping, safe URLs, vCard
@@ -226,7 +261,7 @@
     showLabels: true,               // Show "Call us" / "Email" labels next to icons (panel & card only)
     headings: {
       contact: 'Get in touch',
-      vcard: 'Save to phone',
+      vcard: '',                    // empty = localised "Save to phone" (this.t('saveToPhone'))
     },
 
     // Strip layout extras
@@ -587,6 +622,7 @@
       if (!container) throw new Error('TGContactWidget: container required');
       this.el = container;
       this.cfg = this._mergeConfig(config);
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : null;
       if (!this.shadow) {
         // Defensive — extremely old browsers without Shadow DOM. Fall back to inline.
@@ -608,6 +644,7 @@
 
     update(newConfig) {
       this.cfg = this._mergeConfig(Object.assign({}, this.cfg, newConfig));
+      this.t = makeT(this.cfg);
       this._render();
     }
 
@@ -704,22 +741,22 @@
     _renderChannels(c) {
       const parts = [];
       if (c.phone) {
-        parts.push(this._channelRow('phone', 'Call', c.phone, telHref(c.phone), 'Call ' + c.phone));
+        parts.push(this._channelRow('phone', this.t('call'), c.phone, telHref(c.phone), this.t('callName', { name: c.phone })));
       }
       if (c.email) {
         const href = 'mailto:' + encodeURIComponent(c.email).replace(/%40/g, '@');
-        parts.push(this._channelRow('mail', 'Email', c.email, safeUrl(href), 'Email ' + c.email));
+        parts.push(this._channelRow('mail', this.t('email'), c.email, safeUrl(href), this.t('emailName', { name: c.email })));
       }
       if (c.whatsapp) {
         const href = whatsappHref(c.whatsapp, c.whatsappMessage);
-        parts.push(this._channelRow('whatsapp', 'WhatsApp', this._fmtWhatsAppValue(c.whatsapp), href, 'Open WhatsApp chat'));
+        parts.push(this._channelRow('whatsapp', 'WhatsApp', this._fmtWhatsAppValue(c.whatsapp), href, this.t('openWhatsApp')));
       }
       if (c.address) {
-        parts.push(this._channelRow('map', 'Visit us', c.address, mapsHref(c.address), 'Get directions to ' + c.address, '_blank'));
+        parts.push(this._channelRow('map', this.t('visitUs'), c.address, mapsHref(c.address), this.t('getDirectionsTo', { name: c.address }), '_blank'));
       }
       if (c.website) {
         const safeWeb = safeUrl(c.website);
-        if (safeWeb) parts.push(this._channelRow('globe', 'Website', this._fmtWebsite(c.website), safeWeb, 'Visit website', '_blank'));
+        if (safeWeb) parts.push(this._channelRow('globe', this.t('website'), this._fmtWebsite(c.website), safeWeb, this.t('visitWebsite'), '_blank'));
       }
       return parts.join('');
     }
@@ -742,24 +779,25 @@
 
     _renderCardActions(c) {
       const out = [];
+      const vcardLabel = c.headings.vcard || this.t('saveToPhone');
       if (c.phone) {
         const href = telHref(c.phone);
-        if (href) out.push(`<a class="tgc-action is-primary" href="${esc(href)}" aria-label="Call ${esc(c.phone)}">${icon('phone')}<span>Call</span></a>`);
+        if (href) out.push(`<a class="tgc-action is-primary" href="${esc(href)}" aria-label="${esc(this.t('callName', { name: c.phone }))}">${icon('phone')}<span>${esc(this.t('call'))}</span></a>`);
       }
       if (c.email) {
         const href = safeUrl('mailto:' + encodeURIComponent(c.email).replace(/%40/g, '@'));
-        if (href) out.push(`<a class="tgc-action" href="${esc(href)}" aria-label="Email ${esc(c.email)}">${icon('mail')}<span>Email</span></a>`);
+        if (href) out.push(`<a class="tgc-action" href="${esc(href)}" aria-label="${esc(this.t('emailName', { name: c.email }))}">${icon('mail')}<span>${esc(this.t('email'))}</span></a>`);
       }
       if (c.whatsapp) {
         const href = safeUrl(whatsappHref(c.whatsapp, c.whatsappMessage));
-        if (href) out.push(`<a class="tgc-action" href="${esc(href)}" target="_blank" rel="noopener noreferrer" aria-label="Open WhatsApp">${icon('whatsapp')}<span>WhatsApp</span></a>`);
+        if (href) out.push(`<a class="tgc-action" href="${esc(href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(this.t('openWhatsApp'))}">${icon('whatsapp')}<span>WhatsApp</span></a>`);
       }
       if (c.address) {
         const href = safeUrl(mapsHref(c.address));
-        if (href) out.push(`<a class="tgc-action" href="${esc(href)}" target="_blank" rel="noopener noreferrer" aria-label="Get directions">${icon('map')}<span>Directions</span></a>`);
+        if (href) out.push(`<a class="tgc-action" href="${esc(href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(this.t('getDirections'))}">${icon('map')}<span>${esc(this.t('directions'))}</span></a>`);
       }
       if (c.showVCard !== false && this._hasAnySavableField(c)) {
-        out.push(`<button class="tgc-action" type="button" data-vcard="1" aria-label="${esc(c.headings.vcard)}">${icon('download')}<span>${esc(c.headings.vcard)}</span></button>`);
+        out.push(`<button class="tgc-action" type="button" data-vcard="1" aria-label="${esc(vcardLabel)}">${icon('download')}<span>${esc(vcardLabel)}</span></button>`);
       }
       return out.join('');
     }
@@ -778,12 +816,13 @@
           ${icon(iconName)}${compact ? '' : `<span class="tgc-strip-label">${esc(label)}</span>`}
         </${tag}>`;
       }
-      if (c.phone) out.push(btn('phone', 'Call', telHref(c.phone), true, false, null, 'Call ' + c.phone));
-      if (c.email) out.push(btn('mail', 'Email', 'mailto:' + encodeURIComponent(c.email).replace(/%40/g, '@'), false, false, null, 'Email ' + c.email));
-      if (c.whatsapp) out.push(btn('whatsapp', 'WhatsApp', whatsappHref(c.whatsapp, c.whatsappMessage), false, false, '_blank', 'Open WhatsApp'));
-      if (c.address) out.push(btn('map', 'Directions', mapsHref(c.address), false, false, '_blank', 'Get directions'));
+      const vcardLabel = c.headings.vcard || this.t('saveToPhone');
+      if (c.phone) out.push(btn('phone', this.t('call'), telHref(c.phone), true, false, null, this.t('callName', { name: c.phone })));
+      if (c.email) out.push(btn('mail', this.t('email'), 'mailto:' + encodeURIComponent(c.email).replace(/%40/g, '@'), false, false, null, this.t('emailName', { name: c.email })));
+      if (c.whatsapp) out.push(btn('whatsapp', 'WhatsApp', whatsappHref(c.whatsapp, c.whatsappMessage), false, false, '_blank', this.t('openWhatsApp')));
+      if (c.address) out.push(btn('map', this.t('directions'), mapsHref(c.address), false, false, '_blank', this.t('getDirections')));
       if (c.showVCard !== false && this._hasAnySavableField(c)) {
-        out.push(btn('download', c.headings.vcard, '#', false, true, null, c.headings.vcard));
+        out.push(btn('download', vcardLabel, '#', false, true, null, vcardLabel));
       }
       return out.join('');
     }
@@ -804,9 +843,10 @@
     _renderVCard(c) {
       if (c.showVCard === false) return '';
       if (!this._hasAnySavableField(c)) return '';
+      const vcardLabel = c.headings.vcard || this.t('saveToPhone');
       return `
-        <button class="tgc-vcard" type="button" data-vcard="1" aria-label="${esc(c.headings.vcard)}">
-          ${icon('download')}<span>${esc(c.headings.vcard)}</span>
+        <button class="tgc-vcard" type="button" data-vcard="1" aria-label="${esc(vcardLabel)}">
+          ${icon('download')}<span>${esc(vcardLabel)}</span>
         </button>
       `;
     }

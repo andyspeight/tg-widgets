@@ -16,7 +16,41 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (labels, aria, the approximate-time prefix, the
+  // explanatory note and the load-error message). Airport and city names are
+  // proper nouns and are not translated. English is the source + fallback.
+  const MESSAGES = {
+    en: { heading: 'Flight time & distance', from: 'From', to: 'To', fromAirport: 'From airport', toAirport: 'To airport', swap: 'Swap airports', approx: 'Approx. flight time', note: 'Distance is the direct great-circle route. Flight time is approximate and excludes connections.', loadError: 'Unable to load Flight Time widget' },
+    fr: { heading: 'Temps de vol et distance', from: 'De', to: 'À', fromAirport: 'Aéroport de départ', toAirport: 'Aéroport d’arrivée', swap: 'Inverser les aéroports', approx: 'Temps de vol approx.', note: 'La distance correspond à l’orthodromie directe. Le temps de vol est approximatif et exclut les correspondances.', loadError: 'Impossible de charger le widget Temps de vol' },
+    de: { heading: 'Flugzeit und Entfernung', from: 'Von', to: 'Nach', fromAirport: 'Abflughafen', toAirport: 'Zielflughafen', swap: 'Flughäfen tauschen', approx: 'Flugzeit ca.', note: 'Die Entfernung ist die direkte Großkreisroute. Die Flugzeit ist ungefähr und schließt Umsteigeverbindungen aus.', loadError: 'Flugzeit-Widget kann nicht geladen werden' },
+    es: { heading: 'Tiempo de vuelo y distancia', from: 'Desde', to: 'A', fromAirport: 'Aeropuerto de salida', toAirport: 'Aeropuerto de llegada', swap: 'Intercambiar aeropuertos', approx: 'Tiempo de vuelo aprox.', note: 'La distancia es la ruta directa de círculo máximo. El tiempo de vuelo es aproximado y excluye las conexiones.', loadError: 'No se puede cargar el widget Tiempo de vuelo' },
+    it: { heading: 'Tempo di volo e distanza', from: 'Da', to: 'A', fromAirport: 'Aeroporto di partenza', toAirport: 'Aeroporto di arrivo', swap: 'Inverti aeroporti', approx: 'Tempo di volo appross.', note: 'La distanza è la rotta diretta del cerchio massimo. Il tempo di volo è approssimativo ed esclude gli scali.', loadError: 'Impossibile caricare il widget Tempo di volo' },
+    ro: { heading: 'Durata zborului și distanța', from: 'De la', to: 'La', fromAirport: 'Aeroport de plecare', toAirport: 'Aeroport de sosire', swap: 'Inversează aeroporturile', approx: 'Durata zborului aprox.', note: 'Distanța este ruta directă pe cercul mare. Durata zborului este aproximativă și exclude conexiunile.', loadError: 'Widgetul Durata zborului nu poate fi încărcat' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveConfigApi() {
     if (typeof window === 'undefined') return '/api/widget-config';
@@ -133,6 +167,7 @@
     constructor(el, config) {
       this.el = el;
       this.cfg = this._defaults(config || {});
+      this.t = makeT(this.cfg);
       this.from = this.cfg.defaultFrom;
       this.to = this.cfg.defaultTo;
       this.shadow = el.attachShadow ? el.attachShadow({ mode: 'open' }) : el;
@@ -148,7 +183,7 @@
       let to = this._validCode(c.defaultTo) || 'JFK';
       if (to === from) to = from === 'LHR' ? 'JFK' : 'LHR';
       return {
-        heading: typeof c.heading === 'string' ? c.heading : 'Flight time & distance',
+        heading: typeof c.heading === 'string' ? c.heading : '',
         defaultFrom: from,
         defaultTo: to,
         units: ['km', 'mi', 'both'].includes(c.units) ? c.units : 'both',
@@ -207,18 +242,18 @@
           @media (max-width: 380px){ .ft-row { grid-template-columns:1fr; } .ft-swap { width:100%; transform:rotate(90deg); margin:2px 0; } }
         </style>
         <div class="ft">
-          ${c.heading ? `<h3 class="ft-head">${esc(c.heading)}</h3>` : ''}
+          ${(c.heading || this.t('heading')) ? `<h3 class="ft-head">${esc(c.heading || this.t('heading'))}</h3>` : ''}
           <div class="ft-row">
-            <div class="ft-cell"><label for="from">From</label><select class="ft-sel" id="from" aria-label="From airport">${this._options(this.from)}</select></div>
-            <button class="ft-swap" id="swap" title="Swap airports" aria-label="Swap airports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
-            <div class="ft-cell"><label for="to">To</label><select class="ft-sel" id="to" aria-label="To airport">${this._options(this.to)}</select></div>
+            <div class="ft-cell"><label for="from">${esc(this.t('from'))}</label><select class="ft-sel" id="from" aria-label="${esc(this.t('fromAirport'))}">${this._options(this.from)}</select></div>
+            <button class="ft-swap" id="swap" title="${esc(this.t('swap'))}" aria-label="${esc(this.t('swap'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+            <div class="ft-cell"><label for="to">${esc(this.t('to'))}</label><select class="ft-sel" id="to" aria-label="${esc(this.t('toAirport'))}">${this._options(this.to)}</select></div>
           </div>
           <div class="ft-out">
             <div class="ft-route" id="route"></div>
             <div class="ft-dist" id="dist">—</div>
             ${c.showTime ? '<div class="ft-time" id="time"></div>' : ''}
           </div>
-          <div class="ft-note">Distance is the direct great-circle route. Flight time is approximate and excludes connections.</div>
+          <div class="ft-note">${esc(this.t('note'))}</div>
         </div>`;
       this._wire();
     }
@@ -252,10 +287,10 @@
       const kmTxt = COMMAS(Math.round(km)) + ' km';
       const miTxt = COMMAS(Math.round(mi)) + ' mi';
       distEl.textContent = this.cfg.units === 'km' ? kmTxt : this.cfg.units === 'mi' ? miTxt : (kmTxt + ' · ' + miTxt);
-      if (timeEl) timeEl.innerHTML = 'Approx. flight time <b>' + fmtHours(flightHours(km, this.cfg.cruiseSpeed)) + '</b>';
+      if (timeEl) timeEl.innerHTML = esc(this.t('approx')) + ' <b>' + esc(fmtHours(flightHours(km, this.cfg.cruiseSpeed))) + '</b>';
     }
 
-    update(config) { this.cfg = this._defaults(config || {}); this.from = this.cfg.defaultFrom; this.to = this.cfg.defaultTo; this._build(); this._compute(); }
+    update(config) { this.cfg = this._defaults(config || {}); this.t = makeT(this.cfg); this.from = this.cfg.defaultFrom; this.to = this.cfg.defaultTo; this._build(); this._compute(); }
 
     destroy() { try { this.shadow.innerHTML = ''; } catch (e) {} try { this.el.removeAttribute('data-tg-initialised'); } catch (e) {} }
   }
@@ -283,7 +318,12 @@
         console.warn('[TG Flight Time] Container has neither data-tg-id nor data-tg-config');
       } catch (err) {
         console.error('[TG Flight Time] Failed to initialise:', err);
-        try { el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">Unable to load Flight Time widget</p>'; } catch (e) {}
+        try {
+          let cfg = {};
+          try { const raw = el.getAttribute('data-tg-config'); if (raw) cfg = JSON.parse(raw); } catch (e) { cfg = {}; }
+          const t = makeT(cfg);
+          el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">' + esc(t('loadError')) + '</p>';
+        } catch (e) {}
       }
     }
   }
