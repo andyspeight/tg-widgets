@@ -15,7 +15,42 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (the localised default stat labels used when the
+  // author hasn't set their own, plus the load-error message). Stat numbers,
+  // author-entered labels, prefixes and suffixes are data, never translated.
+  // English is the source + fallback.
+  const MESSAGES = {
+    en: { happyCustomers: 'Happy customers', wouldRecommend: 'Would recommend', yearsExperience: 'Years of experience', averageRating: 'Average rating', loadError: 'Unable to load Stats widget' },
+    fr: { happyCustomers: 'Clients satisfaits', wouldRecommend: 'Nous recommandent', yearsExperience: 'Ans d\'expérience', averageRating: 'Note moyenne', loadError: 'Impossible de charger le widget Stats' },
+    de: { happyCustomers: 'Zufriedene Kunden', wouldRecommend: 'Würden uns weiterempfehlen', yearsExperience: 'Jahre Erfahrung', averageRating: 'Durchschnittsbewertung', loadError: 'Stats-Widget kann nicht geladen werden' },
+    es: { happyCustomers: 'Clientes satisfechos', wouldRecommend: 'Nos recomendarían', yearsExperience: 'Años de experiencia', averageRating: 'Valoración media', loadError: 'No se pudo cargar el widget de estadísticas' },
+    it: { happyCustomers: 'Clienti soddisfatti', wouldRecommend: 'Ci consiglierebbero', yearsExperience: 'Anni di esperienza', averageRating: 'Valutazione media', loadError: 'Impossibile caricare il widget Statistiche' },
+    ro: { happyCustomers: 'Clienți mulțumiți', wouldRecommend: 'Ne-ar recomanda', yearsExperience: 'Ani de experiență', averageRating: 'Evaluare medie', loadError: 'Widgetul Statistici nu poate fi încărcat' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveConfigApi() {
     if (typeof window === 'undefined') return '/api/widget-config';
@@ -54,6 +89,7 @@
     constructor(el, config) {
       this.el = el;
       this.cfg = this._defaults(config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this._raf = null;
       this._io = null;
       this._done = false;
@@ -78,10 +114,13 @@
           .slice(0, 6);
       }
       if (!stats || !stats.length) stats = [
-        { value: 12000, label: 'Happy customers', prefix: '', suffix: '+', decimals: 0 },
-        { value: 98, label: 'Would recommend', prefix: '', suffix: '%', decimals: 0 },
-        { value: 25, label: 'Years of experience', prefix: '', suffix: '', decimals: 0 },
-        { value: 4.9, label: 'Average rating', prefix: '', suffix: '/5', decimals: 1 },
+        // Default sample stats. Labels are blank so the localised default
+        // (resolved via labelKey at render time) shows until the author sets
+        // their own label, which always wins.
+        { value: 12000, label: '', labelKey: 'happyCustomers', prefix: '', suffix: '+', decimals: 0 },
+        { value: 98, label: '', labelKey: 'wouldRecommend', prefix: '', suffix: '%', decimals: 0 },
+        { value: 25, label: '', labelKey: 'yearsExperience', prefix: '', suffix: '', decimals: 0 },
+        { value: 4.9, label: '', labelKey: 'averageRating', prefix: '', suffix: '/5', decimals: 1 },
       ];
       let cols = Number(c.columns);
       if (![2, 3, 4].includes(cols)) cols = Math.min(stats.length, 4) || 1;
@@ -133,9 +172,12 @@
 
       const grid = this.shadow.getElementById('grid');
       this.nums = c.stats.map(s => {
+        // Author label wins; otherwise fall back to the localised default for
+        // this sample stat (labelKey only present on the built-in defaults).
+        const label = s.label || (s.labelKey ? this.t(s.labelKey) : '');
         const item = document.createElement('div');
         item.className = 'sc-item';
-        item.innerHTML = `<div class="sc-num"><span class="sc-affix">${esc(s.prefix)}</span><span data-role="n">0</span><span class="sc-affix">${esc(s.suffix)}</span></div>${s.label ? `<div class="sc-label">${esc(s.label)}</div>` : ''}`;
+        item.innerHTML = `<div class="sc-num"><span class="sc-affix">${esc(s.prefix)}</span><span data-role="n">0</span><span class="sc-affix">${esc(s.suffix)}</span></div>${label ? `<div class="sc-label">${esc(label)}</div>` : ''}`;
         grid.appendChild(item);
         return item.querySelector('[data-role="n"]');
       });
@@ -181,6 +223,7 @@
       if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
       if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
       this.cfg = this._defaults(config || {});
+      this.t = makeT(this.cfg);
       this._done = true;        // editor updates show finals, no re-animation
       this._build();
       this._render(1);
@@ -214,7 +257,7 @@
         console.warn('[TG Stats] Container has neither data-tg-id nor data-tg-config');
       } catch (err) {
         console.error('[TG Stats] Failed to initialise:', err);
-        try { el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">Unable to load Stats widget</p>'; } catch (e) {}
+        try { el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">' + esc(makeT(null)('loadError')) + '</p>'; } catch (e) {}
       }
     }
   }
