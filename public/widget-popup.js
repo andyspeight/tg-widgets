@@ -80,8 +80,98 @@
     } catch (e) { /* fall through */ }
     return '/api/popup-lead';
   })();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
   const STORAGE_PREFIX = 'tgp_';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome (close control, copy control, form field labels, validation
+  // and status strings) plus localised defaults for author-configurable copy
+  // (title, CTA, button labels). Author content overrides these defaults; the
+  // localised default only shows when the author hasn't customised. English is
+  // the source + fallback.
+  const MESSAGES = {
+    en: {
+      close: 'Close', copyCode: 'Copy code', copied: 'Copied!',
+      name: 'Name', email: 'Email',
+      yourName: 'Your name', emailAddress: 'Email address',
+      subscribe: 'Subscribe', findOutMore: 'Find out more',
+      welcomeAboard: 'Welcome aboard!', yesPlease: 'Yes please', noThanks: 'No thanks',
+      invalidEmail: 'Please enter a valid email address',
+      submitError: 'Something went wrong. Please try again.',
+      sending: 'Sending…', noVideo: 'No video URL configured', notification: 'Notification'
+    },
+    fr: {
+      close: 'Fermer', copyCode: 'Copier le code', copied: 'Copié !',
+      name: 'Nom', email: 'Adresse e-mail',
+      yourName: 'Votre nom', emailAddress: 'Adresse e-mail',
+      subscribe: "S'abonner", findOutMore: 'En savoir plus',
+      welcomeAboard: 'Bienvenue à bord !', yesPlease: 'Oui, avec plaisir', noThanks: 'Non merci',
+      invalidEmail: 'Veuillez saisir une adresse e-mail valide.',
+      submitError: "Une erreur s'est produite. Veuillez réessayer.",
+      sending: 'Envoi…', noVideo: 'Aucune URL vidéo configurée', notification: 'Notification'
+    },
+    de: {
+      close: 'Schließen', copyCode: 'Code kopieren', copied: 'Kopiert!',
+      name: 'Name', email: 'E-Mail-Adresse',
+      yourName: 'Ihr Name', emailAddress: 'E-Mail-Adresse',
+      subscribe: 'Abonnieren', findOutMore: 'Mehr erfahren',
+      welcomeAboard: 'Willkommen an Bord!', yesPlease: 'Ja, gerne', noThanks: 'Nein danke',
+      invalidEmail: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+      submitError: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+      sending: 'Senden…', noVideo: 'Keine Video-URL konfiguriert', notification: 'Benachrichtigung'
+    },
+    es: {
+      close: 'Cerrar', copyCode: 'Copiar código', copied: '¡Copiado!',
+      name: 'Nombre', email: 'Correo electrónico',
+      yourName: 'Tu nombre', emailAddress: 'Correo electrónico',
+      subscribe: 'Suscribirse', findOutMore: 'Saber más',
+      welcomeAboard: '¡Bienvenido a bordo!', yesPlease: 'Sí, por favor', noThanks: 'No, gracias',
+      invalidEmail: 'Introduce una dirección de correo electrónico válida.',
+      submitError: 'Algo ha ido mal. Inténtalo de nuevo.',
+      sending: 'Enviando…', noVideo: 'No hay URL de vídeo configurada', notification: 'Notificación'
+    },
+    it: {
+      close: 'Chiudi', copyCode: 'Copia codice', copied: 'Copiato!',
+      name: 'Nome', email: 'Indirizzo email',
+      yourName: 'Il tuo nome', emailAddress: 'Indirizzo email',
+      subscribe: 'Iscriviti', findOutMore: 'Scopri di più',
+      welcomeAboard: 'Benvenuto a bordo!', yesPlease: 'Sì, grazie', noThanks: 'No, grazie',
+      invalidEmail: 'Inserisci un indirizzo email valido.',
+      submitError: 'Qualcosa è andato storto. Riprova.',
+      sending: 'Invio…', noVideo: 'Nessun URL video configurato', notification: 'Notifica'
+    },
+    ro: {
+      close: 'Închide', copyCode: 'Copiază codul', copied: 'Copiat!',
+      name: 'Nume', email: 'Adresă de e-mail',
+      yourName: 'Numele dvs.', emailAddress: 'Adresă de e-mail',
+      subscribe: 'Abonează-te', findOutMore: 'Află mai multe',
+      welcomeAboard: 'Bun venit la bord!', yesPlease: 'Da, vă rog', noThanks: 'Nu, mulțumesc',
+      invalidEmail: 'Introduceți o adresă de e-mail validă.',
+      submitError: 'Ceva nu a funcționat. Vă rugăm să încercați din nou.',
+      sending: 'Se trimite…', noVideo: 'Nicio adresă URL video configurată', notification: 'Notificare'
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ---------- Utilities ----------
   function esc(s) {
@@ -252,21 +342,23 @@
     contentType: 'announcement', // announcement | email-capture | discount | image | two-step | video
 
     // Common content
-    title: 'Welcome aboard!',
+    // Localised-default fields are left empty here; the use-site falls back to
+    // a viewer-language default via this.t(...) when the author hasn't set them.
+    title: '', // localised default: 'Welcome aboard!'
     body: 'Sign up to get exclusive travel deals straight to your inbox.',
     image: '', // Optional hero image URL
     imageAlt: '',
-    ctaText: 'Find out more',
+    ctaText: '', // localised default: 'Find out more'
     ctaUrl: '#',
     secondaryCtaText: '',
     secondaryCtaUrl: '',
 
     // Email capture
-    emailNameLabel: 'Your name',
+    emailNameLabel: '', // localised default: 'Your name'
     emailNamePlaceholder: 'Sarah Smith',
-    emailEmailLabel: 'Email address',
+    emailEmailLabel: '', // localised default: 'Email address'
     emailEmailPlaceholder: 'you@example.com',
-    emailSubmitLabel: 'Subscribe',
+    emailSubmitLabel: '', // localised default: 'Subscribe'
     emailRequireName: true,
     emailSuccessTitle: 'You\'re on the list',
     emailSuccessMessage: 'Thanks for signing up — we\'ll be in touch.',
@@ -274,14 +366,14 @@
 
     // Discount
     discountCode: 'TRAVEL10',
-    discountCopyLabel: 'Copy code',
-    discountCopiedLabel: 'Copied!',
+    discountCopyLabel: '', // localised default: 'Copy code'
+    discountCopiedLabel: '', // localised default: 'Copied!'
     discountTerms: '',
 
     // Two-step
     twoStepQuestion: 'Want £100 off your next holiday?',
-    twoStepYesLabel: 'Yes please',
-    twoStepNoLabel: 'No thanks',
+    twoStepYesLabel: '', // localised default: 'Yes please'
+    twoStepNoLabel: '', // localised default: 'No thanks'
 
     // Video
     videoUrl: '', // YouTube or Vimeo URL
@@ -842,9 +934,9 @@
   `;
 
   // ---------- Content renderers ----------
-  function renderCloseBtn(cfg) {
+  function renderCloseBtn(cfg, t) {
     if (!cfg.showCloseButton) return '';
-    return '<button type="button" class="tgp-close" data-tgp-close aria-label="Close">' + svg(IC.close) + '</button>';
+    return '<button type="button" class="tgp-close" data-tgp-close aria-label="' + esc(t('close')) + '">' + svg(IC.close) + '</button>';
   }
 
   function renderHero(cfg) {
@@ -854,17 +946,19 @@
     return '<img class="tgp-hero" src="' + esc(url) + '" alt="' + esc(cfg.imageAlt || '') + '" loading="lazy" />';
   }
 
-  function renderAnnouncement(cfg) {
+  function renderAnnouncement(cfg, t) {
     let html = '';
     html += renderHero(cfg);
     html += '<div class="tgp-body">';
-    html += renderCloseBtn(cfg);
-    if (cfg.title) html += '<h2 class="tgp-title">' + esc(cfg.title) + '</h2>';
+    html += renderCloseBtn(cfg, t);
+    const title = cfg.title || t('welcomeAboard');
+    if (title) html += '<h2 class="tgp-title">' + esc(title) + '</h2>';
     if (cfg.body) html += '<p class="tgp-text">' + esc(cfg.body) + '</p>';
     html += '<div class="tgp-actions">';
-    if (cfg.ctaText) {
+    const ctaText = cfg.ctaText || t('findOutMore');
+    if (ctaText) {
       const url = safeUrl(cfg.ctaUrl) || '#';
-      html += '<a class="tgp-btn tgp-btn-primary" href="' + esc(url) + '" data-tgp-cta>' + esc(cfg.ctaText) + '</a>';
+      html += '<a class="tgp-btn tgp-btn-primary" href="' + esc(url) + '" data-tgp-cta>' + esc(ctaText) + '</a>';
     }
     if (cfg.secondaryCtaText) {
       const url = safeUrl(cfg.secondaryCtaUrl) || '#';
@@ -874,26 +968,26 @@
     return html;
   }
 
-  function renderEmailCapture(cfg) {
+  function renderEmailCapture(cfg, t) {
     let html = '';
     html += renderHero(cfg);
     html += '<div class="tgp-body" data-tgp-form-wrap>';
-    html += renderCloseBtn(cfg);
+    html += renderCloseBtn(cfg, t);
     if (cfg.title) html += '<h2 class="tgp-title">' + esc(cfg.title) + '</h2>';
     if (cfg.body) html += '<p class="tgp-text">' + esc(cfg.body) + '</p>';
     html += '<form class="tgp-form" data-tgp-form novalidate>';
     if (cfg.emailRequireName) {
       html += '<div class="tgp-field">';
-      html += '<label class="tgp-label" for="tgp-name">' + esc(cfg.emailNameLabel || 'Name') + '</label>';
+      html += '<label class="tgp-label" for="tgp-name">' + esc(cfg.emailNameLabel || t('yourName')) + '</label>';
       html += '<input class="tgp-input" type="text" id="tgp-name" name="name" placeholder="' + esc(cfg.emailNamePlaceholder || '') + '" autocomplete="name" required />';
       html += '</div>';
     }
     html += '<div class="tgp-field">';
-    html += '<label class="tgp-label" for="tgp-email">' + esc(cfg.emailEmailLabel || 'Email') + '</label>';
+    html += '<label class="tgp-label" for="tgp-email">' + esc(cfg.emailEmailLabel || t('emailAddress')) + '</label>';
     html += '<input class="tgp-input" type="email" id="tgp-email" name="email" placeholder="' + esc(cfg.emailEmailPlaceholder || '') + '" autocomplete="email" required />';
     html += '<div class="tgp-error-msg" data-tgp-error hidden></div>';
     html += '</div>';
-    html += '<button type="submit" class="tgp-btn tgp-btn-primary tgp-btn-block" data-tgp-submit>' + esc(cfg.emailSubmitLabel || 'Subscribe') + '</button>';
+    html += '<button type="submit" class="tgp-btn tgp-btn-primary tgp-btn-block" data-tgp-submit>' + esc(cfg.emailSubmitLabel || t('subscribe')) + '</button>';
     if (cfg.emailConsentText) {
       html += '<p class="tgp-consent">' + esc(cfg.emailConsentText) + '</p>';
     }
@@ -902,9 +996,9 @@
     return html;
   }
 
-  function renderEmailSuccess(cfg) {
+  function renderEmailSuccess(cfg, t) {
     let html = '<div class="tgp-body">';
-    html += renderCloseBtn(cfg);
+    html += renderCloseBtn(cfg, t);
     html += '<div class="tgp-success">';
     html += '<div class="tgp-success-icon">' + svg(IC.check) + '</div>';
     html += '<h2 class="tgp-title">' + esc(cfg.emailSuccessTitle || 'Thanks!') + '</h2>';
@@ -913,16 +1007,16 @@
     return html;
   }
 
-  function renderDiscount(cfg) {
+  function renderDiscount(cfg, t) {
     let html = '';
     html += renderHero(cfg);
     html += '<div class="tgp-body">';
-    html += renderCloseBtn(cfg);
+    html += renderCloseBtn(cfg, t);
     if (cfg.title) html += '<h2 class="tgp-title">' + esc(cfg.title) + '</h2>';
     if (cfg.body) html += '<p class="tgp-text">' + esc(cfg.body) + '</p>';
     html += '<div class="tgp-discount">';
     html += '<span class="tgp-discount-code">' + esc(cfg.discountCode || 'CODE') + '</span>';
-    html += '<button type="button" class="tgp-discount-copy" data-tgp-copy>' + svg(IC.copy) + '<span data-tgp-copy-label>' + esc(cfg.discountCopyLabel || 'Copy') + '</span></button>';
+    html += '<button type="button" class="tgp-discount-copy" data-tgp-copy>' + svg(IC.copy) + '<span data-tgp-copy-label>' + esc(cfg.discountCopyLabel || t('copyCode')) + '</span></button>';
     html += '</div>';
     if (cfg.discountTerms) html += '<p class="tgp-terms">' + esc(cfg.discountTerms) + '</p>';
     if (cfg.ctaText) {
@@ -933,11 +1027,11 @@
     return html;
   }
 
-  function renderImage(cfg) {
+  function renderImage(cfg, t) {
     const url = safeUrl(cfg.image);
-    if (!url) return renderAnnouncement(cfg);
+    if (!url) return renderAnnouncement(cfg, t);
     let html = '<div class="tgp-body" style="padding:0">';
-    html += renderCloseBtn(cfg);
+    html += renderCloseBtn(cfg, t);
     if (cfg.ctaUrl) {
       const link = safeUrl(cfg.ctaUrl);
       if (link) {
@@ -954,13 +1048,13 @@
     return html;
   }
 
-  function renderTwoStepQuestion(cfg) {
+  function renderTwoStepQuestion(cfg, t) {
     let html = '<div class="tgp-body">';
-    html += renderCloseBtn(cfg);
+    html += renderCloseBtn(cfg, t);
     html += '<p class="tgp-twostep-q">' + esc(cfg.twoStepQuestion || 'Interested?') + '</p>';
     html += '<div class="tgp-twostep-actions">';
-    html += '<button type="button" class="tgp-btn tgp-btn-secondary" data-tgp-twostep-no>' + esc(cfg.twoStepNoLabel || 'No thanks') + '</button>';
-    html += '<button type="button" class="tgp-btn tgp-btn-primary" data-tgp-twostep-yes>' + esc(cfg.twoStepYesLabel || 'Yes please') + '</button>';
+    html += '<button type="button" class="tgp-btn tgp-btn-secondary" data-tgp-twostep-no>' + esc(cfg.twoStepNoLabel || t('noThanks')) + '</button>';
+    html += '<button type="button" class="tgp-btn tgp-btn-primary" data-tgp-twostep-yes>' + esc(cfg.twoStepYesLabel || t('yesPlease')) + '</button>';
     html += '</div></div>';
     return html;
   }
@@ -978,17 +1072,17 @@
     return '';
   }
 
-  function renderVideo(cfg) {
+  function renderVideo(cfg, t) {
     const embed = getVideoEmbedUrl(cfg.videoUrl);
     let html = '<div class="tgp-body" style="padding:0">';
-    html += renderCloseBtn(cfg);
+    html += renderCloseBtn(cfg, t);
     if (embed) {
       const auto = cfg.videoAutoplay ? '&autoplay=1' : '';
       html += '<div class="tgp-video-wrap">';
       html += '<iframe src="' + esc(embed + auto) + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
       html += '</div>';
     } else {
-      html += '<div style="padding:40px;text-align:center;color:var(--tgp-sub)">No video URL configured</div>';
+      html += '<div style="padding:40px;text-align:center;color:var(--tgp-sub)">' + esc(t('noVideo')) + '</div>';
     }
     if (cfg.title || cfg.body) {
       html += '<div style="padding:20px 24px">';
@@ -1000,20 +1094,20 @@
     return html;
   }
 
-  function renderContent(cfg, state) {
+  function renderContent(cfg, state, t) {
     const ct = cfg.contentType || 'announcement';
-    if (ct === 'announcement') return renderAnnouncement(cfg);
+    if (ct === 'announcement') return renderAnnouncement(cfg, t);
     if (ct === 'email-capture') {
-      return state.submitted ? renderEmailSuccess(cfg) : renderEmailCapture(cfg);
+      return state.submitted ? renderEmailSuccess(cfg, t) : renderEmailCapture(cfg, t);
     }
-    if (ct === 'discount') return renderDiscount(cfg);
-    if (ct === 'image') return renderImage(cfg);
+    if (ct === 'discount') return renderDiscount(cfg, t);
+    if (ct === 'image') return renderImage(cfg, t);
     if (ct === 'two-step') {
-      if (state.twoStepAccepted) return renderEmailCapture(cfg);
-      return renderTwoStepQuestion(cfg);
+      if (state.twoStepAccepted) return renderEmailCapture(cfg, t);
+      return renderTwoStepQuestion(cfg, t);
     }
-    if (ct === 'video') return renderVideo(cfg);
-    return renderAnnouncement(cfg);
+    if (ct === 'video') return renderVideo(cfg, t);
+    return renderAnnouncement(cfg, t);
   }
 
   // ---------- Widget class ----------
@@ -1021,6 +1115,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.state = { submitted: false, twoStepAccepted: false, isOpen: false };
       this.shadow = container.attachShadow({ mode: 'open' });
       this.cleanupFns = [];
@@ -1094,9 +1189,9 @@
       let html = '<style>' + STYLES + '</style>';
       html += '<div class="tgp-root ' + layoutClass + '" data-theme="' + css.theme + '" style="' + css.styles + '">';
       if (showBackdrop) html += '<div class="tgp-backdrop" data-tgp-backdrop></div>';
-      html += '<div class="tgp-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(this.cfg.title || 'Notification') + '">';
+      html += '<div class="tgp-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(this.cfg.title || this.t('notification')) + '">';
       html += '<div class="tgp-card" data-tgp-card>';
-      html += renderContent(this.cfg, this.state);
+      html += renderContent(this.cfg, this.state, this.t);
       html += '</div></div></div>';
 
       this.shadow.innerHTML = html;
@@ -1208,7 +1303,7 @@
           self._copyToClipboard(code);
           copyBtn.classList.add('tgp-copied');
           const labelSpan = copyBtn.querySelector('[data-tgp-copy-label]');
-          if (labelSpan) labelSpan.textContent = cfg.discountCopiedLabel || 'Copied!';
+          if (labelSpan) labelSpan.textContent = cfg.discountCopiedLabel || self.t('copied');
           recordConverted(cfg);
         });
       }
@@ -1226,7 +1321,7 @@
     _rerenderContent() {
       const card = this.shadow.querySelector('[data-tgp-card]');
       if (!card) return;
-      card.innerHTML = renderContent(this.cfg, this.state);
+      card.innerHTML = renderContent(this.cfg, this.state, this.t);
       this._bind();
     }
 
@@ -1267,7 +1362,7 @@
       if (emailInput) emailInput.classList.remove('tgp-error');
 
       if (!isValidEmail(email)) {
-        if (errorEl) { errorEl.hidden = false; errorEl.textContent = 'Please enter a valid email address'; }
+        if (errorEl) { errorEl.hidden = false; errorEl.textContent = this.t('invalidEmail'); }
         if (emailInput) emailInput.classList.add('tgp-error');
         if (emailInput) emailInput.focus();
         return;
@@ -1282,7 +1377,7 @@
       // Disable submit
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending…';
+        submitBtn.textContent = this.t('sending');
       }
 
       try {
@@ -1303,16 +1398,17 @@
         recordConverted(cfg);
         this._rerenderContent();
       } catch (err) {
-        if (errorEl) { errorEl.hidden = false; errorEl.textContent = 'Something went wrong. Please try again.'; }
+        if (errorEl) { errorEl.hidden = false; errorEl.textContent = this.t('submitError'); }
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = cfg.emailSubmitLabel || 'Subscribe';
+          submitBtn.textContent = cfg.emailSubmitLabel || this.t('subscribe');
         }
       }
     }
 
     update(newConfig) {
       this.cfg = Object.assign({}, DEFAULTS, newConfig || {});
+      this.t = makeT(this.cfg);
       if (this.state.isOpen) this._render(), this._bind();
     }
 

@@ -86,7 +86,171 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only: month names, climate-band reason labels, the
+  // season callout phrasing, the legend, the level eyebrow, and the empty /
+  // error notices. English is the source + fallback. Author content (the
+  // section headings and CTA text in config) and live API data (the
+  // destination name, region, country) are NOT translated here. There is no
+  // live weather-condition text in this Phase-1 climatology widget, so none
+  // of these strings come from a weather API.
+  const MESSAGES = {
+    en: {
+      monthsShort: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      monthsFull: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+      bandHot: 'Hot days', bandWarm: 'Warm days', bandMild: 'Mild days', bandCooler: 'Cooler days',
+      littleRain: 'little rain', wetterThanAverage: 'wetter than average',
+      peakConditions: 'Peak conditions', fewerCrowds: 'Fewer crowds',
+      goodWindow: 'A good window to travel',
+      peakSeason: 'Peak season', shoulderSeason: 'Shoulder season', offSeason: 'Off season',
+      perfectTime: 'Perfect time to visit', goodTime: 'A good time to visit', quieterTime: 'Quieter time to visit',
+      typically: 'Typically {temp}°{unit} in {month}.',
+      levelCountry: 'Country', levelCity: 'City / Region', levelResort: 'Resort',
+      tempUnits: 'Temperature units',
+      legendBest: 'Best', legendShoulder: 'Shoulder', legendOff: 'Off', legendRainfall: 'Rainfall',
+      srBest: 'best season', srShoulder: 'shoulder season', srOff: 'off season',
+      srChart: 'Average daytime temperatures for {name}, January through December: {parts}.',
+      thisDestination: 'this destination',
+      enquire: 'Enquire',
+      noDataTitle: 'Weather data not available',
+      noDataBody: 'Please check the page configuration. This widget is looking for a destination with climate data that has not yet been populated.',
+      errorTitle: 'Unable to load weather',
+      errorBody: 'The climate data is temporarily unavailable. Please try again in a moment.',
+    },
+    fr: {
+      monthsShort: ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'],
+      monthsFull: ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],
+      bandHot: 'Journées chaudes', bandWarm: 'Journées douces', bandMild: 'Journées tempérées', bandCooler: 'Journées fraîches',
+      littleRain: 'peu de pluie', wetterThanAverage: 'plus humide que la moyenne',
+      peakConditions: 'Conditions optimales', fewerCrowds: 'Moins de monde',
+      goodWindow: 'Une bonne période pour voyager',
+      peakSeason: 'Haute saison', shoulderSeason: 'Intersaison', offSeason: 'Basse saison',
+      perfectTime: 'Moment idéal pour visiter', goodTime: 'Une bonne période pour visiter', quieterTime: 'Période plus calme pour visiter',
+      typically: 'Généralement {temp}°{unit} en {month}.',
+      levelCountry: 'Pays', levelCity: 'Ville / Région', levelResort: 'Station',
+      tempUnits: 'Unités de température',
+      legendBest: 'Optimale', legendShoulder: 'Intersaison', legendOff: 'Basse', legendRainfall: 'Précipitations',
+      srBest: 'haute saison', srShoulder: 'intersaison', srOff: 'basse saison',
+      srChart: 'Températures diurnes moyennes pour {name}, de janvier à décembre : {parts}.',
+      thisDestination: 'cette destination',
+      enquire: 'Demander',
+      noDataTitle: 'Données météo non disponibles',
+      noDataBody: 'Veuillez vérifier la configuration de la page. Ce widget recherche une destination dont les données climatiques ne sont pas encore renseignées.',
+      errorTitle: 'Impossible de charger la météo',
+      errorBody: 'Les données climatiques sont temporairement indisponibles. Veuillez réessayer dans un instant.',
+    },
+    de: {
+      monthsShort: ['Jan','Feb','März','Apr','Mai','Juni','Juli','Aug','Sep','Okt','Nov','Dez'],
+      monthsFull: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+      bandHot: 'Heiße Tage', bandWarm: 'Warme Tage', bandMild: 'Milde Tage', bandCooler: 'Kühlere Tage',
+      littleRain: 'wenig Regen', wetterThanAverage: 'nasser als üblich',
+      peakConditions: 'Beste Bedingungen', fewerCrowds: 'Weniger Andrang',
+      goodWindow: 'Ein guter Reisezeitraum',
+      peakSeason: 'Hauptsaison', shoulderSeason: 'Nebensaison', offSeason: 'Vorsaison',
+      perfectTime: 'Perfekte Reisezeit', goodTime: 'Eine gute Reisezeit', quieterTime: 'Ruhigere Reisezeit',
+      typically: 'Normalerweise {temp}°{unit} im {month}.',
+      levelCountry: 'Land', levelCity: 'Stadt / Region', levelResort: 'Resort',
+      tempUnits: 'Temperatureinheiten',
+      legendBest: 'Beste', legendShoulder: 'Nebensaison', legendOff: 'Vorsaison', legendRainfall: 'Niederschlag',
+      srBest: 'Hauptsaison', srShoulder: 'Nebensaison', srOff: 'Vorsaison',
+      srChart: 'Durchschnittliche Tagestemperaturen für {name}, Januar bis Dezember: {parts}.',
+      thisDestination: 'dieses Reiseziel',
+      enquire: 'Anfragen',
+      noDataTitle: 'Wetterdaten nicht verfügbar',
+      noDataBody: 'Bitte prüfen Sie die Seitenkonfiguration. Dieses Widget sucht ein Reiseziel mit Klimadaten, die noch nicht hinterlegt sind.',
+      errorTitle: 'Wetter kann nicht geladen werden',
+      errorBody: 'Die Klimadaten sind vorübergehend nicht verfügbar. Bitte versuchen Sie es gleich erneut.',
+    },
+    es: {
+      monthsShort: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+      monthsFull: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+      bandHot: 'Días calurosos', bandWarm: 'Días cálidos', bandMild: 'Días templados', bandCooler: 'Días más frescos',
+      littleRain: 'poca lluvia', wetterThanAverage: 'más lluvioso de lo habitual',
+      peakConditions: 'Condiciones óptimas', fewerCrowds: 'Menos gente',
+      goodWindow: 'Una buena época para viajar',
+      peakSeason: 'Temporada alta', shoulderSeason: 'Temporada media', offSeason: 'Temporada baja',
+      perfectTime: 'Momento perfecto para visitar', goodTime: 'Una buena época para visitar', quieterTime: 'Época más tranquila para visitar',
+      typically: 'Normalmente {temp}°{unit} en {month}.',
+      levelCountry: 'País', levelCity: 'Ciudad / Región', levelResort: 'Resort',
+      tempUnits: 'Unidades de temperatura',
+      legendBest: 'Óptima', legendShoulder: 'Media', legendOff: 'Baja', legendRainfall: 'Precipitación',
+      srBest: 'temporada alta', srShoulder: 'temporada media', srOff: 'temporada baja',
+      srChart: 'Temperaturas diurnas medias para {name}, de enero a diciembre: {parts}.',
+      thisDestination: 'este destino',
+      enquire: 'Consultar',
+      noDataTitle: 'Datos meteorológicos no disponibles',
+      noDataBody: 'Compruebe la configuración de la página. Este widget busca un destino con datos climáticos que aún no se han cargado.',
+      errorTitle: 'No se puede cargar la meteorología',
+      errorBody: 'Los datos climáticos no están disponibles temporalmente. Inténtelo de nuevo en un momento.',
+    },
+    it: {
+      monthsShort: ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'],
+      monthsFull: ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'],
+      bandHot: 'Giornate calde', bandWarm: 'Giornate miti', bandMild: 'Giornate temperate', bandCooler: 'Giornate più fresche',
+      littleRain: 'poca pioggia', wetterThanAverage: 'più piovoso della media',
+      peakConditions: 'Condizioni ottimali', fewerCrowds: 'Meno affollamento',
+      goodWindow: 'Un buon periodo per viaggiare',
+      peakSeason: 'Alta stagione', shoulderSeason: 'Media stagione', offSeason: 'Bassa stagione',
+      perfectTime: 'Momento perfetto per visitare', goodTime: 'Un buon periodo per visitare', quieterTime: 'Periodo più tranquillo per visitare',
+      typically: 'In genere {temp}°{unit} a {month}.',
+      levelCountry: 'Paese', levelCity: 'Città / Regione', levelResort: 'Resort',
+      tempUnits: 'Unità di temperatura',
+      legendBest: 'Ottimale', legendShoulder: 'Media', legendOff: 'Bassa', legendRainfall: 'Precipitazioni',
+      srBest: 'alta stagione', srShoulder: 'media stagione', srOff: 'bassa stagione',
+      srChart: 'Temperature diurne medie per {name}, da gennaio a dicembre: {parts}.',
+      thisDestination: 'questa destinazione',
+      enquire: 'Richiedi',
+      noDataTitle: 'Dati meteo non disponibili',
+      noDataBody: 'Controlla la configurazione della pagina. Questo widget cerca una destinazione con dati climatici non ancora inseriti.',
+      errorTitle: 'Impossibile caricare il meteo',
+      errorBody: 'I dati climatici non sono temporaneamente disponibili. Riprova tra un momento.',
+    },
+    ro: {
+      monthsShort: ['ian.','feb.','mar.','apr.','mai','iun.','iul.','aug.','sept.','oct.','nov.','dec.'],
+      monthsFull: ['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'],
+      bandHot: 'Zile călduroase', bandWarm: 'Zile calde', bandMild: 'Zile blânde', bandCooler: 'Zile mai răcoroase',
+      littleRain: 'puțină ploaie', wetterThanAverage: 'mai ploios decât media',
+      peakConditions: 'Condiții optime', fewerCrowds: 'Mai puțină aglomerație',
+      goodWindow: 'O perioadă bună pentru călătorie',
+      peakSeason: 'Sezon de vârf', shoulderSeason: 'Sezon intermediar', offSeason: 'Extrasezon',
+      perfectTime: 'Moment perfect pentru vizită', goodTime: 'O perioadă bună pentru vizită', quieterTime: 'Perioadă mai liniștită pentru vizită',
+      typically: 'De obicei {temp}°{unit} în {month}.',
+      levelCountry: 'Țară', levelCity: 'Oraș / Regiune', levelResort: 'Stațiune',
+      tempUnits: 'Unități de temperatură',
+      legendBest: 'Optim', legendShoulder: 'Intermediar', legendOff: 'Extrasezon', legendRainfall: 'Precipitații',
+      srBest: 'sezon de vârf', srShoulder: 'sezon intermediar', srOff: 'extrasezon',
+      srChart: 'Temperaturi medii diurne pentru {name}, din ianuarie până în decembrie: {parts}.',
+      thisDestination: 'această destinație',
+      enquire: 'Solicită',
+      noDataTitle: 'Date meteo indisponibile',
+      noDataBody: 'Verificați configurația paginii. Acest widget caută o destinație cu date climatice care nu au fost încă completate.',
+      errorTitle: 'Vremea nu poate fi încărcată',
+      errorBody: 'Datele climatice sunt temporar indisponibile. Încercați din nou într-un moment.',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   /* ------------------------------------------------------------------
    * Icon library — inline SVG path strings.
@@ -665,8 +829,8 @@
   // Derive a short "reason" phrase for a best/shoulder month based on
   // surrounding context. Keeps the best-months panel informative without
   // requiring bespoke content per destination.
-  function reasonForMonth(i, temps, rain, season, unit) {
-    const t = typeof temps[i] === 'number' ? (unit === 'F' ? Math.round(temps[i] * 9 / 5 + 32) : temps[i]) : null;
+  function reasonForMonth(i, temps, rain, season, unit, t) {
+    const tNum = typeof temps[i] === 'number' ? (unit === 'F' ? Math.round(temps[i] * 9 / 5 + 32) : temps[i]) : null;
     const r = typeof rain[i] === 'number' ? rain[i] : null;
     const s = season[i];
 
@@ -681,18 +845,19 @@
     const warmThreshold = unit === 'F' ? 70 : 21;
     const coolThreshold = unit === 'F' ? 59 : 15;
 
+    const tr = t || ((k) => MESSAGES.en[k] || k); // tolerate a missing translator
     const parts = [];
-    if (t !== null) {
-      if (t >= hotThreshold) parts.push('Hot days');
-      else if (t >= warmThreshold) parts.push('Warm days');
-      else if (t >= coolThreshold) parts.push('Mild days');
-      else parts.push('Cooler days');
+    if (tNum !== null) {
+      if (tNum >= hotThreshold) parts.push(tr('bandHot'));
+      else if (tNum >= warmThreshold) parts.push(tr('bandWarm'));
+      else if (tNum >= coolThreshold) parts.push(tr('bandMild'));
+      else parts.push(tr('bandCooler'));
     }
-    if (lowRain) parts.push('little rain');
-    else if (highRain && s !== 'best') parts.push('wetter than average');
+    if (lowRain) parts.push(tr('littleRain'));
+    else if (highRain && s !== 'best') parts.push(tr('wetterThanAverage'));
 
-    if (s === 'best' && parts.length === 0) parts.push('Peak conditions');
-    if (s === 'shoulder' && parts.length === 0) parts.push('Fewer crowds');
+    if (s === 'best' && parts.length === 0) parts.push(tr('peakConditions'));
+    if (s === 'shoulder' && parts.length === 0) parts.push(tr('fewerCrowds'));
 
     return parts.join(', ');
   }
@@ -725,20 +890,23 @@
     return picked.sort((a, b) => a - b);
   }
 
-  // Human-readable month label
-  function monthLabelShort(i) {
-    return MONTH_NAMES_SHORT[i] || '';
+  // Human-readable month label (short). `t` provides the localised month list.
+  function monthLabelShort(i, t) {
+    const months = (t && t('monthsShort')) || MONTH_NAMES_SHORT;
+    return months[i] || '';
   }
 
   // Build screen-reader chart description
-  function climateSrDescription(name, temps, season) {
+  function climateSrDescription(name, temps, season, t) {
     if (!Array.isArray(temps) || temps.length !== 12) return '';
-    const parts = temps.map((t, i) => {
+    const tr = t || ((k) => MESSAGES.en[k] || k);
+    const monthsFull = tr('monthsFull');
+    const parts = temps.map((temp, i) => {
       const s = season[i] || 'unknown';
-      const seasonLabel = s === 'best' ? 'best season' : s === 'shoulder' ? 'shoulder season' : 'off season';
-      return MONTH_NAMES_FULL[i] + ' ' + t + '°C (' + seasonLabel + ')';
+      const seasonLabel = s === 'best' ? tr('srBest') : s === 'shoulder' ? tr('srShoulder') : tr('srOff');
+      return monthsFull[i] + ' ' + temp + '°C (' + seasonLabel + ')';
     });
-    return 'Average daytime temperatures for ' + name + ', January through December: ' + parts.join(', ') + '.';
+    return tr('srChart', { name: name, parts: parts.join(', ') });
   }
 
   /* ------------------------------------------------------------------
@@ -749,6 +917,7 @@
       if (!container) throw new Error('TGWeatherWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
       this._renderShell();
 
@@ -926,7 +1095,7 @@
       const flag = (this.c.showFlag && d.level === 'country') ? flagEmoji(name) : '';
       const flagHtml = flag ? '<span class="tgw-title-flag" aria-hidden="true">' + flag + '</span>' : '';
       // Eyebrow: region (if present) else the destination level.
-      const levelLabel = d.level === 'country' ? 'Country' : d.level === 'city' ? 'City / Region' : 'Resort';
+      const levelLabel = d.level === 'country' ? this.t('levelCountry') : d.level === 'city' ? this.t('levelCity') : this.t('levelResort');
       const eyebrowText = d.region ? d.region : levelLabel;
 
       return (
@@ -946,31 +1115,32 @@
 
       let pillLabel, headlineText, iconName;
       if (s === 'best') {
-        pillLabel = 'Peak season';
-        headlineText = 'Perfect time to visit';
+        pillLabel = this.t('peakSeason');
+        headlineText = this.t('perfectTime');
         iconName = 'sun';
       } else if (s === 'shoulder') {
-        pillLabel = 'Shoulder season';
-        headlineText = 'A good time to visit';
+        pillLabel = this.t('shoulderSeason');
+        headlineText = this.t('goodTime');
         iconName = 'cloud';
       } else {
-        pillLabel = 'Off season';
-        headlineText = 'Quieter time to visit';
+        pillLabel = this.t('offSeason');
+        headlineText = this.t('quieterTime');
         iconName = 'snowflake';
       }
 
       const temps = d.climate && d.climate.temps;
       const unit = this._tempUnit;
+      const monthsFull = this.t('monthsFull');
       const tRaw = typeof temps[m] === 'number' ? temps[m] : null;
       const tDisp = tRaw === null ? '' : (unit === 'F' ? Math.round(tRaw * 9 / 5 + 32) : tRaw);
       const tempSentence = tRaw === null ? '' :
-        ('Typically ' + tDisp + '°' + unit + ' in ' + MONTH_NAMES_FULL[m] + '.');
+        this.t('typically', { temp: tDisp, unit: unit, month: monthsFull[m] });
 
       return (
         '<div class="tgw-callout">' +
           '<div class="tgw-callout-icon">' + icon(iconName, 18) + '</div>' +
           '<div class="tgw-callout-body">' +
-            '<p class="tgw-callout-label">' + esc(MONTH_NAMES_FULL[m]) + '</p>' +
+            '<p class="tgw-callout-label">' + esc(monthsFull[m]) + '</p>' +
             '<p class="tgw-callout-text">' +
               '<span class="tgw-callout-pill" data-season="' + esc(s) + '">' + esc(pillLabel) + '</span>' +
               esc(headlineText) +
@@ -1022,10 +1192,10 @@
         return '<span class="tgw-climate-month"' + (isCurrent ? ' data-current="true"' : '') + '>' + esc(m) + '</span>';
       }).join('');
 
-      const srDesc = climateSrDescription(d.name || 'this destination', temps, season);
+      const srDesc = climateSrDescription(d.name || this.t('thisDestination'), temps, season, this.t);
 
       const unitToggle = (
-        '<div class="tgw-climate-units" role="group" aria-label="Temperature units">' +
+        '<div class="tgw-climate-units" role="group" aria-label="' + esc(this.t('tempUnits')) + '">' +
           '<button type="button" class="tgw-climate-unit" data-unit="C" aria-pressed="' + (unit === 'C' ? 'true' : 'false') + '">°C</button>' +
           '<button type="button" class="tgw-climate-unit" data-unit="F" aria-pressed="' + (unit === 'F' ? 'true' : 'false') + '">°F</button>' +
         '</div>'
@@ -1042,10 +1212,10 @@
           (rainCells ? '<div class="tgw-climate-rain" aria-hidden="true">' + rainCells + '</div>' : '') +
           '<div class="tgw-climate-months" aria-hidden="true">' + months + '</div>' +
           '<div class="tgw-climate-legend" aria-hidden="true">' +
-            '<span class="tgw-climate-legend-item"><span class="tgw-climate-legend-swatch" style="background:var(--tgw-season-best);"></span>Best</span>' +
-            '<span class="tgw-climate-legend-item"><span class="tgw-climate-legend-swatch" style="background:var(--tgw-season-shoulder);"></span>Shoulder</span>' +
-            '<span class="tgw-climate-legend-item"><span class="tgw-climate-legend-swatch" style="background:var(--tgw-season-off);"></span>Off</span>' +
-            (rainCells ? '<span class="tgw-climate-legend-item"><span class="tgw-climate-legend-swatch" style="background:var(--tgw-rain);"></span>Rainfall</span>' : '') +
+            '<span class="tgw-climate-legend-item"><span class="tgw-climate-legend-swatch" style="background:var(--tgw-season-best);"></span>' + esc(this.t('legendBest')) + '</span>' +
+            '<span class="tgw-climate-legend-item"><span class="tgw-climate-legend-swatch" style="background:var(--tgw-season-shoulder);"></span>' + esc(this.t('legendShoulder')) + '</span>' +
+            '<span class="tgw-climate-legend-item"><span class="tgw-climate-legend-swatch" style="background:var(--tgw-season-off);"></span>' + esc(this.t('legendOff')) + '</span>' +
+            (rainCells ? '<span class="tgw-climate-legend-item"><span class="tgw-climate-legend-swatch" style="background:var(--tgw-rain);"></span>' + esc(this.t('legendRainfall')) + '</span>' : '') +
           '</div>' +
         '</div>'
       );
@@ -1061,10 +1231,10 @@
       if (bestIdx.length === 0) return '';
 
       const items = bestIdx.map(i => {
-        const reason = reasonForMonth(i, temps, rain, season, unit) || 'A good window to travel';
+        const reason = reasonForMonth(i, temps, rain, season, unit, this.t) || this.t('goodWindow');
         return (
           '<li class="tgw-best-item">' +
-            '<span class="tgw-best-month">' + esc(monthLabelShort(i)) + '</span>' +
+            '<span class="tgw-best-month">' + esc(monthLabelShort(i, this.t)) + '</span>' +
             '<span class="tgw-best-reason">' + esc(reason) + '</span>' +
           '</li>'
         );
@@ -1083,8 +1253,8 @@
       if (!cta.title && !cta.buttonLabel && !cta.url) return '';
       const url = safeUrl(cta.url, true);
       const buttonHtml = url
-        ? '<a class="tgw-cta-btn" href="' + esc(url) + '" rel="noopener">' + esc(cta.buttonLabel || 'Enquire') + icon('arrow', 13) + '</a>'
-        : '<button class="tgw-cta-btn" type="button" disabled aria-disabled="true" style="opacity:0.8;cursor:not-allowed;">' + esc(cta.buttonLabel || 'Enquire') + icon('arrow', 13) + '</button>';
+        ? '<a class="tgw-cta-btn" href="' + esc(url) + '" rel="noopener">' + esc(cta.buttonLabel || this.t('enquire')) + icon('arrow', 13) + '</a>'
+        : '<button class="tgw-cta-btn" type="button" disabled aria-disabled="true" style="opacity:0.8;cursor:not-allowed;">' + esc(cta.buttonLabel || this.t('enquire')) + icon('arrow', 13) + '</button>';
 
       return (
         '<div class="tgw-cta">' +
@@ -1101,8 +1271,8 @@
       this.root.innerHTML =
         '<div class="tgw-notice">' +
           '<div class="tgw-notice-icon">' + icon('info', 18) + '</div>' +
-          '<h2 class="tgw-notice-title">Weather data not available</h2>' +
-          '<p class="tgw-notice-body">Please check the page configuration. This widget is looking for a destination with climate data that has not yet been populated.</p>' +
+          '<h2 class="tgw-notice-title">' + esc(this.t('noDataTitle')) + '</h2>' +
+          '<p class="tgw-notice-body">' + esc(this.t('noDataBody')) + '</p>' +
         '</div>';
     }
 
@@ -1110,8 +1280,8 @@
       this.root.innerHTML =
         '<div class="tgw-notice">' +
           '<div class="tgw-notice-icon">' + icon('alert', 18) + '</div>' +
-          '<h2 class="tgw-notice-title">Unable to load weather</h2>' +
-          '<p class="tgw-notice-body">The climate data is temporarily unavailable. Please try again in a moment.</p>' +
+          '<h2 class="tgw-notice-title">' + esc(this.t('errorTitle')) + '</h2>' +
+          '<p class="tgw-notice-body">' + esc(this.t('errorBody')) + '</p>' +
         '</div>';
     }
 
@@ -1131,6 +1301,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      this.t = makeT(this.c);
       // Reset unit state so editor config changes to temperatureUnit take effect
       if (newConfig && 'temperatureUnit' in newConfig) this._tempUnit = null;
       this._renderShell();
