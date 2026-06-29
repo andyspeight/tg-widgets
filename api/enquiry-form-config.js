@@ -89,6 +89,12 @@ const EF = {
   submitButtonText:    'fldjrfgcfK7580bft',
   thankYouMode:        'fldTy6oSMKUwYEYjQ',
   thankYouMessage:     'fldiB3PkfcsHRKEWd',
+  // Translations JSON — Layer-2 content i18n. Per-language overlays of the
+  // author content (header, submit label, thank-you, field labels/placeholders/
+  // help and option labels), keyed by 2-letter language code. Produced on save
+  // by /api/enquiry-translate and stored as a JSON string. English is the source;
+  // the widget overlays this per viewer language and falls back string by string.
+  i18nJSON:            'fld0phLw3nKqM7UG6',
   redirectUrl:         'fldYkShCNfibHChpg',
   referencePrefix:     'fldXJxPXCLBnQeb7f',
   buttonColour:        'fldxyawmdBzNiOb7g',
@@ -162,6 +168,99 @@ function safeBool(value) {
   return value === true || value === 'true' || value === 1;
 }
 
+// Coerce to a single-line string with control characters removed and length
+// capped. Done with a char-code loop (no regex) so it is robust and never
+// introduces stray control characters itself.
+function clampStr(value, cap) {
+  if (typeof value !== 'string') return '';
+  let out = '';
+  for (let i = 0; i < value.length && out.length < cap; i++) {
+    const c = value.charCodeAt(i);
+    if (c < 32 || c === 127) continue;   // drop all control chars
+    out += value[i];
+  }
+  return out;
+}
+
+// Validate + whitelist the Layer-2 translations object the editor sends. The
+// shape is keyed by 2-letter language code; each language carries the same
+// content slots as the source (header, submit label, thank-you, and per-field
+// label/placeholder/help/option labels). Everything is capped to the same
+// lengths as the source fields. Field entries are keyed by the field's stable
+// `name`; option labels are keyed by the option's stable `value` — those keys
+// are submission logic and stay exactly as the editor sends them (capped),
+// never translated. Unknown keys, non-strings and empties are dropped. Returns a
+// clean object (possibly empty). Mirrors the offers saved-offers i18n whitelist.
+const I18N_LANG_CAP = 12;
+const I18N_FIELDS_CAP = 80;     // distinct fields with translations per language
+const I18N_OPTIONS_CAP = 80;    // distinct option values per field
+const I18N_KEY_CAP = 200;       // field name / option value key length
+const I18N_SLOT_CAP = { title: 200, subtitle: 500, submitButtonText: 60, thankYouMessage: 500, label: 200, placeholder: 200, help: 500, option: 120 };
+
+function cleanTranslations(raw) {
+  const src = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
+  const out = {};
+  let langN = 0;
+  for (const lang of Object.keys(src)) {
+    if (langN >= I18N_LANG_CAP) break;
+    if (!/^[a-z]{2}$/.test(lang)) continue;
+    const inLang = (src[lang] && typeof src[lang] === 'object' && !Array.isArray(src[lang])) ? src[lang] : {};
+    const o = {};
+
+    // Header.
+    const inHeader = (inLang.header && typeof inLang.header === 'object' && !Array.isArray(inLang.header)) ? inLang.header : {};
+    const header = {};
+    const ht = clampStr(inHeader.title, I18N_SLOT_CAP.title);
+    const hs = clampStr(inHeader.subtitle, I18N_SLOT_CAP.subtitle);
+    if (ht) header.title = ht;
+    if (hs) header.subtitle = hs;
+    if (Object.keys(header).length) o.header = header;
+
+    // Submit + thank-you.
+    const sb = clampStr(inLang.submitButtonText, I18N_SLOT_CAP.submitButtonText);
+    const ty = clampStr(inLang.thankYouMessage, I18N_SLOT_CAP.thankYouMessage);
+    if (sb) o.submitButtonText = sb;
+    if (ty) o.thankYouMessage = ty;
+
+    // Fields — keyed by field name.
+    const inFields = (inLang.fields && typeof inLang.fields === 'object' && !Array.isArray(inLang.fields)) ? inLang.fields : {};
+    const fields = {};
+    let fieldN = 0;
+    for (const rawName of Object.keys(inFields)) {
+      if (fieldN >= I18N_FIELDS_CAP) break;
+      const name = clampStr(rawName, I18N_KEY_CAP);
+      if (!name) continue;
+      const inF = (inFields[rawName] && typeof inFields[rawName] === 'object' && !Array.isArray(inFields[rawName])) ? inFields[rawName] : {};
+      const fo = {};
+      const lbl = clampStr(inF.label, I18N_SLOT_CAP.label);
+      const ph = clampStr(inF.placeholder, I18N_SLOT_CAP.placeholder);
+      const hp = clampStr(inF.help, I18N_SLOT_CAP.help);
+      if (lbl) fo.label = lbl;
+      if (ph) fo.placeholder = ph;
+      if (hp) fo.help = hp;
+
+      // Option labels — keyed by the option's stable value.
+      const inOpts = (inF.options && typeof inF.options === 'object' && !Array.isArray(inF.options)) ? inF.options : {};
+      const opts = {};
+      let optN = 0;
+      for (const rawVal of Object.keys(inOpts)) {
+        if (optN >= I18N_OPTIONS_CAP) break;
+        const val = clampStr(rawVal, I18N_KEY_CAP);
+        if (!val) continue;
+        const lab = clampStr(inOpts[rawVal], I18N_SLOT_CAP.option);
+        if (lab) { opts[val] = lab; optN++; }
+      }
+      if (Object.keys(opts).length) fo.options = opts;
+
+      if (Object.keys(fo).length) { fields[name] = fo; fieldN++; }
+    }
+    if (Object.keys(fields).length) o.fields = fields;
+
+    if (Object.keys(o).length) { out[lang] = o; langN++; }
+  }
+  return out;
+}
+
 function generateWebhookSecret() {
   // 32 bytes of entropy, hex-encoded = 64 chars. Good enough for HMAC signing.
   const arr = new Uint8Array(32);
@@ -230,6 +329,18 @@ function buildEnquiryFormFields(payload, userEmail, isCreate) {
   if (payload.submitButtonText !== undefined)  fields[EF.submitButtonText] = safeStr(payload.submitButtonText, 60);
   if (payload.thankYouMode !== undefined)      fields[EF.thankYouMode] = whitelist(payload.thankYouMode, THANK_YOU_MODES, 'inline');
   if (payload.thankYouMessage !== undefined)   fields[EF.thankYouMessage] = safeStr(payload.thankYouMessage, 500);
+  if (payload.i18n !== undefined) {
+    // Layer-2 translations. Validate + whitelist, then store as a JSON string.
+    // Empty object clears the field. Never write unbounded data.
+    try {
+      const clean = cleanTranslations(payload.i18n);
+      const s = Object.keys(clean).length ? JSON.stringify(clean) : '';
+      if (s.length > 200000) throw new Error('translations too large');
+      fields[EF.i18nJSON] = s;
+    } catch (e) {
+      throw new Error('Invalid i18n: ' + e.message);
+    }
+  }
   if (payload.redirectUrl !== undefined)       fields[EF.redirectUrl] = safeStr(payload.redirectUrl, 500);
   if (payload.referencePrefix !== undefined)   fields[EF.referencePrefix] = safeStr(payload.referencePrefix, 10);
   if (payload.buttonColour !== undefined)      fields[EF.buttonColour] = safeStr(payload.buttonColour, 10);
@@ -298,6 +409,12 @@ function buildEnquiryFormFields(payload, userEmail, isCreate) {
 // Convert an Enquiry Forms record back into the editor's config object shape
 function readEnquiryFormRecord(record) {
   const f = record.fields;
+  // Parse + re-validate the stored translations once, so a hand-edited record can
+  // never inject junk into a render path. audienceLanguages is derived from the
+  // languages that actually have translations, so the editor's language toggles
+  // light up correctly on reload without needing a separate stored field.
+  let i18n = {};
+  try { i18n = cleanTranslations(JSON.parse(f[EF.i18nJSON] || '{}')); } catch (e) { i18n = {}; }
   return {
     recordId: record.id,
     widgetId: f[EF.widgetId] || '',
@@ -317,6 +434,10 @@ function readEnquiryFormRecord(record) {
     submitButtonText: f[EF.submitButtonText] || 'Send my enquiry',
     thankYouMode: f[EF.thankYouMode] || 'inline',
     thankYouMessage: f[EF.thankYouMessage] || '',
+    // Layer-2 translations (parsed + re-validated above) plus the derived set of
+    // languages that carry translations, for the editor's language toggles.
+    i18n: i18n,
+    audienceLanguages: Object.keys(i18n),
     redirectUrl: f[EF.redirectUrl] || '',
     referencePrefix: f[EF.referencePrefix] || 'TG-',
     buttonColour: f[EF.buttonColour] || '#1B2B5B',
@@ -480,6 +601,10 @@ export default async function handler(req, res) {
           message: pub.thankYouMessage,
           redirectUrl: pub.redirectUrl,
         },
+        // Layer-2 translations — per-language overlays of the author content.
+        // The widget overlays these for the viewer's language and falls back
+        // string by string to the English source above.
+        i18n: pub.i18n,
         branding: {
           buttonColour: pub.buttonColour,
           accentColour: pub.accentColour,
@@ -770,3 +895,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Service temporarily unavailable' });
   }
 }
+
+// Test surface — pure validation logic, no network.
+export const _test = { cleanTranslations, clampStr };

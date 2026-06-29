@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.0.1';
+  var WIDGET_VERSION = '1.1.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -908,6 +908,7 @@
     this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
     this.t = makeT(config || {});   // resolve viewer language + UI strings
     this.config = this._normalise(config || {});
+    this._applyI18n();               // overlay author content for that language
     this._resetState();
     this._render();
     try { container.__tgWidget = this; } catch (e) {}
@@ -931,8 +932,32 @@
       },
       security: c.security || {},
       agencyName: c.agencyName || (c.header && c.header.title) || t('defaultAgency'),
-      responseTime: c.responseTime || t('defaultResponseTime')
+      responseTime: c.responseTime || t('defaultResponseTime'),
+      // Layer-2 content translations (per-language overlays of the author copy).
+      // Applied by _applyI18n() once the viewer language is resolved. The pro form
+      // is otherwise fully chrome-translated, so only the author's header and
+      // thank-you message are overlaid here.
+      i18n: (c.i18n && typeof c.i18n === 'object' && !Array.isArray(c.i18n)) ? c.i18n : {}
     };
+  };
+
+  // Overlay the author's translated header + thank-you for the resolved viewer
+  // language. Brand names (agencyName) and the chrome-localised response time are
+  // left as the source. No-op for English or when there are no translations.
+  TGEnquiryProWidget.prototype._applyI18n = function () {
+    var lang = this.t && this.t.lang;
+    if (!lang || lang === 'en') return;
+    var tr = this.config && this.config.i18n && this.config.i18n[lang];
+    if (!tr || typeof tr !== 'object') return;
+    var pick = function (over, base) { return (typeof over === 'string' && over.trim()) ? over : base; };
+    if (tr.header && typeof tr.header === 'object') {
+      this.config.header = this.config.header || {};
+      this.config.header.title = pick(tr.header.title, this.config.header.title);
+      this.config.header.subtitle = pick(tr.header.subtitle, this.config.header.subtitle);
+    }
+    if (tr.thankYouMessage && this.config.thankYou && typeof this.config.thankYou === 'object') {
+      this.config.thankYou.message = pick(tr.thankYouMessage, this.config.thankYou.message);
+    }
   };
 
   TGEnquiryProWidget.prototype._resetState = function () {
@@ -952,6 +977,7 @@
   TGEnquiryProWidget.prototype.update = function (config) {
     this.t = makeT(config || {});
     this.config = this._normalise(config || {});
+    this._applyI18n();
     this._applyTheme();
     this._render();
   };

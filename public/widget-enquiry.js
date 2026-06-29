@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.0.1';
+  var WIDGET_VERSION = '1.1.0';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -2475,9 +2475,65 @@
     this.container = container;
     this.config = this._normalise(config || {});
     this.t = makeT(this.config.branding);   // resolve viewer language + UI strings
+    this._applyI18n();                       // overlay author content for that language
     this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
     this._render();
   }
+
+  // Overlay the author's translated copy for the resolved viewer language onto
+  // the normalised config, in place. Modelled on the offer/FAQ content overlay:
+  // only the author's DISPLAY copy is swapped (header title/subtitle, submit
+  // label, thank-you message, and each field's label, placeholder, help text and
+  // option labels). The submitted field names and option values, the routing and
+  // the {firstName}-style tokens inside translated strings are never touched, so
+  // the form posts exactly the same payload in every language. Missing strings
+  // fall back to the English source, so a partial translation never blanks a
+  // field. No-op for English viewers or when the form carries no translations.
+  TGEnquiryWidget.prototype._applyI18n = function () {
+    var lang = this.t && this.t.lang;
+    if (!lang || lang === 'en') return;
+    var i18n = this.config && this.config.i18n;
+    if (!i18n || typeof i18n !== 'object') return;
+    var tr = i18n[lang];
+    if (!tr || typeof tr !== 'object') return;
+
+    var c = this.config;
+    var pick = function (over, base) { return (typeof over === 'string' && over.trim()) ? over : base; };
+
+    // Header.
+    if (tr.header && typeof tr.header === 'object') {
+      c.header = c.header || {};
+      c.header.title = pick(tr.header.title, c.header.title);
+      c.header.subtitle = pick(tr.header.subtitle, c.header.subtitle);
+    }
+    // Submit label + thank-you message.
+    c.submitText = pick(tr.submitButtonText, c.submitText);
+    if (c.thankYou && typeof c.thankYou === 'object') {
+      c.thankYou.message = pick(tr.thankYouMessage, c.thankYou.message);
+    }
+
+    // Per-field label / placeholder / help, and per-option label. Matched by the
+    // field's stable `id` and the option's stable `value` — the keys the editor
+    // stores translations under and the submission keys off, so they never change.
+    var trFields = (tr.fields && typeof tr.fields === 'object' && !Array.isArray(tr.fields)) ? tr.fields : null;
+    if (trFields && Array.isArray(c.fields)) {
+      c.fields.forEach(function (f) {
+        if (!f || !f.id) return;
+        var tf = trFields[f.id];
+        if (!tf || typeof tf !== 'object') return;
+        if (tf.label) f.label = pick(tf.label, f.label);
+        if (tf.placeholder) f.placeholder = pick(tf.placeholder, f.placeholder);
+        if (tf.help) f.help = pick(tf.help, f.help);
+        var trOpts = (tf.options && typeof tf.options === 'object' && !Array.isArray(tf.options)) ? tf.options : null;
+        if (trOpts && Array.isArray(f.options)) {
+          f.options.forEach(function (opt) {
+            if (!opt || opt.value == null) return;
+            opt.label = pick(trOpts[opt.value], opt.label);
+          });
+        }
+      });
+    }
+  };
 
   // Convert the API response / editor config shape into a normalised form
   // the renderers can consume. Tolerates missing or partial input.
@@ -2501,6 +2557,11 @@
       // Steps array — [{ id: 1, label: 'Your trip' }, ...]. If absent,
       // normaliseSteps() below will synthesise one from the field list.
       steps:      Array.isArray(config.steps) ? config.steps : null,
+      // Layer-2 content translations. Per-language overlays of the author copy,
+      // keyed by 2-letter language code, applied by _applyI18n() once the viewer
+      // language is resolved. English is the source; submitted field names and
+      // option values are never touched.
+      i18n:       (config.i18n && typeof config.i18n === 'object' && !Array.isArray(config.i18n)) ? config.i18n : {},
     };
     // fieldsJSON might arrive as a JSON string or a plain array
     var fields = config.fieldsJSON;
@@ -3079,6 +3140,7 @@
   TGEnquiryWidget.prototype.update = function (newConfig) {
     this.config = this._normalise(newConfig || {});
     this.t = makeT(this.config.branding);
+    this._applyI18n();
     this._render();
   };
 
