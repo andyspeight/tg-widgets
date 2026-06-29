@@ -92,7 +92,181 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (section default headings, fact/planning labels,
+  // climate legend + callout, the level eyebrow, empty/error states and the
+  // screen-reader month names). Destination names, taglines, descriptions,
+  // prices, fact values and the Best For tags are author content and are NOT
+  // translated here. English is the source + fallback.
+  const MESSAGES = {
+    en: {
+      levelCountry: 'Country', levelCity: 'City / Region', levelResort: 'Resort',
+      bestTimePrefix: 'Best time to visit: {months}',
+      tempUnits: 'Temperature units',
+      youAreHere: 'You are here: {month}',
+      legendBest: 'Best season', legendShoulder: 'Shoulder', legendOff: 'Off season', legendRain: 'Rainfall',
+      factFlight: 'Flight from UK', factTimezone: 'Time zone', factCurrency: 'Currency', factLanguage: 'Language', factVoltage: 'Electricity',
+      planPrice: 'Price band', planBooking: 'When to book', planDuration: 'Ideal length', planVisa: 'UK visa',
+      detailVisa: 'Visa and entry', detailHealth: 'Health and vaccinations',
+      headingClimate: 'Climate', headingFacts: 'At a glance', headingPlanning: 'Good to know',
+      headingHighlights: 'Highlights', headingTags: 'Best for', headingEvents: "What's on", headingPaired: 'Pairs well with',
+      ctaTitle: 'Speak to our destination specialist', ctaButton: 'Start your enquiry', ctaButtonFallback: 'Enquire',
+      notFoundTitle: 'Destination not found',
+      notFoundBody: 'Please check the page configuration. This widget is looking for a destination that does not exist in the content database yet.',
+      errorTitle: 'Unable to load destination',
+      errorBody: 'The destination content is temporarily unavailable. Please try again in a moment.',
+      initError: 'Unable to load Destination Spotlight widget',
+      srThisDestination: 'this destination',
+      srBestSeason: 'best season', srShoulderSeason: 'shoulder season', srOffSeason: 'off season',
+      srClimate: 'Average daytime temperatures for {name}, January through December: {parts}.',
+      monthsJoin: ', ', monthRange: '{from} to {to}',
+      monthShort: 'J,F,M,A,M,J,J,A,S,O,N,D',
+      monthsFull: 'January,February,March,April,May,June,July,August,September,October,November,December',
+    },
+    fr: {
+      levelCountry: 'Pays', levelCity: 'Ville / Région', levelResort: 'Station',
+      bestTimePrefix: 'Meilleure période pour visiter : {months}',
+      tempUnits: 'Unités de température',
+      youAreHere: 'Vous êtes ici : {month}',
+      legendBest: 'Meilleure saison', legendShoulder: 'Intersaison', legendOff: 'Hors saison', legendRain: 'Précipitations',
+      factFlight: 'Vol depuis le Royaume-Uni', factTimezone: 'Fuseau horaire', factCurrency: 'Monnaie', factLanguage: 'Langue', factVoltage: 'Électricité',
+      planPrice: 'Gamme de prix', planBooking: 'Quand réserver', planDuration: 'Durée idéale', planVisa: 'Visa britannique',
+      detailVisa: 'Visa et entrée', detailHealth: 'Santé et vaccinations',
+      headingClimate: 'Climat', headingFacts: 'En un coup d’œil', headingPlanning: 'Bon à savoir',
+      headingHighlights: 'Points forts', headingTags: 'Idéal pour', headingEvents: 'À l’affiche', headingPaired: 'À associer avec',
+      ctaTitle: 'Parlez à notre spécialiste des destinations', ctaButton: 'Lancer votre demande', ctaButtonFallback: 'Demander',
+      notFoundTitle: 'Destination introuvable',
+      notFoundBody: 'Veuillez vérifier la configuration de la page. Ce widget recherche une destination qui n’existe pas encore dans la base de contenu.',
+      errorTitle: 'Impossible de charger la destination',
+      errorBody: 'Le contenu de la destination est temporairement indisponible. Veuillez réessayer dans un instant.',
+      initError: 'Impossible de charger le widget Destination Spotlight',
+      srThisDestination: 'cette destination',
+      srBestSeason: 'meilleure saison', srShoulderSeason: 'intersaison', srOffSeason: 'hors saison',
+      srClimate: 'Températures diurnes moyennes pour {name}, de janvier à décembre : {parts}.',
+      monthsJoin: ', ', monthRange: '{from} à {to}',
+      monthShort: 'J,F,M,A,M,J,J,A,S,O,N,D',
+      monthsFull: 'janvier,février,mars,avril,mai,juin,juillet,août,septembre,octobre,novembre,décembre',
+    },
+    de: {
+      levelCountry: 'Land', levelCity: 'Stadt / Region', levelResort: 'Ferienort',
+      bestTimePrefix: 'Beste Reisezeit: {months}',
+      tempUnits: 'Temperatureinheiten',
+      youAreHere: 'Sie sind hier: {month}',
+      legendBest: 'Beste Saison', legendShoulder: 'Nebensaison', legendOff: 'Vorsaison', legendRain: 'Niederschlag',
+      factFlight: 'Flug ab Großbritannien', factTimezone: 'Zeitzone', factCurrency: 'Währung', factLanguage: 'Sprache', factVoltage: 'Strom',
+      planPrice: 'Preisklasse', planBooking: 'Wann buchen', planDuration: 'Ideale Dauer', planVisa: 'Visum (UK)',
+      detailVisa: 'Visum und Einreise', detailHealth: 'Gesundheit und Impfungen',
+      headingClimate: 'Klima', headingFacts: 'Auf einen Blick', headingPlanning: 'Gut zu wissen',
+      headingHighlights: 'Höhepunkte', headingTags: 'Ideal für', headingEvents: 'Veranstaltungen', headingPaired: 'Passt gut zu',
+      ctaTitle: 'Sprechen Sie mit unserem Reisespezialisten', ctaButton: 'Anfrage starten', ctaButtonFallback: 'Anfragen',
+      notFoundTitle: 'Reiseziel nicht gefunden',
+      notFoundBody: 'Bitte prüfen Sie die Seitenkonfiguration. Dieses Widget sucht ein Reiseziel, das noch nicht in der Inhaltsdatenbank vorhanden ist.',
+      errorTitle: 'Reiseziel konnte nicht geladen werden',
+      errorBody: 'Die Inhalte des Reiseziels sind vorübergehend nicht verfügbar. Bitte versuchen Sie es gleich noch einmal.',
+      initError: 'Destination-Spotlight-Widget konnte nicht geladen werden',
+      srThisDestination: 'dieses Reiseziel',
+      srBestSeason: 'beste Saison', srShoulderSeason: 'Nebensaison', srOffSeason: 'Vorsaison',
+      srClimate: 'Durchschnittliche Tagestemperaturen für {name}, Januar bis Dezember: {parts}.',
+      monthsJoin: ', ', monthRange: '{from} bis {to}',
+      monthShort: 'J,F,M,A,M,J,J,A,S,O,N,D',
+      monthsFull: 'Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember',
+    },
+    es: {
+      levelCountry: 'País', levelCity: 'Ciudad / Región', levelResort: 'Destino',
+      bestTimePrefix: 'Mejor época para visitar: {months}',
+      tempUnits: 'Unidades de temperatura',
+      youAreHere: 'Estás aquí: {month}',
+      legendBest: 'Mejor temporada', legendShoulder: 'Temporada media', legendOff: 'Temporada baja', legendRain: 'Precipitaciones',
+      factFlight: 'Vuelo desde el Reino Unido', factTimezone: 'Zona horaria', factCurrency: 'Moneda', factLanguage: 'Idioma', factVoltage: 'Electricidad',
+      planPrice: 'Rango de precios', planBooking: 'Cuándo reservar', planDuration: 'Duración ideal', planVisa: 'Visado del Reino Unido',
+      detailVisa: 'Visado y entrada', detailHealth: 'Salud y vacunas',
+      headingClimate: 'Clima', headingFacts: 'De un vistazo', headingPlanning: 'Conviene saber',
+      headingHighlights: 'Lo más destacado', headingTags: 'Ideal para', headingEvents: 'Qué hacer', headingPaired: 'Combina bien con',
+      ctaTitle: 'Habla con nuestro especialista en destinos', ctaButton: 'Iniciar tu consulta', ctaButtonFallback: 'Consultar',
+      notFoundTitle: 'Destino no encontrado',
+      notFoundBody: 'Comprueba la configuración de la página. Este widget busca un destino que todavía no existe en la base de datos de contenido.',
+      errorTitle: 'No se ha podido cargar el destino',
+      errorBody: 'El contenido del destino no está disponible temporalmente. Vuelve a intentarlo en un momento.',
+      initError: 'No se ha podido cargar el widget Destination Spotlight',
+      srThisDestination: 'este destino',
+      srBestSeason: 'mejor temporada', srShoulderSeason: 'temporada media', srOffSeason: 'temporada baja',
+      srClimate: 'Temperaturas diurnas medias de {name}, de enero a diciembre: {parts}.',
+      monthsJoin: ', ', monthRange: '{from} a {to}',
+      monthShort: 'E,F,M,A,M,J,J,A,S,O,N,D',
+      monthsFull: 'enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre',
+    },
+    it: {
+      levelCountry: 'Paese', levelCity: 'Città / Regione', levelResort: 'Località',
+      bestTimePrefix: 'Periodo migliore per visitare: {months}',
+      tempUnits: 'Unità di temperatura',
+      youAreHere: 'Sei qui: {month}',
+      legendBest: 'Stagione migliore', legendShoulder: 'Mezza stagione', legendOff: 'Bassa stagione', legendRain: 'Precipitazioni',
+      factFlight: 'Volo dal Regno Unito', factTimezone: 'Fuso orario', factCurrency: 'Valuta', factLanguage: 'Lingua', factVoltage: 'Elettricità',
+      planPrice: 'Fascia di prezzo', planBooking: 'Quando prenotare', planDuration: 'Durata ideale', planVisa: 'Visto britannico',
+      detailVisa: 'Visto e ingresso', detailHealth: 'Salute e vaccinazioni',
+      headingClimate: 'Clima', headingFacts: 'In sintesi', headingPlanning: 'Buono a sapersi',
+      headingHighlights: 'Punti salienti', headingTags: 'Ideale per', headingEvents: 'Cosa fare', headingPaired: 'Si abbina bene con',
+      ctaTitle: 'Parla con il nostro specialista delle destinazioni', ctaButton: 'Avvia la tua richiesta', ctaButtonFallback: 'Richiedi',
+      notFoundTitle: 'Destinazione non trovata',
+      notFoundBody: 'Controlla la configurazione della pagina. Questo widget cerca una destinazione che non esiste ancora nel database dei contenuti.',
+      errorTitle: 'Impossibile caricare la destinazione',
+      errorBody: 'I contenuti della destinazione non sono temporaneamente disponibili. Riprova tra un momento.',
+      initError: 'Impossibile caricare il widget Destination Spotlight',
+      srThisDestination: 'questa destinazione',
+      srBestSeason: 'stagione migliore', srShoulderSeason: 'mezza stagione', srOffSeason: 'bassa stagione',
+      srClimate: 'Temperature diurne medie per {name}, da gennaio a dicembre: {parts}.',
+      monthsJoin: ', ', monthRange: 'da {from} a {to}',
+      monthShort: 'G,F,M,A,M,G,L,A,S,O,N,D',
+      monthsFull: 'gennaio,febbraio,marzo,aprile,maggio,giugno,luglio,agosto,settembre,ottobre,novembre,dicembre',
+    },
+    ro: {
+      levelCountry: 'Țară', levelCity: 'Oraș / Regiune', levelResort: 'Stațiune',
+      bestTimePrefix: 'Cea mai bună perioadă de vizitat: {months}',
+      tempUnits: 'Unități de temperatură',
+      youAreHere: 'Te afli aici: {month}',
+      legendBest: 'Cel mai bun sezon', legendShoulder: 'Sezon intermediar', legendOff: 'Extrasezon', legendRain: 'Precipitații',
+      factFlight: 'Zbor din Regatul Unit', factTimezone: 'Fus orar', factCurrency: 'Monedă', factLanguage: 'Limbă', factVoltage: 'Electricitate',
+      planPrice: 'Interval de preț', planBooking: 'Când să rezervi', planDuration: 'Durată ideală', planVisa: 'Viză Regatul Unit',
+      detailVisa: 'Viză și intrare', detailHealth: 'Sănătate și vaccinări',
+      headingClimate: 'Climă', headingFacts: 'Pe scurt', headingPlanning: 'Bine de știut',
+      headingHighlights: 'Puncte de interes', headingTags: 'Ideal pentru', headingEvents: 'Ce se întâmplă', headingPaired: 'Se potrivește cu',
+      ctaTitle: 'Discută cu specialistul nostru în destinații', ctaButton: 'Începe solicitarea', ctaButtonFallback: 'Solicită',
+      notFoundTitle: 'Destinație negăsită',
+      notFoundBody: 'Verifică configurația paginii. Acest widget caută o destinație care nu există încă în baza de date de conținut.',
+      errorTitle: 'Destinația nu a putut fi încărcată',
+      errorBody: 'Conținutul destinației este temporar indisponibil. Încearcă din nou într-o clipă.',
+      initError: 'Widgetul Destination Spotlight nu a putut fi încărcat',
+      srThisDestination: 'această destinație',
+      srBestSeason: 'cel mai bun sezon', srShoulderSeason: 'sezon intermediar', srOffSeason: 'extrasezon',
+      srClimate: 'Temperaturi medii diurne pentru {name}, din ianuarie până în decembrie: {parts}.',
+      monthsJoin: ', ', monthRange: '{from} până în {to}',
+      monthShort: 'I,F,M,A,M,I,I,A,S,O,N,D',
+      monthsFull: 'ianuarie,februarie,martie,aprilie,mai,iunie,iulie,august,septembrie,octombrie,noiembrie,decembrie',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   /* ------------------------------------------------------------------
    * Icon library — inline SVG path strings (Lucide-style).
@@ -986,7 +1160,10 @@
   // Given the season array, return a human-readable best-time phrase.
   // "May to September" if those months are contiguously 'best', or
   // "May, July, August" if fragmented, or null if no 'best' months.
-  function formatBestMonths(seasonArr) {
+  // `t` supplies localised month names and joiners.
+  function formatBestMonths(seasonArr, t) {
+    const monthsFull = (t ? t('monthsFull') : MONTH_NAMES_FULL.join(',')).split(',');
+    const join = t ? t('monthsJoin') : ', ';
     if (!Array.isArray(seasonArr) || seasonArr.length !== 12) return null;
     const bestIndexes = [];
     seasonArr.forEach((s, i) => { if (s === 'best') bestIndexes.push(i); });
@@ -1008,19 +1185,27 @@
     }
 
     return runs.map(r => {
-      if (r.length === 1) return MONTH_NAMES_FULL[r[0]];
-      return MONTH_NAMES_FULL[r[0]] + ' to ' + MONTH_NAMES_FULL[r[r.length - 1]];
-    }).join(', ');
+      if (r.length === 1) return monthsFull[r[0]];
+      return t ? t('monthRange', { from: monthsFull[r[0]], to: monthsFull[r[r.length - 1]] })
+               : monthsFull[r[0]] + ' to ' + monthsFull[r[r.length - 1]];
+    }).join(join);
   }
 
   // Build a screen-reader description of the whole climate chart.
-  function climateSrDescription(name, temps, season) {
+  // `t` supplies localised month names, season words and the sentence frame.
+  function climateSrDescription(name, temps, season, t) {
     if (!Array.isArray(temps) || temps.length !== 12) return '';
-    const parts = temps.map((t, i) => {
+    const monthsFull = (t ? t('monthsFull') : MONTH_NAMES_FULL.join(',')).split(',');
+    const join = t ? t('monthsJoin') : ', ';
+    const best = t ? t('srBestSeason') : 'best season';
+    const shoulder = t ? t('srShoulderSeason') : 'shoulder season';
+    const off = t ? t('srOffSeason') : 'off season';
+    const parts = temps.map((temp, i) => {
       const s = season[i] || 'unknown';
-      return MONTH_NAMES_FULL[i] + ' ' + t + '°C (' + (s === 'best' ? 'best season' : s === 'shoulder' ? 'shoulder season' : 'off season') + ')';
-    });
-    return 'Average daytime temperatures for ' + name + ', January through December: ' + parts.join(', ') + '.';
+      return monthsFull[i] + ' ' + temp + '°C (' + (s === 'best' ? best : s === 'shoulder' ? shoulder : off) + ')';
+    }).join(join);
+    return t ? t('srClimate', { name: name, parts: parts })
+             : 'Average daytime temperatures for ' + name + ', January through December: ' + parts + '.';
   }
 
   /* ------------------------------------------------------------------
@@ -1031,6 +1216,7 @@
       if (!container) throw new Error('TGSpotlightWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
       this._renderShell();
 
@@ -1063,17 +1249,20 @@
         },
         showAttribution: true,
         showBestTimeCallout: true,
-        eventsHeading: "What's on",
-        highlightsHeading: 'Highlights',
-        tagsHeading: 'Best for',
-        climateHeading: 'Climate',
-        factsHeading: 'At a glance',
-        planningHeading: 'Good to know',
-        pairedHeading: 'Pairs well with',
+        // Section headings + CTA copy default to '' so the localised default
+        // (this.t(...)) is used when the author has not set their own. An
+        // author-supplied string always wins and is rendered verbatim.
+        eventsHeading: '',
+        highlightsHeading: '',
+        tagsHeading: '',
+        climateHeading: '',
+        factsHeading: '',
+        planningHeading: '',
+        pairedHeading: '',
         cta: {
-          title: 'Speak to our destination specialist',
+          title: '',
           subtitle: '',
-          buttonLabel: 'Start your enquiry',
+          buttonLabel: '',
           url: '',
         },
         destination: null,       // {level, recordId}
@@ -1221,7 +1410,7 @@
       const attribution = (this.c.showAttribution && d.attributions && d.attributions[0])
         ? esc(d.attributions[0]) : '';
       const tagline = d.tagline || d.heroIntro || '';
-      const levelLabel = d.level === 'country' ? 'Country' : d.level === 'city' ? 'City / Region' : 'Resort';
+      const levelLabel = d.level === 'country' ? this.t('levelCountry') : d.level === 'city' ? this.t('levelCity') : this.t('levelResort');
       // Compose eyebrow: if a Region is set on the destination, show "Country · Region".
       // The middle dot is the standard editorial separator used elsewhere in the brand.
       const eyebrowText = d.region ? levelLabel + ' · ' + d.region : levelLabel;
@@ -1288,47 +1477,55 @@
         return '<div class="tgs-climate-rain-cell"' + currentAttr + ' style="height:' + h + '%;" aria-hidden="true"></div>';
       }).join('') : '';
 
-      const months = MONTH_LABELS.map((m, i) => {
+      const monthLabels = this.t('monthShort').split(',');
+      const months = monthLabels.map((m, i) => {
         const isCurrent = i === currentMonth;
         return '<span class="tgs-climate-month"' + (isCurrent ? ' data-current="true"' : '') + '>' + esc(m) + '</span>';
       }).join('');
 
-      const bestPhrase = formatBestMonths(season);
+      const bestPhrase = formatBestMonths(season, this.t);
       const callout = (this.c.showBestTimeCallout && bestPhrase)
-        ? '<div class="tgs-climate-callout">' + icon('sun', 14) + '<span>Best time to visit: ' + esc(bestPhrase) + '</span></div>'
+        ? '<div class="tgs-climate-callout">' + icon('sun', 14) + '<span>' + esc(this.t('bestTimePrefix', { months: bestPhrase })) + '</span></div>'
         : '';
 
       // Unit toggle — renders two pill buttons. The bind step attaches listeners.
       const unitToggle = (
-        '<div class="tgs-climate-units" role="group" aria-label="Temperature units">' +
+        '<div class="tgs-climate-units" role="group" aria-label="' + esc(this.t('tempUnits')) + '">' +
           '<button type="button" class="tgs-climate-unit" data-unit="C" aria-pressed="' + (unit === 'C' ? 'true' : 'false') + '">°C</button>' +
           '<button type="button" class="tgs-climate-unit" data-unit="F" aria-pressed="' + (unit === 'F' ? 'true' : 'false') + '">°F</button>' +
         '</div>'
       );
 
-      const srDesc = climateSrDescription(d.name || 'this destination', temps, season);
-      const currentLabel = MONTH_NAMES_FULL[currentMonth];
+      const srDesc = climateSrDescription(d.name || this.t('srThisDestination'), temps, season, this.t);
+      const monthsFull = this.t('monthsFull').split(',');
+      const currentLabel = monthsFull[currentMonth];
+      // Build the "You are here: <strong>Month</strong>" label. Interpolate a
+      // unique sentinel for {month}, escape the surrounding chrome, then swap
+      // the sentinel for the month wrapped in <strong>. This keeps the markup
+      // safe whatever the translation's surrounding text contains.
+      const youAreHereHtml = esc(this.t('youAreHere', { month: 'MONTH' }))
+        .replace('MONTH', '<strong>' + esc(currentLabel) + '</strong>');
 
       return (
         '<section class="tgs-section" aria-labelledby="tgs-climate-heading">' +
           '<div class="tgs-section-head">' +
-            '<h2 class="tgs-section-title" id="tgs-climate-heading">' + esc(this.c.climateHeading) + '</h2>' +
+            '<h2 class="tgs-section-title" id="tgs-climate-heading">' + esc(this.c.climateHeading || this.t('headingClimate')) + '</h2>' +
             unitToggle +
           '</div>' +
           '<div class="tgs-climate">' +
             '<div class="tgs-climate-topline">' +
               callout +
-              '<span class="tgs-climate-current-label" aria-hidden="true">You are here: <strong>' + esc(currentLabel) + '</strong></span>' +
+              '<span class="tgs-climate-current-label" aria-hidden="true">' + youAreHereHtml + '</span>' +
             '</div>' +
             '<p class="tgs-climate-sr-only">' + esc(srDesc) + '</p>' +
             '<div class="tgs-climate-chart" role="img" aria-label="' + esc(srDesc) + '">' + bars + '</div>' +
             (rainCells ? '<div class="tgs-climate-rain" aria-hidden="true">' + rainCells + '</div>' : '') +
             '<div class="tgs-climate-months" aria-hidden="true">' + months + '</div>' +
             '<div class="tgs-climate-legend" aria-hidden="true">' +
-              '<span class="tgs-climate-legend-item"><span class="tgs-climate-legend-swatch" style="background:var(--tgs-season-best);"></span>Best season</span>' +
-              '<span class="tgs-climate-legend-item"><span class="tgs-climate-legend-swatch" style="background:var(--tgs-season-shoulder);"></span>Shoulder</span>' +
-              '<span class="tgs-climate-legend-item"><span class="tgs-climate-legend-swatch" style="background:var(--tgs-season-off);"></span>Off season</span>' +
-              (rainCells ? '<span class="tgs-climate-legend-item"><span class="tgs-climate-legend-swatch" style="background:var(--tgs-rain);"></span>Rainfall</span>' : '') +
+              '<span class="tgs-climate-legend-item"><span class="tgs-climate-legend-swatch" style="background:var(--tgs-season-best);"></span>' + esc(this.t('legendBest')) + '</span>' +
+              '<span class="tgs-climate-legend-item"><span class="tgs-climate-legend-swatch" style="background:var(--tgs-season-shoulder);"></span>' + esc(this.t('legendShoulder')) + '</span>' +
+              '<span class="tgs-climate-legend-item"><span class="tgs-climate-legend-swatch" style="background:var(--tgs-season-off);"></span>' + esc(this.t('legendOff')) + '</span>' +
+              (rainCells ? '<span class="tgs-climate-legend-item"><span class="tgs-climate-legend-swatch" style="background:var(--tgs-rain);"></span>' + esc(this.t('legendRain')) + '</span>' : '') +
             '</div>' +
           '</div>' +
         '</section>'
@@ -1338,11 +1535,11 @@
     _renderFacts(d) {
       const f = d.facts || {};
       const items = [
-        { kind: 'flight',   label: 'Flight from UK', value: f.flightTime },
-        { kind: 'timezone', label: 'Time zone',      value: f.timeZone },
-        { kind: 'currency', label: 'Currency',       value: f.currency },
-        { kind: 'language', label: 'Language',       value: f.language },
-        { kind: 'voltage',  label: 'Electricity',    value: f.voltage },
+        { kind: 'flight',   label: this.t('factFlight'),    value: f.flightTime },
+        { kind: 'timezone', label: this.t('factTimezone'),  value: f.timeZone },
+        { kind: 'currency', label: this.t('factCurrency'),  value: f.currency },
+        { kind: 'language', label: this.t('factLanguage'),  value: f.language },
+        { kind: 'voltage',  label: this.t('factVoltage'),   value: f.voltage },
       ].filter(it => it.value && String(it.value).trim());
 
       if (items.length === 0) return '';
@@ -1360,7 +1557,7 @@
       return (
         '<section class="tgs-section" aria-labelledby="tgs-facts-heading">' +
           '<div class="tgs-section-head">' +
-            '<h2 class="tgs-section-title" id="tgs-facts-heading">' + esc(this.c.factsHeading) + '</h2>' +
+            '<h2 class="tgs-section-title" id="tgs-facts-heading">' + esc(this.c.factsHeading || this.t('headingFacts')) + '</h2>' +
           '</div>' +
           '<div class="tgs-facts">' + cards + '</div>' +
         '</section>'
@@ -1377,10 +1574,10 @@
         ? p.tripDuration.join(' · ') : '';
 
       const items = [
-        { kind: 'price',    label: 'Price band',   value: p.priceBand },
-        { kind: 'booking',  label: 'When to book', value: p.bookingLead },
-        { kind: 'duration', label: 'Ideal length', value: durationText },
-        { kind: 'visa',     label: 'UK visa',      value: p.visaStatus },
+        { kind: 'price',    label: this.t('planPrice'),    value: p.priceBand },
+        { kind: 'booking',  label: this.t('planBooking'),  value: p.bookingLead },
+        { kind: 'duration', label: this.t('planDuration'), value: durationText },
+        { kind: 'visa',     label: this.t('planVisa'),     value: p.visaStatus },
       ].filter(it => it.value && String(it.value).trim());
 
       const advisory = (p.visaAdvisory && String(p.visaAdvisory).trim()) ? String(p.visaAdvisory).trim() : '';
@@ -1421,8 +1618,8 @@
       );
 
       const details = [];
-      if (advisory) details.push(detail('passport', 'Visa and entry', advisory));
-      if (health)   details.push(detail('heart', 'Health and vaccinations', health));
+      if (advisory) details.push(detail('passport', this.t('detailVisa'), advisory));
+      if (health)   details.push(detail('heart', this.t('detailHealth'), health));
 
       const grid = items.length ? '<div class="tgs-plan-grid">' + cards + '</div>' : '';
       const det  = details.length ? '<div class="tgs-plan-details">' + details.join('') + '</div>' : '';
@@ -1430,7 +1627,7 @@
       return (
         '<section class="tgs-section" aria-labelledby="tgs-planning-heading">' +
           '<div class="tgs-section-head">' +
-            '<h2 class="tgs-section-title" id="tgs-planning-heading">' + esc(this.c.planningHeading) + '</h2>' +
+            '<h2 class="tgs-section-title" id="tgs-planning-heading">' + esc(this.c.planningHeading || this.t('headingPlanning')) + '</h2>' +
           '</div>' +
           grid + det +
         '</section>'
@@ -1455,7 +1652,7 @@
       return (
         '<section class="tgs-section" aria-labelledby="tgs-highlights-heading">' +
           '<div class="tgs-section-head">' +
-            '<h2 class="tgs-section-title" id="tgs-highlights-heading">' + esc(this.c.highlightsHeading) + '</h2>' +
+            '<h2 class="tgs-section-title" id="tgs-highlights-heading">' + esc(this.c.highlightsHeading || this.t('headingHighlights')) + '</h2>' +
           '</div>' +
           '<div class="tgs-highlights">' + cards + '</div>' +
         '</section>'
@@ -1479,7 +1676,7 @@
       return (
         '<section class="tgs-section" aria-labelledby="tgs-tags-heading">' +
           '<div class="tgs-section-head">' +
-            '<h2 class="tgs-section-title" id="tgs-tags-heading">' + esc(this.c.tagsHeading) + '</h2>' +
+            '<h2 class="tgs-section-title" id="tgs-tags-heading">' + esc(this.c.tagsHeading || this.t('headingTags')) + '</h2>' +
           '</div>' +
           '<div class="tgs-tags">' + pills + '</div>' +
         '</section>'
@@ -1506,7 +1703,7 @@
       return (
         '<section class="tgs-section" aria-labelledby="tgs-events-heading">' +
           '<div class="tgs-section-head">' +
-            '<h2 class="tgs-section-title" id="tgs-events-heading">' + esc(this.c.eventsHeading) + '</h2>' +
+            '<h2 class="tgs-section-title" id="tgs-events-heading">' + esc(this.c.eventsHeading || this.t('headingEvents')) + '</h2>' +
           '</div>' +
           '<div class="tgs-events">' + rows + '</div>' +
         '</section>'
@@ -1537,7 +1734,7 @@
       return (
         '<section class="tgs-section" aria-labelledby="tgs-paired-heading">' +
           '<div class="tgs-section-head">' +
-            '<h2 class="tgs-section-title" id="tgs-paired-heading">' + esc(this.c.pairedHeading) + '</h2>' +
+            '<h2 class="tgs-section-title" id="tgs-paired-heading">' + esc(this.c.pairedHeading || this.t('headingPaired')) + '</h2>' +
           '</div>' +
           '<div class="tgs-pairs">' + pills + '</div>' +
         '</section>'
@@ -1556,9 +1753,9 @@
         destinationLevel: (d && d.level) ? d.level : '',
         region: (d && d.region) ? d.region : '',
       };
-      const title       = renderTemplate(cta.title || '',       tplVars);
+      const title       = renderTemplate(cta.title || this.t('ctaTitle'), tplVars);
       const subtitle    = renderTemplate(cta.subtitle || '',    tplVars);
-      const buttonLabel = renderTemplate(cta.buttonLabel || 'Enquire', tplVars) || 'Enquire';
+      const buttonLabel = renderTemplate(cta.buttonLabel || this.t('ctaButton') || this.t('ctaButtonFallback'), tplVars) || this.t('ctaButtonFallback');
 
       // Even without a URL, we still render the CTA panel — but as a no-op
       // visually-complete block. An editor preview with no URL yet is still
@@ -1584,8 +1781,8 @@
       this.root.innerHTML =
         '<div class="tgs-notice">' +
           '<div class="tgs-notice-icon">' + icon('info', 22) + '</div>' +
-          '<h2 class="tgs-notice-title">Destination not found</h2>' +
-          '<p class="tgs-notice-body">Please check the page configuration. This widget is looking for a destination that does not exist in the content database yet.</p>' +
+          '<h2 class="tgs-notice-title">' + esc(this.t('notFoundTitle')) + '</h2>' +
+          '<p class="tgs-notice-body">' + esc(this.t('notFoundBody')) + '</p>' +
         '</div>';
     }
 
@@ -1593,8 +1790,8 @@
       this.root.innerHTML =
         '<div class="tgs-notice">' +
           '<div class="tgs-notice-icon">' + icon('alert', 22) + '</div>' +
-          '<h2 class="tgs-notice-title">Unable to load destination</h2>' +
-          '<p class="tgs-notice-body">The destination content is temporarily unavailable. Please try again in a moment.</p>' +
+          '<h2 class="tgs-notice-title">' + esc(this.t('errorTitle')) + '</h2>' +
+          '<p class="tgs-notice-body">' + esc(this.t('errorBody')) + '</p>' +
         '</div>';
     }
 
@@ -1629,6 +1826,7 @@
     // Public API
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      this.t = makeT(this.c);
       this._renderShell();
       if (this.c.destinationData) {
         this._destination = this.c.destinationData;
@@ -1701,7 +1899,7 @@
       } catch (err) {
         console.error('[TG Spotlight] Failed to initialise:', err);
         try {
-          el.innerHTML = '<p style="color:#64748b;font:14px/1.5 -apple-system,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">Unable to load Destination Spotlight widget</p>';
+          el.innerHTML = '<p style="color:#64748b;font:14px/1.5 -apple-system,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">' + makeT(null)('initError') + '</p>';
         } catch (e) { /* noop */ }
       }
     }
