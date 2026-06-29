@@ -173,7 +173,1542 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.10.0';
+  const VERSION = '1.10.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only. Booking data, PII, prices, dates, the agency name and
+  // ATOL/ABTA wording are never translated. English is the source + fallback.
+  // Author overrides via c.labels still win — these are only the defaults.
+  const MESSAGES = {
+    en: {
+      title: 'My Booking',
+      subtitle: 'Welcome back. Enter your details to view everything about your upcoming trip.',
+      subtitleShort: 'Look up your trip in seconds',
+      eyebrow: 'Secure booking lookup',
+      email: 'Email address',
+      date: 'Departure date',
+      ref: 'Booking reference',
+      refShort: 'Reference',
+      refPlaceholder: 'e.g. ABC12345',
+      submit: 'Find my booking',
+      submitShort: 'Find booking',
+      trust: 'Your details are encrypted and never stored.',
+      trustShort: 'Secure lookup',
+      loadingTitle: 'Finding your booking',
+      loadingSub: 'This usually takes a couple of seconds.',
+      nfTitle: 'We couldn\'t find that booking',
+      nfBody: 'Please double-check your email address, departure date and booking reference. If the details look right, get in touch and we\'ll help you straight away.',
+      nfRetry: 'Try again',
+      nfContact: 'Contact support',
+      flights: 'Flights',
+      fareConditions: 'Fare conditions',
+      flightsLine: 'Flights',
+      outbound: 'Outbound',
+      return: 'Return',
+      whatToExpect: 'What to expect',
+      atAGlance: 'At a glance',
+      openingTimes: 'Opening times',
+      dressCode: 'Dress code',
+      included: 'Included',
+      drinks: 'Drinks',
+      food: 'Food',
+      flightAnnouncements: 'Flight announcements',
+      features: 'Features',
+      transfer: 'Transfer',
+      transferInfo: 'Important information',
+      transfersLine: 'Transfers',
+      cancellation: 'Cancellation policy',
+      carHire: 'Car hire',
+      carHireLine: 'Car hire',
+      carHireInfo: 'Important information',
+      suppliedBy: 'Supplied by',
+      pickup: 'Pickup',
+      dropoff: 'Dropoff',
+      payAtPickup: 'Also payable at pickup',
+      payAtPickupNote: 'Paid directly to the rental desk on pickup. Not included in your booking cost above.',
+      ticket: 'Ticket',
+      ticketsLine: 'Tickets',
+      ticketDetails: 'Details',
+      highlights: 'Highlights',
+      notIncluded: 'Not included',
+      meetingPoint: 'Meeting point',
+      languages: 'Languages',
+      cancelledPill: 'Cancelled',
+      cancelBtn: 'Cancel',
+      cancelSecTitle: 'Need to cancel something?',
+      cancelSecSub: 'You\'ll see the cancellation policy and any charges before anything is confirmed.',
+      amendSecTitle: 'Need to change something?',
+      amendSecSub: 'Tell us what you\'d like to change and we\'ll pass it to the team. Nothing on your booking changes until they confirm it.',
+      amendOpen: 'Request a change',
+      amendFieldLabel: 'What would you like to change?',
+      amendPlaceholder: 'For example a date change, a name correction, or a room or seat preference.',
+      amendNote: 'This sends a request only. We\'ll be in touch to confirm, and your booking won\'t change straight away.',
+      amendSubmit: 'Send request',
+      amendCancel: 'Cancel',
+      amendSending: 'Sending…',
+      amendRateLimited: 'Too many attempts. Please wait a few minutes and try again.',
+      amendDoneTitle: 'Request sent',
+      amendDoneBody: 'We\'ve passed your request to the team. Nothing on your booking has changed yet, and we\'ll be in touch to confirm.',
+      amendFailed: 'We couldn\'t send your request just now. Please try again, or contact us.',
+      payNextBtn: 'Pay next payment',
+      payBalanceBtn: 'Pay balance',
+      payConfirm: 'Pay',
+      payAmountLabel: 'Amount to pay',
+      payCancel: 'Cancel',
+      payRedirecting: 'Setting up payment…',
+      payRateLimited: 'Too many attempts. Please wait a few minutes and try again.',
+      payNoBalance: 'There\'s nothing left to pay on this booking.',
+      payFailed: 'We couldn\'t start the payment just now. Please try again, or contact us.',
+      payTooMuch: 'That\'s more than your balance of {amount}.',
+      payTooSmall: 'The smallest part payment is {amount}.',
+      payHintInstalment: 'Your next payment is {next}. Pay that, or enter a different amount up to {max}.',
+      payHintFull: 'Pay your balance in full, or enter a smaller amount (up to {max}).',
+      confirmed: 'Confirmed',
+      atolProtected: 'ATOL Protected',
+      packagedHoliday: 'Package Holiday',
+      operatedBy: 'operated by',
+      yourBooking: 'Your booking',
+      reviews: 'reviews',
+      greetingPrefix: 'Welcome back',
+      greetingSuffix: 'your {city} escape is almost here.',
+      countdownFly: 'until you fly',
+      countdownCheckIn: 'until you check in',
+      countdownTravel: 'until you travel',
+      day: 'day',
+      days: 'days',
+      newLookup: 'Look up another booking',
+      actionPreview: 'Preview',
+      actionPreviewSub: 'View the booking pack inline',
+      actionEmail: 'Email',
+      actionEmailSub: 'Send to your inbox',
+      actionDownload: 'Download',
+      actionDownloadSub: 'Save the PDF to your device',
+      actionPrint: 'Print',
+      actionPrintSub: 'Open a printable copy',
+      accommodation: 'Accommodation',
+      checkin: 'Check-in',
+      checkout: 'Check-out',
+      nights: 'Nights',
+      night: 'night',
+      nightsPlural: 'nights',
+      week: '1 week',
+      room: 'Room',
+      guest: 'guest',
+      guests: 'guests',
+      payment: 'Payment',
+      hotelLine: 'Hotel',
+      packageLine: 'Holiday package',
+      extrasLine: 'Airport extras',
+      paidSoFar: 'Paid so far',
+      balanceRemaining: 'Balance remaining',
+      paymentSchedule: 'Payment schedule',
+      payments: 'payments',
+      next: 'Next',
+      nextDueDate: 'Next payment due',
+      paidInFull: 'Paid in full',
+      depositPaid: 'Deposit paid',
+      balanceDue: 'Balance due',
+      dueDate: 'Due date',
+      instalmentPlan: 'Instalment plan',
+      payOnArrival: 'Also payable on arrival',
+      payOnArrivalNote: 'Paid directly to the hotel at check-in. Not included in your holiday cost above.',
+      resortFee: 'Resort fees',
+      travelling: 'Who\'s travelling',
+      leadGuest: 'Lead guest',
+      adult: 'Adult',
+      specialRequests: 'Special requests',
+      documents: 'Your documents',
+      thingsToKnow: 'Things to know',
+      aboutHotel: 'About the hotel',
+      address: 'Address',
+      viewMap: 'View on map',
+      propertyDetails: 'Property details',
+      yearBuilt: 'Year built',
+      totalRooms: 'Total rooms',
+      roomMix: 'Room mix',
+      facilities: 'Facilities',
+      paymentMethods: 'Accepted at the hotel',
+      localFees: 'At the hotel',
+      checkInOutTimes: 'Check-in & check-out',
+      goodToKnow: 'Good to know',
+      helpTitle: 'Need a hand?',
+      helpBody: 'Our team\'s here if anything about your booking needs attention.',
+      emailUs: 'Email us',
+      callUs: 'Call us',
+      flight: 'Flight',
+      direct: 'Direct',
+      stop: 'stop',
+      stops: 'stops',
+      stopoverIn: 'Stopover in {iata}',
+      stopoverInTimed: '{dur} stopover in {iata}',
+      aircraft: 'Aircraft',
+      thisProduct: 'this product',
+      product: 'product',
+      cancelPrefix: 'Cancel',
+      cancelLoadingSub: 'Checking the cancellation policy…',
+      cancelLoading: 'Loading cancellation details…',
+      cancelRef: 'Booking reference',
+      cancelPoliciesSub: 'Please review the cancellation policy below.',
+      cancelPoliciesLabel: 'Cancellation policy & charges',
+      cancelNoPolicy: 'No specific charges were returned for this product.',
+      cancelWarn: 'Cancelling cannot be undone. Any charges above will apply.',
+      cancelKeep: 'Keep booking',
+      cancelContinue: 'Continue',
+      cancelReasonTitle: 'Confirm cancellation',
+      cancelReasonSub: 'Let us know why you\'re cancelling (optional).',
+      cancelReasonLabel: 'Reason for cancelling',
+      cancelReasonPlaceholder: 'e.g. change of plans',
+      cancelFinalWarn: 'This will cancel the product and can\'t be undone.',
+      cancelBack: 'Back',
+      cancelConfirm: 'Cancel this product',
+      cancelConfirming: 'Cancelling…',
+      cancelWorkingTitle: 'Cancelling…',
+      cancelWorkingSub: 'Please wait while we process this.',
+      cancelWorking: 'Cancelling your product…',
+      cancelDoneTitle: 'Cancellation confirmed',
+      cancelDoneHead: 'That\'s cancelled',
+      cancelDoneBodyTmpl: 'Your {label} has been cancelled.',
+      cancelRefLabel: 'Reference',
+      cancelDoneBtn: 'Done',
+      cancelErrorTitle: 'Unable to cancel',
+      cancelClose: 'Close',
+      emailModalTitle: 'Email booking pack',
+      emailModalSubName: 'Send {name} a copy of this booking pack',
+      emailModalSub: 'Send a copy of this booking pack',
+      emailTo: 'Send to',
+      emailToHelp: 'Defaults to the email on your booking. Edit to send to a different address.',
+      emailCc: 'Also send to (optional)',
+      emailCcHelp: 'Separate multiple addresses with commas. Up to 3.',
+      emailMessage: 'Add a message (optional)',
+      emailMessagePlaceholder: 'A short note that will appear above the booking summary.',
+      emailAttachment: 'Attachment',
+      emailAttachmentMeta: 'A4 booking confirmation pack',
+      emailCancel: 'Cancel',
+      emailSend: 'Send email',
+      emailInvalidTo: 'Please enter a valid email address in the To field.',
+      emailInvalidCc: '"{email}" doesn\'t look like a valid email address.',
+      emailTooManyCc: 'You can include up to 3 additional addresses. Remove some and try again.',
+      emailHolderReqd: 'The booking holder\'s email ({email}) must be included as a recipient.',
+      emailHolderReqdShort: 'The booking holder\'s email must be included as a recipient.',
+      emailSending: 'Sending…',
+      emailToastSendTitle: 'Sending your booking pack',
+      emailToastSendSub: 'Generating PDF and emailing it now.',
+      emailTooMany: 'Too many email requests. Please wait a few minutes and try again.',
+      emailInvalidRecipients: 'One of the email addresses looks invalid. Please check and try again.',
+      emailInvalidMessage: 'Your message is too long. Please shorten it to under 1000 characters.',
+      emailSendFailed: 'We couldn\'t send the email just now. Please try again in a moment.',
+      emailNotFound: 'We couldn\'t find that booking. Please look it up again.',
+      genericError: 'Something went wrong. Please try again in a moment.',
+      emailSentTitle: 'Email sent',
+      emailSentSub: 'Booking pack on its way to {email}.',
+      emailNetworkError: 'Network error. Please check your connection and try again.',
+      pdfCannotTitle: 'Cannot generate PDF',
+      pdfLookupAgain: 'Please look up your booking again.',
+      pdfGeneratingTitle: 'Generating your PDF',
+      pdfGeneratingSub: 'This usually takes a few seconds.',
+      pdfTooManyTitle: 'Too many requests',
+      pdfTooManySub: 'Please wait a few minutes and try again.',
+      pdfCouldntTitle: 'We couldn\'t generate that PDF',
+      pdfWrongTitle: 'Something went wrong',
+      pdfTryAgainSoon: 'Please try again in a moment.',
+      pdfFailedTitle: 'Generation failed',
+      pdfCheckConnection: 'Please check your connection and try again.',
+      pdfDownloadedTitle: 'PDF downloaded',
+      pdfPopupTitle: 'Allow pop-ups to print',
+      pdfPopupSub: 'Or use Download, then print the saved PDF.',
+      fillAllFields: 'Please fill in all three fields.',
+      notConfigured: 'This widget is not configured yet. Please contact support.',
+      tooManyAttempts: 'Too many attempts. Please wait a few minutes and try again.',
+      somethingWrong: 'Something went wrong.',
+      ariaClose: 'Close',
+      ariaViewImage: 'View image {n}',
+      totalCost: 'Total cost',
+      totalHoliday: 'Total holiday cost',
+      totalFlights: 'Total flight cost',
+      totalExtras: 'Total cost',
+      totalTickets: 'Total ticket cost',
+      totalCarHire: 'Total car hire cost',
+      totalTransfer: 'Total transfer cost',
+      totalInsurance: 'Total insurance cost',
+    },
+    fr: {
+      title: 'Ma réservation',
+      subtitle: 'Bon retour. Saisissez vos informations pour voir tous les détails de votre prochain voyage.',
+      subtitleShort: 'Retrouvez votre voyage en quelques secondes',
+      eyebrow: 'Recherche de réservation sécurisée',
+      email: 'Adresse e-mail',
+      date: 'Date de départ',
+      ref: 'Référence de réservation',
+      refShort: 'Référence',
+      refPlaceholder: 'ex. ABC12345',
+      submit: 'Trouver ma réservation',
+      submitShort: 'Trouver la réservation',
+      trust: 'Vos données sont chiffrées et jamais stockées.',
+      trustShort: 'Recherche sécurisée',
+      loadingTitle: 'Recherche de votre réservation',
+      loadingSub: 'Cela prend généralement quelques secondes.',
+      nfTitle: 'Réservation introuvable',
+      nfBody: 'Veuillez vérifier votre adresse e-mail, votre date de départ et votre référence de réservation. Si tout semble correct, contactez-nous et nous vous aiderons aussitôt.',
+      nfRetry: 'Réessayer',
+      nfContact: 'Contacter le service client',
+      flights: 'Vols',
+      fareConditions: 'Conditions tarifaires',
+      flightsLine: 'Vols',
+      outbound: 'Aller',
+      return: 'Retour',
+      whatToExpect: 'À quoi s\'attendre',
+      atAGlance: 'En un coup d\'œil',
+      openingTimes: 'Horaires d\'ouverture',
+      dressCode: 'Code vestimentaire',
+      included: 'Inclus',
+      drinks: 'Boissons',
+      food: 'Restauration',
+      flightAnnouncements: 'Annonces de vol',
+      features: 'Caractéristiques',
+      transfer: 'Transfert',
+      transferInfo: 'Informations importantes',
+      transfersLine: 'Transferts',
+      cancellation: 'Politique d\'annulation',
+      carHire: 'Location de voiture',
+      carHireLine: 'Location de voiture',
+      carHireInfo: 'Informations importantes',
+      suppliedBy: 'Fourni par',
+      pickup: 'Prise en charge',
+      dropoff: 'Restitution',
+      payAtPickup: 'À régler également au retrait',
+      payAtPickupNote: 'À régler directement au comptoir de location lors du retrait. Non compris dans le coût de votre réservation ci-dessus.',
+      ticket: 'Billet',
+      ticketsLine: 'Billets',
+      ticketDetails: 'Détails',
+      highlights: 'Points forts',
+      notIncluded: 'Non inclus',
+      meetingPoint: 'Point de rendez-vous',
+      languages: 'Langues',
+      cancelledPill: 'Annulée',
+      cancelBtn: 'Annuler',
+      cancelSecTitle: 'Besoin d\'annuler quelque chose ?',
+      cancelSecSub: 'Vous verrez la politique d\'annulation et les éventuels frais avant toute confirmation.',
+      amendSecTitle: 'Besoin de modifier quelque chose ?',
+      amendSecSub: 'Dites-nous ce que vous souhaitez modifier et nous transmettrons votre demande à l\'équipe. Rien ne change sur votre réservation tant qu\'ils ne l\'ont pas confirmé.',
+      amendOpen: 'Demander une modification',
+      amendFieldLabel: 'Que souhaitez-vous modifier ?',
+      amendPlaceholder: 'Par exemple un changement de date, une correction de nom ou une préférence de chambre ou de siège.',
+      amendNote: 'Ceci envoie uniquement une demande. Nous vous contacterons pour confirmer et votre réservation ne changera pas immédiatement.',
+      amendSubmit: 'Envoyer la demande',
+      amendCancel: 'Annuler',
+      amendSending: 'Envoi…',
+      amendRateLimited: 'Trop de tentatives. Veuillez patienter quelques minutes et réessayer.',
+      amendDoneTitle: 'Demande envoyée',
+      amendDoneBody: 'Nous avons transmis votre demande à l\'équipe. Rien n\'a encore changé sur votre réservation et nous vous contacterons pour confirmer.',
+      amendFailed: 'Nous n\'avons pas pu envoyer votre demande pour le moment. Veuillez réessayer ou nous contacter.',
+      payNextBtn: 'Payer le prochain versement',
+      payBalanceBtn: 'Payer le solde',
+      payConfirm: 'Payer',
+      payAmountLabel: 'Montant à payer',
+      payCancel: 'Annuler',
+      payRedirecting: 'Préparation du paiement…',
+      payRateLimited: 'Trop de tentatives. Veuillez patienter quelques minutes et réessayer.',
+      payNoBalance: 'Il n\'y a plus rien à payer sur cette réservation.',
+      payFailed: 'Nous n\'avons pas pu démarrer le paiement pour le moment. Veuillez réessayer ou nous contacter.',
+      payTooMuch: 'C\'est plus que votre solde de {amount}.',
+      payTooSmall: 'Le paiement partiel minimum est de {amount}.',
+      payHintInstalment: 'Votre prochain versement est de {next}. Réglez-le ou saisissez un autre montant jusqu\'à {max}.',
+      payHintFull: 'Réglez l\'intégralité de votre solde ou saisissez un montant inférieur (jusqu\'à {max}).',
+      confirmed: 'Confirmée',
+      atolProtected: 'ATOL Protected',
+      packagedHoliday: 'Séjour forfait',
+      operatedBy: 'exploité par',
+      yourBooking: 'Votre réservation',
+      reviews: 'avis',
+      greetingPrefix: 'Bon retour',
+      greetingSuffix: 'votre escapade à {city} approche.',
+      countdownFly: 'avant votre vol',
+      countdownCheckIn: 'avant votre arrivée',
+      countdownTravel: 'avant votre départ',
+      day: 'jour',
+      days: 'jours',
+      newLookup: 'Rechercher une autre réservation',
+      actionPreview: 'Aperçu',
+      actionPreviewSub: 'Voir le dossier de réservation ici',
+      actionEmail: 'E-mail',
+      actionEmailSub: 'Envoyer dans votre boîte mail',
+      actionDownload: 'Télécharger',
+      actionDownloadSub: 'Enregistrer le PDF sur votre appareil',
+      actionPrint: 'Imprimer',
+      actionPrintSub: 'Ouvrir une version imprimable',
+      accommodation: 'Hébergement',
+      checkin: 'Arrivée',
+      checkout: 'Départ',
+      nights: 'Nuits',
+      night: 'nuit',
+      nightsPlural: 'nuits',
+      week: '1 semaine',
+      room: 'Chambre',
+      guest: 'voyageur',
+      guests: 'voyageurs',
+      payment: 'Paiement',
+      hotelLine: 'Hôtel',
+      packageLine: 'Forfait vacances',
+      extrasLine: 'Extras aéroport',
+      paidSoFar: 'Payé à ce jour',
+      balanceRemaining: 'Solde restant',
+      paymentSchedule: 'Échéancier de paiement',
+      payments: 'versements',
+      next: 'Prochain',
+      nextDueDate: 'Prochain paiement dû',
+      paidInFull: 'Intégralement payé',
+      depositPaid: 'Acompte versé',
+      balanceDue: 'Solde à payer',
+      dueDate: 'Date d\'échéance',
+      instalmentPlan: 'Plan de paiement échelonné',
+      payOnArrival: 'À régler également à l\'arrivée',
+      payOnArrivalNote: 'À régler directement à l\'hôtel lors de l\'arrivée. Non compris dans le coût de votre séjour ci-dessus.',
+      resortFee: 'Frais de complexe',
+      travelling: 'Qui voyage',
+      leadGuest: 'Voyageur principal',
+      adult: 'Adulte',
+      specialRequests: 'Demandes spéciales',
+      documents: 'Vos documents',
+      thingsToKnow: 'Bon à savoir',
+      aboutHotel: 'À propos de l\'hôtel',
+      address: 'Adresse',
+      viewMap: 'Voir sur la carte',
+      propertyDetails: 'Détails de l\'établissement',
+      yearBuilt: 'Année de construction',
+      totalRooms: 'Nombre de chambres',
+      roomMix: 'Types de chambres',
+      facilities: 'Équipements',
+      paymentMethods: 'Acceptés à l\'hôtel',
+      localFees: 'À l\'hôtel',
+      checkInOutTimes: 'Arrivée et départ',
+      goodToKnow: 'Bon à savoir',
+      helpTitle: 'Besoin d\'aide ?',
+      helpBody: 'Notre équipe est là si quoi que ce soit concernant votre réservation nécessite une attention.',
+      emailUs: 'Nous écrire',
+      callUs: 'Nous appeler',
+      flight: 'Vol',
+      direct: 'Direct',
+      stop: 'escale',
+      stops: 'escales',
+      stopoverIn: 'Escale à {iata}',
+      stopoverInTimed: 'Escale de {dur} à {iata}',
+      aircraft: 'Appareil',
+      thisProduct: 'ce produit',
+      product: 'produit',
+      cancelPrefix: 'Annuler',
+      cancelLoadingSub: 'Vérification de la politique d\'annulation…',
+      cancelLoading: 'Chargement des détails d\'annulation…',
+      cancelRef: 'Référence de réservation',
+      cancelPoliciesSub: 'Veuillez consulter la politique d\'annulation ci-dessous.',
+      cancelPoliciesLabel: 'Politique d\'annulation et frais',
+      cancelNoPolicy: 'Aucun frais spécifique n\'a été indiqué pour ce produit.',
+      cancelWarn: 'L\'annulation est irréversible. Les frais indiqués ci-dessus s\'appliqueront.',
+      cancelKeep: 'Conserver la réservation',
+      cancelContinue: 'Continuer',
+      cancelReasonTitle: 'Confirmer l\'annulation',
+      cancelReasonSub: 'Dites-nous pourquoi vous annulez (facultatif).',
+      cancelReasonLabel: 'Motif de l\'annulation',
+      cancelReasonPlaceholder: 'ex. changement de programme',
+      cancelFinalWarn: 'Cela annulera le produit et est irréversible.',
+      cancelBack: 'Retour',
+      cancelConfirm: 'Annuler ce produit',
+      cancelConfirming: 'Annulation…',
+      cancelWorkingTitle: 'Annulation…',
+      cancelWorkingSub: 'Veuillez patienter pendant le traitement.',
+      cancelWorking: 'Annulation de votre produit…',
+      cancelDoneTitle: 'Annulation confirmée',
+      cancelDoneHead: 'C\'est annulé',
+      cancelDoneBodyTmpl: 'Votre {label} a été annulé.',
+      cancelRefLabel: 'Référence',
+      cancelDoneBtn: 'Terminé',
+      cancelErrorTitle: 'Annulation impossible',
+      cancelClose: 'Fermer',
+      emailModalTitle: 'Envoyer le dossier par e-mail',
+      emailModalSubName: 'Envoyer à {name} une copie de ce dossier de réservation',
+      emailModalSub: 'Envoyer une copie de ce dossier de réservation',
+      emailTo: 'Envoyer à',
+      emailToHelp: 'Par défaut, l\'e-mail de votre réservation. Modifiez pour envoyer à une autre adresse.',
+      emailCc: 'Envoyer aussi à (facultatif)',
+      emailCcHelp: 'Séparez plusieurs adresses par des virgules. Jusqu\'à 3.',
+      emailMessage: 'Ajouter un message (facultatif)',
+      emailMessagePlaceholder: 'Une courte note qui apparaîtra au-dessus du récapitulatif de réservation.',
+      emailAttachment: 'Pièce jointe',
+      emailAttachmentMeta: 'Dossier de confirmation de réservation A4',
+      emailCancel: 'Annuler',
+      emailSend: 'Envoyer l\'e-mail',
+      emailInvalidTo: 'Veuillez saisir une adresse e-mail valide dans le champ Envoyer à.',
+      emailInvalidCc: '« {email} » ne semble pas être une adresse e-mail valide.',
+      emailTooManyCc: 'Vous pouvez inclure jusqu\'à 3 adresses supplémentaires. Supprimez-en et réessayez.',
+      emailHolderReqd: 'L\'e-mail du titulaire de la réservation ({email}) doit figurer parmi les destinataires.',
+      emailHolderReqdShort: 'L\'e-mail du titulaire de la réservation doit figurer parmi les destinataires.',
+      emailSending: 'Envoi…',
+      emailToastSendTitle: 'Envoi de votre dossier de réservation',
+      emailToastSendSub: 'Génération du PDF et envoi en cours.',
+      emailTooMany: 'Trop de demandes d\'e-mail. Veuillez patienter quelques minutes et réessayer.',
+      emailInvalidRecipients: 'L\'une des adresses e-mail semble invalide. Veuillez vérifier et réessayer.',
+      emailInvalidMessage: 'Votre message est trop long. Veuillez le raccourcir à moins de 1000 caractères.',
+      emailSendFailed: 'Nous n\'avons pas pu envoyer l\'e-mail pour le moment. Veuillez réessayer dans un instant.',
+      emailNotFound: 'Réservation introuvable. Veuillez la rechercher à nouveau.',
+      genericError: 'Une erreur s\'est produite. Veuillez réessayer dans un instant.',
+      emailSentTitle: 'E-mail envoyé',
+      emailSentSub: 'Dossier de réservation en route vers {email}.',
+      emailNetworkError: 'Erreur réseau. Veuillez vérifier votre connexion et réessayer.',
+      pdfCannotTitle: 'Impossible de générer le PDF',
+      pdfLookupAgain: 'Veuillez rechercher à nouveau votre réservation.',
+      pdfGeneratingTitle: 'Génération de votre PDF',
+      pdfGeneratingSub: 'Cela prend généralement quelques secondes.',
+      pdfTooManyTitle: 'Trop de demandes',
+      pdfTooManySub: 'Veuillez patienter quelques minutes et réessayer.',
+      pdfCouldntTitle: 'Impossible de générer ce PDF',
+      pdfWrongTitle: 'Une erreur s\'est produite',
+      pdfTryAgainSoon: 'Veuillez réessayer dans un instant.',
+      pdfFailedTitle: 'Échec de la génération',
+      pdfCheckConnection: 'Veuillez vérifier votre connexion et réessayer.',
+      pdfDownloadedTitle: 'PDF téléchargé',
+      pdfPopupTitle: 'Autoriser les pop-ups pour imprimer',
+      pdfPopupSub: 'Ou utilisez Télécharger, puis imprimez le PDF enregistré.',
+      fillAllFields: 'Veuillez remplir les trois champs.',
+      notConfigured: 'Ce widget n\'est pas encore configuré. Veuillez contacter le support.',
+      tooManyAttempts: 'Trop de tentatives. Veuillez patienter quelques minutes et réessayer.',
+      somethingWrong: 'Une erreur s\'est produite.',
+      ariaClose: 'Fermer',
+      ariaViewImage: 'Voir l\'image {n}',
+      totalCost: 'Coût total',
+      totalHoliday: 'Coût total du séjour',
+      totalFlights: 'Coût total des vols',
+      totalExtras: 'Coût total',
+      totalTickets: 'Coût total des billets',
+      totalCarHire: 'Coût total de la location de voiture',
+      totalTransfer: 'Coût total du transfert',
+      totalInsurance: 'Coût total de l\'assurance',
+    },
+    de: {
+      title: 'Meine Buchung',
+      subtitle: 'Willkommen zurück. Geben Sie Ihre Daten ein, um alles zu Ihrer bevorstehenden Reise zu sehen.',
+      subtitleShort: 'Finden Sie Ihre Reise in Sekunden',
+      eyebrow: 'Sichere Buchungssuche',
+      email: 'E-Mail-Adresse',
+      date: 'Abreisedatum',
+      ref: 'Buchungsnummer',
+      refShort: 'Referenz',
+      refPlaceholder: 'z. B. ABC12345',
+      submit: 'Meine Buchung finden',
+      submitShort: 'Buchung finden',
+      trust: 'Ihre Daten werden verschlüsselt und niemals gespeichert.',
+      trustShort: 'Sichere Suche',
+      loadingTitle: 'Ihre Buchung wird gesucht',
+      loadingSub: 'Das dauert normalerweise nur ein paar Sekunden.',
+      nfTitle: 'Buchung nicht gefunden',
+      nfBody: 'Bitte überprüfen Sie Ihre E-Mail-Adresse, Ihr Abreisedatum und Ihre Buchungsnummer. Wenn die Angaben stimmen, melden Sie sich und wir helfen Ihnen sofort.',
+      nfRetry: 'Erneut versuchen',
+      nfContact: 'Support kontaktieren',
+      flights: 'Flüge',
+      fareConditions: 'Tarifbedingungen',
+      flightsLine: 'Flüge',
+      outbound: 'Hinflug',
+      return: 'Rückreise',
+      whatToExpect: 'Was Sie erwartet',
+      atAGlance: 'Auf einen Blick',
+      openingTimes: 'Öffnungszeiten',
+      dressCode: 'Kleiderordnung',
+      included: 'Inbegriffen',
+      drinks: 'Getränke',
+      food: 'Essen',
+      flightAnnouncements: 'Flugdurchsagen',
+      features: 'Ausstattung',
+      transfer: 'Transfer',
+      transferInfo: 'Wichtige Informationen',
+      transfersLine: 'Transfers',
+      cancellation: 'Stornierungsbedingungen',
+      carHire: 'Mietwagen',
+      carHireLine: 'Mietwagen',
+      carHireInfo: 'Wichtige Informationen',
+      suppliedBy: 'Bereitgestellt von',
+      pickup: 'Abholung',
+      dropoff: 'Rückgabe',
+      payAtPickup: 'Auch bei Abholung zahlbar',
+      payAtPickupNote: 'Direkt am Mietschalter bei Abholung zu zahlen. Nicht im oben genannten Buchungspreis enthalten.',
+      ticket: 'Ticket',
+      ticketsLine: 'Tickets',
+      ticketDetails: 'Details',
+      highlights: 'Höhepunkte',
+      notIncluded: 'Nicht inbegriffen',
+      meetingPoint: 'Treffpunkt',
+      languages: 'Sprachen',
+      cancelledPill: 'Storniert',
+      cancelBtn: 'Stornieren',
+      cancelSecTitle: 'Müssen Sie etwas stornieren?',
+      cancelSecSub: 'Sie sehen die Stornierungsbedingungen und etwaige Gebühren, bevor etwas bestätigt wird.',
+      amendSecTitle: 'Möchten Sie etwas ändern?',
+      amendSecSub: 'Sagen Sie uns, was Sie ändern möchten, und wir leiten es an das Team weiter. An Ihrer Buchung ändert sich nichts, bis es bestätigt wurde.',
+      amendOpen: 'Änderung anfragen',
+      amendFieldLabel: 'Was möchten Sie ändern?',
+      amendPlaceholder: 'Zum Beispiel eine Datumsänderung, eine Namenskorrektur oder ein Zimmer- oder Sitzplatzwunsch.',
+      amendNote: 'Dies sendet nur eine Anfrage. Wir melden uns zur Bestätigung, und Ihre Buchung ändert sich nicht sofort.',
+      amendSubmit: 'Anfrage senden',
+      amendCancel: 'Abbrechen',
+      amendSending: 'Wird gesendet…',
+      amendRateLimited: 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
+      amendDoneTitle: 'Anfrage gesendet',
+      amendDoneBody: 'Wir haben Ihre Anfrage an das Team weitergeleitet. An Ihrer Buchung hat sich noch nichts geändert, und wir melden uns zur Bestätigung.',
+      amendFailed: 'Wir konnten Ihre Anfrage gerade nicht senden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+      payNextBtn: 'Nächste Zahlung leisten',
+      payBalanceBtn: 'Restbetrag zahlen',
+      payConfirm: 'Zahlen',
+      payAmountLabel: 'Zu zahlender Betrag',
+      payCancel: 'Abbrechen',
+      payRedirecting: 'Zahlung wird vorbereitet…',
+      payRateLimited: 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
+      payNoBalance: 'Für diese Buchung ist nichts mehr zu zahlen.',
+      payFailed: 'Wir konnten die Zahlung gerade nicht starten. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+      payTooMuch: 'Das ist mehr als Ihr Restbetrag von {amount}.',
+      payTooSmall: 'Die kleinste Teilzahlung beträgt {amount}.',
+      payHintInstalment: 'Ihre nächste Zahlung beträgt {next}. Zahlen Sie diese oder geben Sie einen anderen Betrag bis zu {max} ein.',
+      payHintFull: 'Zahlen Sie Ihren Restbetrag vollständig oder geben Sie einen kleineren Betrag ein (bis zu {max}).',
+      confirmed: 'Bestätigt',
+      atolProtected: 'ATOL Protected',
+      packagedHoliday: 'Pauschalreise',
+      operatedBy: 'durchgeführt von',
+      yourBooking: 'Ihre Buchung',
+      reviews: 'Bewertungen',
+      greetingPrefix: 'Willkommen zurück',
+      greetingSuffix: 'Ihre Auszeit in {city} steht fast bevor.',
+      countdownFly: 'bis zum Abflug',
+      countdownCheckIn: 'bis zum Check-in',
+      countdownTravel: 'bis zur Abreise',
+      day: 'Tag',
+      days: 'Tage',
+      newLookup: 'Andere Buchung suchen',
+      actionPreview: 'Vorschau',
+      actionPreviewSub: 'Buchungsunterlagen direkt ansehen',
+      actionEmail: 'E-Mail',
+      actionEmailSub: 'An Ihr Postfach senden',
+      actionDownload: 'Herunterladen',
+      actionDownloadSub: 'PDF auf Ihrem Gerät speichern',
+      actionPrint: 'Drucken',
+      actionPrintSub: 'Druckversion öffnen',
+      accommodation: 'Unterkunft',
+      checkin: 'Check-in',
+      checkout: 'Check-out',
+      nights: 'Nächte',
+      night: 'Nacht',
+      nightsPlural: 'Nächte',
+      week: '1 Woche',
+      room: 'Zimmer',
+      guest: 'Gast',
+      guests: 'Gäste',
+      payment: 'Zahlung',
+      hotelLine: 'Hotel',
+      packageLine: 'Reisepaket',
+      extrasLine: 'Flughafen-Extras',
+      paidSoFar: 'Bisher gezahlt',
+      balanceRemaining: 'Verbleibender Restbetrag',
+      paymentSchedule: 'Zahlungsplan',
+      payments: 'Zahlungen',
+      next: 'Nächste',
+      nextDueDate: 'Nächste Zahlung fällig',
+      paidInFull: 'Vollständig bezahlt',
+      depositPaid: 'Anzahlung geleistet',
+      balanceDue: 'Restbetrag fällig',
+      dueDate: 'Fälligkeitsdatum',
+      instalmentPlan: 'Ratenzahlungsplan',
+      payOnArrival: 'Auch bei Ankunft zahlbar',
+      payOnArrivalNote: 'Direkt im Hotel beim Check-in zu zahlen. Nicht in den oben genannten Reisekosten enthalten.',
+      resortFee: 'Resortgebühren',
+      travelling: 'Wer reist',
+      leadGuest: 'Hauptgast',
+      adult: 'Erwachsener',
+      specialRequests: 'Sonderwünsche',
+      documents: 'Ihre Dokumente',
+      thingsToKnow: 'Wissenswertes',
+      aboutHotel: 'Über das Hotel',
+      address: 'Adresse',
+      viewMap: 'Auf Karte ansehen',
+      propertyDetails: 'Objektdetails',
+      yearBuilt: 'Baujahr',
+      totalRooms: 'Anzahl Zimmer',
+      roomMix: 'Zimmerarten',
+      facilities: 'Einrichtungen',
+      paymentMethods: 'Im Hotel akzeptiert',
+      localFees: 'Im Hotel',
+      checkInOutTimes: 'Check-in & Check-out',
+      goodToKnow: 'Gut zu wissen',
+      helpTitle: 'Brauchen Sie Hilfe?',
+      helpBody: 'Unser Team ist da, falls bei Ihrer Buchung etwas Aufmerksamkeit braucht.',
+      emailUs: 'E-Mail an uns',
+      callUs: 'Anrufen',
+      flight: 'Flug',
+      direct: 'Direkt',
+      stop: 'Stopp',
+      stops: 'Stopps',
+      stopoverIn: 'Zwischenstopp in {iata}',
+      stopoverInTimed: '{dur} Zwischenstopp in {iata}',
+      aircraft: 'Flugzeug',
+      thisProduct: 'dieses Produkt',
+      product: 'Produkt',
+      cancelPrefix: 'Stornieren',
+      cancelLoadingSub: 'Stornierungsbedingungen werden geprüft…',
+      cancelLoading: 'Stornierungsdetails werden geladen…',
+      cancelRef: 'Buchungsnummer',
+      cancelPoliciesSub: 'Bitte prüfen Sie die Stornierungsbedingungen unten.',
+      cancelPoliciesLabel: 'Stornierungsbedingungen & Gebühren',
+      cancelNoPolicy: 'Für dieses Produkt wurden keine speziellen Gebühren angegeben.',
+      cancelWarn: 'Die Stornierung kann nicht rückgängig gemacht werden. Etwaige oben genannte Gebühren fallen an.',
+      cancelKeep: 'Buchung behalten',
+      cancelContinue: 'Weiter',
+      cancelReasonTitle: 'Stornierung bestätigen',
+      cancelReasonSub: 'Sagen Sie uns, warum Sie stornieren (optional).',
+      cancelReasonLabel: 'Grund für die Stornierung',
+      cancelReasonPlaceholder: 'z. B. geänderte Pläne',
+      cancelFinalWarn: 'Dadurch wird das Produkt storniert und kann nicht rückgängig gemacht werden.',
+      cancelBack: 'Zurück',
+      cancelConfirm: 'Dieses Produkt stornieren',
+      cancelConfirming: 'Wird storniert…',
+      cancelWorkingTitle: 'Wird storniert…',
+      cancelWorkingSub: 'Bitte warten Sie, während wir dies bearbeiten.',
+      cancelWorking: 'Ihr Produkt wird storniert…',
+      cancelDoneTitle: 'Stornierung bestätigt',
+      cancelDoneHead: 'Storniert',
+      cancelDoneBodyTmpl: 'Ihr {label} wurde storniert.',
+      cancelRefLabel: 'Referenz',
+      cancelDoneBtn: 'Fertig',
+      cancelErrorTitle: 'Stornierung nicht möglich',
+      cancelClose: 'Schließen',
+      emailModalTitle: 'Buchungsunterlagen per E-Mail',
+      emailModalSubName: '{name} eine Kopie dieser Buchungsunterlagen senden',
+      emailModalSub: 'Eine Kopie dieser Buchungsunterlagen senden',
+      emailTo: 'Senden an',
+      emailToHelp: 'Standardmäßig die E-Mail Ihrer Buchung. Ändern Sie sie, um an eine andere Adresse zu senden.',
+      emailCc: 'Auch senden an (optional)',
+      emailCcHelp: 'Trennen Sie mehrere Adressen durch Kommas. Bis zu 3.',
+      emailMessage: 'Nachricht hinzufügen (optional)',
+      emailMessagePlaceholder: 'Eine kurze Notiz, die über der Buchungsübersicht erscheint.',
+      emailAttachment: 'Anhang',
+      emailAttachmentMeta: 'A4-Buchungsbestätigungsunterlagen',
+      emailCancel: 'Abbrechen',
+      emailSend: 'E-Mail senden',
+      emailInvalidTo: 'Bitte geben Sie eine gültige E-Mail-Adresse im Feld Senden an ein.',
+      emailInvalidCc: '„{email}" sieht nicht wie eine gültige E-Mail-Adresse aus.',
+      emailTooManyCc: 'Sie können bis zu 3 zusätzliche Adressen angeben. Entfernen Sie einige und versuchen Sie es erneut.',
+      emailHolderReqd: 'Die E-Mail des Buchungsinhabers ({email}) muss als Empfänger enthalten sein.',
+      emailHolderReqdShort: 'Die E-Mail des Buchungsinhabers muss als Empfänger enthalten sein.',
+      emailSending: 'Wird gesendet…',
+      emailToastSendTitle: 'Ihre Buchungsunterlagen werden gesendet',
+      emailToastSendSub: 'PDF wird erstellt und jetzt per E-Mail versendet.',
+      emailTooMany: 'Zu viele E-Mail-Anfragen. Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
+      emailInvalidRecipients: 'Eine der E-Mail-Adressen scheint ungültig zu sein. Bitte prüfen Sie sie und versuchen Sie es erneut.',
+      emailInvalidMessage: 'Ihre Nachricht ist zu lang. Bitte kürzen Sie sie auf unter 1000 Zeichen.',
+      emailSendFailed: 'Wir konnten die E-Mail gerade nicht senden. Bitte versuchen Sie es gleich erneut.',
+      emailNotFound: 'Buchung nicht gefunden. Bitte suchen Sie sie erneut.',
+      genericError: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es gleich erneut.',
+      emailSentTitle: 'E-Mail gesendet',
+      emailSentSub: 'Buchungsunterlagen sind unterwegs an {email}.',
+      emailNetworkError: 'Netzwerkfehler. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.',
+      pdfCannotTitle: 'PDF kann nicht erstellt werden',
+      pdfLookupAgain: 'Bitte suchen Sie Ihre Buchung erneut.',
+      pdfGeneratingTitle: 'Ihr PDF wird erstellt',
+      pdfGeneratingSub: 'Das dauert normalerweise ein paar Sekunden.',
+      pdfTooManyTitle: 'Zu viele Anfragen',
+      pdfTooManySub: 'Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
+      pdfCouldntTitle: 'Dieses PDF konnte nicht erstellt werden',
+      pdfWrongTitle: 'Etwas ist schiefgelaufen',
+      pdfTryAgainSoon: 'Bitte versuchen Sie es gleich erneut.',
+      pdfFailedTitle: 'Erstellung fehlgeschlagen',
+      pdfCheckConnection: 'Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.',
+      pdfDownloadedTitle: 'PDF heruntergeladen',
+      pdfPopupTitle: 'Pop-ups zum Drucken zulassen',
+      pdfPopupSub: 'Oder verwenden Sie Herunterladen und drucken Sie dann das gespeicherte PDF.',
+      fillAllFields: 'Bitte füllen Sie alle drei Felder aus.',
+      notConfigured: 'Dieses Widget ist noch nicht konfiguriert. Bitte wenden Sie sich an den Support.',
+      tooManyAttempts: 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
+      somethingWrong: 'Etwas ist schiefgelaufen.',
+      ariaClose: 'Schließen',
+      ariaViewImage: 'Bild {n} ansehen',
+      totalCost: 'Gesamtkosten',
+      totalHoliday: 'Gesamtkosten der Reise',
+      totalFlights: 'Gesamtkosten der Flüge',
+      totalExtras: 'Gesamtkosten',
+      totalTickets: 'Gesamtkosten der Tickets',
+      totalCarHire: 'Gesamtkosten des Mietwagens',
+      totalTransfer: 'Gesamtkosten des Transfers',
+      totalInsurance: 'Gesamtkosten der Versicherung',
+    },
+    es: {
+      title: 'Mi reserva',
+      subtitle: 'Bienvenido de nuevo. Introduce tus datos para ver todo sobre tu próximo viaje.',
+      subtitleShort: 'Encuentra tu viaje en segundos',
+      eyebrow: 'Búsqueda de reserva segura',
+      email: 'Correo electrónico',
+      date: 'Fecha de salida',
+      ref: 'Referencia de reserva',
+      refShort: 'Referencia',
+      refPlaceholder: 'p. ej. ABC12345',
+      submit: 'Buscar mi reserva',
+      submitShort: 'Buscar reserva',
+      trust: 'Tus datos están cifrados y nunca se almacenan.',
+      trustShort: 'Búsqueda segura',
+      loadingTitle: 'Buscando tu reserva',
+      loadingSub: 'Esto suele tardar unos segundos.',
+      nfTitle: 'Reserva no encontrada',
+      nfBody: 'Comprueba tu correo electrónico, la fecha de salida y la referencia de reserva. Si los datos son correctos, ponte en contacto y te ayudaremos enseguida.',
+      nfRetry: 'Volver a intentar',
+      nfContact: 'Contactar con soporte',
+      flights: 'Vuelos',
+      fareConditions: 'Condiciones de la tarifa',
+      flightsLine: 'Vuelos',
+      outbound: 'Ida',
+      return: 'Regreso',
+      whatToExpect: 'Qué esperar',
+      atAGlance: 'De un vistazo',
+      openingTimes: 'Horario',
+      dressCode: 'Código de vestimenta',
+      included: 'Incluido',
+      drinks: 'Bebidas',
+      food: 'Comida',
+      flightAnnouncements: 'Anuncios de vuelo',
+      features: 'Características',
+      transfer: 'Traslado',
+      transferInfo: 'Información importante',
+      transfersLine: 'Traslados',
+      cancellation: 'Política de cancelación',
+      carHire: 'Alquiler de coche',
+      carHireLine: 'Alquiler de coche',
+      carHireInfo: 'Información importante',
+      suppliedBy: 'Suministrado por',
+      pickup: 'Recogida',
+      dropoff: 'Devolución',
+      payAtPickup: 'También a pagar en la recogida',
+      payAtPickupNote: 'Se paga directamente en el mostrador de alquiler en la recogida. No está incluido en el coste de tu reserva indicado arriba.',
+      ticket: 'Entrada',
+      ticketsLine: 'Entradas',
+      ticketDetails: 'Detalles',
+      highlights: 'Lo más destacado',
+      notIncluded: 'No incluido',
+      meetingPoint: 'Punto de encuentro',
+      languages: 'Idiomas',
+      cancelledPill: 'Cancelada',
+      cancelBtn: 'Cancelar',
+      cancelSecTitle: '¿Necesitas cancelar algo?',
+      cancelSecSub: 'Verás la política de cancelación y cualquier cargo antes de confirmar nada.',
+      amendSecTitle: '¿Necesitas cambiar algo?',
+      amendSecSub: 'Dinos qué te gustaría cambiar y lo pasaremos al equipo. Nada de tu reserva cambia hasta que lo confirmen.',
+      amendOpen: 'Solicitar un cambio',
+      amendFieldLabel: '¿Qué te gustaría cambiar?',
+      amendPlaceholder: 'Por ejemplo un cambio de fecha, una corrección de nombre o una preferencia de habitación o asiento.',
+      amendNote: 'Esto solo envía una solicitud. Nos pondremos en contacto para confirmar y tu reserva no cambiará de inmediato.',
+      amendSubmit: 'Enviar solicitud',
+      amendCancel: 'Cancelar',
+      amendSending: 'Enviando…',
+      amendRateLimited: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
+      amendDoneTitle: 'Solicitud enviada',
+      amendDoneBody: 'Hemos pasado tu solicitud al equipo. Aún no ha cambiado nada de tu reserva y nos pondremos en contacto para confirmar.',
+      amendFailed: 'No hemos podido enviar tu solicitud ahora mismo. Inténtalo de nuevo o contáctanos.',
+      payNextBtn: 'Pagar el próximo pago',
+      payBalanceBtn: 'Pagar saldo',
+      payConfirm: 'Pagar',
+      payAmountLabel: 'Importe a pagar',
+      payCancel: 'Cancelar',
+      payRedirecting: 'Preparando el pago…',
+      payRateLimited: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
+      payNoBalance: 'No queda nada por pagar en esta reserva.',
+      payFailed: 'No hemos podido iniciar el pago ahora mismo. Inténtalo de nuevo o contáctanos.',
+      payTooMuch: 'Eso supera tu saldo de {amount}.',
+      payTooSmall: 'El pago parcial mínimo es de {amount}.',
+      payHintInstalment: 'Tu próximo pago es de {next}. Págalo o introduce otro importe de hasta {max}.',
+      payHintFull: 'Paga tu saldo completo o introduce un importe menor (hasta {max}).',
+      confirmed: 'Confirmada',
+      atolProtected: 'ATOL Protected',
+      packagedHoliday: 'Viaje combinado',
+      operatedBy: 'operado por',
+      yourBooking: 'Tu reserva',
+      reviews: 'reseñas',
+      greetingPrefix: 'Bienvenido de nuevo',
+      greetingSuffix: 'tu escapada a {city} está casi aquí.',
+      countdownFly: 'hasta tu vuelo',
+      countdownCheckIn: 'hasta tu llegada',
+      countdownTravel: 'hasta tu viaje',
+      day: 'día',
+      days: 'días',
+      newLookup: 'Buscar otra reserva',
+      actionPreview: 'Vista previa',
+      actionPreviewSub: 'Ver el dosier de reserva aquí',
+      actionEmail: 'Correo',
+      actionEmailSub: 'Enviar a tu correo',
+      actionDownload: 'Descargar',
+      actionDownloadSub: 'Guarda el PDF en tu dispositivo',
+      actionPrint: 'Imprimir',
+      actionPrintSub: 'Abrir una copia imprimible',
+      accommodation: 'Alojamiento',
+      checkin: 'Entrada',
+      checkout: 'Salida',
+      nights: 'Noches',
+      night: 'noche',
+      nightsPlural: 'noches',
+      week: '1 semana',
+      room: 'Habitación',
+      guest: 'huésped',
+      guests: 'huéspedes',
+      payment: 'Pago',
+      hotelLine: 'Hotel',
+      packageLine: 'Paquete vacacional',
+      extrasLine: 'Extras de aeropuerto',
+      paidSoFar: 'Pagado hasta ahora',
+      balanceRemaining: 'Saldo restante',
+      paymentSchedule: 'Calendario de pagos',
+      payments: 'pagos',
+      next: 'Próximo',
+      nextDueDate: 'Próximo pago',
+      paidInFull: 'Pagado en su totalidad',
+      depositPaid: 'Depósito pagado',
+      balanceDue: 'Saldo pendiente',
+      dueDate: 'Fecha de vencimiento',
+      instalmentPlan: 'Plan de pago a plazos',
+      payOnArrival: 'También a pagar a la llegada',
+      payOnArrivalNote: 'Se paga directamente en el hotel al hacer el check-in. No está incluido en el coste de tu viaje indicado arriba.',
+      resortFee: 'Tasas del complejo',
+      travelling: 'Quién viaja',
+      leadGuest: 'Huésped principal',
+      adult: 'Adulto',
+      specialRequests: 'Peticiones especiales',
+      documents: 'Tus documentos',
+      thingsToKnow: 'Cosas que debes saber',
+      aboutHotel: 'Sobre el hotel',
+      address: 'Dirección',
+      viewMap: 'Ver en el mapa',
+      propertyDetails: 'Detalles del establecimiento',
+      yearBuilt: 'Año de construcción',
+      totalRooms: 'Total de habitaciones',
+      roomMix: 'Tipos de habitación',
+      facilities: 'Instalaciones',
+      paymentMethods: 'Aceptados en el hotel',
+      localFees: 'En el hotel',
+      checkInOutTimes: 'Entrada y salida',
+      goodToKnow: 'Información útil',
+      helpTitle: '¿Necesitas ayuda?',
+      helpBody: 'Nuestro equipo está aquí si algo de tu reserva necesita atención.',
+      emailUs: 'Escríbenos',
+      callUs: 'Llámanos',
+      flight: 'Vuelo',
+      direct: 'Directo',
+      stop: 'escala',
+      stops: 'escalas',
+      stopoverIn: 'Escala en {iata}',
+      stopoverInTimed: 'Escala de {dur} en {iata}',
+      aircraft: 'Aeronave',
+      thisProduct: 'este producto',
+      product: 'producto',
+      cancelPrefix: 'Cancelar',
+      cancelLoadingSub: 'Comprobando la política de cancelación…',
+      cancelLoading: 'Cargando los detalles de cancelación…',
+      cancelRef: 'Referencia de reserva',
+      cancelPoliciesSub: 'Revisa la política de cancelación a continuación.',
+      cancelPoliciesLabel: 'Política de cancelación y cargos',
+      cancelNoPolicy: 'No se han indicado cargos específicos para este producto.',
+      cancelWarn: 'La cancelación no se puede deshacer. Se aplicarán los cargos indicados arriba.',
+      cancelKeep: 'Mantener la reserva',
+      cancelContinue: 'Continuar',
+      cancelReasonTitle: 'Confirmar la cancelación',
+      cancelReasonSub: 'Cuéntanos por qué cancelas (opcional).',
+      cancelReasonLabel: 'Motivo de la cancelación',
+      cancelReasonPlaceholder: 'p. ej. cambio de planes',
+      cancelFinalWarn: 'Esto cancelará el producto y no se puede deshacer.',
+      cancelBack: 'Atrás',
+      cancelConfirm: 'Cancelar este producto',
+      cancelConfirming: 'Cancelando…',
+      cancelWorkingTitle: 'Cancelando…',
+      cancelWorkingSub: 'Espera mientras lo procesamos.',
+      cancelWorking: 'Cancelando tu producto…',
+      cancelDoneTitle: 'Cancelación confirmada',
+      cancelDoneHead: 'Listo, cancelado',
+      cancelDoneBodyTmpl: 'Tu {label} ha sido cancelado.',
+      cancelRefLabel: 'Referencia',
+      cancelDoneBtn: 'Hecho',
+      cancelErrorTitle: 'No se puede cancelar',
+      cancelClose: 'Cerrar',
+      emailModalTitle: 'Enviar el dosier por correo',
+      emailModalSubName: 'Enviar a {name} una copia de este dosier de reserva',
+      emailModalSub: 'Enviar una copia de este dosier de reserva',
+      emailTo: 'Enviar a',
+      emailToHelp: 'Por defecto, el correo de tu reserva. Edítalo para enviarlo a otra dirección.',
+      emailCc: 'Enviar también a (opcional)',
+      emailCcHelp: 'Separa varias direcciones con comas. Hasta 3.',
+      emailMessage: 'Añadir un mensaje (opcional)',
+      emailMessagePlaceholder: 'Una nota breve que aparecerá sobre el resumen de la reserva.',
+      emailAttachment: 'Adjunto',
+      emailAttachmentMeta: 'Dosier de confirmación de reserva A4',
+      emailCancel: 'Cancelar',
+      emailSend: 'Enviar correo',
+      emailInvalidTo: 'Introduce una dirección de correo válida en el campo Enviar a.',
+      emailInvalidCc: '«{email}» no parece una dirección de correo válida.',
+      emailTooManyCc: 'Puedes incluir hasta 3 direcciones adicionales. Quita algunas e inténtalo de nuevo.',
+      emailHolderReqd: 'El correo del titular de la reserva ({email}) debe incluirse como destinatario.',
+      emailHolderReqdShort: 'El correo del titular de la reserva debe incluirse como destinatario.',
+      emailSending: 'Enviando…',
+      emailToastSendTitle: 'Enviando tu dosier de reserva',
+      emailToastSendSub: 'Generando el PDF y enviándolo ahora.',
+      emailTooMany: 'Demasiadas solicitudes de correo. Espera unos minutos e inténtalo de nuevo.',
+      emailInvalidRecipients: 'Una de las direcciones de correo parece inválida. Compruébalo e inténtalo de nuevo.',
+      emailInvalidMessage: 'Tu mensaje es demasiado largo. Acórtalo a menos de 1000 caracteres.',
+      emailSendFailed: 'No hemos podido enviar el correo ahora mismo. Inténtalo de nuevo en un momento.',
+      emailNotFound: 'No hemos encontrado esa reserva. Búscala de nuevo.',
+      genericError: 'Algo salió mal. Inténtalo de nuevo en un momento.',
+      emailSentTitle: 'Correo enviado',
+      emailSentSub: 'El dosier de reserva va de camino a {email}.',
+      emailNetworkError: 'Error de red. Comprueba tu conexión e inténtalo de nuevo.',
+      pdfCannotTitle: 'No se puede generar el PDF',
+      pdfLookupAgain: 'Busca tu reserva de nuevo.',
+      pdfGeneratingTitle: 'Generando tu PDF',
+      pdfGeneratingSub: 'Esto suele tardar unos segundos.',
+      pdfTooManyTitle: 'Demasiadas solicitudes',
+      pdfTooManySub: 'Espera unos minutos e inténtalo de nuevo.',
+      pdfCouldntTitle: 'No hemos podido generar ese PDF',
+      pdfWrongTitle: 'Algo salió mal',
+      pdfTryAgainSoon: 'Inténtalo de nuevo en un momento.',
+      pdfFailedTitle: 'Generación fallida',
+      pdfCheckConnection: 'Comprueba tu conexión e inténtalo de nuevo.',
+      pdfDownloadedTitle: 'PDF descargado',
+      pdfPopupTitle: 'Permite las ventanas emergentes para imprimir',
+      pdfPopupSub: 'O usa Descargar y luego imprime el PDF guardado.',
+      fillAllFields: 'Por favor, rellena los tres campos.',
+      notConfigured: 'Este widget aún no está configurado. Ponte en contacto con soporte.',
+      tooManyAttempts: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
+      somethingWrong: 'Algo salió mal.',
+      ariaClose: 'Cerrar',
+      ariaViewImage: 'Ver imagen {n}',
+      totalCost: 'Coste total',
+      totalHoliday: 'Coste total del viaje',
+      totalFlights: 'Coste total de los vuelos',
+      totalExtras: 'Coste total',
+      totalTickets: 'Coste total de las entradas',
+      totalCarHire: 'Coste total del alquiler de coche',
+      totalTransfer: 'Coste total del traslado',
+      totalInsurance: 'Coste total del seguro',
+    },
+    it: {
+      title: 'La mia prenotazione',
+      subtitle: 'Bentornato. Inserisci i tuoi dati per vedere tutto sul tuo prossimo viaggio.',
+      subtitleShort: 'Trova il tuo viaggio in pochi secondi',
+      eyebrow: 'Ricerca prenotazione sicura',
+      email: 'Indirizzo email',
+      date: 'Data di partenza',
+      ref: 'Riferimento prenotazione',
+      refShort: 'Riferimento',
+      refPlaceholder: 'es. ABC12345',
+      submit: 'Trova la mia prenotazione',
+      submitShort: 'Trova prenotazione',
+      trust: 'I tuoi dati sono crittografati e mai memorizzati.',
+      trustShort: 'Ricerca sicura',
+      loadingTitle: 'Ricerca della tua prenotazione',
+      loadingSub: 'Di solito ci vogliono pochi secondi.',
+      nfTitle: 'Prenotazione non trovata',
+      nfBody: 'Controlla il tuo indirizzo email, la data di partenza e il riferimento della prenotazione. Se i dati sono corretti, contattaci e ti aiuteremo subito.',
+      nfRetry: 'Riprova',
+      nfContact: 'Contatta l\'assistenza',
+      flights: 'Voli',
+      fareConditions: 'Condizioni tariffarie',
+      flightsLine: 'Voli',
+      outbound: 'Andata',
+      return: 'Ritorno',
+      whatToExpect: 'Cosa aspettarsi',
+      atAGlance: 'In breve',
+      openingTimes: 'Orari di apertura',
+      dressCode: 'Codice di abbigliamento',
+      included: 'Incluso',
+      drinks: 'Bevande',
+      food: 'Cibo',
+      flightAnnouncements: 'Annunci di volo',
+      features: 'Caratteristiche',
+      transfer: 'Trasferimento',
+      transferInfo: 'Informazioni importanti',
+      transfersLine: 'Trasferimenti',
+      cancellation: 'Politica di cancellazione',
+      carHire: 'Noleggio auto',
+      carHireLine: 'Noleggio auto',
+      carHireInfo: 'Informazioni importanti',
+      suppliedBy: 'Fornito da',
+      pickup: 'Ritiro',
+      dropoff: 'Riconsegna',
+      payAtPickup: 'Da pagare anche al ritiro',
+      payAtPickupNote: 'Da pagare direttamente al banco del noleggio al ritiro. Non incluso nel costo della prenotazione sopra.',
+      ticket: 'Biglietto',
+      ticketsLine: 'Biglietti',
+      ticketDetails: 'Dettagli',
+      highlights: 'In evidenza',
+      notIncluded: 'Non incluso',
+      meetingPoint: 'Punto d\'incontro',
+      languages: 'Lingue',
+      cancelledPill: 'Annullata',
+      cancelBtn: 'Annulla',
+      cancelSecTitle: 'Devi annullare qualcosa?',
+      cancelSecSub: 'Vedrai la politica di cancellazione ed eventuali costi prima di confermare qualsiasi cosa.',
+      amendSecTitle: 'Devi modificare qualcosa?',
+      amendSecSub: 'Dicci cosa vorresti modificare e lo gireremo al team. Nulla della tua prenotazione cambia finché non lo confermano.',
+      amendOpen: 'Richiedi una modifica',
+      amendFieldLabel: 'Cosa vorresti modificare?',
+      amendPlaceholder: 'Per esempio un cambio di data, una correzione del nome o una preferenza di camera o posto.',
+      amendNote: 'Questo invia solo una richiesta. Ti contatteremo per confermare e la tua prenotazione non cambierà subito.',
+      amendSubmit: 'Invia richiesta',
+      amendCancel: 'Annulla',
+      amendSending: 'Invio…',
+      amendRateLimited: 'Troppi tentativi. Attendi qualche minuto e riprova.',
+      amendDoneTitle: 'Richiesta inviata',
+      amendDoneBody: 'Abbiamo inoltrato la tua richiesta al team. Nulla della tua prenotazione è ancora cambiato e ti contatteremo per confermare.',
+      amendFailed: 'Non siamo riusciti a inviare la tua richiesta in questo momento. Riprova o contattaci.',
+      payNextBtn: 'Paga la prossima rata',
+      payBalanceBtn: 'Paga il saldo',
+      payConfirm: 'Paga',
+      payAmountLabel: 'Importo da pagare',
+      payCancel: 'Annulla',
+      payRedirecting: 'Preparazione del pagamento…',
+      payRateLimited: 'Troppi tentativi. Attendi qualche minuto e riprova.',
+      payNoBalance: 'Non c\'è più nulla da pagare su questa prenotazione.',
+      payFailed: 'Non siamo riusciti ad avviare il pagamento in questo momento. Riprova o contattaci.',
+      payTooMuch: 'È più del tuo saldo di {amount}.',
+      payTooSmall: 'Il pagamento parziale minimo è di {amount}.',
+      payHintInstalment: 'Il tuo prossimo pagamento è di {next}. Pagalo o inserisci un importo diverso fino a {max}.',
+      payHintFull: 'Paga il saldo per intero o inserisci un importo inferiore (fino a {max}).',
+      confirmed: 'Confermata',
+      atolProtected: 'ATOL Protected',
+      packagedHoliday: 'Vacanza tutto incluso',
+      operatedBy: 'operato da',
+      yourBooking: 'La tua prenotazione',
+      reviews: 'recensioni',
+      greetingPrefix: 'Bentornato',
+      greetingSuffix: 'la tua fuga a {city} è ormai vicina.',
+      countdownFly: 'al tuo volo',
+      countdownCheckIn: 'al check-in',
+      countdownTravel: 'alla partenza',
+      day: 'giorno',
+      days: 'giorni',
+      newLookup: 'Cerca un\'altra prenotazione',
+      actionPreview: 'Anteprima',
+      actionPreviewSub: 'Visualizza il pacchetto di prenotazione qui',
+      actionEmail: 'Email',
+      actionEmailSub: 'Invia alla tua casella',
+      actionDownload: 'Scarica',
+      actionDownloadSub: 'Salva il PDF sul tuo dispositivo',
+      actionPrint: 'Stampa',
+      actionPrintSub: 'Apri una copia stampabile',
+      accommodation: 'Alloggio',
+      checkin: 'Check-in',
+      checkout: 'Check-out',
+      nights: 'Notti',
+      night: 'notte',
+      nightsPlural: 'notti',
+      week: '1 settimana',
+      room: 'Camera',
+      guest: 'ospite',
+      guests: 'ospiti',
+      payment: 'Pagamento',
+      hotelLine: 'Hotel',
+      packageLine: 'Pacchetto vacanza',
+      extrasLine: 'Extra aeroporto',
+      paidSoFar: 'Pagato finora',
+      balanceRemaining: 'Saldo residuo',
+      paymentSchedule: 'Piano dei pagamenti',
+      payments: 'pagamenti',
+      next: 'Prossimo',
+      nextDueDate: 'Prossimo pagamento',
+      paidInFull: 'Pagato per intero',
+      depositPaid: 'Acconto versato',
+      balanceDue: 'Saldo dovuto',
+      dueDate: 'Data di scadenza',
+      instalmentPlan: 'Piano rateale',
+      payOnArrival: 'Da pagare anche all\'arrivo',
+      payOnArrivalNote: 'Da pagare direttamente in hotel al check-in. Non incluso nel costo della vacanza sopra.',
+      resortFee: 'Tasse del resort',
+      travelling: 'Chi viaggia',
+      leadGuest: 'Ospite principale',
+      adult: 'Adulto',
+      specialRequests: 'Richieste speciali',
+      documents: 'I tuoi documenti',
+      thingsToKnow: 'Cose da sapere',
+      aboutHotel: 'Informazioni sull\'hotel',
+      address: 'Indirizzo',
+      viewMap: 'Vedi sulla mappa',
+      propertyDetails: 'Dettagli della struttura',
+      yearBuilt: 'Anno di costruzione',
+      totalRooms: 'Numero di camere',
+      roomMix: 'Tipi di camera',
+      facilities: 'Servizi',
+      paymentMethods: 'Accettati in hotel',
+      localFees: 'In hotel',
+      checkInOutTimes: 'Check-in e check-out',
+      goodToKnow: 'Buono a sapersi',
+      helpTitle: 'Hai bisogno di aiuto?',
+      helpBody: 'Il nostro team è qui se qualcosa nella tua prenotazione richiede attenzione.',
+      emailUs: 'Scrivici',
+      callUs: 'Chiamaci',
+      flight: 'Volo',
+      direct: 'Diretto',
+      stop: 'scalo',
+      stops: 'scali',
+      stopoverIn: 'Scalo a {iata}',
+      stopoverInTimed: 'Scalo di {dur} a {iata}',
+      aircraft: 'Aeromobile',
+      thisProduct: 'questo prodotto',
+      product: 'prodotto',
+      cancelPrefix: 'Annulla',
+      cancelLoadingSub: 'Verifica della politica di cancellazione…',
+      cancelLoading: 'Caricamento dei dettagli di cancellazione…',
+      cancelRef: 'Riferimento prenotazione',
+      cancelPoliciesSub: 'Consulta la politica di cancellazione qui sotto.',
+      cancelPoliciesLabel: 'Politica di cancellazione e costi',
+      cancelNoPolicy: 'Nessun costo specifico è stato indicato per questo prodotto.',
+      cancelWarn: 'La cancellazione non può essere annullata. Si applicheranno gli eventuali costi sopra indicati.',
+      cancelKeep: 'Mantieni la prenotazione',
+      cancelContinue: 'Continua',
+      cancelReasonTitle: 'Conferma la cancellazione',
+      cancelReasonSub: 'Facci sapere perché annulli (facoltativo).',
+      cancelReasonLabel: 'Motivo della cancellazione',
+      cancelReasonPlaceholder: 'es. cambio di programma',
+      cancelFinalWarn: 'Questo annullerà il prodotto e non può essere annullato.',
+      cancelBack: 'Indietro',
+      cancelConfirm: 'Annulla questo prodotto',
+      cancelConfirming: 'Annullamento…',
+      cancelWorkingTitle: 'Annullamento…',
+      cancelWorkingSub: 'Attendi mentre elaboriamo la richiesta.',
+      cancelWorking: 'Annullamento del tuo prodotto…',
+      cancelDoneTitle: 'Cancellazione confermata',
+      cancelDoneHead: 'Fatto, annullato',
+      cancelDoneBodyTmpl: 'Il tuo {label} è stato annullato.',
+      cancelRefLabel: 'Riferimento',
+      cancelDoneBtn: 'Fatto',
+      cancelErrorTitle: 'Impossibile annullare',
+      cancelClose: 'Chiudi',
+      emailModalTitle: 'Invia il pacchetto via email',
+      emailModalSubName: 'Invia a {name} una copia di questo pacchetto di prenotazione',
+      emailModalSub: 'Invia una copia di questo pacchetto di prenotazione',
+      emailTo: 'Invia a',
+      emailToHelp: 'Per impostazione predefinita, l\'email della tua prenotazione. Modifica per inviare a un altro indirizzo.',
+      emailCc: 'Invia anche a (facoltativo)',
+      emailCcHelp: 'Separa più indirizzi con le virgole. Fino a 3.',
+      emailMessage: 'Aggiungi un messaggio (facoltativo)',
+      emailMessagePlaceholder: 'Una breve nota che apparirà sopra il riepilogo della prenotazione.',
+      emailAttachment: 'Allegato',
+      emailAttachmentMeta: 'Pacchetto di conferma prenotazione A4',
+      emailCancel: 'Annulla',
+      emailSend: 'Invia email',
+      emailInvalidTo: 'Inserisci un indirizzo email valido nel campo Invia a.',
+      emailInvalidCc: '"{email}" non sembra un indirizzo email valido.',
+      emailTooManyCc: 'Puoi includere fino a 3 indirizzi aggiuntivi. Rimuovine alcuni e riprova.',
+      emailHolderReqd: 'L\'email dell\'intestatario della prenotazione ({email}) deve essere incluso tra i destinatari.',
+      emailHolderReqdShort: 'L\'email dell\'intestatario della prenotazione deve essere incluso tra i destinatari.',
+      emailSending: 'Invio…',
+      emailToastSendTitle: 'Invio del tuo pacchetto di prenotazione',
+      emailToastSendSub: 'Generazione del PDF e invio in corso.',
+      emailTooMany: 'Troppe richieste email. Attendi qualche minuto e riprova.',
+      emailInvalidRecipients: 'Uno degli indirizzi email sembra non valido. Controlla e riprova.',
+      emailInvalidMessage: 'Il tuo messaggio è troppo lungo. Riducilo a meno di 1000 caratteri.',
+      emailSendFailed: 'Non siamo riusciti a inviare l\'email in questo momento. Riprova tra poco.',
+      emailNotFound: 'Prenotazione non trovata. Cercala di nuovo.',
+      genericError: 'Qualcosa è andato storto. Riprova tra poco.',
+      emailSentTitle: 'Email inviata',
+      emailSentSub: 'Il pacchetto di prenotazione è in arrivo a {email}.',
+      emailNetworkError: 'Errore di rete. Controlla la connessione e riprova.',
+      pdfCannotTitle: 'Impossibile generare il PDF',
+      pdfLookupAgain: 'Cerca di nuovo la tua prenotazione.',
+      pdfGeneratingTitle: 'Generazione del tuo PDF',
+      pdfGeneratingSub: 'Di solito ci vogliono pochi secondi.',
+      pdfTooManyTitle: 'Troppe richieste',
+      pdfTooManySub: 'Attendi qualche minuto e riprova.',
+      pdfCouldntTitle: 'Non siamo riusciti a generare quel PDF',
+      pdfWrongTitle: 'Qualcosa è andato storto',
+      pdfTryAgainSoon: 'Riprova tra poco.',
+      pdfFailedTitle: 'Generazione non riuscita',
+      pdfCheckConnection: 'Controlla la connessione e riprova.',
+      pdfDownloadedTitle: 'PDF scaricato',
+      pdfPopupTitle: 'Consenti i pop-up per stampare',
+      pdfPopupSub: 'Oppure usa Scarica e poi stampa il PDF salvato.',
+      fillAllFields: 'Compila tutti e tre i campi.',
+      notConfigured: 'Questo widget non è ancora configurato. Contatta l\'assistenza.',
+      tooManyAttempts: 'Troppi tentativi. Attendi qualche minuto e riprova.',
+      somethingWrong: 'Qualcosa è andato storto.',
+      ariaClose: 'Chiudi',
+      ariaViewImage: 'Vedi immagine {n}',
+      totalCost: 'Costo totale',
+      totalHoliday: 'Costo totale della vacanza',
+      totalFlights: 'Costo totale dei voli',
+      totalExtras: 'Costo totale',
+      totalTickets: 'Costo totale dei biglietti',
+      totalCarHire: 'Costo totale del noleggio auto',
+      totalTransfer: 'Costo totale del trasferimento',
+      totalInsurance: 'Costo totale dell\'assicurazione',
+    },
+    ro: {
+      title: 'Rezervarea mea',
+      subtitle: 'Bine ai revenit. Introdu datele tale pentru a vedea totul despre următoarea ta călătorie.',
+      subtitleShort: 'Găsește-ți călătoria în câteva secunde',
+      eyebrow: 'Căutare securizată a rezervării',
+      email: 'Adresă de e-mail',
+      date: 'Data plecării',
+      ref: 'Referință rezervare',
+      refShort: 'Referință',
+      refPlaceholder: 'ex. ABC12345',
+      submit: 'Găsește rezervarea mea',
+      submitShort: 'Găsește rezervarea',
+      trust: 'Datele tale sunt criptate și nu sunt stocate niciodată.',
+      trustShort: 'Căutare securizată',
+      loadingTitle: 'Căutăm rezervarea ta',
+      loadingSub: 'De obicei durează câteva secunde.',
+      nfTitle: 'Rezervarea nu a fost găsită',
+      nfBody: 'Verifică adresa de e-mail, data plecării și referința rezervării. Dacă datele sunt corecte, contactează-ne și te vom ajuta imediat.',
+      nfRetry: 'Încearcă din nou',
+      nfContact: 'Contactează asistența',
+      flights: 'Zboruri',
+      fareConditions: 'Condiții tarifare',
+      flightsLine: 'Zboruri',
+      outbound: 'Dus',
+      return: 'Întoarcere',
+      whatToExpect: 'La ce să te aștepți',
+      atAGlance: 'Pe scurt',
+      openingTimes: 'Program',
+      dressCode: 'Cod vestimentar',
+      included: 'Inclus',
+      drinks: 'Băuturi',
+      food: 'Mâncare',
+      flightAnnouncements: 'Anunțuri de zbor',
+      features: 'Caracteristici',
+      transfer: 'Transfer',
+      transferInfo: 'Informații importante',
+      transfersLine: 'Transferuri',
+      cancellation: 'Politica de anulare',
+      carHire: 'Închiriere mașină',
+      carHireLine: 'Închiriere mașină',
+      carHireInfo: 'Informații importante',
+      suppliedBy: 'Furnizat de',
+      pickup: 'Preluare',
+      dropoff: 'Returnare',
+      payAtPickup: 'De plătit și la preluare',
+      payAtPickupNote: 'Se plătește direct la ghișeul de închiriere la preluare. Nu este inclus în costul rezervării de mai sus.',
+      ticket: 'Bilet',
+      ticketsLine: 'Bilete',
+      ticketDetails: 'Detalii',
+      highlights: 'Puncte forte',
+      notIncluded: 'Neinclus',
+      meetingPoint: 'Punct de întâlnire',
+      languages: 'Limbi',
+      cancelledPill: 'Anulată',
+      cancelBtn: 'Anulează',
+      cancelSecTitle: 'Trebuie să anulezi ceva?',
+      cancelSecSub: 'Vei vedea politica de anulare și eventualele taxe înainte ca ceva să fie confirmat.',
+      amendSecTitle: 'Trebuie să modifici ceva?',
+      amendSecSub: 'Spune-ne ce ai dori să modifici și vom transmite echipei. Nimic din rezervarea ta nu se schimbă până nu confirmă.',
+      amendOpen: 'Solicită o modificare',
+      amendFieldLabel: 'Ce ai dori să modifici?',
+      amendPlaceholder: 'De exemplu o schimbare de dată, o corecție de nume sau o preferință de cameră ori loc.',
+      amendNote: 'Acest lucru trimite doar o cerere. Te vom contacta pentru confirmare, iar rezervarea ta nu se va schimba imediat.',
+      amendSubmit: 'Trimite cererea',
+      amendCancel: 'Anulează',
+      amendSending: 'Se trimite…',
+      amendRateLimited: 'Prea multe încercări. Așteaptă câteva minute și încearcă din nou.',
+      amendDoneTitle: 'Cerere trimisă',
+      amendDoneBody: 'Am transmis cererea ta echipei. Nimic din rezervarea ta nu s-a schimbat încă și te vom contacta pentru confirmare.',
+      amendFailed: 'Nu am putut trimite cererea ta acum. Încearcă din nou sau contactează-ne.',
+      payNextBtn: 'Plătește următoarea rată',
+      payBalanceBtn: 'Plătește soldul',
+      payConfirm: 'Plătește',
+      payAmountLabel: 'Sumă de plată',
+      payCancel: 'Anulează',
+      payRedirecting: 'Se pregătește plata…',
+      payRateLimited: 'Prea multe încercări. Așteaptă câteva minute și încearcă din nou.',
+      payNoBalance: 'Nu mai este nimic de plătit pentru această rezervare.',
+      payFailed: 'Nu am putut începe plata acum. Încearcă din nou sau contactează-ne.',
+      payTooMuch: 'Aceasta depășește soldul tău de {amount}.',
+      payTooSmall: 'Plata parțială minimă este de {amount}.',
+      payHintInstalment: 'Următoarea ta plată este {next}. Plătește-o sau introdu o altă sumă până la {max}.',
+      payHintFull: 'Plătește soldul integral sau introdu o sumă mai mică (până la {max}).',
+      confirmed: 'Confirmată',
+      atolProtected: 'ATOL Protected',
+      packagedHoliday: 'Pachet de vacanță',
+      operatedBy: 'operat de',
+      yourBooking: 'Rezervarea ta',
+      reviews: 'recenzii',
+      greetingPrefix: 'Bine ai revenit',
+      greetingSuffix: 'escapada ta la {city} este aproape aici.',
+      countdownFly: 'până la zbor',
+      countdownCheckIn: 'până la check-in',
+      countdownTravel: 'până la plecare',
+      day: 'zi',
+      days: 'zile',
+      newLookup: 'Caută altă rezervare',
+      actionPreview: 'Previzualizare',
+      actionPreviewSub: 'Vezi dosarul rezervării aici',
+      actionEmail: 'E-mail',
+      actionEmailSub: 'Trimite în căsuța ta',
+      actionDownload: 'Descarcă',
+      actionDownloadSub: 'Salvează PDF-ul pe dispozitiv',
+      actionPrint: 'Printează',
+      actionPrintSub: 'Deschide o copie printabilă',
+      accommodation: 'Cazare',
+      checkin: 'Check-in',
+      checkout: 'Check-out',
+      nights: 'Nopți',
+      night: 'noapte',
+      nightsPlural: 'nopți',
+      week: '1 săptămână',
+      room: 'Cameră',
+      guest: 'oaspete',
+      guests: 'oaspeți',
+      payment: 'Plată',
+      hotelLine: 'Hotel',
+      packageLine: 'Pachet de vacanță',
+      extrasLine: 'Extra aeroport',
+      paidSoFar: 'Plătit până acum',
+      balanceRemaining: 'Sold rămas',
+      paymentSchedule: 'Calendar de plăți',
+      payments: 'plăți',
+      next: 'Următor',
+      nextDueDate: 'Următoarea plată',
+      paidInFull: 'Plătit integral',
+      depositPaid: 'Avans plătit',
+      balanceDue: 'Sold de plată',
+      dueDate: 'Data scadentă',
+      instalmentPlan: 'Plan de rate',
+      payOnArrival: 'De plătit și la sosire',
+      payOnArrivalNote: 'Se plătește direct la hotel la check-in. Nu este inclus în costul vacanței de mai sus.',
+      resortFee: 'Taxe de stațiune',
+      travelling: 'Cine călătorește',
+      leadGuest: 'Oaspete principal',
+      adult: 'Adult',
+      specialRequests: 'Cereri speciale',
+      documents: 'Documentele tale',
+      thingsToKnow: 'Lucruri de știut',
+      aboutHotel: 'Despre hotel',
+      address: 'Adresă',
+      viewMap: 'Vezi pe hartă',
+      propertyDetails: 'Detalii proprietate',
+      yearBuilt: 'Anul construcției',
+      totalRooms: 'Total camere',
+      roomMix: 'Tipuri de camere',
+      facilities: 'Facilități',
+      paymentMethods: 'Acceptate la hotel',
+      localFees: 'La hotel',
+      checkInOutTimes: 'Check-in și check-out',
+      goodToKnow: 'Bine de știut',
+      helpTitle: 'Ai nevoie de ajutor?',
+      helpBody: 'Echipa noastră este aici dacă ceva legat de rezervarea ta necesită atenție.',
+      emailUs: 'Scrie-ne',
+      callUs: 'Sună-ne',
+      flight: 'Zbor',
+      direct: 'Direct',
+      stop: 'escală',
+      stops: 'escale',
+      stopoverIn: 'Escală în {iata}',
+      stopoverInTimed: 'Escală de {dur} în {iata}',
+      aircraft: 'Aeronavă',
+      thisProduct: 'acest produs',
+      product: 'produs',
+      cancelPrefix: 'Anulează',
+      cancelLoadingSub: 'Se verifică politica de anulare…',
+      cancelLoading: 'Se încarcă detaliile de anulare…',
+      cancelRef: 'Referință rezervare',
+      cancelPoliciesSub: 'Te rugăm să consulți politica de anulare de mai jos.',
+      cancelPoliciesLabel: 'Politica de anulare și taxe',
+      cancelNoPolicy: 'Nu au fost returnate taxe specifice pentru acest produs.',
+      cancelWarn: 'Anularea nu poate fi anulată. Se vor aplica taxele de mai sus.',
+      cancelKeep: 'Păstrează rezervarea',
+      cancelContinue: 'Continuă',
+      cancelReasonTitle: 'Confirmă anularea',
+      cancelReasonSub: 'Spune-ne de ce anulezi (opțional).',
+      cancelReasonLabel: 'Motivul anulării',
+      cancelReasonPlaceholder: 'ex. schimbarea planurilor',
+      cancelFinalWarn: 'Aceasta va anula produsul și nu poate fi anulată.',
+      cancelBack: 'Înapoi',
+      cancelConfirm: 'Anulează acest produs',
+      cancelConfirming: 'Se anulează…',
+      cancelWorkingTitle: 'Se anulează…',
+      cancelWorkingSub: 'Te rugăm să aștepți cât procesăm.',
+      cancelWorking: 'Se anulează produsul tău…',
+      cancelDoneTitle: 'Anulare confirmată',
+      cancelDoneHead: 'Gata, anulat',
+      cancelDoneBodyTmpl: '{label} a fost anulat.',
+      cancelRefLabel: 'Referință',
+      cancelDoneBtn: 'Gata',
+      cancelErrorTitle: 'Nu se poate anula',
+      cancelClose: 'Închide',
+      emailModalTitle: 'Trimite dosarul pe e-mail',
+      emailModalSubName: 'Trimite-i lui {name} o copie a acestui dosar de rezervare',
+      emailModalSub: 'Trimite o copie a acestui dosar de rezervare',
+      emailTo: 'Trimite către',
+      emailToHelp: 'Implicit, e-mailul din rezervarea ta. Modifică pentru a trimite la altă adresă.',
+      emailCc: 'Trimite și către (opțional)',
+      emailCcHelp: 'Separă mai multe adrese cu virgule. Până la 3.',
+      emailMessage: 'Adaugă un mesaj (opțional)',
+      emailMessagePlaceholder: 'O notă scurtă care va apărea deasupra rezumatului rezervării.',
+      emailAttachment: 'Atașament',
+      emailAttachmentMeta: 'Dosar de confirmare a rezervării A4',
+      emailCancel: 'Anulează',
+      emailSend: 'Trimite e-mailul',
+      emailInvalidTo: 'Introdu o adresă de e-mail validă în câmpul Trimite către.',
+      emailInvalidCc: '„{email}" nu pare o adresă de e-mail validă.',
+      emailTooManyCc: 'Poți include până la 3 adrese suplimentare. Elimină câteva și încearcă din nou.',
+      emailHolderReqd: 'E-mailul titularului rezervării ({email}) trebuie inclus ca destinatar.',
+      emailHolderReqdShort: 'E-mailul titularului rezervării trebuie inclus ca destinatar.',
+      emailSending: 'Se trimite…',
+      emailToastSendTitle: 'Se trimite dosarul tău de rezervare',
+      emailToastSendSub: 'Se generează PDF-ul și se trimite acum.',
+      emailTooMany: 'Prea multe cereri de e-mail. Așteaptă câteva minute și încearcă din nou.',
+      emailInvalidRecipients: 'Una dintre adresele de e-mail pare invalidă. Verifică și încearcă din nou.',
+      emailInvalidMessage: 'Mesajul tău este prea lung. Scurtează-l la sub 1000 de caractere.',
+      emailSendFailed: 'Nu am putut trimite e-mailul acum. Încearcă din nou în câteva momente.',
+      emailNotFound: 'Rezervarea nu a fost găsită. Caut-o din nou.',
+      genericError: 'Ceva nu a funcționat. Încearcă din nou în câteva momente.',
+      emailSentTitle: 'E-mail trimis',
+      emailSentSub: 'Dosarul de rezervare este pe drum către {email}.',
+      emailNetworkError: 'Eroare de rețea. Verifică conexiunea și încearcă din nou.',
+      pdfCannotTitle: 'Nu se poate genera PDF-ul',
+      pdfLookupAgain: 'Caută rezervarea din nou.',
+      pdfGeneratingTitle: 'Se generează PDF-ul tău',
+      pdfGeneratingSub: 'De obicei durează câteva secunde.',
+      pdfTooManyTitle: 'Prea multe cereri',
+      pdfTooManySub: 'Așteaptă câteva minute și încearcă din nou.',
+      pdfCouldntTitle: 'Nu am putut genera acel PDF',
+      pdfWrongTitle: 'Ceva nu a funcționat',
+      pdfTryAgainSoon: 'Încearcă din nou în câteva momente.',
+      pdfFailedTitle: 'Generare eșuată',
+      pdfCheckConnection: 'Verifică conexiunea și încearcă din nou.',
+      pdfDownloadedTitle: 'PDF descărcat',
+      pdfPopupTitle: 'Permite ferestrele pop-up pentru a printa',
+      pdfPopupSub: 'Sau folosește Descarcă, apoi printează PDF-ul salvat.',
+      fillAllFields: 'Te rugăm să completezi toate cele trei câmpuri.',
+      notConfigured: 'Acest widget nu este încă configurat. Contactează asistența.',
+      tooManyAttempts: 'Prea multe încercări. Așteaptă câteva minute și încearcă din nou.',
+      somethingWrong: 'Ceva nu a funcționat.',
+      ariaClose: 'Închide',
+      ariaViewImage: 'Vezi imaginea {n}',
+      totalCost: 'Cost total',
+      totalHoliday: 'Cost total vacanță',
+      totalFlights: 'Cost total zboruri',
+      totalExtras: 'Cost total',
+      totalTickets: 'Cost total bilete',
+      totalCarHire: 'Cost total închiriere mașină',
+      totalTransfer: 'Cost total transfer',
+      totalInsurance: 'Cost total asigurare',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
+
 
   // ----- Inline SVG icons -----
   const IC = {
@@ -266,7 +1801,7 @@
   function resolveTotalLabel(items, c) {
     const labels = c?.labels || {};
     if (!Array.isArray(items) || items.length === 0) {
-      return labels.totalCost || 'Total cost';
+      return labels.totalCost || (c && c.t ? c.t('totalCost') : 'Total cost');
     }
 
     const products = new Set(items.map(i => i?.product).filter(Boolean));
@@ -276,10 +1811,10 @@
     // are sold as a single 'Packages' item that bundles hotel + flights;
     // from the customer's POV that's just a holiday.
     if (products.has('Accommodation') || products.has('Packages')) {
-      return labels.totalHoliday || labels.totalCost || 'Total holiday cost';
+      return labels.totalHoliday || labels.totalCost || (c && c.t ? c.t('totalHoliday') : 'Total holiday cost');
     }
     if (products.has('Flights')) {
-      return labels.totalFlights || 'Total flight cost';
+      return labels.totalFlights || (c && c.t ? c.t('totalFlights') : 'Total flight cost');
     }
     // No hotel, no flights — single-product case.
     if (products.size === 1) {
@@ -287,19 +1822,19 @@
       // Map of known single-product labels. Anything not listed falls
       // through to the generic "Total cost".
       const singleProductMap = {
-        AirportExtras:       labels.totalExtras   || 'Total cost',
-        TicketsAttractions:  labels.totalTickets  || 'Total ticket cost',
-        Tickets:             labels.totalTickets  || 'Total ticket cost',
-        Ticket:              labels.totalTickets  || 'Total ticket cost',
-        CarRental:           labels.totalCarHire  || 'Total car hire cost',
-        CarHire:             labels.totalCarHire  || 'Total car hire cost',
-        Transfers:           labels.totalTransfer || 'Total transfer cost',
-        Transfer:            labels.totalTransfer || 'Total transfer cost',
-        Insurance:           labels.totalInsurance|| 'Total insurance cost',
+        AirportExtras:       labels.totalExtras || (c && c.t ? c.t('totalExtras') : 'Total cost'),
+        TicketsAttractions:  labels.totalTickets || (c && c.t ? c.t('totalTickets') : 'Total ticket cost'),
+        Tickets:             labels.totalTickets || (c && c.t ? c.t('totalTickets') : 'Total ticket cost'),
+        Ticket:              labels.totalTickets || (c && c.t ? c.t('totalTickets') : 'Total ticket cost'),
+        CarRental:           labels.totalCarHire || (c && c.t ? c.t('totalCarHire') : 'Total car hire cost'),
+        CarHire:             labels.totalCarHire || (c && c.t ? c.t('totalCarHire') : 'Total car hire cost'),
+        Transfers:           labels.totalTransfer || (c && c.t ? c.t('totalTransfer') : 'Total transfer cost'),
+        Transfer:            labels.totalTransfer || (c && c.t ? c.t('totalTransfer') : 'Total transfer cost'),
+        Insurance:           labels.totalInsurance || (c && c.t ? c.t('totalInsurance') : 'Total insurance cost'),
       };
-      return singleProductMap[only] || labels.totalCost || 'Total cost';
+      return singleProductMap[only] || labels.totalCost || (c && c.t ? c.t('totalCost') : 'Total cost');
     }
-    return labels.totalCost || 'Total cost';
+    return labels.totalCost || (c && c.t ? c.t('totalCost') : 'Total cost');
   }
   function fmtDate(iso, opts) {
     if (!iso) return '';
@@ -1061,34 +2596,34 @@
     return `
       <div class="tgm-form">
         <div class="tgm-hero-form">
-          <span class="tgm-eyebrow"><span class="tgm-eyebrow-dot"></span>${esc(c.eyebrow || 'Secure booking lookup')}</span>
-          <h1 class="tgm-form-title">${esc(c.title || 'My Booking')}</h1>
-          <p class="tgm-form-sub">${esc(c.subtitle || 'Welcome back. Enter your details to view everything about your upcoming trip.')}</p>
+          <span class="tgm-eyebrow"><span class="tgm-eyebrow-dot"></span>${esc(c.eyebrow || c.t('eyebrow'))}</span>
+          <h1 class="tgm-form-title">${esc(c.title || c.t('title'))}</h1>
+          <p class="tgm-form-sub">${esc(c.subtitle || c.t('subtitle'))}</p>
         </div>
         <form class="tgm-form-body" data-tgm-form>
           <div class="tgm-field">
-            <label class="tgm-label" for="tgm-email">${esc(c.labels?.email || 'Email address')}</label>
+            <label class="tgm-label" for="tgm-email">${esc(c.labels?.email || c.t('email'))}</label>
             <div class="tgm-input-wrap">
               ${svg(IC.mail)}
               <input type="email" class="tgm-input" id="tgm-email" name="email" placeholder="you@example.com" autocomplete="email" value="${valEmail}" required>
             </div>
           </div>
           <div class="tgm-field">
-            <label class="tgm-label" for="tgm-date">${esc(c.labels?.date || 'Departure date')}</label>
+            <label class="tgm-label" for="tgm-date">${esc(c.labels?.date || c.t('date'))}</label>
             <div class="tgm-input-wrap">
               ${svg(IC.cal)}
               <input type="date" class="tgm-input" id="tgm-date" name="date" value="${valDate}" required>
             </div>
           </div>
           <div class="tgm-field">
-            <label class="tgm-label" for="tgm-ref">${esc(c.labels?.ref || 'Booking reference')}</label>
+            <label class="tgm-label" for="tgm-ref">${esc(c.labels?.ref || c.t('ref'))}</label>
             <div class="tgm-input-wrap">
               ${svg(IC.ref)}
-              <input type="text" class="tgm-input code" id="tgm-ref" name="ref" placeholder="${esc(c.labels?.refPlaceholder || 'e.g. ABC12345')}" autocomplete="off" value="${valRef}" required>
+              <input type="text" class="tgm-input code" id="tgm-ref" name="ref" placeholder="${esc(c.labels?.refPlaceholder || c.t('refPlaceholder'))}" autocomplete="off" value="${valRef}" required>
             </div>
           </div>
-          <button type="submit" class="tgm-cta" data-tgm-submit>${esc(c.labels?.submit || 'Find my booking')}${svg(IC.arrow)}</button>
-          <div class="tgm-trust">${svg(IC.shield)}${esc(c.labels?.trust || 'Your details are encrypted and never stored.')}</div>
+          <button type="submit" class="tgm-cta" data-tgm-submit>${esc(c.labels?.submit || c.t('submit'))}${svg(IC.arrow)}</button>
+          <div class="tgm-trust">${svg(IC.shield)}${esc(c.labels?.trust || c.t('trust'))}</div>
           ${errMsg}
         </form>
       </div>
@@ -1108,32 +2643,32 @@
           <div class="tgm-hform-heading">
             <div class="tgm-hform-icon">${svg(IC.booking)}</div>
             <div>
-              <h2 class="tgm-hform-title">${esc(c.title || 'My Booking')}</h2>
-              <p class="tgm-hform-sub">${esc(c.subtitleShort || 'Look up your trip in seconds')}</p>
+              <h2 class="tgm-hform-title">${esc(c.title || c.t('title'))}</h2>
+              <p class="tgm-hform-sub">${esc(c.subtitleShort || c.t('subtitleShort'))}</p>
             </div>
           </div>
-          ${!isCompact ? `<span class="tgm-hform-trust">${svg(IC.shield)}${esc(c.labels?.trustShort || 'Secure lookup')}</span>` : ''}
+          ${!isCompact ? `<span class="tgm-hform-trust">${svg(IC.shield)}${esc(c.labels?.trustShort || c.t('trustShort'))}</span>` : ''}
         </div>
         <form class="tgm-hform-row" data-tgm-form>
           <div class="tgm-hform-field">
-            <label>${esc(c.labels?.email || 'Email address')}</label>
+            <label>${esc(c.labels?.email || c.t('email'))}</label>
             <div class="tgm-hform-iw">${svg(IC.mail)}
               <input type="email" class="tgm-hform-input" name="email" placeholder="you@example.com" autocomplete="email" value="${valEmail}" required>
             </div>
           </div>
           <div class="tgm-hform-field">
-            <label>${esc(c.labels?.date || 'Departure date')}</label>
+            <label>${esc(c.labels?.date || c.t('date'))}</label>
             <div class="tgm-hform-iw">${svg(IC.cal)}
               <input type="date" class="tgm-hform-input" name="date" value="${valDate}" required>
             </div>
           </div>
           <div class="tgm-hform-field">
-            <label>${esc(c.labels?.refShort || 'Reference')}</label>
+            <label>${esc(c.labels?.refShort || c.t('refShort'))}</label>
             <div class="tgm-hform-iw">${svg(IC.ref)}
-              <input type="text" class="tgm-hform-input" name="ref" placeholder="${esc(c.labels?.refPlaceholder || 'e.g. ABC12345')}" style="letter-spacing:.04em; font-variant-numeric:tabular-nums;" autocomplete="off" value="${valRef}" required>
+              <input type="text" class="tgm-hform-input" name="ref" placeholder="${esc(c.labels?.refPlaceholder || c.t('refPlaceholder'))}" style="letter-spacing:.04em; font-variant-numeric:tabular-nums;" autocomplete="off" value="${valRef}" required>
             </div>
           </div>
-          <button type="submit" class="tgm-hform-cta" data-tgm-submit>${esc(c.labels?.submitShort || 'Find booking')}${svg(IC.arrow, 2.5)}</button>
+          <button type="submit" class="tgm-hform-cta" data-tgm-submit>${esc(c.labels?.submitShort || c.t('submitShort'))}${svg(IC.arrow, 2.5)}</button>
         </form>
         ${errMsg}
       </div>
@@ -1144,8 +2679,8 @@
     return `
       <div class="tgm-loading" role="status" aria-live="polite">
         <div class="tgm-spinner" aria-hidden="true"></div>
-        <h2>${esc(c.labels?.loadingTitle || 'Finding your booking')}</h2>
-        <p>${esc(c.labels?.loadingSub || 'This usually takes a couple of seconds.')}</p>
+        <h2>${esc(c.labels?.loadingTitle || c.t('loadingTitle'))}</h2>
+        <p>${esc(c.labels?.loadingSub || c.t('loadingSub'))}</p>
       </div>
     `;
   }
@@ -1154,11 +2689,11 @@
     return `
       <div class="tgm-nf">
         <div class="tgm-nf-icon">${svg(IC.search)}</div>
-        <h2>${esc(c.labels?.nfTitle || "We couldn't find that booking")}</h2>
-        <p>${esc(c.labels?.nfBody || "Please double-check your email address, departure date and booking reference. If the details look right, get in touch and we'll help you straight away.")}</p>
+        <h2>${esc(c.labels?.nfTitle || c.t('nfTitle'))}</h2>
+        <p>${esc(c.labels?.nfBody || c.t('nfBody'))}</p>
         <div class="tgm-nf-actions">
-          <button type="button" class="tgm-btn-2" data-tgm-tryagain>${svg(IC.refresh)}${esc(c.labels?.nfRetry || 'Try again')}</button>
-          ${c.support?.email ? `<a class="tgm-btn-1" href="mailto:${esc(c.support.email)}">${svg(IC.mail)}${esc(c.labels?.nfContact || 'Contact support')}</a>` : ''}
+          <button type="button" class="tgm-btn-2" data-tgm-tryagain>${svg(IC.refresh)}${esc(c.labels?.nfRetry || c.t('nfRetry'))}</button>
+          ${c.support?.email ? `<a class="tgm-btn-1" href="mailto:${esc(c.support.email)}">${svg(IC.mail)}${esc(c.labels?.nfContact || c.t('nfContact'))}</a>` : ''}
         </div>
       </div>
     `;
@@ -1190,16 +2725,16 @@
 
     return `
       <div class="tgm-flight-card">
-        <h3>${svg(IC.plane)}${esc(c.labels?.flights || 'Flights')}${
+        <h3>${svg(IC.plane)}${esc(c.labels?.flights || c.t('flights'))}${
           carrierSummary
             ? `<span class="tgm-flight-meta">${esc(carrierSummary)}</span>`
             : ''
         }</h3>
-        ${f.routes.map(route => renderFlightLeg(route)).join('')}
+        ${f.routes.map(route => renderFlightLeg(route, c)).join('')}
         ${meaningfulFareInfo.length ? `
           <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
             <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.fareConditions || 'Fare conditions')}</div>
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.fareConditions || c.t('fareConditions'))}</div>
               ${svg(IC.chev)}
             </button>
             <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
@@ -1216,7 +2751,8 @@
     `;
   }
 
-  function renderFlightLeg(route) {
+  function renderFlightLeg(route, c) {
+    const t = (k, v) => (c && c.t ? c.t(k, v) : k);
     const segs = route.segments || [];
     if (segs.length === 0) return '';
 
@@ -1258,7 +2794,7 @@
     return `
       <div class="tgm-leg">
         <div class="tgm-leg-head">
-          <span class="tgm-leg-dir">${esc(route.direction || 'Flight')}</span>
+          <span class="tgm-leg-dir">${esc(route.direction || t('flight'))}</span>
           ${legDate ? `<span class="tgm-leg-date">${esc(legDate)}</span>` : ''}
         </div>
         <div class="tgm-leg-route">
@@ -1270,7 +2806,7 @@
           <div class="tgm-leg-line">
             <div class="tgm-leg-line-dur">${esc(fmtDuration(flightMins))}</div>
             <div class="tgm-leg-line-bar"><span class="tgm-leg-line-icon">${svg(IC.plane, 2, 14)}</span></div>
-            <div class="tgm-leg-stops">${stops === 0 ? 'Direct' : `${stops} ${stops === 1 ? 'stop' : 'stops'}`}</div>
+            <div class="tgm-leg-stops">${stops === 0 ? esc(t('direct')) : `${stops} ${esc(stops === 1 ? t('stop') : t('stops'))}`}</div>
           </div>
           <div class="tgm-leg-end dest">
             <div class="tgm-leg-time">${esc(fmtTime(last.arrive))}${dayOffset > 0 ? `<sup class="tgm-leg-plus">+${dayOffset}</sup>` : ''}</div>
@@ -1283,12 +2819,13 @@
           ${cabin ? `<span class="tgm-leg-meta-item">${svg(IC.user, 2, 14)}<span><strong>${esc(cabin)}</strong>${fareName ? ` · ${esc(fareName)}` : ''}</span></span>` : ''}
           ${baggage ? `<span class="tgm-leg-meta-item">${svg(IC.bag, 2, 14)}<span>${esc(baggage)}</span></span>` : ''}
         </div>
-        ${stops > 0 ? renderSegmentDetail(segs) : ''}
+        ${stops > 0 ? renderSegmentDetail(segs, c) : ''}
       </div>
     `;
   }
 
-  function renderSegmentDetail(segs) {
+  function renderSegmentDetail(segs, c) {
+    const t = (k, v) => (c && c.t ? c.t(k, v) : k);
     let html = '<div class="tgm-segs">';
     for (let i = 0; i < segs.length; i++) {
       const s = segs[i];
@@ -1301,7 +2838,7 @@
           <div class="tgm-seg-route">
             <strong>${esc(s.marketingCarrier?.code || '')}${esc(s.flightNo || '')}</strong>
             ${s.marketingCarrier?.name ? ` · ${esc(s.marketingCarrier.name)}` : ''}
-            <div class="tgm-seg-flight">${esc(fmtDuration(s.duration))}${s.aircraft ? ` · Aircraft ${esc(s.aircraft)}` : ''}</div>
+            <div class="tgm-seg-flight">${esc(fmtDuration(s.duration))}${s.aircraft ? ` · ${esc(t('aircraft'))} ${esc(s.aircraft)}` : ''}</div>
           </div>
           <div style="text-align:right">
             <div class="tgm-seg-time">${esc(fmtTime(s.arrive))}</div>
@@ -1317,7 +2854,7 @@
           : 0;
         html += `
           <div class="tgm-stop-marker">
-            ${gapMin > 0 ? `${esc(fmtDuration(gapMin))} stopover in ${esc(s.destination?.iataCode || '')}` : `Stopover in ${esc(s.destination?.iataCode || '')}`}
+            ${gapMin > 0 ? esc(t('stopoverInTimed', { dur: fmtDuration(gapMin), iata: s.destination?.iataCode || '' })) : esc(t('stopoverIn', { iata: s.destination?.iataCode || '' }))}
           </div>
         `;
       }
@@ -1433,33 +2970,33 @@
         ${hasDetails ? `
           <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
             <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.whatToExpect || 'What to expect')}</div>
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.whatToExpect || c.t('whatToExpect'))}</div>
               ${svg(IC.chev)}
             </button>
             <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
               ${fullDesc ? `<p>${esc(fullDesc.slice(0, 800))}${fullDesc.length > 800 ? '…' : ''}</p>` : ''}
 
               ${(openingTimes || dressCode) ? `
-                <div class="tgm-subhead">${esc(c.labels?.atAGlance || 'At a glance')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.atAGlance || c.t('atAGlance'))}</div>
                 <dl class="tgm-kv">
-                  ${openingTimes ? `<dt>${esc(c.labels?.openingTimes || 'Opening times')}</dt><dd>${esc(openingTimes)}</dd>` : ''}
-                  ${dressCode ? `<dt>${esc(c.labels?.dressCode || 'Dress code')}</dt><dd>${esc(dressCode)}</dd>` : ''}
+                  ${openingTimes ? `<dt>${esc(c.labels?.openingTimes || c.t('openingTimes'))}</dt><dd>${esc(openingTimes)}</dd>` : ''}
+                  ${dressCode ? `<dt>${esc(c.labels?.dressCode || c.t('dressCode'))}</dt><dd>${esc(dressCode)}</dd>` : ''}
                 </dl>
               ` : ''}
 
               ${(drinks || food) ? `
-                <div class="tgm-subhead">${esc(c.labels?.included || 'Included')}</div>
-                ${drinks ? `<p><strong>${esc(c.labels?.drinks || 'Drinks')}:</strong> ${esc(drinks)}</p>` : ''}
-                ${food ? `<p><strong>${esc(c.labels?.food || 'Food')}:</strong> ${esc(food)}</p>` : ''}
+                <div class="tgm-subhead">${esc(c.labels?.included || c.t('included'))}</div>
+                ${drinks ? `<p><strong>${esc(c.labels?.drinks || c.t('drinks'))}:</strong> ${esc(drinks)}</p>` : ''}
+                ${food ? `<p><strong>${esc(c.labels?.food || c.t('food'))}:</strong> ${esc(food)}</p>` : ''}
               ` : ''}
 
               ${announcements ? `
-                <div class="tgm-subhead">${esc(c.labels?.flightAnnouncements || 'Flight announcements')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.flightAnnouncements || c.t('flightAnnouncements'))}</div>
                 <p>${esc(announcements)}</p>
               ` : ''}
 
               ${features.length ? `
-                <div class="tgm-subhead">${esc(c.labels?.features || 'Features')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.features || c.t('features'))}</div>
                 <div class="tgm-chips">${features.map(f => `<span class="tgm-chip">${svg(IC.check)}${esc(f)}</span>`).join('')}</div>
               ` : ''}
             </div></div>
@@ -1525,27 +3062,27 @@
         <div class="tgm-extra-head">
           <div class="tgm-extra-icon">${svg(IC.van, 2, 22)}</div>
           <div class="tgm-extra-info">
-            <div class="tgm-extra-kind">${esc(c.labels?.transfer || 'Transfer')}${t.type ? ' · ' + esc(t.type) : ''}</div>
+            <div class="tgm-extra-kind">${esc(c.labels?.transfer || c.t('transfer'))}${t.type ? ' · ' + esc(t.type) : ''}</div>
             <div class="tgm-extra-name">${esc([fromLabel, toLabel].filter(Boolean).join(' → ') || t.vehicle || 'Transfer')}</div>
             ${t.vehicle ? `<div class="tgm-extra-sub">${esc(t.vehicle)}${t.company ? ' · ' + esc(t.company) : ''}</div>` : ''}
           </div>
         </div>
         <div class="tgm-extra-meta">
-          ${outDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.outbound || 'Outbound')}:</strong> ${esc(outDate)}${outTime ? ` · ${esc(outTime)}` : ''}</span></span>` : ''}
-          ${returnDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.return || 'Return')}:</strong> ${esc(returnDate)}${returnTime ? ` · ${esc(returnTime)}` : ''}</span></span>` : ''}
+          ${outDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.outbound || c.t('outbound'))}:</strong> ${esc(outDate)}${outTime ? ` · ${esc(outTime)}` : ''}</span></span>` : ''}
+          ${returnDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.return || c.t('return'))}:</strong> ${esc(returnDate)}${returnTime ? ` · ${esc(returnTime)}` : ''}</span></span>` : ''}
           ${t.journeyDuration ? `<span class="tgm-extra-meta-item">${svg(IC.clock, 2, 14)}<span>${esc(t.journeyDuration)}${t.journeyDistance ? ` · ${esc(t.journeyDistance)}` : ''}</span></span>` : ''}
         </div>
         ${chips.length ? `<div class="tgm-chips" style="margin-top:8px;">${chips.map(c => `<span class="tgm-chip">${svg(IC.check)}${esc(c)}</span>`).join('')}</div>` : ''}
         ${hasDetails ? `
           <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
             <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.transferInfo || 'Important information')}</div>
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.transferInfo || c.t('transferInfo'))}</div>
               ${svg(IC.chev)}
             </button>
             <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
               ${importantInfo?.text ? `<p>${esc(importantInfo.text)}</p>` : ''}
               ${cancelInfo?.text ? `
-                <div class="tgm-subhead">${esc(c.labels?.cancellation || 'Cancellation policy')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.cancellation || c.t('cancellation'))}</div>
                 <p>${esc(cancelInfo.text)}</p>
               ` : ''}
             </div></div>
@@ -1624,24 +3161,24 @@
         <div class="tgm-extra-head">
           <div class="tgm-extra-icon">${svg(IC.car, 2, 22)}</div>
           <div class="tgm-extra-info">
-            <div class="tgm-extra-kind">${esc(c.labels?.carHire || 'Car hire')}${cr.className ? ' · ' + esc(cr.className) : ''}</div>
+            <div class="tgm-extra-kind">${esc(c.labels?.carHire || c.t('carHire'))}${cr.className ? ' · ' + esc(cr.className) : ''}</div>
             <div class="tgm-extra-name">${esc(cr.name || 'Hire car')}</div>
-            ${cr.rentalOperator?.name ? `<div class="tgm-extra-sub">${esc(c.labels?.suppliedBy || 'Supplied by')} ${esc(cr.rentalOperator.name)}</div>` : ''}
+            ${cr.rentalOperator?.name ? `<div class="tgm-extra-sub">${esc(c.labels?.suppliedBy || c.t('suppliedBy'))} ${esc(cr.rentalOperator.name)}</div>` : ''}
           </div>
         </div>
         <div class="tgm-extra-meta">
-          ${pickupDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.pickup || 'Pickup')}:</strong> ${esc(pickupDate)}${pickupTime ? ` · ${esc(pickupTime)}` : ''}</span></span>` : ''}
-          ${dropoffDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.dropoff || 'Dropoff')}:</strong> ${esc(dropoffDate)}${dropoffTime ? ` · ${esc(dropoffTime)}` : ''}</span></span>` : ''}
+          ${pickupDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.pickup || c.t('pickup'))}:</strong> ${esc(pickupDate)}${pickupTime ? ` · ${esc(pickupTime)}` : ''}</span></span>` : ''}
+          ${dropoffDate ? `<span class="tgm-extra-meta-item">${svg(IC.cal, 2, 14)}<span><strong>${esc(c.labels?.dropoff || c.t('dropoff'))}:</strong> ${esc(dropoffDate)}${dropoffTime ? ` · ${esc(dropoffTime)}` : ''}</span></span>` : ''}
           ${pickupLabel ? `<span class="tgm-extra-meta-item">${svg(IC.pin, 2, 14)}<span>${esc(pickupLabel)}${(!sameLocation && dropoffLabel) ? ` → ${esc(dropoffLabel)}` : ''}</span></span>` : ''}
         </div>
         ${specs.length ? `<div class="tgm-chips" style="margin-top:8px;">${specs.map(s => `<span class="tgm-chip">${svg(IC.check)}${esc(s)}</span>`).join('')}</div>` : ''}
         ${inclusions.length ? `
-          <div class="tgm-subhead" style="margin-top:12px;">${esc(c.labels?.included || 'Included')}</div>
+          <div class="tgm-subhead" style="margin-top:12px;">${esc(c.labels?.included || c.t('included'))}</div>
           <div class="tgm-chips">${inclusions.map(i => `<span class="tgm-chip">${svg(IC.check)}${esc(i)}</span>`).join('')}</div>
         ` : ''}
         ${validPayAt.length ? `
           <div class="tgm-pay-onarrival" style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--tgm-border-light);">
-            <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payAtPickup || 'Also payable at pickup')}</div>
+            <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payAtPickup || c.t('payAtPickup'))}</div>
             ${validPayAt.map(line => {
               const label = line.name || line.description;
               const hasPrice = typeof line.unitPrice === 'number';
@@ -1657,13 +3194,13 @@
                 </div>
               `;
             }).join('')}
-            <div class="tgm-pay-onarrival-note">${esc(c.labels?.payAtPickupNote || 'Paid directly to the rental desk on pickup. Not included in your booking cost above.')}</div>
+            <div class="tgm-pay-onarrival-note">${esc(c.labels?.payAtPickupNote || c.t('payAtPickupNote'))}</div>
           </div>
         ` : ''}
         ${hasDetails ? `
           <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
             <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.carHireInfo || 'Important information')}</div>
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.carHireInfo || c.t('carHireInfo'))}</div>
               ${svg(IC.chev)}
             </button>
             <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
@@ -1672,7 +3209,7 @@
                 <p>${esc(info.text)}</p>
               `).join('')}
               ${cancelDesc?.text ? `
-                <div class="tgm-subhead">${esc(c.labels?.cancellation || 'Cancellation policy')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.cancellation || c.t('cancellation'))}</div>
                 <p>${esc(cancelDesc.text)}</p>
               ` : ''}
             </div></div>
@@ -1740,7 +3277,7 @@
         <div class="tgm-extra-head">
           <div class="tgm-extra-icon">${svg(IC.ticket, 2, 22)}</div>
           <div class="tgm-extra-info">
-            <div class="tgm-extra-kind">${esc(t.ticketType || c.labels?.ticket || 'Ticket')}${opt?.subOption?.name ? ' · ' + esc(opt.subOption.name) : ''}</div>
+            <div class="tgm-extra-kind">${esc(t.ticketType || c.labels?.ticket || c.t('ticket'))}${opt?.subOption?.name ? ' · ' + esc(opt.subOption.name) : ''}</div>
             <div class="tgm-extra-name">${esc(t.name || 'Booking')}</div>
             ${locationLabel ? `<div class="tgm-extra-sub">${esc(locationLabel)}</div>` : ''}
           </div>
@@ -1754,33 +3291,33 @@
         ${hasDetails ? `
           <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
             <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.ticketDetails || 'Details')}</div>
+              <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.ticketDetails || c.t('ticketDetails'))}</div>
               ${svg(IC.chev)}
             </button>
             <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
               ${overview ? `<p>${esc(overview.slice(0, 800))}${overview.length > 800 ? '…' : ''}</p>` : ''}
               ${highlights ? `
-                <div class="tgm-subhead">${esc(c.labels?.highlights || 'Highlights')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.highlights || c.t('highlights'))}</div>
                 <p>${esc(highlights.replace(/<br\s*\/?>/gi, '\n').slice(0, 600))}</p>
               ` : ''}
               ${included ? `
-                <div class="tgm-subhead">${esc(c.labels?.included || 'Included')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.included || c.t('included'))}</div>
                 <p>${esc(included.replace(/<br\s*\/?>/gi, '\n').slice(0, 600))}</p>
               ` : ''}
               ${notIncluded ? `
-                <div class="tgm-subhead">${esc(c.labels?.notIncluded || 'Not included')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.notIncluded || c.t('notIncluded'))}</div>
                 <p>${esc(notIncluded.replace(/<br\s*\/?>/gi, '\n').slice(0, 600))}</p>
               ` : ''}
               ${meetingPoint ? `
-                <div class="tgm-subhead">${esc(c.labels?.meetingPoint || 'Meeting point')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.meetingPoint || c.t('meetingPoint'))}</div>
                 <p>${esc(meetingPoint.slice(0, 600))}</p>
               ` : ''}
               ${languages ? `
-                <div class="tgm-subhead">${esc(c.labels?.languages || 'Languages')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.languages || c.t('languages'))}</div>
                 <p>${esc(languages.slice(0, 300))}</p>
               ` : ''}
               ${cancelPolicy ? `
-                <div class="tgm-subhead">${esc(c.labels?.cancellation || 'Cancellation policy')}</div>
+                <div class="tgm-subhead">${esc(c.labels?.cancellation || c.t('cancellation'))}</div>
                 <p>${esc(cancelPolicy.slice(0, 600))}</p>
               ` : ''}
             </div></div>
@@ -1828,8 +3365,8 @@
               ${sub ? `<div class="tgm-cancel-row-sub">${sub}</div>` : ''}
             </div>
             ${isCancelled
-              ? `<span class="tgm-cancel-pill">${esc(c.labels?.cancelledPill || 'Cancelled')}</span>`
-              : `<button type="button" class="tgm-cancel-btn" data-tgm-cancel-item data-item-id="${esc(String(it.id))}">${svg(IC.x)}${esc(c.labels?.cancelBtn || 'Cancel')}</button>`}
+              ? `<span class="tgm-cancel-pill">${esc(c.labels?.cancelledPill || c.t('cancelledPill'))}</span>`
+              : `<button type="button" class="tgm-cancel-btn" data-tgm-cancel-item data-item-id="${esc(String(it.id))}">${svg(IC.x)}${esc(c.labels?.cancelBtn || c.t('cancelBtn'))}</button>`}
           </div>`;
       })
       .join('');
@@ -1839,8 +3376,8 @@
     return `
       <div class="tgm-cancel-sec">
         <div class="tgm-cancel-sec-head">
-          <h3>${svg(IC.shield)}${esc(c.labels?.cancelSecTitle || 'Need to cancel something?')}</h3>
-          <p>${esc(c.labels?.cancelSecSub || "You'll see the cancellation policy and any charges before anything is confirmed.")}</p>
+          <h3>${svg(IC.shield)}${esc(c.labels?.cancelSecTitle || c.t('cancelSecTitle'))}</h3>
+          <p>${esc(c.labels?.cancelSecSub || c.t('cancelSecSub'))}</p>
         </div>
         ${rows}
       </div>
@@ -1852,13 +3389,13 @@
   // careful to say so. Whole-order (no per-product id), one step.
   function renderAmendSection(order, c) {
     if (c.display?.showAmend === false) return '';
-    const title = c.labels?.amendSecTitle || 'Need to change something?';
-    const sub = c.labels?.amendSecSub || "Tell us what you'd like to change and we'll pass it to the team. Nothing on your booking changes until they confirm it.";
-    const openLabel = c.labels?.amendOpen || 'Request a change';
-    const fieldLabel = c.labels?.amendFieldLabel || 'What would you like to change?';
-    const placeholder = c.labels?.amendPlaceholder || 'For example a date change, a name correction, or a room or seat preference.';
-    const note = c.labels?.amendNote || "This sends a request only. We'll be in touch to confirm, and your booking won't change straight away.";
-    const submitLabel = c.labels?.amendSubmit || 'Send request';
+    const title = c.labels?.amendSecTitle || c.t('amendSecTitle');
+    const sub = c.labels?.amendSecSub || c.t('amendSecSub');
+    const openLabel = c.labels?.amendOpen || c.t('amendOpen');
+    const fieldLabel = c.labels?.amendFieldLabel || c.t('amendFieldLabel');
+    const placeholder = c.labels?.amendPlaceholder || c.t('amendPlaceholder');
+    const note = c.labels?.amendNote || c.t('amendNote');
+    const submitLabel = c.labels?.amendSubmit || c.t('amendSubmit');
     return `
       <div class="tgm-amend-sec" data-tgm-amend>
         <div class="tgm-amend-head">
@@ -1875,7 +3412,7 @@
             <div class="tgm-amend-foot"><span class="tgm-amend-count" data-tgm-amend-count>0 / ${AMEND_MAX}</span></div>
             <div class="tgm-amend-note">${esc(note)}</div>
             <div class="tgm-amend-actions">
-              <button type="button" class="tgm-amend-cancel" data-tgm-amend-cancel>${esc(c.labels?.amendCancel || 'Cancel')}</button>
+              <button type="button" class="tgm-amend-cancel" data-tgm-amend-cancel>${esc(c.labels?.amendCancel || c.t('amendCancel'))}</button>
               <button type="button" class="tgm-amend-submit" data-tgm-amend-submit disabled>${svg(IC.send)}<span>${esc(submitLabel)}</span></button>
             </div>
             <div data-tgm-amend-error></div>
@@ -1970,15 +3507,15 @@
     const MIN_PART = 1; // smallest part payment; full settlement always allowed
     const min = outstanding <= MIN_PART ? outstanding : MIN_PART;
     const openLabel = isInstalment
-      ? (c.labels?.payNextBtn || 'Pay next payment')
-      : (c.labels?.payBalanceBtn || 'Pay balance');
-    const payVerb = c.labels?.payConfirm || 'Pay';
-    const amountLabel = c.labels?.payAmountLabel || 'Amount to pay';
+      ? (c.labels?.payNextBtn || c.t('payNextBtn'))
+      : (c.labels?.payBalanceBtn || c.t('payBalanceBtn'));
+    const payVerb = c.labels?.payConfirm || c.t('payConfirm');
+    const amountLabel = c.labels?.payAmountLabel || c.t('payAmountLabel');
     // Currency symbol for the input prefix (e.g. "£") derived from the formatter.
     const sym = (fmtMoney(0, currency).match(/^[^\d\s]+/) || [''])[0];
     const hint = isInstalment
-      ? `Your next payment is ${fmtMoney(defaultAmount, currency)}. Pay that, or enter a different amount up to ${fmtMoney(outstanding, currency)}.`
-      : `Pay your balance in full, or enter a smaller amount (up to ${fmtMoney(outstanding, currency)}).`;
+      ? c.t('payHintInstalment', { next: fmtMoney(defaultAmount, currency), max: fmtMoney(outstanding, currency) })
+      : c.t('payHintFull', { max: fmtMoney(outstanding, currency) });
 
     return `
       <div class="tgm-pay-action" data-tgm-pay-max="${esc(outstanding.toFixed(2))}" data-tgm-pay-min="${esc(min.toFixed(2))}" data-tgm-pay-cur="${esc(currency)}">
@@ -1997,7 +3534,7 @@
           </label>
           <div class="tgm-pay-hint" data-tgm-pay-hint data-default="${esc(hint)}">${esc(hint)}</div>
           <div class="tgm-pay-form-row">
-            <button type="button" class="tgm-pay-cancel" data-tgm-pay-cancel>${esc(c.labels?.payCancel || 'Cancel')}</button>
+            <button type="button" class="tgm-pay-cancel" data-tgm-pay-cancel>${esc(c.labels?.payCancel || c.t('payCancel'))}</button>
             <button type="button" class="tgm-pay-cta tgm-pay-confirm" data-tgm-pay-confirm>
               ${svg(IC.card)}<span data-tgm-pay-label>${esc(payVerb)} · ${esc(fmtMoney(defaultAmount, currency))}</span>
             </button>
@@ -2152,32 +3689,32 @@
           <div class="tgm-hero-overlay"></div>
           <div class="tgm-hero-content">
             <div class="tgm-hero-top">
-              <span class="tgm-confirmed">${svg(IC.check, 3)}${esc(c.labels?.confirmed || 'Confirmed')}</span>
+              <span class="tgm-confirmed">${svg(IC.check, 3)}${esc(c.labels?.confirmed || c.t('confirmed'))}</span>
               ${(packageInfo?.atolProtected || packageInfo?.operator?.name) ? `
                 <span class="tgm-atol">
-                  ${packageInfo?.atolProtected ? `${svg(IC.shield, 2.5)}<span>${esc(c.labels?.atolProtected || 'ATOL Protected')}</span>` : `${svg(IC.shield, 2.5)}<span>${esc(c.labels?.packagedHoliday || 'Package Holiday')}</span>`}
-                  ${packageInfo?.operator?.name ? `<span class="tgm-atol-op">${esc(c.labels?.operatedBy || 'operated by')} ${esc(packageInfo.operator.name)}</span>` : ''}
+                  ${packageInfo?.atolProtected ? `${svg(IC.shield, 2.5)}<span>${esc(c.labels?.atolProtected || c.t('atolProtected'))}</span>` : `${svg(IC.shield, 2.5)}<span>${esc(c.labels?.packagedHoliday || c.t('packagedHoliday'))}</span>`}
+                  ${packageInfo?.operator?.name ? `<span class="tgm-atol-op">${esc(c.labels?.operatedBy || c.t('operatedBy'))} ${esc(packageInfo.operator.name)}</span>` : ''}
                 </span>
               ` : ''}
-              ${refValue ? `<span class="tgm-ref">${esc(c.labels?.ref || 'Ref')}<strong>${esc(refValue)}</strong></span>` : ''}
+              ${refValue ? `<span class="tgm-ref">${esc(c.labels?.ref || c.t('ref'))}<strong>${esc(refValue)}</strong></span>` : ''}
             </div>
             <div>
               ${(starHtml || acc?.review?.rating) ? `
                 <div class="tgm-hero-rating">
                   ${starHtml}
-                  ${acc?.review?.rating ? `<span class="tgm-review-chip"><strong>${acc.review.rating}</strong>/5${acc.review.reviews ? ` · ${esc(acc.review.reviews.toLocaleString('en-GB'))} reviews` : ''}${acc.review.platform ? ` · ${esc(acc.review.platform)}` : ''}</span>` : ''}
+                  ${acc?.review?.rating ? `<span class="tgm-review-chip"><strong>${acc.review.rating}</strong>/5${acc.review.reviews ? ` · ${esc(acc.review.reviews.toLocaleString('en-GB'))} ${esc(c.t('reviews'))}` : ''}${acc.review.platform ? ` · ${esc(acc.review.platform)}` : ''}</span>` : ''}
                 </div>
               ` : ''}
-              <h1 class="tgm-hero-name">${esc(acc?.name || 'Your booking')}</h1>
+              <h1 class="tgm-hero-name">${esc(acc?.name || c.t('yourBooking'))}</h1>
               ${acc?.location?.city ? `<p class="tgm-hero-loc">${svg(IC.pin)}${esc(acc.location.city)}${acc.location.country ? ', ' + esc(acc.location.country) : ''}</p>` : ''}
             </div>
           </div>
-          ${thumbs.length > 1 ? `<div class="tgm-hero-thumbs">${thumbs.map((m, i) => `<button class="${i === 0 ? 'active' : ''}" data-tgm-thumb data-img="${esc(m.url)}" style="background-image:url('${esc(m.url)}')" aria-label="View image ${i + 1}"></button>`).join('')}</div>` : ''}
+          ${thumbs.length > 1 ? `<div class="tgm-hero-thumbs">${thumbs.map((m, i) => `<button class="${i === 0 ? 'active' : ''}" data-tgm-thumb data-img="${esc(m.url)}" style="background-image:url('${esc(m.url)}')" aria-label="${esc(c.t('ariaViewImage', { n: i + 1 }))}"></button>`).join('')}</div>` : ''}
         </div>
         ` : ''}
 
         <div class="tgm-greeting">
-          <div class="tgm-greeting-text">${esc((c.labels?.greetingPrefix || 'Welcome back'))}, <strong>${esc(firstName)}</strong>${destCity ? ` — your ${esc(destCity)} escape is almost here.` : '.'}</div>
+          <div class="tgm-greeting-text">${esc((c.labels?.greetingPrefix || c.t('greetingPrefix')))}, <strong>${esc(firstName)}</strong>${destCity ? ` — ${esc(c.t('greetingSuffix', { city: destCity }))}` : '.'}</div>
           ${(() => {
             // Countdown copy must match what the customer is actually doing.
             // "until you fly" is wrong on an accommodation-only or extras-only
@@ -2192,29 +3729,29 @@
               // Legacy / explicit override — don't overrule a client config.
               countdownLabel = c.labels.countdown;
             } else if (summary.hasFlights) {
-              countdownLabel = c.labels?.countdownFly || 'until you fly';
+              countdownLabel = c.labels?.countdownFly || c.t('countdownFly');
             } else if (summary.hasAccommodation) {
-              countdownLabel = c.labels?.countdownCheckIn || 'until you check in';
+              countdownLabel = c.labels?.countdownCheckIn || c.t('countdownCheckIn');
             } else {
               // AirportExtras-only or other future product mix — generic verb.
-              countdownLabel = c.labels?.countdownTravel || 'until you travel';
+              countdownLabel = c.labels?.countdownTravel || c.t('countdownTravel');
             }
-            return `<div class="tgm-countdown">${svg(IC.clock)}<span><strong class="tgm-num">${days} ${days === 1 ? 'day' : 'days'}</strong> ${esc(countdownLabel)}</span></div>`;
+            return `<div class="tgm-countdown">${svg(IC.clock)}<span><strong class="tgm-num">${days} ${esc(days === 1 ? c.t('day') : c.t('days'))}</strong> ${esc(countdownLabel)}</span></div>`;
           })()}
         </div>
 
         ${(c.display?.showActions !== false) ? `
         <div class="tgm-newlookup-row">
           <button type="button" class="tgm-newlookup" data-tgm-newlookup>
-            ${svg(IC.refresh)}<span>${esc(c.labels?.newLookup || 'Look up another booking')}</span>
+            ${svg(IC.refresh)}<span>${esc(c.labels?.newLookup || c.t('newLookup'))}</span>
           </button>
         </div>
         <div class="tgm-action-row">
           <button type="button" class="tgm-action" data-tgm-pdf-preview>
             <div class="tgm-action-icon">${svg(IC.eye)}</div>
             <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionPreview || 'Preview')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionPreviewSub || 'View the booking pack inline')}</div>
+              <div class="tgm-action-title">${esc(c.labels?.actionPreview || c.t('actionPreview'))}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionPreviewSub || c.t('actionPreviewSub'))}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
@@ -2222,8 +3759,8 @@
           <button type="button" class="tgm-action" data-tgm-pdf-email>
             <div class="tgm-action-icon">${svg(IC.mail)}</div>
             <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionEmail || 'Email')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionEmailSub || 'Send to your inbox')}</div>
+              <div class="tgm-action-title">${esc(c.labels?.actionEmail || c.t('actionEmail'))}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionEmailSub || c.t('actionEmailSub'))}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
@@ -2231,8 +3768,8 @@
           <button type="button" class="tgm-action" data-tgm-pdf-download>
             <div class="tgm-action-icon">${svg(IC.dl)}</div>
             <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionDownload || 'Download')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionDownloadSub || 'Save the PDF to your device')}</div>
+              <div class="tgm-action-title">${esc(c.labels?.actionDownload || c.t('actionDownload'))}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionDownloadSub || c.t('actionDownloadSub'))}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
@@ -2240,8 +3777,8 @@
           <button type="button" class="tgm-action" data-tgm-pdf-print>
             <div class="tgm-action-icon">${svg(IC.print)}</div>
             <div class="tgm-action-text">
-              <div class="tgm-action-title">${esc(c.labels?.actionPrint || 'Print')}</div>
-              <div class="tgm-action-sub">${esc(c.labels?.actionPrintSub || 'Open a printable copy')}</div>
+              <div class="tgm-action-title">${esc(c.labels?.actionPrint || c.t('actionPrint'))}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.actionPrintSub || c.t('actionPrintSub'))}</div>
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
@@ -2253,27 +3790,27 @@
 
         ${(checkin || checkout || nights || acc?.units?.[0]) ? `
         <div class="tgm-stay">
-          <h3>${svg(IC.bed)}${esc(c.labels?.accommodation || 'Accommodation')}${
+          <h3>${svg(IC.bed)}${esc(c.labels?.accommodation || c.t('accommodation'))}${
             acc?.name ? `<span class="tgm-stay-meta">${esc(acc.name)}</span>` : ''
           }</h3>
           <div class="tgm-stay-grid">
             ${checkin ? `
             <div class="tgm-stay-cell">
-              <div class="tgm-stay-label">${svg(IC.cal)}${esc(c.labels?.checkin || 'Check-in')}</div>
+              <div class="tgm-stay-label">${svg(IC.cal)}${esc(c.labels?.checkin || c.t('checkin'))}</div>
               <div class="tgm-stay-value">${esc(fmtDayMonth(checkin))}</div>
               <div class="tgm-stay-sub">${esc(fmtWeekday(checkin))} · ${esc(fmtYear(checkin))}</div>
             </div>` : ''}
             ${checkout ? `
             <div class="tgm-stay-cell">
-              <div class="tgm-stay-label">${svg(IC.cal)}${esc(c.labels?.checkout || 'Check-out')}</div>
+              <div class="tgm-stay-label">${svg(IC.cal)}${esc(c.labels?.checkout || c.t('checkout'))}</div>
               <div class="tgm-stay-value">${esc(fmtDayMonth(checkout))}</div>
               <div class="tgm-stay-sub">${esc(fmtWeekday(checkout))} · ${esc(fmtYear(checkout))}</div>
             </div>` : ''}
             ${nights ? `
             <div class="tgm-stay-cell">
-              <div class="tgm-stay-label">${svg(IC.moon)}${esc(c.labels?.nights || 'Nights')}</div>
+              <div class="tgm-stay-label">${svg(IC.moon)}${esc(c.labels?.nights || c.t('nights'))}</div>
               <div class="tgm-stay-value">${nights}</div>
-              <div class="tgm-stay-sub">${nights === 1 ? '1 night' : (nights === 7 ? '1 week' : nights + ' nights')}</div>
+              <div class="tgm-stay-sub">${esc(nights === 1 ? ('1 ' + c.t('night')) : (nights === 7 ? c.t('week') : (nights + ' ' + c.t('nightsPlural'))))}</div>
             </div>` : ''}
             ${acc?.units?.[0] ? (() => {
               // Room display policy: prefer the supplier's full room name
@@ -2290,12 +3827,12 @@
               if (!roomLabel) return '';
               const boardLabel = fmtBoard(rate?.board);
               const guestsBit = (u?.sleepsAdults != null)
-                ? `${u.sleepsAdults} guest${u.sleepsAdults === 1 ? '' : 's'}`
+                ? `${u.sleepsAdults} ${esc(u.sleepsAdults === 1 ? c.t('guest') : c.t('guests'))}`
                 : '';
               const subParts = [boardLabel, guestsBit].filter(Boolean);
               return `
                 <div class="tgm-stay-cell">
-                  <div class="tgm-stay-label">${svg(IC.user)}${esc(c.labels?.room || 'Room')}</div>
+                  <div class="tgm-stay-label">${svg(IC.user)}${esc(c.labels?.room || c.t('room'))}</div>
                   <div class="tgm-stay-value">${esc(roomLabel)}</div>
                   ${subParts.length ? `<div class="tgm-stay-sub">${esc(subParts.join(' · '))}</div>` : ''}
                 </div>
@@ -2314,7 +3851,7 @@
 
         <div class="tgm-two">
           <div class="tgm-section">
-            <h3>${svg(IC.card)}${esc(c.labels?.payment || 'Payment')}</h3>
+            <h3>${svg(IC.card)}${esc(c.labels?.payment || c.t('payment'))}</h3>
             <div class="tgm-pay-total">
               <span class="tgm-pay-label">${esc(resolveTotalLabel(items, c))}</span>
               <span class="tgm-pay-total-amt">${esc(fmtMoney(totalPrice, currency))}</span>
@@ -2343,23 +3880,23 @@
               // Hotel line — only when accommodation is a separate product,
               // NOT when it came from a Packages split.
               if (accItem && !isPackage && typeof accItem.price === 'number') {
-                lines.push({ label: c.labels?.hotelLine || 'Hotel', val: accItem.price });
+                lines.push({ label: c.labels?.hotelLine || c.t('hotelLine'), val: accItem.price });
               }
               // Holiday package — single combined line.
               const packagesTotal = packagesItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
               if (packagesTotal > 0) {
-                lines.push({ label: c.labels?.packageLine || 'Holiday package', val: packagesTotal });
+                lines.push({ label: c.labels?.packageLine || c.t('packageLine'), val: packagesTotal });
               }
               const flightTotal = pureFlightItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
-              if (flightTotal > 0) lines.push({ label: c.labels?.flightsLine || 'Flights', val: flightTotal });
+              if (flightTotal > 0) lines.push({ label: c.labels?.flightsLine || c.t('flightsLine'), val: flightTotal });
               const extrasTotal = extraItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
-              if (extrasTotal > 0) lines.push({ label: c.labels?.extrasLine || 'Airport extras', val: extrasTotal });
+              if (extrasTotal > 0) lines.push({ label: c.labels?.extrasLine || c.t('extrasLine'), val: extrasTotal });
               const transferTotal = transferItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
-              if (transferTotal > 0) lines.push({ label: c.labels?.transfersLine || 'Transfers', val: transferTotal });
+              if (transferTotal > 0) lines.push({ label: c.labels?.transfersLine || c.t('transfersLine'), val: transferTotal });
               const carRentalTotal = carRentalItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
-              if (carRentalTotal > 0) lines.push({ label: c.labels?.carHireLine || 'Car hire', val: carRentalTotal });
+              if (carRentalTotal > 0) lines.push({ label: c.labels?.carHireLine || c.t('carHireLine'), val: carRentalTotal });
               const ticketsTotal = ticketsItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
-              if (ticketsTotal > 0) lines.push({ label: c.labels?.ticketsLine || 'Tickets', val: ticketsTotal });
+              if (ticketsTotal > 0) lines.push({ label: c.labels?.ticketsLine || c.t('ticketsLine'), val: ticketsTotal });
               if (lines.length < 2) return '';
               return `
                 <div class="tgm-pay-breakdown">
@@ -2380,10 +3917,10 @@
               if (!(paid > 0) && !(outstanding > 0)) return '';
               let rows = '';
               if (paid > 0) {
-                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.paidSoFar || 'Paid so far')}</span><span class="v paid">${esc(fmtMoney(paid, currency))}</span></div>`;
+                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.paidSoFar || c.t('paidSoFar'))}</span><span class="v paid">${esc(fmtMoney(paid, currency))}</span></div>`;
               }
               if (outstanding > 0) {
-                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || 'Balance remaining')}</span><span class="v due">${esc(fmtMoney(outstanding, currency))}</span></div>`;
+                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || c.t('balanceRemaining'))}</span><span class="v due">${esc(fmtMoney(outstanding, currency))}</span></div>`;
                 const next = computeNextDue(order);
                 const sched = reconcileSchedule(order);
                 // Instalment plan: show the whole schedule (unless the
@@ -2391,41 +3928,41 @@
                 // below, to avoid showing it twice). Otherwise just the next due.
                 if (next && next.isInstalment && !installPlan && sched.length > 1) {
                   rows += `<div class="tgm-pay-sched">
-                    <div class="tgm-pay-sched-title">${esc(c.labels?.paymentSchedule || 'Payment schedule')} · ${sched.length} ${esc(c.labels?.payments || 'payments')}</div>
+                    <div class="tgm-pay-sched-title">${esc(c.labels?.paymentSchedule || c.t('paymentSchedule'))} · ${sched.length} ${esc(c.labels?.payments || c.t('payments'))}</div>
                     ${sched.map((b, i) => `
                       <div class="tgm-inst${i === 0 ? ' is-next' : ''}">
-                        <span class="date">${esc(fmtDate(b.dueDate))}${i === 0 ? `<span class="tgm-inst-tag">${esc(c.labels?.next || 'Next')}</span>` : ''}</span>
+                        <span class="date">${esc(fmtDate(b.dueDate))}${i === 0 ? `<span class="tgm-inst-tag">${esc(c.labels?.next || c.t('next'))}</span>` : ''}</span>
                         <span class="amt">${esc(fmtMoney(b.amount, currency))}</span>
                       </div>
                     `).join('')}
                   </div>`;
                 } else if (next && next.dueDate) {
-                  rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.nextDueDate || 'Next payment due')}</span><span class="v">${esc(fmtDate(next.dueDate))}</span></div>`;
+                  rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.nextDueDate || c.t('nextDueDate'))}</span><span class="v">${esc(fmtDate(next.dueDate))}</span></div>`;
                 }
               } else if (paid > 0) {
-                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || 'Balance remaining')}</span><span class="v paid">${esc(c.labels?.paidInFull || 'Paid in full')}</span></div>`;
+                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.balanceRemaining || c.t('balanceRemaining'))}</span><span class="v paid">${esc(c.labels?.paidInFull || c.t('paidInFull'))}</span></div>`;
               }
               return rows;
             })()}
             ${standardDep ? `
               <div class="tgm-pay-row">
-                <span class="tgm-pay-label">${esc(c.labels?.depositPaid || 'Deposit paid')}</span>
+                <span class="tgm-pay-label">${esc(c.labels?.depositPaid || c.t('depositPaid'))}</span>
                 <span class="v paid">${esc(fmtMoney(standardDep.amount, currency))}</span>
               </div>
               ${standardDep.breakdown?.[0] ? `
               <div class="tgm-pay-row">
-                <span class="tgm-pay-label">${esc(c.labels?.balanceDue || 'Balance due')}</span>
+                <span class="tgm-pay-label">${esc(c.labels?.balanceDue || c.t('balanceDue'))}</span>
                 <span class="v due">${esc(fmtMoney(standardDep.breakdown[0].amount, currency))}</span>
               </div>
               <div class="tgm-pay-row">
-                <span class="tgm-pay-label">${esc(c.labels?.dueDate || 'Due date')}</span>
+                <span class="tgm-pay-label">${esc(c.labels?.dueDate || c.t('dueDate'))}</span>
                 <span class="v">${esc(fmtDate(standardDep.breakdown[0].dueDate))}</span>
               </div>
               ` : ''}
             ` : ''}
             ${installPlan ? `
               <div class="tgm-pay-sched">
-                <div class="tgm-pay-sched-title">${esc(c.labels?.instalmentPlan || 'Instalment plan')} · ${installPlan.installments} ${esc(c.labels?.payments || 'payments')}</div>
+                <div class="tgm-pay-sched-title">${esc(c.labels?.instalmentPlan || c.t('instalmentPlan'))} · ${installPlan.installments} ${esc(c.labels?.payments || c.t('payments'))}</div>
                 ${(installPlan.breakdown || []).map(b => `
                   <div class="tgm-inst">
                     <span class="date">${esc(fmtDate(b.dueDate))}</span>
@@ -2454,7 +3991,7 @@
               if (validLines.length > 0) {
                 return `
                   <div class="tgm-pay-onarrival">
-                    <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payOnArrival || 'Also payable on arrival')}</div>
+                    <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payOnArrival || c.t('payOnArrival'))}</div>
                     ${validLines.map(line => {
                       const label = line.name || line.description;
                       const hasPrice = typeof line.unitPrice === 'number';
@@ -2469,19 +4006,19 @@
                         </div>
                       `;
                     }).join('')}
-                    <div class="tgm-pay-onarrival-note">${esc(c.labels?.payOnArrivalNote || 'Paid directly to the hotel at check-in. Not included in your holiday cost above.')}</div>
+                    <div class="tgm-pay-onarrival-note">${esc(c.labels?.payOnArrivalNote || c.t('payOnArrivalNote'))}</div>
                   </div>
                 `;
               }
               // Fallback: single inResort total with no itemised breakdown
               return `
                 <div class="tgm-pay-onarrival">
-                  <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payOnArrival || 'Also payable on arrival')}</div>
+                  <div class="tgm-pay-onarrival-title">${svg(IC.alert)}${esc(c.labels?.payOnArrival || c.t('payOnArrival'))}</div>
                   <div class="tgm-pay-onarrival-line">
-                    <span class="name">${esc(c.labels?.resortFee || 'Resort fees')}</span>
+                    <span class="name">${esc(c.labels?.resortFee || c.t('resortFee'))}</span>
                     <span class="val">${esc(fmtMoney(inResort, currency))}</span>
                   </div>
-                  <div class="tgm-pay-onarrival-note">${esc(c.labels?.payOnArrivalNote || 'Paid directly to the hotel at check-in. Not included in your holiday cost above.')}</div>
+                  <div class="tgm-pay-onarrival-note">${esc(c.labels?.payOnArrivalNote || c.t('payOnArrivalNote'))}</div>
                 </div>
               `;
             })()}
@@ -2489,13 +4026,13 @@
           </div>
 
           <div class="tgm-section">
-            <h3>${svg(IC.users)}${esc(c.labels?.travelling || "Who's travelling")}</h3>
+            <h3>${svg(IC.users)}${esc(c.labels?.travelling || c.t('travelling'))}</h3>
             ${travellers.length === 0 ? `
               <div class="tgm-guest">
                 <div class="tgm-guest-av">${esc(initials(order.customerFirstname, order.customerSurname))}</div>
                 <div class="tgm-guest-info">
                   <div class="tgm-guest-name">${esc((order.customerTitle ? order.customerTitle + ' ' : '') + (order.customerFirstname || '') + ' ' + (order.customerSurname || ''))}</div>
-                  <div class="tgm-guest-meta">${esc(c.labels?.leadGuest || 'Lead guest')}</div>
+                  <div class="tgm-guest-meta">${esc(c.labels?.leadGuest || c.t('leadGuest'))}</div>
                 </div>
               </div>
             ` : travellers.map((g, i) => `
@@ -2503,13 +4040,13 @@
                 <div class="tgm-guest-av">${esc(initials(g.firstname, g.surname))}</div>
                 <div class="tgm-guest-info">
                   <div class="tgm-guest-name">${esc((g.title ? g.title + ' ' : '') + (g.firstname || '') + ' ' + (g.surname || ''))}</div>
-                  <div class="tgm-guest-meta">${esc(i === 0 ? (c.labels?.leadGuest || 'Lead guest') : (g.type || 'Adult'))}</div>
+                  <div class="tgm-guest-meta">${esc(i === 0 ? (c.labels?.leadGuest || c.t('leadGuest')) : (g.type || c.t('adult')))}</div>
                 </div>
               </div>
             `).join('')}
             ${order.specialRequests ? `
               <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--tgm-border-light);">
-                <div class="tgm-pay-sched-title">${esc(c.labels?.specialRequests || 'Special requests')}</div>
+                <div class="tgm-pay-sched-title">${esc(c.labels?.specialRequests || c.t('specialRequests'))}</div>
                 <p style="font-size:13px; color:var(--tgm-text-2); margin:8px 0 0; font-style:italic;">"${esc(order.specialRequests)}"</p>
               </div>
             ` : ''}
@@ -2518,7 +4055,7 @@
 
         ${showDocs ? `
         <div class="tgm-section">
-          <h3>${svg(IC.file)}${esc(c.labels?.documents || 'Your documents')}</h3>
+          <h3>${svg(IC.file)}${esc(c.labels?.documents || c.t('documents'))}</h3>
           <div class="tgm-docs">
             ${docs.map(d => `
               <a class="tgm-doc" href="${esc(d.url)}" target="_blank" rel="noopener">
@@ -2534,19 +4071,19 @@
         </div>
         ` : ''}
 
-        ${showThingsToKnow ? `<h3 class="tgm-h-eyebrow">${esc(c.labels?.thingsToKnow || 'Things to know')}</h3>` : ''}
+        ${showThingsToKnow ? `<h3 class="tgm-h-eyebrow">${esc(c.labels?.thingsToKnow || c.t('thingsToKnow'))}</h3>` : ''}
 
         ${ttkAboutHotel ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-            <div class="tgm-collapse-left">${svg(IC.bed)}${esc(c.labels?.aboutHotel || 'About the hotel')}</div>
+            <div class="tgm-collapse-left">${svg(IC.bed)}${esc(c.labels?.aboutHotel || c.t('aboutHotel'))}</div>
             ${svg(IC.chev)}
           </button>
           <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
             ${hotelDesc?.text ? `<p>${esc(hotelDesc.text.slice(0, 800))}${hotelDesc.text.length > 800 ? '…' : ''}</p>` : ''}
 
             ${(acc?.location?.address1 || acc?.location?.city || acc?.location?.postalCode) ? `
-              <div class="tgm-subhead">${esc(c.labels?.address || 'Address')}</div>
+              <div class="tgm-subhead">${esc(c.labels?.address || c.t('address'))}</div>
               <p>
                 ${[
                   acc?.location?.address1,
@@ -2556,27 +4093,27 @@
                   acc?.location?.country,
                 ].filter(Boolean).map(s => esc(s)).join(', ')}
                 ${(acc?.location?.latitude && acc?.location?.longitude)
-                  ? ` · <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(acc.location.latitude + ',' + acc.location.longitude)}" target="_blank" rel="noopener">${esc(c.labels?.viewMap || 'View on map')}</a>`
+                  ? ` · <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(acc.location.latitude + ',' + acc.location.longitude)}" target="_blank" rel="noopener">${esc(c.labels?.viewMap || c.t('viewMap'))}</a>`
                   : ''}
               </p>
             ` : ''}
 
             ${(yearBuilt || totalRooms || roomMix.length) ? `
-              <div class="tgm-subhead">${esc(c.labels?.propertyDetails || 'Property details')}</div>
+              <div class="tgm-subhead">${esc(c.labels?.propertyDetails || c.t('propertyDetails'))}</div>
               <dl class="tgm-kv">
-                ${yearBuilt ? `<dt>${esc(c.labels?.yearBuilt || 'Year built')}</dt><dd>${esc(yearBuilt)}</dd>` : ''}
-                ${totalRooms ? `<dt>${esc(c.labels?.totalRooms || 'Total rooms')}</dt><dd>${esc(totalRooms)}</dd>` : ''}
-                ${roomMix.length ? `<dt>${esc(c.labels?.roomMix || 'Room mix')}</dt><dd>${roomMix.map(r => `${esc(r.count)} ${esc(r.label.toLowerCase())}`).join(', ')}</dd>` : ''}
+                ${yearBuilt ? `<dt>${esc(c.labels?.yearBuilt || c.t('yearBuilt'))}</dt><dd>${esc(yearBuilt)}</dd>` : ''}
+                ${totalRooms ? `<dt>${esc(c.labels?.totalRooms || c.t('totalRooms'))}</dt><dd>${esc(totalRooms)}</dd>` : ''}
+                ${roomMix.length ? `<dt>${esc(c.labels?.roomMix || c.t('roomMix'))}</dt><dd>${roomMix.map(r => `${esc(r.count)} ${esc(r.label.toLowerCase())}`).join(', ')}</dd>` : ''}
               </dl>
             ` : ''}
 
             ${facilities.length ? `
-              <div class="tgm-subhead">${esc(c.labels?.facilities || 'Facilities')}</div>
+              <div class="tgm-subhead">${esc(c.labels?.facilities || c.t('facilities'))}</div>
               <div class="tgm-facilities">${facilities.map(f => `<span class="tgm-fac">${svg(IC.check)}${esc(f)}</span>`).join('')}</div>
             ` : ''}
 
             ${paymentMethods.length ? `
-              <div class="tgm-subhead">${esc(c.labels?.paymentMethods || 'Accepted at the hotel')}</div>
+              <div class="tgm-subhead">${esc(c.labels?.paymentMethods || c.t('paymentMethods'))}</div>
               <div class="tgm-chips">${paymentMethods.map(p => `<span class="tgm-chip">${svg(IC.card)}${esc(p)}</span>`).join('')}</div>
             ` : ''}
           </div></div>
@@ -2585,7 +4122,7 @@
         ${ttkCancelPolicy ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-            <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.cancellation || 'Cancellation policy')}</div>
+            <div class="tgm-collapse-left">${svg(IC.info)}${esc(c.labels?.cancellation || c.t('cancellation'))}</div>
             ${svg(IC.chev)}
           </button>
           <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
@@ -2596,15 +4133,15 @@
         ${ttkAtHotel ? `
         <div class="tgm-collapse">
           <button class="tgm-collapse-trig" type="button" aria-expanded="false">
-            <div class="tgm-collapse-left">${svg(IC.coin)}${esc(c.labels?.localFees || 'At the hotel')}</div>
+            <div class="tgm-collapse-left">${svg(IC.coin)}${esc(c.labels?.localFees || c.t('localFees'))}</div>
             ${svg(IC.chev)}
           </button>
           <div class="tgm-collapse-body"><div class="tgm-collapse-inner">
             ${(checkinTime || checkoutTime) ? `
-              <div class="tgm-subhead">${esc(c.labels?.checkInOutTimes || 'Check-in & check-out')}</div>
+              <div class="tgm-subhead">${esc(c.labels?.checkInOutTimes || c.t('checkInOutTimes'))}</div>
               <dl class="tgm-kv">
-                ${checkinTime ? `<dt>${esc(c.labels?.checkin || 'Check-in')}</dt><dd>${esc(checkinTime)}</dd>` : ''}
-                ${checkoutTime ? `<dt>${esc(c.labels?.checkout || 'Check-out')}</dt><dd>${esc(checkoutTime)}</dd>` : ''}
+                ${checkinTime ? `<dt>${esc(c.labels?.checkin || c.t('checkin'))}</dt><dd>${esc(checkinTime)}</dd>` : ''}
+                ${checkoutTime ? `<dt>${esc(c.labels?.checkout || c.t('checkout'))}</dt><dd>${esc(checkoutTime)}</dd>` : ''}
               </dl>
             ` : ''}
 
@@ -2614,7 +4151,7 @@
                 informational, not financial. */ ''}
 
             ${importantInfo.length ? `
-              <div class="tgm-subhead">${esc(c.labels?.goodToKnow || 'Good to know')}</div>
+              <div class="tgm-subhead">${esc(c.labels?.goodToKnow || c.t('goodToKnow'))}</div>
               ${importantInfo.map(d => `<p>${esc(d.text)}</p>`).join('')}
             ` : ''}
           </div></div>
@@ -2629,12 +4166,12 @@
         ${(c.support?.email || c.support?.phone) ? `
         <div class="tgm-help">
           <div>
-            <h3>${esc(c.labels?.helpTitle || 'Need a hand?')}</h3>
-            <p>${esc(c.labels?.helpBody || "Our team's here if anything about your booking needs attention.")}</p>
+            <h3>${esc(c.labels?.helpTitle || c.t('helpTitle'))}</h3>
+            <p>${esc(c.labels?.helpBody || c.t('helpBody'))}</p>
           </div>
           <div class="tgm-help-actions">
-            ${c.support?.email ? `<a class="tgm-help-btn" href="mailto:${esc(c.support.email)}">${svg(IC.mail)}${esc(c.labels?.emailUs || 'Email us')}</a>` : ''}
-            ${c.support?.phone ? `<a class="tgm-help-btn" href="tel:${esc(c.support.phone.replace(/[^+0-9]/g, ''))}">${svg(IC.phone)}${esc(c.labels?.callUs || 'Call us')}</a>` : ''}
+            ${c.support?.email ? `<a class="tgm-help-btn" href="mailto:${esc(c.support.email)}">${svg(IC.mail)}${esc(c.labels?.emailUs || c.t('emailUs'))}</a>` : ''}
+            ${c.support?.phone ? `<a class="tgm-help-btn" href="tel:${esc(c.support.phone.replace(/[^+0-9]/g, ''))}">${svg(IC.phone)}${esc(c.labels?.callUs || c.t('callUs'))}</a>` : ''}
           </div>
         </div>` : ''}
 
@@ -2659,6 +4196,8 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
+      this.c.t = this.t;        // carry the translator into the module-level render fns (they receive c, not this)
       this.shadow = container.attachShadow({ mode: 'open' });
       this.state = { stage: 'form', order: null, error: null };
       this.lookup = null;
@@ -2719,10 +4258,12 @@
       const merged = Object.assign({
         layout: 'vertical',
         theme: 'light',
-        title: 'My Booking',
-        subtitle: 'Welcome back. Enter your details to view everything about your upcoming trip.',
-        subtitleShort: 'Look up your trip in seconds',
-        eyebrow: 'Secure booking lookup',
+        // Localised-default pattern: empty here, falls back to the translated
+        // default at render time via c.t(); an author-set value still wins.
+        title: '',
+        subtitle: '',
+        subtitleShort: '',
+        eyebrow: '',
         labels: {},
         brand: { name: '' },
         colors: {},
@@ -2968,12 +4509,12 @@
       const ref = (data.get('ref') || '').toString().trim();
 
       if (!email || !date || !ref) {
-        this.state.error = 'Please fill in all three fields.';
+        this.state.error = this.t('fillAllFields');
         this._render();
         return;
       }
       if (!this.c.widgetId) {
-        this.state.error = 'This widget is not configured yet. Please contact support.';
+        this.state.error = this.t('notConfigured');
         this._render();
         return;
       }
@@ -3003,7 +4544,7 @@
         });
 
         if (res.status === 429) {
-          this.state = { stage: 'form', order: null, error: 'Too many attempts. Please wait a few minutes and try again.' };
+          this.state = { stage: 'form', order: null, error: this.t('tooManyAttempts') };
           this._render();
           return;
         }
@@ -3035,7 +4576,7 @@
         this._render();
         this._fireEvent('booking-loaded', { order: data.order });
       } catch (err) {
-        this.state = { stage: 'form', order: null, error: 'Something went wrong. Please try again in a moment.' };
+        this.state = { stage: 'form', order: null, error: this.t('genericError') };
         this._render();
       }
     }
@@ -3069,11 +4610,11 @@
       if (this._pdfBlob) return this._pdfBlob;
 
       if (!this.lookup || !this.c.widgetId) {
-        this._showToast('error', 'Cannot generate PDF', 'Please look up your booking again.');
+        this._showToast('error', this.t('pdfCannotTitle'), this.t('pdfLookupAgain'));
         return null;
       }
 
-      const loadingToastId = this._showToast('loading', 'Generating your PDF', 'This usually takes a few seconds.');
+      const loadingToastId = this._showToast('loading', this.t('pdfGeneratingTitle'), this.t('pdfGeneratingSub'));
 
       try {
         const res = await fetch(API_PDF, {
@@ -3090,11 +4631,11 @@
         if (!res.ok) {
           this._dismissToast(loadingToastId);
           if (res.status === 429) {
-            this._showToast('error', 'Too many requests', 'Please wait a few minutes and try again.', 6000);
+            this._showToast('error', this.t('pdfTooManyTitle'), this.t('pdfTooManySub'), 6000);
           } else if (res.status === 404) {
-            this._showToast('error', "We couldn't generate that PDF", 'Please look up your booking again.', 6000);
+            this._showToast('error', this.t('pdfCouldntTitle'), this.t('pdfLookupAgain'), 6000);
           } else {
-            this._showToast('error', 'Something went wrong', 'Please try again in a moment.', 6000);
+            this._showToast('error', this.t('pdfWrongTitle'), this.t('pdfTryAgainSoon'), 6000);
           }
           return null;
         }
@@ -3105,7 +4646,7 @@
         return blob;
       } catch (err) {
         this._dismissToast(loadingToastId);
-        this._showToast('error', 'Generation failed', 'Please check your connection and try again.', 6000);
+        this._showToast('error', this.t('pdfFailedTitle'), this.t('pdfCheckConnection'), 6000);
         return null;
       }
     }
@@ -3234,7 +4775,7 @@
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-        this._showToast('success', 'PDF downloaded', filename, 4000);
+        this._showToast('success', this.t('pdfDownloadedTitle'), filename, 4000);
         this._fireEvent('pdf-downloaded', { filename });
       } finally {
         btn.disabled = false;
@@ -3260,7 +4801,7 @@
         const win = window.open(url, '_blank');
 
         if (!win) {
-          this._showToast('info', 'Allow pop-ups to print', 'Or use Download, then print the saved PDF.', 6000);
+          this._showToast('info', this.t('pdfPopupTitle'), this.t('pdfPopupSub'), 6000);
           setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} }, 1000);
           return;
         }
@@ -3319,7 +4860,7 @@
       };
 
       if (submit) submit.disabled = true;
-      if (label) label.textContent = this.c.labels?.amendSending || 'Sending…';
+      if (label) label.textContent = this.c.labels?.amendSending || this.t('amendSending');
 
       try {
         const res = await fetch(API_AMEND, {
@@ -3335,7 +4876,7 @@
         });
 
         if (res.status === 429) {
-          showErr(this.c.labels?.amendRateLimited || 'Too many attempts. Please wait a few minutes and try again.');
+          showErr(this.c.labels?.amendRateLimited || this.t('amendRateLimited'));
           return;
         }
 
@@ -3351,7 +4892,7 @@
             result.innerHTML = `
               <div class="tgm-amend-done">
                 <div class="tgm-amend-done-icon">${svg(IC.check)}</div>
-                <div class="tgm-amend-done-text"><strong>${esc(this.c.labels?.amendDoneTitle || 'Request sent')}</strong>${esc(this.c.labels?.amendDoneBody || "We've passed your request to the team. Nothing on your booking has changed yet, and we'll be in touch to confirm.")}</div>
+                <div class="tgm-amend-done-text"><strong>${esc(this.c.labels?.amendDoneTitle || this.t('amendDoneTitle'))}</strong>${esc(this.c.labels?.amendDoneBody || this.t('amendDoneBody'))}</div>
               </div>`;
           }
           this._fireEvent('amend-sent', {});
@@ -3361,9 +4902,9 @@
         // Server-side validation / Travelify error — show its message.
         if (data && data.error) { showErr(data.error); return; }
 
-        showErr(this.c.labels?.amendFailed || "We couldn't send your request just now. Please try again, or contact us.");
+        showErr(this.c.labels?.amendFailed || this.t('amendFailed'));
       } catch (_) {
-        showErr(this.c.labels?.amendFailed || "We couldn't send your request just now. Please try again, or contact us.");
+        showErr(this.c.labels?.amendFailed || this.t('amendFailed'));
       }
     }
 
@@ -3409,9 +4950,9 @@
       if (!raw || isNaN(amt) || amt <= 0) {
         valid = false;
       } else if (amt > max + 0.001) {
-        msg = `That's more than your balance of ${fmtMoney(max, cur)}.`;
+        msg = this.t('payTooMuch', { amount: fmtMoney(max, cur) });
       } else if (amt < min - 0.001 && Math.abs(amt - max) > 0.005) {
-        msg = `The smallest part payment is ${fmtMoney(min, cur)}.`;
+        msg = this.t('payTooSmall', { amount: fmtMoney(min, cur) });
       } else {
         valid = true;
       }
@@ -3419,7 +4960,7 @@
       if (confirm) confirm.disabled = !valid;
       if (label) {
         const shown = valid ? amt : (isNaN(amt) || amt <= 0 ? max : Math.min(amt, max));
-        label.textContent = `${this.c.labels?.payConfirm || 'Pay'} · ${fmtMoney(shown, cur)}`;
+        label.textContent = `${this.c.labels?.payConfirm || this.t('payConfirm')} · ${fmtMoney(shown, cur)}`;
       }
       if (hint) {
         if (msg) { hint.textContent = msg; hint.classList.add('tgm-err'); }
@@ -3444,7 +4985,7 @@
       };
 
       if (confirm) confirm.disabled = true;
-      if (label) label.textContent = this.c.labels?.payRedirecting || 'Setting up payment…';
+      if (label) label.textContent = this.c.labels?.payRedirecting || this.t('payRedirecting');
 
       try {
         const res = await fetch(API_PAY, {
@@ -3460,7 +5001,7 @@
         });
 
         if (res.status === 429) {
-          showErr(this.c.labels?.payRateLimited || 'Too many attempts. Please wait a few minutes and try again.');
+          showErr(this.c.labels?.payRateLimited || this.t('payRateLimited'));
           return;
         }
 
@@ -3483,13 +5024,13 @@
         }
 
         if (data && data.noBalance) {
-          showErr(this.c.labels?.payNoBalance || "There's nothing left to pay on this booking.");
+          showErr(this.c.labels?.payNoBalance || this.t('payNoBalance'));
           return;
         }
 
-        showErr(this.c.labels?.payFailed || "We couldn't start the payment just now. Please try again, or contact us.");
+        showErr(this.c.labels?.payFailed || this.t('payFailed'));
       } catch (_) {
-        showErr(this.c.labels?.payFailed || "We couldn't start the payment just now. Please try again, or contact us.");
+        showErr(this.c.labels?.payFailed || this.t('payFailed'));
       }
     }
 
@@ -3541,7 +5082,7 @@
         });
         if (res.status === 429) {
           this._cancel.stage = 'error';
-          this._cancel.error = 'Too many attempts. Please wait a few minutes and try again.';
+          this._cancel.error = this.t('tooManyAttempts');
           this._renderCancelModal();
           return;
         }
@@ -3580,7 +5121,7 @@
         });
         if (res.status === 429) {
           this._cancel.stage = 'error';
-          this._cancel.error = 'Too many attempts. Please wait a few minutes and try again.';
+          this._cancel.error = this.t('tooManyAttempts');
           this._renderCancelModal();
           return;
         }
@@ -3627,71 +5168,71 @@
       if (!mount || !this._cancel) return;
       const c = this.c;
       const st = this._cancel;
-      const title = st.meta?.label || 'this product';
+      const title = st.meta?.label || c.t('thisProduct');
 
       let headIcon = IC.shield, headTitle, headSub, body, foot;
 
       if (st.stage === 'loading') {
-        headTitle = c.labels?.cancelModalTitle || 'Cancel ' + title;
-        headSub = c.labels?.cancelLoadingSub || 'Checking the cancellation policy…';
-        body = `<div class="tgm-cancel-spin"><div class="tgm-spinner"></div><span>${esc(c.labels?.cancelLoading || 'Loading cancellation details…')}</span></div>`;
+        headTitle = c.labels?.cancelModalTitle || (c.t('cancelPrefix') + ' ' + title);
+        headSub = c.labels?.cancelLoadingSub || c.t('cancelLoadingSub');
+        body = `<div class="tgm-cancel-spin"><div class="tgm-spinner"></div><span>${esc(c.labels?.cancelLoading || c.t('cancelLoading'))}</span></div>`;
         foot = '';
       } else if (st.stage === 'policies') {
         const d = st.data || {};
         const policies = Array.isArray(d.policies) ? d.policies : [];
-        headTitle = c.labels?.cancelModalTitle || 'Cancel ' + title;
+        headTitle = c.labels?.cancelModalTitle || (c.t('cancelPrefix') + ' ' + title);
         headSub = d.bookingReference
-          ? `${esc(c.labels?.cancelRef || 'Booking reference')}: ${esc(d.bookingReference)}`
-          : (c.labels?.cancelPoliciesSub || 'Please review the cancellation policy below.');
+          ? `${esc(c.labels?.cancelRef || c.t('cancelRef'))}: ${esc(d.bookingReference)}`
+          : (c.labels?.cancelPoliciesSub || c.t('cancelPoliciesSub'));
         body = `
           <div class="tgm-modal-field">
-            <label>${esc(c.labels?.cancelPoliciesLabel || 'Cancellation policy & charges')}</label>
+            <label>${esc(c.labels?.cancelPoliciesLabel || c.t('cancelPoliciesLabel'))}</label>
             ${policies.length
               ? `<div class="tgm-policies">${policies.map(p => `<div class="tgm-policy">${svg(IC.info)}<span>${esc(p)}</span></div>`).join('')}</div>`
-              : `<div class="tgm-policy">${svg(IC.info)}<span>${esc(c.labels?.cancelNoPolicy || 'No specific charges were returned for this product.')}</span></div>`}
+              : `<div class="tgm-policy">${svg(IC.info)}<span>${esc(c.labels?.cancelNoPolicy || c.t('cancelNoPolicy'))}</span></div>`}
           </div>
-          <div class="tgm-cancel-warn">${svg(IC.alert)}<span>${esc(c.labels?.cancelWarn || 'Cancelling cannot be undone. Any charges above will apply.')}</span></div>`;
+          <div class="tgm-cancel-warn">${svg(IC.alert)}<span>${esc(c.labels?.cancelWarn || c.t('cancelWarn'))}</span></div>`;
         foot = `
-          <button type="button" class="tgm-btn-2" data-tgm-cancel-keep>${esc(c.labels?.cancelKeep || 'Keep booking')}</button>
-          <button type="button" class="tgm-btn-1" data-tgm-cancel-continue>${esc(c.labels?.cancelContinue || 'Continue')}${svg(IC.arrow)}</button>`;
+          <button type="button" class="tgm-btn-2" data-tgm-cancel-keep>${esc(c.labels?.cancelKeep || c.t('cancelKeep'))}</button>
+          <button type="button" class="tgm-btn-1" data-tgm-cancel-continue>${esc(c.labels?.cancelContinue || c.t('cancelContinue'))}${svg(IC.arrow)}</button>`;
       } else if (st.stage === 'reason') {
-        headTitle = c.labels?.cancelReasonTitle || 'Confirm cancellation';
-        headSub = c.labels?.cancelReasonSub || 'Let us know why you\'re cancelling (optional).';
+        headTitle = c.labels?.cancelReasonTitle || c.t('cancelReasonTitle');
+        headSub = c.labels?.cancelReasonSub || c.t('cancelReasonSub');
         body = `
           <div class="tgm-modal-field">
-            <label for="tgm-cancel-reason">${esc(c.labels?.cancelReasonLabel || 'Reason for cancelling')}</label>
+            <label for="tgm-cancel-reason">${esc(c.labels?.cancelReasonLabel || c.t('cancelReasonLabel'))}</label>
             <textarea id="tgm-cancel-reason" class="tgm-modal-textarea" data-tgm-cancel-reason rows="3" maxlength="250"
-              placeholder="${esc(c.labels?.cancelReasonPlaceholder || 'e.g. change of plans')}"></textarea>
+              placeholder="${esc(c.labels?.cancelReasonPlaceholder || c.t('cancelReasonPlaceholder'))}"></textarea>
             <div class="tgm-reason-count"><span data-tgm-reason-count>0</span>/250</div>
           </div>
-          <div class="tgm-cancel-warn">${svg(IC.alert)}<span>${esc(c.labels?.cancelFinalWarn || "This will cancel the product and can't be undone.")}</span></div>
+          <div class="tgm-cancel-warn">${svg(IC.alert)}<span>${esc(c.labels?.cancelFinalWarn || c.t('cancelFinalWarn'))}</span></div>
           <div data-tgm-cancel-error-mount></div>`;
         foot = `
-          <button type="button" class="tgm-btn-2" data-tgm-cancel-back>${esc(c.labels?.cancelBack || 'Back')}</button>
-          <button type="button" class="tgm-btn-danger" data-tgm-cancel-confirm>${svg(IC.x)}<span data-tgm-cancel-confirm-label>${esc(c.labels?.cancelConfirm || 'Cancel this product')}</span></button>`;
+          <button type="button" class="tgm-btn-2" data-tgm-cancel-back>${esc(c.labels?.cancelBack || c.t('cancelBack'))}</button>
+          <button type="button" class="tgm-btn-danger" data-tgm-cancel-confirm>${svg(IC.x)}<span data-tgm-cancel-confirm-label>${esc(c.labels?.cancelConfirm || c.t('cancelConfirm'))}</span></button>`;
       } else if (st.stage === 'working') {
-        headTitle = c.labels?.cancelWorkingTitle || 'Cancelling…';
-        headSub = c.labels?.cancelWorkingSub || 'Please wait while we process this.';
-        body = `<div class="tgm-cancel-spin"><div class="tgm-spinner"></div><span>${esc(c.labels?.cancelWorking || 'Cancelling your product…')}</span></div>`;
+        headTitle = c.labels?.cancelWorkingTitle || c.t('cancelWorkingTitle');
+        headSub = c.labels?.cancelWorkingSub || c.t('cancelWorkingSub');
+        body = `<div class="tgm-cancel-spin"><div class="tgm-spinner"></div><span>${esc(c.labels?.cancelWorking || c.t('cancelWorking'))}</span></div>`;
         foot = '';
       } else if (st.stage === 'done') {
         headIcon = IC.check;
-        headTitle = c.labels?.cancelDoneTitle || 'Cancellation confirmed';
+        headTitle = c.labels?.cancelDoneTitle || c.t('cancelDoneTitle');
         headSub = '';
         body = `
           <div class="tgm-cancel-done">
             <div class="tgm-cancel-done-icon">${svg(IC.check)}</div>
-            <h2>${esc(c.labels?.cancelDoneHead || 'That\'s cancelled')}</h2>
-            <p>${esc(c.labels?.cancelDoneBody || 'Your ' + (st.meta?.label || 'product').toLowerCase() + ' has been cancelled.')}</p>
-            ${st.reference ? `<div class="tgm-cancel-ref">${esc(c.labels?.cancelRefLabel || 'Reference')}: ${esc(st.reference)}</div>` : ''}
+            <h2>${esc(c.labels?.cancelDoneHead || c.t('cancelDoneHead'))}</h2>
+            <p>${esc(c.labels?.cancelDoneBody || c.t('cancelDoneBodyTmpl', { label: (st.meta?.label || c.t('product')).toLowerCase() }))}</p>
+            ${st.reference ? `<div class="tgm-cancel-ref">${esc(c.labels?.cancelRefLabel || c.t('cancelRefLabel'))}: ${esc(st.reference)}</div>` : ''}
           </div>`;
-        foot = `<button type="button" class="tgm-btn-1" data-tgm-cancel-done>${esc(c.labels?.cancelDoneBtn || 'Done')}</button>`;
+        foot = `<button type="button" class="tgm-btn-1" data-tgm-cancel-done>${esc(c.labels?.cancelDoneBtn || c.t('cancelDoneBtn'))}</button>`;
       } else { // 'error'
         headIcon = IC.alert;
-        headTitle = c.labels?.cancelErrorTitle || 'Unable to cancel';
+        headTitle = c.labels?.cancelErrorTitle || c.t('cancelErrorTitle');
         headSub = '';
-        body = `<div class="tgm-modal-error">${svg(IC.alert)}<span>${esc(st.error || 'Something went wrong.')}</span></div>`;
-        foot = `<button type="button" class="tgm-btn-2" data-tgm-cancel-keep>${esc(c.labels?.cancelClose || 'Close')}</button>`;
+        body = `<div class="tgm-modal-error">${svg(IC.alert)}<span>${esc(st.error || c.t('somethingWrong'))}</span></div>`;
+        foot = `<button type="button" class="tgm-btn-2" data-tgm-cancel-keep>${esc(c.labels?.cancelClose || c.t('cancelClose'))}</button>`;
       }
 
       mount.innerHTML = `
@@ -3703,7 +5244,7 @@
                 <h2 class="tgm-modal-head-title" id="tgm-cancel-title">${esc(headTitle)}</h2>
                 ${headSub ? `<p class="tgm-modal-head-sub">${esc(headSub)}</p>` : ''}
               </div>
-              <button type="button" class="tgm-modal-close" data-tgm-cancel-close aria-label="Close">${svg(IC.x)}</button>
+              <button type="button" class="tgm-modal-close" data-tgm-cancel-close aria-label="${esc(c.t('ariaClose'))}">${svg(IC.x)}</button>
             </div>
             <div class="tgm-modal-body">${body}</div>
             ${foot ? `<div class="tgm-modal-foot">${foot}</div>` : ''}
@@ -3761,7 +5302,7 @@
         if (confirmBtn.disabled) return;
         confirmBtn.disabled = true;
         const label = mount.querySelector('[data-tgm-cancel-confirm-label]');
-        if (label) label.textContent = this.c.labels?.cancelConfirming || 'Cancelling…';
+        if (label) label.textContent = this.c.labels?.cancelConfirming || this.t('cancelConfirming');
         this._cancelConfirm(reason ? reason.value : '');
       });
 
@@ -3837,8 +5378,8 @@
     _renderEmailModal({ customerEmail, customerFirstName, filename }) {
       const c = this.c;
       const greeting = customerFirstName
-        ? `Send ${esc(customerFirstName)} a copy of this booking pack`
-        : 'Send a copy of this booking pack';
+        ? c.t('emailModalSubName', { name: customerFirstName })
+        : c.t('emailModalSub');
 
       return `
         <div class="tgm-modal-backdrop" data-tgm-modal-backdrop role="dialog" aria-modal="true" aria-labelledby="tgm-modal-title">
@@ -3846,14 +5387,14 @@
             <div class="tgm-modal-head">
               <div class="tgm-modal-head-icon">${svg(IC.mail)}</div>
               <div class="tgm-modal-head-text">
-                <h2 class="tgm-modal-head-title" id="tgm-modal-title">${esc(c.labels?.emailModalTitle || 'Email booking pack')}</h2>
+                <h2 class="tgm-modal-head-title" id="tgm-modal-title">${esc(c.labels?.emailModalTitle || c.t('emailModalTitle'))}</h2>
                 <p class="tgm-modal-head-sub">${esc(c.labels?.emailModalSub || greeting)}</p>
               </div>
-              <button type="button" class="tgm-modal-close" data-tgm-modal-close aria-label="Close">${svg(IC.x)}</button>
+              <button type="button" class="tgm-modal-close" data-tgm-modal-close aria-label="${esc(c.t('ariaClose'))}">${svg(IC.x)}</button>
             </div>
             <div class="tgm-modal-body">
               <div class="tgm-modal-field">
-                <label for="tgm-modal-to-input">${esc(c.labels?.emailTo || 'Send to')}</label>
+                <label for="tgm-modal-to-input">${esc(c.labels?.emailTo || c.t('emailTo'))}</label>
                 <input
                   id="tgm-modal-to-input"
                   type="email"
@@ -3864,10 +5405,10 @@
                   autocomplete="email"
                   spellcheck="false"
                 />
-                <div class="tgm-modal-help">${esc(c.labels?.emailToHelp || 'Defaults to the email on your booking. Edit to send to a different address.')}</div>
+                <div class="tgm-modal-help">${esc(c.labels?.emailToHelp || c.t('emailToHelp'))}</div>
               </div>
               <div class="tgm-modal-field">
-                <label for="tgm-modal-cc-input">${esc(c.labels?.emailCc || 'Also send to (optional)')}</label>
+                <label for="tgm-modal-cc-input">${esc(c.labels?.emailCc || c.t('emailCc'))}</label>
                 <input
                   id="tgm-modal-cc-input"
                   type="text"
@@ -3876,36 +5417,36 @@
                   placeholder="someone@example.com, another@example.com"
                   spellcheck="false"
                 />
-                <div class="tgm-modal-help">${esc(c.labels?.emailCcHelp || 'Separate multiple addresses with commas. Up to 3.')}</div>
+                <div class="tgm-modal-help">${esc(c.labels?.emailCcHelp || c.t('emailCcHelp'))}</div>
               </div>
               <div class="tgm-modal-field">
-                <label for="tgm-modal-message-input">${esc(c.labels?.emailMessage || 'Add a message (optional)')}</label>
+                <label for="tgm-modal-message-input">${esc(c.labels?.emailMessage || c.t('emailMessage'))}</label>
                 <textarea
                   id="tgm-modal-message-input"
                   class="tgm-modal-textarea"
                   data-tgm-modal-message
                   rows="3"
                   maxlength="1000"
-                  placeholder="${esc(c.labels?.emailMessagePlaceholder || 'A short note that will appear above the booking summary.')}"
+                  placeholder="${esc(c.labels?.emailMessagePlaceholder || c.t('emailMessagePlaceholder'))}"
                 ></textarea>
               </div>
               <div class="tgm-modal-field">
-                <label>${esc(c.labels?.emailAttachment || 'Attachment')}</label>
+                <label>${esc(c.labels?.emailAttachment || c.t('emailAttachment'))}</label>
                 <div class="tgm-modal-attach">
                   <div class="tgm-modal-attach-icon">${svg(IC.file)}</div>
                   <div class="tgm-modal-attach-text">
                     <div class="tgm-modal-attach-name">${esc(filename)}</div>
-                    <div class="tgm-modal-attach-meta">${esc(c.labels?.emailAttachmentMeta || 'A4 booking confirmation pack')}</div>
+                    <div class="tgm-modal-attach-meta">${esc(c.labels?.emailAttachmentMeta || c.t('emailAttachmentMeta'))}</div>
                   </div>
                 </div>
               </div>
               <div data-tgm-modal-error-mount></div>
             </div>
             <div class="tgm-modal-foot">
-              <button type="button" class="tgm-btn-2" data-tgm-modal-cancel>${esc(c.labels?.emailCancel || 'Cancel')}</button>
+              <button type="button" class="tgm-btn-2" data-tgm-modal-cancel>${esc(c.labels?.emailCancel || c.t('emailCancel'))}</button>
               <button type="button" class="tgm-btn-1" data-tgm-modal-send>
                 ${svg(IC.mail)}
-                <span data-tgm-modal-send-label>${esc(c.labels?.emailSend || 'Send email')}</span>
+                <span data-tgm-modal-send-label>${esc(c.labels?.emailSend || c.t('emailSend'))}</span>
               </button>
             </div>
           </div>
@@ -3940,7 +5481,7 @@
       const emailRe = /^[^\s@<>(),;:"\[\]\\]+@[^\s@<>(),;:"\[\]\\]+\.[^\s@<>(),;:"\[\]\\]+$/;
 
       if (!toEmail || !emailRe.test(toEmail)) {
-        showError('Please enter a valid email address in the To field.');
+        showError(this.t('emailInvalidTo'));
         toInput?.focus();
         return;
       }
@@ -3953,7 +5494,7 @@
       const seen = new Set([toEmail]);
       for (const c of ccCandidates) {
         if (!emailRe.test(c)) {
-          showError(`"${c}" doesn't look like a valid email address.`);
+          showError(this.t('emailInvalidCc', { email: c }));
           ccInput?.focus();
           return;
         }
@@ -3963,7 +5504,7 @@
         if (ccEmails.length >= 3) break;
       }
       if (ccCandidates.length > 3) {
-        showError('You can include up to 3 additional addresses. Remove some and try again.');
+        showError(this.t('emailTooManyCc'));
         return;
       }
 
@@ -3980,7 +5521,7 @@
       if (!isDemoWidget && customerEmail) {
         const allRecipients = new Set([toEmail, ...ccEmails]);
         if (!allRecipients.has(customerEmail)) {
-          showError(`The booking holder's email (${customerEmail}) must be included as a recipient.`);
+          showError(this.t('emailHolderReqd', { email: customerEmail }));
           return;
         }
       }
@@ -3988,10 +5529,10 @@
       // Loading state on the send button. Modal stays open so we can show
       // errors without losing the user's input.
       sendBtn.disabled = true;
-      const previousLabel = sendLabel?.textContent || 'Send email';
-      if (sendLabel) sendLabel.textContent = 'Sending…';
+      const previousLabel = sendLabel?.textContent || this.t('emailSend');
+      if (sendLabel) sendLabel.textContent = this.t('emailSending');
 
-      const loadingToastId = this._showToast('loading', 'Sending your booking pack', 'Generating PDF and emailing it now.');
+      const loadingToastId = this._showToast('loading', this.t('emailToastSendTitle'), this.t('emailToastSendSub'));
 
       try {
         const res = await fetch(API_EMAIL, {
@@ -4014,19 +5555,19 @@
           let serverErr = '';
           try { const j = await res.json(); serverErr = j?.error || ''; } catch {}
           if (res.status === 429) {
-            showError('Too many email requests. Please wait a few minutes and try again.');
+            showError(this.t('emailTooMany'));
           } else if (res.status === 400 && serverErr === 'recipient_mismatch') {
-            showError(`The booking holder's email must be included as a recipient.`);
+            showError(this.t('emailHolderReqdShort'));
           } else if (res.status === 400 && serverErr === 'invalid_recipients') {
-            showError('One of the email addresses looks invalid. Please check and try again.');
+            showError(this.t('emailInvalidRecipients'));
           } else if (res.status === 400 && serverErr === 'invalid_message') {
-            showError('Your message is too long. Please shorten it to under 1000 characters.');
+            showError(this.t('emailInvalidMessage'));
           } else if (res.status === 502 || serverErr === 'send_failed') {
-            showError("We couldn't send the email just now. Please try again in a moment.");
+            showError(this.t('emailSendFailed'));
           } else if (res.status === 404) {
-            showError("We couldn't find that booking. Please look it up again.");
+            showError(this.t('emailNotFound'));
           } else {
-            showError('Something went wrong. Please try again in a moment.');
+            showError(this.t('genericError'));
           }
           return;
         }
@@ -4035,12 +5576,12 @@
         const data = await res.json().catch(() => ({}));
         const sentTo = data?.sentTo || toEmail;
         this._closeEmailModal();
-        this._showToast('success', 'Email sent', `Booking pack on its way to ${sentTo}.`, 5000);
+        this._showToast('success', this.t('emailSentTitle'), this.t('emailSentSub', { email: sentTo }), 5000);
         this._fireEvent('email-sent', { sentTo, ccCount: ccEmails.length });
 
       } catch (err) {
         this._dismissToast(loadingToastId);
-        showError('Network error. Please check your connection and try again.');
+        showError(this.t('emailNetworkError'));
       } finally {
         sendBtn.disabled = false;
         if (sendLabel) sendLabel.textContent = previousLabel;
@@ -4231,6 +5772,8 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      this.t = makeT(this.c);
+      this.c.t = this.t;
       this._render();
     }
 

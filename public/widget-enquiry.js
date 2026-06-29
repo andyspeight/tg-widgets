@@ -38,8 +38,814 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.0.0';
+  var WIDGET_VERSION = '1.0.1';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (field labels, placeholders, validation, buttons,
+  // states, aria-labels). Author content (the visitor's own typed data, custom
+  // field options, brand/place names, ATOL/ABTA wording) is never translated.
+  // English is the source + fallback. Author-overridable defaults (form title,
+  // intro, submit label, per-field labels, success message) resolve through
+  // these keys only when the author has not supplied their own value.
+  var MESSAGES = {
+    en: {
+      formUnavailable: 'Form unavailable',
+      loadingForm: 'Loading form…',
+      unableToLoad: 'Unable to load this form.',
+      unableToReach: 'Unable to reach the Travelgenix widget service. Please try again later.',
+      headerTitle: 'Tell us about your dream holiday',
+      headerSubtitle: 'Share a few details and one of our travel specialists will come back within 24 hours.',
+      submitText: 'Send my enquiry',
+      thankYouMessage: "Thanks {firstName} — we're on it",
+      thankYouFallback: 'Thanks{firstName} — we’re on it',
+      thankYouBody: "One of our travel specialists will be in touch within 24 hours. We've also sent a confirmation to your email.",
+      reference: 'Reference {ref}',
+      back: 'Back',
+      continue: 'Continue',
+      sending: 'Sending…',
+      looksGood: ' Looks good!',
+      secure: 'Secure',
+      gdpr: 'GDPR',
+      reply24hr: '24hr reply',
+      poweredBy: 'Powered by ',
+      noFieldsStep: 'No fields on this step.',
+      stepN: 'Step {n}',
+      securityCheck: 'Security check',
+      securityMisconfigured: 'Security check misconfigured — please contact support.',
+      securityIncomplete: 'Please complete the security check above before submitting.',
+      genericError: 'Something went wrong. Please try again.',
+      fixOneField: 'Please fix the highlighted field above before continuing.',
+      fixNFields: 'Please fix the {count} highlighted fields above before continuing.',
+      checkNFields: 'Please check the {count} highlighted fields above and try again.',
+      // Destination field
+      label_destination: 'Where are you dreaming of?',
+      dest_placeholder: 'Search countries, cities, resorts...',
+      dest_searchAria: 'Search destinations',
+      dest_remove: 'Remove {name}',
+      dest_help: 'Add one, or multiple for a twin-centre trip.',
+      dest_country: 'Country',
+      dest_city: 'City',
+      dest_cityIn: 'City · {country}',
+      dest_resort: 'Resort',
+      dest_resortIn: 'Resort · {place}',
+      dest_cantFind: "Can't find it?",
+      dest_useTyped: 'Use "{text}"',
+      dest_submitAsTyped: 'Submit as typed',
+      dest_startTyping: 'Start typing a country, city, or resort…',
+      dest_keepTyping: 'Keep typing…',
+      dest_searching: 'Searching…',
+      dest_noMatches: 'No matches — try a different term',
+      dest_searchUnavailable: 'Search is temporarily unavailable.',
+      dest_required: 'Please add at least one destination.',
+      // Airport field
+      label_airport: 'Departure airport',
+      airport_optCount: '(pick up to {n})',
+      airport_placeholder: 'Search airports (e.g. Heathrow, LHR, Manchester)...',
+      airport_searchAria: 'Search airports',
+      airport_remove: 'Remove {name}',
+      airport_flexibleChip: 'Flexible',
+      airport_flexibleGroup: 'Flexible',
+      airport_flexibleOption: "I'm flexible on airport",
+      airport_any: 'Any',
+      airport_max: 'You can pick up to {n} airports.',
+      airport_noMatches: 'No matches — try a different term',
+      airport_noMore: 'No more airports to pick',
+      airport_help: 'Add one or more airports — or pick "flexible" if you don’t mind.',
+      airport_required: 'Please pick at least one departure airport.',
+      // Date range field
+      departOn: 'Depart on',
+      returnOn: 'Return on',
+      flexAria: 'Flexible by a week either side',
+      flexLabel: "I'm flexible by a week either side",
+      date_required: 'Please choose a departure date.',
+      date_returnAfter: 'Return date must be after departure.',
+      // Duration field
+      label_duration: 'Duration',
+      duration_options: 'Duration options',
+      duration_nights: '{n} nights',
+      // Travellers field
+      label_travellers: "Who's travelling?",
+      childAgesAria: 'Children ages',
+      childAgesTitle: 'How old will each child be when they travel?',
+      childN: 'Child {n}',
+      ageYoungest: '{age} (youngest)',
+      ageOldest: '{age} (oldest)',
+      decrease: 'Decrease {label} (currently {n})',
+      increase: 'Increase {label} (currently {n})',
+      adults: 'Adults',
+      adultsSub: 'Age 16+',
+      children: 'Children',
+      childrenSub: 'Age 2–15',
+      infants: 'Infants',
+      infantsSub: 'Under 2',
+      trav_required: 'At least one adult required.',
+      // Budget field
+      label_budget: 'Approximate total budget',
+      budgetAria: 'Budget per person',
+      budget_amountAria: '{amount} per person',
+      perPerson: 'per person',
+      // Stars field
+      label_stars: 'Star rating preference',
+      stars_options: 'Star rating options',
+      stars_cardAria: '{stars}-star — {label}. {desc}',
+      // Board field
+      star3_label: 'Comfortable', star3_desc: '3-star. Great value.',
+      star4_label: 'Superior', star4_desc: '4-star. The sweet spot.',
+      star5_label: 'Luxury', star5_desc: '5-star. The full treatment.',
+      label_board: 'Board basis',
+      board_RO: 'Room only', board_BB: 'B&B', board_HB: 'Half board', board_FB: 'Full board', board_AI: 'All inclusive',
+      board_options: 'Board basis options',
+      // Interests field
+      label_interests: 'Interests',
+      interests_pickMany: '(pick as many as apply)',
+      int_beach: 'Beach', int_city: 'City', int_culture: 'Culture', int_food: 'Food & wine', int_adventure: 'Adventure', int_family: 'Family', int_wellness: 'Wellness', int_honeymoon: 'Honeymoon',
+      interests_options: 'Interest options',
+      // Name field
+      firstName: 'First name',
+      lastName: 'Last name',
+      firstName_ph: 'Jane',
+      lastName_ph: 'Smith',
+      firstName_required: 'First name required.',
+      lastName_required: 'Last name required.',
+      // Contact field
+      emailAddress: 'Email address',
+      phone: 'Phone',
+      phoneAria: 'Phone number',
+      email_ph: 'jane@example.com',
+      phone_ph: '07700 900000',
+      optional: '(optional)',
+      email_required: 'Email required.',
+      email_invalid: 'Please enter a valid email address.',
+      // Notes field
+      label_notes: 'Anything else we should know?',
+      notesAria: 'Notes',
+      notes_ph: 'Dietary requirements, accessibility needs, special occasions, specific resorts or hotels you have had your eye on...',
+      // Consent field
+      consent_agreeAria: 'Agree to be contacted',
+      consent_marketingAria: 'Receive marketing updates',
+      consent_contactLabel: 'I agree to be contacted about this enquiry. ',
+      consent_contactSub: "We'll only use your details to respond to your enquiry.",
+      consent_marketingLabel: 'Send me occasional holiday inspiration and exclusive offers.',
+      consent_required: 'Please tick the consent box to continue.'
+    },
+    fr: {
+      formUnavailable: 'Formulaire indisponible',
+      loadingForm: 'Chargement du formulaire…',
+      unableToLoad: 'Impossible de charger ce formulaire.',
+      unableToReach: 'Impossible de joindre le service de widgets Travelgenix. Veuillez réessayer plus tard.',
+      headerTitle: 'Parlez-nous de vos vacances de rêve',
+      headerSubtitle: 'Donnez-nous quelques détails et un de nos spécialistes du voyage vous recontactera sous 24 heures.',
+      submitText: 'Envoyer ma demande',
+      thankYouMessage: 'Merci {firstName} — nous nous en occupons',
+      thankYouFallback: 'Merci{firstName} — nous nous en occupons',
+      thankYouBody: 'Un de nos spécialistes du voyage vous contactera sous 24 heures. Nous avons aussi envoyé une confirmation à votre adresse e-mail.',
+      reference: 'Référence {ref}',
+      back: 'Retour',
+      continue: 'Suivant',
+      sending: 'Envoi…',
+      looksGood: ' Parfait !',
+      secure: 'Sécurisé',
+      gdpr: 'RGPD',
+      reply24hr: 'Réponse 24 h',
+      poweredBy: 'Propulsé par ',
+      noFieldsStep: 'Aucun champ à cette étape.',
+      stepN: 'Étape {n}',
+      securityCheck: 'Contrôle de sécurité',
+      securityMisconfigured: 'Contrôle de sécurité mal configuré — veuillez contacter le support.',
+      securityIncomplete: 'Veuillez effectuer le contrôle de sécurité ci-dessus avant d’envoyer.',
+      genericError: 'Une erreur s’est produite. Veuillez réessayer.',
+      fixOneField: 'Veuillez corriger le champ en surbrillance ci-dessus avant de continuer.',
+      fixNFields: 'Veuillez corriger les {count} champs en surbrillance ci-dessus avant de continuer.',
+      checkNFields: 'Veuillez vérifier les {count} champs en surbrillance ci-dessus et réessayer.',
+      label_destination: 'Où rêvez-vous d’aller ?',
+      dest_placeholder: 'Rechercher des pays, villes, stations...',
+      dest_searchAria: 'Rechercher des destinations',
+      dest_remove: 'Retirer {name}',
+      dest_help: 'Ajoutez-en une, ou plusieurs pour un séjour multi-destinations.',
+      dest_country: 'Pays',
+      dest_city: 'Ville',
+      dest_cityIn: 'Ville · {country}',
+      dest_resort: 'Station',
+      dest_resortIn: 'Station · {place}',
+      dest_cantFind: 'Vous ne la trouvez pas ?',
+      dest_useTyped: 'Utiliser « {text} »',
+      dest_submitAsTyped: 'Envoyer tel quel',
+      dest_startTyping: 'Commencez à taper un pays, une ville ou une station…',
+      dest_keepTyping: 'Continuez à taper…',
+      dest_searching: 'Recherche…',
+      dest_noMatches: 'Aucun résultat — essayez un autre terme',
+      dest_searchUnavailable: 'La recherche est momentanément indisponible.',
+      dest_required: 'Veuillez ajouter au moins une destination.',
+      label_airport: 'Aéroport de départ',
+      airport_optCount: '(jusqu’à {n})',
+      airport_placeholder: 'Rechercher des aéroports (ex. Heathrow, LHR, Manchester)...',
+      airport_searchAria: 'Rechercher des aéroports',
+      airport_remove: 'Retirer {name}',
+      airport_flexibleChip: 'Flexible',
+      airport_flexibleGroup: 'Flexible',
+      airport_flexibleOption: 'Je suis flexible sur l’aéroport',
+      airport_any: 'Tous',
+      airport_max: 'Vous pouvez choisir jusqu’à {n} aéroports.',
+      airport_noMatches: 'Aucun résultat — essayez un autre terme',
+      airport_noMore: 'Plus aucun aéroport à choisir',
+      airport_help: 'Ajoutez un ou plusieurs aéroports — ou choisissez « flexible » si cela vous est égal.',
+      airport_required: 'Veuillez choisir au moins un aéroport de départ.',
+      departOn: 'Départ le',
+      returnOn: 'Retour le',
+      flexAria: 'Flexible d’une semaine de part et d’autre',
+      flexLabel: 'Je suis flexible d’une semaine de part et d’autre',
+      date_required: 'Veuillez choisir une date de départ.',
+      date_returnAfter: 'La date de retour doit être après le départ.',
+      label_duration: 'Durée',
+      duration_options: 'Options de durée',
+      duration_nights: '{n} nuits',
+      label_travellers: 'Qui voyage ?',
+      childAgesAria: 'Âges des enfants',
+      childAgesTitle: 'Quel âge aura chaque enfant au moment du voyage ?',
+      childN: 'Enfant {n}',
+      ageYoungest: '{age} (le plus jeune)',
+      ageOldest: '{age} (le plus âgé)',
+      decrease: 'Diminuer {label} (actuellement {n})',
+      increase: 'Augmenter {label} (actuellement {n})',
+      adults: 'Adultes',
+      adultsSub: '16 ans et plus',
+      children: 'Enfants',
+      childrenSub: '2 à 15 ans',
+      infants: 'Bébés',
+      infantsSub: 'Moins de 2 ans',
+      trav_required: 'Au moins un adulte est requis.',
+      label_budget: 'Budget total approximatif',
+      budgetAria: 'Budget par personne',
+      budget_amountAria: '{amount} par personne',
+      perPerson: 'par personne',
+      label_stars: 'Préférence de catégorie',
+      stars_options: 'Options de catégorie',
+      stars_cardAria: '{stars} étoiles — {label}. {desc}',
+      star3_label: 'Confortable', star3_desc: '3 étoiles. Excellent rapport qualité-prix.',
+      star4_label: 'Supérieur', star4_desc: '4 étoiles. Le juste équilibre.',
+      star5_label: 'Luxe', star5_desc: '5 étoiles. Le grand jeu.',
+      label_board: 'Formule de restauration',
+      board_RO: 'Sans repas', board_BB: 'Petit-déjeuner', board_HB: 'Demi-pension', board_FB: 'Pension complète', board_AI: 'Tout compris',
+      board_options: 'Options de formule',
+      label_interests: 'Centres d’intérêt',
+      interests_pickMany: '(choisissez-en autant que vous voulez)',
+      int_beach: 'Plage', int_city: 'Ville', int_culture: 'Culture', int_food: 'Gastronomie et vins', int_adventure: 'Aventure', int_family: 'Famille', int_wellness: 'Bien-être', int_honeymoon: 'Lune de miel',
+      interests_options: 'Options de centres d’intérêt',
+      firstName: 'Prénom',
+      lastName: 'Nom',
+      firstName_ph: 'Jeanne',
+      lastName_ph: 'Dupont',
+      firstName_required: 'Le prénom est requis.',
+      lastName_required: 'Le nom est requis.',
+      emailAddress: 'Adresse e-mail',
+      phone: 'Téléphone',
+      phoneAria: 'Numéro de téléphone',
+      email_ph: 'jeanne@exemple.com',
+      phone_ph: '06 12 34 56 78',
+      optional: '(facultatif)',
+      email_required: 'L’e-mail est requis.',
+      email_invalid: 'Veuillez saisir une adresse e-mail valide.',
+      label_notes: 'Autre chose à nous dire ?',
+      notesAria: 'Notes',
+      notes_ph: 'Régimes alimentaires, besoins d’accessibilité, occasions spéciales, stations ou hôtels précis que vous avez en tête...',
+      consent_agreeAria: 'Accepter d’être contacté',
+      consent_marketingAria: 'Recevoir des actualités marketing',
+      consent_contactLabel: 'J’accepte d’être contacté au sujet de cette demande. ',
+      consent_contactSub: 'Nous n’utiliserons vos coordonnées que pour répondre à votre demande.',
+      consent_marketingLabel: 'Envoyez-moi de temps en temps des idées de vacances et des offres exclusives.',
+      consent_required: 'Veuillez cocher la case de consentement pour continuer.'
+    },
+    de: {
+      formUnavailable: 'Formular nicht verfügbar',
+      loadingForm: 'Formular wird geladen…',
+      unableToLoad: 'Dieses Formular kann nicht geladen werden.',
+      unableToReach: 'Der Travelgenix-Widget-Dienst ist nicht erreichbar. Bitte versuchen Sie es später erneut.',
+      headerTitle: 'Erzählen Sie uns von Ihrem Traumurlaub',
+      headerSubtitle: 'Teilen Sie uns ein paar Details mit und einer unserer Reisespezialisten meldet sich innerhalb von 24 Stunden.',
+      submitText: 'Anfrage senden',
+      thankYouMessage: 'Vielen Dank {firstName} — wir kümmern uns darum',
+      thankYouFallback: 'Vielen Dank{firstName} — wir kümmern uns darum',
+      thankYouBody: 'Einer unserer Reisespezialisten meldet sich innerhalb von 24 Stunden. Eine Bestätigung haben wir auch an Ihre E-Mail-Adresse gesendet.',
+      reference: 'Referenz {ref}',
+      back: 'Zurück',
+      continue: 'Weiter',
+      sending: 'Wird gesendet…',
+      looksGood: ' Sieht gut aus!',
+      secure: 'Sicher',
+      gdpr: 'DSGVO',
+      reply24hr: 'Antwort in 24 Std.',
+      poweredBy: 'Bereitgestellt von ',
+      noFieldsStep: 'Keine Felder in diesem Schritt.',
+      stepN: 'Schritt {n}',
+      securityCheck: 'Sicherheitsprüfung',
+      securityMisconfigured: 'Sicherheitsprüfung falsch konfiguriert — bitte kontaktieren Sie den Support.',
+      securityIncomplete: 'Bitte führen Sie zuerst die Sicherheitsprüfung oben durch.',
+      genericError: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+      fixOneField: 'Bitte korrigieren Sie das hervorgehobene Feld oben, bevor Sie fortfahren.',
+      fixNFields: 'Bitte korrigieren Sie die {count} hervorgehobenen Felder oben, bevor Sie fortfahren.',
+      checkNFields: 'Bitte prüfen Sie die {count} hervorgehobenen Felder oben und versuchen Sie es erneut.',
+      label_destination: 'Wovon träumen Sie?',
+      dest_placeholder: 'Länder, Städte, Resorts suchen...',
+      dest_searchAria: 'Reiseziele suchen',
+      dest_remove: '{name} entfernen',
+      dest_help: 'Fügen Sie eines hinzu, oder mehrere für eine Zweizentrenreise.',
+      dest_country: 'Land',
+      dest_city: 'Stadt',
+      dest_cityIn: 'Stadt · {country}',
+      dest_resort: 'Resort',
+      dest_resortIn: 'Resort · {place}',
+      dest_cantFind: 'Nicht gefunden?',
+      dest_useTyped: '„{text}“ verwenden',
+      dest_submitAsTyped: 'Wie eingegeben senden',
+      dest_startTyping: 'Geben Sie ein Land, eine Stadt oder ein Resort ein…',
+      dest_keepTyping: 'Weiter tippen…',
+      dest_searching: 'Suche läuft…',
+      dest_noMatches: 'Keine Treffer — versuchen Sie einen anderen Begriff',
+      dest_searchUnavailable: 'Die Suche ist vorübergehend nicht verfügbar.',
+      dest_required: 'Bitte fügen Sie mindestens ein Reiseziel hinzu.',
+      label_airport: 'Abflughafen',
+      airport_optCount: '(bis zu {n})',
+      airport_placeholder: 'Flughäfen suchen (z. B. Heathrow, LHR, Manchester)...',
+      airport_searchAria: 'Flughäfen suchen',
+      airport_remove: '{name} entfernen',
+      airport_flexibleChip: 'Flexibel',
+      airport_flexibleGroup: 'Flexibel',
+      airport_flexibleOption: 'Ich bin beim Flughafen flexibel',
+      airport_any: 'Alle',
+      airport_max: 'Sie können bis zu {n} Flughäfen auswählen.',
+      airport_noMatches: 'Keine Treffer — versuchen Sie einen anderen Begriff',
+      airport_noMore: 'Keine weiteren Flughäfen verfügbar',
+      airport_help: 'Fügen Sie einen oder mehrere Flughäfen hinzu — oder wählen Sie „flexibel“, wenn es Ihnen egal ist.',
+      airport_required: 'Bitte wählen Sie mindestens einen Abflughafen.',
+      departOn: 'Hinflug am',
+      returnOn: 'Rückflug am',
+      flexAria: 'Flexibel um eine Woche in beide Richtungen',
+      flexLabel: 'Ich bin um eine Woche in beide Richtungen flexibel',
+      date_required: 'Bitte wählen Sie ein Abflugdatum.',
+      date_returnAfter: 'Das Rückflugdatum muss nach dem Hinflug liegen.',
+      label_duration: 'Dauer',
+      duration_options: 'Dauer-Optionen',
+      duration_nights: '{n} Nächte',
+      label_travellers: 'Wer reist?',
+      childAgesAria: 'Alter der Kinder',
+      childAgesTitle: 'Wie alt ist jedes Kind zum Reisezeitpunkt?',
+      childN: 'Kind {n}',
+      ageYoungest: '{age} (jüngstes)',
+      ageOldest: '{age} (ältestes)',
+      decrease: '{label} verringern (aktuell {n})',
+      increase: '{label} erhöhen (aktuell {n})',
+      adults: 'Erwachsene',
+      adultsSub: 'Ab 16 Jahren',
+      children: 'Kinder',
+      childrenSub: '2 bis 15 Jahre',
+      infants: 'Kleinkinder',
+      infantsSub: 'Unter 2',
+      trav_required: 'Mindestens ein Erwachsener erforderlich.',
+      label_budget: 'Ungefähres Gesamtbudget',
+      budgetAria: 'Budget pro Person',
+      budget_amountAria: '{amount} pro Person',
+      perPerson: 'pro Person',
+      label_stars: 'Sterne-Präferenz',
+      stars_options: 'Sterne-Optionen',
+      stars_cardAria: '{stars} Sterne — {label}. {desc}',
+      star3_label: 'Komfortabel', star3_desc: '3 Sterne. Tolles Preis-Leistungs-Verhältnis.',
+      star4_label: 'Superior', star4_desc: '4 Sterne. Der ideale Mittelweg.',
+      star5_label: 'Luxus', star5_desc: '5 Sterne. Rundum verwöhnt.',
+      label_board: 'Verpflegung',
+      board_RO: 'Nur Übernachtung', board_BB: 'Übernachtung mit Frühstück', board_HB: 'Halbpension', board_FB: 'Vollpension', board_AI: 'All-inclusive',
+      board_options: 'Verpflegungsoptionen',
+      label_interests: 'Interessen',
+      interests_pickMany: '(wählen Sie so viele wie zutreffen)',
+      int_beach: 'Strand', int_city: 'Stadt', int_culture: 'Kultur', int_food: 'Essen & Wein', int_adventure: 'Abenteuer', int_family: 'Familie', int_wellness: 'Wellness', int_honeymoon: 'Flitterwochen',
+      interests_options: 'Interessen-Optionen',
+      firstName: 'Vorname',
+      lastName: 'Nachname',
+      firstName_ph: 'Anna',
+      lastName_ph: 'Müller',
+      firstName_required: 'Vorname erforderlich.',
+      lastName_required: 'Nachname erforderlich.',
+      emailAddress: 'E-Mail-Adresse',
+      phone: 'Telefon',
+      phoneAria: 'Telefonnummer',
+      email_ph: 'anna@beispiel.de',
+      phone_ph: '0151 23456789',
+      optional: '(optional)',
+      email_required: 'E-Mail erforderlich.',
+      email_invalid: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+      label_notes: 'Sonst noch etwas?',
+      notesAria: 'Notizen',
+      notes_ph: 'Ernährungswünsche, Barrierefreiheit, besondere Anlässe, bestimmte Resorts oder Hotels, die Sie im Auge haben...',
+      consent_agreeAria: 'Kontaktaufnahme zustimmen',
+      consent_marketingAria: 'Marketing-Updates erhalten',
+      consent_contactLabel: 'Ich bin damit einverstanden, zu dieser Anfrage kontaktiert zu werden. ',
+      consent_contactSub: 'Wir verwenden Ihre Daten nur, um auf Ihre Anfrage zu antworten.',
+      consent_marketingLabel: 'Senden Sie mir gelegentlich Urlaubsinspiration und exklusive Angebote.',
+      consent_required: 'Bitte kreuzen Sie das Einwilligungsfeld an, um fortzufahren.'
+    },
+    es: {
+      formUnavailable: 'Formulario no disponible',
+      loadingForm: 'Cargando formulario…',
+      unableToLoad: 'No se puede cargar este formulario.',
+      unableToReach: 'No se puede contactar con el servicio de widgets de Travelgenix. Inténtalo de nuevo más tarde.',
+      headerTitle: 'Cuéntanos sobre tus vacaciones soñadas',
+      headerSubtitle: 'Comparte unos datos y uno de nuestros especialistas en viajes te responderá en 24 horas.',
+      submitText: 'Enviar mi consulta',
+      thankYouMessage: 'Gracias {firstName} — nos ponemos con ello',
+      thankYouFallback: 'Gracias{firstName} — nos ponemos con ello',
+      thankYouBody: 'Uno de nuestros especialistas en viajes se pondrá en contacto contigo en 24 horas. También hemos enviado una confirmación a tu correo electrónico.',
+      reference: 'Referencia {ref}',
+      back: 'Atrás',
+      continue: 'Siguiente',
+      sending: 'Enviando…',
+      looksGood: ' ¡Perfecto!',
+      secure: 'Seguro',
+      gdpr: 'RGPD',
+      reply24hr: 'Respuesta en 24 h',
+      poweredBy: 'Con la tecnología de ',
+      noFieldsStep: 'No hay campos en este paso.',
+      stepN: 'Paso {n}',
+      securityCheck: 'Comprobación de seguridad',
+      securityMisconfigured: 'Comprobación de seguridad mal configurada — ponte en contacto con soporte.',
+      securityIncomplete: 'Completa la comprobación de seguridad de arriba antes de enviar.',
+      genericError: 'Algo salió mal. Inténtalo de nuevo.',
+      fixOneField: 'Corrige el campo resaltado de arriba antes de continuar.',
+      fixNFields: 'Corrige los {count} campos resaltados de arriba antes de continuar.',
+      checkNFields: 'Revisa los {count} campos resaltados de arriba e inténtalo de nuevo.',
+      label_destination: '¿Con qué destino sueñas?',
+      dest_placeholder: 'Buscar países, ciudades, complejos...',
+      dest_searchAria: 'Buscar destinos',
+      dest_remove: 'Quitar {name}',
+      dest_help: 'Añade uno, o varios para un viaje a varios destinos.',
+      dest_country: 'País',
+      dest_city: 'Ciudad',
+      dest_cityIn: 'Ciudad · {country}',
+      dest_resort: 'Complejo',
+      dest_resortIn: 'Complejo · {place}',
+      dest_cantFind: '¿No lo encuentras?',
+      dest_useTyped: 'Usar «{text}»',
+      dest_submitAsTyped: 'Enviar tal cual',
+      dest_startTyping: 'Empieza a escribir un país, ciudad o complejo…',
+      dest_keepTyping: 'Sigue escribiendo…',
+      dest_searching: 'Buscando…',
+      dest_noMatches: 'Sin resultados — prueba con otro término',
+      dest_searchUnavailable: 'La búsqueda no está disponible temporalmente.',
+      dest_required: 'Añade al menos un destino.',
+      label_airport: 'Aeropuerto de salida',
+      airport_optCount: '(hasta {n})',
+      airport_placeholder: 'Buscar aeropuertos (p. ej. Heathrow, LHR, Manchester)...',
+      airport_searchAria: 'Buscar aeropuertos',
+      airport_remove: 'Quitar {name}',
+      airport_flexibleChip: 'Flexible',
+      airport_flexibleGroup: 'Flexible',
+      airport_flexibleOption: 'Soy flexible con el aeropuerto',
+      airport_any: 'Cualquiera',
+      airport_max: 'Puedes elegir hasta {n} aeropuertos.',
+      airport_noMatches: 'Sin resultados — prueba con otro término',
+      airport_noMore: 'No hay más aeropuertos para elegir',
+      airport_help: 'Añade uno o más aeropuertos — o elige «flexible» si te da igual.',
+      airport_required: 'Elige al menos un aeropuerto de salida.',
+      departOn: 'Salida el',
+      returnOn: 'Regreso el',
+      flexAria: 'Flexible una semana arriba o abajo',
+      flexLabel: 'Soy flexible una semana arriba o abajo',
+      date_required: 'Elige una fecha de salida.',
+      date_returnAfter: 'La fecha de regreso debe ser posterior a la de salida.',
+      label_duration: 'Duración',
+      duration_options: 'Opciones de duración',
+      duration_nights: '{n} noches',
+      label_travellers: '¿Quién viaja?',
+      childAgesAria: 'Edades de los niños',
+      childAgesTitle: '¿Qué edad tendrá cada niño al viajar?',
+      childN: 'Niño {n}',
+      ageYoungest: '{age} (el más pequeño)',
+      ageOldest: '{age} (el mayor)',
+      decrease: 'Reducir {label} (actualmente {n})',
+      increase: 'Aumentar {label} (actualmente {n})',
+      adults: 'Adultos',
+      adultsSub: '16 años o más',
+      children: 'Niños',
+      childrenSub: '2 a 15 años',
+      infants: 'Bebés',
+      infantsSub: 'Menos de 2',
+      trav_required: 'Se requiere al menos un adulto.',
+      label_budget: 'Presupuesto total aproximado',
+      budgetAria: 'Presupuesto por persona',
+      budget_amountAria: '{amount} por persona',
+      perPerson: 'por persona',
+      label_stars: 'Preferencia de categoría',
+      stars_options: 'Opciones de categoría',
+      stars_cardAria: '{stars} estrellas — {label}. {desc}',
+      star3_label: 'Cómodo', star3_desc: '3 estrellas. Gran relación calidad-precio.',
+      star4_label: 'Superior', star4_desc: '4 estrellas. El punto justo.',
+      star5_label: 'Lujo', star5_desc: '5 estrellas. El trato completo.',
+      label_board: 'Régimen',
+      board_RO: 'Solo alojamiento', board_BB: 'Alojamiento y desayuno', board_HB: 'Media pensión', board_FB: 'Pensión completa', board_AI: 'Todo incluido',
+      board_options: 'Opciones de régimen',
+      label_interests: 'Intereses',
+      interests_pickMany: '(elige tantos como quieras)',
+      int_beach: 'Playa', int_city: 'Ciudad', int_culture: 'Cultura', int_food: 'Gastronomía y vino', int_adventure: 'Aventura', int_family: 'Familia', int_wellness: 'Bienestar', int_honeymoon: 'Luna de miel',
+      interests_options: 'Opciones de intereses',
+      firstName: 'Nombre',
+      lastName: 'Apellidos',
+      firstName_ph: 'Ana',
+      lastName_ph: 'García',
+      firstName_required: 'El nombre es obligatorio.',
+      lastName_required: 'Los apellidos son obligatorios.',
+      emailAddress: 'Correo electrónico',
+      phone: 'Teléfono',
+      phoneAria: 'Número de teléfono',
+      email_ph: 'ana@ejemplo.com',
+      phone_ph: '612 34 56 78',
+      optional: '(opcional)',
+      email_required: 'El correo electrónico es obligatorio.',
+      email_invalid: 'Introduce una dirección de correo electrónico válida.',
+      label_notes: '¿Algo más que debamos saber?',
+      notesAria: 'Notas',
+      notes_ph: 'Requisitos dietéticos, necesidades de accesibilidad, ocasiones especiales, complejos u hoteles concretos que tengas en mente...',
+      consent_agreeAria: 'Aceptar que me contacten',
+      consent_marketingAria: 'Recibir novedades de marketing',
+      consent_contactLabel: 'Acepto que me contacten sobre esta consulta. ',
+      consent_contactSub: 'Solo usaremos tus datos para responder a tu consulta.',
+      consent_marketingLabel: 'Envíame de vez en cuando inspiración de viajes y ofertas exclusivas.',
+      consent_required: 'Marca la casilla de consentimiento para continuar.'
+    },
+    it: {
+      formUnavailable: 'Modulo non disponibile',
+      loadingForm: 'Caricamento del modulo…',
+      unableToLoad: 'Impossibile caricare questo modulo.',
+      unableToReach: 'Impossibile raggiungere il servizio widget di Travelgenix. Riprova più tardi.',
+      headerTitle: 'Raccontaci la tua vacanza dei sogni',
+      headerSubtitle: 'Condividi qualche dettaglio e uno dei nostri specialisti di viaggio ti ricontatterà entro 24 ore.',
+      submitText: 'Invia la mia richiesta',
+      thankYouMessage: 'Grazie {firstName} — ci pensiamo noi',
+      thankYouFallback: 'Grazie{firstName} — ci pensiamo noi',
+      thankYouBody: 'Uno dei nostri specialisti di viaggio ti contatterà entro 24 ore. Abbiamo anche inviato una conferma alla tua email.',
+      reference: 'Riferimento {ref}',
+      back: 'Indietro',
+      continue: 'Avanti',
+      sending: 'Invio…',
+      looksGood: ' Perfetto!',
+      secure: 'Sicuro',
+      gdpr: 'GDPR',
+      reply24hr: 'Risposta in 24 h',
+      poweredBy: 'Realizzato con ',
+      noFieldsStep: 'Nessun campo in questo passaggio.',
+      stepN: 'Passaggio {n}',
+      securityCheck: 'Controllo di sicurezza',
+      securityMisconfigured: 'Controllo di sicurezza configurato male — contatta l’assistenza.',
+      securityIncomplete: 'Completa il controllo di sicurezza qui sopra prima di inviare.',
+      genericError: 'Qualcosa è andato storto. Riprova.',
+      fixOneField: 'Correggi il campo evidenziato qui sopra prima di continuare.',
+      fixNFields: 'Correggi i {count} campi evidenziati qui sopra prima di continuare.',
+      checkNFields: 'Controlla i {count} campi evidenziati qui sopra e riprova.',
+      label_destination: 'Dove sogni di andare?',
+      dest_placeholder: 'Cerca paesi, città, resort...',
+      dest_searchAria: 'Cerca destinazioni',
+      dest_remove: 'Rimuovi {name}',
+      dest_help: 'Aggiungine una, o più di una per un viaggio in più tappe.',
+      dest_country: 'Paese',
+      dest_city: 'Città',
+      dest_cityIn: 'Città · {country}',
+      dest_resort: 'Resort',
+      dest_resortIn: 'Resort · {place}',
+      dest_cantFind: 'Non la trovi?',
+      dest_useTyped: 'Usa "{text}"',
+      dest_submitAsTyped: 'Invia come scritto',
+      dest_startTyping: 'Inizia a digitare un paese, una città o un resort…',
+      dest_keepTyping: 'Continua a digitare…',
+      dest_searching: 'Ricerca…',
+      dest_noMatches: 'Nessun risultato — prova un altro termine',
+      dest_searchUnavailable: 'La ricerca è temporaneamente non disponibile.',
+      dest_required: 'Aggiungi almeno una destinazione.',
+      label_airport: 'Aeroporto di partenza',
+      airport_optCount: '(fino a {n})',
+      airport_placeholder: 'Cerca aeroporti (es. Heathrow, LHR, Manchester)...',
+      airport_searchAria: 'Cerca aeroporti',
+      airport_remove: 'Rimuovi {name}',
+      airport_flexibleChip: 'Flessibile',
+      airport_flexibleGroup: 'Flessibile',
+      airport_flexibleOption: 'Sono flessibile sull’aeroporto',
+      airport_any: 'Qualsiasi',
+      airport_max: 'Puoi scegliere fino a {n} aeroporti.',
+      airport_noMatches: 'Nessun risultato — prova un altro termine',
+      airport_noMore: 'Nessun altro aeroporto da scegliere',
+      airport_help: 'Aggiungi uno o più aeroporti — oppure scegli "flessibile" se non hai preferenze.',
+      airport_required: 'Scegli almeno un aeroporto di partenza.',
+      departOn: 'Partenza il',
+      returnOn: 'Ritorno il',
+      flexAria: 'Flessibile di una settimana in entrambe le direzioni',
+      flexLabel: 'Sono flessibile di una settimana in entrambe le direzioni',
+      date_required: 'Scegli una data di partenza.',
+      date_returnAfter: 'La data di ritorno deve essere successiva alla partenza.',
+      label_duration: 'Durata',
+      duration_options: 'Opzioni di durata',
+      duration_nights: '{n} notti',
+      label_travellers: 'Chi viaggia?',
+      childAgesAria: 'Età dei bambini',
+      childAgesTitle: 'Quanti anni avrà ogni bambino al momento del viaggio?',
+      childN: 'Bambino {n}',
+      ageYoungest: '{age} (il più piccolo)',
+      ageOldest: '{age} (il più grande)',
+      decrease: 'Riduci {label} (attualmente {n})',
+      increase: 'Aumenta {label} (attualmente {n})',
+      adults: 'Adulti',
+      adultsSub: '16 anni e oltre',
+      children: 'Bambini',
+      childrenSub: '2-15 anni',
+      infants: 'Neonati',
+      infantsSub: 'Sotto i 2 anni',
+      trav_required: 'È richiesto almeno un adulto.',
+      label_budget: 'Budget totale approssimativo',
+      budgetAria: 'Budget a persona',
+      budget_amountAria: '{amount} a persona',
+      perPerson: 'a persona',
+      label_stars: 'Preferenza di categoria',
+      stars_options: 'Opzioni di categoria',
+      stars_cardAria: '{stars} stelle — {label}. {desc}',
+      star3_label: 'Confortevole', star3_desc: '3 stelle. Ottimo rapporto qualità-prezzo.',
+      star4_label: 'Superiore', star4_desc: '4 stelle. Il giusto equilibrio.',
+      star5_label: 'Lusso', star5_desc: '5 stelle. Trattamento completo.',
+      label_board: 'Trattamento',
+      board_RO: 'Solo pernottamento', board_BB: 'Bed & breakfast', board_HB: 'Mezza pensione', board_FB: 'Pensione completa', board_AI: 'Tutto incluso',
+      board_options: 'Opzioni di trattamento',
+      label_interests: 'Interessi',
+      interests_pickMany: '(scegline quanti vuoi)',
+      int_beach: 'Mare', int_city: 'Città', int_culture: 'Cultura', int_food: 'Cibo e vino', int_adventure: 'Avventura', int_family: 'Famiglia', int_wellness: 'Benessere', int_honeymoon: 'Luna di miele',
+      interests_options: 'Opzioni di interessi',
+      firstName: 'Nome',
+      lastName: 'Cognome',
+      firstName_ph: 'Giulia',
+      lastName_ph: 'Rossi',
+      firstName_required: 'Il nome è obbligatorio.',
+      lastName_required: 'Il cognome è obbligatorio.',
+      emailAddress: 'Indirizzo email',
+      phone: 'Telefono',
+      phoneAria: 'Numero di telefono',
+      email_ph: 'giulia@esempio.com',
+      phone_ph: '320 123 4567',
+      optional: '(facoltativo)',
+      email_required: 'L’email è obbligatoria.',
+      email_invalid: 'Inserisci un indirizzo email valido.',
+      label_notes: 'Qualcos’altro che dovremmo sapere?',
+      notesAria: 'Note',
+      notes_ph: 'Esigenze alimentari, necessità di accessibilità, occasioni speciali, resort o hotel specifici che hai in mente...',
+      consent_agreeAria: 'Accetto di essere contattato',
+      consent_marketingAria: 'Ricevere aggiornamenti marketing',
+      consent_contactLabel: 'Accetto di essere contattato in merito a questa richiesta. ',
+      consent_contactSub: 'Useremo i tuoi dati solo per rispondere alla tua richiesta.',
+      consent_marketingLabel: 'Inviami ogni tanto ispirazioni di viaggio e offerte esclusive.',
+      consent_required: 'Spunta la casella di consenso per continuare.'
+    },
+    ro: {
+      formUnavailable: 'Formular indisponibil',
+      loadingForm: 'Se încarcă formularul…',
+      unableToLoad: 'Acest formular nu poate fi încărcat.',
+      unableToReach: 'Serviciul de widgeturi Travelgenix nu poate fi contactat. Încercați din nou mai târziu.',
+      headerTitle: 'Spuneți-ne despre vacanța visurilor dvs.',
+      headerSubtitle: 'Lăsați-ne câteva detalii și unul dintre specialiștii noștri în călătorii vă va contacta în 24 de ore.',
+      submitText: 'Trimite solicitarea',
+      thankYouMessage: 'Mulțumim {firstName} — ne ocupăm de asta',
+      thankYouFallback: 'Mulțumim{firstName} — ne ocupăm de asta',
+      thankYouBody: 'Unul dintre specialiștii noștri în călătorii vă va contacta în 24 de ore. Am trimis și o confirmare pe adresa dvs. de e-mail.',
+      reference: 'Referință {ref}',
+      back: 'Înapoi',
+      continue: 'Înainte',
+      sending: 'Se trimite…',
+      looksGood: ' Arată bine!',
+      secure: 'Securizat',
+      gdpr: 'GDPR',
+      reply24hr: 'Răspuns în 24 h',
+      poweredBy: 'Susținut de ',
+      noFieldsStep: 'Niciun câmp în acest pas.',
+      stepN: 'Pasul {n}',
+      securityCheck: 'Verificare de securitate',
+      securityMisconfigured: 'Verificarea de securitate este configurată greșit — contactați asistența.',
+      securityIncomplete: 'Finalizați verificarea de securitate de mai sus înainte de a trimite.',
+      genericError: 'Ceva nu a funcționat. Încercați din nou.',
+      fixOneField: 'Corectați câmpul evidențiat de mai sus înainte de a continua.',
+      fixNFields: 'Corectați cele {count} câmpuri evidențiate de mai sus înainte de a continua.',
+      checkNFields: 'Verificați cele {count} câmpuri evidențiate de mai sus și încercați din nou.',
+      label_destination: 'Unde visați să ajungeți?',
+      dest_placeholder: 'Căutați țări, orașe, stațiuni...',
+      dest_searchAria: 'Căutați destinații',
+      dest_remove: 'Eliminați {name}',
+      dest_help: 'Adăugați una, sau mai multe pentru un sejur cu mai multe opriri.',
+      dest_country: 'Țară',
+      dest_city: 'Oraș',
+      dest_cityIn: 'Oraș · {country}',
+      dest_resort: 'Stațiune',
+      dest_resortIn: 'Stațiune · {place}',
+      dest_cantFind: 'Nu o găsiți?',
+      dest_useTyped: 'Folosiți „{text}”',
+      dest_submitAsTyped: 'Trimiteți așa cum este',
+      dest_startTyping: 'Începeți să tastați o țară, un oraș sau o stațiune…',
+      dest_keepTyping: 'Continuați să tastați…',
+      dest_searching: 'Se caută…',
+      dest_noMatches: 'Niciun rezultat — încercați alt termen',
+      dest_searchUnavailable: 'Căutarea este temporar indisponibilă.',
+      dest_required: 'Adăugați cel puțin o destinație.',
+      label_airport: 'Aeroport de plecare',
+      airport_optCount: '(până la {n})',
+      airport_placeholder: 'Căutați aeroporturi (ex. Heathrow, LHR, Manchester)...',
+      airport_searchAria: 'Căutați aeroporturi',
+      airport_remove: 'Eliminați {name}',
+      airport_flexibleChip: 'Flexibil',
+      airport_flexibleGroup: 'Flexibil',
+      airport_flexibleOption: 'Sunt flexibil în privința aeroportului',
+      airport_any: 'Oricare',
+      airport_max: 'Puteți alege până la {n} aeroporturi.',
+      airport_noMatches: 'Niciun rezultat — încercați alt termen',
+      airport_noMore: 'Nu mai sunt aeroporturi de ales',
+      airport_help: 'Adăugați unul sau mai multe aeroporturi — sau alegeți „flexibil” dacă nu contează.',
+      airport_required: 'Alegeți cel puțin un aeroport de plecare.',
+      departOn: 'Plecare pe',
+      returnOn: 'Întoarcere pe',
+      flexAria: 'Flexibil cu o săptămână în plus sau în minus',
+      flexLabel: 'Sunt flexibil cu o săptămână în plus sau în minus',
+      date_required: 'Alegeți o dată de plecare.',
+      date_returnAfter: 'Data întoarcerii trebuie să fie după plecare.',
+      label_duration: 'Durată',
+      duration_options: 'Opțiuni de durată',
+      duration_nights: '{n} nopți',
+      label_travellers: 'Cine călătorește?',
+      childAgesAria: 'Vârstele copiilor',
+      childAgesTitle: 'Ce vârstă va avea fiecare copil la momentul călătoriei?',
+      childN: 'Copil {n}',
+      ageYoungest: '{age} (cel mai mic)',
+      ageOldest: '{age} (cel mai mare)',
+      decrease: 'Reduceți {label} (în prezent {n})',
+      increase: 'Creșteți {label} (în prezent {n})',
+      adults: 'Adulți',
+      adultsSub: 'Peste 16 ani',
+      children: 'Copii',
+      childrenSub: '2-15 ani',
+      infants: 'Bebeluși',
+      infantsSub: 'Sub 2 ani',
+      trav_required: 'Este necesar cel puțin un adult.',
+      label_budget: 'Buget total aproximativ',
+      budgetAria: 'Buget de persoană',
+      budget_amountAria: '{amount} de persoană',
+      perPerson: 'de persoană',
+      label_stars: 'Preferință de clasificare',
+      stars_options: 'Opțiuni de clasificare',
+      stars_cardAria: '{stars} stele — {label}. {desc}',
+      star3_label: 'Confortabil', star3_desc: '3 stele. Raport calitate-preț excelent.',
+      star4_label: 'Superior', star4_desc: '4 stele. Echilibrul perfect.',
+      star5_label: 'Lux', star5_desc: '5 stele. Răsfăț complet.',
+      label_board: 'Tip de masă',
+      board_RO: 'Doar cazare', board_BB: 'Mic dejun inclus', board_HB: 'Demipensiune', board_FB: 'Pensiune completă', board_AI: 'All inclusive',
+      board_options: 'Opțiuni de masă',
+      label_interests: 'Interese',
+      interests_pickMany: '(alegeți câte doriți)',
+      int_beach: 'Plajă', int_city: 'Oraș', int_culture: 'Cultură', int_food: 'Gastronomie și vinuri', int_adventure: 'Aventură', int_family: 'Familie', int_wellness: 'Wellness', int_honeymoon: 'Lună de miere',
+      interests_options: 'Opțiuni de interese',
+      firstName: 'Prenume',
+      lastName: 'Nume de familie',
+      firstName_ph: 'Maria',
+      lastName_ph: 'Popescu',
+      firstName_required: 'Prenumele este obligatoriu.',
+      lastName_required: 'Numele de familie este obligatoriu.',
+      emailAddress: 'Adresă de e-mail',
+      phone: 'Telefon',
+      phoneAria: 'Număr de telefon',
+      email_ph: 'maria@exemplu.ro',
+      phone_ph: '0712 345 678',
+      optional: '(opțional)',
+      email_required: 'E-mailul este obligatoriu.',
+      email_invalid: 'Introduceți o adresă de e-mail validă.',
+      label_notes: 'Altceva ce ar trebui să știm?',
+      notesAria: 'Note',
+      notes_ph: 'Cerințe alimentare, nevoi de accesibilitate, ocazii speciale, stațiuni sau hoteluri anume pe care le aveți în vedere...',
+      consent_agreeAria: 'De acord să fiu contactat',
+      consent_marketingAria: 'Primiți noutăți de marketing',
+      consent_contactLabel: 'Sunt de acord să fiu contactat în legătură cu această solicitare. ',
+      consent_contactSub: 'Vom folosi datele dvs. doar pentru a răspunde solicitării.',
+      consent_marketingLabel: 'Trimiteți-mi din când în când inspirație de vacanță și oferte exclusive.',
+      consent_required: 'Bifați caseta de consimțământ pentru a continua.'
+    }
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    var supported = Object.keys(MESSAGES);
+    var baseOf = function (r) { return (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : ''); };
+    var cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    var lang = 'en';
+    for (var i = 0; i < cands.length; i++) { var b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    var dict = MESSAGES[lang] || MESSAGES.en;
+    var t = function (k, vars) {
+      var s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, function (m, n) { return (vars[n] != null ? vars[n] : m); });
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
   // Turnstile challenges are loaded via an iframe pointing at our own domain
   // (/turnstile-frame.html) rather than directly on the host page. Cloudflare
   // sitekeys are bound to hostnames, so we can't whitelist every client's site.
@@ -207,14 +1013,15 @@
   // Create a Turnstile iframe controller. Returns { iframe, reset, destroy,
   // getToken } so the widget's submit handler can check token state without
   // caring about the underlying postMessage plumbing.
-  function createTurnstileFrame(sitekey, theme, onTokenChange) {
+  function createTurnstileFrame(sitekey, theme, onTokenChange, t) {
+    t = t || makeT(null);
     var frame = document.createElement('iframe');
     frame.src = buildTurnstileFrameUrl(sitekey, theme);
     // Constrain the iframe — no scrollbars, transparent background, sized to
     // fit Turnstile's standard 300x65 widget. The host page around it handles
     // layout (padding etc.) in the surrounding .tg-turnstile wrapper.
-    frame.setAttribute('title', 'Security check');
-    frame.setAttribute('aria-label', 'Security check');
+    frame.setAttribute('title', t('securityCheck'));
+    frame.setAttribute('aria-label', t('securityCheck'));
     frame.setAttribute('scrolling', 'no');
     frame.setAttribute('frameborder', '0');
     frame.style.cssText = 'border:0;width:300px;height:65px;background:transparent;color-scheme:normal;';
@@ -677,19 +1484,20 @@
   // notes, consent) are identical to widget v0.3.0 — lifted byte-for-byte.
   // Only the outer shell (class wrapper, mount, update) has been refactored.
 
-  function renderDestination(instance, fieldSpec) {
+  function renderDestination(instance, fieldSpec, t) {
+    t = t || makeT(null);
     // Each entry in `destinations` is a structured object matching the public
     // API shape: { id, name, type, parentCity?, parentCountry? }. Backwards
     // compatible with legacy single-shape { id, name, region } — submit.js
     // accepts either. Free-text entries (user typed something we couldn't
     // match) get type 'free-text' and a synthesised id.
     var destinations = [];
-    var shell = createFieldShell(instance, fieldSpec.label || 'Where are you dreaming of?');
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_destination'));
     var input = el('input', {
       class: 'tg-dest-input', type: 'text',
-      placeholder: 'Search countries, cities, resorts...',
+      placeholder: t('dest_placeholder'),
       autocomplete: 'off',
-      'aria-label': 'Search destinations',
+      'aria-label': t('dest_searchAria'),
       'aria-expanded': 'false',
       'aria-autocomplete': 'list',
       role: 'combobox'
@@ -709,7 +1517,7 @@
       destinations.forEach(function (d) {
         var closeBtn = el('button', {
           class: 'tg-chip-close', type: 'button',
-          'aria-label': 'Remove ' + d.name,
+          'aria-label': t('dest_remove', { name: d.name }),
           onclick: function (e) {
             e.stopPropagation();
             destinations = destinations.filter(function (x) { return x.id !== d.id; });
@@ -728,12 +1536,12 @@
     function describeResult(item) {
       var parts = [];
       if (item.type === 'country') {
-        parts.push('Country');
+        parts.push(t('dest_country'));
       } else if (item.type === 'city') {
-        parts.push(item.parentCountry ? ('City · ' + item.parentCountry) : 'City');
+        parts.push(item.parentCountry ? t('dest_cityIn', { country: item.parentCountry }) : t('dest_city'));
       } else if (item.type === 'resort') {
         var tail = [item.parentCity, item.parentCountry].filter(Boolean).join(', ');
-        parts.push(tail ? ('Resort · ' + tail) : 'Resort');
+        parts.push(tail ? t('dest_resortIn', { place: tail }) : t('dest_resort'));
       }
       return parts.join(' · ');
     }
@@ -774,7 +1582,7 @@
       if (destinations.find(function (d) { return d.type === 'free-text' && d.name.toLowerCase() === trimmed.toLowerCase(); })) return;
       drop.appendChild(el('div', {
         class: 'tg-dest-grouplabel', 'aria-hidden': 'true',
-        text: "Can't find it?"
+        text: t('dest_cantFind')
       }));
       var freeItem = {
         // Stable-ish synthesised id — lets removal work and avoids collisions
@@ -790,8 +1598,8 @@
         onmousedown: function (e) { e.preventDefault(); },
         onclick: function () { selectDestination(freeItem); }
       }, [
-        el('span', { text: 'Use "' + trimmed + '"' }),
-        el('span', { class: 'tg-dest-option-meta', text: 'Submit as typed' })
+        el('span', { text: t('dest_useTyped', { text: trimmed }) }),
+        el('span', { class: 'tg-dest-option-meta', text: t('dest_submitAsTyped') })
       ]);
       drop.appendChild(opt);
       visibleOptions.push({ node: opt, item: freeItem });
@@ -808,7 +1616,7 @@
       if (q.length === 0) {
         drop.appendChild(el('div', {
           style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
-          text: 'Start typing a country, city, or resort…'
+          text: t('dest_startTyping')
         }));
         return;
       }
@@ -816,7 +1624,7 @@
       if (q.length < 2) {
         drop.appendChild(el('div', {
           style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
-          text: 'Keep typing…'
+          text: t('dest_keepTyping')
         }));
         return;
       }
@@ -825,7 +1633,7 @@
       drop.appendChild(el('div', {
         class: 'tg-dest-loading',
         style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
-        text: 'Searching…'
+        text: t('dest_searching')
       }));
       lastRenderedQuery = q;
     }
@@ -868,7 +1676,7 @@
           // text already) — show nothing-to-show message
           drop.appendChild(el('div', {
             style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
-            text: 'No matches — try a different term'
+            text: t('dest_noMatches')
           }));
         }
       }).catch(function (err) {
@@ -881,7 +1689,7 @@
         activeIndex = -1;
         drop.appendChild(el('div', {
           style: { padding: '14px', fontSize: '13px', color: '#DC2626' },
-          text: 'Search is temporarily unavailable.'
+          text: t('dest_searchUnavailable')
         }));
         appendFreeTextOption(thisQuery);
       });
@@ -957,7 +1765,7 @@
 
     shell.fieldNode.appendChild(el('div', { class: 'tg-dest' }, [box, drop]));
     if (fieldSpec.help !== false) {
-      shell.fieldNode.appendChild(el('div', { class: 'tg-help', text: fieldSpec.help || 'Add one, or multiple for a twin-centre trip.' }));
+      shell.fieldNode.appendChild(el('div', { class: 'tg-help', text: fieldSpec.help || t('dest_help') }));
     }
     shell.fieldNode.appendChild(shell.errorNode);
     input.setAttribute('aria-describedby', shell.errorId);
@@ -968,7 +1776,7 @@
       writeTo: function (fields) { fields.destinations = destinations.slice(); },
       validate: function () {
         if (fieldSpec.required === false) return null;
-        return destinations.length > 0 ? null : 'Please add at least one destination.';
+        return destinations.length > 0 ? null : t('dest_required');
       },
       showError: function (msg) { shell.show(msg); input.setAttribute('aria-invalid', 'true'); },
       clearError: function () { shell.clear(); input.removeAttribute('aria-invalid'); },
@@ -976,7 +1784,8 @@
     };
   }
 
-  function renderAirport(instance, fieldSpec) {
+  function renderAirport(instance, fieldSpec, t) {
+    t = t || makeT(null);
     // Multi-select airport picker. Combines a typeahead input with a chip
     // display for selected airports, similar to the destinations field but
     // against a fixed local list (AIRPORTS) — no API call needed.
@@ -985,9 +1794,9 @@
     // "London area" (LHR, LGW, STN) plus one regional — rarely more than
     // that. The cap also keeps the chip bar readable on mobile.
     var MAX_SELECTIONS = 5;
-    var shell = createFieldShell(instance, fieldSpec.label || 'Departure airport', [
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_airport'), [
       ' ',
-      el('span', { class: 'tg-opt', text: '(pick up to ' + MAX_SELECTIONS + ')' })
+      el('span', { class: 'tg-opt', text: t('airport_optCount', { n: MAX_SELECTIONS }) })
     ]);
 
     // Flatten AIRPORTS into a searchable list of { name, code, region, value }.
@@ -1014,9 +1823,9 @@
 
     var input = el('input', {
       class: 'tg-dest-input', type: 'text',
-      placeholder: 'Search airports (e.g. Heathrow, LHR, Manchester)...',
+      placeholder: t('airport_placeholder'),
       autocomplete: 'off',
-      'aria-label': 'Search airports',
+      'aria-label': t('airport_searchAria'),
       'aria-expanded': 'false',
       'aria-autocomplete': 'list',
       role: 'combobox'
@@ -1032,7 +1841,7 @@
       selected.forEach(function (s) {
         var closeBtn = el('button', {
           class: 'tg-chip-close', type: 'button',
-          'aria-label': 'Remove ' + s.value,
+          'aria-label': t('airport_remove', { name: s.value }),
           onclick: function (e) {
             e.stopPropagation();
             selected = selected.filter(function (x) { return x.value !== s.value; });
@@ -1041,7 +1850,7 @@
           }
         }, [svg(ICONS.x)]);
         // Label uses airport code for brevity — chip bar gets busy with full names
-        var label = s.flexible ? 'Flexible' : (s.code || s.value);
+        var label = s.flexible ? t('airport_flexibleChip') : (s.code || s.value);
         var chip = el('span', { class: 'tg-chip', role: 'listitem' }, [
           svg(ICONS.pin), label, closeBtn
         ]);
@@ -1067,7 +1876,7 @@
       // If "flexible" was selected, picking a specific airport clears it
       selected = selected.filter(function (s) { return !s.flexible; });
       if (selected.length >= MAX_SELECTIONS) {
-        shell.show('You can pick up to ' + MAX_SELECTIONS + ' airports.');
+        shell.show(t('airport_max', { n: MAX_SELECTIONS }));
         return;
       }
       if (isSelected(item.value)) return;
@@ -1128,7 +1937,7 @@
       if (!hasSpecific) {
         drop.appendChild(el('div', {
           class: 'tg-dest-grouplabel', 'aria-hidden': 'true',
-          text: 'Flexible'
+          text: t('airport_flexibleGroup')
         }));
         var flexItem = { value: FLEXIBLE_VALUE, flexible: true };
         var flexOpt = el('button', {
@@ -1138,8 +1947,8 @@
           onmousedown: function (e) { e.preventDefault(); },
           onclick: function () { addSelection(flexItem); }
         }, [
-          el('span', { text: "I'm flexible on airport" }),
-          el('span', { class: 'tg-dest-option-meta', text: 'Any' })
+          el('span', { text: t('airport_flexibleOption') }),
+          el('span', { class: 'tg-dest-option-meta', text: t('airport_any') })
         ]);
         drop.appendChild(flexOpt);
         visibleOptions.push({ node: flexOpt, item: flexItem });
@@ -1149,7 +1958,7 @@
       if (!any) {
         drop.appendChild(el('div', {
           style: { padding: '14px', fontSize: '13px', color: '#94A3B8' },
-          text: q ? 'No matches — try a different term' : 'No more airports to pick'
+          text: q ? t('airport_noMatches') : t('airport_noMore')
         }));
       }
     }
@@ -1203,7 +2012,7 @@
     if (fieldSpec.help !== false) {
       shell.fieldNode.appendChild(el('div', {
         class: 'tg-help',
-        text: fieldSpec.help || 'Add one or more airports — or pick "flexible" if you don\u2019t mind.'
+        text: fieldSpec.help || t('airport_help')
       }));
     }
     shell.fieldNode.appendChild(shell.errorNode);
@@ -1220,7 +2029,7 @@
       },
       validate: function () {
         if (fieldSpec.required === false) return null;
-        return selected.length > 0 ? null : 'Please pick at least one departure airport.';
+        return selected.length > 0 ? null : t('airport_required');
       },
       showError: function (msg) { shell.show(msg); input.setAttribute('aria-invalid', 'true'); },
       clearError: function () { shell.clear(); input.removeAttribute('aria-invalid'); },
@@ -1228,14 +2037,15 @@
     };
   }
 
-  function renderDateRange(instance, fieldSpec) {
+  function renderDateRange(instance, fieldSpec, t) {
+    t = t || makeT(null);
     var shell = createFieldShell(instance, null);
     var today = new Date();
     var minDate = today.toISOString().slice(0, 10);
     var departId = 'tg-' + instance + '-depart'; var returnId = 'tg-' + instance + '-return';
-    var depart = el('input', { id: departId, class: 'tg-input', type: 'date', min: minDate, 'aria-label': 'Depart on', 'aria-describedby': shell.errorId, onchange: function () { shell.clear(); depart.removeAttribute('aria-invalid'); } });
-    var ret = el('input', { id: returnId, class: 'tg-input', type: 'date', min: minDate, 'aria-label': 'Return on', 'aria-describedby': shell.errorId, onchange: function () { shell.clear(); ret.removeAttribute('aria-invalid'); } });
-    var flexInput = el('input', { type: 'checkbox', 'aria-label': 'Flexible by a week either side' });
+    var depart = el('input', { id: departId, class: 'tg-input', type: 'date', min: minDate, 'aria-label': t('departOn'), 'aria-describedby': shell.errorId, onchange: function () { shell.clear(); depart.removeAttribute('aria-invalid'); } });
+    var ret = el('input', { id: returnId, class: 'tg-input', type: 'date', min: minDate, 'aria-label': t('returnOn'), 'aria-describedby': shell.errorId, onchange: function () { shell.clear(); ret.removeAttribute('aria-invalid'); } });
+    var flexInput = el('input', { type: 'checkbox', 'aria-label': t('flexAria') });
     var flexTrack = el('span', { class: 'tg-flex-track', 'aria-hidden': 'true' });
 
     depart.addEventListener('change', function () {
@@ -1243,10 +2053,10 @@
     });
 
     shell.fieldNode.appendChild(el('div', { class: 'tg-row' }, [
-      el('div', {}, [el('label', { class: 'tg-label', for: departId, text: 'Depart on' }), depart]),
-      el('div', {}, [el('label', { class: 'tg-label', for: returnId, text: 'Return on' }), ret])
+      el('div', {}, [el('label', { class: 'tg-label', for: departId, text: t('departOn') }), depart]),
+      el('div', {}, [el('label', { class: 'tg-label', for: returnId, text: t('returnOn') }), ret])
     ]));
-    shell.fieldNode.appendChild(el('label', { class: 'tg-flex-toggle' }, [flexInput, flexTrack, el('span', { text: "I'm flexible by a week either side" })]));
+    shell.fieldNode.appendChild(el('label', { class: 'tg-flex-toggle' }, [flexInput, flexTrack, el('span', { text: t('flexLabel') })]));
     shell.fieldNode.appendChild(shell.errorNode);
 
     return {
@@ -1257,8 +2067,8 @@
       },
       validate: function () {
         if (fieldSpec.required === false) return null;
-        if (!depart.value) return 'Please choose a departure date.';
-        if (ret.value && ret.value < depart.value) return 'Return date must be after departure.';
+        if (!depart.value) return t('date_required');
+        if (ret.value && ret.value < depart.value) return t('date_returnAfter');
         return null;
       },
       showError: function (msg) { shell.show(msg); depart.setAttribute('aria-invalid', 'true'); },
@@ -1267,8 +2077,9 @@
     };
   }
 
-  function renderDuration(instance, fieldSpec) {
-    var shell = createFieldShell(instance, fieldSpec.label || 'Duration');
+  function renderDuration(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_duration'));
     var selected = 7;
     var options = [3, 5, 7, 10, 14];
     var buttons = [];
@@ -1281,10 +2092,10 @@
       });
     }
     options.forEach(function (n) {
-      var btn = el('button', { class: 'tg-pill' + (n === 7 ? ' is-active' : ''), type: 'button', 'data-n': String(n), 'aria-pressed': (n === 7 ? 'true' : 'false'), text: n + ' nights', onclick: function () { setActive(n); } });
+      var btn = el('button', { class: 'tg-pill' + (n === 7 ? ' is-active' : ''), type: 'button', 'data-n': String(n), 'aria-pressed': (n === 7 ? 'true' : 'false'), text: t('duration_nights', { n: n }), onclick: function () { setActive(n); } });
       buttons.push(btn);
     });
-    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-label': 'Duration options' }, buttons));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-label': t('duration_options') }, buttons));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'duration',
@@ -1297,11 +2108,12 @@
     };
   }
 
-  function renderTravellers(instance, fieldSpec) {
-    var shell = createFieldShell(instance, fieldSpec.label || "Who's travelling?");
+  function renderTravellers(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_travellers'));
     var values = { adults: 2, children: 0, infants: 0, childAges: [] };
-    var childAgesPanel = el('div', { class: 'tg-child-ages', style: { display: 'none' }, role: 'group', 'aria-label': 'Children ages' }, [
-      el('p', { class: 'tg-child-ages-title', text: 'How old will each child be when they travel?' }),
+    var childAgesPanel = el('div', { class: 'tg-child-ages', style: { display: 'none' }, role: 'group', 'aria-label': t('childAgesAria') }, [
+      el('p', { class: 'tg-child-ages-title', text: t('childAgesTitle') }),
       el('div', { class: 'tg-child-ages-grid' })
     ]);
     var agesGrid = childAgesPanel.querySelector('.tg-child-ages-grid');
@@ -1311,14 +2123,15 @@
       for (var i = 0; i < values.children; i++) {
         var sel = el('select', { 'data-idx': String(i), onchange: (function (idx) { return function (e) { values.childAges[idx] = parseInt(e.target.value, 10); }; })(i) });
         for (var age = 2; age <= 15; age++) {
-          var opt = el('option', { value: String(age), text: age + (age === 2 ? ' (youngest)' : '') + (age === 15 ? ' (oldest)' : '') });
+          var optText = (age === 2) ? t('ageYoungest', { age: age }) : (age === 15) ? t('ageOldest', { age: age }) : String(age);
+          var opt = el('option', { value: String(age), text: optText });
           if (values.childAges[i] === age) opt.selected = true;
           sel.appendChild(opt);
         }
         if (values.childAges[i] === undefined) values.childAges[i] = 2;
         var id = 'tg-' + instance + '-cage-' + i;
         agesGrid.appendChild(el('div', { class: 'tg-child-age-item' }, [
-          el('label', { for: id, text: 'Child ' + (i + 1) }),
+          el('label', { for: id, text: t('childN', { n: i + 1 }) }),
           (function () { sel.setAttribute('id', id); return sel; })()
         ]));
       }
@@ -1332,8 +2145,8 @@
         valEl.textContent = String(values[key]);
         minusBtn.disabled = values[key] <= min;
         plusBtn.disabled = values[key] >= max;
-        minusBtn.setAttribute('aria-label', 'Decrease ' + label + ' (currently ' + values[key] + ')');
-        plusBtn.setAttribute('aria-label', 'Increase ' + label + ' (currently ' + values[key] + ')');
+        minusBtn.setAttribute('aria-label', t('decrease', { label: label, n: values[key] }));
+        plusBtn.setAttribute('aria-label', t('increase', { label: label, n: values[key] }));
         if (key === 'children') renderChildAges();
         if (key === 'adults') shell.clear();
       }
@@ -1346,9 +2159,9 @@
       ]);
     }
 
-    shell.fieldNode.appendChild(stepperRow('Adults', 'Age 16+', 'adults', 1, 9));
-    shell.fieldNode.appendChild(stepperRow('Children', 'Age 2–15', 'children', 0, 6));
-    shell.fieldNode.appendChild(stepperRow('Infants', 'Under 2', 'infants', 0, 3));
+    shell.fieldNode.appendChild(stepperRow(t('adults'), t('adultsSub'), 'adults', 1, 9));
+    shell.fieldNode.appendChild(stepperRow(t('children'), t('childrenSub'), 'children', 0, 6));
+    shell.fieldNode.appendChild(stepperRow(t('infants'), t('infantsSub'), 'infants', 0, 3));
     shell.fieldNode.appendChild(childAgesPanel);
     shell.fieldNode.appendChild(shell.errorNode);
 
@@ -1360,7 +2173,7 @@
       },
       validate: function () {
         if (fieldSpec.required === false) return null;
-        return values.adults > 0 ? null : 'At least one adult required.';
+        return values.adults > 0 ? null : t('trav_required');
       },
       showError: function (msg) { shell.show(msg); },
       clearError: function () { shell.clear(); },
@@ -1368,8 +2181,9 @@
     };
   }
 
-  function renderBudget(instance, fieldSpec) {
-    var shell = createFieldShell(instance, fieldSpec.label || 'Approximate total budget');
+  function renderBudget(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_budget'));
     function sliderToBudget(v) {
       if (v < 25) return 250 + (v / 25) * (1500 - 250);
       if (v < 50) return 1500 + ((v - 25) / 25) * (3000 - 1500);
@@ -1377,7 +2191,7 @@
       return 5000 + ((v - 75) / 25) * (10000 - 5000);
     }
     var amountEl = el('span', { class: 'tg-budget-amount', 'aria-live': 'polite', text: '£3,000' });
-    var range = el('input', { class: 'tg-range', type: 'range', min: '0', max: '100', value: '45', 'aria-label': 'Budget per person', 'aria-valuemin': '250', 'aria-valuemax': '10000', 'aria-valuenow': '3000', 'aria-valuetext': '£3,000 per person' });
+    var range = el('input', { class: 'tg-range', type: 'range', min: '0', max: '100', value: '45', 'aria-label': t('budgetAria'), 'aria-valuemin': '250', 'aria-valuemax': '10000', 'aria-valuenow': '3000', 'aria-valuetext': t('budget_amountAria', { amount: '£3,000' }) });
     var currentBudget = 3000;
     function update() {
       var v = parseInt(range.value, 10);
@@ -1387,10 +2201,10 @@
       else displayText = '£' + currentBudget.toLocaleString('en-GB');
       amountEl.textContent = displayText;
       range.setAttribute('aria-valuenow', String(currentBudget));
-      range.setAttribute('aria-valuetext', displayText + ' per person');
+      range.setAttribute('aria-valuetext', t('budget_amountAria', { amount: displayText }));
     }
     range.addEventListener('input', update);
-    shell.fieldNode.appendChild(el('div', { class: 'tg-budget-display' }, [amountEl, el('span', { class: 'tg-budget-pp', text: 'per person' })]));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-budget-display' }, [amountEl, el('span', { class: 'tg-budget-pp', text: t('perPerson') })]));
     shell.fieldNode.appendChild(range);
     shell.fieldNode.appendChild(el('div', { class: 'tg-budget-markers', 'aria-hidden': 'true' }, [
       el('span', { text: '£250' }), el('span', { text: '£1.5k' }), el('span', { text: '£3k' }), el('span', { text: '£5k+' })
@@ -1407,8 +2221,9 @@
     };
   }
 
-  function renderStars(instance, fieldSpec) {
-    var shell = createFieldShell(instance, fieldSpec.label || 'Star rating preference');
+  function renderStars(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_stars'));
     var selected = 4;
     var cards = [];
     function setActive(stars) {
@@ -1422,16 +2237,20 @@
     STAR_OPTIONS.forEach(function (opt) {
       var icons = el('div', { class: 'tg-star-icons', 'aria-hidden': 'true' });
       for (var i = 0; i < opt.stars; i++) icons.appendChild(starIcon(14));
+      // Preset label/desc are fixed chrome — translate via per-rating keys,
+      // falling back to the English seed in STAR_OPTIONS.
+      var presetLabel = t('star' + opt.stars + '_label') || opt.label;
+      var presetDesc = t('star' + opt.stars + '_desc') || opt.desc;
       var card = el('button', {
         class: 'tg-star-card' + (opt.luxury ? ' luxury' : '') + (opt.preselect ? ' is-active' : ''),
         type: 'button', 'data-stars': String(opt.stars),
         'aria-pressed': opt.preselect ? 'true' : 'false',
-        'aria-label': opt.stars + '-star — ' + opt.label + '. ' + opt.desc,
+        'aria-label': t('stars_cardAria', { stars: opt.stars, label: presetLabel, desc: presetDesc }),
         onclick: function () { setActive(opt.stars); }
-      }, [icons, el('h4', { text: opt.label }), el('p', { text: opt.desc })]);
+      }, [icons, el('h4', { text: presetLabel }), el('p', { text: presetDesc })]);
       cards.push(card);
     });
-    shell.fieldNode.appendChild(el('div', { class: 'tg-star-grid', role: 'group', 'aria-label': 'Star rating options' }, cards));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-star-grid', role: 'group', 'aria-label': t('stars_options') }, cards));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'stars',
@@ -1444,8 +2263,9 @@
     };
   }
 
-  function renderBoard(instance, fieldSpec) {
-    var shell = createFieldShell(instance, fieldSpec.label || 'Board basis');
+  function renderBoard(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_board'));
     var selected = 'RO';
     var buttons = [];
     function setActive(value) {
@@ -1457,16 +2277,19 @@
       });
     }
     BOARD_OPTIONS.forEach(function (opt) {
+      // Preset label is fixed chrome — translate via per-value key, falling
+      // back to the English seed. The submitted value (opt.value) is unchanged.
+      var boardLabel = t('board_' + opt.value) || opt.label;
       var btn = el('button', {
         class: 'tg-seg-btn' + (opt.value === 'RO' ? ' is-active' : ''),
         type: 'button', 'data-value': opt.value,
         'aria-pressed': opt.value === 'RO' ? 'true' : 'false',
-        'aria-label': opt.label, text: opt.label,
+        'aria-label': boardLabel, text: boardLabel,
         onclick: function () { setActive(opt.value); }
       });
       buttons.push(btn);
     });
-    shell.fieldNode.appendChild(el('div', { class: 'tg-seg', role: 'group', 'aria-label': 'Board basis options' }, buttons));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-seg', role: 'group', 'aria-label': t('board_options') }, buttons));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'board',
@@ -1479,23 +2302,27 @@
     };
   }
 
-  function renderInterests(instance, fieldSpec) {
-    var shell = createFieldShell(instance, fieldSpec.label || 'Interests', [' ', el('span', { class: 'tg-opt', text: '(pick as many as apply)' })]);
+  function renderInterests(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_interests'), [' ', el('span', { class: 'tg-opt', text: t('interests_pickMany') })]);
     var selected = [];
     var buttons = [];
     INTEREST_OPTIONS.forEach(function (opt) {
+      // Preset label is fixed chrome — translate via per-value key, falling
+      // back to the English seed. The submitted value (opt.value) is unchanged.
+      var interestLabel = t('int_' + opt.value) || opt.label;
       var btn = el('button', {
         class: 'tg-pill', type: 'button', 'data-value': opt.value,
-        'aria-pressed': 'false', 'aria-label': opt.label,
+        'aria-pressed': 'false', 'aria-label': interestLabel,
         onclick: function () {
           var idx = selected.indexOf(opt.value);
           if (idx >= 0) { selected.splice(idx, 1); btn.classList.remove('is-active'); btn.setAttribute('aria-pressed', 'false'); }
           else { selected.push(opt.value); btn.classList.add('is-active'); btn.setAttribute('aria-pressed', 'true'); }
         }
-      }, [svg(ICONS[opt.icon] || ICONS.pin, { size: 14 }), opt.label]);
+      }, [svg(ICONS[opt.icon] || ICONS.pin, { size: 14 }), interestLabel]);
       buttons.push(btn);
     });
-    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-label': 'Interest options' }, buttons));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-label': t('interests_options') }, buttons));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'interests',
@@ -1508,14 +2335,15 @@
     };
   }
 
-  function renderName(instance, fieldSpec) {
+  function renderName(instance, fieldSpec, t) {
+    t = t || makeT(null);
     var shell = createFieldShell(instance, null);
     var firstId = 'tg-' + instance + '-first'; var lastId = 'tg-' + instance + '-last';
-    var first = el('input', { id: firstId, class: 'tg-input', type: 'text', placeholder: 'Jane', 'aria-label': 'First name', autocomplete: 'given-name', 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); first.removeAttribute('aria-invalid'); last.removeAttribute('aria-invalid'); } });
-    var last = el('input', { id: lastId, class: 'tg-input', type: 'text', placeholder: 'Smith', 'aria-label': 'Last name', autocomplete: 'family-name', 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); first.removeAttribute('aria-invalid'); last.removeAttribute('aria-invalid'); } });
+    var first = el('input', { id: firstId, class: 'tg-input', type: 'text', placeholder: t('firstName_ph'), 'aria-label': t('firstName'), autocomplete: 'given-name', 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); first.removeAttribute('aria-invalid'); last.removeAttribute('aria-invalid'); } });
+    var last = el('input', { id: lastId, class: 'tg-input', type: 'text', placeholder: t('lastName_ph'), 'aria-label': t('lastName'), autocomplete: 'family-name', 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); first.removeAttribute('aria-invalid'); last.removeAttribute('aria-invalid'); } });
     shell.fieldNode.appendChild(el('div', { class: 'tg-row' }, [
-      el('div', {}, [el('label', { class: 'tg-label', for: firstId, text: 'First name' }), first]),
-      el('div', {}, [el('label', { class: 'tg-label', for: lastId, text: 'Last name' }), last])
+      el('div', {}, [el('label', { class: 'tg-label', for: firstId, text: t('firstName') }), first]),
+      el('div', {}, [el('label', { class: 'tg-label', for: lastId, text: t('lastName') }), last])
     ]));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
@@ -1524,8 +2352,8 @@
       writeTo: function (fields) { fields.first_name = first.value.trim(); fields.last_name = last.value.trim(); },
       validate: function () {
         if (fieldSpec.required === false) return null;
-        if (!first.value.trim()) return 'First name required.';
-        if (!last.value.trim()) return 'Last name required.';
+        if (!first.value.trim()) return t('firstName_required');
+        if (!last.value.trim()) return t('lastName_required');
         return null;
       },
       showError: function (msg) { shell.show(msg); if (!first.value.trim()) first.setAttribute('aria-invalid', 'true'); if (!last.value.trim()) last.setAttribute('aria-invalid', 'true'); },
@@ -1534,14 +2362,15 @@
     };
   }
 
-  function renderContact(instance, fieldSpec) {
+  function renderContact(instance, fieldSpec, t) {
+    t = t || makeT(null);
     var shell = createFieldShell(instance, null);
     var emailId = 'tg-' + instance + '-email'; var phoneId = 'tg-' + instance + '-phone';
-    var email = el('input', { id: emailId, class: 'tg-input', type: 'email', placeholder: 'jane@example.com', 'aria-label': 'Email address', autocomplete: 'email', required: true, 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); email.removeAttribute('aria-invalid'); } });
-    var phone = el('input', { id: phoneId, class: 'tg-input', type: 'tel', placeholder: '07700 900000', 'aria-label': 'Phone number', autocomplete: 'tel' });
+    var email = el('input', { id: emailId, class: 'tg-input', type: 'email', placeholder: t('email_ph'), 'aria-label': t('emailAddress'), autocomplete: 'email', required: true, 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); email.removeAttribute('aria-invalid'); } });
+    var phone = el('input', { id: phoneId, class: 'tg-input', type: 'tel', placeholder: t('phone_ph'), 'aria-label': t('phoneAria'), autocomplete: 'tel' });
     shell.fieldNode.appendChild(el('div', { class: 'tg-row' }, [
-      el('div', {}, [el('label', { class: 'tg-label', for: emailId, text: 'Email address' }), email]),
-      el('div', {}, [el('label', { class: 'tg-label', for: phoneId }, ['Phone ', el('span', { class: 'tg-opt', text: '(optional)' })]), phone])
+      el('div', {}, [el('label', { class: 'tg-label', for: emailId, text: t('emailAddress') }), email]),
+      el('div', {}, [el('label', { class: 'tg-label', for: phoneId }, [t('phone') + ' ', el('span', { class: 'tg-opt', text: t('optional') })]), phone])
     ]));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
@@ -1551,8 +2380,8 @@
       validate: function () {
         if (fieldSpec.required === false) return null;
         var e = email.value.trim();
-        if (!e) return 'Email required.';
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return 'Please enter a valid email address.';
+        if (!e) return t('email_required');
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return t('email_invalid');
         return null;
       },
       showError: function (msg) { shell.show(msg); email.setAttribute('aria-invalid', 'true'); },
@@ -1561,10 +2390,11 @@
     };
   }
 
-  function renderNotes(instance, fieldSpec) {
-    var shell = createFieldShell(instance, fieldSpec.label || 'Anything else we should know?', [' ', el('span', { class: 'tg-opt', text: '(optional)' })]);
+  function renderNotes(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_notes'), [' ', el('span', { class: 'tg-opt', text: t('optional') })]);
     var textareaId = 'tg-' + instance + '-notes';
-    var textarea = el('textarea', { id: textareaId, class: 'tg-textarea', 'aria-label': 'Notes', placeholder: fieldSpec.placeholder || 'Dietary requirements, accessibility needs, special occasions, specific resorts or hotels you have had your eye on...', maxlength: '2000' });
+    var textarea = el('textarea', { id: textareaId, class: 'tg-textarea', 'aria-label': t('notesAria'), placeholder: fieldSpec.placeholder || t('notes_ph'), maxlength: '2000' });
     var labelEl = shell.fieldNode.querySelector('.tg-label');
     if (labelEl) labelEl.setAttribute('for', textareaId);
     shell.fieldNode.appendChild(textarea);
@@ -1580,22 +2410,23 @@
     };
   }
 
-  function renderConsent(instance, fieldSpec) {
+  function renderConsent(instance, fieldSpec, t) {
+    t = t || makeT(null);
     var shell = createFieldShell(instance, null);
-    var contactInput = el('input', { type: 'checkbox', 'aria-label': 'Agree to be contacted', onchange: function () { shell.clear(); contactInput.removeAttribute('aria-invalid'); } });
-    var marketingInput = el('input', { type: 'checkbox', 'aria-label': 'Receive marketing updates' });
+    var contactInput = el('input', { type: 'checkbox', 'aria-label': t('consent_agreeAria'), onchange: function () { shell.clear(); contactInput.removeAttribute('aria-invalid'); } });
+    var marketingInput = el('input', { type: 'checkbox', 'aria-label': t('consent_marketingAria') });
     shell.fieldNode.appendChild(el('label', { class: 'tg-check' }, [
       contactInput,
       el('span', { class: 'tg-check-text' }, [
-        el('strong', { text: fieldSpec.contactLabel || 'I agree to be contacted about this enquiry. ' }),
-        fieldSpec.contactSub || "We'll only use your details to respond to your enquiry."
+        el('strong', { text: fieldSpec.contactLabel || t('consent_contactLabel') }),
+        fieldSpec.contactSub || t('consent_contactSub')
       ])
     ]));
     shell.fieldNode.appendChild(el('div', { style: { height: '8px' } }));
     shell.fieldNode.appendChild(el('label', { class: 'tg-check' }, [
       marketingInput,
       el('span', { class: 'tg-check-text' }, [
-        fieldSpec.marketingLabel || 'Send me occasional holiday inspiration and exclusive offers.'
+        fieldSpec.marketingLabel || t('consent_marketingLabel')
       ])
     ]));
     shell.fieldNode.appendChild(shell.errorNode);
@@ -1606,7 +2437,7 @@
       writeTo: function (fields) { fields.contact_consent = !!contactInput.checked; fields.marketing_consent = !!marketingInput.checked; },
       validate: function () {
         if (fieldSpec.required === false) return null;
-        return contactInput.checked ? null : 'Please tick the consent box to continue.';
+        return contactInput.checked ? null : t('consent_required');
       },
       showError: function (msg) { shell.show(msg); contactInput.setAttribute('aria-invalid', 'true'); },
       clearError: function () { shell.clear(); contactInput.removeAttribute('aria-invalid'); },
@@ -1643,6 +2474,7 @@
     this.instance = ++INSTANCE_COUNTER;
     this.container = container;
     this.config = this._normalise(config || {});
+    this.t = makeT(this.config.branding);   // resolve viewer language + UI strings
     this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
     this._render();
   }
@@ -1654,9 +2486,12 @@
       formId:     config.formId || '',
       widgetId:   config.widgetId || '',
       name:       config.name || 'Enquiry form',
-      header:     config.header || { title: 'Tell us about your dream holiday', subtitle: 'Share a few details and one of our travel specialists will come back within 24 hours.' },
-      submitText: config.submitText || 'Send my enquiry',
-      thankYou:   config.thankYou || { mode: 'inline', message: "Thanks {firstName} — we're on it" },
+      // Author-overridable. Defaults left empty here and localised at the use
+      // site (header title/subtitle, submit label, thank-you message) so the
+      // viewer's language is used when the author has not set their own copy.
+      header:     config.header || { title: '', subtitle: '' },
+      submitText: config.submitText || '',
+      thankYou:   config.thankYou || { mode: 'inline', message: '' },
       branding:   config.branding || { buttonColour: '#1B2B5B', accentColour: '#00B4D8', theme: 'light' },
       security:   config.security || { honeypot: true, turnstile: false },
       // Multi-step layout. Values: 'single-page' (default) | 'multi-step'.
@@ -1707,15 +2542,18 @@
       // survives filtering (e.g. stale config).
       var filtered = configSteps
         .filter(function (s) { return s && typeof s === 'object' && usedIds.indexOf(s.id) !== -1; })
-        .map(function (s, i) {
-          return { id: s.id, label: s.label || ('Step ' + (i + 1)) };
+        .map(function (s) {
+          // Preserve the author's label; leave a generic step label null so it
+          // is localised at the render site (see _render progress indicator).
+          return { id: s.id, label: s.label || null };
         });
       if (filtered.length > 0) return filtered;
     }
 
-    // Synthesise: one entry per used ID with a generic label
-    return usedIds.map(function (id, i) {
-      return { id: id, label: 'Step ' + (i + 1) };
+    // Synthesise: one entry per used ID. Label left null so it is localised
+    // at render time rather than baked in as English here.
+    return usedIds.map(function (id) {
+      return { id: id, label: null };
     });
   }
 
@@ -1724,6 +2562,8 @@
     var shadow = this.shadow;
     while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
 
+    if (!this.t) this.t = makeT(this.config.branding);
+    var t = this.t;
     var config = this.config;
     var instance = this.instance;
     var fields = [];
@@ -1743,8 +2583,8 @@
         loading: 'lazy'
       }));
     }
-    heroChildren.push(el('h2', { text: config.header.title || '' }));
-    heroChildren.push(el('p', { text: config.header.subtitle || '' }));
+    heroChildren.push(el('h2', { text: config.header.title || t('headerTitle') }));
+    heroChildren.push(el('p', { text: config.header.subtitle || t('headerSubtitle') }));
     card.appendChild(el('div', { class: 'tg-hero' }, heroChildren));
 
     // ── Multi-step vs single-page branching ─────────────────────────────
@@ -1769,7 +2609,7 @@
         console.warn('[TGEnquiryWidget] Unknown field type:', fieldSpec.type);
         return;
       }
-      var inst = renderer(instance, fieldSpec);
+      var inst = renderer(instance, fieldSpec, t);
       inst.__step = fieldSpec.step || 1; // stash for validation scoping
       fields.push(inst);
       var stepId = fieldSpec.step || 1;
@@ -1785,7 +2625,7 @@
       config.steps.forEach(function (step, idx) {
         var item = el('div', { class: 'tg-progress-step', 'data-step-idx': String(idx) }, [
           el('span', { class: 'tg-progress-num', text: String(idx + 1) }),
-          el('span', { class: 'tg-progress-label', text: step.label || ('Step ' + (idx + 1)) })
+          el('span', { class: 'tg-progress-label', text: step.label || t('stepN', { n: idx + 1 }) })
         ]);
         progressEl.appendChild(item);
       });
@@ -1806,7 +2646,7 @@
           // normally happen because normaliseSteps filters these out.
           section.appendChild(el('div', {
             style: { padding: '24px 0', color: '#94A3B8', fontSize: '13px', textAlign: 'center' },
-            text: 'No fields on this step.'
+            text: t('noFieldsStep')
           }));
         } else {
           nodes.forEach(function (n) { section.appendChild(n); });
@@ -1857,8 +2697,9 @@
     // ── Navigation row ──────────────────────────────────────────────────
     // Single-page: one submit button (existing behaviour).
     // Multi-step:  Back | Next on intermediate steps, Back | Submit on final.
+    var submitText = config.submitText || t('submitText');
     var submitBtn = el('button', { class: 'tg-submit', type: 'button' }, [
-      el('span', { text: config.submitText }),
+      el('span', { text: submitText }),
       svg(ICONS.arrow, { size: 16 })
     ]);
     var backBtn = null;
@@ -1866,10 +2707,10 @@
     if (isMultiStep) {
       backBtn = el('button', { class: 'tg-nav-back', type: 'button' }, [
         svg(ICONS.arrowLeft || ICONS.arrow, { size: 16 }),
-        el('span', { text: 'Back' })
+        el('span', { text: t('back') })
       ]);
       nextBtn = el('button', { class: 'tg-nav-next', type: 'button' }, [
-        el('span', { text: 'Continue' }),
+        el('span', { text: t('continue') }),
         svg(ICONS.arrow, { size: 16 })
       ]);
     }
@@ -1878,18 +2719,18 @@
     if (isMultiStep) {
       navChildren = [
         el('div', { class: 'tg-trust' }, [
-          el('span', {}, [svg(ICONS.check, { size: 12 }), 'Secure']),
-          el('span', {}, [svg(ICONS.check, { size: 12 }), 'GDPR']),
-          el('span', {}, [svg(ICONS.clock, { size: 12 }), '24hr reply'])
+          el('span', {}, [svg(ICONS.check, { size: 12 }), t('secure')]),
+          el('span', {}, [svg(ICONS.check, { size: 12 }), t('gdpr')]),
+          el('span', {}, [svg(ICONS.clock, { size: 12 }), t('reply24hr')])
         ]),
         el('div', { class: 'tg-nav-buttons' }, [backBtn, nextBtn, submitBtn])
       ];
     } else {
       navChildren = [
         el('div', { class: 'tg-trust' }, [
-          el('span', {}, [svg(ICONS.check, { size: 12 }), 'Secure']),
-          el('span', {}, [svg(ICONS.check, { size: 12 }), 'GDPR']),
-          el('span', {}, [svg(ICONS.clock, { size: 12 }), '24hr reply'])
+          el('span', {}, [svg(ICONS.check, { size: 12 }), t('secure')]),
+          el('span', {}, [svg(ICONS.check, { size: 12 }), t('gdpr')]),
+          el('span', {}, [svg(ICONS.clock, { size: 12 }), t('reply24hr')])
         ]),
         submitBtn
       ];
@@ -1898,7 +2739,7 @@
 
     shadow.appendChild(card);
     shadow.appendChild(el('div', { class: 'tg-brand' }, [
-      'Powered by ',
+      t('poweredBy'),
       el('strong', {}, [el('a', { href: 'https://travelgenix.io', target: '_blank', rel: 'noopener', text: 'Travelgenix' })])
     ]));
 
@@ -1932,7 +2773,8 @@
       turnstileFrame = createTurnstileFrame(
         config.security.turnstileSiteKey,
         config.branding.theme,
-        function (newToken) { turnstileToken = newToken; }
+        function (newToken) { turnstileToken = newToken; },
+        t
       );
       turnstileContainer.appendChild(turnstileFrame.iframe);
       this._turnstileFrame = turnstileFrame;
@@ -1943,7 +2785,7 @@
       // rather than silently letting bots through.
       turnstileContainer.appendChild(el('div', {
         style: { padding: '12px', fontSize: '12px', color: '#DC2626', textAlign: 'center' },
-        text: 'Security check misconfigured — please contact support.'
+        text: t('securityMisconfigured')
       }));
       console.error('[TGEnquiryWidget] security.turnstile is true but turnstileSiteKey is missing');
     }
@@ -1975,6 +2817,7 @@
   // _render stays readable and the state machine logic is inspectable.
   TGEnquiryWidget.prototype._buildStepNav = function (ctx) {
     var self = this;
+    var t = this.t;
     var currentIdx = 0;
     var totalSteps = ctx.steps.length;
 
@@ -2004,8 +2847,8 @@
       });
       if (errorCount > 0) {
         var text = errorCount === 1
-          ? 'Please fix the highlighted field above before continuing.'
-          : 'Please fix the ' + errorCount + ' highlighted fields above before continuing.';
+          ? t('fixOneField')
+          : t('fixNFields', { count: errorCount });
         ctx.summaryError.classList.add('is-shown');
         var span = ctx.summaryError.querySelector('.tg-summary-error-text');
         if (span) span.textContent = text;
@@ -2087,6 +2930,7 @@
 
   TGEnquiryWidget.prototype._handleSubmit = function (fields, honeypot, summaryError, submitBtn, getToken) {
     var self = this;
+    var t = this.t;
     var config = this.config;
 
     // Validate every field
@@ -2102,7 +2946,7 @@
         summaryError.classList.remove('is-shown');
       } else {
         summaryError.classList.add('is-shown');
-        summaryError.querySelector('.tg-summary-error-text').textContent = 'Please check the ' + failedFields.length + ' highlighted fields above and try again.';
+        summaryError.querySelector('.tg-summary-error-text').textContent = t('checkNFields', { count: failedFields.length });
       }
       setTimeout(function () {
         if (failedFields[0].focus) failedFields[0].focus();
@@ -2119,7 +2963,7 @@
     var turnstileToken = getToken();
     if (config.security && config.security.turnstile && !turnstileToken) {
       summaryError.classList.add('is-shown');
-      summaryError.querySelector('.tg-summary-error-text').textContent = 'Please complete the security check above before submitting.';
+      summaryError.querySelector('.tg-summary-error-text').textContent = t('securityIncomplete');
       return;
     }
 
@@ -2131,7 +2975,7 @@
       var origHtml = submitBtn.innerHTML;
       submitBtn.innerHTML = '';
       submitBtn.appendChild(svg(ICONS.check, { size: 16 }));
-      submitBtn.appendChild(document.createTextNode(' Looks good!'));
+      submitBtn.appendChild(document.createTextNode(t('looksGood')));
       setTimeout(function () {
         submitBtn.disabled = false;
         submitBtn.innerHTML = origHtml;
@@ -2157,7 +3001,7 @@
     submitBtn.disabled = true;
     submitBtn.innerHTML = '';
     submitBtn.appendChild(svg(ICONS.spinner, { size: 16, class: 'tg-spin' }));
-    submitBtn.appendChild(document.createTextNode(' Sending...'));
+    submitBtn.appendChild(document.createTextNode(' ' + t('sending')));
 
     fetch(API_BASE + '/api/enquiry/submit', {
       method: 'POST',
@@ -2172,17 +3016,18 @@
         self._showSubmitError(submitBtn, summaryError, result.body);
       }
     }).catch(function () {
-      self._showSubmitError(submitBtn, summaryError, { message: 'Something went wrong. Please try again.' });
+      self._showSubmitError(submitBtn, summaryError, { message: t('genericError') });
     });
   };
 
   TGEnquiryWidget.prototype._showSubmitError = function (submitBtn, summaryError, body) {
+    var t = this.t;
     submitBtn.disabled = false;
     submitBtn.innerHTML = '';
-    submitBtn.appendChild(el('span', { text: this.config.submitText }));
+    submitBtn.appendChild(el('span', { text: this.config.submitText || t('submitText') }));
     submitBtn.appendChild(svg(ICONS.arrow, { size: 16 }));
     summaryError.classList.add('is-shown');
-    summaryError.querySelector('.tg-summary-error-text').textContent = (body && body.message) || 'Something went wrong. Please try again.';
+    summaryError.querySelector('.tg-summary-error-text').textContent = (body && body.message) || t('genericError');
     // Reset the Turnstile challenge so the user can generate a fresh token —
     // the one they just used was consumed by the failed submit attempt.
     if (this.config.security && this.config.security.turnstile && this._turnstileFrame) {
@@ -2191,6 +3036,7 @@
   };
 
   TGEnquiryWidget.prototype._renderThankYou = function (response, firstName) {
+    var t = this.t;
     var shadow = this.shadow;
     // Preserve the style element so we don't lose theming
     var styleEl = shadow.querySelector('style');
@@ -2200,20 +3046,26 @@
 
     var message = (response.thankYou && response.thankYou.message) ||
                   (this.config.thankYou && this.config.thankYou.message) ||
-                  ('Thanks' + (firstName ? ', ' + firstName : '') + " — we're on it");
-    message = message.replace(/\{firstName\}/g, firstName || '');
+                  t('thankYouMessage');
+    // Interpolate {firstName}; when absent, also tidy a leading separator
+    // (e.g. "Thanks {firstName} —" becomes "Thanks —" not "Thanks  —").
+    if (firstName) {
+      message = message.replace(/\{firstName\}/g, firstName);
+    } else {
+      message = message.replace(/[ ,]*\{firstName\}/g, '');
+    }
 
     var card = el('div', { class: 'tg-card' }, [
       el('div', { class: 'tg-ty', role: 'status', 'aria-live': 'polite' }, [
         el('div', { class: 'tg-ty-hero', 'aria-hidden': 'true' }, [svg(ICONS.check, { size: 28, strokeWidth: 2.5 })]),
         el('h2', { text: message }),
-        el('p', { text: "One of our travel specialists will be in touch within 24 hours. We've also sent a confirmation to your email." }),
-        el('div', { class: 'tg-ty-ref', text: 'Reference ' + (response.reference || '—') })
+        el('p', { text: t('thankYouBody') }),
+        el('div', { class: 'tg-ty-ref', text: t('reference', { ref: response.reference || '—' }) })
       ])
     ]);
     shadow.appendChild(card);
     shadow.appendChild(el('div', { class: 'tg-brand' }, [
-      'Powered by ',
+      t('poweredBy'),
       el('strong', {}, [el('a', { href: 'https://travelgenix.io', target: '_blank', rel: 'noopener', text: 'Travelgenix' })])
     ]));
 
@@ -2226,6 +3078,7 @@
   // PUBLIC: update the widget with a new config. Used by the editor preview.
   TGEnquiryWidget.prototype.update = function (newConfig) {
     this.config = this._normalise(newConfig || {});
+    this.t = makeT(this.config.branding);
     this._render();
   };
 
@@ -2252,13 +3105,14 @@
   //  widgetId from the API, and mounts a widget instance.
   // ============================================================================
 
-  function renderError(shadow, msg) {
+  function renderError(shadow, msg, t) {
+    t = t || makeT(null);
     while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
     shadow.appendChild(el('style', {
       text: '.tg-oops{padding:48px 32px;text-align:center;font-family:-apple-system,sans-serif}.tg-oops h3{font-size:18px;margin:0 0 8px}.tg-oops p{color:#475569;font-size:14px}'
     }));
     shadow.appendChild(el('div', { class: 'tg-oops', role: 'alert' }, [
-      el('h3', { text: 'Form unavailable' }),
+      el('h3', { text: t('formUnavailable') }),
       el('p', { text: msg })
     ]));
   }
@@ -2267,6 +3121,7 @@
     if (container.__tgMounted) return;
     container.__tgMounted = true;
 
+    var t = makeT(null);
     var widgetId = container.getAttribute('data-tg-id');
     var inlineConfig = container.getAttribute('data-tg-config');
 
@@ -2293,7 +3148,7 @@
     }));
     var loading = el('div', { class: 'tg-loading', role: 'status', 'aria-live': 'polite' }, [
       svg(ICONS.spinner, { size: 24 }),
-      el('div', { text: 'Loading form...' })
+      el('div', { text: t('loadingForm') })
     ]);
     shadow.appendChild(loading);
 
@@ -2307,7 +3162,7 @@
       while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
 
       if (!response.ok) {
-        renderError(shadow, (data && data.error) || 'Unable to load this form.');
+        renderError(shadow, (data && data.error) || t('unableToLoad'), t);
         return;
       }
 
@@ -2327,7 +3182,7 @@
       container.__tgWidget = widget;
     } catch (err) {
       console.error('[TGEnquiryWidget] Failed to load config:', err);
-      renderError(shadow, 'Unable to reach the Travelgenix widget service. Please try again later.');
+      renderError(shadow, t('unableToReach'), t);
     }
   }
 
