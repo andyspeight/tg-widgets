@@ -63,7 +63,133 @@
     } catch (e) { /* fall through */ }
     return '/api/whatsapp-track';
   })();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (weekday names, online/away status, chat controls and
+  // aria-labels). Author content (phone, custom messages, greeting copy) is data
+  // and is never translated. English is the source + fallback. The localised
+  // defaults (team name, button labels, header copy, away message) fall back to
+  // this when the author has not entered their own.
+  const MESSAGES = {
+    en: {
+      sun: 'Sunday', mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday',
+      online: 'Online', away: 'Away',
+      teamName: 'Travel Team', specialist: 'Travel Specialist',
+      headerTitle: 'Chat with us on WhatsApp', headerSubtitle: 'Typically replies in a few minutes',
+      chatIntro: 'Hi there! 👋 How can we help with your next trip?',
+      startChat: 'Start chat', chatWithUs: 'Chat with us', chatOnWhatsApp: 'Chat on WhatsApp', chat: 'Chat',
+      send: 'Send', placeholder: 'Type a message',
+      dismiss: 'Dismiss', close: 'Close',
+      todayAt: 'today at {time}', dayAt: '{day} at {time}',
+      backOnline: 'Back online {when}', currentlyOffline: 'Currently offline',
+      backWhen: 'We\'re back {when}.', awayMessage: 'We\'re closed at the moment. Leave a message and we\'ll get back to you when we\'re open.',
+      replyLater: 'Reply later', replyMinutes: 'Reply within minutes', replyBack: 'Reply when we\'re back', closed: 'Closed',
+      fineprint: 'Opens in WhatsApp · End-to-end encrypted',
+      dialogLabel: 'WhatsApp chat',
+    },
+    fr: {
+      sun: 'Dimanche', mon: 'Lundi', tue: 'Mardi', wed: 'Mercredi', thu: 'Jeudi', fri: 'Vendredi', sat: 'Samedi',
+      online: 'En ligne', away: 'Absent',
+      teamName: 'Équipe Voyage', specialist: 'Spécialiste voyage',
+      headerTitle: 'Discutez avec nous sur WhatsApp', headerSubtitle: 'Répond généralement en quelques minutes',
+      chatIntro: 'Bonjour ! 👋 Comment pouvons-nous vous aider pour votre prochain voyage ?',
+      startChat: 'Démarrer la discussion', chatWithUs: 'Discutez avec nous', chatOnWhatsApp: 'Discuter sur WhatsApp', chat: 'Discuter',
+      send: 'Envoyer', placeholder: 'Écrivez un message',
+      dismiss: 'Fermer', close: 'Fermer',
+      todayAt: 'aujourd\'hui à {time}', dayAt: '{day} à {time}',
+      backOnline: 'De retour {when}', currentlyOffline: 'Actuellement hors ligne',
+      backWhen: 'Nous revenons {when}.', awayMessage: 'Nous sommes fermés pour le moment. Laissez un message et nous vous répondrons dès notre réouverture.',
+      replyLater: 'Réponse plus tard', replyMinutes: 'Réponse en quelques minutes', replyBack: 'Réponse à notre retour', closed: 'Fermé',
+      fineprint: 'Ouvre WhatsApp · Chiffré de bout en bout',
+      dialogLabel: 'Discussion WhatsApp',
+    },
+    de: {
+      sun: 'Sonntag', mon: 'Montag', tue: 'Dienstag', wed: 'Mittwoch', thu: 'Donnerstag', fri: 'Freitag', sat: 'Samstag',
+      online: 'Online', away: 'Abwesend',
+      teamName: 'Reise-Team', specialist: 'Reisespezialist',
+      headerTitle: 'Chatten Sie mit uns auf WhatsApp', headerSubtitle: 'Antwortet meist in wenigen Minuten',
+      chatIntro: 'Hallo! 👋 Wie können wir bei Ihrer nächsten Reise helfen?',
+      startChat: 'Chat starten', chatWithUs: 'Chatten Sie mit uns', chatOnWhatsApp: 'Auf WhatsApp chatten', chat: 'Chatten',
+      send: 'Senden', placeholder: 'Nachricht schreiben',
+      dismiss: 'Schließen', close: 'Schließen',
+      todayAt: 'heute um {time}', dayAt: '{day} um {time}',
+      backOnline: 'Wieder erreichbar {when}', currentlyOffline: 'Derzeit offline',
+      backWhen: 'Wir sind {when} zurück.', awayMessage: 'Wir haben gerade geschlossen. Hinterlassen Sie eine Nachricht und wir melden uns, sobald wir wieder da sind.',
+      replyLater: 'Antwort später', replyMinutes: 'Antwort in Minuten', replyBack: 'Antwort bei Rückkehr', closed: 'Geschlossen',
+      fineprint: 'Öffnet WhatsApp · Ende-zu-Ende-verschlüsselt',
+      dialogLabel: 'WhatsApp-Chat',
+    },
+    es: {
+      sun: 'Domingo', mon: 'Lunes', tue: 'Martes', wed: 'Miércoles', thu: 'Jueves', fri: 'Viernes', sat: 'Sábado',
+      online: 'En línea', away: 'Ausente',
+      teamName: 'Equipo de Viajes', specialist: 'Especialista en viajes',
+      headerTitle: 'Chatea con nosotros en WhatsApp', headerSubtitle: 'Suele responder en unos minutos',
+      chatIntro: '¡Hola! 👋 ¿Cómo podemos ayudarte con tu próximo viaje?',
+      startChat: 'Iniciar chat', chatWithUs: 'Chatea con nosotros', chatOnWhatsApp: 'Chatear por WhatsApp', chat: 'Chatear',
+      send: 'Enviar', placeholder: 'Escribe un mensaje',
+      dismiss: 'Cerrar', close: 'Cerrar',
+      todayAt: 'hoy a las {time}', dayAt: '{day} a las {time}',
+      backOnline: 'De vuelta {when}', currentlyOffline: 'Actualmente sin conexión',
+      backWhen: 'Volvemos {when}.', awayMessage: 'Estamos cerrados en este momento. Deja un mensaje y te responderemos cuando abramos.',
+      replyLater: 'Respuesta más tarde', replyMinutes: 'Respuesta en minutos', replyBack: 'Respuesta a nuestro regreso', closed: 'Cerrado',
+      fineprint: 'Abre WhatsApp · Cifrado de extremo a extremo',
+      dialogLabel: 'Chat de WhatsApp',
+    },
+    it: {
+      sun: 'Domenica', mon: 'Lunedì', tue: 'Martedì', wed: 'Mercoledì', thu: 'Giovedì', fri: 'Venerdì', sat: 'Sabato',
+      online: 'Online', away: 'Assente',
+      teamName: 'Team Viaggi', specialist: 'Specialista viaggi',
+      headerTitle: 'Chatta con noi su WhatsApp', headerSubtitle: 'Di solito risponde in pochi minuti',
+      chatIntro: 'Ciao! 👋 Come possiamo aiutarti con il tuo prossimo viaggio?',
+      startChat: 'Avvia chat', chatWithUs: 'Chatta con noi', chatOnWhatsApp: 'Chatta su WhatsApp', chat: 'Chatta',
+      send: 'Invia', placeholder: 'Scrivi un messaggio',
+      dismiss: 'Chiudi', close: 'Chiudi',
+      todayAt: 'oggi alle {time}', dayAt: '{day} alle {time}',
+      backOnline: 'Di nuovo online {when}', currentlyOffline: 'Attualmente offline',
+      backWhen: 'Torniamo {when}.', awayMessage: 'Siamo chiusi al momento. Lascia un messaggio e ti risponderemo appena saremo aperti.',
+      replyLater: 'Risposta più tardi', replyMinutes: 'Risposta in pochi minuti', replyBack: 'Risposta al nostro ritorno', closed: 'Chiuso',
+      fineprint: 'Apre WhatsApp · Crittografia end-to-end',
+      dialogLabel: 'Chat WhatsApp',
+    },
+    ro: {
+      sun: 'Duminică', mon: 'Luni', tue: 'Marți', wed: 'Miercuri', thu: 'Joi', fri: 'Vineri', sat: 'Sâmbătă',
+      online: 'Online', away: 'Indisponibil',
+      teamName: 'Echipa de Călătorii', specialist: 'Specialist călătorii',
+      headerTitle: 'Discută cu noi pe WhatsApp', headerSubtitle: 'De obicei răspunde în câteva minute',
+      chatIntro: 'Bună! 👋 Cum te putem ajuta cu următoarea ta călătorie?',
+      startChat: 'Începe conversația', chatWithUs: 'Discută cu noi', chatOnWhatsApp: 'Discută pe WhatsApp', chat: 'Discută',
+      send: 'Trimite', placeholder: 'Scrie un mesaj',
+      dismiss: 'Închide', close: 'Închide',
+      todayAt: 'astăzi la {time}', dayAt: '{day} la {time}',
+      backOnline: 'Revenim {when}', currentlyOffline: 'În prezent offline',
+      backWhen: 'Revenim {when}.', awayMessage: 'Suntem închiși momentan. Lasă un mesaj și îți răspundem când deschidem.',
+      replyLater: 'Răspuns mai târziu', replyMinutes: 'Răspuns în câteva minute', replyBack: 'Răspuns la revenire', closed: 'Închis',
+      fineprint: 'Deschide WhatsApp · Criptat integral',
+      dialogLabel: 'Conversație WhatsApp',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -136,7 +262,12 @@
     return h * 60 + mm;
   }
 
-  function evalOfficeHours(hours, now) {
+  function evalOfficeHours(hours, now, t) {
+    const tr = (typeof t === 'function') ? t : ((k, vars) => {
+      let s = MESSAGES.en[k] || k;
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    });
     if (!hours || typeof hours !== 'object') return { open: true, nextOpen: null };
     const d = now || new Date();
     const dayIdx = d.getDay();
@@ -162,7 +293,7 @@
     if (todayLater !== undefined) {
       const hh = String(Math.floor(todayLater / 60)).padStart(2, '0');
       const mm = String(todayLater % 60).padStart(2, '0');
-      return { open: false, nextOpen: 'today at ' + hh + ':' + mm };
+      return { open: false, nextOpen: tr('todayAt', { time: hh + ':' + mm }) };
     }
 
     // Look ahead up to 7 days
@@ -176,8 +307,8 @@
       if (opens !== undefined) {
         const hh = String(Math.floor(opens / 60)).padStart(2, '0');
         const mm = String(opens % 60).padStart(2, '0');
-        const dayLabel = ({ sun: 'Sunday', mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday' })[k];
-        return { open: false, nextOpen: dayLabel + ' at ' + hh + ':' + mm };
+        const dayLabel = tr(k);
+        return { open: false, nextOpen: tr('dayAt', { day: dayLabel, time: hh + ':' + mm }) };
       }
     }
     return { open: false, nextOpen: null };
@@ -832,6 +963,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this._open = false;
       this._greetingDismissed = false;
@@ -841,6 +973,9 @@
 
     _defaults(c) {
       const cfg = c || {};
+      // Resolve the viewer language up front so localised defaults can fall back
+      // to it. Author-entered values always win over the localised default.
+      const t = makeT(cfg);
       const agentsRaw = Array.isArray(cfg.agents) ? cfg.agents : [];
       const agents = agentsRaw.map(a => ({
         name: typeof a.name === 'string' ? a.name : '',
@@ -854,8 +989,8 @@
       const fallbackPhone = typeof cfg.phone === 'string' ? cfg.phone : '';
       if (!agents.length && fallbackPhone) {
         agents.push({
-          name: cfg.name || 'Travel Team',
-          role: cfg.role || 'Online now',
+          name: cfg.name || t('teamName'),
+          role: cfg.role || t('online'),
           phone: fallbackPhone,
           photo: cfg.photo || '',
           online: cfg.online !== false,
@@ -876,35 +1011,40 @@
         mode: cfg.mode === 'multi' ? 'multi' : 'single',          // single | multi
         agents: agents,
 
+        // Carry the language hints through so makeT resolves the same way later
+        lang: cfg.lang, language: cfg.language, locale: cfg.locale,
+
         // Single-mode shortcut fields
         phone: fallbackPhone,
-        name: cfg.name || 'Travel Team',
-        role: cfg.role || 'Online now',
+        name: cfg.name || t('teamName'),
+        role: cfg.role || t('online'),
         photo: cfg.photo || '',
         online: cfg.online !== false,
 
-        // Pre-filled message
+        // Pre-filled message — author content (data); the English default stays
+        // as-is because it is the message text sent to WhatsApp, not UI chrome.
         message: typeof cfg.message === 'string' ? cfg.message : 'Hi! I have a question about your travel services.',
         appendPageUrl: cfg.appendPageUrl !== false,
 
-        // Header content (panel)
-        headerTitle: cfg.headerTitle || 'Chat with us on WhatsApp',
-        headerSubtitle: cfg.headerSubtitle || 'Typically replies in a few minutes',
+        // Header content (panel) — localised default, author override wins
+        headerTitle: cfg.headerTitle || t('headerTitle'),
+        headerSubtitle: cfg.headerSubtitle || t('headerSubtitle'),
 
-        // Bubble (panel) — first message agent says
-        chatIntro: cfg.chatIntro || 'Hi there! 👋 How can we help with your next trip?',
+        // Bubble (panel) — first message agent says (localised default)
+        chatIntro: cfg.chatIntro || t('chatIntro'),
 
         // CTA label
-        ctaLabel: cfg.ctaLabel || 'Start chat',
+        ctaLabel: cfg.ctaLabel || t('startChat'),
 
         // Vertical tab label (used when layout='vertical')
-        tabLabel: cfg.tabLabel || 'Chat with us',
+        tabLabel: cfg.tabLabel || t('chatWithUs'),
 
         // Inline label
-        inlineLabel: cfg.inlineLabel || 'Chat on WhatsApp',
-        inlineSubLabel: cfg.inlineSubLabel || 'Typically replies in a few minutes',
+        inlineLabel: cfg.inlineLabel || t('chatOnWhatsApp'),
+        inlineSubLabel: cfg.inlineSubLabel || t('headerSubtitle'),
 
-        // Greeting bubble (floating)
+        // Greeting bubble (floating) — author marketing copy; left as author
+        // content (English default kept, not localised) per scope guidance.
         greetingEnabled: cfg.greetingEnabled === true,
         greetingText: cfg.greetingText || 'Need help finding your perfect trip?',
         greetingDelay: Number.isFinite(Number(cfg.greetingDelay)) ? Number(cfg.greetingDelay) : 8,
@@ -923,7 +1063,7 @@
           sat: [],
           sun: [],
         },
-        offlineMessage: cfg.offlineMessage || 'We\'re closed at the moment. Leave a message and we\'ll get back to you when we\'re open.',
+        offlineMessage: cfg.offlineMessage || t('awayMessage'),
         hideWhenClosed: cfg.hideWhenClosed === true,
 
         // Tracking
@@ -956,7 +1096,7 @@
 
     _hoursStatus() {
       if (!this.c.hoursEnabled) return { open: true, nextOpen: null };
-      return evalOfficeHours(this.c.hours, new Date());
+      return evalOfficeHours(this.c.hours, new Date(), this.t);
     }
 
     _ctx() {
@@ -1040,7 +1180,7 @@
         ? `
           <div class="tgwa-greeting" data-show="false" id="greeting">
             ${esc(cfg.greetingText)}
-            <button class="tgwa-greeting-close" type="button" id="greetingClose" aria-label="Dismiss">
+            <button class="tgwa-greeting-close" type="button" id="greetingClose" aria-label="${esc(this.t('dismiss'))}">
               ${svg('close', 12)}
             </button>
           </div>
@@ -1050,7 +1190,7 @@
       return `
         <div class="tgwa-floating" data-position="${esc(cfg.position)}">
           ${greeting}
-          <div class="tgwa-panel" data-open="${isOpen}" id="panel" role="dialog" aria-label="WhatsApp chat">
+          <div class="tgwa-panel" data-open="${isOpen}" id="panel" role="dialog" aria-label="${esc(this.t('dialogLabel'))}">
             ${this._renderPanelHead(status)}
             <div class="tgwa-panel-body">
               ${this._renderPanelBody(status, isMulti)}
@@ -1071,12 +1211,12 @@
       const isMulti = cfg.mode === 'multi' && cfg.agents.length > 1;
       // Vertical only supports middle-left or middle-right; map position → side
       const side = cfg.position === 'middle-left' ? 'left' : 'right';
-      const tabLabel = cfg.tabLabel || 'Chat with us';
+      const tabLabel = cfg.tabLabel || this.t('chatWithUs');
 
       return `
         <div class="tgwa-vertical" data-side="${side}">
           ${isOpen ? `
-            <div class="tgwa-panel" data-open="true" id="panel" role="dialog" aria-label="WhatsApp chat">
+            <div class="tgwa-panel" data-open="true" id="panel" role="dialog" aria-label="${esc(this.t('dialogLabel'))}">
               ${this._renderPanelHead(status)}
               <div class="tgwa-panel-body">
                 ${this._renderPanelBody(status, isMulti)}
@@ -1096,7 +1236,7 @@
     _renderPanelHead(status) {
       const cfg = this.c;
       const sub = (cfg.hoursEnabled && !status.open)
-        ? (status.nextOpen ? 'Back online ' + status.nextOpen : 'Currently offline')
+        ? (status.nextOpen ? this.t('backOnline', { when: status.nextOpen }) : this.t('currentlyOffline'))
         : cfg.headerSubtitle;
       return `
         <div class="tgwa-panel-head">
@@ -1105,7 +1245,7 @@
             <div class="tgwa-panel-head-title">${esc(cfg.headerTitle)}</div>
             <div class="tgwa-panel-head-status" data-state="${status.open ? 'online' : 'offline'}">${esc(sub)}</div>
           </div>
-          <button class="tgwa-panel-head-close" type="button" id="panelClose" aria-label="Close">
+          <button class="tgwa-panel-head-close" type="button" id="panelClose" aria-label="${esc(this.t('close'))}">
             ${svg('close', 18)}
           </button>
         </div>
@@ -1119,7 +1259,7 @@
         <div class="tgwa-bubble">${esc(cfg.chatIntro)}</div>
       `;
       const offline = (cfg.hoursEnabled && !status.open)
-        ? `<div class="tgwa-out-of-hours">${esc(cfg.offlineMessage)}${status.nextOpen ? ` We're back ${esc(status.nextOpen)}.` : ''}</div>`
+        ? `<div class="tgwa-out-of-hours">${esc(cfg.offlineMessage)}${status.nextOpen ? ` ${esc(this.t('backWhen', { when: status.nextOpen }))}` : ''}</div>`
         : '';
 
       if (isMulti) {
@@ -1128,8 +1268,8 @@
           <a class="tgwa-agent" href="${esc(this._waLink(a.phone))}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-agent-index="${i}">
             ${this._renderAgentPhoto(a, 38, true)}
             <div class="tgwa-agent-meta">
-              <div class="tgwa-agent-name">${esc(a.name || 'Travel Specialist')}</div>
-              <div class="tgwa-agent-role">${esc(a.role || (a.online ? 'Online' : 'Reply later'))}</div>
+              <div class="tgwa-agent-name">${esc(a.name || this.t('specialist'))}</div>
+              <div class="tgwa-agent-role">${esc(a.role || (a.online ? this.t('online') : this.t('replyLater')))}</div>
             </div>
             <div class="tgwa-agent-cta">${svg('send', 14)}</div>
           </a>
@@ -1149,9 +1289,9 @@
         <div class="tgwa-panel-foot">
           <a class="tgwa-cta" href="${esc(link)}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${isOffline}">
             ${svg('whatsapp', 18)}
-            <span>${esc(isOffline ? 'Currently offline' : cfg.ctaLabel)}</span>
+            <span>${esc(isOffline ? this.t('currentlyOffline') : cfg.ctaLabel)}</span>
           </a>
-          <div class="tgwa-fineprint">Opens in WhatsApp · End-to-end encrypted</div>
+          <div class="tgwa-fineprint">${esc(this.t('fineprint'))}</div>
         </div>
       `;
     }
@@ -1162,7 +1302,7 @@
       const isOffline = cfg.hoursEnabled && !status.open;
       const link = isOffline ? '#' : this._waLink(phone);
       const subLabel = isOffline
-        ? (status.nextOpen ? 'Back online ' + status.nextOpen : 'Currently offline')
+        ? (status.nextOpen ? this.t('backOnline', { when: status.nextOpen }) : this.t('currentlyOffline'))
         : cfg.inlineSubLabel;
       return `
         <a class="tgwa-inline" href="${esc(link)}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${isOffline}">
@@ -1184,13 +1324,13 @@
         <div class="tgwa-inline-card">
           ${this._renderAgentPhoto(agent, 48, !isOffline && agent.online)}
           <div class="tgwa-inline-card-meta">
-            <div class="tgwa-inline-card-meta-name">${esc(agent.name || 'Travel Team')}</div>
+            <div class="tgwa-inline-card-meta-name">${esc(agent.name || this.t('teamName'))}</div>
             <div class="tgwa-inline-card-meta-role">${esc(agent.role || '')}</div>
-            <div class="tgwa-inline-card-meta-status" data-state="${isOffline ? 'offline' : 'online'}">${isOffline ? 'Reply when we\'re back' : 'Reply within minutes'}</div>
+            <div class="tgwa-inline-card-meta-status" data-state="${isOffline ? 'offline' : 'online'}">${esc(isOffline ? this.t('replyBack') : this.t('replyMinutes'))}</div>
           </div>
           <a class="tgwa-inline-card-cta" href="${esc(link)}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${isOffline}">
             ${svg('whatsapp', 14)}
-            <span>${esc(isOffline ? 'Closed' : 'Chat')}</span>
+            <span>${esc(isOffline ? this.t('closed') : this.t('chat'))}</span>
           </a>
         </div>
       `;
@@ -1307,6 +1447,7 @@
     update(newConfig) {
       if (this._greetingTimer) clearTimeout(this._greetingTimer);
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      this.t = makeT(this.c);
       this._render();
     }
 

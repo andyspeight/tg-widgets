@@ -50,7 +50,96 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (control aria-labels, empty/error states, the
+  // directions action). Location titles, addresses, descriptions, link URLs and
+  // any author-set labels are content, translated separately. English is the
+  // source + fallback.
+  const MESSAGES = {
+    en: {
+      locations: 'Locations', location: 'Location', map: 'Map',
+      locationDetails: 'Location details', zoomIn: 'Zoom in', zoomOut: 'Zoom out',
+      recentre: 'Recentre map', close: 'Close',
+      visitWebsite: 'Visit website', getDirections: 'Get directions',
+      emptyTitle: 'No locations yet',
+      emptySub: 'Add at least one location with a valid address or coordinates to see it on the map.',
+      errorTitle: 'Map unavailable',
+      errorSub: 'The map library could not load. Please try again later.',
+    },
+    fr: {
+      locations: 'Emplacements', location: 'Emplacement', map: 'Carte',
+      locationDetails: "Détails de l'emplacement", zoomIn: 'Zoom avant', zoomOut: 'Zoom arrière',
+      recentre: 'Recentrer la carte', close: 'Fermer',
+      visitWebsite: 'Visiter le site', getDirections: 'Itinéraire',
+      emptyTitle: 'Aucun emplacement pour le moment',
+      emptySub: 'Ajoutez au moins un emplacement avec une adresse ou des coordonnées valides pour le voir sur la carte.',
+      errorTitle: 'Carte indisponible',
+      errorSub: "La bibliothèque cartographique n'a pas pu se charger. Veuillez réessayer plus tard.",
+    },
+    de: {
+      locations: 'Standorte', location: 'Standort', map: 'Karte',
+      locationDetails: 'Standortdetails', zoomIn: 'Vergrößern', zoomOut: 'Verkleinern',
+      recentre: 'Karte zentrieren', close: 'Schließen',
+      visitWebsite: 'Website besuchen', getDirections: 'Route',
+      emptyTitle: 'Noch keine Standorte',
+      emptySub: 'Fügen Sie mindestens einen Standort mit einer gültigen Adresse oder Koordinaten hinzu, um ihn auf der Karte zu sehen.',
+      errorTitle: 'Karte nicht verfügbar',
+      errorSub: 'Die Kartenbibliothek konnte nicht geladen werden. Bitte versuchen Sie es später erneut.',
+    },
+    es: {
+      locations: 'Ubicaciones', location: 'Ubicación', map: 'Mapa',
+      locationDetails: 'Detalles de la ubicación', zoomIn: 'Acercar', zoomOut: 'Alejar',
+      recentre: 'Recentrar el mapa', close: 'Cerrar',
+      visitWebsite: 'Visitar el sitio', getDirections: 'Cómo llegar',
+      emptyTitle: 'Aún no hay ubicaciones',
+      emptySub: 'Añade al menos una ubicación con una dirección o coordenadas válidas para verla en el mapa.',
+      errorTitle: 'Mapa no disponible',
+      errorSub: 'No se pudo cargar la biblioteca de mapas. Inténtalo de nuevo más tarde.',
+    },
+    it: {
+      locations: 'Posizioni', location: 'Posizione', map: 'Mappa',
+      locationDetails: 'Dettagli della posizione', zoomIn: 'Ingrandisci', zoomOut: 'Riduci',
+      recentre: 'Ricentra la mappa', close: 'Chiudi',
+      visitWebsite: 'Visita il sito', getDirections: 'Indicazioni',
+      emptyTitle: 'Nessuna posizione ancora',
+      emptySub: 'Aggiungi almeno una posizione con un indirizzo o coordinate validi per vederla sulla mappa.',
+      errorTitle: 'Mappa non disponibile',
+      errorSub: 'Impossibile caricare la libreria della mappa. Riprova più tardi.',
+    },
+    ro: {
+      locations: 'Locații', location: 'Locație', map: 'Hartă',
+      locationDetails: 'Detalii locație', zoomIn: 'Mărește', zoomOut: 'Micșorează',
+      recentre: 'Recentrează harta', close: 'Închide',
+      visitWebsite: 'Vizitează site-ul', getDirections: 'Indicații',
+      emptyTitle: 'Încă nicio locație',
+      emptySub: 'Adăugați cel puțin o locație cu o adresă sau coordonate valide pentru a o vedea pe hartă.',
+      errorTitle: 'Hartă indisponibilă',
+      errorSub: 'Biblioteca de hărți nu a putut fi încărcată. Vă rugăm să încercați din nou mai târziu.',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ═══════════════════════════════════════════════════════════
   // Mapping stack — Leaflet + MapTiler (mirrors widget-worldmap.js)
@@ -328,6 +417,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
       this.map = null;
       this.markers = [];
@@ -348,7 +438,7 @@
           description: l.description || '',
           image: safeImageUrl(l.image),
           link: safeUrl(l.link),
-          linkLabel: l.linkLabel || 'Visit website',
+          linkLabel: l.linkLabel || this.t('visitWebsite'),
           color: safeColor(l.color, safeColor(this.cfg.accent, '#0891B2')),
           lat: c.lat, lng: c.lng,
         };
@@ -378,12 +468,12 @@
         </div>` : '';
 
       const list = wantList && locs.length ? `
-        <div class="tgm-list" role="listbox" aria-label="Locations">
+        <div class="tgm-list" role="listbox" aria-label="${esc(this.t('locations'))}">
           ${locs.map((l) => `
             <button class="tgm-list-item" type="button" role="option" data-idx="${l.idx}" aria-selected="false">
               <span class="tgm-li-dot" style="color:${esc(l.color)}">${icon('pin')}</span>
               <span class="tgm-li-body">
-                <span class="tgm-li-title">${esc(l.title || 'Location')}</span>
+                <span class="tgm-li-title">${esc(l.title || this.t('location'))}</span>
                 ${l.address ? `<span class="tgm-li-sub">${esc(l.address)}</span>` : ''}
               </span>
             </button>`).join('')}
@@ -392,10 +482,10 @@
       const ctrls = this.cfg.showControls ? `
         <div class="tgm-ctrls">
           <div class="tgm-zoom">
-            <button class="tgm-ctrl" type="button" data-act="zoom-in" aria-label="Zoom in">${icon('plus')}</button>
-            <button class="tgm-ctrl" type="button" data-act="zoom-out" aria-label="Zoom out">${icon('minus')}</button>
+            <button class="tgm-ctrl" type="button" data-act="zoom-in" aria-label="${esc(this.t('zoomIn'))}">${icon('plus')}</button>
+            <button class="tgm-ctrl" type="button" data-act="zoom-out" aria-label="${esc(this.t('zoomOut'))}">${icon('minus')}</button>
           </div>
-          ${locs.length ? `<button class="tgm-ctrl" type="button" data-act="recenter" aria-label="Recentre map">${icon('locate')}</button>` : ''}
+          ${locs.length ? `<button class="tgm-ctrl" type="button" data-act="recenter" aria-label="${esc(this.t('recentre'))}">${icon('locate')}</button>` : ''}
         </div>` : '';
 
       this.shadow.innerHTML = `
@@ -407,9 +497,9 @@
           <div class="tgm-shell ${wantList && locs.length ? 'has-list' : ''}">
             ${list}
             <div class="tgm-stage">
-              <div class="tgm-map tgm-skel" aria-label="Map"></div>
+              <div class="tgm-map tgm-skel" aria-label="${esc(this.t('map'))}"></div>
               ${ctrls}
-              <div class="tgm-card" role="dialog" aria-live="polite" aria-label="Location details" hidden></div>
+              <div class="tgm-card" role="dialog" aria-live="polite" aria-label="${esc(this.t('locationDetails'))}" hidden></div>
             </div>
           </div>
         </div>`;
@@ -421,13 +511,13 @@
       this._bindChrome();
 
       if (!locs.length) {
-        this._renderState('empty', 'No locations yet', 'Add at least one location with a valid address or coordinates to see it on the map.');
+        this._renderState('empty', this.t('emptyTitle'), this.t('emptySub'));
         return;
       }
 
       loadLeaflet()
         .then((L) => this._initMap(L))
-        .catch(() => this._renderState('error', 'Map unavailable', 'The map library could not load. Please try again later.'));
+        .catch(() => this._renderState('error', this.t('errorTitle'), this.t('errorSub')));
     }
 
     _initMap(L) {
@@ -530,15 +620,15 @@
       const hasImg = !!loc.image;
       this.cardEl.classList.toggle('has-img', hasImg);
       this.cardEl.innerHTML = `
-        ${hasImg ? `<img class="tgm-card-img" src="${esc(loc.image)}" alt="${esc(loc.title || 'Location')}" loading="lazy">` : ''}
+        ${hasImg ? `<img class="tgm-card-img" src="${esc(loc.image)}" alt="${esc(loc.title || this.t('location'))}" loading="lazy">` : ''}
         <div class="tgm-card-body">
-          <button class="tgm-card-close" type="button" aria-label="Close">${icon('close')}</button>
-          <h4 class="tgm-card-title">${esc(loc.title || 'Location')}</h4>
+          <button class="tgm-card-close" type="button" aria-label="${esc(this.t('close'))}">${icon('close')}</button>
+          <h4 class="tgm-card-title">${esc(loc.title || this.t('location'))}</h4>
           ${loc.address ? `<p class="tgm-card-addr">${esc(loc.address)}</p>` : ''}
           ${loc.description ? `<p class="tgm-card-desc">${esc(loc.description)}</p>` : ''}
           <div class="tgm-card-actions">
-            ${dir ? `<a class="tgm-btn tgm-btn-primary" href="${esc(dir)}" target="_blank" rel="noopener noreferrer">${icon('directions')} Get directions</a>` : ''}
-            ${loc.link ? `<a class="tgm-btn tgm-btn-ghost" href="${esc(loc.link)}" target="_blank" rel="noopener noreferrer">${icon('external')} ${esc(loc.linkLabel || 'Visit website')}</a>` : ''}
+            ${dir ? `<a class="tgm-btn tgm-btn-primary" href="${esc(dir)}" target="_blank" rel="noopener noreferrer">${icon('directions')} ${esc(this.t('getDirections'))}</a>` : ''}
+            ${loc.link ? `<a class="tgm-btn tgm-btn-ghost" href="${esc(loc.link)}" target="_blank" rel="noopener noreferrer">${icon('external')} ${esc(loc.linkLabel || this.t('visitWebsite'))}</a>` : ''}
           </div>
         </div>`;
       this.cardEl.hidden = false;
@@ -568,6 +658,7 @@
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      this.t = makeT(this.cfg);
       this.destroy(true);
       this._render();
     }

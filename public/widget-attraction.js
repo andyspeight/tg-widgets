@@ -35,7 +35,174 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (fact/section labels, badges, CTA button, empty/error
+  // states and aria-labels). The attraction name, description, fact VALUES,
+  // prices and place names are author/data content, translated upstream. English
+  // is the source + fallback.
+  const MESSAGES = {
+    en: {
+      onSiteHotels: 'On-site hotels', dogFriendly: 'Dog friendly', yes: 'Yes',
+      typicalCost: 'Typical cost', timeNeeded: 'Time needed', season: 'Season',
+      bestFor: 'Best for',
+      overview: 'Overview', overviewSub: 'The attraction in brief', whenToGo: 'When to go',
+      starAttractions: 'Star attractions', starSub: 'What not to miss',
+      goodToKnow: 'Good to know', goodToKnowSub: 'Plan around your group',
+      families: 'Families', thrillSeekers: 'Thrill-seekers',
+      heightRestrictions: 'Height restrictions', accessibility: 'Accessibility',
+      ticketsAndPrices: 'Tickets and prices', ticketsSub: 'Ticket types and passes',
+      fastTrack: 'Fast-track and skip-the-queue',
+      gettingThere: 'Getting there', nearestAirports: 'Nearest airports', nearestTown: 'Nearest town',
+      whereToStay: 'Where to stay', nearbyHotels: 'Nearby hotels',
+      foodAndDrink: 'Food and drink',
+      insiderTips: 'Insider tips', insiderTipsSub: 'Things that catch first-timers out',
+      combineTrip: 'Combine your trip', combineSub: 'Other attractions nearby',
+      enquire: 'Enquire', startEnquiry: 'Start your enquiry', verified: 'Verified {date}',
+      mapLabel: 'Map showing {name}',
+      notFoundTitle: 'Attraction not found',
+      notFoundBody: 'This widget is looking for an attraction that is not in the content database yet.',
+      errorTitle: 'Unable to load',
+      errorBody: 'The attraction content is temporarily unavailable. Please try again in a moment.',
+    },
+    fr: {
+      onSiteHotels: 'Hôtels sur place', dogFriendly: 'Chiens admis', yes: 'Oui',
+      typicalCost: 'Coût habituel', timeNeeded: 'Temps nécessaire', season: 'Saison',
+      bestFor: 'Idéal pour',
+      overview: 'Aperçu', overviewSub: 'L\'attraction en bref', whenToGo: 'Quand y aller',
+      starAttractions: 'Attractions phares', starSub: 'À ne pas manquer',
+      goodToKnow: 'Bon à savoir', goodToKnowSub: 'Préparez selon votre groupe',
+      families: 'Familles', thrillSeekers: 'Amateurs de sensations',
+      heightRestrictions: 'Restrictions de taille', accessibility: 'Accessibilité',
+      ticketsAndPrices: 'Billets et tarifs', ticketsSub: 'Types de billets et pass',
+      fastTrack: 'Coupe-file et accès rapide',
+      gettingThere: 'Comment s\'y rendre', nearestAirports: 'Aéroports les plus proches', nearestTown: 'Ville la plus proche',
+      whereToStay: 'Où séjourner', nearbyHotels: 'Hôtels à proximité',
+      foodAndDrink: 'Restauration',
+      insiderTips: 'Conseils d\'initiés', insiderTipsSub: 'Ce qui surprend les nouveaux venus',
+      combineTrip: 'Combinez votre voyage', combineSub: 'Autres attractions à proximité',
+      enquire: 'Faire une demande', startEnquiry: 'Commencer votre demande', verified: 'Vérifié le {date}',
+      mapLabel: 'Carte montrant {name}',
+      notFoundTitle: 'Attraction introuvable',
+      notFoundBody: 'Ce widget recherche une attraction qui n\'est pas encore dans la base de contenu.',
+      errorTitle: 'Chargement impossible',
+      errorBody: 'Le contenu de l\'attraction est temporairement indisponible. Veuillez réessayer dans un instant.',
+    },
+    de: {
+      onSiteHotels: 'Hotels vor Ort', dogFriendly: 'Hunde erlaubt', yes: 'Ja',
+      typicalCost: 'Typische Kosten', timeNeeded: 'Benötigte Zeit', season: 'Saison',
+      bestFor: 'Ideal für',
+      overview: 'Überblick', overviewSub: 'Die Attraktion im Überblick', whenToGo: 'Wann hinfahren',
+      starAttractions: 'Top-Attraktionen', starSub: 'Das sollten Sie nicht verpassen',
+      goodToKnow: 'Gut zu wissen', goodToKnowSub: 'Planen Sie nach Ihrer Gruppe',
+      families: 'Familien', thrillSeekers: 'Adrenalinsuchende',
+      heightRestrictions: 'Größenbeschränkungen', accessibility: 'Barrierefreiheit',
+      ticketsAndPrices: 'Tickets und Preise', ticketsSub: 'Ticketarten und Pässe',
+      fastTrack: 'Schnelleinlass ohne Anstehen',
+      gettingThere: 'Anfahrt', nearestAirports: 'Nächste Flughäfen', nearestTown: 'Nächste Stadt',
+      whereToStay: 'Unterkünfte', nearbyHotels: 'Hotels in der Nähe',
+      foodAndDrink: 'Essen und Trinken',
+      insiderTips: 'Insider-Tipps', insiderTipsSub: 'Worüber Erstbesucher stolpern',
+      combineTrip: 'Reise kombinieren', combineSub: 'Weitere Attraktionen in der Nähe',
+      enquire: 'Anfragen', startEnquiry: 'Anfrage starten', verified: 'Geprüft am {date}',
+      mapLabel: 'Karte mit {name}',
+      notFoundTitle: 'Attraktion nicht gefunden',
+      notFoundBody: 'Dieses Widget sucht eine Attraktion, die noch nicht in der Inhaltsdatenbank ist.',
+      errorTitle: 'Laden nicht möglich',
+      errorBody: 'Der Attraktionsinhalt ist vorübergehend nicht verfügbar. Bitte versuchen Sie es gleich erneut.',
+    },
+    es: {
+      onSiteHotels: 'Hoteles en el lugar', dogFriendly: 'Se admiten perros', yes: 'Sí',
+      typicalCost: 'Coste típico', timeNeeded: 'Tiempo necesario', season: 'Temporada',
+      bestFor: 'Ideal para',
+      overview: 'Resumen', overviewSub: 'La atracción en breve', whenToGo: 'Cuándo ir',
+      starAttractions: 'Atracciones estrella', starSub: 'Lo que no te puedes perder',
+      goodToKnow: 'Bueno saber', goodToKnowSub: 'Planifica según tu grupo',
+      families: 'Familias', thrillSeekers: 'Amantes de la emoción',
+      heightRestrictions: 'Restricciones de altura', accessibility: 'Accesibilidad',
+      ticketsAndPrices: 'Entradas y precios', ticketsSub: 'Tipos de entradas y pases',
+      fastTrack: 'Acceso rápido sin colas',
+      gettingThere: 'Cómo llegar', nearestAirports: 'Aeropuertos más cercanos', nearestTown: 'Ciudad más cercana',
+      whereToStay: 'Dónde alojarse', nearbyHotels: 'Hoteles cercanos',
+      foodAndDrink: 'Comida y bebida',
+      insiderTips: 'Consejos de expertos', insiderTipsSub: 'Lo que sorprende a los primerizos',
+      combineTrip: 'Combina tu viaje', combineSub: 'Otras atracciones cercanas',
+      enquire: 'Consultar', startEnquiry: 'Iniciar tu consulta', verified: 'Verificado el {date}',
+      mapLabel: 'Mapa que muestra {name}',
+      notFoundTitle: 'Atracción no encontrada',
+      notFoundBody: 'Este widget busca una atracción que aún no está en la base de contenido.',
+      errorTitle: 'No se puede cargar',
+      errorBody: 'El contenido de la atracción no está disponible temporalmente. Inténtalo de nuevo en un momento.',
+    },
+    it: {
+      onSiteHotels: 'Hotel in loco', dogFriendly: 'Cani ammessi', yes: 'Sì',
+      typicalCost: 'Costo tipico', timeNeeded: 'Tempo necessario', season: 'Stagione',
+      bestFor: 'Ideale per',
+      overview: 'Panoramica', overviewSub: 'L\'attrazione in breve', whenToGo: 'Quando andare',
+      starAttractions: 'Attrazioni di punta', starSub: 'Da non perdere',
+      goodToKnow: 'Buono a sapersi', goodToKnowSub: 'Organizza in base al tuo gruppo',
+      families: 'Famiglie', thrillSeekers: 'Amanti del brivido',
+      heightRestrictions: 'Limiti di altezza', accessibility: 'Accessibilità',
+      ticketsAndPrices: 'Biglietti e prezzi', ticketsSub: 'Tipi di biglietti e pass',
+      fastTrack: 'Accesso rapido salta-coda',
+      gettingThere: 'Come arrivare', nearestAirports: 'Aeroporti più vicini', nearestTown: 'Città più vicina',
+      whereToStay: 'Dove alloggiare', nearbyHotels: 'Hotel nelle vicinanze',
+      foodAndDrink: 'Cibo e bevande',
+      insiderTips: 'Consigli degli esperti', insiderTipsSub: 'Cosa spiazza chi arriva la prima volta',
+      combineTrip: 'Combina il tuo viaggio', combineSub: 'Altre attrazioni nelle vicinanze',
+      enquire: 'Richiedi info', startEnquiry: 'Inizia la richiesta', verified: 'Verificato il {date}',
+      mapLabel: 'Mappa che mostra {name}',
+      notFoundTitle: 'Attrazione non trovata',
+      notFoundBody: 'Questo widget cerca un\'attrazione non ancora presente nel database dei contenuti.',
+      errorTitle: 'Impossibile caricare',
+      errorBody: 'Il contenuto dell\'attrazione è temporaneamente non disponibile. Riprova tra un istante.',
+    },
+    ro: {
+      onSiteHotels: 'Hoteluri la fața locului', dogFriendly: 'Câini acceptați', yes: 'Da',
+      typicalCost: 'Cost obișnuit', timeNeeded: 'Timp necesar', season: 'Sezon',
+      bestFor: 'Ideal pentru',
+      overview: 'Prezentare generală', overviewSub: 'Atracția pe scurt', whenToGo: 'Când să mergi',
+      starAttractions: 'Atracții principale', starSub: 'Ce nu trebuie ratat',
+      goodToKnow: 'Bine de știut', goodToKnowSub: 'Planifică în funcție de grupul tău',
+      families: 'Familii', thrillSeekers: 'Iubitori de senzații tari',
+      heightRestrictions: 'Restricții de înălțime', accessibility: 'Accesibilitate',
+      ticketsAndPrices: 'Bilete și prețuri', ticketsSub: 'Tipuri de bilete și abonamente',
+      fastTrack: 'Acces rapid fără coadă',
+      gettingThere: 'Cum ajungi', nearestAirports: 'Cele mai apropiate aeroporturi', nearestTown: 'Cel mai apropiat oraș',
+      whereToStay: 'Unde să stai', nearbyHotels: 'Hoteluri din apropiere',
+      foodAndDrink: 'Mâncare și băutură',
+      insiderTips: 'Sfaturi din interior', insiderTipsSub: 'Ce îi încurcă pe cei aflați prima dată',
+      combineTrip: 'Combină-ți călătoria', combineSub: 'Alte atracții din apropiere',
+      enquire: 'Trimite o solicitare', startEnquiry: 'Începe solicitarea', verified: 'Verificat la {date}',
+      mapLabel: 'Hartă care arată {name}',
+      notFoundTitle: 'Atracție negăsită',
+      notFoundBody: 'Acest widget caută o atracție care nu se află încă în baza de conținut.',
+      errorTitle: 'Nu se poate încărca',
+      errorBody: 'Conținutul atracției este temporar indisponibil. Te rugăm să încerci din nou în câteva momente.',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   /* ===== Leaflet loader (same free CARTO/OSM tiles as the other widgets) === */
   const LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
@@ -134,6 +301,7 @@
       if (!container) throw new Error('TGAttractionWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       if (container.shadowRoot) {
         this.shadow = container.shadowRoot;
         while (this.shadow.firstChild) this.shadow.removeChild(this.shadow.firstChild);
@@ -174,7 +342,7 @@
         cta: {
           title: 'Plan your visit to {{name}}',
           subtitle: 'Speak to us about packaging tickets, hotels and transfers.',
-          buttonLabel: 'Start your enquiry',
+          buttonLabel: '',   // empty = localised default (this.t('startEnquiry'))
           buttonUrl: '',
         },
         attractionData: null,
@@ -298,8 +466,8 @@
       const eyebrow = [d.location, d.country, d.type].filter(Boolean).map(esc).join(' &middot; ');
       const badges = [];
       if (d.operator) badges.push('<span class="tgx-badge">' + esc(d.operator) + '</span>');
-      if (d.hasOnSiteHotels) badges.push('<span class="tgx-badge is-on">' + icon('bed', 13) + ' On-site hotels</span>');
-      if (d.dogFriendly) badges.push('<span class="tgx-badge is-on">' + icon('paw', 13) + ' Dog friendly</span>');
+      if (d.hasOnSiteHotels) badges.push('<span class="tgx-badge is-on">' + icon('bed', 13) + ' ' + esc(this.t('onSiteHotels')) + '</span>');
+      if (d.dogFriendly) badges.push('<span class="tgx-badge is-on">' + icon('paw', 13) + ' ' + esc(this.t('dogFriendly')) + '</span>');
       const style = heroImg ? ' style="--tgx-hero-img:url(' + esc(heroImg) + ')"' : '';
       return '<header class="tgx-hero' + (heroImg ? ' has-img' : '') + '"' + style + '>' +
         (eyebrow ? '<div class="tgx-eyebrow"><span class="dot"></span>' + eyebrow + '</div>' : '') +
@@ -317,11 +485,11 @@
     }
     _renderFacts(d) {
       const tiles = [
-        this._fact('coin', 'Typical cost', d.priceBand),
-        this._fact('calendar', 'Time needed', d.daysNeeded),
-        this._fact('sun', 'Season', d.season),
-        this._fact('bed', 'On-site hotels', d.hasOnSiteHotels ? 'Yes' : ''),
-        this._fact('paw', 'Dog friendly', d.dogFriendly ? 'Yes' : ''),
+        this._fact('coin', this.t('typicalCost'), d.priceBand),
+        this._fact('calendar', this.t('timeNeeded'), d.daysNeeded),
+        this._fact('sun', this.t('season'), d.season),
+        this._fact('bed', this.t('onSiteHotels'), d.hasOnSiteHotels ? this.t('yes') : ''),
+        this._fact('paw', this.t('dogFriendly'), d.dogFriendly ? this.t('yes') : ''),
       ].filter(Boolean).slice(0, 4);
       if (!tiles.length) return '';
       return '<div class="tgx-facts" data-count="' + tiles.length + '">' + tiles.join('') + '</div>';
@@ -331,73 +499,73 @@
       const tags = Array.isArray(d.bestFor) ? d.bestFor : [];
       if (!tags.length) return '';
       const pills = tags.map(t => '<span class="tgx-tag">' + icon('users', 13) + '<span>' + esc(t) + '</span></span>').join('');
-      return this._section('users', 'Best for', '', '<div class="tgx-tags">' + pills + '</div>');
+      return this._section('users', this.t('bestFor'), '', '<div class="tgx-tags">' + pills + '</div>');
     }
 
     _renderOverview(d) {
-      const body = this._prose(d.overview, 4) + (d.bestTime ? '<h3 class="tgx-subh">When to go</h3>' + this._prose(d.bestTime, 3) : '');
+      const body = this._prose(d.overview, 4) + (d.bestTime ? '<h3 class="tgx-subh">' + esc(this.t('whenToGo')) + '</h3>' + this._prose(d.bestTime, 3) : '');
       if (!d.overview && !d.bestTime) return '';
-      return this._section('info', 'Overview', 'The attraction in brief', body);
+      return this._section('info', this.t('overview'), this.t('overviewSub'), body);
     }
 
     _renderStar(d) {
       if (!d.starAttractions) return '';
-      return this._section('sparkles', 'Star attractions', 'What not to miss', this._prose(d.starAttractions, 10));
+      return this._section('sparkles', this.t('starAttractions'), this.t('starSub'), this._prose(d.starAttractions, 10));
     }
 
     _renderGuides(d) {
       const cards = [
-        this._card('users', 'Families', d.familyGuide),
-        this._card('coaster', 'Thrill-seekers', d.thrillGuide),
-        this._card('ruler', 'Height restrictions', d.heightRestrict),
-        this._card('access', 'Accessibility', d.accessibility),
+        this._card('users', this.t('families'), d.familyGuide),
+        this._card('coaster', this.t('thrillSeekers'), d.thrillGuide),
+        this._card('ruler', this.t('heightRestrictions'), d.heightRestrict),
+        this._card('access', this.t('accessibility'), d.accessibility),
       ].filter(Boolean);
       if (!cards.length) return '';
-      return this._section('ferris', 'Good to know', 'Plan around your group', '<div class="tgx-cards">' + cards.join('') + '</div>');
+      return this._section('ferris', this.t('goodToKnow'), this.t('goodToKnowSub'), '<div class="tgx-cards">' + cards.join('') + '</div>');
     }
 
     _renderTickets(d) {
       const main = d.tickets ? '<div class="tgx-callout">' + paras(d.tickets, 5) + '</div>' : '';
       const fast = d.fastTrack
-        ? '<h3 class="tgx-subh">Fast-track and skip-the-queue</h3>' + this._prose(d.fastTrack, 3) : '';
+        ? '<h3 class="tgx-subh">' + esc(this.t('fastTrack')) + '</h3>' + this._prose(d.fastTrack, 3) : '';
       if (!main && !fast) return '';
-      return this._section('ticket', 'Tickets and prices', 'Ticket types and passes', main + fast);
+      return this._section('ticket', this.t('ticketsAndPrices'), this.t('ticketsSub'), main + fast);
     }
 
     _renderLocated(d) {
       const blocks = [];
-      if (d.nearestAirport) blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('plane', 15) + '<span>Nearest airports</span></div>' + this._prose(d.nearestAirport, 3) + '</div>');
-      if (d.gettingThere)   blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('car', 15) + '<span>Getting there</span></div>' + this._prose(d.gettingThere, 3) + '</div>');
-      if (d.nearestTown)    blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('pin', 15) + '<span>Nearest town</span></div>' + this._prose(d.nearestTown, 2) + '</div>');
+      if (d.nearestAirport) blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('plane', 15) + '<span>' + esc(this.t('nearestAirports')) + '</span></div>' + this._prose(d.nearestAirport, 3) + '</div>');
+      if (d.gettingThere)   blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('car', 15) + '<span>' + esc(this.t('gettingThere')) + '</span></div>' + this._prose(d.gettingThere, 3) + '</div>');
+      if (d.nearestTown)    blocks.push('<div class="tgx-block"><div class="tgx-block-label">' + icon('pin', 15) + '<span>' + esc(this.t('nearestTown')) + '</span></div>' + this._prose(d.nearestTown, 2) + '</div>');
       const hasLL = typeof d.lat === 'number' && typeof d.lng === 'number';
       const mapEl = (hasLL && this.c.showMap !== false)
-        ? '<div class="tgx-map" data-tgx-map role="region" aria-label="Map showing ' + esc(d.name) + '"></div>' : '';
+        ? '<div class="tgx-map" data-tgx-map role="region" aria-label="' + esc(this.t('mapLabel', { name: d.name })) + '"></div>' : '';
       if (!blocks.length && !mapEl) return '';
-      return this._section('compass', 'Getting there', '', mapEl + blocks.join(''));
+      return this._section('compass', this.t('gettingThere'), '', mapEl + blocks.join(''));
     }
 
     _renderStay(d) {
       const cards = [
-        this._card('bed', 'On-site hotels', d.onSiteHotels),
-        this._card('building', 'Nearby hotels', d.nearbyHotels),
+        this._card('bed', this.t('onSiteHotels'), d.onSiteHotels),
+        this._card('building', this.t('nearbyHotels'), d.nearbyHotels),
       ].filter(Boolean);
       if (!cards.length) return '';
-      return this._section('bed', 'Where to stay', '', '<div class="tgx-cards">' + cards.join('') + '</div>');
+      return this._section('bed', this.t('whereToStay'), '', '<div class="tgx-cards">' + cards.join('') + '</div>');
     }
 
     _renderFood(d) {
       if (!d.foodDrink) return '';
-      return this._section('utensils', 'Food and drink', '', this._prose(d.foodDrink, 4));
+      return this._section('utensils', this.t('foodAndDrink'), '', this._prose(d.foodDrink, 4));
     }
 
     _renderTips(d) {
       if (!d.quirks) return '';
-      return this._section('alert', 'Insider tips', 'Things that catch first-timers out', '<div class="tgx-tips">' + paras(d.quirks, 6) + '</div>');
+      return this._section('alert', this.t('insiderTips'), this.t('insiderTipsSub'), '<div class="tgx-tips">' + paras(d.quirks, 6) + '</div>');
     }
 
     _renderCombine(d) {
       if (!d.combineWith) return '';
-      return this._section('link', 'Combine your trip', 'Other attractions nearby', this._prose(d.combineWith, 3));
+      return this._section('link', this.t('combineTrip'), this.t('combineSub'), this._prose(d.combineWith, 3));
     }
 
     _renderCta(d) {
@@ -408,30 +576,31 @@
       const url = safeUrl(cta.buttonUrl, true);
       // No official-website link by design: agents do not want to send their
       // visitors off to book direct. The CTA drives the enquiry to the agent.
-      const verified = d.verifiedDate ? '<p class="tgx-verified">' + icon('check', 12) + '<span>Verified ' + esc(d.verifiedDate) + '</span></p>' : '';
+      const verified = d.verifiedDate ? '<p class="tgx-verified">' + icon('check', 12) + '<span>' + esc(this.t('verified', { date: d.verifiedDate })) + '</span></p>' : '';
       if (!title && !sub && !url) return verified;
       return '<div class="tgx-cta">' +
         '<div class="tgx-cta-text">' +
           (title ? '<h3 class="tgx-cta-title">' + esc(title) + '</h3>' : '') +
           (sub ? '<p class="tgx-cta-sub">' + esc(sub) + '</p>' : '') +
         '</div>' +
-        (url ? '<div class="tgx-cta-actions"><a href="' + esc(url) + '" class="tgx-btn tgx-btn-primary">' + esc(cta.buttonLabel || 'Enquire') + icon('arrow', 14) + '</a></div>' : '') +
+        (url ? '<div class="tgx-cta-actions"><a href="' + esc(url) + '" class="tgx-btn tgx-btn-primary">' + esc(cta.buttonLabel || this.t('startEnquiry')) + icon('arrow', 14) + '</a></div>' : '') +
         verified + '</div>';
     }
 
     _renderNotFound() {
       this._root.innerHTML = '<div class="tgx-notice"><div class="tgx-notice-icon">' + icon('info', 22) + '</div>' +
-        '<h2 class="tgx-notice-title">Attraction not found</h2>' +
-        '<p class="tgx-notice-body">This widget is looking for an attraction that is not in the content database yet.</p></div>';
+        '<h2 class="tgx-notice-title">' + esc(this.t('notFoundTitle')) + '</h2>' +
+        '<p class="tgx-notice-body">' + esc(this.t('notFoundBody')) + '</p></div>';
     }
     _renderError() {
       this._root.innerHTML = '<div class="tgx-notice"><div class="tgx-notice-icon">' + icon('alert', 22) + '</div>' +
-        '<h2 class="tgx-notice-title">Unable to load</h2>' +
-        '<p class="tgx-notice-body">The attraction content is temporarily unavailable. Please try again in a moment.</p></div>';
+        '<h2 class="tgx-notice-title">' + esc(this.t('errorTitle')) + '</h2>' +
+        '<p class="tgx-notice-body">' + esc(this.t('errorBody')) + '</p></div>';
     }
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig || {}));
+      this.t = makeT(this.c);
       this._renderShell();
       if (this.c.attractionData) { this._data = this.c.attractionData; this._renderContent(); }
       else if (this.c.widgetId || this.c.recordId) { this._load(); }

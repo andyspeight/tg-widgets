@@ -27,7 +27,42 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (relative-time labels, the header/CTA defaults, the
+  // empty state and the aria-labels). Video titles, channel name and
+  // descriptions are author/data content, never translated here. English is the
+  // source + fallback.
+  const MESSAGES = {
+    en: { latestVideos: 'Latest videos', visitChannel: 'Visit our channel', untitled: 'Untitled', noVideos: 'No videos to show.', emptyHelp: 'Add a YouTube channel to show its latest videos.', errorHelp: "Couldn't load videos right now.", views: 'views', play: 'Play: {title}', previous: 'Previous', next: 'Next', videoPlayer: 'Video player', close: 'Close video' },
+    fr: { latestVideos: 'Dernières vidéos', visitChannel: 'Voir notre chaîne', untitled: 'Sans titre', noVideos: 'Aucune vidéo à afficher.', emptyHelp: 'Ajoutez une chaîne YouTube pour afficher ses dernières vidéos.', errorHelp: 'Impossible de charger les vidéos pour le moment.', views: 'vues', play: 'Lire : {title}', previous: 'Précédent', next: 'Suivant', videoPlayer: 'Lecteur vidéo', close: 'Fermer la vidéo' },
+    de: { latestVideos: 'Neueste Videos', visitChannel: 'Unseren Kanal besuchen', untitled: 'Ohne Titel', noVideos: 'Keine Videos vorhanden.', emptyHelp: 'Fügen Sie einen YouTube-Kanal hinzu, um dessen neueste Videos anzuzeigen.', errorHelp: 'Videos konnten gerade nicht geladen werden.', views: 'Aufrufe', play: 'Abspielen: {title}', previous: 'Zurück', next: 'Weiter', videoPlayer: 'Videoplayer', close: 'Video schließen' },
+    es: { latestVideos: 'Últimos vídeos', visitChannel: 'Visita nuestro canal', untitled: 'Sin título', noVideos: 'No hay vídeos para mostrar.', emptyHelp: 'Añade un canal de YouTube para mostrar sus últimos vídeos.', errorHelp: 'No se pudieron cargar los vídeos ahora mismo.', views: 'visualizaciones', play: 'Reproducir: {title}', previous: 'Anterior', next: 'Siguiente', videoPlayer: 'Reproductor de vídeo', close: 'Cerrar vídeo' },
+    it: { latestVideos: 'Ultimi video', visitChannel: 'Visita il nostro canale', untitled: 'Senza titolo', noVideos: 'Nessun video da mostrare.', emptyHelp: 'Aggiungi un canale YouTube per mostrare i suoi ultimi video.', errorHelp: 'Impossibile caricare i video in questo momento.', views: 'visualizzazioni', play: 'Riproduci: {title}', previous: 'Precedente', next: 'Successivo', videoPlayer: 'Lettore video', close: 'Chiudi video' },
+    ro: { latestVideos: 'Cele mai recente videoclipuri', visitChannel: 'Vizitează canalul nostru', untitled: 'Fără titlu', noVideos: 'Niciun videoclip de afișat.', emptyHelp: 'Adaugă un canal YouTube pentru a afișa cele mai recente videoclipuri.', errorHelp: 'Nu am putut încărca videoclipurile acum.', views: 'vizualizări', play: 'Redă: {title}', previous: 'Anterior', next: 'Următor', videoPlayer: 'Player video', close: 'Închide videoclipul' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -69,23 +104,48 @@
   const VIDEO_ID_RE = /^[A-Za-z0-9_-]{11}$/;
   const CHANNEL_ID_RE = /^UC[A-Za-z0-9_-]{22}$/;
 
-  function fmtViews(n) {
+  function fmtViews(n, t) {
     if (typeof n !== 'number' || !isFinite(n) || n < 0) return '';
-    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M views';
-    if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, '') + 'K views';
-    return n + ' views';
+    const views = t ? t('views') : 'views';
+    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M ' + views;
+    if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, '') + 'K ' + views;
+    return n + ' ' + views;
   }
-  function fmtDate(iso) {
+  const LOCALE_MAP = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', it: 'it-IT', ro: 'ro-RO' };
+  function localeFor(lang) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.localeOf === 'function') {
+      try { const l = window.TGi18n.localeOf(lang); if (l) return l; } catch (e) { /* noop */ }
+    }
+    return LOCALE_MAP[lang] || 'en-GB';
+  }
+  function fmtDate(iso, t) {
     if (!iso) return '';
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '';
     const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-    if (days <= 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return days + ' days ago';
-    if (days < 30) { const w = Math.floor(days / 7); return w + (w === 1 ? ' week ago' : ' weeks ago'); }
-    if (days < 365) { const mo = Math.floor(days / 30); return mo + (mo === 1 ? ' month ago' : ' months ago'); }
-    const y = Math.floor(days / 365); return y + (y === 1 ? ' year ago' : ' years ago');
+    // Pick the coarsest sensible unit using the same thresholds the old code used.
+    let n, unit;
+    if (days <= 0)        { n = 0;                      unit = 'day'; }
+    else if (days < 7)    { n = days;                   unit = 'day'; }
+    else if (days < 30)   { n = Math.floor(days / 7);   unit = 'week'; }
+    else if (days < 365)  { n = Math.floor(days / 30);  unit = 'month'; }
+    else                  { n = Math.floor(days / 365); unit = 'year'; }
+    const lang = (t && t.lang) ? t.lang : 'en';
+    try {
+      // numeric:'auto' yields localised "today"/"yesterday"/"2 days ago" with
+      // correct singular/plural. Negative value = in the past.
+      const rtf = new Intl.RelativeTimeFormat(localeFor(lang), { numeric: 'auto' });
+      let s = rtf.format(-n, unit);
+      // The previous output capitalised "Today"/"Yesterday"; match that for the
+      // day-level relative strings so the chrome looks unchanged.
+      if (unit === 'day' && s) s = s.charAt(0).toUpperCase() + s.slice(1);
+      return s;
+    } catch (e) {
+      // Intl unavailable — fall back to a plain English-style relative string.
+      if (unit === 'day' && n <= 0) return 'Today';
+      if (unit === 'day' && n === 1) return 'Yesterday';
+      return n + ' ' + unit + (n === 1 ? '' : 's') + ' ago';
+    }
   }
 
   const ICONS = {
@@ -99,8 +159,8 @@
     channelId: '', channelUrl: '', channelTitle: '', videos: null,
     layout: 'grid', columns: 3, maxVideos: 6,
     theme: 'light', accent: '#0891B2', radius: 16, font: 'Inter', pageBg: '',
-    showHeader: true, headerTitle: 'Latest videos', headerSubtitle: '',
-    showChannelCta: true, channelCtaLabel: 'Visit our channel',
+    showHeader: true, headerTitle: null, headerSubtitle: '',
+    showChannelCta: true, channelCtaLabel: null,
     showTitle: true, showPublished: true, showViews: false,
     play: 'lightbox', autoplay: true,
   };
@@ -245,6 +305,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
       this.videos = [];
       this.channel = { title: this.cfg.channelTitle || '', url: safeUrl(this.cfg.channelUrl) || '' };
@@ -286,11 +347,13 @@
     _headHtml() {
       const cfg = this.cfg;
       if (!cfg.showHeader && !cfg.showChannelCta) return '';
-      const title = cfg.showHeader && cfg.headerTitle ? `<h3 class="tgy-title">${esc(cfg.headerTitle)}</h3>` : '';
+      const headerTitle = (cfg.headerTitle != null) ? cfg.headerTitle : this.t('latestVideos');
+      const ctaLabel = (cfg.channelCtaLabel != null) ? cfg.channelCtaLabel : this.t('visitChannel');
+      const title = cfg.showHeader && headerTitle ? `<h3 class="tgy-title">${esc(headerTitle)}</h3>` : '';
       const sub = cfg.showHeader && cfg.headerSubtitle ? `<p class="tgy-sub">${esc(cfg.headerSubtitle)}</p>` : '';
       const url = safeUrl(this.channel.url) || safeUrl(cfg.channelUrl);
       const cta = (cfg.showChannelCta && url)
-        ? `<a class="tgy-cta" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ICONS.yt}${esc(cfg.channelCtaLabel || 'Visit our channel')}</a>` : '';
+        ? `<a class="tgy-cta" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ICONS.yt}${esc(ctaLabel)}</a>` : '';
       if (!title && !sub && !cta) return '';
       return `<div class="tgy-head"><div class="tgy-head-text">${title}${sub}</div>${cta}</div>`;
     }
@@ -314,23 +377,23 @@
       const cfg = this.cfg;
       // Inline override — render directly, no fetch.
       if (Array.isArray(cfg.videos) && cfg.videos.length) {
-        this.videos = cfg.videos.filter(v => v && VIDEO_ID_RE.test(String(v.id || ''))).map(this._normVideo);
+        this.videos = cfg.videos.filter(v => v && VIDEO_ID_RE.test(String(v.id || ''))).map(this._normVideo, this);
         if (!this.channel.title && cfg.channelTitle) this.channel.title = cfg.channelTitle;
         this._refreshHead();
         this._renderVideos();
         return;
       }
       const id = String(cfg.channelId || '').trim();
-      if (!CHANNEL_ID_RE.test(id)) { this._renderEmpty('Add a YouTube channel to show its latest videos.'); return; }
+      if (!CHANNEL_ID_RE.test(id)) { this._renderEmpty(this.t('emptyHelp')); return; }
       try {
         const max = Math.max(1, Math.min(15, parseInt(cfg.maxVideos, 10) || 6));
         const r = await fetch(FEED_BASE + '?channelId=' + encodeURIComponent(id) + '&max=' + max, { method: 'GET', credentials: 'omit' });
         const d = await r.json().catch(() => null);
         if (!r.ok || !d || !d.ok || !Array.isArray(d.videos) || !d.videos.length) {
-          this._renderEmpty((d && d.error) ? d.error : 'Couldn’t load videos right now.');
+          this._renderEmpty((d && d.error) ? d.error : this.t('errorHelp'));
           return;
         }
-        this.videos = d.videos.map(this._normVideo);
+        this.videos = d.videos.map(this._normVideo, this);
         if (d.channel) {
           if (!this.channel.title) this.channel.title = d.channel.title || '';
           if (!this.channel.url) this.channel.url = safeUrl(d.channel.url) || '';
@@ -338,7 +401,7 @@
         this._refreshHead();
         this._renderVideos();
       } catch (e) {
-        this._renderEmpty('Couldn’t load videos right now.');
+        this._renderEmpty(this.t('errorHelp'));
       }
     }
 
@@ -346,7 +409,7 @@
       const id = String(v.id || '');
       return {
         id,
-        title: v.title || 'Untitled',
+        title: v.title || this.t('untitled'),
         url: safeUrl(v.url) || ('https://www.youtube.com/watch?v=' + id),
         embedUrl: 'https://www.youtube-nocookie.com/embed/' + id,
         published: v.published || '',
@@ -363,13 +426,13 @@
         ? `href="${esc(v.url)}" target="_blank" rel="noopener noreferrer"`
         : `type="button" data-id="${esc(v.id)}"`;
       const meta = [];
-      if (cfg.showPublished && v.published) meta.push(esc(fmtDate(v.published)));
-      if (cfg.showViews && typeof v.views === 'number') meta.push(esc(fmtViews(v.views)));
+      if (cfg.showPublished && v.published) meta.push(esc(fmtDate(v.published, this.t)));
+      if (cfg.showViews && typeof v.views === 'number') meta.push(esc(fmtViews(v.views, this.t)));
       const metaHtml = meta.length ? `<div class="tgy-meta">${meta.map((m, i) => (i ? '<span class="dot"></span>' : '') + m).join('')}</div>` : '';
       const titleHtml = cfg.showTitle ? `<p class="tgy-vtitle">${esc(v.title)}</p>` : '';
       const descHtml = (withDesc && v.description) ? `<p class="tgy-desc">${esc(v.description)}</p>` : '';
       const body = (titleHtml || metaHtml || descHtml) ? `<div class="tgy-body">${titleHtml}${metaHtml}${descHtml}</div>` : '';
-      return `<${tag} class="tgy-card" ${attrs} aria-label="Play: ${esc(v.title)}">
+      return `<${tag} class="tgy-card" ${attrs} aria-label="${esc(this.t('play', { title: v.title }))}">
         <div class="tgy-thumb">
           <img src="${esc(v.thumbnail)}" data-fallback="https://i.ytimg.com/vi/${esc(v.id)}/mqdefault.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
           <span class="tgy-play"><span>${ICONS.play}</span></span>
@@ -383,9 +446,9 @@
       const cards = this.videos.map(v => this._cardHtml(v, layout === 'list')).join('');
       if (layout === 'carousel') {
         this.contentEl.innerHTML = `<div class="tgy-carousel-wrap">
-          <button class="tgy-arrow prev" type="button" aria-label="Previous" disabled>${ICONS.chev}</button>
+          <button class="tgy-arrow prev" type="button" aria-label="${esc(this.t('previous'))}" disabled>${ICONS.chev}</button>
           <div class="tgy-carousel" id="tgy-track">${cards}</div>
-          <button class="tgy-arrow next" type="button" aria-label="Next">${ICONS.chev}</button>
+          <button class="tgy-arrow next" type="button" aria-label="${esc(this.t('next'))}">${ICONS.chev}</button>
         </div>`;
         this._wireCarousel();
       } else {
@@ -395,7 +458,7 @@
     }
 
     _renderEmpty(msg) {
-      this.contentEl.innerHTML = `<div class="tgy-empty">${ICONS.yt}<div>${esc(msg || 'No videos to show.')}</div></div>`;
+      this.contentEl.innerHTML = `<div class="tgy-empty">${ICONS.yt}<div>${esc(msg || this.t('noVideos'))}</div></div>`;
     }
 
     _wirePlayback() {
@@ -440,9 +503,9 @@
       lb.className = 'tgy-lb';
       lb.setAttribute('role', 'dialog');
       lb.setAttribute('aria-modal', 'true');
-      lb.setAttribute('aria-label', 'Video player');
+      lb.setAttribute('aria-label', this.t('videoPlayer'));
       lb.innerHTML = `<div class="tgy-lb-inner">
-        <button class="tgy-lb-close" type="button" aria-label="Close video">${ICONS.close}</button>
+        <button class="tgy-lb-close" type="button" aria-label="${esc(this.t('close'))}">${ICONS.close}</button>
         <div class="tgy-lb-frame"><iframe src="${esc(src)}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
       </div>`;
       // Mount INSIDE the shadow root — styles stay scoped, nothing leaks to the
@@ -465,6 +528,7 @@
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      this.t = makeT(this.cfg);
       this.channel = { title: this.cfg.channelTitle || '', url: safeUrl(this.cfg.channelUrl) || '' };
       this._buildShell();
       this._load();
