@@ -29,8 +29,237 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.0';
+  const VERSION = '0.1.1';
   const API_BASE = '/api/widget-config';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (section headings, fact/detail labels, CTA copy,
+  // booking-bar and form chrome, countdown and success states, aria-labels).
+  // The offer's own data — title, teaser, description, place and hotel names,
+  // prices, dates — is author content and is never translated. ATOL/ABTA
+  // protection wording is left in English on purpose. English is the source +
+  // fallback.
+  const MESSAGES = {
+    en: {
+      defaultTitle: 'Your next great escape',
+      save: 'Save', youSave: 'You save', from: 'From', poa: 'POA',
+      perPerson: 'per person', basedOnLead: 'based on the lead price',
+      deposit: 'Secure it today with a {amount} deposit',
+      duration: 'Duration', nights: 'nights', board: 'Board', flights: 'Flights',
+      travel: 'Travel', hotel: 'Hotel', star: 'star',
+      resort: 'Resort', destination: 'Destination', departsFrom: 'Departs from',
+      airline: 'Airline', boardBasis: 'Board basis', travelPeriod: 'Travel period',
+      bookByLabel: 'Book by', offerReference: 'Offer reference',
+      aboutHoliday: 'About this holiday', whatsIncluded: "What's included",
+      photos: 'Photos', takeALook: 'Take a look', whereYoullBe: "Where you'll be",
+      theDetail: 'The detail',
+      enquireNow: 'Enquire now', enquireAbout: 'Enquire about this offer',
+      sendEnquiry: 'Send my enquiry',
+      fullName: 'Full name', addName: 'Please add your name',
+      email: 'Email', validEmail: 'Valid email please', phone: 'Phone',
+      preferredMonth: 'Preferred month',
+      travellers: 'Travellers', traveller1: '1 traveller', travellers2: '2 travellers',
+      adultsChildren: '2 adults + children', travellers3plus: '3+ travellers',
+      messagePlaceholder: 'Anything else we should know? (dates, room type, questions)',
+      trustLine: 'No payment taken now. A travel expert replies within one working hour.',
+      readyWhenYouAre: 'Ready when you are',
+      ctaCopy: 'Talk to a travel expert and we will hold this price while you decide.',
+      likeTheLook: 'Like the look of it?',
+      enqBandCopy: 'Send us a quick enquiry and a travel expert will be in touch within one working hour. No payment now.',
+      offerRef: 'Offer ref', poweredBy: 'Powered by Travelgenix',
+      bookByPrefix: 'Book by', endsToday: 'Offer ends today',
+      endsIn: 'Offer ends in {days}d {hours}h {mins}m',
+      enquirySent: 'Enquiry sent',
+      thanksName: 'Thanks {name}. A travel expert will be in touch within one working hour.',
+      openPhoto: 'Open photo {n}', video: 'Video'
+    },
+    fr: {
+      defaultTitle: 'Votre prochaine escapade',
+      save: 'Économisez', youSave: 'Vous économisez', from: 'À partir de', poa: 'Sur demande',
+      perPerson: 'par personne', basedOnLead: 'sur la base du prix de départ',
+      deposit: 'Réservez aujourd’hui avec un acompte de {amount}',
+      duration: 'Durée', nights: 'nuits', board: 'Pension', flights: 'Vols',
+      travel: 'Voyage', hotel: 'Hôtel', star: 'étoiles',
+      resort: 'Station', destination: 'Destination', departsFrom: 'Départ de',
+      airline: 'Compagnie aérienne', boardBasis: 'Type de pension', travelPeriod: 'Période de voyage',
+      bookByLabel: 'Réserver avant le', offerReference: 'Référence de l’offre',
+      aboutHoliday: 'À propos de ce séjour', whatsIncluded: 'Ce qui est inclus',
+      photos: 'Photos', takeALook: 'Jetez un œil', whereYoullBe: 'Où vous serez',
+      theDetail: 'Les détails',
+      enquireNow: 'Faire une demande', enquireAbout: 'Renseignez-vous sur cette offre',
+      sendEnquiry: 'Envoyer ma demande',
+      fullName: 'Nom complet', addName: 'Veuillez indiquer votre nom',
+      email: 'E-mail', validEmail: 'Veuillez saisir un e-mail valide', phone: 'Téléphone',
+      preferredMonth: 'Mois souhaité',
+      travellers: 'Voyageurs', traveller1: '1 voyageur', travellers2: '2 voyageurs',
+      adultsChildren: '2 adultes + enfants', travellers3plus: '3 voyageurs ou plus',
+      messagePlaceholder: 'Autre chose à nous signaler ? (dates, type de chambre, questions)',
+      trustLine: 'Aucun paiement maintenant. Un expert voyages vous répond sous une heure ouvrée.',
+      readyWhenYouAre: 'Prêt quand vous l’êtes',
+      ctaCopy: 'Parlez à un expert voyages et nous bloquerons ce prix le temps de votre décision.',
+      likeTheLook: 'Cela vous plaît ?',
+      enqBandCopy: 'Envoyez-nous une demande rapide et un expert voyages vous contactera sous une heure ouvrée. Aucun paiement maintenant.',
+      offerRef: 'Réf. offre', poweredBy: 'Propulsé par Travelgenix',
+      bookByPrefix: 'Réserver avant le', endsToday: 'L’offre se termine aujourd’hui',
+      endsIn: 'L’offre se termine dans {days}j {hours}h {mins}min',
+      enquirySent: 'Demande envoyée',
+      thanksName: 'Merci {name}. Un expert voyages vous contactera sous une heure ouvrée.',
+      openPhoto: 'Ouvrir la photo {n}', video: 'Vidéo'
+    },
+    de: {
+      defaultTitle: 'Ihre nächste Auszeit',
+      save: 'Sparen', youSave: 'Sie sparen', from: 'Ab', poa: 'Auf Anfrage',
+      perPerson: 'pro Person', basedOnLead: 'auf Basis des Startpreises',
+      deposit: 'Sichern Sie es heute mit einer Anzahlung von {amount}',
+      duration: 'Dauer', nights: 'Nächte', board: 'Verpflegung', flights: 'Flüge',
+      travel: 'Reise', hotel: 'Hotel', star: 'Sterne',
+      resort: 'Ferienort', destination: 'Reiseziel', departsFrom: 'Abflug ab',
+      airline: 'Fluggesellschaft', boardBasis: 'Verpflegung', travelPeriod: 'Reisezeitraum',
+      bookByLabel: 'Buchen bis', offerReference: 'Angebotsreferenz',
+      aboutHoliday: 'Über diesen Urlaub', whatsIncluded: 'Was ist inbegriffen',
+      photos: 'Fotos', takeALook: 'Werfen Sie einen Blick', whereYoullBe: 'Wo Sie sein werden',
+      theDetail: 'Die Details',
+      enquireNow: 'Jetzt anfragen', enquireAbout: 'Zu diesem Angebot anfragen',
+      sendEnquiry: 'Anfrage senden',
+      fullName: 'Vollständiger Name', addName: 'Bitte geben Sie Ihren Namen an',
+      email: 'E-Mail', validEmail: 'Bitte gültige E-Mail angeben', phone: 'Telefon',
+      preferredMonth: 'Wunschmonat',
+      travellers: 'Reisende', traveller1: '1 Reisender', travellers2: '2 Reisende',
+      adultsChildren: '2 Erwachsene + Kinder', travellers3plus: '3+ Reisende',
+      messagePlaceholder: 'Sonst noch etwas, das wir wissen sollten? (Daten, Zimmertyp, Fragen)',
+      trustLine: 'Jetzt keine Zahlung. Ein Reiseexperte antwortet innerhalb einer Arbeitsstunde.',
+      readyWhenYouAre: 'Bereit, wenn Sie es sind',
+      ctaCopy: 'Sprechen Sie mit einem Reiseexperten und wir halten diesen Preis, während Sie entscheiden.',
+      likeTheLook: 'Gefällt es Ihnen?',
+      enqBandCopy: 'Senden Sie uns eine kurze Anfrage und ein Reiseexperte meldet sich innerhalb einer Arbeitsstunde. Jetzt keine Zahlung.',
+      offerRef: 'Angebotsref.', poweredBy: 'Bereitgestellt von Travelgenix',
+      bookByPrefix: 'Buchen bis', endsToday: 'Das Angebot endet heute',
+      endsIn: 'Das Angebot endet in {days}T {hours}Std {mins}Min',
+      enquirySent: 'Anfrage gesendet',
+      thanksName: 'Danke {name}. Ein Reiseexperte meldet sich innerhalb einer Arbeitsstunde.',
+      openPhoto: 'Foto {n} öffnen', video: 'Video'
+    },
+    es: {
+      defaultTitle: 'Tu próxima escapada',
+      save: 'Ahorra', youSave: 'Ahorras', from: 'Desde', poa: 'A consultar',
+      perPerson: 'por persona', basedOnLead: 'según el precio de salida',
+      deposit: 'Resérvalo hoy con un depósito de {amount}',
+      duration: 'Duración', nights: 'noches', board: 'Régimen', flights: 'Vuelos',
+      travel: 'Viaje', hotel: 'Hotel', star: 'estrellas',
+      resort: 'Complejo', destination: 'Destino', departsFrom: 'Sale de',
+      airline: 'Aerolínea', boardBasis: 'Régimen', travelPeriod: 'Periodo de viaje',
+      bookByLabel: 'Reserva antes del', offerReference: 'Referencia de la oferta',
+      aboutHoliday: 'Sobre estas vacaciones', whatsIncluded: 'Qué incluye',
+      photos: 'Fotos', takeALook: 'Echa un vistazo', whereYoullBe: 'Dónde estarás',
+      theDetail: 'Los detalles',
+      enquireNow: 'Consultar ahora', enquireAbout: 'Consulta sobre esta oferta',
+      sendEnquiry: 'Enviar mi consulta',
+      fullName: 'Nombre completo', addName: 'Indica tu nombre, por favor',
+      email: 'Correo electrónico', validEmail: 'Introduce un correo válido', phone: 'Teléfono',
+      preferredMonth: 'Mes preferido',
+      travellers: 'Viajeros', traveller1: '1 viajero', travellers2: '2 viajeros',
+      adultsChildren: '2 adultos + niños', travellers3plus: '3 o más viajeros',
+      messagePlaceholder: '¿Algo más que debamos saber? (fechas, tipo de habitación, preguntas)',
+      trustLine: 'Ningún pago ahora. Un experto en viajes responde en una hora laborable.',
+      readyWhenYouAre: 'Cuando quieras',
+      ctaCopy: 'Habla con un experto en viajes y mantendremos este precio mientras decides.',
+      likeTheLook: '¿Te gusta lo que ves?',
+      enqBandCopy: 'Envíanos una consulta rápida y un experto en viajes te contactará en una hora laborable. Sin pago ahora.',
+      offerRef: 'Ref. oferta', poweredBy: 'Con tecnología de Travelgenix',
+      bookByPrefix: 'Reserva antes del', endsToday: 'La oferta termina hoy',
+      endsIn: 'La oferta termina en {days}d {hours}h {mins}min',
+      enquirySent: 'Consulta enviada',
+      thanksName: 'Gracias {name}. Un experto en viajes te contactará en una hora laborable.',
+      openPhoto: 'Abrir foto {n}', video: 'Vídeo'
+    },
+    it: {
+      defaultTitle: 'La tua prossima fuga',
+      save: 'Risparmia', youSave: 'Risparmi', from: 'Da', poa: 'Su richiesta',
+      perPerson: 'a persona', basedOnLead: 'in base al prezzo di partenza',
+      deposit: 'Bloccala oggi con un acconto di {amount}',
+      duration: 'Durata', nights: 'notti', board: 'Trattamento', flights: 'Voli',
+      travel: 'Viaggio', hotel: 'Hotel', star: 'stelle',
+      resort: 'Località', destination: 'Destinazione', departsFrom: 'Partenza da',
+      airline: 'Compagnia aerea', boardBasis: 'Trattamento', travelPeriod: 'Periodo di viaggio',
+      bookByLabel: 'Prenota entro il', offerReference: 'Riferimento offerta',
+      aboutHoliday: 'Su questa vacanza', whatsIncluded: 'Cosa è incluso',
+      photos: 'Foto', takeALook: 'Dai un’occhiata', whereYoullBe: 'Dove sarai',
+      theDetail: 'I dettagli',
+      enquireNow: 'Richiedi ora', enquireAbout: 'Richiedi informazioni su questa offerta',
+      sendEnquiry: 'Invia la mia richiesta',
+      fullName: 'Nome completo', addName: 'Inserisci il tuo nome',
+      email: 'E-mail', validEmail: 'Inserisci un’e-mail valida', phone: 'Telefono',
+      preferredMonth: 'Mese preferito',
+      travellers: 'Viaggiatori', traveller1: '1 viaggiatore', travellers2: '2 viaggiatori',
+      adultsChildren: '2 adulti + bambini', travellers3plus: '3 o più viaggiatori',
+      messagePlaceholder: 'Altro che dovremmo sapere? (date, tipo di camera, domande)',
+      trustLine: 'Nessun pagamento ora. Un esperto di viaggi risponde entro un’ora lavorativa.',
+      readyWhenYouAre: 'Quando vuoi',
+      ctaCopy: 'Parla con un esperto di viaggi e bloccheremo questo prezzo mentre decidi.',
+      likeTheLook: 'Ti piace?',
+      enqBandCopy: 'Inviaci una richiesta veloce e un esperto di viaggi ti contatterà entro un’ora lavorativa. Nessun pagamento ora.',
+      offerRef: 'Rif. offerta', poweredBy: 'Realizzato con Travelgenix',
+      bookByPrefix: 'Prenota entro il', endsToday: 'L’offerta termina oggi',
+      endsIn: 'L’offerta termina tra {days}g {hours}h {mins}min',
+      enquirySent: 'Richiesta inviata',
+      thanksName: 'Grazie {name}. Un esperto di viaggi ti contatterà entro un’ora lavorativa.',
+      openPhoto: 'Apri foto {n}', video: 'Video'
+    },
+    ro: {
+      defaultTitle: 'Următoarea ta evadare',
+      save: 'Economisește', youSave: 'Economisești', from: 'De la', poa: 'La cerere',
+      perPerson: 'de persoană', basedOnLead: 'pe baza prețului de pornire',
+      deposit: 'Rezervă astăzi cu un avans de {amount}',
+      duration: 'Durată', nights: 'nopți', board: 'Masă', flights: 'Zboruri',
+      travel: 'Călătorie', hotel: 'Hotel', star: 'stele',
+      resort: 'Stațiune', destination: 'Destinație', departsFrom: 'Pleacă din',
+      airline: 'Companie aeriană', boardBasis: 'Tip de masă', travelPeriod: 'Perioada de călătorie',
+      bookByLabel: 'Rezervă până la', offerReference: 'Referință ofertă',
+      aboutHoliday: 'Despre acest sejur', whatsIncluded: 'Ce este inclus',
+      photos: 'Fotografii', takeALook: 'Aruncă o privire', whereYoullBe: 'Unde vei fi',
+      theDetail: 'Detaliile',
+      enquireNow: 'Solicită acum', enquireAbout: 'Întreabă despre această ofertă',
+      sendEnquiry: 'Trimite solicitarea mea',
+      fullName: 'Nume complet', addName: 'Te rugăm să adaugi numele tău',
+      email: 'E-mail', validEmail: 'Introdu un e-mail valid', phone: 'Telefon',
+      preferredMonth: 'Luna preferată',
+      travellers: 'Călători', traveller1: '1 călător', travellers2: '2 călători',
+      adultsChildren: '2 adulți + copii', travellers3plus: '3+ călători',
+      messagePlaceholder: 'Altceva ce ar trebui să știm? (date, tip de cameră, întrebări)',
+      trustLine: 'Nicio plată acum. Un expert în călătorii răspunde în maximum o oră lucrătoare.',
+      readyWhenYouAre: 'Când ești pregătit',
+      ctaCopy: 'Vorbește cu un expert în călătorii și vom păstra acest preț cât timp te decizi.',
+      likeTheLook: 'Îți place?',
+      enqBandCopy: 'Trimite-ne o solicitare rapidă și un expert în călătorii te va contacta în maximum o oră lucrătoare. Nicio plată acum.',
+      offerRef: 'Ref. ofertă', poweredBy: 'Susținut de Travelgenix',
+      bookByPrefix: 'Rezervă până la', endsToday: 'Oferta se încheie astăzi',
+      endsIn: 'Oferta se încheie în {days}z {hours}h {mins}min',
+      enquirySent: 'Solicitare trimisă',
+      thanksName: 'Mulțumim {name}. Un expert în călătorii te va contacta în maximum o oră lucrătoare.',
+      openPhoto: 'Deschide fotografia {n}', video: 'Video'
+    }
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // Base URL this script was served from, so we can load sibling widgets
   // (widget-maps.js) from the same origin whether on tg-widgets or a client site.
@@ -448,6 +677,7 @@
       this.el = container;
       container._tgInitialised = true;
       this.cfg = this._defaults(config);
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this._timers = [];
       this._io = null;
@@ -508,7 +738,7 @@
       return {
         sym: sym, images: imgs,
         eyebrow: [this._f('style'), shortType(this._f('type'))].filter(Boolean).join('  ·  '),
-        title: this._f('title') || 'Your next great escape',
+        title: this._f('title') || this.t('defaultTitle'),
         stars: parseStars(this._f('stars')),
         loc: [this._f('resort'), this._f('region'), this._f('country')].filter(Boolean).join(', '),
         teaser: this._f('teaser'),
@@ -545,7 +775,7 @@
     _heroBadges(d, onLight) {
       const glass = onLight ? 'glass light' : 'glass';
       const out = [];
-      if (d.save) out.push('<span class="tgop-badge save">Save ' + esc(d.save) + (d.savePct ? ' (' + d.savePct + '%)' : '') + '</span>');
+      if (d.save) out.push('<span class="tgop-badge save">' + esc(this.t('save')) + ' ' + esc(d.save) + (d.savePct ? ' (' + d.savePct + '%)' : '') + '</span>');
       else if (d.badge && d.badge !== 'No badge') out.push('<span class="tgop-badge save">' + esc(d.badge) + '</span>');
       if (d.atol) out.push('<span class="tgop-badge ' + glass + '">' + I.shield + ' ATOL protected</span>');
       else if (d.abta) out.push('<span class="tgop-badge ' + glass + '">' + I.shield + ' ABTA member</span>');
@@ -553,12 +783,13 @@
     }
 
     _facts(d) {
+      const t = this.t;
       const items = [];
-      if (d.nights) items.push([I.moon, 'Duration', esc(d.nights) + ' nights']);
-      if (d.board) items.push([I.plate, 'Board', esc(d.board)]);
-      if (d.flighttype && d.flighttype !== 'Not included') items.push([I.plane, 'Flights', esc(d.flighttype)]);
-      if (d.period) items.push([I.calendar, 'Travel', esc(d.period)]);
-      if (d.stars) items.push([I.hotel, 'Hotel', d.stars + ' star']);
+      if (d.nights) items.push([I.moon, t('duration'), esc(d.nights) + ' ' + esc(t('nights'))]);
+      if (d.board) items.push([I.plate, t('board'), esc(d.board)]);
+      if (d.flighttype && d.flighttype !== 'Not included') items.push([I.plane, t('flights'), esc(d.flighttype)]);
+      if (d.period) items.push([I.calendar, t('travel'), esc(d.period)]);
+      if (d.stars) items.push([I.hotel, t('hotel'), d.stars + ' ' + esc(t('star'))]);
       // Pad to 5 if we can, but never show empties
       return items.slice(0, 5).map(function (f) {
         return '<div class="tgop-fact"><div class="tgop-fact-ic">' + f[0] + '</div>'
@@ -567,15 +798,16 @@
     }
 
     _detailTable(d) {
+      const t = this.t;
       const rows = [
-        ['Resort', [d.property, this._f('resort')].filter(Boolean).join(', ')],
-        ['Destination', d.loc],
-        ['Departs from', this._f('origin')],
-        ['Airline', [d.airline, d.flighttype].filter(Boolean).join(', ')],
-        ['Board basis', d.board],
-        ['Travel period', d.period],
-        ['Book by', d.bookby],
-        ['Offer reference', d.reference]
+        [t('resort'), [d.property, this._f('resort')].filter(Boolean).join(', ')],
+        [t('destination'), d.loc],
+        [t('departsFrom'), this._f('origin')],
+        [t('airline'), [d.airline, d.flighttype].filter(Boolean).join(', ')],
+        [t('boardBasis'), d.board],
+        [t('travelPeriod'), d.period],
+        [t('bookByLabel'), d.bookby],
+        [t('offerReference'), d.reference]
       ].filter(function (r) { return r[1]; });
       return rows.map(function (r) {
         return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>';
@@ -583,37 +815,38 @@
     }
 
     _bookCard(d) {
+      const t = this.t;
       const was = d.was ? '<span class="tgop-was">' + esc(d.was) + '</span>' : '';
-      const save = d.save ? '<div><span class="tgop-save">You save ' + esc(d.save) + (d.savePct ? ' · ' + d.savePct + '%' : '') + '</span></div>' : '';
-      const basis = d.basis ? '<div class="tgop-basis">' + esc(d.basis) + (d.nights ? ' · based on the lead price' : '') + '</div>' : '';
-      const deposit = d.deposit ? '<div class="tgop-deposit">' + I.shield + '<span>Secure it today with a ' + esc(d.deposit) + ' deposit</span></div>' : '';
+      const save = d.save ? '<div><span class="tgop-save">' + esc(t('youSave')) + ' ' + esc(d.save) + (d.savePct ? ' · ' + d.savePct + '%' : '') + '</span></div>' : '';
+      const basis = d.basis ? '<div class="tgop-basis">' + esc(d.basis) + (d.nights ? ' · ' + esc(t('basedOnLead')) : '') + '</div>' : '';
+      const deposit = d.deposit ? '<div class="tgop-deposit">' + I.shield + '<span>' + esc(t('deposit', { amount: d.deposit })) + '</span></div>' : '';
       const countdown = '<div class="tgop-countdown" data-countdown hidden></div>';
       const trustBits = [];
       if (d.atol) trustBits.push('ATOL protected');
       if (d.abta) trustBits.push('ABTA member');
-      const trust = '<p class="tgop-trust">No payment taken now. A travel expert replies within one working hour.'
+      const trust = '<p class="tgop-trust">' + esc(t('trustLine'))
         + (trustBits.length ? '<br>🔒 <b>' + esc(trustBits.join(' · ')) + '</b>' : '') + '</p>';
 
       return '<div class="tgop-book">'
         + '<div class="tgop-book-top">'
-          + '<div class="tgop-book-from">From</div>'
-          + '<div class="tgop-price-row"><div class="tgop-price">' + (d.price || 'POA') + '</div>' + was + '</div>'
+          + '<div class="tgop-book-from">' + esc(t('from')) + '</div>'
+          + '<div class="tgop-price-row"><div class="tgop-price">' + (d.price || esc(t('poa'))) + '</div>' + was + '</div>'
           + save + basis + deposit + countdown
         + '</div>'
         + '<form class="tgop-form" novalidate>'
-          + '<div class="tgop-form-h">Enquire about this offer</div>'
-          + '<div class="tgop-field" data-req="name"><input class="tgop-input" name="name" placeholder="Full name" autocomplete="name"><span class="tgop-field-err">Please add your name</span></div>'
+          + '<div class="tgop-form-h">' + esc(t('enquireAbout')) + '</div>'
+          + '<div class="tgop-field" data-req="name"><input class="tgop-input" name="name" placeholder="' + esc(t('fullName')) + '" autocomplete="name"><span class="tgop-field-err">' + esc(t('addName')) + '</span></div>'
           + '<div class="tgop-form-row">'
-            + '<div class="tgop-field" data-req="email"><input class="tgop-input" name="email" type="email" placeholder="Email" autocomplete="email"><span class="tgop-field-err">Valid email please</span></div>'
-            + '<div class="tgop-field"><input class="tgop-input" name="phone" type="tel" placeholder="Phone" autocomplete="tel"></div>'
+            + '<div class="tgop-field" data-req="email"><input class="tgop-input" name="email" type="email" placeholder="' + esc(t('email')) + '" autocomplete="email"><span class="tgop-field-err">' + esc(t('validEmail')) + '</span></div>'
+            + '<div class="tgop-field"><input class="tgop-input" name="phone" type="tel" placeholder="' + esc(t('phone')) + '" autocomplete="tel"></div>'
           + '</div>'
           + '<div class="tgop-form-row">'
-            + '<div class="tgop-field"><input class="tgop-input" name="month" placeholder="Preferred month"></div>'
-            + '<div class="tgop-field"><select class="tgop-input" name="travellers"><option value="">Travellers</option><option>1 traveller</option><option selected>2 travellers</option><option>2 adults + children</option><option>3+ travellers</option></select></div>'
+            + '<div class="tgop-field"><input class="tgop-input" name="month" placeholder="' + esc(t('preferredMonth')) + '"></div>'
+            + '<div class="tgop-field"><select class="tgop-input" name="travellers"><option value="">' + esc(t('travellers')) + '</option><option>' + esc(t('traveller1')) + '</option><option selected>' + esc(t('travellers2')) + '</option><option>' + esc(t('adultsChildren')) + '</option><option>' + esc(t('travellers3plus')) + '</option></select></div>'
           + '</div>'
-          + '<div class="tgop-field"><textarea class="tgop-input" name="message" placeholder="Anything else we should know? (dates, room type, questions)"></textarea></div>'
+          + '<div class="tgop-field"><textarea class="tgop-input" name="message" placeholder="' + esc(t('messagePlaceholder')) + '"></textarea></div>'
           + '<input class="tgop-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">'
-          + '<button type="submit" class="tgop-submit">Send my enquiry</button>'
+          + '<button type="submit" class="tgop-submit">' + esc(t('sendEnquiry')) + '</button>'
           + trust
         + '</form>'
       + '</div>';
@@ -636,6 +869,7 @@
       this._renderedAt = Date.now();   // used by the enquiry time-trap
 
       const cfg = this.cfg;
+      const t = this.t;
       const d = this._derive();
 
       const root = document.createElement('div');
@@ -659,43 +893,43 @@
         .map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
       // Only show the About section when there is prose or at least some tags.
       const fAbout = (descParas || tags)
-        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">About this holiday</h2>'
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('aboutHoliday')) + '</h2>'
           + (descParas ? '<div class="tgop-prose">' + descParas + '</div>' : '')
           + tags + '</div>'
         : '';
 
       const fIncludes = d.includes.length
-        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">What\'s included</h2><ul class="tgop-incl">'
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('whatsIncluded')) + '</h2><ul class="tgop-incl">'
           + d.includes.map(function (x) { return '<li><span class="tick">' + I.check + '</span>' + esc(x) + '</li>'; }).join('')
           + '</ul></div>'
         : '';
 
       const fGallery = d.images.length > 1
-        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">Photos</h2><div class="tgop-gallery" data-gallery>'
-          + d.images.slice(0, 5).map(function (src, i) { return '<button type="button" class="g" data-idx="' + i + '" style="background-image:url(' + esc(src) + ')" aria-label="Open photo ' + (i + 1) + '"></button>'; }).join('')
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('photos')) + '</h2><div class="tgop-gallery" data-gallery>'
+          + d.images.slice(0, 5).map(function (src, i) { return '<button type="button" class="g" data-idx="' + i + '" style="background-image:url(' + esc(src) + ')" aria-label="' + esc(t('openPhoto', { n: i + 1 })) + '"></button>'; }).join('')
           + '</div></div>'
         : '';
 
       const fVideo = d.video
-        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">Take a look</h2><div class="tgop-video">' + videoEmbed(d.video) + '</div></div>'
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('takeALook')) + '</h2><div class="tgop-video">' + videoEmbed(d.video) + '</div></div>'
         : '';
 
       // Map placeholder — TGMapsWidget is mounted into [data-map] in _bind().
       const fMap = d.map
-        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">Where you\'ll be</h2>'
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('whereYoullBe')) + '</h2>'
           + (d.map.address ? '<p class="tgop-map-addr">' + I.pin + esc(d.map.address) + '</p>' : '')
           + '<div class="tgop-map" data-map></div></div>'
         : '';
 
       const detailRows = this._detailTable(d);
       const fDetail = detailRows
-        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">The detail</h2><table class="tgop-table"><tbody>' + detailRows + '</tbody></table></div>'
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('theDetail')) + '</h2><table class="tgop-table"><tbody>' + detailRows + '</tbody></table></div>'
         : '';
 
       const fBar = '<div class="tgop-bar" data-bar><div class="tgop-bar-inner">'
         + '<span class="tgop-bar-title">' + esc(d.title) + '</span><span class="tgop-bar-spacer"></span>'
         + (d.price ? '<span class="tgop-bar-price">' + d.price + ' <small>' + esc(d.basis || '') + '</small></span>' : '')
-        + '<button type="button" class="tgop-btn accent sm" data-enquire>Enquire now</button>'
+        + '<button type="button" class="tgop-btn accent sm" data-enquire>' + esc(t('enquireNow')) + '</button>'
       + '</div></div>';
 
       // Overlay hero (classic + editorial)
@@ -724,8 +958,8 @@
           + '</div>'
           + (d.teaser ? '<p class="tgop-hsplit-teaser">' + esc(d.teaser) + '</p>' : '')
           + '<div class="tgop-hsplit-buy">'
-            + (d.price ? '<div class="tgop-hsplit-price"><span>From</span> ' + d.price + (d.basis ? ' <small>' + esc(d.basis) + '</small>' : '') + '</div>' : '')
-            + '<button type="button" class="tgop-btn accent" data-enquire>Enquire now ' + I.arrow + '</button>'
+            + (d.price ? '<div class="tgop-hsplit-price"><span>' + esc(t('from')) + '</span> ' + d.price + (d.basis ? ' <small>' + esc(d.basis) + '</small>' : '') + '</div>' : '')
+            + '<button type="button" class="tgop-btn accent" data-enquire>' + esc(t('enquireNow')) + ' ' + I.arrow + '</button>'
           + '</div>'
         + '</div></div>'
       + '</div>';
@@ -738,17 +972,17 @@
       if (d.abta) footTrust.push('ABTA member');
 
       const fCta = '<div class="tgop-cta-band"><div class="tgop-cta-inner">'
-        + '<div><h3>Ready when you are</h3><p>Talk to a travel expert and we will hold this price while you decide.</p></div>'
+        + '<div><h3>' + esc(t('readyWhenYouAre')) + '</h3><p>' + esc(t('ctaCopy')) + '</p></div>'
         + '<span class="tgop-cta-spacer"></span>'
-        + '<button type="button" class="tgop-btn primary" data-enquire>Enquire now ' + I.arrow + '</button>'
+        + '<button type="button" class="tgop-btn primary" data-enquire>' + esc(t('enquireNow')) + ' ' + I.arrow + '</button>'
         + (d.enquiryPhone ? '<a class="tgop-btn ghost" href="tel:' + esc(d.enquiryPhone.replace(/\s/g, '')) + '">' + I.phone + ' ' + esc(d.enquiryPhone) + '</a>' : '')
       + '</div></div>';
 
       const fFooter = '<div class="tgop-foot"><div class="tgop-foot-inner">'
         + (footTrust.length ? '<span class="tgop-foot-trust">' + I.shield + esc(footTrust.join(' · ')) + '</span>' : '')
-        + (d.reference ? '<span>Offer ref ' + esc(d.reference) + '</span>' : '')
+        + (d.reference ? '<span>' + esc(t('offerRef')) + ' ' + esc(d.reference) + '</span>' : '')
         + (this.cfg.agencyName ? '<span>' + esc(this.cfg.agencyName) + '</span>' : '')
-        + '<span class="tgop-bar-spacer"></span><span>Powered by Travelgenix</span>'
+        + '<span class="tgop-bar-spacer"></span><span>' + esc(t('poweredBy')) + '</span>'
       + '</div></div>';
 
       const fLightbox = '<div class="tgop-lb" data-lb><button type="button" class="tgop-lb-btn close" data-lb-close>' + I.x + '</button>'
@@ -765,7 +999,7 @@
         html = fBar + fHero + fFacts
           + '<div class="tgop-wrap tgop-editorial">' + fAbout + fIncludes + fGallery + fVideo + fMap + fDetail + '</div>'
           + '<div class="tgop-enqband"><div class="tgop-wrap tgop-enqband-inner">'
-            + '<div class="tgop-enqband-copy"><h2 class="tgop-h2">Like the look of it?</h2><p>Send us a quick enquiry and a travel expert will be in touch within one working hour. No payment now.</p></div>'
+            + '<div class="tgop-enqband-copy"><h2 class="tgop-h2">' + esc(t('likeTheLook')) + '</h2><p>' + esc(t('enqBandCopy')) + '</p></div>'
             + '<div class="tgop-enqband-card">' + this._bookCard(d) + '</div>'
           + '</div></div>'
           + fCta + fFooter + fLightbox;
@@ -881,21 +1115,22 @@
     }
 
     _initCountdown(d) {
+      const t = this.t;
       const el = this.root.querySelector('[data-countdown]');
       if (!el || !d.bookby) return;
       const target = new Date(d.bookby);
       if (isNaN(target.getTime())) {
         el.hidden = false;
-        el.textContent = 'Book by ' + d.bookby;
+        el.textContent = t('bookByPrefix') + ' ' + d.bookby;
         return;
       }
       const tick = function () {
         const diff = target.getTime() - Date.now();
-        if (diff <= 0) { el.textContent = 'Offer ends today'; return; }
+        if (diff <= 0) { el.textContent = t('endsToday'); return; }
         const days = Math.floor(diff / 86400000);
         const hrs = Math.floor((diff % 86400000) / 3600000);
         const mins = Math.floor((diff % 3600000) / 60000);
-        el.innerHTML = '⏳ Offer ends in <b>' + days + 'd ' + hrs + 'h ' + mins + 'm</b>';
+        el.innerHTML = '⏳ ' + esc(t('endsIn', { days: days, hours: hrs, mins: mins }));
       };
       el.hidden = false;
       tick();
@@ -977,13 +1212,14 @@
       const card = form.closest('.tgop-book');
       form.outerHTML =
         '<div class="tgop-enq-success"><div class="tick">' + I.check + '</div>'
-        + '<h4>Enquiry sent</h4><p>Thanks ' + esc(detail.enquiry.name.split(' ')[0]) + '. A travel expert will be in touch within one working hour.</p></div>';
+        + '<h4>' + esc(this.t('enquirySent')) + '</h4><p>' + esc(this.t('thanksName', { name: detail.enquiry.name.split(' ')[0] })) + '</p></div>';
       void card;
     }
 
     update(config) {
       this.destroy();
       this.cfg = this._defaults(Object.assign({}, this.cfg, config));
+      this.t = makeT(this.cfg);
       this._render();
     }
 
