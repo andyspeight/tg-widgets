@@ -84,7 +84,235 @@
     } catch (e) { /* fall through */ }
     return '/api/airport-content';
   })();
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
+  // links, empty/error states, aria-labels). Airport names, city names, airline
+  // names, IATA codes and all fact VALUES are data/proper nouns and are never
+  // translated. English is the source + fallback. The "Failed to load Leaflet"
+  // string is a developer diagnostic and is deliberately left untranslated.
+  const MESSAGES = {
+    en: {
+      searchFlights: 'Search flights', browseResorts: 'Browse resorts',
+      findOutMore: 'Find out more', officialWebsite: 'Official website',
+      checkIn: 'Check-in', terminals: 'Terminals', keyAirlines: 'Key airlines',
+      ukAirlines: 'UK airlines', flightFromUk: 'Flight from UK',
+      fromCity: 'From {city}', cityFallback: 'city',
+      servesDestinations: 'Serves these destinations',
+      badgeLounges: 'Lounges', badgeFastTrack: 'Fast Track',
+      badgeUkOrigin: 'UK Origin', badgeDestination: 'Destination',
+      badgeUkOriginDestination: 'UK Origin · Destination',
+      overview: 'Overview', overviewH2: 'The airport in brief',
+      terminalsAirlines: 'Terminals & Airlines',
+      located: 'Located', onwardToResort: 'Onward to your resort',
+      gettingThere: 'Getting there',
+      tabResortTransfers: 'Resort transfers', tabCarHire: 'Car hire',
+      tabTaxi: 'Taxi', tabPublicCoach: 'Public coach', tabTrain: 'Train',
+      tabCar: 'Car', tabCoach: 'Coach', tabParking: 'Parking',
+      tabDropOff: 'Drop-off & pick-up',
+      googleMaps: 'Google Maps', appleMaps: 'Apple Maps',
+      viewResortGuide: 'View resort guide', transferSuffix: 'transfer',
+      cityCentre: 'City centre',
+      facilities: 'Facilities', facilitiesH2: "What's at the airport",
+      facLounges: 'Lounges', facEatShop: 'Eating and shopping',
+      facFamily: 'Family facilities', facAssist: 'Special assistance',
+      facHotels: 'Airport hotels',
+      recommendedArrival: 'Recommended arrival time',
+      usefulToKnow: 'Useful to know',
+      tipsKicker: 'Quirks & insider tips', tipsH2: 'Things that catch first-timers out',
+      notFound: 'Airport not found.',
+      loadError: 'Could not load airport details. Please try again.',
+      iataCode: 'IATA code {code}', mapShowing: 'Map showing {name}',
+      terminalSingular: 'terminal', terminalPlural: 'terminals',
+    },
+    fr: {
+      searchFlights: 'Rechercher des vols', browseResorts: 'Parcourir les destinations',
+      findOutMore: 'En savoir plus', officialWebsite: 'Site officiel',
+      checkIn: 'Enregistrement', terminals: 'Terminaux', keyAirlines: 'Principales compagnies',
+      ukAirlines: 'Compagnies britanniques', flightFromUk: 'Vol depuis le Royaume-Uni',
+      fromCity: 'Depuis {city}', cityFallback: 'la ville',
+      servesDestinations: 'Dessert ces destinations',
+      badgeLounges: 'Salons', badgeFastTrack: 'Coupe-file',
+      badgeUkOrigin: 'Origine Royaume-Uni', badgeDestination: 'Destination',
+      badgeUkOriginDestination: 'Origine Royaume-Uni · Destination',
+      overview: 'Aperçu', overviewH2: 'L’aéroport en bref',
+      terminalsAirlines: 'Terminaux et compagnies',
+      located: 'Situation', onwardToResort: 'Vers votre destination',
+      gettingThere: 'S’y rendre',
+      tabResortTransfers: 'Transferts', tabCarHire: 'Location de voiture',
+      tabTaxi: 'Taxi', tabPublicCoach: 'Autocar public', tabTrain: 'Train',
+      tabCar: 'Voiture', tabCoach: 'Autocar', tabParking: 'Parking',
+      tabDropOff: 'Dépose et reprise',
+      googleMaps: 'Google Maps', appleMaps: 'Apple Maps',
+      viewResortGuide: 'Voir le guide de la destination', transferSuffix: 'de transfert',
+      cityCentre: 'Centre-ville',
+      facilities: 'Services', facilitiesH2: 'Ce que propose l’aéroport',
+      facLounges: 'Salons', facEatShop: 'Restauration et boutiques',
+      facFamily: 'Équipements familiaux', facAssist: 'Assistance spéciale',
+      facHotels: 'Hôtels de l’aéroport',
+      recommendedArrival: 'Heure d’arrivée recommandée',
+      usefulToKnow: 'Bon à savoir',
+      tipsKicker: 'Astuces et conseils', tipsH2: 'Ce qui surprend les nouveaux venus',
+      notFound: 'Aéroport introuvable.',
+      loadError: 'Impossible de charger les détails de l’aéroport. Veuillez réessayer.',
+      iataCode: 'Code IATA {code}', mapShowing: 'Carte de {name}',
+      terminalSingular: 'terminal', terminalPlural: 'terminaux',
+    },
+    de: {
+      searchFlights: 'Flüge suchen', browseResorts: 'Reiseziele durchsuchen',
+      findOutMore: 'Mehr erfahren', officialWebsite: 'Offizielle Website',
+      checkIn: 'Check-in', terminals: 'Terminals', keyAirlines: 'Wichtige Fluggesellschaften',
+      ukAirlines: 'Britische Fluggesellschaften', flightFromUk: 'Flug ab Großbritannien',
+      fromCity: 'Ab {city}', cityFallback: 'der Stadt',
+      servesDestinations: 'Bedient diese Reiseziele',
+      badgeLounges: 'Lounges', badgeFastTrack: 'Fast Track',
+      badgeUkOrigin: 'Abflug Großbritannien', badgeDestination: 'Reiseziel',
+      badgeUkOriginDestination: 'Abflug Großbritannien · Reiseziel',
+      overview: 'Überblick', overviewH2: 'Der Flughafen im Überblick',
+      terminalsAirlines: 'Terminals und Fluggesellschaften',
+      located: 'Lage', onwardToResort: 'Weiter zu Ihrem Reiseziel',
+      gettingThere: 'Anreise',
+      tabResortTransfers: 'Transfers', tabCarHire: 'Mietwagen',
+      tabTaxi: 'Taxi', tabPublicCoach: 'Öffentlicher Bus', tabTrain: 'Zug',
+      tabCar: 'Auto', tabCoach: 'Bus', tabParking: 'Parken',
+      tabDropOff: 'Bringen und Abholen',
+      googleMaps: 'Google Maps', appleMaps: 'Apple Maps',
+      viewResortGuide: 'Reiseführer ansehen', transferSuffix: 'Transfer',
+      cityCentre: 'Stadtzentrum',
+      facilities: 'Einrichtungen', facilitiesH2: 'Das gibt es am Flughafen',
+      facLounges: 'Lounges', facEatShop: 'Essen und Einkaufen',
+      facFamily: 'Familieneinrichtungen', facAssist: 'Besondere Betreuung',
+      facHotels: 'Flughafenhotels',
+      recommendedArrival: 'Empfohlene Ankunftszeit',
+      usefulToKnow: 'Gut zu wissen',
+      tipsKicker: 'Tipps und Hinweise', tipsH2: 'Was Erstbesucher überrascht',
+      notFound: 'Flughafen nicht gefunden.',
+      loadError: 'Flughafendetails konnten nicht geladen werden. Bitte versuchen Sie es erneut.',
+      iataCode: 'IATA-Code {code}', mapShowing: 'Karte von {name}',
+      terminalSingular: 'Terminal', terminalPlural: 'Terminals',
+    },
+    es: {
+      searchFlights: 'Buscar vuelos', browseResorts: 'Explorar destinos',
+      findOutMore: 'Más información', officialWebsite: 'Sitio web oficial',
+      checkIn: 'Facturación', terminals: 'Terminales', keyAirlines: 'Principales aerolíneas',
+      ukAirlines: 'Aerolíneas británicas', flightFromUk: 'Vuelo desde Reino Unido',
+      fromCity: 'Desde {city}', cityFallback: 'la ciudad',
+      servesDestinations: 'Da servicio a estos destinos',
+      badgeLounges: 'Salas VIP', badgeFastTrack: 'Acceso rápido',
+      badgeUkOrigin: 'Origen Reino Unido', badgeDestination: 'Destino',
+      badgeUkOriginDestination: 'Origen Reino Unido · Destino',
+      overview: 'Resumen', overviewH2: 'El aeropuerto en breve',
+      terminalsAirlines: 'Terminales y aerolíneas',
+      located: 'Ubicación', onwardToResort: 'Hacia tu destino',
+      gettingThere: 'Cómo llegar',
+      tabResortTransfers: 'Traslados', tabCarHire: 'Alquiler de coches',
+      tabTaxi: 'Taxi', tabPublicCoach: 'Autobús público', tabTrain: 'Tren',
+      tabCar: 'Coche', tabCoach: 'Autobús', tabParking: 'Aparcamiento',
+      tabDropOff: 'Dejada y recogida',
+      googleMaps: 'Google Maps', appleMaps: 'Apple Maps',
+      viewResortGuide: 'Ver la guía del destino', transferSuffix: 'de traslado',
+      cityCentre: 'Centro de la ciudad',
+      facilities: 'Instalaciones', facilitiesH2: 'Qué hay en el aeropuerto',
+      facLounges: 'Salas VIP', facEatShop: 'Comer y comprar',
+      facFamily: 'Servicios para familias', facAssist: 'Asistencia especial',
+      facHotels: 'Hoteles del aeropuerto',
+      recommendedArrival: 'Hora de llegada recomendada',
+      usefulToKnow: 'Conviene saber',
+      tipsKicker: 'Trucos y consejos', tipsH2: 'Lo que sorprende a los que llegan por primera vez',
+      notFound: 'Aeropuerto no encontrado.',
+      loadError: 'No se pudieron cargar los detalles del aeropuerto. Inténtalo de nuevo.',
+      iataCode: 'Código IATA {code}', mapShowing: 'Mapa de {name}',
+      terminalSingular: 'terminal', terminalPlural: 'terminales',
+    },
+    it: {
+      searchFlights: 'Cerca voli', browseResorts: 'Sfoglia le destinazioni',
+      findOutMore: 'Scopri di più', officialWebsite: 'Sito ufficiale',
+      checkIn: 'Check-in', terminals: 'Terminal', keyAirlines: 'Compagnie principali',
+      ukAirlines: 'Compagnie britanniche', flightFromUk: 'Volo dal Regno Unito',
+      fromCity: 'Da {city}', cityFallback: 'la città',
+      servesDestinations: 'Serve queste destinazioni',
+      badgeLounges: 'Lounge', badgeFastTrack: 'Fast Track',
+      badgeUkOrigin: 'Partenza Regno Unito', badgeDestination: 'Destinazione',
+      badgeUkOriginDestination: 'Partenza Regno Unito · Destinazione',
+      overview: 'Panoramica', overviewH2: 'L’aeroporto in breve',
+      terminalsAirlines: 'Terminal e compagnie',
+      located: 'Posizione', onwardToResort: 'Verso la tua destinazione',
+      gettingThere: 'Come arrivare',
+      tabResortTransfers: 'Trasferimenti', tabCarHire: 'Noleggio auto',
+      tabTaxi: 'Taxi', tabPublicCoach: 'Autobus pubblico', tabTrain: 'Treno',
+      tabCar: 'Auto', tabCoach: 'Autobus', tabParking: 'Parcheggio',
+      tabDropOff: 'Salita e discesa',
+      googleMaps: 'Google Maps', appleMaps: 'Apple Maps',
+      viewResortGuide: 'Vedi la guida della destinazione', transferSuffix: 'di trasferimento',
+      cityCentre: 'Centro città',
+      facilities: 'Servizi', facilitiesH2: 'Cosa c’è in aeroporto',
+      facLounges: 'Lounge', facEatShop: 'Ristoro e shopping',
+      facFamily: 'Servizi per famiglie', facAssist: 'Assistenza speciale',
+      facHotels: 'Hotel in aeroporto',
+      recommendedArrival: 'Orario di arrivo consigliato',
+      usefulToKnow: 'Utile da sapere',
+      tipsKicker: 'Curiosità e consigli', tipsH2: 'Ciò che coglie impreparati i nuovi arrivati',
+      notFound: 'Aeroporto non trovato.',
+      loadError: 'Impossibile caricare i dettagli dell’aeroporto. Riprova.',
+      iataCode: 'Codice IATA {code}', mapShowing: 'Mappa di {name}',
+      terminalSingular: 'terminal', terminalPlural: 'terminal',
+    },
+    ro: {
+      searchFlights: 'Caută zboruri', browseResorts: 'Răsfoiește destinațiile',
+      findOutMore: 'Află mai multe', officialWebsite: 'Site oficial',
+      checkIn: 'Check-in', terminals: 'Terminale', keyAirlines: 'Companii principale',
+      ukAirlines: 'Companii britanice', flightFromUk: 'Zbor din Regatul Unit',
+      fromCity: 'Din {city}', cityFallback: 'oraș',
+      servesDestinations: 'Deservește aceste destinații',
+      badgeLounges: 'Saloane', badgeFastTrack: 'Acces rapid',
+      badgeUkOrigin: 'Plecare Regatul Unit', badgeDestination: 'Destinație',
+      badgeUkOriginDestination: 'Plecare Regatul Unit · Destinație',
+      overview: 'Prezentare', overviewH2: 'Aeroportul pe scurt',
+      terminalsAirlines: 'Terminale și companii',
+      located: 'Amplasare', onwardToResort: 'Către destinația ta',
+      gettingThere: 'Cum ajungi',
+      tabResortTransfers: 'Transferuri', tabCarHire: 'Închirieri auto',
+      tabTaxi: 'Taxi', tabPublicCoach: 'Autocar public', tabTrain: 'Tren',
+      tabCar: 'Mașină', tabCoach: 'Autocar', tabParking: 'Parcare',
+      tabDropOff: 'Urcare și coborâre',
+      googleMaps: 'Google Maps', appleMaps: 'Apple Maps',
+      viewResortGuide: 'Vezi ghidul destinației', transferSuffix: 'transfer',
+      cityCentre: 'Centrul orașului',
+      facilities: 'Facilități', facilitiesH2: 'Ce găsești în aeroport',
+      facLounges: 'Saloane', facEatShop: 'Masă și cumpărături',
+      facFamily: 'Facilități pentru familii', facAssist: 'Asistență specială',
+      facHotels: 'Hoteluri în aeroport',
+      recommendedArrival: 'Ora de sosire recomandată',
+      usefulToKnow: 'Bine de știut',
+      tipsKicker: 'Sfaturi și recomandări', tipsH2: 'Ce îi surprinde pe cei aflați la prima vizită',
+      notFound: 'Aeroport negrăsit.',
+      loadError: 'Nu s-au putut încărca detaliile aeroportului. Încearcă din nou.',
+      iataCode: 'Cod IATA {code}', mapShowing: 'Hartă pentru {name}',
+      terminalSingular: 'terminal', terminalPlural: 'terminale',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   const LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
   const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
@@ -696,6 +924,7 @@
       if (!container) throw new Error('TGAirportWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       // Reuse an existing shadow root if one is already attached — this happens
       // when the editor re-instantiates the widget after the user picks an
       // airport (the auto-init below has already attached a shadow root on
@@ -735,10 +964,10 @@
         cta: {
           originTitle: 'Flying from {{airportName}}?',
           originSubtitle: 'Search flights, hotels and transfers from {{iata}}',
-          originButtonLabel: 'Search flights', originButtonUrl: '',
+          originButtonLabel: '', originButtonUrl: '',
           destinationTitle: 'Plan a holiday near {{airportName}}',
           destinationSubtitle: 'Explore the resorts served by {{iata}}',
-          destinationButtonLabel: 'Browse resorts', destinationButtonUrl: '',
+          destinationButtonLabel: '', destinationButtonUrl: '',
         },
         airport: null, airportData: null,
       };
@@ -825,7 +1054,7 @@
           (eyebrow ? '<div class="tga-eyebrow"><span class="dot"></span>' + eyebrow + '</div>' : '') +
           '<div class="tga-title-row">' +
             '<h1 class="tga-name">' + esc(d.name) + '</h1>' +
-            (iata ? '<span class="tga-iata" aria-label="IATA code ' + iata + '">' + iata + '</span>' : '') +
+            (iata ? '<span class="tga-iata" aria-label="' + esc(this.t('iataCode', { code: iata })) + '">' + iata + '</span>' : '') +
           '</div>' +
           (tagline ? '<p class="tga-tagline">' + tagline + '</p>' : '') +
           this._heroMetaBlock(d, role) +
@@ -856,11 +1085,11 @@
 
     _heroBadgesBlock(d, role) {
       const out = [];
-      if (d.hasLounges)   out.push('<span class="tga-badge is-on">' + icon('check', 14) + ' Lounges</span>');
-      if (d.hasFastTrack) out.push('<span class="tga-badge is-on">' + icon('check', 14) + ' Fast Track</span>');
-      if (role === 'origin')      out.push('<span class="tga-badge">UK Origin</span>');
-      if (role === 'destination') out.push('<span class="tga-badge">Destination</span>');
-      if (role === 'both')        out.push('<span class="tga-badge">UK Origin &middot; Destination</span>');
+      if (d.hasLounges)   out.push('<span class="tga-badge is-on">' + icon('check', 14) + ' ' + esc(this.t('badgeLounges')) + '</span>');
+      if (d.hasFastTrack) out.push('<span class="tga-badge is-on">' + icon('check', 14) + ' ' + esc(this.t('badgeFastTrack')) + '</span>');
+      if (role === 'origin')      out.push('<span class="tga-badge">' + esc(this.t('badgeUkOrigin')) + '</span>');
+      if (role === 'destination') out.push('<span class="tga-badge">' + esc(this.t('badgeDestination')) + '</span>');
+      if (role === 'both')        out.push('<span class="tga-badge">' + esc(this.t('badgeUkOriginDestination')) + '</span>');
       if (d.type) out.push('<span class="tga-badge">' + esc(d.type) + '</span>');
       return out.length ? '<div class="tga-hero-badges">' + out.join('') + '</div>' : '';
     }
@@ -880,31 +1109,31 @@
       });
       if (!items.length) return '';
       return '<div class="tga-serves">' +
-        '<div class="tga-serves-label">' + icon('luggage', 14) + ' Serves these destinations</div>' +
+        '<div class="tga-serves-label">' + icon('luggage', 14) + ' ' + esc(this.t('servesDestinations')) + '</div>' +
         '<div class="tga-serves-chips">' + items.join('') + '</div>' +
       '</div>';
     }
 
     _renderFacts(d, role) {
       const tiles = [];
-      if (d.checkInSummary) tiles.push(this._fact('luggage', 'Check-in', d.checkInSummary, d.checkInDetail));
+      if (d.checkInSummary) tiles.push(this._fact('luggage', this.t('checkIn'), d.checkInSummary, d.checkInDetail));
       if (d.terminalsCount) {
         const n = Number(d.terminalsCount);
-        tiles.push(this._fact('building', 'Terminals', n + ' terminal' + (n > 1 ? 's' : ''), d.terminalsNote));
+        tiles.push(this._fact('building', this.t('terminals'), n + ' ' + this.t(n > 1 ? 'terminalPlural' : 'terminalSingular'), d.terminalsNote));
       }
       if (d.keyAirlines) {
-        tiles.push(this._fact('plane', role === 'destination' ? 'UK airlines' : 'Key airlines',
+        tiles.push(this._fact('plane', this.t(role === 'destination' ? 'ukAirlines' : 'keyAirlines'),
           d.keyAirlines, d.keyAirlinesNote));
       }
       if ((role === 'destination' || role === 'both') && d.flightTimeFromUK) {
-        tiles.push(this._fact('speed', 'Flight from UK', d.flightTimeFromUK, d.flightTimeNote));
+        tiles.push(this._fact('speed', this.t('flightFromUk'), d.flightTimeFromUK, d.flightTimeNote));
       } else if (d.distanceToCity) {
         // distanceToCity is multilineText in Airtable so editors sometimes
         // paste a paragraph in there. Tiles only have ~25% width in the 4-up
         // grid — take the first sentence (or first ~60 chars) for the value,
         // leave the rest available to the longer "Getting there" tabs.
         const short = firstSentence(d.distanceToCity, 60);
-        tiles.push(this._fact('pin', 'From ' + (d.cityServed || 'city'), short, d.driveTimeSummary));
+        tiles.push(this._fact('pin', this.t('fromCity', { city: d.cityServed || this.t('cityFallback') }), short, d.driveTimeSummary));
       }
       const sliced = tiles.slice(0, 4);
       if (!sliced.length) return '';
@@ -928,13 +1157,13 @@
         .map(p => p.trim()).filter(Boolean)
         .map(p => '<p>' + esc(p) + '</p>').join('');
       if (!paras) return '';
-      return this._section('info', 'Overview', d.overviewHeading || 'The airport in brief',
+      return this._section('info', this.t('overview'), d.overviewHeading || this.t('overviewH2'),
         '<div class="tga-prose">' + paras + '</div>');
     }
 
     _renderTerminals(d) {
       if (!d.terminalsAndAirlines) return '';
-      return this._section('building', 'Terminals & Airlines', '',
+      return this._section('building', this.t('terminalsAirlines'), '',
         '<div class="tga-prose"><p>' + esc(d.terminalsAndAirlines) + '</p></div>');
     }
 
@@ -960,7 +1189,7 @@
       ).join('');
 
       const mapBlock = this._renderMapBlock(d);
-      const h2 = isDest ? 'Onward to your resort' : 'Getting there';
+      const h2 = this.t(isDest ? 'onwardToResort' : 'gettingThere');
       const inner = '<div class="tga-locate">' +
         '<div>' + mapBlock + '</div>' +
         '<div>' +
@@ -968,23 +1197,23 @@
           panels +
         '</div>' +
       '</div>';
-      return this._section('compass', 'Located', h2, inner);
+      return this._section('compass', this.t('located'), h2, inner);
     }
 
     _locatedTabs(d, isDest) {
       const T = (id, ic, label, body) => body ? { id, icon: ic, label, body } : null;
       const t = isDest ? [
-        T('transfer', 'transfer', 'Resort transfers', d.transferInfo),
-        T('car',      'car',      'Car hire',         d.carHireInfo),
-        T('taxi',     'taxi',     'Taxi',             d.taxiInfo),
-        T('coach',    'coach',    'Public coach',     d.coachInfo),
+        T('transfer', 'transfer', this.t('tabResortTransfers'), d.transferInfo),
+        T('car',      'car',      this.t('tabCarHire'),         d.carHireInfo),
+        T('taxi',     'taxi',     this.t('tabTaxi'),            d.taxiInfo),
+        T('coach',    'coach',    this.t('tabPublicCoach'),     d.coachInfo),
       ] : [
-        T('train',   'train',   'Train',   d.gettingThereByTrain),
-        T('car',     'car',     'Car',     d.gettingThereByCar),
-        T('taxi',    'taxi',    'Taxi',    d.taxiAndRideshare),
-        T('coach',   'coach',   'Coach',   d.gettingThereByCoach),
-        T('parking', 'parking', 'Parking', d.parking),
-        T('dropoff', 'users',   'Drop-off & pick-up', d.dropOffInfo),
+        T('train',   'train',   this.t('tabTrain'),   d.gettingThereByTrain),
+        T('car',     'car',     this.t('tabCar'),     d.gettingThereByCar),
+        T('taxi',    'taxi',    this.t('tabTaxi'),    d.taxiAndRideshare),
+        T('coach',   'coach',   this.t('tabCoach'),   d.gettingThereByCoach),
+        T('parking', 'parking', this.t('tabParking'), d.parking),
+        T('dropoff', 'users',   this.t('tabDropOff'), d.dropOffInfo),
       ];
       return t.filter(Boolean);
     }
@@ -1002,12 +1231,12 @@
       const a = 'https://maps.apple.com/?ll=' + ll[0] + ',' + ll[1] +
                 '&q=' + encodeURIComponent(d.name || '');
       return '<div class="tga-map-wrap">' +
-        '<div class="tga-map" data-tga-map="1" role="region" aria-label="Map showing ' + esc(d.name) + '"></div>' +
+        '<div class="tga-map" data-tga-map="1" role="region" aria-label="' + esc(this.t('mapShowing', { name: d.name })) + '"></div>' +
         '<div class="tga-map-foot">' +
           '<span class="tga-map-foot-coords">' + icon('pin', 13) + ' ' + fmtCoords(ll[0], ll[1]) + '</span>' +
           '<span class="tga-map-links">' +
-            '<a class="tga-map-link" href="' + esc(g) + '" target="_blank" rel="noopener noreferrer">Google Maps' + icon('arrow_out', 11) + '</a>' +
-            '<a class="tga-map-link" href="' + esc(a) + '" target="_blank" rel="noopener noreferrer">Apple Maps' + icon('arrow_out', 11) + '</a>' +
+            '<a class="tga-map-link" href="' + esc(g) + '" target="_blank" rel="noopener noreferrer">' + esc(this.t('googleMaps')) + icon('arrow_out', 11) + '</a>' +
+            '<a class="tga-map-link" href="' + esc(a) + '" target="_blank" rel="noopener noreferrer">' + esc(this.t('appleMaps')) + icon('arrow_out', 11) + '</a>' +
           '</span>' +
         '</div>' +
       '</div>';
@@ -1015,13 +1244,13 @@
 
     _renderFacilities(d) {
       const cards = [];
-      if (d.loungesInfo) cards.push(this._card('lounge', 'Lounges', d.loungesInfo));
-      if (d.eatShopInfo) cards.push(this._card('shop', 'Eating and shopping', d.eatShopInfo));
-      if (d.familyInfo)  cards.push(this._card('family', 'Family facilities', d.familyInfo));
-      if (d.assistInfo)  cards.push(this._card('assist', 'Special assistance', d.assistInfo));
-      if (d.hotelsInfo)  cards.push(this._card('building', 'Airport hotels', d.hotelsInfo));
+      if (d.loungesInfo) cards.push(this._card('lounge', this.t('facLounges'), d.loungesInfo));
+      if (d.eatShopInfo) cards.push(this._card('shop', this.t('facEatShop'), d.eatShopInfo));
+      if (d.familyInfo)  cards.push(this._card('family', this.t('facFamily'), d.familyInfo));
+      if (d.assistInfo)  cards.push(this._card('assist', this.t('facAssist'), d.assistInfo));
+      if (d.hotelsInfo)  cards.push(this._card('building', this.t('facHotels'), d.hotelsInfo));
       if (!cards.length) return '';
-      return this._section('star', 'Facilities', "What's at the airport",
+      return this._section('star', this.t('facilities'), this.t('facilitiesH2'),
         '<div class="tga-cards">' + cards.join('') + '</div>');
     }
 
@@ -1041,7 +1270,7 @@
         '<div class="tga-callout">' +
           '<span class="tga-callout-icon" aria-hidden="true">' + icon('clock', 22) + '</span>' +
           '<div>' +
-            '<p class="tga-callout-title">Recommended arrival time</p>' +
+            '<p class="tga-callout-title">' + esc(this.t('recommendedArrival')) + '</p>' +
             '<p class="tga-callout-text">' + esc(d.recommendedArrival) + '</p>' +
           '</div>' +
         '</div>' +
@@ -1053,8 +1282,8 @@
       const useful = d.usefulTips ? '<div class="tga-tips">' + esc(d.usefulTips) + '</div>' : '';
       if (!quirks && !useful) return '';
       // When both are present, label the second so the two reads stay distinct.
-      const sub = (quirks && useful) ? '<p class="tga-tips-sublabel">Useful to know</p>' : '';
-      return this._section('alert', 'Quirks & insider tips', 'Things that catch first-timers out',
+      const sub = (quirks && useful) ? '<p class="tga-tips-sublabel">' + esc(this.t('usefulToKnow')) + '</p>' : '';
+      return this._section('alert', this.t('tipsKicker'), this.t('tipsH2'),
         quirks + sub + useful);
     }
 
@@ -1067,7 +1296,8 @@
       };
       const title = renderTemplate(isDest ? cta.destinationTitle : cta.originTitle, vars);
       const sub   = renderTemplate(isDest ? cta.destinationSubtitle : cta.originSubtitle, vars);
-      const label = isDest ? cta.destinationButtonLabel : cta.originButtonLabel;
+      const label = (isDest ? cta.destinationButtonLabel : cta.originButtonLabel) ||
+        this.t(isDest ? 'browseResorts' : 'searchFlights');
       const url   = safeUrl(isDest ? cta.destinationButtonUrl : cta.originButtonUrl);
       const official = safeUrl(d.officialWebsite);
       if (!title && !sub && !label && !official) return '';
@@ -1077,8 +1307,8 @@
           (sub ? '<p class="tga-cta-sub">' + esc(sub) + '</p>' : '') +
         '</div>' +
         '<div class="tga-cta-actions">' +
-          (official ? '<a href="' + esc(official) + '" target="_blank" rel="noopener noreferrer" class="tga-btn tga-btn-ghost">Official website' + icon('arrow', 14) + '</a>' : '') +
-          (url ? '<a href="' + esc(url) + '" class="tga-btn tga-btn-primary">' + esc(label || 'Find out more') + icon('arrow', 14) + '</a>' : '') +
+          (official ? '<a href="' + esc(official) + '" target="_blank" rel="noopener noreferrer" class="tga-btn tga-btn-ghost">' + esc(this.t('officialWebsite')) + icon('arrow', 14) + '</a>' : '') +
+          (url ? '<a href="' + esc(url) + '" class="tga-btn tga-btn-primary">' + esc(label || this.t('findOutMore')) + icon('arrow', 14) + '</a>' : '') +
         '</div>' +
       '</div>';
     }
@@ -1149,8 +1379,8 @@
             L.marker(ll, { icon: makePin('city', '') })
               .addTo(map)
               .bindPopup('<strong>' + esc(r.name) + '</strong>' +
-                (mins ? '<br>~' + esc(mins) + ' transfer' : '') +
-                (url ? '<br><a href="' + esc(url) + '">View resort guide</a>' : ''));
+                (mins ? '<br>~' + esc(mins) + ' ' + esc(this.t('transferSuffix')) : '') +
+                (url ? '<br><a href="' + esc(url) + '">' + esc(this.t('viewResortGuide')) + '</a>' : ''));
             points.push(ll);
           });
         } else {
@@ -1158,7 +1388,7 @@
           if (cityLL) {
             L.marker(cityLL, { icon: makePin('city', '') })
               .addTo(map)
-              .bindPopup('<strong>' + esc(d.cityServed || 'City centre') + '</strong>');
+              .bindPopup('<strong>' + esc(d.cityServed || this.t('cityCentre')) + '</strong>');
             points.push(cityLL);
           }
         }
@@ -1194,8 +1424,8 @@
       });
     }
 
-    _renderNotFound() { this._root.innerHTML = '<div class="tga-empty"><p>Airport not found.</p></div>'; }
-    _renderError()    { this._root.innerHTML = '<div class="tga-empty"><p>Could not load airport details. Please try again.</p></div>'; }
+    _renderNotFound() { this._root.innerHTML = '<div class="tga-empty"><p>' + esc(this.t('notFound')) + '</p></div>'; }
+    _renderError()    { this._root.innerHTML = '<div class="tga-empty"><p>' + esc(this.t('loadError')) + '</p></div>'; }
     _renderHidden() {
       while (this.shadow.firstChild) this.shadow.removeChild(this.shadow.firstChild);
       this.el.style.display = 'none';
@@ -1203,6 +1433,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig || {}));
+      this.t = makeT(this.c);
       this._renderShell();
       if (this.c.airportData) { this._airport = this.c.airportData; this._renderContent(); }
       else if (this._airport) { this._renderContent(); }
