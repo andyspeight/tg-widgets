@@ -16,7 +16,77 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (the spin button, result flow, lead-capture labels and
+  // the prize-wheel aria label). Author content (segment/prize labels, promo
+  // codes) is never translated. English is the source + fallback.
+  const MESSAGES = {
+    en: {
+      spin: 'Spin', heading: 'Spin to win your next trip', cta: 'Enquire now',
+      congrats: 'Congratulations!', youWon: 'Your destination: {prize}', spinAgain: 'Spin again',
+      betterLuck: 'Better luck next time', name: 'Name', email: 'Email address',
+      copyCode: 'Copy code', copied: 'Copied!', invalidEmail: 'Please enter a valid email address.',
+      close: 'Close', wheelLabel: 'Prize wheel',
+    },
+    fr: {
+      spin: 'Tourner', heading: 'Tournez pour gagner votre prochain voyage', cta: 'Faire une demande',
+      congrats: 'Félicitations !', youWon: 'Votre destination : {prize}', spinAgain: 'Retourner',
+      betterLuck: 'Plus de chance la prochaine fois', name: 'Nom', email: 'Adresse e-mail',
+      copyCode: 'Copier le code', copied: 'Copié !', invalidEmail: 'Veuillez saisir une adresse e-mail valide.',
+      close: 'Fermer', wheelLabel: 'Roue des prix',
+    },
+    de: {
+      spin: 'Drehen', heading: 'Drehen und Ihre nächste Reise gewinnen', cta: 'Jetzt anfragen',
+      congrats: 'Glückwunsch!', youWon: 'Ihr Reiseziel: {prize}', spinAgain: 'Nochmal drehen',
+      betterLuck: 'Mehr Glück beim nächsten Mal', name: 'Name', email: 'E-Mail-Adresse',
+      copyCode: 'Code kopieren', copied: 'Kopiert!', invalidEmail: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+      close: 'Schließen', wheelLabel: 'Gewinnrad',
+    },
+    es: {
+      spin: 'Girar', heading: 'Gira para ganar tu próximo viaje', cta: 'Consultar ahora',
+      congrats: '¡Enhorabuena!', youWon: 'Tu destino: {prize}', spinAgain: 'Girar de nuevo',
+      betterLuck: 'Más suerte la próxima vez', name: 'Nombre', email: 'Correo electrónico',
+      copyCode: 'Copiar código', copied: '¡Copiado!', invalidEmail: 'Introduce una dirección de correo electrónico válida.',
+      close: 'Cerrar', wheelLabel: 'Rueda de premios',
+    },
+    it: {
+      spin: 'Gira', heading: 'Gira e vinci il tuo prossimo viaggio', cta: 'Richiedi ora',
+      congrats: 'Congratulazioni!', youWon: 'La tua destinazione: {prize}', spinAgain: 'Gira di nuovo',
+      betterLuck: 'Più fortuna la prossima volta', name: 'Nome', email: 'Indirizzo email',
+      copyCode: 'Copia codice', copied: 'Copiato!', invalidEmail: 'Inserisci un indirizzo email valido.',
+      close: 'Chiudi', wheelLabel: 'Ruota dei premi',
+    },
+    ro: {
+      spin: 'Învârte', heading: 'Învârte ca să câștigi următoarea călătorie', cta: 'Solicită acum',
+      congrats: 'Felicitări!', youWon: 'Destinația ta: {prize}', spinAgain: 'Învârte din nou',
+      betterLuck: 'Mai mult noroc data viitoare', name: 'Nume', email: 'Adresă de e-mail',
+      copyCode: 'Copiază codul', copied: 'Copiat!', invalidEmail: 'Introduceți o adresă de e-mail validă.',
+      close: 'Închide', wheelLabel: 'Roata premiilor',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   function resolveConfigApi() {
     if (typeof window === 'undefined') return '/api/widget-config';
@@ -88,6 +158,7 @@
     constructor(el, config) {
       this.el = el;
       this.cfg = this._defaults(config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this._rot = 0;
       this._spinning = false;
       this._won = null;
@@ -118,15 +189,18 @@
       ];
       if (segs.every(s => s.weight === 0)) segs.forEach(s => s.weight = 1);
       return {
-        heading: typeof c.heading === 'string' ? c.heading : 'Spin to win your next trip',
+        // Author-configurable copy. Empty string means "use the localised
+        // default", resolved against the viewer language at render time
+        // (this.t) so an unconfigured widget speaks the visitor's language.
+        heading: typeof c.heading === 'string' ? c.heading : '',
         subheading: typeof c.subheading === 'string' ? c.subheading : '',
         logo: safeUrl(c.logo) || '',
         segments: segs,
-        buttonText: String(c.buttonText || 'Spin').slice(0, 18),
+        buttonText: typeof c.buttonText === 'string' && c.buttonText ? String(c.buttonText).slice(0, 18) : '',
         buttonPlacement: c.buttonPlacement === 'top' ? 'top' : 'hub',
-        resultTitle: typeof c.resultTitle === 'string' ? c.resultTitle : 'Your destination: {prize}',
+        resultTitle: typeof c.resultTitle === 'string' ? c.resultTitle : '',
         resultText: typeof c.resultText === 'string' ? c.resultText : 'Quote this when you enquire and we will build it around you.',
-        ctaText: String(c.ctaText || 'Enquire now').slice(0, 24),
+        ctaText: typeof c.ctaText === 'string' && c.ctaText ? String(c.ctaText).slice(0, 24) : '',
         ctaUrl: safeUrl(c.ctaUrl) || '',
         oncePerVisitor: !!c.oncePerVisitor,
         spinDuration: Math.max(1500, Math.min(8000, Number(c.spinDuration) || 4500)),
@@ -231,6 +305,9 @@
 
     _build() {
       const c = this.cfg;
+      // Localised defaults for unconfigured author copy.
+      const heading = c.heading || this.t('heading');
+      const buttonText = c.buttonText || this.t('spin');
       const dark = c.theme === 'dark';
       const ink = dark ? '#F1F5F9' : '#0F172A';
       const ink2 = dark ? '#94A3B8' : '#64748B';
@@ -302,12 +379,12 @@
         </style>
         <div class="sw${c.peek ? ' is-peek' : ''}">
           ${c.logo ? `<img class="sw-logo" src="${esc(c.logo)}" alt="">` : ''}
-          ${c.heading ? `<h3 class="sw-head">${esc(c.heading)}</h3>` : ''}
+          ${heading ? `<h3 class="sw-head">${esc(heading)}</h3>` : ''}
           ${c.subheading ? `<p class="sw-sub">${esc(c.subheading)}</p>` : ''}
-          ${topPlacement ? `<button class="sw-topbtn" id="spin" type="button">${esc(c.buttonText)}</button>` : ''}
+          ${topPlacement ? `<button class="sw-topbtn" id="spin" type="button">${esc(buttonText)}</button>` : ''}
           <div class="sw-stage">
-            <svg class="sw-wheel" viewBox="0 0 100 100" role="img" aria-label="Prize wheel">${this._wheelSvg()}</svg>
-            ${topPlacement ? ((c.style !== 'flat' && !c.peek) ? '<div class="sw-hubcap" aria-hidden="true"></div>' : '') : `<button class="sw-hub" id="spin" type="button">${esc(c.buttonText)}</button>`}
+            <svg class="sw-wheel" viewBox="0 0 100 100" role="img" aria-label="${esc(this.t('wheelLabel'))}">${this._wheelSvg()}</svg>
+            ${topPlacement ? ((c.style !== 'flat' && !c.peek) ? '<div class="sw-hubcap" aria-hidden="true"></div>' : '') : `<button class="sw-hub" id="spin" type="button">${esc(buttonText)}</button>`}
           </div>
           <div class="sw-result" id="result" hidden>
             <div class="sw-res-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.6 7 22l5-3 5 3-1.5-8.4"/></svg></div>
@@ -391,11 +468,15 @@
       const title = this.shadow.getElementById('res-title');
       const text = this.shadow.getElementById('res-text');
       const cta = this.shadow.getElementById('cta');
-      const t = c.resultTitle.indexOf('{prize}') >= 0 ? c.resultTitle.replace(/\{prize\}/g, label) : (c.resultTitle + ' ' + label);
+      // Result title: author override wins; otherwise the localised "You won
+      // {prize}" default. The prize label itself is author content, untranslated.
+      const titleTpl = c.resultTitle || this.t('youWon');
+      const t = titleTpl.indexOf('{prize}') >= 0 ? titleTpl.replace(/\{prize\}/g, label) : (titleTpl + ' ' + label);
       title.textContent = t;
       text.textContent = restored && c.oncePerVisitor ? (c.resultText) : c.resultText;
-      if (c.ctaUrl && c.ctaText) {
-        cta.textContent = c.ctaText;
+      const ctaText = c.ctaText || this.t('cta');
+      if (c.ctaUrl && ctaText) {
+        cta.textContent = ctaText;
         cta.setAttribute('href', c.ctaUrl);
         if (/^https?:/i.test(c.ctaUrl)) cta.setAttribute('target', '_blank');
         cta.hidden = false;
@@ -407,6 +488,7 @@
       const keepId = this.cfg.widgetId;
       this.cfg = this._defaults(config || {});
       if (!this.cfg.widgetId) this.cfg.widgetId = keepId;
+      this.t = makeT(this.cfg);
       this._rot = 0;
       this._spinning = false;
       this._build();

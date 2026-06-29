@@ -43,7 +43,42 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (default heading, the "Visit website" link, and the
+  // accessibility labels). Author content — logo names, alt text, captions,
+  // eyebrow, subtitle, taglines — is translated separately. English is the
+  // source + fallback.
+  const MESSAGES = {
+    en: { trustedPartners: 'Trusted partners', visitWebsite: 'Visit website', logos: 'Logos', logo: 'Logo', featuredLogo: 'Featured logo', namedLogo: '{name} logo', featuredPartner: 'Featured Partner', noLogos: 'No logos to display', all: 'All' },
+    fr: { trustedPartners: 'Partenaires de confiance', visitWebsite: 'Visiter le site', logos: 'Logos', logo: 'Logo', featuredLogo: 'Logo en vedette', namedLogo: 'Logo {name}', featuredPartner: 'Partenaire en vedette', noLogos: 'Aucun logo à afficher', all: 'Tous' },
+    de: { trustedPartners: 'Vertrauenswürdige Partner', visitWebsite: 'Website besuchen', logos: 'Logos', logo: 'Logo', featuredLogo: 'Hervorgehobenes Logo', namedLogo: 'Logo {name}', featuredPartner: 'Hervorgehobener Partner', noLogos: 'Keine Logos vorhanden', all: 'Alle' },
+    es: { trustedPartners: 'Socios de confianza', visitWebsite: 'Visitar el sitio', logos: 'Logotipos', logo: 'Logotipo', featuredLogo: 'Logotipo destacado', namedLogo: 'Logotipo de {name}', featuredPartner: 'Socio destacado', noLogos: 'No hay logotipos para mostrar', all: 'Todos' },
+    it: { trustedPartners: 'Partner di fiducia', visitWebsite: 'Visita il sito', logos: 'Loghi', logo: 'Logo', featuredLogo: 'Logo in evidenza', namedLogo: 'Logo {name}', featuredPartner: 'Partner in evidenza', noLogos: 'Nessun logo da mostrare', all: 'Tutti' },
+    ro: { trustedPartners: 'Parteneri de încredere', visitWebsite: 'Vizitează site-ul', logos: 'Logouri', logo: 'Logo', featuredLogo: 'Logo recomandat', namedLogo: 'Logo {name}', featuredPartner: 'Partener recomandat', noLogos: 'Niciun logo de afișat', all: 'Toate' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -411,6 +446,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this._activeGroup = 'all';
       this._render();
@@ -425,7 +461,7 @@
         grayscale: cfg.grayscale === true,
         showHeading: cfg.showHeading !== false,
         eyebrow: cfg.eyebrow || '',
-        title: cfg.title || 'Trusted partners',
+        title: typeof cfg.title === 'string' ? cfg.title : null, // null = use localised default heading
         subtitle: cfg.subtitle || '',
         showCaptions: cfg.showCaptions === true,
         showFilters: cfg.showFilters === true,
@@ -433,6 +469,7 @@
         spotlightCta: cfg.spotlightCta || '',
         logos: Array.isArray(cfg.logos) ? cfg.logos : [],
         fontFamily: typeof cfg.fontFamily === 'string' ? cfg.fontFamily : '',
+        lang: cfg.lang || cfg.language || cfg.locale || '',
         theme: {
           mode: cfg.theme && cfg.theme.mode === 'dark' ? 'dark' : 'light',
           brand: (cfg.theme && cfg.theme.brand) || '#0891B2',
@@ -457,7 +494,7 @@
         <div class="tgl-root" data-theme="${cfg.theme.mode}" data-grayscale="${cfg.grayscale}" style="${themeStyle}">
           ${heading}
           ${tabs}
-          <div class="tgl-logos" role="list" aria-label="${esc(cfg.title || 'Logos')}">
+          <div class="tgl-logos" role="list" aria-label="${esc((cfg.title == null ? this.t('trustedPartners') : cfg.title) || this.t('logos'))}">
             ${body}
           </div>
         </div>
@@ -491,11 +528,14 @@
 
     _renderHeading() {
       const cfg = this.c;
-      if (!cfg.title && !cfg.subtitle && !cfg.eyebrow) return '';
+      // title === null → author left it unset, use the localised default heading.
+      // title === '' → author cleared it deliberately, render no title.
+      const title = cfg.title == null ? this.t('trustedPartners') : cfg.title;
+      if (!title && !cfg.subtitle && !cfg.eyebrow) return '';
       return `
         <div class="tgl-heading">
           ${cfg.eyebrow ? `<div class="tgl-eyebrow">${esc(cfg.eyebrow)}</div>` : ''}
-          ${cfg.title ? `<h2 class="tgl-title">${esc(cfg.title)}</h2>` : ''}
+          ${title ? `<h2 class="tgl-title">${esc(title)}</h2>` : ''}
           ${cfg.subtitle ? `<p class="tgl-subtitle">${esc(cfg.subtitle)}</p>` : ''}
         </div>
       `;
@@ -512,7 +552,7 @@
       const allActive = this._activeGroup === 'all';
       return `
         <div class="tgl-tabs" role="tablist">
-          <button class="tgl-tab" data-group="all" aria-pressed="${allActive}">All</button>
+          <button class="tgl-tab" data-group="all" aria-pressed="${allActive}">${esc(this.t('all'))}</button>
           ${groups.map(g => `
             <button class="tgl-tab" data-group="${esc(g)}" aria-pressed="${this._activeGroup === g}">${esc(g)}</button>
           `).join('')}
@@ -529,7 +569,7 @@
     _renderBody() {
       const logos = this._filteredLogos();
       if (logos.length === 0) {
-        return `<div class="tgl-empty">No logos to display</div>`;
+        return `<div class="tgl-empty">${esc(this.t('noLogos'))}</div>`;
       }
       switch (this.c.layout) {
         case 'strip': return this._renderStrip(logos);
@@ -548,10 +588,11 @@
         : 'role="listitem"';
       const linkClass = url ? ' is-link' : '';
       const name = logo.name || '';
-      const altText = logo.alt || name || 'Logo';
+      // alt and name are author content; only the bare fallback word is chrome.
+      const altText = logo.alt || name || this.t('logo');
       const caption = (this.c.showCaptions && name) ? `<div class="tgl-caption">${esc(name)}</div>` : '';
       return `
-        <${tag} class="tgl-cell${linkClass}" ${linkAttrs} aria-label="${esc(name || 'Logo')}">
+        <${tag} class="tgl-cell${linkClass}" ${linkAttrs} aria-label="${esc(name || this.t('logo'))}">
           <div class="tgl-img-wrap">
             <img class="tgl-img" src="${esc(safeImageUrl(logo.image))}" alt="${esc(altText)}" loading="lazy" decoding="async" />
           </div>
@@ -584,13 +625,13 @@
       const featured = logos.find(l => l.featured) || logos[0];
       const others = logos.filter(l => l !== featured).slice(0, 8);
       const featuredUrl = safeUrl(featured.url);
-      const featuredCta = this.c.spotlightCta || 'Visit website';
+      const featuredCta = this.c.spotlightCta || this.t('visitWebsite');
       return `
         <div class="tgl-spotlight">
           <div class="tgl-spotlight-featured">
-            <span class="tgl-spotlight-badge">Featured Partner</span>
+            <span class="tgl-spotlight-badge">${esc(this.t('featuredPartner'))}</span>
             <div class="tgl-spotlight-img-wrap">
-              <img class="tgl-spotlight-img" src="${esc(safeImageUrl(featured.image))}" alt="${esc(featured.alt || featured.name || 'Featured logo')}" loading="lazy" decoding="async" />
+              <img class="tgl-spotlight-img" src="${esc(safeImageUrl(featured.image))}" alt="${esc(featured.alt || featured.name || this.t('featuredLogo'))}" loading="lazy" decoding="async" />
             </div>
             ${featured.name ? `<h3 class="tgl-spotlight-name">${esc(featured.name)}</h3>` : ''}
             ${this.c.spotlightTagline ? `<p class="tgl-spotlight-tagline">${esc(this.c.spotlightTagline)}</p>` : ''}
@@ -615,6 +656,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      this.t = makeT(this.c);
       this._render();
     }
 

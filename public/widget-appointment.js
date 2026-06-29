@@ -24,7 +24,208 @@
 (function () {
   'use strict';
 
-  const VERSION = '2.0.0';
+  const VERSION = '2.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (step labels, field labels, buttons, validation and
+  // status messages). Author content (heading, subheading, question labels,
+  // consent text, success copy, event/service names) stays as configured.
+  // English is the source + fallback. Month and weekday names are produced by
+  // Intl.DateTimeFormat from the resolved language's locale, not catalogued.
+  const MESSAGES = {
+    en: {
+      chooseMeeting: 'Choose a meeting', meetings: 'Meetings',
+      selectDateTime: 'Select a date & time',
+      prevMonth: 'Previous month', nextMonth: 'Next month',
+      timezone: 'Timezone', timeFormat: 'Time format',
+      fmt12: '12h', fmt24: '24h',
+      minUnit: '{n} min',
+      noTimesLeft: 'No times left on this day.',
+      back: 'Back', name: 'Name', email: 'Email', phone: 'Phone', message: 'Message',
+      namePlaceholder: 'Your name', emailPlaceholder: 'you@example.com', phonePlaceholder: 'Your number',
+      pleaseChoose: 'Please choose…',
+      at: '{date} at {time}',
+      checkFields: 'Please check the highlighted fields.',
+      validEmail: 'Please enter a valid email address.',
+      tickConsent: 'Please tick the box to say we can contact you.',
+      somethingWrong: 'Something went wrong. Please try again.',
+      networkError: 'Network error. Please try again.',
+      sending: 'Sending…',
+      addGoogle: 'Add to Google', downloadIcs: 'Download .ics',
+      manageBooking: 'Manage or cancel this booking', needDifferent: 'Need a different time?',
+      confirmBooking: 'Confirm booking',
+      moveBooking: 'Move your booking to this time.', confirmNewTime: 'Confirm new time',
+      moving: 'Moving…', bookingMoved: 'Your booking has been moved',
+      bookingMovedBody: 'We have updated your appointment to the new time.',
+      couldNotMove: 'Could not move the booking.',
+      modeCallback: 'Phone callback', modePhone: 'Phone call', modeVideo: 'Video call', modeInperson: 'In person',
+    },
+    fr: {
+      chooseMeeting: 'Choisissez un rendez-vous', meetings: 'Rendez-vous',
+      selectDateTime: 'Choisissez une date et une heure',
+      prevMonth: 'Mois précédent', nextMonth: 'Mois suivant',
+      timezone: 'Fuseau horaire', timeFormat: 'Format de l’heure',
+      fmt12: '12h', fmt24: '24h',
+      minUnit: '{n} min',
+      noTimesLeft: 'Aucun horaire disponible ce jour-là.',
+      back: 'Retour', name: 'Nom', email: 'E-mail', phone: 'Téléphone', message: 'Message',
+      namePlaceholder: 'Votre nom', emailPlaceholder: 'vous@exemple.com', phonePlaceholder: 'Votre numéro',
+      pleaseChoose: 'Veuillez choisir…',
+      at: '{date} à {time}',
+      checkFields: 'Veuillez vérifier les champs en surbrillance.',
+      validEmail: 'Veuillez saisir une adresse e-mail valide.',
+      tickConsent: 'Veuillez cocher la case pour autoriser que l’on vous contacte.',
+      somethingWrong: 'Une erreur est survenue. Veuillez réessayer.',
+      networkError: 'Erreur réseau. Veuillez réessayer.',
+      sending: 'Envoi…',
+      addGoogle: 'Ajouter à Google', downloadIcs: 'Télécharger .ics',
+      manageBooking: 'Gérer ou annuler cette réservation', needDifferent: 'Besoin d’un autre horaire ?',
+      confirmBooking: 'Confirmer la réservation',
+      moveBooking: 'Déplacez votre réservation à cet horaire.', confirmNewTime: 'Confirmer le nouvel horaire',
+      moving: 'Déplacement…', bookingMoved: 'Votre réservation a été déplacée',
+      bookingMovedBody: 'Nous avons mis à jour votre rendez-vous à ce nouvel horaire.',
+      couldNotMove: 'Impossible de déplacer la réservation.',
+      modeCallback: 'Rappel téléphonique', modePhone: 'Appel téléphonique', modeVideo: 'Appel vidéo', modeInperson: 'En personne',
+    },
+    de: {
+      chooseMeeting: 'Termin wählen', meetings: 'Termine',
+      selectDateTime: 'Datum und Uhrzeit wählen',
+      prevMonth: 'Vorheriger Monat', nextMonth: 'Nächster Monat',
+      timezone: 'Zeitzone', timeFormat: 'Zeitformat',
+      fmt12: '12 h', fmt24: '24 h',
+      minUnit: '{n} Min.',
+      noTimesLeft: 'An diesem Tag sind keine Zeiten mehr verfügbar.',
+      back: 'Zurück', name: 'Name', email: 'E-Mail', phone: 'Telefon', message: 'Nachricht',
+      namePlaceholder: 'Ihr Name', emailPlaceholder: 'sie@beispiel.de', phonePlaceholder: 'Ihre Nummer',
+      pleaseChoose: 'Bitte wählen…',
+      at: '{date} um {time}',
+      checkFields: 'Bitte überprüfen Sie die markierten Felder.',
+      validEmail: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+      tickConsent: 'Bitte kreuzen Sie das Kästchen an, damit wir Sie kontaktieren dürfen.',
+      somethingWrong: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+      networkError: 'Netzwerkfehler. Bitte versuchen Sie es erneut.',
+      sending: 'Senden…',
+      addGoogle: 'Zu Google hinzufügen', downloadIcs: '.ics herunterladen',
+      manageBooking: 'Buchung verwalten oder stornieren', needDifferent: 'Eine andere Uhrzeit?',
+      confirmBooking: 'Buchung bestätigen',
+      moveBooking: 'Verschieben Sie Ihre Buchung auf diese Uhrzeit.', confirmNewTime: 'Neue Uhrzeit bestätigen',
+      moving: 'Wird verschoben…', bookingMoved: 'Ihre Buchung wurde verschoben',
+      bookingMovedBody: 'Wir haben Ihren Termin auf die neue Uhrzeit aktualisiert.',
+      couldNotMove: 'Buchung konnte nicht verschoben werden.',
+      modeCallback: 'Telefonischer Rückruf', modePhone: 'Telefonanruf', modeVideo: 'Videoanruf', modeInperson: 'Persönlich',
+    },
+    es: {
+      chooseMeeting: 'Elige una cita', meetings: 'Citas',
+      selectDateTime: 'Selecciona una fecha y una hora',
+      prevMonth: 'Mes anterior', nextMonth: 'Mes siguiente',
+      timezone: 'Zona horaria', timeFormat: 'Formato de hora',
+      fmt12: '12 h', fmt24: '24 h',
+      minUnit: '{n} min',
+      noTimesLeft: 'No quedan horarios para este día.',
+      back: 'Atrás', name: 'Nombre', email: 'Correo electrónico', phone: 'Teléfono', message: 'Mensaje',
+      namePlaceholder: 'Tu nombre', emailPlaceholder: 'tu@ejemplo.com', phonePlaceholder: 'Tu número',
+      pleaseChoose: 'Elige una opción…',
+      at: '{date} a las {time}',
+      checkFields: 'Revisa los campos resaltados.',
+      validEmail: 'Introduce una dirección de correo electrónico válida.',
+      tickConsent: 'Marca la casilla para que podamos contactarte.',
+      somethingWrong: 'Algo ha salido mal. Inténtalo de nuevo.',
+      networkError: 'Error de red. Inténtalo de nuevo.',
+      sending: 'Enviando…',
+      addGoogle: 'Añadir a Google', downloadIcs: 'Descargar .ics',
+      manageBooking: 'Gestionar o cancelar esta reserva', needDifferent: '¿Necesitas otra hora?',
+      confirmBooking: 'Confirmar la reserva',
+      moveBooking: 'Mueve tu reserva a esta hora.', confirmNewTime: 'Confirmar la nueva hora',
+      moving: 'Moviendo…', bookingMoved: 'Tu reserva se ha movido',
+      bookingMovedBody: 'Hemos actualizado tu cita a la nueva hora.',
+      couldNotMove: 'No se pudo mover la reserva.',
+      modeCallback: 'Devolución de llamada', modePhone: 'Llamada telefónica', modeVideo: 'Videollamada', modeInperson: 'En persona',
+    },
+    it: {
+      chooseMeeting: 'Scegli un appuntamento', meetings: 'Appuntamenti',
+      selectDateTime: 'Scegli una data e un orario',
+      prevMonth: 'Mese precedente', nextMonth: 'Mese successivo',
+      timezone: 'Fuso orario', timeFormat: 'Formato orario',
+      fmt12: '12h', fmt24: '24h',
+      minUnit: '{n} min',
+      noTimesLeft: 'Nessun orario disponibile in questo giorno.',
+      back: 'Indietro', name: 'Nome', email: 'Email', phone: 'Telefono', message: 'Messaggio',
+      namePlaceholder: 'Il tuo nome', emailPlaceholder: 'tu@esempio.com', phonePlaceholder: 'Il tuo numero',
+      pleaseChoose: 'Scegli…',
+      at: '{date} alle {time}',
+      checkFields: 'Controlla i campi evidenziati.',
+      validEmail: 'Inserisci un indirizzo email valido.',
+      tickConsent: 'Spunta la casella per autorizzarci a contattarti.',
+      somethingWrong: 'Qualcosa è andato storto. Riprova.',
+      networkError: 'Errore di rete. Riprova.',
+      sending: 'Invio…',
+      addGoogle: 'Aggiungi a Google', downloadIcs: 'Scarica .ics',
+      manageBooking: 'Gestisci o annulla questa prenotazione', needDifferent: 'Serve un altro orario?',
+      confirmBooking: 'Conferma la prenotazione',
+      moveBooking: 'Sposta la tua prenotazione a questo orario.', confirmNewTime: 'Conferma il nuovo orario',
+      moving: 'Spostamento…', bookingMoved: 'La tua prenotazione è stata spostata',
+      bookingMovedBody: 'Abbiamo aggiornato il tuo appuntamento al nuovo orario.',
+      couldNotMove: 'Impossibile spostare la prenotazione.',
+      modeCallback: 'Richiamata telefonica', modePhone: 'Chiamata telefonica', modeVideo: 'Videochiamata', modeInperson: 'Di persona',
+    },
+    ro: {
+      chooseMeeting: 'Alege o întâlnire', meetings: 'Întâlniri',
+      selectDateTime: 'Alege o dată și o oră',
+      prevMonth: 'Luna anterioară', nextMonth: 'Luna următoare',
+      timezone: 'Fus orar', timeFormat: 'Format oră',
+      fmt12: '12h', fmt24: '24h',
+      minUnit: '{n} min',
+      noTimesLeft: 'Niciun interval disponibil în această zi.',
+      back: 'Înapoi', name: 'Nume', email: 'E-mail', phone: 'Telefon', message: 'Mesaj',
+      namePlaceholder: 'Numele dvs.', emailPlaceholder: 'tu@exemplu.com', phonePlaceholder: 'Numărul dvs.',
+      pleaseChoose: 'Alegeți…',
+      at: '{date} la {time}',
+      checkFields: 'Verificați câmpurile evidențiate.',
+      validEmail: 'Introduceți o adresă de e-mail validă.',
+      tickConsent: 'Bifați caseta pentru a ne permite să vă contactăm.',
+      somethingWrong: 'Ceva nu a mers bine. Încercați din nou.',
+      networkError: 'Eroare de rețea. Încercați din nou.',
+      sending: 'Se trimite…',
+      addGoogle: 'Adaugă în Google', downloadIcs: 'Descarcă .ics',
+      manageBooking: 'Gestionați sau anulați această rezervare', needDifferent: 'Aveți nevoie de altă oră?',
+      confirmBooking: 'Confirmă rezervarea',
+      moveBooking: 'Mutați rezervarea la această oră.', confirmNewTime: 'Confirmați noua oră',
+      moving: 'Se mută…', bookingMoved: 'Rezervarea dvs. a fost mutată',
+      bookingMovedBody: 'Am actualizat programarea la noua oră.',
+      couldNotMove: 'Rezervarea nu a putut fi mutată.',
+      modeCallback: 'Apel de revenire', modePhone: 'Apel telefonic', modeVideo: 'Apel video', modeInperson: 'În persoană',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
+
+  // Resolve the BCP-47 locale for a language code, so Intl produces month and
+  // weekday names matching the chosen UI language.
+  function localeOf(lang) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.localeOf === 'function') {
+      try { const l = window.TGi18n.localeOf(lang); if (l) return l; } catch (e) { /* noop */ }
+    }
+    return ({ en: 'en-GB', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', it: 'it-IT', ro: 'ro-RO' })[lang] || 'en-GB';
+  }
 
   function resolveOrigin() {
     if (typeof window === 'undefined') return '';
@@ -53,10 +254,38 @@
     return L > 0.5 ? '#0F172A' : '#FFFFFF';
   }
 
+  // English fallbacks. Live month/weekday names come from Intl, localised to the
+  // resolved UI language (see localeNames below).
   const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const WEEKDAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Build localised month/weekday name arrays for a given locale, indexed the
+  // same way as the English fallbacks above (weekday 0=Sun..6=Sat, month 0=Jan).
+  // Any failure falls back to the English arrays so layout never breaks.
+  function localeNames(locale) {
+    const out = { weekdays: WEEKDAYS, weekdaysLong: WEEKDAYS_LONG, months: MONTHS, monthsLong: MONTHS_LONG };
+    try {
+      const wdShort = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
+      const wdLong = new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' });
+      const moShort = new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' });
+      const moLong = new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC' });
+      const weekdays = [], weekdaysLong = [];
+      for (let i = 0; i < 7; i++) {
+        // 2024-01-07 is a Sunday (UTC); add i days for Sun..Sat.
+        const d = new Date(Date.UTC(2024, 0, 7 + i));
+        weekdays.push(wdShort.format(d)); weekdaysLong.push(wdLong.format(d));
+      }
+      const months = [], monthsLong = [];
+      for (let m = 0; m < 12; m++) {
+        const d = new Date(Date.UTC(2024, m, 15));
+        months.push(moShort.format(d)); monthsLong.push(moLong.format(d));
+      }
+      out.weekdays = weekdays; out.weekdaysLong = weekdaysLong; out.months = months; out.monthsLong = monthsLong;
+    } catch (e) { /* keep English fallback */ }
+    return out;
+  }
 
   // Curated timezone list for the switcher (label, IANA id).
   const TZ_LIST = [
@@ -158,7 +387,7 @@
     requireConsent: true,
     consentText: 'I am happy to be contacted about my enquiry.',
     // Confirmation
-    buttonLabel: 'Confirm booking',
+    buttonLabel: '',            // '' = localised default ('Confirm booking' in en)
     successTitle: 'You are booked in',
     successBody: 'We have your time and will be in touch to confirm. A calendar invite is below.',
     addToCalendar: true,
@@ -332,6 +561,8 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, migrate(config || {}));
+      this.t = makeT(this.cfg);                 // resolve viewer language + UI strings
+      this.names = localeNames(localeOf(this.t.lang)); // localised month/weekday names
       this.shadow = container.shadowRoot || (container.attachShadow ? container.attachShadow({ mode: 'open' }) : container);
       this.viewTz = detectTz();
       this.hour12 = this.cfg.timeFormat !== '24';
@@ -452,7 +683,7 @@
       if (showMeta && ev) {
         const icon = MODE_ICONS[ev.mode] || MODE_ICONS.callback;
         meta = `<div class="tga-meta">
-          <div class="tga-meta-row"><svg viewBox="0 0 24 24">${DUR_ICON}</svg> ${esc(ev.mins)} min</div>
+          <div class="tga-meta-row"><svg viewBox="0 0 24 24">${DUR_ICON}</svg> ${esc(this.t('minUnit', { n: ev.mins }))}</div>
           <div class="tga-meta-row"><svg viewBox="0 0 24 24">${icon}</svg> ${esc(this._modeLabel(ev.mode))}</div>
           ${c.location ? `<div class="tga-meta-row"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${esc(c.location)}</div>` : ''}
         </div>`;
@@ -468,7 +699,7 @@
     }
 
     _modeLabel(mode) {
-      return ({ callback: 'Phone callback', phone: 'Phone call', video: 'Video call', inperson: 'In person' })[mode] || 'Phone callback';
+      return ({ callback: this.t('modeCallback'), phone: this.t('modePhone'), video: this.t('modeVideo'), inperson: this.t('modeInperson') })[mode] || this.t('modeCallback');
     }
 
     // ── Step 0: choose an event type ──
@@ -476,13 +707,13 @@
       const c = this.cfg;
       const items = c.eventTypes.map((ev, i) => `<button type="button" class="tga-event" data-ev="${i}">
         <div class="tga-event-name">${esc(ev.label)}</div>
-        <div class="tga-event-meta"><svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2">${DUR_ICON}</svg> ${esc(ev.mins)} min · ${esc(this._modeLabel(ev.mode))}</div>
+        <div class="tga-event-meta"><svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2">${DUR_ICON}</svg> ${esc(this.t('minUnit', { n: ev.mins }))} · ${esc(this._modeLabel(ev.mode))}</div>
         ${ev.description ? `<div class="tga-event-desc">${esc(ev.description)}</div>` : ''}
       </button>`).join('');
       this.root.innerHTML = `<div class="tga-grid">
         ${this._asideHtml(false)}
         <div class="tga-main">
-          <h3 class="tga-step-h">Choose a meeting</h3>
+          <h3 class="tga-step-h">${esc(this.t('chooseMeeting'))}</h3>
           <div class="tga-events">${items}</div>
         </div>
       </div>`;
@@ -506,28 +737,28 @@
       this.root.innerHTML = `<div class="tga-grid">
         ${this._asideHtml(true)}
         <div class="tga-main">
-          ${multi ? `<button type="button" class="tga-back" id="tga-back-ev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Meetings</button>` : ''}
+          ${multi ? `<button type="button" class="tga-back" id="tga-back-ev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> ${esc(this.t('meetings'))}</button>` : ''}
           <div class="tga-sched">
             <div class="tga-cal-wrap">
-              <h3 class="tga-step-h">Select a date &amp; time</h3>
+              <h3 class="tga-step-h">${esc(this.t('selectDateTime'))}</h3>
               <div class="tga-cal-head">
-                <button type="button" class="tga-navbtn" id="tga-prev" aria-label="Previous month"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <button type="button" class="tga-navbtn" id="tga-prev" aria-label="${esc(this.t('prevMonth'))}"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
                 <span class="tga-cal-month" id="tga-month"></span>
-                <button type="button" class="tga-navbtn" id="tga-next" aria-label="Next month"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                <button type="button" class="tga-navbtn" id="tga-next" aria-label="${esc(this.t('nextMonth'))}"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
               </div>
-              <div class="tga-dow"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+              <div class="tga-dow">${[1,2,3,4,5,6,0].map(wd => `<span>${esc(this.names.weekdays[wd])}</span>`).join('')}</div>
               <div class="tga-cal" id="tga-cal"></div>
               <div class="tga-tz">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20"/></svg>
-                <select id="tga-tz" aria-label="Timezone"></select>
+                <select id="tga-tz" aria-label="${esc(this.t('timezone'))}"></select>
               </div>
             </div>
             <div class="tga-times-wrap tga-hidden" id="tga-times-wrap">
               <div class="tga-times-head">
                 <span class="tga-times-date" id="tga-times-date"></span>
-                <span class="tga-fmt" role="group" aria-label="Time format">
-                  <button type="button" data-fmt="12">12h</button>
-                  <button type="button" data-fmt="24">24h</button>
+                <span class="tga-fmt" role="group" aria-label="${esc(this.t('timeFormat'))}">
+                  <button type="button" data-fmt="12">${esc(this.t('fmt12'))}</button>
+                  <button type="button" data-fmt="24">${esc(this.t('fmt24'))}</button>
                 </span>
               </div>
               <div class="tga-times" id="tga-times"></div>
@@ -612,7 +843,7 @@
 
     _renderMonth() {
       const sh = this.shadow, { y, m0 } = this.viewMonth;
-      sh.getElementById('tga-month').textContent = MONTHS_LONG[m0] + ' ' + y;
+      sh.getElementById('tga-month').textContent = this.names.monthsLong[m0] + ' ' + y;
       const { min, max } = this._monthBounds();
       const idx = y * 12 + m0;
       sh.getElementById('tga-prev').disabled = idx <= (min.y * 12 + min.m0);
@@ -642,7 +873,7 @@
       const slots = this.slotsByDate[this.selectedKey] || [];
       const [y, m, d] = this.selectedKey.split('-').map(Number);
       const wd = weekdayOf(y, m - 1, d);
-      sh.getElementById('tga-times-date').textContent = `${WEEKDAYS_LONG[wd]} ${d} ${MONTHS[m - 1]}`;
+      sh.getElementById('tga-times-date').textContent = `${this.names.weekdaysLong[wd]} ${d} ${this.names.months[m - 1]}`;
       sh.querySelectorAll('.tga-fmt [data-fmt]').forEach(b => b.classList.toggle('is-on', (b.getAttribute('data-fmt') === '12') === this.hour12));
       const host = this._hostTz();
       const out = slots.map((s, i) => {
@@ -651,7 +882,7 @@
         const on = this.selectedSlot && this.selectedSlot.inst.getTime() === s.inst.getTime();
         return `<button type="button" class="tga-slot${on ? ' is-on' : ''}" data-i="${i}">${esc(label)}${cross}</button>`;
       }).join('');
-      sh.getElementById('tga-times').innerHTML = out || '<div class="tga-empty">No times left on this day.</div>';
+      sh.getElementById('tga-times').innerHTML = out || `<div class="tga-empty">${esc(this.t('noTimesLeft'))}</div>`;
       wrap.classList.remove('tga-hidden');
       const timesEl = sh.getElementById('tga-times');
       timesEl.onclick = (e) => {
@@ -675,10 +906,12 @@
 
     _whenLines() {
       const ev = this._event();
-      const startStr = new Intl.DateTimeFormat('en-GB', { timeZone: this.viewTz, weekday: 'long', day: 'numeric', month: 'long' }).format(this.selectedSlot.inst);
+      let startStr;
+      try { startStr = new Intl.DateTimeFormat(localeOf(this.t.lang), { timeZone: this.viewTz, weekday: 'long', day: 'numeric', month: 'long' }).format(this.selectedSlot.inst); }
+      catch (e) { startStr = new Intl.DateTimeFormat('en-GB', { timeZone: this.viewTz, weekday: 'long', day: 'numeric', month: 'long' }).format(this.selectedSlot.inst); }
       const timeStr = fmtTimeTz(this.selectedSlot.inst, this.viewTz, this.hour12);
       const tzName = (TZ_LIST.find(z => z[1] === this.viewTz) || [this.viewTz])[0];
-      return { main: `${startStr} at ${timeStr}`, sub: `${ev.mins} min · ${tzName}`, timeStr, startStr };
+      return { main: this.t('at', { date: startStr, time: timeStr }), sub: `${this.t('minUnit', { n: ev.mins })} · ${tzName}`, timeStr, startStr };
     }
 
     // ── Reschedule mode: confirm a new time, no details form ──
@@ -687,11 +920,11 @@
       this.root.innerHTML = `<div class="tga-grid">
         ${this._asideHtml(true)}
         <div class="tga-main">
-          <button type="button" class="tga-back" id="tga-back-cal"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+          <button type="button" class="tga-back" id="tga-back-cal"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> ${esc(this.t('back'))}</button>
           <div class="tga-chosen"><strong>${esc(when.main)}</strong><br><span style="opacity:.7">${esc(when.sub)}</span></div>
-          <p class="tga-sub" style="margin-bottom:14px">Move your booking to this time.</p>
+          <p class="tga-sub" style="margin-bottom:14px">${esc(this.t('moveBooking'))}</p>
           <div class="tga-form-err" id="tga-form-err"></div>
-          <button type="button" class="tga-submit" id="tga-submit">Confirm new time</button>
+          <button type="button" class="tga-submit" id="tga-submit">${esc(this.t('confirmNewTime'))}</button>
         </div>
       </div>`;
       this.shadow.getElementById('tga-back-cal').addEventListener('click', () => this._renderScheduler());
@@ -704,7 +937,7 @@
       const when = this._whenLines();
       const startMs = this.selectedSlot.inst.getTime();
       if (this.cfg.previewMode) { this._showSuccess(when, startMs, startMs + this._event().mins * 60000); return; }
-      btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Moving…';
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = this.t('moving');
       const admin = !!this.adminRescheduleRef;
       const url = (SCRIPT_ORIGIN || '') + (admin ? '/api/appointment/admin-action' : '/api/appointment/manage');
       const payload = admin
@@ -716,10 +949,10 @@
         body: JSON.stringify(payload),
       }).then(r => r.json().then(b => ({ ok: r.ok, body: b })).catch(() => ({ ok: r.ok, body: {} })))
         .then(res => {
-          if (res.ok && res.body.ok) this._showSuccess(when, startMs, startMs + this._event().mins * 60000, { title: 'Your booking has been moved', body: 'We have updated your appointment to the new time.' });
-          else { btn.disabled = false; btn.textContent = orig; formErr.textContent = (res.body && res.body.error) || 'Could not move the booking.'; formErr.classList.add('is-shown'); }
+          if (res.ok && res.body.ok) this._showSuccess(when, startMs, startMs + this._event().mins * 60000, { title: this.t('bookingMoved'), body: this.t('bookingMovedBody') });
+          else { btn.disabled = false; btn.textContent = orig; formErr.textContent = (res.body && res.body.error) || this.t('couldNotMove'); formErr.classList.add('is-shown'); }
         })
-        .catch(() => { btn.disabled = false; btn.textContent = orig; formErr.textContent = 'Network error. Please try again.'; formErr.classList.add('is-shown'); });
+        .catch(() => { btn.disabled = false; btn.textContent = orig; formErr.textContent = this.t('networkError'); formErr.classList.add('is-shown'); });
     }
 
     // ── Step 3: details ──
@@ -733,32 +966,32 @@
         let control = '';
         if (q.type === 'textarea') control = `<textarea id="${id}" maxlength="800"></textarea>`;
         else if (q.type === 'select') {
-          const opts = ['<option value="">Please choose…</option>'].concat((q.options || []).map(o => `<option value="${esc(o)}">${esc(o)}</option>`)).join('');
+          const opts = [`<option value="">${esc(this.t('pleaseChoose'))}</option>`].concat((q.options || []).map(o => `<option value="${esc(o)}">${esc(o)}</option>`)).join('');
           control = `<select id="${id}">${opts}</select>`;
         } else control = `<input id="${id}" type="text" maxlength="200">`;
         return `<div class="tga-field full" data-qfield="${i}"><label for="${id}">${esc(q.label)}${req}</label>${control}</div>`;
       }).join('');
 
       const phoneHtml = c.askPhone ? `<div class="tga-field">
-          <label for="tga-phone">Phone${c.phoneRequired ? ' <span class="tga-req">*</span>' : ''}</label>
-          <input id="tga-phone" type="tel" autocomplete="tel" placeholder="Your number">
+          <label for="tga-phone">${esc(this.t('phone'))}${c.phoneRequired ? ' <span class="tga-req">*</span>' : ''}</label>
+          <input id="tga-phone" type="tel" autocomplete="tel" placeholder="${esc(this.t('phonePlaceholder'))}">
         </div>` : '';
       const consentHtml = c.requireConsent ? `<label class="tga-consent"><input type="checkbox" id="tga-consent"><span>${esc(c.consentText)}</span></label>` : '';
 
       this.root.innerHTML = `<div class="tga-grid">
         ${this._asideHtml(true)}
         <div class="tga-main">
-          <button type="button" class="tga-back" id="tga-back-cal"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back</button>
+          <button type="button" class="tga-back" id="tga-back-cal"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> ${esc(this.t('back'))}</button>
           <div class="tga-chosen"><strong>${esc(when.main)}</strong><br><span style="opacity:.7">${esc(when.sub)}</span></div>
           <div class="tga-fields">
-            <div class="tga-field"><label for="tga-name">Name <span class="tga-req">*</span></label><input id="tga-name" type="text" autocomplete="name" placeholder="Your name"></div>
-            <div class="tga-field"><label for="tga-email">Email <span class="tga-req">*</span></label><input id="tga-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+            <div class="tga-field"><label for="tga-name">${esc(this.t('name'))} <span class="tga-req">*</span></label><input id="tga-name" type="text" autocomplete="name" placeholder="${esc(this.t('namePlaceholder'))}"></div>
+            <div class="tga-field"><label for="tga-email">${esc(this.t('email'))} <span class="tga-req">*</span></label><input id="tga-email" type="email" autocomplete="email" placeholder="${esc(this.t('emailPlaceholder'))}"></div>
             ${phoneHtml}
             ${qFields}
           </div>
           ${consentHtml}
           <div class="tga-form-err" id="tga-form-err"></div>
-          <button type="button" class="tga-submit" id="tga-submit">${esc(c.buttonLabel)}</button>
+          <button type="button" class="tga-submit" id="tga-submit">${esc(c.buttonLabel || this.t('confirmBooking'))}</button>
         </div>
       </div>`;
       void ev;
@@ -782,11 +1015,16 @@
       const phone = phoneEl ? (phoneEl.value || '').trim() : '';
       const consentEl = sh.getElementById('tga-consent');
 
-      let bad = false;
+      let bad = false, onlyEmailFormat = false;
       this._fieldErr('tga-name', false); this._fieldErr('tga-email', false);
       if (!name) { this._fieldErr('tga-name', true); bad = true; }
-      if (!emailOk(email)) { this._fieldErr('tga-email', true); bad = true; }
-      if (c.askPhone && c.phoneRequired && !phone) { this._fieldErr('tga-phone', true); bad = true; }
+      if (!emailOk(email)) {
+        this._fieldErr('tga-email', true);
+        // A non-empty but malformed email gets a specific, friendlier message.
+        if (email && !bad) onlyEmailFormat = true;
+        bad = true;
+      }
+      if (c.askPhone && c.phoneRequired && !phone) { this._fieldErr('tga-phone', true); bad = true; onlyEmailFormat = false; }
 
       const answers = {};
       (Array.isArray(c.questions) ? c.questions : []).forEach((q, i) => {
@@ -795,11 +1033,11 @@
         answers[q.id || ('q' + i)] = v;
         const wrap = sh.querySelector('[data-qfield="' + i + '"]');
         if (wrap) wrap.classList.toggle('has-err', !!(q.required && !v));
-        if (q.required && !v) bad = true;
+        if (q.required && !v) { bad = true; onlyEmailFormat = false; }
       });
 
-      if (bad) { formErr.textContent = 'Please check the highlighted fields.'; formErr.classList.add('is-shown'); return; }
-      if (c.requireConsent && consentEl && !consentEl.checked) { formErr.textContent = 'Please tick the box to say we can contact you.'; formErr.classList.add('is-shown'); return; }
+      if (bad) { formErr.textContent = onlyEmailFormat ? this.t('validEmail') : this.t('checkFields'); formErr.classList.add('is-shown'); return; }
+      if (c.requireConsent && consentEl && !consentEl.checked) { formErr.textContent = this.t('tickConsent'); formErr.classList.add('is-shown'); return; }
 
       const when = this._whenLines();
       const startMs = this.selectedSlot.inst.getTime();
@@ -828,7 +1066,7 @@
 
       const btn = sh.getElementById('tga-submit');
       if (c.previewMode) { this._showSuccess(when, startMs, endMs); return; }
-      btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Sending…';
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = this.t('sending');
 
       // Backend mode posts to the booking endpoint (real calendar, manage link);
       // otherwise it falls back to the generic contact endpoint.
@@ -841,9 +1079,9 @@
         .then(r => r.json().then(b => ({ ok: r.ok, body: b })).catch(() => ({ ok: r.ok, body: {} })))
         .then(res => {
           if (res.ok && (res.body.ok === undefined || res.body.ok)) this._showSuccess(when, startMs, endMs, null, res.body);
-          else { btn.disabled = false; btn.textContent = orig; formErr.textContent = (res.body && res.body.error) || 'Something went wrong. Please try again.'; formErr.classList.add('is-shown'); }
+          else { btn.disabled = false; btn.textContent = orig; formErr.textContent = (res.body && res.body.error) || this.t('somethingWrong'); formErr.classList.add('is-shown'); }
         })
-        .catch(() => { btn.disabled = false; btn.textContent = orig; formErr.textContent = 'Network error. Please try again.'; formErr.classList.add('is-shown'); });
+        .catch(() => { btn.disabled = false; btn.textContent = orig; formErr.textContent = this.t('networkError'); formErr.classList.add('is-shown'); });
     }
 
     _calTitle() {
@@ -888,15 +1126,15 @@
         const g = safeUrl(this._googleUrl(startMs, endMs));
         const ics = this._icsUrl(startMs, endMs);
         cal = `<div class="tga-cal-actions">
-          <a class="tga-cal-btn" href="${esc(g)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Add to Google</a>
-          <a class="tga-cal-btn" href="${esc(ics)}" download="appointment.ics"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download .ics</a>
+          <a class="tga-cal-btn" href="${esc(g)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${esc(this.t('addGoogle'))}</a>
+          <a class="tga-cal-btn" href="${esc(ics)}" download="appointment.ics"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ${esc(this.t('downloadIcs'))}</a>
         </div>`;
       }
       // A real backend booking returns a manage link (reschedule / cancel).
       let foot = '';
       const manageUrl = serverBody && safeUrl(serverBody.manageUrl);
-      if (manageUrl) foot = `<div class="tga-change"><a href="${esc(manageUrl)}" style="color:var(--tga-accent,#0891B2);font-weight:600;text-decoration:underline;font-size:13px">Manage or cancel this booking</a></div>`;
-      else if (!this.rescheduleMode && !this.backend) foot = `<div class="tga-change"><button type="button" id="tga-again">Need a different time?</button></div>`;
+      if (manageUrl) foot = `<div class="tga-change"><a href="${esc(manageUrl)}" style="color:var(--tga-accent,#0891B2);font-weight:600;text-decoration:underline;font-size:13px">${esc(this.t('manageBooking'))}</a></div>`;
+      else if (!this.rescheduleMode && !this.backend) foot = `<div class="tga-change"><button type="button" id="tga-again">${esc(this.t('needDifferent'))}</button></div>`;
 
       this.root.innerHTML = `<div class="tga-success" role="status" aria-live="polite">
         <span class="tga-success-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -912,6 +1150,8 @@
 
     update(newConfig) {
       this.cfg = Object.assign({}, DEFAULTS, migrate(newConfig || {}));
+      this.t = makeT(this.cfg);
+      this.names = localeNames(localeOf(this.t.lang));
       this.viewTz = detectTz();
       this.hour12 = this.cfg.timeFormat !== '24';
       this.widgetId = (this.el.getAttribute && this.el.getAttribute('data-tg-id')) || this.cfg.widgetId || '';
