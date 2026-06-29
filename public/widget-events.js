@@ -73,7 +73,120 @@
     } catch (e) { /* fall through */ }
     return '/api/events-content';
   })();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (month + weekday names, view-switcher and filter
+  // labels, nav controls, empty/loading states, modal controls). Event titles,
+  // descriptions, locations, categories, prices and dates are author content or
+  // feed data and are NOT translated. English is the source + fallback.
+  const MESSAGES = {
+    en: {
+      months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+      monthsShort: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      daysShort: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+      daysLong: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+      viewGroup: 'View', viewList: 'List', viewMonth: 'Month', viewCards: 'Cards',
+      allEvents: 'All events', today: 'Today',
+      prevMonth: 'Previous month', nextMonth: 'Next month', more: '+{n} more',
+      loading: 'Loading events…',
+      emptyTitle: 'Nothing scheduled',
+      emptyNone: 'No upcoming events to show.',
+      emptyError: "We couldn't load events right now. Please try again shortly.",
+      close: 'Close', findOutMore: 'Find out more',
+    },
+    fr: {
+      months: ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],
+      monthsShort: ['jan','fév','mar','avr','mai','jui','jul','aoû','sep','oct','nov','déc'],
+      daysShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
+      daysLong: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+      viewGroup: 'Affichage', viewList: 'Liste', viewMonth: 'Mois', viewCards: 'Cartes',
+      allEvents: 'Tous', today: "Aujourd'hui",
+      prevMonth: 'Mois précédent', nextMonth: 'Mois suivant', more: '+{n} de plus',
+      loading: 'Chargement des évènements…',
+      emptyTitle: 'Rien de prévu',
+      emptyNone: 'Aucun évènement à venir à afficher.',
+      emptyError: "Impossible de charger les évènements pour le moment. Veuillez réessayer sous peu.",
+      close: 'Fermer', findOutMore: 'En savoir plus',
+    },
+    de: {
+      months: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+      monthsShort: ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
+      daysShort: ['So','Mo','Di','Mi','Do','Fr','Sa'],
+      daysLong: ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'],
+      viewGroup: 'Ansicht', viewList: 'Liste', viewMonth: 'Monat', viewCards: 'Karten',
+      allEvents: 'Alle', today: 'Heute',
+      prevMonth: 'Voriger Monat', nextMonth: 'Nächster Monat', more: '+{n} weitere',
+      loading: 'Veranstaltungen werden geladen…',
+      emptyTitle: 'Nichts geplant',
+      emptyNone: 'Keine bevorstehenden Veranstaltungen.',
+      emptyError: 'Veranstaltungen konnten gerade nicht geladen werden. Bitte versuchen Sie es in Kürze erneut.',
+      close: 'Schließen', findOutMore: 'Mehr erfahren',
+    },
+    es: {
+      months: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+      monthsShort: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+      daysShort: ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],
+      daysLong: ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
+      viewGroup: 'Vista', viewList: 'Lista', viewMonth: 'Mes', viewCards: 'Tarjetas',
+      allEvents: 'Todos', today: 'Hoy',
+      prevMonth: 'Mes anterior', nextMonth: 'Mes siguiente', more: '+{n} más',
+      loading: 'Cargando eventos…',
+      emptyTitle: 'Nada programado',
+      emptyNone: 'No hay eventos próximos que mostrar.',
+      emptyError: 'No pudimos cargar los eventos en este momento. Vuelve a intentarlo en breve.',
+      close: 'Cerrar', findOutMore: 'Más información',
+    },
+    it: {
+      months: ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'],
+      monthsShort: ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'],
+      daysShort: ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'],
+      daysLong: ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'],
+      viewGroup: 'Vista', viewList: 'Elenco', viewMonth: 'Mese', viewCards: 'Schede',
+      allEvents: 'Tutti', today: 'Oggi',
+      prevMonth: 'Mese precedente', nextMonth: 'Mese successivo', more: '+{n} altri',
+      loading: 'Caricamento eventi…',
+      emptyTitle: 'Niente in programma',
+      emptyNone: 'Nessun evento in programma da mostrare.',
+      emptyError: 'Non è stato possibile caricare gli eventi in questo momento. Riprova a breve.',
+      close: 'Chiudi', findOutMore: 'Scopri di più',
+    },
+    ro: {
+      months: ['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'],
+      monthsShort: ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','noi','dec'],
+      daysShort: ['Dum','Lun','Mar','Mie','Joi','Vin','Sâm'],
+      daysLong: ['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'],
+      viewGroup: 'Vizualizare', viewList: 'Listă', viewMonth: 'Lună', viewCards: 'Carduri',
+      allEvents: 'Toate', today: 'Azi',
+      prevMonth: 'Luna precedentă', nextMonth: 'Luna următoare', more: '+{n} în plus',
+      loading: 'Se încarcă evenimentele…',
+      emptyTitle: 'Nimic programat',
+      emptyNone: 'Niciun eveniment viitor de afișat.',
+      emptyError: 'Nu am putut încărca evenimentele acum. Te rugăm să încerci din nou în scurt timp.',
+      close: 'Închide', findOutMore: 'Află mai multe',
+    },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -162,20 +275,21 @@
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   }
 
-  function fmtRange(startStr, endStr, locale) {
+  function fmtRange(startStr, endStr, t) {
+    const mon = (t && t('monthsShort')) || MONTH_SHORT;
     const s = parseDate(startStr);
     const e = endStr ? parseDate(endStr) : null;
     if (!s) return '';
     if (!e || sameDay(s, e)) {
-      return ordinal(s.getDate()) + ' ' + MONTH_SHORT[s.getMonth()] + ' ' + s.getFullYear();
+      return ordinal(s.getDate()) + ' ' + mon[s.getMonth()] + ' ' + s.getFullYear();
     }
     if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
-      return s.getDate() + '–' + e.getDate() + ' ' + MONTH_SHORT[s.getMonth()] + ' ' + s.getFullYear();
+      return s.getDate() + '–' + e.getDate() + ' ' + mon[s.getMonth()] + ' ' + s.getFullYear();
     }
     if (s.getFullYear() === e.getFullYear()) {
-      return s.getDate() + ' ' + MONTH_SHORT[s.getMonth()] + ' – ' + e.getDate() + ' ' + MONTH_SHORT[e.getMonth()] + ' ' + s.getFullYear();
+      return s.getDate() + ' ' + mon[s.getMonth()] + ' – ' + e.getDate() + ' ' + mon[e.getMonth()] + ' ' + s.getFullYear();
     }
-    return s.getDate() + ' ' + MONTH_SHORT[s.getMonth()] + ' ' + s.getFullYear() + ' – ' + e.getDate() + ' ' + MONTH_SHORT[e.getMonth()] + ' ' + e.getFullYear();
+    return s.getDate() + ' ' + mon[s.getMonth()] + ' ' + s.getFullYear() + ' – ' + e.getDate() + ' ' + mon[e.getMonth()] + ' ' + e.getFullYear();
   }
 
   // ---------- Inline icons ----------
@@ -1028,6 +1142,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
 
       // Internal state
@@ -1175,10 +1290,10 @@
       const cfg = this.cfg;
       if (!cfg.showHeader) return '';
       const switcher = cfg.showLayoutSwitcher
-        ? '<div class="tge-switcher" role="group" aria-label="View">'
-          + this._switchBtn('list',  'List',  IC.list)
-          + this._switchBtn('month', 'Month', IC.cal)
-          + this._switchBtn('card',  'Cards', IC.card)
+        ? '<div class="tge-switcher" role="group" aria-label="' + esc(this.t('viewGroup')) + '">'
+          + this._switchBtn('list',  this.t('viewList'),  IC.list)
+          + this._switchBtn('month', this.t('viewMonth'), IC.cal)
+          + this._switchBtn('card',  this.t('viewCards'), IC.card)
           + '</div>'
         : '';
       return '<div class="tge-header">'
@@ -1215,7 +1330,7 @@
 
       if (!this.curatedLoaded && this.cfg.useCuratedEvents !== false) {
         filtersMount.innerHTML = '';
-        bodyMount.innerHTML = '<div class="tge-loading"><span class="tge-spinner"></span> Loading events…</div>';
+        bodyMount.innerHTML = '<div class="tge-loading"><span class="tge-spinner"></span> ' + esc(this.t('loading')) + '</div>';
         return;
       }
 
@@ -1242,7 +1357,7 @@
       const allActive = this.activeCategory === 'all';
       let html = '<div class="tge-filters">';
       html += '<button class="tge-chip tge-chip--all" data-cat="all" aria-pressed="' + allActive + '" type="button">'
-        + 'All events'
+        + esc(this.t('allEvents'))
         + '<span class="tge-chip-count">' + allCount + '</span>'
         + '</button>';
 
@@ -1298,24 +1413,26 @@
       for (const e of upcoming) {
         const dt = parseDate(e.startDate);
         if (!dt) continue;
+        const monthsLong = this.t('months');
+        const monthsShort = this.t('monthsShort');
         const key = dt.getFullYear() + '-' + dt.getMonth();
         if (key !== lastKey) {
-          out.push('<div class="tge-list-month">' + MONTH_NAMES[dt.getMonth()] + ' ' + dt.getFullYear() + '</div>');
+          out.push('<div class="tge-list-month">' + esc(monthsLong[dt.getMonth()]) + ' ' + dt.getFullYear() + '</div>');
           lastKey = key;
         }
         const meta = categoryMeta(e.category);
         const catRgb = hexToRgb(e.catColor || meta.color) || '8, 145, 178';
-        const dateRange = fmtRange(e.startDate, e.endDate);
+        const dateRange = fmtRange(e.startDate, e.endDate, this.t);
         const endDt = parseDate(e.endDate);
         const isMultiDay = endDt && !sameDay(dt, endDt);
         const datePillHtml = isMultiDay
           ? '<div class="tge-list-day">' + dt.getDate() + '</div>'
-            + '<div class="tge-list-mon">' + MONTH_SHORT[dt.getMonth()] + '</div>'
+            + '<div class="tge-list-mon">' + esc(monthsShort[dt.getMonth()]) + '</div>'
             + '<div class="tge-list-sep" aria-hidden="true">→</div>'
             + '<div class="tge-list-day tge-list-day-end">' + endDt.getDate() + '</div>'
-            + '<div class="tge-list-mon">' + MONTH_SHORT[endDt.getMonth()] + '</div>'
+            + '<div class="tge-list-mon">' + esc(monthsShort[endDt.getMonth()]) + '</div>'
           : '<div class="tge-list-day">' + dt.getDate() + '</div>'
-            + '<div class="tge-list-mon">' + MONTH_SHORT[dt.getMonth()] + '</div>';
+            + '<div class="tge-list-mon">' + esc(monthsShort[dt.getMonth()]) + '</div>';
         out.push(
           '<button class="tge-list-item" data-event-id="' + esc(e.id) + '" type="button" '
           + 'style="--tge-cat:' + (e.catColor || meta.color) + ';--tge-cat-rgb:' + catRgb + '">'
@@ -1375,7 +1492,8 @@
         }
       }
 
-      const dowCells = DAY_NAMES.map(d => '<div class="tge-dow">' + d + '</div>').join('');
+      const daysShort = this.t('daysShort');
+      const dowCells = daysShort.map(d => '<div class="tge-dow">' + esc(d) + '</div>').join('');
       const cellHtml = cells.map(d => {
         const off = d.getMonth() !== month.getMonth();
         const isToday = sameDay(d, today);
@@ -1398,16 +1516,16 @@
                 + esc(e.name)
                 + '</button>';
             }).join('')
-          + (overflow > 0 ? '<button class="tge-cell-more" type="button" data-day="' + fmtDate(d) + '">+' + overflow + ' more</button>' : '')
+          + (overflow > 0 ? '<button class="tge-cell-more" type="button" data-day="' + fmtDate(d) + '">' + esc(this.t('more', { n: overflow })) + '</button>' : '')
           + '</div>';
       }).join('');
 
       return '<div class="tge-month-nav">'
-        + '<div class="tge-month-title">' + MONTH_NAMES[month.getMonth()] + ' ' + month.getFullYear() + '</div>'
+        + '<div class="tge-month-title">' + esc(this.t('months')[month.getMonth()]) + ' ' + month.getFullYear() + '</div>'
         + '<div class="tge-month-nav-btns">'
-          + '<button class="tge-today-btn" data-month-action="today" type="button">Today</button>'
-          + '<button class="tge-icon-btn" data-month-action="prev" aria-label="Previous month" type="button">' + svgPath(IC.chevL, '') + '</button>'
-          + '<button class="tge-icon-btn" data-month-action="next" aria-label="Next month" type="button">' + svgPath(IC.chevR, '') + '</button>'
+          + '<button class="tge-today-btn" data-month-action="today" type="button">' + esc(this.t('today')) + '</button>'
+          + '<button class="tge-icon-btn" data-month-action="prev" aria-label="' + esc(this.t('prevMonth')) + '" type="button">' + svgPath(IC.chevL, '') + '</button>'
+          + '<button class="tge-icon-btn" data-month-action="next" aria-label="' + esc(this.t('nextMonth')) + '" type="button">' + svgPath(IC.chevR, '') + '</button>'
         + '</div>'
         + '</div>'
         + '<div class="tge-grid">' + dowCells + cellHtml + '</div>';
@@ -1432,7 +1550,7 @@
         const img = (cfg.showImages !== false && e.image)
           ? '<div class="tge-card-img" style="background-image:url(' + esc(e.image) + ')">'
           : '<div class="tge-card-img tge-card-img--placeholder" style="--tge-cat-rgb:' + catRgb + '">' + placeholderSvg;
-        const dateRange = fmtRange(e.startDate, e.endDate);
+        const dateRange = fmtRange(e.startDate, e.endDate, this.t);
         return '<button class="tge-card" data-event-id="' + esc(e.id) + '" type="button" '
           + 'style="--tge-cat:' + catColor + ';--tge-cat-rgb:' + catRgb + '">'
           + img
@@ -1454,12 +1572,10 @@
     }
 
     _renderEmpty() {
-      const msg = this.curatedError
-        ? 'We couldn\'t load events right now. Please try again shortly.'
-        : 'No upcoming events to show.';
+      const msg = this.curatedError ? this.t('emptyError') : this.t('emptyNone');
       return '<div class="tge-empty">'
         + '<div class="tge-empty-ico">' + svgPath(IC.cal, '') + '</div>'
-        + '<div class="tge-empty-title">Nothing scheduled</div>'
+        + '<div class="tge-empty-title">' + esc(this.t('emptyTitle')) + '</div>'
         + '<div>' + esc(msg) + '</div>'
         + '</div>';
     }
@@ -1522,14 +1638,14 @@
       const meta = categoryMeta(e.category);
       const catColor = e.catColor || meta.color;
       const catRgb = hexToRgb(catColor) || '8, 145, 178';
-      const dateRange = fmtRange(e.startDate, e.endDate);
+      const dateRange = fmtRange(e.startDate, e.endDate, this.t);
 
       const root = this.shadow.querySelector('.tge-root');
       const modalHtml = ''
         + '<div class="tge-modal-bg" data-tge-modal></div>'
         + '<div class="tge-modal" role="dialog" aria-modal="true">'
           + '<div class="tge-modal-card" style="position:relative;--tge-cat:' + catColor + ';--tge-cat-rgb:' + catRgb + '">'
-            + '<button class="tge-modal-close" type="button" aria-label="Close">' + svgPath(IC.close, '') + '</button>'
+            + '<button class="tge-modal-close" type="button" aria-label="' + esc(this.t('close')) + '">' + svgPath(IC.close, '') + '</button>'
             + (e.image && this.cfg.showImages !== false
                 ? '<div class="tge-modal-img" style="background-image:url(' + esc(e.image) + ')"></div>'
                 : '')
@@ -1545,7 +1661,7 @@
                   : '')
               + (e.url
                   ? '<a class="tge-modal-cta" href="' + esc(e.url) + '" target="_blank" rel="noopener noreferrer">'
-                    + 'Find out more' + svgPath(IC.arrow, '')
+                    + esc(this.t('findOutMore')) + svgPath(IC.arrow, '')
                     + '</a>'
                   : '')
             + '</div>'
@@ -1593,6 +1709,7 @@
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      this.t = makeT(this.cfg);
       this.layout = this.cfg.layout || this.layout;
       this._render();
       if (this.cfg.useCuratedEvents !== false) {
