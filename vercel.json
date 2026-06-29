@@ -16,6 +16,9 @@
     "api/screenshot-to-code.js": {
       "maxDuration": 60
     },
+    "api/faq-translate.js": {
+      "maxDuration": 60
+    },
     "api/slice-emit.js": {
       "maxDuration": 300
     },

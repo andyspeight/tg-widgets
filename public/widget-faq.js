@@ -59,7 +59,41 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const VERSION = '1.2.0';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome, per language. English is the source + fallback. The author's
+  // questions, answers, headings and CTA are CONTENT (translated separately, on
+  // save) — this only covers the widget's own controls. Author overrides of the
+  // search placeholder / no-results text still win.
+  const MESSAGES = {
+    en: { searchPlaceholder: 'Search questions…', searchAria: 'Search questions', clearSearch: 'Clear search', expandAll: 'Expand all', collapseAll: 'Collapse all', all: 'All', noResults: 'No questions match that search', popular: 'Popular', lastUpdated: 'Last updated {date}' },
+    fr: { searchPlaceholder: 'Rechercher des questions…', searchAria: 'Rechercher des questions', clearSearch: 'Effacer la recherche', expandAll: 'Tout déplier', collapseAll: 'Tout replier', all: 'Toutes', noResults: 'Aucune question ne correspond à cette recherche', popular: 'Populaire', lastUpdated: 'Mis à jour le {date}' },
+    de: { searchPlaceholder: 'Fragen durchsuchen…', searchAria: 'Fragen durchsuchen', clearSearch: 'Suche löschen', expandAll: 'Alle ausklappen', collapseAll: 'Alle einklappen', all: 'Alle', noResults: 'Keine Frage passt zu dieser Suche', popular: 'Beliebt', lastUpdated: 'Zuletzt aktualisiert am {date}' },
+    es: { searchPlaceholder: 'Buscar preguntas…', searchAria: 'Buscar preguntas', clearSearch: 'Borrar búsqueda', expandAll: 'Expandir todo', collapseAll: 'Contraer todo', all: 'Todas', noResults: 'Ninguna pregunta coincide con esa búsqueda', popular: 'Popular', lastUpdated: 'Última actualización: {date}' },
+    it: { searchPlaceholder: 'Cerca domande…', searchAria: 'Cerca domande', clearSearch: 'Cancella ricerca', expandAll: 'Espandi tutto', collapseAll: 'Comprimi tutto', all: 'Tutte', noResults: 'Nessuna domanda corrisponde alla ricerca', popular: 'Popolare', lastUpdated: 'Ultimo aggiornamento: {date}' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   /* ------------------------------------------------------------------
    * Icon library — inline SVG path strings (no external deps).
@@ -570,6 +604,10 @@
       this.widgetId = container.getAttribute('data-tg-id') ||
         ('faq_' + Math.random().toString(36).slice(2, 10));
       this.shadow = container.attachShadow({ mode: 'open' });
+      // `cl` is the language-localised view of the config the render reads from.
+      // It starts as the source config and is recomputed each render once the
+      // viewer's language is known (see _render + _localizedConfig).
+      this.cl = this.c;
       this.state = {
         query: '',
         activeCategory: 'all',
@@ -604,8 +642,8 @@
         },
         search: {
           enabled: true,
-          placeholder: 'Search questions…',
-          noResultsText: 'No questions match that search'
+          placeholder: '',          // '' = localized default for the viewer's language
+          noResultsText: ''         // '' = localized default
         },
         showIcons: true,
         showExpandAll: true,
@@ -652,7 +690,8 @@
     }
 
     _visibleQuestions() {
-      return (this.c.questions || []).filter(q => !q.hidden);
+      // Read from the localised view (falls back to source before first render).
+      return ((this.cl || this.c).questions || []).filter(q => !q.hidden);
     }
 
     _filteredQuestions() {
@@ -682,7 +721,7 @@
     }
 
     _categoryIcon(catId) {
-      const cat = (this.c.categories || []).find(c => c.id === catId);
+      const cat = ((this.cl || this.c).categories || []).find(c => c.id === catId);
       return (cat && cat.icon) || null;
     }
 
@@ -713,7 +752,67 @@
       }`;
     }
 
+    /**
+     * Build the language-localised view of the config for the resolved viewer
+     * language. The author writes the FAQ once in the source language (English);
+     * config.i18n holds per-language overlays produced on save by the editor's
+     * "Translate for my audience" step (api/faq-translate). Here we lay the
+     * overlay for the viewer's language over the source, field by field, so a
+     * missing translation always falls back to the original — never a blank.
+     *
+     * Only CONTENT is overlaid (heading, CTA, category labels, question + answer
+     * text, the optional search-string overrides). Layout, colours, ids, flags
+     * and behaviour come straight from the source config untouched.
+     */
+    _localizedConfig(lang) {
+      const c = this.c;
+      if (!lang || lang === 'en' || !c.i18n || typeof c.i18n !== 'object') return c;
+      const tr = c.i18n[lang];
+      if (!tr || typeof tr !== 'object') return c;
+
+      // Use the translated value only when it is a non-empty string, else keep source.
+      const pick = (base, over) => (typeof over === 'string' && over.trim()) ? over : base;
+      const out = Object.assign({}, c);
+
+      if (tr.heading && typeof tr.heading === 'object') {
+        out.heading = Object.assign({}, c.heading, {
+          title: pick(c.heading && c.heading.title, tr.heading.title),
+          subtitle: pick(c.heading && c.heading.subtitle, tr.heading.subtitle)
+        });
+      }
+      if (tr.cta && typeof tr.cta === 'object') {
+        out.cta = Object.assign({}, c.cta, {
+          heading: pick(c.cta && c.cta.heading, tr.cta.heading),
+          description: pick(c.cta && c.cta.description, tr.cta.description),
+          buttonText: pick(c.cta && c.cta.buttonText, tr.cta.buttonText)
+        });
+      }
+      if (tr.search && typeof tr.search === 'object') {
+        out.search = Object.assign({}, c.search, {
+          placeholder: pick(c.search && c.search.placeholder, tr.search.placeholder),
+          noResultsText: pick(c.search && c.search.noResultsText, tr.search.noResultsText)
+        });
+      }
+      if (tr.categories && typeof tr.categories === 'object' && Array.isArray(c.categories)) {
+        out.categories = c.categories.map((cat) =>
+          Object.assign({}, cat, { label: pick(cat.label, tr.categories[cat.id]) }));
+      }
+      if (tr.questions && typeof tr.questions === 'object' && Array.isArray(c.questions)) {
+        out.questions = c.questions.map((q) => {
+          const tq = tr.questions[q.id];
+          if (!tq || typeof tq !== 'object') return q;
+          return Object.assign({}, q, {
+            question: pick(q.question, tq.question),
+            answer: pick(q.answer, tq.answer)
+          });
+        });
+      }
+      return out;
+    }
+
     _render() {
+      this.t = makeT(this.c);   // resolve viewer language + UI strings each render
+      this.cl = this._localizedConfig(this.t.lang);   // content localised for that language
       const html = '<style>' + STYLES + this._customStyles() + '</style>' + this._renderRoot();
       this.shadow.innerHTML = html;
       this._bind();
@@ -731,7 +830,7 @@
     }
 
     _renderHeader() {
-      const h = this.c.heading;
+      const h = this.cl.heading;
       if (!h || !h.show) return '';
       const title = h.title ? `<h2 class="tgf-title">${esc(h.title)}</h2>` : '';
       const sub = h.subtitle ? `<p class="tgf-subtitle">${esc(h.subtitle)}</p>` : '';
@@ -754,17 +853,17 @@
     }
 
     _renderSearch() {
-      const placeholder = (this.c.search && this.c.search.placeholder) || 'Search questions…';
+      const placeholder = (this.cl.search && this.cl.search.placeholder) || this.t('searchPlaceholder');
       const hasValue = this.state.query ? ' has-value' : '';
       return `<div class="tgf-search${hasValue}">
         <span class="tgf-search-icon">${icon('search', 18)}</span>
-        <input class="tgf-search-input" type="search" placeholder="${esc(placeholder)}" value="${esc(this.state.query)}" aria-label="Search questions" spellcheck="false" autocomplete="off">
-        <button class="tgf-search-clear" type="button" aria-label="Clear search">${icon('x', 16)}</button>
+        <input class="tgf-search-input" type="search" placeholder="${esc(placeholder)}" value="${esc(this.state.query)}" aria-label="${esc(this.t('searchAria'))}" spellcheck="false" autocomplete="off">
+        <button class="tgf-search-clear" type="button" aria-label="${esc(this.t('clearSearch'))}">${icon('x', 16)}</button>
       </div>`;
     }
 
     _renderExpandBtn() {
-      const label = this.state.allExpanded ? 'Collapse all' : 'Expand all';
+      const label = this.state.allExpanded ? this.t('collapseAll') : this.t('expandAll');
       const iconName = this.state.allExpanded ? 'minus' : 'plus';
       return `<button class="tgf-expand-btn" type="button" data-expand-all>
         ${icon(iconName, 16)} ${esc(label)}
@@ -779,11 +878,11 @@
     }
 
     _renderTabs() {
-      const cats = this.c.categories || [];
+      const cats = this.cl.categories || [];
       if (!cats.length) return '';
       const visible = this._visibleQuestions();
       return `<div class="tgf-tabs" role="tablist">
-        <button class="tgf-tab" role="tab" data-cat="all" aria-selected="${this.state.activeCategory === 'all'}">All <span class="tgf-tab-count">${visible.length}</span></button>
+        <button class="tgf-tab" role="tab" data-cat="all" aria-selected="${this.state.activeCategory === 'all'}">${esc(this.t('all'))} <span class="tgf-tab-count">${visible.length}</span></button>
         ${cats.map(cat => {
           const count = visible.filter(q => q.category === cat.id).length;
           const selected = this.state.activeCategory === cat.id;
@@ -793,7 +892,7 @@
     }
 
     _renderChips() {
-      const cats = this.c.categories || [];
+      const cats = this.cl.categories || [];
       if (!cats.length) return '';
       return `<div class="tgf-chips" role="group" aria-label="Filter by category">
         <button class="tgf-chip" type="button" data-cat="all" aria-pressed="${this.state.activeCategory === 'all'}">All</button>
@@ -809,7 +908,7 @@
       const listClass = this.c.layout === 'two-column' ? 'tgf-list tgf-list--two-col' : 'tgf-list';
 
       if (!qs.length) {
-        const noResultsText = (this.c.search && this.c.search.noResultsText) || 'No matches found';
+        const noResultsText = (this.cl.search && this.cl.search.noResultsText) || this.t('noResults');
         return `<div class="tgf-empty">
           <div class="tgf-empty-icon">${icon('search', 28)}</div>
           <p class="tgf-empty-title">${esc(noResultsText)}</p>
@@ -853,7 +952,7 @@
           <div class="tgf-answer-outer">
             <div class="tgf-answer-body">
               ${answerHtml}
-              ${this.c.showUpdated && q.updatedAt ? `<span class="tgf-updated">Last updated ${esc(q.updatedAt)}</span>` : ''}
+              ${this.c.showUpdated && q.updatedAt ? `<span class="tgf-updated">${esc(this.t('lastUpdated', { date: q.updatedAt }))}</span>` : ''}
             </div>
           </div>
         </div>
@@ -863,12 +962,12 @@
     _renderBadges(q) {
       const badges = [];
       if (q.pinned)  badges.push('<span class="tgf-badge tgf-badge--pinned">Pinned</span>');
-      if (q.popular) badges.push('<span class="tgf-badge tgf-badge--popular">Popular</span>');
+      if (q.popular) badges.push(`<span class="tgf-badge tgf-badge--popular">${esc(this.t('popular'))}</span>`);
       return badges.length ? ' <span class="tgf-q-badges">' + badges.join('') + '</span>' : '';
     }
 
     _renderCTA() {
-      const cta = this.c.cta;
+      const cta = this.cl.cta;
       if (!cta || !cta.enabled) return '';
       const styleClass = cta.style === 'strip' ? ' tgf-cta--strip' :
                          cta.style === 'gradient' ? ' tgf-cta--gradient' : '';
