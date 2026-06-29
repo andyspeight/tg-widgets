@@ -22,6 +22,9 @@
     "api/offer-translate.js": {
       "maxDuration": 60
     },
+    "api/enquiry-translate.js": {
+      "maxDuration": 60
+    },
     "api/slice-emit.js": {
       "maxDuration": 300
     },
