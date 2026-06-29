@@ -108,13 +108,42 @@ function cleanOffer(raw) {
     else if (typeof v === 'number' && isFinite(v)) { fields[k] = String(v); n++; }
   }
 
-  return {
+  // i18n — saved per-language content translations (Layer 2). Whitelisted to
+  // known language codes and known field keys only, capped to the same lengths
+  // as the source fields, so saved translations survive a round-trip without
+  // letting unbounded data into the record. Omitted entirely when empty so
+  // existing offers are unchanged.
+  const I18N_FIELD_CAP = { title: 120, teaser: 220, description: 5000, urgency: 140, avail: 140 };
+  const i18n = {};
+  const rawI18n = (s.i18n && typeof s.i18n === 'object' && !Array.isArray(s.i18n)) ? s.i18n : {};
+  let langN = 0;
+  for (const lang of Object.keys(rawI18n)) {
+    if (langN >= 12) break;
+    if (!/^[a-z]{2}$/.test(lang)) continue;
+    const li = (rawI18n[lang] && typeof rawI18n[lang] === 'object' && !Array.isArray(rawI18n[lang])) ? rawI18n[lang] : {};
+    const lf = {};
+    const srcLf = (li.fields && typeof li.fields === 'object' && !Array.isArray(li.fields)) ? li.fields : {};
+    for (const k of Object.keys(I18N_FIELD_CAP)) {
+      if (typeof srcLf[k] === 'string' && srcLf[k]) lf[k] = srcLf[k].slice(0, I18N_FIELD_CAP[k]);
+    }
+    const entry = {};
+    if (Object.keys(lf).length) entry.fields = lf;
+    const inc = strArr(li.includes, 40, 200);
+    if (inc.length) entry.includes = inc;
+    const tg = strArr(li.tags, 30, 60);
+    if (tg.length) entry.tags = tg;
+    if (Object.keys(entry).length) { i18n[lang] = entry; langN++; }
+  }
+
+  const out = {
     currency: cap(s.currency, 8),
     fields: fields,
     includes: strArr(s.includes, 40, 200),
     tags: strArr(s.tags, 30, 60),
     images: strArr(s.images, 20, 1000)
   };
+  if (Object.keys(i18n).length) out.i18n = i18n;
+  return out;
 }
 
 // Is an offer within its show window? (UTC day granularity; the card/page also
