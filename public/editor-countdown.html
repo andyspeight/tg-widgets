@@ -1876,7 +1876,7 @@
           name: widgetName || 'Untitled countdown',
           config: cfg
         };
-        if (widgetId) body.id = widgetId;
+        if (widgetId) body.widgetId = widgetId;
         const res = await fetch('/api/widget-config', {
           method: 'POST',
           headers: authH(),
@@ -1885,8 +1885,9 @@
         if (res.status === 401) { showLogin(); return; }
         if (!res.ok) throw new Error('Save failed (' + res.status + ')');
         const data = await res.json();
-        if (data && data.id) {
-          widgetId = data.id;
+        const savedId = data && (data.widgetId || data.id);
+        if (savedId) {
+          widgetId = savedId;
           // Update URL so refresh keeps the record
           const url = new URL(window.location.href);
           url.searchParams.set('id', widgetId);

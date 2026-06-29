@@ -2393,7 +2393,7 @@
           method: 'POST',
           headers: authHeaders(),
           body: JSON.stringify({
-            id: state.widgetId,
+            widgetId: state.widgetId,
             name: state.widgetName,
             type: WIDGET_TYPE,
             widgetType: WIDGET_TYPE,
@@ -2409,9 +2409,10 @@
         }
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-        if (data && data.id && !state.widgetId) {
-          state.widgetId = data.id;
-          const u = new URL(window.location.href); u.searchParams.set('id', data.id); window.history.replaceState(null, '', u);
+        const newId = data && (data.widgetId || data.id);
+        if (newId && !state.widgetId) {
+          state.widgetId = newId;
+          const u = new URL(window.location.href); u.searchParams.set('id', newId); window.history.replaceState(null, '', u);
         }
         state.dirty = false;
         if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('saved');
