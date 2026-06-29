@@ -19,7 +19,42 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.0';
+  const VERSION = '0.1.1';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (the empty-state line and the default card CTA). The
+  // author's offer data — titles, destinations, hotel names, prices, dates — is
+  // never translated, nor are brand names or ATOL/ABTA wording. English is the
+  // source + fallback.
+  const MESSAGES = {
+    en: { viewDeal: 'View deal', empty: 'No offers available right now.' },
+    fr: { viewDeal: "Voir l'offre", empty: 'Aucune offre disponible pour le moment.' },
+    de: { viewDeal: 'Angebot ansehen', empty: 'Derzeit keine Angebote verfügbar.' },
+    es: { viewDeal: 'Ver oferta', empty: 'No hay ofertas disponibles ahora mismo.' },
+    it: { viewDeal: 'Vedi offerta', empty: 'Nessuna offerta disponibile al momento.' },
+    ro: { viewDeal: 'Vezi oferta', empty: 'Nicio ofertă disponibilă momentan.' },
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    const supported = Object.keys(MESSAGES);
+    const baseOf = (r) => (r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : '');
+    let cands = [];
+    if (cfg) cands.push(cfg.lang, cfg.language, cfg.locale);
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    let lang = 'en';
+    for (let i = 0; i < cands.length; i++) { const b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    const dict = MESSAGES[lang] || MESSAGES.en;
+    const t = (k, vars) => {
+      let s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, n) => (vars[n] != null ? vars[n] : m));
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // Base URL this script was served from, to load the card widget + build links.
   const SCRIPT_BASE = (function () {
@@ -102,6 +137,7 @@
     constructor(container, config) {
       this.el = container;
       container._tgInitialised = true;
+      this.t = makeT(config);   // resolve viewer language + UI strings
       this.cfg = this._defaults(config);
       this.shadow = container.attachShadow({ mode: 'open' });
       this._render(this.cfg.offers ? 'ready' : 'loading');
@@ -125,9 +161,9 @@
         heading: c.heading || '',
         subheading: c.subheading || '',
         max: typeof c.max === 'number' ? c.max : 0,
-        emptyText: c.emptyText || 'No offers available right now.',
+        emptyText: c.emptyText || this.t('empty'),
         offerPage: c.offerPage || '',           // override the offer-page base if needed
-        ctaText: c.ctaText || 'View deal',
+        ctaText: c.ctaText || this.t('viewDeal'),
         offers: Array.isArray(c.offers) ? c.offers : null   // inline (demo/preview)
       };
     }
