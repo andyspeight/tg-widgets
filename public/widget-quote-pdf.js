@@ -18,9 +18,79 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.1.1';
   var DEFAULT_API = (typeof window !== 'undefined' && window.__TG_QUOTE_PDF_API__) ||
     'https://tg-widgets.vercel.app/api/quote-pdf';
+
+  // ─── i18n ───────────────────────────────────────────────────
+  // Fixed UI chrome only (button labels, busy/status states, success/error
+  // messages, aria text). Quote data, prices and the PDF document's own content
+  // are not translated here. English is the source + fallback.
+  var MESSAGES = {
+    en: {
+      download: 'Download PDF', emailMe: 'Email me a copy',
+      working: 'Working…', preparing: 'Preparing…', sending: 'Sending…',
+      sentEmail: 'Sent to your email', downloaded: 'Downloaded',
+      noQuote: 'No quote found on this page',
+      emailFailed: 'Could not send email', pdfFailed: 'Could not generate PDF'
+    },
+    fr: {
+      download: 'Télécharger le PDF', emailMe: 'Me l\'envoyer par e-mail',
+      working: 'En cours…', preparing: 'Préparation…', sending: 'Envoi…',
+      sentEmail: 'Envoyé à votre adresse e-mail', downloaded: 'Téléchargé',
+      noQuote: 'Aucun devis trouvé sur cette page',
+      emailFailed: 'Une erreur s\'est produite. Veuillez réessayer.', pdfFailed: 'Une erreur s\'est produite. Veuillez réessayer.'
+    },
+    de: {
+      download: 'PDF herunterladen', emailMe: 'Per E-Mail senden',
+      working: 'Wird bearbeitet…', preparing: 'Wird vorbereitet…', sending: 'Wird gesendet…',
+      sentEmail: 'An Ihre E-Mail gesendet', downloaded: 'Heruntergeladen',
+      noQuote: 'Kein Angebot auf dieser Seite gefunden',
+      emailFailed: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.', pdfFailed: 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.'
+    },
+    es: {
+      download: 'Descargar PDF', emailMe: 'Enviármelo por correo',
+      working: 'Procesando…', preparing: 'Preparando…', sending: 'Enviando…',
+      sentEmail: 'Enviado a tu correo', downloaded: 'Descargado',
+      noQuote: 'No se encontró ningún presupuesto en esta página',
+      emailFailed: 'Algo salió mal. Inténtalo de nuevo.', pdfFailed: 'Algo salió mal. Inténtalo de nuevo.'
+    },
+    it: {
+      download: 'Scarica PDF', emailMe: 'Inviamelo via email',
+      working: 'In corso…', preparing: 'Preparazione…', sending: 'Invio…',
+      sentEmail: 'Inviato alla tua email', downloaded: 'Scaricato',
+      noQuote: 'Nessun preventivo trovato in questa pagina',
+      emailFailed: 'Qualcosa è andato storto. Riprova.', pdfFailed: 'Qualcosa è andato storto. Riprova.'
+    },
+    ro: {
+      download: 'Descarcă PDF', emailMe: 'Trimite-mi pe e-mail',
+      working: 'Se procesează…', preparing: 'Se pregătește…', sending: 'Se trimite…',
+      sentEmail: 'Trimis pe e-mailul tău', downloaded: 'Descărcat',
+      noQuote: 'Niciun deviz găsit pe această pagină',
+      emailFailed: 'Ceva nu a funcționat. Încercați din nou.', pdfFailed: 'Ceva nu a funcționat. Încercați din nou.'
+    }
+  };
+  // Uses the shared TGi18n core when present; otherwise an identical inline
+  // resolver keeps the widget self-contained.
+  function makeT(cfg) {
+    if (typeof window !== 'undefined' && window.TGi18n && typeof window.TGi18n.make === 'function') return window.TGi18n.make(MESSAGES, cfg);
+    var supported = Object.keys(MESSAGES);
+    var baseOf = function (r) { return r ? String(r).toLowerCase().replace(/_/g, '-').split('-')[0] : ''; };
+    var cands = [];
+    if (cfg) { cands.push(cfg.lang, cfg.language, cfg.locale); }
+    try { cands.push(document.documentElement.getAttribute('lang')); } catch (e) { /* noop */ }
+    try { if (navigator.languages) cands = cands.concat(navigator.languages); cands.push(navigator.language); } catch (e) { /* noop */ }
+    var lang = 'en';
+    for (var i = 0; i < cands.length; i++) { var b = baseOf(cands[i]); if (b && supported.indexOf(b) !== -1) { lang = b; break; } }
+    var dict = MESSAGES[lang] || MESSAGES.en;
+    var t = function (k, vars) {
+      var s = Object.prototype.hasOwnProperty.call(dict, k) ? dict[k] : (MESSAGES.en[k] || k);
+      if (vars) s = String(s).replace(/\{(\w+)\}/g, function (m, n) { return vars[n] != null ? vars[n] : m; });
+      return s;
+    };
+    t.lang = lang; t.dir = 'ltr';
+    return t;
+  }
 
   // --- Inline SVG icons (no external deps) ---
   var IC = {
@@ -279,7 +349,8 @@
     this.opts = opts || {};
     this.api = container.getAttribute('data-tg-api') || DEFAULT_API;
     this.widgetId = container.getAttribute('data-tg-id') || '';
-    this.label = container.getAttribute('data-tg-label') || 'Download PDF';
+    this.t = makeT(this.opts);   // resolve viewer language + UI strings
+    this.label = container.getAttribute('data-tg-label') || this.t('download');
     this.theme = container.getAttribute('data-tg-theme') || 'light';
     var actionsAttr = (container.getAttribute('data-tg-actions') || 'download,email')
       .split(',').map(function (s) { return s.trim(); });
@@ -298,7 +369,7 @@
     }
     if (this.actions.indexOf('email') !== -1) {
       btns += '<button class="tgqp-btn tgqp-btn--ghost" data-act="email" type="button">' +
-        IC.mail + '<span>Email me a copy</span></button>';
+        IC.mail + '<span>' + esc(this.t('emailMe')) + '</span></button>';
     }
     // Button colour overrides from the widget config (if loaded). Validate hex
     // before injecting so a bad value can't break the inline style.
@@ -344,7 +415,7 @@
     if (!btn) return;
     if (on) {
       btn._html = btn.innerHTML;
-      btn.innerHTML = IC.spin + '<span>' + esc(busyLabel || 'Working…') + '</span>';
+      btn.innerHTML = IC.spin + '<span>' + esc(busyLabel || this.t('working')) + '</span>';
     } else if (btn._html) {
       btn.innerHTML = btn._html;
     }
@@ -368,11 +439,11 @@
     }
 
     if (!doc && !this.ref) {
-      this._setMsg('No quote found on this page', 'err');
+      this._setMsg(this.t('noQuote'), 'err');
       return;
     }
 
-    this._busy(btn, true, action === 'email' ? 'Sending…' : 'Preparing…');
+    this._busy(btn, true, action === 'email' ? this.t('sending') : this.t('preparing'));
 
     // Build the request. With id+key the server fetches + renders. If we only
     // have a page-scraped doc (no URL id+key), we send that instead.
@@ -409,7 +480,7 @@
       if (action === 'email') {
         return res.json().then(function (j) {
           if (!res.ok || !j.ok) throw new Error('email failed');
-          self._setMsg('Sent to your email', 'ok');
+          self._setMsg(self.t('sentEmail'), 'ok');
         });
       }
       // download: expect a PDF blob
@@ -424,10 +495,10 @@
         document.body.appendChild(a); a.click();
         document.body.removeChild(a);
         setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
-        self._setMsg('Downloaded', 'ok');
+        self._setMsg(self.t('downloaded'), 'ok');
       });
     }).catch(function () {
-      self._setMsg(action === 'email' ? 'Could not send email' : 'Could not generate PDF', 'err');
+      self._setMsg(action === 'email' ? self.t('emailFailed') : self.t('pdfFailed'), 'err');
     }).then(function () {
       self._busy(btn, false);
       // auto-clear the message after a few seconds
