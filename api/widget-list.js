@@ -70,6 +70,30 @@ async function resolveActiveClientEmail(activeClientId) {
   }
 }
 
+// True when ANOTHER client the user belongs to shares the active client's login
+// email. The ClientEmail legacy fallback assumes an email identifies one client.
+// That breaks for an owner who is a member of several accounts set up under the
+// same email (e.g. a Travelgenix staff member): every account's ownerless legacy
+// widgets would surface in each account. When the email is ambiguous we drop the
+// email fallback entirely and scope by ClientRecordId alone, so each account
+// shows only its own widgets. Unique-email clients are unaffected.
+async function activeEmailIsShared(activeClientId, activeClientEmail, linkedClientIds) {
+  if (!activeClientEmail) return false;
+  const others = linkedClientIds.filter((id) => id !== activeClientId);
+  if (!others.length) return false;
+  const emails = await Promise.all(others.map(async (id) => {
+    try {
+      const c = await getRecord(CLIENTS.tableId, id);
+      const e = c?.fields?.[CLIENTS.fields.email];
+      return typeof e === 'string' ? e.toLowerCase().trim() : '';
+    } catch (err) {
+      console.warn('[widget-list] resolve linked client email failed:', err.message);
+      return '';
+    }
+  }));
+  return emails.some((e) => e && e === activeClientEmail);
+}
+
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 
@@ -120,15 +144,24 @@ export default async function handler(req, res) {
     // Impersonating = the active client is NOT one of your linked clients.
     const isHome = linkedClientIds.includes(activeClientId);
 
+    // ClientRecordId is always authoritative.
     clauses.add(`{ClientRecordId}='${activeClientId}'`); // activeClientId is REC_ID_RE-validated
+
+    // The ClientEmail legacy fallback is only safe when the active client's login
+    // email uniquely identifies it. If another account the user belongs to shares
+    // that email, the email can't tell the accounts apart, so we drop it and scope
+    // by ClientRecordId alone — each account then shows only its own widgets.
     const activeClientEmail = await resolveActiveClientEmail(activeClientId);
-    if (activeClientEmail) {
-      clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(activeClientEmail)}')`);
-    }
-    // Own legacy widgets show in your home workspace, but NOT when cleanly
-    // impersonating a client you are not a member of.
-    if (isHome) {
-      clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(userEmailLower)}')`);
+    const emailShared = await activeEmailIsShared(activeClientId, activeClientEmail, linkedClientIds);
+    if (!emailShared) {
+      if (activeClientEmail) {
+        clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(activeClientEmail)}')`);
+      }
+      // Own legacy widgets show in your home workspace, but NOT when cleanly
+      // impersonating a client you are not a member of.
+      if (isHome) {
+        clauses.add(`AND(${LEGACY}, LOWER({ClientEmail})='${sanitiseForFormula(userEmailLower)}')`);
+      }
     }
   } else {
     // No usable client context (e.g. an old legacy Bearer token): scope purely by
