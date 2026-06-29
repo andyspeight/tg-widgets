@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -66,6 +66,7 @@
     de: { top: 'Oben', backToTop: 'Nach oben' },
     es: { top: 'Arriba', backToTop: 'Volver arriba' },
     it: { top: 'Su', backToTop: 'Torna su' },
+    ro: { top: 'Sus', backToTop: 'Înapoi sus' },
   };
   // Use the shared TGi18n core when it is present on the page; otherwise a tiny
   // self-contained resolver keeps this widget dependency-free. Same logic either

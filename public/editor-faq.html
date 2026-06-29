@@ -1016,13 +1016,23 @@
     }
 
     /* ===================== MULTI-LINGUAL (CONTENT LAYER) ===================== */
-    // The pilot audience languages. English is always the source. Keep in step
-    // with widget-faq.js MESSAGES and api/faq-translate LANG_NAMES.
+    // Audience languages offered in the editor. English is always the source.
+    //
+    // TO ADD A LANGUAGE (we add these as customers request them):
+    //   1. Add it here (code + English label) — this adds the editor toggle.
+    //   2. api/faq-translate.js  → LANG_NAMES   (lets the translator accept it).
+    //   3. public/widget-faq.js  → MESSAGES     (translates the FAQ's own fixed
+    //      labels — search box, Expand all, etc; bump the widget VERSION).
+    //   4. public/tg-i18n.js     → LOCALE       (correct number/date formatting;
+    //      add to RTL too if the script is right-to-left).
+    // The author content (questions, answers, headings) needs no per-language
+    // code — it is translated on demand by the endpoint and stored in config.i18n.
     const AUDIENCE_LANGS = [
       { code: 'fr', label: 'French' },
       { code: 'de', label: 'German' },
       { code: 'es', label: 'Spanish' },
-      { code: 'it', label: 'Italian' }
+      { code: 'it', label: 'Italian' },
+      { code: 'ro', label: 'Romanian' }
     ];
 
     // The translatable content the widget shows, pulled out of the config in the
