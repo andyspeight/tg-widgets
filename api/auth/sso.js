@@ -15,7 +15,9 @@
  *   role             — should always be "AppUser"
  *   primarysid       — Travelify App ID (the company key)
  *   primarygroupsid  — application public API key (stored on the client)
- *   groupsid         — package code (spark / boost / ignite / apionly / etc.)
+ *   groupsid         — package code (spark / boost / ignite / apionly / etc.).
+ *                      Legacy accounts send a numeric code (1/2/3) which is
+ *                      mapped to spark/boost/ignite before lookup.
  *   upn              — company name
  *   website          — company website URL
  *   authmethod       — informational (always "pwd" at the moment)
@@ -118,6 +120,18 @@ const VALID_PACKAGE_CODES = new Set([
   'spark', 'boost', 'ignite', 'apionly',
   'jet2pkg', 'option1', 'option2', 'option3',
 ]);
+
+// Legacy Travelify package codes. Older Travelify accounts predate the
+// named packages and send a numeric groupsid (1 / 2 / 3) rather than the
+// current code. Left unmapped these hit "we don't recognise your package"
+// (sso_package_unknown). Translate them to the canonical code before
+// validation and the PACKAGES lookup so those users sign in cleanly.
+//   1 → spark, 2 → boost, 3 → ignite
+const LEGACY_PACKAGE_ALIASES = {
+  '1': 'spark',
+  '2': 'boost',
+  '3': 'ignite',
+};
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -265,7 +279,9 @@ export default async function handler(req, res) {
   const userRole = String(payload.role || '').trim();
   const travelifyAppId = String(payload.primarysid || '').trim();
   const publicApiKey = String(payload.primarygroupsid || '').trim();
-  const packageCode = String(payload.groupsid || '').trim().toLowerCase();
+  const rawPackageCode = String(payload.groupsid || '').trim().toLowerCase();
+  // Resolve legacy numeric package codes (1/2/3) to their named equivalent.
+  const packageCode = LEGACY_PACKAGE_ALIASES[rawPackageCode] || rawPackageCode;
   const companyName = String(payload.upn || '').trim();
   const websiteRaw = String(payload.website || '').trim();
 
@@ -862,6 +878,8 @@ export default async function handler(req, res) {
         clientCreated, userCreated,
         appId: travelifyAppId,
         packageCode,
+        // Record the original code when a legacy numeric alias was resolved
+        ...(rawPackageCode !== packageCode ? { rawPackageCode } : {}),
       },
     }).catch(() => {});
 
