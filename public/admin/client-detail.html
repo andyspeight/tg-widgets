@@ -848,7 +848,22 @@
           </div>
         </div>`;
 
-      return company + contact + pricing + travelifyPanel + notes;
+      // ── Danger zone ─────────────────────────────────────────────────────
+      const dangerZone = `
+        <div class="panel" style="border-color: rgba(239,68,68,0.35);">
+          <header class="panel-header"><h2 style="color: var(--tg-error);">Danger zone</h2></header>
+          <div class="panel-body">
+            <p style="margin:0 0 14px; line-height:1.6;">
+              Permanently delete this client and everything attached to it —
+              entitlements, and any users who belong only to this account (with
+              their permissions and sessions). Users who also belong to other
+              accounts are kept and simply unlinked. This can't be undone.
+            </p>
+            <button type="button" class="btn btn--danger" id="btn-delete-client">Delete this client</button>
+          </div>
+        </div>`;
+
+      return company + contact + pricing + travelifyPanel + notes + dangerZone;
     }
 
     // ─── Overview editing — each panel edits in place, store only ─────────
@@ -887,6 +902,37 @@
 
       const save = document.querySelector('.ov-save');
       if (save) save.addEventListener('click', () => saveOverviewSection(save.dataset.sec));
+
+      const del = document.getElementById('btn-delete-client');
+      if (del) del.addEventListener('click', deleteClient);
+    }
+
+    async function deleteClient() {
+      const c = clientData.client;
+      const name = c.clientName || '';
+      const typed = window.prompt(
+        `This permanently deletes "${name}" and all data attached to it. This can't be undone.\n\n` +
+        `Type the client's name to confirm:`
+      );
+      if (typed == null) return; // cancelled
+      if (typed.trim().toLowerCase() !== name.trim().toLowerCase()) {
+        toast('Name did not match — nothing was deleted', 'err');
+        return;
+      }
+
+      const btn = document.getElementById('btn-delete-client');
+      if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+      try {
+        await apiCall(
+          `/api/admin/clients/delete?id=${encodeURIComponent(c.id)}&confirmName=${encodeURIComponent(typed.trim())}`,
+          { method: 'DELETE' }
+        );
+        toast('Client deleted', 'ok');
+        setTimeout(() => { window.location.href = '/admin/clients.html'; }, 700);
+      } catch (err) {
+        toast(err.message || 'Delete failed', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Delete this client'; }
+      }
     }
 
     async function saveOverviewSection(sec) {
