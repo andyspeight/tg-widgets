@@ -16,7 +16,7 @@
  *   primarysid       — Travelify App ID (the company key)
  *   primarygroupsid  — application public API key (stored on the client)
  *   groupsid         — package code (spark / boost / ignite / apionly / etc.).
- *                      Legacy accounts send a numeric code (1/2/3) which is
+ *                      Legacy accounts send option1/option2/option3 which are
  *                      mapped to spark/boost/ignite before lookup.
  *   upn              — company name
  *   website          — company website URL
@@ -122,12 +122,18 @@ const VALID_PACKAGE_CODES = new Set([
 ]);
 
 // Legacy Travelify package codes. Older Travelify accounts predate the
-// named packages and send a numeric groupsid (1 / 2 / 3) rather than the
-// current code. Left unmapped these hit "we don't recognise your package"
-// (sso_package_unknown). Translate them to the canonical code before
-// validation and the PACKAGES lookup so those users sign in cleanly.
-//   1 → spark, 2 → boost, 3 → ignite
+// named packages and send an "Option N" groupsid (arriving as option1 /
+// option2 / option3) rather than the current spark / boost / ignite code.
+// Those codes pass the VALID_PACKAGE_CODES allowlist but match no row in
+// the PACKAGES table, so unmapped they hit "we don't recognise your
+// package" (sso_package_unknown). Translate them to the canonical code
+// before the PACKAGES lookup so those users sign in cleanly.
+//   option1 → spark, option2 → boost, option3 → ignite
+// Bare numeric variants (1/2/3) are mapped too as a defensive measure.
 const LEGACY_PACKAGE_ALIASES = {
+  'option1': 'spark',
+  'option2': 'boost',
+  'option3': 'ignite',
   '1': 'spark',
   '2': 'boost',
   '3': 'ignite',
