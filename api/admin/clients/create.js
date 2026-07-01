@@ -37,6 +37,7 @@ import {
   PACKAGES,
 } from '../../_lib/auth/schema.js';
 import { sendAdminInvite } from '../_helpers/invite.js';
+import { isStaffEmail } from '../../_lib/auth/staff.js';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
@@ -140,6 +141,13 @@ export default async function handler(req, res) {
 
   const primaryContactEmail = normaliseEmail(body.primaryContactEmail);
   if (!isValidEmail(primaryContactEmail)) errors.push('primaryContactEmail must be a valid email');
+  // Travelgenix staff must never be a client's primary contact. Doing so links
+  // them as an owner/user of the client account, which breaks tenant isolation
+  // (the cause of the widget-list leaks) and is redundant — staff already reach
+  // any client via "act as". Enforce the rule at the point of entry.
+  if (primaryContactEmail && isStaffEmail(primaryContactEmail)) {
+    errors.push('primaryContactEmail must be the client\'s own address — a Travelgenix staff email can\'t be the client contact (you already have access via "act as")');
+  }
 
   const primaryContactPhone = String(body.primaryContactPhone || '').trim();
   if (primaryContactPhone.length > 40) errors.push('primaryContactPhone max 40 chars');
@@ -183,6 +191,7 @@ export default async function handler(req, res) {
       const agentEmail = normaliseEmail(lc.agentEmail);
       const agentName = String(lc.agentName || '').trim();
       if (!isValidEmail(agentEmail)) errors.push('Luna Chat agentEmail must be valid when not reusing primary contact');
+      if (agentEmail && isStaffEmail(agentEmail)) errors.push('Luna Chat agentEmail can\'t be a Travelgenix staff address — use the client\'s own agent email');
       if (agentName.length < 2) errors.push('Luna Chat agentName must be at least 2 chars when not reusing primary contact');
       lunaChatPayload = { useContact, kbName, brand, accent, welcome, agentEmail, agentName };
     } else {
