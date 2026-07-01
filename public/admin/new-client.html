@@ -864,6 +864,17 @@
       bind('f-contact-phone', 'primaryContactPhone');
     }
 
+    // Travelgenix staff addresses must never be a client's primary contact —
+    // that would link staff as an owner of the client account. Mirrors the
+    // server-side guard in /api/admin/clients/create. Domain check only (the
+    // TG_STAFF_EMAILS allowlist lives server-side and is enforced there too).
+    const STAFF_EMAIL_DOMAINS = ['travelgenix.io', 'travelgenix.com', 'agendas.group'];
+    function isStaffEmailClient(email) {
+      const at = String(email || '').trim().toLowerCase().lastIndexOf('@');
+      if (at === -1) return false;
+      return STAFF_EMAIL_DOMAINS.includes(String(email).trim().toLowerCase().slice(at + 1));
+    }
+
     function validateCompany() {
       const errs = [];
       if (state.companyName.trim().length < 2) errs.push('Company name is required');
@@ -874,6 +885,7 @@
       }
       if (state.primaryContactName.trim().length < 2) errs.push('Primary contact name is required');
       if (!EMAIL_RE.test(state.primaryContactEmail.trim())) errs.push('Primary contact email is not valid');
+      else if (isStaffEmailClient(state.primaryContactEmail)) errs.push('Primary contact can\'t be a Travelgenix staff email — use the client\'s own address (you already have access via "act as")');
       if (state.availability.primaryEmail?.conflict) errs.push('Primary email conflict — use a different email');
       if (state.availability.websiteUrl?.conflict) errs.push('Website URL conflict — already in use');
       if (state.availability.travelifyAppId?.conflict) errs.push('Travelify App ID conflict');
