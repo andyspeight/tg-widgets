@@ -752,7 +752,11 @@ async function rebuildSummary(rows) {
 // rebuild — which is why full rebuilds appeared to do nothing. Now a run that
 // hits the budget still completes all bookkeeping, reports partial: true, and
 // the next invocation (cron tick or another click) continues where it stopped.
-const SWEEP_TIME_BUDGET_MS = 220 * 1000; // leaves ~80s of maxDuration 300 for bookkeeping
+// 200s sweeping + up to ~75s bookkeeping keeps the whole run inside the
+// admin page's 290s wait window (map-rebuild aborts its wait there), so the
+// operator reliably gets the real "swept X of Y — click again" response
+// instead of a vague "still running" race.
+const SWEEP_TIME_BUDGET_MS = 200 * 1000;
 async function selectSlice(rows, full) {
   const total = rows.length;
   const cur = (await getJson(CURSOR_KEY)) || { i: 0 };
