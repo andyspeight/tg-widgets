@@ -401,6 +401,20 @@
       display: flex; justify-content: space-between;
     }
     .breakdown-raw strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+    /* True-availability strip — fed by the editor's own fan-out probe, not
+       the widget's capped sample. Sits at the top of the dedupe panel. */
+    .breakdown-avail {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 6px 8px; margin-bottom: 8px;
+      background: rgba(0,180,216,.08); border: 1px solid rgba(0,180,216,.25);
+      border-radius: 8px; font-size: 12px; color: var(--ink);
+    }
+    .breakdown-avail em { font-style: normal; color: var(--muted); font-size: 10px; }
+    .breakdown-avail strong {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-variant-numeric: tabular-nums; font-size: 14px; color: var(--accent);
+    }
+    .breakdown-avail .avail-note { display: block; font-size: 10px; color: var(--muted); margin-top: 1px; }
 
     /* Viewport-aware preview */
     .preview-stage {
@@ -1002,7 +1016,7 @@
                   </select>
                 </div>
               </div>
-              <div class="field-help">Higher max = more raw data to dedupe from. 100 is plenty for most cases.</div>
+              <div class="field-help">How many offers the widget pulls per page load (supplier maximum 250 per request). This caps what visitors see, not what exists — the dedupe panel's "Available offers" shows the true count for your filters.</div>
             </div>
           </div>
 
@@ -2419,6 +2433,137 @@
       schedulePreview();
     }
 
+    /* ============================================================
+       True availability probe
+       The widget's single fetch is capped by its "Max offers" setting and by
+       Travelify's 250-per-request ceiling, so the dedupe panel's raw count is
+       a SAMPLE, not availability. This probe measures what is really out
+       there for the current filters: one request per configured destination
+       (each gets its own 250 allowance — the same trick the world-map cron
+       uses per airport), offers deduped by id across requests. A request
+       that returns exactly 250 has hit the supplier's ceiling, so the total
+       is reported as a floor ("1,240+"). Results are cached per filter
+       combination, so cosmetic edits (colours, layout) never re-probe.
+       ============================================================ */
+    let availability = null;             // null | {loading} | {total, plus, perDest, failed}
+    let availabilitySeq = 0;             // stale-response guard
+    let availabilityTimer = null;
+    const availabilityCache = new Map(); // filter-key → result
+    const AVAIL_CEILING = 250;           // Travelify per-request maximum
+    const AVAIL_MAX_SEARCHES = 12;       // politeness cap on fan-out width
+
+    function availabilityBasePayload() {
+      const c = state.config;
+      // Mirror the widget's _buildPayload type mapping (keep in sync).
+      let apiType = c.type, packageType = null;
+      if (apiType === 'DynamicPackages') { apiType = 'Packages'; packageType = 'DynamicPackages'; }
+      else if (apiType === 'PackageHolidays') { apiType = 'Packages'; packageType = 'PackageHolidays'; }
+      else if (apiType === 'BothPackages') { apiType = 'Packages'; packageType = 'Any'; }
+      if (c.template === 'departure-board' || c.template === 'boarding-pass') { apiType = 'Flights'; packageType = null; }
+      const p = {
+        type: apiType, deduping: 'None',
+        currency: c.currency, language: c.language, nationality: c.nationality,
+        maxOffers: AVAIL_CEILING, rollingDates: true,
+        DatesMin: c.DatesMin, DatesMax: c.DatesMax,
+        sort: 'price:asc', pricingByType: 'Person',
+      };
+      if (packageType) p.packageType = packageType;
+      if (c.budgetMin) p.budgetMin = c.budgetMin;
+      if (c.budgetMax) p.budgetMax = c.budgetMax;
+      if (c.ratingMin) p.ratingMin = c.ratingMin;
+      if (c.durationMin) p.durationMin = c.durationMin;
+      if (c.durationMax) p.durationMax = c.durationMax;
+      if (c.origins && c.origins.length) p.origins = c.origins;
+      if (c.boardBases && c.boardBases.length) p.boardBases = c.boardBases;
+      if (c.cabinClasses && c.cabinClasses.length) p.cabinClasses = c.cabinClasses;
+      return p;
+    }
+
+    function availabilityHtml() {
+      const escA = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      if (!availability) return '';
+      if (availability.loading) {
+        return '<div class="breakdown-avail" id="availStrip"><span>Available offers</span><strong>counting…</strong></div>';
+      }
+      const n = availability.total.toLocaleString('en-GB') + (availability.plus ? '+' : '');
+      const searches = availability.perDest.length;
+      const detail = availability.perDest.map((d) => d.code + ': ' + d.n + (d.capped ? '+' : '')).join(' · ');
+      const notes = [];
+      if (searches > 1) notes.push(searches + ' destination searches');
+      if (availability.plus) notes.push('some searches hit the supplier’s ' + AVAIL_CEILING + '-offer ceiling, so this is a minimum');
+      if (availability.failed) notes.push(availability.failed + ' search' + (availability.failed === 1 ? '' : 'es') + ' failed');
+      return '<div class="breakdown-avail" id="availStrip" title="' + escA(detail) + '">'
+        + '<span>Available offers' + (notes.length ? '<span class="avail-note">' + escA(notes.join(' · ')) + '</span>' : '') + '</span>'
+        + '<strong>' + escA(n) + '</strong></div>';
+    }
+
+    function paintAvailability() {
+      const strip = $('availStrip');
+      if (!strip) return; // panel not rendered yet — next tgo:dataLoaded includes us
+      strip.outerHTML = availabilityHtml();
+    }
+
+    async function runAvailabilityProbe() {
+      const base = availabilityBasePayload();
+      const dests = (state.config.destinations || []).slice(0, AVAIL_MAX_SEARCHES);
+      const key = JSON.stringify([base, dests]);
+      if (availabilityCache.has(key)) {
+        availability = availabilityCache.get(key);
+        paintAvailability();
+        return;
+      }
+      const seq = ++availabilitySeq;
+      availability = { loading: true };
+      paintAvailability();
+
+      const jobs = dests.length
+        ? dests.map((d) => ({ payload: { ...base, destinations: [d] }, label: d }))
+        : [{ payload: base, label: 'all destinations' }];
+
+      const results = [];
+      let i = 0;
+      const worker = async () => {
+        while (i < jobs.length) {
+          const idx = i++;
+          const { payload, label } = jobs[idx];
+          try {
+            const res = await fetch('/api/offers', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...payload, appId: TG_TRAVELIFY_APPID || '' }),
+            });
+            const data = await res.json();
+            const arr = data && data.success !== false && Array.isArray(data.data) ? data.data : [];
+            results[idx] = { code: label, offers: arr, capped: arr.length >= AVAIL_CEILING, ok: true };
+          } catch (e) {
+            results[idx] = { code: label, offers: [], capped: false, ok: false };
+          }
+        }
+      };
+      await Promise.all(Array.from({ length: Math.min(3, jobs.length) }, worker));
+      if (seq !== availabilitySeq) return; // superseded by a newer probe
+
+      const ids = new Set();
+      for (const r of results) {
+        for (const o of r.offers) {
+          if (o && o.id != null) ids.add(String(o.id));
+        }
+      }
+      availability = {
+        total: ids.size,
+        plus: results.some((r) => r.capped),
+        perDest: results.map((r) => ({ code: r.code, n: r.offers.length, capped: r.capped })),
+        failed: results.filter((r) => !r.ok).length,
+      };
+      availabilityCache.set(key, availability);
+      paintAvailability();
+    }
+
+    function scheduleAvailabilityProbe() {
+      clearTimeout(availabilityTimer);
+      availabilityTimer = setTimeout(runAvailabilityProbe, 900);
+    }
+
     /* Show / hide layout-specific fields. Grid-only fields (Columns) hide when
        layout = carousel. Carousel-only fields (autoplay toggle, interval select)
        hide when layout = grid. The interval select also requires autoplay = on. */
@@ -2461,6 +2606,9 @@
       div.setAttribute('data-tg-widget', 'offers');
       mount.appendChild(div);
       previewWidget = new window.TGOffersWidget(div, cfg);
+      // Re-measure true availability. Cached per filter combination, so
+      // cosmetic re-renders (colours, layout) cost no network calls.
+      scheduleAvailabilityProbe();
     }
 
     /* ============================================================
@@ -2972,11 +3120,12 @@
 
           if (raw === 0) {
             panel.className = 'breakdown-panel is-empty';
-            panel.innerHTML = 'No offers returned. Adjust filters and try again.';
+            panel.innerHTML = availabilityHtml() + 'No offers returned. Adjust filters and try again.';
             return;
           }
 
           let html = '<div class="breakdown-panel-title">Dedupe preview</div>';
+          html += availabilityHtml();
           html += '<div class="breakdown-list">';
           Object.entries(STRATEGY_LABELS).forEach(([key, label]) => {
             const count = breakdown[key];
@@ -2987,8 +3136,11 @@
               + '</div>';
           });
           html += '</div>';
+          // The widget's fetch is capped by its Max offers setting — label it
+          // as the sample it is, so it can't be read as availability (the
+          // strip above shows that).
           html += '<div class="breakdown-raw">'
-            + '<span>Raw from API</span><strong>' + raw + ' offers</strong>'
+            + '<span>Widget sample (Max offers setting)</span><strong>' + raw + ' offers</strong>'
             + '</div>';
           panel.className = 'breakdown-panel';
           panel.innerHTML = html;
