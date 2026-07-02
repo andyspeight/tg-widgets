@@ -493,14 +493,16 @@ async function fetchEnabledCountries() {
 // origins; the widget shows each offer's true departure airport). Any offer
 // that still comes back non-GBP is dropped before it can enter Redis.
 const MARKETS = [
-  // flightOrigins: departure airports named on FLIGHT sweeps only. Evidence
-  // (2 Jul 2026 sweep stats): a destination-only flight request returns ~0.5
-  // offers, while the departure-board widget — which always names an origin —
-  // gets full rows from the same feed. Naming origins on the one existing
-  // request costs nothing extra; per-origin fan-out stays in reserve if the
-  // stats line shows this isn't enough.
-  { id: 'GB', nationality: 'GB', flightOrigins: ['LGW', 'LHR', 'MAN', 'STN', 'LTN', 'BHX', 'EDI', 'GLA', 'NCL', 'LPL'] },
-  { id: 'IE', nationality: 'IE', flightOrigins: ['DUB', 'ORK', 'SNN', 'NOC', 'KIR'] }, // Irish departures for the Irish clients
+  // flightOrigins: departure airports for FLIGHT sweeps, ONE REQUEST EACH.
+  // Evidence trail (2 Jul 2026 sweep stats): destination-only flight requests
+  // returned ~0.5 offers each; adding an `origins` ARRAY changed nothing
+  // (75 fetched across a full 41-country sweep). The departure-board widget —
+  // the one proven flight-returning request in this codebase — names a single
+  // `origin` airport per request, so the sweep now mirrors that shape exactly.
+  // Kept to the busiest airports because each is its own request per
+  // destination; the resumable time budget absorbs the extra volume.
+  { id: 'GB', nationality: 'GB', flightOrigins: ['LGW', 'LHR', 'MAN', 'STN', 'BHX', 'EDI'] },
+  { id: 'IE', nationality: 'IE', flightOrigins: ['DUB', 'ORK', 'SNN'] }, // Irish departures for the Irish clients
 ];
 
 // Offer types swept into the cache. The cache powers the offer-box widgets
@@ -514,16 +516,16 @@ const SWEEP_TYPES = [
   { id: 'Flights', payloadType: 'Flights' },
 ];
 
-function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWEEP_TYPES[0]) {
+function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWEEP_TYPES[0], flightOrigin = null) {
   const f = row.fields || {};
   return {
     appId: f.AppId || DEMO_APP_ID,
     type: sweepType.payloadType,
     ...(sweepType.packageType ? { packageType: sweepType.packageType } : {}),
-    // Flight-only offers need the departure airports named or the feed
-    // returns next to nothing (see MARKETS.flightOrigins).
-    ...(sweepType.id === 'Flights' && Array.isArray(market.flightOrigins) && market.flightOrigins.length
-      ? { origins: market.flightOrigins } : {}),
+    // Flight-only offers only come back when a SINGLE departure airport is
+    // named per request — the departure-board widget's proven shape. The
+    // `origins` array form was ignored by the feed (see MARKETS.flightOrigins).
+    ...(sweepType.id === 'Flights' && flightOrigin ? { origin: flightOrigin } : {}),
     deduping: 'None',
     currency: 'GBP', language: 'en', nationality: market.nationality,
     maxOffers: f.MaxOffers || 250,
@@ -608,11 +610,18 @@ async function sweepCountry(row) {
   }
   const jobs = [];
   for (const code of codes) for (const market of MARKETS) for (const sweepType of SWEEP_TYPES) {
-    jobs.push({ code, market, sweepType });
+    // Flight sweeps fan out to one request per departure airport (the only
+    // request shape the feed returns flight-only offers for). Other types
+    // stay at one request per destination and market.
+    if (sweepType.id === 'Flights' && Array.isArray(market.flightOrigins) && market.flightOrigins.length) {
+      for (const flightOrigin of market.flightOrigins) jobs.push({ code, market, sweepType, flightOrigin });
+    } else {
+      jobs.push({ code, market, sweepType });
+    }
   }
-  const codeResults = await pooled(jobs, async ({ code, market, sweepType }) => {
-    const raw = await callOffersProxy(buildPayload(row, code, market, sweepType));
-    if (!raw.ok) return { code, market: market.id, type: sweepType.id, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, fetched: 0, dropped: null, offers: [] };
+  const codeResults = await pooled(jobs, async ({ code, market, sweepType, flightOrigin }) => {
+    const raw = await callOffersProxy(buildPayload(row, code, market, sweepType, flightOrigin));
+    if (!raw.ok) return { code, market: market.id, type: sweepType.id, origin: flightOrigin || undefined, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, fetched: 0, dropped: null, offers: [] };
     const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
     const dropped = { noPrice: 0, noDest: 0, duration: 0, nonGBP: 0 };
     // The country fallback applies to the non-map types only: the world map's
@@ -625,7 +634,7 @@ async function sweepCountry(row) {
     for (const o of offers) o.market = market.id;
     // fetched = what Travelify actually sent; count = what survived our rules.
     // The gap between them, split by reason, is the whole diagnosis.
-    return { code, market: market.id, type: sweepType.id, ok: true, fetched: arr.length, count: offers.length, dropped, offers };
+    return { code, market: market.id, type: sweepType.id, origin: flightOrigin || undefined, ok: true, fetched: arr.length, count: offers.length, dropped, offers };
   });
   const freshOffers = codeResults.flatMap(r => r.offers);
   const anyOk = codeResults.some(r => r.ok);
@@ -650,7 +659,7 @@ async function sweepCountry(row) {
   return {
     cc, name: f.Name || '',
     ok: anyOk,
-    codeResults: codeResults.map(({ code, market, type, ok, error, fetched, count, dropped }) => ({ code, market, type, ok, error, fetched, count, dropped })),
+    codeResults: codeResults.map(({ code, market, type, origin, ok, error, fetched, count, dropped }) => ({ code, market, type, origin, ok, error, fetched, count, dropped })),
     freshOffers,
   };
 }
