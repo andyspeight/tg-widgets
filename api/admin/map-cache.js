@@ -14,13 +14,20 @@
  *
  * Methods (all admin-gated):
  *   GET               → overview: every stored country key with its offer
- *                       count and refreshedAt, plus the summary's stats.
+ *                       count, refreshedAt and a per-type breakdown
+ *                       (typeStats: count, cheapest pp, oldest/newest fetch,
+ *                       stale count and per-origin tallies for each of
+ *                       Packages / Accommodation / Flights) — drives the
+ *                       type tabs on the Cache tab.
  *   GET ?country=XX   → that country's stored offers, sorted cheapest-first
  *                       (per person), sliced by ?offset / ?limit (default
  *                       200, max 500) so a big country can't flood the page.
- *   DELETE {country}  → purge one country's cached offers + resorts keys.
- *                       The map summary still lists the country until the
- *                       next rebuild — the UI triggers one straight after.
+ *                       Optional ?type=Packages|Accommodation|Flights and
+ *                       ?origins=LGW,DUB filter before sorting/slicing.
+ *   DELETE {country}  → purge one country's cached offers + resorts keys
+ *                       (ALL types). The map summary still lists the country
+ *                       until the next rebuild — the UI triggers one straight
+ *                       after.
  *
  * Security: requireAdmin (same gate as the other map admin routes); no '*'
  * CORS; no-store. Reads only Redis — Airtable is not touched here.
@@ -51,6 +58,50 @@ async function loadCountryOffers(cc) {
 const CC_RE = /^[A-Z]{2}$/;
 const DEFAULT_LIMIT = 200;
 const MAX_LIMIT = 500;
+const OFFER_TYPES = ['Packages', 'Accommodation', 'Flights'];
+// Staleness definition mirrors the cron's purge rules (MAX_AGE_HOURS 70 or a
+// past travel date). Anything counted stale here has escaped deletion and
+// should disappear on the next cron run's maintenance pass.
+const STALE_AGE_MS = 70 * 60 * 60 * 1000;
+function isStale(o, nowMs) {
+  const td = Date.parse(o.outboundDate || o.checkinDate || '');
+  if (Number.isFinite(td) && td < nowMs) return true;
+  if (o.fetchedAt) {
+    const f = Date.parse(o.fetchedAt);
+    if (Number.isFinite(f) && (nowMs - f) > STALE_AGE_MS) return true;
+  }
+  return false;
+}
+
+/** Per-type breakdown of one country's stored offers: count, cheapest pp,
+ *  oldest/newest fetch, stale count and per-departure-airport tallies. The
+ *  Cache tab's type tabs, chips and granular columns all read this. */
+function buildTypeStats(offers, nowMs) {
+  const typeStats = {};
+  let staleCount = 0;
+  for (const o of offers) {
+    if (!o) continue;
+    const t = OFFER_TYPES.includes(o.type) ? o.type : 'Packages';
+    const ts = typeStats[t] || (typeStats[t] = {
+      count: 0, fromPP: null, oldestFetchedAt: null, newestFetchedAt: null, stale: 0, origins: {},
+    });
+    ts.count += 1;
+    const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
+    if (pp != null && (ts.fromPP == null || pp < ts.fromPP)) ts.fromPP = pp;
+    if (o.fetchedAt) {
+      if (!ts.oldestFetchedAt || o.fetchedAt < ts.oldestFetchedAt) ts.oldestFetchedAt = o.fetchedAt;
+      if (!ts.newestFetchedAt || o.fetchedAt > ts.newestFetchedAt) ts.newestFetchedAt = o.fetchedAt;
+    }
+    if (isStale(o, nowMs)) { ts.stale += 1; staleCount += 1; }
+    const k = String(o.origin || '').toUpperCase();
+    if (/^[A-Z]{3}$/.test(k)) {
+      const e = ts.origins[k] || (ts.origins[k] = { count: 0, fromPP: null });
+      e.count += 1;
+      if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp;
+    }
+  }
+  return { typeStats, staleCount };
+}
 
 /** Sort offers cheapest-first by per-person price, total price as fallback,
  *  unpriced last. Stable enough for an inspector view. */
@@ -114,9 +165,9 @@ export default async function handler(req, res) {
     const q = req.query || {};
 
     // ── GET ?country=XX: one country's stored offers ──────────────────────
-    // Optional ?origins=LGW,DUB filters by DEPARTURE airport before sorting
-    // and slicing, so the filter sees the whole stored set, not just the
-    // first page.
+    // Optional ?type=Packages|Accommodation|Flights and ?origins=LGW,DUB
+    // filter before sorting and slicing, so the filters see the whole stored
+    // set, not just the first page.
     if (q.country) {
       const cc = String(q.country).toUpperCase().trim();
       if (!CC_RE.test(cc)) return res.status(400).json({ ok: false, error: 'country must be a 2-letter code' });
@@ -124,6 +175,7 @@ export default async function handler(req, res) {
       if (!stored.exists || !stored.offers.length) {
         return res.status(200).json({ ok: true, country: cc, exists: false, count: 0, offers: [] });
       }
+      const typeParam = OFFER_TYPES.includes(String(q.type || '').trim()) ? String(q.type).trim() : null;
       const origins = String(q.origins || '')
         .split(',')
         .map((s) => s.trim().toUpperCase())
@@ -132,9 +184,10 @@ export default async function handler(req, res) {
       const originSet = origins.length ? new Set(origins) : null;
       const offset = Math.max(0, parseInt(q.offset, 10) || 0);
       const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(q.limit, 10) || DEFAULT_LIMIT));
-      const pool = originSet
-        ? stored.offers.filter((o) => o && originSet.has(String(o.origin || '').toUpperCase()))
+      let pool = typeParam
+        ? stored.offers.filter((o) => o && (o.type || 'Packages') === typeParam)
         : stored.offers;
+      if (originSet) pool = pool.filter((o) => o && originSet.has(String(o.origin || '').toUpperCase()));
       const sorted = pool.slice().sort(byCheapest);
       return res.status(200).json({
         ok: true,
@@ -142,6 +195,7 @@ export default async function handler(req, res) {
         exists: true,
         refreshedAt: stored.refreshedAt || null,
         totalStored: stored.offers.length,
+        appliedType: typeParam,
         appliedOrigins: origins,
         count: sorted.length,
         offset,
@@ -170,6 +224,7 @@ export default async function handler(req, res) {
       }
     }
 
+    const nowMs = Date.now();
     const countries = await pooled(ccs, async (cc) => {
       const stored = await loadCountryOffers(cc);
       const offers = stored.offers;
@@ -181,37 +236,21 @@ export default async function handler(req, res) {
       for (const o of offers) {
         if (o && o.fetchedAt && (!oldestFetchedAt || o.fetchedAt < oldestFetchedAt)) oldestFetchedAt = o.fetchedAt;
       }
-      // Per-DEPARTURE-airport tally: count + cheapest per-person price for
-      // each origin seen in this country's offers. Drives the departure
-      // filter chips on the Cache tab.
-      const origins = {};
-      for (const o of offers) {
-        if (!o) continue;
-        const k = String(o.origin || '').toUpperCase();
-        if (!/^[A-Z]{3}$/.test(k)) continue;
-        const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
-        const e = origins[k];
-        if (!e) origins[k] = { count: 1, fromPP: pp };
-        else { e.count += 1; if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp; }
-      }
-      // Per-type tally so the tab can show how the pool splits between
-      // package, hotel-only and flight-only offers.
-      const types = {};
-      for (const o of offers) {
-        const t = (o && o.type) || 'Packages';
-        types[t] = (types[t] || 0) + 1;
-      }
+      // Per-type breakdown (counts, cheapest, freshness, stale, origins) —
+      // the granular detail behind the Cache tab's All/Packages/Hotels/
+      // Flights views.
+      const { typeStats, staleCount } = buildTypeStats(offers, nowMs);
       return {
         countryCode: cc,
         offerCount: offers.length,
-        types,
+        typeStats,
+        staleCount,
         refreshedAt: stored.refreshedAt,
         oldestFetchedAt,
         resortCount: resorts && Array.isArray(resorts.resorts) ? resorts.resorts.length : 0,
         cheapestPP: s ? (s.fromPricePP ?? s.fromPrice ?? null) : null,
         currency: s ? (s.currency || 'GBP') : 'GBP',
         inSummary: !!s,
-        origins,
       };
     });
 

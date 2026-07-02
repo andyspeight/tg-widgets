@@ -9,8 +9,13 @@
  *   3. Normalises every returned offer (tested parser).
  *   4. Merges the fresh offers into that country's stored set in Redis
  *      (dedup on offer.id, newest wins), then purges offers whose travel date
- *      has passed or whose fetchedAt is older than 4 days (tested sweep logic).
- *   5. Rebuilds the small map summary (cheapest per country + cheapest per airport)
+ *      has passed or whose fetchedAt is older than MAX_AGE_HOURS (tested sweep
+ *      logic).
+ *   5. Maintenance-purges every stored key the sweep did NOT touch with the
+ *      same rules — countries awaiting rotation, countries whose fetches keep
+ *      failing, and orphans removed from MapSearches — deleting keys that end
+ *      up empty. No stored offer outlives the rules by more than one run.
+ *   6. Rebuilds the small map summary (cheapest per country + cheapest per airport)
  *      from ALL stored country keys and writes it to map:offers:v1.
  *
  * CADENCE
@@ -35,12 +40,14 @@
  *   returns the parsed summaries without writing anything. Kept for diagnosis.
  *
  * FAILS SAFE
- *   A country whose requests all fail keeps its existing Redis key untouched.
- *   The summary is only rewritten if at least one country has offers, so a bad
- *   run can never blank the map.
+ *   A country whose requests all fail keeps its existing Redis key untouched
+ *   (the maintenance pass still removes offers that expire, so a failing
+ *   country degrades to empty rather than to stale). The summary is only
+ *   rewritten if at least one country has offers, so a bad run can never
+ *   blank the map.
  */
 
-import { setJson, getJson, setString, getString, configured } from '../_redis.js';
+import { setJson, getJson, setString, getString, keys, del, configured } from '../_redis.js';
 
 // ── Config ────────────────────────────────────────────────────────────────
 const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
@@ -340,6 +347,55 @@ async function storeCountryOffers(cc, freshOffers, now) {
   await setJson(xKey, { offers: survivingX, refreshedAt: now.toISOString() });
 
   return { storedPackages: survivingP.length, storedExtra: survivingX.length };
+}
+
+/** Maintenance purge over EVERY stored offer key, not just the swept slice.
+ *
+ *  The per-sweep purge only runs when a country is actually swept, which
+ *  leaves three ways for stale offers to linger: countries waiting their
+ *  turn in the rotation (travel dates pass mid-cycle), countries whose
+ *  fetches keep failing (fail-safe leaves the key untouched), and countries
+ *  disabled or deleted in MapSearches (never swept again, key orphaned
+ *  forever). This pass applies the same purge rules to every stored key on
+ *  every run, deletes keys that end up empty, and clears the orphaned
+ *  resort key alongside — so nothing outlives the 70-hour/past-date rules
+ *  by more than one cron interval.
+ *
+ *  refreshedAt is preserved on rewrite: it means "last swept", and faking
+ *  it here would wrongly suppress the next real sweep's freshness gate. */
+async function maintainStoredOffers(now, sweptCCs = new Set()) {
+  const report = { countriesChecked: 0, countriesCleaned: 0, offersRemoved: 0, keysDeleted: 0 };
+  const [pKeys, xKeys] = await Promise.all([keys('offers:packages:*'), keys('offers:extra:*')]);
+  const ccs = new Set();
+  for (const k of pKeys) ccs.add(String(k).slice('offers:packages:'.length).toUpperCase());
+  for (const k of xKeys) ccs.add(String(k).slice('offers:extra:'.length).toUpperCase());
+  const targets = Array.from(ccs).filter(cc => /^[A-Z]{2}$/.test(cc) && !sweptCCs.has(cc));
+  report.countriesChecked = targets.length;
+  await pooled(targets, async (cc) => {
+    let removedHere = 0, keysLeft = 0;
+    for (const key of [countryKey(cc), extraKey(cc)]) {
+      const stored = await getJson(key);
+      if (!stored || !Array.isArray(stored.offers) || !stored.offers.length) continue;
+      const surviving = purgeOffers(stored.offers, now);
+      if (surviving.length === stored.offers.length) { keysLeft++; continue; }
+      removedHere += stored.offers.length - surviving.length;
+      if (!surviving.length) {
+        await del(key);
+        report.keysDeleted++;
+      } else {
+        await setJson(key, { offers: surviving, refreshedAt: stored.refreshedAt || now.toISOString() });
+        keysLeft++;
+      }
+    }
+    if (removedHere) {
+      report.countriesCleaned++;
+      report.offersRemoved += removedHere;
+      // Both offer keys gone → the country is fully expired (usually an
+      // orphan). Drop its resort summary too so nothing lingers.
+      if (!keysLeft) await del(resortsKey(cc));
+    }
+  });
+  return report;
 }
 
 // ── Airtable ────────────────────────────────────────────────────────────────
@@ -767,6 +823,18 @@ export default async function handler(req, res) {
       });
     }
 
+    // ── Maintenance: purge every UNSWEPT stored key (stale-offer guarantee) ─
+    // Swept countries were just purged inside storeCountryOffers; this covers
+    // the rest, including orphans no longer in MapSearches. Runs before the
+    // summary rebuild so expired offers can't reach the map either.
+    // Only countries that went through storeCountryOffers this run are freshly
+    // purged — skipped-fresh entries were not, so they stay in scope here.
+    const sweptCCs = new Set(perCountry.filter(p => p.ok && p.cc && !p.skipped).map(p => String(p.cc).toUpperCase()));
+    const maintenance = await maintainStoredOffers(now, sweptCCs);
+    if (maintenance.offersRemoved || maintenance.keysDeleted) {
+      console.log(`[map-cron] maintenance: removed ${maintenance.offersRemoved} expired offers across ${maintenance.countriesCleaned} countries, deleted ${maintenance.keysDeleted} empty keys`);
+    }
+
     // ── Rebuild the widget summary from ALL country keys (full coverage) ───
     // Pass the full rows so region (from MapSearches) travels into the summary.
     const summary = await rebuildSummary(rows);
@@ -781,6 +849,7 @@ export default async function handler(req, res) {
       sweptCountries: slice.length,
       skippedFresh,
       totalCountries: rows.length,
+      maintenance,
       summary,
       perCountry,
       durationMs: Date.now() - startedAt,

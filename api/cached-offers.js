@@ -63,6 +63,22 @@ const normBoard = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
 
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
 
+// Serve-time stale guard — the same expiry rules the cron purges on (past
+// travel date, or fetched more than 70 hours ago; keep in step with the
+// cron's MAX_AGE_HOURS). The cron deletes stale offers on its own cadence,
+// but nothing stale may ever reach a client page even if the cron stalls,
+// so the read side enforces the rules independently.
+const STALE_AGE_MS = 70 * 60 * 60 * 1000;
+function isServable(o, nowMs) {
+  const td = Date.parse(o.outboundDate || o.checkinDate || '');
+  if (Number.isFinite(td) && td < nowMs) return false;
+  if (o.fetchedAt) {
+    const f = Date.parse(o.fetchedAt);
+    if (Number.isFinite(f) && (nowMs - f) > STALE_AGE_MS) return false;
+  }
+  return true;
+}
+
 /** Which stored offers satisfy the requested type. */
 function typePredicate(requested) {
   const t = String(requested || 'BothPackages');
@@ -272,6 +288,7 @@ export default async function handler(req, res) {
         const allOffers = pools.length === 1 ? pools[0].offers : pools[0].offers.concat(pools[1].offers);
         for (const o of allOffers) {
           if (!o || !matchesType(o)) continue;
+          if (!isServable(o, now)) continue;
           // Destination semantics: an offer matches when its arrival airport
           // is one of the requested IATAs, or its country one of the codes.
           if (destTokens.length) {
