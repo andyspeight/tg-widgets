@@ -2489,6 +2489,7 @@
       const searches = availability.perDest.length;
       const detail = availability.perDest.map((d) => d.code + ': ' + d.n + (d.capped ? '+' : '')).join(' · ');
       const notes = [];
+      if (availability.exact) notes.push('exact count from the Travelgenix offer cache');
       if (searches > 1) notes.push(searches + ' destination searches');
       if (availability.plus) notes.push('some searches hit the supplier’s ' + AVAIL_CEILING + '-offer ceiling, so this is a minimum');
       if (availability.failed) notes.push(availability.failed + ' search' + (availability.failed === 1 ? '' : 'es') + ' failed');
@@ -2505,8 +2506,9 @@
 
     async function runAvailabilityProbe() {
       const base = availabilityBasePayload();
-      const dests = (state.config.destinations || []).slice(0, AVAIL_MAX_SEARCHES);
-      const key = JSON.stringify([base, dests]);
+      const allDests = state.config.destinations || [];
+      const dests = allDests.slice(0, AVAIL_MAX_SEARCHES);
+      const key = JSON.stringify([base, allDests]);
       if (availabilityCache.has(key)) {
         availability = availabilityCache.get(key);
         paintAvailability();
@@ -2515,6 +2517,44 @@
       const seq = ++availabilitySeq;
       availability = { loading: true };
       paintAvailability();
+
+      // ── The Travelgenix offer cache first ─────────────────────────
+      // One cheap GET returns the EXACT number of cached offers matching the
+      // filters (totalMatched counts before slicing). Mirror the widget's
+      // _cacheEligible gate: flight widgets and free-text (non IATA/country
+      // code) destination or origin filters are served live, so their counts
+      // must come from the live fan-out below too — a cache count would
+      // describe a pool the widget never reads.
+      const isCode = (v) => /^[A-Za-z]{2,3}$/.test(String(v == null ? '' : v).trim());
+      const cacheEligible = !/^Flights?$/.test(String(base.type))
+        && allDests.length <= 60 && allDests.every(isCode)
+        && (!base.origins || base.origins.every(isCode));
+      if (cacheEligible) try {
+        const q = new URLSearchParams();
+        q.set('type', base.packageType && base.packageType !== 'Any' ? base.packageType : base.type);
+        if (allDests.length) q.set('destinations', allDests.join(','));
+        if (base.origins && base.origins.length) q.set('origins', base.origins.join(','));
+        if (base.boardBases && base.boardBases.length) q.set('boardBases', base.boardBases.join(','));
+        if (base.cabinClasses && base.cabinClasses.length) q.set('cabinClasses', base.cabinClasses.join(','));
+        if (base.budgetMin) q.set('budgetMin', base.budgetMin);
+        if (base.budgetMax) q.set('budgetMax', base.budgetMax);
+        if (base.ratingMin) q.set('ratingMin', base.ratingMin);
+        if (base.durationMin) q.set('durationMin', base.durationMin);
+        if (base.durationMax) q.set('durationMax', base.durationMax);
+        if (base.DatesMin != null) q.set('DatesMin', base.DatesMin);
+        if (base.DatesMax != null) q.set('DatesMax', base.DatesMax);
+        q.set('maxOffers', '1');
+        const r = await fetch('/api/cached-offers?' + q.toString(), { headers: { 'Accept': 'application/json' } });
+        const d = await r.json();
+        if (seq !== availabilitySeq) return;
+        if (d && d.success && Number.isFinite(d.totalMatched) && d.totalMatched > 0) {
+          availability = { total: d.totalMatched, exact: true, perDest: [], failed: 0, plus: false };
+          availabilityCache.set(key, availability);
+          paintAvailability();
+          return;
+        }
+      } catch (e) { /* cache probe failed — fall through to the live estimate */ }
+      if (seq !== availabilitySeq) return;
 
       const jobs = dests.length
         ? dests.map((d) => ({ payload: { ...base, destinations: [d] }, label: d }))
@@ -3138,9 +3178,12 @@
           html += '</div>';
           // The widget's fetch is capped by its Max offers setting — label it
           // as the sample it is, so it can't be read as availability (the
-          // strip above shows that).
+          // strip above shows that). Provenance from the widget's fetch:
+          // 'cache' means the visitor-facing widget is being served from the
+          // Travelgenix offer cache, 'live' means the Travelify fallback.
+          const srcLabel = detail.source === 'cache' ? ' · served from cache' : (detail.source === 'live' ? ' · served live' : '');
           html += '<div class="breakdown-raw">'
-            + '<span>Widget sample (Max offers setting)</span><strong>' + raw + ' offers</strong>'
+            + '<span>Widget sample (Max offers setting)' + srcLabel + '</span><strong>' + raw + ' offers</strong>'
             + '</div>';
           panel.className = 'breakdown-panel';
           panel.innerHTML = html;

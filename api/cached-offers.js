@@ -44,11 +44,20 @@ const extraCountryKey = (cc) => `offers:extra:${cc}`;
 const MAX_OFFERS_CAP = 500;
 const DEFAULT_MAX = 100;
 
-const csv = (v, re, cap = 30) => String(v || '')
-  .split(',')
-  .map((s) => s.trim().toUpperCase())
-  .filter((s) => re.test(s))
-  .slice(0, cap);
+/** Parse a CSV param, validating every token. Returns { tokens, invalid } —
+ *  callers MUST treat invalid tokens as a cache miss, never as "no filter":
+ *  silently dropping a filter token would serve wrong offers with
+ *  totalMatched > 0 and the widget's live fallback would never fire. */
+const csv = (v, re, cap = 60) => {
+  const rawTokens = String(v || '')
+    .split(',')
+    .map((s) => s.trim().toUpperCase())
+    .filter(Boolean);
+  return {
+    tokens: rawTokens.filter((s) => re.test(s)).slice(0, cap),
+    invalid: rawTokens.some((s) => !re.test(s)) || rawTokens.length > cap,
+  };
+};
 
 const normBoard = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
 
@@ -57,6 +66,7 @@ function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
 /** Which stored offers satisfy the requested type. */
 function typePredicate(requested) {
   const t = String(requested || 'BothPackages');
+  if (t === 'Any') return () => true; // "Mixed everything" — every stored type
   if (t === 'Accommodation') return (o) => o.type === 'Accommodation';
   if (t === 'Flights') return (o) => o.type === 'Flights';
   if (t === 'DynamicPackages') return (o) => (o.type || 'Packages') === 'Packages' && o.packageType === 'DynamicPackages';
@@ -85,13 +95,24 @@ function toRawShape(o) {
   if (o.packageType) raw.packageType = o.packageType;
   if (Number.isFinite(o.price)) raw.formattedPrice = gbp(o.price);
   if (Number.isFinite(o.pricePP)) raw.formattedPPPrice = gbp(o.pricePP);
+  // Party size — drives the "Based on N adults sharing" caption and the
+  // per-person derivations.
+  if (Number.isFinite(o.adults)) raw.adults = o.adults;
+  if (Number.isFinite(o.children)) raw.children = o.children;
+  if (Number.isFinite(o.infants)) raw.infants = o.infants;
   // Was-price / lead-in flags travel on the pricing blocks — the widget reads
-  // them for the strike-through price and discount badges.
+  // them for the strike-through price and discount badges. Only emit the
+  // was-price when it exceeds the price we're serving: the stored
+  // priceBeforeChange can be a component-level figure, and a "was £150" strike
+  // next to a £1,240 total would be nonsense.
+  const showWas = o.priceChanged && Number.isFinite(o.priceBeforeChange)
+    && Number.isFinite(o.price) && o.priceBeforeChange > o.price;
   const pricing = {
     price: o.price,
     currency: o.currency || 'GBP',
-    ...(o.priceChanged ? { priceChanged: true, priceBeforeChange: o.priceBeforeChange } : {}),
+    ...(showWas ? { priceChanged: true, priceBeforeChange: o.priceBeforeChange } : {}),
     ...(o.isLeadIn ? { isLeadIn: true } : {}),
+    ...(o.refundability ? { refundability: o.refundability } : {}),
   };
   if (hasFlight) {
     raw.flight = {
@@ -124,6 +145,13 @@ function toRawShape(o) {
       reviewRating: o.reviewRating,
       reviewCount: o.reviewCount,
       checkinDate: o.checkinDate || null,
+      propertyType: o.propertyType || null,
+      chain: o.chain || null,
+      // Operator name + message drive the operator strip and the ATOL badge
+      // (compliance-relevant), so they're stored and rebuilt.
+      operator: (o.operatorName || o.operatorMessage)
+        ? { name: o.operatorName || null, message: o.operatorMessage || null }
+        : null,
       image: o.image ? { url: o.image } : null,
       destination: {
         name: o.resort || null,
@@ -154,11 +182,32 @@ export default async function handler(req, res) {
   const q = req.query || {};
 
   try {
-    const destTokens = csv(q.destinations, /^[A-Z]{2,3}$/);
+    const dest = csv(q.destinations, /^[A-Z]{2,3}$/);
+    // Origins accept 3-letter airport IATAs AND 2-letter country codes (the
+    // editor documents both and its presets use 'GB'). Country origins map to
+    // the sweep market: GB-market offers depart UK airports, IE-market
+    // offers depart Irish airports.
+    const orig = csv(q.origins, /^[A-Z]{2,3}$/);
+    const boardsCsv = csv(q.boardBases, /^[A-Z]/i, 12);
+    // Any filter token we cannot faithfully apply → honest miss (the widget
+    // then falls back to live Travelify, which resolves free-text names).
+    if (dest.invalid || orig.invalid || boardsCsv.invalid) {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).json({ success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
+    }
+    const destTokens = dest.tokens;
     const ccs = new Set(destTokens.filter((s) => s.length === 2));
     const iatas = new Set(destTokens.filter((s) => s.length === 3));
-    const origins = new Set(csv(q.origins, /^[A-Z]{3}$/));
-    const boards = new Set(csv(q.boardBases, /^[A-Z]/i, 12).map(normBoard));
+    const origins = new Set(orig.tokens.filter((s) => s.length === 3));
+    const originMarkets = new Set(orig.tokens.filter((s) => s.length === 2));
+    const hasOriginFilter = orig.tokens.length > 0;
+    const boards = new Set(boardsCsv.tokens.map(normBoard));
+    const cabinsCsv = csv(q.cabinClasses, /^[A-Z]/i, 8);
+    if (cabinsCsv.invalid) {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).json({ success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
+    }
+    const cabins = new Set(cabinsCsv.tokens.map(normBoard)); // same loose normaliser
 
     const budgetMin = num(q.budgetMin);
     const budgetMax = num(q.budgetMax);
@@ -230,8 +279,13 @@ export default async function handler(req, res) {
             const ccOk = ccs.size && o.countryCode && ccs.has(String(o.countryCode).toUpperCase());
             if (!apOk && !ccOk) continue;
           }
-          if (origins.size && !(o.origin && origins.has(String(o.origin).toUpperCase()))) continue;
+          if (hasOriginFilter) {
+            const apOk = origins.size && o.origin && origins.has(String(o.origin).toUpperCase());
+            const mkOk = originMarkets.size && originMarkets.has(String(o.market || 'GB').toUpperCase());
+            if (!apOk && !mkOk) continue;
+          }
           if (boards.size && !boards.has(normBoard(o.boardBasis))) continue;
+          if (cabins.size && !cabins.has(normBoard(o.cabinClass))) continue;
           const pp = Number.isFinite(o.pricePP) ? o.pricePP : o.price;
           if (budgetMin != null && !(Number.isFinite(pp) && pp >= budgetMin)) continue;
           if (budgetMax != null && !(Number.isFinite(pp) && pp <= budgetMax)) continue;

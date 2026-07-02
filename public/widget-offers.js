@@ -1,6 +1,7 @@
 /**
- * Travelgenix Travel Offers Widget v1.6.0
- * Self-contained, embeddable widget pulling live data from the Travelify offers cache.
+ * Travelgenix Travel Offers Widget v1.7.0
+ * Self-contained, embeddable widget served from the Travelgenix offer cache,
+ * with a live Travelify fallback.
  *
  * Usage:
  *   <div data-tg-widget="offers" data-tg-id="YOUR_WIDGET_ID"></div>
@@ -18,6 +19,17 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.7.0 (Jul 2026) — Served from the Travelgenix offer cache:
+ *     • Stay-type widgets fetch GET /api/cached-offers first (the pool the
+ *       cron builds from Travelify at 250/request) and only fall back to the
+ *       live /api/offers proxy on a cache miss or error — fail-open, never
+ *       a blank widget
+ *     • Cache path is gated: flight widgets/templates and any config with
+ *       free-text (non IATA/country-code) destination or origin filters go
+ *       straight to the live proxy, so an unresolvable filter can never
+ *       widen results
+ *     • tgo:dataLoaded now reports source ('cache' | 'live' | 'session') and
+ *       the cache's TRUE availableTotal for the editor's availability line
  *   v1.6.0 (May 2026) — Popup template:
  *     • New "Popup" template — renders offers inside a configurable popup chassis
  *       instead of inline on the page
@@ -93,7 +105,12 @@
   // on Travelgenix's own demo site (no client setup), the appId is empty or
   // '250' and the proxy falls through to demo credentials.
   const OFFERS_PROXY = API_BASE.replace('/widget-config', '/offers');
-  const VERSION = '1.6.1';
+  // The Travelgenix offer cache — the pool the refresh cron builds up from
+  // Travelify in 250-offer increments. Offer boxes read THIS first (locked
+  // decision 2 Jul 2026) and only fall back to the live proxy when the cache
+  // has nothing matching the widget's filters.
+  const CACHED_OFFERS_URL = API_BASE.replace('/widget-config', '/cached-offers');
+  const VERSION = '1.7.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -5737,9 +5754,38 @@
         const cached = cacheGet(ck, ttlMs);
         if (cached) {
           this.rawOffers = cached;
+          this._offersSource = 'session';
           this._renderOffers();
           this._fireDataLoaded();
           return;
+        }
+      }
+
+      // ── Cache first ──────────────────────────────────────────────
+      // Stay-type widgets (hotels + every package flavour) are served from
+      // the Travelgenix offer cache: no Travelify call from the visitor's
+      // browser, instant loads, thousands-deep pool. Flight-centric widgets
+      // stay on the live proxy for now — cached flight records don't yet
+      // carry the departure times those templates are built around. Any
+      // cache miss or error falls through to the live proxy (fail-open: a
+      // filling or unreachable cache never blanks a widget).
+      if (this._cacheEligible(payload)) {
+        try {
+          const res = await fetch(CACHED_OFFERS_URL + '?' + this._cachedOffersQuery(payload), {
+            headers: { 'Accept': 'application/json' },
+          });
+          const data = await res.json();
+          if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
+            this.rawOffers = data.data;
+            this._offersSource = 'cache';
+            this._availableTotal = Number.isFinite(data.totalMatched) ? data.totalMatched : data.data.length;
+            if (ttlMs > 0) cacheSet(ck, this.rawOffers);
+            this._renderOffers();
+            this._fireDataLoaded();
+            return;
+          }
+        } catch (err) {
+          // Cache path failed — fall through to live.
         }
       }
 
@@ -5769,12 +5815,57 @@
           return;
         }
         this.rawOffers = data.data || [];
+        this._offersSource = 'live';
+        this._availableTotal = null;
         if (ttlMs > 0) cacheSet(ck, this.rawOffers);
         this._renderOffers();
         this._fireDataLoaded();
       } catch (err) {
         this._showError(err.message || 'Network error.');
       }
+    }
+
+    /** The cache serves the stay types. Flight-centric widgets and templates
+     *  keep the live proxy (their rows need departure times the cache lacks).
+     *  Filters must all be 2-3 letter codes (IATA airports / country codes /
+     *  GB-IE markets): the cache can't resolve free-text names like
+     *  "Tenerife", and a dropped filter must never widen a client's widget
+     *  to worldwide offers — those configs go straight to the live proxy. */
+    _cacheEligible(payload) {
+      if (this.cfg.template === 'departure-board' || this.cfg.template === 'boarding-pass') return false;
+      const t = this.cfg.type;
+      if (t === 'Flights' || t === 'Flight') return false;
+      const isCode = (v) => /^[A-Za-z]{2,3}$/.test(String(v == null ? '' : v).trim());
+      const dests = (payload && Array.isArray(payload.destinations)) ? payload.destinations : [];
+      const origs = (payload && Array.isArray(payload.origins)) ? payload.origins : [];
+      if (dests.length > 60 || origs.length > 60) return false;
+      if (!dests.every(isCode) || !origs.every(isCode)) return false;
+      return true;
+    }
+
+    /** Translate the live-proxy payload into /api/cached-offers query params.
+     *  packageType wins over the generic type so DynamicPackages and
+     *  PackageHolidays widgets filter precisely. */
+    _cachedOffersQuery(payload) {
+      const q = new URLSearchParams();
+      const type = (payload.packageType && payload.packageType !== 'Any')
+        ? payload.packageType
+        : (payload.type || 'Packages');
+      q.set('type', type);
+      if (Array.isArray(payload.destinations) && payload.destinations.length) q.set('destinations', payload.destinations.join(','));
+      if (Array.isArray(payload.origins) && payload.origins.length) q.set('origins', payload.origins.join(','));
+      if (Array.isArray(payload.boardBases) && payload.boardBases.length) q.set('boardBases', payload.boardBases.join(','));
+      if (Array.isArray(payload.cabinClasses) && payload.cabinClasses.length) q.set('cabinClasses', payload.cabinClasses.join(','));
+      if (payload.budgetMin) q.set('budgetMin', payload.budgetMin);
+      if (payload.budgetMax) q.set('budgetMax', payload.budgetMax);
+      if (payload.ratingMin) q.set('ratingMin', payload.ratingMin);
+      if (payload.durationMin) q.set('durationMin', payload.durationMin);
+      if (payload.durationMax) q.set('durationMax', payload.durationMax);
+      if (payload.DatesMin != null) q.set('DatesMin', payload.DatesMin);
+      if (payload.DatesMax != null) q.set('DatesMax', payload.DatesMax);
+      if (payload.sort) q.set('sort', payload.sort);
+      if (payload.maxOffers) q.set('maxOffers', payload.maxOffers);
+      return q.toString();
     }
 
     // Fire a custom event so the editor can listen and display dedupe breakdown.
@@ -5785,6 +5876,10 @@
           detail: {
             rawCount: this.rawOffers.length,
             breakdown: dedupeBreakdown(this.rawOffers),
+            // Provenance for the editor: which source served this render, and
+            // the cache's TRUE matching total when it did.
+            source: this._offersSource || 'live',
+            availableTotal: this._availableTotal != null ? this._availableTotal : null,
           },
         });
         this.el.dispatchEvent(ev);

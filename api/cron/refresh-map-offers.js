@@ -80,7 +80,7 @@ const resortsKey = (cc) => `map:resorts:${cc}`;
 // Redis value written in one REST call, so it must stay comfortably inside
 // Upstash's request-size limit however many airports, markets and types a
 // country accumulates. Cheapest-first matches how every consumer sorts.
-const STORE_CAPS = { Packages: 900, Accommodation: 600, Flights: 400 };
+const STORE_CAPS = { Packages: 800, Accommodation: 500, Flights: 400 };
 
 /** Cap a merged offer list: within each type|market group keep only the
  *  cheapest STORE_CAPS[type] offers (per person). */
@@ -187,6 +187,14 @@ function normaliseOffer(offer) {
     priceChanged: pricing.priceChanged === true || null,
     priceBeforeChange: num(pricing.priceBeforeChange),
     isLeadIn: pricing.isLeadIn === true || null,
+    refundability: pricing.refundability || null,
+    adults: num(offer.adults), children: num(offer.children), infants: num(offer.infants),
+    propertyType: acc.propertyType || null, chain: acc.chain || null,
+    operatorName: (acc.operator && acc.operator.name) || null,
+    // Operator message carries the ATOL/ABTA protection line the cards show.
+    // Capped so a verbose operator can't bloat the stored offer.
+    operatorMessage: (acc.operator && acc.operator.message)
+      ? String(acc.operator.message).slice(0, 200) : null,
     image: (acc.image && acc.image.url) || (flight.image && flight.image.url) || null,
     url: offer.url || null, updated: offer.updated || null, fetchedAt: new Date().toISOString(),
   };
