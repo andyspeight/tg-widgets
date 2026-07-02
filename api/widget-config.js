@@ -651,9 +651,16 @@ export default async function handler(req, res) {
       const cleanConfig = sanitiseConfig(config);
       const configStr = JSON.stringify(cleanConfig);
 
-      // Cap config size (prevent abuse)
-      if (configStr.length > 500000) {
-        return res.status(413).json({ error: 'Config too large (max 500KB)' });
+      // Cap config size. Airtable's Config column is long text, hard-capped at
+      // 100,000 characters — anything bigger is rejected by Airtable with a 422
+      // (INVALID_VALUE_FOR_COLUMN) that used to surface as an unexplained 500.
+      // Gate at 95,000 for headroom and tell the user what to actually do.
+      // The usual culprit is an image embedded as a base64 data URI (the old
+      // Quote PDF logo path); logos are now uploaded to Blob and stored as URLs.
+      if (configStr.length > 95000) {
+        return res.status(413).json({
+          error: 'This design is too large to save. If you added a logo or image, remove it and upload it again (it will be stored as a link instead of embedded). Otherwise, try trimming some content and saving again.',
+        });
       }
 
       const safeName = (typeof name === 'string' ? name : 'Untitled').slice(0, 200);
@@ -951,6 +958,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
     console.error('[widget-config]', err.message);
+    // Airtable rejecting the Config value (long-text column, 100k char cap)
+    // is a user-fixable condition, not an outage — say so instead of a 500.
+    // The 95k gate above should catch this first; this is belt and braces.
+    if (/INVALID_VALUE_FOR_COLUMN/.test(err.message || '')) {
+      return res.status(422).json({
+        error: 'This design is too large to save. If you added a logo or image, please remove it and upload it again — it will now be stored as a link instead of embedded.',
+      });
+    }
     return res.status(500).json({ error: 'Service temporarily unavailable' });
   }
 }
