@@ -733,16 +733,25 @@ async function rebuildSummary(rows) {
   return { written: ok, ...payload.stats };
 }
 
-// ── Cursor for hourly rotation ──────────────────────────────────────────────
+// ── Cursor + time budget ────────────────────────────────────────────────────
+// Every run — rotating AND full — starts at the stored cursor, sweeps as many
+// of its target countries as the time budget allows, then advances the cursor
+// past exactly the countries it processed. A full sweep of 40+ countries does
+// not fit inside the function's 300s limit once retries and three offer types
+// are in play; before this, an over-long full sweep was killed mid-loop and
+// NOTHING after it ran — no sweep stats, no maintenance purge, no summary
+// rebuild — which is why full rebuilds appeared to do nothing. Now a run that
+// hits the budget still completes all bookkeeping, reports partial: true, and
+// the next invocation (cron tick or another click) continues where it stopped.
+const SWEEP_TIME_BUDGET_MS = 220 * 1000; // leaves ~80s of maxDuration 300 for bookkeeping
 async function selectSlice(rows, full) {
-  if (full) return { slice: rows, nextCursor: 0 };
   const total = rows.length;
-  const sliceSize = Math.max(1, Math.ceil(total * HOURLY_FRACTION));
   const cur = (await getJson(CURSOR_KEY)) || { i: 0 };
   const start = (cur.i || 0) % total;
+  const target = full ? total : Math.max(1, Math.ceil(total * HOURLY_FRACTION));
   const slice = [];
-  for (let k = 0; k < sliceSize; k++) slice.push(rows[(start + k) % total]);
-  return { slice, nextCursor: (start + sliceSize) % total };
+  for (let k = 0; k < Math.min(target, total); k++) slice.push(rows[(start + k) % total]);
+  return { slice, start, total };
 }
 
 // ── Handler ─────────────────────────────────────────────────────────────────
@@ -906,13 +915,17 @@ export default async function handler(req, res) {
 
     // ── Select the slice to sweep this run ────────────────────────────────
     const full = q.full === '1' || q.full === 'true';
-    const { slice, nextCursor } = await selectSlice(rows, full);
+    const { slice, start, total } = await selectSlice(rows, full);
 
     // ── Sweep each country in the slice, store per-country with merge+purge ─
     const now = new Date();
     const perCountry = [];
     let skippedFresh = 0;
+    let processed = 0;
+    let budgetExhausted = false;
     for (const row of slice) {
+      if (Date.now() - startedAt > SWEEP_TIME_BUDGET_MS) { budgetExhausted = true; break; }
+      processed++;
       const rowCC = ((row.fields || {}).CountryCode || '').trim().toUpperCase();
       // Interval gate: on a normal (rotating) run, skip any country whose
       // offers are younger than the configured interval. A full sweep (?full=1)
@@ -958,7 +971,9 @@ export default async function handler(req, res) {
       await setJson(SWEEP_STATS_KEY, {
         at: now.toISOString(),
         mode: full ? 'full' : 'hourly',
+        ...(budgetExhausted ? { partial: true } : {}),
         sweptCountries: sweptCount,
+        targetCountries: slice.length,
         perType: sweepStats,
       });
       for (const [t, s] of Object.entries(sweepStats)) {
@@ -985,14 +1000,21 @@ export default async function handler(req, res) {
     // Pass the full rows so region (from MapSearches) travels into the summary.
     const summary = await rebuildSummary(rows);
 
-    // ── Advance the rotation cursor (hourly only) ─────────────────────────
-    if (!full) await setJson(CURSOR_KEY, { i: nextCursor });
+    // ── Advance the cursor past exactly the countries processed ───────────
+    // Both modes resume from here next run, so a budget-limited full sweep
+    // continues where it stopped instead of restarting.
+    await setJson(CURSOR_KEY, { i: total ? (start + processed) % total : 0 });
+    if (budgetExhausted) {
+      console.log(`[map-cron] time budget reached after ${processed} of ${slice.length} countries — cursor advanced, next run continues from there`);
+    }
 
     return res.status(200).json({
       ok: true,
       mode: full ? 'full' : 'hourly',
       intervalMins,
-      sweptCountries: slice.length,
+      partial: budgetExhausted,
+      processedCountries: processed,
+      targetCountries: slice.length,
       skippedFresh,
       totalCountries: rows.length,
       sweepStats,

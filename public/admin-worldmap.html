@@ -826,8 +826,11 @@
     const parts = [part('Packages', 'Packages'), part('Accommodation', 'Hotels'), part('Flights', 'Flights')].filter(Boolean);
     if (!parts.length) return '';
     const scope = ls.mode === 'full' ? 'full sweep' : ls.mode && ls.mode.startsWith('country:') ? `re-poll ${esc(ls.mode.slice(8))}` : 'rotating sweep';
+    const partialNote = ls.partial
+      ? ` — hit the time limit at ${ls.sweptCountries || 0} of ${ls.targetCountries || '?'}; the next run continues from there`
+      : '';
     return `<div style="padding:8px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE" title="Fetched = offers Travelify returned for our requests. Kept = offers that passed our storage rules. The difference, split by reason, shows why a type is thin.">
-      Last sweep <b style="color:var(--text)">${esc(timeAgo(ls.at))}</b> (${scope}, ${ls.sweptCountries || 0} ${ls.sweptCountries === 1 ? 'country' : 'countries'}): ${parts.join(' · ')}
+      Last sweep <b style="color:var(--text)">${esc(timeAgo(ls.at))}</b> (${scope}, ${ls.sweptCountries || 0} ${ls.sweptCountries === 1 ? 'country' : 'countries'}${partialNote}): ${parts.join(' · ')}
     </div>`;
   }
 
@@ -1155,10 +1158,12 @@
       const d = await r.json().catch(() => ({}));
       if (r.status === 401 || r.status === 403) { toast('Admin access required', 'err'); return; }
       if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+      const cron = d.result || {};
       if (d.pending) toast(d.message || 'Rebuild running…', 'ok');
+      else if (cron.partial) toast(`Swept ${cron.processedCountries} of ${cron.totalCountries} countries before the time limit — click again to continue from where it stopped`, 'ok');
       else toast('Rebuild complete', 'ok');
-      // Give the cron a moment, then reload counts.
-      setTimeout(load, body.scope === 'all' ? 3000 : 1500);
+      // Give the cron a moment, then reload counts on whichever tab is open.
+      setTimeout(() => (activeTab === 'cache' ? loadCache() : load()), body.scope === 'all' ? 3000 : 1500);
     } catch (e) {
       toast(e.message, 'err');
     } finally {
