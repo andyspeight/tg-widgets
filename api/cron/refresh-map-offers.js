@@ -50,7 +50,9 @@ const SELF_ORIGIN = 'https://tg-widgets.vercel.app';
 const DEMO_APP_ID = '250';
 
 const PER_REQUEST_TIMEOUT_MS = 10000;
-const REQUEST_CONCURRENCY = 4;     // parallel proxy calls within a country
+const REQUEST_CONCURRENCY = 6;     // parallel proxy calls within a country
+                                   // (raised from 4 when types × markets grew
+                                   // the per-country request count)
 const HOURLY_FRACTION = 0.15;      // ~15% of countries per hourly run
 const MAX_AGE_HOURS = 70;          // purge offers older than this (was 4 days / 96h)
 // Trip-duration bounds. Travelify returns offers of varying real durations and
@@ -68,7 +70,37 @@ const REFRESH_INTERVAL_KEY = 'tg:wm:refresh-interval-mins';
 const DEFAULT_INTERVAL_MINS = 45;
 const ALLOWED_INTERVALS = [15, 30, 45, 60, 120, 240, 1440];
 const countryKey = (cc) => `offers:packages:${cc}`;
+// Accommodation-only and flight-only offers live in their OWN key so the
+// long-standing packages key (which the world map reads) keeps its exact
+// product and neither key can outgrow Upstash's per-request write ceiling.
+const extraKey = (cc) => `offers:extra:${cc}`;
 const resortsKey = (cc) => `map:resorts:${cc}`;
+
+// Per-country, per-market storage caps (cheapest kept). A country key is one
+// Redis value written in one REST call, so it must stay comfortably inside
+// Upstash's request-size limit however many airports, markets and types a
+// country accumulates. Cheapest-first matches how every consumer sorts.
+const STORE_CAPS = { Packages: 900, Accommodation: 600, Flights: 400 };
+
+/** Cap a merged offer list: within each type|market group keep only the
+ *  cheapest STORE_CAPS[type] offers (per person). */
+function capStoredOffers(offers) {
+  const groups = new Map();
+  for (const o of offers || []) {
+    const k = `${o.type || 'Packages'}|${o.market || 'GB'}`;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(o);
+  }
+  const pp = (o) => (Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : Infinity));
+  const out = [];
+  for (const [k, arr] of groups) {
+    const type = k.split('|')[0];
+    const cap = STORE_CAPS[type] || STORE_CAPS.Packages;
+    arr.sort((a, b) => pp(a) - pp(b));
+    out.push(...arr.slice(0, cap));
+  }
+  return out;
+}
 
 /**
  * Read the operator-configured min interval between re-sweeps of the same
@@ -125,6 +157,11 @@ function normaliseOffer(offer) {
   const lat = num(fdest.latitude) ?? num(adest.latitude);
   const lng = num(fdest.longitude) ?? num(adest.longitude);
   if (!iata && !countryCode) return null;
+  // Was-price/lead-in flags: taken from whichever pricing block carries them
+  // (they power the strike-through price and discount badges in the widget).
+  const pricing = (acc.pricing && acc.pricing.priceChanged != null) ? acc.pricing
+    : (flight.pricing && flight.pricing.priceChanged != null) ? flight.pricing
+    : (acc.pricing || flight.pricing || {});
   return {
     id: offer.id, type: offer.type || 'Packages', packageType: offer.packageType || null,
     price, pricePP: parsePPPrice(offer),
@@ -134,10 +171,22 @@ function normaliseOffer(offer) {
     resortLat: num(adest.latitude), resortLng: num(adest.longitude),
     hotel: acc.name || null, rating: num(acc.rating), boardBasis: acc.boardBasis || null,
     nights: num(acc.nights), reviewRating: num(acc.reviewRating), reviewCount: num(acc.reviewCount),
-    carrier: (flight.carrier && flight.carrier.name) || null, direct: !!flight.direct,
+    carrier: (flight.carrier && flight.carrier.name) || null,
+    carrierCode: (flight.carrier && flight.carrier.code) || null,
+    direct: !!flight.direct,
+    stops: num(flight.stops),
+    duration: num(flight.duration),
+    cabinClass: flight.cabinClass || null,
+    flightNumber: flight.flightNumber || null,
     origin: (flight.origin && flight.origin.iataCode) || null,
+    originName: (flight.origin && flight.origin.name) || null,
     outboundDate: flight.outboundDate || null,
+    returnDate: flight.returnDate || null,
+    arrivalDate: flight.arrivalDate || flight.outboundArrivalDate || null,
     checkinDate: acc.checkinDate || null,
+    priceChanged: pricing.priceChanged === true || null,
+    priceBeforeChange: num(pricing.priceBeforeChange),
+    isLeadIn: pricing.isLeadIn === true || null,
     image: (acc.image && acc.image.url) || (flight.image && flight.image.url) || null,
     url: offer.url || null, updated: offer.updated || null, fetchedAt: new Date().toISOString(),
   };
@@ -147,12 +196,20 @@ function withinNightsRange(o) {
   // (we'd rather omit an offer than show a duration-less "deal").
   return Number.isFinite(o.nights) && o.nights >= MIN_NIGHTS && o.nights <= MAX_NIGHTS;
 }
-function normaliseOffers(rawArray) {
+/** The nights rule only makes sense for offers with a stay. Flight-only
+ *  offers have no nights and must not be dropped by it. */
+function passesDurationRule(o) {
+  return (o.type === 'Flights') ? true : withinNightsRange(o);
+}
+function normaliseOffers(rawArray, sweepTypeId = 'Packages') {
   if (!Array.isArray(rawArray)) return [];
   const out = [];
   for (const o of rawArray) {
     const n = normaliseOffer(o);
-    if (n && withinNightsRange(n)) out.push(n);
+    if (!n) continue;
+    // Stamp the swept type authoritatively — the read side filters on it.
+    n.type = sweepTypeId;
+    if (passesDurationRule(n)) out.push(n);
   }
   return out;
 }
@@ -223,11 +280,13 @@ function summariseByResort(offers) {
 
 // ── Tested sweep / merge / purge logic (unit-verified 22 May 2026) ──────────
 function mergeOffers(existing, fresh) {
-  // Key by id + origin: with two departure markets in one cache, the same
-  // package id can legitimately exist once per departure airport (Gatwick and
-  // Dublin are different offers with different prices). Keying by id alone
-  // would make them overwrite each other on every sweep.
-  const key = (o) => `${o.id}|${o.origin || ''}`;
+  // Key by id + origin + type: with two departure markets in one cache, the
+  // same package id can legitimately exist once per departure airport
+  // (Gatwick and Dublin are different offers with different prices), and with
+  // three offer types swept, ids from different type namespaces must never
+  // overwrite each other. Keying by id alone would make them clobber each
+  // other on every sweep.
+  const key = (o) => `${o.id}|${o.origin || ''}|${o.type || 'Packages'}`;
   const byId = new Map();
   for (const o of existing || []) if (o && o.id != null) byId.set(key(o), o);
   for (const o of fresh || []) if (o && o.id != null) byId.set(key(o), o);
@@ -238,10 +297,11 @@ function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS) {
   const nowMs = now.getTime();
   const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
   return (offers || []).filter(o => {
-    // Drop offers outside the holiday-length range. This also clears any
-    // pre-existing out-of-range offers stored before the nights filter existed,
-    // so the fix takes effect on the next sweep rather than over MAX_AGE_HOURS.
-    if (!withinNightsRange(o)) return false;
+    // Drop offers outside the holiday-length range (stay types only — flights
+    // have no nights). This also clears any pre-existing out-of-range offers
+    // stored before the nights filter existed, so the fix takes effect on the
+    // next sweep rather than over MAX_AGE_HOURS.
+    if (!passesDurationRule(o)) return false;
     const td = travelDateOf(o);
     if (td) { const t = Date.parse(td); if (Number.isFinite(t) && t < nowMs) return false; }
     if (o.fetchedAt) { const f = Date.parse(o.fetchedAt); if (Number.isFinite(f) && (nowMs - f) > maxAgeMs) return false; }
@@ -250,6 +310,28 @@ function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS) {
 }
 function updateCountryOffers(existingOffers, freshOffers, now = new Date()) {
   return purgeOffers(mergeOffers(existingOffers, freshOffers), now);
+}
+
+/** Merge a sweep's fresh offers (all types mixed) into the country's TWO
+ *  storage keys: Packages → offers:packages:{CC} (the key the world map
+ *  reads, product unchanged), Accommodation + Flights → offers:extra:{CC}.
+ *  Each key gets the shared merge + purge + cheapest-cap treatment.
+ *  Returns stored counts for the run report. */
+async function storeCountryOffers(cc, freshOffers, now) {
+  const freshPackages = freshOffers.filter(o => (o.type || 'Packages') === 'Packages');
+  const freshExtra = freshOffers.filter(o => (o.type || 'Packages') !== 'Packages');
+
+  const pKey = countryKey(cc);
+  const existingP = (await getJson(pKey)) || { offers: [] };
+  const survivingP = capStoredOffers(updateCountryOffers(existingP.offers || [], freshPackages, now));
+  await setJson(pKey, { offers: survivingP, refreshedAt: now.toISOString() });
+
+  const xKey = extraKey(cc);
+  const existingX = (await getJson(xKey)) || { offers: [] };
+  const survivingX = capStoredOffers(updateCountryOffers(existingX.offers || [], freshExtra, now));
+  await setJson(xKey, { offers: survivingX, refreshedAt: now.toISOString() });
+
+  return { storedPackages: survivingP.length, storedExtra: survivingX.length };
 }
 
 // ── Airtable ────────────────────────────────────────────────────────────────
@@ -287,12 +369,23 @@ const MARKETS = [
   { id: 'IE', nationality: 'IE' }, // Irish departures for the Irish clients
 ];
 
-function buildPayload(row, destinationCode, market = MARKETS[0]) {
+// Offer types swept into the cache. The cache powers the offer-box widgets
+// (locked decision 2 Jul 2026: offer boxes read the cache, not live
+// Travelify), so it must hold every type a widget can be set to — not just
+// the Packages the world map pins. The map's summary and deals stay
+// Packages-only via type filters at read/summarise time.
+const SWEEP_TYPES = [
+  { id: 'Packages', payloadType: 'Packages', packageType: 'Any' },
+  { id: 'Accommodation', payloadType: 'Accommodation' },
+  { id: 'Flights', payloadType: 'Flights' },
+];
+
+function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWEEP_TYPES[0]) {
   const f = row.fields || {};
   return {
     appId: f.AppId || DEMO_APP_ID,
-    type: 'Packages',
-    packageType: 'Any',
+    type: sweepType.payloadType,
+    ...(sweepType.packageType ? { packageType: sweepType.packageType } : {}),
     deduping: 'None',
     currency: 'GBP', language: 'en', nationality: market.nationality,
     maxOffers: f.MaxOffers || 250,
@@ -368,17 +461,19 @@ async function sweepCountry(row) {
     return { cc: cc || '(none)', name: f.Name || '', ok: false, error: 'no country code', codeResults: [], freshOffers: [] };
   }
   const jobs = [];
-  for (const code of codes) for (const market of MARKETS) jobs.push({ code, market });
-  const codeResults = await pooled(jobs, async ({ code, market }) => {
-    const raw = await callOffersProxy(buildPayload(row, code, market));
-    if (!raw.ok) return { code, market: market.id, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, offers: [] };
+  for (const code of codes) for (const market of MARKETS) for (const sweepType of SWEEP_TYPES) {
+    jobs.push({ code, market, sweepType });
+  }
+  const codeResults = await pooled(jobs, async ({ code, market, sweepType }) => {
+    const raw = await callOffersProxy(buildPayload(row, code, market, sweepType));
+    if (!raw.ok) return { code, market: market.id, type: sweepType.id, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, offers: [] };
     const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
-    let offers = normaliseOffers(arr);
+    let offers = normaliseOffers(arr, sweepType.id);
     const beforeCurrencyFilter = offers.length;
     offers = offers.filter(o => o.currency === 'GBP');
     const droppedNonGBP = beforeCurrencyFilter - offers.length;
     for (const o of offers) o.market = market.id;
-    return { code, market: market.id, ok: true, count: offers.length, droppedNonGBP, offers };
+    return { code, market: market.id, type: sweepType.id, ok: true, count: offers.length, droppedNonGBP, offers };
   });
   const freshOffers = codeResults.flatMap(r => r.offers);
   const anyOk = codeResults.some(r => r.ok);
@@ -403,7 +498,7 @@ async function sweepCountry(row) {
   return {
     cc, name: f.Name || '',
     ok: anyOk,
-    codeResults: codeResults.map(({ code, market, ok, error, count }) => ({ code, market, ok, error, count })),
+    codeResults: codeResults.map(({ code, market, type, ok, error, count }) => ({ code, market, type, ok, error, count })),
     freshOffers,
   };
 }
@@ -427,11 +522,16 @@ async function rebuildSummary(rows) {
   for (const cc of allCountryCodes) {
     const stored = await getJson(countryKey(cc));
     if (stored && Array.isArray(stored.offers)) {
-      all = all.concat(stored.offers);
+      // The world map is a PACKAGE-deals product: its pins, prices and resort
+      // cards must not blend hotel-only or flight-only offers now that the
+      // cache stores all types for the offer boxes. Summaries are built from
+      // the Packages subset only.
+      const packageOffers = stored.offers.filter(o => (o.type || 'Packages') === 'Packages');
+      all = all.concat(packageOffers);
       // Write a compact per-country resort summary (ALL resorts, cheapest +
       // coords + count each) so the widget can pin every resort, not just the
       // handful in the deals endpoint's cheapest slice.
-      const resorts = summariseByResort(stored.offers);
+      const resorts = summariseByResort(packageOffers);
       await setJson(resortsKey(cc), { resorts, refreshedAt: new Date().toISOString() });
     }
   }
@@ -598,11 +698,8 @@ export default async function handler(req, res) {
       const swept = await sweepCountry(row);
       let stored = 'unchanged', fetched = 0;
       if (swept.ok) {
-        const key = countryKey(swept.cc);
-        const existing = (await getJson(key)) || { offers: [] };
-        const surviving = updateCountryOffers(existing.offers || [], swept.freshOffers, now);
-        await setJson(key, { offers: surviving, refreshedAt: now.toISOString() });
-        stored = surviving.length;
+        const counts = await storeCountryOffers(swept.cc, swept.freshOffers, now);
+        stored = counts.storedPackages + counts.storedExtra;
         fetched = swept.freshOffers.length;
       }
       const summary = await rebuildSummary(rows);
@@ -647,17 +744,17 @@ export default async function handler(req, res) {
         continue;
       }
       if (!swept.ok) {
-        // All requests failed — leave the existing key untouched (fail safe).
+        // All requests failed — leave the existing keys untouched (fail safe).
         perCountry.push({ cc: swept.cc, ok: false, error: 'all requests failed', codeResults: swept.codeResults, stored: 'unchanged' });
         continue;
       }
-      const key = countryKey(swept.cc);
-      const existing = (await getJson(key)) || { offers: [] };
-      const surviving = updateCountryOffers(existing.offers || [], swept.freshOffers, now);
-      await setJson(key, { offers: surviving, refreshedAt: now.toISOString() });
+      const counts = await storeCountryOffers(swept.cc, swept.freshOffers, now);
       perCountry.push({
         cc: swept.cc, ok: true,
-        fetched: swept.freshOffers.length, stored: surviving.length,
+        fetched: swept.freshOffers.length,
+        stored: counts.storedPackages + counts.storedExtra,
+        storedPackages: counts.storedPackages,
+        storedExtra: counts.storedExtra,
         codeResults: swept.codeResults,
       });
     }

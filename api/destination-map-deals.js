@@ -88,6 +88,11 @@ export default async function handler(req, res) {
     const stored = await getJson(countryKey(country));
     let offers = stored && Array.isArray(stored.offers) ? stored.offers.slice() : [];
 
+    // The map's deal cards are package deals. The country keys now also hold
+    // Accommodation and Flights offers (swept for the offer-box widgets), so
+    // scope to Packages before anything else.
+    offers = offers.filter(o => (o.type || 'Packages') === 'Packages');
+
     // Scope to the airport if one was given.
     if (airport) offers = offers.filter(o => o.airport === airport);
 

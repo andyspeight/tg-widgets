@@ -33,7 +33,20 @@ const COUNTRY_PREFIX = 'offers:packages:';
 const SUMMARY_KEY = 'map:offers:v1';
 const LASTRUN_KEY = 'map:offers:lastRunAt';
 const countryKey = (cc) => `${COUNTRY_PREFIX}${cc}`;
+// Accommodation + Flights offers live in a second per-country key (see the
+// cron's storeCountryOffers). The inspector shows the WHOLE pool.
+const extraCountryKey = (cc) => `offers:extra:${cc}`;
 const resortsKey = (cc) => `map:resorts:${cc}`;
+
+/** Load and combine a country's two offer keys. */
+async function loadCountryOffers(cc) {
+  const [p, x] = await Promise.all([getJson(countryKey(cc)), getJson(extraCountryKey(cc))]);
+  const offers = []
+    .concat(p && Array.isArray(p.offers) ? p.offers : [])
+    .concat(x && Array.isArray(x.offers) ? x.offers : []);
+  const refreshedAt = [p && p.refreshedAt, x && x.refreshedAt].filter(Boolean).sort().pop() || null;
+  return { offers, refreshedAt, exists: !!(p || x) };
+}
 
 const CC_RE = /^[A-Z]{2}$/;
 const DEFAULT_LIMIT = 200;
@@ -84,6 +97,7 @@ export default async function handler(req, res) {
       const cc = String(body.country || '').toUpperCase().trim();
       if (!CC_RE.test(cc)) return res.status(400).json({ ok: false, error: 'country must be a 2-letter code' });
       const removedOffers = await del(countryKey(cc));
+      await del(extraCountryKey(cc));
       await del(resortsKey(cc));
       return res.status(200).json({
         ok: true,
@@ -106,8 +120,8 @@ export default async function handler(req, res) {
     if (q.country) {
       const cc = String(q.country).toUpperCase().trim();
       if (!CC_RE.test(cc)) return res.status(400).json({ ok: false, error: 'country must be a 2-letter code' });
-      const stored = await getJson(countryKey(cc));
-      if (!stored || !Array.isArray(stored.offers)) {
+      const stored = await loadCountryOffers(cc);
+      if (!stored.exists || !stored.offers.length) {
         return res.status(200).json({ ok: true, country: cc, exists: false, count: 0, offers: [] });
       }
       const origins = String(q.origins || '')
@@ -157,8 +171,8 @@ export default async function handler(req, res) {
     }
 
     const countries = await pooled(ccs, async (cc) => {
-      const stored = await getJson(countryKey(cc));
-      const offers = stored && Array.isArray(stored.offers) ? stored.offers : [];
+      const stored = await loadCountryOffers(cc);
+      const offers = stored.offers;
       const resorts = await getJson(resortsKey(cc));
       const s = summaryByCC.get(cc);
       // Oldest fetchedAt still stored — surfaces countries drifting toward the
@@ -180,10 +194,18 @@ export default async function handler(req, res) {
         if (!e) origins[k] = { count: 1, fromPP: pp };
         else { e.count += 1; if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp; }
       }
+      // Per-type tally so the tab can show how the pool splits between
+      // package, hotel-only and flight-only offers.
+      const types = {};
+      for (const o of offers) {
+        const t = (o && o.type) || 'Packages';
+        types[t] = (types[t] || 0) + 1;
+      }
       return {
         countryCode: cc,
         offerCount: offers.length,
-        refreshedAt: (stored && stored.refreshedAt) || null,
+        types,
+        refreshedAt: stored.refreshedAt,
         oldestFetchedAt,
         resortCount: resorts && Array.isArray(resorts.resorts) ? resorts.resorts.length : 0,
         cheapestPP: s ? (s.fromPricePP ?? s.fromPrice ?? null) : null,

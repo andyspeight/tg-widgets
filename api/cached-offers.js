@@ -1,0 +1,285 @@
+/**
+ * GET /api/cached-offers
+ *
+ * Serves the OFFER-BOX widgets from the Travelgenix offer cache in Redis —
+ * the pool the refresh-map-offers cron builds up from Travelify in
+ * 250-offer increments (per destination × market × type). Locked decision
+ * 2 Jul 2026: offer boxes read this cache, not live Travelify; the widget
+ * falls back to the live proxy only when the cache has nothing matching.
+ *
+ * Query params (all optional):
+ *   type          Accommodation | Flights | Packages | DynamicPackages |
+ *                 PackageHolidays | BothPackages   (default Packages family)
+ *   destinations  CSV of 3-letter airport IATA and/or 2-letter country codes
+ *   origins       CSV of departure-airport IATA codes
+ *   boardBases    CSV of board names (matched loosely: case/punctuation-blind)
+ *   budgetMin, budgetMax   per-person GBP bounds
+ *   ratingMin     minimum hotel star rating
+ *   durationMin, durationMax   nights bounds (stay types only)
+ *   DatesMin, DatesMax   departure window in days from today
+ *   sort          price:asc (default) | price:desc
+ *   maxOffers     1..500 (default 100)
+ *
+ * Response mirrors /api/offers: { success, data: [...] } — data entries are
+ * rebuilt into the raw Travelify shape the widget renderer already reads
+ * (the exact reverse of the cron's normaliseOffer field mapping), plus:
+ *   totalMatched  the TRUE number of cached offers matching the filters
+ *                 (before maxOffers slicing) — this is the availability count
+ *   source        'cache'
+ *
+ * Public + CORS * (widgets run on client sites), edge-cached briefly.
+ */
+
+import { setCors } from './_auth.js';
+import { getJson, keys, configured } from './_redis.js';
+
+const COUNTRY_PREFIX = 'offers:packages:';
+const SUMMARY_KEY = 'map:offers:v1';
+const countryKey = (cc) => `${COUNTRY_PREFIX}${cc}`;
+// Accommodation-only and flight-only offers live in a second key per country
+// (see the cron's storeCountryOffers) so the packages key the world map reads
+// keeps its exact product. This endpoint reads both.
+const extraCountryKey = (cc) => `offers:extra:${cc}`;
+
+const MAX_OFFERS_CAP = 500;
+const DEFAULT_MAX = 100;
+
+const csv = (v, re, cap = 30) => String(v || '')
+  .split(',')
+  .map((s) => s.trim().toUpperCase())
+  .filter((s) => re.test(s))
+  .slice(0, cap);
+
+const normBoard = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
+
+function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
+
+/** Which stored offers satisfy the requested type. */
+function typePredicate(requested) {
+  const t = String(requested || 'BothPackages');
+  if (t === 'Accommodation') return (o) => o.type === 'Accommodation';
+  if (t === 'Flights') return (o) => o.type === 'Flights';
+  if (t === 'DynamicPackages') return (o) => (o.type || 'Packages') === 'Packages' && o.packageType === 'DynamicPackages';
+  if (t === 'PackageHolidays') return (o) => (o.type || 'Packages') === 'Packages' && o.packageType === 'PackageHolidays';
+  // Packages / BothPackages / anything else → the whole Packages family.
+  return (o) => (o.type || 'Packages') === 'Packages';
+}
+
+/** GBP display string in the shape Travelify uses (whole pounds). */
+const gbp = (n) => (Number.isFinite(n) ? '£' + Math.round(n).toLocaleString('en-GB') : null);
+
+/**
+ * Rebuild the raw Travelify offer shape from a cached normalised offer —
+ * the exact inverse of normaliseOffer in api/cron/refresh-map-offers.js.
+ * Every field here is one that normaliseOffer originally read from the raw
+ * offer, so the paths are provably the ones the widget knows.
+ */
+function toRawShape(o) {
+  const hasFlight = !!(o.origin || o.airport || o.carrier || o.outboundDate);
+  const raw = {
+    id: o.id,
+    type: o.type === 'Packages' ? 'Packages' : o.type,
+    url: o.url || null,
+    updated: o.updated || null,
+  };
+  if (o.packageType) raw.packageType = o.packageType;
+  if (Number.isFinite(o.price)) raw.formattedPrice = gbp(o.price);
+  if (Number.isFinite(o.pricePP)) raw.formattedPPPrice = gbp(o.pricePP);
+  // Was-price / lead-in flags travel on the pricing blocks — the widget reads
+  // them for the strike-through price and discount badges.
+  const pricing = {
+    price: o.price,
+    currency: o.currency || 'GBP',
+    ...(o.priceChanged ? { priceChanged: true, priceBeforeChange: o.priceBeforeChange } : {}),
+    ...(o.isLeadIn ? { isLeadIn: true } : {}),
+  };
+  if (hasFlight) {
+    raw.flight = {
+      origin: o.origin ? { iataCode: o.origin, name: o.originName || null } : null,
+      destination: {
+        iataCode: o.airport || null,
+        name: o.airportName || null,
+        countryCode: o.countryCode || null,
+        latitude: o.lat, longitude: o.lng,
+      },
+      carrier: (o.carrier || o.carrierCode) ? { name: o.carrier || null, code: o.carrierCode || null } : null,
+      direct: !!o.direct,
+      stops: o.stops,
+      duration: o.duration,
+      cabinClass: o.cabinClass || null,
+      flightNumber: o.flightNumber || null,
+      outboundDate: o.outboundDate || null,
+      returnDate: o.returnDate || null,
+      arrivalDate: o.arrivalDate || null,
+      image: o.image && !o.hotel ? { url: o.image } : null,
+      pricing,
+    };
+  }
+  if (o.hotel || o.resort || Number.isFinite(o.nights)) {
+    raw.accommodation = {
+      name: o.hotel || null,
+      rating: o.rating,
+      boardBasis: o.boardBasis || null,
+      nights: o.nights,
+      reviewRating: o.reviewRating,
+      reviewCount: o.reviewCount,
+      checkinDate: o.checkinDate || null,
+      image: o.image ? { url: o.image } : null,
+      destination: {
+        name: o.resort || null,
+        countryCode: o.countryCode || null,
+        latitude: o.resortLat, longitude: o.resortLng,
+      },
+      pricing,
+    };
+  }
+  raw._cache = { market: o.market || 'GB', fetchedAt: o.fetchedAt || null };
+  return raw;
+}
+
+export default async function handler(req, res) {
+  setCors(res);
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ success: false, error: 'GET only' });
+  }
+
+  if (!configured()) {
+    // No Redis in this deploy — tell the widget honestly so it falls back to live.
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({ success: true, source: 'cache', totalMatched: 0, data: [] });
+  }
+
+  const q = req.query || {};
+
+  try {
+    const destTokens = csv(q.destinations, /^[A-Z]{2,3}$/);
+    const ccs = new Set(destTokens.filter((s) => s.length === 2));
+    const iatas = new Set(destTokens.filter((s) => s.length === 3));
+    const origins = new Set(csv(q.origins, /^[A-Z]{3}$/));
+    const boards = new Set(csv(q.boardBases, /^[A-Z]/i, 12).map(normBoard));
+
+    const budgetMin = num(q.budgetMin);
+    const budgetMax = num(q.budgetMax);
+    const ratingMin = num(q.ratingMin);
+    const durationMin = num(q.durationMin);
+    const durationMax = num(q.durationMax);
+    const datesMin = num(q.DatesMin);
+    const datesMax = num(q.DatesMax);
+    const sortDesc = String(q.sort || '') === 'price:desc';
+    const maxOffers = Math.min(MAX_OFFERS_CAP, Math.max(1, num(q.maxOffers) || DEFAULT_MAX));
+    const matchesType = typePredicate(q.type);
+
+    // ── Which country keys to read ─────────────────────────────────────────
+    // 2-letter tokens name countries directly. 3-letter tokens are airports —
+    // resolve them to countries via the summary's airport index. If no
+    // destinations were given, read everything (edge cache absorbs the cost).
+    const targetCCs = new Set(ccs);
+    if (iatas.size) {
+      const summary = await getJson(SUMMARY_KEY);
+      const airports = summary && Array.isArray(summary.airports) ? summary.airports : [];
+      for (const a of airports) {
+        if (a && iatas.has(String(a.airport || '').toUpperCase()) && a.countryCode) {
+          targetCCs.add(String(a.countryCode).toUpperCase());
+        }
+      }
+    }
+    let ccList;
+    if (targetCCs.size) {
+      ccList = Array.from(targetCCs);
+    } else if (!destTokens.length) {
+      ccList = (await keys(`${COUNTRY_PREFIX}*`))
+        .map((k) => String(k).slice(COUNTRY_PREFIX.length).toUpperCase())
+        .filter((cc) => /^[A-Z]{2}$/.test(cc));
+    } else {
+      ccList = []; // destinations were given but none resolved — no matches
+    }
+
+    // ── Load + filter ───────────────────────────────────────────────────────
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const windowMin = datesMin != null ? now + datesMin * dayMs : null;
+    const windowMax = datesMax != null ? now + datesMax * dayMs : null;
+    const isFlights = String(q.type || '') === 'Flights';
+
+    const matched = [];
+    let newestRefresh = null;
+
+    // Bounded concurrency over the country keys (same idiom as the cron).
+    let i = 0;
+    const workers = Array.from({ length: Math.min(8, ccList.length || 1) }, async () => {
+      while (i < ccList.length) {
+        const cc = ccList[i++];
+        const [packagesStored, extraStored] = await Promise.all([
+          getJson(countryKey(cc)),
+          getJson(extraCountryKey(cc)),
+        ]);
+        const pools = [packagesStored, extraStored].filter(s => s && Array.isArray(s.offers));
+        if (!pools.length) continue;
+        for (const s of pools) {
+          if (s.refreshedAt && (!newestRefresh || s.refreshedAt > newestRefresh)) newestRefresh = s.refreshedAt;
+        }
+        const allOffers = pools.length === 1 ? pools[0].offers : pools[0].offers.concat(pools[1].offers);
+        for (const o of allOffers) {
+          if (!o || !matchesType(o)) continue;
+          // Destination semantics: an offer matches when its arrival airport
+          // is one of the requested IATAs, or its country one of the codes.
+          if (destTokens.length) {
+            const apOk = iatas.size && o.airport && iatas.has(String(o.airport).toUpperCase());
+            const ccOk = ccs.size && o.countryCode && ccs.has(String(o.countryCode).toUpperCase());
+            if (!apOk && !ccOk) continue;
+          }
+          if (origins.size && !(o.origin && origins.has(String(o.origin).toUpperCase()))) continue;
+          if (boards.size && !boards.has(normBoard(o.boardBasis))) continue;
+          const pp = Number.isFinite(o.pricePP) ? o.pricePP : o.price;
+          if (budgetMin != null && !(Number.isFinite(pp) && pp >= budgetMin)) continue;
+          if (budgetMax != null && !(Number.isFinite(pp) && pp <= budgetMax)) continue;
+          if (ratingMin != null && ratingMin > 0 && !(Number.isFinite(o.rating) && o.rating >= ratingMin)) continue;
+          if (!isFlights) {
+            if (durationMin != null && durationMin > 0 && !(Number.isFinite(o.nights) && o.nights >= durationMin)) continue;
+            if (durationMax != null && durationMax > 0 && !(Number.isFinite(o.nights) && o.nights <= durationMax)) continue;
+          }
+          if (windowMin != null || windowMax != null) {
+            const td = Date.parse(o.outboundDate || o.checkinDate || '');
+            if (!Number.isFinite(td)) continue;
+            if (windowMin != null && td < windowMin) continue;
+            if (windowMax != null && td > windowMax) continue;
+          }
+          matched.push(o);
+        }
+      }
+    });
+    await Promise.all(workers);
+
+    // Dedupe (same composite key the cron merges on), sort, slice.
+    const seen = new Set();
+    const unique = [];
+    for (const o of matched) {
+      const k = `${o.id}|${o.origin || ''}|${o.type || 'Packages'}`;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      unique.push(o);
+    }
+    const price = (o) => (Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : Infinity));
+    unique.sort((a, b) => (sortDesc ? price(b) - price(a) : price(a) - price(b)));
+    const sliced = unique.slice(0, maxOffers);
+
+    res.setHeader('Cache-Control', unique.length
+      ? 'public, s-maxage=120, stale-while-revalidate=300'
+      : 'no-store'); // never edge-cache a miss — the cache may be mid-fill
+    return res.status(200).json({
+      success: true,
+      source: 'cache',
+      totalMatched: unique.length,
+      refreshedAt: newestRefresh,
+      data: sliced.map(toRawShape),
+    });
+  } catch (err) {
+    console.error('[cached-offers] failed:', err?.message);
+    // Fail soft with an empty result — the widget treats this as a miss and
+    // falls back to the live proxy, so visitors always see offers.
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({ success: true, source: 'cache', totalMatched: 0, data: [], degraded: true });
+  }
+}
