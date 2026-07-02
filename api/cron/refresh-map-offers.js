@@ -223,9 +223,14 @@ function summariseByResort(offers) {
 
 // ── Tested sweep / merge / purge logic (unit-verified 22 May 2026) ──────────
 function mergeOffers(existing, fresh) {
+  // Key by id + origin: with two departure markets in one cache, the same
+  // package id can legitimately exist once per departure airport (Gatwick and
+  // Dublin are different offers with different prices). Keying by id alone
+  // would make them overwrite each other on every sweep.
+  const key = (o) => `${o.id}|${o.origin || ''}`;
   const byId = new Map();
-  for (const o of existing || []) if (o && o.id != null) byId.set(String(o.id), o);
-  for (const o of fresh || []) if (o && o.id != null) byId.set(String(o.id), o);
+  for (const o of existing || []) if (o && o.id != null) byId.set(key(o), o);
+  for (const o of fresh || []) if (o && o.id != null) byId.set(key(o), o);
   return Array.from(byId.values());
 }
 function travelDateOf(offer) { return offer.outboundDate || offer.checkinDate || null; }
@@ -271,14 +276,25 @@ async function fetchEnabledCountries() {
 }
 
 // ── Offers proxy ─────────────────────────────────────────────────────────────
-function buildPayload(row, destinationCode) {
+// Markets swept per destination. Each market is one extra request per
+// destination code with a different customer nationality, which is what
+// steers Travelify's departure market. BOTH request GBP so the blended cache
+// stays single-currency (locked decision 2 Jul 2026: one cache, mixed
+// origins; the widget shows each offer's true departure airport). Any offer
+// that still comes back non-GBP is dropped before it can enter Redis.
+const MARKETS = [
+  { id: 'GB', nationality: 'GB' },
+  { id: 'IE', nationality: 'IE' }, // Irish departures for the Irish clients
+];
+
+function buildPayload(row, destinationCode, market = MARKETS[0]) {
   const f = row.fields || {};
   return {
     appId: f.AppId || DEMO_APP_ID,
     type: 'Packages',
     packageType: 'Any',
     deduping: 'None',
-    currency: 'GBP', language: 'en', nationality: 'GB',
+    currency: 'GBP', language: 'en', nationality: market.nationality,
     maxOffers: f.MaxOffers || 250,
     // DatesMin/DatesMax are the DEPARTURE ADVANCE WINDOW in days from today
     // (NOT trip duration). 1–700 = "anything departing between tomorrow and ~23
@@ -341,7 +357,9 @@ async function pooled(items, worker, concurrency = REQUEST_CONCURRENCY) {
   return results;
 }
 
-/** Sweep one country: fire a request per destination code, return fresh normalised offers. */
+/** Sweep one country: fire a request per destination code PER MARKET (GB and
+ *  IE), return fresh normalised offers. Non-GBP offers are dropped so the
+ *  blended cache stays single-currency whatever the supplier returns. */
 async function sweepCountry(row) {
   const f = row.fields || {};
   const cc = (f.CountryCode || '').trim();
@@ -349,19 +367,43 @@ async function sweepCountry(row) {
   if (!cc || codes.length === 0) {
     return { cc: cc || '(none)', name: f.Name || '', ok: false, error: 'no country code', codeResults: [], freshOffers: [] };
   }
-  const codeResults = await pooled(codes, async (code) => {
-    const raw = await callOffersProxy(buildPayload(row, code));
-    if (!raw.ok) return { code, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, offers: [] };
+  const jobs = [];
+  for (const code of codes) for (const market of MARKETS) jobs.push({ code, market });
+  const codeResults = await pooled(jobs, async ({ code, market }) => {
+    const raw = await callOffersProxy(buildPayload(row, code, market));
+    if (!raw.ok) return { code, market: market.id, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, offers: [] };
     const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
-    const offers = normaliseOffers(arr);
-    return { code, ok: true, count: offers.length, offers };
+    let offers = normaliseOffers(arr);
+    const beforeCurrencyFilter = offers.length;
+    offers = offers.filter(o => o.currency === 'GBP');
+    const droppedNonGBP = beforeCurrencyFilter - offers.length;
+    for (const o of offers) o.market = market.id;
+    return { code, market: market.id, ok: true, count: offers.length, droppedNonGBP, offers };
   });
   const freshOffers = codeResults.flatMap(r => r.offers);
   const anyOk = codeResults.some(r => r.ok);
+
+  // Observability for the Irish market rollout: log what the IE requests
+  // actually returned (origin airports prove the market took effect; a tally
+  // of UK-only origins would mean nationality does not steer the market and
+  // we need a different lever). Logged per country, only when informative.
+  const ieResults = codeResults.filter(r => r.market === 'IE');
+  if (ieResults.length) {
+    const ieOffers = ieResults.flatMap(r => r.offers || []);
+    const originTally = {};
+    for (const o of ieOffers) { const k = o.origin || '??'; originTally[k] = (originTally[k] || 0) + 1; }
+    const dropped = ieResults.reduce((s, r) => s + (r.droppedNonGBP || 0), 0);
+    const errs = ieResults.filter(r => !r.ok).length;
+    console.log(`[map-cron] ${cc} IE market: ${ieOffers.length} offers` +
+      (Object.keys(originTally).length ? ` origins=${Object.entries(originTally).map(([k, v]) => `${k}x${v}`).join(',')}` : '') +
+      (dropped ? ` droppedNonGBP=${dropped}` : '') +
+      (errs ? ` failedRequests=${errs}` : ''));
+  }
+
   return {
     cc, name: f.Name || '',
     ok: anyOk,
-    codeResults: codeResults.map(({ code, ok, error, count }) => ({ code, ok, error, count })),
+    codeResults: codeResults.map(({ code, market, ok, error, count }) => ({ code, market, ok, error, count })),
     freshOffers,
   };
 }
@@ -480,7 +522,11 @@ export default async function handler(req, res) {
     if (q.debug === '1' || q.debug === 'true') {
       const row = rows[0];
       const code = q.dest ? String(q.dest).split(',')[0].trim() : destinationCodesFor(row)[0];
-      const payload = buildPayload(row, code);
+      // ?nat=IE probes a different market without writing anything — used to
+      // verify what nationality steers on the Travelify side.
+      const nat = q.nat && /^[A-Za-z]{2}$/.test(String(q.nat)) ? String(q.nat).toUpperCase() : 'GB';
+      const market = MARKETS.find(m => m.nationality === nat) || { id: nat, nationality: nat };
+      const payload = buildPayload(row, code, market);
       if (q.max) { const m = parseInt(q.max, 10); if (Number.isFinite(m) && m > 0) payload.maxOffers = m; }
       const raw = await callOffersProxy(payload);
       const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : null;

@@ -368,7 +368,15 @@
     EMA: { lat: 52.8311, lng: -1.3281, label: 'East Midlands' },
     BOH: { lat: 50.7800, lng: -1.8425, label: 'Bournemouth' },
     LPL: { lat: 53.3336, lng: -2.8497, label: 'Liverpool' },
+    BFS: { lat: 54.6575, lng: -6.2158, label: 'Belfast Intl' },
+    BHD: { lat: 54.6181, lng: -5.8725, label: 'Belfast City' },
+    // Irish airports — the cache sweeps the Irish departure market too, so
+    // Irish-origin offers appear in the data and need routes and pins.
     DUB: { lat: 53.4213, lng: -6.2701, label: 'Dublin' },
+    ORK: { lat: 51.8413, lng: -8.4911, label: 'Cork' },
+    SNN: { lat: 52.7020, lng: -8.9248, label: 'Shannon' },
+    NOC: { lat: 53.9103, lng: -8.8185, label: 'Ireland West Knock' },
+    KIR: { lat: 52.1809, lng: -9.5238, label: 'Kerry' },
   };
 
   // ── Leaflet CSS (inlined — needs to live inside Shadow DOM since <link> tags don't penetrate)
