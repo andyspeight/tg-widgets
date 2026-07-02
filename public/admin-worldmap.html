@@ -821,7 +821,12 @@
         .map(([k, n]) => `${REASONS[k] || k} ${n.toLocaleString('en-GB')}`);
       if (s.failed) drops.push(`${s.failed}/${s.requests} requests failed`);
       const gap = drops.length ? ` <span style="color:${(s.dropped && (s.dropped.noPrice || s.dropped.noDest)) || s.failed ? 'var(--err)' : 'var(--muted)'}">(${esc(drops.join(', '))})</span>` : '';
-      return `<span style="white-space:nowrap">${esc(label)} <b style="color:var(--text)">${(s.fetched || 0).toLocaleString('en-GB')}</b> fetched → <b style="color:var(--text)">${(s.kept || 0).toLocaleString('en-GB')}</b> kept${gap}</span>`;
+      // "unique" is what actually lands in the store: the same offer returned
+      // by both market requests (hotels especially) counts once. Only shown
+      // when the run recorded it and dedupe actually collapsed something.
+      const uniquePart = (Number.isFinite(s.unique) && s.unique > 0 && s.unique < s.kept)
+        ? ` → <b style="color:var(--text)">${s.unique.toLocaleString('en-GB')}</b> unique` : '';
+      return `<span style="white-space:nowrap" title="Fetched = returned across every request (each destination is asked twice, once per market). Unique = distinct offers after the two markets' copies merge — this is what lands in the store.">${esc(label)} <b style="color:var(--text)">${(s.fetched || 0).toLocaleString('en-GB')}</b> fetched → <b style="color:var(--text)">${(s.kept || 0).toLocaleString('en-GB')}</b> kept${uniquePart}${gap}</span>`;
     };
     const parts = [part('Packages', 'Packages'), part('Accommodation', 'Hotels'), part('Flights', 'Flights')].filter(Boolean);
     if (!parts.length) return '';

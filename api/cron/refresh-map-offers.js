@@ -639,6 +639,23 @@ async function sweepCountry(row) {
   const freshOffers = codeResults.flatMap(r => r.offers);
   const anyOk = codeResults.some(r => r.ok);
 
+  // Unique offers per type across this country's requests. Hotel-only offers
+  // come back near-identical from the GB and IE market requests (no flight
+  // leg to differ on), so roughly half of what's fetched merges away — the
+  // sweep report shows this stage so "fetched 5,258, stored 2,607" reads as
+  // dedupe, not loss. Same key as mergeOffers.
+  const uniqueByType = {};
+  {
+    const seen = new Set();
+    for (const o of freshOffers) {
+      const k = `${o.id}|${o.origin || ''}|${o.type || 'Packages'}`;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      const t = o.type || 'Packages';
+      uniqueByType[t] = (uniqueByType[t] || 0) + 1;
+    }
+  }
+
   // Observability for the Irish market rollout: log what the IE requests
   // actually returned (origin airports prove the market took effect; a tally
   // of UK-only origins would mean nationality does not steer the market and
@@ -659,6 +676,7 @@ async function sweepCountry(row) {
   return {
     cc, name: f.Name || '',
     ok: anyOk,
+    uniqueByType,
     codeResults: codeResults.map(({ code, market, type, origin, ok, error, fetched, count, dropped }) => ({ code, market, type, origin, ok, error, fetched, count, dropped })),
     freshOffers,
   };
@@ -670,13 +688,14 @@ async function sweepCountry(row) {
  *  gap names the rule doing the dropping. */
 function aggregateSweepStats(perCountry) {
   const perType = {};
+  const bucket = (type) => perType[type] || (perType[type] = {
+    requests: 0, failed: 0, fetched: 0, kept: 0, unique: 0,
+    dropped: { noPrice: 0, noDest: 0, duration: 0, nonGBP: 0 },
+  });
   for (const p of perCountry || []) {
     for (const r of (p.codeResults || [])) {
       if (!r || !r.type) continue;
-      const t = perType[r.type] || (perType[r.type] = {
-        requests: 0, failed: 0, fetched: 0, kept: 0,
-        dropped: { noPrice: 0, noDest: 0, duration: 0, nonGBP: 0 },
-      });
+      const t = bucket(r.type);
       t.requests++;
       if (!r.ok) { t.failed++; continue; }
       t.fetched += r.fetched || 0;
@@ -687,6 +706,10 @@ function aggregateSweepStats(perCountry) {
       t.dropped.duration += d.duration || 0;
       t.dropped.nonGBP += d.nonGBP || 0;
     }
+    // Per-country unique tallies (offers are country-scoped, so summing
+    // across countries stays an exact unique count).
+    const u = p.uniqueByType || {};
+    for (const type of Object.keys(u)) bucket(type).unique += u[type] || 0;
   }
   return perType;
 }
@@ -908,7 +931,7 @@ export default async function handler(req, res) {
           at: now.toISOString(),
           mode: `country:${reqCountry}`,
           sweptCountries: 1,
-          perType: aggregateSweepStats([{ codeResults: swept.codeResults }]),
+          perType: aggregateSweepStats([{ codeResults: swept.codeResults, uniqueByType: swept.uniqueByType }]),
         });
       }
       const summary = await rebuildSummary(rows);
@@ -969,6 +992,7 @@ export default async function handler(req, res) {
         storedPackages: counts.storedPackages,
         storedExtra: counts.storedExtra,
         keyKB: counts.keyKB,
+        uniqueByType: swept.uniqueByType,
         ...(counts.writeFailed ? { writeFailed: true } : {}),
         ...(counts.halved ? { halved: true } : {}),
         codeResults: swept.codeResults,
