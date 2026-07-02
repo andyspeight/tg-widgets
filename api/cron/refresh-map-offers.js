@@ -492,17 +492,52 @@ async function fetchEnabledCountries() {
 // stays single-currency (locked decision 2 Jul 2026: one cache, mixed
 // origins; the widget shows each offer's true departure airport). Any offer
 // that still comes back non-GBP is dropped before it can enter Redis.
+// ── Travelify's ACTUAL flight inventory shape ───────────────────────────────
+// Two authoritative dumps produced by the Travelify team (2 Jul 2026): every
+// departure point and every arrival point their flight DB holds. Flight
+// requests outside these lists are guaranteed zeros — before these lists the
+// sweep was asking Cork and Shannon (not held) and over a hundred arrival
+// airports with no flight inventory at all.
+const TRAVELIFY_FLIGHT_ORIGINS = new Set([
+  'LGA', 'BRS', 'YUL', 'JED', 'LTN', 'NQY', 'PHX', 'ARN', 'SKT', 'GOI', 'EWR',
+  'LHE', 'MAN', 'GLA', 'NRT', 'FSC', 'LBA', 'ZRH', 'MME', 'EDI', 'STN', 'LCY',
+  'LDY', 'BHX', 'SYD', 'HND', 'TPA', 'DUB', 'DEL', 'SEN', 'AMD', 'ABZ', 'SIN',
+  'NCL', 'GOX', 'JFK', 'HAN', 'GVA', 'MCO', 'EMA', 'LGW', 'LPL', 'INV', 'LHR',
+]);
+const TRAVELIFY_FLIGHT_DESTINATIONS = new Set([
+  'LGA', 'LIN', 'VCE', 'SGN', 'DJE', 'JED', 'SVQ', 'FAO', 'DAC', 'ALC', 'GOI',
+  'TZL', 'ACE', 'TRN', 'EWR', 'VRN', 'BOM', 'LPA', 'LHE', 'BHM', 'YYZ', 'AGA',
+  'MAN', 'DMM', 'LYS', 'ADB', 'OSL', 'CAN', 'ORY', 'LCA', 'KUL', 'KHI', 'PMI',
+  'MUM', 'AUH', 'MED', 'DAD', 'GYD', 'XNB', 'CMF', 'DMK', 'NRT', 'CFU', 'MXP',
+  'SAW', 'BHJ', 'TIV', 'TFS', 'BCN', 'IAD', 'BHX', 'SYD', 'BKK', 'HND', 'CDG',
+  'DEL', 'TUN', 'IBZ', 'ONT', 'AMD', 'CAI', 'RUH', 'ISU', 'ATQ', 'BDQ', 'AGP',
+  'IST', 'OLB', 'BLR', 'CMB', 'AMS', 'SIN', 'EBB', 'GOX', 'FCO', 'RAK', 'RVN',
+  'DOH', 'JFK', 'YWG', 'GNB', 'NBO', 'DAR', 'CHQ', 'ISB', 'GVA', 'MCO', 'LGW',
+  'AYT', 'DPS', 'DXB', 'AMM', 'ZYL', 'INN', 'MLE', 'LAX', 'LHR', 'HER',
+]);
+
+/** Should a flight request be fired for this destination code? Only when
+ *  Travelify's flight inventory holds the airport — anything else is a
+ *  guaranteed zero. 2-letter country codes can't be matched against the
+ *  airport list, so they skip flight fan-out (every MapSearches row
+ *  currently carries airport codes, so nothing is lost). */
+function flightDestinationHeld(code) {
+  return TRAVELIFY_FLIGHT_DESTINATIONS.has(String(code || '').toUpperCase());
+}
+
 const MARKETS = [
-  // flightOrigins: departure airports for FLIGHT sweeps, ONE REQUEST EACH.
-  // Evidence trail (2 Jul 2026 sweep stats): destination-only flight requests
-  // returned ~0.5 offers each; adding an `origins` ARRAY changed nothing
-  // (75 fetched across a full 41-country sweep). The departure-board widget —
-  // the one proven flight-returning request in this codebase — names a single
-  // `origin` airport per request, so the sweep now mirrors that shape exactly.
-  // Kept to the busiest airports because each is its own request per
-  // destination; the resumable time budget absorbs the extra volume.
-  { id: 'GB', nationality: 'GB', flightOrigins: ['LGW', 'LHR', 'MAN', 'STN', 'BHX', 'EDI'] },
-  { id: 'IE', nationality: 'IE', flightOrigins: ['DUB', 'ORK', 'SNN'] }, // Irish departures for the Irish clients
+  // flightOrigins: departure airports for FLIGHT sweeps, ONE REQUEST EACH
+  // (the single-`origin` request is the only shape the feed returns flight
+  // offers for — proven by the departure-board widget). The lists are every
+  // UK / Irish airport present in TRAVELIFY_FLIGHT_ORIGINS: 20 UK airports,
+  // and Dublin alone for Ireland (Cork and Shannon are not in Travelify's
+  // flight inventory, so requests from them are guaranteed zeros).
+  {
+    id: 'GB', nationality: 'GB',
+    flightOrigins: ['LGW', 'LHR', 'LCY', 'LTN', 'STN', 'SEN', 'MAN', 'BHX', 'EMA', 'BRS',
+                    'NCL', 'LBA', 'LPL', 'MME', 'ABZ', 'EDI', 'GLA', 'INV', 'NQY', 'LDY'],
+  },
+  { id: 'IE', nationality: 'IE', flightOrigins: ['DUB'] }, // Irish departures for the Irish clients
 ];
 
 // Offer types swept into the cache. The cache powers the offer-box widgets
@@ -611,13 +646,15 @@ async function sweepCountry(row) {
   const jobs = [];
   for (const code of codes) for (const market of MARKETS) for (const sweepType of SWEEP_TYPES) {
     // Flight sweeps fan out to one request per departure airport (the only
-    // request shape the feed returns flight-only offers for). Other types
-    // stay at one request per destination and market.
-    if (sweepType.id === 'Flights' && Array.isArray(market.flightOrigins) && market.flightOrigins.length) {
-      for (const flightOrigin of market.flightOrigins) jobs.push({ code, market, sweepType, flightOrigin });
-    } else {
-      jobs.push({ code, market, sweepType });
+    // request shape the feed returns flight-only offers for) — but only
+    // toward destinations Travelify's flight inventory actually holds.
+    // Everything else is a guaranteed zero, so it isn't asked.
+    if (sweepType.id === 'Flights') {
+      if (!flightDestinationHeld(code)) continue;
+      for (const flightOrigin of (market.flightOrigins || [])) jobs.push({ code, market, sweepType, flightOrigin });
+      continue;
     }
+    jobs.push({ code, market, sweepType });
   }
   const codeResults = await pooled(jobs, async ({ code, market, sweepType, flightOrigin }) => {
     const raw = await callOffersProxy(buildPayload(row, code, market, sweepType, flightOrigin));
