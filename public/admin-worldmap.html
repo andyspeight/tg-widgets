@@ -192,6 +192,25 @@
   .tab[data-tab="empty"] .tab-count[data-nonzero="1"] { background: var(--err); color: #fff; }
   .tab.is-active[data-tab="empty"] .tab-count[data-nonzero="1"] { background: var(--err); }
 
+  /* Departure-airport filter chips (Cache tab) */
+  .origin-chips {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    padding: 10px 18px; border-bottom: 1px solid var(--border); background: #FBFCFE;
+  }
+  .origin-chips .chips-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-right: 4px; }
+  .origin-chip {
+    font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px;
+    background: var(--card); color: var(--text); display: inline-flex; align-items: baseline; gap: 6px;
+    transition: all .12s;
+  }
+  .origin-chip:hover { border-color: var(--teal); }
+  .origin-chip .oc-count { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .origin-chip.is-on { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .origin-chip.is-on .oc-count { color: rgba(255,255,255,.75); }
+  .origin-chip.oc-clear { border-style: dashed; color: var(--muted); }
+  .origin-chip.oc-clear:hover { color: var(--err); border-color: var(--err); }
+
   /* Interval selector */
   .interval-wrap {
     display: inline-flex; align-items: center; gap: 8px; padding: 0 4px 0 12px;
@@ -478,6 +497,7 @@
   let configLoaded = false;
   let CACHE = null;               // cache overview: { countries, summary, lastRunAt }
   const CACHE_OFFERS = new Map(); // cc → fetched offers payload for the expanded view
+  const cacheOriginFilter = new Set(); // selected departure airports (multi)
 
   // ── helpers ──────────────────────────────────────────────────
   const $ = (id) => document.getElementById(id);
@@ -715,24 +735,69 @@
       <b style="color:var(--text)">${total.toLocaleString('en-GB')}</b> offers stored across
       <b style="color:var(--text)">${(CACHE.countries || []).length}</b> countries ·
       map summary rebuilt <b style="color:var(--text)">${esc(gen)}</b>${redisNote}
-    </div>`;
+    </div>` + originChipsRow();
+  }
+
+  // Departure-airport filter chips: the union of every origin seen across the
+  // cache, with total offer counts, most offers first. Multi-select; selected
+  // chips filter the country rows, the counts and the expanded offer views.
+  function originChipsRow() {
+    const totals = new Map(); // iata → total count
+    for (const c of (CACHE.countries || [])) {
+      const org = c.origins || {};
+      for (const k of Object.keys(org)) totals.set(k, (totals.get(k) || 0) + (org[k].count || 0));
+    }
+    if (!totals.size) return '';
+    // Prune selections that no longer exist in the data (e.g. after a purge).
+    for (const k of Array.from(cacheOriginFilter)) if (!totals.has(k)) cacheOriginFilter.delete(k);
+    const chips = Array.from(totals.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([iata, n]) => `<button class="origin-chip${cacheOriginFilter.has(iata) ? ' is-on' : ''}" data-act="cache-origin" data-iata="${esc(iata)}" title="Only show offers departing from ${esc(iata)}">${esc(iata)} <span class="oc-count">${n.toLocaleString('en-GB')}</span></button>`)
+      .join('');
+    const clear = cacheOriginFilter.size
+      ? `<button class="origin-chip oc-clear" data-act="cache-origin-clear" title="Clear the departure filter">Clear ×</button>`
+      : '';
+    return `<div class="origin-chips"><span class="chips-label">Departing from</span>${chips}${clear}</div>`;
+  }
+
+  // Filtered view of one country row: offer count and cheapest pp across the
+  // SELECTED origins only. Returns null when the filter is off.
+  function cacheRowFiltered(c) {
+    if (!cacheOriginFilter.size) return null;
+    const org = c.origins || {};
+    let count = 0, fromPP = null;
+    for (const k of cacheOriginFilter) {
+      const e = org[k];
+      if (!e) continue;
+      count += e.count || 0;
+      if (e.fromPP != null && (fromPP == null || e.fromPP < fromPP)) fromPP = e.fromPP;
+    }
+    return { count, fromPP };
   }
 
   function renderCacheTable() {
     if (!CACHE) { loadCache(); return; }
     const q = filter.trim().toLowerCase();
-    const rows = (CACHE.countries || []).filter(c =>
-      !q || c.countryCode.toLowerCase().includes(q) || ccName(c.countryCode).toLowerCase().includes(q)
-    );
+    const rows = (CACHE.countries || [])
+      .filter(c => !q || c.countryCode.toLowerCase().includes(q) || ccName(c.countryCode).toLowerCase().includes(q))
+      .map(c => ({ c, f: cacheRowFiltered(c) }))
+      .filter(x => !x.f || x.f.count > 0);
+
+    $('tc-cache').textContent = rows.length;
 
     if (!rows.length) {
-      $('table-host').innerHTML = cacheMetaLine() + `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>${esc(q ? 'No cached countries match your search.' : 'The cache is empty. Run a rebuild to fill it.')}</div></div>`;
+      const msg = q ? 'No cached countries match your search.'
+        : cacheOriginFilter.size ? 'No cached offers depart from the selected airport' + (cacheOriginFilter.size === 1 ? '' : 's') + '.'
+        : 'The cache is empty. Run a rebuild to fill it.';
+      $('table-host').innerHTML = cacheMetaLine() + `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>${esc(msg)}</div></div>`;
       return;
     }
 
-    const body = rows.map(c => {
+    const body = rows.map(({ c, f }) => {
       const name = ccName(c.countryCode);
-      const price = money(c.cheapestPP, c.currency);
+      const shownCount = f ? f.count : (c.offerCount || 0);
+      const countTitle = f ? `${f.count.toLocaleString('en-GB')} of ${(c.offerCount || 0).toLocaleString('en-GB')} stored depart from ${Array.from(cacheOriginFilter).join(', ')}` : '';
+      const price = f ? money(f.fromPP, c.currency) : money(c.cheapestPP, c.currency);
       const summaryFlag = c.inSummary ? '' : ' <span class="region-tag" style="background:#FFFBEB;color:#B45309" title="Stored in Redis but missing from the map summary — rebuild to include it">not on map</span>';
       return `<tr data-cc="${esc(c.countryCode)}">
         <td><div class="cc-cell">
@@ -740,7 +805,7 @@
           <span class="cc-flag">${flag(c.countryCode)}</span>
           <div><div class="cc-name">${esc(name)}${summaryFlag}</div><div class="cc-code">${esc(c.countryCode)}</div></div>
         </div></td>
-        <td class="num"><span class="count-pill"><b>${(c.offerCount || 0).toLocaleString('en-GB')}</b></span></td>
+        <td class="num" title="${esc(countTitle)}"><span class="count-pill"><b>${shownCount.toLocaleString('en-GB')}</b></span>${f ? `<span class="count-na" style="font-size:11px"> / ${(c.offerCount || 0).toLocaleString('en-GB')}</span>` : ''}</td>
         <td class="num hide-sm">${c.resortCount || 0}</td>
         <td class="num hide-sm" title="${esc(c.refreshedAt || '')}">${timeAgo(c.refreshedAt)}</td>
         <td class="num hide-sm" title="Oldest offer still stored — offers expire 70h after they were fetched">${timeAgo(c.oldestFetchedAt)}</td>
@@ -789,8 +854,11 @@
       <td class="num">${esc(money(o.price, o.currency) || '—')}</td>
       <td class="ap-name" title="${esc(o.fetchedAt || '')}">${timeAgo(o.fetchedAt)}</td>
     </tr>`).join('');
+    const filterNote = (d.appliedOrigins && d.appliedOrigins.length)
+      ? ` · departing ${esc(d.appliedOrigins.join(', '))} (${d.count.toLocaleString('en-GB')} of ${(d.totalStored || d.count).toLocaleString('en-GB')} stored)`
+      : '';
     host.innerHTML = `
-      <h4>Cached offers · showing ${d.offers.length.toLocaleString('en-GB')} of ${d.count.toLocaleString('en-GB')}, cheapest first · refreshed ${timeAgo(d.refreshedAt)}</h4>
+      <h4>Cached offers · showing ${d.offers.length.toLocaleString('en-GB')} of ${d.count.toLocaleString('en-GB')}, cheapest first${filterNote} · refreshed ${timeAgo(d.refreshedAt)}</h4>
       <table style="width:100%; border-collapse:collapse;">
         <thead><tr>
           <th style="text-align:left">Hotel</th><th style="text-align:left">Resort</th>
@@ -815,7 +883,10 @@
     if (isOpen) return;
     if (!CACHE_OFFERS.has(cc)) {
       try {
-        const r = await fetch(`${API_CACHE}?country=${encodeURIComponent(cc)}`, { credentials: 'include' });
+        const originsParam = cacheOriginFilter.size
+          ? `&origins=${encodeURIComponent(Array.from(cacheOriginFilter).join(','))}`
+          : '';
+        const r = await fetch(`${API_CACHE}?country=${encodeURIComponent(cc)}${originsParam}`, { credentials: 'include' });
         if (!r.ok) throw new Error('HTTP ' + r.status);
         CACHE_OFFERS.set(cc, await r.json());
       } catch (e) {
@@ -1069,6 +1140,20 @@
     if (!btn) return;
     const act = btn.getAttribute('data-act');
 
+    if (act === 'cache-origin') {
+      const iata = btn.getAttribute('data-iata');
+      if (cacheOriginFilter.has(iata)) cacheOriginFilter.delete(iata);
+      else cacheOriginFilter.add(iata);
+      CACHE_OFFERS.clear(); // expanded views must refetch with the new filter
+      renderTable();
+      return;
+    }
+    if (act === 'cache-origin-clear') {
+      cacheOriginFilter.clear();
+      CACHE_OFFERS.clear();
+      renderTable();
+      return;
+    }
     if (act === 'cache-toggle') { toggleCacheOffers(btn); return; }
     if (act === 'cache-purge') { purgeCacheCountry(btn); return; }
     if (act === 'cache-rebuild') {

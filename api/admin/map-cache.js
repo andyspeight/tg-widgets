@@ -100,6 +100,9 @@ export default async function handler(req, res) {
     const q = req.query || {};
 
     // ── GET ?country=XX: one country's stored offers ──────────────────────
+    // Optional ?origins=LGW,DUB filters by DEPARTURE airport before sorting
+    // and slicing, so the filter sees the whole stored set, not just the
+    // first page.
     if (q.country) {
       const cc = String(q.country).toUpperCase().trim();
       if (!CC_RE.test(cc)) return res.status(400).json({ ok: false, error: 'country must be a 2-letter code' });
@@ -107,14 +110,25 @@ export default async function handler(req, res) {
       if (!stored || !Array.isArray(stored.offers)) {
         return res.status(200).json({ ok: true, country: cc, exists: false, count: 0, offers: [] });
       }
+      const origins = String(q.origins || '')
+        .split(',')
+        .map((s) => s.trim().toUpperCase())
+        .filter((s) => /^[A-Z]{3}$/.test(s))
+        .slice(0, 30);
+      const originSet = origins.length ? new Set(origins) : null;
       const offset = Math.max(0, parseInt(q.offset, 10) || 0);
       const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(q.limit, 10) || DEFAULT_LIMIT));
-      const sorted = stored.offers.slice().sort(byCheapest);
+      const pool = originSet
+        ? stored.offers.filter((o) => o && originSet.has(String(o.origin || '').toUpperCase()))
+        : stored.offers;
+      const sorted = pool.slice().sort(byCheapest);
       return res.status(200).json({
         ok: true,
         country: cc,
         exists: true,
         refreshedAt: stored.refreshedAt || null,
+        totalStored: stored.offers.length,
+        appliedOrigins: origins,
         count: sorted.length,
         offset,
         limit,
@@ -153,6 +167,19 @@ export default async function handler(req, res) {
       for (const o of offers) {
         if (o && o.fetchedAt && (!oldestFetchedAt || o.fetchedAt < oldestFetchedAt)) oldestFetchedAt = o.fetchedAt;
       }
+      // Per-DEPARTURE-airport tally: count + cheapest per-person price for
+      // each origin seen in this country's offers. Drives the departure
+      // filter chips on the Cache tab.
+      const origins = {};
+      for (const o of offers) {
+        if (!o) continue;
+        const k = String(o.origin || '').toUpperCase();
+        if (!/^[A-Z]{3}$/.test(k)) continue;
+        const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
+        const e = origins[k];
+        if (!e) origins[k] = { count: 1, fromPP: pp };
+        else { e.count += 1; if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp; }
+      }
       return {
         countryCode: cc,
         offerCount: offers.length,
@@ -162,6 +189,7 @@ export default async function handler(req, res) {
         cheapestPP: s ? (s.fromPricePP ?? s.fromPrice ?? null) : null,
         currency: s ? (s.currency || 'GBP') : 'GBP',
         inSummary: !!s,
+        origins,
       };
     });
 
