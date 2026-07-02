@@ -801,7 +801,34 @@
       <b style="color:var(--text)">${total.toLocaleString('en-GB')}</b> offers stored across
       <b style="color:var(--text)">${countries.length}</b> countries ·
       map summary rebuilt <b style="color:var(--text)">${esc(gen)}</b>${staleNote}${redisNote}
-    </div>` + typeTabsRow(countries) + originChipsRow();
+    </div>` + lastSweepLine() + typeTabsRow(countries) + originChipsRow();
+  }
+
+  // What the LAST cron sweep pulled per type: fetched from Travelify versus
+  // kept after our rules, with the drop reasons named. This line is how a
+  // thin type gets diagnosed: small "fetched" numbers mean Travelify sent
+  // little for our request shape; a big fetched-to-kept gap names the rule
+  // doing the dropping.
+  function lastSweepLine() {
+    const ls = CACHE && CACHE.lastSweep;
+    if (!ls || !ls.perType) return '';
+    const REASONS = { noPrice: 'no price', noDest: 'no destination', duration: 'stay length', nonGBP: 'non-GBP' };
+    const part = (typeKey, label) => {
+      const s = ls.perType[typeKey];
+      if (!s || !s.requests) return '';
+      const drops = Object.entries(s.dropped || {})
+        .filter(([, n]) => n > 0)
+        .map(([k, n]) => `${REASONS[k] || k} ${n.toLocaleString('en-GB')}`);
+      if (s.failed) drops.push(`${s.failed}/${s.requests} requests failed`);
+      const gap = drops.length ? ` <span style="color:${(s.dropped && (s.dropped.noPrice || s.dropped.noDest)) || s.failed ? 'var(--err)' : 'var(--muted)'}">(${esc(drops.join(', '))})</span>` : '';
+      return `<span style="white-space:nowrap">${esc(label)} <b style="color:var(--text)">${(s.fetched || 0).toLocaleString('en-GB')}</b> fetched → <b style="color:var(--text)">${(s.kept || 0).toLocaleString('en-GB')}</b> kept${gap}</span>`;
+    };
+    const parts = [part('Packages', 'Packages'), part('Accommodation', 'Hotels'), part('Flights', 'Flights')].filter(Boolean);
+    if (!parts.length) return '';
+    const scope = ls.mode === 'full' ? 'full sweep' : ls.mode && ls.mode.startsWith('country:') ? `re-poll ${esc(ls.mode.slice(8))}` : 'rotating sweep';
+    return `<div style="padding:8px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE" title="Fetched = offers Travelify returned for our requests. Kept = offers that passed our storage rules. The difference, split by reason, shows why a type is thin.">
+      Last sweep <b style="color:var(--text)">${esc(timeAgo(ls.at))}</b> (${scope}, ${ls.sweptCountries || 0} ${ls.sweptCountries === 1 ? 'country' : 'countries'}): ${parts.join(' · ')}
+    </div>`;
   }
 
   // Offer-type sub-tabs: All plus one per stored type, with global counts.

@@ -73,6 +73,9 @@ const MAX_NIGHTS = 28;
 const SUMMARY_KEY = 'map:offers:v1';
 const LASTRUN_KEY = 'map:offers:lastRunAt';
 const CURSOR_KEY = 'map:offers:cursor';
+// Per-type fetch/keep/drop tallies from the most recent sweep — the Cache
+// tab reads this so the operator can see supplier-thin vs parser-dropped.
+const SWEEP_STATS_KEY = 'map:offers:lastSweepStats';
 const REFRESH_INTERVAL_KEY = 'tg:wm:refresh-interval-mins';
 const DEFAULT_INTERVAL_MINS = 45;
 const ALLOWED_INTERVALS = [15, 30, 45, 60, 120, 240, 1440];
@@ -154,13 +157,17 @@ function parsePPPrice(offer) {
   }
   return null;
 }
-function normaliseOffer(offer) {
+function normaliseOffer(offer, fallbackCC = null) {
   const flight = offer.flight || {}, acc = offer.accommodation || {};
   const fdest = flight.destination || {}, adest = acc.destination || {};
   const price = parsePrice(offer);
   if (price == null) return null;
   const iata = fdest.iataCode || null;
-  const countryCode = fdest.countryCode || adest.countryCode || null;
+  // fallbackCC: the sweep requested ONE destination, so an offer that comes
+  // back without its own countryCode still factually belongs to the swept
+  // country. Hotel-only offers often carry no flight leg to infer geo from;
+  // without this they'd be binned as destination-less.
+  const countryCode = fdest.countryCode || adest.countryCode || fallbackCC || null;
   const lat = num(fdest.latitude) ?? num(adest.latitude);
   const lng = num(fdest.longitude) ?? num(adest.longitude);
   if (!iata && !countryCode) return null;
@@ -216,15 +223,22 @@ function withinNightsRange(o) {
 function passesDurationRule(o) {
   return (o.type === 'Flights') ? true : withinNightsRange(o);
 }
-function normaliseOffers(rawArray, sweepTypeId = 'Packages') {
+function normaliseOffers(rawArray, sweepTypeId = 'Packages', drops = null, fallbackCC = null) {
   if (!Array.isArray(rawArray)) return [];
   const out = [];
   for (const o of rawArray) {
-    const n = normaliseOffer(o);
-    if (!n) continue;
+    const n = normaliseOffer(o, fallbackCC);
+    if (!n) {
+      // Tally WHY the offer was unusable (the parsePrice re-check is cheap):
+      // the sweep report needs to show supplier-thin versus parser-dropped
+      // per type, or the type mix in the cache can't be diagnosed.
+      if (drops) { if (parsePrice(o) == null) drops.noPrice++; else drops.noDest++; }
+      continue;
+    }
     // Stamp the swept type authoritatively — the read side filters on it.
     n.type = sweepTypeId;
     if (passesDurationRule(n)) out.push(n);
+    else if (drops) drops.duration++;
   }
   return out;
 }
@@ -530,14 +544,20 @@ async function sweepCountry(row) {
   }
   const codeResults = await pooled(jobs, async ({ code, market, sweepType }) => {
     const raw = await callOffersProxy(buildPayload(row, code, market, sweepType));
-    if (!raw.ok) return { code, market: market.id, type: sweepType.id, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, offers: [] };
+    if (!raw.ok) return { code, market: market.id, type: sweepType.id, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, fetched: 0, dropped: null, offers: [] };
     const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
-    let offers = normaliseOffers(arr, sweepType.id);
+    const dropped = { noPrice: 0, noDest: 0, duration: 0, nonGBP: 0 };
+    // The country fallback applies to the non-map types only: the world map's
+    // Packages product keeps its exact geo requirements, while hotel-only and
+    // flight-only offers inherit the swept country when the supplier omits it.
+    let offers = normaliseOffers(arr, sweepType.id, dropped, sweepType.id === 'Packages' ? null : cc);
     const beforeCurrencyFilter = offers.length;
     offers = offers.filter(o => o.currency === 'GBP');
-    const droppedNonGBP = beforeCurrencyFilter - offers.length;
+    dropped.nonGBP = beforeCurrencyFilter - offers.length;
     for (const o of offers) o.market = market.id;
-    return { code, market: market.id, type: sweepType.id, ok: true, count: offers.length, droppedNonGBP, offers };
+    // fetched = what Travelify actually sent; count = what survived our rules.
+    // The gap between them, split by reason, is the whole diagnosis.
+    return { code, market: market.id, type: sweepType.id, ok: true, fetched: arr.length, count: offers.length, dropped, offers };
   });
   const freshOffers = codeResults.flatMap(r => r.offers);
   const anyOk = codeResults.some(r => r.ok);
@@ -551,7 +571,7 @@ async function sweepCountry(row) {
     const ieOffers = ieResults.flatMap(r => r.offers || []);
     const originTally = {};
     for (const o of ieOffers) { const k = o.origin || '??'; originTally[k] = (originTally[k] || 0) + 1; }
-    const dropped = ieResults.reduce((s, r) => s + (r.droppedNonGBP || 0), 0);
+    const dropped = ieResults.reduce((s, r) => s + ((r.dropped && r.dropped.nonGBP) || 0), 0);
     const errs = ieResults.filter(r => !r.ok).length;
     console.log(`[map-cron] ${cc} IE market: ${ieOffers.length} offers` +
       (Object.keys(originTally).length ? ` origins=${Object.entries(originTally).map(([k, v]) => `${k}x${v}`).join(',')}` : '') +
@@ -562,9 +582,36 @@ async function sweepCountry(row) {
   return {
     cc, name: f.Name || '',
     ok: anyOk,
-    codeResults: codeResults.map(({ code, market, type, ok, error, count }) => ({ code, market, type, ok, error, count })),
+    codeResults: codeResults.map(({ code, market, type, ok, error, fetched, count, dropped }) => ({ code, market, type, ok, error, fetched, count, dropped })),
     freshOffers,
   };
+}
+
+/** Roll each request's fetched/kept/drop tallies up per offer type. This is
+ *  the number that answers "why so few hotels or flights": a small `fetched`
+ *  means Travelify sent little for that request shape; a big fetched-to-kept
+ *  gap names the rule doing the dropping. */
+function aggregateSweepStats(perCountry) {
+  const perType = {};
+  for (const p of perCountry || []) {
+    for (const r of (p.codeResults || [])) {
+      if (!r || !r.type) continue;
+      const t = perType[r.type] || (perType[r.type] = {
+        requests: 0, failed: 0, fetched: 0, kept: 0,
+        dropped: { noPrice: 0, noDest: 0, duration: 0, nonGBP: 0 },
+      });
+      t.requests++;
+      if (!r.ok) { t.failed++; continue; }
+      t.fetched += r.fetched || 0;
+      t.kept += r.count || 0;
+      const d = r.dropped || {};
+      t.dropped.noPrice += d.noPrice || 0;
+      t.dropped.noDest += d.noDest || 0;
+      t.dropped.duration += d.duration || 0;
+      t.dropped.nonGBP += d.nonGBP || 0;
+    }
+  }
+  return perType;
 }
 
 // ── Summary rebuild from all stored country keys ────────────────────────────
@@ -765,6 +812,14 @@ export default async function handler(req, res) {
         const counts = await storeCountryOffers(swept.cc, swept.freshOffers, now);
         stored = counts.storedPackages + counts.storedExtra;
         fetched = swept.freshOffers.length;
+        // Single-country re-polls refresh the sweep stats too — labelled so
+        // the Cache tab shows the honest scope.
+        await setJson(SWEEP_STATS_KEY, {
+          at: now.toISOString(),
+          mode: `country:${reqCountry}`,
+          sweptCountries: 1,
+          perType: aggregateSweepStats([{ codeResults: swept.codeResults }]),
+        });
       }
       const summary = await rebuildSummary(rows);
       return res.status(200).json({
@@ -823,6 +878,25 @@ export default async function handler(req, res) {
       });
     }
 
+    // ── Sweep stats: per-type fetched vs kept, with drop reasons ───────────
+    // Written every run so the Cache tab can show what the last sweep
+    // actually pulled per type and why anything was rejected.
+    const sweptCount = perCountry.filter(p => p.ok && !p.skipped).length;
+    const sweepStats = aggregateSweepStats(perCountry);
+    if (sweptCount) {
+      await setJson(SWEEP_STATS_KEY, {
+        at: now.toISOString(),
+        mode: full ? 'full' : 'hourly',
+        sweptCountries: sweptCount,
+        perType: sweepStats,
+      });
+      for (const [t, s] of Object.entries(sweepStats)) {
+        console.log(`[map-cron] sweep ${t}: ${s.fetched} fetched → ${s.kept} kept` +
+          ` (noPrice ${s.dropped.noPrice}, noDest ${s.dropped.noDest}, duration ${s.dropped.duration}, nonGBP ${s.dropped.nonGBP}` +
+          (s.failed ? `, ${s.failed}/${s.requests} requests failed)` : `)`));
+      }
+    }
+
     // ── Maintenance: purge every UNSWEPT stored key (stale-offer guarantee) ─
     // Swept countries were just purged inside storeCountryOffers; this covers
     // the rest, including orphans no longer in MapSearches. Runs before the
@@ -849,6 +923,7 @@ export default async function handler(req, res) {
       sweptCountries: slice.length,
       skippedFresh,
       totalCountries: rows.length,
+      sweepStats,
       maintenance,
       summary,
       perCountry,

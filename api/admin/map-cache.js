@@ -39,6 +39,9 @@ import { getJson, getString, del, keys, configured } from '../_redis.js';
 const COUNTRY_PREFIX = 'offers:packages:';
 const SUMMARY_KEY = 'map:offers:v1';
 const LASTRUN_KEY = 'map:offers:lastRunAt';
+// Per-type fetched/kept/drop tallies written by the cron's last sweep — the
+// Cache tab shows these so thin types can be diagnosed at a glance.
+const SWEEP_STATS_KEY = 'map:offers:lastSweepStats';
 const countryKey = (cc) => `${COUNTRY_PREFIX}${cc}`;
 // Accommodation + Flights offers live in a second per-country key (see the
 // cron's storeCountryOffers). The inspector shows the WHOLE pool.
@@ -205,10 +208,11 @@ export default async function handler(req, res) {
     }
 
     // ── GET: overview of every stored country key ─────────────────────────
-    const [allKeys, summary, lastRunAt] = await Promise.all([
+    const [allKeys, summary, lastRunAt, lastSweep] = await Promise.all([
       keys(`${COUNTRY_PREFIX}*`),
       getJson(SUMMARY_KEY),
       getString(LASTRUN_KEY),
+      getJson(SWEEP_STATS_KEY),
     ]);
 
     const ccs = allKeys
@@ -260,6 +264,7 @@ export default async function handler(req, res) {
       ok: true,
       redisConfigured: true,
       lastRunAt: lastRunAt || null,
+      lastSweep: lastSweep || null,
       summary: summary ? { generatedAt: summary.generatedAt || null, stats: summary.stats || null } : null,
       countries,
     });
