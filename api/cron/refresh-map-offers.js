@@ -93,8 +93,10 @@ const resortsKey = (cc) => `map:resorts:${cc}`;
 const STORE_CAPS = { Packages: 800, Accommodation: 500, Flights: 400 };
 
 /** Cap a merged offer list: within each type|market group keep only the
- *  cheapest STORE_CAPS[type] offers (per person). */
-function capStoredOffers(offers) {
+ *  cheapest STORE_CAPS[type] offers (per person). `factor` scales every
+ *  group's cap down proportionally — the oversized-write retry uses it so
+ *  degradation stays fair across types and markets. */
+function capStoredOffers(offers, factor = 1) {
   const groups = new Map();
   for (const o of offers || []) {
     const k = `${o.type || 'Packages'}|${o.market || 'GB'}`;
@@ -105,7 +107,7 @@ function capStoredOffers(offers) {
   const out = [];
   for (const [k, arr] of groups) {
     const type = k.split('|')[0];
-    const cap = STORE_CAPS[type] || STORE_CAPS.Packages;
+    const cap = Math.max(1, Math.ceil((STORE_CAPS[type] || STORE_CAPS.Packages) * factor));
     arr.sort((a, b) => pp(a) - pp(b));
     out.push(...arr.slice(0, cap));
   }
@@ -341,26 +343,70 @@ function updateCountryOffers(existingOffers, freshOffers, now = new Date()) {
   return purgeOffers(mergeOffers(existingOffers, freshOffers), now);
 }
 
+/** Strip null/undefined fields before storage. Every reader is defensive
+ *  (`||` fallbacks and Number.isFinite throughout), so a missing key reads
+ *  identically to null — but nulls cost real bytes: a hotel-only offer
+ *  carries a dozen null flight fields, and each country key must stay
+ *  inside Upstash's per-request write limit. Zeros and falses are kept
+ *  (stops: 0 and direct: false are meaningful). */
+function compactOffer(o) {
+  const out = {};
+  for (const k of Object.keys(o)) {
+    if (o[k] !== null && o[k] !== undefined) out[k] = o[k];
+  }
+  return out;
+}
+
+/** Write one country offers key with size telemetry and a fair-share retry:
+ *  if the write is rejected (typically the request-size limit), retry once
+ *  with every type|market group's cap halved. A too-big country degrades to
+ *  fewer (cheapest) offers instead of silently keeping its stale contents —
+ *  setJson returning false was previously ignored here, which left the OLD
+ *  offers in place with no trace. */
+async function writeOffersKey(key, cappedOffers, refreshedAtIso) {
+  const compact = cappedOffers.map(compactOffer);
+  const bytes = JSON.stringify({ offers: compact, refreshedAt: refreshedAtIso }).length;
+  if (bytes > 700 * 1024) {
+    console.log(`[map-cron] ${key} is ~${Math.round(bytes / 1024)}KB — approaching the write limit`);
+  }
+  if (await setJson(key, { offers: compact, refreshedAt: refreshedAtIso })) {
+    return { ok: true, stored: compact.length, kb: Math.round(bytes / 1024) };
+  }
+  const halved = capStoredOffers(compact, 0.5);
+  const retryBytes = JSON.stringify({ offers: halved, refreshedAt: refreshedAtIso }).length;
+  console.error(`[map-cron] write FAILED for ${key} (~${Math.round(bytes / 1024)}KB, ${compact.length} offers) — retrying with ${halved.length}`);
+  if (await setJson(key, { offers: halved, refreshedAt: refreshedAtIso })) {
+    return { ok: true, stored: halved.length, kb: Math.round(retryBytes / 1024), halved: true };
+  }
+  console.error(`[map-cron] retry write FAILED for ${key} (~${Math.round(retryBytes / 1024)}KB) — key left unchanged`);
+  return { ok: false, stored: 0, kb: Math.round(bytes / 1024) };
+}
+
 /** Merge a sweep's fresh offers (all types mixed) into the country's TWO
  *  storage keys: Packages → offers:packages:{CC} (the key the world map
  *  reads, product unchanged), Accommodation + Flights → offers:extra:{CC}.
  *  Each key gets the shared merge + purge + cheapest-cap treatment.
- *  Returns stored counts for the run report. */
+ *  Returns stored counts + write health for the run report. */
 async function storeCountryOffers(cc, freshOffers, now) {
   const freshPackages = freshOffers.filter(o => (o.type || 'Packages') === 'Packages');
   const freshExtra = freshOffers.filter(o => (o.type || 'Packages') !== 'Packages');
+  const iso = now.toISOString();
 
-  const pKey = countryKey(cc);
-  const existingP = (await getJson(pKey)) || { offers: [] };
+  const existingP = (await getJson(countryKey(cc))) || { offers: [] };
   const survivingP = capStoredOffers(updateCountryOffers(existingP.offers || [], freshPackages, now));
-  await setJson(pKey, { offers: survivingP, refreshedAt: now.toISOString() });
+  const pRes = await writeOffersKey(countryKey(cc), survivingP, iso);
 
-  const xKey = extraKey(cc);
-  const existingX = (await getJson(xKey)) || { offers: [] };
+  const existingX = (await getJson(extraKey(cc))) || { offers: [] };
   const survivingX = capStoredOffers(updateCountryOffers(existingX.offers || [], freshExtra, now));
-  await setJson(xKey, { offers: survivingX, refreshedAt: now.toISOString() });
+  const xRes = await writeOffersKey(extraKey(cc), survivingX, iso);
 
-  return { storedPackages: survivingP.length, storedExtra: survivingX.length };
+  return {
+    storedPackages: pRes.stored,
+    storedExtra: xRes.stored,
+    writeFailed: !pRes.ok || !xRes.ok,
+    halved: !!(pRes.halved || xRes.halved),
+    keyKB: { packages: pRes.kb, extra: xRes.kb },
+  };
 }
 
 /** Maintenance purge over EVERY stored offer key, not just the swept slice.
@@ -397,7 +443,9 @@ async function maintainStoredOffers(now, sweptCCs = new Set()) {
         await del(key);
         report.keysDeleted++;
       } else {
-        await setJson(key, { offers: surviving, refreshedAt: stored.refreshedAt || now.toISOString() });
+        // Compact on rewrite too — shrinks legacy null-heavy entries the
+        // sweeps haven't touched yet.
+        await setJson(key, { offers: surviving.map(compactOffer), refreshedAt: stored.refreshedAt || now.toISOString() });
         keysLeft++;
       }
     }
@@ -874,6 +922,9 @@ export default async function handler(req, res) {
         stored: counts.storedPackages + counts.storedExtra,
         storedPackages: counts.storedPackages,
         storedExtra: counts.storedExtra,
+        keyKB: counts.keyKB,
+        ...(counts.writeFailed ? { writeFailed: true } : {}),
+        ...(counts.halved ? { halved: true } : {}),
         codeResults: swept.codeResults,
       });
     }
