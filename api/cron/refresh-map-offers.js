@@ -424,7 +424,7 @@ async function storeCountryOffers(cc, freshOffers, now) {
  *  refreshedAt is preserved on rewrite: it means "last swept", and faking
  *  it here would wrongly suppress the next real sweep's freshness gate. */
 async function maintainStoredOffers(now, sweptCCs = new Set()) {
-  const report = { countriesChecked: 0, countriesCleaned: 0, offersRemoved: 0, keysDeleted: 0 };
+  const report = { countriesChecked: 0, countriesCleaned: 0, offersRemoved: 0, keysDeleted: 0, writeFailures: 0 };
   const [pKeys, xKeys] = await Promise.all([keys('offers:packages:*'), keys('offers:extra:*')]);
   const ccs = new Set();
   for (const k of pKeys) ccs.add(String(k).slice('offers:packages:'.length).toUpperCase());
@@ -443,9 +443,11 @@ async function maintainStoredOffers(now, sweptCCs = new Set()) {
         await del(key);
         report.keysDeleted++;
       } else {
-        // Compact on rewrite too — shrinks legacy null-heavy entries the
-        // sweeps haven't touched yet.
-        await setJson(key, { offers: surviving.map(compactOffer), refreshedAt: stored.refreshedAt || now.toISOString() });
+        // Checked write with the halving fallback (compacts internally) —
+        // an unchecked setJson here left oversized countries frozen with
+        // ageing offers, which is exactly how stale offers were surviving.
+        const w = await writeOffersKey(key, surviving, stored.refreshedAt || now.toISOString());
+        if (!w.ok) report.writeFailures++;
         keysLeft++;
       }
     }
@@ -491,8 +493,14 @@ async function fetchEnabledCountries() {
 // origins; the widget shows each offer's true departure airport). Any offer
 // that still comes back non-GBP is dropped before it can enter Redis.
 const MARKETS = [
-  { id: 'GB', nationality: 'GB' },
-  { id: 'IE', nationality: 'IE' }, // Irish departures for the Irish clients
+  // flightOrigins: departure airports named on FLIGHT sweeps only. Evidence
+  // (2 Jul 2026 sweep stats): a destination-only flight request returns ~0.5
+  // offers, while the departure-board widget — which always names an origin —
+  // gets full rows from the same feed. Naming origins on the one existing
+  // request costs nothing extra; per-origin fan-out stays in reserve if the
+  // stats line shows this isn't enough.
+  { id: 'GB', nationality: 'GB', flightOrigins: ['LGW', 'LHR', 'MAN', 'STN', 'LTN', 'BHX', 'EDI', 'GLA', 'NCL', 'LPL'] },
+  { id: 'IE', nationality: 'IE', flightOrigins: ['DUB', 'ORK', 'SNN', 'NOC', 'KIR'] }, // Irish departures for the Irish clients
 ];
 
 // Offer types swept into the cache. The cache powers the offer-box widgets
@@ -512,6 +520,10 @@ function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWE
     appId: f.AppId || DEMO_APP_ID,
     type: sweepType.payloadType,
     ...(sweepType.packageType ? { packageType: sweepType.packageType } : {}),
+    // Flight-only offers need the departure airports named or the feed
+    // returns next to nothing (see MARKETS.flightOrigins).
+    ...(sweepType.id === 'Flights' && Array.isArray(market.flightOrigins) && market.flightOrigins.length
+      ? { origins: market.flightOrigins } : {}),
     deduping: 'None',
     currency: 'GBP', language: 'en', nationality: market.nationality,
     maxOffers: f.MaxOffers || 250,
@@ -528,29 +540,37 @@ function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWE
     customerUserAgent: 'Travelgenix-WorldMapCron/1.0',
   };
 }
-async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS) {
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(OFFERS_PROXY, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Referer': SELF_ORIGIN + '/',
-        'Origin': SELF_ORIGIN,
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-    clearTimeout(t);
-    if (!res.ok) return { ok: false, status: res.status };
-    const data = await res.json();
-    if (data && data.success === false) return { ok: false, error: data.error || 'upstream failure' };
-    return { ok: true, data };
-  } catch (e) {
-    clearTimeout(t);
-    return { ok: false, error: e.message };
+async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS, retries = 1) {
+  let last;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    if (attempt) await new Promise(r => setTimeout(r, 500));
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(OFFERS_PROXY, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Referer': SELF_ORIGIN + '/',
+          'Origin': SELF_ORIGIN,
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      clearTimeout(t);
+      if (!res.ok) { last = { ok: false, status: res.status }; continue; } // retryable
+      const data = await res.json();
+      if (data && data.success === false) {
+        // Upstream said no — a retry won't change its mind. Fail now.
+        return { ok: false, error: data.error || 'upstream failure' };
+      }
+      return { ok: true, data };
+    } catch (e) {
+      clearTimeout(t);
+      last = { ok: false, error: e.message }; // timeout/network — retryable
+    }
   }
+  return last || { ok: false, error: 'request failed' };
 }
 
 /** Resolve which destination codes to query for a row. */
@@ -956,8 +976,9 @@ export default async function handler(req, res) {
     // purged — skipped-fresh entries were not, so they stay in scope here.
     const sweptCCs = new Set(perCountry.filter(p => p.ok && p.cc && !p.skipped).map(p => String(p.cc).toUpperCase()));
     const maintenance = await maintainStoredOffers(now, sweptCCs);
-    if (maintenance.offersRemoved || maintenance.keysDeleted) {
-      console.log(`[map-cron] maintenance: removed ${maintenance.offersRemoved} expired offers across ${maintenance.countriesCleaned} countries, deleted ${maintenance.keysDeleted} empty keys`);
+    if (maintenance.offersRemoved || maintenance.keysDeleted || maintenance.writeFailures) {
+      console.log(`[map-cron] maintenance: removed ${maintenance.offersRemoved} expired offers across ${maintenance.countriesCleaned} countries, deleted ${maintenance.keysDeleted} empty keys` +
+        (maintenance.writeFailures ? `, ${maintenance.writeFailures} rewrites FAILED even halved` : ''));
     }
 
     // ── Rebuild the widget summary from ALL country keys (full coverage) ───
