@@ -105,3 +105,11 @@ export async function decr(key) {
 export async function del(key) {
   return await callRedis('del', key);
 }
+
+/** KEYS pattern — returns matching key names ([] if none/unconfigured).
+ *  Fine here: the store holds a few dozen keys (one per country plus
+ *  bookkeeping), so KEYS is cheap. Do not use on large keyspaces. */
+export async function keys(pattern) {
+  const r = await callRedis('keys', pattern);
+  return Array.isArray(r) ? r : [];
+}
