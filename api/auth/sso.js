@@ -295,7 +295,15 @@ export default async function handler(req, res) {
   if (userRole !== 'AppUser') validationErrors.push('role must be AppUser');
   if (!isValidEmailStrict(email)) validationErrors.push('valid email required');
   if (!isStringLike(givenName) || givenName.length > 80) validationErrors.push('valid given_name required');
-  if (!isStringLike(familyName) || familyName.length > 80) validationErrors.push('valid family_name required');
+  // family_name is optional. Some Travelify accounts have no surname on
+  // record (first-name-only contacts, or generic mailboxes like info@…), so
+  // the JWT arrives with an empty family_name. Requiring it here rejected the
+  // token before the company and user were ever created, which looked to the
+  // client like a broken sign-in with no account provisioned (Ski Solutions
+  // and flightscanner.nl, 1–2 July 2026). Accept a missing/empty surname —
+  // given_name above still guarantees we have a name — and only guard the
+  // upper length bound when a surname is actually present.
+  if (familyName.length > 80) validationErrors.push('family_name too long (max 80 chars)');
   if (!/^\d{1,10}$/.test(travelifyAppId)) validationErrors.push('primarysid must be 1–10 digit numeric');
   if (publicApiKey.length === 0 || publicApiKey.length > 80) validationErrors.push('primarygroupsid required (max 80 chars)');
   if (!VALID_PACKAGE_CODES.has(packageCode)) validationErrors.push(`unknown groupsid: ${packageCode}`);
