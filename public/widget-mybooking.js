@@ -25,6 +25,15 @@
  *     and date), not just the next one, when a plan is set up.
  *   - Added a Print action alongside Preview / Email / Download.
  *
+ * v1.10.2 changes:
+ *   - The dedicated "Cancellation policy" toggle (display.showCancellation)
+ *     now actually gates the informational policy blocks (the flight "Fare
+ *     conditions" cancellation terms and the "Cancellation policy"
+ *     accordion). Previously only showCancel gated them, so switching
+ *     "Cancellation policy" off did nothing. Both blocks now hide when
+ *     EITHER toggle is off; the cancel ACTION section stays gated by
+ *     showCancel alone.
+ *
  * v1.7.1 changes:
  *   - Cancellation info now follows the cancel toggle: when cancellation is
  *     off, cancellation terms are hidden everywhere (the flight "Fare
@@ -173,7 +182,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.10.1';
+  const VERSION = '1.10.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only. Booking data, PII, prices, dates, the agency name and
@@ -2712,9 +2721,12 @@
     const carrierSummary = Array.from(carrierNames).slice(0, 3).join(', ');
 
     const fareInfo = Array.isArray(f.fareInformation) ? f.fareInformation : [];
-    // When the agent has turned cancellation off, the cancellation terms that
-    // arrive as flight fare information must not leak into "Fare conditions".
-    const hideCancel = c.display?.showCancel === false;
+    // Cancellation terms arriving as flight fare information must not leak
+    // into "Fare conditions" when either the "Cancellation policy" toggle
+    // (showCancellation — the dedicated info toggle) or the "Online
+    // cancellation" toggle (showCancel — hiding the action hides the info
+    // too) is off.
+    const hideCancel = c.display?.showCancellation === false || c.display?.showCancel === false;
     const meaningfulFareInfo = fareInfo.filter(fi => {
       if (!fi.title || !fi.text) return false;
       if ((fi.type || '').toLowerCase() === 'farebasis') return false;
@@ -3670,9 +3682,11 @@
 
     // "Things to know" groups three optional accordions. The heading must only
     // appear when at least one of them has content (otherwise a flight-only
-    // booking shows an orphaned heading). Cancellation policy text also follows
-    // the cancel toggle, so turning cancellation off hides the policy here too.
-    const showCancelInfo = c.display?.showCancel !== false;
+    // booking shows an orphaned heading). The Cancellation policy accordion is
+    // gated by the dedicated "Cancellation policy" toggle (showCancellation)
+    // AND follows the "Online cancellation" toggle (showCancel) — turning
+    // either off hides the policy text here.
+    const showCancelInfo = c.display?.showCancellation !== false && c.display?.showCancel !== false;
     const ttkAboutHotel = !!(hotelDesc?.text || acc?.location?.address1 || paymentMethods.length || yearBuilt || totalRooms || roomMix.length || facilities.length);
     const ttkCancelPolicy = showCancelInfo && cancelDescs.length > 0;
     const ttkAtHotel = !!(importantInfo.length || checkinTime || checkoutTime);

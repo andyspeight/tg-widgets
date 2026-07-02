@@ -763,6 +763,9 @@ export default async function handler(req, res) {
       supportPhone: widgetSettings?.support?.phone || null,
       colors: widgetSettings?.colors || {},
       radius: typeof widgetSettings?.radius === 'number' ? widgetSettings.radius : 12,
+      // Widget display toggles (e.g. display.showCancellation) so the PDF
+      // honours the same show/hide choices as the on-page widget.
+      display: (widgetSettings && typeof widgetSettings.display === 'object' && widgetSettings.display) || {},
       // The customer-typed orderRef is the final fallback when no supplier
       // bookingReference exists on any item. Without it, the template
       // displays the internal numeric order.id, which the customer has

@@ -932,6 +932,9 @@ import { renderEmailHtml } from '/_email-template.js';
       supportPhone: state.config.support?.phone || null,
       colors: state.config.colors,
       radius: state.config.radius,
+      // Display toggles so the PDF preview mirrors the live PDF (e.g. the
+      // Cancellation policy toggle hides the policy blocks there too).
+      display: state.config.display || {},
       issuedAt: new Date().toISOString(),
     };
   }

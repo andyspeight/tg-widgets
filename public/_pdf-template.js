@@ -176,7 +176,7 @@ const fmtDuration = (mins) => {
 // (Outbound / Inbound) becomes a row group: depart info | route arrow |
 // arrive info, then a meta strip with cabin + baggage, then segment
 // detail rows for multi-stop legs. No collapsibles — print is always-on.
-const renderPdfFlightItem = (item) => {
+const renderPdfFlightItem = (item, showCancellation = true) => {
   const f = item?.flights;
   if (!f || !Array.isArray(f.routes) || f.routes.length === 0) return '';
 
@@ -272,6 +272,9 @@ const renderPdfFlightItem = (item) => {
     if (!fi.title || !fi.text) return false;
     if ((fi.type || '').toLowerCase() === 'farebasis') return false;
     if (/fare\s*basis/i.test(fi.title)) return false;
+    // Mirror the widget: when the Cancellation policy toggle is off, the
+    // cancellation terms must not leak into "Fare conditions".
+    if (!showCancellation && (/cancel/i.test(fi.title) || /cancel/i.test(fi.type || ''))) return false;
     return true;
   });
 
@@ -354,18 +357,21 @@ const locLabel = (p) => {
 };
 
 // PDF: Transfer card
-const renderPdfTransferItem = (item) => {
+const renderPdfTransferItem = (item, showCancellation = true) => {
   const t = item?.transfers;
   if (!t) return '';
   const outDate = t.outPickup?.dateTime ? formatDateShort(t.outPickup.dateTime) : '';
-  const outTime = t.outPickup?.dateTime ? formatTime(t.outPickup.dateTime) : '';
+  const outTime = t.outPickup?.dateTime ? fmtTimeUtc(t.outPickup.dateTime) : '';
   const returnDate = t.returnPickup?.dateTime ? formatDateShort(t.returnPickup.dateTime) : '';
-  const returnTime = t.returnPickup?.dateTime ? formatTime(t.returnPickup.dateTime) : '';
+  const returnTime = t.returnPickup?.dateTime ? fmtTimeUtc(t.returnPickup.dateTime) : '';
   const fromLabel = locLabel(t.outPickup);
   const toLabel = locLabel(t.outDropoff);
   const route = [fromLabel, toLabel].filter(Boolean).join(' → ');
   const importantInfo = (t.information || []).find(i => i.type === 'Generic' || /important/i.test(i.title || ''));
-  const cancelInfo = (t.information || []).find(i => i.type === 'CancelAndAmendments' || /cancel/i.test(i.title || ''));
+  // Cancellation line follows the Cancellation policy toggle.
+  const cancelInfo = showCancellation
+    ? (t.information || []).find(i => i.type === 'CancelAndAmendments' || /cancel/i.test(i.title || ''))
+    : null;
 
   const chips = [];
   if (t.maxOccupancy) chips.push(`${t.maxOccupancy} ${t.maxOccupancy === 1 ? 'passenger' : 'passengers'}`);
@@ -396,9 +402,9 @@ const renderPdfCarRentalItem = (item) => {
   const cr = item?.carRental;
   if (!cr) return '';
   const pickupDate = cr.pickup?.dateTime ? formatDateShort(cr.pickup.dateTime) : '';
-  const pickupTime = cr.pickup?.dateTime ? formatTime(cr.pickup.dateTime) : '';
+  const pickupTime = cr.pickup?.dateTime ? fmtTimeUtc(cr.pickup.dateTime) : '';
   const dropoffDate = cr.dropoff?.dateTime ? formatDateShort(cr.dropoff.dateTime) : '';
-  const dropoffTime = cr.dropoff?.dateTime ? formatTime(cr.dropoff.dateTime) : '';
+  const dropoffTime = cr.dropoff?.dateTime ? fmtTimeUtc(cr.dropoff.dateTime) : '';
   const pickupLoc = locLabel(cr.pickup);
   const dropoffLoc = locLabel(cr.dropoff);
   const sameLocation = cr.pickup?.name && cr.dropoff?.name && cr.pickup.name === cr.dropoff.name;
@@ -446,7 +452,7 @@ const renderPdfTicketsItem = (item) => {
   const opt = t.selectedOption;
   const schedISO = opt?.scheduledDateTime || item.startDate;
   const schedDate = schedISO ? formatDateShort(schedISO) : '';
-  const schedTime = schedISO ? formatTime(schedISO) : '';
+  const schedTime = schedISO ? fmtTimeUtc(schedISO) : '';
   const duration = fmtMins(t.minDuration === t.maxDuration ? t.minDuration : (t.maxDuration || t.minDuration));
   const cityLine = t.location?.city ? [t.location.city, t.location.country].filter(Boolean).join(', ') : '';
 
@@ -510,7 +516,8 @@ function shiftHex(hex, percent) {
  *   supportEmail?: string,
  *   supportPhone?: string,
  *   colors?: { primary, accent, success, warning, text },
- *   radius?: number                // base radius in px
+ *   radius?: number,               // base radius in px
+ *   display?: { showCancellation?: boolean }  // widget display toggles
  * }
  */
 export function renderPdfHtml(order, opts = {}) {
@@ -519,6 +526,15 @@ export function renderPdfHtml(order, opts = {}) {
   const hasBrand = brandName.length > 0;
   const supportEmail = opts.supportEmail || null;
   const supportPhone = opts.supportPhone || null;
+  // Widget display toggles. showCancellation gates every cancellation-policy
+  // block in the PDF (flight fare-condition cancel terms, the transfer
+  // Cancellation line and the Policies > Cancellation card). Mirrors the
+  // widget exactly: the blocks hide when EITHER the dedicated "Cancellation
+  // policy" toggle (showCancellation) OR the "Online cancellation" toggle
+  // (showCancel) is off. Default-show (`!== false`) matches the widget's
+  // convention so configs saved before the toggles existed are unaffected.
+  const showCancellation = opts.display?.showCancellation !== false
+    && opts.display?.showCancel !== false;
 
   // Colour overrides — defaults match the Travelgenix design language but
   // are fully overridable per widget.
@@ -1319,7 +1335,7 @@ export function renderPdfHtml(order, opts = {}) {
 
     ${flightItems.length > 0 ? `
     <div class="pdf-section">
-      ${flightItems.map(renderPdfFlightItem).join('')}
+      ${flightItems.map((it) => renderPdfFlightItem(it, showCancellation)).join('')}
     </div>` : ''}
 
     ${extraItems.length > 0 ? `
@@ -1331,7 +1347,7 @@ export function renderPdfHtml(order, opts = {}) {
     ${transferItems.length > 0 ? `
     <div class="pdf-section">
       <div class="pdf-section-title">${transferItems.length === 1 ? 'Transfer' : 'Transfers'}</div>
-      ${transferItems.map(renderPdfTransferItem).join('')}
+      ${transferItems.map((it) => renderPdfTransferItem(it, showCancellation)).join('')}
     </div>` : ''}
 
     ${carRentalItems.length > 0 ? `
@@ -1514,7 +1530,8 @@ export function renderPdfHtml(order, opts = {}) {
 
     <div class="pdf-section">
       <div class="pdf-section-title">Policies</div>
-      <div class="pdf-policies">
+      <div class="pdf-policies"${showCancellation ? '' : ' style="grid-template-columns:1fr;"'}>
+        ${showCancellation ? `
         <div class="pdf-policy">
           <div class="pdf-policy-label">Cancellation</div>
           <div class="pdf-policy-title">${isRefundable ? 'Refundable' : 'Non-refundable'}</div>
@@ -1523,7 +1540,7 @@ export function renderPdfHtml(order, opts = {}) {
               ? `<span class="good">Fully refundable</span> until your refundability deadline. After that, the full room rate will be charged.`
               : `This rate is non-refundable. Please contact us if your plans change.`}
           </div>
-        </div>
+        </div>` : ''}
         <div class="pdf-policy">
           <div class="pdf-policy-label">Check-in / out</div>
           <div class="pdf-policy-title">Standard hours</div>
