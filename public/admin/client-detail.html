@@ -563,6 +563,10 @@
 
     let clientData = null;
     let currentTab = 'overview';
+    // Suppliers tab state (per-client supplier visibility).
+    let supMaster = [];         // master list [{ key, id, prodType, name, isPremium }]
+    let supEnabled = new Set();  // enabled keys for THIS client
+    let supBaseline = '';        // JSON of the saved set, for dirty tracking
     let overviewEdit = null; // null | 'company' | 'contact' | 'pricing' | 'notes' — which Overview panel is being edited in place
 
     // Packages offered in the Overview package picker. Stable record ids from
@@ -668,6 +672,7 @@
             Users <span style="opacity:0.6;font-weight:400;">(${clientData.users.length})</span>
           </button>
           <button class="sub-tab" role="tab" data-tab="branding" aria-selected="false" type="button">Branding</button>
+          <button class="sub-tab" role="tab" data-tab="suppliers" aria-selected="false" type="button">Suppliers</button>
         </div>
 
         <div id="tab-content"></div>
@@ -693,6 +698,172 @@
       else if (tab === 'entitlements') tc.innerHTML = renderEntitlements();
       else if (tab === 'users') tc.innerHTML = renderUsers();
       else if (tab === 'branding') { tc.innerHTML = renderBranding(); attachBrandingHandlers(); }
+      else if (tab === 'suppliers') { tc.innerHTML = renderSuppliers(); loadSuppliers(); }
+    }
+
+    // ─── Suppliers tab (per-client supplier visibility) ──────────────────
+    // Choose which suppliers THIS client shows in their offer + map widgets.
+    // Nothing switched on for a product type = show every supplier for it;
+    // switch some on to limit it to just those (opt-in). Master list from
+    // /api/admin/suppliers, selection stored per client via
+    // /api/admin/client-suppliers (Redis suppliers:client:{clientId}).
+    const SUP_PROD_ORDER = ['Packages', 'Accommodation', 'Flights'];
+    const SUP_PROD_LABEL = { Packages: 'Packages (flight + hotel)', Accommodation: 'Hotels', Flights: 'Flights' };
+
+    function renderSuppliers() {
+      return `
+        <style>
+          .sup-group { margin-top: 20px; }
+          .sup-group:first-child { margin-top: 4px; }
+          .sup-group-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+          .sup-group-head h3 { font-size:14px; font-weight:700; margin:0; }
+          .sup-g-actions button { font:inherit; font-size:12.5px; font-weight:600; color:var(--tg-accent-dark,#0096B7); background:none; border:0; cursor:pointer; padding:4px 6px; }
+          .sup-rows { border:1px solid var(--border,#e2e8f0); border-radius:8px; overflow:hidden; }
+          .sup-row { display:flex; align-items:center; gap:12px; padding:11px 14px; border-top:1px solid var(--border,#e2e8f0); }
+          .sup-row:first-child { border-top:0; }
+          .sup-row .sup-nm { flex:1; font-size:14px; font-weight:500; }
+          .sup-row .sup-prem { font-size:11px; font-weight:700; color:#B45309; background:#FEF3C7; padding:1px 7px; border-radius:10px; }
+          .sup-sw { position:relative; width:42px; height:24px; flex:0 0 auto; }
+          .sup-sw input { opacity:0; width:42px; height:24px; margin:0; cursor:pointer; }
+          .sup-sw .sup-track { position:absolute; inset:0; background:#CBD5E1; border-radius:999px; transition:background .15s; pointer-events:none; }
+          .sup-sw .sup-knob { position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform .15s; pointer-events:none; box-shadow:0 1px 2px rgba(0,0,0,.2); }
+          .sup-sw input:checked ~ .sup-track { background:#10B981; }
+          .sup-sw input:checked ~ .sup-knob { transform:translateX(18px); }
+          .sup-banner { border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:4px; background:#E0F2FE; color:#075985; border:1px solid #BAE6FD; }
+          .sup-loading, .sup-error { color:var(--tg-text-secondary,#475569); font-size:14px; padding:8px 0; }
+        </style>
+        <div class="panel">
+          <header class="panel-header">
+            <div class="panel-header-actions">
+              <div>
+                <h2>Suppliers</h2>
+                <p>Choose which suppliers this client shows in their offer and map widgets. Leave a product type with nothing switched on to show every supplier for it, or switch some on to limit it to just those.</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span id="sup-status" style="font-size:12px;color:var(--tg-text-secondary,#475569);"></span>
+                <button type="button" class="btn btn--sm btn--primary" id="sup-save" disabled>Save suppliers</button>
+              </div>
+            </div>
+          </header>
+          <div class="panel-body" id="sup-body">
+            <div class="sup-loading">Loading suppliers&hellip;</div>
+          </div>
+        </div>`;
+    }
+
+    async function loadSuppliers() {
+      const clientId = clientData && clientData.client && clientData.client.id;
+      const body = document.getElementById('sup-body');
+      if (!clientId) { if (body) body.innerHTML = '<div class="sup-error">No client id.</div>'; return; }
+      try {
+        const [mRes, cRes] = await Promise.all([
+          fetch('/api/admin/suppliers', { credentials: 'include' }),
+          fetch('/api/admin/client-suppliers?clientId=' + encodeURIComponent(clientId), { credentials: 'include' }),
+        ]);
+        const mData = await mRes.json();
+        const cData = await cRes.json();
+        supMaster = Array.isArray(mData.suppliers) ? mData.suppliers : [];
+        supEnabled = new Set(Array.isArray(cData.enabled) ? cData.enabled : []);
+        supBaseline = JSON.stringify([...supEnabled].sort());
+        renderSupplierGroups();
+      } catch (e) {
+        if (body) body.innerHTML = '<div class="sup-error">Could not load suppliers. Try reloading the page.</div>';
+      }
+    }
+
+    function supDirty() { return JSON.stringify([...supEnabled].sort()) !== supBaseline; }
+    function syncSupSave() {
+      const btn = document.getElementById('sup-save');
+      const st = document.getElementById('sup-status');
+      if (btn) btn.disabled = !supDirty();
+      if (st) st.textContent = supDirty() ? 'Unsaved changes' : '';
+    }
+
+    function renderSupplierGroups() {
+      const body = document.getElementById('sup-body');
+      if (!body) return;
+      if (!supMaster.length) { body.innerHTML = '<div class="sup-error">No suppliers in the list yet. They load from Travelify &mdash; try again shortly.</div>'; return; }
+      const byType = {};
+      supMaster.forEach((s) => { (byType[s.prodType] = byType[s.prodType] || []).push(s); });
+      const anySel = supEnabled.size > 0;
+      const banner = anySel
+        ? 'This client shows offers only from the suppliers switched on below. Any product type with nothing switched on shows all of that type.'
+        : 'Nothing is switched on, so this client shows offers from every supplier. Switch some on to limit the widgets to just those.';
+      const groups = SUP_PROD_ORDER.filter((t) => byType[t] && byType[t].length).map((t) => {
+        const rows = byType[t].map((s) => `
+          <div class="sup-row">
+            <span class="sup-nm">${escapeHtml(s.name)}</span>
+            ${s.isPremium ? '<span class="sup-prem">Premium</span>' : ''}
+            <label class="sup-sw"><input type="checkbox" data-key="${escapeHtml(s.key)}" ${supEnabled.has(s.key) ? 'checked' : ''}><span class="sup-track"></span><span class="sup-knob"></span></label>
+          </div>`).join('');
+        return `<div class="sup-group">
+          <div class="sup-group-head"><h3>${escapeHtml(SUP_PROD_LABEL[t] || t)}</h3>
+            <div class="sup-g-actions"><button type="button" data-sup-group="${escapeHtml(t)}" data-on="1">All on</button><button type="button" data-sup-group="${escapeHtml(t)}" data-on="0">All off</button></div>
+          </div>
+          <div class="sup-rows">${rows}</div>
+        </div>`;
+      }).join('');
+      body.innerHTML = `<div class="sup-banner">${banner}</div>
+        <div class="sup-group-head" style="margin-top:10px"><div class="sup-g-actions"><button type="button" data-sup-all="on">Enable all</button><button type="button" data-sup-all="off">Disable all</button></div></div>
+        ${groups}`;
+      // Delegated handlers scoped to #sup-body (reassigned each render — fine).
+      body.onchange = (e) => {
+        const cb = e.target.closest('input[data-key]'); if (!cb) return;
+        if (cb.checked) supEnabled.add(cb.getAttribute('data-key')); else supEnabled.delete(cb.getAttribute('data-key'));
+        syncSupSave();
+      };
+      body.onclick = (e) => {
+        const g = e.target.closest('button[data-sup-group]');
+        if (g) {
+          const t = g.getAttribute('data-sup-group'), on = g.getAttribute('data-on') === '1';
+          supMaster.filter((s) => s.prodType === t).forEach((s) => { on ? supEnabled.add(s.key) : supEnabled.delete(s.key); });
+          supApplyChecks(); syncSupSave(); return;
+        }
+        const a = e.target.closest('button[data-sup-all]');
+        if (a) {
+          const on = a.getAttribute('data-sup-all') === 'on';
+          supEnabled = on ? new Set(supMaster.map((s) => s.key)) : new Set();
+          supApplyChecks(); syncSupSave(); return;
+        }
+      };
+      // Save button lives in the panel header (outside #sup-body), so wire it here.
+      const saveBtn = document.getElementById('sup-save');
+      if (saveBtn) saveBtn.onclick = saveSuppliers;
+      syncSupSave();
+    }
+
+    function supApplyChecks() {
+      document.querySelectorAll('#sup-body input[data-key]').forEach((cb) => { cb.checked = supEnabled.has(cb.getAttribute('data-key')); });
+    }
+
+    async function saveSuppliers() {
+      const clientId = clientData && clientData.client && clientData.client.id;
+      if (!clientId) return;
+      const btn = document.getElementById('sup-save');
+      const st = document.getElementById('sup-status');
+      if (btn) btn.disabled = true;
+      if (st) st.textContent = 'Saving…';
+      try {
+        const r = await fetch('/api/admin/client-suppliers', {
+          method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientId, enabled: [...supEnabled] }),
+        });
+        const d = await r.json();
+        if (d.ok) {
+          supBaseline = JSON.stringify([...supEnabled].sort());
+          if (st) st.textContent = '';
+          toast('Suppliers saved');
+          renderSupplierGroups(); // refresh the all-vs-some banner
+        } else {
+          if (st) st.textContent = '';
+          toast(d.error || 'Could not save suppliers', 'error');
+          if (btn) btn.disabled = false;
+        }
+      } catch (e) {
+        if (st) st.textContent = '';
+        toast('Network error saving suppliers', 'error');
+        if (btn) btn.disabled = false;
+      }
     }
 
     function renderOverview() {
