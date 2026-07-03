@@ -383,7 +383,7 @@
     widgetType: 'Appointment',
     widgetTag: 'appointment',
     scriptFile: 'widget-appointment.js',
-    getConfig: () => C,
+    getConfig: () => { repairMeetingUrls(); return C; },
     setConfig: (c) => { C = Object.assign({}, C, c); syncUIFromState(); render(); },
     fontPickerEl: '#fontPickerMount',
     onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
@@ -422,12 +422,28 @@
     }
   }
 
+  // Heal event meeting links the same way, on load AND on every save (see
+  // getConfig). A link pasted with a clipped scheme ("ttps://…") that was never
+  // re-typed would otherwise sit broken in the config and quietly send bookings
+  // to Google Meet instead of the Zoom room. Idempotent, so it is safe to run
+  // repeatedly. Returns true if it changed anything.
+  function repairMeetingUrls() {
+    if (!Array.isArray(C.eventTypes)) return false;
+    let changed = false;
+    C.eventTypes.forEach((ev) => {
+      if (!ev || !ev.meetingUrl) return;
+      const fixed = normaliseMeetingUrl(ev.meetingUrl);
+      if (fixed !== ev.meetingUrl) { ev.meetingUrl = fixed; changed = true; }
+    });
+    return changed;
+  }
+
   function loadFromUrl() {
     const wId = new URLSearchParams(location.search).get('id');
     if (!wId) { render(); return; }
     fetch('/api/widget-config?id=' + encodeURIComponent(wId))
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (!d) return; if (d.config) C = Object.assign({}, C, d.config); if (d.name) document.getElementById('name-input').value = d.name; repairAvailability(); syncUIFromState(); render(); })
+      .then(d => { if (!d) return; if (d.config) C = Object.assign({}, C, d.config); if (d.name) document.getElementById('name-input').value = d.name; repairAvailability(); repairMeetingUrls(); syncUIFromState(); render(); })
       .catch(() => tgse.toast('Failed to load widget', 'err'));
   }
 
@@ -548,7 +564,7 @@
   function normaliseMeetingUrl(v) {
     let s = String(v || '').trim();
     if (!s) return '';
-    s = s.replace(/^(h+t+p+s?|t+t+p+s?|h+t+t+p+):\/\//i, 'https://'); // clipped/mangled scheme
+    s = s.replace(/^[htps]{2,6}:\/\//i, 'https://'); // clipped/mangled scheme (ttps://, tps://, http://)
     if (!/^https?:\/\//i.test(s) && /^[\w-]+(\.[\w-]+)+([\/?#]\S*)?$/.test(s)) s = 'https://' + s; // bare domain
     return s;
   }

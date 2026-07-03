@@ -80,10 +80,33 @@ export async function resolveWidget(widgetId) {
   } catch (e) { return null; }
 }
 
+/**
+ * Repair a meeting URL a human pasted into widget settings before it is used or
+ * validated. A clipped scheme ("ttps://…") or a missing scheme ("zoom.us/j/…")
+ * would fail URL validation at booking time and silently drop the booking back
+ * to an auto-minted Google Meet link — the opposite of "driven by what is
+ * entered into the widget settings". We repair what is clearly recoverable and
+ * leave real validation to the caller. Mirrors normaliseMeetingUrl in
+ * editor-appointment.html so the editor and the server agree on what a link
+ * means.
+ */
+export function normaliseMeetingUrl(v) {
+  let s = String(v == null ? '' : v).trim();
+  if (!s) return '';
+  s = s.replace(/^[htps]{2,6}:\/\//i, 'https://'); // clipped/mangled scheme (ttps://, tps://, http://)
+  if (!/^https?:\/\//i.test(s) && /^[\w-]+(\.[\w-]+)+([/?#]\S*)?$/.test(s)) s = 'https://' + s; // bare domain
+  return s;
+}
+
 export function pickEvent(config, eventId) {
   const list = Array.isArray(config.eventTypes) && config.eventTypes.length
     ? config.eventTypes
     : [{ id: 'consult', label: config.heading || 'Appointment', mins: 30, mode: config.mode || 'callback' }];
-  if (eventId) { const m = list.find(e => e.id === eventId); if (m) return m; }
-  return list[0];
+  let ev = null;
+  if (eventId) ev = list.find(e => e.id === eventId) || null;
+  if (!ev) ev = list[0];
+  // Return a shallow copy with a repaired meeting link — never mutate config,
+  // and never let a recoverable link fall through to an auto-minted Meet link.
+  if (ev && ev.meetingUrl) ev = Object.assign({}, ev, { meetingUrl: normaliseMeetingUrl(ev.meetingUrl) });
+  return ev;
 }
