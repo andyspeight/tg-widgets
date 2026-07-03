@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.6.1';
+  const VERSION = '3.7.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -214,16 +214,58 @@
     return t;
   }
 
-  const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '';
+  // Resolve OUR origin so every API call and asset load hits where the widget
+  // script is served from (widgets.travelify.io), NOT the embedding client's
+  // domain. Order: explicit global, then the origin of our own <script> tag,
+  // then a script-tag scan, then relative as a last resort. Every other TG
+  // widget does this; the map must too — without it, on a site that doesn't set
+  // the global, API_BASE was '' and calls 404'd against the client domain,
+  // showing "Map unavailable".
+  function resolveApiOrigin() {
+    if (typeof window === 'undefined') return '';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      const me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin;
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-worldmap\.js(\?|$|#)/.test(s)) return new URL(s).origin;
+      }
+    } catch (e) { /* fall through */ }
+    return '';
+  }
+  const API_BASE = resolveApiOrigin();
   const OFFERS_URL = API_BASE + '/api/destination-map-offers';
   const DEALS_URL = API_BASE + '/api/destination-map-deals';
   const RESORTS_URL = API_BASE + '/api/destination-map-resorts';
   const CONFIG_URL = API_BASE + '/api/widget-config';
 
+  // Telemetry: report a load heartbeat and any failure to /api/widget-log so we
+  // hear about a broken embed before the client does. Posts to our own API
+  // origin (connect-src), so a client site's script-src CSP can't block it, and
+  // it never throws.
+  function tgReport(event, widgetId, message, detail) {
+    try {
+      var u = API_BASE + '/api/widget-log';
+      var b = JSON.stringify({
+        event: event, widget: 'worldmap', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })(),
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(u, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(u, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
+
   // Max deal cards rendered per country (cheapest first). One-line tunable.
   const MAX_DEAL_CARDS = 20;
 
-  const LEAFLET_JS_URL = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  // Leaflet is served from OUR origin (vendored in public/vendor), not a public
+  // CDN: a client site's Content-Security-Policy that allows our widget script
+  // but not unpkg would block the CDN load and the map would show "unavailable".
+  // Loading from the same origin as the widget itself is always permitted.
+  const LEAFLET_JS_URL = API_BASE + '/vendor/leaflet-1.9.4.js';
 
   // MapTiler Streets — the chosen provider. The key is a single shared
   // Travelgenix key, domain-restricted in the MapTiler dashboard to
@@ -1934,6 +1976,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     constructor(container, config) {
       if (!container) return;
       this.host = container;
+      this.widgetId = (config && config.widgetId) || (container.getAttribute && container.getAttribute('data-tg-id')) || '';
       this.cfg = Object.assign({}, DEFAULTS, config || {});
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
@@ -1981,9 +2024,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this.data = this._applyCountryAllowList(offers);
         this._renderMap(L);
         this._hideLoading();
+        tgReport('load', this.widgetId, 'ok');
       } catch (e) {
         console.warn('[tgwm v3] init failed:', e.message);
         this._showError(this.t('mapUnavailable'));
+        tgReport('error', this.widgetId, 'map init failed', e && e.message);
       }
     }
 
