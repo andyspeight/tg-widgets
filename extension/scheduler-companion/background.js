@@ -15,6 +15,7 @@ const API = 'https://widgets.travelify.io';
 const ALLOWED_PATHS = [
   /^\/api\/widget-list$/,
   /^\/api\/appointment\/list(\?[A-Za-z0-9=&_-]*)?$/,
+  /^\/api\/widget-config\?id=[A-Za-z0-9_.-]+$/, // public config — meeting types for the popover
 ];
 
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});

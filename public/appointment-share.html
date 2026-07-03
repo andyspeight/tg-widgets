@@ -101,7 +101,9 @@
     })();
 
     var current = schedulers[0] ? schedulers[0].id : '';
-    var tz = 'Europe/London', eventId = '', selected = []; // array of startISO
+    // ?event=ID scopes the whole flow (availability, links) to one meeting
+    // type; otherwise the scheduler's default event applies.
+    var tz = 'Europe/London', eventId = P.get('event') || '', selected = []; // selected = array of startISO
 
     function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(function () { t.classList.remove('show'); }, 1900); }
 
@@ -132,7 +134,7 @@
       $('slots').innerHTML = '<div class="state">Loading your availability…</div>';
       var from = new Date().toISOString();
       var to = new Date(Date.now() + 14 * 86400000).toISOString();
-      fetch('/api/appointment/availability?widgetId=' + encodeURIComponent(current) + '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to))
+      fetch('/api/appointment/availability?widgetId=' + encodeURIComponent(current) + (eventId ? '&eventId=' + encodeURIComponent(eventId) : '') + '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to))
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {
           if (!d) { $('slots').innerHTML = '<div class="state">Could not load availability for this scheduler.</div>'; return; }

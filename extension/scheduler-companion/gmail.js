@@ -109,9 +109,11 @@
     header button { border: 0; background: none; cursor: pointer; color: #64748B; font-size: 16px; padding: 2px 6px; }
     header button:hover { color: #0F172A; }
     .list { padding: 10px 12px; max-height: 46vh; overflow-y: auto; }
+    .group { font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: .05em; padding: 8px 6px 2px; }
     .row { display: flex; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid #F1F5F9; }
     .row:last-child { border-bottom: 0; }
     .row .name { flex: 1; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row .mins { color: #64748B; font-weight: 500; font-size: 11.5px; margin-left: 6px; }
     .row button {
       border: 1px solid #E2E8F0; background: #fff; border-radius: 8px; cursor: pointer;
       font-family: inherit; font-size: 12px; font-weight: 700; padding: 6px 11px; color: #0F172A;
@@ -175,7 +177,19 @@
         paint('<div class="state">Could not reach Travelgenix. Check your connection and try again.</div>');
         return;
       }
-      schedulers = res.body.filter((w) => w && w.type === 'Appointment' && w.widgetId);
+      const found = res.body.filter((w) => w && w.type === 'Appointment' && w.widgetId);
+      // Meeting types per scheduler (public config) — one insertable row each.
+      await Promise.all(found.map(async (s) => {
+        const cr = await bg('/api/widget-config?id=' + encodeURIComponent(s.widgetId));
+        const cfg = (cr.ok && cr.body && (cr.body.config || cr.body)) || {};
+        if (Array.isArray(cfg.eventTypes)) {
+          s.events = cfg.eventTypes
+            .filter((e) => e && e.id)
+            .map((e) => ({ id: e.id, label: e.label || 'Meeting', mins: Number(e.mins) || 0 }));
+        }
+      }));
+      if (!popover || popover.host !== host) return;
+      schedulers = found;
     }
 
     if (!schedulers.length) {
@@ -183,27 +197,43 @@
       return;
     }
 
-    paint('<div class="list">' + schedulers.map((s, i) =>
-      '<div class="row"><span class="name" title="' + esc(s.name) + '">' + esc(s.name) + '</span>' +
-      '<button type="button" data-link="' + i + '" title="Insert this scheduler\'s booking-page link">Link</button>' +
-      '<button type="button" class="primary" data-times="' + i + '" title="Pick specific times to offer">Times</button></div>'
-    ).join('') + '</div>');
+    paint('<div class="list">' + schedulers.map((s, i) => {
+      const events = (s.events && s.events.length) ? s.events : [null];
+      const head = '<div class="group">' + esc(s.name) + '</div>';
+      return head + events.map((ev, j) =>
+        '<div class="row"><span class="name" title="' + esc(ev ? ev.label : s.name) + '">' + esc(ev ? ev.label : 'Booking page') +
+        (ev && ev.mins ? '<span class="mins">' + esc(String(ev.mins)) + ' min</span>' : '') + '</span>' +
+        '<button type="button" data-link="' + i + ':' + j + '" title="Insert this booking link at the cursor">Link</button>' +
+        '<button type="button" class="primary" data-times="' + i + ':' + j + '" title="Pick specific times to offer">Times</button></div>'
+      ).join('');
+    }).join('') + '</div>');
 
+    const pick = (attr, btn) => {
+      const parts = String(btn.getAttribute(attr)).split(':');
+      const s = schedulers[Number(parts[0])];
+      const ev = s && s.events && s.events[Number(parts[1])] ? s.events[Number(parts[1])] : null;
+      return s ? { s, ev } : null;
+    };
     box.querySelectorAll('[data-link]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const s = schedulers[Number(btn.getAttribute('data-link'))];
-        if (!s) return;
-        const url = API + '/book-appointment?widget=' + encodeURIComponent(s.widgetId);
+        const hit = pick('data-link', btn);
+        if (!hit || !popover) return;
+        const url = API + '/book-appointment?widget=' + encodeURIComponent(hit.s.widgetId)
+          + (hit.ev && hit.ev.id ? '&event=' + encodeURIComponent(hit.ev.id) : '');
+        const label = hit.ev ? 'Book: ' + hit.ev.label : 'Book an appointment';
         const { targetBody: tb, savedRange: sr } = popover;
         closePopover();
-        insertHtml(tb, sr, '<a href="' + esc(url) + '">Book an appointment</a>&nbsp;');
+        insertHtml(tb, sr, '<a href="' + esc(url) + '">' + esc(label) + '</a>&nbsp;');
       });
     });
     box.querySelectorAll('[data-times]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const s = schedulers[Number(btn.getAttribute('data-times'))];
-        if (!s || !popover) return;
-        paint('<iframe src="' + esc(API + '/appointment-share?widget=' + encodeURIComponent(s.widgetId) + '&mode=insert&nonce=' + nonce) + '" allow="clipboard-write" title="Share times"></iframe>');
+        const hit = pick('data-times', btn);
+        if (!hit || !popover) return;
+        const url = API + '/appointment-share?widget=' + encodeURIComponent(hit.s.widgetId)
+          + (hit.ev && hit.ev.id ? '&event=' + encodeURIComponent(hit.ev.id) : '')
+          + '&mode=insert&nonce=' + nonce;
+        paint('<iframe src="' + esc(url) + '" allow="clipboard-write" title="Share times"></iframe>');
       });
     });
   }

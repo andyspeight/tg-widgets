@@ -8,6 +8,7 @@
  */
 
 import crypto from 'node:crypto';
+import { ensureAvailability } from './slots.js';
 
 function secret() {
   const raw = process.env.TG_OAUTH_STATE_SECRET || process.env.TG_ENCRYPTION_KEY || '';
@@ -65,6 +66,10 @@ export async function resolveWidget(widgetId) {
     if (!rec) return null;
     let config = {};
     try { config = JSON.parse(rec.fields.Config || '{}'); } catch (e) { config = {}; }
+    // Repair empty/unusable working hours here so EVERY server consumer
+    // (availability, share flow, booking validation) sees the same bookable
+    // scheduler the widget renders.
+    config = ensureAvailability(config);
     return {
       clientRecordId: rec.fields.ClientRecordId || (Array.isArray(rec.fields.Client) ? rec.fields.Client[0] : '') || '',
       clientEmail: (rec.fields.ClientEmail || '').toLowerCase().trim(),

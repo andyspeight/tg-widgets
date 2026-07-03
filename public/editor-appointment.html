@@ -407,12 +407,27 @@
     });
   }
 
+  // A saved config can carry empty/unusable working hours (an old bug let the
+  // day toggles delete every day). Repair it on load with the same rule the
+  // widget and the server now apply, so the editor UI, the preview and the
+  // live widget all show the same bookable scheduler — and the next Save
+  // persists the repair.
+  function repairAvailability() {
+    const av = C.availability;
+    const usable = av && typeof av === 'object' && Object.keys(av).some((k) =>
+      Array.isArray(av[k]) && av[k].some((r) => Array.isArray(r) && /^\d{1,2}:\d{2}$/.test(String(r[0] || '')) && /^\d{1,2}:\d{2}$/.test(String(r[1] || ''))));
+    if (!usable) {
+      C.availability = { 1: [['09:00', '17:00']], 2: [['09:00', '17:00']], 3: [['09:00', '17:00']], 4: [['09:00', '17:00']], 5: [['09:00', '17:00']] };
+      tgse.toast('Working hours were empty — restored Mon-Fri 9 to 5. Adjust and save.', 'ok');
+    }
+  }
+
   function loadFromUrl() {
     const wId = new URLSearchParams(location.search).get('id');
     if (!wId) { render(); return; }
     fetch('/api/widget-config?id=' + encodeURIComponent(wId))
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (!d) return; if (d.config) C = Object.assign({}, C, d.config); if (d.name) document.getElementById('name-input').value = d.name; syncUIFromState(); render(); })
+      .then(d => { if (!d) return; if (d.config) C = Object.assign({}, C, d.config); if (d.name) document.getElementById('name-input').value = d.name; repairAvailability(); syncUIFromState(); render(); })
       .catch(() => tgse.toast('Failed to load widget', 'err'));
   }
 
@@ -573,13 +588,21 @@
       const s = rw.querySelectorAll('[data-av-f]'); return [s[0].value, s[1].value];
     });
   }
+  // A scheduler with NO available days can never be booked — refuse to let
+  // the last one go rather than saving a dead calendar.
+  function availDayCount() {
+    return Object.keys(C.availability || {}).filter((k) => Array.isArray(C.availability[k]) && C.availability[k].length).length;
+  }
   document.getElementById('avail-list').addEventListener('click', (e) => {
     const tog = e.target.closest('[data-av-toggle]');
     const add = e.target.closest('[data-add-range]');
     const del = e.target.closest('[data-del-range]');
     if (tog) {
       const k = tog.getAttribute('data-av-toggle');
-      if (C.availability[k] || C.availability[Number(k)]) { delete C.availability[k]; delete C.availability[Number(k)]; }
+      if (C.availability[k] || C.availability[Number(k)]) {
+        if (availDayCount() <= 1) { tgse.toast('Keep at least one day available, or no one can ever book', 'err'); return; }
+        delete C.availability[k]; delete C.availability[Number(k)];
+      }
       else C.availability[k] = [['09:00', '17:00']];
       renderAvailability(); shell.markDirty(); render(); return;
     }
@@ -593,6 +616,7 @@
       const block = del.closest('[data-wd]'); const k = block.getAttribute('data-wd');
       const ri = +del.getAttribute('data-del-range');
       const cur = (C.availability[k] || C.availability[Number(k)] || []).slice();
+      if (cur.length <= 1 && availDayCount() <= 1) { tgse.toast('Keep at least one time range, or no one can ever book', 'err'); return; }
       cur.splice(ri, 1);
       if (cur.length) C.availability[k] = cur; else { delete C.availability[k]; delete C.availability[Number(k)]; }
       renderAvailability(); shell.markDirty(); render();

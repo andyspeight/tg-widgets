@@ -129,8 +129,13 @@
 
     // Standing mode: no preselected slot — this is the scheduler's shareable
     // booking-page link (what "Copy booking link" copies). The visitor picks
-    // their own time in the full widget.
+    // their own time in the full widget. With &event=ID the widget is scoped
+    // to that one meeting type (the drawer's per-meeting links use this).
     function renderStanding() {
+      if (eventId && Array.isArray(cfg.eventTypes)) {
+        var match = cfg.eventTypes.filter(function (e) { return e && e.id === eventId; });
+        if (match.length) cfg = Object.assign({}, cfg, { eventTypes: match, heading: match[0].label || cfg.heading });
+      }
       document.title = (cfg.heading || 'Book an appointment') + ' · Travelgenix';
       $('card').classList.add('wide');
       $('card').innerHTML =

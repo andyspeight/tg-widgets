@@ -24,7 +24,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '2.0.1';
+  const VERSION = '2.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (step labels, field labels, buttons, validation and
@@ -404,13 +404,23 @@
     previewMode: false,
   };
 
+  // True when at least one weekday carries at least one parseable time range.
+  // Anything less is a scheduler no one can ever book — never intentional, so
+  // it is treated as "unset" and rebuilt (an availability of {} previously
+  // slipped past the missing-object check and produced a dead calendar).
+  function hasUsableAvailability(av) {
+    if (!av || typeof av !== 'object') return false;
+    return Object.keys(av).some(k =>
+      Array.isArray(av[k]) && av[k].some(r => Array.isArray(r) && parseHM(r[0]) && parseHM(r[1])));
+  }
+
   // Bring a v1 config forward to the v2 shape without losing anything.
   function migrate(cfg) {
     const c = Object.assign({}, cfg || {});
     if (!Array.isArray(c.eventTypes) || !c.eventTypes.length) {
       c.eventTypes = [{ id: 'consult', label: c.heading || 'Consultation', mins: clampNum(c.slotMins, 5, 240, 30), mode: c.mode || 'callback', description: '' }];
     }
-    if (!c.availability || typeof c.availability !== 'object') {
+    if (!hasUsableAvailability(c.availability)) {
       const wd = Array.isArray(c.workingDays) && c.workingDays.length ? c.workingDays.map(Number) : [1, 2, 3, 4, 5];
       const start = pad2(clampNum(c.startHour, 0, 23, 9)) + ':00';
       const end = pad2(clampNum(c.endHour, 1, 24, 17) % 24) + ':00';

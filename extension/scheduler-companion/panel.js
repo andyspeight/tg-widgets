@@ -28,8 +28,9 @@ function openTab(url) {
   catch (e) { window.open(url, '_blank', 'noopener'); }
 }
 
-function bookingLink(id) {
-  return API + '/book-appointment?widget=' + encodeURIComponent(id);
+function bookingLink(id, eventId) {
+  return API + '/book-appointment?widget=' + encodeURIComponent(id)
+    + (eventId ? '&event=' + encodeURIComponent(eventId) : '');
 }
 
 // ── Views ────────────────────────────────────────────────────────────────
@@ -69,23 +70,30 @@ function showList(bookings) {
   $('foot').hidden = false;
   $('view').classList.remove('no-pad');
 
+  // One row per MEETING TYPE (the Calendly mental model): every event type
+  // gets its own copyable link and its own share-times flow. A scheduler
+  // whose config didn't load falls back to a single whole-scheduler row.
   let html = '';
-  html += '<div class="sec">Your schedulers</div>';
+  html += '<div class="sec">Your meetings</div>';
   if (!schedulers.length) {
     html += '<div class="state">No appointment schedulers yet.<br>Create one in the dashboard and it appears here.</div>';
   } else {
-    html += schedulers.map((s, i) =>
-      '<div class="sched">' +
-      '<div class="name" title="' + esc(s.name) + '">' + esc(s.name) + '</div>' +
-      '<div class="row">' +
-      '<button class="btn primary" data-copy="' + i + '">Copy link</button>' +
-      '<button class="btn ghost" data-share="' + i + '">Share times</button>' +
-      '</div></div>'
-    ).join('');
+    html += schedulers.map((s, i) => {
+      const events = (s.events && s.events.length) ? s.events : [null];
+      const rows = events.map((ev, j) =>
+        '<div class="ev-row">' +
+        '<span class="ev-name" title="' + esc(ev ? ev.label : s.name) + '">' + esc(ev ? ev.label : 'Booking page') +
+        (ev && ev.mins ? '<span class="ev-mins">' + esc(String(ev.mins)) + ' min</span>' : '') + '</span>' +
+        '<button class="btn primary" data-copy="' + i + ':' + j + '">Copy link</button>' +
+        '<button class="btn ghost" data-share="' + i + ':' + j + '">Times</button>' +
+        '</div>'
+      ).join('');
+      return '<div class="sched"><div class="name" title="' + esc(s.name) + '">' + esc(s.name) + '</div>' + rows + '</div>';
+    }).join('');
   }
 
+  html += '<div class="sec">Coming up</div>';
   if (bookings && bookings.length) {
-    html += '<div class="sec">Coming up</div>';
     html += bookings.slice(0, 12).map((b) => {
       let when = '';
       try {
@@ -100,15 +108,23 @@ function showList(bookings) {
         (b.eventLabel ? '<span class="what">' + esc(b.eventLabel) + '</span>' : '') +
         '</div>';
     }).join('');
+  } else {
+    html += '<div class="empty-note">Nothing booked through your schedulers in the next two weeks yet. Appointments made via your links appear here (it shows scheduler bookings, not your whole calendar).</div>';
   }
 
   $('view').innerHTML = html;
 
+  const pick = (attr, btn) => {
+    const parts = String(btn.getAttribute(attr)).split(':');
+    const s = schedulers[Number(parts[0])];
+    const ev = s && s.events && s.events[Number(parts[1])] ? s.events[Number(parts[1])] : null;
+    return s ? { s, ev } : null;
+  };
   $('view').querySelectorAll('[data-copy]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const s = schedulers[Number(btn.getAttribute('data-copy'))];
-      if (!s) return;
-      navigator.clipboard.writeText(bookingLink(s.widgetId)).then(() => {
+      const hit = pick('data-copy', btn);
+      if (!hit) return;
+      navigator.clipboard.writeText(bookingLink(hit.s.widgetId, hit.ev && hit.ev.id)).then(() => {
         btn.textContent = 'Copied ✓';
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 1600);
@@ -117,19 +133,22 @@ function showList(bookings) {
   });
   $('view').querySelectorAll('[data-share]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const s = schedulers[Number(btn.getAttribute('data-share'))];
-      if (s) showShare(s);
+      const hit = pick('data-share', btn);
+      if (hit) showShare(hit.s, hit.ev);
     });
   });
 }
 
 // The share-times flow is the hosted /appointment-share page (public, themed
-// to the scheduler) embedded full-bleed. Back returns to the list.
-function showShare(s) {
+// to the scheduler) embedded full-bleed, scoped to one meeting type when
+// given. Back returns to the list.
+function showShare(s, ev) {
   $('back').hidden = false;
   $('view').classList.add('no-pad');
+  const url = API + '/appointment-share?widget=' + encodeURIComponent(s.widgetId)
+    + (ev && ev.id ? '&event=' + encodeURIComponent(ev.id) : '');
   $('view').innerHTML =
-    '<iframe id="share-frame" allow="clipboard-write" src="' + esc(API + '/appointment-share?widget=' + encodeURIComponent(s.widgetId)) + '" title="Share times"></iframe>';
+    '<iframe id="share-frame" allow="clipboard-write" src="' + esc(url) + '" title="Share times"></iframe>';
 }
 
 // ── Data ─────────────────────────────────────────────────────────────────
@@ -148,6 +167,23 @@ async function load() {
   }
   schedulers = (Array.isArray(widgets) ? widgets : [])
     .filter((w) => w && w.type === 'Appointment' && w.widgetId);
+
+  // Pull each scheduler's config (public endpoint) for its meeting types —
+  // the drawer lists those, Calendly-style. A failed fetch just means that
+  // scheduler shows a single whole-booking-page row instead.
+  await Promise.all(schedulers.map(async (s) => {
+    try {
+      const r = await fetch(API + '/api/widget-config?id=' + encodeURIComponent(s.widgetId));
+      if (!r.ok) return;
+      const d = await r.json();
+      const cfg = (d && (d.config || d)) || {};
+      if (Array.isArray(cfg.eventTypes)) {
+        s.events = cfg.eventTypes
+          .filter((e) => e && e.id)
+          .map((e) => ({ id: e.id, label: e.label || 'Meeting', mins: Number(e.mins) || 0 }));
+      }
+    } catch (e) { /* fall back to the scheduler-level row */ }
+  }));
 
   // Upcoming bookings are a bonus — never block the list on them.
   let bookings = [];

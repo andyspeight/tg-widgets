@@ -36,6 +36,28 @@ function weekdayOf(y, m0, d) { return new Date(Date.UTC(y, m0, d)).getUTCDay(); 
 function parseHM(s) { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || '').trim()); return m ? { h: clampNum(m[1], 0, 23, 9), m: clampNum(m[2], 0, 59, 0) } : null; }
 
 /**
+ * Availability counts as SET only when at least one weekday carries at least
+ * one parseable time range. Anything less is a scheduler nobody can ever
+ * book — never intentional — so it is rebuilt from the legacy fields or the
+ * Mon-Fri 9-5 default. Mirrors the widget's migrate() exactly: an
+ * availability of {} previously produced zero slots from every server
+ * consumer (availability endpoint, share flow, booking validation).
+ */
+export function ensureAvailability(config) {
+  const av = config && config.availability;
+  const usable = av && typeof av === 'object' && Object.keys(av).some(k =>
+    Array.isArray(av[k]) && av[k].some(r => Array.isArray(r) && parseHM(r[0]) && parseHM(r[1])));
+  if (usable) return config;
+  const wd = Array.isArray(config.workingDays) && config.workingDays.length ? config.workingDays.map(Number) : [1, 2, 3, 4, 5];
+  const start = pad2(clampNum(config.startHour, 0, 23, 9)) + ':00';
+  const endRaw = pad2(clampNum(config.endHour, 1, 24, 17) % 24) + ':00';
+  const end = endRaw === '00:00' ? '23:59' : endRaw;
+  const built = {};
+  wd.forEach(d => { built[d] = [[start, end]]; });
+  return Object.assign({}, config, { availability: built });
+}
+
+/**
  * Generate candidate slots for an event type across the booking window.
  * Returns [{ startISO, endISO, key }] sorted ascending.
  */

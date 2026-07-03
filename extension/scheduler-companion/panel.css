@@ -52,10 +52,20 @@ main.no-pad { padding: 0; }
   background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--accent);
   border-radius: 12px; padding: 12px 13px; margin-bottom: 9px;
 }
-.sched .name { font-weight: 700; font-size: 14px; margin-bottom: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sched .name { font-weight: 700; font-size: 14px; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sched .row { display: flex; gap: 8px; }
 .sched .row .btn { flex: 1; padding: 8px 10px; font-size: 12.5px; text-align: center; }
+/* One row per meeting type */
+.ev-row { display: flex; align-items: center; gap: 7px; padding: 7px 0; border-top: 1px solid #F1F5F9; }
+.ev-row:first-of-type { border-top: 0; }
+.ev-row .ev-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev-row .ev-mins { color: var(--muted); font-weight: 500; font-size: 11.5px; margin-left: 6px; }
+.ev-row .btn { padding: 6px 10px; font-size: 12px; flex: 0 0 auto; }
 .btn.copied { background: #DCFCE7; color: #166534; border-color: #BBF7D0; }
+.empty-note {
+  background: #fff; border: 1px dashed var(--border); border-radius: 10px;
+  padding: 12px 13px; color: var(--muted); font-size: 12.5px; line-height: 1.55;
+}
 
 /* Upcoming appointments */
 .appt {
