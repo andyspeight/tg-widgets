@@ -27,6 +27,7 @@ import {
 } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
 import { USERS } from './_lib/auth/schema.js';
+import { isStaffEmail } from './_lib/auth/staff.js';
 
 /**
  * Hydrate the user's email from the Users table when the JWT didn't carry it.
@@ -548,10 +549,12 @@ export default async function handler(req, res) {
         const record = await fetchEnquiryFormByWidgetId(widgetId, headers, AIRTABLE_BASE_ID);
         if (!record) return res.status(404).json({ error: 'Form not found' });
 
-        // Ownership check
+        // Access check. Travelgenix staff can open any client's form ("act as
+        // client" support capability, per staff.js); otherwise the signed-in
+        // user must be the form's owner.
         const ownerEmail = (record.fields[EF.ownerEmail] || '').toLowerCase().trim();
         const userEmail  = (auth.user.email || '').toLowerCase().trim();
-        if (!ownerEmail || ownerEmail !== userEmail) {
+        if (!isStaffEmail(userEmail) && (!ownerEmail || ownerEmail !== userEmail)) {
           console.warn('[enquiry-form-config] GET 403: ownership mismatch', { ownerEmail: ownerEmail || '(empty)', userEmail: userEmail || '(empty)', widgetId });
           return res.status(403).json({ error: 'You do not have permission to view this form' });
         }
@@ -670,10 +673,13 @@ export default async function handler(req, res) {
 
         if (!efRec) return res.status(404).json({ error: 'Form not found' });
 
-        // Ownership check against the real record (source of truth for enquiry forms)
+        // Access check against the real record (source of truth for enquiry
+        // forms). Travelgenix staff can edit any client's form ("act as client"
+        // support capability, per staff.js); otherwise the signed-in user must
+        // be the form's owner.
         const ownerEmail = (efRec.fields[EF.ownerEmail] || '').toLowerCase().trim();
         const userEmail  = (user.email || '').toLowerCase().trim();
-        if (!ownerEmail || ownerEmail !== userEmail) {
+        if (!isStaffEmail(userEmail) && (!ownerEmail || ownerEmail !== userEmail)) {
           console.warn('[enquiry-form-config] UPDATE 403: ownership mismatch', { ownerEmail: ownerEmail || '(empty)', userEmail: userEmail || '(empty)', widgetId });
           return res.status(403).json({ error: 'You do not have permission to edit this form' });
         }
