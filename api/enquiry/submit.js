@@ -761,6 +761,18 @@ export default async function handler(req, res) {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Cache-Control', 'no-store');
 
+  // CORS: reflect the requesting origin on EVERY response — success AND every
+  // refusal — so the browser lets the widget read our reply. Without this, a
+  // refusal that returns before the later origin-check header (a disallowed
+  // origin, a rate limit, a missing form) is blocked by the browser and the
+  // widget shows the misleading "Could not reach the server" instead of the
+  // real reason. The origin RESTRICTION still applies: a disallowed origin gets
+  // a readable 403, not access.
+  if (req.headers.origin) {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    res.setHeader('Vary', 'Origin');
+  }
+
   // 1. CORS preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'POST');
