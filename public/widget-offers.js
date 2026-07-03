@@ -113,7 +113,7 @@
   // Our own FX proxy (ECB/Frankfurter). The cache is GBP; we convert at display
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
-  const VERSION = '1.8.0';
+  const VERSION = '1.9.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -589,6 +589,59 @@
     ILS: 'Israeli Shekel', IDR: 'Indonesian Rupiah', KRW: 'South Korean Won',
     MYR: 'Malaysian Ringgit', PHP: 'Philippine Peso' };
   const CURRENCY_ORDER = Object.keys(CURRENCIES);
+
+  // ── Travelify booking deeplinks ────────────────────────────────────────
+  // Offer links must open a fresh live search in the CLIENT's own Travelify
+  // application, not our demo cache. We build a deeplink from the offer's
+  // details per Travelify's spec (dl.tvllnk.com/deeplink/{AppID}?st=...&params).
+  // The client's AppID rides the widget config (injected by /api/widget-config).
+  // ACTIVE_APPID is set at the top of each render pass (render is synchronous,
+  // so multiple widget instances never interleave).
+  let ACTIVE_APPID = '';
+  function setActiveAppId(id) { ACTIVE_APPID = String(id || '').trim(); }
+  function brdCode(b) {
+    const k = String(b || '').toLowerCase().replace(/[^a-z]/g, '');
+    return ({ roomonly: 'RoomOnly', selfcatering: 'SelfCatering', bedandbreakfast: 'BedAndBreakfast',
+      breakfast: 'BedAndBreakfast', halfboard: 'HalfBoard', fullboard: 'FullBoard', allinclusive: 'AllInclusive' })[k] || '';
+  }
+  // Build a Travelify deeplink from a RAW-shape offer (o.flight.* / o.accommodation.*).
+  // Returns '' when no client AppID is available so the caller can fall back to
+  // the raw link. Adults-only (child ages are not stored; a child search needs
+  // an age per child per the spec, so it would be invalid).
+  function offersDeeplink(o) {
+    const id = ACTIVE_APPID;
+    if (!id || !o) return '';
+    const fl = o.flight || null, acc = o.accommodation || null;
+    const type = String(o.type || (fl && acc ? 'Packages' : acc ? 'Accommodation' : fl ? 'Flights' : 'Packages'));
+    const st = type === 'Flights' ? 'Flights' : type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging';
+    const p = new URLSearchParams();
+    p.set('st', st);
+    if (st !== 'Accommodation' && fl) {
+      if (fl.origin && fl.origin.iataCode) p.set('org', fl.origin.iataCode);
+      if (fl.destination && fl.destination.iataCode) p.set('dst', fl.destination.iataCode);
+    }
+    if (st !== 'Flights' && acc) {
+      if (acc.destination && acc.destination.name) p.set('loc', acc.destination.name);
+      const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
+      if (ctry) p.set('ctry', ctry);
+    }
+    const start = String((fl && fl.outboundDate) || (acc && acc.checkinDate) || '');
+    if (/^\d{4}-\d{2}-\d{2}/.test(start)) p.set('fr', start.slice(0, 10));
+    if (acc && acc.nights) p.set('dur', String(acc.nights));
+    p.set('adt', String(o.adults || 2));
+    if (st !== 'Flights' && acc) {
+      const brd = brdCode(acc.boardBasis); if (brd) p.set('brd', brd);
+      if (acc.rating) p.set('rat', String(acc.rating));
+    }
+    const curr = (acc && acc.pricing && acc.pricing.currency) || (fl && fl.pricing && fl.pricing.currency) || (o.pricing && o.pricing.currency);
+    if (curr) p.set('curr', curr);
+    if (st !== 'Accommodation' && fl) {
+      if (fl.direct) p.set('dir', 'true');
+      if (fl.cabinClass) p.set('cabin', fl.cabinClass);
+      if (fl.carrier && fl.carrier.code) p.set('carrier', fl.carrier.code);
+    }
+    return 'https://dl.tvllnk.com/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
+  }
   function fmtCur(val, code) {
     const rounded = Math.round(val);
     try { return new Intl.NumberFormat('en-GB', { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(rounded); }
@@ -5699,8 +5752,20 @@
           return;
         }
         if (ev.target.matches('[data-tgo-popover-confirm]')) {
-          const sep = url.indexOf('?') >= 0 ? '&' : '?';
-          const newUrl = url + sep + 'adt=' + state.adults + '&chd=' + state.children + '&inf=' + state.infants;
+          // Set (not append) the pax params so the visitor's choice replaces
+          // the deeplink's default adt rather than duplicating it. Falls back to
+          // a plain append if url isn't a full URL.
+          let newUrl;
+          try {
+            const u = new URL(url, location.href);
+            u.searchParams.set('adt', state.adults);
+            u.searchParams.set('chd', state.children);
+            u.searchParams.set('inf', state.infants);
+            newUrl = u.toString();
+          } catch (e) {
+            const sep = url.indexOf('?') >= 0 ? '&' : '?';
+            newUrl = url + sep + 'adt=' + state.adults + '&chd=' + state.children + '&inf=' + state.infants;
+          }
           window.open(safeUrl(newUrl), '_blank', 'noopener,noreferrer');
           close();
           return;
@@ -5986,6 +6051,7 @@
 
     _renderOffers() {
       setActiveCur(this.cur);
+      setActiveAppId(this.cfg.appId);
       // Departure-board template doesn't dedupe (it's a fares list, not a
       // shop-around grid), so pass raw offers straight in.
       if (this.cfg.template === 'departure-board') {
@@ -6357,7 +6423,7 @@
 
     _renderPriceFooter(o, wasPrice) {
       const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const wasHtml = (this.cfg.show.wasPrice && wasPrice) ? '<div class="tgo-price-was">' + esc(wasPrice) + '</div>' : '';
 
       // Pax-basis trigger — opens the popover. Encoded as a button so keyboard users
@@ -6374,7 +6440,7 @@
             adults: o.adults || 0,
             children: o.children || 0,
             infants: o.infants || 0,
-            url: o.url || '',
+            url: offersDeeplink(o) || o.url || '',
           });
           basisHtml = '<button type="button" class="tgo-pax-basis" data-tgo-pax="' + esc(paxData) + '">'
             + esc(label) + '</button>';
@@ -6930,7 +6996,7 @@
     // restyled for a vertical right-side column.
     _renderListPrice(o, wasPrice) {
       const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const wasHtml = (this.cfg.show.wasPrice && wasPrice)
         ? '<span class="tgo-list-was">' + esc(wasPrice) + '</span>' : '';
 
@@ -6942,7 +7008,7 @@
             adults: o.adults || 0,
             children: o.children || 0,
             infants: o.infants || 0,
-            url: o.url || '',
+            url: offersDeeplink(o) || o.url || '',
           });
           basisHtml = '<button type="button" class="tgo-pax-basis" data-tgo-pax="' + esc(paxData) + '" style="font-size:10px;padding-top:2px;">'
             + esc(label) + '</button>';
@@ -7122,7 +7188,7 @@
 
       // Price block on the right of the hero
       const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const accPricing = acc.pricing || {};
       const flightPricing = f.pricing || {};
       const wasPrice = (accPricing.priceChanged && accPricing.priceBeforeChange)
@@ -7223,7 +7289,7 @@
       }
 
       const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
 
       const sideAttr = ' data-side="' + esc(side) + '"';
       const featureAttr = isFeature ? ' data-feature="true"' : '';
@@ -7376,7 +7442,7 @@
       const isPkg = o.type === 'Package' || o.type === 'Packages';
 
       const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
 
       // Compose the content based on offer type
       let inner = '';
@@ -7686,7 +7752,7 @@
       const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
         || (o.flight && o.flight.image && o.flight.image.url) || '');
       const display = this._popupPriceContext(o);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const wasPrice = this._popupWasPrice(o);
       const discount = this._popupDiscountPercent(o);
 
@@ -7727,7 +7793,7 @@
       const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
         || (o.flight && o.flight.image && o.flight.image.url) || '');
       const display = this._popupPriceContext(o);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const wasPrice = this._popupWasPrice(o);
       const discount = this._popupDiscountPercent(o);
 
@@ -7766,7 +7832,7 @@
       if (!headline) return '';
       const kicker = this._popupKickerText(o);
       const display = this._popupPriceContext(o);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
 
       let html = '<a class="tgop-row" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
       html += '<div class="tgop-row-text">';
@@ -7788,7 +7854,7 @@
       const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
         || (o.flight && o.flight.image && o.flight.image.url) || '');
       const display = this._popupPriceContext(o);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const wasPrice = this._popupWasPrice(o);
 
       let html = '<a class="tgop-offer" href="' + esc(url) + '" target="_blank" rel="noopener" data-tgop-conv>';
@@ -7834,7 +7900,7 @@
       const display = this._popupPriceContext(o);
       const wasPrice = this._popupWasPrice(o);
       const discount = this._popupDiscountPercent(o);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
 
       let html = '<div class="tgop-content tgop-content-single">';
 
@@ -7952,7 +8018,7 @@
       const img = safeImgUrl((o.accommodation && o.accommodation.image && o.accommodation.image.url)
         || (o.flight && o.flight.image && o.flight.image.url) || '');
       const display = this._popupPriceContext(o);
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const wasPrice = this._popupWasPrice(o);
       const discount = this._popupDiscountPercent(o);
 
@@ -8199,7 +8265,7 @@
     _popupMiniPill(o) {
       const isFlight = o.type === 'Flight' || o.type === 'Flights';
       const isPkg = o.type === 'Package' || o.type === 'Packages';
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const display = this._popupPriceContext(o);
       if (!display.primary) return '';
 
@@ -8246,6 +8312,8 @@
     // Build the full popup HTML — chassis + content. Called by _popupOpen.
     _popupBuildHtml(offers) {
       const cfg = this.cfg;
+      setActiveCur(this.cur);
+      setActiveAppId(cfg.appId);
       const layout = cfg.popupLayout || 'slide-in';
       const showBackdrop = ['centered', 'fullscreen', 'side-drawer'].includes(layout) && cfg.popupOverlay !== false;
       const opacity = Math.max(0, Math.min(100, cfg.popupOverlayOpacity || 60)) / 100;
@@ -8577,7 +8645,7 @@
       const carrier = f.carrier || {};
       const pricing = f.pricing || {};
 
-      const url = safeUrl(o.url || '#');
+      const url = safeUrl(offersDeeplink(o) || o.url || '#');
       const carrierCode = (carrier.code || '').slice(0, 2).toUpperCase() || 'XX';
       const carrierName = carrier.name || this.t('carrier');
       const flightNumber = (carrier.code && f.flightNumber) ? carrier.code + ' ' + f.flightNumber : (carrier.code || '');
@@ -8849,7 +8917,7 @@
         const og = f.origin || {};
         const dest = f.destination || {};
         const carrier = f.carrier || {};
-        const url = safeUrl(o.url || '#');
+        const url = safeUrl(offersDeeplink(o) || o.url || '#');
         const time = formatBoardTime(f.outboundDate);                    // "12:35"
         const date = formatBoardDate(f.outboundDate);                    // "12 MAY"
         const fromIata = (og.iataCode || '???').toUpperCase();
