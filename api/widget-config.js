@@ -558,12 +558,16 @@ export default async function handler(req, res) {
         // widget-offers.js header comment). If that changes in future,
         // switch this to proxy through /api/offers instead and keep creds
         // server-side.
-        if (widgetType === 'Travel Offers' && clientEmail) {
+        // The World Map builds Travelify booking deeplinks and needs the
+        // client's AppID (the demo-account deeplinks in the shared cache are
+        // rewritten to the client's own AppID). It does NOT call Travelify
+        // directly, so it never needs the API key — inject the AppID alone.
+        if ((widgetType === 'Travel Offers' || widgetType === 'World Map') && clientEmail) {
           try {
             const creds = await lookupClientCredentialsByEmail(clientEmail);
             if (creds) {
               config.appId = creds.appId;
-              config.apiKey = creds.apiKey;
+              if (widgetType === 'Travel Offers') config.apiKey = creds.apiKey;
             } else {
               console.warn('[widget-config] no Travelify credentials on Clients record for', clientEmail, 'widgetId:', widgetId);
               // Leave config without creds — widget will show "Missing Travelify credentials"

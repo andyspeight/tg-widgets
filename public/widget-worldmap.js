@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.7.0';
+  const VERSION = '3.8.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -307,6 +307,18 @@
     if (s.startsWith('#') || s.startsWith('/')) return s;
     if (/^(https?|mailto|tel):/i.test(s)) return s;
     return '#';
+  }
+  // Rebuild an offer's booking deeplink for THIS client. Cached offers carry a
+  // Travelify deeplink (https://dl.tvllnk.com/deeplink/{AppID}?st=...&params)
+  // built on the account the cache was populated from (our demo). The search
+  // params are already correct; only the AppID in the path needs to become the
+  // embedding client's, so the same search runs in their Travelify application.
+  // No AppID (inline embeds, missing creds) → leave the link untouched.
+  function clientDeeplink(rawUrl, appId) {
+    const s = String(rawUrl || '').trim();
+    const id = String(appId || '').trim();
+    if (!s || !id) return s;
+    return s.replace(/(\/deeplink\/)[^/?#]+/i, '$1' + encodeURIComponent(id));
   }
   // Accept ONLY #RGB or #RRGGBB. Anything else (named colours, rgb(), url(),
   // javascript:, garbage) returns '' so it can never reach a style attribute.
@@ -3426,7 +3438,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     /** Build one deal card. Whole card is an anchor to the Travelify deeplink. */
     _cardHtml(o) {
-      const href = safeUrl(o.url);
+      const href = safeUrl(clientDeeplink(o.url, this.cfg.appId));
       const img = safeUrl(o.image);
       const t = this.t;
       const pp = formatPrice(o.pricePP || o.price, o.currency);
