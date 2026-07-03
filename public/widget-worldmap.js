@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.8.0';
+  const VERSION = '3.7.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -307,21 +307,6 @@
     if (s.startsWith('#') || s.startsWith('/')) return s;
     if (/^(https?|mailto|tel):/i.test(s)) return s;
     return '#';
-  }
-  // Cached offers carry a Travelify booking deeplink built on the account the
-  // cache was populated from (our demo). Every client embeds the SAME cache, so
-  // the raw link would send their visitors to our demo site. Rebase it onto the
-  // site the widget is embedded on: keep the booking path + query + hash, swap
-  // the origin to this page's. A same-origin or path-only link is left as-is.
-  function rebaseToHost(rawUrl) {
-    const s = String(rawUrl || '').trim();
-    if (!s || s === '#') return s;
-    try {
-      if (typeof location === 'undefined' || !location.origin) return s;
-      const u = new URL(s, location.href);
-      if (u.origin === location.origin) return u.href;
-      return location.origin + u.pathname + u.search + u.hash;
-    } catch (e) { return s; }
   }
   // Accept ONLY #RGB or #RRGGBB. Anything else (named colours, rgb(), url(),
   // javascript:, garbage) returns '' so it can never reach a style attribute.
@@ -3441,7 +3426,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     /** Build one deal card. Whole card is an anchor to the Travelify deeplink. */
     _cardHtml(o) {
-      const href = safeUrl(rebaseToHost(o.url));
+      const href = safeUrl(o.url);
       const img = safeUrl(o.image);
       const t = this.t;
       const pp = formatPrice(o.pricePP || o.price, o.currency);
