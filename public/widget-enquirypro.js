@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.0';
+  var WIDGET_VERSION = '1.2.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -570,6 +570,23 @@
     } catch (e) {}
     return 'https://tg-widgets.vercel.app';
   })();
+
+  // Telemetry: report a load heartbeat and any failure to /api/widget-log so we
+  // hear about a broken embed before the client does. It posts to the same API
+  // origin the widget already uses (connect-src), so a client site's script-src
+  // CSP cannot block it, and it never throws.
+  function tgReport(event, widgetId, message, detail) {
+    try {
+      var u = API_BASE + '/api/widget-log';
+      var b = JSON.stringify({
+        event: event, widget: 'enquirypro', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })(),
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(u, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(u, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
 
   // ===========================================================================
   //  Reference data
@@ -1616,9 +1633,9 @@
     }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
       .then(function (res) {
         if (res.ok && res.body && res.body.ok) { self._renderDone(res.body); }
-        else { self._submitError((res.body && res.body.message) || self.t('errGeneric')); }
+        else { self._submitError((res.body && res.body.message) || self.t('errGeneric')); tgReport('error', self.widgetId, 'enquiry submit refused', (res.body && res.body.error) || ''); }
       })
-      .catch(function () { self._submitError(self.t('errServer')); });
+      .catch(function () { self._submitError(self.t('errServer')); tgReport('error', self.widgetId, 'enquiry submit unreachable'); });
   };
   TGEnquiryProWidget.prototype._submitError = function (msg) {
     var n = this.nextBtn; if (n) { n.disabled = false; while (n.firstChild) n.removeChild(n.firstChild); n.appendChild(document.createTextNode(this.t('sendEnquiry'))); n.appendChild(svgEl(ICONS.send, 18)); }
@@ -1712,13 +1729,14 @@
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (res) {
         while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
-        if (!res.ok) { renderOops(shadow, (res.d && res.d.error) || t('oopsLoad'), t); return; }
+        if (!res.ok) { renderOops(shadow, (res.d && res.d.error) || t('oopsLoad'), t); tgReport('error', widgetId, 'config load failed', (res.d && res.d.error) || 'HTTP error'); return; }
         var w = Object.create(TGEnquiryProWidget.prototype);
-        w.instance = ++INSTANCE_COUNTER; w.container = container; w.shadow = shadow;
+        w.instance = ++INSTANCE_COUNTER; w.container = container; w.shadow = shadow; w.widgetId = widgetId;
         w.t = makeT(res.d); w.config = w._normalise(res.d); w._resetState(); w._render();
         container.__tgWidget = w;
+        tgReport('load', widgetId, 'ok');
       })
-      .catch(function (err) { console.error('[TGEnquiryProWidget] config load failed:', err); renderOops(shadow, t('oopsReach'), t); });
+      .catch(function (err) { console.error('[TGEnquiryProWidget] config load failed:', err); renderOops(shadow, t('oopsReach'), t); tgReport('error', widgetId, 'config unreachable', err && err.message); });
   }
 
   function autoInit() {

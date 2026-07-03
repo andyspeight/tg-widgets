@@ -113,3 +113,37 @@ export async function keys(pattern) {
   const r = await callRedis('keys', pattern);
   return Array.isArray(r) ? r : [];
 }
+
+// ── Lists (used by the widget telemetry log — a capped rolling buffer) ──
+/** LPUSH key value — prepend. Returns new length or null. */
+export async function lpush(key, value) {
+  return await callRedis('lpush', key, value);
+}
+/** LTRIM key start stop — keep only the given range (caps the list). */
+export async function ltrim(key, start, stop) {
+  return await callRedis('ltrim', key, String(start), String(stop));
+}
+/** LRANGE key start stop — returns the slice as an array ([] if none). */
+export async function lrange(key, start, stop) {
+  const r = await callRedis('lrange', key, String(start), String(stop));
+  return Array.isArray(r) ? r : [];
+}
+
+/**
+ * SET key value only if absent, with a TTL (seconds). Returns true if it was
+ * set (the key did not exist), false otherwise. Used as a dedupe/throttle gate
+ * so one broken widget can't send a flood of alert emails.
+ */
+export async function setNxEx(key, value, ttlSeconds) {
+  if (!configured()) return false;
+  try {
+    const url = `${REDIS_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}?NX=true&EX=${Math.max(1, Math.floor(ttlSeconds))}`;
+    const res = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+    if (!res.ok) return false;
+    const j = await res.json();
+    return j && j.result === 'OK';
+  } catch (e) {
+    console.error('[redis] setNxEx error', e.message);
+    return false;
+  }
+}
