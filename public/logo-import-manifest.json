@@ -1,0 +1,4137 @@
+{
+ "source": "Airtable Logo Library appWOGt1R6SaoSaVy, exported 2026-07-03",
+ "brands": [
+  {
+   "name": "2Checkout",
+   "domain": "2checkout.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/2checkout/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/2checkout/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Abercrombie & Kent",
+   "domain": "abercrombiekent.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1f1c23",
+   "colourSecondary": "#aa5431",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/abercrombie-kent/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/abercrombie-kent/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Abta",
+   "domain": "abta.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/abta/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/abta/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Accor Luxury",
+   "domain": "accorluxury.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1a73e8",
+   "colourSecondary": "#1a73e8",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/accor-luxury/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/accor-luxury/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Adyen",
+   "domain": "adyen.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/adyen/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/adyen/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Aer Lingus",
+   "domain": "aerlingus.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#008374",
+   "colourSecondary": "#88b131",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/aer-lingus/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/aer-lingus/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Aer Lingus Holidays",
+   "domain": "aerlingusholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/aer-lingus-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/aer-lingus-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Affirm",
+   "domain": "affirm.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/affirm/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/affirm/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Afterpay",
+   "domain": "afterpay.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/afterpay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/afterpay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Agoda",
+   "domain": "agoda.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/agoda/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/agoda/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Air Caraibes Express",
+   "domain": "aircaraibesexpress.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-caraibes-express/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-caraibes-express/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Air Europa",
+   "domain": "aireuropa.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#B428CD",
+   "colourSecondary": "#2D69E1",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-europa/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-europa/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Air Europa Holidays",
+   "domain": "aireuropaholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-europa-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-europa-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Air France",
+   "domain": "airfrance.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#e95a2f",
+   "colourSecondary": "#e95a2f",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-france/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-france/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Air France Holidays",
+   "domain": "airfrance-holidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-france-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-france-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Air Nostrum",
+   "domain": "airnostrum.es",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-nostrum/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/air-nostrum/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "AITO",
+   "domain": "aito.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/aito/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/aito/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Alipay",
+   "domain": "alipay.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/alipay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/alipay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Alitalia Holidays",
+   "domain": "alitaliaholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1967d2",
+   "colourSecondary": "#1967d2",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/alitalia-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/alitalia-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Allegiant Air",
+   "domain": "allegiantair.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/allegiant-air/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/allegiant-air/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Amadeus",
+   "domain": "amadeus.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/amadeus/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/amadeus/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Aman",
+   "domain": "amanresorts.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#313131",
+   "colourSecondary": "#fdfaf5",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/aman/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/aman/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "AmaWaterways",
+   "domain": "amawaterways.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#5b1c1c",
+   "colourSecondary": "#b3453d",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/amawaterways/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/amawaterways/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Amazon Pay",
+   "domain": "pay.amazon.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/amazon-pay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/amazon-pay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "American Express",
+   "domain": "americanexpress.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/american-express/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/american-express/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Angsana",
+   "domain": "angsana.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#77351b",
+   "colourSecondary": "#77351b",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/angsana/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/angsana/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Apple Pay",
+   "domain": "applepay.apple.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/apple-pay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/apple-pay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Audley Travel",
+   "domain": "audleytravel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/audley-travel/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/audley-travel/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "AvantStay",
+   "domain": "avantstay.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/avantstay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/avantstay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Azamara",
+   "domain": "azamara.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#00205b",
+   "colourSecondary": "#00205b",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/azamara/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/azamara/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Banyan Tree",
+   "domain": "banyantree.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#173f35",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/banyan-tree/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/banyan-tree/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Belmond",
+   "domain": "belmond.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#0b151f",
+   "colourSecondary": "#e3824d",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/belmond/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/belmond/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Bespoke Travel",
+   "domain": "bespoketravel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/bespoke-travel/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/bespoke-travel/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Black Tomato",
+   "domain": "blacktomato.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/black-tomato/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/black-tomato/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Blue Air",
+   "domain": "blueair.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/blue-air/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/blue-air/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Booking.com",
+   "domain": "booking.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/booking-com/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/booking-com/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "BookingBridge",
+   "domain": "bookingbridge.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/bookingbridge/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/bookingbridge/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "British airways",
+   "domain": "britishairways.com",
+   "category": "Airline",
+   "tgSupplier": true,
+   "colourPrimary": "#cf2424",
+   "colourSecondary": "#2f5e9e",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/british-airways/svg-default.svg"
+    },
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/british-airways/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/british-airways/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/british-airways/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "British Airways Holidays",
+   "domain": "ba-holidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/british-airways-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/british-airways-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "British Airways Holidays",
+   "domain": "baholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#ffffff",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/british-airways-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/british-airways-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Brussels Airlines",
+   "domain": "brusselsairlines.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#051446",
+   "colourSecondary": "#e5002b",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/brussels-airlines/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/brussels-airlines/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Brussels Airlines Holidays",
+   "domain": "brusselsairlinesholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#ffffff",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/brussels-airlines-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/brussels-airlines-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Butterscotch",
+   "domain": "butterscotch.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/butterscotch/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/butterscotch/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Carnival Cruise Line",
+   "domain": "carnival.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#015299",
+   "colourSecondary": "#d7143d",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/carnival-cruise-line/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/carnival-cruise-line/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Carrier",
+   "domain": "carrier.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/carrier/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/carrier/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Celebrity Cruises",
+   "domain": "celebritycruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#002859",
+   "colourSecondary": "#E87535",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/celebrity-cruises/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/celebrity-cruises/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Channel Manager",
+   "domain": "channelmanager.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/channel-manager/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/channel-manager/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Checkout.com",
+   "domain": "checkout.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/checkout-com/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/checkout-com/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Citalia",
+   "domain": "citalia.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/citalia/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/citalia/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Claridge's",
+   "domain": "claridges.co.uk",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#a39263",
+   "colourSecondary": "#a39263",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/claridge-s/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/claridge-s/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Clearpay",
+   "domain": "clearpay.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/clearpay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/clearpay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Cloudbeds",
+   "domain": "cloudbeds.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cloudbeds/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cloudbeds/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Club Med",
+   "domain": "clubmed.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1e2a4a",
+   "colourSecondary": "#ffcc00",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/club-med/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/club-med/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Cosmos",
+   "domain": "cosmos.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#b91c22",
+   "colourSecondary": "#b91c22",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cosmos/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cosmos/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Cox & Kings",
+   "domain": "coxkings.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cox-kings/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cox-kings/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "CroisiEurope",
+   "domain": "croisieurope.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#006cb4",
+   "colourSecondary": "#006cb4",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/croisieurope/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/croisieurope/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Cubilis",
+   "domain": "cubilis.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cubilis/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cubilis/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Cunard",
+   "domain": "cunard.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#ef3e42",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cunard/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/cunard/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Curve",
+   "domain": "curve.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/curve/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/curve/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Despegar",
+   "domain": "despegar.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/despegar/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/despegar/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Diners Club",
+   "domain": "dinersclub.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/diners-club/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/diners-club/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Discover",
+   "domain": "discover.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/discover/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/discover/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Disney Cruise Line",
+   "domain": "disneycruiseline.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#ffffff",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/disney-cruise-line/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/disney-cruise-line/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "easyJet",
+   "domain": "easyjet.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#ff6600",
+   "colourSecondary": "#ff6600",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/easyjet/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/easyjet/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "easyJet Holidays",
+   "domain": "easyjetholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#ffffff",
+   "colourSecondary": "#060000",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/easyjet-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/easyjet-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "easyToBook",
+   "domain": "easytobook.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/easytobook/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/easytobook/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Emerald Waterways",
+   "domain": "emeraldwaterways.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#528387",
+   "colourSecondary": "#528387",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/emerald-waterways/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/emerald-waterways/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Emirates",
+   "domain": "emirates.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#333333",
+   "colourSecondary": "#c60c30",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/emirates/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/emirates/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Emirates Holidays",
+   "domain": "emiratesholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#d20308",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/emirates-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/emirates-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Etihad Holidays",
+   "domain": "etihadholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#ffffff",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/etihad-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/etihad-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Eurowings",
+   "domain": "eurowings.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/eurowings/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/eurowings/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Expedia",
+   "domain": "expedia.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/expedia/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/expedia/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Explore",
+   "domain": "explore.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/explore/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/explore/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Explore Worldwide",
+   "domain": "exploreworldwide.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#801b13",
+   "colourSecondary": "#801b13",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/explore-worldwide/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/explore-worldwide/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "ezRez",
+   "domain": "ezrez.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ezrez/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ezrez/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Fairmont",
+   "domain": "fairmont.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#031016",
+   "colourSecondary": "#a6191f",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/fairmont/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/fairmont/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Finnair",
+   "domain": "finnair.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#171617",
+   "colourSecondary": "#0b1560",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/finnair/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/finnair/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Finnair Holidays",
+   "domain": "finnairholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/finnair-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/finnair-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "First Choice",
+   "domain": "firstchoice.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#a01319",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/first-choice/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/first-choice/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Flybe",
+   "domain": "flybe.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#5a3f99",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/flybe/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/flybe/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "FlyDai Holidays",
+   "domain": "flydaiholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/flydai-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/flydai-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Flydubai",
+   "domain": "flydubai.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/flydubai/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/flydubai/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Flydubai Holidays",
+   "domain": "flydubaiholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#202124",
+   "colourSecondary": "#ffffff",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/flydubai-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/flydubai-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Four Seasons",
+   "domain": "fourseasons.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#ffffff",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/four-seasons/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/four-seasons/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Fred. Olsen Cruise Lines",
+   "domain": "fredolsencruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#00112d",
+   "colourSecondary": "#005e9b",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/fred-olsen-cruise-lines/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/fred-olsen-cruise-lines/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Galileo",
+   "domain": "galileo.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/galileo/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/galileo/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "GetJet Airlines",
+   "domain": "getjetairlines.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/getjet-airlines/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/getjet-airlines/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "GetResponse",
+   "domain": "getresponse.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/getresponse/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/getresponse/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Google Pay",
+   "domain": "pay.google.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/google-pay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/google-pay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Grand Hyatt",
+   "domain": "grandhyatt.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/grand-hyatt/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/grand-hyatt/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "GuestCentric",
+   "domain": "guestcentric.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/guestcentric/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/guestcentric/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Hays Travel",
+   "domain": "haystravel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hays-travel/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hays-travel/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Hilton",
+   "domain": "hilton.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#0E468B",
+   "colourSecondary": "#0E468B",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hilton/svg-default.svg"
+    }
+   ]
+  },
+  {
+   "name": "Hostelworld",
+   "domain": "hostelworld.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hostelworld/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hostelworld/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Hotelbeds",
+   "domain": "hotelbeds.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hotelbeds/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hotelbeds/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Hoteliers",
+   "domain": "hoteliers.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hoteliers/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hoteliers/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Hurtigruten",
+   "domain": "hurtigruten.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1f1f1f",
+   "colourSecondary": "#d40000",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hurtigruten/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hurtigruten/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Hyatt",
+   "domain": "hyatt.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#0072CE",
+   "colourSecondary": "#FFB612",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hyatt/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/hyatt/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "IATA",
+   "domain": "iata.org",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/iata/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/iata/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Iberia",
+   "domain": "iberia.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#d7192d",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/iberia/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/iberia/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Iberia Holidays",
+   "domain": "iberiaholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/iberia-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/iberia-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Icelandair",
+   "domain": "icelandair.is",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#001b71",
+   "colourSecondary": "#001b71",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/icelandair/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/icelandair/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "IDeals",
+   "domain": "ideals.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ideals/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ideals/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "InsideJapan Tours",
+   "domain": "insidejapantours.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/insidejapan-tours/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/insidejapan-tours/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "InterContinental Hotels Group",
+   "domain": "ihg.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#C2C7CA",
+   "colourSecondary": "#1F4456",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/intercontinental-hotels-group/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/intercontinental-hotels-group/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "InterLodge",
+   "domain": "interlodge.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/interlodge/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/interlodge/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Intrepid Travel",
+   "domain": "intrepidtravel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#ff2828",
+   "colourSecondary": "#ff2828",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/intrepid-travel/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/intrepid-travel/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "ITAA",
+   "domain": "itaa.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/itaa/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/itaa/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Jacada Travel",
+   "domain": "jacadatravel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jacada-travel/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jacada-travel/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "JCB",
+   "domain": "jcb.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jcb/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jcb/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Jet2",
+   "domain": "jet2.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jet2/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jet2/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Jet2holidays",
+   "domain": "jet2holidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#d2232a",
+   "colourSecondary": "#d2232a",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jet2holidays/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jet2holidays/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Jumeirah",
+   "domain": "jumeirah.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#080808",
+   "colourSecondary": "#d0964b",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jumeirah/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/jumeirah/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Kirker Holidays",
+   "domain": "kirkerholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/kirker-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/kirker-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Klarna",
+   "domain": "klarna.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/klarna/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/klarna/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "KLM",
+   "domain": "klm.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#00A1E4",
+   "colourSecondary": "#00A1E4",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/klm/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/klm/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "KLM Holidays",
+   "domain": "klmholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/klm-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/klm-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Kuoni",
+   "domain": "kuoni.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/kuoni/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/kuoni/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Lauda",
+   "domain": "lauda.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lauda/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lauda/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Leading Hotels of the World",
+   "domain": "leadinghotelsoftheworld.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/leading-hotels-of-the-world/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/leading-hotels-of-the-world/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Loganair",
+   "domain": "loganair.co.uk",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#0e6a79",
+   "colourSecondary": "#e2241c",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/loganair/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/loganair/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "LOT Polish Airlines Holidays",
+   "domain": "lotpolishairlinesholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lot-polish-airlines-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lot-polish-airlines-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Lufthansa",
+   "domain": "lufthansa.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#FFAD00",
+   "colourSecondary": "#05164D",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lufthansa/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lufthansa/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Lufthansa CityLine",
+   "domain": "lufthansacityline.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#666666",
+   "colourSecondary": "#666666",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lufthansa-cityline/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lufthansa-cityline/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Lufthansa Holidays",
+   "domain": "lufthansa-holidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#ffad01",
+   "colourSecondary": "#ffad01",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lufthansa-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/lufthansa-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Mandarin Oriental",
+   "domain": "mandarinoriental.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#073d91",
+   "colourSecondary": "#ceb781",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/mandarin-oriental/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/mandarin-oriental/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Marella Cruises",
+   "domain": "marellacruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/marella-cruises/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/marella-cruises/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Marriott",
+   "domain": "marriott.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#FF9962",
+   "colourSecondary": "#FF9962",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/marriott/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/marriott/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Mastercard",
+   "domain": "mastercard.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/mastercard/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/mastercard/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Meridiana",
+   "domain": "meridiana.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/meridiana/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/meridiana/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Monarch Airlines",
+   "domain": "monarchairlines.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1a73e8",
+   "colourSecondary": "#1a73e8",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/monarch-airlines/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/monarch-airlines/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Monzo",
+   "domain": "monzo.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/monzo/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/monzo/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "MSC Cruises",
+   "domain": "msccruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000a3c",
+   "colourSecondary": "#000a3c",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/msc-cruises/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/msc-cruises/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Neos",
+   "domain": "neos.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/neos/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/neos/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Norwegian",
+   "domain": "norwegian.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#B12A0B",
+   "colourSecondary": "#E5212D",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/norwegian/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/norwegian/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Norwegian Cruise Line",
+   "domain": "ncl.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#0171A6",
+   "colourSecondary": "#FF8307",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/norwegian-cruise-line/svg-default.svg"
+    }
+   ]
+  },
+  {
+   "name": "One&Only",
+   "domain": "oneandonly.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/one-only/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/one-only/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Openpay",
+   "domain": "openpay.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/openpay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/openpay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "P&O Cruises",
+   "domain": "pocruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#173a87",
+   "colourSecondary": "#173a87",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/p-o-cruises/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/p-o-cruises/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Park Hyatt",
+   "domain": "parkhydt.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/park-hyatt/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/park-hyatt/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "PayPal",
+   "domain": "paypal.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/paypal/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/paypal/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Peninsula",
+   "domain": "peninsula.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#313131",
+   "colourSecondary": "#5ea4de",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/peninsula/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/peninsula/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Pennyhill Park",
+   "domain": "pennyhillpark.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/pennyhill-park/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/pennyhill-park/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "PMS Central",
+   "domain": "pmscentral.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/pms-central/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/pms-central/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Preferred Hotels & Resorts",
+   "domain": "preferredhotels.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#938658",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/preferred-hotels-resorts/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/preferred-hotels-resorts/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Princess Cruises",
+   "domain": "princesscruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#e60060",
+   "colourSecondary": "#e60060",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/princess-cruises/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/princess-cruises/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Qatar Airways",
+   "domain": "qatarairways.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#F2F3FA",
+   "colourSecondary": "#8E2157",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/qatar-airways/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/qatar-airways/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Qatar Holidays",
+   "domain": "qatarholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#7bafe8",
+   "colourSecondary": "#7bafe8",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/qatar-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/qatar-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Radisson Collection",
+   "domain": "radissonhotel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/radisson-collection/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/radisson-collection/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Rate Shark",
+   "domain": "rateshark.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/rate-shark/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/rate-shark/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Regent Seven Seas Cruises",
+   "domain": "regent.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#111723",
+   "colourSecondary": "#00bd7d",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/regent-seven-seas-cruises/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/regent-seven-seas-cruises/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Revolut",
+   "domain": "revolut.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/revolut/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/revolut/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Ritz-Carlton",
+   "domain": "ritzcarlton.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1c1c1c",
+   "colourSecondary": "#E9F1FA",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ritz-carlton/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ritz-carlton/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "River Cruises of Europe",
+   "domain": "rivercruisesofeurope.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1a73e8",
+   "colourSecondary": "#1a73e8",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/river-cruises-of-europe/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/river-cruises-of-europe/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "RoomsBooking",
+   "domain": "roomsbooking.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/roomsbooking/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/roomsbooking/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Rosewood",
+   "domain": "rosewoodhotels.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#10707f",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/rosewood/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/rosewood/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Royal Caribbean",
+   "domain": "royalcaribbean.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#F9C700",
+   "colourSecondary": "#FF0CB2",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/royal-caribbean/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/royal-caribbean/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Ryanair",
+   "domain": "ryanair.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#06276a",
+   "colourSecondary": "#2b4779",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ryanair/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ryanair/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Ryanair Holidays",
+   "domain": "ryanairholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ryanair-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/ryanair-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Sabre",
+   "domain": "sabre.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sabre/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sabre/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Saga",
+   "domain": "saga.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/saga/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/saga/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Saga Cruises",
+   "domain": "sagacruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/saga-cruises/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/saga-cruises/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Samsung Pay",
+   "domain": "samsungpay.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/samsung-pay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/samsung-pay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Sandals Resorts",
+   "domain": "sandals.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#2356F6",
+   "colourSecondary": "#2356F6",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sandals-resorts/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sandals-resorts/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "SAS",
+   "domain": "sas.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#02183B",
+   "colourSecondary": "#FF8224",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sas/svg-default.svg"
+    }
+   ]
+  },
+  {
+   "name": "SAS Holidays",
+   "domain": "sasholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#cdb701",
+   "colourSecondary": "#cdb701",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sas-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sas-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Savoy",
+   "domain": "savoy.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/savoy/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/savoy/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Scenic Tours",
+   "domain": "scenictours.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/scenic-tours/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/scenic-tours/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Scott Dunn",
+   "domain": "scottdunn.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/scott-dunn/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/scott-dunn/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Seabourn",
+   "domain": "seabourn.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#ab8d45",
+   "colourSecondary": "#ab8d45",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/seabourn/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/seabourn/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Shangri-La",
+   "domain": "shangri-la.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/shangri-la/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/shangri-la/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Silversea Cruises",
+   "domain": "silversea.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#323234",
+   "colourSecondary": "#f0bc75",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/silversea-cruises/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/silversea-cruises/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Simpson Travel",
+   "domain": "simpsontravel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/simpson-travel/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/simpson-travel/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Singapore Airlines",
+   "domain": "singaporeair.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#FFA107",
+   "colourSecondary": "#FFA107",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/singapore-airlines/svg-default.svg"
+    }
+   ]
+  },
+  {
+   "name": "Siteminder",
+   "domain": "siteminder.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/siteminder/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/siteminder/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Six Senses",
+   "domain": "sixsenses.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#673065",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/six-senses/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/six-senses/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "SkyUp",
+   "domain": "skyup.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/skyup/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/skyup/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "SmartWings",
+   "domain": "smartwings.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/smartwings/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/smartwings/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Sonesta",
+   "domain": "sonesta.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sonesta/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/sonesta/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Spanair",
+   "domain": "spanair.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/spanair/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/spanair/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Square",
+   "domain": "square.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/square/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/square/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Staah",
+   "domain": "staah.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/staah/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/staah/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Starling Bank",
+   "domain": "starlingbank.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/starling-bank/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/starling-bank/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Stripe",
+   "domain": "stripe.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/stripe/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/stripe/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Swan Hellenic",
+   "domain": "swanhellenic.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#091119",
+   "colourSecondary": "#aebbc5",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/swan-hellenic/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/swan-hellenic/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Swiss International Air Lines",
+   "domain": "swiss.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#e60005",
+   "colourSecondary": "#e60005",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/swiss-international-air-lines/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/swiss-international-air-lines/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Swiss International Air Lines Holidays",
+   "domain": "swissinternationalairlinesholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/swiss-international-air-lines-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/swiss-international-air-lines-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "SynXis",
+   "domain": "synxis.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/synxis/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/synxis/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "TAP Air Portugal",
+   "domain": "flytap.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#eb2d2e",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tap-air-portugal/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tap-air-portugal/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "TAP Air Portugal Holidays",
+   "domain": "tapholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tap-air-portugal-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tap-air-portugal-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Tauck",
+   "domain": "tauck.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#ffffff",
+   "colourSecondary": "#9bc135",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tauck/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tauck/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "The Dorchester",
+   "domain": "dorchesterhotel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#8a6c26",
+   "colourSecondary": "#8a6c26",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/the-dorchester/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/the-dorchester/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "The Luxury Collection",
+   "domain": "luxurycollection.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/the-luxury-collection/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/the-luxury-collection/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Thomson",
+   "domain": "thomson.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1e1e1e",
+   "colourSecondary": "#d64000",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/thomson/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/thomson/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Tigerair Scandinavia",
+   "domain": "tigerairscandinavia.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tigerair-scandinavia/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tigerair-scandinavia/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Trade Air",
+   "domain": "tradeair.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/trade-air/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/trade-air/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Transavia",
+   "domain": "transavia.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/transavia/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/transavia/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Travelbag",
+   "domain": "travelbag.co.uk",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelbag/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelbag/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "TravelClick",
+   "domain": "travelclick.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelclick/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelclick/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Travelport",
+   "domain": "travelport.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelport/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelport/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "TravelQuotient",
+   "domain": "travelquotient.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelquotient/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelquotient/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Travelsphere",
+   "domain": "travelsphere.co.uk",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelsphere/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/travelsphere/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Traveltalk Tours",
+   "domain": "traveltalktours.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/traveltalk-tours/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/traveltalk-tours/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Tropical Sky",
+   "domain": "tropicalsky.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tropical-sky/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tropical-sky/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Tui",
+   "domain": "tui.co.uk",
+   "category": "Tour Operator",
+   "tgSupplier": true,
+   "colourPrimary": "#10486d",
+   "colourSecondary": "#70cbf4",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tui/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tui/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "TUI Airways",
+   "domain": "tuiairways.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1a73e8",
+   "colourSecondary": "#1a73e8",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tui-airways/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tui-airways/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "TUI Cruises",
+   "domain": "tuicruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#0d1e3e",
+   "colourSecondary": "#d41318",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tui-cruises/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/tui-cruises/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Turkish Airlines",
+   "domain": "turkishairlines.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#c70a0c",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/turkish-airlines/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/turkish-airlines/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Turkish Airlines Holidays",
+   "domain": "turkishairlinesholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#c80c0f",
+   "colourSecondary": "#c80c0f",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/turkish-airlines-holidays/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/turkish-airlines-holidays/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "UnionPay",
+   "domain": "unionpayintl.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/unionpay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/unionpay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Uniworld",
+   "domain": "uniworld.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#295367",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/uniworld/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/uniworld/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Uniworld Boutique River Cruises",
+   "domain": "uniworldcruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#1a73e8",
+   "colourSecondary": "#1a73e8",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/uniworld-boutique-river-cruises/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/uniworld-boutique-river-cruises/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Vertical Booking",
+   "domain": "verticalbooking.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/vertical-booking/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/vertical-booking/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Viator",
+   "domain": "viator.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/viator/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/viator/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Viking Ocean Cruises",
+   "domain": "vikingoceancruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#ffffff",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/viking-ocean-cruises/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/viking-ocean-cruises/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Virgin Atlantic",
+   "domain": "virginatlantic.com",
+   "category": "Airline",
+   "tgSupplier": true,
+   "colourPrimary": "#101921",
+   "colourSecondary": "#DA0630",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/virgin-atlantic/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/virgin-atlantic/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Virgin Atlantic Holidays",
+   "domain": "virginatlanticholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/virgin-atlantic-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/virgin-atlantic-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Visa",
+   "domain": "visa.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/visa/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/visa/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Vueling",
+   "domain": "vueling.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#FFCC03",
+   "colourSecondary": "#FFCC03",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/vueling/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/vueling/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "W Hotels",
+   "domain": "whotels.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/w-hotels/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/w-hotels/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Waymark",
+   "domain": "waymark.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/waymark/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/waymark/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "WeChat Pay",
+   "domain": "mypay.weixin.qq.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wechat-pay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wechat-pay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Wilderness Journeys",
+   "domain": "wildernessjourneys.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wilderness-journeys/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wilderness-journeys/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Wilderness Travel",
+   "domain": "wildernesstravel.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wilderness-travel/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wilderness-travel/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Windstar Cruises",
+   "domain": "windstarcruises.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#000000",
+   "colourSecondary": "#014567",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/windstar-cruises/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/windstar-cruises/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Wise",
+   "domain": "wise.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wise/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wise/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Wizz Air",
+   "domain": "wizzair.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#06038d",
+   "colourSecondary": "#c6007e",
+   "assets": [
+    {
+     "type": "SVG",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wizz-air/svg-default.svg"
+    },
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wizz-air/png-transparent-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Wizz Air Holidays",
+   "domain": "wizzairholidays.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "#00112c",
+   "colourSecondary": "#ffffff",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wizz-air-holidays/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/wizz-air-holidays/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "WorldPay",
+   "domain": "worldpay.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/worldpay/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/worldpay/png-original-default.png"
+    }
+   ]
+  },
+  {
+   "name": "Worldspan",
+   "domain": "worldspan.com",
+   "category": "Other",
+   "tgSupplier": false,
+   "colourPrimary": "",
+   "colourSecondary": "",
+   "assets": [
+    {
+     "type": "PNG-Transparent",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/worldspan/png-transparent-default.png"
+    },
+    {
+     "type": "PNG-Original",
+     "url": "https://bmyskos1ic8qxd0v.public.blob.vercel-storage.com/brands/worldspan/png-original-default.png"
+    }
+   ]
+  }
+ ]
+}
