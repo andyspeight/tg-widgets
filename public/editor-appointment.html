@@ -542,6 +542,17 @@
   document.getElementById('buf-before').addEventListener('change', (e) => { C.bufferBefore = parseInt(e.target.value, 10) || 0; shell.markDirty(); render(); });
   document.getElementById('buf-after').addEventListener('change', (e) => { C.bufferAfter = parseInt(e.target.value, 10) || 0; shell.markDirty(); render(); });
 
+  // Meeting links get pasted from all sorts of places and a clipped scheme
+  // ("ttps://…", a bare "zoom.us/j/…") would be silently rejected at booking
+  // time and fall back to Meet — repair the obvious cases and flag the rest.
+  function normaliseMeetingUrl(v) {
+    let s = String(v || '').trim();
+    if (!s) return '';
+    s = s.replace(/^(h+t+p+s?|t+t+p+s?|h+t+t+p+):\/\//i, 'https://'); // clipped/mangled scheme
+    if (!/^https?:\/\//i.test(s) && /^[\w-]+(\.[\w-]+)+([\/?#]\S*)?$/.test(s)) s = 'https://' + s; // bare domain
+    return s;
+  }
+
   // ── Event list ──
   document.getElementById('event-list').addEventListener('input', (e) => {
     const item = e.target.closest('[data-ev]'); if (!item) return;
@@ -549,6 +560,22 @@
     if (f === 'mins') C.eventTypes[i].mins = parseInt(e.target.value, 10);
     else C.eventTypes[i][f] = e.target.value;
     shell.markDirty(); render();
+  });
+  document.getElementById('event-list').addEventListener('change', (e) => {
+    const item = e.target.closest('[data-ev]'); if (!item) return;
+    const f = e.target.getAttribute('data-ev-f');
+    if (f !== 'meetingUrl') return;
+    const i = +item.getAttribute('data-ev');
+    const fixed = normaliseMeetingUrl(e.target.value);
+    if (fixed !== e.target.value.trim()) {
+      e.target.value = fixed;
+      C.eventTypes[i].meetingUrl = fixed;
+      tgse.toast('Link tidied up — double-check it looks right', 'ok');
+      shell.markDirty(); render();
+    }
+    if (fixed && !/^https?:\/\/\S+$/i.test(fixed)) {
+      tgse.toast('That does not look like a full meeting link — bookings will fall back to Google Meet', 'err');
+    }
   });
   document.getElementById('event-list').addEventListener('change', (e) => {
     const item = e.target.closest('[data-ev]'); if (!item) return;
